@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.13 2007/07/20 01:21:11 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.14 2007/07/24 19:33:05 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-  static const char *const version = "$Id: ESMCI_Grid.C,v 1.13 2007/07/20 01:21:11 oehmke Exp $";
+  static const char *const version = "$Id: ESMCI_Grid.C,v 1.14 2007/07/24 19:33:05 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -152,7 +152,7 @@ static  void _free3D(Type ****array)
     int *array;
     if (size>0) {
       array=new int[size];
-      memcpy(array,in->array,size*sizeof(in));
+      memcpy(array,in->array,size*sizeof(int));
     } else {
       array=ESMC_NULL_POINTER;
     }
@@ -331,6 +331,13 @@ int GridActivate(
 
   // initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
+
+  // make sure grid is inactive
+  if (_grid->getStatus() != ESMC_GRIDSTATUS_NOT_READY) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+      "- grid must be status 'not ready' to be activated ", &rc);
+    return rc;
+  }  
   
   // check the input and get the information together to call GridConstruct
   // Must have a valid distgrid
@@ -788,7 +795,7 @@ int gridSetCoordFromArray(
 //EOP
 //-----------------------------------------------------------------------------
   // local vars
-  int status;                 // local error status
+  int localrc;
   int rc;
   int staggerloc;
   int coord;
@@ -805,7 +812,7 @@ int gridSetCoordFromArray(
   // TODO: Change to get rid of return codes in favor of try-catch
 
   // initialize return code; assume routine not implemented
-  status = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
   rc = ESMC_RC_NOT_IMPL;
   
   // check the input and get the information together to add array
@@ -814,6 +821,13 @@ int gridSetCoordFromArray(
       "- Not a valid pointer to grid argument", &rc);
     return rc;
   }
+
+  // make sure grid is inactive
+  if (_grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+      "- grid not of correct status to perform this operation", &rc);
+    return rc;
+  }  
 
 
   // Process staggerloc
@@ -877,6 +891,14 @@ int gridSetCoordFromArray(
       return rc;
     }
 
+  // check IndexFlag
+  if (_grid->getIndexFlag() != _array->getIndexflag()){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+        "- Array and Grid Indexflag mismatch ", &rc);
+      return rc;
+    }
+
+
   // Get some useful info
   coordIsDist=_grid->getCoordIsDist();
   coordMapDim=_grid->getCoordMapDim();
@@ -900,36 +922,108 @@ int gridSetCoordFromArray(
       return rc;
   }
 
-  // Check that the array's bounds are consistant with this coord
+  
+  // Check and make sure the array's computational bounds are
+  // big enough for the stagger padding
   arrayLBounds=_array->getLBounds();
   arrayUBounds=_array->getUBounds();
   gridLBounds=_grid->getLbounds();
   gridUBounds=_grid->getUbounds();
-  ok=true;
-  for (int i=0; i<coordRank[coord]; i++) {
-    int gi=coordDimMap[coord][i];
-    if (!coordIsDist[coord][i]) {
-      if (arrayLBounds[coordMapDim[coord][i]] != gridLBounds[gi]) { 
-	ok=false;
-	break;
-      }
-      if (arrayUBounds[coordMapDim[coord][i]] != gridUBounds[gi]) { 
-	ok=false;
-	break;
+  int offset[ESMF_MAXDIM];
+  int staggerLBnd[ESMF_MAXDIM];
+  int staggerUBnd[ESMF_MAXDIM];
+  int compLBnd[ESMF_MAXDIM];
+  int compUBnd[ESMF_MAXDIM];
+  int distRank=_array->getDistGrid()->getDimCount();
+  int localDECount=_grid->getDistGrid()->getDELayout()->getLocalDeCount();
+  for (int lDE=0; lDE < localDECount; lDE++) {
+    
+    //// Calculate the stagger lower bounds from the array
+    ////// Get array exclusive bounds
+   const int *arrayExLBnd=_array->getExclusiveLBound()+lDE*distRank;
+
+    ////// Get stagger Lbnd offset
+    localrc=_grid->getStaggerLWidth(staggerloc, lDE, offset);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+					      &rc)) return rc; 
+    ////// Fill in the staggerLBnd array
+    for (int i=0; i<coordRank[coord]; i++) {
+      int gi=coordDimMap[coord][i];
+      if (coordIsDist[coord][i]) {
+	staggerLBnd[i]=arrayExLBnd[coordMapDim[coord][i]]-offset[gi];
+      } else {
+	staggerLBnd[i]=gridLBounds[gridMapDim[gi]]-offset[gi];
       }
     }
-  } 
-  if (!ok) {
+
+    //// get computationalLBound from the array
+    ///// get the computational bounds of the localDE
+    const int *arrayCompLBnd=_array->getComputationalLBound()+lDE*distRank;
+
+    ///// Fill in the compLBnd array
+    for (int i=0; i<coordRank[coord]; i++) {
+      if (coordIsDist[coord][i]) {
+	compLBnd[i]=arrayCompLBnd[coordMapDim[coord][i]];
+      } else {
+	compLBnd[i]=arrayLBounds[coordMapDim[coord][i]];
+      }
+    }
+
+    //// Make sure the grid staggerLbounds fit within the array computational L bounds
+    for (int i=0; i<coordRank[coord]; i++) {
+      if (compLBnd[i] > staggerLBnd[i]) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
-		   "- Array and Grid Coord lbounds or ubounds mismatch ", &rc);
+		   "- Array computationalLBound or LBounds insufficient to hold grid+stagger bounds ", &rc);
       return rc;
+
+      }
+    }
+
+
+    //// Calculate the stagger upper bounds from the array
+    ////// Get array exclusive bounds
+   const int *arrayExUBnd=_array->getExclusiveUBound()+lDE*distRank;
+
+    ////// Get stagger Ubnd offset
+    localrc=_grid->getStaggerUWidth(staggerloc, lDE, offset);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+					      &rc)) return rc; 
+    ////// Fill in the staggerLBnd array
+    for (int i=0; i<coordRank[coord]; i++) {
+      int gi=coordDimMap[coord][i];
+      if (coordIsDist[coord][i]) {
+	staggerUBnd[i]=arrayExUBnd[coordMapDim[coord][i]]+offset[gi];
+      } else {
+	staggerUBnd[i]=gridUBounds[gridMapDim[gi]]+offset[gi];
+      }
+    }
+    
+
+    //// get computationalUBound from the array
+    ///// get the computational bounds of the localDE
+    const int *arrayCompUBnd=_array->getComputationalUBound()+lDE*distRank;
+
+    ///// Fill in the compLBnd array
+    for (int i=0; i<coordRank[coord]; i++) {
+      if (coordIsDist[coord][i]) {
+	compUBnd[i]=arrayCompUBnd[coordMapDim[coord][i]];
+      } else {
+	compUBnd[i]=arrayUBounds[coordMapDim[coord][i]];
+      }
+    }
+
+    //// Make sure the grid staggerLbounds fit within the array computational L bounds
+    for (int i=0; i<coordRank[coord]; i++) {
+      if (compUBnd[i] < staggerUBnd[i]) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+		   "- Array computationalUBound or UBounds insufficient to hold grid+stagger bounds ", &rc);
+      return rc;
+
+      }
+    }
   }
-
-
-  // TODO: Check and make sure the array's computational bounds are
-  //       big enough for the stagger padding
-
-
+ 
+  // Put _array into grid 
   rc=_grid->setCoordArray(staggerloc, coord, _array, false);
 
   // return what setCoordArray returned
@@ -996,6 +1090,13 @@ int gridAllocCoord(
       "- Not a valid pointer to grid argument", &rc);
     return rc;
   }
+
+  // make sure grid is inactive
+  if (_grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+      "- grid not of correct status to perform this operation", &rc);
+    return rc;
+  }  
 
 
   // Process staggerloc
@@ -1297,6 +1398,13 @@ int GridCommit(
   // initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
 
+  // check the input and get the information together to add array
+  if (_grid == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to grid argument", &rc);
+    return rc;
+  }
+
   // Make sure that we haven't been created
   if (_grid->getStatus() != ESMC_GRIDSTATUS_NOT_READY) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD,
@@ -1319,7 +1427,12 @@ int GridCommit(
                        proto->indexflag,  proto->gridType);
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
 	    ESMF_ERR_PASSTHRU, &rc)) return rc;        
- 
+
+   // Now that we don't need it anymore, remove the protogrid from the grid
+   localrc=_grid->delProtoGrid();
+   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+		       ESMF_ERR_PASSTHRU, &rc)) return rc;        
+
   // return successfully
   return ESMF_SUCCESS;
   }
@@ -1362,6 +1475,7 @@ int GridSetFromDistGrid(
 //EOP
 //-----------------------------------------------------------------------------
   // local vars
+  int rc;
   int localrc;                 // local error status
   ProtoGrid *proto;
 
@@ -1370,9 +1484,16 @@ int GridSetFromDistGrid(
   // initialize return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
+  // check the input and get the information together to add array
+  if (_grid == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to grid argument", &rc);
+    return rc;
+  }
+
   // Make sure that we haven't been created
   if (_grid->getStatus() != ESMC_GRIDSTATUS_NOT_READY) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
       "- Can't use set on an already created object", &localrc);
     return localrc;
   }
@@ -1507,7 +1628,7 @@ int gridGetCoordIntoArray(
   // initialize return code; assume routine not implemented
   status = ESMC_RC_NOT_IMPL;
   rc = ESMC_RC_NOT_IMPL;
-  
+
   // check the input and get the information together to add array
   if (_grid == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -1515,6 +1636,13 @@ int gridGetCoordIntoArray(
     return rc;
   }
 
+  // make sure grid is inactive
+  if (_grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+      "- grid not of correct status to perform this operation", &rc);
+    return rc;
+  }  
+  
   // Process staggerloc
   if (_staggerloc==NULL) {
     staggerloc=0;  // default
@@ -1556,7 +1684,7 @@ int gridGetCoordIntoArray(
   // (note that _array is already a ** to Array)
   rc=_grid->getCoordArray(staggerloc, coord, _array);
 
-   // return what setCoordArray returned
+   // return what getCoordArray returned
   return rc;
   }
 //-----------------------------------------------------------------------------
@@ -1795,6 +1923,52 @@ int Grid::addProtoGrid(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::delProtoGrid()"
+//BOPI
+// !IROUTINE:  delProtoGrid
+//
+// !INTERFACE:
+int Grid::delProtoGrid(
+//
+// !RETURN VALUE:
+//    error code
+//
+// !ARGUMENTS:
+//
+  ){
+//
+// !DESCRIPTION:
+//   Removes a protogrid from a grid
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int rc;
+
+  // this shouldn't cause problems, but its weird enough to 
+  // ring alarm bells, so if necessary remove this check 
+  if (status == ESMC_GRIDSTATUS_NOT_READY) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
+	    "- removing a protogrid from an uncreated Grid", &rc); 
+    return rc;
+  }
+
+  // If present delete ProtoGrid
+  if (proto != ESMC_NULL_POINTER) delete proto;
+
+  // Set to NULL so we can tell that proto has been deleted 
+  proto = ESMC_NULL_POINTER;
+
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+
+
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Grid()"
 //BOPI
 // !IROUTINE:  GridConstruct
@@ -1916,10 +2090,8 @@ Grid::Grid(
      _free2D<int>(&coordMapDim); 
   }
 
-#if 1
   if (isDELBnd != ESMC_NULL_POINTER) delete [] isDELBnd;
   if (isDEUBnd != ESMC_NULL_POINTER) delete [] isDEUBnd;
-#endif
 }
 
 
@@ -2216,7 +2388,7 @@ int Grid::getCoordArray(
   rc = ESMC_RC_NOT_IMPL;
   
   // Check status
-  if (status != ESMC_GRIDSTATUS_SHAPE_READY) {
+  if (status < ESMC_GRIDSTATUS_SHAPE_READY) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
       "- Grid not fully created", &rc);
     return rc;

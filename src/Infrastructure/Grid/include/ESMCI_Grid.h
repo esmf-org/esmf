@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.9 2007/07/20 00:27:28 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.10 2007/07/24 19:33:05 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -201,6 +201,8 @@ int getCoordExclusiveUBnd(
   );
 
  int addProtoGrid();
+ int delProtoGrid();
+
 
   
 };  // end class ESMC_Grid

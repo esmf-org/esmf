@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.14 2007/07/20 21:31:31 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.15 2007/07/24 19:33:05 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.14 2007/07/20 21:31:31 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.15 2007/07/24 19:33:05 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -320,7 +320,7 @@ end interface
 ! !INTERFACE:
   ! Private name; call using ESMF_GridAllocCoord()
      subroutine ESMF_GridAllocCoordNoValues(grid, staggerLoc,  &
-                coordLWidth, coordUWidth, coordAlign, &
+                staggerLWidth, staggerUWidth, staggerAlign, &
                 computationalLWidth, computationalUWidth, &
                 totalLWidth, totalUWidth,rc)
 
@@ -328,9 +328,9 @@ end interface
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)              :: grid 
       type (ESMF_StaggerLoc), intent(in),optional     :: staggerLoc
-      integer,                intent(in),optional     :: coordLWidth(:)
-      integer,                intent(in),optional     :: coordUWidth(:)
-      integer,                intent(in),optional     :: coordAlign(:)
+      integer,                intent(in),optional     :: staggerLWidth(:)
+      integer,                intent(in),optional     :: staggerUWidth(:)
+      integer,                intent(in),optional     :: staggerAlign(:)
       integer,                intent(out), optional   :: computationalLWidth(:)
       integer,                intent(out), optional   :: computationalUWidth(:)
       integer,                intent(out), optional   :: totalLWidth(:)
@@ -344,7 +344,7 @@ end interface
 !  storage (creates internal ESMF\_Arrays and associated memory) for  a particular
 !  stagger location. Note, that this
 !  call doesn't assign any values to the storage, it only allocates it. The
-!  remaining options {\tt coordLWidth}, etc. allow the user to adjust the 
+!  remaining options {\tt staggerLWidth}, etc. allow the user to adjust the 
 !  padding on the coordinate arrays.
 !
 ! The arguments are:
@@ -353,32 +353,32 @@ end interface
 !       Grid to allocate coordinate storage in.  
 ! \item[{[staggerLoc]}]
 !      The stagger location to add. If not present, defaults to ESMF\_STAGGERLOC\_CENTER. 
-! \item[{[coordLWidth]}] 
+! \item[{[staggerLWidth]}] 
 !      This array should be the same rank as the grid. It specifies the lower corner of the stagger
 !      region with respect to the lower corner of the exclusive region.
-! \item[{[coordUWidth]}] 
+! \item[{[staggerUWidth]}] 
 !      This array should be the same rank as the grid. It specifies the upper corner of the stagger
 !      region with respect to the upper corner of the exclusive region.
-! \item[{[coordAlign]}] 
+! \item[{[staggerAlign]}] 
 !      This array is of size  grid rank.
 !      For this stagger location, it specifies which element
 !      has the same index value as the center. For example, 
 !      for a 2D cell with corner stagger it specifies which 
 !      of the 4 corners has the same index as the center. 
-!      If this is set and either coordUWidth or coordLWidth is not,
+!      If this is set and either staggerUWidth or staggerLWidth is not,
 !      this determines the default array padding for a stagger. 
 !      If not set, then this defaults to all negative. (e.g. 
 !      The most negative part of the stagger in a cell is aligned with the 
 !      center and the padding is all on the postive side.) 
 !\item[{[computationalLWidth]}]
 !     The lower boundary of the computatational region in reference to the exclusive region. 
-!     If {\tt coordLWidth} is present then the actual computational width
-!     is the max on a dimension by dimension basis between {\tt coordLWidth} and
+!     If {\tt staggerLWidth} is present then the actual computational width
+!     is the max on a dimension by dimension basis between {\tt staggerLWidth} and
 !      {\tt computationalLWidth}. [CURRENTLY NOT IMPLEMENTED]
 !\item[{[computationalUWidth]}]
 !     The lower boundary of the computatational region in reference to the exclusive region. 
-!     If {\tt coordUWidth} is present then the actual computational width
-!     is the max on a dimension by dimension basis between {\tt coordUWidth} and
+!     If {\tt staggerUWidth} is present then the actual computational width
+!     is the max on a dimension by dimension basis between {\tt staggerUWidth} and
 !      {\tt computationalUWidth}. [CURRENTLY NOT IMPLEMENTED]
 !\item[{[totalLWidth]}]
 !     The lower boundary of the computatational region in reference to the computational region. 
@@ -386,7 +386,7 @@ end interface
 !     [CURRENTLY NOT IMPLEMENTED]
 !\item[{[totalUWidth]}]
 !     The lower boundary of the computatational region in reference to the computational region. 
-!     Note, the computational region includes the extra padding specified by {\tt coordLWidth}.
+!     Note, the computational region includes the extra padding specified by {\tt staggerLWidth}.
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -396,9 +396,9 @@ end interface
 
     integer :: tmp_staggerloc
     integer :: localrc ! local error status
-    type(ESMF_InterfaceInt) :: coordLWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: coordUWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: coordAlignArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: staggerLWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: staggerUWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: staggerAlignArg  ! Language Interface Helper Var
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -444,43 +444,43 @@ end interface
        tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc
     endif
 
-    !! coordLWidth
-    coordLWidthArg = ESMF_InterfaceIntCreate(coordLWidth, rc=localrc)
+    !! staggerLWidth
+    staggerLWidthArg = ESMF_InterfaceIntCreate(staggerLWidth, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    !! coordUWidth
-    coordUWidthArg = ESMF_InterfaceIntCreate(coordUWidth, rc=localrc)
+    !! staggerUWidth
+    staggerUWidthArg = ESMF_InterfaceIntCreate(staggerUWidth, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    !! coordAlign
-    coordAlignArg = ESMF_InterfaceIntCreate(coordAlign, rc=localrc)
+    !! staggerAlign
+    staggerAlignArg = ESMF_InterfaceIntCreate(staggerAlign, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    !! coordAlign
-    coordAlignArg = ESMF_InterfaceIntCreate(coordAlign, rc=localrc)
+    !! staggerAlign
+    staggerAlignArg = ESMF_InterfaceIntCreate(staggerAlign, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridalloccoord(grid%this,tmp_staggerloc, &
-      coordLWidthArg, coordUWidthArg, coordAlignArg, localrc)
+      staggerLWidthArg, staggerUWidthArg, staggerAlignArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate helper variables
-    call ESMF_InterfaceIntDestroy(coordLWidthArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(staggerLWidthArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_InterfaceIntDestroy(coordUWidthArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(staggerUWidthArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_InterfaceIntDestroy(coordAlignArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(staggerAlignArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1445,6 +1445,8 @@ end interface
           ESMF_CONTEXT, rcToReturn=rc)) return
    endif
 
+
+   
 
    ! Create DistGrid --------------------------------------------------------------
 
@@ -5667,16 +5669,16 @@ endif
 
 ! !INTERFACE:
      subroutine ESMF_GridGetStaggerLocInfo(grid, staggerLoc, coord, isAllocated, &
-                        coordLWidth, coordUWidth, coordAlign, rc)
+                        staggerLWidth, staggerUWidth, staggerAlign, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)              :: grid 
       type (ESMF_StaggerLoc), intent(in)              :: staggerLoc
       integer,                intent(in)              :: coord
       logical,                intent(in),   optional  :: isAllocated
-      integer,                intent(in),   optional  :: coordLWidth(:)
-      integer,                intent(in),   optional  :: coordUWidth(:)
-      integer,                intent(in),   optional  :: coordAlign(:)
+      integer,                intent(in),   optional  :: staggerLWidth(:)
+      integer,                intent(in),   optional  :: staggerUWidth(:)
+      integer,                intent(in),   optional  :: staggerAlign(:)
       integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -5692,13 +5694,13 @@ endif
 !      The coordinate component to get the information for (e.g. 1=x). 
 ! \item[{[isAllocated]}] 
 !      If TRUE, then this stagger location has coordinate data allocated.  
-! \item[{[coordLWidth]}] 
+! \item[{[staggerLWidth]}] 
 !      This array should be the same rank as the grid. It specifies the lower corner of the computational
 !      region with respect to the lower corner of the exclusive region.
-! \item[{[coordUWidth]}] 
+! \item[{[staggerUWidth]}] 
 !      This array should be the same rank as the grid. It specifies the upper corner of the computational
 !      region with respect to the lower corner of the exclusive region.
-! \item[{[coordAlign]}] 
+! \item[{[staggerAlign]}] 
 !      This array is of size  grid rank.
 !      For this stagger location, it specifies which element
 !      has the same index value as the center. For example, 
@@ -6051,7 +6053,7 @@ endif
 
 ! !INTERFACE:
       subroutine ESMF_GridSetCoordFromFptr2DR8(grid, staggerLoc, coord, &
-                   fptr, doCopy, coordLWidth, coordUWidth, coordAlign, &
+                   fptr, doCopy, staggerLWidth, staggerUWidth, staggerAlign, &
                    computationalLWidth, computationalUWidth, &
                    totalLWidth, totalUWidth,rc)
 !
@@ -6061,9 +6063,9 @@ endif
       integer,                intent(in)            :: coord
       real(ESMF_KIND_R8),     intent(out), optional :: fptr(:,:)
       type(ESMF_CopyFlag),    intent(in),  optional :: docopy
-      integer,                intent(in),  optional :: coordLWidth(:)
-      integer,                intent(in),  optional :: coordUWidth(:)
-      integer,                intent(in),  optional :: coordAlign(:)
+      integer,                intent(in),  optional :: staggerLWidth(:)
+      integer,                intent(in),  optional :: staggerUWidth(:)
+      integer,                intent(in),  optional :: staggerAlign(:)
       integer,                intent(out), optional :: computationalLWidth(:)
       integer,                intent(out), optional :: computationalUWidth(:)
       integer,                intent(out), optional :: totalLWidth(:)
@@ -6090,39 +6092,39 @@ endif
 !    Default to {\tt ESMF\_DATA\_REF}, makes the grid reference the passed
 !    in array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
 !    of the array.
-!\item[{[coordLWidth]}] 
+!\item[{[staggerLWidth]}] 
 !    This array should be the same rank as the grid. It specifies the lower corner of the computational
 !    region with respect to the lower corner of the exclusive region.
-!\item[{[coordUWidth]}] 
+!\item[{[staggerUWidth]}] 
 !    This array should be the same rank as the grid. It specifies the upper corner of the computational
 !    region with respect to the lower corner of the exclusive region.
-!\item[{[coordAlign]}] 
+!\item[{[staggerAlign]}] 
 !    This array is of size  grid rank.
 !    For this stagger location, it specifies which element
 !    has the same index value as the center. For example, 
 !    for a 2D cell with corner stagger it specifies which 
 !    of the 4 corners has the same index as the center. 
-!    If this is set and coordUWidth is not,
+!    If this is set and staggerUWidth is not,
 !    this determines the default array padding for a stagger. 
 !    If not set, then this defaults to all negative. (e.g. 
 !    The most negative part of the stagger in a cell is aligned with the 
 !    center and the padding is all on the postive side.) 
 !\item[{[computationalLWidth]}]
 !    The lower boundary of the computatational region in reference to the exclusive region. 
-!    If {\tt coordLWidth} is present then the actual computational width
-!    is the max on a dimension by dimension basis between {\tt coordLWidth} and
+!    If {\tt staggerLWidth} is present then the actual computational width
+!    is the max on a dimension by dimension basis between {\tt staggerLWidth} and
 !    {\tt computationalLWidth}.
 !\item[{[computationalUWidth]}]
 !    The lower boundary of the computatational region in reference to the exclusive region. 
-!    If {\tt coordUWidth} is present then the actual computational width
-!    is the max on a dimension by dimension basis between {\tt coordUWidth} and
+!    If {\tt staggerUWidth} is present then the actual computational width
+!    is the max on a dimension by dimension basis between {\tt staggerUWidth} and
 !    {\tt computationalUWidth}.
 !\item[{[totalLWidth]}]
 !    The lower boundary of the computatational region in reference to the computational region. 
 !    Note, the computational region includes the extra padding specified by {\tt ccordLWidth}.
 !\item[{[totalUWidth]}]
 !    The lower boundary of the computatational region in reference to the computational region. 
-!    Note, the computational region includes the extra padding specified by {\tt coordLWidth}.
+!    Note, the computational region includes the extra padding specified by {\tt staggerLWidth}.
 !\item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -6387,17 +6389,17 @@ endif
   ! Private name; call using ESMF_GridSetCoord()
      function ESMF_GridSet3DCoordFromArray(grid, staggerLoc, &
                         coord1, coord2, coord3, &
-                        coordLWidth, coordUWidth, &
-                        coordAlign, rc)
+                        staggerLWidth, staggerUWidth, &
+                        staggerAlign, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),       intent(in)             :: grid 
       type (ESMF_StaggerLoc), intent(in)       :: staggerLoc
       type(ESMF_ARRAY), intent(in)            :: coord1(:), coord2(:)
       type(ESMF_ARRAY), intent(in)            :: coord3(:)
-      integer,               intent(in),   optional  :: coordLWidth(:)
-      integer,               intent(in),   optional  :: coordUWidth(:)
-      integer,               intent(in),   optional  :: coordAlign(:)
+      integer,               intent(in),   optional  :: staggerLWidth(:)
+      integer,               intent(in),   optional  :: staggerUWidth(:)
+      integer,               intent(in),   optional  :: staggerAlign(:)
       type(ESMF_CopyFlag),   intent(in), optional :: docopy
       integer,               intent(out),  optional  :: rc
 !
@@ -6418,19 +6420,19 @@ endif
 !         ESMF Array holding coordinate data for the second coordinate component (e.g. y).
 ! \item[{[coord3]}]
 !         ESMF Array holding coordinate data for the third coordinate component (e.g. z).
-! \item[{[coordLWidth]}] 
+! \item[{[staggerLWidth]}] 
 !      This array should be the same rank as the grid. It specifies the lower corner of the computational
 !      region with respect to the lower corner of the exclusive region.
-! \item[{[coordUWidth]}] 
+! \item[{[staggerUWidth]}] 
 !      This array should be the same rank as the grid. It specifies the upper corner of the computational
 !      region with respect to the lower corner of the exclusive region.
-! \item[{[coordAlign]}] 
+! \item[{[staggerAlign]}] 
 !      This array is of size  grid rank.
 !      For this stagger location, it specifies which element
 !      has the same index value as the center. For example, 
 !      for a 2D cell with corner stagger it specifies which 
 !      of the 4 corners has the same index as the center. 
-!      If this is set and coordUWidth is not,
+!      If this is set and staggerUWidth is not,
 !      this determines the default array padding for a stagger. 
 !      If not set, then this defaults to all negative. (e.g. 
 !      The most negative part of the stagger in a cell is aligned with the 
@@ -6503,17 +6505,17 @@ endif
   ! Private name; call using ESMF_GridSetCoord()
      function ESMF_GridSetCoordFptr(grid, staggerLoc, &
                         coord1, coord2, coord3, &
-                        coordLWidth, coordUWidth, &
-                        coordAlign, rc)
+                        staggerLWidth, staggerUWidth, &
+                        staggerAlign, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),       intent(in)             :: grid 
       type (ESMF_StaggerLoc), intent(in)       :: staggerLoc
       real (ESMF_KIND_R8), intent(in)            :: coord1(:), coord2(:)
       real (ESMF_KIND_R8), intent(in)            :: coord3(:)
-      integer,               intent(in),   optional  :: coordLWidth(:)
-      integer,               intent(in),   optional  :: coordUWidth(:)
-      integer,               intent(in),   optional  :: coordAlign(:)
+      integer,               intent(in),   optional  :: staggerLWidth(:)
+      integer,               intent(in),   optional  :: staggerUWidth(:)
+      integer,               intent(in),   optional  :: staggerAlign(:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer,               intent(out),  optional  :: rc
 !
@@ -6534,19 +6536,19 @@ endif
 !        The F90 pointer to coordinate data for the second coordinate component (e.g. y).
 ! \item[{[coord3]}]
 !        The F90 pointer to coordinate data for the third coordinate component (e.g. z).
-! \item[{[coordLWidth]}] 
+! \item[{[staggerLWidth]}] 
 !      This array should be the same rank as the grid. It specifies the lower corner of the computational
 !      region with respect to the lower corner of the exclusive region.
-! \item[{[coordUWidth]}] 
+! \item[{[staggerUWidth]}] 
 !      This array should be the same rank as the grid. It specifies the upper corner of the computational
 !      region with respect to the lower corner of the exclusive region.
-! \item[{[coordAlign]}] 
+! \item[{[staggerAlign]}] 
 !      This array is of size  grid rank.
 !      For this stagger location, it specifies which element
 !      has the same index value as the center. For example, 
 !      for a 2D cell with corner stagger it specifies which 
 !      of the 4 corners has the same index as the center. 
-!      If this is set and coordUWidth is not,
+!      If this is set and staggerUWidth is not,
 !      this determines the default array padding for a stagger. 
 !      If not set, then this defaults to all negative. (e.g. 
 !      The most negative part of the stagger in a cell is aligned with the 

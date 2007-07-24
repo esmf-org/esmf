@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.10 2007/07/23 04:44:52 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.11 2007/07/24 19:33:05 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,6 +38,10 @@ program ESMF_GridCreateEx
       real(ESMF_KIND_R8), pointer :: cornerX(:,:,:), cornerY(:,:,:)
       real(ESMF_KIND_R8), pointer :: coordX(:,:), coordY(:,:)
 
+      integer :: elbnd(3),eubnd(3)
+      integer :: slbnd(3),subnd(3)
+      integer :: clbnd(3),cubnd(3)
+      integer :: tlbnd(3),tubnd(3)
       integer :: i,j,k
       integer :: lbnd(3), ubnd(3), lbnd_corner(3), ubnd_corner(3)
       integer, allocatable :: petMap(:,:,:), localIndices(:,:)
@@ -193,8 +197,8 @@ program ESMF_GridCreateEx
    ! location.  Since no coordinate values are specified in this
    ! call no coordinate values are set yet.
    !-------------------------------------------------------------------
-   call ESMF_GridAllocCoord(grid3D, staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
-   call ESMF_GridAllocCoord(grid3D, staggerloc=ESMF_STAGGERLOC_CORNER, rc=rc)
+   call ESMF_GridAllocCoord(grid3D, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, rc=rc)
+   call ESMF_GridAllocCoord(grid3D, staggerloc=ESMF_STAGGERLOC_CORNER_VCENTER, rc=rc)
 
 !----------------------------------------------------------------------
 ! Fill in  the coordinates for the non-center stagger location first.
@@ -206,9 +210,9 @@ program ESMF_GridCreateEx
    ! example would be in a loop over the local DEs. 
    !-------------------------------------------------------------------
    call ESMF_GridGetLocalTileInfo(grid3D, coord=1,          &
-          staggerLoc=ESMF_STAGGERLOC_CORNER,                    &
-          staggerLBound=lbnd_corner,                      &
-          staggerUBound=ubnd_corner,                      &
+          staggerLoc=ESMF_STAGGERLOC_CORNER_VCENTER,        &
+          staggerLBound=lbnd_corner,                        &
+          staggerUBound=ubnd_corner,                       &
           rc=rc)
 
    !-------------------------------------------------------------------
@@ -216,7 +220,7 @@ program ESMF_GridCreateEx
    ! the Grid object.
    !-------------------------------------------------------------------
    call ESMF_GridGetLocalTileCoord(grid3D, coord=1, &
-          staggerloc=ESMF_STAGGERLOC_CORNER, fptr=cornerX, rc=rc)
+          staggerloc=ESMF_STAGGERLOC_CORNER_VCENTER, fptr=cornerX, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension.
@@ -233,10 +237,10 @@ program ESMF_GridCreateEx
    ! Get the local bounds of the global indexing for the second
    ! coordinate array on the local DE.
    !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileInfo(grid3D, coord=2, &
-          staggerLoc=ESMF_STAGGERLOC_CORNER,                    &
-          staggerLBound=lbnd_corner,                      &
-          staggerUBound=ubnd_corner,                      &
+   call ESMF_GridGetLocalTileInfo(grid3D, coord=2,     &
+          staggerLoc=ESMF_STAGGERLOC_CORNER_VCENTER,   &
+          staggerLBound=lbnd_corner,                   &
+          staggerUBound=ubnd_corner,                   &
           rc=rc)
 
    !-------------------------------------------------------------------
@@ -244,7 +248,7 @@ program ESMF_GridCreateEx
    ! the Grid object.
    !-------------------------------------------------------------------
    call ESMF_GridGetLocalTileCoord(grid3D, coord=2, &
-          staggerLoc=ESMF_STAGGERLOC_CORNER, fptr=cornerY, rc=rc)
+          staggerLoc=ESMF_STAGGERLOC_CORNER_VCENTER, fptr=cornerY, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calcuate and set coordinates in the second dimension.
@@ -266,13 +270,16 @@ program ESMF_GridCreateEx
    ! coordinate array on the local DE.
    !-------------------------------------------------------------------
    call ESMF_GridGetLocalTileInfo(grid3D, coord=1, &
+          staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
           staggerLBound=lbnd, staggerUBound=ubnd, rc=rc)
 
    !-------------------------------------------------------------------
    ! Get the pointer to the first coordinate array from inside
    ! the Grid object.
    !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileCoord(grid3D, coord=1, fptr=centerX, rc=rc)
+   call ESMF_GridGetLocalTileCoord(grid3D, coord=1, &
+             staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
+             fptr=centerX, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension.
@@ -291,13 +298,16 @@ program ESMF_GridCreateEx
    ! coordinate array on the local DE.
    !-------------------------------------------------------------------
    call ESMF_GridGetLocalTileInfo(grid3D, coord=2, &
+          staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
           staggerLBound=lbnd, staggerUBound=ubnd, rc=rc)
 
    !-------------------------------------------------------------------
    ! Get the pointer to the second coordinate array from inside
    ! the Grid object.
    !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileCoord(grid3D, coord=2, fptr=centerY, rc=rc)
+   call ESMF_GridGetLocalTileCoord(grid3D, coord=2, &
+          staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
+          fptr=centerY, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calcuate and set coordinates in the second dimension.
@@ -316,13 +326,16 @@ program ESMF_GridCreateEx
    ! coordinate array on the local DE.
    !-------------------------------------------------------------------
    call ESMF_GridGetLocalTileInfo(grid3D, coord=3, &
+          staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
           staggerLBound=lbnd, staggerUBound=ubnd, rc=rc)
 
    !-------------------------------------------------------------------
    ! Get the pointer to the third coordinate array from inside
    ! the Grid object.
    !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileCoord(grid3D, coord=3, fptr=centerZ, rc=rc)
+   call ESMF_GridGetLocalTileCoord(grid3D, coord=3, &
+          staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
+          fptr=centerZ, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calcuate and set the vertical coordinates
@@ -391,12 +404,12 @@ program ESMF_GridCreateEx
 !---------------------------------------------------------------------------
 ! Set Grid coordinates at the cell center location.
 !---------------------------------------------------------------------------
-   call ESMF_GridAllocCoord(grid2D, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
+   call ESMF_GridAllocCoord(grid2D, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, rc=rc)
 
 !---------------------------------------------------------------------------
 ! Set Grid coordinates at the corner stagger location.
 !---------------------------------------------------------------------------
-   call ESMF_GridAllocCoord(grid2D, staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
+   call ESMF_GridAllocCoord(grid2D, staggerLoc=ESMF_STAGGERLOC_CORNER_VCENTER, rc=rc)
 
 !EOC
    !-------------------------------------------------------------------
@@ -945,6 +958,81 @@ call ESMF_GridDestroy(grid2D,rc=rc)
           staggerLoc=ESMF_STAGGERLOC_CORNER,    &
           coord=2,                              &
           array=arrayCoordY, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Cleanup after Example
+!!!!!!!!!!!!!!!!!!!!!!
+   call ESMF_GridDestroy(grid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   call ESMF_DistGridDestroy(distgrid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+
+
+!BOE
+!\subsubsection{Getting Grid Coordinate Array Bounds}
+!
+! Once coordinates have been allocated the user may wish to 
+! retrieve the bounds of the piece of that array on
+! the local DE. This is useful for iterating through the
+! array to set coordinates, retrieve coordiantes, or do calculations. 
+! The method {\tt ESMF\_GridGetLocalTileInfo} allows the user
+! to retrieve bound information for a particular coordinate
+! array. 
+!
+! There are actually four types of bounds the user can 
+! get: exclusive bounds, stagger bounds, computational bounds, 
+! total bounds. Note that although some of these are similar
+! to bounds provided by ESMF\_Array subroutines the format
+! here is different. The Array bounds are only for
+! distributed dimensions and are ordered to correspond 
+! to the dimension order in the associated DistGrid. The bounds
+! provided by the Grid are for both distributed and undistributed dimensions
+! and are ordered accoording to the order of dimensions in the 
+! coordiante. This means that the bounds provided should be usable
+! "as is" to access data in the coordinate array.  
+!
+! The exclusive bounds are the bounds of the index space defined by the 
+! distgrid and lbound and ubounds of the Grid. These correspond to the
+! index space region of the center stagger location. 
+!
+! The stagger bounds are the exclusive bounds plus the extra
+! padding added for the stagger. Note that this padding will
+! change from DE to DE because the padding is only applied to 
+! the edge of the tile. The stagger bounds are the bounds the 
+! user will typically use for their computations. 
+!
+! The computational bounds are the exclusive bounds plus the stagger padding, 
+! plus any extra halo space. 
+!
+! The total bounds are the outermost bounds of the coordinate array. The
+! total bounds should always match the bounds of the fortran array 
+! retrieved by {\tt ESMF\_GetLocalTileCoords}. 
+!
+! The following is an example of retrieving the bounds for the first
+! coordinate array from the corner stagger location. 
+!EOE
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Setup For Example
+!!!!!!!!!!!!!!!!!!!!!!
+   distgrid2D=ESMF_DistGridCreate(minIndex=(/1,1/),maxIndex=(/10,10/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CORNER, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+ 
+!BOC
+   call ESMF_GridGetLocalTileInfo(grid2D, coord=1,              &
+          staggerLoc=ESMF_STAGGERLOC_CORNER,                    &
+          exclusiveLBound=elbnd, exclusiveUBound=eubnd,         &
+          staggerLBound=slbnd, staggerUBound=subnd,             &
+          computationalLBound=clbnd, computationalUBound=cubnd, &
+          totalLBound=tlbnd, totalUBound=tubnd, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -1687,8 +1775,8 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !EOE
 
 !BOE
-! The {\tt coordLWidth} and 
-! {\tt coordUWidth} arguments are both 1D arrays of the
+! The {\tt staggerLWidth} and 
+! {\tt staggerUWidth} arguments are both 1D arrays of the
 ! same size as the Grid rank. The entries in the arrays
 ! give the extra offset from the outer boundary of
 ! the tile exclusive region for
@@ -1711,11 +1799,11 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !BOC 
    call ESMF_GridAllocCoord(grid2D, &
           staggerLoc=ESMF_STAGGERLOC_CORNER, &
-          coordLWidth=(/0,0/), coordUWidth=(/0,0/), rc=rc)
+          staggerLWidth=(/0,0/), staggerUWidth=(/0,0/), rc=rc)
 
    call ESMF_GridAllocCoord(grid2D, &
           staggerLoc=ESMF_STAGGERLOC_CENTER, &
-          coordLWidth=(/1,1/), coordUWidth=(/0,0/), rc=rc)
+          staggerLWidth=(/1,1/), staggerUWidth=(/0,0/), rc=rc)
 
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1732,11 +1820,11 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
 !BOE
 ! To indicate how the data at a particular stagger location is aligned with the 
-! cell center, the optional {\tt coordAlign} parameter 
+! cell center, the optional {\tt staggerAlign} parameter 
 ! may be used. This parameter indicates which stagger elements 
 ! in a cell shares the same index values as the cell center. 
 ! For example, in a 2D cell, it would indicate which of the four corners has
-! the same index value as the center. To set {\tt coordAlign},  
+! the same index value as the center. To set {\tt staggerAlign},  
 ! the values -1,+1 are used to indicate the alignment in
 ! each dimension. If a stagger location is 
 ! centered in a dimension (e.g. an edge in 2D), then that
@@ -1759,7 +1847,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
 !BOC 
    call ESMF_GridAllocCoord(grid2D, &
-          staggerLoc=ESMF_STAGGERLOC_CORNER, coordAlign=(/1,1/), rc=rc)
+          staggerLoc=ESMF_STAGGERLOC_CORNER, staggerAlign=(/1,1/), rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
