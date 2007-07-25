@@ -1,6 +1,6 @@
 ================================================================================
 
-                        README - ESMF v3.0.4 beta snapshot
+                        README - ESMF v3.0.3
 
                     Earth System Modeling Framework (ESMF)
 
@@ -225,8 +225,10 @@ ESMF_INSTALL_PREFIX
 This variable specifies the prefix of the installation path used during the
 installation process accessible thought the install target. Libraries, F90
 module files, header files and documentation all are installed relative to
-ESMF_INSTALL_PREFIX by default. The ESMF_INSTALL_PREFIX may be provided as
-absolute path or relative to ESMF_DIR.
+ESMF_INSTALL_PREFIX by default. See the ESMF User's Guide on how to customize
+the installation location of the installed files using additional 
+"ESMF_INSTALL_..." environment variables. The ESMF_INSTALL_PREFIX may be
+provided as absolute path or relative to ESMF_DIR.
 
 
 Supported Makefile Targets
@@ -562,4 +564,4 @@ Please contact esmf_support@ucar.edu with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.84 2007/07/21 06:11:35 theurich Exp $
+ $Id: README,v 1.85 2007/07/25 22:19:05 theurich Exp $
