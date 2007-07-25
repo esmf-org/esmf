@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.4 2007/07/24 19:33:05 oehmke Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.5 2007/07/25 05:48:59 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.4 2007/07/24 19:33:05 oehmke Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.5 2007/07/25 05:48:59 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -54,12 +54,9 @@ program ESMF_GridCoordUTest
   integer :: rank
   type(ESMF_Array) :: array2D, array2
   type(ESMF_ArraySpec) :: arrayspec2D
+  type(ESMF_StaggerLoc) :: customStagger
   real(ESMF_KIND_R8), pointer :: fptr(:,:), outfptr(:,:), fptr3D(:,:,:)
   integer :: lbnd(2),ubnd(2),lbnd3d(3),ubnd3d(3)
-  integer :: elbnd(3),eubnd(3)
-  integer :: slbnd(3),subnd(3)
-  integer :: clbnd(3),cubnd(3)
-  integer :: tlbnd(3),tubnd(3)
   integer :: petMap2D(2,2,1)
 
   !-----------------------------------------------------------------------------
@@ -227,6 +224,61 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
 
 
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test ESMF_StaggerLocSet"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! Test StaggerLocSet by creating a custom stagger to  like a predefined and then
+  ! using then interchangeably.
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! create 2D test Grid
+  grid2D=ESMF_GridCreate(distgrid=distgrid2D, coordTypeKind=ESMF_TYPEKIND_R8, &
+         indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Create Array with extra space
+  array2D=ESMF_ArrayCreate(arrayspec2D, distgrid=distgrid2D, computationalUWidth=(/1,1/), &
+            indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! create a custom stagger to look like ESMF_STAGGERLOC_EDGE1
+  call ESMF_StaggerLocSet(customStagger,loc=(/1,0/),rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Set Coord From Array
+  call ESMF_GridSetCoord(grid2D,coord=2, &
+               staggerloc=customStagger, array=array2D, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! set pointer to null
+  nullify(fptr)
+
+  ! Get Coord From Grid
+  call ESMF_GridGetLocalTileCoord(grid2D, localDE=0, &
+            staggerLoc=ESMF_STAGGERLOC_EDGE1, coord=2, fptr=fptr, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Check that output is as expected
+  correct=.true.
+  if (.not. associated(fptr)) correct=.false.
+
+ ! Destroy Test Grid
+  call ESMF_GridDestroy(grid2D, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! destroy test array
+  call ESMF_ArrayDestroy(array2D, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D GridAllocCoord, by allocating coordinates for every stagger"
@@ -271,7 +323,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D CoordAlloc and GridGetLocalTileInfo, by making sure default Center bounds are as expected"
+  write(name, *) "Test 2D CoordAlloc and GridGetLocalTileInfo, by making sure default CENTER bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -283,197 +335,450 @@ program ESMF_GridCoordUTest
   ! Init correct flag
   correct=.true.
 
-  ! Check if bounds are correct for each DE
-  if (petCount .eq. 1) then
-      ! Note the order of DE's here is dependant on the ordering
-      ! in ESMF_GridCreateShape, if that changes then this will
-      ! probably have to change also. 
+  ! check coord 1
+  call check2DBnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_CENTER, &
+           localPet=localPet, petCount=petCount,                          &
+           ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
+           ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/0,0/), &
+           ielbnd2=(/1,4/),ieubnd2=(/1,7/),iloff2=(/0,0/),iuoff2=(/0,0/), &
+           ielbnd3=(/2,4/),ieubnd3=(/3,7/),iloff3=(/0,0/),iuoff3=(/0,0/), &
+           correct=correct, rc=rc) 
 
-      ! check DE 0
-      call ESMF_GridGetLocalTileInfo(grid2D, coord=1, localDE=0, &
-             staggerLoc=ESMF_STAGGERLOC_CENTER,                  &
-             exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
-             staggerLBound=slbnd, staggerUBound=subnd,           &
-             computationalLBound=clbnd, computationalUBound=cubnd,  &
-             totalLBound=tlbnd, totalUBound=tubnd, rc=localrc)
-             if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     !! set pointer to null
-     nullify(fptr)
-
-     !! Get Coord Array From Grid
-     call ESMF_GridGetLocalTileCoord(grid2D, localDE=0, &
-              staggerLoc=ESMF_STAGGERLOC_CENTER, coord=1, fptr=fptr, rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     !! Check that output is as expected
-     if (.not. associated(fptr)) correct=.false.
-     if ((lbound(fptr,1) .ne. tlbnd(1)) .or. (lbound(fptr,2) .ne. tlbnd(2))) correct=.false.
-     if ((ubound(fptr,1) .ne. tubnd(1)) .or. (ubound(fptr,2) .ne. tubnd(2))) correct=.false.
-     if ((elbnd(1) .ne. 1) .or. (elbnd(2) .ne. 1)) correct=.false.
-     if ((eubnd(1) .ne. 1) .or. (eubnd(2) .ne. 3)) correct=.false.
-     if ((slbnd(1) .ne. 1) .or. (slbnd(2) .ne. 1)) correct=.false.
-     if ((subnd(1) .ne. 1) .or. (subnd(2) .ne. 3)) correct=.false.
-     if ((clbnd(1) .ne. 1) .or. (clbnd(2) .ne. 1)) correct=.false.
-     if ((cubnd(1) .ne. 1) .or. (cubnd(2) .ne. 3)) correct=.false.
-     if ((tlbnd(1) .ne. 1) .or. (tlbnd(2) .ne. 1)) correct=.false.
-     if ((tubnd(1) .ne. 1) .or. (tubnd(2) .ne. 3)) correct=.false.
-
-      ! check DE 1
-      call ESMF_GridGetLocalTileInfo(grid2D, coord=1, localDE=1, &
-             staggerLoc=ESMF_STAGGERLOC_CENTER,                  &
-             exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
-             staggerLBound=slbnd, staggerUBound=subnd,           &
-             computationalLBound=clbnd, computationalUBound=cubnd,  &
-             totalLBound=tlbnd, totalUBound=tubnd, rc=localrc)
-             if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     !! set pointer to null
-     nullify(fptr)
-
-     !! Get Coord From Grid
-     call ESMF_GridGetLocalTileCoord(grid2D, localDE=1, &
-              staggerLoc=ESMF_STAGGERLOC_CENTER, coord=1, fptr=fptr, rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     !! Check that output is as expected
-     if (.not. associated(fptr)) correct=.false.
-     if ((lbound(fptr,1) .ne. tlbnd(1)) .or. (lbound(fptr,2) .ne. tlbnd(2))) correct=.false.
-     if ((ubound(fptr,1) .ne. tubnd(1)) .or. (ubound(fptr,2) .ne. tubnd(2))) correct=.false.
-     if ((elbnd(1) .ne. 2) .or. (elbnd(2) .ne. 1)) correct=.false.
-     if ((eubnd(1) .ne. 3) .or. (eubnd(2) .ne. 3)) correct=.false.
-     if ((slbnd(1) .ne. 2) .or. (slbnd(2) .ne. 1)) correct=.false.
-     if ((subnd(1) .ne. 3) .or. (subnd(2) .ne. 3)) correct=.false.
-     if ((clbnd(1) .ne. 2) .or. (clbnd(2) .ne. 1)) correct=.false.
-     if ((cubnd(1) .ne. 3) .or. (cubnd(2) .ne. 3)) correct=.false.
-     if ((tlbnd(1) .ne. 2) .or. (tlbnd(2) .ne. 1)) correct=.false.
-     if ((tubnd(1) .ne. 3) .or. (tubnd(2) .ne. 3)) correct=.false.
-
-
-      ! check DE 2
-      call ESMF_GridGetLocalTileInfo(grid2D, coord=1, localDE=2, &
-             staggerLoc=ESMF_STAGGERLOC_CENTER,                  &
-             exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
-             staggerLBound=slbnd, staggerUBound=subnd,           &
-             computationalLBound=clbnd, computationalUBound=cubnd,  &
-             totalLBound=tlbnd, totalUBound=tubnd, rc=localrc)
-             if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     !! set pointer to null
-     nullify(fptr)
-
-     !! Get Coord From Grid
-     call ESMF_GridGetLocalTileCoord(grid2D, localDE=2, &
-              staggerLoc=ESMF_STAGGERLOC_CENTER, coord=1, fptr=fptr, rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     !! Check that output is as expected
-     if (.not. associated(fptr)) correct=.false.
-     if ((lbound(fptr,1) .ne. tlbnd(1)) .or. (lbound(fptr,2) .ne. tlbnd(2))) correct=.false.
-     if ((ubound(fptr,1) .ne. tubnd(1)) .or. (ubound(fptr,2) .ne. tubnd(2))) correct=.false.
-     if ((elbnd(1) .ne. 1) .or. (elbnd(2) .ne. 4)) correct=.false.
-     if ((eubnd(1) .ne. 1) .or. (eubnd(2) .ne. 7)) correct=.false.
-     if ((slbnd(1) .ne. 1) .or. (slbnd(2) .ne. 4)) correct=.false.
-     if ((subnd(1) .ne. 1) .or. (subnd(2) .ne. 7)) correct=.false.
-     if ((clbnd(1) .ne. 1) .or. (clbnd(2) .ne. 4)) correct=.false.
-     if ((cubnd(1) .ne. 1) .or. (cubnd(2) .ne. 7)) correct=.false.
-     if ((tlbnd(1) .ne. 1) .or. (tlbnd(2) .ne. 4)) correct=.false.
-     if ((tubnd(1) .ne. 1) .or. (tubnd(2) .ne. 7)) correct=.false. 
-
-      ! check DE 3
-      call ESMF_GridGetLocalTileInfo(grid2D, coord=1, localDE=3, &
-             staggerLoc=ESMF_STAGGERLOC_CENTER,                  &
-             exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
-             staggerLBound=slbnd, staggerUBound=subnd,           &
-             computationalLBound=clbnd, computationalUBound=cubnd,  &
-             totalLBound=tlbnd, totalUBound=tubnd, rc=localrc)
-             if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     !! set pointer to null
-     nullify(fptr)
-
-     !! Get Coord From Grid
-     call ESMF_GridGetLocalTileCoord(grid2D, localDE=3, &
-              staggerLoc=ESMF_STAGGERLOC_CENTER, coord=1, fptr=fptr, rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     !! Check that output is as expected
-     if (.not. associated(fptr)) correct=.false.
-     if ((lbound(fptr,1) .ne. tlbnd(1)) .or. (lbound(fptr,2) .ne. tlbnd(2))) correct=.false.
-     if ((ubound(fptr,1) .ne. tubnd(1)) .or. (ubound(fptr,2) .ne. tubnd(2))) correct=.false.
-     if ((elbnd(1) .ne. 2) .or. (elbnd(2) .ne. 4)) correct=.false.
-     if ((eubnd(1) .ne. 3) .or. (eubnd(2) .ne. 7)) correct=.false.
-     if ((slbnd(1) .ne. 2) .or. (slbnd(2) .ne. 4)) correct=.false.
-     if ((subnd(1) .ne. 3) .or. (subnd(2) .ne. 7)) correct=.false.
-     if ((clbnd(1) .ne. 2) .or. (clbnd(2) .ne. 4)) correct=.false.
-     if ((cubnd(1) .ne. 3) .or. (cubnd(2) .ne. 7)) correct=.false.
-     if ((tlbnd(1) .ne. 2) .or. (tlbnd(2) .ne. 4)) correct=.false.
-     if ((tubnd(1) .ne. 3) .or. (tubnd(2) .ne. 7)) correct=.false. 
-
-  else  if (petCount .eq. 4) then
-      call ESMF_GridGetLocalTileInfo(grid2D, coord=1, localDE=0, &
-             staggerLoc=ESMF_STAGGERLOC_CENTER,                  &
-             exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
-             staggerLBound=slbnd, staggerUBound=subnd,           &
-             computationalLBound=clbnd, computationalUBound=cubnd,  &
-             totalLBound=tlbnd, totalUBound=tubnd, rc=localrc)
-             if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-      ! set pointer to null
-      nullify(fptr)
-
-     ! Get Coord From Grid
-     call ESMF_GridGetLocalTileCoord(grid2D, localDE=0, &
-              staggerLoc=ESMF_STAGGERLOC_CENTER, coord=1, fptr=fptr, rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     ! Check that output is as expected
-     if (.not. associated(fptr)) correct=.false.
-     if ((lbound(fptr,1) .ne. tlbnd(1)) .or. (lbound(fptr,2) .ne. tlbnd(2))) correct=.false.
-     if ((ubound(fptr,1) .ne. tubnd(1)) .or. (ubound(fptr,2) .ne. tubnd(2))) correct=.false.
-
-     if (localPet .eq. 0) then
-        if ((elbnd(1) .ne. 1) .or. (elbnd(2) .ne. 1)) correct=.false.
-        if ((eubnd(1) .ne. 1) .or. (eubnd(2) .ne. 3)) correct=.false.
-        if ((slbnd(1) .ne. 1) .or. (slbnd(2) .ne. 1)) correct=.false.
-        if ((subnd(1) .ne. 1) .or. (subnd(2) .ne. 3)) correct=.false.
-        if ((clbnd(1) .ne. 1) .or. (clbnd(2) .ne. 1)) correct=.false.
-        if ((cubnd(1) .ne. 1) .or. (cubnd(2) .ne. 3)) correct=.false.
-        if ((tlbnd(1) .ne. 1) .or. (tlbnd(2) .ne. 1)) correct=.false.
-        if ((tubnd(1) .ne. 1) .or. (tubnd(2) .ne. 3)) correct=.false.
-     else if (localPet .eq. 1) then
-        if ((elbnd(1) .ne. 2) .or. (elbnd(2) .ne. 1)) correct=.false.
-        if ((eubnd(1) .ne. 3) .or. (eubnd(2) .ne. 3)) correct=.false.
-        if ((slbnd(1) .ne. 2) .or. (slbnd(2) .ne. 1)) correct=.false.
-        if ((subnd(1) .ne. 3) .or. (subnd(2) .ne. 3)) correct=.false.
-        if ((clbnd(1) .ne. 2) .or. (clbnd(2) .ne. 1)) correct=.false.
-        if ((cubnd(1) .ne. 3) .or. (cubnd(2) .ne. 3)) correct=.false.
-        if ((tlbnd(1) .ne. 2) .or. (tlbnd(2) .ne. 1)) correct=.false.
-        if ((tubnd(1) .ne. 3) .or. (tubnd(2) .ne. 3)) correct=.false.
-     else if (localPet .eq. 2) then
-        if ((elbnd(1) .ne. 1) .or. (elbnd(2) .ne. 4)) correct=.false.
-        if ((eubnd(1) .ne. 1) .or. (eubnd(2) .ne. 7)) correct=.false.
-        if ((slbnd(1) .ne. 1) .or. (slbnd(2) .ne. 4)) correct=.false.
-        if ((subnd(1) .ne. 1) .or. (subnd(2) .ne. 7)) correct=.false.
-        if ((clbnd(1) .ne. 1) .or. (clbnd(2) .ne. 4)) correct=.false.
-        if ((cubnd(1) .ne. 1) .or. (cubnd(2) .ne. 7)) correct=.false.
-        if ((tlbnd(1) .ne. 1) .or. (tlbnd(2) .ne. 4)) correct=.false.
-        if ((tubnd(1) .ne. 1) .or. (tubnd(2) .ne. 7)) correct=.false. 
-     else if (localPet .eq. 3) then
-        if ((elbnd(1) .ne. 2) .or. (elbnd(2) .ne. 4)) correct=.false.
-        if ((eubnd(1) .ne. 3) .or. (eubnd(2) .ne. 7)) correct=.false.
-        if ((slbnd(1) .ne. 2) .or. (slbnd(2) .ne. 4)) correct=.false.
-        if ((subnd(1) .ne. 3) .or. (subnd(2) .ne. 7)) correct=.false.
-        if ((clbnd(1) .ne. 2) .or. (clbnd(2) .ne. 4)) correct=.false.
-        if ((cubnd(1) .ne. 3) .or. (cubnd(2) .ne. 7)) correct=.false.
-        if ((tlbnd(1) .ne. 2) .or. (tlbnd(2) .ne. 4)) correct=.false.
-        if ((tubnd(1) .ne. 3) .or. (tubnd(2) .ne. 7)) correct=.false. 
-     endif
-  endif
+  ! check coord 2
+  call check2DBnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_CENTER, &
+           localPet=localPet, petCount=petCount,                          &
+           ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
+           ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/0,0/), &
+           ielbnd2=(/1,4/),ieubnd2=(/1,7/),iloff2=(/0,0/),iuoff2=(/0,0/), &
+           ielbnd3=(/2,4/),ieubnd3=(/3,7/),iloff3=(/0,0/),iuoff3=(/0,0/), &
+           correct=correct, rc=rc) 
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test 2D CoordAlloc and GridGetLocalTileInfo, by making sure default EDGE1 bounds are as expected"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! Note that this test depends on coordinates allocated above
+  ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! Init correct flag
+  correct=.true.
+
+  ! check coord 1
+  call check2DBnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_EDGE1, &
+           localPet=localPet, petCount=petCount,                          &
+           ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
+           ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/1,0/), &
+           ielbnd2=(/1,4/),ieubnd2=(/1,7/),iloff2=(/0,0/),iuoff2=(/0,0/), &
+           ielbnd3=(/2,4/),ieubnd3=(/3,7/),iloff3=(/0,0/),iuoff3=(/1,0/), &
+           correct=correct, rc=rc) 
+
+  ! check coord 2
+  call check2DBnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_EDGE1, &
+           localPet=localPet, petCount=petCount,                          &
+           ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
+           ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/1,0/), &
+           ielbnd2=(/1,4/),ieubnd2=(/1,7/),iloff2=(/0,0/),iuoff2=(/0,0/), &
+           ielbnd3=(/2,4/),ieubnd3=(/3,7/),iloff3=(/0,0/),iuoff3=(/1,0/), &
+           correct=correct, rc=rc) 
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test 2D CoordAlloc and GridGetLocalTileInfo, by making sure default EDGE2 bounds are as expected"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! Note that this test depends on coordinates allocated above
+  ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! Init correct flag
+  correct=.true.
+
+  ! check coord 1
+  call check2DBnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_EDGE2, &
+           localPet=localPet, petCount=petCount,                          &
+           ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
+           ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/0,0/), &
+           ielbnd2=(/1,4/),ieubnd2=(/1,7/),iloff2=(/0,0/),iuoff2=(/0,1/), &
+           ielbnd3=(/2,4/),ieubnd3=(/3,7/),iloff3=(/0,0/),iuoff3=(/0,1/), &
+           correct=correct, rc=rc) 
+
+  ! check coord 2
+  call check2DBnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_EDGE2, &
+           localPet=localPet, petCount=petCount,                          &
+           ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
+           ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/0,0/), &
+           ielbnd2=(/1,4/),ieubnd2=(/1,7/),iloff2=(/0,0/),iuoff2=(/0,1/), &
+           ielbnd3=(/2,4/),ieubnd3=(/3,7/),iloff3=(/0,0/),iuoff3=(/0,1/), &
+           correct=correct, rc=rc) 
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test 2D CoordAlloc and GridGetLocalTileInfo, by making sure default CORNER bounds are as expected"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! Note that this test depends on coordinates allocated above
+  ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! Init correct flag
+  correct=.true.
+
+  ! check coord 1
+  call check2DBnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_CORNER, &
+           localPet=localPet, petCount=petCount,                          &
+           ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
+           ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/1,0/), &
+           ielbnd2=(/1,4/),ieubnd2=(/1,7/),iloff2=(/0,0/),iuoff2=(/0,1/), &
+           ielbnd3=(/2,4/),ieubnd3=(/3,7/),iloff3=(/0,0/),iuoff3=(/1,1/), &
+           correct=correct, rc=rc) 
+
+  ! check coord 2
+  call check2DBnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_CORNER, &
+           localPet=localPet, petCount=petCount,                          &
+           ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
+           ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/1,0/), &
+           ielbnd2=(/1,4/),ieubnd2=(/1,7/),iloff2=(/0,0/),iuoff2=(/0,1/), &
+           ielbnd3=(/2,4/),ieubnd3=(/3,7/),iloff3=(/0,0/),iuoff3=(/1,1/), &
+           correct=correct, rc=rc) 
+
+  ! Destroy Test Grid
+  call ESMF_GridDestroy(grid2D, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test 2D GridAllocCoord with staggerWidths, by allocating coordinates for every stagger with different widths"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! if petCount >1, setup petMap
+  if (petCount .gt. 1) then
+     petMap2D(:,1,1)=(/0,1/)
+     petMap2D(:,2,1)=(/2,3/)
+
+     grid2D=ESMF_GridCreateShape(countsPerDEDim1=(/1,2/), &
+                              countsPerDeDim2=(/3,4/), indexflag=ESMF_INDEX_GLOBAL, &
+                              petMap=petMap2D, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  else
+     grid2D=ESMF_GridCreateShape(countsPerDEDim1=(/1,2/), &
+                              countsPerDeDim2=(/3,4/), indexflag=ESMF_INDEX_GLOBAL, &
+                              rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  endif
+
+  ! Allocate Staggers
+  call ESMF_GridAllocCoord(grid2D, staggerLWidth=(/1,2/), staggerUWidth=(/3,4/), &
+               staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  call ESMF_GridAllocCoord(grid2D, staggerLWidth=(/5,6/), &
+               staggerloc=ESMF_STAGGERLOC_EDGE1, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  call ESMF_GridAllocCoord(grid2D, staggerUWidth=(/7,8/), &
+               staggerloc=ESMF_STAGGERLOC_EDGE2, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  call ESMF_GridAllocCoord(grid2D, &           ! leave as default
+               staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test 2D CoordAlloc and GridGetLocalTileInfo, by making sure set CENTER bounds are as expected"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! Note that this test depends on coordinates allocated above
+  ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! Init correct flag
+  correct=.true.
+
+  ! check coord 1
+  call check2DBnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_CENTER, &
+           localPet=localPet, petCount=petCount,                          &
+           ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/1,2/),iuoff0=(/0,0/), &
+           ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,2/),iuoff1=(/3,0/), &
+           ielbnd2=(/1,4/),ieubnd2=(/1,7/),iloff2=(/1,0/),iuoff2=(/0,4/), &
+           ielbnd3=(/2,4/),ieubnd3=(/3,7/),iloff3=(/0,0/),iuoff3=(/3,4/), &
+           correct=correct, rc=rc) 
+
+  ! check coord 2
+  call check2DBnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_CENTER, &
+           localPet=localPet, petCount=petCount,                          &
+           ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/1,2/),iuoff0=(/0,0/), &
+           ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,2/),iuoff1=(/3,0/), &
+           ielbnd2=(/1,4/),ieubnd2=(/1,7/),iloff2=(/1,0/),iuoff2=(/0,4/), &
+           ielbnd3=(/2,4/),ieubnd3=(/3,7/),iloff3=(/0,0/),iuoff3=(/3,4/), &
+           correct=correct, rc=rc) 
+
+
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test 2D CoordAlloc and GridGetLocalTileInfo, by making sure set EDGE1 bounds are as expected"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! Note that this test depends on coordinates allocated above
+  ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! Init correct flag
+  correct=.true.
+
+  ! check coord 1
+  call check2DBnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_EDGE1, &
+           localPet=localPet, petCount=petCount,                          &
+           ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/5,6/),iuoff0=(/0,0/), &
+           ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,6/),iuoff1=(/0,0/), &
+           ielbnd2=(/1,4/),ieubnd2=(/1,7/),iloff2=(/5,0/),iuoff2=(/0,0/), &
+           ielbnd3=(/2,4/),ieubnd3=(/3,7/),iloff3=(/0,0/),iuoff3=(/0,0/), &
+           correct=correct, rc=rc) 
+
+  ! check coord 2
+  call check2DBnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_EDGE1, &
+           localPet=localPet, petCount=petCount,                          &
+           ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/5,6/),iuoff0=(/0,0/), &
+           ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,6/),iuoff1=(/0,0/), &
+           ielbnd2=(/1,4/),ieubnd2=(/1,7/),iloff2=(/5,0/),iuoff2=(/0,0/), &
+           ielbnd3=(/2,4/),ieubnd3=(/3,7/),iloff3=(/0,0/),iuoff3=(/0,0/), &
+           correct=correct, rc=rc) 
+
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test 2D CoordAlloc and GridGetLocalTileInfo, by making sure set EDGE2 bounds are as expected"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! Note that this test depends on coordinates allocated above
+  ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! Init correct flag
+  correct=.true.
+
+  ! check coord 1
+  call check2DBnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_EDGE2, &
+           localPet=localPet, petCount=petCount,                          &
+           ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
+           ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/7,0/), &
+           ielbnd2=(/1,4/),ieubnd2=(/1,7/),iloff2=(/0,0/),iuoff2=(/0,8/), &
+           ielbnd3=(/2,4/),ieubnd3=(/3,7/),iloff3=(/0,0/),iuoff3=(/7,8/), &
+           correct=correct, rc=rc) 
+
+  ! check coord 2
+  call check2DBnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_EDGE2, &
+           localPet=localPet, petCount=petCount,                          &
+           ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
+           ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/7,0/), &
+           ielbnd2=(/1,4/),ieubnd2=(/1,7/),iloff2=(/0,0/),iuoff2=(/0,8/), &
+           ielbnd3=(/2,4/),ieubnd3=(/3,7/),iloff3=(/0,0/),iuoff3=(/7,8/), &
+           correct=correct, rc=rc) 
+
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test 2D CoordAlloc and GridGetLocalTileInfo, by making sure set CORNER bounds are as expected"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! Note that this test depends on coordinates allocated above
+  ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! Init correct flag
+  correct=.true.
+
+  ! check coord 1
+  call check2DBnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_CORNER, &
+           localPet=localPet, petCount=petCount,                          &
+           ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
+           ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/1,0/), &
+           ielbnd2=(/1,4/),ieubnd2=(/1,7/),iloff2=(/0,0/),iuoff2=(/0,1/), &
+           ielbnd3=(/2,4/),ieubnd3=(/3,7/),iloff3=(/0,0/),iuoff3=(/1,1/), &
+           correct=correct, rc=rc) 
+
+  ! check coord 2
+  call check2DBnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_CORNER, &
+           localPet=localPet, petCount=petCount,                          &
+           ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
+           ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/1,0/), &
+           ielbnd2=(/1,4/),ieubnd2=(/1,7/),iloff2=(/0,0/),iuoff2=(/0,1/), &
+           ielbnd3=(/2,4/),ieubnd3=(/3,7/),iloff3=(/0,0/),iuoff3=(/1,1/), &
+           correct=correct, rc=rc) 
+
+  ! Destroy Test Grid
+  call ESMF_GridDestroy(grid2D, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test 2D coordDep, by flipping coord2 and allocating CENTER and CORNER staggers"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! if petCount >1, setup petMap
+  if (petCount .gt. 1) then
+     petMap2D(:,1,1)=(/0,1/)
+     petMap2D(:,2,1)=(/2,3/)
+
+     grid2D=ESMF_GridCreateShape(countsPerDEDim1=(/1,2/), &
+                              countsPerDeDim2=(/3,4/), indexflag=ESMF_INDEX_GLOBAL, &
+                              coordDep2=(/2,1/), petMap=petMap2D, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  else
+     grid2D=ESMF_GridCreateShape(countsPerDEDim1=(/1,2/), &
+                              countsPerDeDim2=(/3,4/), indexflag=ESMF_INDEX_GLOBAL, &
+                              coordDep2=(/2,1/), rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  endif
+
+  ! Allocate Staggers
+  call ESMF_GridAllocCoord(grid2D, staggerLWidth=(/1,2/), staggerUWidth=(/3,4/), &
+               staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  call ESMF_GridAllocCoord(grid2D, &           ! leave as default
+               staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test 2D CoordDep, by making sure set CENTER bounds are as expected"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! Note that this test depends on coordinates allocated above
+  ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! Init correct flag
+  correct=.true.
+
+  ! check coord 1
+  call check2DBnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_CENTER, &
+           localPet=localPet, petCount=petCount,                          &
+           ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/1,2/),iuoff0=(/0,0/), &
+           ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,2/),iuoff1=(/3,0/), &
+           ielbnd2=(/1,4/),ieubnd2=(/1,7/),iloff2=(/1,0/),iuoff2=(/0,4/), &
+           ielbnd3=(/2,4/),ieubnd3=(/3,7/),iloff3=(/0,0/),iuoff3=(/3,4/), &
+           correct=correct, rc=rc) 
+
+  ! check coord 2
+  call check2DBnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_CENTER, &
+           localPet=localPet, petCount=petCount,                          &
+           ielbnd0=(/1,1/),ieubnd0=(/3,1/),iloff0=(/2,1/),iuoff0=(/0,0/), &
+           ielbnd1=(/1,2/),ieubnd1=(/3,3/),iloff1=(/2,0/),iuoff1=(/0,3/), &
+           ielbnd2=(/4,1/),ieubnd2=(/7,1/),iloff2=(/0,1/),iuoff2=(/4,0/), &
+           ielbnd3=(/4,2/),ieubnd3=(/7,3/),iloff3=(/0,0/),iuoff3=(/4,3/), &
+           correct=correct, rc=rc) 
+
+
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test 2D CoordDep, by making sure default CORNER bounds are as expected"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! Note that this test depends on coordinates allocated above
+  ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! Init correct flag
+  correct=.true.
+
+  ! check coord 1
+  call check2DBnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_CORNER, &
+           localPet=localPet, petCount=petCount,                          &
+           ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
+           ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/1,0/), &
+           ielbnd2=(/1,4/),ieubnd2=(/1,7/),iloff2=(/0,0/),iuoff2=(/0,1/), &
+           ielbnd3=(/2,4/),ieubnd3=(/3,7/),iloff3=(/0,0/),iuoff3=(/1,1/), &
+           correct=correct, rc=rc) 
+
+  ! check coord 2
+  call check2DBnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_CORNER, &
+           localPet=localPet, petCount=petCount,                          &
+           ielbnd0=(/1,1/),ieubnd0=(/3,1/),iloff0=(/0,0/),iuoff0=(/0,0/), &
+           ielbnd1=(/1,2/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/0,1/), &
+           ielbnd2=(/4,1/),ieubnd2=(/7,1/),iloff2=(/0,0/),iuoff2=(/1,0/), &
+           ielbnd3=(/4,2/),ieubnd3=(/7,3/),iloff3=(/0,0/),iuoff3=(/1,1/), &
+           correct=correct, rc=rc) 
+
+  ! Destroy Test Grid
+  call ESMF_GridDestroy(grid2D, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
 
 
   !-----------------------------------------------------------------------------
@@ -543,5 +848,319 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+
+contains
+
+
+subroutine check2DBnds2x2(grid, coord, staggerloc, localPet, petCount, &
+                          ielbnd0,ieubnd0,iloff0,iuoff0, &
+                          ielbnd1,ieubnd1,iloff1,iuoff1, &
+                          ielbnd2,ieubnd2,iloff2,iuoff2, &
+                          ielbnd3,ieubnd3,iloff3,iuoff3, &
+                          correct, rc)
+
+  type (ESMF_Grid) :: grid
+  type (ESMF_StaggerLoc),intent(in) :: staggerloc
+  integer,intent(in) :: coord, localPet, petCount
+  integer,intent(in) :: ielbnd0(:),ieubnd0(:),iloff0(:),iuoff0(:)
+  integer,intent(in) :: ielbnd1(:),ieubnd1(:),iloff1(:),iuoff1(:)
+  integer,intent(in) :: ielbnd2(:),ieubnd2(:),iloff2(:),iuoff2(:)
+  integer,intent(in) :: ielbnd3(:),ieubnd3(:),iloff3(:),iuoff3(:)
+  logical,intent(inout) :: correct
+  integer,intent(inout) :: rc
+  
+  integer :: localrc
+  integer :: elbnd(2),eubnd(2)
+  integer :: slbnd(2),subnd(2)
+  integer :: clbnd(2),cubnd(2)
+  integer :: tlbnd(2),tubnd(2)
+  real (ESMF_KIND_R8), pointer :: fptr(:,:)
+
+
+
+  ! Check if bounds are correct for each DE
+  if (petCount .eq. 1) then
+      ! Note the order of DE's here is dependant on the ordering
+      ! in ESMF_GridCreateShape, if that changes then this will
+      ! probably have to change also. 
+
+      ! check DE 0
+      call ESMF_GridGetLocalTileInfo(grid, coord=coord, localDE=0, &
+             staggerLoc=staggerloc,                  &
+             exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
+             staggerLBound=slbnd, staggerUBound=subnd,           &
+             computationalLBound=clbnd, computationalUBound=cubnd,  &
+             totalLBound=tlbnd, totalUBound=tubnd, rc=localrc)
+             if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!    write(*,*) "0:",slbnd,",",subnd
+
+     !! set pointer to null
+     nullify(fptr)
+ 
+     !! Get Coord Array From Grid
+     call ESMF_GridGetLocalTileCoord(grid, localDE=0, &
+              staggerLoc=staggerloc, coord=coord, fptr=fptr, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     !! Check that output is as expected
+     if (.not. associated(fptr)) correct=.false.
+     if ((lbound(fptr,1) .ne. tlbnd(1)) .or. (lbound(fptr,2) .ne. tlbnd(2))) correct=.false.
+     if ((ubound(fptr,1) .ne. tubnd(1)) .or. (ubound(fptr,2) .ne. tubnd(2))) correct=.false.
+
+     if (elbnd(1) .ne. ielbnd0(1)) correct=.false.
+     if (elbnd(2) .ne. ielbnd0(2)) correct=.false.
+     if (eubnd(1) .ne. ieubnd0(1)) correct=.false.
+     if (eubnd(2) .ne. ieubnd0(2)) correct=.false.
+
+     if (slbnd(1) .ne. ielbnd0(1)-iloff0(1)) correct=.false.
+     if (slbnd(2) .ne. ielbnd0(2)-iloff0(2)) correct=.false.
+     if (subnd(1) .ne. ieubnd0(1)+iuoff0(1)) correct=.false.
+     if (subnd(2) .ne. ieubnd0(2)+iuoff0(2)) correct=.false.
+
+     if (clbnd(1) .gt. ielbnd0(1)-iloff0(1)) correct=.false.
+     if (clbnd(2) .gt. ielbnd0(2)-iloff0(2)) correct=.false.
+     if (cubnd(1) .lt. ieubnd0(1)+iuoff0(1)) correct=.false.
+     if (cubnd(2) .lt. ieubnd0(2)+iuoff0(2)) correct=.false.
+
+     if (tlbnd(1) .gt. ielbnd0(1)-iloff0(1)) correct=.false.
+     if (tlbnd(2) .gt. ielbnd0(2)-iloff0(2)) correct=.false.
+     if (tubnd(1) .lt. ieubnd0(1)+iuoff0(1)) correct=.false.
+     if (tubnd(2) .lt. ieubnd0(2)+iuoff0(2)) correct=.false.
+
+      ! check DE 1
+      call ESMF_GridGetLocalTileInfo(grid2D, coord=coord, localDE=1, &
+             staggerLoc=staggerloc,                  &
+             exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
+             staggerLBound=slbnd, staggerUBound=subnd,           &
+             computationalLBound=clbnd, computationalUBound=cubnd,  &
+             totalLBound=tlbnd, totalUBound=tubnd, rc=localrc)
+             if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+ !   write(*,*) "1:",slbnd,",",subnd
+
+     !! set pointer to null
+     nullify(fptr)
+
+     !! Get Coord From Grid
+     call ESMF_GridGetLocalTileCoord(grid, localDE=1, &
+              staggerLoc=staggerloc, coord=coord, fptr=fptr, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     !! Check that output is as expected
+     if (.not. associated(fptr)) correct=.false.
+     if ((lbound(fptr,1) .ne. tlbnd(1)) .or. (lbound(fptr,2) .ne. tlbnd(2))) correct=.false.
+     if ((ubound(fptr,1) .ne. tubnd(1)) .or. (ubound(fptr,2) .ne. tubnd(2))) correct=.false.
+
+     if (elbnd(1) .ne. ielbnd1(1)) correct=.false.
+     if (elbnd(2) .ne. ielbnd1(2)) correct=.false.
+     if (eubnd(1) .ne. ieubnd1(1)) correct=.false.
+     if (eubnd(2) .ne. ieubnd1(2)) correct=.false.
+
+     if (slbnd(1) .ne. ielbnd1(1)-iloff1(1)) correct=.false.
+     if (slbnd(2) .ne. ielbnd1(2)-iloff1(2)) correct=.false.
+     if (subnd(1) .ne. ieubnd1(1)+iuoff1(1)) correct=.false.
+     if (subnd(2) .ne. ieubnd1(2)+iuoff1(2)) correct=.false.
+
+     if (clbnd(1) .gt. ielbnd1(1)-iloff1(1)) correct=.false.
+     if (clbnd(2) .gt. ielbnd1(2)-iloff1(2)) correct=.false.
+     if (cubnd(1) .lt. ieubnd1(1)+iuoff1(1)) correct=.false.
+     if (cubnd(2) .lt. ieubnd1(2)+iuoff1(2)) correct=.false.
+
+     if (tlbnd(1) .gt. ielbnd1(1)-iloff1(1)) correct=.false.
+     if (tlbnd(2) .gt. ielbnd1(2)-iloff1(2)) correct=.false.
+     if (tubnd(1) .lt. ieubnd1(1)+iuoff1(1)) correct=.false.
+     if (tubnd(2) .lt. ieubnd1(2)+iuoff1(2)) correct=.false.
+
+
+      ! check DE 2
+      call ESMF_GridGetLocalTileInfo(grid, coord=coord, localDE=2, &
+             staggerLoc=staggerloc,                  &
+             exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
+             staggerLBound=slbnd, staggerUBound=subnd,           &
+             computationalLBound=clbnd, computationalUBound=cubnd,  &
+             totalLBound=tlbnd, totalUBound=tubnd, rc=localrc)
+             if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+ !   write(*,*) "2:",slbnd,",",subnd
+     !! set pointer to null
+     nullify(fptr)
+
+     !! Get Coord From Grid
+     call ESMF_GridGetLocalTileCoord(grid, localDE=2, &
+              staggerLoc=staggerloc, coord=coord, fptr=fptr, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     !! Check that output is as expected
+     if (.not. associated(fptr)) correct=.false.
+     if ((lbound(fptr,1) .ne. tlbnd(1)) .or. (lbound(fptr,2) .ne. tlbnd(2))) correct=.false.
+     if ((ubound(fptr,1) .ne. tubnd(1)) .or. (ubound(fptr,2) .ne. tubnd(2))) correct=.false.
+ 
+     if (elbnd(1) .ne. ielbnd2(1)) correct=.false.
+     if (elbnd(2) .ne. ielbnd2(2)) correct=.false.
+     if (eubnd(1) .ne. ieubnd2(1)) correct=.false.
+     if (eubnd(2) .ne. ieubnd2(2)) correct=.false.
+
+     if (slbnd(1) .ne. ielbnd2(1)-iloff2(1)) correct=.false.
+     if (slbnd(2) .ne. ielbnd2(2)-iloff2(2)) correct=.false.
+     if (subnd(1) .ne. ieubnd2(1)+iuoff2(1)) correct=.false.
+     if (subnd(2) .ne. ieubnd2(2)+iuoff2(2)) correct=.false.
+
+     if (clbnd(1) .gt. ielbnd2(1)-iloff2(1)) correct=.false.
+     if (clbnd(2) .gt. ielbnd2(2)-iloff2(2)) correct=.false.
+     if (cubnd(1) .lt. ieubnd2(1)+iuoff2(1)) correct=.false.
+     if (cubnd(2) .lt. ieubnd2(2)+iuoff2(2)) correct=.false.
+
+     if (tlbnd(1) .gt. ielbnd2(1)-iloff2(1)) correct=.false.
+     if (tlbnd(2) .gt. ielbnd2(2)-iloff2(2)) correct=.false.
+     if (tubnd(1) .lt. ieubnd2(1)+iuoff2(1)) correct=.false.
+     if (tubnd(2) .lt. ieubnd2(2)+iuoff2(2)) correct=.false.
+
+
+      ! check DE 3
+      call ESMF_GridGetLocalTileInfo(grid, coord=coord, localDE=3, &
+             staggerLoc=staggerloc,                  &
+             exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
+             staggerLBound=slbnd, staggerUBound=subnd,           &
+             computationalLBound=clbnd, computationalUBound=cubnd,  &
+             totalLBound=tlbnd, totalUBound=tubnd, rc=localrc)
+             if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+ !   write(*,*) "3:",slbnd,",",subnd
+     !! set pointer to null
+     nullify(fptr)
+
+     !! Get Coord From Grid
+     call ESMF_GridGetLocalTileCoord(grid, localDE=3, &
+              staggerLoc=staggerloc, coord=coord, fptr=fptr, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     !! Check that output is as expected
+     if (.not. associated(fptr)) correct=.false.
+     if ((lbound(fptr,1) .ne. tlbnd(1)) .or. (lbound(fptr,2) .ne. tlbnd(2))) correct=.false.
+     if ((ubound(fptr,1) .ne. tubnd(1)) .or. (ubound(fptr,2) .ne. tubnd(2))) correct=.false.
+
+     if (elbnd(1) .ne. ielbnd3(1)) correct=.false.
+     if (elbnd(2) .ne. ielbnd3(2)) correct=.false.
+     if (eubnd(1) .ne. ieubnd3(1)) correct=.false.
+     if (eubnd(2) .ne. ieubnd3(2)) correct=.false.
+
+     if (slbnd(1) .ne. ielbnd3(1)-iloff3(1)) correct=.false.
+     if (slbnd(2) .ne. ielbnd3(2)-iloff3(2)) correct=.false.
+     if (subnd(1) .ne. ieubnd3(1)+iuoff3(1)) correct=.false.
+     if (subnd(2) .ne. ieubnd3(2)+iuoff3(2)) correct=.false.
+
+     if (clbnd(1) .gt. ielbnd3(1)-iloff3(1)) correct=.false.
+     if (clbnd(2) .gt. ielbnd3(2)-iloff3(2)) correct=.false.
+     if (cubnd(1) .lt. ieubnd3(1)+iuoff3(1)) correct=.false.
+     if (cubnd(2) .lt. ieubnd3(2)+iuoff3(2)) correct=.false.
+
+     if (tlbnd(1) .gt. ielbnd3(1)-iloff3(1)) correct=.false.
+     if (tlbnd(2) .gt. ielbnd3(2)-iloff3(2)) correct=.false.
+     if (tubnd(1) .lt. ieubnd3(1)+iuoff3(1)) correct=.false.
+     if (tubnd(2) .lt. ieubnd3(2)+iuoff3(2)) correct=.false.
+
+  else  if (petCount .eq. 4) then
+      call ESMF_GridGetLocalTileInfo(grid, coord=coord, localDE=0, &
+             staggerLoc=staggerloc,                  &
+             exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
+             staggerLBound=slbnd, staggerUBound=subnd,           &
+             computationalLBound=clbnd, computationalUBound=cubnd,  &
+             totalLBound=tlbnd, totalUBound=tubnd, rc=localrc)
+             if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      ! set pointer to null
+      nullify(fptr)
+
+     ! Get Coord From Grid
+     call ESMF_GridGetLocalTileCoord(grid, localDE=0, &
+              staggerLoc=staggerloc, coord=coord, fptr=fptr, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     ! Check that output is as expected
+     if (.not. associated(fptr)) correct=.false.
+     if ((lbound(fptr,1) .ne. tlbnd(1)) .or. (lbound(fptr,2) .ne. tlbnd(2))) correct=.false.
+     if ((ubound(fptr,1) .ne. tubnd(1)) .or. (ubound(fptr,2) .ne. tubnd(2))) correct=.false.
+
+     if (localPet .eq. 0) then
+        if (elbnd(1) .ne. ielbnd0(1)) correct=.false.
+        if (elbnd(2) .ne. ielbnd0(2)) correct=.false.
+        if (eubnd(1) .ne. ieubnd0(1)) correct=.false.
+        if (eubnd(2) .ne. ieubnd0(2)) correct=.false.
+
+        if (slbnd(1) .ne. ielbnd0(1)-iloff0(1)) correct=.false.
+        if (slbnd(2) .ne. ielbnd0(2)-iloff0(2)) correct=.false.
+        if (subnd(1) .ne. ieubnd0(1)+iuoff0(1)) correct=.false.
+        if (subnd(2) .ne. ieubnd0(2)+iuoff0(2)) correct=.false.
+
+        if (clbnd(1) .gt. ielbnd0(1)-iloff0(1)) correct=.false.
+        if (clbnd(2) .gt. ielbnd0(2)-iloff0(2)) correct=.false.
+        if (cubnd(1) .lt. ieubnd0(1)+iuoff0(1)) correct=.false.
+        if (cubnd(2) .lt. ieubnd0(2)+iuoff0(2)) correct=.false.
+
+        if (tlbnd(1) .gt. ielbnd0(1)-iloff0(1)) correct=.false.
+        if (tlbnd(2) .gt. ielbnd0(2)-iloff0(2)) correct=.false.
+        if (tubnd(1) .lt. ieubnd0(1)+iuoff0(1)) correct=.false.
+        if (tubnd(2) .lt. ieubnd0(2)+iuoff0(2)) correct=.false.
+     else if (localPet .eq. 1) then
+        if (elbnd(1) .ne. ielbnd1(1)) correct=.false.
+        if (elbnd(2) .ne. ielbnd1(2)) correct=.false.
+        if (eubnd(1) .ne. ieubnd1(1)) correct=.false.
+        if (eubnd(2) .ne. ieubnd1(2)) correct=.false.
+
+        if (slbnd(1) .ne. ielbnd1(1)-iloff1(1)) correct=.false.
+        if (slbnd(2) .ne. ielbnd1(2)-iloff1(2)) correct=.false.
+        if (subnd(1) .ne. ieubnd1(1)+iuoff1(1)) correct=.false.
+        if (subnd(2) .ne. ieubnd1(2)+iuoff1(2)) correct=.false.
+
+        if (clbnd(1) .gt. ielbnd1(1)-iloff1(1)) correct=.false.
+        if (clbnd(2) .gt. ielbnd1(2)-iloff1(2)) correct=.false.
+        if (cubnd(1) .lt. ieubnd1(1)+iuoff1(1)) correct=.false.
+        if (cubnd(2) .lt. ieubnd1(2)+iuoff1(2)) correct=.false.
+
+        if (tlbnd(1) .gt. ielbnd1(1)-iloff1(1)) correct=.false.
+        if (tlbnd(2) .gt. ielbnd1(2)-iloff1(2)) correct=.false.
+        if (tubnd(1) .lt. ieubnd1(1)+iuoff1(1)) correct=.false.
+        if (tubnd(2) .lt. ieubnd1(2)+iuoff1(2)) correct=.false.
+     else if (localPet .eq. 2) then
+        if (elbnd(1) .ne. ielbnd2(1)) correct=.false.
+        if (elbnd(2) .ne. ielbnd2(2)) correct=.false.
+        if (eubnd(1) .ne. ieubnd2(1)) correct=.false.
+        if (eubnd(2) .ne. ieubnd2(2)) correct=.false.
+
+        if (slbnd(1) .ne. ielbnd2(1)-iloff2(1)) correct=.false.
+        if (slbnd(2) .ne. ielbnd2(2)-iloff2(2)) correct=.false.
+        if (subnd(1) .ne. ieubnd2(1)+iuoff2(1)) correct=.false.
+        if (subnd(2) .ne. ieubnd2(2)+iuoff2(2)) correct=.false.
+
+        if (clbnd(1) .gt. ielbnd2(1)-iloff2(1)) correct=.false.
+        if (clbnd(2) .gt. ielbnd2(2)-iloff2(2)) correct=.false.
+        if (cubnd(1) .lt. ieubnd2(1)+iuoff2(1)) correct=.false.
+        if (cubnd(2) .lt. ieubnd2(2)+iuoff2(2)) correct=.false.
+
+        if (tlbnd(1) .gt. ielbnd2(1)-iloff2(1)) correct=.false.
+        if (tlbnd(2) .gt. ielbnd2(2)-iloff2(2)) correct=.false.
+        if (tubnd(1) .lt. ieubnd2(1)+iuoff2(1)) correct=.false.
+        if (tubnd(2) .lt. ieubnd2(2)+iuoff2(2)) correct=.false.
+     else if (localPet .eq. 3) then
+        if (elbnd(1) .ne. ielbnd3(1)) correct=.false.
+        if (elbnd(2) .ne. ielbnd3(2)) correct=.false.
+        if (eubnd(1) .ne. ieubnd3(1)) correct=.false.
+        if (eubnd(2) .ne. ieubnd3(2)) correct=.false.
+
+        if (slbnd(1) .ne. ielbnd3(1)-iloff3(1)) correct=.false.
+        if (slbnd(2) .ne. ielbnd3(2)-iloff3(2)) correct=.false.
+        if (subnd(1) .ne. ieubnd3(1)+iuoff3(1)) correct=.false.
+        if (subnd(2) .ne. ieubnd3(2)+iuoff3(2)) correct=.false.
+
+        if (clbnd(1) .gt. ielbnd3(1)-iloff3(1)) correct=.false.
+        if (clbnd(2) .gt. ielbnd3(2)-iloff3(2)) correct=.false.
+        if (cubnd(1) .lt. ieubnd3(1)+iuoff3(1)) correct=.false.
+        if (cubnd(2) .lt. ieubnd3(2)+iuoff3(2)) correct=.false.
+
+        if (tlbnd(1) .gt. ielbnd3(1)-iloff3(1)) correct=.false.
+        if (tlbnd(2) .gt. ielbnd3(2)-iloff3(2)) correct=.false.
+        if (tubnd(1) .lt. ieubnd3(1)+iuoff3(1)) correct=.false.
+        if (tubnd(2) .lt. ieubnd3(2)+iuoff3(2)) correct=.false.
+     endif
+  endif
+end subroutine check2DBnds2x2
+
 
 end program ESMF_GridCoordUTest
