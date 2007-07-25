@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.13 2007/07/25 04:59:54 cdeluca Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.14 2007/07/25 06:01:23 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -612,7 +612,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
               indexflag=ESMF_INDEX_GLOBAL,     & ! Use global indices
               rc=rc)
 
-   [To make this a curvilinear grid don't you need a coordDep argument? CMD] 
+!   [To make this a curvilinear grid don't you need a coordDep argument? CMD] 
 
    !-------------------------------------------------------------------
    ! Allocate coordinate storage for both center and corner stagger
