@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.15 2007/07/25 13:38:59 cdeluca Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.16 2007/07/25 15:31:50 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1017,12 +1017,10 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
 
 !BOE
-! [Think you need to check method names here.   - CMD]
-
-! Alternatively, the call {\tt ESMF\_GridGetLocalTileCoord()} gets a fortran pointer to 
+! Alternatively, the call {\tt ESMF\_GridGetLocalTileCoord()} gets a Fortran pointer to 
 ! the coordinate data. The user can then operate on this array in the usual
 ! manner. The following call gets a reference to the
-! fortran array which holds the data for the second coordinate (e.g. y). 
+! Fortran array which holds the data for the second coordinate (e.g. y). 
 !EOE
 
 !!!!!!!!!!!!!!!!!!!!!!!
@@ -1058,9 +1056,9 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! There are actually four types of bounds the user can 
 ! get: exclusive bounds, stagger bounds, computational bounds, 
 ! and total bounds. Note that although some of these are similar
-! to bounds provided by ESMF\_Array subroutines (see section ... CMD) 
-! the format
-! here is different. The Array bounds are only for
+! to bounds provided by ESMF\_Array subroutines 
+! (see Section~\ref{Array_regions_and_default_bounds}) 
+! the format here is different. The Array bounds are only for
 ! distributed dimensions and are ordered to correspond 
 ! to the dimension order in the associated DistGrid. The bounds
 ! provided by the Grid are for both distributed and undistributed dimensions
@@ -1082,7 +1080,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! plus any extra halo space. 
 !
 ! The total bounds are the outermost bounds of the coordinate array. The
-! total bounds should always match the bounds of the fortran array 
+! total bounds should always match the bounds of the Fortran array 
 ! retrieved by {\tt ESMF\_GetLocalTileCoords()}. 
 !
 ! The following is an example of retrieving the bounds for the first
@@ -1123,10 +1121,10 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 #ifdef LOCAL_NOT_IMPL
 !BOEI
 ! The second pair of methods enable the user to set or get data using
-! a fortran pointer. These methods only work with the local piece of the 
+! a Fortran pointer. These methods only work with the local piece of the 
 ! Grid on the DE. {\tt ESMF\_GridLocalTileSetCoord} enables the user
 ! to set data into the local piece of the coordinates residing on the DE.
-! The following call gets a pointer (fptr) to the fortran array holding the 
+! The following call gets a pointer (fptr) to the Fortran array holding the 
 ! first component (e.g. x) coordinates for the corner stagger
 ! for the piece of tile 2 which is on this processor. It
 ! defaults to the first DE because it isn't specified. 
@@ -1276,11 +1274,11 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
 !removeBOE
 ! The final option allows the user to add a metric constructed
-! out of a series of fortran arrays. Note that this option is restricted
+! out of a series of Fortran arrays. Note that this option is restricted
 ! to situations where there is a 1-to-1 DE to PET mapping. 
 ! The following call adds metric "Length" to the 
 ! grid at the edge stagger location. It does this from 
-! fortran array length.   
+! Fortran array length.   
 !removeEOE
 
 !removeBOC
@@ -1325,10 +1323,10 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
 !removeBOE
 ! The second pair of methods enable the user to set or get metric data using
-! a fortran pointer. These methods only work with the local piece of the 
+! a Fortran pointer. These methods only work with the local piece of the 
 ! Grid on the DE. {\tt ESMF\_GridLocalTileSetMetric} enables the user
 ! to set data into the local piece of the metric residing on the DE.
-! The following call gets a pointer (fptr) to the fortran array holding the 
+! The following call gets a pointer (fptr) to the Fortran array holding the 
 ! area for the piece of tile 2 which is on this processor. It
 ! defaults to the first DE because it isn't specified. 
 !removeEOE
@@ -1339,7 +1337,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !removeEOC
 
 !removeBOE
-! The call {\tt ESMF\_GridLocalTileGetMetric} gets a fortran pointer to 
+! The call {\tt ESMF\_GridLocalTileGetMetric} gets a Fortran pointer to 
 ! the metric data. The user can then operate on this array in the usual
 ! manner. The following call allocates an array (fptr) and
 ! makes copy of the part of tile 1's area which
@@ -1411,7 +1409,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !
 ! This example illustrates the creation of a simple 2D Grid from coordinate data
 !  contained in 4 byte real fortan arrays.  The new Grid contains just the center stagger location.
-!  Each processor contains a pair of 10x10 fortran 90 arrays named fptrX and fptrY. 
+!  Each processor contains a pair of 10x10 Fortran 90 arrays named fptrX and fptrY. 
 !  These arrays contain the coordinates for the piece of the global Grid held by each
 !  processor. The final global Grid will be 20x20 and the pieces of this Grid held
 ! by each processor are as follows:
@@ -1556,7 +1554,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! the distribution and shape of the Grid, and then to employ that to either directly
 ! create the Grid or first create Arrays and then create the Grid from those. 
 ! This method gives the user maximum control over the topology and distribution of the Grid. 
-! See the DistGrid documentation in Section [... CMD]  for an in depth description of its use. 
+! See the DistGrid documentation in Section~\ref{sec:DistGrid} for an in depth description of its interface and use. 
 ! Also, the examples in Section~\ref{sec:usage:ex:adv:cart} and 
 ! Section~\ref{sec:usage:ex:adv:tripole}
 ! illustrate its use in creating two types of Grid. [Are these currently in the
