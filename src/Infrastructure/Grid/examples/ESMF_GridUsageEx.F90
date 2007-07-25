@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.16 2007/07/25 15:31:50 cdeluca Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.17 2007/07/25 23:18:49 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -73,16 +73,7 @@ program ESMF_GridCreateEx
 ! not connected.  Once completed, this method will enable users
 ! to create many common grid shapes, including
 ! rectangle, bipole sphere, and tripole sphere. 
-
-#ifdef LOCAL_NOT_IMPL
-! [This isn't true yet, right, because topologies aren't
-! implemented even in distgrid?  CMD]
-! The user can define more complex topologies by creating
-! a DistGrid object and using a more general Grid create
-! interface. See Section~\ref{sec:usage:adv:create}
-! for more details.
-#endif
-
+!
 ! The {\tt ESMF\_GridCreateShape()} method will eventually support 
 ! the three types of distributions described in 
 ! Section~\ref{sec:desc:dist}. It currently supports only 
@@ -95,17 +86,16 @@ program ESMF_GridCreateEx
 ! {\tt minIndex}), and the number of pieces in which to partition
 ! each dimension (via a {\tt regDecomp} argument).
 ! ESMF then divides the index space as evenly as possible 
-! into the specified number of pieces. [If elements are left over
-! the default behavior is ? ... CMD]  [Should you really be talking
-! about partitioning grid cells and not index space here?]
+! into the specified number of pieces. If there are elements
+! left over then they are distributed one per DE starting from
+! the first DE until they are gone.
 !
 ! If {\tt minIndex} is 
 ! not specified, then the bottom of the index range is assumed
 ! to be (1,1,...,1). If {\tt regDecomp} is not specified, then
 ! by default ESMF creates a distribution that partitions the
 ! grid cells in the first dimension (e.g. NPx1x1...1) as evenly 
-! as possible by 
-! the number of processors NP.
+! as possible by  the number of processors NP.
 ! The remaining dimensions are not partitioned.
 ! The rank of the Grid is the size of {\tt maxIndex}. To create
 ! an undistributed dimension set that entry in {\tt regDecomp}
@@ -131,19 +121,13 @@ program ESMF_GridCreateEx
 ! arguments are used to specify a rectangular distribution
 ! containing size(countsPerDEDim1) by size(countsPerDEDim2) by
 ! size(countsPerDEDim3) DEs. The entries in each of these arrays
-! specify the size of the DEs in that dimension.
-! [is it clearer to say number of grid cells along that dimension
-! DE rather 
-! than the size of the DE? CMD]    
+! specify the number of grid cells per DE in that dimension.
 ! The rank of the grid is determined by the presence of
 ! {\tt countsPerDEDim3}.  If it's present the Grid
 ! will be 3D, if just {\tt countsPerDEDim1} and 
 ! {\tt countsPerDEDim2} are specified the Grid 
 ! will be 2D.  If any of these arrays has size
 ! 1 then that index dimension is undistributed.
-! [What if you just specify countsPerDEDim2? Can you handle
-! 1D?  Can you handle not getting the first dim but getting
-! the others? CMD]  
 !
 ! The following call illustrates the creation of 
 ! a 10x20 two dimensional rectangular Grid distributed across six DEs.
@@ -239,8 +223,6 @@ endif
 
 !BOE
 ! Arbitrary distribution has not yet been implemented.
-! [Processor is being used throughout this section and I think 
-! it should be DE? I changed it.  CMD]
 ! The design is that the user specifies the global minimum and maximum
 ! ranges of the index space with the
 ! arguments {\tt minIndex} and {\tt maxIndex}, and through a {\tt localIndices}
@@ -368,7 +350,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! \label{example:2DIrregUniGrid}
 !
 ! The following is an example of creating a simple rectilinear grid and
-! loading in a set of coordinates. It illustrates straightforward use
+! loading in a set of coordinates. It illustrates a straightforward use
 ! of the {\tt ESMF\_GridCreateShape()}
 ! call described in the previous section.  This code creates a 10x20
 ! 2D grid with uniformly spaced coordinates varying from (10,10) to (100,200).
@@ -423,10 +405,110 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension [10-100].
+   ! Note that the coordX array needs to be 2D because currently
+   ! all coordinate arrays must each have the same rank as the grid, but 
+   ! because the coordinate is rectilinear we only need to store a 1D array.
+   !-------------------------------------------------------------------
+   do i=lbnd(1),ubnd(1)
+        coordX(i,lbnd(2)) = i*10.0
+   enddo
+
+
+   !-------------------------------------------------------------------
+   ! Get the local bounds of the global indexing for the  second
+   ! coordinate array on the local DE.
+   !-------------------------------------------------------------------
+   call ESMF_GridGetLocalTileInfo(grid2D, coord=2, &
+          staggerloc=ESMF_STAGGERLOC_CENTER,       &
+          staggerLBound=lbnd, staggerUBound=ubnd, rc=rc)
+
+   !-------------------------------------------------------------------
+   ! Get the pointer to the second coordinate array from inside
+   ! the Grid object.
+   !-------------------------------------------------------------------
+   call ESMF_GridGetLocalTileCoord(grid2D, coord=2, &
+          staggerloc=ESMF_STAGGERLOC_CENTER, fptr=coordY, rc=rc)
+
+   !-------------------------------------------------------------------
+   ! Calculate and set coordinates in the second dimension [10-200]
+   ! Note that the coordY array needs to be 2D because currently
+   ! all coordinate arrays must each have the same rank as the grid, but 
+   ! because the coordinate is rectilinear we only need to store a 1D array.
+   !-------------------------------------------------------------------
+   do j=lbnd(2),ubnd(2)
+        coordY(lbnd(1),j) = j*10.0
+   enddo
+!EOC
+   !-------------------------------------------------------------------
+   ! Clean up to prepare for the next example.
+   !-------------------------------------------------------------------
+   call ESMF_GridDestroy(grid2D, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+
+!BOE
+!\subsubsection{Creating a 2D Irregularly Distributed Grid
+!                  With Curvilinear Coordinates}
+! \label{example:2DIrregCurviGrid}
+!
+! The following is an example of creating a simple curvilinear grid and
+! loading in a set of coordinates. It creates a 10x20
+! 2D grid where the coordinates vary along every dimension. 
+! The grid is partitioned using an irregular distribution. The first dimension
+! it is divided into two pieces, the first with 3 grid cells per
+! DE and the second with 7 grid cells per DE. In the second dimension,
+! the Grid is divided into 3 pieces, with 5, 9, and 6 cells per DE respectively.
+! The Grid is created with global indices. After grid creation the
+! local bounds and native Fortran arrays are retrieved and the
+! coordinates are set by the user. 
+!
+!EOE
+
+!BOC
+   !-------------------------------------------------------------------
+   ! Create the Grid:  Allocate space for the Grid object, define the
+   ! topology and distribution of the grid, and specify that it 
+   ! will have global coordinates.  Note that aperiodic bounds are
+   ! specified by default - if periodic bounds were desired they
+   ! would need to be specified using an additional gridConn argument
+   ! (which isn't implemented yet).
+   !-------------------------------------------------------------------
+   grid2D=ESMF_GridCreateShape(          &
+            ! Define an irregular distribution
+            countsPerDEDim1=(/3,7/),     &
+            countsPerDEDim2=(/4,7,6/),   &
+            indexflag=ESMF_INDEX_GLOBAL, & ! Use global indices
+            rc=rc)
+
+   !-------------------------------------------------------------------
+   ! Allocate coordinate storage and associate it with the center
+   ! stagger location.  Since no coordinate values are specified in
+   ! this call no coordinate values are set yet.
+   !-------------------------------------------------------------------
+   call ESMF_GridAllocCoord(grid2D,  & 
+          staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
+
+   !-------------------------------------------------------------------
+   ! Get the local bounds of the global indexing for the first 
+   ! coordinate array on the local DE.
+   !-------------------------------------------------------------------
+   call ESMF_GridGetLocalTileInfo(grid2D, coord=1, &
+          staggerloc=ESMF_STAGGERLOC_CENTER,       &
+          staggerLBound=lbnd, staggerUBound=ubnd, rc=rc)
+
+   !-------------------------------------------------------------------
+   ! Get the pointer to the first coordinate array from inside
+   ! the Grid object.
+   !-------------------------------------------------------------------
+   call ESMF_GridGetLocalTileCoord(grid2D, coord=1, &
+          staggerloc=ESMF_STAGGERLOC_CENTER, fptr=coordX, rc=rc)
+
+   !-------------------------------------------------------------------
+   ! Calculate and set coordinates in the first dimension [10-100].
    !-------------------------------------------------------------------
    do j=lbnd(2),ubnd(2)
    do i=lbnd(1),ubnd(1)
-        coordX(i,j) = i*10.0
+        coordX(i,j) = i+j
    enddo
    enddo
 
@@ -450,7 +532,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    !-------------------------------------------------------------------
    do j=lbnd(2),ubnd(2)
    do i=lbnd(1),ubnd(1)
-        coordY(i,j) = i*10.0
+        coordY(i,j) = j-i/100.0
    enddo
    enddo
 !EOC
@@ -476,18 +558,20 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! the first dimension of coordinate 1 maps to index
 ! dimension 1 and the second maps to index dimension 2. If
 ! the {\tt coordDep} arrays are not specified, 
-! then {\tt coordDepX} defaults to {/X/}.  This default
-! thus specifies a rectilinear grid.  
+! then {\tt coordDep1} defaults to {/1,2..,gridrank/}.  This default
+! thus specifies a curvilinear grid.  
 !
-! It follows that the size of the {\tt coordDep}
-! array is the rank of the corresponding coordinate array.
-! For example, {\tt size(coordDep1)=2} means that coordinate
-! array 1 is 2D. 
-
-! Currently ESMF only supports coordinate dimensions 
-! that are the same rank as the grid.  
-! [What does this mean - can you give an example
-! of what you can't do? CMD]. 
+! Currently in ESMF every coordinate array must have
+! the same rank as the Grid itself. 
+! For example, with a 3D grid you can't have a 2D X and Y coordinate array
+! and a 1D Z coordinate array. However, this limitation
+! is only in the dimension of the coordinate storage provided
+! by the Grid. The user is free to use whatever portion
+! of the storage they chose. Because of this temporary limitation,
+! the {\tt coordDep} argument must have the same number of 
+! elements as the rank of the Grid it is being used to create.
+! In the future the size of the {\tt coordDep} array will
+! determine the rank of the associated coordinate array.  
 !EOE
 
 #ifdef LOCAL_NOT_IMPL
@@ -575,20 +659,14 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
 
 !BOE
-!\subsubsection{Creating an Irregularly Distributed Grid with
-!               Horizontal Curvilinear Coordinates
-!               and an Undistributed Vertical Dimension}
+!\subsubsection{Creating an Irregularly Distributed Rectilinear Grid with
+!                an Undistributed Vertical Dimension}
 ! \label{example:CurviGridWithUndistDim}
 !
-! This example demonstrates how a user can build a curvilinear 
+! This example demonstrates how a user can build a rectilinear 
 ! horizontal grid with an undistributed vertical dimension. The Grid 
 ! contains both the center and corner stagger locations (i.e. Arakawa 
-! B-Grid). This might be, for example, a displaced pole grid used in
-! ocean modeling where the north pole has been relocated to a land
-! mass in order to remove the pole from the computational region.
-! Often the ocean depth is placed in the undistributed third
-! dimension because the size of the depth dimension is typically
-! much less than that of the horizontal grid dimension.
+! B-Grid). 
 !
 !EOE
 
@@ -611,8 +689,6 @@ call ESMF_GridDestroy(grid2D,rc=rc)
               countsPerDEDim3=(/40/),          &
               indexflag=ESMF_INDEX_GLOBAL,     & ! Use global indices
               rc=rc)
-
-!   [To make this a curvilinear grid don't you need a coordDep argument? CMD] 
 
    !-------------------------------------------------------------------
    ! Allocate coordinate storage for both center and corner stagger
@@ -649,14 +725,14 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension.
+   ! Note that the cornerX array needs to be 3D because currently
+   ! all coordinate arrays must each have the same rank as the grid, but 
+   ! because the coordinate is rectilinear we only need to store a 1D array.
    !-------------------------------------------------------------------
-   do k=lbnd_corner(3),ubnd_corner(3)
-   do j=lbnd_corner(2),ubnd_corner(2)
    do i=lbnd_corner(1),ubnd_corner(1)
-        cornerX(i,j,k) = (i-1)*(360.0/180.0)
+        cornerX(i,lbnd_corner(2),lbnd_corner(3)) = (i-1)*(360.0/180.0)
    enddo
-   enddo
-   enddo
+
 
    !-------------------------------------------------------------------
    ! Get the local bounds of the global indexing for the second
@@ -677,14 +753,14 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
    !-------------------------------------------------------------------
    ! Calcuate and set coordinates in the second dimension.
+   ! Note that the cornerY array needs to be 3D because currently
+   ! all coordinate arrays must each have the same rank as the grid, but 
+   ! because the coordinate is rectilinear we only need to store a 1D array.
    !-------------------------------------------------------------------
-   do k=lbnd_corner(3),ubnd_corner(3)
    do j=lbnd_corner(2),ubnd_corner(2)
-   do i=lbnd_corner(1),ubnd_corner(1)
-        cornerY(i,j,k) = (i-1)*(180.0/90.0)
+        cornerY(lbnd_corner(1),j,lbnd_corner(3)) = (j-1)*(180.0/90.0)
    enddo
-   enddo
-   enddo
+
 
 !----------------------------------------------------------------------
 ! Now fill the coordinates for the center stagger location by averaging 
@@ -708,15 +784,15 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension.
+   ! Note that the centerX array needs to be 3D because currently
+   ! all coordinate arrays must each have the same rank as the grid, but 
+   ! because the coordinate is rectilinear we only need to store a 1D array.
    !-------------------------------------------------------------------
-   do k=lbnd(3),ubnd(3)
-   do j=lbnd(2),ubnd(2)
    do i=lbnd(1),ubnd(1)
-        centerX(i,j,k) = 0.25*(  cornerX(i,j,k) + cornerX(i+1,j,k) + &
-                              cornerX(i+1,j+1,k) + cornerX(i,j+1,k)  )
+        centerX(i,lbnd(2),lbnd(3)) = 0.5*(cornerX(i,lbnd(2),lbnd(3)) + &
+                                          cornerX(i+1,lbnd(2),lbnd(3))) 
    enddo
-   enddo
-   enddo
+
 
    !-------------------------------------------------------------------
    ! Get the local bounds of the global indexing for the second
@@ -736,15 +812,15 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
    !-------------------------------------------------------------------
    ! Calcuate and set coordinates in the second dimension.
+   ! Note that the centerY array needs to be 3D because currently
+   ! all coordinate arrays must each have the same rank as the grid, but 
+   ! because the coordinate is rectilinear we only need to store a 1D array.
    !-------------------------------------------------------------------
-   do k=lbnd(3),ubnd(3)
    do j=lbnd(2),ubnd(2)
-   do i=lbnd(1),ubnd(1)
-        centerY(i,j,k) = 0.25*(  cornerY(i,j,k) + cornerY(i+1,j,k) + &
-                              cornerY(i+1,j+1,k) + cornerY(i,j+1,k)  )
+        centerY(lbnd(1),j,lbnd(3)) = 0.5*(cornerY(lbnd(1),j,lbnd(3)) + &
+                                          cornerY(lbnd(1),j+1,lbnd(3))) 
    enddo
-   enddo
-   enddo
+
 
    !-------------------------------------------------------------------
    ! Get the local bounds of the global indexing for the third
@@ -764,13 +840,12 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
    !-------------------------------------------------------------------
    ! Calcuate and set the vertical coordinates
+   ! Note that the centerZ array needs to be 3D because currently
+   ! all coordinate arrays must each have the same rank as the grid, but 
+   ! because the coordinate is rectilinear we only need to store a 1D array.
    !-------------------------------------------------------------------
    do k=lbnd(3),ubnd(3)
-   do j=lbnd(2),ubnd(2)
-   do i=lbnd(1),ubnd(1)
-        centerZ(i,j,k) = 4000.0*( (1./39.)*(k-1)  )**2
-   enddo
-   enddo
+        centerZ(lbnd(1),lbnd(2),k) = 4000.0*( (1./39.)*(k-1)  )**2
    enddo
 
 !EOC
@@ -863,7 +938,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
 !BOE
 !\subsubsection{Associating Coordinates with Stagger Locations}
-! \label{sec:usage:staggerloc}
+!\label{sec:usage:staggerloc}
 !
 ! Stagger locations refer to the places in a Grid cell that 
 ! contain coordinates and, once a Grid is associated with a 
@@ -874,7 +949,18 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! locations in a Grid.  The new Grid class is not yet integrated with
 ! the Field class, but once it is the user will be able to put Field data
 ! at any of the stagger locations in a Grid.  
-
+!
+! By default the coordinate array at the center stagger location
+! starts at the bottom index of the Grid (default (1,1..,1)) and extends
+! up to the number of elements described by the {\tt countsPerDE} arrays.
+! Other stagger locations also start at the bottom index of the Grid, however, 
+! they can extend to +1 element beyond the center in some dimensions to allow
+! for the extra space to surround the center elements. See Section~\ref{sec:usage:staggerloc:adv}
+! for a description of this extra space and how to adjust if it necessary. 
+! The subroutine {\tt ESMF\_GridGetLocalTileInfo} can be used
+! to retrieve the stagger bounds for the piece of a coordinate
+! array on a particular DE. 
+!
 ! The user can allocate coordinate arrays without setting coordinates 
 ! using the {\tt ESMF\_AllocCoord()} call, or allocate and 
 ! set coordinates in a single call with {\tt ESMF\_SetCoord()}.    
@@ -1041,6 +1127,14 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
+!!!!!!!!!!!!!!!!!!!!!!!
+! Cleanup after Example
+!!!!!!!!!!!!!!!!!!!!!!
+   call ESMF_GridDestroy(grid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_DistGridDestroy(distgrid2D, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
 
 !BOE
 !\subsubsection{Getting Grid Coordinate Array Bounds}
@@ -1136,16 +1230,6 @@ call ESMF_GridDestroy(grid2D,rc=rc)
           coord=1, fptr, doCopy=ESMF_DATA_REF, rc=rc)
 !EOCI
 #endif
-
-
-!!!!!!!!!!!!!!!!!!!!!!!
-! Cleanup after Example
-!!!!!!!!!!!!!!!!!!!!!!
-   call ESMF_GridDestroy(grid2D, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_DistGridDestroy(distgrid2D, rc=rc)
-
 
 
 #ifdef LOCAL_NOT_IMPL
@@ -1555,10 +1639,6 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! create the Grid or first create Arrays and then create the Grid from those. 
 ! This method gives the user maximum control over the topology and distribution of the Grid. 
 ! See the DistGrid documentation in Section~\ref{sec:DistGrid} for an in depth description of its interface and use. 
-! Also, the examples in Section~\ref{sec:usage:ex:adv:cart} and 
-! Section~\ref{sec:usage:ex:adv:tripole}
-! illustrate its use in creating two types of Grid. [Are these currently in the
-! document? CMD]
 !
 ! A DistGrid describes only the distributed dimensions of the index
 ! space, so when creating a Grid from a DistGrid some arguments
