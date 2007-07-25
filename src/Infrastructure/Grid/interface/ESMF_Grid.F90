@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.17 2007/07/25 19:19:58 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.18 2007/07/25 22:45:44 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.17 2007/07/25 19:19:58 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.18 2007/07/25 22:45:44 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -512,7 +512,7 @@ end interface
 !    {\tt grid} will have sufficient size, rank, and distribution information to be
 !    used as the basis for allocating Field data. (The integration of 
 !    Field and Grid classes has't yet happened, so you can't currently 
-!    allocating Fields based on Grids no matter what the status.)
+!    allocate Fields based on Grids no matter what the status.)
 !
 !    It is necessary to call the {\tt ESMF\_GridCommit()} method after
 !    creating a Grid object using the {\tt ESMF\_GridCreateEmpty()} method

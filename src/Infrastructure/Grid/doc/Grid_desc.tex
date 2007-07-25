@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.30 2007/07/25 19:19:58 cdeluca Exp $
+% $Id: Grid_desc.tex,v 1.31 2007/07/25 22:45:44 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -23,7 +23,9 @@ are not implemented and default to aperiodic.  Only irregular
 distributions can be defined.  Specific interfaces for regular
 and arbitrary distributions have not been implemented, though
 regular distributions can be defined as a special case of 
-irregular distributions.  Other constraints of the current
+irregular distributions.  Also, each coordinate array in a 
+grid has the full rank of the grid itself (i.e., the grid
+is assumed to be curvilinear).  Other constraints of the current
 implementation are noted in the usage section and in the API
 descriptions.
 
