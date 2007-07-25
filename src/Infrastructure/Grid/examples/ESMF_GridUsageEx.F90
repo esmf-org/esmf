@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.14 2007/07/25 06:01:23 cdeluca Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.15 2007/07/25 13:38:59 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -446,7 +446,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
           staggerloc=ESMF_STAGGERLOC_CENTER, fptr=coordY, rc=rc)
 
    !-------------------------------------------------------------------
-   ! Calcuate and set coordinates in the second dimension [10-200]
+   ! Calculate and set coordinates in the second dimension [10-200]
    !-------------------------------------------------------------------
    do j=lbnd(2),ubnd(2)
    do i=lbnd(1),ubnd(1)
@@ -599,7 +599,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    ! Dim2 (longitude), and 40 in Dim3 (depth).  The first dimension is
    ! decomposed over 4 DEs, the second over 3 DEs, and the third is 
    ! undistributed.  The connectivities in each dimension default 
-   ! to aperiodic since they are not specified.  (Once connectivities
+   ! to aperiodic since they are not yet implemented.  (Once connectivities
    ! are implemented, the longitude dimension will be periodic, the 
    ! poles will be defined at each end of the latitude dimension, 
    ! and the depth dimension will remain aperiodic - see 
@@ -866,12 +866,13 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! \label{sec:usage:staggerloc}
 !
 ! Stagger locations refer to the places in a Grid cell that 
-! contain coordinates and field data. Typically data can be located
+! contain coordinates and, once a Grid is associated with a 
+! Field object, field data. Typically data can be located
 ! at the cell center, at the cell corners, or at the cell faces, in 2D, 3D, and
 ! higher dimensions.  Users can put coordinates, which are necessary
 ! for operations such as regrid, at multiple stagger
 ! locations in a Grid.  The new Grid class is not yet integrated with
-! the Field class, but after it is the user will be able to put Field data
+! the Field class, but once it is the user will be able to put Field data
 ! at any of the stagger locations in a Grid.  
 
 ! The user can allocate coordinate arrays without setting coordinates 
@@ -935,10 +936,10 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !
 ! Once a Grid has been created, the user has several options to access
 ! the Grid coordinate data. The first of these, {\tt ESMF\_GridSetCoord()}, 
-! [Using the private interface here, so I changed it CMD] enables the user to set data 
+! enables the user to set data 
 ! for one stagger location across the whole Grid, using ESMF Arrays. 
-! For example, the following sets the 
-! first component (e.g. x) coordinates for the center stagger location to 
+! For example, the following sets the coordinates in the first dimension 
+! (e.g. x) for the center stagger location to 
 ! those in the ESMF Array {\tt arrayCoordX}.
 !EOE
 
@@ -1049,21 +1050,22 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! Once coordinates have been allocated the user may wish to 
 ! retrieve the bounds of the piece of that array on
 ! the local DE. This is useful for iterating through the
-! array to set coordinates, retrieve coordiantes, or do calculations. 
+! array to set coordinates, retrieve coordinates, or do calculations. 
 ! The method {\tt ESMF\_GridGetLocalTileInfo} allows the user
 ! to retrieve bound information for a particular coordinate
 ! array. 
 !
 ! There are actually four types of bounds the user can 
 ! get: exclusive bounds, stagger bounds, computational bounds, 
-! total bounds. Note that although some of these are similar
-! to bounds provided by ESMF\_Array subroutines the format
+! and total bounds. Note that although some of these are similar
+! to bounds provided by ESMF\_Array subroutines (see section ... CMD) 
+! the format
 ! here is different. The Array bounds are only for
 ! distributed dimensions and are ordered to correspond 
 ! to the dimension order in the associated DistGrid. The bounds
 ! provided by the Grid are for both distributed and undistributed dimensions
 ! and are ordered accoording to the order of dimensions in the 
-! coordiante. This means that the bounds provided should be usable
+! coordinate. This means that the bounds provided should be usable
 ! "as is" to access data in the coordinate array.  
 !
 ! The exclusive bounds are the bounds of the index space defined by the 
@@ -1545,31 +1547,25 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !\subsubsection{Creating More Complex Grids Using DistGrid}
 !\label{sec:usage:adv:create}
 !
-! Beyond the shortcut methods for creating a grid, there is
+! Besides the shortcut methods for creating a Grid object such as
+! {\tt ESMF\_GridCreateShape()}, there is
 ! a set of methods which give the user more control over the
 ! specifics of the grid.  The following describes the more 
-! general interface. 
-!
-!BOPI
-!% NEED TO ADD MORE HERE EXPLAINING HOW THE GENERAL DIST DIFFER FROM THE 
-!% SHORTCUT AND EXPLAINING MORE ABOUT USING THE DIST GRID
-!EOPI
-! There are four methods of specifying the distribution in the more
-! general grid creation interface. Three of them are basically the same as
-! those used in the shortcut create 
-! and the user is directed to Section~\ref{sec:usage:short:create} for further explanation
-! of those. The fourth method is to first create an ESMF DistGrid object describing
+! general interface, using DistGrid.
+! The basic idea is to first create an ESMF DistGrid object describing
 ! the distribution and shape of the Grid, and then to employ that to either directly
 ! create the Grid or first create Arrays and then create the Grid from those. 
 ! This method gives the user maximum control over the topology and distribution of the Grid. 
-! Please see the DistGrid design document for an in depth description of its use. 
-! Also, Example~\ref{sec:usage:ex:adv:cart} and Example~\ref{sec:usage:ex:adv:tripole}
-! illustrate its use in creating two types of Grid. 
+! See the DistGrid documentation in Section [... CMD]  for an in depth description of its use. 
+! Also, the examples in Section~\ref{sec:usage:ex:adv:cart} and 
+! Section~\ref{sec:usage:ex:adv:tripole}
+! illustrate its use in creating two types of Grid. [Are these currently in the
+! document? CMD]
 !
 ! A DistGrid describes only the distributed dimensions of the index
 ! space, so when creating a Grid from a DistGrid some arguments
-! are need to describe the undistributed part, To add undistributed dimensions
-! to the Grid, the arguments {\tt lbounds} and {\tt ubounds} may be used. 
+! are needed to describe the undistributed part, To add undistributed dimensions
+! to the Grid, the arguments {\tt lbounds} and {\tt ubounds} are used. 
 ! The {\tt lbounds} argument
 ! contains the lower bounds of the undistributed dimensions and {\tt ubounds}
 ! contains the upper bounds. As an example, the following call constructs
@@ -1582,8 +1578,8 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    distgrid2D = ESMF_DistGridCreate(minIndex=(/1,2/), maxIndex=(/11,22/), rc=rc)  
 
    ! Create Grid
-   grid3D=ESMF_GridCreate(distGrid=distgrid2D,        & ! specify distgrid 
-                       lbounds=(/3/), ubounds=(/33/), & ! specify tensor bounds
+   grid3D=ESMF_GridCreate(distGrid=distgrid2D,        & 
+                       lbounds=(/3/), ubounds=(/33/), & 
                        rc=rc)
 !EOC  
 
@@ -1727,12 +1723,11 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !\subsubsection{Specifying Custom Stagger Locations}
 !\label{sec:usage:staggerloc:adv}
 !
-! This section discusses the advanced options for adding data 
-! (coordinates or metrics) to different stagger locations in a grid.
-! The first of these supports the construction of custom stagger locations.
+! This section discusses the advanced options for adding  
+! coordinates to different stagger locations in a grid.
 ! To construct a custom stagger location the subroutine 
-! {\it ESMF\_StaggerLocSet()} is used to specify the staggers general location,
-! by specifying for each dimension whether it is located at the interior (0) 
+! {\it ESMF\_StaggerLocSet()} is used to specify, 
+! for each dimension, whether the stagger is located at the interior (0) 
 ! or on the boundary (1) of the cell. Further description of the method is
 ! available in Section~\ref{ref:stagger}. This method allows users
 ! to construct stagger locations for which
@@ -1796,11 +1791,11 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! Consider the preceeding 2D grid, where the ``*'' represents the cell corners
 ! and the ``+'' represents the cell centers. For the corners to completely
 ! enclose the cell centers (symmetric stagger), the number of corners in each 
-! dimension, needs to be one greater then the number of cell centers. In the above 
+! dimension needs to be one greater then the number of cell centers. In the above 
 ! figure, there are two rows and three columns of cell centers. To enclose the 
 ! cell centers, there must be three rows and four columns of cell corners.
 ! This is true in general for Grids without periodicity or
-! other connections.  In fact for a symmetric stagger, given that the center
+! other connections.  In fact, for a symmetric stagger, given that the center
 ! location requires n x m storage, the corresponding corner location
 ! requires n+1 x m+1, and the edges, depending on the side, require n+1 x m or
 ! m+1 x n.  In order to add the extra storage, but also to 
@@ -1866,7 +1861,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! To indicate how the data at a particular stagger location is aligned with the 
 ! cell center, the optional {\tt staggerAlign} parameter 
 ! may be used. This parameter indicates which stagger elements 
-! in a cell shares the same index values as the cell center. 
+! in a cell share the same index values as the cell center. 
 ! For example, in a 2D cell, it would indicate which of the four corners has
 ! the same index value as the center. To set {\tt staggerAlign},  
 ! the values -1,+1 are used to indicate the alignment in
@@ -1877,7 +1872,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! are not set then its value determines where the default padding
 ! is placed. If not specified, then the default is to align all 
 ! staggers to the most negative, so the padding is on the positive side. 
-! The following code illustrates aligning the positive (North East) 
+! The following code illustrates aligning the positive (northeast in 2D) 
 ! corner with the center. 
 !EOE
 
