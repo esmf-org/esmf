@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.16 2007/07/24 21:46:46 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.17 2007/07/25 19:19:58 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.16 2007/07/24 21:46:46 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.17 2007/07/25 19:19:58 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -342,7 +342,7 @@ end interface
 !  When a Grid is created all of its potential stagger locations can hold coordinate
 !  data, but none of them have storage allocated. This call allocates coordinate
 !  storage (creates internal ESMF\_Arrays and associated memory) for  a particular
-!  stagger location. Note, that this
+!  stagger location. Note that this
 !  call doesn't assign any values to the storage, it only allocates it. The
 !  remaining options {\tt staggerLWidth}, etc. allow the user to adjust the 
 !  padding on the coordinate arrays.
@@ -509,8 +509,10 @@ end interface
 !    This call is used to complete the {\tt grid} so that it is usable at
 !    the level indicated by the {\tt status} flag.  For example, once committed
 !    with a {\tt status} value of {\tt ESMF\_GRIDSTATUS\_SHAPE\_READY}, the 
-!    {\tt grid} has sufficient size, rank, and distribution information to be
-!    used as the basis for allocating Field data.  
+!    {\tt grid} will have sufficient size, rank, and distribution information to be
+!    used as the basis for allocating Field data. (The integration of 
+!    Field and Grid classes has't yet happened, so you can't currently 
+!    allocating Fields based on Grids no matter what the status.)
 !
 !    It is necessary to call the {\tt ESMF\_GridCommit()} method after
 !    creating a Grid object using the {\tt ESMF\_GridCreateEmpty()} method
@@ -620,13 +622,13 @@ end interface
 ! object. It allows the user to fully specify the topology and index space
 ! (of the distributed dimensions) using the DistGrid methods and then build a grid out
 ! of the resulting {\tt distgrid}.  Optional {\tt lbound} and {\tt ubound}
-! arguments can be used to specify extra tensor dimensions. The {\tt dimmap} argument
-! specifies how the distributed (from {\tt distgrid}) and tensor (from {\tt bounds})
+! arguments can be used to specify extra undistributed dimensions. The {\tt dimmap} argument
+! specifies how the distributed (from {\tt distgrid}) and undistributed (from {\tt bounds})
 ! dimensions are intermixed. The {\tt coordRank} and {\tt coordDimMap} arguments
 ! allow the user to specify how the coordinate arrays should map to the grid
 ! dimensions. (Note, though, that creating a grid does not allocate coordinate
-! storage, other methods (such as ESMF\_GridAllocCoord) must be used
-! before adding coordinate data.
+! storage. A method such as {\tt ESMF\_GridAllocCoord()} must be called
+! before adding coordinate values.)
 !
 ! The arguments are:
 ! \begin{description}
@@ -1608,8 +1610,8 @@ end interface
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Destroys an {\tt ESMF\_Grid} object and all related internal structures. This call
-!    does not destroy the internal coordinate Arrays, or internally generated DistGrid. 
+!     Destroys an {\tt ESMF\_Grid} object and related internal structures. This call
+!    does not destroy the internal coordinate Arrays, or the internally generated DistGrid. 
 !
 !     The arguments are:
 !     \begin{description}
@@ -1839,8 +1841,8 @@ end subroutine ESMF_GridGet
 ! !DESCRIPTION:
 !    This method allows the user to get access to the ESMF Array holding
 !    coordinate data at a particular stagger location. This is useful, for example, 
-!    to set the coordinate values. To have an Array to access the coordinate Arrays
-!    must have already been set, for example by {\tt ESMF\_GridAllocCoord} or
+!    to set the coordinate values. To have an Array to access, the coordinate Arrays
+!    must have already been allocated, for example by {\tt ESMF\_GridAllocCoord} or
 !    {\tt ESMF\_GridSetCoord}.
 !
 !     The arguments are:

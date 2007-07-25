@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.29 2007/07/17 05:37:35 donstark Exp $
+% $Id: Grid_desc.tex,v 1.30 2007/07/25 19:19:58 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -16,6 +16,17 @@ The most frequent use of the Grid class is to describe physical grids
 in user code so that sufficient information is available to perform ESMF
 methods such as regridding.  
 
+In the current release (v3.0.3)
+the functionality in this class is partially implemented.  
+Multi-tile grids are not supported, and edge connectivities 
+are not implemented and default to aperiodic.  Only irregular 
+distributions can be defined.  Specific interfaces for regular
+and arbitrary distributions have not been implemented, though
+regular distributions can be defined as a special case of 
+irregular distributions.  Other constraints of the current
+implementation are noted in the usage section and in the API
+descriptions.
+
 \begin{center}
 \begin{tabular}{|p{6in}|}
 \hline
@@ -24,16 +35,19 @@ methods such as regridding.
 Representation of grids formed by logically rectangular regions,
 including uniform and rectilinear grids (e.g. lat-lon grids),
 curvilinear grids (e.g. displaced pole grids), and grids formed
-by connected logically rectangular regions (e.g. cubed sphere grids).\\
+by connected logically rectangular regions (e.g. cubed sphere grids)
+[CONNECTED REGIONS ARE NOT YET SUPPORTED].\\
 Support for 1D, 2D, 3D, and higher dimension grids.\\ 
 Distribution of grids across computational resources for parallel
 operations - users set which grid dimensions are distributed.\\
 Grids can be created already distributed, so that no single
 resource needs global information during the creation process.\\
 Options to define periodicity and other edge connectivities either 
-explicitly or implicitly via shape shortcuts.\\ 
+explicitly or implicitly via shape shortcuts [EDGE CONNECTIVITIES
+CURRENTLY DEFAULT TO APERIODIC BOUNDS].\\ 
 Options for users to define grid coordinates themselves or call
-prefabricated coordinate generation routines for standard grids.\\
+prefabricated coordinate generation routines for standard grids
+[NO GENERATION ROUTINES YET].\\
 Options for incremental construction of grids.\\
 Options for using a set of pre-defined stagger locations or for setting
 custom stagger locations.\\ [.03in] \hline
@@ -42,7 +56,8 @@ custom stagger locations.\\ [.03in] \hline
 
 \subsubsection{Grid Representation in ESMF}
 
-ESMF Grids are based on the concepts described in {\it A Standard Descriptor of Grids Used in Earth System Models} [Balaji 2006].  In this document
+ESMF Grids are based on the concepts described in {\it A Standard
+Descriptor of Grids Used in Earth System Models} [Balaji 2006].  In this document
 Balaji introduces the mosaic concept as a means of describing
 a wide variety of Earth system model grids.  A {\bf mosaic} is
 composed of grid tiles connected at their edges.  Mosaic grids
@@ -75,8 +90,9 @@ The range of supported grids in ESMF can be defined by:
 more logically rectangular grid Tiles with connectivities specified
 between cells.  For more details see section \ref{sec:ShapeShortcut}.
 \item Types of distributions supported.  ESMF supports  regular,
-irregular, or arbitrary distributions of data.  For more details see section 
-\ref{sec:desc:dist}.
+irregular, or arbitrary distributions of data.  Note that arbitrary
+distributions have not been implemented as of v3.0.3.
+For more details see section \ref{sec:desc:dist}.
 \item Types of coordinates supported.  ESMF supports uniform, rectilinear,
 and curvilinear coordinates.  For more details see section \ref{sec:coordspec}.
 \end{itemize}
@@ -96,7 +112,8 @@ such as ESMF\_GRIDCONN\_PERIODIC.
 The table below shows the ESMF\_GridConn settings used to create 
 standard shapes in 2D using the ESMF\_GridCreateShape() call.  Two values
 are specified for each dimension, one for the low end and one for 
-the high end of the dimension's index values.  
+the high end of the dimension's index values.  Note that connectivities
+have not been implemented as of v3.0.3 and default to aperiodic bounds.
 
 \medskip
 \begin{tabular}{|l|c|c||c|c||}
@@ -133,7 +150,8 @@ unequal numbers of contiguous gridpoints are assigned to each
 DE in the distributed dimension.  An {\bf arbitrary} distribution is
 one in which any gridpoint can be assigned to any DE.  Any ofthese
 distribution options can be applied to any of the grid shapes (i.e.,
-rectangle) or types (i.e., rectilinear).
+rectangle) or types (i.e., rectilinear).  Arbitrary distributions
+have not been implemented as of v3.0.3.
 
 Figure \ref{fig:GridDecomps} illustrates options for distribution.
 \begin{figure}
@@ -163,7 +181,8 @@ does not affect the computations performed on an ocean model grid.  Figure
 
 Any of these logically rectangular grid types can be combined through edge
 connections to form a mosaic.  Cubed sphere and yin-yang grids are examples
-of mosaic grids.
+of mosaic grids.  Note that as of v3.0.3 multi-tile grids have not yet been
+implemented.
  
 \begin{figure}
 \scalebox{0.9}{\includegraphics{LogRectGrids}}
@@ -197,7 +216,7 @@ first way is for the user to {\bf set} the coordinates.  The second
 way is to take a shortcut and have the framework {\bf generate}
 the coordinates.  
 
-The only ESMF generation routine currently available is for uniform grids.
+No ESMF generation routines are currently available.
 
 See Section~\ref{sec:usage:coordstore} for more description and examples of
 setting coordinates.
@@ -245,7 +264,8 @@ These stages are:
 \item Create the Grid topology or shape.  At the completion of this
 stage, the Grid has a specific topology and distribution, but
 empty coordinate arrays.  The Grid can be used as the basis for
-allocating a Field.  Its {\tt ESMF\_GridStatus} parameter has 
+allocating a Field (once Grid is integrated with Field; as of 
+v3.0.3, it is not).  Its {\tt ESMF\_GridStatus} parameter has 
 a value of {\tt ESMF\_GRIDSTATUS\_SHAPE\_READY}.  
 
 The options for specifying the Grid shape are:
@@ -262,7 +282,8 @@ pass the DistGrid into a general {\tt ESMF\_GridCreate()} method.
 \item Specify the Grid coordinates and any other information
 required for regridding (this can vary depending on the particular
 regridding method).  At the completion of this stage, the Grid can
-be used in a regridding operation.  Its {\tt ESMF\_GridStatus}
+be used in a regridding operation (once Grid is connected to regrid;
+as of v3.0.3, it is not).  Its {\tt ESMF\_GridStatus}
 has a value of {\tt ESMF\_GRIDSTATUS\_REGRID\_READY}.
 \end{enumerate}
 
