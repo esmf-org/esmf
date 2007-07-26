@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.31 2007/07/25 22:45:44 cdeluca Exp $
+% $Id: Grid_desc.tex,v 1.32 2007/07/26 19:41:18 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ the user to define the complex edge relationships of tripole and other
 grids.  The DistGrid can be created explicitly and passed into a Grid
 creation routine, or it can be created implicitly if the user takes
 a Grid creation shortcut.  Options for grid creation are described in 
-more detail in section \ref{sec:gridcreateoptions}
+more detail in section \ref{sec:gridcreateoptions}.
 
 \subsubsection{Supported Grids}
 
@@ -220,7 +220,7 @@ the coordinates.
 
 No ESMF generation routines are currently available.
 
-See Section~\ref{sec:usage:coordstore} for more description and examples of
+See Section~\ref{sec:usage:staggerloc} for more description and examples of
 setting coordinates.
 
 \subsubsection{Staggering}
@@ -248,7 +248,8 @@ coordinates to a Grid.
 For examples and a full description of the stagger interface 
 see Section~\ref{sec:usage:staggerloc}. 
 
-\subsubsection{Options for Building Grids} 
+\subsubsection{Options for Building Grids}
+\label{sec:gridcreateoptions}
 
 ESMF Grid objects must represent a wide range of grid types 
 and use cases, some of them quite complex.  As a result, multiple

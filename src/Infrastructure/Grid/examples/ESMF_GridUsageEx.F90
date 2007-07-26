@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.17 2007/07/25 23:18:49 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.18 2007/07/26 19:41:18 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -467,7 +467,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !BOC
    !-------------------------------------------------------------------
    ! Create the Grid:  Allocate space for the Grid object, define the
-   ! topology and distribution of the grid, and specify that it 
+   ! distribution of the grid, and specify that it 
    ! will have global coordinates.  Note that aperiodic bounds are
    ! specified by default - if periodic bounds were desired they
    ! would need to be specified using an additional gridConn argument
@@ -544,121 +544,6 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
 
 !BOE
-!
-!\subsubsection{Specifying Coordinate Arrays and Their Relation to
-! Index Space Dimensions}
-!
-! To specify how the coordinate arrays are mapped to the 
-! index dimensions the arguments {\tt coordDep1}, 
-! {\tt coordDep2}, and {\tt coordDep3} are used, each 
-! of which is a Fortran array. The values of the elements
-! in a {\tt coordDep} array specify which index dimension
-! the corresponding coordinate dimension
-! maps to.  For example, {\tt coordDep1=(/1,2/)} means that
-! the first dimension of coordinate 1 maps to index
-! dimension 1 and the second maps to index dimension 2. If
-! the {\tt coordDep} arrays are not specified, 
-! then {\tt coordDep1} defaults to {/1,2..,gridrank/}.  This default
-! thus specifies a curvilinear grid.  
-!
-! Currently in ESMF every coordinate array must have
-! the same rank as the Grid itself. 
-! For example, with a 3D grid you can't have a 2D X and Y coordinate array
-! and a 1D Z coordinate array. However, this limitation
-! is only in the dimension of the coordinate storage provided
-! by the Grid. The user is free to use whatever portion
-! of the storage they chose. Because of this temporary limitation,
-! the {\tt coordDep} argument must have the same number of 
-! elements as the rank of the Grid it is being used to create.
-! In the future the size of the {\tt coordDep} array will
-! determine the rank of the associated coordinate array.  
-!EOE
-
-#ifdef LOCAL_NOT_IMPL
-!BOEI
-! The following call demonstrates the creation of a
-! 10x20 2D rectilinear grid where the first coordinate
-! component is mapped to the second index dimension
-! (i.e. is of size 20) and the second coordinate component
-! is mapped to the first index dimension (i.e. is of size
-! 10).
-!EOEI
-
-!BOCI
-   grid2D=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
-          countsPerDEDim2=(/7,7,6/),                    &
-          coordDep1=(/2/),                              &
-          coordDep2=(/1/), rc=rc)   
-!EOCI
-#endif
-
-!BOE
-! The following call demonstrates the creation of a
-! 10x20 2D curvilinear grid where where both
-! coordinate component arrays are 10x20 also, but
-! the order of their dependency on the Grid dimensions
-! is reversed. 
-!EOE
-
-!BOC
-   grid2D=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
-          countsPerDEDim2=(/7,7,6/), coordDep1=(/2,1/), &
-          coordDep2=(/1,2/), rc=rc)   
-!EOC 
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
-
-!!!!!!!!!!!!!!!!!!!!!!!
-! Cleanup after Example
-!!!!!!!!!!!!!!!!!!!!!!
-call ESMF_GridDestroy(grid2D,rc=rc)
-
-#ifdef LOCAL_NOT_IMPL
-!BOEI
-! The following call demonstrates the creation of a
-! 10x20x30 2D plus 1 curvilinear grid where 
-! coordinate component 1 and 2 are still 10x20, but
-! coordinate component 3 is mapped just to the 
-! undistributed third index dimension.
-!EOE
-
-!BOCI
-   grid2D=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
-          countsPerDEDim2=(/7,7,6/), countsPerDEDim3=(/30/), &
-          coordDep1=(/1,2/), coordDep2=(/1,2/), &
-          coordDep3=(/3/), rc=rc)   
-!EOCI 
-
-!!!!!!!!!!!!!!!!!!!!!!!
-! Cleanup after Example
-!!!!!!!!!!!!!!!!!!!!!!
-call ESMF_GridDestroy(grid2D,rc=rc)
-#endif
-
-
-!BOE
-!
-! By default the local piece of the array on each processor starts at 
-! (1,1,..), however, the indexing for each grid coordinate array  
-! on each DE may be shifted to the global indices by using the {\tt indexflag}.
-! For example, the following call switches the grid to use global indices. 
-!EOE
-
-!BOC
-   grid2D=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
-           countsPerDEDim2=(/7,7,6/), indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
-
-!!!!!!!!!!!!!!!!!!!!!!!
-! Cleanup after Example
-!!!!!!!!!!!!!!!!!!!!!!
-call ESMF_GridDestroy(grid2D,rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
-
-!BOE
 !\subsubsection{Creating an Irregularly Distributed Rectilinear Grid with
 !                an Undistributed Vertical Dimension}
 ! \label{example:CurviGridWithUndistDim}
@@ -680,8 +565,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    ! to aperiodic since they are not yet implemented.  (Once connectivities
    ! are implemented, the longitude dimension will be periodic, the 
    ! poles will be defined at each end of the latitude dimension, 
-   ! and the depth dimension will remain aperiodic - see 
-   ! Section~\ref{example:TileEdgeConn}.)
+   ! and the depth dimension will remain aperiodic.
    !-------------------------------------------------------------------
    grid3D=ESMF_GridCreateShape(                &
               countsPerDEDim1=(/45,45,45,45/), &
@@ -1016,6 +900,122 @@ call ESMF_GridDestroy(grid2D,rc=rc)
           coord1=CoordX, coord2=CoordY, rc=rc)
 !EOCI
 #endif
+
+
+!BOE
+!
+!\subsubsection{Specifying the Relationship of Coordinate Arrays
+!               to Index Space Dimensions}
+!
+! To specify how the coordinate arrays are mapped to the 
+! index dimensions the arguments {\tt coordDep1}, 
+! {\tt coordDep2}, and {\tt coordDep3} are used, each 
+! of which is a Fortran array. The values of the elements
+! in a {\tt coordDep} array specify which index dimension
+! the corresponding coordinate dimension
+! maps to.  For example, {\tt coordDep1=(/1,2/)} means that
+! the first dimension of coordinate 1 maps to index
+! dimension 1 and the second maps to index dimension 2. If
+! the {\tt coordDep} arrays are not specified, 
+! then {\tt coordDep1} defaults to {/1,2..,gridrank/}.  This default
+! thus specifies a curvilinear grid.  
+!
+! Currently in ESMF every coordinate array must have
+! the same rank as the Grid itself. 
+! For example, with a 3D grid you can't have a 2D X and Y coordinate array
+! and a 1D Z coordinate array. However, this limitation
+! is only in the dimension of the coordinate storage provided
+! by the Grid. The user is free to use whatever portion
+! of the storage they chose. Because of this temporary limitation,
+! the {\tt coordDep} argument must have the same number of 
+! elements as the rank of the Grid it is being used to create.
+! In the future the size of the {\tt coordDep} array will
+! determine the rank of the associated coordinate array.  
+!EOE
+
+#ifdef LOCAL_NOT_IMPL
+!BOEI
+! The following call demonstrates the creation of a
+! 10x20 2D rectilinear grid where the first coordinate
+! component is mapped to the second index dimension
+! (i.e. is of size 20) and the second coordinate component
+! is mapped to the first index dimension (i.e. is of size
+! 10).
+!EOEI
+
+!BOCI
+   grid2D=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
+          countsPerDEDim2=(/7,7,6/),                    &
+          coordDep1=(/2/),                              &
+          coordDep2=(/1/), rc=rc)   
+!EOCI
+#endif
+
+!BOE
+! The following call demonstrates the creation of a
+! 10x20 2D curvilinear grid where where both
+! coordinate component arrays are 10x20 also, but
+! the order of their dependency on the Grid dimensions
+! is reversed. 
+!EOE
+
+!BOC
+   grid2D=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
+          countsPerDEDim2=(/7,7,6/), coordDep1=(/2,1/), &
+          coordDep2=(/1,2/), rc=rc)   
+!EOC 
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Cleanup after Example
+!!!!!!!!!!!!!!!!!!!!!!
+call ESMF_GridDestroy(grid2D,rc=rc)
+
+#ifdef LOCAL_NOT_IMPL
+!BOEI
+! The following call demonstrates the creation of a
+! 10x20x30 2D plus 1 curvilinear grid where 
+! coordinate component 1 and 2 are still 10x20, but
+! coordinate component 3 is mapped just to the 
+! undistributed third index dimension.
+!EOE
+
+!BOCI
+   grid2D=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
+          countsPerDEDim2=(/7,7,6/), countsPerDEDim3=(/30/), &
+          coordDep1=(/1,2/), coordDep2=(/1,2/), &
+          coordDep3=(/3/), rc=rc)   
+!EOCI 
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Cleanup after Example
+!!!!!!!!!!!!!!!!!!!!!!
+call ESMF_GridDestroy(grid2D,rc=rc)
+#endif
+
+
+!BOE
+!
+! By default the local piece of the array on each processor starts at 
+! (1,1,..), however, the indexing for each grid coordinate array  
+! on each DE may be shifted to the global indices by using the {\tt indexflag}.
+! For example, the following call switches the grid to use global indices. 
+!EOE
+
+!BOC
+   grid2D=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
+           countsPerDEDim2=(/7,7,6/), indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Cleanup after Example
+!!!!!!!!!!!!!!!!!!!!!!
+call ESMF_GridDestroy(grid2D,rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
 
 !BOE
 !\subsubsection{Accessing Grid Coordinates}
@@ -1638,7 +1638,8 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! the distribution and shape of the Grid, and then to employ that to either directly
 ! create the Grid or first create Arrays and then create the Grid from those. 
 ! This method gives the user maximum control over the topology and distribution of the Grid. 
-! See the DistGrid documentation in Section~\ref{sec:DistGrid} for an in depth description of its interface and use. 
+! See the DistGrid documentation in Section~\ref{sec:DistGrid} for an 
+! in-depth description of its interface and use. 
 !
 ! A DistGrid describes only the distributed dimensions of the index
 ! space, so when creating a Grid from a DistGrid some arguments
@@ -1804,7 +1805,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! This section discusses the advanced options for adding  
 ! coordinates to different stagger locations in a grid.
 ! To construct a custom stagger location the subroutine 
-! {\it ESMF\_StaggerLocSet()} is used to specify, 
+! {\tt ESMF\_StaggerLocSet()} is used to specify, 
 ! for each dimension, whether the stagger is located at the interior (0) 
 ! or on the boundary (1) of the cell. Further description of the method is
 ! available in Section~\ref{ref:stagger}. This method allows users

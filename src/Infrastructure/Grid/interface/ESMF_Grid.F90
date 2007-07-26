@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.18 2007/07/25 22:45:44 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.19 2007/07/26 19:41:18 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.18 2007/07/25 22:45:44 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.19 2007/07/26 19:41:18 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -594,7 +594,7 @@ end interface
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreate"
 !BOP
-! !IROUTINE: ESMF_GridCreate - Create a Grid from a distgrid
+! !IROUTINE: ESMF_GridCreate - Create a Grid from a DistGrid
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
@@ -649,9 +649,9 @@ end interface
 !       is to map all of distgrid's dimensions against the lower dimensions of the
 !       grid in sequence. 
 ! \item[{[lbounds]}] 
-!      Lower bounds for tensor array dimensions. Must be the same size as {\tt ubounds}.
+!      Lower bounds for undistributed array dimensions. Must be the same size as {\tt ubounds}.
 ! \item[{[ubounds]}] 
-!      Upper bounds for tensor array dimensions. Must be the same size as {\tt lbounds}.
+!      Upper bounds for undistributed array dimensions. Must be the same size as {\tt lbounds}.
 ! \item[{[coordRank]}]
 !      List that has as many elements as the grid rank .
 !      Gives the dimension of each component (e.g. x) array. This is 
@@ -708,7 +708,7 @@ end interface
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    !! tensor bounds
+    !! undistributed bounds
     lboundsArg = ESMF_InterfaceIntCreate(lbounds, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1716,9 +1716,9 @@ end interface
 !\item[{[distGrid]}]
 !   The structure describing the distribution of the grid.
 !\item[{[lbounds]}] 
-!   Lower bounds for tensor array dimensions.
+!   Lower bounds for undistributed array dimensions.
 !\item[{[ubounds]}] 
-!   Upper bounds for tensor array dimensions. 
+!   Upper bounds for undistributed array dimensions. 
 !\item[{[localDECount]}]
 !   The number of DE's in this grid on this processor
 !\item[{[distRank]}]
@@ -1764,7 +1764,7 @@ end interface
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    !! tensor bounds
+    !! undistributed bounds
     lboundsArg = ESMF_InterfaceIntCreate(lbounds, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3170,9 +3170,9 @@ endif
 !       is to map all of distgrid's dimensions against the lower dimensions of the
 !       grid in sequence. 
 ! \item[{[lbounds]}] 
-!      Lower bounds for tensor array dimensions.
+!      Lower bounds for undistributed array dimensions.
 ! \item[{[ubounds]}] 
-!      Upper bounds for tensor array dimensions.
+!      Upper bounds for undistributed array dimensions.
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
 ! \item[{[gridType]}]
@@ -3215,7 +3215,7 @@ endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    !! tensor bounds
+    !! undistributed bounds
     lboundsArg = ESMF_InterfaceIntCreate(lbounds, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4284,9 +4284,9 @@ endif
 !           map to. If a value is 0, then that dimension doesn't correspond to 
 !          a grid dimension. If not present the default is (/1,2,3,.../). 
 !     \item[{[lbounds]}] 
-!          Lower bounds for tensor array dimensions.
+!          Lower bounds for undistributed array dimensions.
 !     \item[{[ubounds]}] 
-!          Upper bounds for tensor array dimensions.
+!          Upper bounds for undistributed array dimensions.
 ! \item[{[metricLWidth]}] 
 !      This array should be the same rank as the grid. It specifies the lower corner of the computational
 !      region with respect to the lower corner of the exclusive region.
@@ -4382,9 +4382,9 @@ endif
 !           map to. If a value is 0, then that dimension doesn't correspond to 
 !          a grid dimension. If not present the default is (/1,2,3,.../). 
 !     \item[{[lbounds]}] 
-!          Lower bounds for tensor array dimensions.
+!          Lower bounds for undistributed array dimensions.
 !     \item[{[ubounds]}] 
-!          Upper bounds for tensor array dimensions.
+!          Upper bounds for undistributed array dimensions.
 ! \item[{[metricLWidth]}] 
 !      This array should be the same rank as the grid. It specifies the lower corner of the computational
 !      region with respect to the lower corner of the exclusive region.
@@ -4706,11 +4706,11 @@ endif
 !       the default is to map the dimensions against the lower dimensions of the
 !       grid in sequence. 
 ! \item[{[lbounds]}] 
-!      Lower bounds for tensor array dimensions. If {\tt ubounds}
+!      Lower bounds for undistributed array dimensions. If {\tt ubounds}
 !      is specified, but {\tt lbounds} is not then the lower bounds
 !      default to {1,1,1,...}
 ! \item[{[ubounds]}] 
-!      Upper bounds for tensor array dimensions.
+!      Upper bounds for undistributed array dimensions.
 ! \item[{[coordRank]}]
 !      List that has as many elements as the grid rank .
 !      Gives the dimension of each component (e.g. x) array. This is 
@@ -4938,11 +4938,11 @@ endif
 !       the default is to map the dimensions against the lower dimensions of the
 !       grid in sequence. 
 ! \item[{[lbounds]}] 
-!      Lower bounds for tensor array dimensions. If {\tt ubounds}
+!      Lower bounds for undistributed array dimensions. If {\tt ubounds}
 !      is specified, but {\tt lbounds} is not then the lower bounds
 !      default to {1,1,1,...}
 ! \item[{[ubounds]}] 
-!      Upper bounds for tensor array dimensions.
+!      Upper bounds for undistributed array dimensions.
 ! \item[{[coordRank]}]
 !      List that has as many elements as the grid rank .
 !      Gives the dimension of each component (e.g. x) array. This is 
@@ -5097,11 +5097,11 @@ endif
 !       the default is to map the dimensions against the lower dimensions of the
 !       grid in sequence. 
 ! \item[{[lbounds]}] 
-!      Lower bounds for tensor array dimensions. If {\tt ubounds}
+!      Lower bounds for undistributed array dimensions. If {\tt ubounds}
 !      is specified, but {\tt lbounds} is not then the lower bounds
 !      default to {1,1,1,...}
 ! \item[{[ubounds]}] 
-!      Upper bounds for tensor array dimensions.
+!      Upper bounds for undistributed array dimensions.
 ! \item[{[coordRank]}]
 !      List that has as many elements as the grid rank .
 !      Gives the dimension of each component (e.g. x) array. This is 
@@ -5260,11 +5260,11 @@ endif
 !       the default is to map the dimensions against the lower dimensions of the
 !       grid in sequence. 
 ! \item[{[lbounds]}] 
-!      Lower bounds for tensor array dimensions. If {\tt ubounds}
+!      Lower bounds for undistributed array dimensions. If {\tt ubounds}
 !      is specified, but {\tt lbounds} is not then the lower bounds
 !      default to {1,1,1,...}
 ! \item[{[ubounds]}] 
-!      Upper bounds for tensor array dimensions.
+!      Upper bounds for undistributed array dimensions.
 ! \item[{[coordRank]}]
 !      List that has as many elements as the grid rank .
 !      Gives the dimension of each component (e.g. x) array. This is 

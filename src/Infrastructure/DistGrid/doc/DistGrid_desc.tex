@@ -1,5 +1,7 @@
-% $Id: DistGrid_desc.tex,v 1.7 2007/04/02 22:52:47 theurich Exp $
+% $Id: DistGrid_desc.tex,v 1.8 2007/07/26 19:41:18 cdeluca Exp $
 
+
+\label{sec:DistGrid}
 The {\tt ESMF\_DistGrid} class sits on top of the DELayout class and holds domain information in index space. A DistGrid object captures the index space topology and describes its decomposition in terms of DEs. Combined with DELayout and VM the DistGrid defines the data distribution of a domain decomposition across the computational resources of an ESMF component.
 
 The global domain is defined as the union or ``patchwork'' of logically rectangular (LR) sub-domains or {\em patches}. The DistGrid create methods allow the specification of such a patchwork global domain and its decomposition into exclusive, DE-local LR regions according to various degrees of user specified constraints. Complex index space topologies can be constructed by specifying connection relationships between patches during creation.
