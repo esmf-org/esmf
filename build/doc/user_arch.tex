@@ -1,4 +1,4 @@
-% $Id: user_arch.tex,v 1.22 2007/07/26 16:10:41 theurich Exp $
+% $Id: user_arch.tex,v 1.23 2007/07/27 18:54:41 theurich Exp $
 
 % List of architectures supported.  This file is 
 % meant to be included in a user doc.
@@ -16,62 +16,78 @@ included in the build system.
 {\bf Fully tested combinations}: (See \htmladdnormallink{http://www.esmf.ucar.edu/download/platforms/}{http://www.esmf.ucar.edu/download/platforms/} for the most up-to-date table of supported combinations.)
 \vspace{1ex}
 
-\begin{tabular}{lcccc}
-  &{\bfseries ESMF\_OS} &{\bfseries ESMF\_COMPILER} & {\bfseries ESMF\_COMM} & {\bfseries ESMF\_ABI} \\
+\begin{tabular}{lllllll}
+  &{\bfseries\footnotesize ESMF\_OS} &{\bfseries\footnotesize ESMF\_COMPILER} & {\bfseries\footnotesize\it F90 compiler} & {\bfseries\footnotesize\it C++ compiler} & {\bfseries\footnotesize ESMF\_COMM} & {\bfseries\footnotesize ESMF\_ABI} \\ \hline
 
-Cray X1     &  Unicos  &  default      &  mpi         &  64 \\
-Cray X3/4   &  Unicos  &  pgi          &  mpi         &  64 \\
-HP IA64     &  Linux   &  intel        &  lam         &  64  \\
-IBM Opteron &  Linux   &  pathscale    &  mpich       &  64  \\
-IBM Opteron &  Linux   &  pgi          &  mpich       &  64  \\
-IBM SP      &  AIX     &  default      &  mpi         &  32,64  \\
-Mac         &  Darwin  &  absoft       &  lam,mpiuni  &  32  \\
-Mac         &  Darwin  &  nag          &  lam,mpiuni  &  32  \\
-Mac         &  Darwin  &  xlf          &  lam,mpiuni  &  32  \\
-Mac         &  Darwin  &  xlfgcc       &  lam,mpiuni  &  32  \\
-PC          &  Linux   &  absoftintel  &  mpich       &  32  \\
-PC          &  Linux   &  g95          &  mpich       &  32  \\
-PC          &  Linux   &  intel        &  mpich       &  32  \\
-PC 	    &  Linux   &  lahey        &  mpiuni      &  32  \\
-PC 	    &  Linux   &  nagintel     &  mpich       &  32  \\
-PC 	    &  Linux   &  pgi          &  mpich,mpiuni&  32  \\
-SGI Altix   &  Linux   &  intel        &  mpi         &  64  \\
-SGI Mips    &  IRIX64  &  default      &  mpi         &  32,64 
+Cray X1         &\tt Unicos &\tt default & ftn \footnotesize 5.5.0.6 & CC \footnotesize 5.5.0.6 &\tt mpi &\tt 64 \\
+Cray X1         &\tt Unicos &\tt default & ftn \footnotesize 5.5.0.9 & CC \footnotesize 5.5.0.9 &\tt mpi &\tt 64 \\
+Cray X3/4       &\tt Unicos &\tt pgi     & ftn \footnotesize 7.0-5   & CC \footnotesize 7.0-5 s &\tt mpi &\tt 64 \\
+HP ZX6000       &\tt Linux  &\tt intel   & ifort \footnotesize 8.1.021 & icpc \footnotesize 8.1.024 &\tt lam &\tt 64 \\
+IBM Bluegene    &\tt AIX    &\tt xlf     & mpxlf90 \footnotesize 10.1.0.4 & mpxlC \footnotesize 8.0.0.4 &\tt mpi &\tt 32 \\
+IBM Opteron     &\tt Linux  &\tt pathscale & pathf90 \footnotesize 2.4 & pathCC \footnotesize 2.4 &\tt mpich &\tt x86\_64\_small, \\
+                &           &              &                           &                          &          &\tt x86\_64\_medium \\
+IBM Opteron     &\tt Linux  &\tt pgi     & pgf90 \footnotesize 6.2-3 & pgCC \footnotesize 6.2-3 &\tt mpich   &\tt x86\_64\_small, \\
+                &           &            &                           &                          &            &\tt x86\_64\_medium \\
+IBM SP          &\tt AIX    &\tt default & mpxlf90\_r \footnotesize 10.1.0.4 & mpCC\_r \footnotesize 8.0.0.0 &\tt mpi &\tt 32,64 \\
+IBM SP          &\tt AIX    &\tt default & mpxlf90\_r \footnotesize 10.1.0.4 & mpCC\_r \footnotesize 8.0.0.5 &\tt mpi &\tt 32,64 \\
+Mac G5          &\tt Darwin &\tt absoft  & f90 \footnotesize 9.0     & g++ \footnotesize 3.3    &\tt lam,mpiuni &\tt 32 \\
+Mac G5          &\tt Darwin &\tt absoft  & f90 \footnotesize 8.2     & g++ \footnotesize 3.3    &\tt lam,mpiuni &\tt 32 \\
+Mac G5          &\tt Darwin &\tt nag     & f95 \footnotesize 5.0(272)& g++ \footnotesize 3.3    &\tt lam,mpiuni &\tt 32 \\
+Mac G5          &\tt Darwin &\tt xlf     & xlf90\_r \footnotesize 8.1& xlC\_r \footnotesize 6.0 &\tt lam,mpiuni &\tt 32 \\
+Mac G5          &\tt Darwin &\tt xlfgcc  & xlf90\_r \footnotesize 8.1& g++ \footnotesize 3.3    &\tt lam,mpiuni &\tt 32 \\
+PC Pentium III  &\tt Linux  &\tt lahey   & lf95 \footnotesize L6.20d & g++ \footnotesize 3.2.3  &\tt mpiuni     &\tt 32 \\
+PC Pentium III  &\tt Linux  &\tt pgigcc  & pgf90 \footnotesize 7.0-6 & g++ \footnotesize 3.2.3  &\tt mpiuni     &\tt 32 \\
+PC Xeon Cluster &\tt Linux  &\tt absoftintel & f90 \footnotesize 9.0 r2 & icpc \footnotesize 8.1&\tt mpich      &\tt 32 \\
+PC Xeon Cluster &\tt Linux  &\tt g95     & f90 \footnotesize 4.0.2   & g++ \footnotesize 4.0.2  &\tt mpich      &\tt 32 \\
+PC Xeon Cluster &\tt Linux  &\tt intel   & ifort \footnotesize 8.1   & icpc \footnotesize 8.1   &\tt mpich      &\tt 32 \\
+PC Xeon Cluster &\tt Linux  &\tt nagintel & f95 \footnotesize 5.0(361) & icpc \footnotesize 8.1 &\tt mpich      &\tt 32 \\
+SGI Altix       &\tt Linux  &\tt intel   & ifort \footnotesize 9.1.033 & icpc \footnotesize 9.1.039 &\tt mpi    &\tt 64 \\
+SGI Origin 3800 &\tt IRIX64 &\tt default & f90 \footnotesize 7.4.3m  & CC \footnotesize 7.4.3m  &\tt mpi        &\tt 32,64
 \end{tabular}
 
 \vspace{1ex}
 
 {\bf All possible options}. Where multiple options exist 
-and the default is independent of {\tt ESMF\_MACHINE} the default value is in bold:
+and the default is independent of {\tt ESMF\_MACHINE} the default value is in {\bf bold}:
 
 \vspace{1ex}
 
 
-\begin{tabular}{lcccc}
-  {\bfseries ESMF\_OS} &{\bfseries ESMF\_COMPILER} & {\bfseries ESMF\_COMM} & {\bfseries ESMF\_ABI} \\
+\begin{tabular}{lllll}
+  {\bfseries\footnotesize ESMF\_OS} &{\bfseries\footnotesize ESMF\_COMPILER} & {\bfseries\footnotesize ESMF\_COMM} & {\bfseries\footnotesize ESMF\_ABI} \\ \hline
 
-AIX     &  default      &  {\bf mpi},mpiuni,user         &  32,{\bf 64}  \\
-Darwin  &  absoft       &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
-Darwin  &  g95          &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
-Darwin  &  gfortran     &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
-Darwin  &  nag          &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
-Darwin  &  xlf          &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
-Darwin  &  xlfgcc       &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
-IRIX64  &  default      &  {\bf mpi},mpiuni,user         &  32,{\bf 64}  \\
-Linux   &  absoft       &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32, 64  \\
-Linux   &  absoftintel  &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32, 64  \\
-Linux   &  intel        &  {\bf mpiuni},mpi,mpich,mpich2,intelmpi,lam,openmpi,user  &  32, 64 \\
-Linux   &  intelgcc     &  {\bf mpiuni},mpi,mpich,mpich2,lam,openmpi,user  &  32, 64 \\
-Linux   &  lahey        &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
-Linux   &  nag          &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
-Linux   &  nagintel     &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
-Linux   &  pathscale    &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  64  \\
-Linux   &  pgi          &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32, 64  \\
-Linux   &  pgigcc       &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32, 64  \\
-Linux   &  xlf          &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
-OSF1    &  default      &  {\bf mpi},mpiuni,user         &  64  \\
-Unicos  &  default      &  {\bf mpi},mpiuni,user         &  64  \\
-Unicos  &  pgi          &  {\bf mpi},mpiuni,user         &  64
+AIX     &\tt default     &\tt mpiuni,{\bf mpi},user      &\tt 32, {\bf 64} \\
+Cygwin  &\tt g95         &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, {\bf 64} \\
+Cygwin  &\tt gfortran    &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, {\bf 64} \\
+Darwin  &\tt absoft      &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32 \\
+Darwin  &\tt g95         &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt {\bf 32}, 64 \\
+Darwin  &\tt gfortran    &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt {\bf 32}, 64 \\
+Darwin  &\tt nag         &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32 \\
+Darwin  &\tt xlf         &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32 \\
+Darwin  &\tt xlfgcc      &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32 \\
+IRIX64  &\tt default     &\tt mpiuni,{\bf mpi},user     &\tt 32, {\bf 64} \\
+Linux   &\tt absoft      &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, 64 \\
+Linux   &\tt absoftintel &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, 64  \\
+Linux   &\tt g95         &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, 64, ia64\_32, ia64\_64, \\
+        &                &                              &\tt x86\_64\_32, x86\_64\_small, \\
+        &                &                              &\tt x86\_64\_medium \\
+Linux   &\tt gfortran    &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, 64 \\
+Linux   &\tt intel       &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user,&\tt 32, 64, ia64\_32, ia64\_64, \\
+        &                &\tt intelmpi                  &\tt x86\_64\_32, x86\_64\_small, \\
+        &                &                              &\tt x86\_64\_medium \\
+Linux   &\tt intelgcc    &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, 64 \\
+Linux   &\tt lahey       &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32 \\
+Linux   &\tt nag         &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32 \\
+Linux   &\tt nagintel    &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32 \\
+Linux   &\tt pathscale   &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, 64, x86\_64\_32, \\
+        &                &                              &\tt x86\_64\_small, x86\_64\_medium \\
+Linux   &\tt pgi         &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, 64, x86\_64\_32, \\
+        &                &                              &\tt x86\_64\_small, x86\_64\_medium \\
+Linux   &\tt pgigcc      &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32 \\
+Linux   &\tt xlf         &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32 \\
+OSF1    &\tt default     &\tt mpiuni,{\bf mpi},user      &\tt 64  \\
+Unicos  &\tt default     &\tt mpiuni,{\bf mpi},user      &\tt 64  \\
+Unicos  &\tt pgi         &\tt mpiuni,{\bf mpi},user      &\tt 64
 
 \end{tabular}
 
