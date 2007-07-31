@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.10 2007/07/24 19:33:05 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.11 2007/07/31 22:54:51 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -81,9 +81,9 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 
   int staggerLocCount;
   Array ***coordArrayList; // size of coordArrayList = staggerLocCountxrank [staggerLoc][coord]
-  int   **coordAlignList;     // hold alignment info [staggerloc][coord][dim]
-  int   **coordLWidthList;     // hold LWidth info [staggerloc][dim]
-  int   **coordUWidthList;     // hold UWidth info [staggerloc][dim]
+  int   **staggerAlignList;     // hold alignment info [staggerloc][coord][dim]
+  int   **staggerLWidthList;     // hold LWidth info [staggerloc][dim]
+  int   **staggerUWidthList;     // hold UWidth info [staggerloc][dim]
   bool  **didIAllocList;        // if true, I allocated this Array [staggerloc][coord]
 
   // map grid dim to distgrid dim and grid bounds dim
@@ -166,11 +166,11 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 		    bool _self_alloc // (in)
 		    );
 
-  int setCoordInfo(
+  int setStaggerInfo(
 		    int _staggerloc, // (in)
-		    int *coordAlign,  // (in)
-		    int *coordLWidth,  // (in)
-		    int *coordUWidth  // (in)
+		    int *staggerAlign,  // (in)
+		    int *staggerLWidth,  // (in)
+		    int *staggerUWidth  // (in)
 		    );
 
 
@@ -250,9 +250,9 @@ Grid *GridCreateEmpty(int *_rc);
 int gridAllocCoord(
 		   Grid *_grid, 
 		   int *_staggerloc,
-		   InterfaceInt *_coordLWidthArg,
-		   InterfaceInt *_coordUWidthArg,
-		   InterfaceInt *_coordAlign
+		   InterfaceInt *_staggerLWidthArg,
+		   InterfaceInt *_staggerUWidthArg,
+		   InterfaceInt *_staggerAlign
 		   );
 
 int gridSetCoordFromArray(
