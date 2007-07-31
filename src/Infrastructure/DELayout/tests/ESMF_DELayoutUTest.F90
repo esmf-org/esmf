@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutUTest.F90,v 1.16 2007/04/19 19:13:04 svasquez Exp $
+! $Id: ESMF_DELayoutUTest.F90,v 1.17 2007/07/31 22:41:46 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_DELayoutUTest.F90,v 1.16 2007/04/19 19:13:04 svasquez Exp $'
+      '$Id: ESMF_DELayoutUTest.F90,v 1.17 2007/07/31 22:41:46 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -89,6 +89,14 @@
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "DELayout validate an un-created delayout Test"
       call ESMF_DELayoutValidate(delayout2, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
+     !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Calling DELayoutGetDEMatchDE with uncreated DELayout Test"
+      call ESMF_DELayoutGetDEMatchDE(delayout=delayout, de=1, &
+			delayoutMatch=delayout1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
