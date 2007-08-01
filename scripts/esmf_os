@@ -5,7 +5,7 @@ if [ $esmf_os = UNICOS/mp ]; then
 esmf_os=Unicos
 fi
 cygwin_test=`echo $esmf_os | grep -i cygwin`
-if [ -n $cygwin_test ]; then
+if [ -n "$cygwin_test" ]; then
 esmf_os=Cygwin
 fi
 echo $esmf_os
