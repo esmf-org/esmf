@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.79 2007/06/12 21:47:30 cdeluca Exp $
+# $Id: makefile,v 1.80 2007/08/01 01:28:54 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -91,8 +91,6 @@ script_info:
 	  echo "ESMF_BATCHOPTIONS:      $(ESMF_BATCHOPTIONS)" ; fi
 	-@if [ -n "$(ESMF_MPIRUNOPTIONS)" ] ; then \
 	  echo "ESMF_MPIRUNOPTIONS:     $(ESMF_MPIRUNOPTIONS)" ; fi
-	-@if [ -n "$(ESMF_STDCXX_LIBRARY)" ] ; then \
-	  echo "ESMF_STDCXX_LIBRARY:    $(ESMF_STDCXX_LIBRARY)" ; fi
 	-@echo "ESMF_PTHREADS:          $(ESMF_PTHREADS)"
 	-@echo "ESMF_TESTWITHTHREADS:   $(ESMF_TESTWITHTHREADS)"
 	-@echo "ESMF_ARRAY_LITE:        $(ESMF_ARRAY_LITE)"
@@ -222,8 +220,6 @@ info_mk:
 	  echo "# ESMF_BATCHOPTIONS: $(ESMF_BATCHOPTIONS)" >> $(MKINFO) ; fi
 	-@if [ -n "$(ESMF_MPIRUNOPTIONS)" ] ; then \
 	  echo "# ESMF_MPIRUNOPTIONS: $(ESMF_MPIRUNOPTIONS)" >> $(MKINFO) ; fi
-	-@if [ -n "$(ESMF_STDCXX_LIBRARY)" ] ; then \
-	  echo "# ESMF_STDCXX_LIBRARY: $(ESMF_STDCXX_LIBRARY)" >> $(MKINFO) ; fi
 	-@echo "# ESMF_PTHREADS: $(ESMF_PTHREADS)" >> $(MKINFO)
 	-@echo "# ESMF_TESTWITHTHREADS: $(ESMF_TESTWITHTHREADS)" >> $(MKINFO)
 	-@echo "# ESMF_ARRAY_LITE: $(ESMF_ARRAY_LITE)" >> $(MKINFO)

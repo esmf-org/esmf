@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.192 2007/06/28 21:54:18 cdeluca Exp $
+#  $Id: common.mk,v 1.193 2007/08/01 01:28:54 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -58,6 +58,10 @@ endif
 
 ifeq ($(origin ESMF_CXX_LIBRARIES), environment)
 $(error Deprecated environment variable ESMF_CXX_LIBRARIES detected. Please see README.)
+endif
+
+ifeq ($(origin ESMF_STDCXX_LIBRARY), environment)
+$(error Deprecated environment variable ESMF_STDCXX_LIBRARY detected. Please see README.)
 endif
 
 ifeq ($(origin ESMF_F90_LIBRARY_PATH), environment)

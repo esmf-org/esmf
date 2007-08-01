@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.2 2007/03/16 18:02:45 theurich Exp $
+# $Id: build_rules.mk,v 1.3 2007/08/01 01:28:55 theurich Exp $
 #
 # Linux.nagintel.default
 #
@@ -88,22 +88,6 @@ ESMF_F90COMPILEOPTS += -kind=byte
 ESMF_F90COMPILEOPTS += -dusty
 
 ############################################################
-# To compile with Intel's icpc but link with GCC's stdc++ lib
-# set ESMF_STDCXX_LIBRARY to gcc before building
-#
-ifeq ($(ESMF_STDCXX_LIBRARY),gcc)
-ESMF_F90LINKPATHS   += -L$(dir $(shell gcc -print-file-name=libstdc++.so))
-ESMF_F90LINKLIBS    += -lstdc++
-ESMF_CXXCOMPILEOPTS += -cxxlib-gcc
-ESMF_CXXLINKOPTS    += -cxxlib-gcc
-else
-ESMF_F90LINKPATHS   += $(addprefix -L,$(shell $(ESMF_DIR)/scripts/libpath.icpc $(ESMF_CXXCOMPILER)))
-ESMF_F90LINKLIBS    += -lcprts
-ESMF_CXXCOMPILEOPTS += -cxxlib-icc
-ESMF_CXXLINKOPTS    += -cxxlib-icc
-endif
-
-############################################################
 # Conditionally add pthread compiler and linker flags
 #
 ifeq ($(ESMF_PTHREADS),ON)
@@ -124,9 +108,14 @@ ESMF_F90LINKRPATHS      =
 ESMF_CXXLINKRPATHS      =
 
 ############################################################
+# Determine where icpc's libraries are located
+#
+ESMF_F90LINKPATHS += $(addprefix -L,$(shell $(ESMF_DIR)/scripts/libpath.icpc "$(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS)"))
+
+############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lirc -lunwind -lrt -ldl
+ESMF_F90LINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.icpc "$(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS)")
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
