@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.6 2007/07/31 22:54:51 oehmke Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.7 2007/08/01 18:54:53 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.6 2007/07/31 22:54:51 oehmke Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.7 2007/08/01 18:54:53 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -2634,7 +2634,7 @@ subroutine check2DP1Bnds2x2(grid, coord, staggerloc, localPet, petCount, &
      if (tubnd(3) .lt. ieubnd3(3)+iuoff3(3)) correct=.false.
 
   else  if (petCount .eq. 4) then
-      call ESMF_GridGetLocalTileInfo(grid, coord=coord, localDE=2, &
+      call ESMF_GridGetLocalTileInfo(grid, coord=coord, localDE=0, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
              staggerLBound=slbnd, staggerUBound=subnd,           &
@@ -2646,9 +2646,10 @@ subroutine check2DP1Bnds2x2(grid, coord, staggerloc, localPet, petCount, &
       nullify(fptr)
 
      ! Get Coord From Grid
-     call ESMF_GridGetLocalTileCoord(grid, localDE=3, &
+     call ESMF_GridGetLocalTileCoord(grid, localDE=0, &
               staggerLoc=staggerloc, coord=coord, fptr=fptr, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
 
      ! Check that output is as expected
      if (.not. associated(fptr)) correct=.false.
