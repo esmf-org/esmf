@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.193 2007/08/01 01:28:54 theurich Exp $
+#  $Id: common.mk,v 1.194 2007/08/01 22:21:59 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -202,6 +202,18 @@ endif
 ifeq ($(ESMF_OS),Darwin)
 # default on Darwin is 32-bit
 export ESMF_ABI = 32
+endif
+ifeq ($(ESMF_OS),Cygwin)
+# default on Cygwin is 32-bit
+export ESMF_ABI = 32
+ifeq ($(ESMF_MACHINE),ia64)
+# except for IA64
+export ESMF_ABI = 64
+endif
+ifeq ($(ESMF_MACHINE),x86_64)
+#and x86_64
+export ESMF_ABI = 64
+endif
 endif
 endif
 
