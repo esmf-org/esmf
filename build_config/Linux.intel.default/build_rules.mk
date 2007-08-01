@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.56 2007/08/01 05:38:27 theurich Exp $
+# $Id: build_rules.mk,v 1.57 2007/08/01 20:10:22 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -163,7 +163,7 @@ ESMF_F90LINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.icpc "$(ESMF_CXXCOMPILER) $
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)")
+ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)") -lrt -ldl
 
 ############################################################
 # Blank out shared library options
