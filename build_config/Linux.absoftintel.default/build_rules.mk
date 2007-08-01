@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.4 2007/08/01 01:28:55 theurich Exp $
+# $Id: build_rules.mk,v 1.5 2007/08/01 05:36:40 theurich Exp $
 #
 # Linux.absoftintel.default
 #
@@ -111,7 +111,7 @@ ESMF_F90LINKPATHS += $(addprefix -L,$(shell $(ESMF_DIR)/scripts/libpath.icpc "$(
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.icpc "$(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS)")
+ESMF_F90LINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.icpc "$(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS)") -lrt -ldl
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
