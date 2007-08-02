@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.194 2007/08/01 22:21:59 theurich Exp $
+#  $Id: common.mk,v 1.195 2007/08/02 17:59:10 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -178,7 +178,14 @@ export ESMF_OS := $(shell $(ESMF_DIR)/scripts/esmf_os)
 endif
 
 ifeq ($(ESMF_OS),Linux)
-# currently ESMF_MACHINE is only used on Linux
+# set ESMF_MACHINE for Linux
+ifeq ($(ESMF_MACHINE),default)
+export ESMF_MACHINE := $(shell uname -m)
+endif
+endif
+
+ifeq ($(ESMF_OS),Cygwin)
+# set ESMF_MACHINE for Cygwin
 ifeq ($(ESMF_MACHINE),default)
 export ESMF_MACHINE := $(shell uname -m)
 endif
