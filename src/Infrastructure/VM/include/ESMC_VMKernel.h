@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.49 2007/06/20 23:38:00 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.50 2007/08/02 22:47:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -225,7 +225,7 @@ class VMK{
 
   // methods
   private:
-    void obtain_args(void);
+    void obtain_args();
     void commqueueitem_link(vmk_commhandle *commhandle);
     int  commqueueitem_unlink(vmk_commhandle *commhandle);
   public:
@@ -233,12 +233,12 @@ class VMK{
       // initialize the physical machine and a default (all MPI) virtual machine
     void finalize(int finalizeMpi=1);
       // finalize default (all MPI) virtual machine
-    void abort(void);
+    void abort();
       // abort default (all MPI) virtual machine
 
     void construct(void *sarg);
       // fill an already existing VMK object with info
-    void destruct(void);
+    void destruct();
       // free allocations within an existing VMK object
 
     void *startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
@@ -249,15 +249,15 @@ class VMK{
     void shutdown(class VMKPlan *vmp, void *arg);
       // exit a vm derived from current vm according to the VMKPlan
   
-    void print(void);
+    void print() const;
     
     // get() calls    <-- to be replaced by following new inlined section
-    int getNpets(void);            // return npets
-    int getMypet(void);            // return mypet
-    pthread_t getMypthid(void);    // return mypthid
+    int getNpets();                // return npets
+    int getMypet();                // return mypet
+    pthread_t getMypthid();        // return mypthid
     int getNcpet(int i);           // return ncpet
     int getSsiid(int i);           // return ssiid
-    MPI_Comm getMpi_c(void);       // return mpi_c
+    MPI_Comm getMpi_c();           // return mpi_c
     int getNthreads(int i);        // return number of threads in group PET
     int getTid(int i);             // return tid for PET
     int getVas(int i);             // return vas for PET
@@ -266,8 +266,8 @@ class VMK{
     // get() calls
     int getLocalPet() const {return mypet;}
     int getPetCount() const {return npets;}
+    pthread_t getLocalPthreadId() const {return mypthid;}
 
-       
     // p2p communication calls
     int vmk_send(void *message, int size, int dest, int tag=-1);
     int vmk_send(void *message, int size, int dest,
@@ -288,9 +288,9 @@ class VMK{
       vmk_commhandle **commhandle, int tag=-1);
 
     // collective communication calls
-    int vmk_barrier(void);
+    int vmk_barrier();
 
-    int vmk_threadbarrier(void);
+    int vmk_threadbarrier();
 
     int vmk_reduce(void *in, void *out, int len, vmType type, vmOp op, 
       int root);
@@ -328,7 +328,7 @@ class VMK{
     // non-blocking service calls
     int commwait(vmk_commhandle **commhandle, vmk_status *status=NULL,
       int nanopause=0);
-    void commqueuewait(void);
+    void commqueuewait();
     void commcancel(vmk_commhandle **commhandle);
     
     // IntraProcessSharedMemoryAllocation Table Methods
@@ -336,7 +336,7 @@ class VMK{
     void vmk_ipshmdeallocate(void *);
 
     // IntraProcessMutex Methods
-    vmk_ipmutex *vmk_ipmutexallocate(void);
+    vmk_ipmutex *vmk_ipmutexallocate();
     void vmk_ipmutexdeallocate(vmk_ipmutex *ipmutex);
     int vmk_ipmutexlock(vmk_ipmutex *ipmutex);
     int vmk_ipmutexunlock(vmk_ipmutex *ipmutex);
@@ -378,13 +378,13 @@ class VMKPlan{
     int groupfreeflag;  // flag to indicate which PETs must free MPIgroup
         
   public:
-    VMKPlan(void);
+    VMKPlan();
       // native constructor (sets communication preferences to defaults)
-    ~VMKPlan(void);
+    ~VMKPlan();
       // native destructor
-    void vmkplan_garbage(void);
+    void vmkplan_garbage();
       // perform garbage collection within a VMKPlan object
-    int vmkplan_nspawn(void);
+    int vmkplan_nspawn();
       // return number of PETs that are being spawned out of current PET
     void vmkplan_myvms(ESMCI::VMK **myvms);
       // set the internal myvms pointer array
@@ -439,7 +439,7 @@ class VMKPlan{
       // set up a VMKPlan that will have pets with the maximum number of
       // cores available, but not more than max and only use PETs listed in
       // plist
-    void vmkplan_print(void);  
+    void vmkplan_print();  
 
   friend class VMK;
   

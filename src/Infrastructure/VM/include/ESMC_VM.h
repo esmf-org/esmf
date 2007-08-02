@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.37 2007/06/20 23:38:00 theurich Exp $
+// $Id: ESMC_VM.h,v 1.38 2007/08/02 22:47:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -84,44 +84,32 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
   // This is the ESMF derived virtual machine class.
 
   public:
+    // initialize(), finalize() and abort() of global VM
+    static VM *initialize(MPI_Comm mpiCommunicator, int *rc);
+    static void finalize(ESMC_Logical *keepMpiFlag, int *rc);   
+    static void abort(int *rc);
+    // life cycle methods      
     void *startup(class VMPlan *vmp, void *(fctp)(void *, void *), void *cargo,
       int *rc);
-    void shutdown(class VMPlan *vmp, void *info, int *rc);
     int enter(class VMPlan *vmp, void *info, void *cargo);
-    
-    // get() calls
+    void shutdown(class VMPlan *vmp, void *info, int *rc);
+    // get()
     int get(int *localPet, int *petCount, int *peCount,
       MPI_Comm *mpiCommunicator, ESMC_Logical *okOpenMpFlag);
     int getPETLocalInfo(int pet, int *peCount, int *ssiId, int *threadCount,
       int *threadId, int *vas);
     int getPETMatchPET(int pet, VM &vmMatch, int *petMatchCount,
       int *petMatchList, int len_petMatchList);
-    VMId *getVMId(int *rc);   // Return VMId of the VM context.
+    VMId *getVMId(int *rc) const;   // Return VMId of the VM context.
+    static void getArgs(int *argc, char ***argv, int *rc);  // command line args
+    static VM *getGlobal(int *rc);      // global VM
+    static VM *getCurrent(int *rc);     // current VM
+    static VMId *getCurrentID(int *rc); // VMId of current VM
+    // misc.
+    int print() const;
+    int validate() const;
     int sendVMId(VMId *vmid, int dest);
     int recvVMId(VMId *vmid, int source);
-    void print(int *rc=NULL);
-    
-    static void getArgs(int *argc, char ***argv, int *rc);
-      // Command line args
-    
-    static VM *getGlobal(int *rc);   
-      // Return pointer to global VM
-    
-    static VM *getCurrent(int *rc);
-      // Return pointer to VM of current context
-    
-    static VMId *getCurrentID(int *rc);
-      // Return ID of the current VM context.
-    
-    static VM *initialize(MPI_Comm mpiCommunicator, int *rc);
-      // Initialize global VMK
-    
-    static void finalize(ESMC_Logical *keepMpiFlag, int *rc);   
-      // Shut down and clean up global VMK
-    
-    static void abort(int *rc);  // Abort and clean up global VMK
-    
-    
 };  // class VM
 
 

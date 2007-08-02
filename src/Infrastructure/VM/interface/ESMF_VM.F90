@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.93 2007/08/01 18:39:57 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.94 2007/08/02 22:47:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -183,7 +183,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.93 2007/08/01 18:39:57 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.94 2007/08/02 22:47:28 theurich Exp $"
 
 !==============================================================================
 
@@ -573,7 +573,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllFullReduceI4
@@ -677,7 +677,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllFullReduceR4
@@ -781,7 +781,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllFullReduceR8
@@ -886,7 +886,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllGatherI4
@@ -991,7 +991,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllGatherR4
@@ -1096,7 +1096,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllGatherR8
@@ -1201,7 +1201,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllGatherLogical
@@ -1309,7 +1309,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllGatherVI4
@@ -1417,7 +1417,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllGatherVR4
@@ -1525,7 +1525,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllGatherVR8
@@ -1630,7 +1630,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllReduceI4
@@ -1735,7 +1735,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllReduceR4
@@ -1840,7 +1840,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllReduceR8
@@ -1953,7 +1953,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllToAllVI4
@@ -2066,7 +2066,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllToAllVR4
@@ -2179,7 +2179,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllToAllVR8
@@ -2227,7 +2227,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMBarrier
@@ -2332,7 +2332,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMBroadcastI4
@@ -2438,7 +2438,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMBroadcastR4
@@ -2542,7 +2542,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMBroadcastR8
@@ -2647,7 +2647,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMBroadcastLogical
@@ -2755,7 +2755,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMGatherI4
@@ -2863,7 +2863,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMGatherR4
@@ -2971,7 +2971,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMGatherR8
@@ -3079,7 +3079,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMGatherLogical
@@ -3161,7 +3161,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMGatherVI4
@@ -3243,7 +3243,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMGatherVR4
@@ -3325,7 +3325,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMGatherVR8
@@ -3402,7 +3402,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMGet
@@ -3442,7 +3442,7 @@ module ESMF_VMMod
     ! Copy the handle to the global VM into the output variable
     vm = GlobalVM
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMGetGlobal
@@ -3487,7 +3487,7 @@ module ESMF_VMMod
     ! Set init code
     ESMF_INIT_SET_CREATED(vm)
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMGetCurrent
@@ -3529,7 +3529,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMGetCurrentID
@@ -3577,7 +3577,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMGetVMId
@@ -3649,7 +3649,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMGetPETLocalInfo
@@ -3697,7 +3697,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMPrint
@@ -3796,7 +3796,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMRecvI4
@@ -3895,7 +3895,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMRecvR4
@@ -3994,7 +3994,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMRecvR8
@@ -4093,7 +4093,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMRecvLogical
@@ -4192,7 +4192,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMRecvCharacter
@@ -4300,7 +4300,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMReduceI4
@@ -4408,7 +4408,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMReduceR4
@@ -4516,7 +4516,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMReduceR8
@@ -4624,7 +4624,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMScatterI4
@@ -4732,7 +4732,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMScatterR4
@@ -4840,7 +4840,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMScatterR8
@@ -4948,7 +4948,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMScatterLogical
@@ -5024,7 +5024,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMScatterVI4
@@ -5100,7 +5100,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMScatterVR4
@@ -5176,7 +5176,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMScatterVR8
@@ -5275,7 +5275,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMSendI4
@@ -5374,7 +5374,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMSendR4
@@ -5473,7 +5473,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMSendR8
@@ -5572,7 +5572,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMSendLogical
@@ -5671,7 +5671,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMSendCharacter
@@ -5785,7 +5785,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMSendRecvI4
@@ -5899,7 +5899,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMSendRecvR4
@@ -6013,7 +6013,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMSendRecvR8
@@ -6127,7 +6127,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMSendRecvLogical
@@ -6241,7 +6241,7 @@ module ESMF_VMMod
       endif
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMSendRecvCharacter
@@ -6290,17 +6290,17 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMThreadBarrier
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMValidate()"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_VMValidate - Validate VM internals
 
 ! !INTERFACE:
@@ -6323,7 +6323,7 @@ module ESMF_VMMod
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -6335,12 +6335,11 @@ module ESMF_VMMod
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
     ! Call into the C++ interface, which will sort out optional arguments.
-    !todo: call c_ESMC_VMValidate(vm, localrc)
-    localrc = ESMF_SUCCESS  ! remove when todo is done.
+    call c_ESMC_VMValidate(vm, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMValidate
@@ -6394,7 +6393,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMCommWait
@@ -6443,7 +6442,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMCommQueueWait
@@ -6489,7 +6488,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMWtime
@@ -6534,7 +6533,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMWtimeDelay
@@ -6593,7 +6592,7 @@ module ESMF_VMMod
     end do
     prec = temp_prec
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMWtimePrec
@@ -6645,7 +6644,7 @@ module ESMF_VMMod
     ! Set init code
     ESMF_INIT_SET_CREATED(GlobalVM)
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMInitialize
@@ -6695,7 +6694,7 @@ module ESMF_VMMod
     ! Set init code
     ESMF_INIT_SET_DELETED(GlobalVM)
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMFinalize
@@ -6739,7 +6738,7 @@ module ESMF_VMMod
       return
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAbort
@@ -6787,7 +6786,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMShutdown
@@ -6865,7 +6864,7 @@ module ESMF_VMMod
     ! Set init code
     ESMF_INIT_SET_CREATED(vm)
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
     
   end subroutine ESMF_VMSetInitCreated
@@ -6909,7 +6908,7 @@ module ESMF_VMMod
     ! Copy C++ pointer
     this = vm%this
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
     
   end subroutine ESMF_VMGetThis
@@ -6953,7 +6952,7 @@ module ESMF_VMMod
     ! Copy C++ pointer
     vm%this = this
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
     
   end subroutine ESMF_VMSetThis
@@ -7020,7 +7019,7 @@ module ESMF_VMMod
     ! Set init code
     ESMF_INIT_SET_CREATED(vmplan)
  
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_VMPlanConstruct
@@ -7070,7 +7069,7 @@ module ESMF_VMMod
     ! Set init code
     ESMF_INIT_SET_DELETED(vmplan)
  
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_VMPlanDestruct
@@ -7151,7 +7150,7 @@ module ESMF_VMMod
     ! Copy C++ pointer
     this = vmplan%this
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
     
   end subroutine ESMF_VMPlanGetThis
@@ -7195,7 +7194,7 @@ module ESMF_VMMod
     ! Copy C++ pointer
     vmplan%this = this
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
     
   end subroutine ESMF_VMPlanSetThis
@@ -7267,7 +7266,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMPlanMaxPEs
@@ -7339,7 +7338,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMPlanMaxThreads
@@ -7411,7 +7410,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMPlanMinThreads
@@ -7466,7 +7465,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end function ESMF_VMIdCompare
@@ -7510,7 +7509,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMIdPrint
@@ -7554,7 +7553,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMIdCreate
@@ -7598,7 +7597,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMIdDestroy
@@ -7649,7 +7648,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMRecvVMId
@@ -7699,7 +7698,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMSendVMId
@@ -7754,7 +7753,7 @@ module ESMF_VMMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_CommHandleValidate

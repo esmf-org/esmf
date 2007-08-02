@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.72 2007/08/01 22:08:40 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.73 2007/08/02 22:47:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@ extern "C" {
       delete [] message;
       return;
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -97,7 +97,7 @@ extern "C" {
       delete [] message;
       return;
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -118,7 +118,7 @@ extern "C" {
       delete [] message;
       return;
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -157,7 +157,7 @@ extern "C" {
       delete [] message;
       return;
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
@@ -194,7 +194,7 @@ extern "C" {
       delete [] message;
       return;
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -233,7 +233,7 @@ extern "C" {
       delete [] message;
       return;
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -251,7 +251,7 @@ extern "C" {
       delete [] message;
       return;
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -270,7 +270,7 @@ extern "C" {
       delete [] message;
       return;
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
@@ -291,7 +291,7 @@ extern "C" {
       delete [] message;
       return;
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
@@ -310,7 +310,7 @@ extern "C" {
       delete [] message;
       return;
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -331,7 +331,7 @@ extern "C" {
       delete [] message;
       return;
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -370,7 +370,7 @@ extern "C" {
       delete [] message;
       return;
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
@@ -398,7 +398,7 @@ extern "C" {
       *mpiCommunicator = (int)MPI_Comm_c2f(mpiCommTemp);
 #endif
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -418,7 +418,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(vas)),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
@@ -431,7 +431,7 @@ extern "C" {
     *vmid = (*ptr)->getVMId(&localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return;
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -440,11 +440,24 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_vmprint()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    int localrc = ESMC_RC_NOT_IMPL;
-    (*ptr)->print(&localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
-      return;
-    // Return successfully
+    // Call into the actual C++ method wrapped inside LogErr handling
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->print(),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN(c_esmc_vmvalidate)(ESMCI::VM **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmvalidate()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->validate(),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -463,7 +476,7 @@ extern "C" {
       delete [] message;
       return;
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -484,7 +497,7 @@ extern "C" {
       delete [] message;
       return;
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -521,7 +534,7 @@ extern "C" {
       delete [] message;
       return;
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -540,7 +553,7 @@ extern "C" {
       delete [] message;
       return;
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
@@ -561,7 +574,7 @@ extern "C" {
       delete [] message;
       return;
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
@@ -600,7 +613,7 @@ extern "C" {
       delete [] message;
       return;
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
@@ -619,7 +632,7 @@ extern "C" {
       delete [] message;
       return;
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -640,7 +653,7 @@ extern "C" {
       delete [] message;
       return;
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -660,7 +673,7 @@ extern "C" {
       delete [] message;
       return;
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -682,7 +695,7 @@ extern "C" {
       delete [] message;
       return;
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
@@ -700,7 +713,7 @@ extern "C" {
       delete [] message;
       return;
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -745,7 +758,7 @@ extern "C" {
       delete [] message;
       return;
     }
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -758,7 +771,7 @@ extern "C" {
     *ptr = ESMCI::VM::getCurrent(&localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return;
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -816,7 +829,7 @@ extern "C" {
     (*ptr_vmparent)->shutdown(*ptr_vmplan, *vm_info, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return;
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
@@ -1049,7 +1062,7 @@ extern "C" {
     *vmid = ESMCI::VM::getCurrentID(&localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return;
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -1082,7 +1095,7 @@ extern "C" {
     **vmid = ESMCI::VMIdCreate(&localrc); // allocate VMId internal members
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return;
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -1097,7 +1110,7 @@ extern "C" {
     *vmid=NULL;
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return;
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -1112,7 +1125,7 @@ extern "C" {
     localrc = (*ptr)->sendVMId(*vmid, *dest);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return;
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -1126,7 +1139,7 @@ extern "C" {
     localrc = (*ptr)->recvVMId(*vmid, *source);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return;
-    // Return successfully
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
     

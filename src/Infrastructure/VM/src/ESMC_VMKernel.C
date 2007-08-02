@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.95 2007/06/20 01:29:25 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.96 2007/08/02 22:47:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -161,7 +161,7 @@ int vmkt_join(vmkt_t *vmkt){
 
 namespace ESMCI {
 
-void VMK::obtain_args(void){
+void VMK::obtain_args(){
   // obtain command line args for this process
 #ifndef ESMF_NO_SYSTEMCALL
   int mypid = getpid();
@@ -401,7 +401,7 @@ void VMK::finalize(int finalizeMpi){
 }
 
 
-void VMK::abort(void){
+void VMK::abort(){
   // abort default (all MPI) virtual machine
   int finalized;
   MPI_Finalized(&finalized);
@@ -596,7 +596,7 @@ void VMK::construct(void *ssarg){
 }
 
 
-void VMK::destruct(void){
+void VMK::destruct(){
   // determine how many pets are of the same pid as mypet is
   int num_same_pid=0;
   for (int i=0; i<npets; i++)
@@ -1642,7 +1642,7 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
 }
 
 
-void VMK::print(void){
+void VMK::print()const{
   // print info about the VMK object
   printf("--- VMK::print() start ---\n");
   printf("vm located at: %p\n", this);
@@ -1678,17 +1678,17 @@ void VMK::print(void){
 }
 
 
-int VMK::getNpets(void){
+int VMK::getNpets(){
   return npets;
 }
 
 
-int VMK::getMypet(void){
+int VMK::getMypet(){
   return mypet;
 }
 
 
-pthread_t VMK::getMypthid(void){
+pthread_t VMK::getMypthid(){
   return mypthid;
 }
 
@@ -1703,7 +1703,7 @@ int VMK::getSsiid(int i){
 }
 
 
-MPI_Comm VMK::getMpi_c(void){
+MPI_Comm VMK::getMpi_c(){
   return mpi_c;
 }
 
@@ -1731,7 +1731,7 @@ int VMK::getLpid(int i){
 // --- VMKPlan methods ---
 
 
-VMKPlan::VMKPlan(void){
+VMKPlan::VMKPlan(){
   // native constructor
   nothreadflag = 1; // by default use non-threaded VMs
   parentVMflag = 0; // default is to create a new VM for every child
@@ -1752,7 +1752,7 @@ VMKPlan::VMKPlan(void){
 }
 
 
-VMKPlan::~VMKPlan(void){
+VMKPlan::~VMKPlan(){
   // native destructor
   vmkplan_garbage();
   if (lpid_mpi_g_part_map != NULL){
@@ -1770,7 +1770,7 @@ VMKPlan::~VMKPlan(void){
 }
 
   
-void VMKPlan::vmkplan_garbage(void){
+void VMKPlan::vmkplan_garbage(){
   // perform garbage collection within a VMKPlan object
   if (spawnflag != NULL){
     delete [] spawnflag;
@@ -1786,7 +1786,7 @@ void VMKPlan::vmkplan_garbage(void){
 }
 
 
-int VMKPlan::vmkplan_nspawn(void){
+int VMKPlan::vmkplan_nspawn(){
   // return number of PETs that are being spawned out of current PET
   return nspawn;
 }
@@ -2240,7 +2240,7 @@ int VMKPlan::vmkplan_maxcores(VMK &vm, int max, int *plist,
 }
 
 
-void VMKPlan::vmkplan_print(void){
+void VMKPlan::vmkplan_print(){
   // print info about the VMKPlan object
   printf("--- vmkplan_print start ---\n");
   printf("nothreadflag = %d\n", nothreadflag);
@@ -2411,7 +2411,7 @@ int VMK::commwait(vmk_commhandle **commhandle, vmk_status *status,
 }
 
 
-void VMK::commqueuewait(void){
+void VMK::commqueuewait(){
   int n=nhandles;
   vmk_commhandle *fh;
   for (int i=0; i<n; i++){
@@ -2971,7 +2971,7 @@ int VMK::vmk_vasrecv(void *message, int size, int srcVAS,
 }
 
   
-int VMK::vmk_barrier(void){
+int VMK::vmk_barrier(){
   // collective barrier over all PETs
   int localrc=0;
   if (mpionly){
@@ -3084,7 +3084,7 @@ int VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
   return localrc;
 }
   
-int VMK::vmk_threadbarrier(void){
+int VMK::vmk_threadbarrier(){
   int localrc=0;
   if (!mpionly && !nothreadsflag){
     // collective barrier over all PETs in thread group with mypet
@@ -4334,7 +4334,7 @@ void VMK::vmk_ipshmdeallocate(void *pointer){
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-vmk_ipmutex *VMK::vmk_ipmutexallocate(void){
+vmk_ipmutex *VMK::vmk_ipmutexallocate(){
   int firstFlag;
   pthread_mutex_lock(ipSetupMutex);
   vmk_ipmutex *ipmutex = (vmk_ipmutex *)

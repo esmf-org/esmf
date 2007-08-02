@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.52 2007/06/20 01:29:25 theurich Exp $
+// $Id: ESMC_VM.C,v 1.53 2007/08/02 22:47:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -51,7 +51,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.52 2007/06/20 01:29:25 theurich Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.53 2007/08/02 22:47:31 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -123,8 +123,8 @@ VMId VMIdCreate(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  //Initialize return code; assume routine not implemented
-  *rc = ESMC_RC_NOT_IMPL;
+  // initialize return code; assume routine not implemented
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
 
   // allocates memory for vmKey member
   VMId vmID;    // temporary stack variable
@@ -132,7 +132,9 @@ VMId VMIdCreate(
   for (int i=0; i<vmKeyWidth; i++)
     vmID.vmKey[i] = 0x00;  // zero out all bits
   vmID.localID = 0;   // reset
-  *rc = ESMF_SUCCESS;
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
   return vmID;
 }
 //-----------------------------------------------------------------------------
@@ -161,21 +163,27 @@ void VMIdDestroy(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  *rc = ESMF_RC_NOT_IMPL;     // assume failure
+  // initialize return code; assume routine not implemented
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+
   if (vmID==NULL){
-    ESMC_LogDefault.ESMC_LogWrite("invalid vmID", ESMC_LOG_ERROR);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "- Invalid vmID", rc);
     return; // bail out
   }
   if (vmID->vmKey==NULL){
-    ESMC_LogDefault.ESMC_LogWrite("invalid vmID->vmKey", ESMC_LOG_ERROR);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "- Invalid vmID->vmKey", rc);
     return; // bail out
   }
-  // frees memory for vmKey member
+  // free memory for vmKey member
   if (vmID->vmKey){
     delete [] vmID->vmKey;
     vmID->vmKey = NULL;
   }
-  *rc = ESMF_SUCCESS;
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 
@@ -204,7 +212,8 @@ ESMC_Logical VMIdCompare(
 //EOPI
 //-----------------------------------------------------------------------------
   if (vmID1==NULL || vmID2==NULL){
-    ESMC_LogDefault.ESMC_LogWrite("invalid vmIDs", ESMC_LOG_ERROR);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "- Invalid vmIDs", NULL);
     return ESMF_FALSE;    // bail out
   }
   if (vmID1->localID != vmID2->localID) return ESMF_FALSE;
@@ -236,17 +245,24 @@ int VMIdCopy(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  //Initialize return code; assume routine not implemented
-  int rc = ESMC_RC_NOT_IMPL;
+  // local vars
+  int rc;                     // final return code
+
+  // initialize return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
 
   if (vmIDdst==NULL || vmIDsrc==NULL){
-    ESMC_LogDefault.ESMC_LogWrite("invalid vmIDs", ESMC_LOG_ERROR);
-    return ESMF_FAILURE;    // bail out
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "- Invalid vmIDs", &rc);
+    return rc;    // bail out
   }
   for (int i=0; i<vmKeyWidth; i++)
     vmIDdst->vmKey[i] = vmIDsrc->vmKey[i];
   vmIDdst->localID = vmIDsrc->localID;
-  return ESMF_SUCCESS;
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
 }
 //-----------------------------------------------------------------------------
 
@@ -275,12 +291,14 @@ void VMIdPrint(
 //-----------------------------------------------------------------------------
   printf("ESMCI::VMIdPrint:\n");
   if (vmID==NULL){
-    ESMC_LogDefault.ESMC_LogWrite("invalid vmID", ESMC_LOG_ERROR);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "- Invalid vmID", NULL);
     return; // bail out
   }
   printf("vmID located at: %p\n", vmID);
   if (vmID->vmKey==NULL){
-    ESMC_LogDefault.ESMC_LogWrite("invalid vmID->vmKey", ESMC_LOG_ERROR);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "- Invalid vmID->vmKey", NULL);
     return; // bail out
   }
   printf("  vmKey=0x");
@@ -336,9 +354,12 @@ void *VM::startup(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  int localrc;
-  // Initialize return code
-  if (rc) *rc = ESMC_RC_NOT_IMPL;
+  // local vars
+  int localrc;                // local return code
+   
+  // initialize return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
   
   // Startup the VM
   void *info = VMK::startup(static_cast<VMKPlan *>(vmp), fctp, cargo, &localrc);
@@ -419,14 +440,15 @@ void *VM::startup(
           return NULL;  // bail out on error
         }
       }
-      matchTable_tid[index]  = vmp->myvms[j]->getMypthid();  // pthid
+      matchTable_tid[index]  = vmp->myvms[j]->getMypthid();   // pthid
       matchTable_vm[index]   = vmp->myvms[j];                 // ptr to this VM
       matchTable_vmID[index] = vmID;                          // vmID
     }
     delete [] emptyList;
   }
   
-  if (rc) *rc = ESMF_SUCCESS; // Return successfully
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
   return info;  // Return pointer to info structure
 }
 //-----------------------------------------------------------------------------
@@ -455,9 +477,12 @@ void VM::shutdown(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  int localrc;
-  // Initialize return code
-  if (rc) *rc = ESMC_RC_NOT_IMPL;
+  // local vars
+  int localrc;                // local return code
+   
+  // initialize return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
 
   VMK::shutdown(static_cast<VMKPlan *>(vmp), info);
 
@@ -472,16 +497,19 @@ void VM::shutdown(
         // found matching entry in the matchTable
         matchTable_vm[i] = NULL;  // mark this entry invalid
         VMIdDestroy(&(matchTable_vmID[i]), &localrc);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          rc)) return;
       }else{
         // matchTable must be corrupted
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_MEMC,
           " - VM matchTable corrupted.", rc);
-        return; // bail out on error
+        return;
       }
     }
   }
 
-  if (rc) *rc = ESMF_SUCCESS; // Return successfully
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
   
   //-----------------------------------------------------------------------------
@@ -508,9 +536,12 @@ int VM::enter(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  // local vars
+  int rc;                     // final return code
   int matchTableIndex_old;
-  //Initialize return code; assume routine not implemented
-  int rc = ESMC_RC_NOT_IMPL;
+
+  // initialize return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
 
   if(vmp->nothreadflag){
     // take care of book keeping for ESMF...
@@ -534,7 +565,10 @@ int VM::enter(
     // restore book keeping for ESMF...
     matchTableIndex = matchTableIndex_old;
   }
-  return ESMF_SUCCESS;
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
 }
 //-----------------------------------------------------------------------------
 
@@ -564,8 +598,11 @@ int VM::get(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  //Initialize return code; assume routine not implemented
-  int rc = ESMC_RC_NOT_IMPL;
+  // local vars
+  int rc;                     // final return code
+
+  // initialize return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
 
   if (localPet != ESMC_NULL_POINTER)
     *localPet = this->getMypet();
@@ -582,7 +619,10 @@ int VM::get(
   }
   if (okOpenMpFlag != ESMC_NULL_POINTER)
     *okOpenMpFlag = ESMF_TRUE;    // TODO: Determine this at compile time...
-  return ESMF_SUCCESS;
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
 }
 //-----------------------------------------------------------------------------
 
@@ -614,8 +654,11 @@ int VM::getPETLocalInfo(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  //Initialize return code; assume routine not implemented
-  int rc = ESMC_RC_NOT_IMPL;
+  // local vars
+  int rc;                     // final return code
+
+  // initialize return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
 
   if (peCount != ESMC_NULL_POINTER)
     *peCount = this->getNcpet(pet);
@@ -627,7 +670,10 @@ int VM::getPETLocalInfo(
     *threadId = this->getTid(pet);
   if (vas != ESMC_NULL_POINTER)
     *vas = this->getVas(pet);
-  return ESMF_SUCCESS;
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
 }
 //-----------------------------------------------------------------------------
 
@@ -658,19 +704,22 @@ int VM::getPETMatchPET(
 //    provided vmMatch VM. Return number of matched PETs and a list of the
 //    matching PET id's that operate in the same virtual address space as
 //    the specified PET.
-//    Returns ESMF_FAILURE if {\tt petMatchList} was provided (i.e. not equal
-//    to {\tt ESMC_NULL_POINTER) but {\tt len_petMatchList} < number of matching
-//    PETs found. Otherwise returns ESMF_SUCCESS (even if no matching PETs were
-//    found!).
+//    Returns ESMC_RC_ARG_SIZE if {\tt petMatchList} was provided 
+//    (i.e. not equal to {\tt ESMC_NULL_POINTER) but 
+//    {\tt len_petMatchList} < number of matching PETs found.
+//    Otherwise returns ESMF_SUCCESS (even if no matching PETs were found!).
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  // local vars
+  int rc;                     // final return code
   int npets = vmMatch.getNpets();  // maximum number of PETs in vmMatch
   int *tempMatchList = new int[npets];
   int vasCompare = pid[pet];        // this is pet's virtual address space id
   int j=0;
-  //Initialize return code; assume routine not implemented
-  int rc = ESMC_RC_NOT_IMPL;
+
+  // initialize return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
 
   for (int i=0; i<npets; i++)
     if (vmMatch.getVas(i) == vasCompare){
@@ -686,13 +735,16 @@ int VM::getPETMatchPET(
       for (int i=0; i<j; i++)
         petMatchList[i] = tempMatchList[i];
     else{
-      ESMC_LogDefault.ESMC_LogWrite("provided petMatchList too small",
-        ESMC_LOG_ERROR);
-      return ESMF_FAILURE;
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- Provided petMatchList too small", &rc);
+      return rc;
     }
   }
   delete [] tempMatchList;
-  return ESMF_SUCCESS;
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
 }
 //-----------------------------------------------------------------------------
 
@@ -711,27 +763,31 @@ VMId *VM::getVMId(
 //
 // !ARGUMENTS:
 //
-  int *rc){   // return code
+  int *rc) const{   // return code
 //
 // !DESCRIPTION:
 //   Get the ID of the {\tt ESMC\_VM} object.
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  *rc = ESMF_RC_NOT_IMPL;  // assume failure
-  pthread_t mytid = getMypthid();
+  // initialize return code; assume routine not implemented
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+
+  pthread_t mytid = getLocalPthreadId();
   int i = matchTableIndex;
   if (matchTable_tid[i] != mytid){
     for (i=0; i<matchTableBound; i++)
       if (matchTable_tid[i] == mytid) break;
     if (i == matchTableBound){
-      ESMC_LogDefault.ESMC_LogWrite("could not determine VMId",
-        ESMC_LOG_ERROR);
-      return NULL;  // bail out
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- Could not determine VMId", rc);
+      return NULL;
     }
   }
   // found a match
-  *rc = ESMF_SUCCESS;
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
   return &matchTable_vmID[i];
 }
 //-----------------------------------------------------------------------------
@@ -760,16 +816,23 @@ int VM::sendVMId(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  //Initialize return code; assume routine not implemented
-  int rc = ESMC_RC_NOT_IMPL;
+  // local vars
+  int rc;                     // final return code
+
+  // initialize return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
 
   if (vmID==ESMC_NULL_POINTER){
-    ESMC_LogDefault.ESMC_LogWrite("invalid vmID", ESMC_LOG_ERROR);
-    return ESMF_FAILURE;
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Invalid VMId", &rc);
+    return rc;
   }
   vmk_send(vmID->vmKey, vmKeyWidth, dest);
   vmk_send(&(vmID->localID), sizeof(int), dest);
-  return ESMF_SUCCESS;
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
 }
 //-----------------------------------------------------------------------------
 
@@ -797,16 +860,23 @@ int VM::recvVMId(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  //Initialize return code; assume routine not implemented
-  int rc = ESMC_RC_NOT_IMPL;
+  // local vars
+  int rc;                     // final return code
+
+  // initialize return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
 
   if (vmID==ESMC_NULL_POINTER){
-    ESMC_LogDefault.ESMC_LogWrite("invalid vmID", ESMC_LOG_ERROR);
-    return ESMF_FAILURE;
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Invalid VMId", &rc);
+    return rc;
   }
   vmk_recv(vmID->vmKey, vmKeyWidth, source);
   vmk_recv(&(vmID->localID), sizeof(int), source);
-  return ESMF_SUCCESS;
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
 }
 //-----------------------------------------------------------------------------
 
@@ -818,28 +888,78 @@ int VM::recvVMId(
 // !IROUTINE:  ESMCI::VM::print
 //
 // !INTERFACE:
-void VM::print(
+int VM::print() const{
 //
 // !RETURN VALUE:
-//    void
+//    int return code
 //
-// !ARGUMENTS:
-//
-    int *rc       // return code
-  ){
 //
 // !DESCRIPTION:
-//    Print {\tt ESMCI::VM} object and its {\\tt ESMCI::VMId}
+//    Print details of VM object 
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  int localrc=ESMC_RC_NOT_IMPL;
-  printf("=== <ESMCI::VM::print()> =============================\n");
+  // local vars
+  int localrc;                // local return code
+  int rc;                     // final return code
+
+  // initialize return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
+
+  // return with errors for NULL pointer
+  if (this == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      " - 'this' pointer is NULL.", &rc);
+    return rc;
+  }
+  // print info about the ESMCI::VM object
+  printf("--- ESMCI::VM::print() start ---\n");
   VMId *vmid = getVMId(&localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    &rc)) return rc;
   VMIdPrint(vmid);
   VMK::print();
-  printf("=== </ESMCI::VM::print> ============================\n");
-  if (rc) *rc=localrc;
+  printf("--- ESMCI::VM::print() end ---\n");
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::validate()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::validate
+//
+// !INTERFACE:
+int VM::validate()const{
+//
+// !RETURN VALUE:
+//    int return code
+//
+//
+// !DESCRIPTION:
+//    Validate details of VM object 
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // Initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+  // check against NULL pointer
+  if (this == ESMC_NULL_POINTER){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      " - 'this' pointer is NULL.", &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
 }
 //-----------------------------------------------------------------------------
 
@@ -874,15 +994,19 @@ void VM::getArgs(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  *rc = ESMF_RC_NOT_IMPL; // assume failure
+  // initialize return code; assume routine not implemented
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+
   if (GlobalVM==NULL){
-    ESMC_LogDefault.ESMC_LogWrite("invalid GlobalVM", ESMC_LOG_ERROR);
-    return; // bail out
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Invalid GlobalVM", rc);
+    return;
   }
   *argc = GlobalVM->argc;
   *argv = GlobalVM->argv;
-  // success
-  *rc = ESMF_SUCCESS;
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 
@@ -910,12 +1034,17 @@ VM *VM::getGlobal(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  *rc = ESMF_RC_NOT_IMPL; // assume failure
+  // initialize return code; assume routine not implemented
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+
   if (GlobalVM==NULL){
-    ESMC_LogDefault.ESMC_LogWrite("invalid GlobalVM", ESMC_LOG_ERROR);
-    return NULL; // bail out
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Invalid GlobalVM", rc);
+    return NULL;
   }
-  *rc = ESMF_SUCCESS;
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
   return GlobalVM;
 }
 //-----------------------------------------------------------------------------
@@ -942,20 +1071,24 @@ VM *VM::getCurrent(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  *rc = ESMF_RC_NOT_IMPL; // assume failure
+  // initialize return code; assume routine not implemented
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+
   pthread_t mytid = pthread_self();
   int i = matchTableIndex;
   if (matchTable_tid[i] != mytid){
     for (i=0; i<matchTableBound; i++)
       if (matchTable_tid[i] == mytid) break;
     if (i == matchTableBound){
-      ESMC_LogDefault.ESMC_LogWrite("could not determine current VM",
-        ESMC_LOG_ERROR);
-      return NULL;  // bail out
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- Could not determine current VM", rc);
+      return NULL;
     }
   }
   // found a match
-  *rc = ESMF_SUCCESS;
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
   return matchTable_vm[i];
 }
 //-----------------------------------------------------------------------------
@@ -982,20 +1115,24 @@ VMId *VM::getCurrentID(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  *rc = ESMF_RC_NOT_IMPL; // assume failure
+  // initialize return code; assume routine not implemented
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+
   pthread_t mytid = pthread_self();
   int i = matchTableIndex;
   if (matchTable_tid[i] != mytid){
     for (i=0; i<matchTableBound; i++)
       if (matchTable_tid[i] == mytid) break;
     if (i == matchTableBound){
-      ESMC_LogDefault.ESMC_LogWrite("could not determine current VMId",
-        ESMC_LOG_ERROR);
-      return NULL;  // bail out
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- Could not determine current VM", rc);
+      return NULL;
     }
   }
   // found a match
-  *rc = ESMF_SUCCESS;
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
   return &matchTable_vmID[i];
 }
 //-----------------------------------------------------------------------------
@@ -1024,13 +1161,15 @@ VM *VM::initialize(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  *rc = ESMF_RC_NOT_IMPL; // assume failurelure
+  // initialize return code; assume routine not implemented
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+
   GlobalVM = new VM;
   GlobalVM->VMK::init(mpiCommunicator);  // set up default ESMC_VMK (all MPI)
   if (GlobalVM==NULL){
-    ESMC_LogDefault.ESMC_LogWrite("VMK::init() returned invalid GlobalVM",
-      ESMC_LOG_ERROR);
-    return NULL; // bail out
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- VMK::init() returned invalid GlobalVM", rc);
+    return NULL;
   }
   
   // allocate the VM association table
@@ -1064,8 +1203,8 @@ VM *VM::initialize(
                              // call - it freezes or crashes or ignores input.
   GlobalVM->vmk_barrier();   // so for now, wait for everyone to init.
 
-  *rc = ESMF_SUCCESS;         // success at last
-
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
   return GlobalVM;
 }
 //-----------------------------------------------------------------------------
@@ -1093,11 +1232,17 @@ void VM::finalize(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  int localrc;
-  *rc = ESMF_RC_NOT_IMPL; // assume failure
+  // local vars
+  int localrc;                // local return code
+   
+  // initialize return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+
   if (GlobalVM==NULL){
-    ESMC_LogDefault.ESMC_LogWrite("invalid GlobalVM", ESMC_LOG_ERROR);
-    return; // bail out
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Invalid GlobalVM", rc);
+    return;
   }
   int finalizeMpi = 1;  // set
   if (keepMpiFlag){
@@ -1107,10 +1252,14 @@ void VM::finalize(
   matchTableBound = 0;
   // delete the VM association table
   VMIdDestroy(&(matchTable_vmID[0]), &localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    return;
 //gjtNotYet  delete [] matchTable_tid;
 //gjtNotYet  delete [] matchTable_vm;
 //gjtNotYet  delete [] matchTable_vmID;
-  *rc = ESMF_SUCCESS;
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 
@@ -1136,14 +1285,19 @@ void VM::abort(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  *rc = ESMF_RC_NOT_IMPL;     // assume failure
+  // initialize return code; assume routine not implemented
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+
   if (GlobalVM==NULL){
-    ESMC_LogDefault.ESMC_LogWrite("invalid GlobalVM", ESMC_LOG_ERROR);
-    return; // bail out
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Invalid GlobalVM", rc);
+    return;
   }
   GlobalVM->VMK::abort();
   matchTableBound = 0;
-  *rc = ESMF_SUCCESS;
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 

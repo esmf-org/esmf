@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUTest.F90,v 1.25 2007/07/13 16:54:46 svasquez Exp $
+! $Id: ESMF_VMUTest.F90,v 1.26 2007/08/02 22:47:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -964,7 +964,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUTest.F90,v 1.25 2007/07/13 16:54:46 svasquez Exp $'
+      '$Id: ESMF_VMUTest.F90,v 1.26 2007/08/02 22:47:32 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
@@ -976,6 +976,13 @@
 ! added to allow a script to count the number and types of unit tests.
 !------------------------------------------------------------------------------- 
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(failMsg, *) "Returned ESMF_SUCCESS"
+      write(name, *) "VM validate Test before valid VM"
+      call ESMF_VMValidate(vm, rc)
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest
@@ -996,6 +1003,13 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM print Test"
       call ESMF_VMPrint(vm, rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM validate Test"
+      call ESMF_VMValidate(vm, rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
