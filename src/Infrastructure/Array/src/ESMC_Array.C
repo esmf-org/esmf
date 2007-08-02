@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.100 2007/07/21 04:52:57 theurich Exp $
+// $Id: ESMC_Array.C,v 1.101 2007/08/02 22:03:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.100 2007/07/21 04:52:57 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.101 2007/08/02 22:03:40 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1629,7 +1629,7 @@ int Array::scatter(
               if (localrc){
                 char *message = new char[160];
                 sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-                ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
+                ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
                   message, &rc);
                 delete [] message;
                 return rc;
@@ -1725,7 +1725,7 @@ int Array::scatter(
         if (localrc){
           char *message = new char[160];
           sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
             message, &rc);
           delete [] message;
           return rc;
@@ -1770,7 +1770,7 @@ int Array::scatter(
             if (localrc){
               char *message = new char[160];
               sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
+              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
                 message, &rc);
               delete [] message;
               return rc;
@@ -1807,7 +1807,7 @@ int Array::scatter(
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
         message, &rc);
       delete [] message;
       return rc;
@@ -6007,8 +6007,8 @@ ESMC_newArray *ESMC_newArrayCreate(
 //-----------------------------------------------------------------------------
   int localrc;
   // Initialize rc and localrc ; assume functions not implemented
-  localrc = ESMF_RC_NOT_IMPL;
-  if (*rc) *rc = ESMF_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
+  if (*rc) *rc = ESMC_RC_NOT_IMPL;
 
   ESMC_newArray *array;
   // determine required information
