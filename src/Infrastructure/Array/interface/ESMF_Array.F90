@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.59 2007/07/21 05:21:57 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.60 2007/08/02 18:41:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -128,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.59 2007/07/21 05:21:57 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.60 2007/08/02 18:41:58 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -597,9 +597,12 @@ contains
 !   Store an Array sparse matrix multiplication operation from {\tt srcArray}
 !   to {\tt dstArray}. PETs that specify non-zero matrix coefficients must use
 !   the <type><kind> overloaded interface and provide the {\tt factorList} and
-!   {\tt factorIndexList} arguments. PETs that don't provide matrix elements
-!   call into the overloaded interface without {\tt factorList} and 
-!   {\tt factorIndexList} arguments.
+!   {\tt factorIndexList} arguments. Providing {\tt factorList} and
+!   {\tt factorIndexList} arguments with {\tt size(factorList) = (/0/)} and
+!   {\tt size(factorIndexList) = (/2,0/)} indicates that a PET does not 
+!   provide matrix elements. Alternatively, PETs that do not provide matrix
+!   elements may also call into the overloaded interface without 
+!   {\tt factorList} and {\tt factorIndexList} arguments.
 !
 !   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
 !   vectors. The sequence is defined by the order of DistGrid dimensions and 
@@ -929,9 +932,12 @@ contains
 !   Store an Array sparse matrix multiplication operation from {\tt srcArray}
 !   to {\tt dstArray}. PETs that specify non-zero matrix coefficients must use
 !   the <type><kind> overloaded interface and provide the {\tt factorList} and
-!   {\tt factorIndexList} arguments. PETs that don't provide matrix elements
-!   call into the overloaded interface without {\tt factorList} and 
-!   {\tt factorIndexList} arguments.
+!   {\tt factorIndexList} arguments. Providing {\tt factorList} and
+!   {\tt factorIndexList} arguments with {\tt size(factorList) = (/0/)} and
+!   {\tt size(factorIndexList) = (/2,0/)} indicates that a PET does not 
+!   provide matrix elements. Alternatively, PETs that do not provide matrix
+!   elements may also call into the overloaded interface without 
+!   {\tt factorList} and {\tt factorIndexList} arguments.
 !
 !   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
 !   vectors. The sequence is defined by the order of DistGrid dimensions and 

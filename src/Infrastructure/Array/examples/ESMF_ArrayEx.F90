@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.22 2007/07/21 05:24:29 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.23 2007/08/02 18:41:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -1140,12 +1140,12 @@ program ESMF_ArrayEx
 ! multiplication. The multiplication factors may be provided in parallel, i.e.
 ! multiple PETs may specify {\tt factorList} and {\tt factorIndexList} arguments
 ! when calling into {\tt ESMF\_ArraySparseMatMulStore()}. PETs that do not
-! provide factors must issue the call without the {\tt factorList} and {\tt
-! factorIndexList} arguments.
+! provide factors either call with {\tt factorList} and {\tt factorIndexList}
+! arguments containing zero elements or issue the call omitting both arguments.
 !EOE
 !BOC
   if (localPet == 0) then
-    allocate(factorList(1))             ! PET 0 specifies 1 factor
+    allocate(factorList(1))               ! PET 0 specifies 1 factor
     allocate(factorIndexList(2,1))
     factorList = (/0.2/)                  ! factors
     factorIndexList(1,:) = (/5/)          ! seq indices into srcArray
