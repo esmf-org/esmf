@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.53 2007/08/02 22:47:31 theurich Exp $
+// $Id: ESMC_VM.C,v 1.54 2007/08/02 23:07:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -51,7 +51,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.53 2007/08/02 22:47:31 theurich Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.54 2007/08/02 23:07:56 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -232,7 +232,7 @@ ESMC_Logical VMIdCompare(
 int VMIdCopy(
 //
 // !RETURN VALUE:
-//    Error code. 
+//    int return code 
 //
 // !ARGUMENTS:
 //
@@ -347,7 +347,7 @@ void *VM::startup(
   class VMPlan *vmp,              // plan for this child VM
   void *(fctp)(void *, void *),   // function pointer to 1st stage callback
   void *cargo,                    // pointer to cargo structure for in/out data
-  int *rc){                       // error return code
+  int *rc){                       // return code
 //
 // !DESCRIPTION:
 //    Startup a new child VM according to plan.
@@ -470,7 +470,7 @@ void VM::shutdown(
 //
   class VMPlan *vmp,              // plan for this child VM
   void *info,                     // info structure
-  int *rc){                       // error return code
+  int *rc){                       // return code
 //
 // !DESCRIPTION:
 //    Startup a new child VM according to plan.
@@ -522,7 +522,7 @@ void VM::shutdown(
 int VM::enter(
 //
 // !RETURN VALUE:
-//    Error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
@@ -583,7 +583,7 @@ int VM::enter(
 int VM::get(
 //
 // !RETURN VALUE:
-//    Error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
@@ -637,7 +637,7 @@ int VM::get(
 int VM::getPETLocalInfo(
 //
 // !RETURN VALUE:
-//    Error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
@@ -688,7 +688,7 @@ int VM::getPETLocalInfo(
 int VM::getPETMatchPET(
 //
 // !RETURN VALUE:
-//    Error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
@@ -803,7 +803,7 @@ VMId *VM::getVMId(
 int VM::sendVMId(
 //
 // !RETURN VALUE:
-//    Error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
@@ -847,7 +847,7 @@ int VM::sendVMId(
 int VM::recvVMId(
 //
 // !RETURN VALUE:
-//    Error return code
+//    int return code
 //
 // !ARGUMENTS:
 //
