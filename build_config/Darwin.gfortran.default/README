@@ -1,12 +1,6 @@
 Settings for Darwin (Mac OS X), using the GNU gfortran/f95 compiler
-(part of the gcc 4.0 release) and GNU C++ compiler (g++).
+(part of the GCC 4.0 release) and GNU C++ compiler (g++).
 
 Requires the following environment settings:
 
 ESMF_COMPILER gfortran
-
-Note:  We have *not* successfully compiled ESMF with this compiler
-on the Mac platform.  If you do get this to work, please email
-esmf_support@ucar.edu with your successful configuration and
-any changes the files in this directory.
-
