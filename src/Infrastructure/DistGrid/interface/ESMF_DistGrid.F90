@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.26 2007/07/19 20:58:33 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.27 2007/08/03 00:34:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -110,7 +110,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.26 2007/07/19 20:58:33 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.27 2007/08/03 00:34:13 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2599,7 +2599,6 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
