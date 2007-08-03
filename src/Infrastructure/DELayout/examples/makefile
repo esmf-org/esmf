@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.9 2006/01/30 20:10:08 nscollins Exp $
+# $Id: makefile,v 1.10 2007/08/03 22:28:34 theurich Exp $
 
 ALL: build_examples
-
 run: run_examples
+run_uni: run_examples_uni
 
 CFLAGS    =
 FFLAGS    =
@@ -40,4 +40,3 @@ run_ESMF_DELayoutEx:
 
 run_ESMF_DELayoutEx_uni:
 	$(MAKE) EXNAME=DELayout NP=1 exfrun
-
