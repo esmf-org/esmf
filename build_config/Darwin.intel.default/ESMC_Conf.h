@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.4 2007/03/31 05:50:42 cdeluca Exp $"
+"$Id: ESMC_Conf.h,v 1.5 2007/08/03 11:41:27 theurich Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -28,10 +28,34 @@ Licensed under the University of Illinois-NCSA License.
 #define ESMF_F90_PTR_PLUS_RANK 12
 #define ESMC_POINTER_SIZE 4
 #endif
-#if S64
+#if Sia64_32
+#define ESMF_IS_32BIT_MACHINE 1
+#define ESMF_F90_PTR_BASE_SIZE 36
+#define ESMF_F90_PTR_PLUS_RANK 12
+#define ESMC_POINTER_SIZE 4
+#endif
+#if Sia64_64
 #define ESMF_IS_64BIT_MACHINE 1
 #define ESMF_F90_PTR_BASE_SIZE 72 
 #define ESMF_F90_PTR_PLUS_RANK 24
+#define ESMC_POINTER_SIZE 8
+#endif
+#if Sx86_64_32
+#define ESMF_IS_32BIT_MACHINE 1
+#define ESMF_F90_PTR_BASE_SIZE 36
+#define ESMF_F90_PTR_PLUS_RANK 12
+#define ESMC_POINTER_SIZE 4
+#endif
+#if Sx86_64_small
+#define ESMF_IS_64BIT_MACHINE 1
+#define ESMF_F90_PTR_BASE_SIZE 72
+#define ESMF_F90_PTR_PLUS_RANK 24
+#define ESMC_POINTER_SIZE 8
+#endif
+#if Sx86_64_medium
+#define ESMF_IS_64BIT_MACHINE 1
+#define ESMF_F90_PTR_BASE_SIZE 144
+#define ESMF_F90_PTR_PLUS_RANK 48
 #define ESMC_POINTER_SIZE 8
 #endif
 

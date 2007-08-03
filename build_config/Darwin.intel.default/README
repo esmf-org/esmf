@@ -1,24 +1,6 @@
-Settings for Darwin (Mac OS X) machines with Intel processors,
-using the Intel fortran compiler and either Intel or GNU C++ compiler.
+Settings for Darwin (Mac OS X) machines with Intel processors, using the
+commercial Intel Fortran (ifort) and C++ (icpc) compilers.
 
 Requires the following environment settings:
 
 ESMF_COMPILER intel
-
-You can compile the ESMF libraries with either a mix of
-ifort and gcc/g++ (the gnu C compilers), or with ifort and icc
-(the intel product C/C++ compilers).
-
-To compile with icc, leave ESMF_C_COMPILER unset.
-To compile with gcc,  set: ESMF_C_COMPILER gcc
-
-Defaults to 64 bit, can compile on 32-bit systems with:
-
-ESMF_ABI 32
-
-
-NOTE: This configuration is untested as of now.  The intel
-compilers are in beta, and we do not yet have access to one
-of the new Mac machines.  If anyone gets this working, please
-email to esmf_support@ucar.edu with any changed needed.
-
