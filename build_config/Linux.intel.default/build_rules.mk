@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.57 2007/08/01 20:10:22 theurich Exp $
+# $Id: build_rules.mk,v 1.58 2007/08/03 22:57:30 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -136,12 +136,6 @@ ESMF_CXXCOMPILEOPTS +=  -pthread
 ESMF_F90LINKOPTS    += -threads
 ESMF_CXXLINKOPTS    += -pthread
 endif
-
-############################################################
-# Need this until the file convention is fixed (then remove these two lines)
-#
-ESMF_F90COMPILEFREENOCPP = -fpp0 -FR
-ESMF_F90COMPILEFIXCPP    = -fpp
 
 ############################################################
 # Determine where ifort's libraries are located
