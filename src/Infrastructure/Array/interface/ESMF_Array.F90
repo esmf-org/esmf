@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.60 2007/08/02 18:41:58 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.61 2007/08/03 22:13:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -128,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.60 2007/08/02 18:41:58 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.61 2007/08/03 22:13:24 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -291,10 +291,11 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
 
-    ! Use LogErr to handle return code
-!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
   end subroutine ESMF_ArraySetAllDecompAllDe
 !------------------------------------------------------------------------------
@@ -349,10 +350,11 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
 
-    ! Use LogErr to handle return code
-!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
   end subroutine ESMF_ArraySetTensorAllDe
 !------------------------------------------------------------------------------
@@ -388,21 +390,21 @@ contains
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: status       ! local error status
+    integer                 :: localrc      ! local return code
 
-    ! Initialize return code; assume failure until success is certain
-    status = ESMF_RC_NOT_IMPL
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
     
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_ArrayPrint(array, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call c_ESMC_ArrayPrint(array, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_ArrayPrint
@@ -469,6 +471,12 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
   end subroutine ESMF_ArrayHalo
 !------------------------------------------------------------------------------
 
@@ -533,6 +541,12 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
   end subroutine ESMF_ArrayHaloStore
 !------------------------------------------------------------------------------
 
@@ -572,6 +586,12 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
   end subroutine ESMF_ArrayHaloRun
 !------------------------------------------------------------------------------
 
@@ -668,15 +688,15 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                         :: status             ! local error status
+    integer                         :: localrc            ! local return code
     integer(ESMF_KIND_I4), pointer  :: opt_factorList(:)  ! helper variable
     integer                         :: len_factorList     ! helper variable
     type(ESMF_InterfaceInt)         :: factorIndexListArg ! helper variable
 
-    ! Initialize return code; assume failure until success is certain
-    status = ESMF_RC_NOT_IMPL
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
@@ -685,28 +705,28 @@ contains
     len_factorList = size(factorList)
     opt_factorList => factorList
     factorIndexListArg = &
-      ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySparseMatMulStore(srcArray, dstArray, routehandle, &
       ESMF_TYPEKIND_I4, opt_factorList, len_factorList, factorIndexListArg, &
-      status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark routehandle object as being created
-    call ESMF_RouteHandleSetInitCreated(routehandle, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySparseMatMulStoreI4
@@ -734,13 +754,13 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                         :: status             ! local error status
+    integer                         :: localrc            ! local return code
     integer(ESMF_KIND_I8), pointer  :: opt_factorList(:)  ! helper variable
     integer                         :: len_factorList     ! helper variable
     type(ESMF_InterfaceInt)         :: factorIndexListArg ! helper variable
 
-    ! Initialize return code; assume failure until success is certain
-    status = ESMF_RC_NOT_IMPL
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
@@ -751,28 +771,28 @@ contains
     len_factorList = size(factorList)
     opt_factorList => factorList
     factorIndexListArg = &
-      ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySparseMatMulStore(srcArray, dstArray, routehandle, &
       ESMF_TYPEKIND_I8, opt_factorList, len_factorList, factorIndexListArg, &
-      status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark routehandle object as being created
-    call ESMF_RouteHandleSetInitCreated(routehandle, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySparseMatMulStoreI8
@@ -800,13 +820,13 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                         :: status             ! local error status
+    integer                         :: localrc            ! local return code
     real(ESMF_KIND_R4), pointer     :: opt_factorList(:)  ! helper variable
     integer                         :: len_factorList     ! helper variable
     type(ESMF_InterfaceInt)         :: factorIndexListArg ! helper variable
 
-    ! Initialize return code; assume failure until success is certain
-    status = ESMF_RC_NOT_IMPL
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
@@ -817,28 +837,28 @@ contains
     len_factorList = size(factorList)
     opt_factorList => factorList
     factorIndexListArg = &
-      ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySparseMatMulStore(srcArray, dstArray, routehandle, &
       ESMF_TYPEKIND_R4, opt_factorList, len_factorList, factorIndexListArg, &
-      status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark routehandle object as being created
-    call ESMF_RouteHandleSetInitCreated(routehandle, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySparseMatMulStoreR4
@@ -866,13 +886,13 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                         :: status             ! local error status
+    integer                         :: localrc            ! local return code
     real(ESMF_KIND_R8), pointer     :: opt_factorList(:)  ! helper variable
     integer                         :: len_factorList     ! helper variable
     type(ESMF_InterfaceInt)         :: factorIndexListArg ! helper variable
 
-    ! Initialize return code; assume failure until success is certain
-    status = ESMF_RC_NOT_IMPL
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
@@ -883,28 +903,28 @@ contains
     len_factorList = size(factorList)
     opt_factorList => factorList
     factorIndexListArg = &
-      ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySparseMatMulStore(srcArray, dstArray, routehandle, &
       ESMF_TYPEKIND_R8, opt_factorList, len_factorList, factorIndexListArg, &
-      status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark routehandle object as being created
-    call ESMF_RouteHandleSetInitCreated(routehandle, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySparseMatMulStoreR8
@@ -969,10 +989,10 @@ contains
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                         :: status             ! local error status
+    integer                 :: localrc      ! local return code
 
-    ! Initialize return code; assume failure until success is certain
-    status = ESMF_RC_NOT_IMPL
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
@@ -981,16 +1001,16 @@ contains
     
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySparseMatMulStoreNF(srcArray, dstArray, routehandle, &
-      status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Mark routehandle object as being created
-    call ESMF_RouteHandleSetInitCreated(routehandle, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySparseMatMulStoreNF
@@ -1042,13 +1062,13 @@ contains
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                       :: status         ! local error status
-    type(ESMF_Logical)            :: opt_zeroflag   ! helper variable
+    integer                 :: localrc      ! local return code
+    type(ESMF_Logical)      :: opt_zeroflag ! helper variable
 
-    ! Initialize return code; assume failure until success is certain
-    status = ESMF_RC_NOT_IMPL
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
@@ -1060,11 +1080,11 @@ contains
         
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySparseMatMul(srcArray, dstArray, routehandle, &
-      opt_zeroflag, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      opt_zeroflag, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySparseMatMul
@@ -1117,6 +1137,12 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
   end subroutine ESMF_ArrayRedist
 !------------------------------------------------------------------------------
 
@@ -1162,6 +1188,12 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
   end subroutine ESMF_ArrayRedistStore
 !------------------------------------------------------------------------------
 
@@ -1203,6 +1235,12 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
   end subroutine ESMF_ArrayRedistRun
 !------------------------------------------------------------------------------
 
@@ -1257,19 +1295,12 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                 :: localrc      ! local return code
 
-    ! Initialize return code
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_ArrayScatterB(array, larray, rootPET, vm, localrc)
-
-    ! Use LogErr to handle return code
-!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!      ESMF_CONTEXT, rcToReturn=rc)) return
-
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
   end subroutine ESMF_ArrayReduce
 !------------------------------------------------------------------------------
 
@@ -1340,19 +1371,12 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                 :: localrc      ! local return code
 
-    ! Initialize return code
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_ArrayScatterB(array, larray, rootPET, vm, localrc)
-
-    ! Use LogErr to handle return code
-!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!      ESMF_CONTEXT, rcToReturn=rc)) return
-
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
   end subroutine ESMF_ArrayReduceFarray
 !------------------------------------------------------------------------------
 
@@ -1391,21 +1415,21 @@ contains
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                       :: status         ! local error status
+    integer                 :: localrc      ! local return code
 
-    ! Initialize return code; assume failure until success is certain
-    status = ESMF_RC_NOT_IMPL
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
+    
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
     
     ! Set the name in Base object
-    call c_ESMC_SetName(array, "Array", name, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call c_ESMC_SetName(array, "Array", name, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySet
@@ -1440,21 +1464,21 @@ contains
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                 :: localrc      ! local return code
 
-    ! Initialize return code
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
     
     ! Call into the C++ interface, which will sort out optional arguments.
-    !todo: call c_ESMC_ArrayValidate(array, localrc)
-    !if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    !  ESMF_CONTEXT, rcToReturn=rc)) return
+    call c_ESMC_ArrayValidate(array, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
       
-    ! Return success
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
     
   end subroutine ESMF_ArrayValidate
@@ -1855,7 +1879,7 @@ contains
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_ArrayBundleCreate)
  
-    ! Return successfully
+    ! return successfully
     !todo: if (present(rc)) rc = ESMF_SUCCESS
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
@@ -1912,7 +1936,7 @@ contains
     ! Set init code
     ESMF_INIT_SET_DELETED(arraybundle)
  
-    ! Return successfully
+    ! return successfully
     !todo: if (present(rc)) rc = ESMF_SUCCESS
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
  
@@ -2441,7 +2465,7 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
-    ! Return success
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
     
   end subroutine ESMF_ArrayBundleValidate

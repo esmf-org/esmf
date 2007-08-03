@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.62 2007/08/03 18:27:16 theurich Exp $
+// $Id: ESMC_Array_F.C,v 1.63 2007/08/03 22:13:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -53,12 +53,11 @@ extern "C" {
     ESMC_IndexFlag *indexflag, int *staggerLoc, int *vectorDim, 
     ESMCI::InterfaceInt **lboundsArg, ESMCI::InterfaceInt **uboundsArg,
     char *name, int *len_name, int *rc){
-    int localrc;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraycreatealldecomp()"
-    //Initialize return code
-    *rc = ESMC_RC_NOT_IMPL;
-    localrc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
     // call into C++
     *ptr = ESMCI::Array::create(larrayList, *larrayCount, *distgrid, *dimmap,
       *computationalLWidthArg, *computationalUWidthArg, *totalLWidthArg,
@@ -87,12 +86,11 @@ extern "C" {
     ESMC_IndexFlag *indexflag, int *staggerLoc, int *vectorDim, 
     ESMCI::InterfaceInt **lboundsArg, ESMCI::InterfaceInt **uboundsArg,
     char *name, int *len_name, int *rc){
-    int localrc;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraycreatealldecomp()"
-    //Initialize return code
-    *rc = ESMC_RC_NOT_IMPL;
-    localrc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
     // call into C++
     *ptr = ESMCI::Array::create(arrayspec, *distgrid, *dimmap,
       *computationalLWidthArg, *computationalUWidthArg, *totalLWidthArg,
@@ -116,15 +114,14 @@ extern "C" {
   void FTN(c_esmc_arraydestroy)(ESMCI::Array **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraydestroy()"
-    //Initialize return code
-    *rc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // call into C++
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Array::destroy(ptr),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  
   void FTN(c_esmc_arrayget)(ESMCI::Array **ptr, ESMC_TypeKind *typekind, 
     int *rank, ESMC_LocalArray **opt_localArrayList,
     int *len_localArrayList, ESMCI::DistGrid **distgrid,
@@ -141,8 +138,9 @@ extern "C" {
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayget()"
-    int localrc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
     // fill simple return values    
     if (ESMC_NOT_PRESENT_FILTER(distgrid) != ESMC_NULL_POINTER)
       *distgrid = (*ptr)->getDistGrid();
@@ -480,42 +478,29 @@ extern "C" {
     }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
-  
-    
-    
-#if 0
-    // deal with optional arguments
-    if (ESMC_NOT_PRESENT_FILTER(distgrid) == ESMC_NULL_POINTER)
-      opt_distgrid = NULL;
-    else opt_distgrid = distgrid;
-    if (ESMC_NOT_PRESENT_FILTER(delayout) == ESMC_NULL_POINTER)
-      opt_delayout = NULL;
-    else opt_delayout = delayout;
-    // call into C++, dealing with optional arguments 
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->get(
-      ESMC_NOT_PRESENT_FILTER(typekind), ESMC_NOT_PRESENT_FILTER(rank),
-      opt_localArrayList, *len_localArrayList, opt_distgrid, opt_delayout,
-      ESMC_NOT_PRESENT_FILTER(indexflag),
-      *dimmap, *inverseDimmap, *exclusiveLBound, *exclusiveUBound,
-      *computationalLBound, *computationalUBound, *totalLBound, *totalUBound,
-      *computationalLWidth, *computationalUWidth, *totalLWidth, *totalUWidth),
-      ESMF_ERR_PASSTHRU,
-      ESMC_NOT_PRESENT_FILTER(rc));
-#endif
   }
-
 
   void FTN(c_esmc_arrayprint)(ESMCI::Array **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayprint()"
-    //Initialize return code
-    *rc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->print(),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
-  
+
+  void FTN(c_esmc_arrayvalidate)(ESMCI::Array **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arrayvalidate()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->validate(),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
 
   void FTN(c_esmc_arraysparsematmulstore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMC_RouteHandle **routehandle, 
@@ -523,8 +508,8 @@ extern "C" {
     ESMCI::InterfaceInt **factorIndexList, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysparsematmulstore()"
-    //Initialize return code
-    *rc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Array::sparseMatMulStore(
       *srcArray, *dstArray, routehandle, *typekind, factorList,
@@ -532,45 +517,42 @@ extern "C" {
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
-  
 
   void FTN(c_esmc_arraysparsematmulstorenf)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMC_RouteHandle **routehandle, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysparsematmulstorenf()"
-    //Initialize return code
-    *rc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Array::sparseMatMulStore(
       *srcArray, *dstArray, routehandle),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
-  
 
   void FTN(c_esmc_arraysparsematmul)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMC_RouteHandle **routehandle,
     ESMC_Logical *zeroflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysparsematmul()"
-    //Initialize return code
-    *rc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Array::sparseMatMul(
       *srcArray, *dstArray, routehandle, *zeroflag),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
-
   
   void FTN(c_esmc_arrayscatter)(ESMCI::Array **array, void *farray,
     ESMC_TypeKind *typekind, int *rank, int *counts,
     int *patch, int *rootPet, ESMCI::VM **vm, int *rc){
-    ESMCI::VM *opt_vm;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayscatter()"
-    //Initialize return code
-    *rc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    ESMCI::VM *opt_vm;
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
@@ -581,15 +563,14 @@ extern "C" {
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
-
   
   void FTN(c_esmc_arrayscatternotroot)(ESMCI::Array **array,
     int *patch, int *rootPet, ESMCI::VM **vm, int *rc){
-    ESMCI::VM *opt_vm;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayscatternotroot()"
-    //Initialize return code
-    *rc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    ESMCI::VM *opt_vm;
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
@@ -600,28 +581,26 @@ extern "C" {
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
-
   
   void FTN(c_esmc_arrayserialize)(ESMCI::Array **array, char *buf, int *length,
     int *offset, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayserialize()"
-    //Initialize return code
-    *rc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*array)->serialize(
       buf, length, offset),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
-  
 
   void FTN(c_esmc_arraydeserialize)(ESMCI::Array **array, char *buf,
     int *offset, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraydeserialize()"
-    //Initialize return code
-    *rc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     *array = new ESMCI::Array;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*array)->deserialize(
@@ -629,8 +608,6 @@ extern "C" {
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
-  
-  
   
 #undef  ESMC_METHOD
 }

@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.102 2007/08/03 18:27:16 theurich Exp $
+// $Id: ESMC_Array.C,v 1.103 2007/08/03 22:13:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.102 2007/08/03 18:27:16 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.103 2007/08/03 22:13:25 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -102,12 +102,9 @@ Array::Array(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-   
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
   // fill in the Array object
   typekind = typekindArg;
@@ -312,12 +309,9 @@ Array *Array::create(
 //    Create an {\tt ESMC\_Array} object from list if LocalArrays and DistGrid.
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-   
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
   // check the input and get the information together to call construct()
   // larrayListArg -> typekind/rank
@@ -767,12 +761,9 @@ Array *Array::create(
 //    Create an {\tt ESMC\_Array} object from ArraySpec and DistGrid.
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-   
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
   // check the input and get the information together to call construct()
   // arrayspec -> typekind/rank
@@ -1140,13 +1131,9 @@ int Array::destroy(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // return with errors for NULL pointer
   if (array == ESMC_NULL_POINTER || *array == ESMC_NULL_POINTER){
@@ -1198,7 +1185,7 @@ int Array::getLinearIndexExclusive(
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   // determine the linearized index
   //todo: the following assumes rank==dimCount -> will need to skip over not
@@ -1242,13 +1229,9 @@ int Array::print()const{
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // return with errors for NULL pointer
   if (this == NULL){
@@ -1299,6 +1282,42 @@ int Array::print()const{
     }
   }
   printf("--- ESMCI::Array::print end ---\n");
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::validate()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::validate
+//
+// !INTERFACE:
+int Array::validate()const{
+//
+// !RETURN VALUE:
+//    int return code
+//
+//
+// !DESCRIPTION:
+//    Validate details of Array object 
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // check against NULL pointer
+  if (this == ESMC_NULL_POINTER){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+       " - 'this' pointer is NULL.", &rc);
+    return rc;
+  }
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -1335,13 +1354,9 @@ int Array::serialize(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // Prepare pointer variables of different types
   char *cp;
@@ -1404,13 +1419,9 @@ int Array::deserialize(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // Prepare pointer variables of different types
   char *cp;
@@ -1484,13 +1495,9 @@ int Array::scatter(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // return with errors for NULL pointer
   if (this == NULL){
@@ -1960,13 +1967,9 @@ int Array::sparseMatMulStore(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // get the current VM and VM releated information
   VM *vm = VM::getCurrent(&localrc);
@@ -4251,13 +4254,9 @@ int Array::sparseMatMul(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
   
   // error checking for input
   if (srcArray == NULL){
@@ -4318,13 +4317,9 @@ int Array::sparseMatMulRelease(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // get XXE from routehandle
   XXE *xxe = (XXE *)routehandle->ESMC_RouteHandleGetStorage();
@@ -4395,9 +4390,8 @@ int ESMC_newArray::ESMC_newArrayConstruct(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  int localrc;
-  //Initialize localrc; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
   // determine required information
   if (vm==NULL)
     vm = ESMCI::VM::getCurrent(&localrc);  // get current VM context
@@ -5195,9 +5189,8 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  int localrc;
-  //Initialize localrc; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
   // determine required information
   if (vm==NULL)
     vm = ESMCI::VM::getCurrent(&localrc);  // get current VM context
