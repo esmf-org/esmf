@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid_F.C,v 1.24 2007/07/19 20:58:33 theurich Exp $
+// $Id: ESMC_DistGrid_F.C,v 1.25 2007/08/03 21:31:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -52,12 +52,13 @@ extern "C" {
     ESMCI::InterfaceInt **connectionList,
     ESMCI::InterfaceInt **connectionTransformList,
     ESMCI::DELayout **delayout, ESMCI::VM **vm, int *rc){
-    int localrc;
-    ESMCI::DELayout *opt_delayout;
-    ESMCI::VM *opt_vm;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreaterd()"
+    // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    ESMCI::DELayout *opt_delayout;
+    ESMCI::VM *opt_vm;
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(delayout) == ESMC_NULL_POINTER) 
       opt_delayout = NULL;
@@ -81,13 +82,13 @@ extern "C" {
     ESMCI::InterfaceInt **connectionList,
     ESMCI::InterfaceInt **connectionTransformList,
     ESMCI::DELayout **delayout, ESMCI::VM **vm, int *rc){
-    int localrc;
-    ESMCI::DELayout *opt_delayout;
-    ESMCI::VM *opt_vm;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreatedb()"
-  if (rc!=NULL)
-    *rc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    ESMCI::DELayout *opt_delayout;
+    ESMCI::VM *opt_vm;
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(delayout) == ESMC_NULL_POINTER) 
       opt_delayout = NULL;
@@ -112,12 +113,12 @@ extern "C" {
     ESMCI::InterfaceInt **connectionList,
     ESMCI::InterfaceInt **connectionTransformList,
     int *fastAxis, ESMCI::VM **vm, int *rc){
-    int localrc;
-    ESMCI::VM *opt_vm;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreaterdfa()"
-  if (rc!=NULL)
-    *rc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    ESMCI::VM *opt_vm;
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
@@ -139,13 +140,13 @@ extern "C" {
     ESMCI::InterfaceInt **connectionList,
     ESMCI::InterfaceInt **connectionTransformList,
     ESMCI::DELayout **delayout, ESMCI::VM **vm, int *rc){
-    int localrc;
-    ESMCI::DELayout *opt_delayout;
-    ESMCI::VM *opt_vm;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreaterdp()"
-  if (rc!=NULL)
-    *rc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    ESMCI::DELayout *opt_delayout;
+    ESMCI::VM *opt_vm;
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(delayout) == ESMC_NULL_POINTER) 
       opt_delayout = NULL;
@@ -165,8 +166,8 @@ extern "C" {
   void FTN(c_esmc_distgriddestroy)(ESMCI::DistGrid **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgriddestroy()"
-  if (rc!=NULL)
-    *rc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // call into C++
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::DistGrid::destroy(ptr),
       ESMF_ERR_PASSTHRU,
@@ -184,8 +185,9 @@ extern "C" {
     ESMC_Logical *regDecompFlag, ESMCI::DELayout **delayout, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridget()"
-    int localrc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
     // fill simple return values
     if (ESMC_NOT_PRESENT_FILTER(delayout) != ESMC_NULL_POINTER)
       *delayout = (*ptr)->getDELayout();
@@ -349,8 +351,9 @@ extern "C" {
     int *localDeArg, ESMCI::InterfaceInt **seqIndexList, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridgetplocalde()"
-    int localrc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
     // shift input indices
     int localDe = *localDeArg;  // already base 0
     // check input values
@@ -423,8 +426,9 @@ extern "C" {
     int *localDeArg, int *dimArg, ESMCI::InterfaceInt **indexList, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridgetplocaldepdim()"
-    int localrc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
     // shift input indices
     int localDe = *localDeArg;  // already base 0
     int dim = *dimArg - 1;      // shift to base 0
@@ -460,7 +464,8 @@ extern "C" {
   void FTN(c_esmc_distgridprint)(ESMCI::DistGrid **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridprint()"
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->print(),
       ESMF_ERR_PASSTHRU,
@@ -470,7 +475,8 @@ extern "C" {
   void FTN(c_esmc_distgridvalidate)(ESMCI::DistGrid **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridvalidate()"
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->validate(),
       ESMF_ERR_PASSTHRU,
@@ -483,8 +489,8 @@ extern "C" {
     ESMCI::InterfaceInt **orientationVector, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_connection()"
-  if (rc!=NULL)
-    *rc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError(
       ESMCI::DistGrid::connection(*connection, *patchIndexA,
@@ -497,8 +503,8 @@ extern "C" {
     ESMCI::DistGrid **ptr, ESMCI::InterfaceInt **arbSeqIndex, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridsetarbseqindex()"
-    if (rc!=NULL)
-      *rc = ESMC_RC_NOT_IMPL;
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError(
       (*ptr)->setArbSeqIndex(*arbSeqIndex),

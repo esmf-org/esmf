@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.27 2007/08/03 00:34:13 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.28 2007/08/03 21:31:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -110,7 +110,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.27 2007/08/03 00:34:13 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.28 2007/08/03 21:31:16 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -385,7 +385,7 @@ contains
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_DistGridCreateRD)
  
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DistGridCreateRD
@@ -593,7 +593,7 @@ contains
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDB)
  
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DistGridCreateDB
@@ -805,7 +805,7 @@ contains
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_DistGridCreateRDFA)
  
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DistGridCreateRDFA
@@ -961,7 +961,7 @@ contains
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDBFA)
  
-    ! Return successfully
+    ! return successfully
     !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
  
   end function ESMF_DistGridCreateDBFA
@@ -1186,7 +1186,7 @@ contains
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_DistGridCreateRDP)
  
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DistGridCreateRDP
@@ -1353,7 +1353,7 @@ contains
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDBP)
  
-    ! Return successfully
+    ! return successfully
     !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
  
   end function ESMF_DistGridCreateDBP
@@ -1513,7 +1513,7 @@ contains
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_DistGridCreateRDPFA)
  
-    ! Return successfully
+    ! return successfully
     !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
  
   end function ESMF_DistGridCreateRDPFA
@@ -1671,7 +1671,7 @@ contains
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDBPFA)
  
-    ! Return successfully
+    ! return successfully
     !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
  
   end function ESMF_DistGridCreateDBPFA
@@ -1800,7 +1800,7 @@ contains
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDBAI)
  
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DistGridCreateDBAI
@@ -1854,7 +1854,7 @@ contains
     ! Set init code
     ESMF_INIT_SET_DELETED(distgrid)
  
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_DistGridDestroy
@@ -2059,7 +2059,7 @@ contains
 !    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
 
   end subroutine ESMF_DistGridGetPDe
@@ -2267,7 +2267,7 @@ contains
 !    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
 
   end subroutine ESMF_DistGridGetLinksPDe
@@ -2612,7 +2612,7 @@ contains
 !    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
     
   end subroutine ESMF_ConnectionTransform

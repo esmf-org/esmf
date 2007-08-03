@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.29 2007/07/19 20:58:34 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.30 2007/08/03 21:31:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.29 2007/07/19 20:58:34 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistGrid.C,v 1.30 2007/08/03 21:31:16 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -87,12 +87,9 @@ DistGrid *DistGrid::create(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-   
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
   // allocate the new DistGrid object
   DistGrid *distgrid;
@@ -443,12 +440,9 @@ DistGrid *DistGrid::create(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-   
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
   // allocate the new DistGrid object
   DistGrid *distgrid;
@@ -679,12 +673,9 @@ DistGrid *DistGrid::create(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-   
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
   // create a DELayout according to fastAxis argument
   // todo: once DELayout functions exist to determine communication capabilities
@@ -741,12 +732,9 @@ DistGrid *DistGrid::create(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-   
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
   // allocate the new DistGrid object
   DistGrid *distgrid;
@@ -1146,13 +1134,9 @@ int DistGrid::destroy(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // return with errors for NULL pointer
   if (distgrid == ESMC_NULL_POINTER || *distgrid == ESMC_NULL_POINTER){
@@ -1215,13 +1199,9 @@ int DistGrid::construct(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // fill in the DistGrid object
   dimCount = dimCountArg;
@@ -1329,13 +1309,9 @@ int DistGrid::destruct(void){
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // garbage collection
   delete [] indexCountPDimPDe;
@@ -1391,13 +1367,9 @@ int DistGrid::print()const{
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // return with errors for NULL pointer
   if (this == NULL){
@@ -1485,8 +1457,8 @@ int DistGrid::validate()const{
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // Initialize return code; assume routine not implemented
-  int rc = ESMC_RC_NOT_IMPL;
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // check against NULL pointer
   if (this == ESMC_NULL_POINTER){
@@ -1495,7 +1467,7 @@ int DistGrid::validate()const{
     return rc;
   }
 
-  // Return successfully
+  // return successfully
   rc = ESMF_SUCCESS;
   return rc;
 }
@@ -1534,7 +1506,7 @@ int DistGrid::getContigFlagPDimPDe(
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
   // check input
   int deCount = delayout->getDeCount();
@@ -1580,7 +1552,7 @@ int DistGrid::getCellCountPDe(
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
   // check input
   int deCount = delayout->getDeCount();
@@ -1623,7 +1595,7 @@ int DistGrid::getSequenceIndex(
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   // check input
   int localDeCount = delayout->getLocalDeCount();
@@ -1690,7 +1662,7 @@ const int *DistGrid::getMinIndexPDimPPatch(
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
   // check input
   if (patch < 1 || patch > patchCount){
@@ -1730,7 +1702,7 @@ const int *DistGrid::getMaxIndexPDimPPatch(
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
   // check input
   if (patch < 1 || patch > patchCount){
@@ -1771,7 +1743,7 @@ const int *DistGrid::getIndexListPDimPLocalDe(
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   // check input
   int localDeCount = delayout->getLocalDeCount();
@@ -1817,7 +1789,7 @@ const int *DistGrid::getArbSeqIndexListPLocalDe(
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   // check input
   int localDeCount = delayout->getLocalDeCount();
@@ -1854,24 +1826,20 @@ int DistGrid::serialize(
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
-      char *buffer,          // inout - byte stream to fill
-      int *length,           // inout - buf length; realloc'd here if needed
-      int *offset            // inout - original offset, updated to point 
+  char *buffer,          // inout - byte stream to fill
+  int *length,           // inout - buf length; realloc'd here if needed
+  int *offset            // inout - original offset, updated to point 
                              //  to first free byte after current obj info
-      )const{
+  )const{
 //
 // !DESCRIPTION:
 //    Turn info in distgrid object into a stream of bytes.
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   int fixedpart, nbytes;
   int i, j;
@@ -1956,8 +1924,8 @@ DistGrid *DistGrid::deserialize(
 //    DistGrid * to deserialized proxy object
 //
 // !ARGUMENTS:
-      char *buffer,          // in - byte stream to read
-      int *offset) {         // inout - original offset, updated to point 
+  char *buffer,          // in - byte stream to read
+  int *offset) {         // inout - original offset, updated to point 
                              //  to first free byte after current obj info
 //
 // !DESCRIPTION:
@@ -1965,57 +1933,63 @@ DistGrid *DistGrid::deserialize(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-    DistGrid *a = new DistGrid;
-    int fixedpart, nbytes, rc;
-    int i, j;
-    char *cp;
-    int *ip;
-    ESMC_Logical *lp;
-    VM **vp;
-    ESMC_DePinFlag *dp;
-    de_type *dep;
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-    // Initialize return code; assume routine not implemented
-    rc = ESMC_RC_NOT_IMPL;
-    // first get the base part of the object
-    rc = a->ESMC_Base::ESMC_Deserialize(buffer, offset);
-    a->delayout = DELayout::deserialize(buffer, offset);
-    a->vm = NULL; // VM must be reset
+  DistGrid *a = new DistGrid;
+  int fixedpart, nbytes;
+  int i, j;
+  char *cp;
+  int *ip;
+  ESMC_Logical *lp;
+  VM **vp;
+  ESMC_DePinFlag *dp;
+  de_type *dep;
 
-    // now the rest
-    cp = (char *)(buffer + *offset);
-    
-    // deserialize scalar members
-    ip = (int *)cp;
-    a->dimCount = *ip++;
-    a->patchCount = *ip++;
-    a->connectionCount = *ip++;
-    lp = (ESMC_Logical *)ip;
-    a->regDecompFlag = *lp++;
-        
-    int deCount = a->delayout->getDeCount();
-    // deserialize array members
-    ip = (int *)lp;
-    a->cellCountPPatch = new int[a->patchCount];
-    for (int i=0; i<a->patchCount; i++)
-      a->cellCountPPatch[i] = *ip++;
-    a->patchListPDe = new int[deCount];
-    for (int i=0; i<deCount; i++)
-      a->patchListPDe[i] = *ip++;
-    a->minIndexPDimPPatch = new int[a->dimCount*a->patchCount];
-    for (int i=0; i<a->dimCount*a->patchCount; i++)
-      a->minIndexPDimPPatch[i] = *ip++;
-    a->maxIndexPDimPPatch = new int[a->dimCount*a->patchCount];
-    for (int i=0; i<a->dimCount*a->patchCount; i++)
-      a->maxIndexPDimPPatch[i] = *ip++;
-    a->indexCountPDimPDe = new int[a->dimCount*deCount];
-    for (int i=0; i<a->dimCount*deCount; i++)
-      a->indexCountPDimPDe[i] = *ip++;
-    
-    cp = (char *)ip;
-    *offset = (cp - buffer);
-   
-    return a;
+  // first get the base part of the object
+  localrc = a->ESMC_Base::ESMC_Deserialize(buffer, offset);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return NULL;
+  a->delayout = DELayout::deserialize(buffer, offset);
+  a->vm = NULL; // VM must be reset
+
+  // now the rest
+  cp = (char *)(buffer + *offset);
+  
+  // deserialize scalar members
+  ip = (int *)cp;
+  a->dimCount = *ip++;
+  a->patchCount = *ip++;
+  a->connectionCount = *ip++;
+  lp = (ESMC_Logical *)ip;
+  a->regDecompFlag = *lp++;
+      
+  int deCount = a->delayout->getDeCount();
+  // deserialize array members
+  ip = (int *)lp;
+  a->cellCountPPatch = new int[a->patchCount];
+  for (int i=0; i<a->patchCount; i++)
+    a->cellCountPPatch[i] = *ip++;
+  a->patchListPDe = new int[deCount];
+  for (int i=0; i<deCount; i++)
+    a->patchListPDe[i] = *ip++;
+  a->minIndexPDimPPatch = new int[a->dimCount*a->patchCount];
+  for (int i=0; i<a->dimCount*a->patchCount; i++)
+    a->minIndexPDimPPatch[i] = *ip++;
+  a->maxIndexPDimPPatch = new int[a->dimCount*a->patchCount];
+  for (int i=0; i<a->dimCount*a->patchCount; i++)
+    a->maxIndexPDimPPatch[i] = *ip++;
+  a->indexCountPDimPDe = new int[a->dimCount*deCount];
+  for (int i=0; i<a->dimCount*deCount; i++)
+    a->indexCountPDimPDe[i] = *ip++;
+  
+  cp = (char *)ip;
+  *offset = (cp - buffer);
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return a;
 }
 //-----------------------------------------------------------------------------
 
@@ -2051,13 +2025,9 @@ int DistGrid::connection(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // check connetion argument
   if (connection == NULL){
@@ -2155,13 +2125,9 @@ int DistGrid::setArbSeqIndex(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
   
   //TODO: This routine is kind of strange and needs to be refactored:
   //      1) InterfaceInt types should not make it into Set() or Get() methods.
