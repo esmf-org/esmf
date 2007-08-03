@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.30 2007/07/18 20:43:39 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.31 2007/08/03 04:21:46 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -106,7 +106,7 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     int construct(VM *vmArg=ESMC_NULL_POINTER, 
       ESMC_DePinFlag *dePinFlagArg=ESMC_NULL_POINTER, 
       int *petMap=ESMC_NULL_POINTER, int petMapCount=0);
-    int destruct(void);
+    int destruct();
     
   public:
     // create() and destroy()
@@ -130,9 +130,10 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
       int *vasLocalDeCountArg, int *vasLocalDeListArg, int vasLocalDeListCount)
       const;
     // misc.
-    int print(void);
-    int validate(void);
-    int serialize(char *buffer, int *length, int *offset);
+    int print() const;
+    int validate() const;
+    // serialize() and deserialize()
+    int serialize(char *buffer, int *length, int *offset) const;
     static DELayout *deserialize(char *buffer, int *offset);
     // work queue synchronization methods
     DELayoutServiceReply serviceOffer(int de, int *rc);
@@ -150,7 +151,6 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     static DELayout *create(VM &vm, int *nDEs, int ndim, 
       int *DEtoPET, int len, ESMC_Logical *cyclic, int *rc);  // deprecated
     // get()
-    int getVM(VM **vm)const;
     int getDeprecated(int *nDEs, int *ndim, int *nmyDEs, 
       int *myDEs, int len_myDEs, int *localDe, ESMC_Logical *oneToOneFlag,
       ESMC_Logical *logRectFlag, int *deCountPerDim, int len_deCountPerDim)

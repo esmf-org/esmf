@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.66 2007/06/26 19:02:47 samsoncheung Exp $
+! $Id: ESMF_DELayout.F90,v 1.67 2007/08/03 04:21:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -132,7 +132,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.66 2007/06/26 19:02:47 samsoncheung Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.67 2007/08/03 04:21:47 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -267,26 +267,25 @@ contains
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer                 :: status       ! local error status
+    integer                 :: localrc      ! local return code
     type(ESMF_DELayout)     :: delayout     ! opaque pointer to new C++ DELayout  
     type(ESMF_InterfaceInt) :: deGroupingArg
     type(ESMF_InterfaceInt) :: petListArg
 
-    ! Initialize return code; assume routine not implemented
-    status = ESMF_RC_NOT_IMPL
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
     ! Deal with optional array arguments
-    deGroupingArg = ESMF_InterfaceIntCreate(deGrouping, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    deGroupingArg = ESMF_InterfaceIntCreate(deGrouping, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    petListArg = ESMF_InterfaceIntCreate(petList, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    petListArg = ESMF_InterfaceIntCreate(petList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Mark this DELayout as invalid
@@ -294,25 +293,25 @@ contains
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutCreateDefault(delayout, deCount, deGroupingArg, &
-      dePinFlag, petListArg, vm, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      dePinFlag, petListArg, vm, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set return value
     ESMF_DELayoutCreateDefault = delayout 
     
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(deGroupingArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(deGroupingArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(petListArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(petListArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_DELayoutCreateDefault)
  
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DELayoutCreateDefault
@@ -369,16 +368,15 @@ contains
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer                 :: status       ! local error status
+    integer                 :: localrc      ! local return code
     type(ESMF_DELayout)     :: delayout     ! opaque pointer to new C++ DELayout  
     integer                 :: len_petMap   ! number of elements in petMap
 
-    ! Initialize return code; assume routine not implemented
-    status = ESMF_RC_NOT_IMPL
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
@@ -390,8 +388,8 @@ contains
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutCreateFromPetMap(delayout, petMap(1), len_petMap, &
-      dePinFlag, vm, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      dePinFlag, vm, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set return value
@@ -400,7 +398,7 @@ contains
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_DELayoutCreateFromPetMap)
  
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DELayoutCreateFromPetMap
@@ -492,26 +490,25 @@ contains
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer                 :: status       ! local error status
+    integer                 :: localrc      ! local return code
     type(ESMF_DELayout)     :: delayout     ! opaque pointer to new C++ DELayout  
     type(ESMF_InterfaceInt) :: deGroupingArg
     type(ESMF_InterfaceInt) :: petListArg
 
-    ! Initialize return code; assume routine not implemented
-    status = ESMF_RC_NOT_IMPL
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
     ! Deal with optional array arguments
-    deGroupingArg = ESMF_InterfaceIntCreate(deGrouping, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    deGroupingArg = ESMF_InterfaceIntCreate(deGrouping, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    petListArg = ESMF_InterfaceIntCreate(petList, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    petListArg = ESMF_InterfaceIntCreate(petList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Mark this DELayout as invalid
@@ -521,25 +518,25 @@ contains
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutCreateDefault(delayout, deCount, deGroupingArg, &
-      dePinFlag, petListArg, vm, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      dePinFlag, petListArg, vm, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set return value
     ESMF_DELayoutCreateHintWeights = delayout 
  
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(deGroupingArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(deGroupingArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(petListArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(petListArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_DELayoutCreateHintWeights)
  
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DELayoutCreateHintWeights
@@ -635,19 +632,16 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                 :: localrc      ! local return code
+    type(ESMF_DELayout)     :: delayout     ! opaque pointer to new C++ DELayout
+    integer                 :: len_deCountList, len_petList
+    integer, pointer        :: opt_deCountList(:), opt_petList(:)
+    integer, target         :: dummy(1)     ! used to satisfy the C interface...
 
-    type(ESMF_DELayout):: delayout  ! opaque pointer to new C++ DELayout
-    integer :: len_deCountList, len_petList
-    integer, pointer :: opt_deCountList(:), opt_petList(:)
-    integer, target :: dummy(1)     ! used to satisfy the C interface...
-
-    ! Initialize return code; assume routine not implemented
+    ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vmObject, rc)
@@ -674,8 +668,6 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutCreateND(delayout, vmObject, opt_deCountList(1), &
       len_deCountList, opt_petList(1), len_petList, localrc)
-
-    ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -685,7 +677,7 @@ contains
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_DELayoutCreateDeprecated)
  
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DELayoutCreateDeprecated
@@ -718,20 +710,19 @@ contains
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer                 :: status       ! local error status
+    integer                 :: localrc      ! local return code
 
-    ! Initialize return code; assume routine not implemented
-    status = ESMF_RC_NOT_IMPL
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
     
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DELayoutDestroy(delayout, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call c_ESMC_DELayoutDestroy(delayout, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark this DELayout as invalid
@@ -740,7 +731,7 @@ contains
     ! Set init code
     ESMF_INIT_SET_DELETED(delayout)
  
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_DELayoutDestroy
@@ -826,9 +817,8 @@ contains
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer                 :: status       ! local error status
+    integer                 :: localrc      ! local return code
     integer, target         :: dummy(1)     ! used to satisfy the C interface...
     integer, pointer        :: opt_petMap(:)  ! optional argument
     integer                 :: len_petMap   ! number of elements in optional arg
@@ -839,10 +829,10 @@ contains
     integer, pointer        :: opt_vasLocalDeList(:)  ! optional argument
     integer                 :: len_vasLocalDeList   ! number of elem. in opt. arg
 
-    ! Initialize return code; assume routine not implemented
-    status = ESMF_RC_NOT_IMPL
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
     
@@ -894,18 +884,18 @@ contains
     call c_ESMC_DELayoutGet(delayout, vm, deCount, opt_petMap(1), &
       len_petMap, opt_vasMap(1), len_vasMap, oneToOneFlag, dePinFlag, &
       localDeCount, opt_localDeList(1), len_localDeList, vasLocalDeCount, &
-      opt_vasLocalDeList(1), len_vasLocalDeList, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      opt_vasLocalDeList(1), len_vasLocalDeList, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! Set init code for deep C++ objects
     if (present(vm)) then
-      call ESMF_VMSetInitCreated(vm, rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      call ESMF_VMSetInitCreated(vm, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_DELayoutGet
@@ -974,18 +964,15 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                 :: localrc      ! local return code
+    integer                 :: len_localDeList, len_deCountPerDim
+    integer, pointer        :: opt_localDeList(:), opt_deCountPerDim(:)
+    integer, target         :: dummy(1)     ! used to satisfy the C interface...
 
-    integer :: len_localDeList, len_deCountPerDim
-    integer, pointer :: opt_localDeList(:), opt_deCountPerDim(:)
-    integer, target :: dummy(1)     ! used to satisfy the C interface...
-    
-    ! Initialize return code; assume routine not implemented
+    ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
@@ -1010,13 +997,12 @@ contains
     call c_ESMC_DELayoutGetDeprecated(delayout, deCount, dimCount, localDeCount, &
       opt_localDeList(1), len_localDeList, localDe, oneToOneFlag, logRectFlag, &
       opt_deCountPerDim(1), len_deCountPerDim, localrc)
-
-    ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
+    
   end subroutine ESMF_DELayoutGetDeprecated
 !------------------------------------------------------------------------------
 
@@ -1070,18 +1056,15 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                 :: localrc      ! local return code
+    integer                 :: i, len_coord, len_cde, len_cw
+    integer, target         :: dummy(1)     ! used to satisfy the C interface...
+    integer, pointer        :: opt_DEcoord(:), opt_DEcde(:), opt_DEcw(:)
 
-    integer :: i, len_coord, len_cde, len_cw
-    integer, target :: dummy(1)     ! used to satisfy the C interface...
-    integer, pointer:: opt_DEcoord(:), opt_DEcde(:), opt_DEcw(:)
-
-    ! Initialize return code; assume routine not implemented
+    ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
@@ -1111,8 +1094,6 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutGetDELocalInfo(delayout, de, opt_DEcoord(1), len_coord,&
       opt_DEcde(1), len_cde, opt_DEcw(1), len_cw, connectionCount, pid, localrc)
-
-    ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1123,8 +1104,9 @@ contains
       enddo
     endif
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
+    
   end subroutine ESMF_DELayoutGetDELocalInfo
 !------------------------------------------------------------------------------
 
@@ -1175,18 +1157,15 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                 :: localrc      ! local return code
+    integer                 :: len_deMatchList
+    integer, target         :: dummy(1)     ! used to satisfy the C interface...
+    integer, pointer        :: opt_deMatchList(:)
 
-    integer :: len_deMatchList
-    integer, target :: dummy(1)     ! used to satisfy the C interface...
-    integer, pointer:: opt_deMatchList(:)
-
-    ! Initialize return code; assume routine not implemented
+    ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
@@ -1204,13 +1183,12 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutGetDEMatchDE(delayout, de, delayoutMatch, &
       deMatchCount, opt_deMatchList(1), len_deMatchList, localrc)
-
-    ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
+    
   end subroutine ESMF_DELayoutGetDEMatchDE
 !------------------------------------------------------------------------------
 
@@ -1261,18 +1239,15 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                 :: localrc      ! local return code
+    integer                 :: len_petMatchList
+    integer, target         :: dummy(1)     ! used to satisfy the C interface...
+    integer, pointer        :: opt_petMatchList(:)
 
-    integer :: len_petMatchList
-    integer, target :: dummy(1)     ! used to satisfy the C interface...
-    integer, pointer:: opt_petMatchList(:)
-
-    ! Initialize return code; assume routine not implemented
+    ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
@@ -1290,13 +1265,12 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutGetDEMatchPET(delayout, de, vmMatch, &
       petMatchCount, opt_petMatchList(1), len_petMatchList, localrc)
-
-    ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
+    
   end subroutine ESMF_DELayoutGetDEMatchPET
 !------------------------------------------------------------------------------
 
@@ -1331,14 +1305,12 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                 :: localrc      ! local return code
 
-    ! Initialize return code; assume routine not implemented
+    ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
@@ -1353,7 +1325,7 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_DELayoutGetVM
@@ -1390,11 +1362,10 @@ contains
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                 :: localrc      ! local return code
 
-    ! Initialize return code; assume routine not implemented
+    ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -1403,13 +1374,12 @@ contains
     
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutPrint(delayout, localrc)
-    
-    ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
+    
   end subroutine ESMF_DELayoutPrint
 !------------------------------------------------------------------------------
 
@@ -1444,24 +1414,23 @@ contains
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer                 :: status       ! local error status
+    integer                 :: localrc      ! local return code
 
-    ! Initialize return code; assume routine not implemented
-    status = ESMF_RC_NOT_IMPL
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
     
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DELayoutServiceComplete(delayout, de, status)
+    call c_ESMC_DELayoutServiceComplete(delayout, de, localrc)
 !TODO: enable LogErr once it is thread-safe
-!    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !      ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
       
   end subroutine ESMF_DELayoutServiceComplete
@@ -1510,26 +1479,25 @@ contains
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer                 :: status       ! local error status
+    integer                 :: localrc      ! local return code
     type(ESMF_DELayoutServiceReply) :: reply
 
-    ! Initialize return code; assume routine not implemented
-    status = ESMF_RC_NOT_IMPL
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
     
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DELayoutServiceOffer(delayout, de, reply, status)
+    call c_ESMC_DELayoutServiceOffer(delayout, de, reply, localrc)
     ESMF_DELayoutServiceOffer = reply
 !TODO: enable LogErr once it is thread-safe
-!    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !      ESMF_CONTEXT, rcToReturn=rc)) return
  
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
       
   end function ESMF_DELayoutServiceOffer
@@ -1563,11 +1531,10 @@ contains
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                 :: localrc      ! local return code
 
-    ! Initialize return code; assume routine not implemented
+    ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -1576,12 +1543,10 @@ contains
     
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutValidate(delayout, localrc)
-    
-    ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_DELayoutValidate
@@ -1633,15 +1598,13 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                 :: localrc      ! local return code
+    integer                 :: len_petMatchList
+    integer, target         :: dummy(1)     ! used to satisfy the C interface...
+    integer, pointer        :: opt_petMatchList(:)
 
-    integer :: len_petMatchList
-    integer, target :: dummy(1)     ! used to satisfy the C interface...
-    integer, pointer:: opt_petMatchList(:)
-
-    ! Initialize return code; assume routine not implemented
+    ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -1661,13 +1624,12 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutGetDEMatchPET(delayout, de, vmMatch, &
       petMatchCount, opt_petMatchList(1), len_petMatchList, localrc)
-
-    ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
+    
   end subroutine ESMF_DELayoutVASMatch
 !------------------------------------------------------------------------------
 
@@ -1680,14 +1642,14 @@ contains
 ! !IROUTINE: ESMF_DELayoutSerialize - Serialize delayout info into a byte stream
 !
 ! !INTERFACE:
-      subroutine ESMF_DELayoutSerialize(delayout, buffer, length, offset, rc) 
+  subroutine ESMF_DELayoutSerialize(delayout, buffer, length, offset, rc) 
 !
 ! !ARGUMENTS:
-      type(ESMF_DELayout), intent(in) :: delayout 
-      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
-      integer, intent(inout) :: length
-      integer, intent(inout) :: offset
-      integer, intent(out), optional :: rc 
+    type(ESMF_DELayout), intent(in) :: delayout 
+    integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+    integer, intent(inout) :: length
+    integer, intent(inout) :: offset
+    integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !      Takes an {\tt ESMF\_DELayout} object and adds all the information needed
@@ -1714,26 +1676,27 @@ contains
 !     \end{description}
 !
 !EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
 
-    integer :: localrc                     ! Error status
-
-    ! Initialize return code; assume routine not implemented
+    ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
     
+    ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutSerialize(delayout, buffer(1), length, offset, localrc)
-
-    ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Return successfully
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
-    end subroutine ESMF_DELayoutSerialize
+    
+  end subroutine ESMF_DELayoutSerialize
 !------------------------------------------------------------------------------
+
 
 ! -------------------------- ESMF-private method ------------------------------
 #undef  ESMF_METHOD
@@ -1743,15 +1706,15 @@ contains
 ! !IROUTINE: ESMF_DELayoutDeserialize - Deserialize a byte stream into a DELayout
 !
 ! !INTERFACE:
-      function ESMF_DELayoutDeserialize(buffer, offset, rc) 
+  function ESMF_DELayoutDeserialize(buffer, offset, rc) 
 !
 ! !RETURN VALUE:
-      type(ESMF_DELayout) :: ESMF_DELayoutDeserialize   
+    type(ESMF_DELayout) :: ESMF_DELayoutDeserialize   
 !
 ! !ARGUMENTS:
-      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
-      integer, intent(inout) :: offset
-      integer, intent(out), optional :: rc 
+    integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+    integer, intent(inout) :: offset
+    integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !      Takes a byte-stream buffer and reads the information needed to
@@ -1773,13 +1736,14 @@ contains
 !     \end{description}
 !
 !EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
 
-    integer :: localrc
-
-    ! Initialize return code; assume routine not implemented
+    ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutDeserialize(ESMF_DELayoutDeserialize%this, buffer(1), &
       offset, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1791,7 +1755,7 @@ contains
     ! Return success
     if (present(rc)) rc = ESMF_SUCCESS
     
-    end function ESMF_DELayoutDeserialize
+  end function ESMF_DELayoutDeserialize
 !------------------------------------------------------------------------------
 
 
@@ -1802,13 +1766,13 @@ contains
 ! !IROUTINE: ESMF_DELayoutGetInit - Internal access routine for init code
 !
 ! !INTERFACE:
-      function ESMF_DELayoutGetInit(delayout) 
+  function ESMF_DELayoutGetInit(delayout) 
 !
 ! !RETURN VALUE:
-      ESMF_INIT_TYPE :: ESMF_DELayoutGetInit   
+    ESMF_INIT_TYPE :: ESMF_DELayoutGetInit   
 !
 ! !ARGUMENTS:
-      type(ESMF_DELayout), intent(in), optional :: delayout
+    type(ESMF_DELayout), intent(in), optional :: delayout
 !
 ! !DESCRIPTION:
 !      Access deep object init code.
@@ -1820,14 +1784,14 @@ contains
 !     \end{description}
 !
 !EOPI
-
+!------------------------------------------------------------------------------
     if (present(delayout)) then
       ESMF_DELayoutGetInit = ESMF_INIT_GET(delayout)
     else
       ESMF_DELayoutGetInit = ESMF_INIT_CREATED
     endif
 
-    end function ESMF_DELayoutGetInit
+  end function ESMF_DELayoutGetInit
 !------------------------------------------------------------------------------
 
 
@@ -1857,13 +1821,12 @@ contains
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                 :: localrc      ! local return code
 
-    ! Initialize return code; assume routine not implemented
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Set init code
     ESMF_INIT_SET_CREATED(delayout)
