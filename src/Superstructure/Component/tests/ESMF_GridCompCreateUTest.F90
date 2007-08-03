@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompCreateUTest.F90,v 1.19 2007/06/26 23:33:33 svasquez Exp $
+! $Id: ESMF_GridCompCreateUTest.F90,v 1.20 2007/08/03 17:30:27 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -119,15 +119,14 @@
 
 !-------------------------------------------------------------------------
 !   !
-    !EX____UTest
-!   ! THis test is commented out until bug 1743928 is closed.
+    !EX_UTest
 !   !  Test validate a component
 
-    !call ESMF_GridCompValidate(comp1, rc=rc)
+    call ESMF_GridCompValidate(comp1, rc=rc)
 
-    !write(failMsg, *) "Did not return ESMF_SUCCESS"
-    !write(name, *) "Validating a Component Test"
-    !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Validating a Component Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
