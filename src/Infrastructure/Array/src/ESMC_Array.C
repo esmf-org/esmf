@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.101 2007/08/02 22:03:40 theurich Exp $
+// $Id: ESMC_Array.C,v 1.102 2007/08/03 18:27:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.101 2007/08/02 22:03:40 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.102 2007/08/03 18:27:16 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4403,8 +4403,8 @@ int ESMC_newArray::ESMC_newArrayConstruct(
     vm = ESMCI::VM::getCurrent(&localrc);  // get current VM context
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
-  int localTid;
-  vm->getPETLocalInfo(NULL, NULL, NULL, NULL, &localTid, &localVAS);
+  int localTid = vm->getTid(localPet);
+  localVAS = vm->getVas(localPet);
   // get info about the LocalArray on rootPET and broadcast it to all PETs
   int laRank;
   if (localPet == rootPET)
@@ -4557,8 +4557,7 @@ int ESMC_newArray::ESMC_newArrayConstruct(
     thargArray = new ESMC_newArrayThreadArg[localDeCount];
     // need to send localArrays/commhArray pointer to other PETs in threadGroup
     for (int pet=0; pet<petCount; pet++){
-      int vas;
-      vm->getPETLocalInfo(pet, NULL, NULL, NULL, NULL, &vas);
+      int vas = vm->getVas(pet);
       if (pet != localPet && vas == localVAS){
         // send the localArrays pointer to this PET
         vm->vmk_send(&localArrays, sizeof(ESMC_LocalArray **), pet);
@@ -4570,8 +4569,8 @@ int ESMC_newArray::ESMC_newArrayConstruct(
     // localPet is part of a threadGroup but is not the master thread
     int pet;
     for (pet=0; pet<petCount; pet++){
-      int vas, tid;
-      vm->getPETLocalInfo(pet, NULL, NULL, NULL, &tid, &vas);
+      int tid = vm->getTid(pet);
+      int vas = vm->getVas(pet);
       if (vas == localVAS && tid == 0) break; // found master thread
     }
     // receive the localArrays and commhArray pointer from master thread
@@ -5531,8 +5530,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
   for (localDe=0; localDe<localDeCount; localDe++)
     if (localDeList[localDe] == de) break;
   // determine VAS for rootPET
-  int rootVAS;
-  vm->getPETLocalInfo(rootPET, NULL, NULL, NULL, NULL, &rootVAS);
+  int rootVAS = vm->getVas(rootPET);
   // check that t/k matches (on all PETs!)
   if (dtk != kind){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
@@ -6270,8 +6268,7 @@ void *ESMC_newArrayScatterThread(
   for (localDe=0; localDe<localDeCount; localDe++)
     if (localDeList[localDe] == de) break;
   // determine VAS for rootPET
-  int rootVAS;
-  vm->getPETLocalInfo(rootPET, NULL, NULL, NULL, NULL, &rootVAS);
+  int rootVAS = vm->getVas(rootPET);
   // receive some of larray's meta info from scatter root method
   int rank = array->rank;
   int *laLength = new int[rank];

@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.164 2007/06/23 04:00:43 cdeluca Exp $
+//$Id: ESMC_Route.C,v 1.165 2007/08/03 18:27:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.164 2007/06/23 04:00:43 cdeluca Exp $";
+               "$Id: ESMC_Route.C,v 1.165 2007/08/03 18:27:16 theurich Exp $";
 //-----------------------------------------------------------------------------
 class permuteLocal {
 public:
@@ -3410,8 +3410,9 @@ int compare2(const void *item1, const void *item2) {
     ////ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     //printf(msgbuf);
     //vm->VMPrint("");
-    { int myid, petcount;
-      vm->get(&myid, &petcount, NULL, NULL, NULL);
+    {
+      int myid = vm->getLocalPet();
+      int petcount = vm->getPetCount();
       sprintf(msgbuf, "VM: my pet = %d of %d\n", myid, petcount);
       //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
       printf(msgbuf);

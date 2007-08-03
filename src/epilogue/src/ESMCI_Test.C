@@ -1,4 +1,4 @@
-// $Id: ESMCI_Test.C,v 1.2 2007/06/20 01:29:31 theurich Exp $
+// $Id: ESMCI_Test.C,v 1.3 2007/08/03 18:27:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,    
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Test.C,v 1.2 2007/06/20 01:29:31 theurich Exp $";
+ static const char *const version = "$Id: ESMCI_Test.C,v 1.3 2007/08/03 18:27:17 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -224,18 +224,7 @@
    return (false);
  }
 
- rc = globalVM->get(NULL, &numPETs, NULL, NULL, NULL);
- if (rc != ESMF_SUCCESS) {
-   sprintf(msgbuf, 
-   "FAIL rc=%d, %s, line %d, Unable to get number of PETs\n", 
-                    rc, file, line);
-
-   whichLog->ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
-   if (!only)
-     fprintf(stderr, msgbuf);
-
-   return (false);
- }
+ numPETs = globalVM->getPetCount();
 
  if (numPETs > petCount) {
    sprintf(failMsg, "These tests must not run on more than %d processors.\n", 
@@ -305,18 +294,7 @@
    return (false);
  }
 
- rc = globalVM->get(NULL, &numPETs, NULL, NULL, NULL);
- if (rc != ESMF_SUCCESS) {
-   sprintf(msgbuf, 
-   "FAIL rc=%d, %s, line %d, Unable to get number of PETs\n", 
-                    rc, file, line);
-
-   whichLog->ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
-   if (!only)
-     fprintf(stderr, msgbuf);
-
-   return (false);
- }
+ numPETs = globalVM->getPetCount();
 
  if (numPETs < petCount) {
    sprintf(failMsg, "These tests must not run on less than %d processors.\n", 
@@ -387,18 +365,7 @@
    return (false);
  }
 
- rc = globalVM->get(NULL, &numPETs, NULL, NULL, NULL);
- if (rc != ESMF_SUCCESS) {
-   sprintf(msgbuf, 
-   "FAIL rc=%d, %s, line %d, Unable to get number of PETs\n", 
-                    rc, file, line);
-
-   whichLog->ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
-   if (!only)
-     fprintf(stderr, msgbuf);
-
-   return (false);
- }
+ numPETs = globalVM->getPetCount();
 
  if (numPETs != petCount) {
    sprintf(failMsg, "These tests must run on exactly %d processors.\n", 
@@ -482,16 +449,7 @@
    return (false);
  }
 
- rc = globalVM->get(NULL, &numPETs, NULL, NULL, NULL);
- if (rc != ESMF_SUCCESS) {
-   sprintf(msgbuf, "FAIL  rc=%d, %s, line %d, Unable to get number of PETs\n", 
-                    rc, file, line);
-   whichLog->ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
-   if (!only)
-     fprintf(stderr, msgbuf);
-   return(rc);
- }
-
+ numPETs = globalVM->getPetCount();
 
  sprintf(msgbuf, "Beginning Test, file %s, line %d\n", file, line);
  whichLog->ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);

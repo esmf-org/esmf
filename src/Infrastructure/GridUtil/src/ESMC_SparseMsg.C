@@ -1,4 +1,4 @@
-// $Id: ESMC_SparseMsg.C,v 1.5 2007/06/20 01:29:21 theurich Exp $
+// $Id: ESMC_SparseMsg.C,v 1.6 2007/08/03 18:27:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_SparseMsg.C,v 1.5 2007/06/20 01:29:21 theurich Exp $";
+            "$Id: ESMC_SparseMsg.C,v 1.6 2007/08/03 18:27:16 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -81,7 +81,8 @@ SparseMsg::SparseMsg(
   self_idx(0),
   obj_state(BASE)
 {
-  vm.get(&rank, &npet, NULL, NULL, NULL);
+  rank = vm.getLocalPet();
+  npet = vm.getPetCount();
 }
 
 //-----------------------------------------------------------------------------

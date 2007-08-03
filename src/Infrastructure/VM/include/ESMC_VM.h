@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.38 2007/08/02 22:47:27 theurich Exp $
+// $Id: ESMC_VM.h,v 1.39 2007/08/03 18:27:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -94,10 +94,6 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     int enter(class VMPlan *vmp, void *info, void *cargo);
     void shutdown(class VMPlan *vmp, void *info, int *rc);
     // get()
-    int get(int *localPet, int *petCount, int *peCount,
-      MPI_Comm *mpiCommunicator, ESMC_Logical *okOpenMpFlag);
-    int getPETLocalInfo(int pet, int *peCount, int *ssiId, int *threadCount,
-      int *threadId, int *vas);
     int getPETMatchPET(int pet, VM &vmMatch, int *petMatchCount,
       int *petMatchList, int len_petMatchList);
     VMId *getVMId(int *rc) const;   // Return VMId of the VM context.

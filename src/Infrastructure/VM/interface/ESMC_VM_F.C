@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.75 2007/08/03 00:47:02 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.76 2007/08/03 18:27:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -381,23 +381,27 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     MPI_Comm mpiCommTemp;
-    // Call into the actual C++ method wrapped inside LogErr handling
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->get(
-      ESMC_NOT_PRESENT_FILTER(localPet), 
-      ESMC_NOT_PRESENT_FILTER(petCount), 
-      ESMC_NOT_PRESENT_FILTER(peCount),
-      &mpiCommTemp, 
-      ESMC_NOT_PRESENT_FILTER(okOpenMpFlag)),
-      ESMF_ERR_PASSTHRU,
-      ESMC_NOT_PRESENT_FILTER(rc))) return;
-    // deal with the MPI communicator  
+    // fill return values
+    if (ESMC_NOT_PRESENT_FILTER(localPet) != ESMC_NULL_POINTER)
+      *localPet = (*ptr)->getLocalPet();
+    if (ESMC_NOT_PRESENT_FILTER(petCount) != ESMC_NULL_POINTER)
+      *petCount = (*ptr)->getPetCount();
+    if (ESMC_NOT_PRESENT_FILTER(peCount) != ESMC_NULL_POINTER){
+      int npets = (*ptr)->getNpets();
+      *peCount = 0; // reset
+      for (int i=0; i<npets; i++)
+        *peCount += (*ptr)->getNcpet(i);
+    }
     if (ESMC_NOT_PRESENT_FILTER(mpiCommunicator) != ESMC_NULL_POINTER){
+      mpiCommTemp = (*ptr)->getMpi_c();
 #ifdef ESMF_DONT_HAVE_MPI_COMM_C2F
       *mpiCommunicator = (int)(mpiCommTemp);
 #else
       *mpiCommunicator = (int)MPI_Comm_c2f(mpiCommTemp);
 #endif
-    }
+    }        
+    if (ESMC_NOT_PRESENT_FILTER(okOpenMpFlag) != ESMC_NULL_POINTER)
+      *okOpenMpFlag = ESMF_TRUE;    // TODO: Determine this at compile time...
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
@@ -408,16 +412,24 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_vmgetpetlocalinfo()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    // Call into the actual C++ method wrapped inside LogErr handling
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->getPETLocalInfo(
-      *pet,
-      ESMC_NOT_PRESENT_FILTER(peCount),
-      ESMC_NOT_PRESENT_FILTER(ssiId),
-      ESMC_NOT_PRESENT_FILTER(threadCount),
-      ESMC_NOT_PRESENT_FILTER(threadId),
-      ESMC_NOT_PRESENT_FILTER(vas)),
-      ESMF_ERR_PASSTHRU,
-      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // check that pet is within bounds
+    int petCount = (*ptr)->getPetCount();
+    if (*pet < 0 || *pet >= petCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+        "- provided pet id is out of range", rc);
+      return;
+    }
+    // fill return values
+    if (ESMC_NOT_PRESENT_FILTER(peCount) != ESMC_NULL_POINTER)
+      *peCount = (*ptr)->getNcpet(*pet);
+    if (ESMC_NOT_PRESENT_FILTER(ssiId) != ESMC_NULL_POINTER)
+      *ssiId = (*ptr)->getSsiid(*pet);
+    if (ESMC_NOT_PRESENT_FILTER(threadCount) != ESMC_NULL_POINTER)
+      *threadCount = (*ptr)->getNthreads(*pet);
+    if (ESMC_NOT_PRESENT_FILTER(threadId) != ESMC_NULL_POINTER)
+      *threadId = (*ptr)->getTid(*pet);
+    if (ESMC_NOT_PRESENT_FILTER(vas) != ESMC_NULL_POINTER)
+      *vas = (*ptr)->getVas(*pet);
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }

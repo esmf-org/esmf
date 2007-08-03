@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.61 2007/07/19 22:30:45 theurich Exp $
+// $Id: ESMC_Array_F.C,v 1.62 2007/08/03 18:27:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -751,8 +751,7 @@ extern "C" {
       opt_vm = ESMCI::VM::getCurrent(&localrc);
     else opt_vm = *vm;
     // check if this is rootPET
-    int localPET;
-    opt_vm->get(&localPET, NULL, NULL, NULL, NULL);
+    int localPET = opt_vm->getLocalPet();
     // if this is not the rootPET then exit because this is root side of scatter
     if (localPET != *rootPET){
       if (ESMC_NOT_PRESENT_FILTER(rc) != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
@@ -828,8 +827,7 @@ extern "C" {
       opt_vm = ESMCI::VM::getCurrent(&localrc);
     else opt_vm = *vm;
     // check if this is rootPET
-    int localPET;
-    opt_vm->get(&localPET, NULL, NULL, NULL, NULL);
+    int localPET = opt_vm->getLocalPet();
     // if this is not the rootPET then exit because this is root side of scatter
     if (localPET != *rootPET){
       if (ESMC_NOT_PRESENT_FILTER(rc) != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
@@ -886,8 +884,7 @@ extern "C" {
       opt_vm = ESMCI::VM::getCurrent(&localrc);
     else opt_vm = *vm;
     // check if this is rootPET
-    int localPET;
-    opt_vm->get(&localPET, NULL, NULL, NULL, NULL);
+    int localPET = opt_vm->getLocalPet();
     // if this is not the rootPET then exit because this is root side of scatter
     if (localPET != *rootPET){
       if (ESMC_NOT_PRESENT_FILTER(rc) != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;

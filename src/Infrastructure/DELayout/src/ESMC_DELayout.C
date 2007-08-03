@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.63 2007/08/03 04:21:47 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.64 2007/08/03 18:27:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.63 2007/08/03 04:21:47 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.64 2007/08/03 18:27:16 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -78,12 +78,9 @@ DELayout *DELayout::create(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-   
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
   // allocate the new DELayout object and construct the inside
   DELayout *delayout;
@@ -132,12 +129,9 @@ DELayout *DELayout::create(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-   
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
   // There is only one DELayoutConstruct() method - it requires a petMap
   // in order to construct the inside of a DELayout object. The task of 
@@ -298,14 +292,11 @@ DELayout *DELayout::create(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  DELayout *layout;
-   
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
+  DELayout *layout;
   // deal with optional variables
   ESMC_Logical cyclic = ESMF_FALSE;
   if (cyclic_opt != ESMC_NULL_POINTER)
@@ -406,13 +397,9 @@ int DELayout::destroy(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // return with errors for NULL pointer
   if (delayout == ESMC_NULL_POINTER || *delayout == ESMC_NULL_POINTER){
@@ -465,13 +452,9 @@ int DELayout::construct(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // by default use the currentVM for vm
   if (vmArg == ESMC_NULL_POINTER){
@@ -480,10 +463,10 @@ int DELayout::construct(
     return rc;
   }
 
-  // query the VM for localPet and petCount
-  int localPet, petCount, localVas;
-  vmArg->get(&localPet, &petCount, NULL, NULL, NULL);
-  localVas = vmArg->getVas(localPet);
+  // query the VM
+  int petCount = vmArg->getPetCount();
+  int localPet = vmArg->getLocalPet();
+  int localVas = vmArg->getVas(localPet);
   
   // by default pin DEs to PETs
   if (dePinFlagArg == ESMC_NULL_POINTER)
@@ -618,11 +601,8 @@ int DELayout::construct1D(VM &vmArg, int deCountArg,
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
   
   oldstyle = 1;           // while the old style delayout is still supported
   vm = &vmArg;                       // set the pointer onto this VM instance
@@ -762,11 +742,8 @@ int DELayout::constructND(VM &vmArg, int *deCountArg, int nndim,
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   oldstyle = 1;           // while the old style delayout is still supported
   vm = &vmArg;                       // set the pointer onto this VM instance
@@ -880,11 +857,8 @@ int DELayout::destruct(){
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
   
   if (oldstyle){
     // oldstyle DELayout has several more allocations that need to be deleted
@@ -940,11 +914,8 @@ int DELayout::ESMC_DELayoutFillLocal(int mypet){
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   deList = new int[deCount];
   localDeCount = 0;               // reset local de count
@@ -1011,11 +982,8 @@ int DELayout::get(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   if (vmArg != NULL)
     *vmArg = vm;
@@ -1128,11 +1096,8 @@ int DELayout::getDeprecated(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   if (deCountArg != ESMC_NULL_POINTER)
     *deCountArg = deCount;
@@ -1236,11 +1201,8 @@ int DELayout::getDELocalInfo(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   int i;
   if (de < 0 || de >= deCount){
@@ -1303,11 +1265,8 @@ int DELayout::getDEMatchDE(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   int *tempMatchList = new int[layoutMatch.deCount]; // maximum number of DEs
   int tempMatchCount = 0;
@@ -1363,11 +1322,8 @@ int DELayout::getDEMatchPET(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   int npets = vmMatch.getNpets();  // maximum number of PETs in vmMatch
   int *tempMatchList = new int[npets];
@@ -1419,11 +1375,8 @@ int DELayout::print()const{
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // return with errors for NULL pointer
   if (this == NULL){
@@ -1520,11 +1473,8 @@ int DELayout::validate()const{
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // check against NULL pointer
   if (this == ESMC_NULL_POINTER){
@@ -1569,11 +1519,8 @@ int DELayout::serialize(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   int fixedpart, nbytes;
   int i, j;
@@ -1682,13 +1629,9 @@ DELayout *DELayout::deserialize(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   DELayout *a = new DELayout;
   int fixedpart, nbytes;
@@ -1804,7 +1747,7 @@ DELayoutServiceReply DELayout::serviceOffer(
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
   // initialize the reply
   DELayoutServiceReply reply = DELAYOUT_SERVICE_DENY; // reset
@@ -1890,11 +1833,8 @@ int DELayout::serviceComplete(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   int localPet = vm->getMypet();
   int localVas = vm->getVas(localPet);
@@ -1978,11 +1918,8 @@ int DELayout::ESMC_DELayoutCopy(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // ensure this is a 1-to-1 delayout, if not bail out
   if (oneToOneFlag != ESMF_TRUE){
@@ -2036,13 +1973,9 @@ int DELayout::ESMC_DELayoutCopy(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   int blen = len * ESMC_TypeKindSize(dtk);
   localrc = ESMC_DELayoutCopy(srcdata, destdata, blen, srcDE, destDE);
@@ -2577,13 +2510,9 @@ int XXE::exec(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
   
   // get the current VM
   VM *vm = VM::getCurrent(&localrc);
@@ -2737,13 +2666,9 @@ int XXE::execReady(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
 #if 0
   printf("gjt in ESMCI::XXE::execReady(), stream=%p, %d, %d\n", stream, count, 
@@ -2930,13 +2855,9 @@ int XXE::optimize(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // local vars
-  int localrc;                // local return code
-  int rc;                     // final return code
-
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-  rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
   
 #if 0
   printf("gjt in ESMCI::XXE::optimize(), stream=%p, %d, %d\n", stream, count, 

@@ -1,4 +1,4 @@
-// $Id: ESMC_DistDir.C,v 1.5 2007/06/27 17:28:27 dneckels Exp $
+// $Id: ESMC_DistDir.C,v 1.6 2007/08/03 18:27:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistDir.C,v 1.5 2007/06/27 17:28:27 dneckels Exp $";
+static const char *const version = "$Id: ESMC_DistDir.C,v 1.6 2007/08/03 18:27:16 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -76,7 +76,8 @@ my_managed()
 
   {
     int npet_i, rank_i; // signed to unsigned helpers
-    vm.get(&rank_i, &npet_i, NULL, NULL, NULL);
+    npet_i = vm.getPetCount();
+    rank_i = vm.getLocalPet();
     npet = npet_i; rank = rank_i;
   }
   
