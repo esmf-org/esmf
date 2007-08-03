@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.74 2007/08/03 00:15:35 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.75 2007/08/03 00:47:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -836,7 +836,6 @@ extern "C" {
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // ESMCI::VMPlan interfaces
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
   
   void FTN(c_esmc_vmplanconstruct)(ESMCI::VMPlan **ptr, ESMCI::VM **ptr_vm,
     int *npetlist, int *petlist, ESMC_ContextFlag *contextflag, int *rc){
@@ -1047,11 +1046,9 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
   }
   
-  
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // ESMCI::VMId interfaces
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 
   void FTN(c_esmc_vmgetcurrentid)(ESMCI::VMId **vmid, int *rc){
 #undef  ESMC_METHOD
@@ -1114,7 +1111,6 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-
   void FTN(c_esmc_vmsendvmid)(ESMCI::VM **ptr, ESMCI::VMId **vmid, int *dest,
     int *rc){
 #undef  ESMC_METHOD
@@ -1154,4 +1150,5 @@ extern "C" {
     printf("c_esmc_vmpointerprint: %p\n", ptr);
   }
   
+#undef  ESMC_METHOD
 }
