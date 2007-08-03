@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.64 2007/08/03 18:27:16 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.65 2007/08/03 20:57:46 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.64 2007/08/03 18:27:16 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.65 2007/08/03 20:57:46 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -947,35 +947,27 @@ int DELayout::ESMC_DELayoutFillLocal(int mypet){
 //
 //-----------------------------------------------------------------------------
 
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DELayout::get()"
+#define ESMC_METHOD "ESMCI::DELayout::getDEMatchDE()"
 //BOPI
-// !IROUTINE:  ESMCI::DELayout::get
+// !IROUTINE:  ESMCI::DELayout::getDEMatchDE
 //
 // !INTERFACE:
-int DELayout::get(
+int DELayout::getDEMatchDE(
 //
 // !RETURN VALUE:
 //    int return code
 //
 // !ARGUMENTS:
 //
-  VM **vmArg,                 // out - VM context
-  int  *deCountArg,           // out - Total number of DEs
-  int  *petMap,               // out - list that maps each DE against a PET
-  int  petMapCount,           // in  - number of elements in petMap
-  int  *vasMap,               // out - list that maps each DE against a VAS
-  int  vasMapCount,           // in  - number of elements in vasMap
-  ESMC_Logical *oneToOneFlagArg, // out - 1-to-1 layout flag
-  ESMC_DePinFlag *dePinFlagArg,  // out - resources DEs are pinned to
-  int  *localDeCountArg,      // out - number of local DEs
-  int  *localDeListArg,       // out - list of local DEs
-  int  localDeListCount,      // in  - number of elements in localDeListArg
-  int  *vasLocalDeCountArg,   // out - number of vas-local DEs
-  int  *vasLocalDeListArg,    // out - list of vas-local DEs
-  int  vasLocalDeListCount    // in  - number of elements in vasLocalDeListArg
-  )const{    
+  int de,                       // in  - DE id of DE to be queried
+  DELayout &layoutMatch,        // in  - layout to match against
+  int *deMatchCount,            // out - number of matching DEs in layoutMatch
+  int *deMatchList,             // out - list of matching DEs in layoutMatch
+  int len_deMatchList           // in  - size of deMatchList
+  )const{ 
 //
 // !DESCRIPTION:
 //    Get information about a DELayout object
@@ -985,78 +977,97 @@ int DELayout::get(
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  if (vmArg != NULL)
-    *vmArg = vm;
-
-  if (deCountArg != ESMC_NULL_POINTER)
-    *deCountArg = deCount;
-
-  if (petMapCount == deCount){
-    for (int i=0; i<deCount; i++)
-      petMap[i] = deInfoList[i].pet;
-  }else if (petMapCount != 0){
+  int *tempMatchList = new int[layoutMatch.deCount]; // maximum number of DEs
+  int tempMatchCount = 0;
+  int vasCompare = deInfoList[de].vas;
+  int j=0;
+  for (int i=0; i<layoutMatch.deCount; i++)
+    if (layoutMatch.deInfoList[i].vas == vasCompare){
+      tempMatchList[j] = i;
+      ++j;
+    }
+  // now j is equal to the number of DEs in layoutMatch which operate in the 
+  // same virtual memory space as "de" does in this layout.
+  if (deMatchCount != ESMC_NULL_POINTER)
+    *deMatchCount = j;
+  if (len_deMatchList >= j)
+    for (int i=0; i<j; i++)
+      deMatchList[i] = tempMatchList[i];
+  else if (len_deMatchList != -1){
+    // deMatchList argument was specified but its size is insufficient
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-      "- Size of petMap does not match deCount", &rc);
+      "- deMatchList must be of size 'deMatchCount'", &rc);
     return rc;
-  }  
-
-  if (vasMapCount == deCount){
-    for (int i=0; i<deCount; i++)
-      vasMap[i] = deInfoList[i].vas;
-  }else if (vasMapCount != 0){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-      "- Size of vasMap does not match deCount", &rc);
-    return rc;
-  }  
-
-  if (oneToOneFlagArg != ESMC_NULL_POINTER)
-    *oneToOneFlagArg = oneToOneFlag;
-
-  if (dePinFlagArg != ESMC_NULL_POINTER){
-    // TODO: once OLDSTYLE DELayout goes remove this check!
-    if (oldstyle){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- OLDSTYLE DELayout does not support this query", &rc);
-      return rc;
-    }else
-      *dePinFlagArg = dePinFlag;
   }
+    
+  // garbage collection
+  delete [] tempMatchList;
   
-  if (localDeCountArg != ESMC_NULL_POINTER)
-    *localDeCountArg = localDeCount;
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
 
-  if (localDeListCount == localDeCount){
-    for (int i=0; i<localDeCount; i++)
-      localDeListArg[i] = localDeList[i];
-  }else if (localDeListCount != 0){
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DELayout::getDEMatchPET()"
+//BOPI
+// !IROUTINE:  ESMCI::DELayout::getDEMatchPET
+//
+// !INTERFACE:
+int DELayout::getDEMatchPET(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int de,                       // in  - DE id of DE to be matched
+  VM &vmMatch,                  // in  - vm to match against
+  int *petMatchCount,           // out - number of matching PETs in vmMatch
+  int *petMatchList,            // out - list of matching PETs in vmMatch
+  int len_petMatchList          // in  - size of petMatchList
+  )const{ 
+//
+// !DESCRIPTION:
+//    Match de in the current DELayout object against the PETs in the 
+//    provided vmMatch VM. Return number of matched PETs and a list of the
+//    matching pet id's that operate in the same virtual address space in which
+//    de lies.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  int npets = vmMatch.getNpets();  // maximum number of PETs in vmMatch
+  int *tempMatchList = new int[npets];
+  int tempMatchCount = 0;
+  int vasCompare = deInfoList[de].vas; // this is the virtual address space id
+  int j=0;
+  for (int i=0; i<npets; i++)
+    if (vmMatch.getVas(i) == vasCompare){
+      tempMatchList[j] = i;
+      ++j;
+    }
+  // now j is equal to the number of PETs in vmMatch which operate in the 
+  // same virtual address space as "de" does in this layout.
+  if (petMatchCount != ESMC_NULL_POINTER)
+    *petMatchCount = j;
+  if (len_petMatchList >= j)
+    for (int i=0; i<j; i++)
+      petMatchList[i] = tempMatchList[i];
+  else if (len_petMatchList != -1){
+    // petMatchList argument was specified but its size is insufficient
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-      "- Size of localDeListArg does not match localDeCount", &rc);
+      "- petMatchList must be of size 'petMatchCount'", &rc);
     return rc;
-  }  
-
-  if (vasLocalDeCountArg != ESMC_NULL_POINTER)
-    // TODO: once OLDSTYLE DELayout goes remove this check!
-    if (oldstyle){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- OLDSTYLE DELayout does not support this query", &rc);
-      return rc;
-    }else
-      *vasLocalDeCountArg = vasLocalDeCount;
-
-  if (vasLocalDeListCount == vasLocalDeCount){
-    // TODO: once OLDSTYLE DELayout goes remove this check!
-    if (oldstyle && vasLocalDeCount!=0){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- OLDSTYLE DELayout does not support this query", &rc);
-      return rc;
-    }else
-      for (int i=0; i<vasLocalDeCount; i++)
-        vasLocalDeListArg[i] = vasLocalDeList[i];
-  }else if (vasLocalDeListCount != 0){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-      "- Size of vasLocalDeListArg does not match vasLocalDeCount", &rc);
-    return rc;
-  }  
+  }
+    
+  // garbage collection
+  delete [] tempMatchList;
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -1173,7 +1184,7 @@ int DELayout::getDeprecated(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DELayout::getDELocalInfo()"
+#define ESMC_METHOD "ESMCI::DELayout::getDELocalInfo() - deprecated"
 //BOPI
 // !IROUTINE:  ESMCI::DELayout::getDELocalInfo
 //
@@ -1231,118 +1242,6 @@ int DELayout::getDELocalInfo(
     *nDEc = deInfoList[de].nconnect;
   if (vas != ESMC_NULL_POINTER)
     *vas = deInfoList[de].vas;
-
-  // return successfully
-  rc = ESMF_SUCCESS;
-  return rc;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DELayout::getDEMatchDE()"
-//BOPI
-// !IROUTINE:  ESMCI::DELayout::getDEMatchDE
-//
-// !INTERFACE:
-int DELayout::getDEMatchDE(
-//
-// !RETURN VALUE:
-//    int return code
-//
-// !ARGUMENTS:
-//
-  int de,                       // in  - DE id of DE to be queried
-  DELayout &layoutMatch,        // in  - layout to match against
-  int *deMatchCount,            // out - number of matching DEs in layoutMatch
-  int *deMatchList,             // out - list of matching DEs in layoutMatch
-  int len_deMatchList           // in  - size of deMatchList
-  )const{ 
-//
-// !DESCRIPTION:
-//    Get information about a DELayout object
-//
-//EOPI
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int rc = ESMC_RC_NOT_IMPL;              // final return code
-
-  int *tempMatchList = new int[layoutMatch.deCount]; // maximum number of DEs
-  int tempMatchCount = 0;
-  int vasCompare = deInfoList[de].vas;
-  int j=0;
-  for (int i=0; i<layoutMatch.deCount; i++)
-    if (layoutMatch.deInfoList[i].vas == vasCompare){
-      tempMatchList[j] = i;
-      ++j;
-    }
-  // now j is equal to the number of DEs in layoutMatch which operate in the 
-  // same virtual memory space as "de" does in this layout.
-  if (deMatchCount != ESMC_NULL_POINTER)
-    *deMatchCount = j;
-  if (len_deMatchList >= j)
-    for (int i=0; i<j; i++)
-      deMatchList[i] = tempMatchList[i];
-  delete [] tempMatchList;
-  
-  // return successfully
-  rc = ESMF_SUCCESS;
-  return rc;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DELayout::getDEMatchPET()"
-//BOPI
-// !IROUTINE:  ESMCI::DELayout::getDEMatchPET
-//
-// !INTERFACE:
-int DELayout::getDEMatchPET(
-//
-// !RETURN VALUE:
-//    int return code
-//
-// !ARGUMENTS:
-//
-  int de,                       // in  - DE id of DE to be matched
-  VM &vmMatch,                  // in  - vm to match against
-  int *petMatchCount,           // out - number of matching PETs in vmMatch
-  int *petMatchList,            // out - list of matching PETs in vmMatch
-  int len_petMatchList          // in  - size of petMatchList
-  )const{ 
-//
-// !DESCRIPTION:
-//    Match de in the current DELayout object against the PETs in the 
-//    provided vmMatch VM. Return number of matched PETs and a list of the
-//    matching pet id's that operate in the same virtual address space in which
-//    de lies.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int rc = ESMC_RC_NOT_IMPL;              // final return code
-
-  int npets = vmMatch.getNpets();  // maximum number of PETs in vmMatch
-  int *tempMatchList = new int[npets];
-  int tempMatchCount = 0;
-  int vasCompare = deInfoList[de].vas; // this is the virtual address space id
-  int j=0;
-  for (int i=0; i<npets; i++)
-    if (vmMatch.getVas(i) == vasCompare){
-      tempMatchList[j] = i;
-      ++j;
-    }
-  // now j is equal to the number of PETs in vmMatch which operate in the 
-  // same virtual address space as "de" does in this layout.
-  if (petMatchCount != ESMC_NULL_POINTER)
-    *petMatchCount = j;
-  if (len_petMatchList >= j)
-    for (int i=0; i<j; i++)
-      petMatchList[i] = tempMatchList[i];
-  delete [] tempMatchList;
 
   // return successfully
   rc = ESMF_SUCCESS;

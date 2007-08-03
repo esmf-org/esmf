@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.32 2007/08/03 18:27:16 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.33 2007/08/03 20:57:45 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -122,13 +122,16 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     const int *getDeList()          const {return deList;}
     int getLocalDeCount()           const {return localDeCount;}
     const int *getLocalDeList()     const {return localDeList;}
-
-    int get(VM **vmArg, int *deCountArg, int *petMap, 
-      int petMapCount, int *vasMap, int vasMapCount, 
-      ESMC_Logical *oneToOneFlagArg, ESMC_DePinFlag *dePinFlagArg,
-      int *localDeCountArg, int *localDeListArg, int localDeListCount,
-      int *vasLocalDeCountArg, int *vasLocalDeListArg, int vasLocalDeListCount)
-      const;
+    int getVasLocalDeCount()        const {return vasLocalDeCount;}
+    const int *getVasLocalDeList()  const {return vasLocalDeList;}
+    int getPet(int i)               const {return deInfoList[i].pet;}
+    int getVas(int i)               const {return deInfoList[i].vas;}
+    ESMC_Logical getOneToOneFlag()  const {return oneToOneFlag;}
+    ESMC_DePinFlag getDePinFlag()   const {return dePinFlag;}
+    int getDEMatchDE(int DEid, DELayout &layoutMatch, int *deMatchCount, 
+      int *deMatchList, int len_deMatchList)const;
+    int getDEMatchPET(int DEid, VM &vmMatch, int *petMatchCount,
+      int *petMatchList, int len_petMatchList)const;
     // misc.
     int print() const;
     int validate() const;
@@ -158,10 +161,6 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     int getDELocalInfo(int DEid, int *DEcoord, int len_coord, 
       int *DEcde, int len_cde, int *DEcw, int len_cw, int *nDEc, int *pid)
       const;
-    int getDEMatchDE(int DEid, DELayout &layoutMatch,
-      int *deMatchCount, int *deMatchList, int len_deMatchList)const;
-    int getDEMatchPET(int DEid, VM &vmMatch,
-      int *petMatchCount, int *petMatchList, int len_petMatchList)const;
         
     // ================ don't promote DELayout Comms =================
   private:

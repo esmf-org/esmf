@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.67 2007/08/03 04:21:47 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.68 2007/08/03 20:57:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -116,8 +116,7 @@ module ESMF_DELayoutMod
   public ESMF_DELayoutGetInit
   public ESMF_DELayoutSetInitCreated
 
-! - depricated methods
-  public ESMF_DELayoutGetVM
+! - deprecated methods
   public ESMF_DELayoutGetDeprecated
   public ESMF_DELayoutGetDELocalInfo
   
@@ -132,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.67 2007/08/03 04:21:47 theurich Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.68 2007/08/03 20:57:45 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -818,17 +817,12 @@ contains
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    integer, target         :: dummy(1)     ! used to satisfy the C interface...
-    integer, pointer        :: opt_petMap(:)  ! optional argument
-    integer                 :: len_petMap   ! number of elements in optional arg
-    integer, pointer        :: opt_vasMap(:)  ! optional argument
-    integer                 :: len_vasMap   ! number of elements in optional arg
-    integer, pointer        :: opt_localDeList(:)  ! optional argument
-    integer                 :: len_localDeList   ! number of elem. in opt. arg
-    integer, pointer        :: opt_vasLocalDeList(:)  ! optional argument
-    integer                 :: len_vasLocalDeList   ! number of elem. in opt. arg
-
+    integer                 :: localrc                ! local return code
+    type(ESMF_InterfaceInt) :: petMapArg              ! helper variable
+    type(ESMF_InterfaceInt) :: vasMapArg              ! helper variable
+    type(ESMF_InterfaceInt) :: localDeListArg         ! helper variable
+    type(ESMF_InterfaceInt) :: vasLocalDeListArg      ! helper variable
+    
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -836,55 +830,38 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
     
-    ! Deal with not implemented features
+    ! Not implemented features
     if (present(compCapacity)) then
-      compCapacity = 0
-      call ESMF_LogWrite("Query not implemented - Returning dummy compCapacity", &
-        ESMF_LOG_WARNING, &
-        ESMF_CONTEXT)
+      call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+          "- compCapacity query not implemented", &
+          ESMF_CONTEXT, rc)
+      return
     endif
     if (present(commCapacity)) then
-      commCapacity = 0
-      call ESMF_LogWrite("Query not implemented - Returning dummy commCapacity", &
-        ESMF_LOG_WARNING, &
-        ESMF_CONTEXT)
+      call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+          "- commCapacity query not implemented", &
+          ESMF_CONTEXT, rc)
+      return
     endif
     
-    ! Deal with optional array arguments
-    if (present(petMap)) then
-      len_petMap = size(petMap)
-      opt_petMap => petMap
-    else
-      len_petMap = 0
-      opt_petMap => dummy
-    endif
-    if (present(vasMap)) then
-      len_vasMap = size(vasMap)
-      opt_vasMap => vasMap
-    else
-      len_vasMap = 0
-      opt_vasMap => dummy
-    endif
-    if (present(localDeList)) then
-      len_localDeList = size(localDeList)
-      opt_localDeList => localDeList
-    else
-      len_localDeList = 0
-      opt_localDeList => dummy
-    endif
-    if (present(vasLocalDeList)) then
-      len_vasLocalDeList = size(vasLocalDeList)
-      opt_vasLocalDeList => vasLocalDeList
-    else
-      len_vasLocalDeList = 0
-      opt_vasLocalDeList => dummy
-    endif
-
+    ! Deal with (optional) array arguments
+    petMapArg = ESMF_InterfaceIntCreate(petMap, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    vasMapArg = ESMF_InterfaceIntCreate(vasMap, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    localDeListArg = ESMF_InterfaceIntCreate(localDeList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    vasLocalDeListArg = ESMF_InterfaceIntCreate(vasLocalDeList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DELayoutGet(delayout, vm, deCount, opt_petMap(1), &
-      len_petMap, opt_vasMap(1), len_vasMap, oneToOneFlag, dePinFlag, &
-      localDeCount, opt_localDeList(1), len_localDeList, vasLocalDeCount, &
-      opt_vasLocalDeList(1), len_vasLocalDeList, localrc)
+    call c_ESMC_DELayoutGet(delayout, vm, deCount, petMapArg, vasMapArg, &
+      oneToOneFlag, dePinFlag, localDeCount, localDeListArg, &
+      vasLocalDeCount, vasLocalDeListArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -895,6 +872,20 @@ contains
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     
+    ! garbage collection
+    call ESMF_InterfaceIntDestroy(petMapArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(vasMapArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(localDeListArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(vasLocalDeListArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1176,7 +1167,7 @@ contains
       len_deMatchList = size(deMatchList)
       opt_deMatchList => deMatchList
     else
-      len_deMatchList = 0
+      len_deMatchList = -1 ! indicate not present
       opt_deMatchList => dummy
     endif
 
@@ -1258,7 +1249,7 @@ contains
       len_petMatchList = size(petMatchList)
       opt_petMatchList => petMatchList
     else
-      len_petMatchList = 0
+      len_petMatchList = -1 ! indicate not present
       opt_petMatchList => dummy
     endif
 
@@ -1272,63 +1263,6 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
     
   end subroutine ESMF_DELayoutGetDEMatchPET
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DELayoutGetVM()"
-!BOPI
-! !IROUTINE: ESMF_DELayoutGetVM - Get VM on which this DELayout is defined
-
-! !INTERFACE:
-  subroutine ESMF_DELayoutGetVM(delayout, vm, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_DELayout),  intent(in)              :: delayout
-    type(ESMF_VM),        intent(out)             :: vm
-    integer,              intent(out),  optional  :: rc  
-!         
-!
-! !DESCRIPTION:
-!     Get internal decomposion information.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[delayout] 
-!        Queried {\tt ESMF\_DELayout} object.
-!     \item[{vm}]
-!        Upon return this holds the {\tt ESMF\_VM} object on which delayout
-!        is defined.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
-    
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_DELayoutGetVM(delayout, vm, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Set init code for deep C++ objects
-    call ESMF_VMSetInitCreated(vm, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_DELayoutGetVM
 !------------------------------------------------------------------------------
 
 

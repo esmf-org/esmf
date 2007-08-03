@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutUTest.F90,v 1.17 2007/07/31 22:41:46 svasquez Exp $
+! $Id: ESMF_DELayoutUTest.F90,v 1.18 2007/08/03 20:57:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_DELayoutUTest.F90,v 1.17 2007/07/31 22:41:46 svasquez Exp $'
+      '$Id: ESMF_DELayoutUTest.F90,v 1.18 2007/08/03 20:57:46 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -177,13 +177,6 @@
       write(name, *) "Verify matches"
       call ESMF_Test(((nsum.eq.1).and.(isum.eq.0)), name, failMsg, result, ESMF_SRCLINE)
       
-      !------------------------------------------------------------------------
-      !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "DELayout Get VM Test"
-      call ESMF_DELayoutGetVM(delayout, vm1, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
 
       call ESMF_VMPrint(vm1)
       call ESMF_VMPrint(vm)
