@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.65 2007/08/03 20:57:46 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.66 2007/08/03 21:15:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.65 2007/08/03 20:57:46 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.66 2007/08/03 21:15:35 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1419,6 +1419,7 @@ int DELayout::serialize(
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   int fixedpart, nbytes;
@@ -1442,7 +1443,9 @@ int DELayout::serialize(
   }
 
   // first set the base part of the object
-  rc = this->ESMC_Base::ESMC_Serialize(buffer, length, offset);
+  localrc = this->ESMC_Base::ESMC_Serialize(buffer, length, offset);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
 
   cp = (char *)(buffer + *offset);
   
