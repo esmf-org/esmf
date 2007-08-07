@@ -1,4 +1,4 @@
-// $Id: ESMC_PatchRecovery.C,v 1.2 2007/08/07 20:08:09 dneckels Exp $
+// $Id: ESMC_PatchRecovery.C,v 1.3 2007/08/07 20:46:00 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -18,6 +18,7 @@
 #include <ESMC_MeshField.h>
 
 #include <ESMC_MeshTypes.h>
+#include <Util/include/ESMCI_Util.h>
 
 #include <set>
 #include <iostream>
@@ -25,12 +26,12 @@
 #include <iomanip>
 #include <cmath>
 
-#include <Sacado.hpp>
+#include <sacado/Sacado.hpp>
 #include <cstdlib>
 
 
 
-extern "C" void DVD_FTN(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,double*,int*,double*,int*,int*);
+extern "C" void FTN(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,double*,int*,double*,int*,int*);
           
 
 namespace ESMCI {
@@ -265,14 +266,14 @@ std::vector<double> matsav = mat;
 #endif
 
 #ifdef OLDWAY
-  DVD_FTN(dgelsy)(
+  FTN(dgelsy)(
     &m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &jpvt[0], &rcond, &rank, &work[0], &lwork, &info);
 #else
   std::vector<double> id_rhs(ldb*ldb, 0);
   // Set up B=I
   for (int i = 0; i < m; i++) id_rhs[i*ldb + i] = 1.0;
 
-  DVD_FTN(dgelsy)(
+  FTN(dgelsy)(
     &m, &n, &m, &mat[0], &m, &id_rhs[0], &ldb, &jpvt[0], &rcond, &rank, &work[0], &lwork, &info);
 #ifdef RESIDUALS
 std::cout << "A(" << m << "," << n << ")=" << std::endl;

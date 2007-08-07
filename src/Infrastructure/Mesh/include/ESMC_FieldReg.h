@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldReg.h,v 1.1 2007/08/07 17:47:55 dneckels Exp $
+// $Id: ESMC_FieldReg.h,v 1.2 2007/08/07 20:45:56 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -15,8 +15,8 @@
 // these lines prevent this file from being read more than once if it
 // ends up being included multiple times
 
-#ifndef ESMC_MeshFieldReg_h
-#define ESMC_MeshFieldReg_h
+#ifndef ESMC_FieldReg_h
+#define ESMC_FieldReg_h
 
 #include <ESMC_Attr.h>
 #include <ESMC_MEField.h>

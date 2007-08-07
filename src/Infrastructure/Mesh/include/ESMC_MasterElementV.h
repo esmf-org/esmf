@@ -1,4 +1,4 @@
-// $Id: ESMC_MasterElementV.h,v 1.1 2007/08/07 17:47:56 dneckels Exp $
+// $Id: ESMC_MasterElementV.h,v 1.2 2007/08/07 20:45:56 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -149,6 +149,7 @@ public:
 };
 
 
+} // namespace
 } // namespace
 
 #endif

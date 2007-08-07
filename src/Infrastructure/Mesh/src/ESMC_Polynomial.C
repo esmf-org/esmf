@@ -1,4 +1,4 @@
-// $Id: ESMC_Polynomial.C,v 1.1 2007/08/07 17:48:01 dneckels Exp $
+// $Id: ESMC_Polynomial.C,v 1.2 2007/08/07 20:46:00 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -10,10 +10,13 @@
 //
 //==============================================================================
 #include <ESMC_Polynomial.h>
+
+#include <Util/include/ESMCI_Util.h>
+
 #include <iterator>
 #include <iostream>
 
-extern "C" void DVD_FTN(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,double*,int*,double*,int*,int*);
+extern "C" void FTN(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,double*,int*,double*,int*,int*);
 
 namespace ESMCI {
 namespace MESH {
@@ -128,7 +131,7 @@ void PolyFit1D(UInt nsamples, const double coord[], const double vals[], const s
   std::vector<double> work(lwork, 0);
   double rcond=0.0000000000001;
 
-  DVD_FTN(dgelsy)(
+  FTN(dgelsy)(
     &m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &jpvt[0], &rcond, &rank, &work[0], &lwork, &info);
 
   for (UInt i = 0; i < ncoef; i++) coef[i] = rhs[i];

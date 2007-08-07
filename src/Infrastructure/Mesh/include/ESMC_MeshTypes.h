@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshTypes.h,v 1.2 2007/08/07 20:08:09 dneckels Exp $
+// $Id: ESMC_MeshTypes.h,v 1.3 2007/08/07 20:45:56 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -18,7 +18,7 @@
 #ifndef ESMC_MeshTypes_h
 #define ESMC_MeshTypes_h
 
-#include <Sacado.hpp>
+#include <sacado/Sacado.hpp>
 
 namespace ESMCI {
 namespace MESH {

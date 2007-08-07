@@ -1,4 +1,4 @@
-// $Id: ESMC_Zoltan.h,v 1.1 2007/08/07 17:47:59 dneckels Exp $
+// $Id: ESMC_Zoltan.h,v 1.2 2007/08/07 20:45:56 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -34,20 +34,6 @@ typedef enum {ZOLT_BILIN=0, ZOLT_PATCH=1} Zolt_Interp;
 void ZoltanRendezvous(Mesh &srcmesh, Mesh &destMesh, Mesh &srcR, Mesh &dstR,
   UInt num_fields, MEField<> **sfields, MEField<> **dfields,
   const UInt zinterp[]);
-
-
-struct ZoltanInterp {
-  Mesh srcR, dstR;
-  CommReg A;
-  CommReg B;
-  SearchResult sres;
-};
-
-// Create/Free a transfer object
-void CreateZoltanInterp(Mesh &srcmesh, Mesh &destMesh, ZoltanInterp &z);
-void DeleteZoltanInterp(ZoltanInterp &z);
-
-void ZoltanTransfer(ZoltanInterp &z, UInt num_fields, MEField<> *);
 
 } // namespace
 } // namespace

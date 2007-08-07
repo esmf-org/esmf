@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshRead.C,v 1.1 2007/08/07 17:48:01 dneckels Exp $
+// $Id: ESMC_MeshRead.C,v 1.2 2007/08/07 20:46:00 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@ void WriteMesh(const Mesh &mesh, const std::string &fbase, int nstep, double tst
   
   std::string newname;
 
-  std::string extension = file_type == DVD_FILE_EXODUS ? ".g" : ".vtk";
+  std::string extension = file_type == ESMC_FILE_EXODUS ? ".g" : ".vtk";
 
   // If csize = 1, read fbase.g
   if (psize > 1) {
@@ -49,9 +49,9 @@ void WriteMesh(const Mesh &mesh, const std::string &fbase, int nstep, double tst
     newname = newname_str.str() + extension;
   } else newname = fbase + extension;
 
-  if (file_type == DVD_FILE_EXODUS) {
+  if (file_type == ESMC_FILE_EXODUS) {
     WriteExMesh(mesh, newname, nstep, tstep);
-  } else if (file_type == DVD_FILE_VTK) {
+  } else if (file_type == ESMC_FILE_VTK) {
     WriteVTKMesh(mesh, newname);
   } else Throw() << "Unknown filetype:" << file_type;
 }
@@ -85,7 +85,7 @@ void ReadMesh(Mesh &mesh, const std::string &fbase, bool skin, int file_type)
   int psize = Par::Size();
   
   std::string newname;
-  std::string extension = file_type == DVD_FILE_EXODUS ? ".g" : ".vtk";
+  std::string extension = file_type == ESMC_FILE_EXODUS ? ".g" : ".vtk";
 
   // If csize = 1, read fbase.g
   if (psize > 1) {
@@ -98,9 +98,9 @@ void ReadMesh(Mesh &mesh, const std::string &fbase, bool skin, int file_type)
 
 
   // Load the local serial mesh
-  if (file_type == DVD_FILE_EXODUS) {
+  if (file_type == ESMC_FILE_EXODUS) {
     LoadExMesh(mesh, newname);
-  } else if (file_type == DVD_FILE_VTK) {
+  } else if (file_type == ESMC_FILE_VTK) {
   } else Throw() << "Unknown file type:" << file_type;
 
   mesh.remove_unused_nodes();

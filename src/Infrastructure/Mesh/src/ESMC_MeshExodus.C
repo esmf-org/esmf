@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshExodus.C,v 1.1 2007/08/07 17:48:01 dneckels Exp $
+// $Id: ESMC_MeshExodus.C,v 1.2 2007/08/07 20:46:00 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -27,15 +27,18 @@
 #include <ESMC_ParEnv.h>
 
 
+#ifdef ESMC_EXODUS
 extern "C" {
 #include "exodusII.h"
 }
+#endif
 
 
 namespace ESMCI {
 namespace MESH {
  
 void LoadExMesh(Mesh &mesh, const std::string &filename, int nstep) {
+#ifdef ESMC_EXODUS
   char   title[250];
   int    ws1, ws2, exoid, exoerr;
   int    i, j, k, m, nblocks, nns, nss, nelems,
@@ -357,6 +360,7 @@ std::cout << std::endl;
 
   std::cout << "MeshExodus Load file " << filename << " complete." << std::endl;
 
+#endif
 }
 
 // Load data into an array from the mesh, switching on the correct typeid
@@ -409,6 +413,7 @@ void get_data(iter ni, iter ne, const FIELD &llf, double data[], UInt d) {
 }
 
 void WriteExMesh(const Mesh &mesh, const std::string &filename, int nstep, double tstep) {
+#ifdef ESMC_EXODUS
 
   int wsize = sizeof(double);
   int ex_id = ex_create(filename.c_str(), EX_CLOBBER, &wsize, &wsize);
@@ -579,52 +584,6 @@ std::cout << "Saving nodeset:" << nodeid << ", with " << nnd << " members" << st
 
   }
 
-#ifdef NOT
-  // Sideset variables
-
-  //int var_size = mesh.max_mapping_data;
-  unsigned int var_size = mesh.max_mapping_data;
-  if (var_size > 0) {
-  
-    ex_put_var_param(ex_id, "s", var_size);
-    std::vector<std::string> snames(var_size);
-    std::vector<char*> snames_ptr(var_size);
-
-    int vwidth = (var_size / 10)+1;
-    for (unsigned i = 0; i < var_size; i++) {
-      std::stringstream os;
-      os << "mapping_data_" << std::setw(vwidth) << std::setfill('0') << (i+1);
-      snames[i]=os.str();
-      snames_ptr[i] = const_cast<char*>(snames[i].c_str());
-    }
-    ex_put_var_names(ex_id, "s", var_size, &snames_ptr[0]);
-
-
-    ex_put_time(ex_id, nstep, &tstep);
-
-    for (MeshDB::KernelList::const_iterator msi = mesh.sidesets.begin(); msi != mesh.sidesets.end(); msi++) {
-      Kernel &md = *(msi->second);
-      int nfaces = md.count;
-      std::vector<std::vector<double> > data(var_size, std::vector<double>(nfaces));
-      int sideid = (*md.start)->get_int("sideset");
-
-      // Collect the data
-      int i = 0;
-      for (MeshDB::iterator mi = md.start; mi != md.end; mi++) {
-        const std::vector<double> &mdata = (*mi)->get_double_data("mapping_data");
-        for (unsigned int j = 0; j < mdata.size(); j++) data[j][i] = mdata[j];
-        // Zero pad the rest
-        for (unsigned int j = mdata.size(); j < var_size; j++) data[j][i] = 0.0;
-        i++;
-      }
-
-      // Now write the data
-      for (unsigned int j = 0; j < var_size; j++)
-        ex_put_sset_var(ex_id, nstep, j+1, sideid, nfaces, &(data[j])[0]);
-    }
-
-  } // if mapping data
-#endif
 
   if (nstep != 0) ex_put_time(ex_id, nstep, &tstep);
 std::cout << "nstep=" << nstep << ", tstep=" << tstep << std::endl;
@@ -777,9 +736,11 @@ std::cout << "nstep=" << nstep << ", tstep=" << tstep << std::endl;
   } // element vars
 
   ex_close(ex_id);
+#endif
 }
 
 void WriteExMeshTimeStep(int nstep, double tstep, const Mesh &mesh, const std::string &filename) {
+#ifdef ESMC_EXODUS
   int    ws1, ws2, ex_id;
   float  version;
 
@@ -920,6 +881,7 @@ void WriteExMeshTimeStep(int nstep, double tstep, const Mesh &mesh, const std::s
 
   ex_close(ex_id);
 
+#endif
 }
 
 } //namespace

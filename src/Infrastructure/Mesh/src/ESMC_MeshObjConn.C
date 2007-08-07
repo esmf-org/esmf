@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshObjConn.C,v 1.1 2007/08/07 17:48:01 dneckels Exp $
+// $Id: ESMC_MeshObjConn.C,v 1.2 2007/08/07 20:46:00 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -1039,5 +1039,6 @@ bool verify_face_relations(Mesh &mesh) {
   return ok;
 }
 
+} // namespace 
 } // namespace 
 } // namespace 

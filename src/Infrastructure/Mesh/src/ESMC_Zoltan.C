@@ -1,4 +1,4 @@
-// $Id: ESMC_Zoltan.C,v 1.1 2007/08/07 17:48:02 dneckels Exp $
+// $Id: ESMC_Zoltan.C,v 1.2 2007/08/07 20:46:00 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -19,7 +19,9 @@
 #include <ESMC_MeshObjConn.h>
 #include <ESMC_MeshSkin.h>
 
+#ifdef ESMC_ZOLTAN
 #include <zoltan.h>
+#endif
 
 #include <mpi.h>
 
@@ -37,6 +39,7 @@
 namespace ESMCI {
 namespace MESH {
 
+#ifdef ESMC_ZOLTAN
 typedef std::vector<MeshObj*> MeshObjVect;
 
 struct zoltan_user_data {
@@ -153,6 +156,7 @@ static void GetObject(void *user, int numGlobalIds, int numLids, int numObjs,
     for (UInt d = 0; d < (UInt) numDim; d++) pts[i*numDim + d] = c[d];
   }
 }
+#endif
 
 
 
@@ -160,7 +164,7 @@ void ZoltanRendezvous(Mesh &srcMesh, Mesh &dstMesh, Mesh &srcR, Mesh &dstR,
         UInt num_fields, MEField<> **sfields, MEField<> **dfields,
         const UInt zinterp[])
 {
-
+#ifdef ESMC_ZOLTAN
   std::vector<MEField<> *> sfields_uniq;
   std::copy(&sfields[0], &sfields[num_fields], std::back_inserter(sfields_uniq));
   std::sort(sfields_uniq.begin(), sfields_uniq.end());
@@ -560,20 +564,6 @@ std::cout << "Sym node, rank=" << i << std::endl;
   WriteMesh(dstR, "drend");
   // Delete commspecs
 
-#ifdef NOT
-
-  // Remove fields
-  for (UInt i = 0; i < num_fields; i++) {
-    delete dt[i]; 
-  }
-  for (UInt i = 0; i < nsfields; i++) {
-    delete st_uniq[i];
-  }
-
-  delete get_coord_field(srcR);
-  delete get_coord_field(dstR);
-#endif
-
   // Clean up
 
   Zoltan_LB_Free_Part(&importGlobalGids, &importLocalGids,
@@ -585,263 +575,6 @@ std::cout << "Sym node, rank=" << i << std::endl;
   delete mesh_isect;
 
   Zoltan_Destroy(&zz);
-}
-
-void CreateZoltanInterp(Mesh &srcMesh, Mesh &dstMesh, ZoltanInterp &z)
-{
-
-#ifdef NOT
-  float ver;
-  int rc = Zoltan_Initialize(0, NULL, &ver);
-
-  struct Zoltan_Struct *zz;
-  int rank; 
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  int csize; 
-  MPI_Comm_size(MPI_COMM_WORLD, &csize);
-
-  double seconds = 0, nseconds = 0;
-  MPI_Barrier(MPI_COMM_WORLD);
-  seconds = MPI_Wtime();
-
-  zz = Zoltan_Create(MPI_COMM_WORLD);
-
-  Zoltan_Set_Param(zz, "DEBUG_LEVEL", "0");
-  Zoltan_Set_Param(zz, "LB_METHOD", "RCB");
-  Zoltan_Set_Param(zz, "NUM_GID_ENTRIES", "2"); // Two integers for an id
-  Zoltan_Set_Param(zz, "NUM_LID_ENTRIES", "1");
-  Zoltan_Set_Param(zz, "RETURN_LISTS", "ALL");
-  Zoltan_Set_Param(zz, "RCB_RECTILINEAR_BLOCKS", "1");
-  Zoltan_Set_Param(zz, "AVERAGE_CUTS", "1");
-
-   
-  // RCB
-  Zoltan_Set_Param(zz, "KEEP_CUTS", "1");
-  Zoltan_Set_Param(zz, "RCB_OUTPUT_LEVEL", "0");
-  //Zoltan_Set_Param(zz, "RCB_RECTILINEAR_BLOCKS", "1");
-
-  int changes;
-  int numGidEntries;
-  int numLidEntries;
-  int numImport;
-  ZOLTAN_ID_PTR importGlobalGids;
-  ZOLTAN_ID_PTR importLocalGids;
-  int *importProcs;
-  int *importToPart;
-  int numExport;
-  ZOLTAN_ID_PTR exportGlobalGids;
-  ZOLTAN_ID_PTR exportLocalGids;
-  int *exportProcs;
-  int *exportToPart;
-
-  Field<NodalField> *src_coord = get_coord_field(srcMesh);
-  Field<NodalField> *dst_coord = get_coord_field(dstMesh);
-
-  UInt sdim = srcMesh.spatial_dim();
-
-  BBox *mesh_isect;
-
-  {
-    BBox b1(*src_coord, srcMesh);
-    BBox b2(*dst_coord, dstMesh);
-
-    BBox *a1, *a2;
-
-    // Get global bounding boxes
-    a1 = BBoxParUnion(b1);
-    a2 = BBoxParUnion(b2);
-
-    mesh_isect = BBoxIntersection(*a1, *a2);
-
-    delete a1; delete a2;
-  }
-
-
-std::cout << "P:" << rank << " mesh_isec=" << *mesh_isect << std::endl;
-
-
-  zoltan_user_data zud;
-  // Build the two lists of nodes that are in the box
-  build_lists(*mesh_isect, srcMesh, dstMesh, zud.elemSrc, zud.nodesDst);
-
-std::cout << "P:" << rank << " nodesSRc:" << zud.elemSrc.size() << ", nodesDst:" << zud.nodesDst.size() << std::endl;
-std::cout << "P:" << rank << " srcmeshnodes:" << srcMesh.num_nodes() << ", dstmeshnodes:" << dstMesh.num_nodes() << std::endl;
-
-  zud.srcMesh = &srcMesh; zud.dstMesh = &dstMesh;
-
-
-  // Callback parameters
-  Zoltan_Set_Num_Obj_Fn(zz, GetNumAssignedObj, (void*) &zud);
-  Zoltan_Set_Obj_List_Fn(zz, GetObjList, (void*) &zud);
-  Zoltan_Set_Num_Geom_Fn(zz, GetNumGeom, (void*) &zud);
-  Zoltan_Set_Geom_Multi_Fn(zz, GetObject, (void*) &zud);
-
-
-  rc = Zoltan_LB_Partition(zz, &changes, &numGidEntries, &numLidEntries,
-    &numImport, &importGlobalGids, &importLocalGids, &importProcs, &importToPart,
-    &numExport, &exportGlobalGids, &exportLocalGids, &exportProcs, &exportToPart);
-
-std::cout << "Zoltan rc=" << rc << std::endl;
-
-std::cout << "P:" << rank << ", numIMp:" << numImport << ", numExport:" << numExport << std::endl;
-
-  // *** Migrate the source mesh to the new decomp
-  
-  // Create a symmetric CommSpec
-  std::vector<CommRel::CommNode> srcObj;
-  UInt es_size = zud.elemSrc.size();
-  std::vector<int> moving(es_size, 0);
-
-
-  // One more step here: TODO: add the boundary elements to the RCB decomp
-  // Loop src blocks again, and add them to dstObj for
-  // all procs they intersect
-
-  bool send_neighbors = true;
-
-  int numprocs;
-  std::vector<int> procs(csize);
-  for (UInt i = 0; i < es_size; i++) {
-    //if (added[i]) continue; // only check those not yet added
-    MeshObj &elem = *zud.elemSrc[i];
-    BBox bound(*src_coord, elem);
-    Zoltan_LB_Box_Assign(zz, bound.getMin()[0],
-                             bound.getMin()[1],
-                             sdim > 2 ? bound.getMin()[2] : 0,
-                             bound.getMax()[0],
-                             bound.getMax()[1],
-                             sdim > 2 ? bound.getMax()[2] : 0,
-                             &procs[0],
-                             &numprocs);
-
-    std::set<MeshObj*> nbors;
-    if (send_neighbors) {
-      const MeshObjTopo *topo = GetMeshObjTopo(elem);
-      for (UInt f = 0; f < topo->num_sides; f++) {
-        MeshObj *el = MeshObjConn::opposite_element(elem, f);
-        if (el) nbors.insert(el);
-      }
-    }
-    for (UInt p = 0; p < (UInt) numprocs; p++) {
-      srcObj.push_back(CommRel::CommNode(&elem, procs[p]));
-      if (send_neighbors) {
-        std::set<MeshObj*>::iterator si = nbors.begin(), se = nbors.end();
-        for (; si != se; ++si) {
-          srcObj.push_back(CommRel::CommNode(*si, procs[p]));
-        }
-      } // if sn
-    } // p
-                             
-  }
-
-  // unique srcObj
-  std::sort(srcObj.begin(), srcObj.end());
-  srcObj.erase(std::unique(srcObj.begin(), srcObj.end()), srcObj.end());
-
-
-
-  CommRel *src_migration = new CommRel("src_migration", srcMesh, z.srcR);
-  src_migration->add_domain(srcObj);
-
-  srcObj.clear(); // Free some memory
-  //src_migration->Print();
-
-  z.A = src_migration->dependants();
-  CommRel *src_node_migration = z.A;
-
-  z.srcR.set_parametric_dimension(srcMesh.parametric_dim());
-  z.srcR.set_spatial_dimension(srcMesh.spatial_dim());
-  // Create the nodes
-  src_node_migration->build_range(true);
-
-  // Create the elements
-  src_migration->build_range(true);
-
-
-  // Commit srcmesh
-  z.srcR.Commit();
-
-  // Create and send the coordinate field
-  new Field<NodalField>(z.srcR, "coordinates", z.srcR.spatial_dim());
-
-  src_node_migration->send_fields(1, &src_coord);
-
-  // At this point we can send over fields (for instance coords)
-  //srcR.Print();
-
-
-
-
-  // **** Migrate the destination nodes
-  // Create a symmetric CommSpec
-  std::vector<CommRel::CommNode> dstObj;
-
-  // set a 1 if this local element is moving
-  UInt nd_size = zud.nodesDst.size();
-  moving.resize(nd_size);
-  for (UInt i = 0; i < nd_size; i++) moving[i] = 0;
-  for (UInt i = 0; i < (UInt) numExport; i++) {
-    if (exportGlobalGids[2*i] == 1) { // a node
-      moving[exportLocalGids[i]-es_size] = 1;
-    }
-  }
-
-  // Add in all the local objects that are not moving
-  for (UInt i = 0; i < nd_size; i++) {
-    if (moving[i] == 0) {
-      CommRel::CommNode cn(zud.nodesDst[i], rank);
-      dstObj.push_back(cn);
-    }
-  }
-    
-
-  // Fill This with the migrating elements
-  for (UInt i = 0; i < (UInt) numExport; i++) {
-    if (exportGlobalGids[2*i] == 1) { // a node
-      MeshObj &node = *zud.nodesDst[exportLocalGids[i]-es_size];
-      CommRel::CommNode cn(&node, exportProcs[i]);
-      dstObj.push_back(cn);
-    }
-
-  }
-
-
-  z.B = new CommRel("dst_migration", dstMesh, z.dstR);
-  CommRel *dst_migration = z.B;
-  dst_migration->add_domain(dstObj);
-  dstObj.clear(); // free memory
-
-  dst_migration->build_range(true);
-  z.dstR.set_parametric_dimension(dstMesh.parametric_dim());
-  z.dstR.set_spatial_dimension(dstMesh.spatial_dim());
-  z.dstR.Commit();
-  // Create and send the coordinate field
-  new Field<NodalField>(z.dstR, "coordinates", z.dstR.spatial_dim());
-
-  dst_migration->send_fields(1, &dst_coord);
-
-
-  MPI_Barrier(MPI_COMM_WORLD);
-  nseconds = MPI_Wtime();
-  if (rank == 0) std:: cout << "TIMING: Zoltan:" << (nseconds-seconds) << std::endl;
-  seconds = nseconds;
-  Search(z.srcR, z.dstR, z.sres);
-  MPI_Barrier(MPI_COMM_WORLD);
-  nseconds = MPI_Wtime();
-  if (rank == 0) std:: cout << "TIMING: Search:" << (nseconds-seconds) << std::endl;
-  seconds = nseconds;
-
-  // clean up
-  Zoltan_LB_Free_Part(&importGlobalGids, &importLocalGids,
-                      &importProcs, &importToPart);
-  Zoltan_LB_Free_Part(&exportGlobalGids, &exportLocalGids,
-                      &exportProcs, &exportToPart);
-
-
-  delete mesh_isect;
-
-  Zoltan_Destroy(&zz);
-  return;
 #endif
 }
 

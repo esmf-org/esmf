@@ -1,4 +1,4 @@
-// $Id: ESMC_Rebalance.C,v 1.1 2007/08/07 17:48:02 dneckels Exp $
+// $Id: ESMC_Rebalance.C,v 1.2 2007/08/07 20:46:00 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -16,7 +16,9 @@
 #include <ESMC_MeshObjConn.h>
 #include <ESMC_MeshField.h>
 
+#ifdef ESMC_ZOLTAN
 #include <zoltan.h>
+#endif
 
 namespace ESMCI {
 namespace MESH {
@@ -364,6 +366,7 @@ static int num_children(MeshObj &obj) {
 
 
 // Zoltan Mesh Functions
+#ifdef ESMC_ZOLTAN
 
 static int GetNumAssignedObj(void *user, int *err) {
   zoltan_user_data &udata = *(static_cast<zoltan_user_data*>(user));
@@ -417,6 +420,7 @@ static void GetObject(void *user, int numGlobalIds, int numLids, int numObjs,
     for (UInt d = 0; d < (UInt) numDim; d++) pts[i*numDim + d] = c[d];
   }
 }
+#endif
 
 
 
@@ -426,6 +430,7 @@ static void GetObject(void *user, int numGlobalIds, int numLids, int numObjs,
 // sym specs.
 /*--------------------------------------------------------*/
 static bool form_rebalance_comm(Mesh &mesh, CommReg &migration) {
+#ifdef ESMC_ZOLTAN
 
   float ver;
   int rc = Zoltan_Initialize(0, NULL, &ver);
@@ -511,6 +516,9 @@ std::cout << "P:" << rank << ", numIMp:" << numImport << ", numExport:" << numEx
  // Zoltan_Destroy(&zz);
 
   return changes != 0;
+#else
+  return false;
+#endif
 }
 
 } // namespace

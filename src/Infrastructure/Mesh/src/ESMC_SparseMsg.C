@@ -1,4 +1,4 @@
-// $Id: ESMC_SparseMsg.C,v 1.1 2007/08/07 17:48:02 dneckels Exp $
+// $Id: ESMC_SparseMsg.C,v 1.2 2007/08/07 20:46:00 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -220,7 +220,7 @@ void SparseMsg::communicate() {
 bool SparseMsg::filled() {
   for (UInt i = 0; i < nsend; i++) {
     buffer &b = outBuffers[i];
-    UInt dist = b.end - b.cur;
+    //UInt dist = b.end - b.cur;
 
 /*
     if (dist != 0) {
@@ -229,12 +229,12 @@ bool SparseMsg::filled() {
 */
 //std::cout << "buffer cur=" << (int) b.cur << ", end=" << (int) b.end << std::endl;
     if (b.cur > b.end) {
-      std::cout << "buffer overfilled!! cur=" << (int) b.cur << ", end=" << (int) b.end << std::endl;
+      //std::cout << "buffer overfilled!! cur=" << (int) b.cur << ", end=" << (int) b.end << std::endl;
       return false;
     }
 
     if (b.cur != &b.beg[b.msize]) {
-      std::cout << "buffer to " << b.proc << " underfilled!! cur=" << (int) b.cur << ", end=" << (int) b.end << std::endl;
+     // std::cout << "buffer to " << b.proc << " underfilled!! cur=" << (int) b.cur << ", end=" << (int) b.end << std::endl;
       return false;
     }
   }
