@@ -1,0 +1,127 @@
+// $Id: ESMC_DCat.C,v 1.1 2007/08/07 17:47:54 dneckels Exp $
+//
+// Earth System Modeling Framework
+// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+// Laboratory, University of Michigan, National Centers for Environmental 
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// NASA Goddard Space Flight Center.
+// Licensed under the University of Illinois-NCSA License.
+//
+//==============================================================================
+//==============================================================================
+// EXAMPLE        String used by test script to count examples.
+//==============================================================================
+
+/*
+ * Program concatenates a set of parallel mesh files into a single file
+*/
+
+#include <unistd.h>
+#include <stdlib.h>
+//#include <ctype.h>
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+
+#include <stdexcept>
+#include <ESMC_MeshExodus.h>
+#include <ESMC_Mesh.h>
+#include <ESMC_MeshSkin.h>
+
+#include <ESMC_ShapeFunc.h>
+#include <ESMC_Mapping.h>
+#include <ESMC_Search.h>
+#include <ESMC_Transfer.h>
+
+#include <ESMC_Field.h>
+
+#include <ESMC_MeshUtils.h>
+#include <ESMC_MasterElement.h>
+#include <ESMC_MeshRead.h>
+
+#include <ESMC_MeshPartition.h>
+
+#include <ESMC_ParEnv.h>
+
+#include <iterator>
+#include <ostream>
+#include <sstream>
+#include <iomanip>
+
+#include <cmath>
+
+#include <ESMC_types.h>
+
+using namespace ESMCI::MESH;
+
+void usage(const std::string &pname) {
+    std::cout << "Usage:" << pname << " file nparts" << std::endl;
+    std::exit(1);
+}
+
+int main(int argc, char *argv[]) {
+
+
+  Par::Init(argc, argv, "CATLOG", true);
+  std::cout << "size=" << Par::Size() << std::endl;
+
+  Mesh catmesh;
+
+  bool vtk = false;
+  if (argc == 4) {
+    if (std::string(argv[3]) == "vtk") {
+      vtk = true;
+    } else {
+      usage(argv[0]);
+    }
+  } else if (argc != 3) {
+    usage(argv[0]);
+  }
+  std::string fname(argv[1]);
+  UInt npart = std::atoi(argv[2]);
+  std::cout << "Collecting mesh " << argv[1] << " from " << npart << " poritions" << std::endl;
+  catmesh.set_filename("cat_" + fname);
+
+  std::vector<Mesh*> srcmesh(npart);
+
+
+  try {
+    // Read in the meshes
+    for (UInt i = 0; i < npart; i++) {
+      int vwidth = numDecimal(npart);
+      std::stringstream os;
+      os << fname << "." << npart << "." << std::setw(vwidth) << std::setfill('0') << i;
+      std::string src_name = os.str();
+      Mesh *mesh = new Mesh();
+      ReadMesh(*mesh, src_name, false);
+      mesh->Commit();
+      srcmesh[i] = mesh;
+    }
+
+    MeshConcat(catmesh, srcmesh);
+
+    if (!vtk)
+      WriteMesh(catmesh, catmesh.filename());
+    else
+      WriteMesh(catmesh, catmesh.filename(), 1, 0.0, ESMC_FILE_VTK);
+
+  
+  } catch (std::runtime_error &ex) {
+    std::cerr << "runtime exception:" << ex.what() << std::endl;
+    Par::Abort();
+  }
+   catch (const char *msg) {
+    std::cerr << "exception:" << msg << std::endl;
+    Par::Abort();
+  }
+  catch(std::exception &ex) {
+    std::cerr << "exception:" << ex.what() << std::endl;
+    Par::Abort();
+  }
+
+  Par::End();
+
+  return 0;
+  
+}
