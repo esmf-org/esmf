@@ -1,4 +1,4 @@
-// $Id: ESMC_ShapeFunc.C,v 1.1 2007/08/07 17:48:02 dneckels Exp $
+// $Id: ESMC_ShapeFunc.C,v 1.2 2007/08/07 20:08:09 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -12,7 +12,7 @@
 #include <ESMC_ShapeFunc.h>
 #include <ESMC_Exception.h>
 
-#include <Sacado_Fad_DFad.hpp>
+#include <Sacado.hpp>
 
 namespace ESMCI {
 namespace MESH {
