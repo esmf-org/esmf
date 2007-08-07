@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.66 2007/08/03 21:15:35 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.67 2007/08/07 05:54:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.66 2007/08/03 21:15:35 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.67 2007/08/07 05:54:14 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2432,7 +2432,8 @@ int XXE::exec(
   WaitOnIndexInfo *xxeWaitOnIndexInfo;
   WaitOnIndexRangeInfo *xxeWaitOnIndexRangeInfo;
   CommhandleInfo *xxeCommhandleInfo;
-  ProductSumInfo *xxeProductSumInfo;
+  ProductSumVectorInfo *xxeProductSumVectorInfo;
+  ProductSumScalarInfo *xxeProductSumScalarInfo;
   MemCpyInfo *xxeMemCpyInfo;
   
   for (int i=0; i<count; i++){
@@ -2484,44 +2485,89 @@ int XXE::exec(
         }
       }
       break;
-    case productSum:
+    case productSumVector:
       {
-        xxeProductSumInfo = (ProductSumInfo *)xxeElement;
-        switch (xxeProductSumInfo->opSubId){
+        xxeProductSumVectorInfo = (ProductSumVectorInfo *)xxeElement;
+        switch (xxeProductSumVectorInfo->opSubId){
         case I4:
           {
-            ESMC_I4 *element = (ESMC_I4 *)xxeProductSumInfo->element;
-            ESMC_I4 *factorList = (ESMC_I4 *)xxeProductSumInfo->factorList;
-            ESMC_I4 *valueList = (ESMC_I4 *)xxeProductSumInfo->valueList;
-            for (int j=0; j<xxeProductSumInfo->factorCount; j++)
+            ESMC_I4 *element = (ESMC_I4 *)xxeProductSumVectorInfo->element;
+            ESMC_I4 *factorList =
+              (ESMC_I4 *)xxeProductSumVectorInfo->factorList;
+            ESMC_I4 *valueList = (ESMC_I4 *)xxeProductSumVectorInfo->valueList;
+            for (int j=0; j<xxeProductSumVectorInfo->factorCount; j++)
               *element += factorList[j] * valueList[j];
           }
           break;
         case I8:
           {
-            ESMC_I8 *element = (ESMC_I8 *)xxeProductSumInfo->element;
-            ESMC_I8 *factorList = (ESMC_I8 *)xxeProductSumInfo->factorList;
-            ESMC_I8 *valueList = (ESMC_I8 *)xxeProductSumInfo->valueList;
-            for (int j=0; j<xxeProductSumInfo->factorCount; j++)
+            ESMC_I8 *element = (ESMC_I8 *)xxeProductSumVectorInfo->element;
+            ESMC_I8 *factorList =
+              (ESMC_I8 *)xxeProductSumVectorInfo->factorList;
+            ESMC_I8 *valueList = (ESMC_I8 *)xxeProductSumVectorInfo->valueList;
+            for (int j=0; j<xxeProductSumVectorInfo->factorCount; j++)
               *element += factorList[j] * valueList[j];
           }
           break;
         case R4:
           {
-            ESMC_R4 *element = (ESMC_R4 *)xxeProductSumInfo->element;
-            ESMC_R4 *factorList = (ESMC_R4 *)xxeProductSumInfo->factorList;
-            ESMC_R4 *valueList = (ESMC_R4 *)xxeProductSumInfo->valueList;
-            for (int j=0; j<xxeProductSumInfo->factorCount; j++)
+            ESMC_R4 *element = (ESMC_R4 *)xxeProductSumVectorInfo->element;
+            ESMC_R4 *factorList =
+              (ESMC_R4 *)xxeProductSumVectorInfo->factorList;
+            ESMC_R4 *valueList = (ESMC_R4 *)xxeProductSumVectorInfo->valueList;
+            for (int j=0; j<xxeProductSumVectorInfo->factorCount; j++)
               *element += factorList[j] * valueList[j];
           }
           break;
         case R8:
           {
-            ESMC_R8 *element = (ESMC_R8 *)xxeProductSumInfo->element;
-            ESMC_R8 *factorList = (ESMC_R8 *)xxeProductSumInfo->factorList;
-            ESMC_R8 *valueList = (ESMC_R8 *)xxeProductSumInfo->valueList;
-            for (int j=0; j<xxeProductSumInfo->factorCount; j++)
+            ESMC_R8 *element = (ESMC_R8 *)xxeProductSumVectorInfo->element;
+            ESMC_R8 *factorList =
+              (ESMC_R8 *)xxeProductSumVectorInfo->factorList;
+            ESMC_R8 *valueList = (ESMC_R8 *)xxeProductSumVectorInfo->valueList;
+            for (int j=0; j<xxeProductSumVectorInfo->factorCount; j++)
               *element += factorList[j] * valueList[j];
+          }
+          break;
+        default:
+          break;
+        }
+      }
+      break;
+    case productSumScalar:
+      {
+        xxeProductSumScalarInfo = (ProductSumScalarInfo *)xxeElement;
+        switch (xxeProductSumScalarInfo->opSubId){
+        case I4:
+          {
+            ESMC_I4 *element = (ESMC_I4 *)xxeProductSumScalarInfo->element;
+            ESMC_I4 *factor = (ESMC_I4 *)xxeProductSumScalarInfo->factor;
+            ESMC_I4 *value = (ESMC_I4 *)xxeProductSumScalarInfo->value;
+            *element += *factor * *value;
+          }
+          break;
+        case I8:
+          {
+            ESMC_I8 *element = (ESMC_I8 *)xxeProductSumScalarInfo->element;
+            ESMC_I8 *factor = (ESMC_I8 *)xxeProductSumScalarInfo->factor;
+            ESMC_I8 *value = (ESMC_I8 *)xxeProductSumScalarInfo->value;
+            *element += *factor * *value;
+          }
+          break;
+        case R4:
+          {
+            ESMC_R4 *element = (ESMC_R4 *)xxeProductSumScalarInfo->element;
+            ESMC_R4 *factor = (ESMC_R4 *)xxeProductSumScalarInfo->factor;
+            ESMC_R4 *value = (ESMC_R4 *)xxeProductSumScalarInfo->value;
+            *element += *factor * *value;
+          }
+          break;
+        case R8:
+          {
+            ESMC_R8 *element = (ESMC_R8 *)xxeProductSumScalarInfo->element;
+            ESMC_R8 *factor = (ESMC_R8 *)xxeProductSumScalarInfo->factor;
+            ESMC_R8 *value = (ESMC_R8 *)xxeProductSumScalarInfo->value;
+            *element += *factor * *value;
           }
           break;
         default:
@@ -2593,7 +2639,7 @@ int XXE::execReady(
   WaitOnIndexInfo *xxeWaitOnIndexInfo;
   WaitOnIndexRangeInfo *xxeWaitOnIndexRangeInfo;
   CommhandleInfo *xxeCommhandleInfo;
-  ProductSumInfo *xxeProductSumInfo;
+  ProductSumVectorInfo *xxeProductSumVectorInfo;
   
   int i = 0;  // prime index counter
   while(i!=count){
@@ -2772,7 +2818,7 @@ int XXE::optimize(
   WaitOnIndexInfo *xxeWaitOnIndexInfo;
   WaitOnIndexRangeInfo *xxeWaitOnIndexRangeInfo;
   CommhandleInfo *xxeCommhandleInfo;
-  ProductSumInfo *xxeProductSumInfo;
+  ProductSumVectorInfo *xxeProductSumVectorInfo;
   MemCpyInfo *xxeMemCpyInfo;
   
   class AnalyzeElement{

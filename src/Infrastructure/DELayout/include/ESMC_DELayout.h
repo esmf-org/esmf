@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.33 2007/08/03 20:57:45 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.34 2007/08/07 05:54:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -205,7 +205,8 @@ class XXE{
       send, recv,
       sendnb, recvnb,
       waitOnIndex, waitOnIndexRange,
-      productSum, memCpy,
+      productSumVector, productSumScalar,
+      memCpy,
       // --- ids below are not suitable for direct execution
       waitOnAllSendnb, waitOnAllRecvnb,
       // --- nop
@@ -297,7 +298,15 @@ class XXE{
       void *factorList;
       void *valueList;
       int factorCount;
-    }ProductSumInfo;
+    }ProductSumVectorInfo;
+
+    typedef struct{
+      OpId opId;
+      OpSubId opSubId;
+      void *element;
+      void *factor;
+      void *value;
+    }ProductSumScalarInfo;
 
     typedef struct{
       OpId opId;
