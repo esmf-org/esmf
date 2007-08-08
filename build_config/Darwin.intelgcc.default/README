@@ -1,0 +1,6 @@
+Settings for Darwin (Mac OS X) machines with Intel processors, using the
+commercial Intel Fortran (ifort) compiler and GNU C++ compiler (g++).
+
+Requires the following environment settings:
+
+ESMF_COMPILER intelgcc
