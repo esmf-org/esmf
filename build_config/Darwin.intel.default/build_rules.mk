@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.3 2007/08/03 11:41:27 theurich Exp $
+# $Id: build_rules.mk,v 1.4 2007/08/08 21:52:57 theurich Exp $
 #
 # Darwin.intel.default
 #
@@ -139,8 +139,6 @@ ESMF_F90COMPILEFIXCPP    = -fpp
 # Determine where ifort's libraries are located
 #
 ESMF_CXXLINKPATHS += -L$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
-ESMF_CXXLINKRPATHS += \
-  $(ESMF_RPATHPREFIX)$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
 
 ############################################################
 # Determine where icpc's libraries are located
@@ -148,14 +146,20 @@ ESMF_CXXLINKRPATHS += \
 ESMF_F90LINKPATHS += $(addprefix -L,$(shell $(ESMF_DIR)/scripts/libpath.icpc "$(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS)"))
 
 ############################################################
+# Blank out variables to prevent rpath encoding
+#
+ESMF_F90LINKRPATHS      =
+ESMF_CXXLINKRPATHS      =
+
+############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.icpc "$(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS)") -lrt -ldl
+ESMF_F90LINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.icpc "$(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS)")
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)") -lrt -ldl
+ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)")
 
 ############################################################
 # Blank out shared library options
