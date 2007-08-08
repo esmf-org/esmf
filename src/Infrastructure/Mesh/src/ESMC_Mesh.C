@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.C,v 1.1 2007/08/07 17:48:01 dneckels Exp $
+// $Id: ESMC_Mesh.C,v 1.2 2007/08/08 17:14:12 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -542,10 +542,6 @@ Par::Out() << "Resolve object type:" << MeshObjTypeString(obj_type) << std::endl
           MeshObjConn::get_node_support(*obj, etopo, ord, nodes);
         }
 
-#ifdef CRE_DEBUG
-Par::Out() << "Hit obj:" << obj->get_id() << ", send to:" << proc << std::endl;
-if (obj->get_id() == 7625 || obj->get_id() == 7744) Par::Out() << *obj;
-#endif
         std::vector<UInt>::iterator lb = std::lower_bound(to_proc.begin(), to_proc.end(), proc);
         if (lb == to_proc.end() || *lb != proc)
           to_proc.insert(lb, proc);
@@ -778,12 +774,6 @@ if (elems.size() > 0)
            // Use entry 0 to search for object
            MeshObj &elem = *elems[0];
 
-if (obj_id == 7744) {
-Par::Out() << "Elems found:" << std::endl;
-for(UInt e = 0; e < elems.size(); e++) {
-  Par::Out() << "*elems[i]=" << *elems[e];
-}
-}
       
            const MeshObjTopo *elem_topo = GetMeshObjTopo(elem);
  
