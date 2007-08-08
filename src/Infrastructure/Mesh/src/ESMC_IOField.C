@@ -1,4 +1,4 @@
-// $Id: ESMC_IOField.C,v 1.1 2007/08/07 17:48:00 dneckels Exp $
+// $Id: ESMC_IOField.C,v 1.2 2007/08/08 22:46:52 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -23,7 +23,6 @@ IOField<DataAssoc,DTYPE>::IOField(const MeshDB &mesh, const std::string &name, U
   fname(name),
   output(ostat)
 {
-
 
   // Alloc storage
   UInt fsize = num_mesh_obj();

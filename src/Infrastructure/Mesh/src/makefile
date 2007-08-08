@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2007/08/07 20:08:10 dneckels Exp $
+# $Id: makefile,v 1.2 2007/08/08 22:46:52 dneckels Exp $
 
 # leave alone.
 ALL: build_here 
@@ -45,7 +45,7 @@ CLOBBERDIRS =
 include ${ESMF_DIR}/makefile
 
 # Leave the following line blank.
-DIRS	  = 
+DIRS	  = Zoltan
 
 
 

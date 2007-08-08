@@ -1,4 +1,4 @@
-// $Id: ESMC_Zoltan.C,v 1.2 2007/08/07 20:46:00 dneckels Exp $
+// $Id: ESMC_Zoltan.C,v 1.3 2007/08/08 22:46:52 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -11,6 +11,8 @@
 //==============================================================================
 #include <ESMC_Zoltan.h>
 
+#define ESMC_ZOLTAN
+
 #include <ESMC_Mesh.h>
 #include <ESMC_BBox.h>
 #include <ESMC_MeshUtils.h>
@@ -20,7 +22,7 @@
 #include <ESMC_MeshSkin.h>
 
 #ifdef ESMC_ZOLTAN
-#include <zoltan.h>
+#include <Zoltan/zoltan.h>
 #endif
 
 #include <mpi.h>
