@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.104 2007/08/07 05:57:08 theurich Exp $
+// $Id: ESMC_Array.C,v 1.105 2007/08/09 16:54:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.104 2007/08/07 05:57:08 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.105 2007/08/09 16:54:21 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1979,10 +1979,15 @@ int Array::sparseMatMulStore(
   int petCount = vm->getPetCount();
   
   double t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11; //gjt - profile
+  double t4a, t4b, t4c, t5a, t5b, t5c;  //gjt - profile
+  double t4c1=0., t4c2=0., t4c3=0., t4c4=0., t4c5=0.;  //gjt - profile
+  double t4c3a, t4c3b, t4c3c, t4c3d;  //gjt - profile
+  double dt4c34=0., dt4c45=0.;  //gjt - profile
+  double dt4c3ab=0., dt4c3bc=0., dt4c3cd=0.;  //gjt - profile
   double t10a, t10b, t10c, t10d, t10e, t10f, t10g; //gjt - profile
-  double t10c1, t10c2;
-  double t10c2a, t10c2b, t10c2c, dt10c2bc=0.;
-  double t10f1a, t10f1b, dt10f1ab=0.;
+  double t10c1, t10c2; //gjt - profile
+  double t10c2a, t10c2b, t10c2c, dt10c2bc=0.; //gjt - profile
+  double t10f1a, t10f1b, dt10f1ab=0.; //gjt - profile
   VMK::wtime(&t0);   //gjt - profile
   
   // every Pet must provide srcArray and dstArray
@@ -2034,6 +2039,10 @@ int Array::sparseMatMulStore(
         "- method not implemented for specified typekindArg", &rc);
       return rc;
     }
+  }else{
+    // set typekindArg to ESMF_NOKIND -> prevent this Pet to act as rootPet
+    // when factors are being distributed
+    typekindArg = ESMF_NOKIND;
   }
 
   // communicate typekindArg across all Pets
@@ -2348,7 +2357,7 @@ int Array::sparseMatMulStore(
   // todo: use nb-allgather and wait right before needed below
   int *dstSeqIndexMinMaxList = new int[2*petCount];
   vm->vmk_allgather(dstSeqIndexMinMax, dstSeqIndexMinMaxList, 2*sizeof(int));
-
+  
   VMK::wtime(&t3);   //gjt - profile
 
 #if 0
@@ -2380,6 +2389,8 @@ int Array::sparseMatMulStore(
     }
   }
     
+  VMK::wtime(&t4a);   //gjt - profile
+
   // set up a distributed directory for srcArray seqIndex look-up
   int indicesPerPet = (srcSeqIndexMaxGlobal - srcSeqIndexMinGlobal + 1)
     / petCount;
@@ -2416,33 +2427,76 @@ int Array::sparseMatMulStore(
     srcSeqIndexFactorLookup[i].de = 0; // use during initialization as counter
     srcSeqIndexFactorLookup[i].factorCount = 0; // reset
   }
-  int *srcLocalFactorCount = new int[srcSeqIndexInterval[localPet].count];
+
+  // set up srcSeqIntervFactorListCount and srcSeqIntervFactorListIndex
+  int *srcSeqIntervFactorListCount = new int[petCount];
+  int **srcSeqIntervFactorListIndex = new int*[petCount];
+  for (int i=0; i<petCount; i++)
+    srcSeqIntervFactorListCount[i] = 0; // reset
+  for (int j=0; j<factorListCount; j++){
+    // loop over all factorList entries
+    int srcSeqIndex = factorIndexList->array[j*2];
+    for (int i=0; i<petCount; i++){
+      // loop over all Pets
+      if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
+        srcSeqIndex <= srcSeqIndexInterval[i].max){
+        // srcSeqIndex lies within srcSeqIndex for this Pet
+        ++srcSeqIntervFactorListCount[i]; // count this factor for this Pet
+        break;  // no other Pet can have this factor in its interval
+      }
+    }
+  }
+  int *srcSeqIntervFactorCounter = new int[petCount];
+  for (int i=0; i<petCount; i++){
+    srcSeqIntervFactorListIndex[i] = new int[srcSeqIntervFactorListCount[i]];
+    srcSeqIntervFactorCounter[i] = 0;  // reset
+  }
+  for (int j=0; j<factorListCount; j++){
+    // loop over all factorList entries
+    int srcSeqIndex = factorIndexList->array[j*2];
+    for (int i=0; i<petCount; i++){
+      // loop over all Pets
+      if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
+        srcSeqIndex <= srcSeqIndexInterval[i].max){
+        // srcSeqIndex lies within srcSeqIndex for this Pet
+        int *k = &(srcSeqIntervFactorCounter[i]);
+        srcSeqIntervFactorListIndex[i][(*k)++] = j; // store factorList index
+        break;  // no other Pet can have this factor in its interval
+      }
+    }
+  }
+  delete [] srcSeqIntervFactorCounter;
+  
+  VMK::wtime(&t4b);   //gjt - profile
 
   // all Pets construct their local srcSeqIndexFactorLookup[]
   int srcSeqIndexFactorCount = 0; // reset
   for (int factorPetIndex=0; factorPetIndex<factorPetCount; factorPetIndex++){
     // each Pet in factorPetList gets to be rootPet once and provide its factors
     int rootPet = factorPetList[factorPetIndex];
-    for (int i=0; i<srcSeqIndexInterval[localPet].count; i++)
-      srcLocalFactorCount[i] = 0; // reset
     if (localPet == rootPet){
       // rootPet
       for (int i=0; i<petCount; i++){
+        int *thisPetFactorCountList = new int[srcSeqIndexInterval[i].count+1];
+        // the extra integer value is used to store thisPetTotalFactorCount
+        // to optimize communications
+        for (int j=0; j<srcSeqIndexInterval[i].count+1; j++)
+          thisPetFactorCountList[j] = 0; // reset
         if (i == rootPet){
+          
+  VMK::wtime(&t4c1);   //gjt - profile
+  
           // rootPet -> rootPet "communication"
-          for (int j=0; j<factorListCount; j++){
-            // loop over all factorList entries
+          for (int jj=0; jj<srcSeqIntervFactorListCount[i]; jj++){
+            // loop over factorList entries in this Pet's srcSeqIndex interv
+            int j = srcSeqIntervFactorListIndex[i][jj];
             int srcSeqIndex = factorIndexList->array[j*2];
-            if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
-              srcSeqIndex <= srcSeqIndexInterval[i].max){
-              // srcSeqIndex lies within srcSeqIndex for this Pet
-              int k = srcSeqIndex - srcSeqIndexInterval[i].min;
-              ++srcLocalFactorCount[k];  // count this factor
-            }
+            int k = srcSeqIndex - srcSeqIndexInterval[i].min;
+            ++thisPetFactorCountList[k];  // count this factor
           }
           // set srcSeqIndexFactorLookup[]
-          for (int j=0; j<srcSeqIndexInterval[i].count; j++)
-            if (int factorCount = srcLocalFactorCount[j]){
+          for (int j=0; j<srcSeqIndexInterval[i].count; j++){
+            if (int factorCount = thisPetFactorCountList[j]){
               srcSeqIndexFactorCount += factorCount;  // add to the total count
               int prevFactorCount = srcSeqIndexFactorLookup[j].factorCount;
               // allocate new factorList
@@ -2459,216 +2513,202 @@ int Array::sparseMatMulStore(
               srcSeqIndexFactorLookup[j].factorList = factorList;
               srcSeqIndexFactorLookup[j].factorCount += factorCount;
             }
+          }
           // fill srcSeqIndexFactorLookup[]
           if (typekindArg == ESMC_TYPEKIND_R4){
-            for (int j=0; j<factorListCount; j++){
-              // loop over all factorList entries
+            for (int jj=0; jj<srcSeqIntervFactorListCount[i]; jj++){
+              // loop over factorList entries in this Pet's srcSeqIndex interv
+              int j = srcSeqIntervFactorListIndex[i][jj];
               int srcSeqIndex = factorIndexList->array[j*2];
-              if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
-                srcSeqIndex <= srcSeqIndexInterval[i].max){
-                // srcSeqIndex lies within srcSeqIndex for this Pet
-                int k = srcSeqIndex - srcSeqIndexInterval[i].min;
-                int kk = srcSeqIndexFactorLookup[k].de++;// counter during init
-                srcSeqIndexFactorLookup[k].factorList[kk].partnerSeqIndex =
-                  factorIndexList->array[j*2+1]; // dstSeqIndex
-                *((ESMC_R4 *)srcSeqIndexFactorLookup[k].factorList[kk].factor) =
-                  ((ESMC_R4 *)factorList)[j];
-              }
+              int k = srcSeqIndex - srcSeqIndexInterval[i].min;
+              int kk = srcSeqIndexFactorLookup[k].de++;// counter during init
+              srcSeqIndexFactorLookup[k].factorList[kk].partnerSeqIndex =
+                factorIndexList->array[j*2+1]; // dstSeqIndex
+              *((ESMC_R4 *)srcSeqIndexFactorLookup[k].factorList[kk].factor) =
+                ((ESMC_R4 *)factorList)[j];
             }
           }else if (typekindArg == ESMC_TYPEKIND_R8){
-            for (int j=0; j<factorListCount; j++){
-              // loop over all factorList entries
+            for (int jj=0; jj<srcSeqIntervFactorListCount[i]; jj++){
+              // loop over factorList entries in this Pet's srcSeqIndex interv
+              int j = srcSeqIntervFactorListIndex[i][jj];
               int srcSeqIndex = factorIndexList->array[j*2];
-              if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
-                srcSeqIndex <= srcSeqIndexInterval[i].max){
-                // srcSeqIndex lies within srcSeqIndex for this Pet
-                int k = srcSeqIndex - srcSeqIndexInterval[i].min;
-                int kk = srcSeqIndexFactorLookup[k].de++;// counter during init
-                srcSeqIndexFactorLookup[k].factorList[kk].partnerSeqIndex =
-                  factorIndexList->array[j*2+1]; // dstSeqIndex
-                *((ESMC_R8 *)srcSeqIndexFactorLookup[k].factorList[kk].factor) =
-                  ((ESMC_R8 *)factorList)[j];
+              int k = srcSeqIndex - srcSeqIndexInterval[i].min;
+              int kk = srcSeqIndexFactorLookup[k].de++;// counter during init
+              srcSeqIndexFactorLookup[k].factorList[kk].partnerSeqIndex =
+                factorIndexList->array[j*2+1]; // dstSeqIndex
+              *((ESMC_R8 *)srcSeqIndexFactorLookup[k].factorList[kk].factor) =
+                ((ESMC_R8 *)factorList)[j];
 #if 0
 printf("srcArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n", factorListCount, srcSeqIndex, factorIndexList->array[j*2+1], ((ESMC_R8 *)factorList)[j]);   
 #endif              
-              }
             }
           }else if (typekindArg == ESMC_TYPEKIND_I4){
-            for (int j=0; j<factorListCount; j++){
-              // loop over all factorList entries
+            for (int jj=0; jj<srcSeqIntervFactorListCount[i]; jj++){
+              // loop over factorList entries in this Pet's srcSeqIndex interv
+              int j = srcSeqIntervFactorListIndex[i][jj];
               int srcSeqIndex = factorIndexList->array[j*2];
-              if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
-                srcSeqIndex <= srcSeqIndexInterval[i].max){
-                // srcSeqIndex lies within srcSeqIndex for this Pet
-                int k = srcSeqIndex - srcSeqIndexInterval[i].min;
-                int kk = srcSeqIndexFactorLookup[k].de++;// counter during init
-                srcSeqIndexFactorLookup[k].factorList[kk].partnerSeqIndex =
-                  factorIndexList->array[j*2+1]; // dstSeqIndex
-                *((ESMC_I4 *)srcSeqIndexFactorLookup[k].factorList[kk].factor) =
-                  ((ESMC_I4 *)factorList)[j];
-              }
+              int k = srcSeqIndex - srcSeqIndexInterval[i].min;
+              int kk = srcSeqIndexFactorLookup[k].de++;// counter during init
+              srcSeqIndexFactorLookup[k].factorList[kk].partnerSeqIndex =
+                factorIndexList->array[j*2+1]; // dstSeqIndex
+              *((ESMC_I4 *)srcSeqIndexFactorLookup[k].factorList[kk].factor) =
+                ((ESMC_I4 *)factorList)[j];
             }
           }else if (typekindArg == ESMC_TYPEKIND_I8){
-            for (int j=0; j<factorListCount; j++){
-              // loop over all factorList entries
+            for (int jj=0; jj<srcSeqIntervFactorListCount[i]; jj++){
+              // loop over factorList entries in this Pet's srcSeqIndex interv
+              int j = srcSeqIntervFactorListIndex[i][jj];
               int srcSeqIndex = factorIndexList->array[j*2];
-              if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
-                srcSeqIndex <= srcSeqIndexInterval[i].max){
-                // srcSeqIndex lies within srcSeqIndex for this Pet
-                int k = srcSeqIndex - srcSeqIndexInterval[i].min;
-                int kk = srcSeqIndexFactorLookup[k].de++;// counter during init
-                srcSeqIndexFactorLookup[k].factorList[kk].partnerSeqIndex =
-                  factorIndexList->array[j*2+1]; // dstSeqIndex
-                *((ESMC_I8 *)srcSeqIndexFactorLookup[k].factorList[kk].factor) =
-                  ((ESMC_I8 *)factorList)[j];
-              }
-            }
-          }          
-        }else{
-          // rootPet -> not rootPet communication
-          SeqIndexFactorCount *seqIndexFactorCountList = 
-            new SeqIndexFactorCount[srcSeqIndexInterval[i].count]; // no more
-          int counts[2];
-          counts[0] = counts[1] = 0;  // reset
-          for (int j=0; j<factorListCount; j++){
-            // loop over all factorList entries
-            int srcSeqIndex = factorIndexList->array[j*2];
-            if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
-              srcSeqIndex <= srcSeqIndexInterval[i].max){
-              // srcSeqIndex lies within srcSeqIndex for this Pet
-              ++counts[1];
-              int k;
-              for (k=0; k<counts[0]; k++)
-                if (seqIndexFactorCountList[k].seqIndex == srcSeqIndex) break;
-              if (k==counts[0]){
-                // new entry
-                seqIndexFactorCountList[k].seqIndex = srcSeqIndex;
-                seqIndexFactorCountList[k].factorCount = 1; // initialize
-                ++counts[0];
-              }else{
-                // increment factorCount in existing entry
-                ++seqIndexFactorCountList[k].factorCount;
-              }
+              int k = srcSeqIndex - srcSeqIndexInterval[i].min;
+              int kk = srcSeqIndexFactorLookup[k].de++;// counter during init
+              srcSeqIndexFactorLookup[k].factorList[kk].partnerSeqIndex =
+                factorIndexList->array[j*2+1]; // dstSeqIndex
+              *((ESMC_I8 *)srcSeqIndexFactorLookup[k].factorList[kk].factor) =
+                ((ESMC_I8 *)factorList)[j];
             }
           }
+          
+  VMK::wtime(&t4c2);   //gjt - profile
+          
+        }else{
+          
+  VMK::wtime(&t4c3);   //gjt - profile
+  VMK::wtime(&t4c3a);   //gjt - profile
+          // rootPet -> not rootPet communication
+          int totalCountIndex = srcSeqIndexInterval[i].count;
+          for (int jj=0; jj<srcSeqIntervFactorListCount[i]; jj++){
+            // loop over factorList entries in this Pet's srcSeqIndex interv
+            int j = srcSeqIntervFactorListIndex[i][jj];
+            int srcSeqIndex = factorIndexList->array[j*2];
+            int k = srcSeqIndex - srcSeqIndexInterval[i].min;
+            // count this factor
+            ++thisPetFactorCountList[k];
+            ++thisPetFactorCountList[totalCountIndex];
+          }
+          
+  VMK::wtime(&t4c3b);   //gjt - profile
+  
           // send info to Pet "i"
-          vm->vmk_send(counts, 2*sizeof(int), i);
-          vm->vmk_send(seqIndexFactorCountList,
-            counts[0]*sizeof(SeqIndexFactorCount), i);
-          // prepare to send remaining information to Pet "i" in one big stream
-          int byteCount = counts[1] * (2 * sizeof(int) + dataSize);
+          vm->vmk_send(thisPetFactorCountList, 
+            (srcSeqIndexInterval[i].count + 1) * sizeof(int), i);
+            
+  VMK::wtime(&t4c3c);   //gjt - profile
+
+          // prepare to send remaining information to Pet "i" in one long stream
+          int thisPetTotalFactorCount =
+            thisPetFactorCountList[srcSeqIndexInterval[i].count];
+          int byteCount = thisPetTotalFactorCount * (2*sizeof(int) + dataSize);
           char *stream = new char[byteCount];
           int *intStream;
           if (typekindArg == ESMC_TYPEKIND_R4){
             ESMC_R4 *factorStream = (ESMC_R4 *)stream;
-            for (int j=0; j<factorListCount; j++){
-              // loop over all factorList entries
+            for (int jj=0; jj<srcSeqIntervFactorListCount[i]; jj++){
+              // loop over factorList entries in this Pet's srcSeqIndex interv
+              int j = srcSeqIntervFactorListIndex[i][jj];
               int srcSeqIndex = factorIndexList->array[j*2];
-              if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
-                srcSeqIndex <= srcSeqIndexInterval[i].max){
-                // srcSeqIndex lies within srcSeqIndex for this Pet
-                intStream = (int *)factorStream;
-                *intStream++ = srcSeqIndex;
-                *intStream++ = factorIndexList->array[j*2+1]; // dstSeqIndex
-                factorStream = (ESMC_R4 *)intStream;
-                *factorStream++ = ((ESMC_R4 *)factorList)[j];
-              }
+              intStream = (int *)factorStream;
+              *intStream++ = srcSeqIndex;
+              *intStream++ = factorIndexList->array[j*2+1]; // dstSeqIndex
+              factorStream = (ESMC_R4 *)intStream;
+              *factorStream++ = ((ESMC_R4 *)factorList)[j];
             }
           }else if (typekindArg == ESMC_TYPEKIND_R8){
             ESMC_R8 *factorStream = (ESMC_R8 *)stream;
-            for (int j=0; j<factorListCount; j++){
-              // loop over all factorList entries
+            for (int jj=0; jj<srcSeqIntervFactorListCount[i]; jj++){
+              // loop over factorList entries in this Pet's srcSeqIndex interv
+              int j = srcSeqIntervFactorListIndex[i][jj];
               int srcSeqIndex = factorIndexList->array[j*2];
-              if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
-                srcSeqIndex <= srcSeqIndexInterval[i].max){
-                // srcSeqIndex lies within srcSeqIndex for this Pet
-                intStream = (int *)factorStream;
-                *intStream++ = srcSeqIndex;
-                *intStream++ = factorIndexList->array[j*2+1]; // dstSeqIndex
-                factorStream = (ESMC_R8 *)intStream;
-                *factorStream++ = ((ESMC_R8 *)factorList)[j];
+              intStream = (int *)factorStream;
+              *intStream++ = srcSeqIndex;
+              *intStream++ = factorIndexList->array[j*2+1]; // dstSeqIndex
+              factorStream = (ESMC_R8 *)intStream;
+              *factorStream++ = ((ESMC_R8 *)factorList)[j];
 #if 0
 printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\n", factorListCount, srcSeqIndex, factorIndexList->array[j*2+1], ((ESMC_R8 *)factorList)[j]);   
 #endif              
-              }
             }
           }else if (typekindArg == ESMC_TYPEKIND_I4){
             ESMC_I4 *factorStream = (ESMC_I4 *)stream;
-            for (int j=0; j<factorListCount; j++){
-              // loop over all factorList entries
+            for (int jj=0; jj<srcSeqIntervFactorListCount[i]; jj++){
+              // loop over factorList entries in this Pet's srcSeqIndex interv
+              int j = srcSeqIntervFactorListIndex[i][jj];
               int srcSeqIndex = factorIndexList->array[j*2];
-              if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
-                srcSeqIndex <= srcSeqIndexInterval[i].max){
-                // srcSeqIndex lies within srcSeqIndex for this Pet
-                intStream = (int *)factorStream;
-                *intStream++ = srcSeqIndex;
-                *intStream++ = factorIndexList->array[j*2+1]; // dstSeqIndex
-                factorStream = (ESMC_I4 *)intStream;
-                *factorStream++ = ((ESMC_I4 *)factorList)[j];
-              }
+              intStream = (int *)factorStream;
+              *intStream++ = srcSeqIndex;
+              *intStream++ = factorIndexList->array[j*2+1]; // dstSeqIndex
+              factorStream = (ESMC_I4 *)intStream;
+              *factorStream++ = ((ESMC_I4 *)factorList)[j];
             }
           }else if (typekindArg == ESMC_TYPEKIND_I8){
             ESMC_I8 *factorStream = (ESMC_I8 *)stream;
-            for (int j=0; j<factorListCount; j++){
-              // loop over all factorList entries
+            for (int jj=0; jj<srcSeqIntervFactorListCount[i]; jj++){
+              // loop over factorList entries in this Pet's srcSeqIndex interv
+              int j = srcSeqIntervFactorListIndex[i][jj];
               int srcSeqIndex = factorIndexList->array[j*2];
-              if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
-                srcSeqIndex <= srcSeqIndexInterval[i].max){
-                // srcSeqIndex lies within srcSeqIndex for this Pet
-                intStream = (int *)factorStream;
-                *intStream++ = srcSeqIndex;
-                *intStream++ = factorIndexList->array[j*2+1]; // dstSeqIndex
-                factorStream = (ESMC_I8 *)intStream;
-                *factorStream++ = ((ESMC_I8 *)factorList)[j];
-              }
+              intStream = (int *)factorStream;
+              *intStream++ = srcSeqIndex;
+              *intStream++ = factorIndexList->array[j*2+1]; // dstSeqIndex
+              factorStream = (ESMC_I8 *)intStream;
+               *factorStream++ = ((ESMC_I8 *)factorList)[j];
             }
           }
-          // ready to send information to Pet "i" in one big stream
+          // ready to send information to Pet "i" in one long stream
+  VMK::wtime(&t4c3d);   //gjt - profile
+  VMK::wtime(&t4c4);   //gjt - profile
           vm->vmk_send(stream, byteCount, i);
+  VMK::wtime(&t4c5);   //gjt - profile
+  
+  dt4c34 += t4c4 - t4c3;
+  dt4c45 += t4c5 - t4c4;
+  dt4c3ab += t4c3b - t4c3a;
+  dt4c3bc += t4c3c - t4c3b;
+  dt4c3cd += t4c3d - t4c3c;
           // garbage collection
-          delete [] seqIndexFactorCountList;
           delete [] stream;
         }
-      }
+        delete [] thisPetFactorCountList;
+      } // i -petCount
     }else{
-      // not rootPet
+      // localPet not rootPet
       // receive info from rootPet
-      int counts[2];
-      vm->vmk_recv(counts, 2*sizeof(int), rootPet);
-      SeqIndexFactorCount *seqIndexFactorCountList = 
-        new SeqIndexFactorCount[counts[0]];
-      vm->vmk_recv(seqIndexFactorCountList,
-        counts[0]*sizeof(SeqIndexFactorCount), rootPet);
-      // process seqIndexFactorCountList and set srcSeqIndexFactorLookup[]
-      for (int i=0; i<counts[0]; i++){
-        int j = seqIndexFactorCountList[i].seqIndex
-          - srcSeqIndexInterval[localPet].min;
-        int factorCount = seqIndexFactorCountList[i].factorCount;
-        srcSeqIndexFactorCount += factorCount;  // add to the total count
-        int prevFactorCount = srcSeqIndexFactorLookup[j].factorCount;
-        // allocate new factorList
-        FactorElement *factorList = 
-          new FactorElement[prevFactorCount + factorCount];
-        if (prevFactorCount){
-          // copy previous factorList elements into new factorList
-          memcpy(factorList, srcSeqIndexFactorLookup[j].factorList,
-            prevFactorCount * sizeof(FactorElement));
-          // delete previous factorList
-          delete [] srcSeqIndexFactorLookup[j].factorList;
+      int *localPetFactorCountList =
+        new int[srcSeqIndexInterval[localPet].count+1];
+      // the extra integer value is used to store thisPetTotalFactorCount
+      // to optimize communications
+      vm->vmk_recv(localPetFactorCountList, 
+        (srcSeqIndexInterval[localPet].count + 1) * sizeof(int), rootPet);
+      int localPetTotalFactorCount =
+        localPetFactorCountList[srcSeqIndexInterval[localPet].count];
+      // process localPetFactorCountList and set srcSeqIndexFactorLookup[]
+      for (int j=0; j<srcSeqIndexInterval[localPet].count; j++){
+        if (int factorCount = localPetFactorCountList[j]){
+          srcSeqIndexFactorCount += factorCount;  // add to the total count
+          int prevFactorCount = srcSeqIndexFactorLookup[j].factorCount;
+          // allocate new factorList
+          FactorElement *factorList = 
+            new FactorElement[prevFactorCount + factorCount];
+          if (prevFactorCount){
+            // copy previous factorList elements into new factorList
+            memcpy(factorList, srcSeqIndexFactorLookup[j].factorList,
+              prevFactorCount * sizeof(FactorElement));
+            // delete previous factorList
+            delete [] srcSeqIndexFactorLookup[j].factorList;
+          }
+          // place new factorList into look-up table and set new count
+          srcSeqIndexFactorLookup[j].factorList = factorList;
+          srcSeqIndexFactorLookup[j].factorCount += factorCount;
         }
-        // place new factorList into look-up table and set new count
-        srcSeqIndexFactorLookup[j].factorList = factorList;
-        srcSeqIndexFactorLookup[j].factorCount += factorCount;
       }
-      // receive remaining information from rootPet in one big stream
-      int byteCount = counts[1] * (2 * sizeof(int) + dataSize);
+      delete [] localPetFactorCountList;
+      // receive remaining information from rootPet in one long stream
+      int byteCount = localPetTotalFactorCount * (2 * sizeof(int) + dataSize);
       char *stream = new char[byteCount];
       vm->vmk_recv(stream, byteCount, rootPet);
       // process stream and set srcSeqIndexFactorLookup[] content
       int *intStream;
       if (typekindArg == ESMC_TYPEKIND_R4){
         ESMC_R4 *factorStream = (ESMC_R4 *)stream;
-        for (int i=0; i<counts[1]; i++){
+        for (int i=0; i<localPetTotalFactorCount; i++){
           intStream = (int *)factorStream;
           int j=*intStream++ - srcSeqIndexInterval[localPet].min; // srcSeqIndex
           int k=srcSeqIndexFactorLookup[j].de++;// counter during initialization
@@ -2680,7 +2720,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
         }
       }else if (typekindArg == ESMC_TYPEKIND_R8){
         ESMC_R8 *factorStream = (ESMC_R8 *)stream;
-        for (int i=0; i<counts[1]; i++){
+        for (int i=0; i<localPetTotalFactorCount; i++){
           intStream = (int *)factorStream;
           int j=*intStream++ - srcSeqIndexInterval[localPet].min; // srcSeqIndex
           int k=srcSeqIndexFactorLookup[j].de++;// counter during initialization
@@ -2692,7 +2732,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
         }
       }else if (typekindArg == ESMC_TYPEKIND_I4){
         ESMC_I4 *factorStream = (ESMC_I4 *)stream;
-        for (int i=0; i<counts[1]; i++){
+        for (int i=0; i<localPetTotalFactorCount; i++){
           intStream = (int *)factorStream;
           int j=*intStream++ - srcSeqIndexInterval[localPet].min; // srcSeqIndex
           int k=srcSeqIndexFactorLookup[j].de++;// counter during initialization
@@ -2704,7 +2744,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
         }
       }else if (typekindArg == ESMC_TYPEKIND_I8){
         ESMC_I8 *factorStream = (ESMC_I8 *)stream;
-        for (int i=0; i<counts[1]; i++){
+        for (int i=0; i<localPetTotalFactorCount; i++){
           intStream = (int *)factorStream;
           int j=*intStream++ - srcSeqIndexInterval[localPet].min; // srcSeqIndex
           int k=srcSeqIndexFactorLookup[j].de++;// counter during initialization
@@ -2716,11 +2756,12 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
         }
       }
       // garbage collection
-      delete [] seqIndexFactorCountList;
       delete [] stream;
     }
   } // factorPetIndex
   
+  VMK::wtime(&t4c);   //gjt - profile
+
   // communicate between Pets to set up "de" member in srcSeqIndexFactorLookup[]
   for (int i=0; i<petCount; i++){
     // Pet "i" is the active srcSeqIndex interval
@@ -2785,6 +2826,11 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     }
   }
       
+  printf("gjt - profile for PET %d:\n"
+    " t4a=%g\n t4b=%g\n t4c1=%g\n t4c2=%g\n dt4c3ab=%g\n dt4c3bc=%g\n "
+    "dt4c3cd=%g\n dt4c34=%g\n dt4c45=%g\n t4c=%g\n",
+    localPet, t4a-t3, t4b-t3, t4c1-t3, t4c2-t3, dt4c3ab, dt4c3bc, dt4c3cd, 
+    dt4c34, dt4c45, t4c-t3);
   VMK::wtime(&t4);   //gjt - profile
 
   // determine the dstSeqIndexMinGlobal and MaxGlobal
@@ -2808,6 +2854,8 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     }
   }
     
+  VMK::wtime(&t5a);   //gjt - profile
+
   // set up a distributed directory for dstArray seqIndex look-up
   indicesPerPet = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1) / petCount;
   extraIndices = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1) % petCount;
@@ -2842,33 +2890,73 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     dstSeqIndexFactorLookup[i].de = 0; // use during initialization as counter
     dstSeqIndexFactorLookup[i].factorCount = 0; // reset
   }
-  int *dstLocalFactorCount = new int[dstSeqIndexInterval[localPet].count];
+
+  // set up dstSeqIntervFactorListCount and dstSeqIntervFactorListIndex
+  int *dstSeqIntervFactorListCount = new int[petCount];
+  int **dstSeqIntervFactorListIndex = new int*[petCount];
+  for (int i=0; i<petCount; i++)
+    dstSeqIntervFactorListCount[i] = 0; // reset
+  for (int j=0; j<factorListCount; j++){
+    // loop over all factorList entries
+    int dstSeqIndex = factorIndexList->array[j*2+1];
+    for (int i=0; i<petCount; i++){
+      // loop over all Pets
+      if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
+        dstSeqIndex <= dstSeqIndexInterval[i].max){
+        // dstSeqIndex lies within dstSeqIndex for this Pet
+        ++dstSeqIntervFactorListCount[i]; // count this factor for this Pet
+        break;  // no other Pet can have this factor in its interval
+      }
+    }
+  }
+  int *dstSeqIntervFactorCounter = new int[petCount];
+  for (int i=0; i<petCount; i++){
+    dstSeqIntervFactorListIndex[i] = new int[dstSeqIntervFactorListCount[i]];
+    dstSeqIntervFactorCounter[i] = 0;  // reset
+  }
+  for (int j=0; j<factorListCount; j++){
+    // loop over all factorList entries
+    int dstSeqIndex = factorIndexList->array[j*2+1];
+    for (int i=0; i<petCount; i++){
+      // loop over all Pets
+      if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
+        dstSeqIndex <= dstSeqIndexInterval[i].max){
+        // dstSeqIndex lies within dstSeqIndex for this Pet
+        int *k = &(dstSeqIntervFactorCounter[i]);
+        dstSeqIntervFactorListIndex[i][(*k)++] = j; // store factorList index
+        break;  // no other Pet can have this factor in its interval
+      }
+    }
+  }
+  delete [] dstSeqIntervFactorCounter;
   
+  VMK::wtime(&t5b);   //gjt - profile
+
   // all Pets construct their local dstSeqIndexFactorLookup[]
   int dstSeqIndexFactorCount = 0; // reset
   for (int factorPetIndex=0; factorPetIndex<factorPetCount; factorPetIndex++){
     // each Pet in factorPetList gets to be rootPet once and provide its factors
     int rootPet = factorPetList[factorPetIndex];
-    for (int i=0; i<dstSeqIndexInterval[localPet].count; i++)
-      dstLocalFactorCount[i] = 0; // reset
     if (localPet == rootPet){
       // rootPet
       for (int i=0; i<petCount; i++){
+        int *thisPetFactorCountList = new int[dstSeqIndexInterval[i].count+1];
+        // the extra integer value is used to store thisPetTotalFactorCount
+        // to optimize communications
+        for (int j=0; j<dstSeqIndexInterval[i].count+1; j++)
+          thisPetFactorCountList[j] = 0; // reset
         if (i == rootPet){
           // rootPet -> rootPet "communication"
-          for (int j=0; j<factorListCount; j++){
-            // loop over all factorList entries
+          for (int jj=0; jj<dstSeqIntervFactorListCount[i]; jj++){
+            // loop over factorList entries in this Pet's dstSeqIndex interv
+            int j = dstSeqIntervFactorListIndex[i][jj];
             int dstSeqIndex = factorIndexList->array[j*2+1];
-            if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
-              dstSeqIndex <= dstSeqIndexInterval[i].max){
-              // dstSeqIndex lies within dstSeqIndex for this Pet
-              int k = dstSeqIndex - dstSeqIndexInterval[i].min;
-              ++dstLocalFactorCount[k];  // count this factor
-            }
+            int k = dstSeqIndex - dstSeqIndexInterval[i].min;
+            ++thisPetFactorCountList[k];  // count this factor
           }
           // set dstSeqIndexFactorLookup[]
-          for (int j=0; j<dstSeqIndexInterval[i].count; j++)
-            if (int factorCount = dstLocalFactorCount[j]){
+          for (int j=0; j<dstSeqIndexInterval[i].count; j++){
+            if (int factorCount = thisPetFactorCountList[j]){
               dstSeqIndexFactorCount += factorCount;  // add to the total count
               int prevFactorCount = dstSeqIndexFactorLookup[j].factorCount;
               // allocate new factorList
@@ -2885,216 +2973,181 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
               dstSeqIndexFactorLookup[j].factorList = factorList;
               dstSeqIndexFactorLookup[j].factorCount += factorCount;
             }
+          }
           // fill dstSeqIndexFactorLookup[]
           if (typekindArg == ESMC_TYPEKIND_R4){
-            for (int j=0; j<factorListCount; j++){
-              // loop over all factorList entries
+            for (int jj=0; jj<dstSeqIntervFactorListCount[i]; jj++){
+              // loop over factorList entries in this Pet's dstSeqIndex interv
+              int j = dstSeqIntervFactorListIndex[i][jj];
               int dstSeqIndex = factorIndexList->array[j*2+1];
-              if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
-                dstSeqIndex <= dstSeqIndexInterval[i].max){
-                // dstSeqIndex lies within dstSeqIndex for this Pet
-                int k = dstSeqIndex - dstSeqIndexInterval[i].min;
-                int kk = dstSeqIndexFactorLookup[k].de++;// counter during init
-                dstSeqIndexFactorLookup[k].factorList[kk].partnerSeqIndex =
-                  factorIndexList->array[j*2]; // srcSeqIndex
-                *((ESMC_R4 *)dstSeqIndexFactorLookup[k].factorList[kk].factor) =
-                  ((ESMC_R4 *)factorList)[j];
-              }
+              int k = dstSeqIndex - dstSeqIndexInterval[i].min;
+              int kk = dstSeqIndexFactorLookup[k].de++;// counter during init
+              dstSeqIndexFactorLookup[k].factorList[kk].partnerSeqIndex =
+                factorIndexList->array[j*2]; // srcSeqIndex
+              *((ESMC_R4 *)dstSeqIndexFactorLookup[k].factorList[kk].factor) =
+                ((ESMC_R4 *)factorList)[j];
             }
           }else if (typekindArg == ESMC_TYPEKIND_R8){
-            for (int j=0; j<factorListCount; j++){
-              // loop over all factorList entries
+            for (int jj=0; jj<dstSeqIntervFactorListCount[i]; jj++){
+              // loop over factorList entries in this Pet's dstSeqIndex interv
+              int j = dstSeqIntervFactorListIndex[i][jj];
               int dstSeqIndex = factorIndexList->array[j*2+1];
-              if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
-                dstSeqIndex <= dstSeqIndexInterval[i].max){
-                // dstSeqIndex lies within dstSeqIndex for this Pet
-                int k = dstSeqIndex - dstSeqIndexInterval[i].min;
-                int kk = dstSeqIndexFactorLookup[k].de++;// counter during init
-                dstSeqIndexFactorLookup[k].factorList[kk].partnerSeqIndex =
-                  factorIndexList->array[j*2]; // srcSeqIndex
-                *((ESMC_R8 *)dstSeqIndexFactorLookup[k].factorList[kk].factor) =
-                  ((ESMC_R8 *)factorList)[j];
+              int k = dstSeqIndex - dstSeqIndexInterval[i].min;
+              int kk = dstSeqIndexFactorLookup[k].de++;// counter during init
+              dstSeqIndexFactorLookup[k].factorList[kk].partnerSeqIndex =
+                factorIndexList->array[j*2]; // srcSeqIndex
+              *((ESMC_R8 *)dstSeqIndexFactorLookup[k].factorList[kk].factor) =
+                ((ESMC_R8 *)factorList)[j];
 #if 0
 printf("dstArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n", factorListCount, dstSeqIndex, factorIndexList->array[j*2], ((ESMC_R8 *)factorList)[j]);
 #endif        
-              }
             }
           }else if (typekindArg == ESMC_TYPEKIND_I4){
-            for (int j=0; j<factorListCount; j++){
-              // loop over all factorList entries
+            for (int jj=0; jj<dstSeqIntervFactorListCount[i]; jj++){
+              // loop over factorList entries in this Pet's dstSeqIndex interv
+              int j = dstSeqIntervFactorListIndex[i][jj];
               int dstSeqIndex = factorIndexList->array[j*2+1];
-              if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
-                dstSeqIndex <= dstSeqIndexInterval[i].max){
-                // dstSeqIndex lies within dstSeqIndex for this Pet
-                int k = dstSeqIndex - dstSeqIndexInterval[i].min;
-                int kk = dstSeqIndexFactorLookup[k].de++;// counter during init
-                dstSeqIndexFactorLookup[k].factorList[kk].partnerSeqIndex =
-                  factorIndexList->array[j*2]; // srcSeqIndex
-                *((ESMC_I4 *)dstSeqIndexFactorLookup[k].factorList[kk].factor) =
-                  ((ESMC_I4 *)factorList)[j];
-              }
+              int k = dstSeqIndex - dstSeqIndexInterval[i].min;
+              int kk = dstSeqIndexFactorLookup[k].de++;// counter during init
+              dstSeqIndexFactorLookup[k].factorList[kk].partnerSeqIndex =
+                factorIndexList->array[j*2]; // srcSeqIndex
+              *((ESMC_I4 *)dstSeqIndexFactorLookup[k].factorList[kk].factor) =
+                ((ESMC_I4 *)factorList)[j];
             }
           }else if (typekindArg == ESMC_TYPEKIND_I8){
-            for (int j=0; j<factorListCount; j++){
-              // loop over all factorList entries
+            for (int jj=0; jj<dstSeqIntervFactorListCount[i]; jj++){
+              // loop over factorList entries in this Pet's dstSeqIndex interv
+              int j = dstSeqIntervFactorListIndex[i][jj];
               int dstSeqIndex = factorIndexList->array[j*2+1];
-              if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
-                dstSeqIndex <= dstSeqIndexInterval[i].max){
-                // dstSeqIndex lies within dstSeqIndex for this Pet
-                int k = dstSeqIndex - dstSeqIndexInterval[i].min;
-                int kk = dstSeqIndexFactorLookup[k].de++;// counter during init
-                dstSeqIndexFactorLookup[k].factorList[kk].partnerSeqIndex =
-                  factorIndexList->array[j*2]; // srcSeqIndex
-                *((ESMC_I8 *)dstSeqIndexFactorLookup[k].factorList[kk].factor) =
-                  ((ESMC_I8 *)factorList)[j];
-              }
+              int k = dstSeqIndex - dstSeqIndexInterval[i].min;
+              int kk = dstSeqIndexFactorLookup[k].de++;// counter during init
+              dstSeqIndexFactorLookup[k].factorList[kk].partnerSeqIndex =
+                factorIndexList->array[j*2]; // srcSeqIndex
+              *((ESMC_I8 *)dstSeqIndexFactorLookup[k].factorList[kk].factor) =
+                ((ESMC_I8 *)factorList)[j];
             }
           }          
         }else{
           // rootPet -> not rootPet communication
-          SeqIndexFactorCount *seqIndexFactorCountList = 
-            new SeqIndexFactorCount[dstSeqIndexInterval[i].count]; // no more
-          int counts[2];
-          counts[0] = counts[1] = 0;  // reset
-          for (int j=0; j<factorListCount; j++){
-            // loop over all factorList entries
+          int totalCountIndex = dstSeqIndexInterval[i].count;
+          for (int jj=0; jj<dstSeqIntervFactorListCount[i]; jj++){
+            // loop over factorList entries in this Pet's dstSeqIndex interv
+            int j = dstSeqIntervFactorListIndex[i][jj];
             int dstSeqIndex = factorIndexList->array[j*2+1];
-            if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
-              dstSeqIndex <= dstSeqIndexInterval[i].max){
-              // dstSeqIndex lies within dstSeqIndex for this Pet
-              ++counts[1];
-              int k;
-              for (k=0; k<counts[0]; k++)
-                if (seqIndexFactorCountList[k].seqIndex == dstSeqIndex) break;
-              if (k==counts[0]){
-                // new entry
-                seqIndexFactorCountList[k].seqIndex = dstSeqIndex;
-                seqIndexFactorCountList[k].factorCount = 1; // initialize
-                ++counts[0];
-              }else{
-                // increment factorCount in existing entry
-                ++seqIndexFactorCountList[k].factorCount;
-              }
-            }
+            int k = dstSeqIndex - dstSeqIndexInterval[i].min;
+            // count this factor
+            ++thisPetFactorCountList[k];
+            ++thisPetFactorCountList[totalCountIndex];
           }
           // send info to Pet "i"
-          vm->vmk_send(counts, 2*sizeof(int), i);
-          vm->vmk_send(seqIndexFactorCountList,
-            counts[0]*sizeof(SeqIndexFactorCount), i);
-          // prepare to send remaining information to Pet "i" in one big stream
-          int byteCount = counts[1] * (2 * sizeof(int) + dataSize);
+          vm->vmk_send(thisPetFactorCountList, 
+            (dstSeqIndexInterval[i].count + 1) * sizeof(int), i);
+          // prepare to send remaining information to Pet "i" in one long stream
+          int thisPetTotalFactorCount =
+            thisPetFactorCountList[dstSeqIndexInterval[i].count];
+          int byteCount = thisPetTotalFactorCount * (2*sizeof(int) + dataSize);
           char *stream = new char[byteCount];
           int *intStream;
           if (typekindArg == ESMC_TYPEKIND_R4){
             ESMC_R4 *factorStream = (ESMC_R4 *)stream;
-            for (int j=0; j<factorListCount; j++){
-              // loop over all factorList entries
+            for (int jj=0; jj<dstSeqIntervFactorListCount[i]; jj++){
+              // loop over factorList entries in this Pet's dstSeqIndex interv
+              int j = dstSeqIntervFactorListIndex[i][jj];
               int dstSeqIndex = factorIndexList->array[j*2+1];
-              if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
-                dstSeqIndex <= dstSeqIndexInterval[i].max){
-                // dstSeqIndex lies within dstSeqIndex for this Pet
-                intStream = (int *)factorStream;
-                *intStream++ = dstSeqIndex;
-                *intStream++ = factorIndexList->array[j*2]; // srcSeqIndex
-                factorStream = (ESMC_R4 *)intStream;
-                *factorStream++ = ((ESMC_R4 *)factorList)[j];
-              }
+              intStream = (int *)factorStream;
+              *intStream++ = dstSeqIndex;
+              *intStream++ = factorIndexList->array[j*2]; // srcSeqIndex
+              factorStream = (ESMC_R4 *)intStream;
+              *factorStream++ = ((ESMC_R4 *)factorList)[j];
             }
           }else if (typekindArg == ESMC_TYPEKIND_R8){
             ESMC_R8 *factorStream = (ESMC_R8 *)stream;
-            for (int j=0; j<factorListCount; j++){
-              // loop over all factorList entries
+            for (int jj=0; jj<dstSeqIntervFactorListCount[i]; jj++){
+              // loop over factorList entries in this Pet's dstSeqIndex interv
+              int j = dstSeqIntervFactorListIndex[i][jj];
               int dstSeqIndex = factorIndexList->array[j*2+1];
-              if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
-                dstSeqIndex <= dstSeqIndexInterval[i].max){
-                // dstSeqIndex lies within dstSeqIndex for this Pet
-                intStream = (int *)factorStream;
-                *intStream++ = dstSeqIndex;
-                *intStream++ = factorIndexList->array[j*2]; // srcSeqIndex
-                factorStream = (ESMC_R8 *)intStream;
-                *factorStream++ = ((ESMC_R8 *)factorList)[j];
+              intStream = (int *)factorStream;
+              *intStream++ = dstSeqIndex;
+              *intStream++ = factorIndexList->array[j*2]; // srcSeqIndex
+              factorStream = (ESMC_R8 *)intStream;
+              *factorStream++ = ((ESMC_R8 *)factorList)[j];
 #if 0
 printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\n", factorListCount, dstSeqIndex, factorIndexList->array[j*2], ((ESMC_R8 *)factorList)[j]);
 #endif
-              }
             }
           }else if (typekindArg == ESMC_TYPEKIND_I4){
             ESMC_I4 *factorStream = (ESMC_I4 *)stream;
-            for (int j=0; j<factorListCount; j++){
-              // loop over all factorList entries
+            for (int jj=0; jj<dstSeqIntervFactorListCount[i]; jj++){
+              // loop over factorList entries in this Pet's dstSeqIndex interv
+              int j = dstSeqIntervFactorListIndex[i][jj];
               int dstSeqIndex = factorIndexList->array[j*2+1];
-              if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
-                dstSeqIndex <= dstSeqIndexInterval[i].max){
-                // dstSeqIndex lies within dstSeqIndex for this Pet
-                intStream = (int *)factorStream;
-                *intStream++ = dstSeqIndex;
-                *intStream++ = factorIndexList->array[j*2]; // srcSeqIndex
-                factorStream = (ESMC_I4 *)intStream;
-                *factorStream++ = ((ESMC_I4 *)factorList)[j];
-              }
+              intStream = (int *)factorStream;
+              *intStream++ = dstSeqIndex;
+              *intStream++ = factorIndexList->array[j*2]; // srcSeqIndex
+              factorStream = (ESMC_I4 *)intStream;
+              *factorStream++ = ((ESMC_I4 *)factorList)[j];
             }
           }else if (typekindArg == ESMC_TYPEKIND_I8){
             ESMC_I8 *factorStream = (ESMC_I8 *)stream;
-            for (int j=0; j<factorListCount; j++){
-              // loop over all factorList entries
+            for (int jj=0; jj<dstSeqIntervFactorListCount[i]; jj++){
+              // loop over factorList entries in this Pet's dstSeqIndex interv
+              int j = dstSeqIntervFactorListIndex[i][jj];
               int dstSeqIndex = factorIndexList->array[j*2+1];
-              if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
-                dstSeqIndex <= dstSeqIndexInterval[i].max){
-                // dstSeqIndex lies within dstSeqIndex for this Pet
-                intStream = (int *)factorStream;
-                *intStream++ = dstSeqIndex;
-                *intStream++ = factorIndexList->array[j*2]; // srcSeqIndex
-                factorStream = (ESMC_I8 *)intStream;
-                *factorStream++ = ((ESMC_I8 *)factorList)[j];
-              }
+              intStream = (int *)factorStream;
+              *intStream++ = dstSeqIndex;
+              *intStream++ = factorIndexList->array[j*2]; // srcSeqIndex
+              factorStream = (ESMC_I8 *)intStream;
+              *factorStream++ = ((ESMC_I8 *)factorList)[j];
             }
           }
-          // ready to send information to Pet "i" in one big stream
+          // ready to send information to Pet "i" in one long stream
           vm->vmk_send(stream, byteCount, i);
           // garbage collection
-          delete [] seqIndexFactorCountList;
           delete [] stream;
         }
-      }
+        delete [] thisPetFactorCountList;
+      } // i -petCount
     }else{
-      // not rootPet
+      // localPet not rootPet
       // receive info from rootPet
-      int counts[2];
-      vm->vmk_recv(counts, 2*sizeof(int), rootPet);
-      SeqIndexFactorCount *seqIndexFactorCountList = 
-        new SeqIndexFactorCount[counts[0]];
-      vm->vmk_recv(seqIndexFactorCountList,
-        counts[0]*sizeof(SeqIndexFactorCount), rootPet);
-      // process seqIndexFactorCountList and set dstSeqIndexFactorLookup[]
-      for (int i=0; i<counts[0]; i++){
-        int j = seqIndexFactorCountList[i].seqIndex
-          - dstSeqIndexInterval[localPet].min;
-        int factorCount = seqIndexFactorCountList[i].factorCount;
-        dstSeqIndexFactorCount += factorCount;  // add to the total count
-        int prevFactorCount = dstSeqIndexFactorLookup[j].factorCount;
-        // allocate new factorList
-        FactorElement *factorList = 
-          new FactorElement[prevFactorCount + factorCount];
-        if (prevFactorCount){
-          // copy previous factorList elements into new factorList
-          memcpy(factorList, dstSeqIndexFactorLookup[j].factorList,
-            prevFactorCount * sizeof(FactorElement));
-          // delete previous factorList
-          delete [] dstSeqIndexFactorLookup[j].factorList;
+      int *localPetFactorCountList =
+        new int[dstSeqIndexInterval[localPet].count+1];
+      // the extra integer value is used to store thisPetTotalFactorCount
+      // to optimize communications
+      vm->vmk_recv(localPetFactorCountList, 
+        (dstSeqIndexInterval[localPet].count + 1) * sizeof(int), rootPet);
+      int localPetTotalFactorCount =
+        localPetFactorCountList[dstSeqIndexInterval[localPet].count];
+      // process localPetFactorCountList and set dstSeqIndexFactorLookup[]
+      for (int j=0; j<dstSeqIndexInterval[localPet].count; j++){
+        if (int factorCount = localPetFactorCountList[j]){
+          dstSeqIndexFactorCount += factorCount;  // add to the total count
+          int prevFactorCount = dstSeqIndexFactorLookup[j].factorCount;
+          // allocate new factorList
+          FactorElement *factorList = 
+            new FactorElement[prevFactorCount + factorCount];
+          if (prevFactorCount){
+            // copy previous factorList elements into new factorList
+            memcpy(factorList, dstSeqIndexFactorLookup[j].factorList,
+              prevFactorCount * sizeof(FactorElement));
+            // delete previous factorList
+            delete [] dstSeqIndexFactorLookup[j].factorList;
+          }
+          // place new factorList into look-up table and set new count
+          dstSeqIndexFactorLookup[j].factorList = factorList;
+          dstSeqIndexFactorLookup[j].factorCount += factorCount;
         }
-        // place new factorList into look-up table and set new count
-        dstSeqIndexFactorLookup[j].factorList = factorList;
-        dstSeqIndexFactorLookup[j].factorCount += factorCount;
       }
-      // receive remaining information from rootPet in one big stream
-      int byteCount = counts[1] * (2 * sizeof(int) + dataSize);
+      delete [] localPetFactorCountList;
+      // receive remaining information from rootPet in one long stream
+      int byteCount = localPetTotalFactorCount * (2 * sizeof(int) + dataSize);
       char *stream = new char[byteCount];
       vm->vmk_recv(stream, byteCount, rootPet);
       // process stream and set dstSeqIndexFactorLookup[] content
       int *intStream;
       if (typekindArg == ESMC_TYPEKIND_R4){
         ESMC_R4 *factorStream = (ESMC_R4 *)stream;
-        for (int i=0; i<counts[1]; i++){
+        for (int i=0; i<localPetTotalFactorCount; i++){
           intStream = (int *)factorStream;
           int j=*intStream++ - dstSeqIndexInterval[localPet].min; // dstSeqIndex
           int k=dstSeqIndexFactorLookup[j].de++;// counter during initialization
@@ -3106,7 +3159,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
         }
       }else if (typekindArg == ESMC_TYPEKIND_R8){
         ESMC_R8 *factorStream = (ESMC_R8 *)stream;
-        for (int i=0; i<counts[1]; i++){
+        for (int i=0; i<localPetTotalFactorCount; i++){
           intStream = (int *)factorStream;
           int j=*intStream++ - dstSeqIndexInterval[localPet].min; // dstSeqIndex
           int k=dstSeqIndexFactorLookup[j].de++;// counter during initialization
@@ -3118,7 +3171,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
         }
       }else if (typekindArg == ESMC_TYPEKIND_I4){
         ESMC_I4 *factorStream = (ESMC_I4 *)stream;
-        for (int i=0; i<counts[1]; i++){
+        for (int i=0; i<localPetTotalFactorCount; i++){
           intStream = (int *)factorStream;
           int j=*intStream++ - dstSeqIndexInterval[localPet].min; // dstSeqIndex
           int k=dstSeqIndexFactorLookup[j].de++;// counter during initialization
@@ -3130,7 +3183,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
         }
       }else if (typekindArg == ESMC_TYPEKIND_I8){
         ESMC_I8 *factorStream = (ESMC_I8 *)stream;
-        for (int i=0; i<counts[1]; i++){
+        for (int i=0; i<localPetTotalFactorCount; i++){
           intStream = (int *)factorStream;
           int j=*intStream++ - dstSeqIndexInterval[localPet].min; // dstSeqIndex
           int k=dstSeqIndexFactorLookup[j].de++;// counter during initialization
@@ -3142,11 +3195,12 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
         }
       }
       // garbage collection
-      delete [] seqIndexFactorCountList;
       delete [] stream;
     }
   } // factorPetIndex
   
+  VMK::wtime(&t5c);   //gjt - profile
+
   // communicate between Pets to set up "de" member in dstSeqIndexFactorLookup[]
   for (int i=0; i<petCount; i++){
     // Pet "i" is the active dstSeqIndex interval
@@ -3211,6 +3265,8 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     }
   }
     
+  printf("gjt - profile for PET %d:\n"
+    " t5a=%g\n t5b=%g\n t5c=%g\n", localPet, t5a-t4, t5b-t4, t5c-t4);
   VMK::wtime(&t5);   //gjt - profile
 
   // fill in the partnerDe member in srcSeqIndexFactorLookup using dst distdir
@@ -4380,8 +4436,14 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   delete [] dstSeqIndexFactorLookup;
   delete [] dstSeqIndexInterval;
   delete [] factorPetList;
-  delete [] srcLocalFactorCount;
-  delete [] dstLocalFactorCount;
+  delete [] srcSeqIntervFactorListCount;
+  for (int i=0; i<petCount; i++)
+    delete [] srcSeqIntervFactorListIndex[i];
+  delete [] srcSeqIntervFactorListIndex;
+  delete [] dstSeqIntervFactorListCount;
+  for (int i=0; i<petCount; i++)
+    delete [] dstSeqIntervFactorListIndex[i];
+  delete [] dstSeqIntervFactorListIndex;
     
   VMK::wtime(&t11);   //gjt - profile
   printf("gjt - profile for PET %d:\n"
