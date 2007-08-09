@@ -7,21 +7,21 @@
  * CVS File Information :
  *    $RCSfile: par_sync.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:55 $
+ *    $Date: 2007/08/09 17:33:39 $
  *    Revision: 1.8 $
  ****************************************************************************/
-
-
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
 
 
 #include <stdio.h>
 #include <stdlib.h>
 #include "zoltan_util.h"
 #include "par_const.h"
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
+
 
 
 #define PRINT_SYNC 5000   /* definition needed for print sync */

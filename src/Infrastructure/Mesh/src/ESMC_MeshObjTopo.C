@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshObjTopo.C,v 1.1 2007/08/07 17:48:01 dneckels Exp $
+// $Id: ESMC_MeshObjTopo.C,v 1.2 2007/08/09 17:33:11 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,6 +43,7 @@ static int hex_edges[] = {
  3,7,  15
 };
 
+#ifdef FACE_EDGE
 static int hex_face_edge[] = {
   0,  9,  4,  8,
   1, 10,  5,  9,
@@ -59,6 +60,7 @@ static int hex_face_edge_pol[] = {
   1, 0, 0, 1,
   1, 1, 1, 1
 };
+#endif
 
 static int quad_sides[] = {
  0, 1,  4,
@@ -118,6 +120,7 @@ static int tet_edges[] = {
  2,3,  9
 };
 
+#ifdef FACE_EDGE
 static int tet_face_edge[] = {
   0, 4, 3,
   1, 5, 4,
@@ -131,6 +134,7 @@ static int tet_face_edge_pol[] = {
   1, 0, 1,
   0, 0, 0
 };
+#endif
 
 static int bar_sides[] = {
  0,

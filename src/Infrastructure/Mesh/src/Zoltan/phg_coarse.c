@@ -7,17 +7,17 @@
  * CVS File Information :
  *    $RCSfile: phg_coarse.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:56 $
+ *    $Date: 2007/08/09 17:33:41 $
  *    Revision: 1.73 $
  ****************************************************************************/
+#include "zz_sort.h"    
+#include "phg.h"
+#include "zoltan_comm.h"
+
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */
 extern "C" {
 #endif
-
-#include "zz_sort.h"    
-#include "phg.h"
-#include "zoltan_comm.h"
 
 
 

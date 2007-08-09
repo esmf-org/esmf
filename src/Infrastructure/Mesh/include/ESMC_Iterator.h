@@ -1,4 +1,4 @@
-// $Id: ESMC_Iterator.h,v 1.1 2007/08/07 17:47:55 dneckels Exp $
+// $Id: ESMC_Iterator.h,v 1.2 2007/08/09 17:33:08 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@ typedef Ref reference;
 typedef Ptr pointer;
 typedef Map_Ptr_Adapt_iterator<MapType, Map_iterator,T, Ref, Ptr> self;
 
-friend class  Map_Ptr_Adapt_iterator<MapType, typename MapType::const_iterator, T, const T&, const T*>;
+template<typename A, typename B, typename C, typename D, typename E> friend class Map_Ptr_Adapt_iterator;
 
 Map_Ptr_Adapt_iterator(const iterator &rhs) :
  mi(rhs.mi) 

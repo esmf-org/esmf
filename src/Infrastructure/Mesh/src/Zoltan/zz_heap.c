@@ -8,16 +8,16 @@
  * CVS File Information :
  *    $RCSfile: zz_heap.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:44:00 $
+ *    $Date: 2007/08/09 17:33:53 $
  *    Revision: 1.21 $
  ****************************************************************************/
+
+#include "zz_heap.h"
 
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */
 extern "C" {
 #endif
-
-#include "zz_heap.h"
 
 
 #define INT_SWAP(A,B)         {int    _C_=(A);(A)=(B);(B)=_C_;}

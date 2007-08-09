@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshObjConn.C,v 1.2 2007/08/07 20:46:00 dneckels Exp $
+// $Id: ESMC_MeshObjConn.C,v 1.3 2007/08/09 17:33:11 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -448,31 +448,8 @@ void edge_info(obj_iter node_begin, obj_iter node_end,
     } // edges
     if (must_find && !found) Throw() << "Edge not found in element";
     if (!found) ordinal[el] = -1;
-/*
-if (!found) {
-  std::cout << "P:" << Par::Rank() << " Edge was not associated with element!!" << std::endl;;
-  std::cout << "Nodes:";
-  for (UInt i = 0; i < nodes.size(); i++) {
-    std::cout << nodes[i]->get_id() << ":" << *nodes[i] << std::endl;
-  }
-  std::cout << std::endl << "ELEMS:" << std::endl;
-  for (UInt i = 0; i < elems.size(); i++) {
-    std::cout << *elems[i];
-  }
-  // Throw()
-}
-*/
   } // elems
 }
-
-template void edge_info<>(std::vector<MeshObj*>::iterator node_begin,
-               std::vector<MeshObj*>::iterator node_end,
-               std::vector<MeshObj*>::iterator elem_begin,
-               std::vector<MeshObj*>::iterator elem_end,
-               int *ordinal, // out
-               int *polarity, // out
-               bool
-               );
 
 template void edge_info<>(MeshObj **node_begin,
                MeshObj** node_end,
@@ -594,16 +571,6 @@ std::cout << "(rot,pol):" << rotation[el] << ", " << polarity[el] << std::endl;
   } // elems
 }
 
-template void face_info<>(std::vector<MeshObj*>::iterator node_begin,
-               std::vector<MeshObj*>::iterator node_end,
-               std::vector<MeshObj*>::iterator elem_begin,
-               std::vector<MeshObj*>::iterator elem_end,
-               int *ordinal, // out
-               int *polarity, // out
-               int *rotation, // out
-               bool
-               );
-
 template void face_info<>(MeshObj** node_begin,
                MeshObj** node_end,
                MeshObj** elem_begin,
@@ -614,11 +581,6 @@ template void face_info<>(MeshObj** node_begin,
                bool
                );
 
-template
-void common_objs<>(std::vector<MeshObj*>::iterator in_obj_begin, std::vector<MeshObj*>::iterator in_obj_end, 
-                 UInt rel_type, 
-                 UInt out_obj_type, 
-                 std::vector<MeshObj*> &out_obj);
 template
 void common_objs<>(MeshObj** in_obj_begin, MeshObj** in_obj_end, 
                  UInt rel_type, 

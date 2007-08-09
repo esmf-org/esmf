@@ -7,21 +7,21 @@
  * CVS File Information :
  *    $RCSfile: zz_struct.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:44:00 $
+ *    $Date: 2007/08/09 17:33:53 $
  *    Revision: 1.19.2.1 $
  ****************************************************************************/
-
-
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
 
 
 #include "zz_const.h"
 #include "lb_init_const.h"
 #include "params_const.h"
 #include "ha_const.h"
+
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
 
 /*****************************************************************************/
 /*****************************************************************************/

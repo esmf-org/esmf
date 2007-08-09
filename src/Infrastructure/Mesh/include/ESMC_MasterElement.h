@@ -1,4 +1,4 @@
-// $Id: ESMC_MasterElement.h,v 1.1 2007/08/07 17:47:55 dneckels Exp $
+// $Id: ESMC_MasterElement.h,v 1.2 2007/08/09 17:33:08 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -72,7 +72,7 @@ public:
   // We partition fields by how much data to store per topological object.  This partitions
   // the topo objs into sets by how many indices on the object.  For a given dof, this
   // functions returns how many total dofs live on the topological object.
-  const int GetDofValSet(UInt dof) const;
+  int GetDofValSet(UInt dof) const;
 
   // Declare the interpolation points.  To interpolate to coefficient values for this
   // ME, one must provide values of the function to interpolate at the given points.
@@ -190,6 +190,7 @@ public:
   virtual MasterElement<METraits<> > *operator()(METraits<>) const = 0;
   virtual MasterElement<METraits<double,fad_type> > *operator()(METraits<double,fad_type>) const = 0;
   virtual MasterElement<METraits<fad_type,double> > *operator()(METraits<fad_type,double>) const = 0;
+  virtual MasterElement<METraits<fad_type,fad_type> > *operator()(METraits<fad_type,fad_type>) const = 0;
 
 };
 

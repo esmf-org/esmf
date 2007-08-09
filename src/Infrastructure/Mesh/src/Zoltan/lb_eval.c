@@ -7,22 +7,20 @@
  * CVS File Information :
  *    $RCSfile: lb_eval.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:52 $
+ *    $Date: 2007/08/09 17:33:23 $
  *    Revision: 1.61.2.8 $
  ****************************************************************************/
-
-
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
-
 
 #include "zz_const.h"
 #include "zz_util_const.h"
 #include "phg.h"
 #include <limits.h>
 #include <float.h>
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
 
 #include "parmetis_jostle.h"
 #ifndef FLT_MAX /* just in case it's not defined */

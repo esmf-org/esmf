@@ -8,14 +8,9 @@
  * CVS File Information :
  *    $RCSfile: hsfc.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:52 $
+ *    $Date: 2007/08/09 17:33:21 $
  *    Revision: 1.61 $
  ****************************************************************************/
-
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
 
 /* Andy Bauer's Space Filling Curve (SFC) partitioning modified by Bob Heaphy */
 
@@ -30,6 +25,12 @@ extern "C" {
 
 #include "hsfc.h"
 #include <float.h>
+
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
 
 /****************************************************************************/
 

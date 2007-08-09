@@ -7,19 +7,18 @@
  * CVS File Information :
  *    $RCSfile: lb_init.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:52 $
+ *    $Date: 2007/08/09 17:33:24 $
  *    Revision: 1.22 $
  ****************************************************************************/
 
+#include "zz_const.h"
+#include "lb_init_const.h"
 
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */
 extern "C" {
 #endif
 
-
-#include "zz_const.h"
-#include "lb_init_const.h"
 
 /*****************************************************************************/
 /*****************************************************************************/

@@ -7,21 +7,21 @@
  * CVS File Information :
  *    $RCSfile: par_average.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:54 $
+ *    $Date: 2007/08/09 17:33:36 $
  *    Revision: 1.6.2.1 $
  ****************************************************************************/
-
-
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
 
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <float.h>
 #include "par_median_const.h"
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
+
 
 #define TINY   1.0e-6
 

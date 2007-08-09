@@ -1,4 +1,4 @@
-// $Id: ESMC_SmallAlloc.C,v 1.1 2007/08/07 17:48:02 dneckels Exp $
+// $Id: ESMC_SmallAlloc.C,v 1.2 2007/08/09 17:33:12 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -17,11 +17,6 @@ namespace ESMCI {
 namespace MESH {
 
 
-static UInt round_to_word(UInt size) {
-  UInt wsz = sizeof(long);
-  UInt rm = size % wsz;
-  return rm ? size + (wsz - rm) : size;
-}
 
 // ******* Chunk *******
 

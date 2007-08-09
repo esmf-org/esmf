@@ -7,19 +7,18 @@
  * CVS File Information :
  *    $RCSfile: verify_graph.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:58 $
+ *    $Date: 2007/08/09 17:33:50 $
  *    Revision: 1.33 $
  ****************************************************************************/
 
+#include "zz_const.h"
+#include "parmetis_jostle.h"
 
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */
 extern "C" {
 #endif
 
-
-#include "zz_const.h"
-#include "parmetis_jostle.h"
 
 /*********************************************************************/
 /* Verify ParMetis graph structure.                                  */

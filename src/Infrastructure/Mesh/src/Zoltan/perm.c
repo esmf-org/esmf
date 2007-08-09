@@ -7,9 +7,11 @@
  * CVS File Information :
  *    $RCSfile: perm.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:55 $
+ *    $Date: 2007/08/09 17:33:39 $
  *    Revision: 1.6 $
  ****************************************************************************/
+#include "zz_const.h"
+#include "order_const.h"
 
 
 #ifdef __cplusplus
@@ -17,8 +19,6 @@
 extern "C" {
 #endif
 
-#include "zz_const.h"
-#include "order_const.h"
 
 /* MPI tags */
 #define TAG1 32111

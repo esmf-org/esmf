@@ -7,15 +7,9 @@
  * CVS File Information :
  *    $RCSfile: parmetis_jostle.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:55 $
+ *    $Date: 2007/08/09 17:33:39 $
  *    Revision: 1.137.2.1 $
  ****************************************************************************/
-
-
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
 
 
 #include <ctype.h>
@@ -25,6 +19,12 @@ extern "C" {
 #include "parmetis_jostle.h"
 #include "params_const.h"
 #include "order_const.h"
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
+
 
 /**********  parameters structure for parmetis methods **********/
 static PARAM_VARS Parmetis_params[] = {

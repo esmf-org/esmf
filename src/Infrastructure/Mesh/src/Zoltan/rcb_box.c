@@ -7,15 +7,9 @@
  * CVS File Information :
  *    $RCSfile: rcb_box.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:57 $
+ *    $Date: 2007/08/09 17:33:46 $
  *    Revision: 1.3 $
  ****************************************************************************/
-
-
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
 
 
 #include <stdio.h>
@@ -23,6 +17,12 @@ extern "C" {
 #include <float.h>
 #include "zz_const.h"
 #include "rcb.h"
+
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
 
 static void compute_box(ZZ *, int, struct rcb_tree *, int, struct rcb_box *);
 

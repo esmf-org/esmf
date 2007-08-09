@@ -7,10 +7,13 @@
  * CVS File Information :
  *    $RCSfile: lb_remap.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:53 $
+ *    $Date: 2007/08/09 17:33:26 $
  *    Revision: 1.13 $
  ****************************************************************************/
 
+#include "zz_const.h"
+#include "phg_hypergraph.h"
+#include <limits.h>
 
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */
@@ -18,9 +21,6 @@ extern "C" {
 #endif
 
 
-#include "zz_const.h"
-#include "phg_hypergraph.h"
-#include <limits.h>
 
 /*
  * Values indicating how partition remapping should be done.

@@ -2,7 +2,7 @@
  * CVS File Information :
  *    $RCSfile: octree_const.h,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:54 $
+ *    $Date: 2007/08/09 17:33:35 $
  *    Revision: 1.10 $
  ****************************************************************************/
 
@@ -22,11 +22,11 @@ typedef struct {
   COORD min;
   COORD max;
   pRList list;
-} Map;
+} OMap;
 
 typedef struct {
   pRList OCT_rootlist;          /* list of all the local roots          */
-  Map    *map;
+  OMap    *map;
   int mapsize;
   int OCT_localpid;             /* the processor id                     */
   COORD OCT_gmin;

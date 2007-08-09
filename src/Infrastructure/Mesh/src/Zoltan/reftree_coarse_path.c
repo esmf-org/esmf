@@ -2,14 +2,9 @@
  * CVS File Information :
  *    $RCSfile: reftree_coarse_path.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:58 $
+ *    $Date: 2007/08/09 17:33:47 $
  *    Revision: 1.13 $
  ****************************************************************************/
-
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
 
 /*****************************************************************************/
 /* This file contains the functions that define a path, along with in        */
@@ -20,6 +15,11 @@ extern "C" {
 #include "zz_const.h"
 #include "reftree.h"
 #include "hsfc_hilbert_const.h"
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
 
 /*****************************************************************************/
 /*****************************************************************************/

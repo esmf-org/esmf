@@ -7,19 +7,20 @@
  * CVS File Information :
  *    $RCSfile: phg_refinement.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:57 $
+ *    $Date: 2007/08/09 17:33:43 $
  *    Revision: 1.49.2.1 $
  ****************************************************************************/
+
+#include <math.h>
+#include <float.h>
+#include "phg.h"
+#include "zz_heap.h"
 
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */
 extern "C" {
 #endif
 
-#include <math.h>
-#include <float.h>
-#include "phg.h"
-#include "zz_heap.h"
     
 #define HANDLE_ISOLATED_VERTICES    
 #define USE_SERIAL_REFINEMENT_ON_ONE_PROC

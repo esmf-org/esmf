@@ -8,18 +8,18 @@
  * CVS File Information :
  *    $RCSfile: hsfc_point_assign.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:52 $
+ *    $Date: 2007/08/09 17:33:21 $
  *    Revision: 1.18 $
  ****************************************************************************/
+
+#include "hsfc.h"
+#include "zz_util_const.h"
 
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */
 extern "C" {
 #endif
 
-
-#include "hsfc.h"
-#include "zz_util_const.h"
 
 /* For a detailed explaination of this module, please see the Developers
    Guide.  For instructions on its use, please see the Users Guide.   */

@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshRefine.C,v 1.1 2007/08/07 17:48:01 dneckels Exp $
+// $Id: ESMC_MeshRefine.C,v 1.2 2007/08/09 17:33:12 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -102,20 +102,7 @@ static void retrieve_nodes(MeshObj &obj, const MeshObjTopo *topo, std::vector<Me
 //Par::Out() << nodes[i]->get_id() << " ";
       }
     }
-  } else {
-    Throw() << "Did not expect this branch!!";
-    // Must go through an element
-    MeshObjRelationList::iterator eri = MeshObjConn::find_relation(obj, MeshObj::ELEMENT);
-    ThrowRequire(eri != obj.Relations.end());
-    const MeshObjTopo *etopo = GetMeshObjTopo(*eri->obj);
-    ThrowRequire(etopo);
-    const int *obj_nodes = obj.get_type() == MeshObj::EDGE ? etopo->get_edge_nodes(eri->ordinal) : 
-                             etopo->get_side_nodes(eri->ordinal);
-    for (UInt i = 0; i < topo->num_nodes; i++) {
-      nodes[i] = eri->obj->Relations[obj_nodes[i]].obj;
-//Par::Out() << nodes[i]->get_id() << " ";
-    }
-  }
+  } else Throw() << "Did not expect this branch!!";
   // Now have base nodes in place.  Look for any child nodes
 
   // If nodes exist, they will be on the side or edge of an element.  Hence, if we are an element,
@@ -176,7 +163,6 @@ Par::Out() << "<" << side_nodes[nsn] << "> " <<nodes[side_nodes[nsn]]->get_id() 
 Par::Out() << "r_n ";
 #endif
     Throw() << "Did not expect THIS branch!!";
-    retrieve_nodes(nodes, topo, nodes);
   }
 
   // Make sure all nodes are active: nodes may be inactive if they are here only as ghosts

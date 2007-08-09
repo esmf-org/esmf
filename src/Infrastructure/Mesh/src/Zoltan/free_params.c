@@ -7,16 +7,9 @@
  * CVS File Information :
  *    $RCSfile: free_params.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:51 $
+ *    $Date: 2007/08/09 17:33:20 $
  *    Revision: 1.22 $
  ****************************************************************************/
-
-
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
-
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,6 +17,11 @@ extern "C" {
 #include "zoltan_mem.h"
 #include "zoltan_types.h"
 #include "zz_util_const.h"
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
 
 
 void Zoltan_Free_Params(

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2007/08/08 22:46:52 dneckels Exp $
+# $Id: makefile,v 1.3 2007/08/09 17:33:12 dneckels Exp $
 
 # leave alone.
 ALL: build_here 
@@ -16,7 +16,7 @@ SOURCEC	  = ESMC_HAdapt.C ESMC_MEImprint.C ESMC_MeshObjPack.C ESMC_ParEnv.C ESMC
             ESMC_CommReg.C ESMC_Mapping.C ESMC_MeshExodus.C ESMC_MeshRead.C ESMC_Polynomial.C ESMC_Transfer.C \
             ESMC_CommRel.C ESMC_MasterElement.C ESMC_Meshfield.C ESMC_MeshRefine.C ESMC_Quadrature.C ESMC_Zoltan.C \
             ESMC_Context.C ESMC_MasterElementV.C ESMC_MeshField.C ESMC_MeshSkin.C ESMC_Rebalance.C \
-            ESMC_DDir.C ESMC_MCoord.C ESMC_MeshNC.C ESMC_MeshUtils.C ESMC_RefineTopo.C \
+            ESMC_MCoord.C ESMC_MeshNC.C ESMC_MeshUtils.C ESMC_RefineTopo.C \
             ESMC_Exception.C ESMC_MEFamily.C ESMC_MeshObj.C ESMC_MeshVTK.C ESMC_Search.C \
             ESMC_FieldReg.C ESMC_MEField.C ESMC_MeshObjConn.C ESMC_MEValues.C ESMC_ShapeFunc.C
 

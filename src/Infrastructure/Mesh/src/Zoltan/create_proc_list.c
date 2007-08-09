@@ -7,19 +7,20 @@
  * CVS File Information :
  *    $RCSfile: create_proc_list.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:48 $
+ *    $Date: 2007/08/09 17:33:17 $
  *    Revision: 1.22 $
  ****************************************************************************/
 
+
+
+
+#include "zz_const.h"
+#include "create_proc_list_const.h"
 
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */
 extern "C" {
 #endif
-
-
-#include "zz_const.h"
-#include "create_proc_list_const.h"
 
 static void Zoltan_RB_Gather(int *, int *, int, int, int, MPI_Comm);
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshObj.C,v 1.1 2007/08/07 17:48:01 dneckels Exp $
+// $Id: ESMC_MeshObj.C,v 1.2 2007/08/09 17:33:11 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -54,19 +54,14 @@ std::string MeshObjTypeString(UInt type) {
     switch(type) {
       case MeshObj::NODE:
         return "NODE";
-      break;
       case MeshObj::EDGE:
         return "EDGE";
-      break;
       case MeshObj::FACE:
          return "FACE";
-      break;
       case MeshObj::ELEMENT:
          return "ELEMENT";
-      break;
       default:
          return "UNKNOWN";
-      break;
     }
 }
 
@@ -74,19 +69,14 @@ std::string RelationTypeString(UInt type) {
     switch(type) {
       case MeshObj::USES:
         return "USES";
-      break;
       case MeshObj::USED_BY:
         return "USED_BY";
-      break;
       case MeshObj::PARENT:
          return "PARENT";
-      break;
       case MeshObj::CHILD:
          return "CHILD";
-      break;
       default:
          return "UNKNOWN";
-      break;
     }
 }
 

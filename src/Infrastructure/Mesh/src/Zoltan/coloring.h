@@ -7,22 +7,23 @@
  * CVS File Information :
  *    $RCSfile: coloring.h,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:44 $
+ *    $Date: 2007/08/09 17:33:15 $
  *    Revision: 1.3 $
  ****************************************************************************/
 
 #ifndef __COLORING_H
 #define __COLORING_H
 
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
 
 #include <ctype.h>
 #include "zz_const.h"
 #include "zz_util_const.h"
 #include "coloring_const.h"
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
 
 #define SWAP(a,b) tmp=(a);(a)=(b);(b)=tmp;
 

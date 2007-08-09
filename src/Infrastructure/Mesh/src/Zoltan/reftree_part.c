@@ -2,14 +2,9 @@
  * CVS File Information :
  *    $RCSfile: reftree_part.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:58 $
+ *    $Date: 2007/08/09 17:33:47 $
  *    Revision: 1.34 $
  ****************************************************************************/
-
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
 
 
 #include <stdio.h>
@@ -17,6 +12,11 @@ extern "C" {
 #include "reftree.h"
 #include "all_allo_const.h"
 #include "params_const.h"
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
 
 /* TEMP SINGLE WEIGHT
         Currently, it has not been decided how to handle multi-component

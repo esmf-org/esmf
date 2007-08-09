@@ -7,15 +7,11 @@
  * CVS File Information :
  *    $RCSfile: box_assign.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:42 $
+ *    $Date: 2007/08/09 17:33:14 $
  *    Revision: 1.28 $
  ****************************************************************************/
 
 
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
 
 
 #include <stdio.h>
@@ -24,6 +20,11 @@ extern "C" {
 #include "zz_util_const.h"
 #include "rcb.h"
 #include "rib.h"
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
 
 static void Box_Assign(ZZ *, struct rcb_tree *, struct rcb_box *,
   int, int, int *, int *, int *, int);

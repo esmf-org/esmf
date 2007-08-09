@@ -7,17 +7,9 @@
  * CVS File Information :
  *    $RCSfile: inertial1d.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:52 $
+ *    $Date: 2007/08/09 17:33:21 $
  *    Revision: 1.11 $
  ****************************************************************************/
-
-
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
-
-
 /* This software was developed by Bruce Hendrickson and Robert Leland   *
  * at Sandia National Laboratories under US Department of Energy        *
  * contract DE-AC04-76DP00789 and is copyrighted by Sandia Corporation. */
@@ -26,6 +18,14 @@ extern "C" {
 
 #include <stdio.h>
 #include "rib.h"
+
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
+
+
 
 int Zoltan_RIB_inertial1d(
      struct Dot_Struct *dotpt,  /* graph data structure for weights */

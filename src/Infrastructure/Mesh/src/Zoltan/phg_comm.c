@@ -7,18 +7,18 @@
  * CVS File Information :
  *    $RCSfile: phg_comm.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:56 $
+ *    $Date: 2007/08/09 17:33:41 $
  *    Revision: 1.3 $
  ****************************************************************************/
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /* Communication routines for parallel hypergraph partitioning. */
 /* UNDER CONSTRUCTION */
     
 #include "phg.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 #if 0
 /* 

@@ -7,21 +7,21 @@
  * CVS File Information :
  *    $RCSfile: order.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:54 $
+ *    $Date: 2007/08/09 17:33:36 $
  *    Revision: 1.16 $
  ****************************************************************************/
-
-
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
 
 #include "zz_const.h"
 #include "key_params.h"
 #include "params_const.h"
 #include "ha_const.h"
 #include "order_const.h"
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
+
 
 /*****************************************************************************/
 /*****************************************************************************/

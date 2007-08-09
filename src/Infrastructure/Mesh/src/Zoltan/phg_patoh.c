@@ -7,18 +7,18 @@
  * CVS File Information :
  *    $RCSfile: phg_patoh.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:57 $
+ *    $Date: 2007/08/09 17:33:42 $
  *    Revision: 1.1 $
  ****************************************************************************/
+
+#include <limits.h>
+#include "zz_const.h"
+#include "phg.h"
 
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */
 extern "C" {
 #endif
-
-#include <limits.h>
-#include "zz_const.h"
-#include "phg.h"
 
 #ifdef ZOLTAN_PATOH
 

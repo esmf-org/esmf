@@ -2,15 +2,9 @@
  * CVS File Information :
  *    $RCSfile: octupdate.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:54 $
+ *    $Date: 2007/08/09 17:33:36 $
  *    Revision: 1.77 $
  ****************************************************************************/
-
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
-
 #include "zz_const.h"
 #include "octree_const.h"
 #include "costs_const.h"
@@ -23,6 +17,12 @@ extern "C" {
 #include "migtags_const.h"
 #include "params_const.h"
 #include <float.h>
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
+
 #define POW(a,b) pow((double)(a),(double)(b))
 
 /*test*/
@@ -437,7 +437,7 @@ static void Zoltan_Oct_gen_tree_from_input_data(ZZ *zz, int oct_wgtflag,
   int level,              /* number of levels of refinement */
       n,                  /* index counter */
       part;               /* partition counter */
-  Map *array;             /* map of which processors own which octants */
+  OMap *array;             /* map of which processors own which octants */
   int hold;               /* used for calculating partition divisions */
   int ierr = 0;
 
@@ -571,7 +571,7 @@ static void Zoltan_Oct_gen_tree_from_input_data(ZZ *zz, int oct_wgtflag,
     part = hold / zz->Num_Proc;          /* how many octants per partition */
     remainder = hold % zz->Num_Proc; /* extra octants, not evenly divisible */
     extra = zz->Num_Proc - remainder;/* where to start adding extra octants */
-    array = (Map *) ZOLTAN_MALLOC(hold * sizeof(Map));   /* alloc map array */
+    array = (OMap *) ZOLTAN_MALLOC(hold * sizeof(OMap));   /* alloc map array */
     if(array == NULL) {
       fprintf(stderr, "OCT ERROR on proc %d, could not allocate array map\n",
 	      zz->Proc);

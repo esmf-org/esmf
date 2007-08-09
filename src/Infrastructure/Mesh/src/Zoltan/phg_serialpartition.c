@@ -7,18 +7,18 @@
  * CVS File Information :
  *    $RCSfile: phg_serialpartition.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:57 $
+ *    $Date: 2007/08/09 17:33:45 $
  *    Revision: 1.63.2.3 $
  ****************************************************************************/
+
+#include "zz_sort.h"
+#include "phg.h"
+#include "zz_heap.h"
 
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */
 extern "C" {
 #endif
-
-#include "zz_sort.h"
-#include "phg.h"
-#include "zz_heap.h"
     
 /* If adding a new coarse partitioning fn, add prototype here 
  * AND add entry to CoarsePartitionFns array 

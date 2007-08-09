@@ -7,17 +7,17 @@
  * CVS File Information :
  *    $RCSfile: phg_match.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:56 $
+ *    $Date: 2007/08/09 17:33:41 $
  *    Revision: 1.180.2.2 $
  ****************************************************************************/
+
+#include <stdlib.h>
+#include "phg.h"
  
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */
 extern "C" {
 #endif
-
-#include <stdlib.h>
-#include "phg.h"
 
 
 static ZOLTAN_PHG_MATCHING_FN pmatching_ipm;         /* inner product matching */

@@ -7,15 +7,9 @@
  * CVS File Information :
  *    $RCSfile: set_param.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:58 $
+ *    $Date: 2007/08/09 17:33:49 $
  *    Revision: 1.50 $
  ****************************************************************************/
-
-
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
 
 
 #include <stdio.h>
@@ -38,6 +32,12 @@ extern "C" {
 #include "phg_const.h"    
 #endif
 #include "coloring_const.h"
+
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
 
 static int add_param(ZZ *, char **, char **, int);
 static int remove_param(ZZ *, char *, int);

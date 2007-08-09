@@ -7,15 +7,11 @@
  * CVS File Information :
  *    $RCSfile: coloring.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:44 $
+ *    $Date: 2007/08/09 17:33:15 $
  *    Revision: 1.18.2.1 $
  ****************************************************************************/
 
 
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
 
 
 #include <limits.h>
@@ -28,6 +24,11 @@ extern "C" {
 #include "zz_util_const.h"
 #include "parmetis_jostle.h"
 #include "all_allo_const.h"
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
 
 #define COLORTAG     1001
 #define SNTAG        1002

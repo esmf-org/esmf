@@ -7,9 +7,11 @@
  * CVS File Information :
  *    $RCSfile: lb_set_method.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:53 $
+ *    $Date: 2007/08/09 17:33:27 $
  *    Revision: 1.27 $
  ****************************************************************************/
+#include "zz_const.h"
+#include "zz_util_const.h"
 
 
 #ifdef __cplusplus
@@ -18,8 +20,6 @@ extern "C" {
 #endif
 
 
-#include "zz_const.h"
-#include "zz_util_const.h"
 
 /*****************************************************************************/
 /*****************************************************************************/

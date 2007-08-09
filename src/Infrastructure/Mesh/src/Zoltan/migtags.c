@@ -2,15 +2,9 @@
  * CVS File Information :
  *    $RCSfile: migtags.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:53 $
+ *    $Date: 2007/08/09 17:33:32 $
  *    Revision: 1.13 $
  ****************************************************************************/
-
-
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
 
 
 #include "zz_const.h"
@@ -18,6 +12,12 @@ extern "C" {
 #include "migoct_const.h"
 #include "migtags_const.h"
 #include "all_allo_const.h"
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
+
 
 /* function prototypes */
 

@@ -7,15 +7,9 @@
  * CVS File Information :
  *    $RCSfile: zz_coord.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:44:00 $
+ *    $Date: 2007/08/09 17:33:52 $
  *    Revision: 1.18.2.1 $
  ****************************************************************************/
-
-
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
 
 #include <math.h>
 
@@ -24,6 +18,12 @@ extern "C" {
 #include "rcb.h"
 #include "rib.h"
 #include "hsfc.h"
+
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
 
 /*****************************************************************************/
 /*****************************************************************************/

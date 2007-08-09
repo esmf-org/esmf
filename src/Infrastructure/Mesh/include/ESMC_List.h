@@ -1,4 +1,4 @@
-// $Id: ESMC_List.h,v 1.1 2007/08/07 17:47:55 dneckels Exp $
+// $Id: ESMC_List.h,v 1.2 2007/08/09 17:33:08 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@ typedef std::size_t size_type;
 typedef _List_iterator<_T,_T&,_T*> iterator;
 typedef _List_iterator<_T,const _T&,const _T*> const_iterator;
 typedef _List_iterator<_T,Ref,Ptr> self;
-friend class _List_iterator<_T,const _T&,const _T*>;
+template<typename A,typename B,typename C> friend class _List_iterator;
 
 _List_iterator() : cur(NULL) {}
 _List_iterator(ListNode<_T> *nd) : cur(nd) {}

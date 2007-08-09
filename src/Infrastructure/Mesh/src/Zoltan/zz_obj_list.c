@@ -7,19 +7,19 @@
  * CVS File Information :
  *    $RCSfile: zz_obj_list.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:44:00 $
+ *    $Date: 2007/08/09 17:33:53 $
  *    Revision: 1.12 $
  ****************************************************************************/
+
+
+#include <ctype.h>
+#include "zz_const.h"
 
 
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */
 extern "C" {
 #endif
-
-
-#include <ctype.h>
-#include "zz_const.h"
 
 /*****************************************************************************/
 /*****************************************************************************/

@@ -7,16 +7,9 @@
  * CVS File Information :
  *    $RCSfile: key_params.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:52 $
+ *    $Date: 2007/08/09 17:33:22 $
  *    Revision: 1.47 $
  ****************************************************************************/
-
-
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
-
 
 #include <stdio.h>
 #include "zz_const.h"
@@ -24,6 +17,13 @@ extern "C" {
 #include "params_const.h"
 #include "timer_const.h"
 #include "zz_rand.h"
+
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
+
 
 /*****************************************************************************/
 /*****************************************************************************/

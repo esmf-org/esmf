@@ -7,15 +7,9 @@
  * CVS File Information :
  *    $RCSfile: timer_params.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:58 $
+ *    $Date: 2007/08/09 17:33:50 $
  *    Revision: 1.2 $
  ****************************************************************************/
-
-
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
 
 #include <string.h>
 
@@ -23,6 +17,12 @@ extern "C" {
 #include "zoltan_timer.h"
 #include "params_const.h"
 #include "zoltan_util.h"
+
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
 
 /* Function to interpret and set timer parameters */
 

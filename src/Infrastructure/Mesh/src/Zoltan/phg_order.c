@@ -7,19 +7,20 @@
  * CVS File Information :
  *    $RCSfile: phg_order.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:57 $
+ *    $Date: 2007/08/09 17:33:41 $
  *    Revision: 1.6 $
  ****************************************************************************/
 
  
+#include <stdlib.h>
+#include "zz_sort.h"    
+#include "phg.h"
+
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */
 extern "C" {
 #endif
 
-#include <stdlib.h>
-#include "zz_sort.h"    
-#include "phg.h"
 
 int Zoltan_PHG_Vertex_Visit_Order(
   ZZ *zz, 

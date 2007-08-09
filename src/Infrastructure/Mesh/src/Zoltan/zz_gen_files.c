@@ -6,14 +6,9 @@
  * CVS File Information :
  *    $RCSfile: zz_gen_files.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:44:00 $
+ *    $Date: 2007/08/09 17:33:52 $
  *    Revision: 1.29.2.3 $
  ****************************************************************************/
-
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
 
 
 #include "zz_const.h"
@@ -21,6 +16,11 @@ extern "C" {
 #include "parmetis_jostle.h"
 #include "params_const.h"
 #include "phg_hypergraph.h"
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
 
 #define ZOLTAN_PRINT_VTX_NUM  0  /* print vertex number at beginning of line? */
 

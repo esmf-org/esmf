@@ -6,15 +6,11 @@
  * CVS File Information :
  *    $RCSfile: build_graph.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:42 $
+ *    $Date: 2007/08/09 17:33:14 $
  *    Revision: 1.20 $
  ****************************************************************************/
 
 
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
 
 #include <ctype.h>
 #include "zz_const.h"
@@ -23,6 +19,10 @@ extern "C" {
 #include "parmetis_jostle.h"
 #include "params_const.h"
 
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
 
 /* Prototypes */
 static int hash_lookup (ZZ *zz, struct Hash_Node **hashtab, ZOLTAN_ID_PTR key,

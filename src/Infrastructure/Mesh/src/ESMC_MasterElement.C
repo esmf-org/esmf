@@ -1,4 +1,4 @@
-// $Id: ESMC_MasterElement.C,v 1.3 2007/08/07 20:46:00 dneckels Exp $
+// $Id: ESMC_MasterElement.C,v 1.4 2007/08/09 17:33:11 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ void compute_imprint(const MasterElementBase &me, std::vector<int> &res) {
 MasterElementBase::MasterElementBase(const std::string &_name) : name(_name) {
 }
 
-const int MasterElementBase::GetDofValSet(UInt dof) const {
+int MasterElementBase::GetDofValSet(UInt dof) const {
   return dofvalset[dof];
 }
 

@@ -7,20 +7,20 @@
  * CVS File Information :
  *    $RCSfile: phg_build_calls.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:56 $
+ *    $Date: 2007/08/09 17:33:41 $
  *    Revision: 1.25.2.2 $
  ****************************************************************************/
+#include <math.h>
+#include "zz_const.h"
+#include "zz_util_const.h"
+#include "phg_hypergraph.h"
+#include "parmetis_jostle.h"
 
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */
 extern "C" {
 #endif
 
-#include <math.h>
-#include "zz_const.h"
-#include "zz_util_const.h"
-#include "phg_hypergraph.h"
-#include "parmetis_jostle.h"
     
 #define MEMORY_ERROR { \
   ZOLTAN_PRINT_ERROR(zz->Proc, yo, "Memory error."); \

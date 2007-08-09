@@ -2,9 +2,13 @@
  * CVS File Information :
  *    $RCSfile: migoct.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:53 $
+ *    $Date: 2007/08/09 17:33:31 $
  *    Revision: 1.46 $
  ****************************************************************************/
+#include "zz_const.h"
+#include "octree_const.h"
+#include "migoct_const.h"
+#include "all_allo_const.h"
 
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */
@@ -12,10 +16,6 @@ extern "C" {
 #endif
 
 
-#include "zz_const.h"
-#include "octree_const.h"
-#include "migoct_const.h"
-#include "all_allo_const.h"
 
 /* function prototypes */
 
@@ -627,7 +627,7 @@ static int Zoltan_Oct_Update_Map(ZZ *zz) {
   pOctant remoteoctant;
   Migrate_msg *rootlists = NULL;
   OCT_Global_Info *OCT_info = (OCT_Global_Info *)(zz->LB.Data_Structure);
-  Map *array = OCT_info->map;
+  OMap *array = OCT_info->map;
   int mapsize = OCT_info->mapsize;
   int rlsize = 0;
   int ierr = ZOLTAN_OK;

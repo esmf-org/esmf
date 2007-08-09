@@ -7,15 +7,9 @@
  * CVS File Information :
  *    $RCSfile: rib.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:58 $
+ *    $Date: 2007/08/09 17:33:48 $
  *    Revision: 1.6.2.2 $
  ****************************************************************************/
-
-
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
 
 
 #include <stdio.h>
@@ -27,6 +21,12 @@ extern "C" {
 #include "params_const.h"
 #include "ha_const.h"
 #include "par_median_const.h"
+
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
 
 /* Inertial recursive bisection (RIB) load balancing routine operates on
    "dots" as defined in shared_const.h */

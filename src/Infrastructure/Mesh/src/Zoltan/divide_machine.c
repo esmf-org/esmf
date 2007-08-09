@@ -7,18 +7,16 @@
  * CVS File Information :
  *    $RCSfile: divide_machine.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:49 $
+ *    $Date: 2007/08/09 17:33:17 $
  *    Revision: 1.14 $
  ****************************************************************************/
 
+#include "zz_const.h"
 
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */
 extern "C" {
 #endif
-
-
-#include "zz_const.h"
 
 
 int Zoltan_Divide_Machine(

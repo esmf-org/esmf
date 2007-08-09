@@ -8,18 +8,18 @@
  * CVS File Information :
  *    $RCSfile: hsfc_box_assign.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:52 $
+ *    $Date: 2007/08/09 17:33:21 $
  *    Revision: 1.24 $
  ****************************************************************************/
+
+#include "hsfc.h"
+#include "zz_util_const.h"
+#include <math.h>
 
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */
 extern "C" {
 #endif
-
-#include "hsfc.h"
-#include "zz_util_const.h"
-#include <math.h>
 
 
 /* For a detailed description of the following algorithm, please see the

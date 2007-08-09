@@ -7,16 +7,9 @@
  * CVS File Information :
  *    $RCSfile: inertial3d.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:52 $
+ *    $Date: 2007/08/09 17:33:22 $
  *    Revision: 1.17 $
  ****************************************************************************/
-
-
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
-
 
 /* This software was developed by Bruce Hendrickson and Robert Leland   *
  * at Sandia National Laboratories under US Department of Energy        *
@@ -26,6 +19,11 @@ extern "C" {
 #include <stdio.h>
 #include <math.h>
 #include "rib.h"
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
 
 /* macros for routines */ 
 #define max(a, b) ((a) < (b) ? (b) : (a)) 

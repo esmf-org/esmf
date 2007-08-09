@@ -7,15 +7,9 @@
  * CVS File Information :
  *    $RCSfile: zz_hash.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:44:00 $
+ *    $Date: 2007/08/09 17:33:52 $
  *    Revision: 1.2 $
  ****************************************************************************/
-
-
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
 
 
 #include <stdio.h>
@@ -28,6 +22,12 @@ extern "C" {
 
 #include "zz_util_const.h"
 #include "zoltan_mem.h"
+
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
 
 /*****************************************************************************/
 /*****************************************************************************/

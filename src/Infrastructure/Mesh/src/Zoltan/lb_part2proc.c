@@ -7,17 +7,18 @@
  * CVS File Information :
  *    $RCSfile: lb_part2proc.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:53 $
+ *    $Date: 2007/08/09 17:33:24 $
  *    Revision: 1.12 $
  ****************************************************************************/
+
+#include "zz_const.h"
+#include "zz_util_const.h"
 
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */
 extern "C" {
 #endif
 
-#include "zz_const.h"
-#include "zz_util_const.h"
 
 /* Routines to handle mapping of partitions to processors. */
 /*****************************************************************************/

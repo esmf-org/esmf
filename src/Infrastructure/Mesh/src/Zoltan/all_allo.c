@@ -7,21 +7,22 @@
  * CVS File Information :
  *    $RCSfile: all_allo.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:41 $
+ *    $Date: 2007/08/09 17:33:13 $
  *    Revision: 1.38 $
  ****************************************************************************/
 
 
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
 
 
 #include <stdio.h>
 #include <stdlib.h>
 #include "all_allo_const.h"
 #include "params_const.h"
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
 
 /* Fortran memory allocation callback functions */
 

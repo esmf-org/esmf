@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshDB.h,v 1.1 2007/08/07 17:47:56 dneckels Exp $
+// $Id: ESMC_MeshDB.h,v 1.2 2007/08/09 17:33:09 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -56,8 +56,8 @@ public:
         typename MSet_iterator::const_iterator, typename obj_iterator::const_iterator> const_iterator;
   typedef mesh_obj_iterator<_T, Ref, Ptr, MSet_iterator, obj_iterator> self;
 
-  friend class mesh_obj_iterator<_T, const _T&, const _T*,
-        typename MSet_iterator::const_iterator, typename obj_iterator::const_iterator>;
+  template<typename A, typename B, typename C, typename D, typename E> friend class mesh_obj_iterator;
+
 
 // By default, only iterate the active objects.
 mesh_obj_iterator() : attr() {}
@@ -285,7 +285,7 @@ MeshDB::iterator node_end_all() {
   return obj_end_all(MeshObj::NODE); }
 
 // Sets up numbering tables for data indexing
-virtual void Commit(UInt nFields, MEFieldBase **Fields);
+void Commit(UInt nFields, MEFieldBase **Fields);
 
 // Set linear data index 
 void linearize_data_index();
@@ -334,8 +334,8 @@ MeshObj::MeshObjType side_type() const { return parametric_dim() == 3 ? MeshObj:
 // Find rosters with the local numbering bit set and
 // find global numbers for them.  The default (serial) implementation
 // just removes the local bit from the context.
-virtual void ResolvePendingDelete(int obj_type = MeshObj::ANY);
-virtual void ResolvePendingCreate();
+void ResolvePendingDelete(int obj_type = MeshObj::ANY);
+void ResolvePendingCreate();
 
 
 // Is the mesh parallel?  Obviously the parallel mesh

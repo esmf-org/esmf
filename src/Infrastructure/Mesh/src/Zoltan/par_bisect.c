@@ -7,15 +7,9 @@
  * CVS File Information :
  *    $RCSfile: par_bisect.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:54 $
+ *    $Date: 2007/08/09 17:33:38 $
  *    Revision: 1.34 $
  ****************************************************************************/
-
-#ifdef __cplusplus
-/* if C++, define the rest of this header file as extern C */
-extern "C" {
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <float.h>
@@ -24,6 +18,12 @@ extern "C" {
 #include "par_bisect_const.h"
 #include "par_tflops_special_const.h"
 #include "par_average_const.h"
+
+#ifdef __cplusplus
+/* if C++, define the rest of this header file as extern C */
+extern "C" {
+#endif
+
 
 /* EBEB: The following constants, structs, and function prototypes should 
    probably be moved to a header file. */
