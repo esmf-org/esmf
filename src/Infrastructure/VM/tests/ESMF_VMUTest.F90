@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUTest.F90,v 1.26 2007/08/02 22:47:32 theurich Exp $
+! $Id: ESMF_VMUTest.F90,v 1.27 2007/08/09 20:28:03 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -964,7 +964,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUTest.F90,v 1.26 2007/08/02 22:47:32 theurich Exp $'
+      '$Id: ESMF_VMUTest.F90,v 1.27 2007/08/09 20:28:03 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
@@ -975,7 +975,16 @@
 ! Special strings (Non-exhaustive and exhaustive) have been
 ! added to allow a script to count the number and types of unit tests.
 !------------------------------------------------------------------------------- 
+
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "VM Get before initialization Test"
+      call ESMF_VMGet(vm, petCount=npets, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest
