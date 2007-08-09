@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.67 2007/08/07 05:54:14 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.68 2007/08/09 23:45:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.67 2007/08/07 05:54:14 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.68 2007/08/09 23:45:11 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2406,10 +2406,14 @@ int XXE::exec(
 //
 // !ARGUMENTS:
 //
+  int rraCount,       // in - number of relative run-time address in rraList
+  char **rraList      // in - relative run-time addresses
   ){
 //
 // !DESCRIPTION:
-//
+//  Execute the XXE stream. For performance reasons there is _no_ checking
+//  during execution to ensure relative run-time addressing (RRA) references
+//  in the XXE stream are within the rraList bounds, i.e. [0...rraCount-1].
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -2429,12 +2433,16 @@ int XXE::exec(
   void *xxeElement, *xxeIndexElement;
   SendnbInfo *xxeSendnbInfo;
   RecvnbInfo *xxeRecvnbInfo;
+  SendnbRRAInfo *xxeSendnbRRAInfo;
+  RecvnbRRAInfo *xxeRecvnbRRAInfo;
   WaitOnIndexInfo *xxeWaitOnIndexInfo;
   WaitOnIndexRangeInfo *xxeWaitOnIndexRangeInfo;
   CommhandleInfo *xxeCommhandleInfo;
   ProductSumVectorInfo *xxeProductSumVectorInfo;
   ProductSumScalarInfo *xxeProductSumScalarInfo;
+  ProductSumScalarRRAInfo *xxeProductSumScalarRRAInfo;
   MemCpyInfo *xxeMemCpyInfo;
+  MemCpySrcRRAInfo *xxeMemCpySrcRRAInfo;
   
   for (int i=0; i<count; i++){
     xxeElement = &(stream[i]);
@@ -2462,6 +2470,30 @@ int XXE::exec(
 //          xxeRecvnbInfo->commhandle);
         vm->vmk_recv(xxeRecvnbInfo->buffer, xxeRecvnbInfo->size,
           xxeRecvnbInfo->srcPet, xxeRecvnbInfo->commhandle);
+      }
+      break;
+    case sendnbRRA:
+      {
+        xxeSendnbRRAInfo = (SendnbRRAInfo *)xxeElement;
+//        printf("case: sendnbRRA: %p, %d, %d, %p\n", xxeSendnbInfo->buffer,
+//          xxeSendnbInfo->size, xxeSendnbInfo->dstPet,
+//          xxeSendnbInfo->commhandle);
+        vm->vmk_send(rraList[xxeSendnbRRAInfo->rraIndex]    
+          + xxeSendnbRRAInfo->rraOffset,
+          xxeSendnbRRAInfo->size, xxeSendnbRRAInfo->dstPet,
+          xxeSendnbRRAInfo->commhandle);
+      }
+      break;
+    case recvnbRRA:
+      {
+        xxeRecvnbRRAInfo = (RecvnbRRAInfo *)xxeElement;
+//        printf("case: recvnbRRA: %p, %d, %d, %p\n", xxeRecvnbInfo->buffer,
+//          xxeRecvnbInfo->size, xxeRecvnbInfo->srcPet,
+//          xxeRecvnbInfo->commhandle);
+        vm->vmk_recv(rraList[xxeRecvnbRRAInfo->rraIndex]
+          + xxeRecvnbRRAInfo->rraOffset,
+          xxeRecvnbRRAInfo->size, xxeRecvnbRRAInfo->srcPet,
+          xxeRecvnbRRAInfo->commhandle);
       }
       break;
     case waitOnIndex:
@@ -2575,11 +2607,69 @@ int XXE::exec(
         }
       }
       break;
+    case productSumScalarRRA:
+      {
+        xxeProductSumScalarRRAInfo = (ProductSumScalarRRAInfo *)xxeElement;
+        switch (xxeProductSumScalarRRAInfo->opSubId){
+        case I4:
+          {
+            ESMC_I4 *element = (ESMC_I4 *)
+              (rraList[xxeProductSumScalarRRAInfo->rraIndex]
+              + xxeProductSumScalarRRAInfo->rraOffset);
+            ESMC_I4 *factor = (ESMC_I4 *)xxeProductSumScalarRRAInfo->factor;
+            ESMC_I4 *value = (ESMC_I4 *)xxeProductSumScalarRRAInfo->value;
+            *element += *factor * *value;
+          }
+          break;
+        case I8:
+          {
+            ESMC_I8 *element = (ESMC_I8 *)
+              (rraList[xxeProductSumScalarRRAInfo->rraIndex]
+              + xxeProductSumScalarRRAInfo->rraOffset);
+            ESMC_I8 *factor = (ESMC_I8 *)xxeProductSumScalarRRAInfo->factor;
+            ESMC_I8 *value = (ESMC_I8 *)xxeProductSumScalarRRAInfo->value;
+            *element += *factor * *value;
+          }
+          break;
+        case R4:
+          {
+            ESMC_R4 *element = (ESMC_R4 *)
+              (rraList[xxeProductSumScalarRRAInfo->rraIndex]
+              + xxeProductSumScalarRRAInfo->rraOffset);
+            ESMC_R4 *factor = (ESMC_R4 *)xxeProductSumScalarRRAInfo->factor;
+            ESMC_R4 *value = (ESMC_R4 *)xxeProductSumScalarRRAInfo->value;
+            *element += *factor * *value;
+          }
+          break;
+        case R8:
+          {
+            ESMC_R8 *element = (ESMC_R8 *)
+              (rraList[xxeProductSumScalarRRAInfo->rraIndex]
+              + xxeProductSumScalarRRAInfo->rraOffset);
+            ESMC_R8 *factor = (ESMC_R8 *)xxeProductSumScalarRRAInfo->factor;
+            ESMC_R8 *value = (ESMC_R8 *)xxeProductSumScalarRRAInfo->value;
+            *element += *factor * *value;
+          }
+          break;
+        default:
+          break;
+        }
+      }
+      break;
     case memCpy:
       {
         xxeMemCpyInfo = (MemCpyInfo *)xxeElement;
         memcpy(xxeMemCpyInfo->dstMem, xxeMemCpyInfo->srcMem,
           xxeMemCpyInfo->size);
+      }
+      break;
+    case memCpySrcRRA:
+      {
+        xxeMemCpySrcRRAInfo = (MemCpySrcRRAInfo *)xxeElement;
+        memcpy(xxeMemCpySrcRRAInfo->dstMem,
+          rraList[xxeMemCpySrcRRAInfo->rraIndex]
+          + xxeMemCpySrcRRAInfo->rraOffset,
+          xxeMemCpySrcRRAInfo->size);
       }
       break;
     default:

@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.34 2007/08/07 05:54:14 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.35 2007/08/09 23:45:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -203,10 +203,10 @@ class XXE{
   public:
     enum OpId{
       send, recv,
-      sendnb, recvnb,
+      sendnb, recvnb, sendnbRRA, recvnbRRA,
       waitOnIndex, waitOnIndexRange,
-      productSumVector, productSumScalar,
-      memCpy,
+      productSumVector, productSumScalar, productSumScalarRRA,
+      memCpy, memCpySrcRRA,
       // --- ids below are not suitable for direct execution
       waitOnAllSendnb, waitOnAllRecvnb,
       // --- nop
@@ -253,7 +253,7 @@ class XXE{
       }
       delete [] commhandle;
     }
-    int exec();
+    int exec(int rraCount=0, char **rraList=NULL);
     int execReady();
     int optimize();
     
@@ -277,6 +277,26 @@ class XXE{
       int size;
       int srcPet;
     }RecvnbInfo;
+
+    typedef struct{
+      OpId opId;
+      OpSubId opSubId;
+      vmk_commhandle **commhandle;
+      int rraOffset;
+      int size;
+      int dstPet;
+      int rraIndex;
+    }SendnbRRAInfo;
+
+    typedef struct{
+      OpId opId;
+      OpSubId opSubId;
+      vmk_commhandle **commhandle;
+      int rraOffset;
+      int size;
+      int srcPet;
+      int rraIndex;
+    }RecvnbRRAInfo;
 
     typedef struct{
       OpId opId;
@@ -311,12 +331,30 @@ class XXE{
     typedef struct{
       OpId opId;
       OpSubId opSubId;
+      int rraOffset;
+      void *factor;
+      void *value;
+      int rraIndex;
+    }ProductSumScalarRRAInfo;
+
+    typedef struct{
+      OpId opId;
+      OpSubId opSubId;
       void *dstMem;
       void *srcMem;
       int size;
     }MemCpyInfo;
 
-    
+    typedef struct{
+      OpId opId;
+      OpSubId opSubId;
+      void *dstMem;
+      int rraOffset;
+      int size;
+      int rraIndex;
+    }MemCpySrcRRAInfo;
+
+        
     typedef struct{
       OpId opId;
       OpSubId opSubId;
