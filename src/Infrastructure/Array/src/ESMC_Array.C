@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.106 2007/08/09 17:14:28 theurich Exp $
+// $Id: ESMC_Array.C,v 1.107 2007/08/09 18:44:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.106 2007/08/09 17:14:28 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.107 2007/08/09 18:44:33 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2431,7 +2431,8 @@ int Array::sparseMatMulStore(
   for (int j=0; j<factorListCount; j++){
     // loop over all factorList entries
     int srcSeqIndex = factorIndexList->array[j*2];
-    for (int i=0; i<petCount; i++){
+    int i;
+    for (i=0; i<petCount; i++){
       // loop over all Pets
       if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
         srcSeqIndex <= srcSeqIndexInterval[i].max){
@@ -2439,6 +2440,12 @@ int Array::sparseMatMulStore(
         ++srcSeqIntervFactorListCount[i]; // count this factor for this Pet
         break;  // no other Pet can have this factor in its interval
       }
+    }
+    if (i==petCount){
+      // srcSeqIndex lies outside srcArray bounds
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+        "- Found srcSeqIndex outside srcArray bounds", &rc);
+      return rc;
     }
   }
   int *srcSeqIntervFactorCounter = new int[petCount];
@@ -2894,7 +2901,8 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   for (int j=0; j<factorListCount; j++){
     // loop over all factorList entries
     int dstSeqIndex = factorIndexList->array[j*2+1];
-    for (int i=0; i<petCount; i++){
+    int i;
+    for (i=0; i<petCount; i++){
       // loop over all Pets
       if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
         dstSeqIndex <= dstSeqIndexInterval[i].max){
@@ -2902,6 +2910,12 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
         ++dstSeqIntervFactorListCount[i]; // count this factor for this Pet
         break;  // no other Pet can have this factor in its interval
       }
+    }
+    if (i==petCount){
+      // dstSeqIndex lies outside dstArray bounds
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+        "- Found dstSeqIndex outside dstArray bounds", &rc);
+      return rc;
     }
   }
   int *dstSeqIntervFactorCounter = new int[petCount];
