@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.195 2007/08/02 17:59:10 theurich Exp $
+#  $Id: common.mk,v 1.196 2007/08/09 17:32:31 dneckels Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -452,7 +452,7 @@ ESMF_F90OPTFLAG_O =  -Wf" -O $(ESMF_OPTLEVEL)"
 else
 ESMF_F90OPTFLAG_O =  -O$(ESMF_OPTLEVEL)
 endif
-ESMF_CXXOPTFLAG_O = -O$(ESMF_OPTLEVEL)
+ESMF_CXXOPTFLAG_O = -O$(ESMF_OPTLEVEL) -DNDEBUG
 else
 # if NEC, insert option before -O
 ifeq ($(ESMF_COMPILER),sxcross)
@@ -460,7 +460,7 @@ ESMF_F90OPTFLAG_O = -Wf -O
 else
 ESMF_F90OPTFLAG_O = -O
 endif
-ESMF_CXXOPTFLAG_O = -O
+ESMF_CXXOPTFLAG_O = -O -DNDEBUG
 endif
 
 
