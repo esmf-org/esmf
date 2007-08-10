@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.61 2007/08/03 22:13:24 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.62 2007/08/10 21:07:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -128,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.61 2007/08/03 22:13:24 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.62 2007/08/10 21:07:41 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1025,13 +1025,14 @@ contains
 !
 ! !INTERFACE:
   subroutine ESMF_ArraySparseMatMul(srcArray, dstArray, routehandle, &
-    zeroflag, rc)
+    zeroflag, checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in)              :: srcArray
     type(ESMF_Array),       intent(inout)           :: dstArray
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
     type(ESMF_Logical),     intent(in),   optional  :: zeroflag
+    type(ESMF_Logical),     intent(in),   optional  :: checkflag
     integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -1056,6 +1057,12 @@ contains
 !     {\tt ESMF\_FALSE} the cells in {\tt dstArray} will not be modified
 !     prior to the sparse matrix multiplication and results will be added
 !     to the incoming cell values.
+!   \item [{[checkflag]}]
+!     If set to {\tt ESMF\_TRUE} the input Array pair will be checked for
+!     consistency with the precomputed operation provided by {\tt routehandle}.
+!     If set to {\tt ESMF\_FALSE} {\em (default)} only a very basic input check
+!     will be performed, leaving many inconsistencies undetected. Set
+!     {\tt checkflag} to {\tt ESMF\_FALSE} to achieve highest performance.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1064,6 +1071,7 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_Logical)      :: opt_zeroflag ! helper variable
+    type(ESMF_Logical)      :: opt_checkflag! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1074,13 +1082,15 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
     
-    ! Set default opt_zeroflag
+    ! Set default flags
     opt_zeroflag = ESMF_TRUE
     if (present(zeroflag)) opt_zeroflag = zeroflag
+    opt_checkflag = ESMF_FALSE
+    if (present(checkflag)) opt_checkflag = checkflag
         
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySparseMatMul(srcArray, dstArray, routehandle, &
-      opt_zeroflag, localrc)
+      opt_zeroflag, opt_checkflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     

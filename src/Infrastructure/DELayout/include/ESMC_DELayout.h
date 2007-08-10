@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.35 2007/08/09 23:45:11 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.36 2007/08/10 21:07:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -198,6 +198,12 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
 
 
 
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-- eXtreme eXchange Engine (XXE) --------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
 
 class XXE{
   public:
@@ -230,6 +236,7 @@ class XXE{
     vmk_commhandle ***commhandle;
     int commhandleCount;
     int commhandleMaxCount;
+    ESMC_TypeKind typekind[10];
     
   public:
     XXE(int maxArg, int storageMaxCountArg=100, int commhandleMaxCountArg=100){

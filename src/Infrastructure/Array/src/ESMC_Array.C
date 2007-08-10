@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.108 2007/08/09 23:45:11 theurich Exp $
+// $Id: ESMC_Array.C,v 1.109 2007/08/10 21:07:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.108 2007/08/09 23:45:11 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.109 2007/08/10 21:07:42 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1952,18 +1952,31 @@ int Array::sparseMatMulStore(
 //
 // !ARGUMENTS:
 //
-  Array *srcArray,                      // in    -
-  Array *dstArray,                      // inout -
-  ESMC_RouteHandle **routehandle,       // inout -
-  ESMC_TypeKind typekindArg,            // in    -
-  void *factorList,                     // in    -
-  int factorListCount,                  // in    -
-  InterfaceInt *factorIndexList         // in    -
+  Array *srcArray,                      // in    - source Array
+  Array *dstArray,                      // in    - destination Array
+  ESMC_RouteHandle **routehandle,       // inout - handle to precomputed comm
+  ESMC_TypeKind typekindArg,            // in    - typekind of factors
+  void *factorList,                     // in    - sparse matrix factors
+  int factorListCount,                  // in    - number of sparse mat. indices
+  InterfaceInt *factorIndexList         // in    - sparse matrix indices
   ){    
 //
 // !DESCRIPTION:
-//    Precompute and store details of an Array sparse matrix multiplication
-//    operation.
+//  Precompute and store communication pattern for sparse matrix multiplication
+//  from srcArray to dstArray.
+//
+//  The implementation consists of three main phases:
+//
+//  - Phase I:    Check input for consistency. The sparse matrix is provided in
+//                "input" distribution 
+//  - Phase II:   Construct two distributed directories of sparse matrix
+//                elements, one indexed by srcSeqIndex, one indexed by
+//                dstSeqIndex. This takes the matrix from "input" to "work"
+//                distribution.
+//  - Phase III:  Use the information in "work" distribution to precompute the
+//                XXE stream and take associated data into "run" distribution
+//                according to the "execution pattern". Corrently the
+//                "dstArray execution pattern" has been implemented.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -1971,6 +1984,10 @@ int Array::sparseMatMulStore(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
+  //---------------------------------------------------------------------------
+  // Phase I
+  //---------------------------------------------------------------------------
+  
   // get the current VM and VM releated information
   VM *vm = VM::getCurrent(&localrc);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
@@ -2076,12 +2093,13 @@ int Array::sparseMatMulStore(
     return rc;
   }
   
-  // check that the typekindArg matches srcArray and dstArray typekind
+  // check that the typekindArg matches srcArray typekind
   if (typekindArg != srcArray->getTypekind()){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
       "- TypeKind mismatch between srcArray argument and factorList", &rc);
     return rc;
   }
+  // check that the typekindArg matches dstArray typekind
   if (typekindArg != dstArray->getTypekind()){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
       "- TypeKind mismatch between dstArray argument and factorList", &rc);
@@ -2119,6 +2137,10 @@ int Array::sparseMatMulStore(
   
   VMK::wtime(&t1);   //gjt - profile
   
+  //---------------------------------------------------------------------------
+  // Phase II
+  //---------------------------------------------------------------------------
+
   // create and initialize the RouteHandle
   *routehandle = ESMC_RouteHandleCreate(&localrc);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
@@ -3782,11 +3804,18 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
 
   VMK::wtime(&t7);   //gjt - profile
 
+  //---------------------------------------------------------------------------
+  // Phase III
+  //---------------------------------------------------------------------------
+
   // allocate XXE and attach to RouteHandle
   XXE *xxe = new XXE(1000000, 1000000, 20000);
   localrc = (*routehandle)->ESMC_RouteHandleSetStorage(xxe);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
+  // set typekind in xxe
+  xxe->typekind[0] = typekindArg;
+  // obtain local handle on xxe stream
   XXE::StreamElement *xxestream = xxe->stream;
   // prepare XXE related helper variables
   int xxeCount = 0;   // reset count
@@ -4472,10 +4501,13 @@ int Array::sparseMatMul(
 //
 // !ARGUMENTS:
 //
-  Array *srcArray,                      // in    -
-  Array *dstArray,                      // inout -
-  ESMC_RouteHandle **routehandle,       // inout -
-  ESMC_Logical zeroflag                 // in    -
+  Array *srcArray,                      // in    - source Array
+  Array *dstArray,                      // inout - destination Array
+  ESMC_RouteHandle **routehandle,       // inout - handle to precomputed comm
+  ESMC_Logical zeroflag,                // in    - ESMF_FALSE: don't zero dstA.
+                                        //         ESMF_TRUE: (def.) zero dstA.
+  ESMC_Logical checkflag                // in    - ESMF_FALSE: (def.) bas. chcks
+                                        //         ESMF_TRUE: full input check
   ){    
 //
 // !DESCRIPTION:
@@ -4487,7 +4519,7 @@ int Array::sparseMatMul(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  // error checking for input
+  // basic error checking for input
   if (srcArray == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to srcArray", &rc);
@@ -4499,8 +4531,31 @@ int Array::sparseMatMul(
     return rc;
   }
   
+  // get a handle on the XXE stored in routehandle
+  XXE *xxe = (XXE *)(*routehandle)->ESMC_RouteHandleGetStorage();
+
+  // conditionally perform full input checks
+  if (checkflag==ESMF_TRUE){
+    // check that XXE's typekind matches srcArray typekind
+    if (xxe->typekind[0] != srcArray->getTypekind()){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+        "- TypeKind mismatch between srcArray argument and precomputed XXE",
+        &rc);
+      return rc;
+    }
+    // check that XXE's typekind matches dstArray typekind
+    if (xxe->typekind[0] != dstArray->getTypekind()){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+        "- TypeKind mismatch between dstArray argument and precomputed XXE",
+        &rc);
+      return rc;
+    }
+    // todo: need to check DistGrid-conformance and congruence of local tiles
+    //       between argument Array pair and Array pair used during XXE precomp.
+  }
+  
+  // conditionally zero out total regions of the dstArray for all localDEs
   if (zeroflag==ESMF_TRUE){
-    // zero out total regions of the dstArray for all localDEs
     for (int i=0; i<dstArray->delayout->getLocalDeCount(); i++){
       char *start = (char *)(dstArray->larrayBaseAddrList[i]);
       int dataSize = ESMC_TypeKindSize(dstArray->typekind);
@@ -4521,8 +4576,6 @@ int Array::sparseMatMul(
     dstArray->larrayBaseAddrList,
     dstArray->delayout->getLocalDeCount() * sizeof(char *));
 
-  // put a handle on the XXE in routehandle
-  XXE *xxe = (XXE *)(*routehandle)->ESMC_RouteHandleGetStorage();
   // execute XXE list
   localrc = xxe->exec(rraCount, rraList);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))

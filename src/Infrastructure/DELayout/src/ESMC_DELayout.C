@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.68 2007/08/09 23:45:11 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.69 2007/08/10 21:07:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.68 2007/08/09 23:45:11 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.69 2007/08/10 21:07:43 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2388,6 +2388,8 @@ int DELayout::ESMC_DELayoutFindDEtoPET(int npets){
 
 
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-- eXtreme eXchange Engine (XXE) --------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 
