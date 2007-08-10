@@ -1,4 +1,4 @@
-% $Id: user_arch.tex,v 1.25 2007/08/01 22:21:59 theurich Exp $
+% $Id: user_arch.tex,v 1.26 2007/08/10 21:57:13 theurich Exp $
 
 % List of architectures supported.  This file is 
 % meant to be included in a user doc.
@@ -21,9 +21,9 @@ included in the build system.
 
 Cray X1         &\tt Unicos &\tt default & ftn \footnotesize 5.5.0.6 & CC \footnotesize 5.5.0.6 &\tt mpi &\tt 64 \\
 Cray X1         &\tt Unicos &\tt default & ftn \footnotesize 5.5.0.9 & CC \footnotesize 5.5.0.9 &\tt mpi &\tt 64 \\
-Cray X3/4       &\tt Unicos &\tt pgi     & ftn \footnotesize 7.0-5   & CC \footnotesize 7.0-5 s &\tt mpi &\tt 64 \\
+Cray XT3/4      &\tt Unicos &\tt pgi     & ftn \footnotesize 7.0-5   & CC \footnotesize 7.0-5 &\tt mpi &\tt 64 \\
 HP ZX6000       &\tt Linux  &\tt intel   & ifort \footnotesize 8.1.021 & icpc \footnotesize 8.1.024 &\tt lam &\tt 64 \\
-IBM Bluegene    &\tt AIX    &\tt xlf     & mpxlf90 \footnotesize 10.1.0.4 & mpxlC \footnotesize 8.0.0.4 &\tt mpi &\tt 32 \\
+IBM Bluegene    &\tt Linux  &\tt xlf     & mpxlf90 \footnotesize 10.1.0.4 & mpxlC \footnotesize 8.0.0.4 &\tt mpi &\tt 32 \\
 IBM Opteron     &\tt Linux  &\tt pathscale & pathf90 \footnotesize 2.4 & pathCC \footnotesize 2.4 &\tt mpich &\tt x86\_64\_small, \\
                 &           &              &                           &                          &          &\tt x86\_64\_medium \\
 IBM Opteron     &\tt Linux  &\tt pgi     & pgf90 \footnotesize 6.2-3 & pgCC \footnotesize 6.2-3 &\tt mpich   &\tt x86\_64\_small, \\
@@ -36,9 +36,10 @@ Mac G5          &\tt Darwin &\tt nag     & f95 \footnotesize 5.0(272)& g++ \foot
 Mac G5          &\tt Darwin &\tt xlf     & xlf90\_r \footnotesize 8.1& xlC\_r \footnotesize 6.0 &\tt lam,mpiuni &\tt 32 \\
 Mac G5          &\tt Darwin &\tt xlfgcc  & xlf90\_r \footnotesize 8.1& g++ \footnotesize 3.3    &\tt lam,mpiuni &\tt 32 \\
 PC Pentium III  &\tt Linux  &\tt lahey   & lf95 \footnotesize L6.20d & g++ \footnotesize 3.2.3  &\tt mpiuni     &\tt 32 \\
+PC Pentium III  &\tt Linux  &\tt pgi & pgf90 \footnotesize 7.0-6 & pgCC \footnotesize 7.0-6  &\tt mpiuni     &\tt 32 \\
 PC Pentium III  &\tt Linux  &\tt pgigcc  & pgf90 \footnotesize 7.0-6 & g++ \footnotesize 3.2.3  &\tt mpiuni     &\tt 32 \\
 PC Xeon Cluster &\tt Linux  &\tt absoftintel & f90 \footnotesize 9.0 r2 & icpc \footnotesize 8.1&\tt mpich      &\tt 32 \\
-PC Xeon Cluster &\tt Linux  &\tt g95     & f90 \footnotesize 4.0.2   & g++ \footnotesize 4.0.2  &\tt mpich      &\tt 32 \\
+PC Xeon Cluster &\tt Linux  &\tt g95     & g95 \footnotesize 4.0.2   & g++ \footnotesize 4.0.2  &\tt mpich      &\tt 32 \\
 PC Xeon Cluster &\tt Linux  &\tt intel   & ifort \footnotesize 8.1   & icpc \footnotesize 8.1   &\tt mpich      &\tt 32 \\
 PC Xeon Cluster &\tt Linux  &\tt nagintel & f95 \footnotesize 5.0(361) & icpc \footnotesize 8.1 &\tt mpich      &\tt 32 \\
 SGI Altix       &\tt Linux  &\tt intel   & ifort \footnotesize 9.1.033 & icpc \footnotesize 9.1.039 &\tt mpi    &\tt 64 \\
