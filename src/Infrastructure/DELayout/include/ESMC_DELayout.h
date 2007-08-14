@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.36 2007/08/10 21:07:43 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.37 2007/08/14 21:13:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -215,6 +215,8 @@ class XXE{
       memCpy, memCpySrcRRA,
       // --- ids below are not suitable for direct execution
       waitOnAllSendnb, waitOnAllRecvnb,
+      // --- profiling
+      wtimer,
       // --- nop
       nop    
     };
@@ -261,6 +263,7 @@ class XXE{
       delete [] commhandle;
     }
     int exec(int rraCount=0, char **rraList=NULL);
+    int printProfile();
     int execReady();
     int optimize();
     
@@ -360,8 +363,26 @@ class XXE{
       int size;
       int rraIndex;
     }MemCpySrcRRAInfo;
+    
+    // --- profiling
+    
+    typedef struct{
+      OpId opId;
+      OpSubId opSubId;
+      char *timerString;
+      int timerId;
+      int actualWtimerId;
+      int relativeWtimerId;
+      // members below are for internal use
+      int actualWtimerIndex;
+      int relativeWtimerIndex;
+      int sumTermCount;
+      double wtime;
+      double wtimeSum;
+    }WtimerInfo;
+    
+    // --- meta Info structs (i.e. don't correspond to OpIds)
 
-        
     typedef struct{
       OpId opId;
       OpSubId opSubId;

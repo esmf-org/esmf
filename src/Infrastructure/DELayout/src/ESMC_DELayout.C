@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.69 2007/08/10 21:07:43 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.70 2007/08/14 21:13:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.69 2007/08/10 21:07:43 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.70 2007/08/14 21:13:51 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2445,7 +2445,8 @@ int XXE::exec(
   ProductSumScalarRRAInfo *xxeProductSumScalarRRAInfo;
   MemCpyInfo *xxeMemCpyInfo;
   MemCpySrcRRAInfo *xxeMemCpySrcRRAInfo;
-  
+  WtimerInfo *xxeWtimerInfo, *xxeWtimerInfoActual, *xxeWtimerInfoRelative;
+      
   for (int i=0; i<count; i++){
     xxeElement = &(stream[i]);
 //    printf("gjt: %d, opId=%d\n", i, stream[i].opId);
@@ -2674,6 +2675,30 @@ int XXE::exec(
           xxeMemCpySrcRRAInfo->size);
       }
       break;
+    case wtimer:
+      {
+        xxeWtimerInfo = (WtimerInfo *)xxeElement;
+        int index = xxeWtimerInfo->actualWtimerIndex;
+        double *wtime = &(xxeWtimerInfo->wtime);
+        *wtime = 0.;                      // initialize
+        xxeWtimerInfo->wtimeSum = 0.;     // initialize
+        xxeWtimerInfo->sumTermCount = -1;  // initialize
+        xxeWtimerInfoActual = (WtimerInfo *)(&(stream[index]));
+        double *wtimeActual = &(xxeWtimerInfoActual->wtime);
+        double *wtimeSumActual = &(xxeWtimerInfoActual->wtimeSum);
+        int *sumTermCountActual = &(xxeWtimerInfoActual->sumTermCount);
+        index = xxeWtimerInfo->relativeWtimerIndex;
+        xxeWtimerInfoRelative = (WtimerInfo *)(&(stream[index]));
+        double wtimeRelative = xxeWtimerInfoRelative->wtime;
+        // this xxe wtimer stream element
+        VMK::wtime(wtime);
+        *wtime -= wtimeRelative;
+        // actual xxe wtimer stream element
+        *wtimeSumActual += *wtime - *wtimeActual; // add time interval
+        *wtimeActual = *wtime;
+        ++(*sumTermCountActual);  // count this sum term
+      }
+      break;
     default:
       break;
     }
@@ -2687,6 +2712,81 @@ int XXE::exec(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::printProfile()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::printProfile
+//
+// !INTERFACE:
+int XXE::printProfile(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  ){
+//
+// !DESCRIPTION:
+//  Print profile data collected during the XXE stream execution.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // get the current VM
+  VM *vm = VM::getCurrent(&localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  
+#if 0
+  printf("gjt in ESMCI::XXE::printProfile(), stream=%p, %d, %d\n", stream,
+    count, sizeof(StreamElement));
+#endif
+  
+  int localPet = vm->getLocalPet();
+  int petCount = vm->getPetCount();
+  
+  void *xxeElement;
+  WtimerInfo *xxeWtimerInfo;
+  
+  for (int pet=0; pet<petCount; pet++){
+    if (pet==localPet){
+      for (int i=0; i<count; i++){
+        xxeElement = &(stream[i]);
+//        printf("gjt: %d, opId=%d\n", i, stream[i].opId);
+        switch(stream[i].opId){
+        case wtimer:
+          {
+            xxeWtimerInfo = (WtimerInfo *)xxeElement;
+            int index = xxeWtimerInfo->actualWtimerIndex;
+            if (index == i){
+              // this is an actual wtimer element -> print
+              printf("localPet %d - XXE profile wtimer: %s\t"
+                "  id: %d\telement: %d\twtime = %gs\t wtimeSum = %gs\t"
+                "sumTermCount: %d\n", 
+                localPet, xxeWtimerInfo->timerString, xxeWtimerInfo->timerId, i,
+                xxeWtimerInfo->wtime, xxeWtimerInfo->wtimeSum,
+                xxeWtimerInfo->sumTermCount);
+            }
+          }
+          break;
+        default:
+          break;
+        }
+      }
+    }
+    vm->vmk_barrier();
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+      
+      //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::XXE::execReady()"
 //BOPI
@@ -2732,6 +2832,7 @@ int XXE::execReady(
   WaitOnIndexRangeInfo *xxeWaitOnIndexRangeInfo;
   CommhandleInfo *xxeCommhandleInfo;
   ProductSumVectorInfo *xxeProductSumVectorInfo;
+  WtimerInfo *xxeWtimerInfo;
   
   int i = 0;  // prime index counter
   while(i!=count){
@@ -2867,6 +2968,52 @@ int XXE::execReady(
   // garbage collection
   delete [] sendnbIndexList;
   delete [] recvnbIndexList;
+
+  // translate profiling Wtimer Ids into XXE stream indices
+  int *idList = new int[count];
+  int *indexList = new int[count];
+  int iCount = 0; // reset
+  for (i=0; i<count; i++){
+    // set up id-to-index look-up
+    if (stream[i].opId == wtimer){
+      xxeElement = &(stream[i]);
+      xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
+      idList[iCount] = xxeWtimerInfo->timerId;
+      indexList[iCount] = i;
+      ++iCount;
+    }
+  }
+  for (i=0; i<count; i++){
+    // use id-to-index look-up to translate Wtimer Ids
+    if (stream[i].opId == wtimer){
+      xxeElement = &(stream[i]);
+      xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
+      int actualWtimerId = xxeWtimerInfo->actualWtimerId;
+      int relativeWtimerId = xxeWtimerInfo->relativeWtimerId;
+      int resolveCounter = 0; // reset
+      int j;
+      for (j=0; j<iCount; j++){
+        if (idList[j] == actualWtimerId){
+          xxeWtimerInfo->actualWtimerIndex = indexList[j];
+          ++resolveCounter;
+        }
+        if (idList[j] == relativeWtimerId){
+          xxeWtimerInfo->relativeWtimerIndex = indexList[j];
+          ++resolveCounter;
+        }
+        if (resolveCounter==2) break; // resolved both Ids
+      }
+      if (j==iCount){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- unable to resolve XXE WTimer Id", &rc);
+        return rc;
+      }
+    }
+  }
+  
+  // garbage collection
+  delete [] idList;
+  delete [] indexList;
   
   // return successfully
   rc = ESMF_SUCCESS;
