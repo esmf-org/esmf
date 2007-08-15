@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.70 2007/08/14 21:13:51 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.71 2007/08/15 00:44:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.70 2007/08/14 21:13:51 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.71 2007/08/15 00:44:05 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2445,7 +2445,9 @@ int XXE::exec(
   ProductSumScalarRRAInfo *xxeProductSumScalarRRAInfo;
   MemCpyInfo *xxeMemCpyInfo;
   MemCpySrcRRAInfo *xxeMemCpySrcRRAInfo;
+  SubStreamInfo *xxeSubStreamInfo;
   WtimerInfo *xxeWtimerInfo, *xxeWtimerInfoActual, *xxeWtimerInfoRelative;
+  PrintInfo *xxePrintInfo;
       
   for (int i=0; i<count; i++){
     xxeElement = &(stream[i]);
@@ -2675,6 +2677,12 @@ int XXE::exec(
           xxeMemCpySrcRRAInfo->size);
       }
       break;
+    case subStream:
+      {
+        xxeSubStreamInfo = (SubStreamInfo *)xxeElement;
+        xxeSubStreamInfo->xxe->exec(rraCount, rraList);
+      }
+      break;
     case wtimer:
       {
         xxeWtimerInfo = (WtimerInfo *)xxeElement;
@@ -2694,9 +2702,17 @@ int XXE::exec(
         VMK::wtime(wtime);
         *wtime -= wtimeRelative;
         // actual xxe wtimer stream element
-        *wtimeSumActual += *wtime - *wtimeActual; // add time interval
+        if (xxeWtimerInfo->opSubId != noSum){
+          *wtimeSumActual += *wtime - *wtimeActual; // add time interval
+          ++(*sumTermCountActual);  // count this sum term
+        }
         *wtimeActual = *wtime;
-        ++(*sumTermCountActual);  // count this sum term
+      }
+      break;
+    case print:
+      {
+        xxePrintInfo = (PrintInfo *)xxeElement;
+        printf("%s", xxePrintInfo->printString);
       }
       break;
     default:

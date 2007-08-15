@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.37 2007/08/14 21:13:51 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.38 2007/08/15 00:44:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -213,15 +213,20 @@ class XXE{
       waitOnIndex, waitOnIndexRange,
       productSumVector, productSumScalar, productSumScalarRRA,
       memCpy, memCpySrcRRA,
-      // --- ids below are not suitable for direct execution
-      waitOnAllSendnb, waitOnAllRecvnb,
+      // --- sub-streams
+      subStream,
       // --- profiling
       wtimer,
+      // --- misc
+      print,
       // --- nop
-      nop    
+      nop,
+      // --- ids below are not suitable for direct execution
+      waitOnAllSendnb, waitOnAllRecvnb
     };
     enum OpSubId{
-      I4, I8, R4, R8
+      I4, I8, R4, R8,
+      noSum
     };
     struct StreamElement{
       OpId opId;              // id of operation
@@ -238,10 +243,14 @@ class XXE{
     vmk_commhandle ***commhandle;
     int commhandleCount;
     int commhandleMaxCount;
+    XXE **xxeSubStream;
+    int xxeSubStreamCount;
+    int xxeSubStreamMaxCount;
     ESMC_TypeKind typekind[10];
     
   public:
-    XXE(int maxArg, int storageMaxCountArg=100, int commhandleMaxCountArg=100){
+    XXE(int maxArg, int storageMaxCountArg=100, int commhandleMaxCountArg=100,
+      int xxeSubStreamMaxCountArg=100){
       // constructor
       stream = new StreamElement[maxArg]; count = 0; max = maxArg;
       storage = new char*[storageMaxCountArg];
@@ -250,6 +259,9 @@ class XXE{
       commhandle = new vmk_commhandle**[commhandleMaxCountArg];
       commhandleCount  = 0;
       commhandleMaxCount = commhandleMaxCountArg;
+      xxeSubStream = new XXE*[xxeSubStreamMaxCountArg];
+      xxeSubStreamCount  = 0;
+      xxeSubStreamMaxCount = xxeSubStreamMaxCountArg;
     }
     ~XXE(){     // destructor
       delete [] stream;
@@ -261,6 +273,9 @@ class XXE{
         delete commhandle[i];
       }
       delete [] commhandle;
+      for (int i=0; i<xxeSubStreamCount; i++)
+        delete xxeSubStream[i];
+      delete [] xxeSubStream;
     }
     int exec(int rraCount=0, char **rraList=NULL);
     int printProfile();
@@ -364,6 +379,14 @@ class XXE{
       int rraIndex;
     }MemCpySrcRRAInfo;
     
+    // --- sub-streams
+    
+    typedef struct{
+      OpId opId;
+      OpSubId opSubId;
+      XXE *xxe;
+    }SubStreamInfo;
+    
     // --- profiling
     
     typedef struct{
@@ -380,6 +403,14 @@ class XXE{
       double wtime;
       double wtimeSum;
     }WtimerInfo;
+    
+    // --- misc
+    
+    typedef struct{
+      OpId opId;
+      OpSubId opSubId;
+      char *printString;
+    }PrintInfo;
     
     // --- meta Info structs (i.e. don't correspond to OpIds)
 
