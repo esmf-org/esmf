@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.29 2007/08/15 21:17:53 dneckels Exp $
+# $Id: build_rules.mk,v 1.30 2007/08/15 21:27:27 theurich Exp $
 #
 # AIX.default.default
 #
@@ -8,7 +8,6 @@
 #
 ESMF_F90DEFAULT         = xlf90_r
 ESMF_CXXDEFAULT         = xlC_r
-ESMF_SL_LIBOPTS        += -Wl,-bbigtoc
 
 ############################################################
 # Default MPI setting.
@@ -114,6 +113,7 @@ ESMF_CXXLINKLIBS += -lm_r -lxlf90_r -lC_r
 ############################################################
 # Shared library options
 #
+ESMF_SL_LIBOPTS  += -Wl,-bbigtoc
 ESMF_SL_LIBOPTS  += -G -qmkshrobj
 ifeq ($(ESMF_ABI),64)
 ESMF_SL_LIBOPTS  += -q64
