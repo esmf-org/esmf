@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbIdxUTest.F90,v 1.4 2007/08/15 18:40:39 theurich Exp $
+! $Id: ESMF_ArrayArbIdxUTest.F90,v 1.5 2007/08/15 18:44:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayArbIdxUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayArbIdxUTest.F90,v 1.4 2007/08/15 18:40:39 theurich Exp $'
+    '$Id: ESMF_ArrayArbIdxUTest.F90,v 1.5 2007/08/15 18:44:45 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -373,7 +373,7 @@ program ESMF_ArrayArbIdxUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArraySparseMatMulMul: srcArray2 -> dstArray2 Test"
+  write(name, *) "ArraySparseMatMulMul: srcArray2 -> dstArray2 (RRA) Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArraySparseMatMul(srcArray=srcArray2, dstArray=dstArray2, &
     routehandle=routehandle, rc=rc)
@@ -402,7 +402,7 @@ program ESMF_ArrayArbIdxUTest
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Verify results in dstArray2 Test"
+  write(name, *) "Verify results in dstArray2 (RRA) Test"
   write(failMsg, *) "Wrong results" 
   if (localPet == 0) then
     call ESMF_Test(((farrayPtr(1).eq.38).and.((farrayPtr(2).eq.0))), &
