@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.50 2007/07/05 15:25:05 samsoncheung Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.51 2007/08/15 19:28:06 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.50 2007/07/05 15:25:05 samsoncheung Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.51 2007/08/15 19:28:06 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -50,7 +50,7 @@
       type(ESMF_Field) :: fields(10)
       type(ESMF_Field) :: returnedfield1, returnedfield2, returnedfield3
       type(ESMF_Field) :: simplefield
-      type(ESMF_Bundle) :: bundle1, bundle2, bundle3
+      type(ESMF_Bundle) :: bundle1, bundle2, bundle3, bundle4
       real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr2
       real (ESMF_KIND_R8) :: mincoord(2)
 
@@ -247,12 +247,17 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX   _UTest
+      !EX_UTest
       ! Test Requirement FLD2.1.1 Creating a Bundle with ESMF_PACKED_DATA option
-      !bundle1 = ESMF_BundleCreate(3, fields, ESMF_PACKED_DATA, &
-      !			name="atmosphere data", rc=rc)
-      !write(name, *) "Creating Bundle with ESMF_PACKED_DATA Req. FLD2.1.1"
-      ! call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      ! The ESMF_PACKED_DATA is not implemented, this test will return ESMF_RC_MEM
+      ! until it is implemented, at that point it should return success and the
+      ! test will need to be changed.
+      write(failMsg, *) "Did not return ESMF_RC_MEM"
+      bundle4 = ESMF_BundleCreate(3, fields, ESMF_PACKED_DATA, &
+      			name="atmosphere data", rc=rc)
+      write(name, *) "Creating Bundle with ESMF_PACKED_DATA Req. FLD2.1.1"
+      call ESMF_Test((rc.eq.ESMF_RC_MEM), name, failMsg, result, ESMF_SRCLINE)
+      print *, "rc = ", rc
       !------------------------------------------------------------------------
 
       !EX_UTest
