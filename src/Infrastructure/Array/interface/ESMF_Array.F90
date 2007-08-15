@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.62 2007/08/10 21:07:41 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.63 2007/08/15 18:41:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -128,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.62 2007/08/10 21:07:41 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.63 2007/08/15 18:41:23 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -636,16 +636,18 @@ contains
 !   Array arguments.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_ArraySparseMatMul()} on any pair of Arrays that are 
-!   DistGrid-conform with the Array pair for which the Route was precomputed. 
+!   {\tt ESMF\_ArraySparseMatMul()} on any pair of Arrays that are congruent
+!   with the {\tt srcArray}, {\tt dstArray} pair. Congruent Arrays possess
+!   matching DistGrids and the shape of the local array tiles matches between
+!   the Arrays for every DE.
 !
 !   This call is {\em collective} across the current VM.
 !
 !   \begin{description}
 !   \item [srcArray]
-!     {\tt ESMF\_Array} containing source data.
+!     {\tt ESMF\_Array} with source data.
 !   \item [dstArray]
-!     {\tt ESMF\_Array} holding destination data.
+!     {\tt ESMF\_Array} with destination data.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [factorList]
@@ -971,16 +973,18 @@ contains
 !   Array arguments.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_ArraySparseMatMul()} on any pair of Arrays that are 
-!   DistGrid-conform with the Array pair for which the Route was precomputed. 
+!   {\tt ESMF\_ArraySparseMatMul()} on any pair of Arrays that are congruent
+!   with the {\tt srcArray}, {\tt dstArray} pair. Congruent Arrays possess
+!   matching DistGrids and the shape of the local array tiles matches between
+!   the Arrays for every DE.
 !
 !   This call is {\em collective} across the current VM.
 !
 !   \begin{description}
 !   \item [srcArray]
-!     {\tt ESMF\_Array} containing source data.
+!     {\tt ESMF\_Array} with source data.
 !   \item [dstArray]
-!     {\tt ESMF\_Array} holding destination data.
+!     {\tt ESMF\_Array} with destination data.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [{[rc]}]
@@ -1037,17 +1041,23 @@ contains
 !
 ! !DESCRIPTION:
 !   Execute a precomputed Array sparse matrix multiplication from {\tt srcArray}
-!   to {\tt dstArray}. See {\tt ESMF\_ArraySparseMatMulStore()} on how to
-!   precompute {\tt routehandle}. See section \ref{Array:SparseMatMul} for
-!   details on the operation this call performs.
+!   to {\tt dstArray}. Both Arrays {\tt srcArray} and {\tt dstArray} must be
+!   congruent with the respective Arrays used during 
+!   {\tt ESMF\_ArraySparseMatMulStore()}. Congruent Arrays possess
+!   matching DistGrids and the shape of the local array tiles matches between
+!   the Arrays for every DE.
+!
+!   See {\tt ESMF\_ArraySparseMatMulStore()} on how to precompute 
+!   {\tt routehandle}. See section \ref{Array:SparseMatMul} for details on the
+!   operation {\tt ESMF\_ArraySparseMatMul()} performs.
 !
 !   This call is {\em collective} across the current VM.
 !
 !   \begin{description}
 !   \item [srcArray]
-!     {\tt ESMF\_Array} containing source data.
+!     {\tt ESMF\_Array} with source data.
 !   \item [dstArray]
-!     {\tt ESMF\_Array} holding destination data.
+!     {\tt ESMF\_Array} with destination data.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [{[zeroflag]}]
@@ -1138,9 +1148,9 @@ contains
 !
 !   \begin{description}
 !   \item [srcArray]
-!         {\tt ESMF\_Array} containing source data.
+!         {\tt ESMF\_Array} with source data.
 !   \item [dstArray]
-!         {\tt ESMF\_Array} holding destination data.
+!         {\tt ESMF\_Array} with destination data.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1187,9 +1197,9 @@ contains
 !
 !   \begin{description}
 !   \item [srcArray]
-!         {\tt ESMF\_Array} containing source data.
+!         {\tt ESMF\_Array} with source data.
 !   \item [dstArray]
-!         {\tt ESMF\_Array} holding destination data.
+!         {\tt ESMF\_Array} with destination data.
 !   \item [routehandle]
 !         Handle to the Route that stores the operation.
 !   \item [{[rc]}]
@@ -1234,9 +1244,9 @@ contains
 !
 !   \begin{description}
 !   \item [srcArray]
-!         {\tt ESMF\_Array} containing source data.
+!         {\tt ESMF\_Array} with source data.
 !   \item [dstArray]
-!         {\tt ESMF\_Array} holding destination data.
+!         {\tt ESMF\_Array} with destination data.
 !   \item [routehandle]
 !         Handle to the Route that stores the operation.
 !   \item [{[rc]}]
@@ -2413,9 +2423,9 @@ contains
 !
 !   \begin{description}
 !   \item [srcArrayBundle]
-!         {\tt ESMF\_ArrayBundle} containing source data.
+!         {\tt ESMF\_ArrayBundle} with source data.
 !   \item [dstArrayBundle]
-!         {\tt ESMF\_ArrayBundle} holding destination data.
+!         {\tt ESMF\_ArrayBundle} with destination data.
 !   \item [routehandle]
 !         Handle to the Route that stores the operation.
 !   \item [{[rc]}]
