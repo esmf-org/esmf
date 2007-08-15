@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.28 2007/01/17 23:09:32 svasquez Exp $
+# $Id: build_rules.mk,v 1.29 2007/08/15 21:17:53 dneckels Exp $
 #
 # AIX.default.default
 #
@@ -8,6 +8,7 @@
 #
 ESMF_F90DEFAULT         = xlf90_r
 ESMF_CXXDEFAULT         = xlC_r
+ESMF_SL_LIBOPTS        += -Wl,-bbigtoc
 
 ############################################################
 # Default MPI setting.

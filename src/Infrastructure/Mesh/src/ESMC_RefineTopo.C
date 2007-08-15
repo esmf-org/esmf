@@ -1,4 +1,4 @@
-// $Id: ESMC_RefineTopo.C,v 1.1 2007/08/07 17:48:02 dneckels Exp $
+// $Id: ESMC_RefineTopo.C,v 1.2 2007/08/15 21:17:36 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -150,9 +150,9 @@ static const HomoRefineTopo *ManufactureHomoRefineTopo(const std::string &name) 
   return topo;
 }
 
-static std::map<const std::string,const RefineTopo*> static_rtopo_map;
 
 const RefineTopo *GetHomoRefineTopo(const std::string &tname) {
+  static std::map<std::string,const RefineTopo*> static_rtopo_map;
   const RefineTopo *rtopo;
   std::map<std::string, const RefineTopo*>::iterator mit;
   

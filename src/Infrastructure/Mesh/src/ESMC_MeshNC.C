@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshNC.C,v 1.1 2007/08/07 17:48:01 dneckels Exp $
+// $Id: ESMC_MeshNC.C,v 1.2 2007/08/15 21:17:36 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -19,7 +19,9 @@
 #include <ESMC_Mesh.h>
 #include <ESMC_IOField.h>
 
+#ifdef ESMC_NETCDF
 #include <netcdf.h>
+#endif
 #include <cmath>
 #include <iostream>
 #include <algorithm>
@@ -47,6 +49,7 @@ struct llnode {
 };
 
 void LoadNCMesh(MeshDB &mesh, const std::string name, bool land, pole_func *pf, latlon_func *lf) {
+#ifdef ESMC_NETCDF
 
   // open the netcdf file
   int ncid, stat;
@@ -277,12 +280,14 @@ std::cout << "size of ll:" << ll.size() << std::endl;
 
   nc_close(ncid);
 
+#endif
 }
 
 // Load a spectral mesh with only lat/lon, not cell info
 void LoadNCTMesh(Mesh &mesh, const std::string name,
                  latlon_func *lf)
 {
+#ifdef ESMC_NETCDF
 
   // open the netcdf file
   int ncid, stat;
@@ -420,6 +425,7 @@ std::cout << "size of ll:" << ll.size() << std::endl;
 
   nc_close(ncid);
 
+#endif
 }
 
 bool LoadNCTData(MeshDB &mesh, 
@@ -427,6 +433,7 @@ bool LoadNCTData(MeshDB &mesh,
                  const std::vector<std::string> &vnames, // the names for each component
                  const MEField<> &field, int timestep)
 {
+#ifdef ESMC_NETCDF
   if (vnames.size() != field.dim()) 
     Throw() << "NCTData, vnamesize=" << vnames.size() << ", but field dim=" << field.dim();
   // open the netcdf file
@@ -500,6 +507,7 @@ std::cout << "ntsteps:" << ntstep << std::endl;
   nc_close(ncid);
 
   return true;
+#endif
 }
 
 } //namespace
