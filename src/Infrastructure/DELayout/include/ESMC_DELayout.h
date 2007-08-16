@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.39 2007/08/16 20:13:58 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.40 2007/08/16 23:11:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -215,6 +215,7 @@ class XXE{
       productSumScalar, productSumScalarRRA,
       productSumSuperScalarRRA,
       memCpy, memCpySrcRRA,
+      memGatherSrcRRA,
       // --- sub-streams
       subStream,
       // --- profiling
@@ -227,7 +228,7 @@ class XXE{
       waitOnAllSendnb, waitOnAllRecvnb
     };
     enum OpSubId{
-      I4, I8, R4, R8,
+      I4, I8, R4, R8, BYTE,
       noSum
     };
     struct StreamElement{
@@ -390,6 +391,16 @@ class XXE{
       int size;
       int rraIndex;
     }MemCpySrcRRAInfo;
+    
+    typedef struct{
+      OpId opId;
+      OpSubId opSubId;
+      void *dstBase;
+      int *rraOffsetList;
+      int *countList;
+      int rraIndex;
+      int chunkCount;
+    }MemGatherSrcRRAInfo;
     
     // --- sub-streams
     

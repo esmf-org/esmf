@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.72 2007/08/16 20:13:58 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.73 2007/08/16 23:11:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.72 2007/08/16 20:13:58 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.73 2007/08/16 23:11:34 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2446,6 +2446,7 @@ int XXE::exec(
   ProductSumSuperScalarRRAInfo *xxeProductSumSuperScalarRRAInfo;
   MemCpyInfo *xxeMemCpyInfo;
   MemCpySrcRRAInfo *xxeMemCpySrcRRAInfo;
+  MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo;
   SubStreamInfo *xxeSubStreamInfo;
   WtimerInfo *xxeWtimerInfo, *xxeWtimerInfoActual, *xxeWtimerInfoRelative;
   PrintInfo *xxePrintInfo;
@@ -2731,6 +2732,74 @@ int XXE::exec(
           rraList[xxeMemCpySrcRRAInfo->rraIndex]
           + xxeMemCpySrcRRAInfo->rraOffset,
           xxeMemCpySrcRRAInfo->size);
+      }
+      break;
+    case memGatherSrcRRA:
+      {
+        xxeMemGatherSrcRRAInfo = (MemGatherSrcRRAInfo *)xxeElement;
+        char *dstBase = (char *)xxeMemGatherSrcRRAInfo->dstBase;
+        char *rraBase = rraList[xxeMemGatherSrcRRAInfo->rraIndex];
+        int *rraOffsetList = xxeMemGatherSrcRRAInfo->rraOffsetList;
+        int *countList = xxeMemGatherSrcRRAInfo->countList;
+        switch (xxeMemGatherSrcRRAInfo->opSubId){
+        case BYTE:
+          {
+            char *dstPointer = dstBase;
+            for (int k=0; k<xxeMemGatherSrcRRAInfo->chunkCount; k++){
+              memcpy(dstPointer, rraBase + rraOffsetList[k], countList[k]);
+              dstPointer += countList[k];
+            }
+          }
+          break;
+        case I4:
+          {
+            ESMC_I4 *dstPointer = (ESMC_I4*)dstBase;
+            ESMC_I4 *srcPointer;
+            for (int k=0; k<xxeMemGatherSrcRRAInfo->chunkCount; k++){
+              srcPointer = (ESMC_I4*)(rraBase + rraOffsetList[k]);
+              for (int kk=0; kk<countList[k]; kk++)
+                dstPointer[kk] = srcPointer[kk]; 
+              dstPointer += countList[k];
+            }
+          }
+          break;
+        case I8:
+          {
+            ESMC_I8 *dstPointer = (ESMC_I8*)dstBase;
+            ESMC_I8 *srcPointer;
+            for (int k=0; k<xxeMemGatherSrcRRAInfo->chunkCount; k++){
+              srcPointer = (ESMC_I8*)(rraBase + rraOffsetList[k]);
+              for (int kk=0; kk<countList[k]; kk++)
+                dstPointer[kk] = srcPointer[kk]; 
+              dstPointer += countList[k];
+            }
+          }
+          break;
+        case R4:
+          {
+            ESMC_R4 *dstPointer = (ESMC_R4*)dstBase;
+            ESMC_R4 *srcPointer;
+            for (int k=0; k<xxeMemGatherSrcRRAInfo->chunkCount; k++){
+              srcPointer = (ESMC_R4*)(rraBase + rraOffsetList[k]);
+              for (int kk=0; kk<countList[k]; kk++)
+                dstPointer[kk] = srcPointer[kk]; 
+              dstPointer += countList[k];
+            }
+          }
+          break;
+        case R8:
+          {
+            ESMC_R8 *dstPointer = (ESMC_R8*)dstBase;
+            ESMC_R8 *srcPointer;
+            for (int k=0; k<xxeMemGatherSrcRRAInfo->chunkCount; k++){
+              srcPointer = (ESMC_R8*)(rraBase + rraOffsetList[k]);
+              for (int kk=0; kk<countList[k]; kk++)
+                dstPointer[kk] = srcPointer[kk]; 
+              dstPointer += countList[k];
+            }
+          }
+          break;
+        }
       }
       break;
     case subStream:
