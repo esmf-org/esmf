@@ -1,5 +1,5 @@
 %===============================================================================
-% CVS $Id: testing.tex,v 1.11 2007/06/27 21:00:08 svasquez Exp $
+% CVS $Id: testing.tex,v 1.12 2007/08/16 20:15:42 svasquez Exp $
 % CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/testing.tex,v $
 % CVS $Name:  $
 %===============================================================================
@@ -88,7 +88,7 @@ values.
 Unit tests usually test a single argument of a method to make it easier to
 identify the bug when a unit test fails.
 There are several steps to writing a unit test.
-First the unit test must be labled, with one of the following tags:
+First, each unit test must be labled with one of the following tags:
 \begin{itemize}
 \item NEX\_UTest - This tag signifies a non-exhaustive test. These tests are always run and
 are considered to be sanity tests they usually consist of creating and destroying a specific class.
@@ -104,22 +104,28 @@ Note that when the NEX\_UTest\_Multi\_Proc\_Only or EX\_UTest\_Multi\_Proc\_Only
 the file must be labeled as such. You may not mix these tags with the other tags. In addition, verify that the makefile
 does not allow the unit tests with these tags to be run uni.
 
-Second a string is specified describing the test, for example:
+Second, a string is specified describing the test, for example:
 \begin{verbatim}
 
 	write(name, *) "Grid Destroy Test"
 
 \end{verbatim}
-Third a string to be printed  when the test fails is specified, for example:
+Third, a string to be printed when the test fails is specified, for example:
 \begin{verbatim}
 
 	write(failMsg, *) "Did not return ESMF_SUCCESS"
 
 \end{verbatim}
+Fourth, the ESMF\_Test subroutine is called to determine the test results, for example:
+\begin{verbatim}
+
+	call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+\end{verbatim}
 The following two tests are good examples of how unit tests should be written.
 The first test verify that getting the attribute count from a Field returns ESMF\_SUCCESS, while
 the second verifies the attribute count is correct. These two tests could be combined into one
-with a logical AND statement when calling ESMF\_Test, but breaking the tests up makes it easier
+with a logical AND statement when calling ESMF\_Test, but breaking the tests up allows you
 to identify the source of the bug immediately.
 \begin{verbatim}
 
@@ -143,6 +149,41 @@ to identify the source of the bug immediately.
 \end{verbatim}
 
 
+\paragraph{Analyzing unit test results }
+When unit test are run, a Perl script prints out the test results as shown in
+Section "Running ESMF Unit Tests" in the ESMF User's Guide. To print out the test results,
+the Perl script must determine the number of unit tests in each test file and the number of
+processors executing the unit test. It determines the number of tests by counting the
+EX\_UTest, NEX\_UTest, EX\_UTest\_Multi\_Proc\_Only, or NEX\_UTest\_Multi\_Proc\_Only 
+tags in the test source file whichever is appropriate for the test being run. 
+To determine the number of processors, it counts the number of "NUMBER\_OF\_PROCESSORS" strings in the
+unit test output Log file. The script then counts the number of PASS and FAIL strings in the
+test Log file.
+The Perl script first divides the number of PASS strings by the number of processors. If the
+quotient is not a whole  number then the script concludes that the test crashed. If the quotient
+is a whole number, the script then divides the number of FAIL strings by the number of processors.
+The sum of the two quotients must equal the total number of tests, if not the test is marked
+as crashed.
+
+Sometimes a unit test is written expecting a subset of the processors to fail the test. To
+handle this case, the unit test must verify results from each processor as in the unit test below:
+\begin{verbatim}
+
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Verify that the rc is correct on all pets.
+    write(failMsg, *) "Did not return FAILURE  on PET 1, SUCCESS otherwise"
+    write(name, *) "Verify rc of a Gridded Component Test"
+    if (localPet==1) then
+      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+    else
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    endif
+
+    !------------------------------------------------------------------------
+
+\end{verbatim}
 
 \subsubsection{System Tests}
 
@@ -165,6 +206,31 @@ descriptions, a list of test cases executed, results, and any unexpected
 events. Bugs should be documented in the \htmladdnormallink{{\it SourceForge Bug 
 Tracker}}{https://sourceforge.net/tracker/?group\_id=38089&atid=421185} and 
 any bug fixes shall be validated.
+
+\paragraph{Writing System Tests}
+
+System tests should contain the following secctions:
+\begin{itemize}
+\item Create - Create Components, Couplers, Clock, Grids, States etc.
+\item Register - Register Components and the initialize, run and finalize subroutines.
+\item Initialize - Initialize as needed.
+\item Run - Run the test.
+\item Finalize - Verify results.
+\item Destroy - Destory all classes.
+\end{itemize}
+
+At the end of the system it is recommended that the ESMF\_TestGlobal subroutine be used to gather
+test results from all processors and print out a single PASS/FAIL message instead
+of individual PASS/FAIL messages from all the processors.
+After the test is written it must be documented on the ESMF Test \& Validaton
+web page:
+
+\begin{verbatim}
+
+http://www.esmf.ucar.edu/developers/test/system/
+
+\end{verbatim}
+
 
 \subsubsection{Use Test Cases (UTCs)}
 
