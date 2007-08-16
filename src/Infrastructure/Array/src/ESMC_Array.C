@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.112 2007/08/16 20:16:09 theurich Exp $
+// $Id: ESMC_Array.C,v 1.113 2007/08/16 23:13:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.112 2007/08/16 20:16:09 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.113 2007/08/16 23:13:06 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3929,6 +3929,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   XXE::ProductSumSuperScalarRRAInfo *xxeProductSumSuperScalarRRAInfo;
   XXE::MemCpyInfo *xxeMemCpyInfo;
   XXE::MemCpySrcRRAInfo *xxeMemCpySrcRRAInfo;
+  XXE::MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo;
   XXE::SubStreamInfo *xxeSubStreamInfo;
   XXE::WtimerInfo *xxeWtimerInfo;
   XXE::PrintInfo *xxePrintInfo;
@@ -4126,7 +4127,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
 #if 0
         printf("gjt: non-contiguous linIndex in srcArray -> need buffer \n");
 #endif
-        // need intermediate buffer and memCpyRRAs
+        // need intermediate buffer and memCpySrcRRAs
         char *buffer = new char[partnerDeCount[i] * dataSize];
         xxe->storage[xxe->storageCount] = buffer; // for xxe garbage collection
         ++(xxe->storageCount);
@@ -4135,10 +4136,11 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
             "- xxe->storageCount out of range", &rc);
           return rc;
         }
+#ifdef USEmemCpySrcRRA
         char *bufferPointer = buffer;
         for (int k=0; k<count; k++){
           int byteCount = linIndexContigBlockList[k].linIndexCount * dataSize;
-          // memCpyRRA pieces into intermediate buffer
+          // memCpySrcRRA pieces into intermediate buffer
           xxestream[xxeCount].opId = XXE::memCpySrcRRA;
           xxeElement = &(xxestream[xxeCount]);
           xxeMemCpySrcRRAInfo = (XXE::MemCpySrcRRAInfo *)xxeElement;
@@ -4155,6 +4157,63 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
           }
           bufferPointer += byteCount;
         }
+#else
+        // memGatherSrcRRA pieces into intermediate buffer
+        xxestream[xxeCount].opId = XXE::memGatherSrcRRA;
+        xxeElement = &(xxestream[xxeCount]);
+        xxeMemGatherSrcRRAInfo = (XXE::MemGatherSrcRRAInfo *)xxeElement;
+        xxeMemGatherSrcRRAInfo->dstBase = buffer;
+        xxeMemGatherSrcRRAInfo->rraIndex = j; // localDe index into srcArray
+        xxeMemGatherSrcRRAInfo->chunkCount = count;
+        char *rraOffsetListChar = new char[count*sizeof(int)];
+        int *rraOffsetList = (int *)rraOffsetListChar;
+        xxeMemGatherSrcRRAInfo->rraOffsetList = rraOffsetList;
+        xxe->storage[xxe->storageCount] = rraOffsetListChar; // f xxe garb coll.
+        ++(xxe->storageCount);
+        if (xxe->storageCount >= xxe->storageMaxCount){
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+            "- xxe->storageCount out of range", &rc);
+          return rc;
+        }
+        char *countListChar = new char[count*sizeof(int)];
+        int *countList = (int *)countListChar;
+        xxeMemGatherSrcRRAInfo->countList = countList;
+        xxe->storage[xxe->storageCount] = countListChar; // for xxe garb coll.
+        ++(xxe->storageCount);
+        if (xxe->storageCount >= xxe->storageMaxCount){
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+            "- xxe->storageCount out of range", &rc);
+          return rc;
+        }
+#define USEBYTE
+#ifdef USEBYTE
+        xxestream[xxeCount].opSubId = XXE::BYTE;
+        for (int k=0; k<count; k++){
+          rraOffsetList[k] = linIndexContigBlockList[k].linIndex * dataSize;
+          countList[k] = linIndexContigBlockList[k].linIndexCount * dataSize;
+        }
+#else
+        if (typekindArg == ESMC_TYPEKIND_R4)
+          xxestream[xxeCount].opSubId = XXE::R4;
+        else if (typekindArg == ESMC_TYPEKIND_R8)
+          xxestream[xxeCount].opSubId = XXE::R8;
+        else if (typekindArg == ESMC_TYPEKIND_I4)
+          xxestream[xxeCount].opSubId = XXE::I4;
+        else if (typekindArg == ESMC_TYPEKIND_I8)
+          xxestream[xxeCount].opSubId = XXE::I8;
+        for (int k=0; k<count; k++){
+          rraOffsetList[k] = linIndexContigBlockList[k].linIndex * dataSize;
+          countList[k] = linIndexContigBlockList[k].linIndexCount;
+        }
+#endif
+        ++xxeCount;
+        if (xxeCount >= xxe->max){
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+            "- xxeCount out of range", &rc);
+          return rc;
+        }
+                
+#endif
         // sendnb out of contiguous intermediate buffer
         xxestream[xxeCount].opId = XXE::sendnb;
         xxeElement = &(xxestream[xxeCount]);
@@ -4807,7 +4866,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
             "- xxeCount out of range", &rc);
           return rc;
         }
-      } // kk - partnerDeCount[k[
+      } // kk - partnerDeCount[k]
 #else
       // enter super-scalar "+=*" operation into XXE stream
       xxestream[xxeCount].opId = XXE::productSumSuperScalarRRA;
@@ -5122,11 +5181,8 @@ int Array::sparseMatMul(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  double t0;            //gjt - profile
+  double t0, t1, t2, t3, t4, t5, t6;            //gjt - profile
   VMK::wtime(&t0);      //gjt - profile
-  int localPet = 999;   // for now in order to save on overhead
-  printf("gjt - exec() profile for PET %d: t0 = %g\n",
-    localPet, t0);
 
   // basic error checking for input
   if (srcArray == NULL){
@@ -5140,6 +5196,8 @@ int Array::sparseMatMul(
     return rc;
   }
   
+  VMK::wtime(&t1);      //gjt - profile
+
   // get a handle on the XXE stored in routehandle
   XXE *xxe = (XXE *)(*routehandle)->ESMC_RouteHandleGetStorage();
 
@@ -5163,6 +5221,8 @@ int Array::sparseMatMul(
     //       between argument Array pair and Array pair used during XXE precomp.
   }
   
+  VMK::wtime(&t2);      //gjt - profile
+
   // conditionally zero out total regions of the dstArray for all localDEs
   if (zeroflag==ESMF_TRUE){
     for (int i=0; i<dstArray->delayout->getLocalDeCount(); i++){
@@ -5174,6 +5234,8 @@ int Array::sparseMatMul(
     }
   }
   
+  VMK::wtime(&t3);      //gjt - profile
+
   // prepare for relative run-time addressing (RRA)
   int rraCount = srcArray->delayout->getLocalDeCount();
   rraCount += dstArray->delayout->getLocalDeCount();
@@ -5185,14 +5247,24 @@ int Array::sparseMatMul(
     dstArray->larrayBaseAddrList,
     dstArray->delayout->getLocalDeCount() * sizeof(char *));
 
+  VMK::wtime(&t4);      //gjt - profile
+
   // execute XXE stream
   localrc = xxe->exec(rraCount, rraList);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
+  VMK::wtime(&t5);      //gjt - profile
+
   // garbage collection
   delete [] rraList;
   
+  VMK::wtime(&t6);      //gjt - profile
+  int localPet = 999;   // for now in order to save on overhead
+  printf("gjt - exec() profile for PET %d: "
+    "dt1 = %g\tdt2 = %g\tdt3 = %g\tdt4 = %g\tdt5 = %g\tdt6 = %g\n",
+    localPet, t1-t0, t2-t0, t3-t0, t4-t0, t5-t0, t6-t0);
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
