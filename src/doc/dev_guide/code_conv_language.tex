@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_language.tex,v 1.5 2007/04/12 21:18:56 cdeluca Exp $
+% CVS $Id: code_conv_language.tex,v 1.6 2007/08/16 20:44:22 cdeluca Exp $
 
 \subsection{Lang: Interlanguage Coding Conventions}
 
@@ -39,10 +39,7 @@ and "European Standards For Writing and Documenting Exchangeable
 Fortran 90 Code"
 (\htmladdnormallink{http://nsipp.gsfc.nasa.gov/infra/eurorules.html}{http://nsipp.gsfc.nasa.gov/infra/eurorules.html}).
 
-The conventions also assume the use of the automatic dependency
-generator
-\htmladdnormallink{mkmf}{http://www.gfdl.gov/\~{}vb/mkmf.html} and the
-embedded documentation extractor
+The conventions assume the use of embedded documentation extractor
 \htmladdnormallink{ProTeX}{http://dao.gsfc.nasa.gov/software/protex}.
 
 \subsubsection{Content Rules}
@@ -50,7 +47,7 @@ embedded documentation extractor
 \begin{description}
 
 \item[F95 Standard] ESMF will adhere to the Fortran 95 language
-  standard~\cite{ref:f95}.
+  standard~\cite{ref:f95}, to the extent that it is implemented.
 
 \begin{enumerate}
 \item All elements of the ANSI \texttt{f95} standard are permitted,
@@ -84,21 +81,13 @@ following conditions:
   relaxed on platforms where the builtin preprocessor proves to be
   inadequate.
 \item Use is restricted to short code sections (a useful rule of thumb
-  is that an \texttt{\#ifdef} and the matching \texttt{\#endif} must
+  is that an \texttt{\#ifdef} and the matching \texttt{\#endif} should
   both be visible on a single 80\latexhtml{$\times$}{x}24 editor
   window).
 \item Tokens must be uppercase.
 \item Owing to restrictions in certain compilers, preprocessor
   variable names may not exceed 31 characters.
 \end{enumerate}
-
-We will identify a consistent strategy for handling cases in which the
-built-in preprocessor is inadequate.  The convention will be documented
-in the {\it Developer's Guide} no later than Milestone G (April 2004).
-
-\item[Macros] Standard macros will be identified in later versions
-of this Guide.  A full set of standard macros will be identified no later
-than Milestone G (April 2004).  
 
 \item[Source files] Each source code file defines a single
   \texttt{program} or \texttt{f90 module}. The filename must be the
@@ -135,28 +124,10 @@ implicit none
 
 in the module header, and every variable explicitly declared.
 
-Variables are generally assumed to be of default \texttt{KIND}. There
-may sometimes be reason to specify the \texttt{KIND} of a variable:
-
-\begin{enumerate}
-\item If \texttt{KIND} must be specified for reasons of precision, the
-  \texttt{f90} intrinsics \texttt{SELECTED\_REAL\_KIND} and
-  \texttt{SELECTED\_INT\_KIND} must be used.
-\item If \texttt{KIND} must be specified in order to control the
-  storage size (bytelength) of a variable (typically in communication
-  and I/O code) it must be done using the parameters \texttt{r8\_kind},
-  \texttt{r4\_kind}, \texttt{i8\_kind}, \texttt{i4\_kind} and
-  \texttt{i2\_kind}, supplied by the module \texttt{platform},
-  which sets various values that are specific to the computing
-  platform. The \texttt{platform} module sets these values to the
-  appropriate \texttt{KIND} values for FP and integer variables of the
-  required bytelength.
-\end{enumerate}
-
 There are a few restrictions on the length of a character variable:
 
 \begin{enumerate}
-\item Character variables that are \emph{arguments} to routines must
+\item Character variables that are \emph{arguments} to routines should
   be declared with \texttt{(len=*)}. It has been observed that
   compilers are inconsistent in their ``padding'' practices, and the
   standard is silent on the subject.
@@ -210,7 +181,7 @@ end subroutine advection
 call advection(1)
 \end{verbatim}
 
-is forbidden. This should instead be written as:
+is discouraged. This should instead be written as:
 
 \begin{verbatim}
 integer, parameter :: UPWIND=1, SMOLAR=2
@@ -234,13 +205,13 @@ call advection(UPWIND)
 
 \begin{enumerate}
 \item Procedures that perform the same function on different datatypes
-  (e.g of differing type, kind or rank) must have a single generic
+  (e.g of differing type, kind or rank) should have a single generic
   interface. When the generic public interface exists, all the
   module procedures that constitute it must be private.
 \item Optional arguments, if any, should \emph{follow} the required
   arguments, so that the procedure may be called without explicit
   argument keywords.
-\item Argument lists should be short. If necessary related elements of
+\item Argument lists should be as short as possible. If necessary related elements of
   an argument list should be encapsulated in a public derived type.
 \end{enumerate}
 
@@ -262,7 +233,7 @@ call advection(UPWIND)
 
 \item[mkmf] The
   \htmladdnormallink{mkmf}{http://www.gfdl.gov/\~{}vb/mkmf.html} tool
-  will be used to generate Makefiles with correct dependencies for F90
+  may be used to generate Makefiles with correct dependencies for F90
   and hybrid-language codes. This places minor restrictions on
   \texttt{module} and \texttt{use} statements: these declarations must
   be on a single line, and the use of continuation lines, e.g:
@@ -305,7 +276,7 @@ use &
 
 Style is somewhat personal, and it would be needlessly restrictive to
 attempt to impose style requirements. These are recommendations which
-we believe will lead pleasant encounters with clear, legible and
+we believe will lead to pleasant encounters with clear, legible and
 understandable code. The only style requirement we place is that of
 {\it consistency}: a single code unit is required to be rigorous in
 using the author's preferred set of stylistic attributes.  It is not
@@ -338,21 +309,6 @@ Style recommendations include the following:
 \end{enumerate}
 
 \subsection{Lang: C/C++ Coding Standard}
-
-We shall adopt Taligent's Guide to Designing Programs \cite{taligent} 
-as our C++ coding standard.  
-
-In addition to the Taligent guidelines, we shall adhere to the following
-conventions.
-
-\begin{itemize}
-\item {\bf Naming} The names of C procedure interfaces will be preceded 
-by {\tt ESMC\_}.  Class names will normally be the first item in a procedure 
-name, followed by the specific method, e.g., {\tt ESMC\_TimeMgrGetCurrDate}.  
-Code will be mixed case, with a capital letter beginning each new word.
-When capitalized abbreviations or acronyms are part of a name all letters 
-in the abbreviation should be capitalized (for example, {\tt RG} to represent 
-Regular Grid). 
 
 \item {\bf Protex Prologues}  Each C or C++ function, subroutine, or 
 module will include a prologue instrumented for use with the
