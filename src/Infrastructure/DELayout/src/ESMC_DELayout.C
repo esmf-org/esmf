@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.71 2007/08/15 00:44:05 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.72 2007/08/16 20:13:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.71 2007/08/15 00:44:05 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.72 2007/08/16 20:13:58 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2443,6 +2443,7 @@ int XXE::exec(
   ProductSumVectorInfo *xxeProductSumVectorInfo;
   ProductSumScalarInfo *xxeProductSumScalarInfo;
   ProductSumScalarRRAInfo *xxeProductSumScalarRRAInfo;
+  ProductSumSuperScalarRRAInfo *xxeProductSumSuperScalarRRAInfo;
   MemCpyInfo *xxeMemCpyInfo;
   MemCpySrcRRAInfo *xxeMemCpySrcRRAInfo;
   SubStreamInfo *xxeSubStreamInfo;
@@ -2615,12 +2616,12 @@ int XXE::exec(
     case productSumScalarRRA:
       {
         xxeProductSumScalarRRAInfo = (ProductSumScalarRRAInfo *)xxeElement;
+        char *rraBase = rraList[xxeProductSumScalarRRAInfo->rraIndex];
         switch (xxeProductSumScalarRRAInfo->opSubId){
         case I4:
           {
             ESMC_I4 *element = (ESMC_I4 *)
-              (rraList[xxeProductSumScalarRRAInfo->rraIndex]
-              + xxeProductSumScalarRRAInfo->rraOffset);
+              (rraBase + xxeProductSumScalarRRAInfo->rraOffset);
             ESMC_I4 *factor = (ESMC_I4 *)xxeProductSumScalarRRAInfo->factor;
             ESMC_I4 *value = (ESMC_I4 *)xxeProductSumScalarRRAInfo->value;
             *element += *factor * *value;
@@ -2629,8 +2630,7 @@ int XXE::exec(
         case I8:
           {
             ESMC_I8 *element = (ESMC_I8 *)
-              (rraList[xxeProductSumScalarRRAInfo->rraIndex]
-              + xxeProductSumScalarRRAInfo->rraOffset);
+              (rraBase + xxeProductSumScalarRRAInfo->rraOffset);
             ESMC_I8 *factor = (ESMC_I8 *)xxeProductSumScalarRRAInfo->factor;
             ESMC_I8 *value = (ESMC_I8 *)xxeProductSumScalarRRAInfo->value;
             *element += *factor * *value;
@@ -2639,8 +2639,7 @@ int XXE::exec(
         case R4:
           {
             ESMC_R4 *element = (ESMC_R4 *)
-              (rraList[xxeProductSumScalarRRAInfo->rraIndex]
-              + xxeProductSumScalarRRAInfo->rraOffset);
+              (rraBase + xxeProductSumScalarRRAInfo->rraOffset);
             ESMC_R4 *factor = (ESMC_R4 *)xxeProductSumScalarRRAInfo->factor;
             ESMC_R4 *value = (ESMC_R4 *)xxeProductSumScalarRRAInfo->value;
             *element += *factor * *value;
@@ -2649,11 +2648,68 @@ int XXE::exec(
         case R8:
           {
             ESMC_R8 *element = (ESMC_R8 *)
-              (rraList[xxeProductSumScalarRRAInfo->rraIndex]
-              + xxeProductSumScalarRRAInfo->rraOffset);
+              (rraBase + xxeProductSumScalarRRAInfo->rraOffset);
             ESMC_R8 *factor = (ESMC_R8 *)xxeProductSumScalarRRAInfo->factor;
             ESMC_R8 *value = (ESMC_R8 *)xxeProductSumScalarRRAInfo->value;
             *element += *factor * *value;
+          }
+          break;
+        default:
+          break;
+        }
+      }
+      break;
+    case productSumSuperScalarRRA:
+      {
+        xxeProductSumSuperScalarRRAInfo =
+          (ProductSumSuperScalarRRAInfo *)xxeElement;
+        char *rraBase = rraList[xxeProductSumSuperScalarRRAInfo->rraIndex];
+        int *rraOffsetList = xxeProductSumSuperScalarRRAInfo->rraOffsetList;
+        void **factorList = xxeProductSumSuperScalarRRAInfo->factorList;
+        void **valueList = xxeProductSumSuperScalarRRAInfo->valueList;
+        switch (xxeProductSumSuperScalarRRAInfo->opSubId){
+        case I4:
+          {
+            ESMC_I4 *element, *factor, *value;
+            for (int k=0; k<xxeProductSumSuperScalarRRAInfo->termCount; k++){
+              element = (ESMC_I4 *)(rraBase + rraOffsetList[k]);
+              factor = (ESMC_I4 *)factorList[k];
+              value = (ESMC_I4 *)valueList[k];
+              *element += *factor * *value;
+            }
+          }
+          break;
+        case I8:
+          {
+            ESMC_I8 *element, *factor, *value;
+            for (int k=0; k<xxeProductSumSuperScalarRRAInfo->termCount; k++){
+              element = (ESMC_I8 *)(rraBase + rraOffsetList[k]);
+              factor = (ESMC_I8 *)factorList[k];
+              value = (ESMC_I8 *)valueList[k];
+              *element += *factor * *value;
+            }
+          }
+          break;
+        case R4:
+          {
+            ESMC_R4 *element, *factor, *value;
+            for (int k=0; k<xxeProductSumSuperScalarRRAInfo->termCount; k++){
+              element = (ESMC_R4 *)(rraBase + rraOffsetList[k]);
+              factor = (ESMC_R4 *)factorList[k];
+              value = (ESMC_R4 *)valueList[k];
+              *element += *factor * *value;
+            }
+          }
+          break;
+        case R8:
+          {
+            ESMC_R8 *element, *factor, *value;
+            for (int k=0; k<xxeProductSumSuperScalarRRAInfo->termCount; k++){
+              element = (ESMC_R8 *)(rraBase + rraOffsetList[k]);
+              factor = (ESMC_R8 *)factorList[k];
+              value = (ESMC_R8 *)valueList[k];
+              *element += *factor * *value;
+            }
           }
           break;
         default:
