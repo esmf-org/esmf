@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.113 2007/08/16 23:13:06 theurich Exp $
+// $Id: ESMC_Array.C,v 1.114 2007/08/17 22:38:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.113 2007/08/16 23:13:06 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.114 2007/08/17 22:38:02 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1995,16 +1995,15 @@ int Array::sparseMatMulStore(
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
   
-  double t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11; //gjt - profile
+  double t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10X, t10Y, t11;//gjt - profile
   double t4a, t4b, t4c, t5a, t5b, t5c;  //gjt - profile
   double t4c1=0., t4c2=0., t4c3=0., t4c4=0., t4c5=0.;  //gjt - profile
   double t4c3a, t4c3b, t4c3c, t4c3d;  //gjt - profile
   double dt4c34=0., dt4c45=0.;  //gjt - profile
   double dt4c3ab=0., dt4c3bc=0., dt4c3cd=0.;  //gjt - profile
-  double t10a, t10b, t10c, t10d, t10e, t10f, t10g; //gjt - profile
-  double t10c1, t10c2; //gjt - profile
-  double t10c2a, t10c2b, t10c2c, dt10c2bc=0.; //gjt - profile
-  double t10f1a, t10f1b, dt10f1ab=0.; //gjt - profile
+  double t10Xa, t10Xb, t10Xc, t10Xd, t10Xe; //gjt - profile
+  double t10Xc1, t10Xc2; //gjt - profile
+  double t10Yf, t10Yg; //gjt - profile
   VMK::wtime(&t0);   //gjt - profile
   
   // every Pet must provide srcArray and dstArray
@@ -3961,6 +3960,248 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   }
   // </XXE profiling element>
 
+  // prepare arrays used in recvnb loop _and_ +=* loop
+  int *diffPartnerDeCount = new int[dstLocalDeCount];
+  int **recvnbIndex = new int*[dstLocalDeCount];
+  int **partnerDeCount = new int*[dstLocalDeCount];
+  struct DstInfo{
+    int linIndex;
+    int seqIndex;
+    int partnerSeqIndex;
+    int localDeFactorListIndex;
+    static int cmp(const void *a, const void *b){
+      DstInfo *aObj = (DstInfo *)a;
+      DstInfo *bObj = (DstInfo *)b;
+      if (aObj->partnerSeqIndex < bObj->partnerSeqIndex) return -1;
+      if (aObj->partnerSeqIndex > bObj->partnerSeqIndex) return +1;
+      // partnerSeqIndex must be equal
+      if (aObj->seqIndex < bObj->seqIndex) return -1;
+      if (aObj->seqIndex > bObj->seqIndex) return +1;
+      // seqIndex must also be equal
+      return 0;
+    }
+  };
+  DstInfo ***dstInfoTable = new DstInfo**[dstLocalDeCount];
+  char **localDeFactorList = new char*[dstLocalDeCount];
+  char ***buffer = new char**[dstLocalDeCount];
+      
+  // determine recv pattern for all localDEs in dstArray and issue XXE::recvnb
+  for (int j=0; j<dstLocalDeCount; j++){
+    int *index2Ref = new int[dstDistGridLocalDeCellCount[j]];  // large enough
+    int localDeFactorCount = 0; // reset
+    int iCount = 0; // reset
+    for (int k=0; k<dstDistGridLocalDeCellCount[j]; k++){
+      int factorCount = dstLinSeqList[j][k].factorCount;
+      if (factorCount){
+        index2Ref[iCount] = k;   // store index2
+        localDeFactorCount += factorCount;
+        ++iCount; // increment counter
+      }
+    }
+
+    VMK::wtime(&t10Xa);   //gjt - profile
+    
+#if 0
+printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
+#endif
+    int *index2Ref2 = new int[localDeFactorCount];  // large enough
+    int *factorIndexRef = new int[localDeFactorCount];  // large enough
+    int *partnerDeRef = new int[localDeFactorCount];  // large enough
+    int *partnerDeList = new int[localDeFactorCount];  // large enough
+    partnerDeCount[j] = new int[localDeFactorCount];  // large enough
+    diffPartnerDeCount[j] = 0; // reset
+    int count = 0; // reset
+    for (int i=0; i<iCount; i++){
+      int factorCount = dstLinSeqList[j][index2Ref[i]].factorCount;
+      for (int k=0; k<factorCount; k++){
+        int partnerDe = dstLinSeqList[j][index2Ref[i]].factorList[k].partnerDe;
+        int kk;
+        for (kk=0; kk<diffPartnerDeCount[j]; kk++)
+          if (partnerDeList[kk]==partnerDe) break;
+        if (kk==diffPartnerDeCount[j]){
+          // new entry
+          partnerDeList[kk] = partnerDe;
+          partnerDeCount[j][kk] = 1; // initialize
+          ++diffPartnerDeCount[j];
+        }else
+          ++partnerDeCount[j][kk];   // increment
+        index2Ref2[count] = index2Ref[i];
+        factorIndexRef[count] = k;
+        partnerDeRef[count] = kk;
+        ++count;
+      }
+    }
+    
+    VMK::wtime(&t10Xb);   //gjt - profile
+    
+    // invert the look-up direction
+    // prepare to sort each "diffPartnerDeCount[j] group"
+    // at the same time determine linIndexTermCount and linIndexTermFactorCount
+    dstInfoTable[j] = new DstInfo*[diffPartnerDeCount[j]];
+    int *dstInfoTableInit = new int[diffPartnerDeCount[j]];
+    localDeFactorList[j] = new char[localDeFactorCount * dataSize];
+    xxe->storage[xxe->storageCount] = localDeFactorList[j]; // xxe garb. coll.
+    ++(xxe->storageCount);
+    if (xxe->storageCount >= xxe->storageMaxCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- xxe->storageCount out of range", &rc);
+      return rc;
+    }
+    for (int i=0; i<diffPartnerDeCount[j]; i++){
+      dstInfoTable[j][i] = new DstInfo[partnerDeCount[j][i]];
+      dstInfoTableInit[i] = 0;   // reset
+    }
+    VMK::wtime(&t10Xc1);   //gjt - profile
+    for (int i=0; i<localDeFactorCount; i++){
+      int partnerDeListIndex = partnerDeRef[i];
+      int index2 = dstInfoTableInit[partnerDeListIndex]++;
+      dstInfoTable[j][partnerDeListIndex][index2].linIndex =
+        dstLinSeqList[j][index2Ref2[i]].linIndex;
+      dstInfoTable[j][partnerDeListIndex][index2].seqIndex =
+        dstLinSeqList[j][index2Ref2[i]].seqIndex;
+      dstInfoTable[j][partnerDeListIndex][index2].partnerSeqIndex =
+        dstLinSeqList[j][index2Ref2[i]].factorList[factorIndexRef[i]]
+        .partnerSeqIndex;
+      
+      memcpy(localDeFactorList[j] + i*dataSize,
+        dstLinSeqList[j][index2Ref2[i]].factorList[factorIndexRef[i]]
+        .factor, dataSize);
+      dstInfoTable[j][partnerDeListIndex][index2].localDeFactorListIndex = i;
+    }
+    
+    VMK::wtime(&t10Xc2);   //gjt - profile
+    
+    // sort each "diffPartnerDeCount[j] group" wrt partnerSeqIndex and seqIndex
+    // in this order (opposite of src)
+    for (int i=0; i<diffPartnerDeCount[j]; i++)
+      qsort(dstInfoTable[j][i], partnerDeCount[j][i], 
+        sizeof(DstInfo), DstInfo::cmp);
+
+#if 0
+    // print:
+    printf("dstArray: %d, %d\n", j, diffPartnerDeCount[j]); 
+    for (int i=0; i<diffPartnerDeCount[j]; i++)
+      for (int k=0; k<partnerDeCount[j][i]; k++)
+        printf("dstInfoTable[%d][%d][%d].seqIndex = %d, .partnerSeqIndex[][] ="
+          " %d\n", j, i, k, dstInfoTable[j][i][k].seqIndex, 
+          dstInfoTable[j][i][k].partnerSeqIndex);
+#endif
+    
+    VMK::wtime(&t10Xd);   //gjt - profile
+    
+    // <XXE profiling element>
+    xxestream[xxeCount].opId = XXE::wtimer;
+    xxeElement = &(xxestream[xxeCount]);
+    xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
+    xxeWtimerInfo->timerId = xxeCount;
+    xxeWtimerInfo->timerString = new char[80];
+    strcpy(xxeWtimerInfo->timerString, "Wt: recnbL");
+    xxeWtimerInfo->actualWtimerId = xxeCount;
+    xxeWtimerInfo->relativeWtimerId = 0;
+    ++xxeCount;
+    if (xxeCount >= xxe->max){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- xxeCount out of range", &rc);
+      return rc;
+    }
+    xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
+    ++(xxe->storageCount);
+    if (xxe->storageCount >= xxe->storageMaxCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- xxe->storageCount out of range", &rc);
+      return rc;
+    }
+    // </XXE profiling element>
+    
+    
+    // construct recv pattern and fill in corresponding XXE StreamElements
+    recvnbIndex[j] = new int[diffPartnerDeCount[j]];
+    buffer[j] = new char*[diffPartnerDeCount[j]];
+    for (int i=0; i<diffPartnerDeCount[j]; i++){
+      // fill in XXE StreamElements for dstArray side
+      // large contiguous 1st level receive buffer
+      buffer[j][i] = new char[partnerDeCount[j][i] * dataSize];
+      xxe->storage[xxe->storageCount] = buffer[j][i]; // xxe garbage collection
+      ++(xxe->storageCount);
+      if (xxe->storageCount >= xxe->storageMaxCount){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- xxe->storageCount out of range", &rc);
+        return rc;
+      }
+      int srcDe = partnerDeList[i];
+      int srcPet;   //TODO: DE-based comms
+      srcArray->delayout->getDEMatchPET(srcDe, *vm, NULL, &srcPet, 1);
+#if 0
+      printf("gjt: XXE::recvnb on localPet %d from Pet %d\n", localPet, srcPet);
+#endif
+      recvnbIndex[j][i] = xxeCount;  // need this index for the associated wait
+      xxestream[xxeCount].opId = XXE::recvnb;
+      xxeElement = &(xxestream[xxeCount]);
+      xxeRecvnbInfo = (XXE::RecvnbInfo *)xxeElement;
+      xxeRecvnbInfo->buffer = buffer[j][i];
+      xxeRecvnbInfo->size = partnerDeCount[j][i] * dataSize;
+      xxeRecvnbInfo->srcPet = srcPet;
+      xxeRecvnbInfo->commhandle = new vmk_commhandle*;
+      *(xxeRecvnbInfo->commhandle) = new vmk_commhandle;
+      ++xxeCount;
+      if (xxeCount >= xxe->max){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- xxeCount out of range", &rc);
+        return rc;
+      }
+      // keep track of commhandles for xxe garbage collection
+      xxe->commhandle[xxe->commhandleCount] = xxeRecvnbInfo->commhandle;
+      ++(xxe->commhandleCount);
+      if (xxe->commhandleCount >= xxe->commhandleMaxCount){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- xxe->commhandleCount out of range", &rc);
+        return rc;
+      }
+    } // for i - diffPartnerDeCount[j]
+        
+    // <XXE profiling element>
+    xxestream[xxeCount].opId = XXE::wtimer;
+    xxeElement = &(xxestream[xxeCount]);
+    xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
+    xxeWtimerInfo->timerId = xxeCount;
+    xxeWtimerInfo->timerString = new char[80];
+    strcpy(xxeWtimerInfo->timerString, "Wt: /recnbL");
+    xxeWtimerInfo->actualWtimerId = xxeCount;
+    xxeWtimerInfo->relativeWtimerId = 0;
+    ++xxeCount;
+    if (xxeCount >= xxe->max){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- xxeCount out of range", &rc);
+      return rc;
+    }
+    xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
+    ++(xxe->storageCount);
+    if (xxe->storageCount >= xxe->storageMaxCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- xxe->storageCount out of range", &rc);
+      return rc;
+    }
+    // </XXE profiling element>
+    
+    // garbage collection
+    delete [] index2Ref;
+    delete [] index2Ref2;
+    delete [] factorIndexRef;
+    delete [] partnerDeRef;
+    delete [] partnerDeList;
+    delete [] dstInfoTableInit;
+    
+    VMK::wtime(&t10Xe);   //gjt - profile
+    printf("gjt - profile for PET %d, j-loop %d:\n"
+      " t10Xa=%g\n t10Xb=%g\n t10Xc1=%g\n t10Xc2=%g\n t10Xd=%g\n t10Xe=%g\n",
+      localPet, j,
+      t10Xa-t8, t10Xb-t8, t10Xc1-t8, t10Xc2-t8, t10Xd-t8, t10Xe-t8);
+    
+    
+  } // for j - dstLocalDeCount
+  
+  VMK::wtime(&t10X);   //gjt - profile
+
   // determine send pattern for all localDEs in srcArray and fill in XXE
   for (int j=0; j<srcLocalDeCount; j++){
     int *index2Ref = new int[srcDistGridLocalDeCellCount[j]];  // large enough
@@ -4047,29 +4288,29 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
           " %d\n", i, k, srcInfoTable[i][k].seqIndex, 
           srcInfoTable[i][k].partnerSeqIndex);
 #endif
-  // <XXE profiling element>
-  xxestream[xxeCount].opId = XXE::wtimer;
-  xxeElement = &(xxestream[xxeCount]);
-  xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-  xxeWtimerInfo->timerId = 1;
-  xxeWtimerInfo->timerString = new char[80];
-  strcpy(xxeWtimerInfo->timerString, "Wtimer 1");
-  xxeWtimerInfo->actualWtimerId = 1;
-  xxeWtimerInfo->relativeWtimerId = 0;
-  ++xxeCount;
-  if (xxeCount >= xxe->max){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxeCount out of range", &rc);
-    return rc;
-  }
-  xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
-  ++(xxe->storageCount);
-  if (xxe->storageCount >= xxe->storageMaxCount){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxe->storageCount out of range", &rc);
-    return rc;
-  }
-  // </XXE profiling element>
+    // <XXE profiling element>
+    xxestream[xxeCount].opId = XXE::wtimer;
+    xxeElement = &(xxestream[xxeCount]);
+    xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
+    xxeWtimerInfo->timerId = xxeCount;
+    xxeWtimerInfo->timerString = new char[80];
+    strcpy(xxeWtimerInfo->timerString, "Wt: sendnbL");
+    xxeWtimerInfo->actualWtimerId = xxeCount;
+    xxeWtimerInfo->relativeWtimerId = 0;
+    ++xxeCount;
+    if (xxeCount >= xxe->max){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- xxeCount out of range", &rc);
+      return rc;
+    }
+    xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
+    ++(xxe->storageCount);
+    if (xxe->storageCount >= xxe->storageMaxCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- xxe->storageCount out of range", &rc);
+      return rc;
+    }
+    // </XXE profiling element>
 
     // construct send pattern and fill in corresponding XXE StreamElements    
     struct LinIndexContigBlock{
@@ -4255,36 +4496,36 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     delete [] srcInfoTable;
     delete [] srcInfoTableInit;
     
-  // <XXE profiling element>
-  xxestream[xxeCount].opId = XXE::wtimer;
-  xxeElement = &(xxestream[xxeCount]);
-  xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-  xxeWtimerInfo->timerId = 2;
-  xxeWtimerInfo->timerString = new char[80];
-  strcpy(xxeWtimerInfo->timerString, "Wtimer 2");
-  xxeWtimerInfo->actualWtimerId = 2;
-  xxeWtimerInfo->relativeWtimerId = 0;
-  ++xxeCount;
-  if (xxeCount >= xxe->max){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxeCount out of range", &rc);
-    return rc;
-  }
-  xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
-  ++(xxe->storageCount);
-  if (xxe->storageCount >= xxe->storageMaxCount){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxe->storageCount out of range", &rc);
-    return rc;
-  }
-  // </XXE profiling element>
+    // <XXE profiling element>
+    xxestream[xxeCount].opId = XXE::wtimer;
+    xxeElement = &(xxestream[xxeCount]);
+    xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
+    xxeWtimerInfo->timerId = xxeCount;
+    xxeWtimerInfo->timerString = new char[80];
+    strcpy(xxeWtimerInfo->timerString, "Wt: /sendnbL");
+    xxeWtimerInfo->actualWtimerId = xxeCount;
+    xxeWtimerInfo->relativeWtimerId = 0;
+    ++xxeCount;
+    if (xxeCount >= xxe->max){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- xxeCount out of range", &rc);
+      return rc;
+    }
+    xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
+    ++(xxe->storageCount);
+    if (xxe->storageCount >= xxe->storageMaxCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- xxe->storageCount out of range", &rc);
+      return rc;
+    }
+    // </XXE profiling element>
     
   } // for j - srcLocalDeCount
 
   
   VMK::wtime(&t9);   //gjt - profile
   
-  
+#if 0
   // -------- <testing the use of XXE subStream> ---------
   xxestream[xxeCount].opId = XXE::subStream;
   xxeElement = &(xxestream[xxeCount]);
@@ -4317,9 +4558,11 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
       "- xxeCount out of range", &rc);
     return rc;
   }
-  xxeSubStreamInfo->xxe->storage[xxeSubStreamInfo->xxe->storageCount] = xxePrintInfo->printString; // xxe garb coll
+  xxeSubStreamInfo->xxe->storage[xxeSubStreamInfo->xxe->storageCount] =
+    xxePrintInfo->printString; // xxe garb coll
   ++(xxeSubStreamInfo->xxe->storageCount);
-  if (xxeSubStreamInfo->xxe->storageCount >= xxeSubStreamInfo->xxe->storageMaxCount){
+  if (xxeSubStreamInfo->xxe->storageCount >=
+    xxeSubStreamInfo->xxe->storageMaxCount){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
       "- xxeSubStreamInfo->xxe->storageCount out of range", &rc);
     return rc;
@@ -4327,434 +4570,119 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   // store sub xxeCount
   xxeSubStreamInfo->xxe->count = subXxeCount;
   // -------- </testing the use of XXE subStream> ---------
+#endif
   
   
-  // determine recv pattern for all localDEs in dstArray and fill in XXE
+  // use recv pattern for all localDEs in dstArray and issue XXE::"+=*"
   for (int j=0; j<dstLocalDeCount; j++){
-    int *index2Ref = new int[dstDistGridLocalDeCellCount[j]];  // large enough
-    int localDeFactorCount = 0; // reset
-    int iCount = 0; // reset
-    for (int k=0; k<dstDistGridLocalDeCellCount[j]; k++){
-      int factorCount = dstLinSeqList[j][k].factorCount;
-      if (factorCount){
-        index2Ref[iCount] = k;   // store index2
-        localDeFactorCount += factorCount;
-        ++iCount; // increment counter
-      }
-    }
 
-    VMK::wtime(&t10a);   //gjt - profile
-    
-#if 0
-printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
-#endif
-    int *index2Ref2 = new int[localDeFactorCount];  // large enough
-    int *factorIndexRef = new int[localDeFactorCount];  // large enough
-    int *partnerDeRef = new int[localDeFactorCount];  // large enough
-    int *partnerDeList = new int[localDeFactorCount];  // large enough
-    int *partnerDeCount = new int[localDeFactorCount];  // large enough
-    int diffPartnerDeCount = 0; // reset
-    int count = 0; // reset
-    for (int i=0; i<iCount; i++){
-      int factorCount = dstLinSeqList[j][index2Ref[i]].factorCount;
-      for (int k=0; k<factorCount; k++){
-        int partnerDe = dstLinSeqList[j][index2Ref[i]].factorList[k].partnerDe;
-        int kk;
-        for (kk=0; kk<diffPartnerDeCount; kk++)
-          if (partnerDeList[kk]==partnerDe) break;
-        if (kk==diffPartnerDeCount){
-          // new entry
-          partnerDeList[kk] = partnerDe;
-          partnerDeCount[kk] = 1; // initialize
-          ++diffPartnerDeCount;
-        }else
-          ++partnerDeCount[kk];   // increment
-        index2Ref2[count] = index2Ref[i];
-        factorIndexRef[count] = k;
-        partnerDeRef[count] = kk;
-        ++count;
-      }
-    }
-    
-    VMK::wtime(&t10b);   //gjt - profile
-    
-    // invert the look-up direction
-    struct DstInfo{
-      int linIndex;
-      int seqIndex;
-      int partnerSeqIndex;
-      int localDeFactorListIndex;
-      static int cmp(const void *a, const void *b){
-        DstInfo *aObj = (DstInfo *)a;
-        DstInfo *bObj = (DstInfo *)b;
-        if (aObj->partnerSeqIndex < bObj->partnerSeqIndex) return -1;
-        if (aObj->partnerSeqIndex > bObj->partnerSeqIndex) return +1;
-        // partnerSeqIndex must be equal
-        if (aObj->seqIndex < bObj->seqIndex) return -1;
-        if (aObj->seqIndex > bObj->seqIndex) return +1;
-        // seqIndex must also be equal
-        return 0;
-      }
-    };
-    // prepare to sort each "diffPartnerDeCount group"
-    // at the same time determine linIndexTermCount and linIndexTermFactorCount
-    DstInfo **dstInfoTable = new DstInfo*[diffPartnerDeCount];
-    int *dstInfoTableInit = new int[diffPartnerDeCount];
-    char *localDeFactorList = new char[localDeFactorCount * dataSize];
-    xxe->storage[xxe->storageCount] = localDeFactorList; // for xxe garb. coll.
-    ++(xxe->storageCount);
-    if (xxe->storageCount >= xxe->storageMaxCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-        "- xxe->storageCount out of range", &rc);
-      return rc;
-    }
-#ifdef SECONDLEVELBUFFER
-    int linIndexTermCount = 0;  // reset
-    int *linIndexTermList = new int[localDeFactorCount];
-    int *linIndexTermFactorCount = new int[localDeFactorCount];
-#endif
-    for (int i=0; i<diffPartnerDeCount; i++){
-      dstInfoTable[i] = new DstInfo[partnerDeCount[i]];
-      dstInfoTableInit[i] = 0;   // reset
-    }
-    VMK::wtime(&t10c1);   //gjt - profile
-    for (int i=0; i<localDeFactorCount; i++){
-      int partnerDeListIndex = partnerDeRef[i];
-      int index2 = dstInfoTableInit[partnerDeListIndex]++;
-      dstInfoTable[partnerDeListIndex][index2].linIndex =
-        dstLinSeqList[j][index2Ref2[i]].linIndex;
-      dstInfoTable[partnerDeListIndex][index2].seqIndex =
-        dstLinSeqList[j][index2Ref2[i]].seqIndex;
-      dstInfoTable[partnerDeListIndex][index2].partnerSeqIndex =
-        dstLinSeqList[j][index2Ref2[i]].factorList[factorIndexRef[i]]
-        .partnerSeqIndex;
-      
-//    VMK::wtime(&t10c2a);   //gjt - profile
-      memcpy(localDeFactorList + i*dataSize,
-        dstLinSeqList[j][index2Ref2[i]].factorList[factorIndexRef[i]]
-        .factor, dataSize);
-      dstInfoTable[partnerDeListIndex][index2].localDeFactorListIndex = i;
-      
-      
-    VMK::wtime(&t10c2b);   //gjt - profile
-//printf("gjt - profile for PET %d, j-loop %d, localDeFactorCount %d:\n"
-//    " t10c2b - t10c2a = %g\n", localPet, j, localDeFactorCount, 
-//    t10c2b - t10c2a);
-      
-#ifdef SECONDLEVELBUFFER
-      // determine linIndexTermCount, linIndexTermList, linIndexTermFactorCount
-      int k;
-      for (k=0; k<linIndexTermCount; k++)
-        if (linIndexTermList[k] == dstLinSeqList[j][index2Ref2[i]].linIndex)
-          break;
-      if (k==linIndexTermCount){
-        // new linIndex entry
-        linIndexTermList[k] = dstLinSeqList[j][index2Ref2[i]].linIndex;
-        linIndexTermFactorCount[k] = 1; // initialize
-        ++linIndexTermCount;
-      }else{
-        // existing entry
-        ++linIndexTermFactorCount[k]; // increment counter
-      }
-#endif
-    VMK::wtime(&t10c2c);   //gjt - profile
-    dt10c2bc += t10c2c - t10c2b;
-    }
-    
-    VMK::wtime(&t10c2);   //gjt - profile
-    
-    // sort each "diffPartnerDeCount group" wrt partnerSeqIndex and seqIndex
-    // in this order (opposite of src)
-    for (int i=0; i<diffPartnerDeCount; i++)
-      qsort(dstInfoTable[i], partnerDeCount[i], sizeof(DstInfo), DstInfo::cmp);
-
-#if 0
-    // print:
-    printf("dstArray: %d, %d\n", j, diffPartnerDeCount); 
-    for (int i=0; i<diffPartnerDeCount; i++)
-      for (int k=0; k<partnerDeCount[i]; k++)
-        printf("dstInfoTable[%d][%d].seqIndex = %d, .partnerSeqIndex[][] ="
-          " %d\n", i, k, dstInfoTable[i][k].seqIndex, 
-          dstInfoTable[i][k].partnerSeqIndex);
-#endif
-    
-    VMK::wtime(&t10d);   //gjt - profile
-    
-  // <XXE profiling element>
-  xxestream[xxeCount].opId = XXE::wtimer;
-  xxeElement = &(xxestream[xxeCount]);
-  xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-  xxeWtimerInfo->timerId = 3;
-  xxeWtimerInfo->timerString = new char[80];
-  strcpy(xxeWtimerInfo->timerString, "Wtimer 3");
-  xxeWtimerInfo->actualWtimerId = 3;
-  xxeWtimerInfo->relativeWtimerId = 0;
-  ++xxeCount;
-  if (xxeCount >= xxe->max){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxeCount out of range", &rc);
-    return rc;
-  }
-  xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
-  ++(xxe->storageCount);
-  if (xxe->storageCount >= xxe->storageMaxCount){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxe->storageCount out of range", &rc);
-    return rc;
-  }
-  // </XXE profiling element>
-    
-    
-    // construct recv pattern and fill in corresponding XXE StreamElements
-    int *recvnbIndex = new int[diffPartnerDeCount];
-    char **buffer = new char*[diffPartnerDeCount];
-    for (int i=0; i<diffPartnerDeCount; i++){
-      // fill in XXE StreamElements for dstArray side
-      // large contiguous 1st level receive buffer
-      buffer[i] = new char[partnerDeCount[i] * dataSize];
-      xxe->storage[xxe->storageCount] = buffer[i]; // for xxe garbage collection
-      ++(xxe->storageCount);
-      if (xxe->storageCount >= xxe->storageMaxCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-          "- xxe->storageCount out of range", &rc);
-        return rc;
-      }
-      int srcDe = partnerDeList[i];
-      int srcPet;   //TODO: DE-based comms
-      srcArray->delayout->getDEMatchPET(srcDe, *vm, NULL, &srcPet, 1);
-#if 0
-      printf("gjt: XXE::recvnb on localPet %d from Pet %d\n", localPet, srcPet);
-#endif
-      recvnbIndex[i] = xxeCount;  // need this index for the associated wait
-      xxestream[xxeCount].opId = XXE::recvnb;
-      xxeElement = &(xxestream[xxeCount]);
-      xxeRecvnbInfo = (XXE::RecvnbInfo *)xxeElement;
-      xxeRecvnbInfo->buffer = buffer[i];
-      xxeRecvnbInfo->size = partnerDeCount[i] * dataSize;
-      xxeRecvnbInfo->srcPet = srcPet;
-      xxeRecvnbInfo->commhandle = new vmk_commhandle*;
-      *(xxeRecvnbInfo->commhandle) = new vmk_commhandle;
-      ++xxeCount;
-      if (xxeCount >= xxe->max){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-          "- xxeCount out of range", &rc);
-        return rc;
-      }
-      // keep track of commhandles for xxe garbage collection
-      xxe->commhandle[xxe->commhandleCount] = xxeRecvnbInfo->commhandle;
-      ++(xxe->commhandleCount);
-      if (xxe->commhandleCount >= xxe->commhandleMaxCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-          "- xxe->commhandleCount out of range", &rc);
-        return rc;
-      }
-    } // for i - diffPartnerDeCount
-    
-    VMK::wtime(&t10e);   //gjt - profile
-    
-  // <XXE profiling element>
-  xxestream[xxeCount].opId = XXE::wtimer;
-  xxeElement = &(xxestream[xxeCount]);
-  xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-  xxeWtimerInfo->timerId = 4;
-  xxeWtimerInfo->timerString = new char[80];
-  strcpy(xxeWtimerInfo->timerString, "Wtimer 4");
-  xxeWtimerInfo->actualWtimerId = 4;
-  xxeWtimerInfo->relativeWtimerId = 0;
-  ++xxeCount;
-  if (xxeCount >= xxe->max){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxeCount out of range", &rc);
-    return rc;
-  }
-  xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
-  ++(xxe->storageCount);
-  if (xxe->storageCount >= xxe->storageMaxCount){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxe->storageCount out of range", &rc);
-    return rc;
-  }
-  // </XXE profiling element>
-
-#if 0
-    // post XXE::waitOnAllRecvnb
-    xxestream[xxeCount].opId = XXE::waitOnAllRecvnb;
+    // <XXE profiling element>
+    xxestream[xxeCount].opId = XXE::wtimer;
+    xxeElement = &(xxestream[xxeCount]);
+    xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
+    xxeWtimerInfo->timerId = xxeCount;
+    xxeWtimerInfo->timerString = new char[80];
+    strcpy(xxeWtimerInfo->timerString, "Wt: w+=*L");
+    xxeWtimerInfo->actualWtimerId = xxeCount;
+    xxeWtimerInfo->relativeWtimerId = 0;
     ++xxeCount;
     if (xxeCount >= xxe->max){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
         "- xxeCount out of range", &rc);
       return rc;
     }
-#endif
-    
-  // <XXE profiling element>
-  xxestream[xxeCount].opId = XXE::wtimer;
-  xxeElement = &(xxestream[xxeCount]);
-  xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-  xxeWtimerInfo->timerId = 5;
-  xxeWtimerInfo->timerString = new char[80];
-  strcpy(xxeWtimerInfo->timerString, "Wtimer 5");
-  xxeWtimerInfo->actualWtimerId = 5;
-  xxeWtimerInfo->relativeWtimerId = 0;
-  ++xxeCount;
-  if (xxeCount >= xxe->max){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxeCount out of range", &rc);
-    return rc;
-  }
-  xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
-  ++(xxe->storageCount);
-  if (xxe->storageCount >= xxe->storageMaxCount){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxe->storageCount out of range", &rc);
-    return rc;
-  }
-  // </XXE profiling element>
-    
-  // <XXE profiling element>
-  xxestream[xxeCount].opId = XXE::wtimer;
-  xxeElement = &(xxestream[xxeCount]);
-  xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-  xxeWtimerInfo->timerId = 6;
-  xxeWtimerInfo->timerString = new char[80];
-  strcpy(xxeWtimerInfo->timerString, "Wtimer 6");
-  xxeWtimerInfo->actualWtimerId = 6;
-  xxeWtimerInfo->relativeWtimerId = 0;
-  ++xxeCount;
-  if (xxeCount >= xxe->max){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxeCount out of range", &rc);
-    return rc;
-  }
-  xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
-  ++(xxe->storageCount);
-  if (xxe->storageCount >= xxe->storageMaxCount){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxe->storageCount out of range", &rc);
-    return rc;
-  }
-  // </XXE profiling element>
-    
-#ifdef SECONDLEVELBUFFER
-    // memCpy pieces into 2nd level buffers for each linIndexTerm and "+=*"
-    for (int i=0; i<linIndexTermCount; i++){
-      int linIndex = linIndexTermList[i];
-      int factorCount = linIndexTermFactorCount[i];
-      // prepare buffers
-      char *dataBuffer = new char[factorCount * dataSize];
-      char *factorBuffer = new char[factorCount * dataSize];
-      xxe->storage[xxe->storageCount] = dataBuffer; // for xxe garbage coll.
-      ++(xxe->storageCount);
-      if (xxe->storageCount >= xxe->storageMaxCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-          "- xxe->storageCount out of range", &rc);
-        return rc;
-      }
-      xxe->storage[xxe->storageCount] = factorBuffer; // for xxe garbage coll.
-      ++(xxe->storageCount);
-      if (xxe->storageCount >= xxe->storageMaxCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-          "- xxe->storageCount out of range", &rc);
-        return rc;
-      }
-      // pull data and factors together into buffers from sorted table
-      char *dataBufferPointer = dataBuffer;
-      char *factorBufferPointer = factorBuffer;
-      
-    VMK::wtime(&t10f1a);   //gjt - profile
-      
-      for (int k=0; k<diffPartnerDeCount; k++){
-        for (int kk=0; kk<partnerDeCount[k]; kk++){
-          DstInfo *dstInfo = &(dstInfoTable[k][kk]);
-          if (dstInfo->linIndex == linIndex){
-            // memcpy factor
-            memcpy(factorBufferPointer,
-              localDeFactorList + (dstInfo->localDeFactorListIndex) * dataSize, 
-              dataSize);
-            // enter memCpy for data into XXE stream
-            xxestream[xxeCount].opId = XXE::memCpy;
-            xxeElement = &(xxestream[xxeCount]);
-            xxeMemCpyInfo = (XXE::MemCpyInfo *)xxeElement;
-            xxeMemCpyInfo->dstMem = dataBufferPointer;
-            xxeMemCpyInfo->srcMem = buffer[k] + kk*dataSize;
-            xxeMemCpyInfo->size = dataSize;
-            ++xxeCount;
-            if (xxeCount >= xxe->max){
-              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-                "- xxeCount out of range", &rc);
-              return rc;
-            }
-            // increment buffer pointers
-            dataBufferPointer += dataSize;
-            factorBufferPointer += dataSize;
-          }
-        }
-      }
-      
-    VMK::wtime(&t10f1b);   //gjt - profile
-    dt10f1ab += t10f1b - t10f1a;
+    xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
+    ++(xxe->storageCount);
+    if (xxe->storageCount >= xxe->storageMaxCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- xxe->storageCount out of range", &rc);
+      return rc;
+    }
+    // </XXE profiling element>
 
-      // enter vector "+=*" operation into XXE stream
-      xxestream[xxeCount].opId = XXE::productSumVector;
-      // todo: replace the following with using ESMC_TypeKind in XXE!
-      if (typekindArg == ESMC_TYPEKIND_R4)
-        xxestream[xxeCount].opSubId = XXE::R4;
-      else if (typekindArg == ESMC_TYPEKIND_R8)
-        xxestream[xxeCount].opSubId = XXE::R8;
-      else if (typekindArg == ESMC_TYPEKIND_I4)
-        xxestream[xxeCount].opSubId = XXE::I4;
-      else if (typekindArg == ESMC_TYPEKIND_I8)
-        xxestream[xxeCount].opSubId = XXE::I8;
+    int waitSumIndex = xxeCount;    
+    // <XXE profiling element>
+    xxestream[xxeCount].opId = XXE::wtimer;
+    xxeElement = &(xxestream[xxeCount]);
+    xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
+    xxeWtimerInfo->timerId = xxeCount;
+    xxeWtimerInfo->timerString = new char[80];
+    strcpy(xxeWtimerInfo->timerString, "waitSum");
+    xxeWtimerInfo->actualWtimerId = xxeCount;
+    xxeWtimerInfo->relativeWtimerId = 0;
+    ++xxeCount;
+    if (xxeCount >= xxe->max){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- xxeCount out of range", &rc);
+      return rc;
+    }
+    xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
+    ++(xxe->storageCount);
+    if (xxe->storageCount >= xxe->storageMaxCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- xxe->storageCount out of range", &rc);
+      return rc;
+    }
+    // </XXE profiling element>
+    
+    int superSumIndex = xxeCount;
+    // <XXE profiling element>
+    xxestream[xxeCount].opId = XXE::wtimer;
+    xxeElement = &(xxestream[xxeCount]);
+    xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
+    xxeWtimerInfo->timerId = xxeCount;
+    xxeWtimerInfo->timerString = new char[80];
+    strcpy(xxeWtimerInfo->timerString, "superSum");
+    xxeWtimerInfo->actualWtimerId = xxeCount;
+    xxeWtimerInfo->relativeWtimerId = 0;
+    ++xxeCount;
+    if (xxeCount >= xxe->max){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- xxeCount out of range", &rc);
+      return rc;
+    }
+    xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
+    ++(xxe->storageCount);
+    if (xxe->storageCount >= xxe->storageMaxCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- xxe->storageCount out of range", &rc);
+      return rc;
+    }
+    // </XXE profiling element>
+    
+    for (int k=0; k<diffPartnerDeCount[j]; k++){
+      
+      // <XXE profiling element>
+      xxestream[xxeCount].opId = XXE::wtimer;
+      xxestream[xxeCount].opSubId = XXE::noSum;
       xxeElement = &(xxestream[xxeCount]);
-      xxeProductSumVectorInfo = (XXE::ProductSumVectorInfo *)xxeElement;
-      char *element = (char *)(dstArray->larrayBaseAddrList[j])
-        + (linIndex * dataSize);   //TODO: RRA -> see productSumScalarRRA code
-      xxeProductSumVectorInfo->element = (void *)element;
-      xxeProductSumVectorInfo->factorList = (void *)factorBuffer;
-      xxeProductSumVectorInfo->valueList = (void *)dataBuffer;
-      xxeProductSumVectorInfo->factorCount = factorCount;
+      xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
+      xxeWtimerInfo->timerId = xxeCount;
+      xxeWtimerInfo->timerString = new char[80];
+      strcpy(xxeWtimerInfo->timerString, "Wtimer");
+      xxeWtimerInfo->actualWtimerId = waitSumIndex;
+      xxeWtimerInfo->relativeWtimerId = 0;
       ++xxeCount;
       if (xxeCount >= xxe->max){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
           "- xxeCount out of range", &rc);
         return rc;
       }
-    } // i - linIndexTermCount
-    
-#else
-    for (int k=0; k<diffPartnerDeCount; k++){
-      
-  // <XXE profiling element>
-  xxestream[xxeCount].opId = XXE::wtimer;
-  xxestream[xxeCount].opSubId = XXE::noSum;
-  xxeElement = &(xxestream[xxeCount]);
-  xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-  xxeWtimerInfo->timerId = xxeCount;
-  xxeWtimerInfo->timerString = new char[80];
-  strcpy(xxeWtimerInfo->timerString, "Wtimer");
-  xxeWtimerInfo->actualWtimerId = 5;
-  xxeWtimerInfo->relativeWtimerId = 0;
-  ++xxeCount;
-  if (xxeCount >= xxe->max){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxeCount out of range", &rc);
-    return rc;
-  }
-  xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
-  ++(xxe->storageCount);
-  if (xxe->storageCount >= xxe->storageMaxCount){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxe->storageCount out of range", &rc);
-    return rc;
-  }
-  // </XXE profiling element>
-      
+      // xxe garbCo
+      xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; 
+      ++(xxe->storageCount);
+      if (xxe->storageCount >= xxe->storageMaxCount){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- xxe->storageCount out of range", &rc);
+        return rc;
+      }
+      // </XXE profiling element>
       
       // post XXE::waitOnIndex for recvnb operation associated with diff DE "k"
       xxestream[xxeCount].opId = XXE::waitOnIndex;
       xxeElement = &(xxestream[xxeCount]);
       xxeWaitOnIndexInfo = (XXE::WaitOnIndexInfo *)xxeElement;
-      xxeWaitOnIndexInfo->index = recvnbIndex[k];
+      xxeWaitOnIndexInfo->index = recvnbIndex[j][k];
       ++xxeCount;
       if (xxeCount >= xxe->max){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -4762,84 +4690,88 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         return rc;
       }
       
-  // <XXE profiling element>
-  xxestream[xxeCount].opId = XXE::wtimer;
-  xxeElement = &(xxestream[xxeCount]);
-  xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-  xxeWtimerInfo->timerId = xxeCount;
-  xxeWtimerInfo->timerString = new char[80];
-  strcpy(xxeWtimerInfo->timerString, "Wtimer");
-  xxeWtimerInfo->actualWtimerId = 5;
-  xxeWtimerInfo->relativeWtimerId = 0;
-  ++xxeCount;
-  if (xxeCount >= xxe->max){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxeCount out of range", &rc);
-    return rc;
-  }
-  xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
-  ++(xxe->storageCount);
-  if (xxe->storageCount >= xxe->storageMaxCount){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxe->storageCount out of range", &rc);
-    return rc;
-  }
-  // </XXE profiling element>
+      // <XXE profiling element>
+      xxestream[xxeCount].opId = XXE::wtimer;
+      xxeElement = &(xxestream[xxeCount]);
+      xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
+      xxeWtimerInfo->timerId = xxeCount;
+      xxeWtimerInfo->timerString = new char[80];
+      strcpy(xxeWtimerInfo->timerString, "Wtimer");
+      xxeWtimerInfo->actualWtimerId = waitSumIndex;
+      xxeWtimerInfo->relativeWtimerId = 0;
+      ++xxeCount;
+      if (xxeCount >= xxe->max){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- xxeCount out of range", &rc);
+        return rc;
+      }
+      // xxe garb coll
+      xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString;
+      ++(xxe->storageCount);
+      if (xxe->storageCount >= xxe->storageMaxCount){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- xxe->storageCount out of range", &rc);
+        return rc;
+      }
+      // </XXE profiling element>
   
-  // <XXE profiling element>
-  xxestream[xxeCount].opId = XXE::wtimer;
-  xxeElement = &(xxestream[xxeCount]);
-  xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-  xxeWtimerInfo->timerId = xxeCount;
-  xxeWtimerInfo->timerString = new char[80];
-  strcpy(xxeWtimerInfo->timerString, "Wt: wOI");
-  xxeWtimerInfo->actualWtimerId = xxeCount;
-  xxeWtimerInfo->relativeWtimerId = 0;
-  ++xxeCount;
-  if (xxeCount >= xxe->max){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxeCount out of range", &rc);
-    return rc;
-  }
-  xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
-  ++(xxe->storageCount);
-  if (xxe->storageCount >= xxe->storageMaxCount){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxe->storageCount out of range", &rc);
-    return rc;
-  }
-  // </XXE profiling element>
+      // <XXE profiling element>
+      xxestream[xxeCount].opId = XXE::wtimer;
+      xxeElement = &(xxestream[xxeCount]);
+      xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
+      xxeWtimerInfo->timerId = xxeCount;
+      xxeWtimerInfo->timerString = new char[80];
+      strcpy(xxeWtimerInfo->timerString, "Wt: wOI");
+      xxeWtimerInfo->actualWtimerId = xxeCount;
+      xxeWtimerInfo->relativeWtimerId = 0;
+      ++xxeCount;
+      if (xxeCount >= xxe->max){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- xxeCount out of range", &rc);
+        return rc;
+      }
+      // xxe garb coll
+      xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString;
+      ++(xxe->storageCount);
+      if (xxe->storageCount >= xxe->storageMaxCount){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- xxe->storageCount out of range", &rc);
+        return rc;
+      }
+      // </XXE profiling element>
 
-  // <XXE profiling element>
-  xxestream[xxeCount].opId = XXE::wtimer;
-  xxestream[xxeCount].opSubId = XXE::noSum;
-  xxeElement = &(xxestream[xxeCount]);
-  xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-  xxeWtimerInfo->timerId = xxeCount;
-  xxeWtimerInfo->timerString = new char[80];
-  strcpy(xxeWtimerInfo->timerString, "Wtimer");
-  xxeWtimerInfo->actualWtimerId = 6;
-  xxeWtimerInfo->relativeWtimerId = 0;
-  ++xxeCount;
-  if (xxeCount >= xxe->max){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxeCount out of range", &rc);
-    return rc;
-  }
-  xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
-  ++(xxe->storageCount);
-  if (xxe->storageCount >= xxe->storageMaxCount){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxe->storageCount out of range", &rc);
-    return rc;
-  }
-  // </XXE profiling element>
+      // <XXE profiling element>
+      xxestream[xxeCount].opId = XXE::wtimer;
+      xxestream[xxeCount].opSubId = XXE::noSum;
+      xxeElement = &(xxestream[xxeCount]);
+      xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
+      xxeWtimerInfo->timerId = xxeCount;
+      xxeWtimerInfo->timerString = new char[80];
+      strcpy(xxeWtimerInfo->timerString, "Wtimer");
+      xxeWtimerInfo->actualWtimerId = superSumIndex;
+      xxeWtimerInfo->relativeWtimerId = 0;
+      ++xxeCount;
+      if (xxeCount >= xxe->max){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- xxeCount out of range", &rc);
+        return rc;
+      }
+      // xxe garb coll
+      xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString;
+      ++(xxe->storageCount);
+      if (xxe->storageCount >= xxe->storageMaxCount){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- xxe->storageCount out of range", &rc);
+        return rc;
+      }
+      // </XXE profiling element>
   
-      printf("gjt checking #1: k=%d, %d\n", k, partnerDeCount[k]);
+      printf("gjt checking #1 localPet=%d: k=%d, %d\n", localPet, 
+        k, partnerDeCount[j][k]);
   
 #ifdef USEproductSumScalarRRA
-      for (int kk=0; kk<partnerDeCount[k]; kk++){
-        DstInfo *dstInfo = &(dstInfoTable[k][kk]);
+      for (int kk=0; kk<partnerDeCount[j][k]; kk++){
+        DstInfo *dstInfo = &(dstInfoTable[j][k][kk]);
         int linIndex = dstInfo->linIndex;
         // enter scalar "+=*" operation into XXE stream
         xxestream[xxeCount].opId = XXE::productSumScalarRRA;
@@ -4856,8 +4788,9 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         xxeProductSumScalarRRAInfo = (XXE::ProductSumScalarRRAInfo *)xxeElement;
         xxeProductSumScalarRRAInfo->rraOffset = linIndex * dataSize;
         xxeProductSumScalarRRAInfo->factor = (void *)
-          (localDeFactorList + (dstInfo->localDeFactorListIndex) * dataSize);
-        xxeProductSumScalarRRAInfo->value = (void *)(buffer[k] + kk*dataSize);
+          (localDeFactorList[j] + (dstInfo->localDeFactorListIndex) * dataSize);
+        xxeProductSumScalarRRAInfo->value = (void *)
+          (buffer[j][k] + kk*dataSize);
         xxeProductSumScalarRRAInfo->rraIndex = srcLocalDeCount
           + j; // localDe index into dstArray shifted by srcArray localDeCount
         ++xxeCount;
@@ -4866,7 +4799,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
             "- xxeCount out of range", &rc);
           return rc;
         }
-      } // kk - partnerDeCount[k]
+      } // kk - partnerDeCount[j][k]
 #else
       // enter super-scalar "+=*" operation into XXE stream
       xxestream[xxeCount].opId = XXE::productSumSuperScalarRRA;
@@ -4884,7 +4817,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         (XXE::ProductSumSuperScalarRRAInfo *)xxeElement;
       xxeProductSumSuperScalarRRAInfo->rraIndex = srcLocalDeCount
         + j; // localDe index into dstArray shifted by srcArray localDeCount
-      int termCount = partnerDeCount[k];
+      int termCount = partnerDeCount[j][k];
       xxeProductSumSuperScalarRRAInfo->termCount = termCount;
       char *rraOffsetListChar = new char[termCount*sizeof(int)];
       int *rraOffsetList = (int *)rraOffsetListChar;
@@ -4917,12 +4850,12 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         return rc;
       }
       for (int kk=0; kk<termCount; kk++){
-        DstInfo *dstInfo = &(dstInfoTable[k][kk]);
+        DstInfo *dstInfo = &(dstInfoTable[j][k][kk]);
         int linIndex = dstInfo->linIndex;
         rraOffsetList[kk] = linIndex * dataSize;
         factorList[kk] = (void *)
-          (localDeFactorList + (dstInfo->localDeFactorListIndex) * dataSize);
-        valueList[kk] = (void *)(buffer[k] + kk*dataSize);
+          (localDeFactorList[j] + (dstInfo->localDeFactorListIndex) * dataSize);
+        valueList[kk] = (void *)(buffer[j][k] + kk*dataSize);
           + j; // localDe index into dstArray shifted by srcArray localDeCount
       } // for kk - termCount
       ++xxeCount;
@@ -4933,118 +4866,135 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       }
 #endif
       
-  // <XXE profiling element>
-  xxestream[xxeCount].opId = XXE::wtimer;
-  xxeElement = &(xxestream[xxeCount]);
-  xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-  xxeWtimerInfo->timerId = xxeCount;
-  xxeWtimerInfo->timerString = new char[80];
-  strcpy(xxeWtimerInfo->timerString, "Wtimer");
-  xxeWtimerInfo->actualWtimerId = 6;
-  xxeWtimerInfo->relativeWtimerId = 0;
-  ++xxeCount;
-  if (xxeCount >= xxe->max){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxeCount out of range", &rc);
-    return rc;
-  }
-  xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
-  ++(xxe->storageCount);
-  if (xxe->storageCount >= xxe->storageMaxCount){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxe->storageCount out of range", &rc);
-    return rc;
-  }
-  // </XXE profiling element>
-      
-  // <XXE profiling element>
-  xxestream[xxeCount].opId = XXE::wtimer;
-  xxeElement = &(xxestream[xxeCount]);
-  xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-  xxeWtimerInfo->timerId = xxeCount;
-  xxeWtimerInfo->timerString = new char[80];
-  strcpy(xxeWtimerInfo->timerString, "Wt: pSSRRA");
-  xxeWtimerInfo->actualWtimerId = xxeCount;
-  xxeWtimerInfo->relativeWtimerId = 0;
-  ++xxeCount;
-  if (xxeCount >= xxe->max){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxeCount out of range", &rc);
-    return rc;
-  }
-  xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
-  ++(xxe->storageCount);
-  if (xxe->storageCount >= xxe->storageMaxCount){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxe->storageCount out of range", &rc);
-    return rc;
-  }
-  // </XXE profiling element>
-      
-      
-    } // k - diffPartnerDeCount
-    VMK::wtime(&t10f1a);   //gjt - profile
-    VMK::wtime(&t10f1b);   //gjt - profile
-    dt10f1ab += t10f1b - t10f1a;
-    
-#endif
-    
-    VMK::wtime(&t10f);   //gjt - profile
-    
       // <XXE profiling element>
-  xxestream[xxeCount].opId = XXE::wtimer;
-  xxeElement = &(xxestream[xxeCount]);
-  xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-  xxeWtimerInfo->timerId = 50;
-  xxeWtimerInfo->timerString = new char[80];
-  strcpy(xxeWtimerInfo->timerString, "Wtimer 50");
-  xxeWtimerInfo->actualWtimerId = 50;
-  xxeWtimerInfo->relativeWtimerId = 0;
-  ++xxeCount;
-  if (xxeCount >= xxe->max){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxeCount out of range", &rc);
-    return rc;
-  }
-  xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
-  ++(xxe->storageCount);
-  if (xxe->storageCount >= xxe->storageMaxCount){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- xxe->storageCount out of range", &rc);
-    return rc;
-  }
-  // </XXE profiling element>
-
+      xxestream[xxeCount].opId = XXE::wtimer;
+      xxeElement = &(xxestream[xxeCount]);
+      xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
+      xxeWtimerInfo->timerId = xxeCount;
+      xxeWtimerInfo->timerString = new char[80];
+      strcpy(xxeWtimerInfo->timerString, "Wtimer");
+      xxeWtimerInfo->actualWtimerId = superSumIndex;
+      xxeWtimerInfo->relativeWtimerId = 0;
+      ++xxeCount;
+      if (xxeCount >= xxe->max){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- xxeCount out of range", &rc);
+        return rc;
+      }
+      // xxe garbCo
+      xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString;
+      ++(xxe->storageCount);
+      if (xxe->storageCount >= xxe->storageMaxCount){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- xxe->storageCount out of range", &rc);
+        return rc;
+      }
+      // </XXE profiling element>
+      
+      // <XXE profiling element>
+      xxestream[xxeCount].opId = XXE::wtimer;
+      xxeElement = &(xxestream[xxeCount]);
+      xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
+      xxeWtimerInfo->timerId = xxeCount;
+      xxeWtimerInfo->timerString = new char[80];
+      strcpy(xxeWtimerInfo->timerString, "Wt: pSSRRA");
+      xxeWtimerInfo->actualWtimerId = xxeCount;
+      xxeWtimerInfo->relativeWtimerId = 0;
+      ++xxeCount;
+      if (xxeCount >= xxe->max){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- xxeCount out of range", &rc);
+        return rc;
+      }
+      // xxe garb coll
+      xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString;
+      ++(xxe->storageCount);
+      if (xxe->storageCount >= xxe->storageMaxCount){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- xxe->storageCount out of range", &rc);
+        return rc;
+      }
+      // </XXE profiling element>
+      
+    } // k - diffPartnerDeCount[j]    
+    
+    VMK::wtime(&t10Yf);   //gjt - profile
+    
+    // <XXE profiling element>
+    xxestream[xxeCount].opId = XXE::wtimer;
+    xxeElement = &(xxestream[xxeCount]);
+    xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
+    xxeWtimerInfo->timerId = xxeCount;
+    xxeWtimerInfo->timerString = new char[80];
+    strcpy(xxeWtimerInfo->timerString, "Wt: /w+=*L");
+    xxeWtimerInfo->actualWtimerId = xxeCount;
+    xxeWtimerInfo->relativeWtimerId = 0;
+    ++xxeCount;
+    if (xxeCount >= xxe->max){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- xxeCount out of range", &rc);
+      return rc;
+    }
+    xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
+    ++(xxe->storageCount);
+    if (xxe->storageCount >= xxe->storageMaxCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- xxe->storageCount out of range", &rc);
+      return rc;
+    }
+    // </XXE profiling element>
     
     // garbage collection
-    delete [] buffer;
-    delete [] index2Ref;
-    delete [] index2Ref2;
-    delete [] factorIndexRef;
-    delete [] partnerDeRef;
-    delete [] partnerDeList;
-    delete [] partnerDeCount;
-    for (int i=0; i<diffPartnerDeCount; i++){
-      delete [] dstInfoTable[i];
+    delete [] partnerDeCount[j];
+    for (int i=0; i<diffPartnerDeCount[j]; i++){
+      delete [] dstInfoTable[j][i];
     }
-    delete [] dstInfoTable;
-    delete [] dstInfoTableInit;
-#ifdef SECONDLEVELBUFFER
-    delete [] linIndexTermList;
-    delete [] linIndexTermFactorCount;
-#endif
-    delete [] recvnbIndex;
+    delete [] dstInfoTable[j];
+    delete [] recvnbIndex[j];
+    delete [] buffer[j];
         
-    VMK::wtime(&t10g);   //gjt - profile
+    VMK::wtime(&t10Yg);   //gjt - profile
   printf("gjt - profile for PET %d, j-loop %d:\n"
-    " t10a=%g\n t10b=%g\n t10c1=%g\n t10c2=%g\n t10d=%g\n t10e=%g\n t10f=%g\n"
-    " t10g=%g\n dt10c2bc=%g\n dt10f1ab=%g\n", localPet, j,
-    t10a-t9, t10b-t9, t10c1-t9, t10c2-t9, t10d-t9, t10e-t9, t10f-t9, t10g-t9,
-    dt10c2bc, dt10f1ab);
+    " t10Yf=%g\n t10Yg=%g\n", localPet, j,
+    t10Yf-t9, t10Yg-t9);
     
   } // for j - dstLocalDeCount
-        
-  VMK::wtime(&t10);   //gjt - profile
+
+  // garbage collection
+  delete [] diffPartnerDeCount;
+  delete [] recvnbIndex;
+  delete [] partnerDeCount;
+  delete [] dstInfoTable;
+  delete [] buffer;
+    
+//=============== </work> ============
+          
+    
+  VMK::wtime(&t10Y);   //gjt - profile
+
+  // <XXE profiling element>
+  xxestream[xxeCount].opId = XXE::wtimer;
+  xxeElement = &(xxestream[xxeCount]);
+  xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
+  xxeWtimerInfo->timerId = 99;
+  xxeWtimerInfo->timerString = new char[80];
+  strcpy(xxeWtimerInfo->timerString, "Wtimer 99");
+  xxeWtimerInfo->actualWtimerId = 99;
+  xxeWtimerInfo->relativeWtimerId = 0;
+  ++xxeCount;
+  if (xxeCount >= xxe->max){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- xxeCount out of range", &rc);
+    return rc;
+  }
+  xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
+  ++(xxe->storageCount);
+  if (xxe->storageCount >= xxe->storageMaxCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- xxe->storageCount out of range", &rc);
+    return rc;
+  }
+  // </XXE profiling element>
 
   // post XXE::waitOnAllSendnb
   xxestream[xxeCount].opId = XXE::waitOnAllSendnb;
@@ -5138,9 +5088,9 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   VMK::wtime(&t11);   //gjt - profile
   printf("gjt - profile for PET %d:\n"
     " t1=%g\n t2=%g\n t3=%g\n t4=%g\n t5=%g\n t6=%g\n"
-    " t7=%g\n t8=%g\n t9=%g\n t10=%g\n t11=%g\n", localPet,
+    " t7=%g\n t8=%g\n t10X=%g\n t9=%g\n t10Y=%g\n t11=%g\n", localPet,
     t1-t0, t2-t0, t3-t0, t4-t0, 
-    t5-t0, t6-t0, t7-t0, t8-t0, t9-t0, t10-t0, t11-t0);
+    t5-t0, t6-t0, t7-t0, t8-t0, t10Y-t0, t9-t0, t10Y-t0, t11-t0);
 
   // return successfully
   rc = ESMF_SUCCESS;
