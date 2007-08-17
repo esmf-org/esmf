@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2005/10/12 19:06:16 nscollins Exp $
+# $Id: makefile,v 1.16 2007/08/17 20:53:25 cdeluca Exp $
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -19,7 +19,7 @@ TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_FieldGatherUTest \
 		$(ESMC_TESTDIR)/ESMF_FieldGather1DUTest
 
 TESTS_RUN     = RUN_ESMF_FieldGatherUTest \
-                RUN_ESMF_FieldGather1DUTest
+		RUN_ESMF_FieldGather1DUTest
 
 TESTS_RUN_UNI = RUN_ESMF_FieldGatherUTestUNI \
 		RUN_ESMF_FieldGather1DUTestUNI

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.39 2007/07/06 20:13:20 svasquez Exp $
+# $Id: makefile,v 1.40 2007/08/17 20:53:26 cdeluca Exp $
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -29,11 +29,11 @@ TESTS_RUN     = RUN_ESMF_RegridToolUTest \
 		RUN_ESMF_RegridBandingUTest \
 		RUN_ESMF_RegridTimeUTest
 
-TESTS_RUN_UNI = RUN_ESMF_RegridToolUTestUNI \
+TESTS_RUN_UNI =	RUN_ESMF_RegridToolUTestUNI \
 		RUN_ESMF_RegridTimeUTestUNI \
 		RUN_ESMF_RegridUTestUNI \
-	        RUN_ESMF_RegridOptionsUTestUNI \
-	        RUN_ESMF_RegridBandingUTestUNI
+		RUN_ESMF_RegridOptionsUTestUNI \
+		RUN_ESMF_RegridBandingUTestUNI
 
 
 include $(ESMF_DIR)/makefile

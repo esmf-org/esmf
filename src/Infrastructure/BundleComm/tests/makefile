@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2007/03/06 00:10:58 theurich Exp $ 
+# $Id: makefile,v 1.18 2007/08/17 20:53:25 cdeluca Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -18,19 +18,19 @@ DIRS	  =
 LOCDIR	  = src/Infrastructure/BundleComm/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_BundleCommUTest \
-                $(ESMF_TESTDIR)/ESMF_BundleCommOptionsUTest \
-                $(ESMF_TESTDIR)/ESMF_BundleRedistUTest \
-                $(ESMF_TESTDIR)/ESMF_BundleRedistUseUTest
+		$(ESMF_TESTDIR)/ESMF_BundleCommOptionsUTest \
+		$(ESMF_TESTDIR)/ESMF_BundleRedistUTest \
+		$(ESMF_TESTDIR)/ESMF_BundleRedistUseUTest
 
 TESTS_RUN     = RUN_ESMF_BundleCommUTest \
-                RUN_ESMF_BundleCommOptionsUTest \
-                RUN_ESMF_BundleRedistUTest \
-                RUN_ESMF_BundleRedistUseUTest 
+		RUN_ESMF_BundleCommOptionsUTest \
+		RUN_ESMF_BundleRedistUTest \
+		RUN_ESMF_BundleRedistUseUTest 
 
 TESTS_RUN_UNI = RUN_ESMF_BundleCommUTestUNI \
-                RUN_ESMF_BundleCommOptionsUTestUNI \
-                RUN_ESMF_BundleRedistUTestUNI \
-                RUN_ESMF_BundleRedistUseUTestUNI 
+		RUN_ESMF_BundleCommOptionsUTestUNI \
+		RUN_ESMF_BundleRedistUTestUNI \
+		RUN_ESMF_BundleRedistUseUTestUNI 
 
 include ${ESMF_DIR}/makefile
 
