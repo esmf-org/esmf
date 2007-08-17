@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCommUTest.F90,v 1.21 2007/06/23 04:00:11 cdeluca Exp $
+! $Id: ESMF_BundleCommUTest.F90,v 1.22 2007/08/17 18:37:44 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleCommUTest.F90,v 1.21 2007/06/23 04:00:11 cdeluca Exp $'
+      '$Id: ESMF_BundleCommUTest.F90,v 1.22 2007/08/17 18:37:44 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -82,7 +82,7 @@
       write(failMsg, *) "rc not ESMF_SUCCESS"
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       call ESMF_VMGetGlobal(vm, rc)
       write(name, *) "Getting global vm"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -93,7 +93,7 @@
       !  so the route code can use a single route table for all fields.
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       !  Create 4 data field for use below. fields 1 and 2 share a igrid, 
       !  fields 3 and 4 share a different igrid.  fields 1 and 2 go into 
       !  bundle 1; fields 3 and 4 go into bundle 2.  
@@ -102,21 +102,21 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       !  Get igrid from previous field and reuse it below.
       call ESMF_FieldGet(fields(1), igrid=igrid, rc=rc)
       write(name, *) "Getting IGrid from Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       fields(2) = CreateDataField("pressure", igrid=igrid, &
                                    r8value=2.2_ESMF_KIND_R8, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! Create a non-default layout of type "2".  See the helper routines
       ! for the various options in layout types.
       layout = CreateLayout(2, rc)
@@ -124,48 +124,48 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       fields(3) = CreateDataField("humidity", r8value=-88.88_ESMF_KIND_R8, &
                                    layout=layout, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       !  Get igrid from previous field and reuse it below.
       call ESMF_FieldGet(fields(3), igrid=igrid, rc=rc)
       write(name, *) "Getting IGrid from Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       fields(4) = CreateDataField("pressure", igrid=igrid, &
                                   r8value=-99.99_ESMF_KIND_R8, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       !  Create 2 bundles with the already created fields.
       bundle1 = ESMF_BundleCreate(2, fields(1:2), name="ocn export", rc=rc)
       write(name, *) "Creating source Bundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       bundle2 = ESMF_BundleCreate(2, fields(3:4), name="atm import", rc=rc)
       write(name, *) "Creating destination Bundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! redistribute data from bundle1 to bundle2
       call ESMF_BundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
       write(name, *) "Precompute Redist Communication"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       !  This route table should have only 1 internal route.
       call ESMF_RouteHandleGet(rh, route_count=nroutes, rc=rc)
       write(name, *) "Single route inside handle"
@@ -176,26 +176,26 @@
       write(failMsg, *) "rc not ESMF_SUCCESS"
       
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       !  Redist both fields in a single Bundle call.
       call ESMF_BundleRedist(bundle1, bundle2, rh, rc=rc)
       write(name, *) "Redistributing data from all Fields in a Bundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       call ValidateConstantR8Field(fields(3), val=1.1_ESMF_KIND_R8, rc=rc)
       write(name, *) "Validating field 3 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       call ValidateConstantR8Field(fields(4), val=2.2_ESMF_KIND_R8, rc=rc)
       write(name, *) "Validating field 4 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       !  Release the routehandle
       call ESMF_BundleRedistRelease(rh, rc=rc)
       write(name, *) "Release the RouteHandle"
@@ -204,27 +204,27 @@
       !------------------------------------------------------------------------
       ! clean up the objects
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! Clean up by deleting the Bundles.
       call ESMF_BundleDestroy(bundle1, rc=rc)
       write(name, *) "Bundle Destroy 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       call ESMF_BundleDestroy(bundle2, rc=rc)
       write(name, *) "Bundle Destroy 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! Clean up by deleting the Fields.
       call FieldCleanup(fields(1), fields(2), rc=rc)
       write(name, *) "Field Destroy 1,2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! Clean up by deleting the Fields.
       call FieldCleanup(fields(3), fields(4), rc=rc)
       write(name, *) "Field Destroy 3,4"
@@ -237,7 +237,7 @@
 
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_removeUTest
       ! Bundle Halo Release of non-initialized routehandle
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
       call ESMF_BundleHaloRelease(rh3,rc)
@@ -246,7 +246,7 @@
 
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_removeUTest
       ! Bundle Halo Store of non-initialized routehandle
       write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
       call ESMF_BundleHaloStore(bundle1, rh3, rc=rc)
@@ -267,7 +267,7 @@
       !  so the route code must compute multiple routes and loop internally.
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Create 4 data field for use below. fields 1 and 2 share a igrid, 
       !  fields 3 and 4 share a different igrid.  fields 1 and 2 go into 
       !  bundle 1; fields 3 and 4 go into bundle 2.
@@ -276,21 +276,21 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Get igrid from previous field and reuse it below.
       call ESMF_FieldGet(fields(1), igrid=igrid, rc=rc)
       write(name, *) "Getting IGrid from Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       fields(2) = CreateDataField("pressure", igrid=igrid, &
                                    r4value=2.2_ESMF_KIND_R4, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Create a non-default layout of type "2".  See the helper routines
       ! for the various options in layout types.
       layout = CreateLayout(2, rc)
@@ -298,48 +298,48 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       fields(3) = CreateDataField("humidity", r8value=-88.88_ESMF_KIND_R8, &
                                    layout=layout, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Get igrid from previous field and reuse it below.
       call ESMF_FieldGet(fields(3), igrid=igrid, rc=rc)
       write(name, *) "Getting IGrid from Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       fields(4) = CreateDataField("pressure", igrid=igrid, &
                                   r4value=-99.99_ESMF_KIND_R4, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Create 2 bundles with the already created fields.
       bundle1 = ESMF_BundleCreate(2, fields(1:2), name="ocn export", rc=rc)
       write(name, *) "Creating source Bundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       bundle2 = ESMF_BundleCreate(2, fields(3:4), name="atm import", rc=rc)
       write(name, *) "Creating destination Bundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! redistribute data from bundle1 to bundle2
       call ESMF_BundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
       write(name, *) "Precompute Redist Communication"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  This route table should have 2 internal routes.
       call ESMF_RouteHandleGet(rh, route_count=nroutes, rc=rc)
       write(name, *) "Multiple routes inside handle"
@@ -350,26 +350,26 @@
       write(failMsg, *) "rc not ESMF_SUCCESS"
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Redist both fields in a single Bundle call.
       call ESMF_BundleRedist(bundle1, bundle2, rh, rc=rc)
       write(name, *) "Redistributing data from all Fields in a Bundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       call ValidateConstantR8Field(fields(3), val=1.1_ESMF_KIND_R8, rc=rc)
       write(name, *) "Validating field 3 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       call ValidateConstantR4Field(fields(4), val=2.2_ESMF_KIND_R4, rc=rc)
       write(name, *) "Validating field 4 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Release the routehandle
       call ESMF_BundleRedistRelease(rh, rc=rc)
       write(name, *) "Release the RouteHandle"
@@ -378,27 +378,27 @@
       !------------------------------------------------------------------------
       ! clean up the objects
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Clean up by deleting the Bundles.
       call ESMF_BundleDestroy(bundle1, rc=rc)
       write(name, *) "Bundle Destroy 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       call ESMF_BundleDestroy(bundle2, rc=rc)
       write(name, *) "Bundle Destroy 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Clean up by deleting the Fields.
       call FieldCleanup(fields(1), fields(2), rc=rc)
       write(name, *) "Field Destroy 1,2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Clean up by deleting the Fields.
       call FieldCleanup(fields(3), fields(4), rc=rc)
       write(name, *) "Field Destroy 3,4"
@@ -412,7 +412,7 @@
       ! Test halo of bundle both when the fields match and when they do not.
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Create 4 data field for use below. fields 1 and 2 share a igrid, 
       !  fields 3 and 4 share a different igrid.  fields 1 and 2 go into 
       !  bundle 1; fields 3 and 4 go into bundle 2.  fields 1 and 2 match;
@@ -422,35 +422,35 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! set the halo to another value.
       call FillConstantR8Halo(fields(1), val=-4.4_ESMF_KIND_R8, rc=rc)
       write(name, *) "Setting halo region to another value"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Get igrid from previous field and reuse it below.
       call ESMF_FieldGet(fields(1), igrid=igrid, rc=rc)
       write(name, *) "Getting IGrid from Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       fields(2) = CreateDataField("pressure", igrid=igrid, &
                                    r8value=2.2_ESMF_KIND_R8, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! set the halo to another value.
       call FillConstantR8Halo(fields(2), val=-6.6_ESMF_KIND_R8, rc=rc)
       write(name, *) "Setting halo region to another value"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Create a non-default layout of type "2".  See the helper routines
       ! for the various options in layout types.
       layout = CreateLayout(2, rc)
@@ -458,105 +458,105 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       fields(3) = CreateDataField("humidity", r8value=8.8_ESMF_KIND_R8, &
                                    layout=layout, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! set the halo to another value.
       call FillConstantR8Halo(fields(3), val=-1.1_ESMF_KIND_R8, rc=rc)
       write(name, *) "Setting halo region to another value"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Get igrid from previous field and reuse it below.
       call ESMF_FieldGet(fields(3), igrid=igrid, rc=rc)
       write(name, *) "Getting IGrid from Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       fields(4) = CreateDataField("pressure", igrid=igrid, &
                                   r4value=9.9_ESMF_KIND_R4, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! set the halo to another value.
       call FillConstantR4Halo(fields(4), val=-2.2_ESMF_KIND_R4, rc=rc)
       write(name, *) "Setting halo region to another value"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Create 2 bundles with the already created fields.
       bundle1 = ESMF_BundleCreate(2, fields(1:2), name="ocn export", rc=rc)
       write(name, *) "Creating source Bundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       bundle2 = ESMF_BundleCreate(2, fields(3:4), name="atm import", rc=rc)
       write(name, *) "Creating destination Bundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! compute halo routehandles for both bundle1 and bundle2
       call ESMF_BundleHaloStore(bundle1, rh1, rc=rc)
       write(name, *) "Precompute Halo Communication 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       call ESMF_BundleHaloStore(bundle2, rh2, rc=rc)
       write(name, *) "Precompute Halo Communication 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Halo both fields in a single Bundle call.
       call ESMF_BundleHalo(bundle1, rh1, rc=rc)
       write(name, *) "Halo data from all Fields in a Bundle 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       call ESMF_BundleHalo(bundle2, rh2, rc=rc)
       write(name, *) "Halo data from all Fields in a Bundle 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       call ValidateConstantR8Field(fields(1), val=1.1_ESMF_KIND_R8, rc=rc)
       write(name, *) "Validating field 1 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       call ValidateConstantR8Field(fields(2), val=2.2_ESMF_KIND_R8, rc=rc)
       write(name, *) "Validating field 2 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       call ValidateConstantR8Field(fields(3), val=8.8_ESMF_KIND_R8, rc=rc)
       write(name, *) "Validating field 3 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       call ValidateConstantR4Field(fields(4), val=9.9_ESMF_KIND_R4, rc=rc)
       write(name, *) "Validating field 4 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Bundle Halo Release of routehandle
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       call ESMF_BundleHaloRelease(rh1, rc)
@@ -564,7 +564,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Release the routehandles
       write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
       call ESMF_BundleRedistRelease(rh1, rc=rc)
@@ -572,14 +572,14 @@
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Release the routehandles
       call ESMF_BundleRedistRelease(rh2, rc=rc)
       write(name, *) "Release RouteHandle 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Bundle Halo Release of routehandle
       write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
       call ESMF_BundleHaloRelease(rh1,rc)
@@ -588,27 +588,27 @@
       !------------------------------------------------------------------------
       ! clean up the data used by the previous tests.
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Clean up by deleting the Bundles.
       call ESMF_BundleDestroy(bundle1, rc=rc)
       write(name, *) "Bundle Destroy 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       call ESMF_BundleDestroy(bundle2, rc=rc)
       write(name, *) "Bundle Destroy 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Clean up by deleting the Fields.
       call FieldCleanup(fields(1), fields(2), rc=rc)
       write(name, *) "Field Destroy 1,2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Clean up by deleting the Fields.
       call FieldCleanup(fields(3), fields(4), rc=rc)
       write(name, *) "Field Destroy 3,4"
@@ -620,7 +620,7 @@
       !  precomputed set of weights and route table apply to all.
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Create 4 data field for use below. fields 1 and 2 share a igrid, 
       !  fields 3 and 4 share a different igrid.  fields 1 and 2 go into 
       !  bundle 1; fields 3 and 4 go into bundle 2.
@@ -629,21 +629,21 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Get igrid from previous field and reuse it below.
       call ESMF_FieldGet(fields(1), igrid=igrid, rc=rc)
       write(name, *) "Getting IGrid from Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       fields(2) = CreateDataField("pressure", igrid=igrid, &
                                    r8value=2.2_ESMF_KIND_R8, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Create a non-default layout of type "3".  See the helper routines
       ! for the various options in layout types.
       layout = CreateLayout(3, rc)
@@ -651,7 +651,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Create a different igrid based on the above layout.
       ! See the helper routines for the different igrid options.
       igrid = CreateIGrid(3, layout, rc)
@@ -659,34 +659,34 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       fields(3) = CreateDataField("humidity", r8value=-88.88_ESMF_KIND_R8, &
                                   igrid=igrid, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       fields(4) = CreateDataField("pressure", igrid=igrid, &
                                   r8value=-99.99_ESMF_KIND_R8, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Create 2 bundles with the already created fields.
       bundle1 = ESMF_BundleCreate(2, fields(1:2), name="ocn export", rc=rc)
       write(name, *) "Creating source Bundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       bundle2 = ESMF_BundleCreate(2, fields(3:4), name="atm import", rc=rc)
       write(name, *) "Creating destination Bundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! regrid data from bundle1 to bundle2
       call ESMF_BundleRegridStore(bundle1, bundle2, vm, rh, &
                                   ESMF_REGRID_METHOD_BILINEAR, rc=rc)
@@ -694,26 +694,26 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Regrid both fields in a single Bundle call.
       call ESMF_BundleRegrid(bundle1, bundle2, rh, rc=rc)
       write(name, *) "Regridding data from all Fields in a Bundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       call ValidateConstantR8Field(fields(3), val=1.1_ESMF_KIND_R8, rc=rc)
       write(name, *) "Validating field 3 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       call ValidateConstantR8Field(fields(4), val=2.2_ESMF_KIND_R8, rc=rc)
       write(name, *) "Validating field 4 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Release the routehandle
       call ESMF_BundleRegridRelease(rh, rc=rc)
       write(name, *) "Release the RouteHandle"
@@ -722,27 +722,27 @@
       !------------------------------------------------------------------------
       ! clean up the objects
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Clean up by deleting the Bundles.
       call ESMF_BundleDestroy(bundle1, rc=rc)
       write(name, *) "Bundle Destroy 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       call ESMF_BundleDestroy(bundle2, rc=rc)
       write(name, *) "Bundle Destroy 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Clean up by deleting the Fields.
       call FieldCleanup(fields(1), fields(2), rc=rc)
       write(name, *) "Field Destroy 1,2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Clean up by deleting the Fields.
       call FieldCleanup(fields(3), fields(4), rc=rc)
       write(name, *) "Field Destroy 3,4"
@@ -758,7 +758,7 @@
       !  each field individually.
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Create 4 data field for use below. fields 1 and 2 share a igrid, 
       !  fields 3 and 4 share a different igrid.  fields 1 and 2 go into 
       !  bundle 1; fields 3 and 4 go into bundle 2.
@@ -768,14 +768,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Get igrid from previous field and reuse it below.
       call ESMF_FieldGet(fields(1), igrid=igrid, rc=rc)
       write(name, *) "Getting IGrid from Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       fields(2) = CreateDataField("pressure", igrid=igrid, &
                                    r8value=2.2_ESMF_KIND_R8, &
                                    relloc=ESMF_CELL_CENTER, rc=rc)
@@ -783,7 +783,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Create a non-default layout of type "3".  See the helper routines
       ! for the various options in layout types.
       layout = CreateLayout(3, rc)
@@ -791,7 +791,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Create a different igrid based on the above layout.
       ! See the helper routines for the different igrid options.
       igrid = CreateIGrid(3, layout, rc)
@@ -799,7 +799,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       fields(3) = CreateDataField("humidity", igrid=igrid, &
                                    r8value=-88.88_ESMF_KIND_R8, &
                                    relloc=ESMF_CELL_NECORNER, rc=rc)
@@ -807,7 +807,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       fields(4) = CreateDataField("pressure", igrid=igrid, &
                                   r8value=-99.99_ESMF_KIND_R8, &
                                   relloc=ESMF_CELL_CENTER, rc=rc)
@@ -815,20 +815,20 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Create 2 bundles with the already created fields.
       bundle1 = ESMF_BundleCreate(2, fields(1:2), name="ocn export", rc=rc)
       write(name, *) "Creating source Bundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       bundle2 = ESMF_BundleCreate(2, fields(3:4), name="atm import", rc=rc)
       write(name, *) "Creating destination Bundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! regrid data from bundle1 to bundle2
       call ESMF_BundleRegridStore(bundle1, bundle2, vm, rh, &
                                   ESMF_REGRID_METHOD_BILINEAR, rc=rc)
@@ -837,26 +837,26 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Regrid both fields in a single Bundle call.
       call ESMF_BundleRegrid(bundle1, bundle2, rh, rc=rc)
       write(name, *) "Regridding data from all Fields in a Bundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       call ValidateConstantR8Field(fields(3), val=1.1_ESMF_KIND_R8, rc=rc)
       write(name, *) "Validating field 3 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       call ValidateConstantR8Field(fields(4), val=2.2_ESMF_KIND_R8, rc=rc)
       write(name, *) "Validating field 4 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Release the routehandle
       call ESMF_BundleRegridRelease(rh, rc=rc)
       write(name, *) "Release the RouteHandle"
@@ -865,27 +865,27 @@
       !------------------------------------------------------------------------
       ! clean up the objects
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Clean up by deleting the Bundles.
       call ESMF_BundleDestroy(bundle1, rc=rc)
       write(name, *) "Bundle Destroy 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       call ESMF_BundleDestroy(bundle2, rc=rc)
       write(name, *) "Bundle Destroy 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Clean up by deleting the Fields.
       call FieldCleanup(fields(1), fields(2), rc=rc)
       write(name, *) "Field Destroy 1,2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Clean up by deleting the Fields.
       call FieldCleanup(fields(3), fields(4), rc=rc)
       write(name, *) "Field Destroy 3,4"
@@ -901,7 +901,7 @@
       !  each field individually.
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Create 4 data field for use below. fields 1 and 2 share a igrid, 
       !  fields 3 and 4 share a different igrid.  fields 1 and 2 go into 
       !  bundle 1; fields 3 and 4 go into bundle 2.
@@ -910,21 +910,21 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Get igrid from previous field and reuse it below.
       call ESMF_FieldGet(fields(1), igrid=igrid, rc=rc)
       write(name, *) "Getting IGrid from Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       fields(2) = CreateDataField("pressure", igrid=igrid, &
                                    r8value=2.2_ESMF_KIND_R8, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Create a non-default layout of type "3".  See the helper routines
       ! for the various options in layout types.
       layout = CreateLayout(3, rc)
@@ -932,7 +932,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Create a different igrid based on the above layout.
       ! See the helper routines for the different igrid options.
       igrid = CreateIGrid(3, layout, rc)
@@ -940,34 +940,34 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       fields(3) = CreateDataField("humidity", r4value=-88.88_ESMF_KIND_R4, &
                                   igrid=igrid, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       fields(4) = CreateDataField("pressure", igrid=igrid, &
                                   r8value=-99.99_ESMF_KIND_R8, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Create 2 bundles with the already created fields.
       bundle1 = ESMF_BundleCreate(2, fields(1:2), name="ocn export", rc=rc)
       write(name, *) "Creating source Bundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       bundle2 = ESMF_BundleCreate(2, fields(3:4), name="atm import", rc=rc)
       write(name, *) "Creating destination Bundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! regrid data from bundle1 to bundle2
       call ESMF_BundleRegridStore(bundle1, bundle2, vm, rh, &
                                   ESMF_REGRID_METHOD_BILINEAR, rc=rc)
@@ -976,26 +976,26 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Regrid both fields in a single Bundle call.
       call ESMF_BundleRegrid(bundle1, bundle2, rh, rc=rc)
       write(name, *) "Regridding data from all Fields in a Bundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       call ValidateConstantR4Field(fields(3), val=1.1_ESMF_KIND_R4, rc=rc)
       write(name, *) "Validating field 3 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       call ValidateConstantR8Field(fields(4), val=2.2_ESMF_KIND_R8, rc=rc)
       write(name, *) "Validating field 4 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Release the routehandle
       call ESMF_BundleRegridRelease(rh, rc=rc)
       write(name, *) "Release the RouteHandle"
@@ -1004,27 +1004,27 @@
       !------------------------------------------------------------------------
       ! clean up the objects
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Clean up by deleting the Bundles.
       call ESMF_BundleDestroy(bundle1, rc=rc)
       write(name, *) "Bundle Destroy 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       call ESMF_BundleDestroy(bundle2, rc=rc)
       write(name, *) "Bundle Destroy 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Clean up by deleting the Fields.
       call FieldCleanup(fields(1), fields(2), rc=rc)
       write(name, *) "Field Destroy 1,2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Clean up by deleting the Fields.
       call FieldCleanup(fields(3), fields(4), rc=rc)
       write(name, *) "Field Destroy 3,4"
@@ -1040,7 +1040,7 @@
       !  data types, fields are empty (no data), and source == destination.
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Create 5 data field for use below. fields 1, 2, and 3 share a igrid, 
       !  fields 4 and 5 share a different igrid.  fields 1, 2 and 3 go into 
       !  bundle 1; fields 4 and 5 go into bundle 2.
@@ -1049,28 +1049,28 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Get igrid from previous field and reuse it below.
       call ESMF_FieldGet(fields(1), igrid=igrid, rc=rc)
       write(name, *) "Getting IGrid from Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       fields(2) = CreateDataField("pressure", igrid=igrid, &
                                    r4value=2.2_ESMF_KIND_R4, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       fields(3) = CreateDataField("density", igrid=igrid, &
                                    r8value=4.4_ESMF_KIND_R8, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Create a non-default layout of type "2".  See the helper routines
       ! for the various options in layout types.
       layout = CreateLayout(2, rc)
@@ -1078,41 +1078,41 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       fields(4) = CreateDataField("humidity", r8value=-88.88_ESMF_KIND_R8, &
                                    layout=layout, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Get igrid from previous field and reuse it below.
       call ESMF_FieldGet(fields(4), igrid=igrid, rc=rc)
       write(name, *) "Getting IGrid from Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       fields(5) = CreateDataField("pressure", igrid=igrid, &
                                   r4value=-99.99_ESMF_KIND_R4, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Create 2 bundles with the already created fields.
       bundle1 = ESMF_BundleCreate(3, fields(1:3), name="ocn export", rc=rc)
       write(name, *) "Creating source Bundle with 3 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       bundle2 = ESMF_BundleCreate(2, fields(4:5), name="atm import", rc=rc)
       write(name, *) "Creating destination Bundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! redistribute data from bundle1 to bundle2 - this *should* fail
       ! because count of fields in source and dest bundles not same.
       call ESMF_BundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
@@ -1121,7 +1121,7 @@
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !!EX_UTest
+      !!EX_removeUTest
       ! redistribute data from bundle1 to bundle2 - this *should* fail
       ! because data types do not line up between src and dst bundles.
       call ESMF_BundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
@@ -1130,7 +1130,7 @@
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! redistribute data from bundle1 to bundle2 - this *should* fail
       ! because empty fields do not line up.
       call ESMF_BundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
@@ -1139,7 +1139,7 @@
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! redistribute data from bundle1 to bundle2 - this *should* fail
       ! because both bundles have no fields.
       call ESMF_BundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
@@ -1148,7 +1148,7 @@
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! redistribute data from bundle1 to bundle2 - this *should* fail
       ! because both bundles have fields but the fields have no data.
       call ESMF_BundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
@@ -1165,27 +1165,27 @@
       !------------------------------------------------------------------------
       ! clean up the objects
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Clean up by deleting the Bundles.
       call ESMF_BundleDestroy(bundle1, rc=rc)
       write(name, *) "Bundle Destroy 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       call ESMF_BundleDestroy(bundle2, rc=rc)
       write(name, *) "Bundle Destroy 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Clean up by deleting the Fields.
       call FieldCleanup(fields(1), fields(2), fields(3), rc=rc)
       write(name, *) "Field Destroy 1,2,3"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Clean up by deleting the Fields.
       call FieldCleanup(fields(4), fields(5), rc=rc)
       write(name, *) "Field Destroy 4,5"

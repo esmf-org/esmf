@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCommOptionsUTest.F90,v 1.14 2007/06/23 04:00:10 cdeluca Exp $
+! $Id: ESMF_BundleCommOptionsUTest.F90,v 1.15 2007/08/17 18:37:44 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_BundleCommOptionsUTest.F90,v 1.14 2007/06/23 04:00:10 cdeluca Exp $'
+      '$Id: ESMF_BundleCommOptionsUTest.F90,v 1.15 2007/08/17 18:37:44 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -81,7 +81,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     call createField1(humidity1, vm, result, rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating Field 1 for testing"
@@ -89,7 +89,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     call createField2(humidity2, vm, result, rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating Field 2 for testing"
@@ -97,7 +97,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     ! set initial values
     call initializeData(humidity1, result, rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -106,7 +106,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     ! this is to test the verify routine - this is calling the verification
     ! on the original data; if this fails, there is something wrong with it
     ! before we even start the redist process.
@@ -121,7 +121,7 @@
 !-------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     call ESMF_FieldRedistStore(humidity1, humidity2, vm, &
                                routehandle=routehandle, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -142,7 +142,7 @@
     !  receive equivalents.
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     call ESMF_FieldRedist(humidity1, humidity2, routehandle, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Executing the Redist"
@@ -154,7 +154,7 @@
 !-------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     call verifyResults(humidity2, maxerror, result, rc)
     write(failMsg, *) "Percentage error in data result is too large"
     write(name, *) "Redist percentage error less than 0.1%"
@@ -162,7 +162,7 @@
     if (maxerror .ge. 0.01) goto 10
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Redist returned ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -178,7 +178,7 @@
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     roption = ESMF_ROUTE_OPTION_SYNC + ESMF_ROUTE_OPTION_PACK_PET
     call ESMF_FieldRedist(humidity1, humidity2, routehandle, &
                           routeOptions=roption, rc=rc)
@@ -188,7 +188,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     call verifyResults(humidity2, maxerror, result, rc)
     write(failMsg, *) "Percentage error in data result is too large"
     write(name, *) "Redist percentage error less than 2%"
@@ -196,7 +196,7 @@
     if (maxerror .ge. 2.0) goto 10
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Redist returned ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -206,7 +206,7 @@
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     roption = ESMF_ROUTE_OPTION_SYNC + ESMF_ROUTE_OPTION_PACK_XP
     call ESMF_FieldRedist(humidity1, humidity2, routehandle, &
                           routeOptions=roption, rc=rc)
@@ -216,7 +216,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     call verifyResults(humidity2, maxerror, result, rc)
     write(failMsg, *) "Percentage error in data result is too large"
     write(name, *) "Redist percentage error less than 2%"
@@ -224,7 +224,7 @@
     if (maxerror .ge. 2.0) goto 10
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Redist returned ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -234,7 +234,7 @@
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     roption = ESMF_ROUTE_OPTION_SYNC + ESMF_ROUTE_OPTION_PACK_NOPACK
     call ESMF_FieldRedist(humidity1, humidity2, routehandle, &
                           routeOptions=roption, rc=rc)
@@ -244,7 +244,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     call verifyResults(humidity2, maxerror, result, rc)
     write(failMsg, *) "Percentage error in data result is too large"
     write(name, *) "Redist percentage error less than 2%"
@@ -252,7 +252,7 @@
     if (maxerror .ge. 2.0) goto 10
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Redist returned ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -262,7 +262,7 @@
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     roption = ESMF_ROUTE_OPTION_ASYNC + ESMF_ROUTE_OPTION_PACK_PET
     call ESMF_FieldRedist(humidity1, humidity2, routehandle, &
                           routeOptions=roption, rc=rc)
@@ -272,7 +272,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     call verifyResults(humidity2, maxerror, result, rc)
     write(failMsg, *) "Percentage error in data result is too large"
     write(name, *) "Redist percentage error less than 2%"
@@ -280,7 +280,7 @@
     if (maxerror .ge. 2.0) goto 10
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Redist returned ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -290,7 +290,7 @@
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     roption = ESMF_ROUTE_OPTION_ASYNC + ESMF_ROUTE_OPTION_PACK_XP
     call ESMF_FieldRedist(humidity1, humidity2, routehandle, &
                           routeOptions=roption, rc=rc)
@@ -300,7 +300,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     call verifyResults(humidity2, maxerror, result, rc)
     write(failMsg, *) "Percentage error in data result is too large"
     write(name, *) "Redist percentage error less than 2%"
@@ -308,7 +308,7 @@
     if (maxerror .ge. 2.0) goto 10
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Redist returned ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -318,7 +318,7 @@
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     roption = ESMF_ROUTE_OPTION_ASYNC + ESMF_ROUTE_OPTION_PACK_NOPACK
     call ESMF_FieldRedist(humidity1, humidity2, routehandle, &
                           routeOptions=roption, rc=rc)
@@ -328,7 +328,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     call verifyResults(humidity2, maxerror, result, rc)
     write(failMsg, *) "Percentage error in data result is too large"
     write(name, *) "Redist percentage error less than 2%"
@@ -336,7 +336,7 @@
     if (maxerror .ge. 2.0) goto 10
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Redist returned ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -351,7 +351,7 @@
 !-------------------------------------------------------------------------
    
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     call ESMF_FieldRedistRelease(routehandle, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Releasing the routehandle"

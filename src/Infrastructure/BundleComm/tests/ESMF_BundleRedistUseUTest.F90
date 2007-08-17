@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistUseUTest.F90,v 1.13 2007/06/23 04:00:12 cdeluca Exp $
+! $Id: ESMF_BundleRedistUseUTest.F90,v 1.14 2007/08/17 18:37:44 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleRedistUseUTest.F90,v 1.13 2007/06/23 04:00:12 cdeluca Exp $'
+      '$Id: ESMF_BundleRedistUseUTest.F90,v 1.14 2007/08/17 18:37:44 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -149,7 +149,7 @@
       nprime = 4
       
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! create first igrid
       igrid(1) = CreateLatLonIGrid(nx, ny, nz, m, n, "MxN", rc=rc)
       write(name, *) "Creating igrid 1"
@@ -157,7 +157,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! create fields
       call CreateFields(igrid(1), &
                         sfield(1), sfield(2), sfield(3), sfield(4), sfield(5), &
@@ -173,7 +173,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! create fields, cont.
       call CreateFields(igrid(1), &
                         sfield(6), sfield(7), sfield(8), sfield(9), sfield(10),&
@@ -189,7 +189,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! create src bundle
       call CreateBundle(bundle(1), sfield(1), sfield(2), sfield(3), &
                                    sfield(4), sfield(5), rc=rc)
@@ -198,7 +198,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! add more fields
       call AddBundle(bundle(1), sfield(6), sfield(7), sfield(8), &
                                 sfield(9), sfield(10), rc=rc)
@@ -208,14 +208,14 @@
 
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       igrid(2) = CreateLatLonIGrid(nx, ny, nz, mprime, nprime, "M'xN'", mprime, nprime-1, rc)
       write(name, *) "Creating igrid 2"
       write(failMsg, *) "Unable to create igrid 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! create fields
       call CreateFields(igrid(2), &
                         dfield(1), dfield(2), dfield(3), dfield(4), dfield(5),&
@@ -231,7 +231,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! create fields, cont.
       call CreateFields(igrid(2), &
                         dfield(6), dfield(7), dfield(8), dfield(9), dfield(10),&
@@ -247,7 +247,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! create dst bundle
       call CreateBundle(bundle(2), dfield(1), dfield(2), dfield(3), &
                                    dfield(4), dfield(5), rc=rc)
@@ -256,7 +256,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! add more fields
       call AddBundle(bundle(2), dfield(6), dfield(7), dfield(8), &
                                 dfield(9), dfield(10), rc=rc)
@@ -266,7 +266,7 @@
 
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! fill source fields with known data
       call FillConstantR8Field(sfield(1), val_one, rc)
       write(name, *) "Filling src field 1 with constant data values"
@@ -274,7 +274,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! fill source fields with known data
       call FillConstantR8Field(sfield(2), val_two, rc)
       write(name, *) "Filling src field 2 with constant data values"
@@ -282,7 +282,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! fill source fields with known data
       call FillConstantR8Field(sfield(3), val_three, rc)
       write(name, *) "Filling src field 3 with constant data values"
@@ -290,7 +290,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! fill source fields with known data
       call FillConstantR8Field(sfield(4), val_four, rc)
       write(name, *) "Filling src field 4 with constant data values"
@@ -298,7 +298,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! fill source fields with known data
       call FillConstantR8Field(sfield(5), val_five, rc)
       write(name, *) "Filling src field 5 with constant data values"
@@ -306,7 +306,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! fill source fields with known data
       call FillConstantR8Field(sfield(6), val_six, rc)
       write(name, *) "Filling src field 6 with constant data values"
@@ -314,7 +314,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! fill source fields with known data
       call FillConstantR8Field(sfield(7), val_seven, rc)
       write(name, *) "Filling src field 7 with constant data values"
@@ -322,7 +322,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! fill source fields with known data
       call FillConstantR8Field(sfield(8), val_eight, rc)
       write(name, *) "Filling src field 8 with constant data values"
@@ -330,7 +330,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! fill source fields with known data
       call FillConstantR8Field(sfield(9), val_nine, rc)
       write(name, *) "Filling src field 9 with constant data values"
@@ -338,7 +338,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! fill source fields with known data
       call FillConstantR8Field(sfield(10), val_ten, rc)
       write(name, *) "Filling src field 10 with constant data values"
@@ -347,7 +347,7 @@
 
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! fill dest fields with known data
       call FillConstantR8Field(dfield(1), val_neg_one, rc)
       write(name, *) "Filling dst field 1 with constant data values"
@@ -355,7 +355,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! fill dest fields with known data
       call FillConstantR8Field(dfield(2), val_neg_two, rc)
       write(name, *) "Filling dst field 2 with constant data values"
@@ -363,7 +363,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! fill dest fields with known data
       call FillConstantR8Field(dfield(3), val_neg_three, rc)
       write(name, *) "Filling dst field 3 with constant data values"
@@ -371,7 +371,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! fill dest fields with known data
       call FillConstantR8Field(dfield(4), val_neg_four, rc)
       write(name, *) "Filling dst field 4 with constant data values"
@@ -379,7 +379,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! fill dest fields with known data
       call FillConstantR8Field(dfield(5), val_neg_five, rc)
       write(name, *) "Filling dst field 5 with constant data values"
@@ -387,7 +387,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! fill dest fields with known data
       call FillConstantR8Field(dfield(6), val_neg_six, rc)
       write(name, *) "Filling dst field 6 with constant data values"
@@ -395,7 +395,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! fill dest fields with known data
       call FillConstantR8Field(dfield(7), val_neg_seven, rc)
       write(name, *) "Filling dst field 7 with constant data values"
@@ -403,7 +403,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! fill dest fields with known data
       call FillConstantR8Field(dfield(8), val_neg_eight, rc)
       write(name, *) "Filling dst field 8 with constant data values"
@@ -411,7 +411,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! fill dest fields with known data
       call FillConstantR8Field(dfield(9), val_neg_nine, rc)
       write(name, *) "Filling dst field 9 with constant data values"
@@ -419,7 +419,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! fill dest fields with known data
       call FillConstantR8Field(dfield(10), val_neg_ten, rc)
       write(name, *) "Filling dst field 10 with constant data values"
@@ -433,7 +433,7 @@
       !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! store
       call ESMF_VMGetGlobal(vm, rc=rc)
       call ESMF_BundleRedistStore(bundle(1), bundle(2), vm, &
@@ -444,7 +444,7 @@
 
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! run
       call ESMF_BundleRedist(bundle(1), bundle(2), routehandle=redist_rh, rc=rc)
       write(name, *) "Executing redist"
@@ -456,7 +456,7 @@
 
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! validate dest fields 
       call ValidateConstantR8Field(dfield(1), val_one, rc=rc)
       write(name, *) "Validating dst field 1"
@@ -464,7 +464,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! validate dest fields 
       call ValidateConstantR8Field(dfield(2), val_two, rc=rc)
       write(name, *) "Validating dst field 2"
@@ -472,7 +472,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! validate dest fields 
       call ValidateConstantR8Field(dfield(3), val_three, rc=rc)
       write(name, *) "Validating dst field 3"
@@ -480,7 +480,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! validate dest fields 
       call ValidateConstantR8Field(dfield(4), val_four, rc=rc)
       write(name, *) "Validating dst field 4"
@@ -488,7 +488,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! validate dest fields 
       call ValidateConstantR8Field(dfield(5), val_five, rc=rc)
       write(name, *) "Validating dst field 5"
@@ -496,7 +496,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! validate dest fields 
       call ValidateConstantR8Field(dfield(6), val_six, rc=rc)
       write(name, *) "Validating dst field 6"
@@ -504,7 +504,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! validate dest fields 
       call ValidateConstantR8Field(dfield(7), val_seven, rc=rc)
       write(name, *) "Validating dst field 7"
@@ -512,7 +512,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! validate dest fields 
       call ValidateConstantR8Field(dfield(8), val_eight, rc=rc)
       write(name, *) "Validating dst field 8"
@@ -520,7 +520,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! validate dest fields 
       call ValidateConstantR8Field(dfield(9), val_nine, rc=rc)
       write(name, *) "Validating dst field 9"
@@ -528,7 +528,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! validate dest fields 
       call ValidateConstantR8Field(dfield(10), val_ten, rc=rc)
       write(name, *) "Validating dst field 10"
@@ -566,7 +566,7 @@
 #endif
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! release
       call ESMF_BundleRedistRelease(redist_rh, rc=rc)
       write(name, *) "Releasing route"
@@ -574,7 +574,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! cleanup
       call BundleCleanup(bundle(1), bundle(2), rc=rc)
       write(name, *) "Deleting bundles at cleanup time"
@@ -582,7 +582,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! cleanup
       combined_rc = ESMF_SUCCESS
       call FieldCleanup(sfield(1), sfield(2), sfield(3), sfield(4), &
