@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridOptionsUTest.F90,v 1.18 2007/06/23 04:00:41 cdeluca Exp $
+! $Id: ESMF_RegridOptionsUTest.F90,v 1.19 2007/08/17 18:29:02 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_RegridOptionsUTest.F90,v 1.18 2007/06/23 04:00:41 cdeluca Exp $'
+      '$Id: ESMF_RegridOptionsUTest.F90,v 1.19 2007/08/17 18:29:02 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -89,7 +89,7 @@
 !-------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     call ESMF_FieldRegridStore(humidity1, humidity2, vm, routehandle, &
                                regridmethod=ESMF_REGRID_METHOD_BILINEAR, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -106,7 +106,7 @@
     !  this simply has to execute the send and receive equivalents.
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     call ESMF_FieldRegrid(humidity1, humidity2, routehandle, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Executing the Regrid"
@@ -118,7 +118,7 @@
 !-------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     call verifyResults(humidity2, maxerror, result, rc)
     write(failMsg, *) "Percentage error in data result is too large"
     write(name, *) "Regrid percentage error less than 2%"
@@ -126,7 +126,7 @@
     if (maxerror .ge. 2.0) goto 10
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Regrid returned ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -142,7 +142,7 @@
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     roption = ESMF_ROUTE_OPTION_SYNC + ESMF_ROUTE_OPTION_PACK_PET
     call ESMF_FieldRegrid(humidity1, humidity2, routehandle, &
                           routeOptions=roption, rc=rc)
@@ -152,7 +152,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     call verifyResults(humidity2, maxerror, result, rc)
     write(failMsg, *) "Percentage error in data result is too large"
     write(name, *) "Regrid percentage error less than 2%"
@@ -160,7 +160,7 @@
     if (maxerror .ge. 2.0) goto 10
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Regrid returned ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -170,7 +170,7 @@
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     roption = ESMF_ROUTE_OPTION_SYNC + ESMF_ROUTE_OPTION_PACK_XP
     call ESMF_FieldRegrid(humidity1, humidity2, routehandle, &
                           routeOptions=roption, rc=rc)
@@ -180,7 +180,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     call verifyResults(humidity2, maxerror, result, rc)
     write(failMsg, *) "Percentage error in data result is too large"
     write(name, *) "Regrid percentage error less than 2%"
@@ -188,7 +188,7 @@
     if (maxerror .ge. 2.0) goto 10
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Regrid returned ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -198,7 +198,7 @@
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     roption = ESMF_ROUTE_OPTION_SYNC + ESMF_ROUTE_OPTION_PACK_NOPACK
     call ESMF_FieldRegrid(humidity1, humidity2, routehandle, &
                           routeOptions=roption, rc=rc)
@@ -208,7 +208,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     call verifyResults(humidity2, maxerror, result, rc)
     write(failMsg, *) "Percentage error in data result is too large"
     write(name, *) "Regrid percentage error less than 2%"
@@ -216,7 +216,7 @@
     if (maxerror .ge. 2.0) goto 10
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Regrid returned ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -226,7 +226,7 @@
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     roption = ESMF_ROUTE_OPTION_ASYNC + ESMF_ROUTE_OPTION_PACK_PET
     call ESMF_FieldRegrid(humidity1, humidity2, routehandle, &
                           routeOptions=roption, rc=rc)
@@ -236,7 +236,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     call verifyResults(humidity2, maxerror, result, rc)
     write(failMsg, *) "Percentage error in data result is too large"
     write(name, *) "Regrid percentage error less than 2%"
@@ -244,7 +244,7 @@
     if (maxerror .ge. 2.0) goto 10
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Regrid returned ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -254,7 +254,7 @@
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     roption = ESMF_ROUTE_OPTION_ASYNC + ESMF_ROUTE_OPTION_PACK_XP
     call ESMF_FieldRegrid(humidity1, humidity2, routehandle, &
                           routeOptions=roption, rc=rc)
@@ -264,7 +264,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     call verifyResults(humidity2, maxerror, result, rc)
     write(failMsg, *) "Percentage error in data result is too large"
     write(name, *) "Regrid percentage error less than 2%"
@@ -272,7 +272,7 @@
     if (maxerror .ge. 2.0) goto 10
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Regrid returned ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -282,7 +282,7 @@
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     roption = ESMF_ROUTE_OPTION_ASYNC + ESMF_ROUTE_OPTION_PACK_NOPACK
     call ESMF_FieldRegrid(humidity1, humidity2, routehandle, &
                           routeOptions=roption, rc=rc)
@@ -292,7 +292,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     call verifyResults(humidity2, maxerror, result, rc)
     write(failMsg, *) "Percentage error in data result is too large"
     write(name, *) "Regrid percentage error less than 2%"
@@ -300,7 +300,7 @@
     if (maxerror .ge. 2.0) goto 10
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Regrid returned ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -315,7 +315,7 @@
 !-------------------------------------------------------------------------
    
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     call ESMF_FieldRegridRelease(routehandle, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Releasing the routehandle"

@@ -1,19 +1,19 @@
-! $Id: ESMF_RegridTestList.rc,v 1.5 2007/06/23 04:00:41 cdeluca Exp $
+! $Id: ESMF_RegridTestList.rc,v 1.6 2007/08/17 18:29:03 cdeluca Exp $
 This is the list of Regrid tests.
 When adding tests do not leave blank lines between tests.
 The tag behind the test string must be included. It is used to count the number of test by
 the nightly build script.
 start_of_tests
-CBAABBAA EX_UTest
-AAAAAAAA EX_UTest
-BAAACCAA EX_UTest
-CAAAAAAA EX_UTest
-DAAACCAA EX_UTest
-DBAACCAA EX_UTest
-BBBBBBAA EX_UTest
-CACCCCAA EX_UTest
-DBAAAAAA EX_UTest
-AAAAAAAA EX_UTest
+CBAABBAA EX_removeUTest
+AAAAAAAA EX_removeUTest
+BAAACCAA EX_removeUTest
+CAAAAAAA EX_removeUTest
+DAAACCAA EX_removeUTest
+DBAACCAA EX_removeUTest
+BBBBBBAA EX_removeUTest
+CACCCCAA EX_removeUTest
+DBAAAAAA EX_removeUTest
+AAAAAAAA EX_removeUTest
 end_of_tests
 
 Each letter and position determines the test argument for each unit test.

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGatherUTest.F90,v 1.19 2007/06/23 04:00:26 cdeluca Exp $
+! $Id: ESMF_FieldGatherUTest.F90,v 1.20 2007/08/17 18:29:02 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldGatherUTest.F90,v 1.19 2007/06/23 04:00:26 cdeluca Exp $'
+      '$Id: ESMF_FieldGatherUTest.F90,v 1.20 2007/08/17 18:29:02 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -88,7 +88,7 @@
 #if ESMF_EXHAUSTIVE
 !-----------------------------------------------------------------------------
       ! Create a 2D layout to be used by the Field
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a DELayout Test"
       delayout = ESMF_DELayoutCreate(vm, (/ 2, npets/2 /), rc=rc)
@@ -98,7 +98,7 @@
 !-----------------------------------------------------------------------------
       ! Create a igrid and corresponding Field.  Note that the counts are
       ! prime numbers to ensure the igrid can not be evenly distributed
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Array Spec Set Test"
       pi              = 3.14159
@@ -115,7 +115,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-----------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "IGrid Create Horz XYUni Test"
       igrid = ESMF_IGridCreateHorzXYUni(counts=counts, &
@@ -128,7 +128,7 @@
 
 
 !-----------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "IGrid Distribute Test"
       call ESMF_IGridDistribute(igrid, delayout=delayout, rc=rc)
@@ -136,7 +136,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 20
 
 !-----------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Field Create Test"
       field = ESMF_FieldCreate(igrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
@@ -146,7 +146,7 @@
 
 !-----------------------------------------------------------------------------
       ! Get coordinate arrays available for setting the source data array
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "IGrid Get Corrd Test"
       call ESMF_IGridGetCoord(igrid, dim=1, horzRelloc=ESMF_CELL_CENTER, &
@@ -156,7 +156,7 @@
 
 
 !-----------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "IGrid Get Corrd Test"
       call ESMF_IGridGetCoord(igrid, dim=2, horzRelloc=ESMF_CELL_CENTER, &
@@ -165,7 +165,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 20
 
 !-----------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Field Get Data Test"
       call ESMF_FieldGetDataPointer(field, srcData, copyflag=ESMF_DATA_REF, rc=rc)
@@ -192,7 +192,7 @@
 !-------------------------------------------------------------------------
 !
       ! Call gather method here, output ends up in array2 on DE0
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Field Gather Test"
       call ESMF_FieldGather(field, 0, array2, rc=rc)
@@ -204,7 +204,7 @@
 !-----------------------------------------------------------------------------
       ! check results, at least if the values are in the global computational
       ! range
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "DELayout Get Test"
       call ESMF_DELayoutGetDeprecated(delayout, localDE=myDE, rc=rc)
@@ -229,7 +229,7 @@
         enddo
         ok = (minGather.ge.10.0 .AND. maxGather.le.17.0)
       endif
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not calculate correct results"
       write(name, *) "Field Gather Test"
       call ESMF_Test(ok, name, failMsg, result, ESMF_SRCLINE)
@@ -237,7 +237,7 @@
       ! Clean up
 
 !-----------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Field Destroy Test"
       call ESMF_FieldDestroy(field, rc)
@@ -245,7 +245,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 20
 
 !-----------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "IGrid Destroy Test"
       call ESMF_IGridDestroy(igrid, rc)
@@ -253,7 +253,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 20
 
 !-----------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "DELayout Destroy Test"
       call ESMF_DELayoutDestroy(delayout, rc)

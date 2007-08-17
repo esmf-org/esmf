@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RegridTimeUTest.F90,v 1.9 2007/06/23 04:00:41 cdeluca Exp $'
+      '$Id: ESMF_RegridTimeUTest.F90,v 1.10 2007/08/17 18:29:03 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
     integer :: lrc,iFunction
@@ -76,7 +76,7 @@
     sub_rc=ESMF_SUCCESS
 
    !--------------------------------
-   !NEX_UTest
+   !NEX_removeUTest
    !Test for function, f=x, decomp = (npets,1) regrid_method = ESMF_REGRID_METHOD_BILINEAR
     iFunction = 1
     iDistr = 1
@@ -88,7 +88,7 @@
 
 #ifdef ESMF_EXHAUSTIVE
    !--------------------------------
-   !EX_UTest
+   !EX_removeUTest
    ! Verify that ESMF_VMWtime works (we are going to use it to verify that
    ! the conservative regrid algorithm does not run too slowly.)
     call ESMF_VMWtime(startTime,rc=rc)
@@ -117,7 +117,7 @@
    print *, "Calibration factor = ", calibrationTime
 
    !--------------------------------
-   !EX_UTest
+   !EX_removeUTest
    !Test for function, f=2+ (sin(2*theta))**16 * cos(16*phi), decomp = (npets/2,2), regrid_method = ESMF_REGRID_METHOD_CONSERV1
     iFunction = 4
     iDistr = 2
@@ -133,7 +133,7 @@
     call ESMF_Test((sub_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
 
    !--------------------------------
-   !EX_UTest
+   !EX_removeUTest
    ! Verify that the regrid does not take too long
     write(failMsg, *) "Regrid took too long"
     write(name, *) " Verify Conserv Regrid takes no longer than 60 seconds"
