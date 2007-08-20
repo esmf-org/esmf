@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshVTK.C,v 1.1 2007/08/07 17:48:01 dneckels Exp $
+// $Id: ESMC_MeshVTK.C,v 1.2 2007/08/20 19:26:53 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -12,15 +12,58 @@
 #include <ESMC_MeshVTK.h>
 #include <ESMC_Mesh.h>
 #include <ESMC_MEField.h>
+#include <ESMC_MeshObjTopo.h>
+#include <ESMC_ParEnv.h>
+#include <ESMC_IOField.h>
 
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <cstdio>
 
 namespace ESMCI {
 namespace MESH {
 
 enum {VTK_TRIANGLE=5, VTK_QUAD=9, VTK_TETRA=10, VTK_HEXAHEDRON=12};
+
+static UInt vtk_type_dim(UInt type) {
+  switch (type) {
+    case VTK_TRIANGLE:
+    case VTK_QUAD:
+    return 2;
+
+    default:
+    return 3;
+  }
+}
+
+static const MeshObjTopo *vtk2topo(UInt vtk_type, UInt sdim) {
+  if (sdim == 2) {
+    switch(vtk_type) {
+
+      case VTK_TRIANGLE:
+        return GetTopo("TRI3");
+
+      case VTK_QUAD:
+        return GetTopo("QUAD");
+
+      default:
+        Throw() "vtk type unknown:" << vtk_type;
+    }
+  } else if (sdim == 3) {
+    switch(vtk_type) {
+
+      case VTK_TETRA:
+        return GetTopo("TETRA");
+
+      case VTK_HEXAHEDRON:
+        return GetTopo("HEX");
+
+      default:
+        Throw() "vtk type unknown:" << vtk_type;
+    }
+  } else Throw() << "sdim not valid:" << sdim;
+}
 
 
 // Load data into an array from the mesh, switching on the correct typeid
@@ -74,6 +117,7 @@ static void get_data(iter ni, iter ne, const FIELD &llf, double data[], UInt d) 
 
 
 void WriteVTKMesh(const Mesh &mesh, const std::string &filename) {
+  Trace __trace("WriteVTKMesh(const Mesh &mesh, const std::string &filename)");
 
   std::ofstream out(filename.c_str(), std::ios::out);
 
@@ -101,7 +145,7 @@ void WriteVTKMesh(const Mesh &mesh, const std::string &filename) {
   }
 
   // Now figure out how large the cell index list is:
-  int cell_size = 0, num_elem = 0;
+  int cell_size = 0, num_elem = 0, num_nodes = mesh.num_nodes();
   {
     Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
     for (; ei != ee; ++ei) {
@@ -173,11 +217,33 @@ void WriteVTKMesh(const Mesh &mesh, const std::string &filename) {
 
   } // print cell types
 
+  // Unfortunately this file format is quite dumb (mean this literally, not in any condescending way).
+  // Therefore we must save off the node and element numbers as fields.
+  {
+    // Element numbers
+    std::vector<double> data(num_elem, 0);
+    out << "CELL_DATA " << num_elem << std::endl;
+    out << "SCALARS " << "_ELEM_NUM" << " double 1" << std::endl;
+    out << "LOOKUP_TABLE default" << std::endl;
+
+    Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+    for (UInt i = 0; ei != ee; ++ei) {
+      const MeshObj &elem = *ei;
+ 
+      data[i++] = (double) elem.get_id();
+    }
+
+    for (UInt e = 0; e < (UInt) num_elem; e++)
+      out << data[e] << " ";
+
+    out << std::endl;
+
+  }
+
   // Now element variables
   {
      FieldReg::MEField_const_iterator nv = mesh.Field_begin(), ne = mesh.Field_end();
 
-     bool firstvar = true;
      std::vector<double> data(num_elem, 0);
      for (; nv != ne; ++nv) {
        const MEField<> &mf = *nv;
@@ -188,10 +254,6 @@ void WriteVTKMesh(const Mesh &mesh, const std::string &filename) {
            std::sprintf(buf, "_%d", d);
            std::string vname = mf.name() + (mf.dim() == 1? "" : std::string(buf));
 
-           if (firstvar) {
-             out << "CELL_DATA " << num_elem << std::endl;
-             firstvar = false;
-           }
            out << "SCALARS " << vname << " double 1" << std::endl;
            out << "LOOKUP_TABLE default" << std::endl;
 
@@ -211,12 +273,375 @@ void WriteVTKMesh(const Mesh &mesh, const std::string &filename) {
 
   } // elem vars
 
-  // And next, nodal variables
+  // Save off the node numbering
   {
-  } // nodal vars
-  
+    // Node numbers
+    std::vector<double> data(num_nodes, 0);
+    out << "POINT_DATA " << num_nodes << std::endl;
+    out << "SCALARS " << "_NODE_NUM" << " double 1" << std::endl;
+    out << "LOOKUP_TABLE default" << std::endl;
+
+    Mesh::const_iterator ni = mesh.node_begin(), ne = mesh.node_end();
+    for (UInt i = 0; ni != ne; ++ni) {
+      const MeshObj &node = *ni;
+ 
+      data[i++] = (double) node.get_id();
+    }
+
+    for (UInt e = 0; e < (UInt) num_nodes; e++)
+      out << data[e] << " ";
+
+    out << std::endl;
+
+  }
+
+  // Now node variables
+  {
+     FieldReg::MEField_const_iterator nv = mesh.Field_begin(), ne = mesh.Field_end();
+
+     std::vector<double> data(num_nodes, 0);
+     for (; nv != ne; ++nv) {
+       const MEField<> &mf = *nv;
+       if (mf.Output() && mf.is_nodal()) {
+
+         for (UInt d = 0; d < mf.dim(); d++) {
+           char buf[512];
+           std::sprintf(buf, "_%d", d);
+           std::string vname = mf.name() + (mf.dim() == 1? "" : std::string(buf));
+
+           out << "SCALARS " << vname << " double 1" << std::endl;
+           out << "LOOKUP_TABLE default" << std::endl;
+
+           const _field &llf = mf();
+           get_data(mesh.node_begin(), mesh.node_end(), llf, &data[0], d);
+           
+           for (UInt e = 0; e < (UInt) num_nodes; e++)
+             out << data[e] << " ";
+
+           out << std::endl;
+
+         } //for d
+
+       } // is nodal/output
+
+     }// fields
+
+  } // node vars
+
 }
 
+
+/*--------------------------------------------------------------------------*/
+// Read a vtk mesh.  This function is EXTREMELY primitive and will not tolerate
+// any deviations from a very STRICT format.  It is provided just as a method
+// to read at least some kind of file.  It will, for instance, read in vtk
+// files that are generate by the write command above.  This allows some simple
+// things like providing a mesh concatenator.
+// The correct solution would be to use the EXODUS file format or compile a
+// fully operation VTK paraser into ESMF.  Both are not allowed currently due
+// to our reluctance to compile agains 3rd party libraries.
+/*--------------------------------------------------------------------------*/
+void ReadVTKMesh(Mesh &mesh, const std::string &filename) {
+
+  // Manager the file resource so that early exit still closes the file...
+  struct FileManager {
+    FileManager(const char *_f) : fp(NULL) {
+      fp = fopen(_f, "r");
+      if (!fp) Throw() << "Could not open infile:" << _f;
+    }
+    ~FileManager() {
+       if (fp) fclose(fp);
+     }
+    FILE *operator()() { return fp;}
+    FILE *fp;
+  };
+
+  FileManager fp(filename.c_str());
+
+  // I'm sorry, but fscanf seems to be more powerful than ifstream...
+
+
+  UInt sdim(0), pdim(0);
+
+  // This is a rough reader... robustness is not guaranteed at this time.
+  // What IS guaranteed is that this routine will read files written by the framework.
+  {
+
+    // The version line
+    char linebuf[4096];
+    float version;
+    UInt ret = fscanf(fp(), "# vtk DataFile Version %f\n", &version);
+    ThrowRequire(ret == 1);
+  
+    fgets(linebuf, 1000, fp());
+  //std::cout << "linebuf=" << linebuf << std::endl;
+  
+    ThrowRequire(0 == fscanf(fp(), "ASCII\n"));
+  
+    ThrowRequire(0 == fscanf(fp(), "DATASET UNSTRUCTURED_GRID\n"));
+  
+    UInt npoints;
+    ThrowRequire(1 == fscanf(fp(), "POINTS %u double\n", &npoints));
+  
+  //std::cout << "npoints = " << npoints << std::endl;
+  
+    /*------------------------------------------------------------*/
+    // Now read the coords
+    /*------------------------------------------------------------*/
+    std::vector<double> coord(3*npoints);
+    for (UInt i = 0; i < npoints; i++) {
+      int t_i = 3*i;
+      ThrowRequire(3 == fscanf(fp(), "%lf %lf %lf\n", &coord[t_i], &coord[t_i+1], &coord[t_i+2]));
+    }
+  
+#ifdef DBG_VTKREAD
+  for (UInt i = 0; i < npoints; i++) {
+  std::cout << coord[3*i] << " " << coord[3*i+1] << " " << coord[3*i+2] << std::endl;
+  }
+#endif
+  
+    UInt nelem, width;
+    ThrowRequire(2 == fscanf(fp(), "CELLS %u %u\n", &nelem, &width));
+  
+  //std::cout << "nelem:" << nelem << ", w=" << width << std::endl;
+  
+    /*------------------------------------------------------------*/
+    // Read the connectivity for elements
+    /*------------------------------------------------------------*/
+    std::vector<UInt> conn(nelem*width);
+  
+    for (UInt i = 0; i < nelem; i++) {
+      UInt wi = width*i;
+  
+      ThrowRequire(1 == fscanf(fp(), "%u ", &conn[wi]));
+  
+      for (UInt n = 0; n < conn[wi]; n++) {
+        ThrowRequire(1 == fscanf(fp(), "%u ", &conn[wi+n+1]));
+      } 
+      fscanf(fp(), "\n");
+    }
+  
+    
+#ifdef DBG_VTKREAD
+  for (UInt i = 0; i < nelem; i++) {
+      UInt wi = width*i;
+      std::cout << conn[wi] << " ";
+      for (UInt n = 0; n < conn[wi]; n++) {
+        std::cout << conn[wi+n+1] << " ";
+      } 
+     std::cout << std::endl;
+  }
+#endif
+  
+    /*------------------------------------------------------------*/
+    // Read the element types
+    /*------------------------------------------------------------*/
+    UInt nctype;
+    ThrowRequire(1 == fscanf(fp(), "CELL_TYPES %u", &nctype));
+  
+    ThrowRequire(nctype == nelem);
+  
+    std::vector<UInt> ctypes(nctype);
+    
+    for (UInt i = 0; i < nctype; i++) {
+      ThrowRequire(1 == fscanf(fp(), "%u\n", &ctypes[i]));
+    }
+
+   
+    /*------------------------------------------------------------*/
+    // Take a moment to actually build the mesh
+    /*------------------------------------------------------------*/
+    
+    // Nodes first
+    std::vector<MeshObj*> nodevect; nodevect.reserve(npoints);
+    for (UInt i = 0; i < npoints; i++) {
+      MeshObj *node = new MeshObj(MeshObj::NODE, -(i+1), i);
+      nodevect.push_back(node);
+
+      node->set_owner(Par::Rank());
+
+      mesh.add_node(node, 0);
+    }
+
+    // Now, build an element_type -> block array.
+
+    typedef std::map<UInt, UInt> bmap;
+    bmap etype2blk;
+
+    UInt cur_blk = 1;
+
+    for (UInt i = 0; i < nelem; i++) {
+      std::pair<bmap::iterator, bool> lk =
+        etype2blk.insert(std::make_pair(ctypes[i], cur_blk));
+
+      // If insert was successful, this was a new block
+      if (lk.second == true) cur_blk++;
+      
+    }
+
+
+    // Parametric dim??
+
+    ThrowRequire(ctypes.size() > 0);
+    pdim = vtk_type_dim(ctypes[0]);
+
+    // And another administrative detail: are we 3D physical or 2D space ?
+    // Assum that if we are 2d the last coord is fixed...
+ 
+
+    // Spatial dim??
+
+    if (pdim == 2) {
+      double c3 = coord[2];
+
+      bool coorddiff = false;
+
+      for (UInt i = 0; !coorddiff && i < npoints; i++) {
+        if (std::fabs(coord[3*i + 2] - c3) > 1e-5) coorddiff = true;
+      }
+
+      sdim = (coorddiff ? 3 : 2);
+ 
+    } else sdim = 3;
+
+    mesh.set_parametric_dimension(pdim);
+    mesh.set_spatial_dimension(sdim);
+
+    // Add the elements
+    for (UInt i = 0; i < nelem; i++) {
+
+      const MeshObjTopo *topo = vtk2topo(ctypes[i], sdim);
+
+      MeshObj *elem = new MeshObj(MeshObj::ELEMENT, -(i+1), i);
+
+      // Collect an array of the nodes.
+      std::vector<MeshObj*> elemnodes; elemnodes.reserve(topo->num_nodes);
+      for (UInt n = 0; n < topo->num_nodes; n++)
+        elemnodes.push_back(nodevect[conn[i*width+1+n]]);
+
+      elem->set_owner(Par::Rank());
+
+      mesh.add_element(elem, elemnodes, etype2blk[ctypes[i]], topo);
+    }
+
+    // Register coords
+    IOField<NodalField> *node_coord = mesh.RegisterNodalField("coordinates", mesh.spatial_dim());
+
+    // Copy coordinates into field
+    {
+      MeshDB::const_iterator ni = mesh.node_begin(), ne = mesh.node_end();
+      for (; ni != ne; ++ni) {
+        double *c = node_coord->data(*ni);
+        UInt idx = ni->get_data_index();
+        c[0] = coord[3*idx];
+        if (mesh.spatial_dim() >= 2) c[1] = coord[3*idx+1];
+        if (mesh.spatial_dim() >= 3) c[2] = coord[3*idx+2];
+      }
+    }
+
+  } // close read mesh objects
+
+  // Field data.  Pick of _ELEM_NUM, _NODE_NUM as special cases.
+  UInt num_nodes = mesh.num_nodes(), num_elems = mesh.num_elems();
+  
+  // Try reading POINT_DATA
+  bool done = false;
+
+  enum {VTK_NO_DATA = -1, VTK_CELL_DATA=0, VTK_NODE_DATA=1};
+
+  int data_type = VTK_NO_DATA;
+  while (!done) {
+    UInt ndata;
+    int nread = fscanf(fp(), "POINT_DATA %u\n", &ndata);
+    if (nread == EOF) {
+      done = true; continue;
+    }
+
+    if (1 == nread) {
+      data_type = VTK_NODE_DATA;
+    } else { // Try to read cell data
+      nread = fscanf(fp(), "CELL_DATA %u\n", &ndata);
+      if (nread == EOF) {
+        done = true; continue;
+      }
+     
+      if (1 == nread) {
+        data_type = VTK_CELL_DATA;
+      } else {
+        // If data_type is already defined, just use what we have.
+        // Otherwise we have a parsing error.
+        if (data_type == VTK_NO_DATA)
+          Throw() << "Confusion parsing VTK data type!";
+      }
+    }
+
+//std::cout << "data_type=" << data_type << std::endl;
+
+    // Process the data.  data_type is one of elem or node
+    char vname[512];
+    ThrowRequire(1 == fscanf(fp(), "SCALARS %s double 1\n", vname));
+//std::cout << "Reading var:" << vname << std::endl;
+
+    fscanf(fp(), "LOOKUP_TABLE default\n");
+
+    // Now read the data
+    UInt num_data = data_type == VTK_NODE_DATA ? num_nodes : num_elems;
+    std::vector<double> data(num_data, 0);
+
+ 
+    for (UInt i = 0; i < num_data; i++) {
+      ThrowRequire(1 == fscanf(fp(), "%lf ", &data[i]));
+//std::cout << "Read " << data[i] << std::endl;
+    }
+    
+    fscanf(fp(), "\n");
+
+    // If NUM, process specially
+    if (data_type == VTK_CELL_DATA && std::string(vname) == "_ELEM_NUM") {
+
+      MeshDB::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      for (; ei != ee; ++ei) {
+
+        MeshObj &obj = *ei;
+
+        // Remove object from old map
+        Mesh::MeshObjIDMap &omap = mesh.get_map(MeshObj::ELEMENT);
+        omap.erase(&obj);
+
+        // Insert with new id
+        obj.key = static_cast<long>(data[obj.get_data_index()]);
+        std::pair<Mesh::MeshObjIDMap::iterator,bool> iu =
+            omap.insert(obj);
+        if (!iu.second)
+              Throw() << "Error inserting. Key already exists!!! Obj:" << obj << std::endl;
+      }
+
+      
+    } else if (data_type == VTK_NODE_DATA && std::string(vname) == "_NODE_NUM") {
+      MeshDB::iterator ei = mesh.node_begin(), ee = mesh.node_end();
+      for (; ei != ee; ++ei) {
+
+        MeshObj &obj = *ei;
+
+        // Remove object from old map
+        Mesh::MeshObjIDMap &omap = mesh.get_map(MeshObj::NODE);
+        omap.erase(&obj);
+
+        // Insert with new id
+        obj.key = static_cast<long>(data[obj.get_data_index()]);
+        std::pair<Mesh::MeshObjIDMap::iterator,bool> iu =
+            omap.insert(obj);
+        if (!iu.second)
+              Throw() << "Error inserting. Key already exists!!! Obj:" << obj << std::endl;
+      }
+    } else {
+
+      // Regular variable
+    }
+
+  } // while processing data
+
+}
 
 } // namespace
 } // namespace

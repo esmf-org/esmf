@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshVTK.h,v 1.1 2007/08/07 17:47:58 dneckels Exp $
+// $Id: ESMC_MeshVTK.h,v 1.2 2007/08/20 19:26:53 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -25,6 +25,8 @@ namespace MESH {
 class Mesh;
 
 void WriteVTKMesh(const Mesh &mesh, const std::string &filename);
+
+void ReadVTKMesh(Mesh &mesh, const std::string &filename);
 
 } // namespace
 } // namespace
