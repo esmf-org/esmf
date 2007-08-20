@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshDB.C,v 1.1 2007/08/07 17:48:01 dneckels Exp $
+// $Id: ESMC_MeshDB.C,v 1.2 2007/08/20 19:34:51 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -122,6 +122,13 @@ void MeshDB::Print(std::ostream &os, bool summary_only) const {
       os << "\tTopo:" << (topo ? topo->name : "NONE") << std::endl;
       //obj.printdata();
     }
+  }
+
+  os << "Contexts:";
+  ContextMapType::const_iterator ci = contexts.begin(), ce = contexts.end();
+
+  for (; ci != ce; ++ci) {
+    os << "\t" << ci->first << "->" << ci->second << std::endl;
   }
 
   os << "Set map:" << std::endl;
@@ -717,6 +724,8 @@ UInt MeshDB::DefineContext(const std::string &cname) {
 }
 
 UInt MeshDB::GetContext(const std::string &cname) {
+  Trace __trace("MeshDB::GetContext(const std::string &cname)");
+
   ContextMapType::iterator is =
     contexts.find(cname);
 

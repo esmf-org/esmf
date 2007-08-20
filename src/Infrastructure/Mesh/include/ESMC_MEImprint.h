@@ -1,4 +1,4 @@
-// $Id: ESMC_MEImprint.h,v 1.1 2007/08/07 17:47:55 dneckels Exp $
+// $Id: ESMC_MEImprint.h,v 1.2 2007/08/20 19:34:51 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -28,12 +28,14 @@ namespace MESH {
 
 class MasterElementBase;
 
+void MEImprintValSets(const std::string &imname, MeshObj &obj,
+               const MasterElementBase &me, std::vector<UInt> &nvalSet, std::vector<UInt> &valSetObj);
 // Imprint a mesh object with the necessary contexts to define a field
 // A common name should be used when imprinting a family of objects, e.g.
 // linear lagrange
 // Returns number of distinct contexts found
 void MEImprint(const std::string &imname, MeshObj &obj,
-               const MasterElementBase &me, std::vector<UInt> &nvalSet, std::vector<UInt> &valSetObj);
+               const MasterElementBase &me);
 
 } // namespace
 } // namespace

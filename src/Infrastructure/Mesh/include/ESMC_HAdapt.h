@@ -1,4 +1,4 @@
-// $Id: ESMC_HAdapt.h,v 1.1 2007/08/07 17:47:55 dneckels Exp $
+// $Id: ESMC_HAdapt.h,v 1.2 2007/08/20 19:34:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -47,6 +47,12 @@ class HAdapt {
 public:
 
 enum {ELEM_REQUEST_UNREFINE = -2, ELEM_UNREFINE = -1, ELEM_REFINE = 1};
+
+/**
+ * Refine the mesh uniformly.  If keep_parents is false, make the refined
+ * mesh the active mesh and delete parents.
+ */
+void RefineUniformly(bool keep_parents=true);
 
 /**
  * Create an HAdapt, attach to a mesh

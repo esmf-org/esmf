@@ -1,4 +1,4 @@
-// $Id: ESMC_Kernel.C,v 1.1 2007/08/07 17:48:00 dneckels Exp $
+// $Id: ESMC_Kernel.C,v 1.2 2007/08/20 19:34:51 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -235,10 +235,10 @@ void Kernel::AssimilateObject(MeshObj &obj) {
 }
 
 void Kernel::Imprint(MeshObj &obj) const {
-  std::vector<UInt> t1, t2;
   for (UInt i = 0; i < MEFieldme.size(); i++) {
-    if (MEFieldme[i]) 
-      MEImprint(Fields[i]->name(), obj, *MEFieldme[i], t1, t2);
+    MEFieldBase &mef = *Fields[i];
+    if (MEFieldme[mef.GetOrdinal()]) 
+      MEImprint(mef.name(), obj, *MEFieldme[mef.GetOrdinal()]);
   }
 }
 

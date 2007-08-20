@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2007/08/09 17:33:28 dneckels Exp $
+# $Id: makefile,v 1.3 2007/08/20 19:34:51 dneckels Exp $
 
 # leave alone.
 ALL: build_here 
@@ -36,7 +36,7 @@ SOURCEC	  = all_allo.c assign_param_vals.c bind_param.c box_assign.c \
             reftree_part.c rib.c rib_util.c rootlist.c scatter_graph.c set_param.c shared.c \
             timer.c timer_params.c verify_graph.c zoltan_align.c zoltan_id.c zoltan_timer.c \
             zz_coord.c zz_gen_files.c zz_hash.c zz_heap.c zz_init.c zz_obj_list.c zz_rand.c \
-            zz_set_fn.c zz_sort.c zz_struct.c zz_util.c
+            zz_set_fn.c zz_sort.c zz_struct.c zz_util.c mem.c
 
 
 # If you have F90 files in this directory, list them all on the line below.
@@ -51,7 +51,7 @@ OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
 MANSEC	  = mesh
-LIBBASE	  = libzolt
+LIBBASE	  = libesmf
 
 # The following line must be set to the current subdir name relative
 # to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)

@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshRead.h,v 1.1 2007/08/07 17:47:56 dneckels Exp $
+// $Id: ESMC_MeshRead.h,v 1.2 2007/08/20 19:34:51 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@
 namespace ESMCI {
 namespace MESH {
 
-enum { ESMC_FILE_EXODUS = 0, ESMC_FILE_VTK };
+enum { ESMC_FILE_EXODUS = 0, ESMC_FILE_VTK=1 };
 
 // Read the mesh in parallel (append the correct strings to the local filename)
 // Create the shared CommRel.

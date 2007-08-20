@@ -1,4 +1,4 @@
-// $Id: ESMC_MEImprint.C,v 1.1 2007/08/07 17:48:00 dneckels Exp $
+// $Id: ESMC_MEImprint.C,v 1.2 2007/08/20 19:34:51 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -19,9 +19,26 @@
 namespace ESMCI {
 namespace MESH {
 
-
-void MEImprint(const std::string &imname, MeshObj &obj, const MasterElementBase &me,
+void MEImprintValSets(const std::string &imname, MeshObj &obj, const MasterElementBase &me,
                std::vector<UInt> &nvalSet, std::vector<UInt> &valSetObj) {
+  MeshDB &mesh = GetMeshObjMesh(obj);
+
+
+  for (UInt i = 0; i < me.num_functions(); i++) {
+    const int *dd = me.GetDofDescription(i);
+    UInt nval = me.GetDofValSet(i);
+    std::vector<UInt>::iterator nsi = std::lower_bound(nvalSet.begin(), nvalSet.end(), nval);
+    if (nsi == nvalSet.end() || *nsi != nval) {
+      nsi = nvalSet.insert(nsi, nval);
+    }
+    if (nval >= valSetObj.size()) valSetObj.resize(nval+1, 0);
+    valSetObj[nval] |= dof2mtype(dd[0]);
+
+ }
+
+}
+
+void MEImprint(const std::string &imname, MeshObj &obj, const MasterElementBase &me) {
   MeshDB &mesh = GetMeshObjMesh(obj);
 
 
@@ -31,13 +48,7 @@ void MEImprint(const std::string &imname, MeshObj &obj, const MasterElementBase 
     char buf[1024];
     std::sprintf(buf, "%s_%d", imname.c_str(), nval);
 //std::cout << "def ctxt:" << buf << std::endl;
-    UInt ctxt_id = mesh.DefineContext(buf);
-    std::vector<UInt>::iterator nsi = std::lower_bound(nvalSet.begin(), nvalSet.end(), nval);
-    if (nsi == nvalSet.end() || *nsi != nval) {
-      nsi = nvalSet.insert(nsi, nval);
-    }
-    if (nval >= valSetObj.size()) valSetObj.resize(nval+1, 0);
-    valSetObj[nval] |= dof2mtype(dd[0]);
+    UInt ctxt_id = mesh.GetContext(buf);
 
     // Get the object.  If element, go right to it, else if side, go through parent
     MeshObjRelationList::iterator ri;

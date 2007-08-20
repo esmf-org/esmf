@@ -1,4 +1,4 @@
-// $Id: ESMC_PatchRecovery.C,v 1.3 2007/08/07 20:46:00 dneckels Exp $
+// $Id: ESMC_PatchRecovery.C,v 1.4 2007/08/20 19:34:51 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -129,6 +129,7 @@ void PatchRecov<NFIELD,Real>::CreatePatch(
            const MCoord *_mc
            ) 
 {
+#ifdef ESMC_LAPACK
   patch_ok = true; // used below
   pdeg = _pdeg;
   mc = _mc;
@@ -350,6 +351,7 @@ std::copy(tst.begin(), tst.end(), std::ostream_iterator<double>(std::cout, ", ")
   //std::copy(&rhs[0], &rhs[nrhs*ncoef], coeff.begin());
 
   patch_ok = true;
+#endif
 }
 
 template<typename NFIELD, typename Real>

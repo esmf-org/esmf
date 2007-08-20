@@ -1,4 +1,4 @@
-// $Id: ESMC_HAdapt.C,v 1.1 2007/08/07 17:48:00 dneckels Exp $
+// $Id: ESMC_HAdapt.C,v 1.2 2007/08/20 19:34:51 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,6 +38,80 @@ mesh(_mesh)
     elem_marker = mesh.RegisterField("_hadapt_marker", MEFamilyDG0::instance(),
                                      MeshObj::ELEMENT, ctxt, 1, false, _fieldType<char>::instance());
   }
+}
+
+void HAdapt::RefineUniformly(bool keep_parents) {
+  // Loop mesh.  Mark all elements
+  Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+  for (; ei != ee; ++ei) {
+     MarkElement(*ei, ELEM_REFINE);
+  }
+
+  MarkerResolution(); 
+
+  RefineMesh();
+
+  RefinementResolution();
+
+  // If not to keep parents, mark all inactive objects to delete
+  if (!keep_parents) {
+    KernelList::iterator ki = mesh.set_begin(), ke = mesh.set_end();
+    for (; ki != ke; ++ki) {
+      Kernel &ker = *ki;
+      // select all objs of this type and not the newly created ones (which have bogus ids)
+      if (!ker.GetContext().is_set(Attr::PENDING_DELETE_ID) 
+          && !ker.GetContext().is_set(Attr::ACTIVE_ID)) {
+
+        Kernel::obj_iterator oi = ker.obj_begin(), oe = ker.obj_end(), on;
+        for (; oi !=oe;) {
+
+          // Object may be deleted from list, so get next in advance.
+          on = oi; ++on;
+
+          // Mark object to delete
+          MeshObj &obj = *oi;
+          const Context &ctxt = GetMeshObjContext(obj);
+          Context newctxt(ctxt);
+          newctxt.set(Attr::PENDING_DELETE_ID);
+          Attr attr(GetAttr(obj), newctxt);
+          mesh.update_obj(&obj, attr);
+
+          oi = on;
+
+        } // for oi
+      } // if a candidate
+
+    } // for kernel
+
+    mesh.ResolvePendingDelete();
+
+    // Mark all objects with the genesis bit
+    ki = mesh.set_begin(); ke = mesh.set_end();
+    for (; ki != ke; ++ki) {
+      Kernel &ker = *ki;
+      Kernel::obj_iterator oi = ker.obj_begin(), oe = ker.obj_end(), on;
+      for (; oi !=oe;) {
+
+        // Object may be deleted from list, so get next in advance.
+        on = oi; ++on;
+
+        // Mark object to delete
+        MeshObj &obj = *oi;
+        const Context &ctxt = GetMeshObjContext(obj);
+        Context newctxt(ctxt);
+        newctxt.set(Attr::GENESIS_ID);
+        if (newctxt != ctxt) {
+          Attr attr(GetAttr(obj), newctxt);
+          mesh.update_obj(&obj, attr);
+        }
+
+        oi = on;
+
+      } // for oi
+
+    } // for kernel
+
+  } // !keep_parents
 }
 
 void HAdapt::ZeroMarker() const {

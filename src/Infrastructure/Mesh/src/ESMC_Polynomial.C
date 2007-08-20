@@ -1,4 +1,4 @@
-// $Id: ESMC_Polynomial.C,v 1.2 2007/08/07 20:46:00 dneckels Exp $
+// $Id: ESMC_Polynomial.C,v 1.3 2007/08/20 19:34:51 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -111,6 +111,7 @@ void set_Ilegendre_coef(UInt K, std::vector<double> &coef) {
 template<typename POLY>
 void PolyFit1D(UInt nsamples, const double coord[], const double vals[], const std::vector<POLY*> &poly, double coef[])
 {
+#ifdef ESMC_LAPACK
   UInt ncoef = poly.size();
   int m = nsamples, n = ncoef, nrhs = 1, info = 0, rank, ldb;
   ldb = std::max(std::max(m,n),1);
@@ -136,6 +137,7 @@ void PolyFit1D(UInt nsamples, const double coord[], const double vals[], const s
 
   for (UInt i = 0; i < ncoef; i++) coef[i] = rhs[i];
 
+#endif
 }
 
 template void PolyFit1D(UInt, const double*, const double*, const std::vector<Legendre<double>*> &, double *);

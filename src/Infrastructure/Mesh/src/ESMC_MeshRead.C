@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshRead.C,v 1.2 2007/08/07 20:46:00 dneckels Exp $
+// $Id: ESMC_MeshRead.C,v 1.3 2007/08/20 19:34:51 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@ void ReadMesh(Mesh &mesh, const std::string &fbase, bool skin, int file_type)
   int psize = Par::Size();
   
   std::string newname;
-  std::string extension = file_type == ESMC_FILE_EXODUS ? ".g" : ".vtk";
+  std::string extension = (file_type == ESMC_FILE_EXODUS ? ".g" : ".vtk");
 
   // If csize = 1, read fbase.g
   if (psize > 1) {
@@ -101,6 +101,7 @@ void ReadMesh(Mesh &mesh, const std::string &fbase, bool skin, int file_type)
   if (file_type == ESMC_FILE_EXODUS) {
     LoadExMesh(mesh, newname);
   } else if (file_type == ESMC_FILE_VTK) {
+    ReadVTKMesh(mesh, newname);
   } else Throw() << "Unknown file type:" << file_type;
 
   mesh.remove_unused_nodes();

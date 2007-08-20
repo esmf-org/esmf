@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshObjTopo.C,v 1.2 2007/08/09 17:33:11 dneckels Exp $
+// $Id: ESMC_MeshObjTopo.C,v 1.3 2007/08/20 19:34:51 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -17,7 +17,6 @@
 namespace ESMCI {
 namespace MESH {
 
-static std::map<std::string, MeshObjTopo*> static_topo_map;
 
 static int hex_sides[] = {
  0, 1, 5, 4,  8, 13, 16, 12, 25,
@@ -472,6 +471,7 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
 }
 
 MeshObjTopo *GetTopo(const std::string &name) {
+  static std::map<std::string, MeshObjTopo*> static_topo_map;
 
   MeshObjTopo *topo;
   std::map<std::string, MeshObjTopo*>::iterator mit;

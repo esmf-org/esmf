@@ -1,4 +1,4 @@
-// $Id: ESMC_ShapeHierarchic.C,v 1.2 2007/08/07 20:46:00 dneckels Exp $
+// $Id: ESMC_ShapeHierarchic.C,v 1.3 2007/08/20 19:34:51 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -26,6 +26,7 @@ namespace MESH {
 static void solve_sys(UInt nsamples, UInt ncoef, const double vals[],
     double mat[], double coef[])
 {
+#ifdef ESMC_LAPACK
   int m = nsamples, n = ncoef, nrhs = 1, info = 0, rank, ldb;
   ldb = std::max(std::max(m,n),1);
   std::vector<double> rhs(ldb);
@@ -46,6 +47,7 @@ static void solve_sys(UInt nsamples, UInt ncoef, const double vals[],
 
   for (UInt i = 0; i < ncoef; i++) coef[i] = rhs[i];
 
+#endif
 }
 
 // ************* Base Shape Hier ************

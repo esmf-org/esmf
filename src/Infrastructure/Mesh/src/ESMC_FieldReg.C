@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldReg.C,v 1.2 2007/08/07 20:46:00 dneckels Exp $
+// $Id: ESMC_FieldReg.C,v 1.3 2007/08/20 19:34:51 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -11,6 +11,8 @@
 //==============================================================================
 #include <ESMC_FieldReg.h>
 #include <ESMC_MEImprint.h>
+#include <ESMC_ParEnv.h>
+
 #include <algorithm>
 
 namespace ESMCI {
@@ -213,9 +215,68 @@ void FieldReg::ReleaseDBFields() {
   }
 }
 
+// Union the two sets in parallel
+static void parallel_union_field_info(std::vector<UInt> &nvalSet, std::vector<UInt> &nvalSetObj) {
+
+  UInt csize = Par::Size();
+
+  if (csize == 1) return; 
+
+  std::vector<UInt> nvs(nvalSet);
+  std::vector<UInt> nvso(nvalSetObj);
+
+
+  // First share how many each processor wishes to send
+  std::vector<int> num_val(csize, 0);
+  UInt num_val_l = nvalSet.size();
+
+  MPI_Allgather(&num_val_l, 1, MPI_UNSIGNED, &num_val[0], 1, MPI_UNSIGNED, Par::Comm());
+
+  std::vector<int> rdisp(csize+1, 0);
+  for (UInt i = 0; i < csize; i++) {
+    rdisp[i+1] = rdisp[i] + num_val[i];
+  }
+
+  std::vector<UInt> allval(rdisp[csize], 0);
+
+  MPI_Allgatherv(&nvs[0], nvs.size(), MPI_UNSIGNED, &allval[0],
+      &num_val[0], &rdisp[0], MPI_UNSIGNED, Par::Comm());
+
+  // Now send out the valsetobj
+  // First copy to a contiguous buffer
+  std::vector<UInt> contig_nvso(nvs.size(), 0);
+  for (UInt i = 0; i < nvs.size(); i++)
+    contig_nvso[i] = nvso[nvs[i]];
+
+  std::vector<UInt> allvalo(rdisp[csize], 0);
+
+  MPI_Allgatherv(&contig_nvso[0], nvs.size(), MPI_UNSIGNED, &allvalo[0],
+      &num_val[0], &rdisp[0], MPI_UNSIGNED, Par::Comm());
+
+  // Loop through results
+  for (UInt i = 0; i < (UInt) rdisp[csize]; i++) {
+    std::vector<UInt>::iterator lb = 
+      std::lower_bound(nvs.begin(), nvs.end(), allval[i]);
+
+    if (lb == nvs.end() || *lb != allval[i])
+      nvs.insert(lb, allval[i]);
+
+    if (allval[i] >= nvso.size()) nvso.resize(allval[i]+1);
+
+    nvso[allval[i]] |= allvalo[i];
+
+  }
+
+  // Finally, update the return vals
+  nvalSet = nvs;
+  nvalSetObj = nvso;
+  
+}
+
 void FieldReg::Commit(MeshDB &mesh) {
 
-  // Step 1: Imprint the objects for low level fields
+  // Step 0: Get the imprint contexts that will be used; share in parallel
+  // and define these contexts.
   {
     FMapType::iterator fi = fmap.begin(), fe = fmap.end();
     UInt ord = 0; // number MEFields
@@ -243,25 +304,64 @@ void FieldReg::Commit(MeshDB &mesh) {
           Kernel::obj_iterator oi = ker.obj_begin(), oe = ker.obj_end(), on;
           for (; oi != oe; ) {
             on = oi; ++on;
-            MEImprint(f.name(), *oi, me, nvalSet, nvalSetObj);
+            MEImprintValSets(f.name(), *oi, me, nvalSet, nvalSetObj);
             oi = on;
           } // oi
         }
   
         ki = kn;
       } // for k
-      // Register low level fields
+
+      // Must parallel union nvalSet and nvalSetObj
+      parallel_union_field_info(nvalSet, nvalSetObj);
+
+      // Register low level fields and define the contexts
       for (UInt i = 0; i < nvalSet.size(); i++) {
         UInt nval = nvalSet[i];
         Context ctxt;
         char buf[1024];
         std::sprintf(buf, "%s_%d", f.name().c_str(), nval);
-        UInt c_id = mesh.GetContext(buf);
+        UInt c_id = mesh.DefineContext(buf);
         ctxt.set(c_id);
         Attr fatt(nvalSetObj[nval], ctxt);
         f.Addfield(Registerfield(buf, fatt, f.FType(), nval*f.dim()), nval);
 //std::cout << "Creating subfield:" << buf << std::endl;
       }
+    }
+   }
+
+  // Step 1: Imprint the objects for low level fields
+  {
+    FMapType::iterator fi = fmap.begin(), fe = fmap.end();
+    for ( ;fi !=fe; ++fi) {
+      MEField<> &f = *fi->second;
+//std::cout << "Imprinting MEField:" << f.name() << std::endl;
+      // Loop obj type
+      KernelList::iterator ki = mesh.set_begin(), ke = mesh.set_end(), kn;
+      for (; ki != ke; ) {
+        kn = ki; ++kn; // manage iterators in case imprint changes kernel list
+        Kernel &ker = *ki;
+        // if kernel wrong type or context doesnt match, move on
+        if (ker.type() == f.GetType() && ker.GetContext().any(f.GetContext())) {
+  
+          const MeshObjTopo *otopo = ker.GetTopo();
+          if (!otopo)
+            Throw() << "Field " << f.name() << " has no topo on matching kernel";
+          const MEFamily &mef = f.GetMEFamily();
+          MasterElement<> &me = *mef.getME(otopo->name);
+  //std::cout << "topo:" << otopo->name << " yields me:" << me.name << std::endl;
+          // loop objects, imprint
+          Kernel::obj_iterator oi = ker.obj_begin(), oe = ker.obj_end(), on;
+          for (; oi != oe; ) {
+            on = oi; ++on;
+            MEImprint(f.name(), *oi, me);
+            oi = on;
+          } // oi
+        }
+  
+        ki = kn;
+      } // for k
+
     }
    }
 
