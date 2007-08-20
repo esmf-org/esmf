@@ -1,4 +1,4 @@
-// $Id: ESMC_ShapeHierarchic.C,v 1.3 2007/08/20 19:34:51 dneckels Exp $
+// $Id: ESMC_ShapeHierarchic.C,v 1.4 2007/08/20 22:19:47 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -13,12 +13,12 @@
 
 #include <ESMC_Quadrature.h>
 
-#include <Util/include/ESMCI_Util.h>
-
 #include <iostream>
 
 
+#ifdef ESMC_LAPACK
 extern "C" void FTN(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,double*,int*,double*,int*,int*);
+#endif
 
 namespace ESMCI {
 namespace MESH {

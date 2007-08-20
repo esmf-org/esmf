@@ -1,4 +1,4 @@
-// $Id: ESMC_PatchRecovery.C,v 1.4 2007/08/20 19:34:51 dneckels Exp $
+// $Id: ESMC_PatchRecovery.C,v 1.5 2007/08/20 22:21:41 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -18,7 +18,6 @@
 #include <ESMC_MeshField.h>
 
 #include <ESMC_MeshTypes.h>
-#include <Util/include/ESMCI_Util.h>
 
 #include <set>
 #include <iostream>
@@ -31,7 +30,9 @@
 
 
 
+#ifdef ESMC_LAPACK
 extern "C" void FTN(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,double*,int*,double*,int*,int*);
+#endif
           
 
 namespace ESMCI {
