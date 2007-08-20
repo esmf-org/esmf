@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.114 2007/08/17 22:38:02 theurich Exp $
+// $Id: ESMC_Array.C,v 1.115 2007/08/20 15:51:00 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.114 2007/08/17 22:38:02 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.115 2007/08/20 15:51:00 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4976,10 +4976,10 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   xxestream[xxeCount].opId = XXE::wtimer;
   xxeElement = &(xxestream[xxeCount]);
   xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-  xxeWtimerInfo->timerId = 99;
+  xxeWtimerInfo->timerId = xxeCount;
   xxeWtimerInfo->timerString = new char[80];
-  strcpy(xxeWtimerInfo->timerString, "Wtimer 99");
-  xxeWtimerInfo->actualWtimerId = 99;
+  strcpy(xxeWtimerInfo->timerString, "Wt: before wOAS");
+  xxeWtimerInfo->actualWtimerId = xxeCount;
   xxeWtimerInfo->relativeWtimerId = 0;
   ++xxeCount;
   if (xxeCount >= xxe->max){
@@ -5009,10 +5009,34 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   xxestream[xxeCount].opId = XXE::wtimer;
   xxeElement = &(xxestream[xxeCount]);
   xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-  xxeWtimerInfo->timerId = 100;
+  xxeWtimerInfo->timerId = xxeCount;
   xxeWtimerInfo->timerString = new char[80];
   strcpy(xxeWtimerInfo->timerString, "Wtimer End");
-  xxeWtimerInfo->actualWtimerId = 100;
+  xxeWtimerInfo->actualWtimerId = xxeCount;
+  xxeWtimerInfo->relativeWtimerId = 0;
+  ++xxeCount;
+  if (xxeCount >= xxe->max){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- xxeCount out of range", &rc);
+    return rc;
+  }
+  xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
+  ++(xxe->storageCount);
+  if (xxe->storageCount >= xxe->storageMaxCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- xxe->storageCount out of range", &rc);
+    return rc;
+  }
+  // </XXE profiling element>
+
+  // <XXE profiling element>
+  xxestream[xxeCount].opId = XXE::wtimer;
+  xxeElement = &(xxestream[xxeCount]);
+  xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
+  xxeWtimerInfo->timerId = xxeCount;
+  xxeWtimerInfo->timerString = new char[80];
+  strcpy(xxeWtimerInfo->timerString, "Wtimer End2");
+  xxeWtimerInfo->actualWtimerId = xxeCount;
   xxeWtimerInfo->relativeWtimerId = 0;
   ++xxeCount;
   if (xxeCount >= xxe->max){
