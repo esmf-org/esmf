@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_language.tex,v 1.7 2007/08/16 20:48:23 cdeluca Exp $
+% CVS $Id: code_conv_language.tex,v 1.8 2007/08/20 20:32:05 dneckels Exp $
 
 \subsection{Lang: Interlanguage Coding Conventions}
 
@@ -309,6 +309,76 @@ Style recommendations include the following:
 \end{enumerate}
 
 \subsection{Lang: C/C++ Coding Standard}
+
+\item {\bf Use of namespaces}
+To avoid conflict in symbols, ESMF C++ code will utilize namespaces to
+add either ESMC (interface code) or ESMCI to symbol names.
+
+Example: 
+
+The header file for an {\it ESMC\_Widget} is as follows:
+\begin{verbatim}
+**file ESMCI_Widget.h
+// Internal Widget esmf class
+#ifndef ESMCI_Widget_h
+#define ESMCI_Widget_h
+
+namesapce ESMCI {
+
+class Widget {
+public:
+Widget();
+~Widget();
+void Manufacture();
+};
+
+} // namespace ESMCI
+\end{verbatim}
+
+The implementation file is:
+\begin{verbatim}
+***file ESMCI_Widget.C
+#include <ESMCI_Widget.h>
+
+namespace ESMCI {
+
+Widget::Widget() {
+...
+}
+Widget::~Widget() {
+...
+}
+void Widget::Manufacture() {
+...
+}
+
+} // namespace ESMCI
+\end{verbatim}
+
+Lastly, when this object is used from C interface code, the following constructs are used:
+
+\begin{verbatim}
+*** file ESMC_SomeInterface_F.C
+#include <ESMCI_Widget.h>
+
+extern "C" {
+// this cannot be in the ESMCI namespace, else it would change the
+// linkage. We have two choices: 1) add using namespace ESMCI and
+// then use Widget, else 2) qualify Widget, ESMCI::Widget
+void FTN(c_esmc_someinterface)(
+ESMCI::Widget **wptr, int *rc){
+#undef ESMC_METHOD
+#define ESMC_METHOD "c_esmc_someinterface()"
+if (rc!=NULL)
+*rc = ESMC_RC_NOT_IMPL;
+
+.....
+(*wptr)->Manufacture();
+
+}
+
+} // extern "C"
+\end{verbatim}
 
 \item {\bf Protex Prologues}  Each C or C++ function, subroutine, or 
 module will include a prologue instrumented for use with the
