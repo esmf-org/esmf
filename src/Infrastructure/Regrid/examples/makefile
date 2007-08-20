@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2006/01/30 20:10:09 nscollins Exp $
+# $Id: makefile,v 1.12 2007/08/20 22:57:41 cdeluca Exp $
 
 ALL: build_examples
 
@@ -12,11 +12,14 @@ SOURCEH	  =
 OBJSC     = 
 OBJSF     = 
 
-EXAMPLES_BUILD   = $(ESMF_EXDIR)/ESMF_RegridEx
+EXAMPLES_BUILD   = 
+# $(ESMF_EXDIR)/ESMF_RegridEx
 
-EXAMPLES_RUN     = run_ESMF_RegridEx
+EXAMPLES_RUN     = 
+# run_ESMF_RegridEx
 
-EXAMPLES_RUN_UNI = run_ESMF_RegridEx_uni
+EXAMPLES_RUN_UNI = 
+# run_ESMF_RegridEx_uni
 
 
 include ${ESMF_DIR}/makefile

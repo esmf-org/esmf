@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.28 2007/07/18 18:32:09 svasquez Exp $ 
+# $Id: makefile,v 1.29 2007/08/20 22:57:41 cdeluca Exp $ 
 
 ALL: build_system_tests
 
@@ -13,26 +13,27 @@ DIRS     = \
            ESMF_FieldRedist \
            ESMF_FieldHalo \
            ESMF_FieldHaloPer \
-           ESMF_FieldRegrid \
-           ESMF_FieldRegridConserv \
-           ESMF_FieldRegridMulti \
-           ESMF_FieldRegridOrder \
            ESMF_BundleRedistArb2Arb \
            ESMF_BundleRedistBlk2Arb \
            ESMF_BundleRedistBlk2Blk \
            ESMF_FieldRedistArb2Arb \
            ESMF_FieldRedistBlk2Arb \
            ESMF_FieldRedistBlk2Blk \
-           ESMF_FieldExcl \
            ESMF_SimpleCoupling \
            ESMF_FlowComp \
            ESMF_FlowWithCoupling \
            ESMF_DistDir
 
-# tests not yet ready
+# Tests not yet ready
 #           ESMF_RowReduce \        gjt: currently the code depends on DELayout comms, but it should be covered/converted to newArray
 #           ESMF_MergeCoupling \
 #           ESMF_CplOnExclDEs \
+# Removed for new Regrid construction. cmd 8/07.
+#           ESMF_FieldRegrid \
+#           ESMF_FieldRegridConserv \
+#           ESMF_FieldRegridMulti \
+#           ESMF_FieldRegridOrder \
+#           ESMF_FieldExcl \
 
 
 CLEANDIRS   =

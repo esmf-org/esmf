@@ -1,10 +1,10 @@
-! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.17 2007/06/23 07:01:01 cdeluca Exp $
+! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.18 2007/08/20 22:57:42 cdeluca Exp $
 !
 ! System test code FieldRegridOrder
 !  Description on Sourceforge under System Test #xxxxxx
 
 !-------------------------------------------------------------------------
-!SYSTEM_TEST        String used by test script to count system tests.
+!SYSTEM_removeTEST        String used by test script to count system tests.
 !=========================================================================
 
 !BOP

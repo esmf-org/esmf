@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridEx.F90,v 1.14 2007/06/23 04:00:37 cdeluca Exp $
+! $Id: ESMF_RegridEx.F90,v 1.15 2007/08/20 22:57:41 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
     program ESMF_RegridEx
 
 !------------------------------------------------------------------------------
-!EXAMPLE        String used by test script to count examples.
+!EXremoveAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
 !

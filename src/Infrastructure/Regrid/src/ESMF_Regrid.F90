@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.118 2007/06/23 04:00:38 cdeluca Exp $
+! $Id: ESMF_Regrid.F90,v 1.119 2007/08/20 22:57:41 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -87,7 +87,6 @@
     public ESMF_IArrayRegridStore, ESMF_IArrayRegrid, ESMF_IArrayRegridRelease
     public ESMF_RegridDestroy    ! deallocate memory associated with a regrid
     public ESMF_RegridValidate   ! Error checking and validation
-    public ESMF_RegridPrint      ! Prints various regrid info
     public ESMF_RegridHasData    ! framework internal use only
 
 !
@@ -95,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.118 2007/06/23 04:00:38 cdeluca Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.119 2007/08/20 22:57:41 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -283,7 +282,6 @@
 !   \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  TODO
 
       ! TODO: the interfaces have changed - this will no longer be called
       !  with fields, but with the igrid, datamap, and array which are either
@@ -317,6 +315,9 @@
       if (hasDstData) then
         ESMF_INIT_CHECK_DEEP(ESMF_InternArrayGetInit,dstArray,rc)
       endif
+
+! Remove to make way for new regrid code. CMD 8/07.
+#if 0
 
       ! TODO: error check for regridnormOpt only for conservative methods
       
@@ -492,6 +493,7 @@
                                 ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
+#endif
 
       end subroutine ESMF_RegridCreate
 
@@ -558,6 +560,9 @@
       ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
+
+! Remove to make way for new regrid code.  CMD 8/07.
+#if 0
 
       ! Before going further down into this code, make sure
       ! that this DE has at least src or dst data.   If neither, return now.
@@ -838,6 +843,7 @@
 
       ! set return codes
       if (present(rc)) rc = ESMF_SUCCESS
+#endif
 
       end subroutine ESMF_RegridRunR4
 
@@ -904,6 +910,9 @@
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
       ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
+
+! Remove to make way for new regrid code. CMD 8/07.
+#if 0
 
       ! Before going further down into this code, make sure
       ! that this DE has at least src or dst data.   If neither, return now.
@@ -1189,6 +1198,7 @@
 
       ! set return codes
       if (present(rc)) rc = ESMF_SUCCESS
+#endif
 
       end subroutine ESMF_RegridRunR8
 
@@ -1280,8 +1290,10 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
-! !REQUIREMENTS:  XXXn.n, YYYn.n
+!EOPI
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
 
@@ -1291,50 +1303,6 @@
 
       end subroutine ESMF_RegridValidate
 
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_RegridPrint"
-! TODO: this routine should be BOP once it is filled in
-!BOPI
-! !IROUTINE: ESMF_RegridPrint - Print the contents of a Regrid
-
-! !INTERFACE:
-      subroutine ESMF_RegridPrint(routehandle, opt, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_RouteHandle), intent(in) :: routehandle
-      character (len=*), intent(in) :: opt
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!      Print information about a Regrid.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[regrid]
-!          Class to be queried.
-!     \item[[opt]]
-!          Print ptions that control the type of information and level of
-!          detail.
-!     \item[[rc]]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-      ! TODO: does this even need to be here?  it seems the print and
-      ! validate routines should be in the routehandle code only.
-
-      ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
-
-      ! 
-      ! code goes here
-      ! 
-
-      end subroutine ESMF_RegridPrint
-
-!------------------------------------------------------------------------------
 
 !==============================================================================
 ! These are the user-level, public entry points for calling regridding at
@@ -1436,8 +1404,6 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:
-
 
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDatamap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDatamap)
@@ -1445,6 +1411,8 @@
       ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,dstIGrid,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVM,rc)
 
+! Remove to make way for new regrid code.  CMD 8/07.
+#if 0
       call ESMF_IArrayRegridStoreIndex(srcArray, srcIGrid, srcDatamap, &
                                       dstArray, dstIGrid, dstDatamap, &
                                       parentVM, routehandle, &
@@ -1452,6 +1420,7 @@
                                       regridmethod, regridnorm, &
                                       srcmask, dstmask, routeOptions, rc) 
 
+#endif
       end subroutine ESMF_IArrayRegridStoreOne
 
 !------------------------------------------------------------------------------
@@ -1541,7 +1510,6 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
     integer :: localrc        ! local error status
     type(ESMF_Route) :: route
@@ -1557,6 +1525,7 @@
     ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,dstIGrid,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,parentVM,rc)
 
+#if 0
     ! TODO: add code here
     !  The form of this code depends on how we organize the interfaces
     !  between the Regrid code and this code.  This is the lowest level
@@ -1628,6 +1597,7 @@
 
     ! set return code if user specified it
     if (present(rc)) rc = ESMF_SUCCESS
+#endif
 
     end subroutine ESMF_IArrayRegridStoreIndex
 
@@ -1711,7 +1681,6 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
       integer :: localrc        ! local error status
       logical :: dummy
@@ -1727,7 +1696,9 @@
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDataMap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDataMap)
       ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
- 
+
+! Remove to make way for new regrid. CMD 8/07.
+#if 0 
       ! Before going further down into this code, make sure
       ! that this DE has at least src or dst data.   If neither, return now.
       if ((.not.hasSrcData) .and. (.not.hasDstData)) then
@@ -1800,6 +1771,7 @@
 
       ! Set return code if user specified it
       if (present(rc)) rc = ESMF_SUCCESS
+#endif
 
       end subroutine ESMF_IArrayRegridRunOne
 
@@ -1884,7 +1856,6 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
       integer :: localrc        ! local error status
       logical :: dummy
@@ -1899,7 +1870,9 @@
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,srcDataMap)
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,dstDataMap)
       ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
- 
+
+! Remove to make way for new regrid. CMD 8/07.
+#if 0 
       ! Before going further down into this code, make sure
       ! that this DE has at least src or dst data.   If neither, return now.
       if ((.not.hasSrcData) .and. (.not.hasDstData)) then
@@ -1965,6 +1938,7 @@
 
       ! Set return code if user specified it
       if (present(rc)) rc = ESMF_SUCCESS
+#endif
 
       end subroutine ESMF_IArrayRegridRunList
 
@@ -2001,12 +1975,16 @@
 
       ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
 
+! Remove to make way for new regrid. CMD 8/07.
+#if 0
+
       call ESMF_RouteHandleDestroy(routehandle, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
+#endif
 
       end subroutine ESMF_IArrayRegridRelease
 
@@ -2052,6 +2030,9 @@
       ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
       ESMF_INIT_CHECK_DEEP(ESMF_IGridGetInit,igrid,rc)
 
+! Remove to make way for new regrid. CMD 8/07.
+#if 0
+
       ESMF_RegridHasData = .false.
 
       call ESMF_IGridValidate(igrid, rc=localrc)
@@ -2082,6 +2063,7 @@
 
 
       if (present(rc)) rc = ESMF_SUCCESS
+#endif
 
       end function ESMF_RegridHasData
 
