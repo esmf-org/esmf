@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.10 2007/07/31 22:54:51 oehmke Exp $
+// $Id: ESMCI_Grid_F.C,v 1.11 2007/08/21 13:23:45 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ extern "C" {
     localrc = ESMC_RC_NOT_IMPL;
 
     // call into C++
-    localrc= ESMCI::GridCommit(*grid);
+    localrc= ESMCI::Grid::commit(*grid);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
@@ -73,7 +73,7 @@ extern "C" {
     localrc = ESMC_RC_NOT_IMPL;
 
     // call into C++
-    *ptr = ESMCI::GridCreateEmpty(&localrc);
+    *ptr = ESMCI::Grid::create(&localrc);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
@@ -99,7 +99,7 @@ extern "C" {
     localrc = ESMC_RC_NOT_IMPL;
 
     // call into C++
-    *ptr = ESMCI::GridCreate(*nameLen, ESMC_NOT_PRESENT_FILTER(name),
+    *ptr = ESMCI::Grid::create(*nameLen, ESMC_NOT_PRESENT_FILTER(name),
       ESMC_NOT_PRESENT_FILTER(coordTypeKind), *distgrid, *dimmapArg,
       *lboundsArg, *uboundsArg, *coordRankArg, *coordDimMapArg,
       ESMC_NOT_PRESENT_FILTER(indexflag), ESMC_NOT_PRESENT_FILTER(gridtype),
@@ -308,7 +308,7 @@ extern "C" {
     localrc = ESMC_RC_NOT_IMPL;
 
     // call into C++
-    localrc= ESMCI::gridGetCoordIntoArray(*grid, ESMC_NOT_PRESENT_FILTER(staggerloc),
+    localrc= ESMCI::Grid::getCoordArray(*grid, ESMC_NOT_PRESENT_FILTER(staggerloc),
       ESMC_NOT_PRESENT_FILTER(coord), array, ESMC_NOT_PRESENT_FILTER(docopy));
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -331,7 +331,7 @@ extern "C" {
     localrc = ESMC_RC_NOT_IMPL;
 
     // call into C++
-    localrc= ESMCI::gridAllocCoord(*grid, ESMC_NOT_PRESENT_FILTER(staggerloc),
+    localrc= ESMCI::Grid::allocCoordArray(*grid, ESMC_NOT_PRESENT_FILTER(staggerloc),
       *staggerLWidthArg, *staggerUWidthArg, *staggerAlignArg);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -356,7 +356,7 @@ extern "C" {
     localrc = ESMC_RC_NOT_IMPL;
 
     // call into C++
-    localrc= ESMCI::gridSetCoordFromArray(*grid, ESMC_NOT_PRESENT_FILTER(staggerloc),
+    localrc= ESMCI::Grid::setCoordArray(*grid, ESMC_NOT_PRESENT_FILTER(staggerloc),
       ESMC_NOT_PRESENT_FILTER(coord), *array, ESMC_NOT_PRESENT_FILTER(docopy));
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -394,7 +394,7 @@ extern "C" {
     }
     
     // call into C++
-    localrc = ESMCI::GridSetFromDistGrid(*grid, *nameLen, ESMC_NOT_PRESENT_FILTER(name),
+    localrc = (*grid)->set(*nameLen, ESMC_NOT_PRESENT_FILTER(name),
       ESMC_NOT_PRESENT_FILTER(coordTypeKind), tmp_distgrid, *dimmapArg,
       *lboundsArg, *uboundsArg, *coordRankArg, *coordDimMapArg,
       ESMC_NOT_PRESENT_FILTER(indexflag), ESMC_NOT_PRESENT_FILTER(gridtype));
@@ -503,7 +503,7 @@ extern "C" {
 
 
     // Get Array From Grid
-    localrc=grid->getCoordArray(staggerloc, coord, &array);
+    localrc=grid->getCoordArrayInternal(staggerloc, coord, &array);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(_rc));
     if (array == ESMC_NULL_POINTER) {
@@ -764,9 +764,8 @@ extern "C" {
     //Initialize return code
     *rc = ESMC_RC_NOT_IMPL;
     // call into C++
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::GridDestroy(ptr),
-      ESMF_ERR_PASSTHRU,
-      ESMC_NOT_PRESENT_FILTER(rc));
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Grid::destroy(ptr),
+         ESMF_ERR_PASSTHRU, ESMC_NOT_PRESENT_FILTER(rc));
   } 
 
   ///////////////////////////////////////////////////////////////////////////////////
