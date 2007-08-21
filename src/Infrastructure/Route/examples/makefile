@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2007/04/12 20:48:22 theurich Exp $
+# $Id: makefile,v 1.14 2007/08/21 02:27:45 cdeluca Exp $
 
 ALL:  build_examples
 
@@ -16,12 +16,11 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/Route/examples
 
+EXAMPLES_BUILD   = 
 
-EXAMPLES_BUILD   = $(ESMF_EXDIR)/ESMF_RouteEx
+EXAMPLES_RUN     = 
 
-EXAMPLES_RUN     = run_ESMF_RouteEx
-
-EXAMPLES_RUN_UNI = run_ESMF_RouteEx_uni
+EXAMPLES_RUN_UNI = 
 
 
 include ${ESMF_DIR}/makefile
@@ -38,9 +37,7 @@ CLOBBERDIRS =
 # ESMF_RouteEx
 #
 run_ESMF_RouteEx:
-	$(MAKE) EXNAME=Route NP=4 exfrun
 
 run_ESMF_RouteEx_uni:
-	$(MAKE) EXNAME=Route NP=1 exfrun
 
 
