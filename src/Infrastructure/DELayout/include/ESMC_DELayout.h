@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.40 2007/08/16 23:11:34 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.41 2007/08/21 23:46:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -252,8 +252,8 @@ class XXE{
     ESMC_TypeKind typekind[10];
     
   public:
-    XXE(int maxArg, int storageMaxCountArg=100, int commhandleMaxCountArg=100,
-      int xxeSubStreamMaxCountArg=100){
+    XXE(int maxArg=1000, int storageMaxCountArg=1000,
+      int commhandleMaxCountArg=1000, int xxeSubStreamMaxCountArg=1000){
       // constructor
       stream = new StreamElement[maxArg]; count = 0; max = maxArg;
       storage = new char*[storageMaxCountArg];
@@ -284,6 +284,12 @@ class XXE{
     int printProfile();
     int execReady();
     int optimize();
+    int optimizeElement(int index);
+    
+    int growStream(int increase);
+    int growStorage(int increase);
+    int growCommhandle(int increase);
+    int growXxeSubStream(int increase);
     
   // types to interprete the StreamElement data
   public:
@@ -371,6 +377,7 @@ class XXE{
       int *rraOffsetList;
       void **factorList;
       void **valueList;
+      ESMC_R4 *factorValueList;
       int rraIndex;
       int termCount;
     }ProductSumSuperScalarRRAInfo;

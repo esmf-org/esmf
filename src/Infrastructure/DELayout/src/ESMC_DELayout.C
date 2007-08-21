@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.73 2007/08/16 23:11:34 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.74 2007/08/21 23:46:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.73 2007/08/16 23:11:34 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.74 2007/08/21 23:46:09 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2913,12 +2913,188 @@ int XXE::printProfile(
             }
           }
           break;
+// debugging section ----------------------------------------          
+        case productSumSuperScalarRRA:
+          ProductSumSuperScalarRRAInfo *xxeProductSumSuperScalarRRAInfo;
+          if((localPet==3 && ((i>37 && i<41 )|| (i>53 && i<57)))||
+             (localPet==4 && ((i>39 && i<43 )|| (i>47 && i<51)))){
+            xxeProductSumSuperScalarRRAInfo =
+              (ProductSumSuperScalarRRAInfo *)xxeElement;
+            int *rraOffsetList = xxeProductSumSuperScalarRRAInfo->rraOffsetList;
+            void **factorList = xxeProductSumSuperScalarRRAInfo->factorList;
+            void **valueList = xxeProductSumSuperScalarRRAInfo->valueList;
+            switch (xxeProductSumSuperScalarRRAInfo->opSubId){
+            case I4:
+              {
+                ESMC_I4 *element, *factor, *value;
+                for (int k=0; k<xxeProductSumSuperScalarRRAInfo->termCount; k++){
+                  factor = (ESMC_I4 *)factorList[k];
+                  value = (ESMC_I4 *)valueList[k];
+                  printf("XXE profile debug: k=%d, rraOffsetList[]=%d, "
+                    "factor=%p, value=%p\n", k, rraOffsetList[k],
+                    factor, value);
+                }
+              }
+              break;
+            case I8:
+              {
+                ESMC_I8 *element, *factor, *value;
+                for (int k=0; k<xxeProductSumSuperScalarRRAInfo->termCount; k++){
+                  factor = (ESMC_I8 *)factorList[k];
+                  value = (ESMC_I8 *)valueList[k];
+                  printf("XXE profile debug: k=%d, rraOffsetList[]=%d, "
+                    "factor=%p, value=%p\n", k, rraOffsetList[k],
+                    factor, value);
+                }
+              }
+              break;
+            case R4:
+              {
+                ESMC_R4 *element, *factor, *value;
+                for (int k=0; k<xxeProductSumSuperScalarRRAInfo->termCount; k++){
+                  factor = (ESMC_R4 *)factorList[k];
+                  value = (ESMC_R4 *)valueList[k];
+                  printf("XXE profile debug: k=%d, rraOffsetList[]=%d, "
+                    "factor=%p, value=%p\n", k, rraOffsetList[k],
+                    factor, value);
+                }
+              }
+              break;
+            case R8:
+              {
+                ESMC_R8 *element, *factor, *value;
+                for (int k=0; k<xxeProductSumSuperScalarRRAInfo->termCount; k++){
+                  factor = (ESMC_R8 *)factorList[k];
+                  value = (ESMC_R8 *)valueList[k];
+                  printf("XXE profile debug: k=%d, rraOffsetList[]=%d, "
+                    "factor=%p, value=%p\n", k, rraOffsetList[k],
+                    factor, value);
+                }
+              }
+              break;
+            default:
+              break;
+            }
+          }
+          break;
+// debugging section ----------------------------------------          
         default:
           break;
         }
       }
     }
     vm->vmk_barrier();
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+      
+      //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::optimizeElement()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::optimizeElement
+//
+// !INTERFACE:
+int XXE::optimizeElement(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int index){
+//
+// !DESCRIPTION:
+//  Optimize element indexed by "index".
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // get the current VM
+  VM *vm = VM::getCurrent(&localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  
+#if 0
+  printf("gjt in ESMCI::XXE::optimizeElement(), stream=%p, %d, %d\n", stream,
+    count, sizeof(StreamElement));
+#endif
+  
+  // todo: error check that index < count
+    
+  void *xxeElement = &(stream[index]);
+  switch(stream[index].opId){
+  case productSumSuperScalarRRA:
+    ProductSumSuperScalarRRAInfo *xxeProductSumSuperScalarRRAInfo;
+    struct ListSort{
+      int sortIndex;
+      int elementIndex;
+      static int cmp(const void *a, const void *b){
+        ListSort *aObj = (ListSort *)a;
+        ListSort *bObj = (ListSort *)b;
+        if (aObj->sortIndex < bObj->sortIndex) return -1;
+        if (aObj->sortIndex > bObj->sortIndex) return +1;
+        // sortIndex must be equal
+        return 0;
+      }
+    };
+    {
+      xxeProductSumSuperScalarRRAInfo =
+        (ProductSumSuperScalarRRAInfo *)xxeElement;
+      int termCount = xxeProductSumSuperScalarRRAInfo->termCount;
+      int *rraOffsetList = xxeProductSumSuperScalarRRAInfo->rraOffsetList;
+      void **factorList = xxeProductSumSuperScalarRRAInfo->factorList;
+      void **valueList = xxeProductSumSuperScalarRRAInfo->valueList;
+#if 0
+      // The following code rearranges the sequence of element, factor, value.
+      // I introduced this code in hopes of optimizing the
+      // productSumSuperScalarRRA execution time. On columbia I see performance
+      // variations on the order of one magnitude between different 
+      // productSumSuperScalarRRA's (all of the same length 69490 elements),
+      // so I thought that the difference might be the order in which the
+      // elements are being processed. Interestingly the following 
+      // rearrangement did not change performance on any of the
+      // productSumSuperScalarRRA's! The slow ones stayed slow and the fast
+      // ones stayed fast. This finding leads me to believe that the differnce
+      // must be not in the inter-element interaction but must be an
+      // intra-element issue, so that rearranging elements does not change
+      // anything. The most likely intra-element interaction I can think of
+      // are cache effects.
+      ListSort *list = new ListSort[termCount];
+      for (int k=0; k<termCount; k++){
+        list[k].sortIndex = rraOffsetList[k];
+        list[k].elementIndex = k;
+      }
+      qsort(list, termCount, sizeof(ListSort), ListSort::cmp);
+      void **factorSortList = new void*[termCount];
+      void **valueSortList = new void*[termCount];
+      memcpy(factorSortList, factorList, termCount*sizeof(void *));
+      memcpy(valueSortList, valueList, termCount*sizeof(void *));
+      int altFlag = 0;  // reset
+      int kk = 0; // reset
+      int halfShift = (termCount+1) / 2;
+      for (int k=0; k<termCount; k++){
+        int kkk = kk;
+        if (altFlag){
+          kkk += halfShift;
+          ++kk;
+          altFlag = 0;
+        }else
+          altFlag = 1;
+        rraOffsetList[kkk] = list[k].sortIndex;
+        factorList[kkk] = factorSortList[list[k].elementIndex];
+        valueList[kkk] = valueSortList[list[k].elementIndex];
+      }
+#endif
+    }
+  default:
+    break;
   }
 
   // return successfully
@@ -3592,5 +3768,207 @@ int XXE::optimize(
   //rc = ESMF_SUCCESS       todo: activate once done implementing
   return rc;
 }
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::growStream()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::growStream
+//
+// !INTERFACE:
+int XXE::growStream(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int increase){    // in - number of additional elements
+//
+// !DESCRIPTION:
+//  Increase the length of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  if (increase == 0){
+    // nothing to do -> return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+
+  if (increase < 0){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "- increase must be positive", &rc);
+    return rc;
+  }
+  
+  int maxNew = max + increase;
+  StreamElement *streamNew = new StreamElement[maxNew];
+  memcpy(streamNew, stream, count*sizeof(StreamElement)); // copy prev. elements
+  delete [] stream;     // delete previous stream
+  stream = streamNew;   // plug in newly allocated stream
+  max = maxNew;         // adjust max value
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::growStorage()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::growStorage
+//
+// !INTERFACE:
+int XXE::growStorage(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int increase){    // in - number of additional elements
+//
+// !DESCRIPTION:
+//  Increase the length of the XXE storage.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  if (increase == 0){
+    // nothing to do -> return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+
+  if (increase < 0){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "- increase must be positive", &rc);
+    return rc;
+  }
+  
+  int storageMaxCountNew = storageMaxCount + increase;
+  char **storageNew = new char*[storageMaxCountNew];
+  memcpy(storageNew, storage, storageCount*sizeof(char *)); //copy prev elements
+  delete [] storage;      // delete previous storage
+  storage = storageNew;   // plug in newly allocated storage
+  storageMaxCount = storageMaxCountNew;     // adjust max value
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::growCommhandle()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::growCommhandle
+//
+// !INTERFACE:
+int XXE::growCommhandle(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int increase){    // in - number of additional elements
+//
+// !DESCRIPTION:
+//  Increase the length of the XXE commhandle storage.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  if (increase == 0){
+    // nothing to do -> return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+
+  if (increase < 0){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "- increase must be positive", &rc);
+    return rc;
+  }
+  
+  int commhandleMaxCountNew = commhandleMaxCount + increase;
+  vmk_commhandle ***commhandleNew = new vmk_commhandle**[commhandleMaxCountNew];
+  memcpy(commhandleNew, commhandle, commhandleCount*sizeof(vmk_commhandle **)); 
+  delete [] commhandle;                         // delete previous commhandle
+  commhandle = commhandleNew;           // plug in newly allocated commhandle
+  commhandleMaxCount = commhandleMaxCountNew;   // adjust max value
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::growXxeSubStream()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::growXxeSubStream
+//
+// !INTERFACE:
+int XXE::growXxeSubStream(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int increase){    // in - number of additional elements
+//
+// !DESCRIPTION:
+//  Increase the length of the XXE subStream storage.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  if (increase == 0){
+    // nothing to do -> return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+
+  if (increase < 0){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "- increase must be positive", &rc);
+    return rc;
+  }
+  
+  int xxeSubStreamMaxCountNew = xxeSubStreamMaxCount + increase;
+  XXE **xxeSubStreamNew = new XXE*[xxeSubStreamMaxCountNew];
+  memcpy(xxeSubStreamNew, xxeSubStream, xxeSubStreamCount*sizeof(XXE *));
+  delete [] xxeSubStream;               // delete previous xxeSubStream
+  xxeSubStream = xxeSubStreamNew;       // plug in newly allocated xxeSubStream
+  xxeSubStreamMaxCount = xxeSubStreamMaxCountNew;   // adjust max value
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
 
 } // namespace ESMCI
