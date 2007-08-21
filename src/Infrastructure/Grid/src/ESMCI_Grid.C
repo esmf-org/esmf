@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.16 2007/08/21 13:23:46 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.17 2007/08/21 17:35:21 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-  static const char *const version = "$Id: ESMCI_Grid.C,v 1.16 2007/08/21 13:23:46 oehmke Exp $";
+  static const char *const version = "$Id: ESMCI_Grid.C,v 1.17 2007/08/21 17:35:21 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -135,8 +135,6 @@ int Grid::allocCoordArray(
   ESMC_IndexFlag indexflag;
   int extent[1];
 
-  // TODO: Change to get rid of return codes in favor of try-catch
-
   // initialize return code; assume routine not implemented
   status = ESMC_RC_NOT_IMPL;
   rc = ESMC_RC_NOT_IMPL;
@@ -155,7 +153,6 @@ int Grid::allocCoordArray(
     return rc;
   }  
 
-
   // If staggerloc hasn't been passed in use a default, otherwise copy it. 
   if (_staggerloc==NULL) {
     staggerloc=0;  // default
@@ -163,28 +160,30 @@ int Grid::allocCoordArray(
     staggerloc=*_staggerloc;
   }
 
-
   // get the grid rank
   rank=_grid->getRank();
 
   // If _staggerAlign hasn't been passed in then set a default, otherwise
-  // error check and copu the passed in value.  
+  // error check and copy the passed in value.  
   staggerAlign = new int[rank];
   if (_staggerAlign == NULL) {
     for (int i=0; i<rank; i++)
       staggerAlign[i] = -1; // set staggerAlign to default (-1,-1,-1...)
   } else {
+    //// Ensure staggerAlign has the correct rank
     if (_staggerAlign->dimCount != 1){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
         "- staggerAlign array must be of rank 1", &rc);
       return rc;
     }
+    //// Ensure staggerAlign has the correct size
     if (_staggerAlign->extent[0] != rank){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
         "- staggerAlign size and Grid rank mismatch ", &rc);
       return rc;
     }
     for (int i=0; i<rank; i++){
+      //// Ensure staggerAlign values are -1,0,1
       if ((_staggerAlign->array[i] < -1) || (_staggerAlign->array[i] > 1)) {
 	ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
 		 "- staggerAlign must be either -1, 0, or 1", &rc);
@@ -221,11 +220,13 @@ int Grid::allocCoordArray(
       }
     }
   } else {
+    //// Ensure staggerLWidth is of the correct rank 
     if (_staggerLWidth->dimCount != 1){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
         "- staggerLWidth array must be of rank 1", &rc);
       return rc;
     }
+    //// Ensure staggerUWidth is of the correct size
     if (_staggerLWidth->extent[0] != rank){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
         "- staggerLWidth size and Grid rank mismatch ", &rc);
@@ -256,11 +257,13 @@ int Grid::allocCoordArray(
       }
     }
   } else {
+    //// Ensure staggerUWidth is of the correct rank
     if (_staggerUWidth->dimCount != 1){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
 		   "- staggerUWidth array must be of rank 1", &rc);
       return rc;
     }
+    //// Ensure staggerUWidth is of the correct size
     if (_staggerUWidth->extent[0] != rank){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
         "- staggerUWidth size and Grid rank mismatch ", &rc);
@@ -319,7 +322,6 @@ int Grid::allocCoordArray(
   InterfaceInt *compUWidth=new InterfaceInt(compUWidthArray,1,extent); 
 
 
-
   ////////////
   ///// Loop Constructing all the coordinate arrays
   ///////////
@@ -330,7 +332,10 @@ int Grid::allocCoordArray(
     arrayspec->ESMC_ArraySpecSetTypeKind(_grid->getTypeKind());
     
 
-    //// fill in dimmap, lbounds, and ubounds
+    //// fill in dimmap, lbounds, and ubounds for use in Array::create
+    //// dimmap - computed by inverting how coords dims map to distgrid
+    //// bounds - computed by matching up an undistributed coord dimension
+    ////          with the bound values at the corresponding grid dimension 
     int coordDistRank=0;
     int coordUndistRank=0;
     for (int i=0; i<coordRank[coord]; i++) {
@@ -366,14 +371,14 @@ int Grid::allocCoordArray(
     }
     compLWidth->extent[0]=coordDistRank;
     
-    // init ComputationalUWidth
+    // init ComputationalUWidth to 0
     for (int i=0; i<coordDistRank; i++) {
       compUWidthArray[i]=0; // init to 0.
     }
     compUWidth->extent[0]=coordDistRank;
     
-    //// Expand the boundaries of the array (distributed and undistributed)
-    //// to hold the stagger padding
+    //// Expand the boundaries of the computational region of the Array 
+    //// (distributed and undistributed) to hold the stagger padding
     for (int i=0; i<coordRank[coord]; i++) {
       int gi=coordDimMap[coord][i];
       if (coordIsDist[coord][i]) {
@@ -386,7 +391,7 @@ int Grid::allocCoordArray(
       }
     }
 
-    // Create an Array to hold the coords
+    // Create an Array to hold the coords 
     if (coordUndistRank) { 
       // Pass in lbounds, ubounds if there are undistributed dims...
       array=Array::create(arrayspec, (DistGrid *)_grid->getDistGrid(),
@@ -458,7 +463,7 @@ int Grid::commit(
 //
 // !ARGUMENTS:
 //
-  Grid *_grid
+		 Grid *_grid  // (in)
  ){
 //
 // !DESCRIPTION:
@@ -598,7 +603,7 @@ Grid *Grid::create(
 //
 // !ARGUMENTS:
 //
-  int *_rc                                     // (out) optional return code 
+		   int *_rc  // (out) optional return code 
   ){
 //
 // !DESCRIPTION:
@@ -732,8 +737,6 @@ int Grid::getCoordArray(
   ESMC_DataCopy docopy;
   int rank;
 
-  // TODO: Change to get rid of return codes in favor of try-catch
-
   // initialize return code; assume routine not implemented
   status = ESMC_RC_NOT_IMPL;
   rc = ESMC_RC_NOT_IMPL;
@@ -760,13 +763,13 @@ int Grid::getCoordArray(
   }
 
   // Make sure they passed in the coordinate component, and if so
-  // translate to C base-0.
+  // translate to C++ base-0.
   if (_coord==NULL) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
       "- Must pass in coord argument", &rc);
     return rc;
   } else {
-    coord=(*_coord)-1; // translate from 1 based to 0 based
+    coord=(*_coord)-1; // translate from F90 1 based to 0 based
   }
 
   // make sure _array pointer is valid
@@ -844,7 +847,7 @@ int Grid::getStaggerLWidth(
     return rc;
   }
 
-  // Input Error Checking
+  // Ensure _localDE isn't out of range for this PET
   if ((_localDE < 0) || (_localDE >=distgrid->getDELayout()->getLocalDeCount())) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
           "- localDE outside range on this processor", &rc);
@@ -1181,34 +1184,33 @@ int Grid::setCoordArray(
   coordRank=_grid->getCoordRank();
   coordDimMap=_grid->getCoordDimMap();
  
-  // Make sure the passed in array has the correct rank
+  // Ensure the passed in array has the correct rank
   if (coordRank[coord] != _array->getRank()){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- Array and Grid coord rank mismatch ", &rc);
       return rc;
     }
 
-  // Make sure the passed in array has the correct typekind
+  // Ensure the passed in array has the correct typekind
   if (_grid->getTypeKind() != _array->getTypekind()){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- Array and Grid TypeKind mismatch ", &rc);
       return rc;
     }
 
-    // Make sure the passed in array has the correct distgrid
+  // Ensure the passed in array has the correct distgrid
   if (_grid->getDistGrid() != _array->getDistGrid()){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- Array and Grid DistGrid mismatch ", &rc);
       return rc;
     }
 
-    // Make sure the passed in array has the correct indexflag
+  // Ensure the passed in array has the correct indexflag
   if (_grid->getIndexFlag() != _array->getIndexflag()){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- Array and Grid Indexflag mismatch ", &rc);
       return rc;
     }
-
 
   // Get the mapping from the Grid dimensions to 
   // the distgrid and bounds array
@@ -1220,8 +1222,7 @@ int Grid::setCoordArray(
   coordIsDist=_grid->getCoordIsDist();
   coordMapDim=_grid->getCoordMapDim();
 
-
-  // Check that the array's dimmap is consistant with this coords
+  // Check that the passed in Array's dimmap is consistant with this coord's
   arrayDimMap=_array->getDimmap();
   ok=true;
   for (int i=0; i<coordRank[coord]; i++) {
@@ -1255,18 +1256,21 @@ int Grid::setCoordArray(
   for (int lDE=0; lDE < localDECount; lDE++) {
     
     //// Calculate the stagger lower bounds from the array
-    ////// Get array exclusive bounds
-   const int *arrayExLBnd=_array->getExclusiveLBound()+lDE*distRank;
+    ////// Get exclusive bounds (since the grid and array have
+    ////// the same distgrid their exclusive bounds are the same)
+   const int *exLBnd=_array->getExclusiveLBound()+lDE*distRank;
 
     ////// Get stagger Lbnd offset
     localrc=_grid->getStaggerLWidth(staggerloc, lDE, offset);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
 					      &rc)) return rc; 
     ////// Fill in the staggerLBnd array
+    ////// distributed bounds are exclusive bounds minus stagger padding
+    ////// undistributed bounds are lbounds minus stagger padding
     for (int i=0; i<coordRank[coord]; i++) {
       int gi=coordDimMap[coord][i];
       if (coordIsDist[coord][i]) {
-	staggerLBnd[i]=arrayExLBnd[coordMapDim[coord][i]]-offset[gi];
+	staggerLBnd[i]=exLBnd[coordMapDim[coord][i]]-offset[gi];
       } else {
 	staggerLBnd[i]=gridLBounds[gridMapDim[gi]]-offset[gi];
       }
@@ -1297,24 +1301,26 @@ int Grid::setCoordArray(
 
 
     //// Calculate the stagger upper bounds from the array
-    ////// Get array exclusive bounds
-   const int *arrayExUBnd=_array->getExclusiveUBound()+lDE*distRank;
+    ////// Get array exclusive bounds (since the grid and array have
+    ////// the same distgrid their exclusive bounds are the same)
+   const int *exUBnd=_array->getExclusiveUBound()+lDE*distRank;
 
     ////// Get stagger Ubnd offset
     localrc=_grid->getStaggerUWidth(staggerloc, lDE, offset);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
 					      &rc)) return rc; 
     ////// Fill in the staggerLBnd array
+    ////// distributed bounds are exclusive bounds plus stagger padding
+    ////// undistributed bounds are ubounds plus stagger padding
     for (int i=0; i<coordRank[coord]; i++) {
       int gi=coordDimMap[coord][i];
       if (coordIsDist[coord][i]) {
-	staggerUBnd[i]=arrayExUBnd[coordMapDim[coord][i]]+offset[gi];
+	staggerUBnd[i]=exUBnd[coordMapDim[coord][i]]+offset[gi];
       } else {
 	staggerUBnd[i]=gridUBounds[gridMapDim[gi]]+offset[gi];
       }
     }
     
-
     //// get computationalUBound from the array
     ///// get the computational bounds of the localDE
     const int *arrayCompUBnd=_array->getComputationalUBound()+lDE*distRank;
