@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.19 2007/08/20 22:57:41 cdeluca Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.20 2007/08/21 01:29:45 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -182,7 +182,7 @@
 !-------------------------------------------------------------------------
 !BremoveOE
 !\subsubsection{Field Regridding operation}
-      
+!      
 !  The user has already created an {\tt ESMF\_IGrid}, an
 !  {\tt ESMF\_Array} with data, and used them to create an {\tt ESMF\_Field}.
 !
@@ -192,27 +192,27 @@
 !  The store call will precompute the data movement necessary, and the
 !  call to {\tt ESMF\_FieldRegrid()} will perform the actual movement.
 !EremoveOE
-
-
-
+!
+!
+!
 !BremoveOC
-    call ESMF_FieldRegridStore(field1, field2, vm, &
-                               routehandle=regrid_rh, &
-                               regridmethod=ESMF_REGRID_METHOD_BILINEAR, rc=rc)
+!    call ESMF_FieldRegridStore(field1, field2, vm, &
+!                               routehandle=regrid_rh, &
+!                               regridmethod=ESMF_REGRID_METHOD_BILINEAR, rc=rc)
 !EremoveOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
+!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!
 !BremoveOC
-    call ESMF_FieldRegrid(field1, field2, regrid_rh, rc=rc)
+!    call ESMF_FieldRegrid(field1, field2, regrid_rh, rc=rc)
 !EremoveOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
+!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!
 !BremoveOC
-    call ESMF_FieldRegridRelease(regrid_rh, rc=rc)
+!    call ESMF_FieldRegridRelease(regrid_rh, rc=rc)
 !EremoveOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    print *, "Regrid example 3 returned"
+!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!
+!    print *, "Regrid example 3 returned"
 
 !-------------------------------------------------------------------------
 !    ! Cleanup

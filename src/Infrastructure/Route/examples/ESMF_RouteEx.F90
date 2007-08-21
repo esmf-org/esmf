@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteEx.F90,v 1.31 2007/06/23 04:00:42 cdeluca Exp $
+! $Id: ESMF_RouteEx.F90,v 1.32 2007/08/21 01:32:01 cdeluca Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -155,23 +155,23 @@
 !   ! Example 3:
 !   !
 !   !  Calling Field Regrid
-
-
-
-    call ESMF_FieldRegridStore(field1, field2, vm, &
-                               routehandle=regrid_rh, &
-                               regridmethod=ESMF_REGRID_METHOD_BILINEAR, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    call ESMF_FieldRegrid(field1, field2, regrid_rh, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    call ESMF_FieldRegridRelease(regrid_rh, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-
-    print *, "Regrid example 3 returned"
-
+!
+!
+!
+!    call ESMF_FieldRegridStore(field1, field2, vm, &
+!                               routehandle=regrid_rh, &
+!                               regridmethod=ESMF_REGRID_METHOD_BILINEAR, rc=rc)
+!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!
+!    call ESMF_FieldRegrid(field1, field2, regrid_rh, rc=rc)
+!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!
+!    call ESMF_FieldRegridRelease(regrid_rh, rc=rc)
+!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!
+!
+!    print *, "Regrid example 3 returned"
+!
 !-------------------------------------------------------------------------
 !    ! Cleanup
 
