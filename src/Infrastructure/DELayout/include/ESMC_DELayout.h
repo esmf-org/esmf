@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.41 2007/08/21 23:46:09 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.42 2007/08/22 23:27:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -280,7 +280,8 @@ class XXE{
         delete xxeSubStream[i];
       delete [] xxeSubStream;
     }
-    int exec(int rraCount=0, char **rraList=NULL);
+    int exec(int rraCount=0, char **rraList=NULL, double *dTime=NULL,
+      int indexStart=-1, int indexStop=-1);
     int printProfile();
     int execReady();
     int optimize();

@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.74 2007/08/21 23:46:09 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.75 2007/08/22 23:27:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.74 2007/08/21 23:46:09 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.75 2007/08/22 23:27:24 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2408,8 +2408,11 @@ int XXE::exec(
 //
 // !ARGUMENTS:
 //
-  int rraCount,       // in - number of relative run-time address in rraList
-  char **rraList      // in - relative run-time addresses
+  int rraCount,       // in  - number of relative run-time address in rraList
+  char **rraList,     // in  - relative run-time addresses
+  double *dTime,      // out - execution time, NULL to disable
+  int indexStart,     // in  - start index, < 0 for default (full stream)
+  int indexStop       // in  - stop index, < 0 for default (full stream)
   ){
 //
 // !DESCRIPTION:
@@ -2432,6 +2435,24 @@ int XXE::exec(
     sizeof(StreamElement));
 #endif
   
+  // set index range
+  int indexRangeStart = 0;        // default
+  if (indexStart >= 0) indexRangeStart = indexStart;
+  int indexRangeStop = count-1;   // default
+  if (indexStop >= 0) indexRangeStop = indexStop;
+  
+  // check index range
+  if (indexRangeStart > count-1){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "- indexStart out of range", &rc);
+    return rc;
+  }
+  if (indexRangeStop > count-1){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "- indexStop out of range", &rc);
+    return rc;
+  }
+  
   void *xxeElement, *xxeIndexElement;
   SendnbInfo *xxeSendnbInfo;
   RecvnbInfo *xxeRecvnbInfo;
@@ -2450,8 +2471,13 @@ int XXE::exec(
   SubStreamInfo *xxeSubStreamInfo;
   WtimerInfo *xxeWtimerInfo, *xxeWtimerInfoActual, *xxeWtimerInfoRelative;
   PrintInfo *xxePrintInfo;
+  
+  double t0, t1;
+  
+  if (dTime != NULL)
+    VMK::wtime(&t0);
       
-  for (int i=0; i<count; i++){
+  for (int i=indexRangeStart; i<=indexRangeStop; i++){
     xxeElement = &(stream[i]);
 //    printf("gjt: %d, opId=%d\n", i, stream[i].opId);
     switch(stream[i].opId){
@@ -2844,7 +2870,12 @@ int XXE::exec(
       break;
     }
   }
-
+  
+  if (dTime != NULL){
+    VMK::wtime(&t1);
+    *dTime = t1 - t0;
+  }
+  
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
