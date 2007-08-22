@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.117 2007/08/22 23:28:46 theurich Exp $
+// $Id: ESMC_Array.C,v 1.118 2007/08/22 23:50:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.117 2007/08/22 23:28:46 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.118 2007/08/22 23:50:15 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -5139,6 +5139,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
   for (int i=0; i<petCount; i++)
     delete [] dstSeqIntervFactorListIndex[i];
   delete [] dstSeqIntervFactorListIndex;
+  delete [] rraList;
     
   VMK::wtime(&t11);   //gjt - profile
   printf("gjt - profile for PET %d:\n"
