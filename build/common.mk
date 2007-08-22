@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.196 2007/08/09 17:32:31 dneckels Exp $
+#  $Id: common.mk,v 1.197 2007/08/22 22:09:01 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1011,6 +1011,9 @@ tree_clean:
 	   fi ;\
 	done
 	$(ESMF_RM) $(CLEANFILES) $(CLEAN_DEFAULTS)
+        
+tree_cleanfiles:
+	$(ESMF_RM) $(CLEANFILES) $(CLEAN_DEFAULTS)
 
 # target which does a light cleaning - remove files only under the src dir 
 #  (logfiles, doc files, test output files, files made by preprocessing, etc)
@@ -1327,6 +1330,7 @@ stest:
 #
 clean_system_tests:
 	$(ESMF_RM) $(ESMF_TESTDIR)/*STest* 
+	$(MAKE) ACTION=tree_cleanfiles tree
 
 #
 # report statistics on system tests
@@ -1701,6 +1705,7 @@ exhaustive_flag_clobber:
 #
 clean_unit_tests:
 	$(ESMF_RM) $(ESMF_TESTDIR)/*UTest* $(TESTS_CONFIG)
+	$(MAKE) ACTION=tree_cleanfiles tree
 
 
 #
@@ -1902,6 +1907,7 @@ excrun:
 #
 clean_examples:
 	$(ESMF_RM) $(ESMF_EXDIR)/*
+	$(MAKE) ACTION=tree_cleanfiles tree
 
 #
 # report statistics on examples
