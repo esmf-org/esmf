@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.116 2007/08/21 23:46:52 theurich Exp $
+// $Id: ESMC_Array.C,v 1.117 2007/08/22 23:28:46 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.116 2007/08/21 23:46:52 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.117 2007/08/22 23:28:46 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2134,6 +2134,18 @@ int Array::sparseMatMulStore(
   int dstPetCount = dstVm->getPetCount();
 #endif  
   
+  // prepare for relative run-time addressing (RRA)
+  // this is to support xxe->exec() during sparseMatMulStore()
+  int rraCount = srcArray->delayout->getLocalDeCount();
+  rraCount += dstArray->delayout->getLocalDeCount();
+  char **rraList = new char*[rraCount];
+  memcpy((char *)rraList, srcArray->larrayBaseAddrList,
+    srcArray->delayout->getLocalDeCount() * sizeof(char *));
+  memcpy((char *)rraList
+    + srcArray->delayout->getLocalDeCount() * sizeof(char *),
+    dstArray->larrayBaseAddrList,
+    dstArray->delayout->getLocalDeCount() * sizeof(char *));
+
   VMK::wtime(&t1);   //gjt - profile
   
   //---------------------------------------------------------------------------
@@ -4423,34 +4435,65 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
             ESMF_ERR_PASSTHRU, &rc)) return rc;
         }
-#define USEBYTE
-#ifdef USEBYTE
-        xxe->stream[xxe->count].opSubId = XXE::BYTE;
-        for (int k=0; k<count; k++){
-          rraOffsetList[k] = linIndexContigBlockList[k].linIndex * dataSize;
-          countList[k] = linIndexContigBlockList[k].linIndexCount * dataSize;
-        }
-#else
-        if (typekindArg == ESMC_TYPEKIND_R4)
-          xxe->stream[xxe->count].opSubId = XXE::R4;
-        else if (typekindArg == ESMC_TYPEKIND_R8)
-          xxe->stream[xxe->count].opSubId = XXE::R8;
-        else if (typekindArg == ESMC_TYPEKIND_I4)
-          xxe->stream[xxe->count].opSubId = XXE::I4;
-        else if (typekindArg == ESMC_TYPEKIND_I8)
-          xxe->stream[xxe->count].opSubId = XXE::I8;
-        for (int k=0; k<count; k++){
-          rraOffsetList[k] = linIndexContigBlockList[k].linIndex * dataSize;
-          countList[k] = linIndexContigBlockList[k].linIndexCount;
-        }
-#endif
+        int xxeIndex = xxe->count;  // need this beyond the increment
         ++(xxe->count);
         if (xxe->count >= xxe->max){
           localrc = xxe->growStream(1000);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
             ESMF_ERR_PASSTHRU, &rc)) return rc;
         }
-                
+        // try typekind specific memGatherSrcRRA
+        if (typekindArg == ESMC_TYPEKIND_R4)
+          xxe->stream[xxeIndex].opSubId = XXE::R4;
+        else if (typekindArg == ESMC_TYPEKIND_R8)
+          xxe->stream[xxeIndex].opSubId = XXE::R8;
+        else if (typekindArg == ESMC_TYPEKIND_I4)
+          xxe->stream[xxeIndex].opSubId = XXE::I4;
+        else if (typekindArg == ESMC_TYPEKIND_I8)
+          xxe->stream[xxeIndex].opSubId = XXE::I8;
+        for (int k=0; k<count; k++){
+          rraOffsetList[k] = linIndexContigBlockList[k].linIndex * dataSize;
+          countList[k] = linIndexContigBlockList[k].linIndexCount;
+        }
+        double dt_tk;
+        localrc = xxe->exec(rraCount, rraList, &dt_tk, xxeIndex, xxeIndex);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          &rc)) return rc;
+        // try byte option for memGatherSrcRRA
+        xxe->stream[xxeIndex].opSubId = XXE::BYTE;
+        for (int k=0; k<count; k++){
+          rraOffsetList[k] = linIndexContigBlockList[k].linIndex * dataSize;
+          countList[k] = linIndexContigBlockList[k].linIndexCount * dataSize;
+        }
+        double dt_byte;
+        localrc = xxe->exec(rraCount, rraList, &dt_byte, xxeIndex, xxeIndex);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          &rc)) return rc;
+printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
+  " dt_byte=%g s\n", localPet, dt_tk, dt_byte);
+        // decide for the fastest option
+        if (dt_byte < dt_tk){
+          // use byte option for memGatherSrcRRA
+          xxe->stream[xxeIndex].opSubId = XXE::BYTE;
+          for (int k=0; k<count; k++){
+            rraOffsetList[k] = linIndexContigBlockList[k].linIndex * dataSize;
+            countList[k] = linIndexContigBlockList[k].linIndexCount * dataSize;
+          }
+        }else{
+          // use typekind specific memGatherSrcRRA
+          if (typekindArg == ESMC_TYPEKIND_R4)
+            xxe->stream[xxeIndex].opSubId = XXE::R4;
+          else if (typekindArg == ESMC_TYPEKIND_R8)
+            xxe->stream[xxeIndex].opSubId = XXE::R8;
+          else if (typekindArg == ESMC_TYPEKIND_I4)
+            xxe->stream[xxeIndex].opSubId = XXE::I4;
+          else if (typekindArg == ESMC_TYPEKIND_I8)
+            xxe->stream[xxeIndex].opSubId = XXE::I8;
+          for (int k=0; k<count; k++){
+            rraOffsetList[k] = linIndexContigBlockList[k].linIndex * dataSize;
+            countList[k] = linIndexContigBlockList[k].linIndexCount;
+          }
+        }
 #endif
         // sendnb out of contiguous intermediate buffer
         xxe->stream[xxe->count].opId = XXE::sendnb;
