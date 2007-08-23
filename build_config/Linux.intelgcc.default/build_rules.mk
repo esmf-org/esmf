@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.2 2006/09/22 23:55:39 theurich Exp $
+# $Id: build_rules.mk,v 1.3 2007/08/23 21:22:52 dneckels Exp $
 #
 # Linux.intelgcc.default
 #
@@ -132,7 +132,7 @@ ESMF_F90LINKLIBS += -limf -lm -lcxa -lunwind -lrt -ldl
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lifcoremt -lunwind -lrt -ldl
+ESMF_CXXLINKLIBS += -lifcoremt -lrt -ldl
 ifeq ($(ESMF_ABI),64)
 ESMF_CXXLINKLIBS += -lipr
 endif
