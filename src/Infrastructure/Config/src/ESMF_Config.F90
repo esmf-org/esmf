@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.41 2007/07/05 15:40:12 samsoncheung Exp $
+! $Id: ESMF_Config.F90,v 1.42 2007/08/23 20:06:47 oehmke Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -141,7 +141,7 @@
 ! Revised parameter table to fit Fortran 90 standard.
 
        integer,   parameter :: LSZ = 256
-       integer,   parameter :: MSZ = 200
+       integer,   parameter :: MSZ = 1000
        integer,   parameter :: NBUF_MAX = MSZ*LSZ ! max size of buffer
        
        character, parameter :: BLK = achar(32)   ! blank (space)
