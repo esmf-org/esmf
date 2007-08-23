@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.44 2007/06/23 07:00:50 cdeluca Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.45 2007/08/23 17:16:00 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Comp_C.F90,v 1.44 2007/06/23 07:00:50 cdeluca Exp $'
+!      '$Id: ESMF_Comp_C.F90,v 1.45 2007/08/23 17:16:00 cdeluca Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -244,14 +244,14 @@ end subroutine f_esmf_compdelete
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_gridcompcreate"
-subroutine f_esmf_gridcompcreate(gcomp, name, mtype, igrid, config, configFile, &
+subroutine f_esmf_gridcompcreate(gcomp, name, mtype, grid, config, configFile, &
   clock, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_ConfigMod
   use ESMF_ClockMod
   use ESMF_ClockTypeMod
-  use ESMF_IGridTypesMod
+  use ESMF_GridMod
   use ESMF_CompMod
   use ESMF_GridCompMod
   use ESMF_InitMacrosMod
@@ -260,7 +260,7 @@ subroutine f_esmf_gridcompcreate(gcomp, name, mtype, igrid, config, configFile, 
   type(ESMF_GridComp) :: gcomp
   character(len=*), optional :: name
   type(ESMF_GridCompType), optional :: mtype
-  type(ESMF_IGrid), optional :: igrid
+  type(ESMF_Grid), optional :: grid
   type(ESMF_Config), optional :: config
   character(len=*), optional :: configFile
   type(ESMF_Clock), optional :: clock
@@ -269,7 +269,7 @@ subroutine f_esmf_gridcompcreate(gcomp, name, mtype, igrid, config, configFile, 
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
 
-  gcomp = ESMF_GridCompCreate(name=name, gridcomptype=mtype, igrid=igrid, &
+  gcomp = ESMF_GridCompCreate(name=name, gridcomptype=mtype, grid=grid, &
     config=config, configFile=configFile, clock=clock, rc=rc)
 end subroutine f_esmf_gridcompcreate
 

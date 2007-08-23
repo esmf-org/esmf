@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2007/06/26 20:09:26 oehmke Exp $
+# $Id: makefile,v 1.17 2007/08/23 17:15:57 cdeluca Exp $
 
 # leave alone.
 ALL: build_here 
@@ -16,7 +16,7 @@ SOURCEF	  =
 # If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 # List all .h files which should be copied to common include dir
-STOREH	  = ESMCI_Grid.h
+STOREH	  = ESMCI_Grid.h ESMC_Grid.h
 
 # Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))

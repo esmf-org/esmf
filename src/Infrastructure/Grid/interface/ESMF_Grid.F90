@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.19 2007/07/26 19:41:18 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.20 2007/08/23 17:15:54 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@
       use ESMF_StaggerLocMod
       use ESMF_DistGridMod
       use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
-      
+
 !     NEED TO ADD MORE HERE
       implicit none
 
@@ -62,7 +62,6 @@
   ! F90 class type to hold pointer to C++ object
   type ESMF_Grid
   sequence
-  private
     type(ESMF_Pointer) :: this
     ESMF_INIT_DECLARE
   end type
@@ -137,7 +136,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.19 2007/07/26 19:41:18 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.20 2007/08/23 17:15:54 cdeluca Exp $'
 
 !==============================================================================
 ! 

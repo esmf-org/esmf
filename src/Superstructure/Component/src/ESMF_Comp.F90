@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.163 2007/07/19 21:41:05 cdeluca Exp $
+! $Id: ESMF_Comp.F90,v 1.164 2007/08/23 17:16:00 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@
       use ESMF_ConfigMod
       use ESMF_CalendarMod
       use ESMF_ClockMod
-      use ESMF_IGridTypesMod
+      use ESMF_GridMod
       use ESMF_StateTypesMod
       use ESMF_StateMod
       use ESMF_InitMacrosMod
@@ -140,7 +140,7 @@
 
          character(len=ESMF_MAXSTR) :: configFile ! resource filename
          character(len=ESMF_MAXSTR) :: dirPath    ! relative dirname, app only
-         type(ESMF_IGrid) :: igrid                  ! default igrid, gcomp only
+         type(ESMF_Grid) :: grid                  ! default grid, gcomp only
 #ifdef ESMF_IS_64BIT_MACHINE
 
          integer            :: npetlist           ! number of PETs in petlist
@@ -269,7 +269,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.163 2007/07/19 21:41:05 cdeluca Exp $'
+      '$Id: ESMF_Comp.F90,v 1.164 2007/08/23 17:16:00 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -474,7 +474,7 @@ end function
 
 ! !INTERFACE:
       recursive subroutine ESMF_CompConstruct(compp, ctype, name, gridcomptype, &
-                          dirPath, configFile, config, igrid, clock, parent, &
+                          dirPath, configFile, config, grid, clock, parent, &
                           vm, petlist, contextflag, rc)
 !
 ! !ARGUMENTS:
@@ -485,7 +485,7 @@ end function
       character(len=*), intent(in), optional :: dirPath
       character(len=*), intent(in), optional :: configFile
       type(ESMF_Config), intent(in), optional :: config
-      type(ESMF_IGrid), intent(in), optional :: igrid
+      type(ESMF_Grid), intent(in), optional :: grid
       type(ESMF_Clock), intent(in), optional :: clock
       type(ESMF_CompClass), pointer, optional :: parent
       type(ESMF_VM), intent(in), optional :: vm
@@ -515,8 +515,8 @@ end function
 !    or relative to {\tt dirPath}.
 !   \item[{[config]}]
 !    Already created {\tt config} object.
-!   \item[{[igrid]}]
-!    Default {\tt igrid} for a Gridded {\tt Component}.
+!   \item[{[grid]}]
+!    Default {\tt grid} for a Gridded {\tt Component}.
 !   \item[{[clock]}]
 !    Private {\tt clock} for this {\tt Component}.
 !   \item[{[parent]}]
@@ -579,8 +579,8 @@ end function
         ! type(ESMF_Clock) compp%clock                ! private component clock
         compp%configFile = "uninitialized"
         compp%dirPath = "uninitialized"
-        nullify(compp%igrid%ptr)
-        compp%npetlist = 0
+	compp%grid%this = ESMF_NULL_POINTER        
+	compp%npetlist = 0
         ! type(ESMF_GridCompType) compp%gridcomptype
         nullify(compp%parent)
         ! type(ESMF_CWrap)   compp%compw
@@ -683,11 +683,11 @@ end function
           ! compp%config = ?
         endif
 
-        ! default igrid for a Gridded Component
-        if (present(igrid)) then
-          compp%igrid = igrid
+        ! default grid for a Gridded Component
+        if (present(grid)) then
+          compp%grid = grid
         else
-          ! TODO: do we need an "empty igrid" object?
+          ! TODO: do we need an "empty grid" object?
         endif
 
         ! default clock
@@ -1330,7 +1330,7 @@ end function
 !
 ! !INTERFACE:
       recursive subroutine ESMF_CompGet(compp, name, vm, vm_parent, vmplan, &
-        vm_info, contextflag, gridcomptype, igrid, clock, dirPath, configFile, &
+        vm_info, contextflag, gridcomptype, grid, clock, dirPath, configFile, &
         config, ctype, rc)
 !
 ! !ARGUMENTS:
@@ -1342,7 +1342,7 @@ end function
       type(ESMF_Pointer), intent(out), optional :: vm_info
       type(ESMF_ContextFlag), intent(out), optional :: contextflag
       type(ESMF_GridCompType), intent(out), optional :: gridcomptype 
-      type(ESMF_IGrid), intent(out), optional :: igrid
+      type(ESMF_Grid), intent(out), optional :: grid
       type(ESMF_Clock), intent(out), optional :: clock
       character(len=*), intent(out), optional :: dirPath
       character(len=*), intent(out), optional :: configFile
@@ -1421,8 +1421,8 @@ end function
           gridcomptype = compp%gridcomptype
         endif
 
-        if (present(igrid)) then
-          igrid = compp%igrid
+        if (present(grid)) then
+          grid = compp%grid
         endif
 
         if (present(clock)) then
@@ -1456,7 +1456,7 @@ end function
 !
 ! !INTERFACE:
       recursive subroutine ESMF_CompSet(compp, name, vm, vm_info, gridcomptype,&
-        igrid, clock, dirPath, configFile, config, rc)
+        grid, clock, dirPath, configFile, config, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
@@ -1464,7 +1464,7 @@ end function
       type(ESMF_VM), intent(in), optional :: vm
       type(ESMF_Pointer), intent(in), optional :: vm_info
       type(ESMF_GridCompType), intent(in), optional :: gridcomptype 
-      type(ESMF_IGrid), intent(in), optional :: igrid
+      type(ESMF_Grid), intent(in), optional :: grid
       type(ESMF_Clock), intent(in), optional :: clock
       character(len=*), intent(in), optional :: dirPath
       character(len=*), intent(in), optional :: configFile
@@ -1526,8 +1526,8 @@ end function
           compp%gridcomptype = gridcomptype
         endif
 
-        if (present(igrid)) then
-          compp%igrid = igrid
+        if (present(grid)) then
+          compp%grid = grid
         endif
 
         if (present(clock)) then

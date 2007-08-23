@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.29 2007/08/20 22:57:41 cdeluca Exp $ 
+# $Id: makefile,v 1.30 2007/08/23 17:16:08 cdeluca Exp $ 
 
 ALL: build_system_tests
 
@@ -20,8 +20,6 @@ DIRS     = \
            ESMF_FieldRedistBlk2Arb \
            ESMF_FieldRedistBlk2Blk \
            ESMF_SimpleCoupling \
-           ESMF_FlowComp \
-           ESMF_FlowWithCoupling \
            ESMF_DistDir
 
 # Tests not yet ready
@@ -34,7 +32,9 @@ DIRS     = \
 #           ESMF_FieldRegridMulti \
 #           ESMF_FieldRegridOrder \
 #           ESMF_FieldExcl \
-
+# Removed while inserting new grid into components. cmd 8/07.
+#           ESMF_FlowWithCoupling \
+#           ESMF_FlowComp \
 
 CLEANDIRS   =
 CLEANFILES  =

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2007/06/12 04:54:24 cdeluca Exp $
+# $Id: makefile,v 1.2 2007/08/23 17:16:07 cdeluca Exp $
 
 all: demos
 
@@ -6,7 +6,9 @@ LOCDIR   = src/demos
 
 include $(ESMF_DIR)/makefile
 
-DIRS     = coupled_flow 
+DIRS     = 
+# Disabled while putting new fields into grids.
+# coupled_flow 
 
 CLEANDIRS   =
 CLEANFILES  =

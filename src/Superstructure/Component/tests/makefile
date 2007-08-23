@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.42 2007/06/23 07:00:54 cdeluca Exp $ 
+# $Id: makefile,v 1.43 2007/08/23 17:16:06 cdeluca Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -71,38 +71,38 @@ UTEST_CompSetServ_OBJS = ESMF_SetServCode.o
 # Components
 #
 RUN_ESMF_ComponentUTest:
-	cp -f igrid.rc $(ESMF_TESTDIR)
+	cp -f grid.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=Component NP=4 ftest
 
 RUN_ESMF_ComponentUTestUNI:
-	cp -f igrid.rc $(ESMF_TESTDIR)
+	cp -f grid.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=Component NP=1 ftest
 
 
 RUN_ESMF_GridCompCreateUTest:
-	cp -f igrid.rc $(ESMF_TESTDIR)
+	cp -f grid.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=GridCompCreate NP=4 ftest
 
 RUN_ESMF_GridCompCreateUTestUNI:
-	cp -f igrid.rc $(ESMF_TESTDIR)
+	cp -f grid.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=GridCompCreate NP=1 ftest
 
 
 RUN_ESMF_CplCompCreateUTest:
-	cp -f igrid.rc $(ESMF_TESTDIR)
+	cp -f grid.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=CplCompCreate NP=4 ftest
 
 RUN_ESMF_CplCompCreateUTestUNI:
-	cp -f igrid.rc $(ESMF_TESTDIR)
+	cp -f grid.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=CplCompCreate NP=1 ftest
 
 
 RUN_ESMF_CompSetServUTest:
-	cp -f igrid.rc $(ESMF_TESTDIR)
+	cp -f grid.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=CompSetServ NP=4 ftest
 
 RUN_ESMF_CompSetServUTestUNI:
-	cp -f igrid.rc $(ESMF_TESTDIR)
+	cp -f grid.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=CompSetServ NP=1 ftest
 
 #
@@ -115,11 +115,11 @@ $(ESMC_TESTDIR)/ESMC_CompCreate: ESMC_CompCreate.o
 	${ESMF_RM} -f ESMC_CompCreate.o
 
 RUN_ESMC_CompCreate:
-	cp -f igrid.rc $(ESMF_TESTDIR)
+	cp -f grid.rc $(ESMF_TESTDIR)
 	-${ESMF_MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_CompCreate > $(ESMC_TESTDIR)/ESMC_CompCreate.stdout
 
 RUN_ESMC_CompCreateUNI:
-	cp -f igrid.rc $(ESMF_TESTDIR)
+	cp -f grid.rc $(ESMF_TESTDIR)
 	-${ESMF_MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_CompCreate > $(ESMC_TESTDIR)/ESMC_CompCreate.stdout
 
 
@@ -134,11 +134,11 @@ $(ESMC_TESTDIR)/ESMF_CompRun: ESMF_UserGComp.o ESMF_CompRun.o
 	${ESMF_RM} -f ESMF_CompRun.o
 
 RUN_ESMF_CompRun:
-	cp -f igrid.rc $(ESMF_TESTDIR)
+	cp -f grid.rc $(ESMF_TESTDIR)
 	-${ESMF_MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_CompRun > $(ESMC_TESTDIR)/ESMF_CompRun.stdout
 
 RUN_ESMF_CompRunUNI:
-	cp -f igrid.rc $(ESMF_TESTDIR)
+	cp -f grid.rc $(ESMF_TESTDIR)
 	-${ESMF_MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CompRun > $(ESMC_TESTDIR)/ESMF_CompRun.stdout
 
 
@@ -155,11 +155,11 @@ $(ESMC_TESTDIR)/ESMC_CompRun: ESMF_UserGComp.o ESMF_UserGComp_F.o ESMC_CompRun.o
 	${ESMF_RM} -f ESMC_CompRun.o ESMF_UserGComp_F.o ESMF_UserGComp.o
 
 RUN_ESMC_CompRun:
-	cp -f igrid.rc $(ESMF_TESTDIR)
+	cp -f grid.rc $(ESMF_TESTDIR)
 	-${ESMF_MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_CompRun > $(ESMC_TESTDIR)/ESMC_CompRun.stdout
 
 RUN_ESMC_CompRunUNI:
-	cp -f igrid.rc $(ESMF_TESTDIR)
+	cp -f grid.rc $(ESMF_TESTDIR)
 	-${ESMF_MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_CompRun > $(ESMC_TESTDIR)/ESMC_CompRun.stdout
 
 

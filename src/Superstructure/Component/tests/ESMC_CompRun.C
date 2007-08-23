@@ -1,4 +1,4 @@
-// $Id: ESMC_CompRun.C,v 1.15 2007/07/19 21:41:05 cdeluca Exp $
+// $Id: ESMC_CompRun.C,v 1.16 2007/08/23 17:16:03 cdeluca Exp $
 //
 // Test code which creates a new Component in C++.  The called
 // component is still in F90.
@@ -43,7 +43,7 @@ main(int argc, char **argv)
     // TODO: query framework for default layout here
 
     cname = "Atmosphere";
-    comp1 = ESMC_GridCompCreate(cname, ESMF_ATM, NULL, "igrid.rc", clock, &rc);
+    comp1 = ESMC_GridCompCreate(cname, ESMF_ATM, NULL, "grid.rc", clock, &rc);
 
     printf("GridComp Create returned, name = '%s'\n", cname);
 

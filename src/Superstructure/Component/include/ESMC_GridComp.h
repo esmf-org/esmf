@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.h,v 1.18 2007/06/23 07:00:50 cdeluca Exp $
+// $Id: ESMC_GridComp.h,v 1.19 2007/08/23 17:16:00 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
 #include "ESMC_DELayout.h"
 #include "ESMC_Time.h"
 #include "ESMC_Clock.h"
-#include "ESMC_InternGrid.h"
+#include "ESMC_Grid.h"
 #include "ESMC_FTable.h"  // function & data pointer table 
 #include "ESMC_State.h"
 #include "ESMC_Comp.h"
@@ -113,7 +113,7 @@
 // an ESMC_GridComp object.
 
  ESMC_GridComp *ESMC_GridCompCreate(char *name, enum ESMC_GridCompType mtype,
-                                    ESMC_IGrid *igrid, char *configFile, 
+                                    ESMC_Grid *grid, char *configFile, 
                                     ESMC_Clock *clock, int *rc);
  int ESMC_GridCompDestroy(ESMC_GridComp *comp);
 
@@ -122,7 +122,7 @@
 extern "C" {
  void FTN(f_esmf_gridcompcreate)(ESMC_GridComp *comp, char *name, 
                          ESMC_GridCompType *mtype, 
-                         ESMC_IGrid *igrid, ESMC_Config *config, 
+                         ESMC_Grid *grid, ESMC_Config *config, 
                          char *configFile, ESMC_Clock *clock, 
                          int *rc, int nlen, int clen);
  void FTN(f_esmf_gridcompdestroy)(ESMC_GridComp *comp, int *rc);

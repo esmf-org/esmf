@@ -1,4 +1,4 @@
-! $Id: ESMF_UserMain.F90,v 1.17 2007/07/19 21:41:06 cdeluca Exp $
+! $Id: ESMF_UserMain.F90,v 1.18 2007/08/23 17:16:04 cdeluca Exp $
 !
 ! Test code which creates a new Application Component. 
 !   Expects to be compiled with ESMF_UserCComp.F90 and ESMF_UserGComp.F90
@@ -19,7 +19,7 @@
 !   ! ESMF Framework module
     use ESMF_Mod
 
-    use UserGridCompMod, only: User_SetServices => igrid_services
+    use UserGridCompMod, only: User_SetServices => grid_services
     use UserCplCompMod, only: User_SetServices => coupler_services
     
     implicit none
@@ -41,7 +41,7 @@
     type(ESMF_Config) :: tconfig
     type(ESMF_DELayout) :: tlayout
 
-    type(ESMF_IGrid) :: igrid1, igrid2
+    type(ESMF_IGrid) :: grid1, grid2
     type(ESMF_State) :: atmimport, ocnexport
 
     character(ESMF_MAXSTR) :: tname, gname1, gname2, cname
@@ -92,18 +92,18 @@
     !-------------------------------------------------------------------------
     !  Create the 2 Gridded Components
 
-    igrid1 = ESMF_IGridCreate("ocean igrid", rc=rc)
+    grid1 = ESMF_IGridCreate("ocean grid", rc=rc)
     gname1 = "Ocean"
     oceangridcomp = ESMF_GridCompCreate(name=gname1, layout=tlayout, &
-                                    mtype=ESMF_OCEAN, igrid=igrid1, &
+                                    mtype=ESMF_OCEAN, grid=grid1, &
                                     config=tconfig, rc=rc)  
 
     print *, "GridComp Create completed, name = ", trim(gname1)
 
-    igrid2 = ESMF_IGridCreate("atm igrid", rc=rc)
+    grid2 = ESMF_IGridCreate("atm grid", rc=rc)
     gname2 = "Atmosphere"
     atmgridcomp = ESMF_GridCompCreate(name=gname2, layout=tlayout, &
-                                    mtype=ESMF_ATM, igrid=igrid2, &
+                                    mtype=ESMF_ATM, grid=grid2, &
                                     config=tconfig, rc=rc)  
 
     print *, "GridComp Create completed, name = ", trim(gname2)
@@ -120,8 +120,8 @@
     !-------------------------------------------------------------------------
     !  Register the entry points for each component
 
-    call ESMF_GridCompSetServices(oceangridcomp, igrid_services, rc)
-    call ESMF_GridCompSetServices(atmgridcomp, igrid_services, rc)
+    call ESMF_GridCompSetServices(oceangridcomp, grid_services, rc)
+    call ESMF_GridCompSetServices(atmgridcomp, grid_services, rc)
     call ESMF_CplCompSetServices(cplcomp, cpl_services, rc)
 
     !-------------------------------------------------------------------------

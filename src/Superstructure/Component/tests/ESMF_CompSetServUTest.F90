@@ -1,4 +1,4 @@
-! $Id: ESMF_CompSetServUTest.F90,v 1.7 2007/06/23 07:00:51 cdeluca Exp $
+! $Id: ESMF_CompSetServUTest.F90,v 1.8 2007/08/23 17:16:03 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -74,7 +74,7 @@
 !   !  Create a Component
     cname = "Atmosphere"
     comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
-                                             configFile="igrid.rc", rc=rc)  
+                                             configFile="grid.rc", rc=rc)  
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Component Test"
@@ -179,7 +179,7 @@
 !   !  Create a Component
     cname = "Atmosphere - child in parent VM context"
     comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
-      configFile="igrid.rc", contextflag=ESMF_CHILD_IN_PARENT_VM, rc=rc)  
+      configFile="grid.rc", contextflag=ESMF_CHILD_IN_PARENT_VM, rc=rc)  
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Component Test"
