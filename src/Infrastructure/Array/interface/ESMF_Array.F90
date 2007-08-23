@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.63 2007/08/15 18:41:23 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.64 2007/08/23 16:29:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -128,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.63 2007/08/15 18:41:23 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.64 2007/08/23 16:29:38 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -637,9 +637,9 @@ contains
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
 !   {\tt ESMF\_ArraySparseMatMul()} on any pair of Arrays that are congruent
-!   with the {\tt srcArray}, {\tt dstArray} pair. Congruent Arrays possess
-!   matching DistGrids and the shape of the local array tiles matches between
-!   the Arrays for every DE.
+!   and typekind conform with the {\tt srcArray}, {\tt dstArray} pair. 
+!   Congruent Arrays possess matching DistGrids and the shape of the local
+!   array tiles matches between the Arrays for every DE.
 !
 !   This call is {\em collective} across the current VM.
 !
@@ -974,9 +974,9 @@ contains
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
 !   {\tt ESMF\_ArraySparseMatMul()} on any pair of Arrays that are congruent
-!   with the {\tt srcArray}, {\tt dstArray} pair. Congruent Arrays possess
-!   matching DistGrids and the shape of the local array tiles matches between
-!   the Arrays for every DE.
+!   and typekind conform with the {\tt srcArray}, {\tt dstArray} pair. 
+!   Congruent Arrays possess matching DistGrids and the shape of the local
+!   array tiles matches between the Arrays for every DE.
 !
 !   This call is {\em collective} across the current VM.
 !
@@ -1041,8 +1041,8 @@ contains
 !
 ! !DESCRIPTION:
 !   Execute a precomputed Array sparse matrix multiplication from {\tt srcArray}
-!   to {\tt dstArray}. Both Arrays {\tt srcArray} and {\tt dstArray} must be
-!   congruent with the respective Arrays used during 
+!   to {\tt dstArray}. Both {\tt srcArray} and {\tt dstArray} must be
+!   congruent and typekind conform with the respective Arrays used during 
 !   {\tt ESMF\_ArraySparseMatMulStore()}. Congruent Arrays possess
 !   matching DistGrids and the shape of the local array tiles matches between
 !   the Arrays for every DE.
