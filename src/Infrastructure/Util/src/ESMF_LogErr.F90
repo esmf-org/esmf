@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.37 2007/07/17 21:57:44 samsoncheung Exp $
+! $Id: ESMF_LogErr.F90,v 1.38 2007/08/23 23:48:05 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -139,13 +139,13 @@ type ESMF_LogPrivate
 #ifndef ESMF_NO_INITIALIZERS
     type(ESMF_LogEntry), dimension(:),pointer       ::  LOG_ENTRY=>Null()
     type(ESMF_Logical)                              ::  FileIsOpen=ESMF_FALSE
-    integer, dimension(:), pointer                  ::  errorMask(:)=>Null()
     integer                                         ::  errorMaskCount=0
+    integer, dimension(:), pointer                  ::  errorMask(:)=>Null()
 #else
     type(ESMF_LogEntry), dimension(:),pointer       ::  LOG_ENTRY
     type(ESMF_Logical)                              ::  FileIsOpen
-    integer, dimension(:), pointer                  ::  errorMask(:)
     integer                                         ::  errorMaskCount
+    integer, dimension(:), pointer                  ::  errorMask(:)
 #endif                                          
     character(len=32)                               ::  nameLogErrFile
     character(len=ESMF_MAXSTR)                      ::  petNumLabel
