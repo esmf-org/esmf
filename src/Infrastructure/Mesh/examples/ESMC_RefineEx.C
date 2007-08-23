@@ -149,7 +149,7 @@ void test_adapt_wave_exec(HAdapt &hadapt, Mesh &mesh) {
   // Adaptivity loop
   while (nstep < num_itr) {
 
-    Par::Out() << "**** Running step " << nstep << std::endl;
+    if (Par::Rank() == 0) std::cout << "**** Running step " << nstep << std::endl;
 
     // Loop and mark elements.
     Mesh::iterator b_obj = mesh.elem_begin(), e_obj = mesh.elem_end(), i_obj;
@@ -275,14 +275,17 @@ int main(int argc, char *argv[]) {
   } 
    catch (std::exception &x) {
     std::cerr << "std::Exception:" << x.what() << std::endl;
+    std::cerr << std::flush;
     Par::Abort();
   }
    catch (const char *msg) {
     std::cerr << "Exception:" << msg << std::endl;
+    std::cerr << std::flush;
     Par::Abort();
   }
   catch(...) {
     std::cerr << "Unknown exception:" << std::endl;
+    std::cerr << std::flush;
     Par::Abort();
   }
 

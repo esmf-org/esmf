@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.C,v 1.2 2007/08/08 17:14:12 dneckels Exp $
+// $Id: ESMC_Mesh.C,v 1.3 2007/08/23 21:22:14 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -354,7 +354,7 @@ void Mesh::assign_new_ids() {
             MeshObj::id_type newid = needed_ids[i++];
             // Take object from map
             MeshObj &obj = *oi;
-Par::Out() << MeshObjTypeString(obj_type) << " " << obj.get_id() << " -> " << newid << std::endl;
+//Par::Out() << MeshObjTypeString(obj_type) << " " << obj.get_id() << " -> " << newid << std::endl;
             MeshObjIDMap &omap = get_map(obj_type);
             omap.erase(&obj);
             obj.key = newid;
@@ -1750,7 +1750,7 @@ void Mesh::build_sym_comm_rel(UInt obj_type) {
      MeshObj &node = *ni;
      UInt oproc = node.get_owner();
      if (oproc != (UInt) Par::Rank()) {
- Par::Out() << "proc:" << Par::Rank() << ", shared obj:" << MeshObjTypeString(obj_type) << ", id=" << node.get_id() << ", owner=" << node.get_owner() << std::endl;
+ //Par::Out() << "proc:" << Par::Rank() << ", shared obj:" << MeshObjTypeString(obj_type) << ", id=" << node.get_id() << ", owner=" << node.get_owner() << std::endl;
        snodes.push_back(CommRel::CommNode(&node, oproc));
      }
 

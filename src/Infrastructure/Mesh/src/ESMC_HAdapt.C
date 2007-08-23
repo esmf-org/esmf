@@ -1,4 +1,4 @@
-// $Id: ESMC_HAdapt.C,v 1.2 2007/08/20 19:34:51 dneckels Exp $
+// $Id: ESMC_HAdapt.C,v 1.3 2007/08/23 21:22:13 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -461,7 +461,11 @@ Par::Out() << "Element " << elem.get_id() << " and siblings ok to unrefine, chec
         may_unrefine_list.push_back(&parent);
 
       } // ok to unrefine
-      else Par::Out() << "Element " << elem.get_id() << " and siblings NOT ok to unrefine, check 1" << std::endl;
+      else {
+#ifdef REF_DEBUG
+ Par::Out() << "Element " << elem.get_id() << " and siblings NOT ok to unrefine, check 1" << std::endl;
+#endif
+      }
 
     } // siblings
 

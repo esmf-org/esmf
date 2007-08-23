@@ -1,4 +1,4 @@
-// $Id: ESMC_Rebalance.C,v 1.4 2007/08/23 17:54:06 dneckels Exp $
+// $Id: ESMC_Rebalance.C,v 1.5 2007/08/23 21:22:15 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -46,8 +46,10 @@ bool Rebalance(Mesh &mesh) {
     return false;
   }
 
+#ifdef REBAL_DEBUG
   Par::Out() << "Rebalance comm:" << std::endl;
   mig.CommPrint(Par::Out());
+#endif
 
   // Assign elements and child elements to new processors
   set_new_elem_owners(mesh, mig);

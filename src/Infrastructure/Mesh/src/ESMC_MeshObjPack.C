@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshObjPack.C,v 1.1 2007/08/07 17:48:01 dneckels Exp $
+// $Id: ESMC_MeshObjPack.C,v 1.2 2007/08/23 21:22:14 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -48,13 +48,13 @@ void MeshObjPack(SparseMsg::buffer &b, MeshObj &obj, bool ghosting) {
 
   // Obj id;
   SparsePack<MeshObj::id_type>(b, obj.get_id());
-Par::Out() << "Packingn id=" << obj.get_id() << std::endl;
+//Par::Out() << "Packingn id=" << obj.get_id() << std::endl;
 
   // Obj topo
   const MeshObjTopo *topo = GetMeshObjTopo(obj);
   UInt tnum = topo ? topo->number : 0;
   SparsePack<UInt>(b, tnum);
-Par::Out() << "Packingn tnum=" << tnum << std::endl;
+//Par::Out() << "Packingn tnum=" << tnum << std::endl;
 
   // Pack owner
   UInt owner = obj.get_owner();
@@ -82,12 +82,12 @@ void MeshObjUnpack(MeshDB &mesh, SparseMsg::buffer &b, MeshObj *&obj) {
   // Obj id;
   MeshObj::id_type id;
   SparseUnpack<MeshObj::id_type>(b, id);
-Par::Out() << "Unpack id=" << id << std::endl;
+//Par::Out() << "Unpack id=" << id << std::endl;
 
   // Obj topo
   UInt tnum;
   SparseUnpack<UInt>(b, tnum);
-Par::Out() << "Unpack tnum=" << tnum << std::endl;
+//Par::Out() << "Unpack tnum=" << tnum << std::endl;
   const MeshObjTopo *topo = GetTopo(tnum);
 
   // Obj owner
@@ -124,8 +124,10 @@ Par::Out() << "Unpack tnum=" << tnum << std::endl;
   if (obj_exists) {
 
     // May need to update owner.  Any diagnostic check???
+/*
 Par::Out() << "obj " << MeshObjTypeString(obj->get_type()) << " " << obj->get_id() << " old owner:"
     << obj->get_owner() << " -> " << owner << std::endl;
+*/
     obj->set_owner(owner);
 
     for (UInt n = 0; n < nrel; n++) {
@@ -184,7 +186,7 @@ Par::Out() << "obj " << MeshObjTypeString(obj->get_type()) << " " << obj->get_id
     }
   
     // Now add object to Mesh
-Par::Out() << "Unpacked object:" << MeshObjTypeString(obj->get_type()) << ", id=" << obj->get_id() << std::endl;
+//Par::Out() << "Unpacked object:" << MeshObjTypeString(obj->get_type()) << ", id=" << obj->get_id() << std::endl;
     mesh.add_object(obj, attr, topo);
   } // if !exists
 
