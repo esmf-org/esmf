@@ -71,42 +71,7 @@ void wave_refine_unrefine(HAdapt &hadapt, bool rebal)
 
 }
 
-// Return the diameter of an element.
-void get_diam(double &diameter, Mesh &mesh, MeshObj &parent_obj) {
-  MEField<> &c_ref = *mesh.GetCoordField();
-
-  double ave[3];
-  ave[0] = ave[1] = ave[2] = 0.0;
-
-  // Loop over parent's nodes
-  MeshObjRelationList::iterator n_i  = parent_obj.Relations.begin();
-
-  int num_parent_nodes = 0;
-
-  double max_diam = 0;
-  double * coord0 = c_ref.data(*n_i->obj); // child 0
-  for ( ; n_i != parent_obj.Relations.end() &&
-          n_i->obj->get_type() == MeshObj::NODE ; ++n_i )
-  {
-    double * coord = c_ref.data(*n_i->obj);
-
-    if ( n_i->type == MeshObj::USES ) {
-      ++num_parent_nodes ;
-      double diam = 0;
-      diam += std::fabs(coord0[0] - coord[0]);
-      diam += std::fabs(coord0[1] - coord[1]);
-      if (mesh.spatial_dim() == 3)
-        diam += std::fabs(coord0[2] - coord[2]);
-
-      if (diam > max_diam) max_diam = diam;
-    }
-  }
-
-  diameter = max_diam;
-
-}
-
-// Get the centroid of an element.
+// Get the centroid of an element.  Calc the diameter at the same time
 void get_avgerage_nodecoord(double &diameter, double ave[], Mesh &mesh, MeshObj &parent_obj) {
   MEField<> &c_ref = *mesh.GetCoordField();
 
@@ -194,8 +159,11 @@ void test_adapt_wave_exec(HAdapt &hadapt, Mesh &mesh) {
       // First, is the element within epsilon of the circle?
       double ave[3];
       double diameter;
+
+      // Get the element centroid, and the diamter of the element
       get_avgerage_nodecoord(diameter, ave, mesh, elem);
 
+      // Set the diameter variable.
       double *hv = hf->data(elem);
       *hv = diameter;
       
@@ -203,14 +171,16 @@ void test_adapt_wave_exec(HAdapt &hadapt, Mesh &mesh) {
       // subtract center from ave
       ave[0] -= center[0]; ave[1] -= center[1]; ave[2] -= center[2];
 
+      // Calculate distance to the circle.
       double d2circle = 0;
         d2circle = ave[0]*ave[0] + ave[1]*ave[1];
       if (sdim == 3) d2circle += ave[2]*ave[2];
 
       d2circle = std::sqrt(d2circle);
 
-      // That is distance to center of circle, now 
-
+      // That is distance to center of circle, now refine if within the
+      // tolerance.  Unrefine with a slight hysterisis, to avoid chattering between
+      // the refine/unrefine state.
       if (std::fabs(d2circle-circleRadius) < epsilon && diameter > h) { 
         hadapt.MarkElement(elem, HAdapt::ELEM_REFINE);
       } else
@@ -225,21 +195,6 @@ void test_adapt_wave_exec(HAdapt &hadapt, Mesh &mesh) {
     // Now that all elements are marked, perform the refinement.  Loadbalance every load_bal steps.
     wave_refine_unrefine(hadapt, ((nstep % load_bal) == 0));
 
-
-    // Set the element diameter variable.  In 3d this is a good variable to volume
-    // render for viewing the mesh sizes.
-    {
-       Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
-       for (; ei != ee; ++ei) {
-         MeshObj &elem = *ei;
-
-         double h;
-         get_diam(h, mesh, elem);
-
-         double *hv = hf->data(elem);
-         *hv = h;
-       }
-    }
 
     // Write out the mesh at this frequency
     int freq = mesh.spatial_dim() == 2 ? 1 : 4;
@@ -280,8 +235,9 @@ int main(int argc, char *argv[]) {
   // processors.
 
   // Choose any of the following topologies
-  //const MeshObjTopo *topo = GetTopo("QUAD");
-  const MeshObjTopo *topo = GetTopo("TRI3");
+  const MeshObjTopo *topo = GetTopo("QUAD");
+  //const MeshObjTopo *topo = GetTopo("TRI3");
+
   //const MeshObjTopo *topo = GetTopo("HEX");
   //const MeshObjTopo *topo = GetTopo("TETRA");
 
