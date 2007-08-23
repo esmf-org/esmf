@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.45 2007/06/26 17:51:07 samsoncheung Exp $
+! $Id: ESMF_Init.F90,v 1.46 2007/08/23 17:34:10 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -121,6 +121,14 @@
 !     {\tt MPI\_Init()}. For instance, it is unsafe for some MPI implementations,
 !     such as MPICH, to do IO before the MPI environment is initialized. Please
 !     consult the documentation of your MPI implementation for details.
+!
+!     Note that when using MPICH as the mpi library, ESMF needs to use
+!     the application command line arguments for {\tt MPI\_Init()}. However,
+!     ESMF acquires these arguments internally and the user does not need
+!     to worry about providing them. Also, note that ESMF does not alter
+!     the command line arguments, so that if the user obtains them they will
+!     be as specified on the command line (including those which MPICH would
+!     normally strip out). 
 !
 !     Before exiting the application
 !     the user must call {\tt ESMF\_Finalize()} to release resources 
