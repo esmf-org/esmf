@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshGen.C,v 1.1 2007/08/20 19:46:10 dneckels Exp $
+// $Id: ESMC_MeshGen.C,v 1.2 2007/08/23 17:54:05 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -55,6 +55,65 @@ static void gen2d(Mesh &mesh, const MeshObjTopo *topo) {
         MeshObj *elem = new MeshObj(MeshObj::ELEMENT, 1, 0);
   
         mesh.add_element(elem, node, 1, topo);
+      }
+
+      // Set up the coordinates to match the unit cube.
+      IOField<NodalField> *node_coord = mesh.RegisterNodalField("coordinates", mesh.spatial_dim());
+
+      if (Par::Rank() == 0) {
+        double *c = node_coord->data(*node[0]);
+        c[0] = 0; c[1] = 0;
+        c = node_coord->data(*node[1]);
+        c[0] = 1; c[1] = 0;
+        c = node_coord->data(*node[2]);
+        c[0] = 1; c[1] = 1;
+        c = node_coord->data(*node[3]);
+        c[0] = 0; c[1] = 1;
+      }
+    
+    }
+    break;
+
+    case 3:
+    // Triangle
+    {
+      std::vector<MeshObj*> node(4, (MeshObj*) 0);
+
+      mesh.set_parametric_dimension(2);
+      mesh.set_spatial_dimension(2);
+
+      if (Par::Rank() == 0) {
+        // Create the nodes
+        node[0] = new MeshObj(MeshObj::NODE, 1, 0);
+        node[1] = new MeshObj(MeshObj::NODE, 2, 1);
+        node[2] = new MeshObj(MeshObj::NODE, 3, 2);
+        node[3] = new MeshObj(MeshObj::NODE, 4, 3);
+  
+        mesh.add_node(node[0], 1);
+        mesh.add_node(node[1], 1);
+        mesh.add_node(node[2], 1);
+        mesh.add_node(node[3], 1);
+  
+        // Set as locally owned
+        node[0]->set_owner(0);
+        node[1]->set_owner(0);
+        node[2]->set_owner(0);
+        node[3]->set_owner(0);
+  
+        // Create the elements
+        std::vector<MeshObj*> tnode(3,static_cast<MeshObj*>(0));
+
+        MeshObj *elem = new MeshObj(MeshObj::ELEMENT, 1, 0);
+        MeshObj *elem1 = new MeshObj(MeshObj::ELEMENT, 2, 1);
+
+        // First triangle
+        tnode[0] = node[0]; tnode[1] = node[1]; tnode[2] = node[2];
+        mesh.add_element(elem, tnode, 1, topo);
+
+        // Second triangle
+        tnode[0] = node[3]; tnode[1] = node[2]; tnode[2] = node[0];
+        mesh.add_element(elem1, tnode, 1, topo);
+  
       }
 
       // Set up the coordinates to match the unit cube.

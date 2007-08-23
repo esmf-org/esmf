@@ -278,7 +278,12 @@ int main(int argc, char *argv[]) {
   // To avoid reading a datafile, we generate a start mesh by a simple procedure:
   // Build a hypercube on proc 0; Refine uniformly and then rebalance across
   // processors.
-  const MeshObjTopo *topo = GetTopo("QUAD");
+
+  // Choose any of the following topologies
+  //const MeshObjTopo *topo = GetTopo("QUAD");
+  const MeshObjTopo *topo = GetTopo("TRI3");
+  //const MeshObjTopo *topo = GetTopo("HEX");
+  //const MeshObjTopo *topo = GetTopo("TETRA");
 
   HyperCube(srcmesh, topo);
 

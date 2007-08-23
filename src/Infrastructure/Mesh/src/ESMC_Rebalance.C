@@ -1,4 +1,4 @@
-// $Id: ESMC_Rebalance.C,v 1.3 2007/08/08 22:46:52 dneckels Exp $
+// $Id: ESMC_Rebalance.C,v 1.4 2007/08/23 17:54:06 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@ bool Rebalance(Mesh &mesh) {
   CommReg mig("_rebalance_migration", mesh, mesh);
 
   if (!form_rebalance_comm(mesh, mig)) {
-    std::cout << "No rebalance!!";
+    //std::cout << "No rebalance!!";
     return false;
   }
 
@@ -492,7 +492,7 @@ static bool form_rebalance_comm(Mesh &mesh, CommReg &migration) {
     &numExport, &exportGlobalGids, &exportLocalGids, &exportProcs, &exportToPart);
 
 
-std::cout << "P:" << rank << ", numIMp:" << numImport << ", numExport:" << numExport << std::endl;
+//std::cout << "P:" << rank << ", numIMp:" << numImport << ", numExport:" << numExport << std::endl;
 
   // Figure out the migration CommSpec.  Just put the genesis
   // elements in, and where they go.
