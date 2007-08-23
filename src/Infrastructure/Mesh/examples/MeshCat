@@ -1,0 +1,81 @@
+#!/usr/bin/perl
+# $Id: MeshCat,v 1.1 2007/08/23 17:46:04 dneckels Exp $
+#
+# Earth System Modeling Framework
+# Copyright 2002-2007, University Corporation for Atmospheric Research, 
+# Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+# Laboratory, University of Michigan, National Centers for Environmental 
+# Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+# NASA Goddard Space Flight Center.
+# Licensed under the University of Illinois-NCSA License.
+
+
+# (all lines below between the !BOP and !EOP markers will be included in
+#  the automated document processing.)
+#-------------------------------------------------------------------------
+# these lines prevent this file from being read more than once if it
+# ends up being included multiple times
+
+# Script to concatenate a suite of parallel mesh files together.
+# 
+# Example: Suppose we run a simulation on 5 processors, where the output is refine_out
+#          and that we run the process for two steps
+# We get the files
+#   refine_out_0000.5.0.vtk
+#   refine_out_0000.5.1.vtk
+#   refine_out_0000.5.2.vtk
+#   refine_out_0000.5.3.vtk
+#   refine_out_0000.5.4.vtk
+#
+#   refine_out_0001.5.0.vtk
+#   refine_out_0001.5.1.vtk
+#   refine_out_0001.5.2.vtk
+#   refine_out_0001.5.3.vtk
+#   refine_out_0001.5.4.vtk
+#
+#   The numbers are refine_out_{timestep}.{nproc}.{procrank}.vtk
+#
+#   For viewing the files (easily) in paraview, we wish to concatenate each of these
+#   files into one global spatial mesh.
+#
+#   We run 
+#     MeshCat path_to_ESMC_DCatEx refine_out 5
+#
+#   This script will loop through all files that match the pattern refine_out_[0-9]+.5.[0-9]+.vtk
+#   and create files cat_refine_out_0000.vtk, cat_refine_out_0001.vtk, which paraview
+#   can then read and animate.
+#
+#   To use paraview, go to http://www.paraview.org, download the software, and then just
+#   run the program and open the cat_*.vtk file under the menu.  The program will automatically
+#   animate the vtk files.
+
+
+
+
+if ($#ARGV != 2) {
+  print "Usage:MeshCat concat_path file_stub nprocs\n";
+  exit;
+}
+
+$concat = $ARGV[0];
+$file_stub = $ARGV[1];
+$nproc = $ARGV[2];
+
+
+# Read all files in the directory
+opendir(DIR, "./");
+@allfiles = readdir(DIR);
+close(DIR);
+
+# So we can tell when we might finish
+@allfilessorted = sort @allfiles;
+
+# Process the files, building a list of files to concat
+foreach $file (@allfilessorted) {
+
+  if ($file =~ m/(${file_stub}_[0-9]+)\.${nproc}\.0\.vtk/) {
+    $cfile = $1;
+    print "Concatenate ${cfile}\n";
+    `$concat $cfile $nproc`;
+  }
+}

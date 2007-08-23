@@ -165,7 +165,7 @@ void test_adapt_wave_exec(HAdapt &hadapt, Mesh &mesh) {
 
   const double circleRadius = 0.25;
   const double epsilon = 0.02; // refine within this distance of circle
-  const double h = mesh.spatial_dim() == 2 ? 0.013 : 0.07; // refine elements to this size
+  const double h = mesh.spatial_dim() == 2 ? 0.02 : 0.07; // refine elements to this size
 
   const int load_bal = 3;
 
@@ -180,12 +180,6 @@ void test_adapt_wave_exec(HAdapt &hadapt, Mesh &mesh) {
   double ddist = (1+2*circleRadius/sqrtd)/num_itr;
 
   int nstep = 0;
-
-  // Program used to concatenate mesh (for viewing with a tool like paraview).
-  char *concat = getenv("ESMF_MESHCAT");
-  if (!concat) {
-    Throw() << "Please define the variable ESMF_MESHCAT to point to the ESMF_DCatEx executable";
-  }
 
   // Adaptivity loop
   while (nstep < num_itr) {
@@ -255,19 +249,6 @@ void test_adapt_wave_exec(HAdapt &hadapt, Mesh &mesh) {
       std::sprintf(buf, "refine_out_%04d", nout++);
       WriteMesh(mesh, buf, 1, 0.0, ESMC_FILE_VTK);
 
-      MPI_Barrier(Par::Comm());
-
-      // Concatenate the mesh on processor 0.  Again, this is just for 
-      // debug and viewing in paraview.  A real application would most likely not
-      // do this or would do this step externally.
-      if (Par::Rank() == 0) {
-        char sbuf[1024];
-        std::sprintf(sbuf, "%s %s %d", concat, buf, Par::Size());
-        std::cout << "executing:" << sbuf << std::endl;
-        system(sbuf);
-      }
-
-      MPI_Barrier(Par::Comm());
     }
 
     // move circle
