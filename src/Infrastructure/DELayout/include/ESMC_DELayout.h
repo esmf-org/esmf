@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.43 2007/08/24 18:18:00 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.44 2007/08/24 23:34:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -210,15 +210,15 @@ class XXE{
     enum OpId{
       send, recv,
       sendnb, recvnb, sendnbRRA, recvnbRRA,
-      waitOnIndex, waitOnIndexRange,
+      waitOnIndex, waitOnAnyIndexSub, waitOnIndexRange,
       productSumVector,
       productSumScalar, productSumScalarRRA,
       productSumSuperScalarRRA,
       productSumSuperScalarContigRRA,
       memCpy, memCpySrcRRA,
       memGatherSrcRRA,
-      // --- sub-streams
-      subStream,
+      // --- subs
+      xxeSub, xxeSubMulti,
       // --- profiling
       wtimer,
       // --- misc
@@ -247,14 +247,14 @@ class XXE{
     vmk_commhandle ***commhandle;
     int commhandleCount;
     int commhandleMaxCount;
-    XXE **xxeSubStream;
-    int xxeSubStreamCount;
-    int xxeSubStreamMaxCount;
+    XXE **xxeSubList;
+    int xxeSubCount;
+    int xxeSubMaxCount;
     ESMC_TypeKind typekind[10];
     
   public:
     XXE(int maxArg=1000, int storageMaxCountArg=1000,
-      int commhandleMaxCountArg=1000, int xxeSubStreamMaxCountArg=1000){
+      int commhandleMaxCountArg=1000, int xxeSubMaxCountArg=1000){
       // constructor
       stream = new StreamElement[maxArg]; count = 0; max = maxArg;
       storage = new char*[storageMaxCountArg];
@@ -263,9 +263,9 @@ class XXE{
       commhandle = new vmk_commhandle**[commhandleMaxCountArg];
       commhandleCount  = 0;
       commhandleMaxCount = commhandleMaxCountArg;
-      xxeSubStream = new XXE*[xxeSubStreamMaxCountArg];
-      xxeSubStreamCount  = 0;
-      xxeSubStreamMaxCount = xxeSubStreamMaxCountArg;
+      xxeSubList = new XXE*[xxeSubMaxCountArg];
+      xxeSubCount  = 0;
+      xxeSubMaxCount = xxeSubMaxCountArg;
     }
     ~XXE(){     // destructor
       delete [] stream;
@@ -277,9 +277,9 @@ class XXE{
         delete commhandle[i];
       }
       delete [] commhandle;
-      for (int i=0; i<xxeSubStreamCount; i++)
-        delete xxeSubStream[i];
-      delete [] xxeSubStream;
+      for (int i=0; i<xxeSubCount; i++)
+        delete xxeSubList[i];
+      delete [] xxeSubList;
     }
     int exec(int rraCount=0, char **rraList=NULL, double *dTime=NULL,
       int indexStart=-1, int indexStop=-1);
@@ -291,7 +291,7 @@ class XXE{
     int growStream(int increase);
     int growStorage(int increase);
     int growCommhandle(int increase);
-    int growXxeSubStream(int increase);
+    int growXxeSub(int increase);
     
   // types to interprete the StreamElement data
   public:
@@ -339,6 +339,15 @@ class XXE{
       OpSubId opSubId;
       int index;
     }WaitOnIndexInfo;
+
+    typedef struct{
+      OpId opId;
+      OpSubId opSubId;
+      int count;
+      XXE **xxe;
+      int *index;
+      int *completeFlag;
+    }WaitOnAnyIndexSubInfo;
 
     typedef struct{
       OpId opId;
@@ -426,7 +435,14 @@ class XXE{
       OpId opId;
       OpSubId opSubId;
       XXE *xxe;
-    }SubStreamInfo;
+    }XxeSubInfo;
+    
+    typedef struct{
+      OpId opId;
+      OpSubId opSubId;
+      int count;
+      XXE **xxe;
+    }XxeSubMultiInfo;
     
     // --- profiling
     

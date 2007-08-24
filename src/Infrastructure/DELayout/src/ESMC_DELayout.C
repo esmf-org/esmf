@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.76 2007/08/24 18:18:00 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.77 2007/08/24 23:34:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.76 2007/08/24 18:18:00 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.77 2007/08/24 23:34:51 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2459,6 +2459,7 @@ int XXE::exec(
   SendnbRRAInfo *xxeSendnbRRAInfo;
   RecvnbRRAInfo *xxeRecvnbRRAInfo;
   WaitOnIndexInfo *xxeWaitOnIndexInfo;
+  WaitOnAnyIndexSubInfo *xxeWaitOnAnyIndexSubInfo;
   WaitOnIndexRangeInfo *xxeWaitOnIndexRangeInfo;
   CommhandleInfo *xxeCommhandleInfo;
   ProductSumVectorInfo *xxeProductSumVectorInfo;
@@ -2469,7 +2470,8 @@ int XXE::exec(
   MemCpyInfo *xxeMemCpyInfo;
   MemCpySrcRRAInfo *xxeMemCpySrcRRAInfo;
   MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo;
-  SubStreamInfo *xxeSubStreamInfo;
+  XxeSubInfo *xxeSubInfo;
+  XxeSubMultiInfo *xxeSubMultiInfo;
   WtimerInfo *xxeWtimerInfo, *xxeWtimerInfoActual, *xxeWtimerInfoRelative;
   PrintInfo *xxePrintInfo;
   
@@ -2891,10 +2893,42 @@ int XXE::exec(
         }
       }
       break;
-    case subStream:
+    case xxeSub:
       {
-        xxeSubStreamInfo = (SubStreamInfo *)xxeElement;
-        xxeSubStreamInfo->xxe->exec(rraCount, rraList);
+        xxeSubInfo = (XxeSubInfo *)xxeElement;
+        xxeSubInfo->xxe->exec(rraCount, rraList); // recursive call
+      }
+      break;
+    case xxeSubMulti:
+      {
+        xxeSubMultiInfo = (XxeSubMultiInfo *)xxeElement;
+        for (int k=0; k<xxeSubMultiInfo->count; k++)
+          xxeSubMultiInfo->xxe[k]->exec(rraCount, rraList); // recursive call
+      }
+      break;
+    case waitOnAnyIndexSub:
+      {
+        xxeWaitOnAnyIndexSubInfo = (WaitOnAnyIndexSubInfo *)xxeElement;
+        int *completeFlag = xxeWaitOnAnyIndexSubInfo->completeFlag;
+        int count = xxeWaitOnAnyIndexSubInfo->count;
+        int completeTotal = 0;  // reset
+        for (int k=0; k<count; k++)
+          completeFlag[k] = 0;  // reset
+        while (completeTotal < count){
+          for (int k=0; k<count; k++){
+            if (!completeFlag[k]){
+              xxeIndexElement = &(stream[xxeWaitOnAnyIndexSubInfo->index[k]]);
+              xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
+              vm->commtest(xxeCommhandleInfo->commhandle, &(completeFlag[k]));
+              if (completeFlag[k]){
+                // recursive call into xxe execution
+                xxeWaitOnAnyIndexSubInfo->xxe[k]->exec(rraCount, rraList);
+                ++completeTotal;
+              }
+            }
+          }
+          if (completeTotal == count) break;
+        }
       }
       break;
     case wtimer:
@@ -2981,103 +3015,114 @@ int XXE::printProfile(
 #endif
   
   int localPet = vm->getLocalPet();
-  int petCount = vm->getPetCount();
   
   void *xxeElement;
   WtimerInfo *xxeWtimerInfo;
+  XxeSubInfo *xxeSubInfo;
+  XxeSubMultiInfo *xxeSubMultiInfo;
+  WaitOnAnyIndexSubInfo *xxeWaitOnAnyIndexSubInfo;
   
-  for (int pet=0; pet<petCount; pet++){
-    if (pet==localPet){
-      for (int i=0; i<count; i++){
-        xxeElement = &(stream[i]);
-//        printf("gjt: %d, opId=%d\n", i, stream[i].opId);
-        switch(stream[i].opId){
-        case wtimer:
+  for (int i=0; i<count; i++){
+    xxeElement = &(stream[i]);
+//    printf("gjt: %d, opId=%d\n", i, stream[i].opId);
+    switch(stream[i].opId){
+    case xxeSub:
+      xxeSubInfo = (XxeSubInfo *)xxeElement;
+      xxeSubInfo->xxe->printProfile(); // recursive call
+      break;
+    case xxeSubMulti:
+      xxeSubMultiInfo = (XxeSubMultiInfo *)xxeElement;
+      for (int k=0; k<xxeSubMultiInfo->count; k++)
+        xxeSubMultiInfo->xxe[k]->printProfile(); // recursive call
+      break;
+    case waitOnAnyIndexSub:
+      xxeWaitOnAnyIndexSubInfo = (WaitOnAnyIndexSubInfo *)xxeElement;
+      for (int k=0; k<xxeWaitOnAnyIndexSubInfo->count; k++)
+        xxeWaitOnAnyIndexSubInfo->xxe[k]->printProfile(); // recursive call
+      break;
+    case wtimer:
+      {
+        xxeWtimerInfo = (WtimerInfo *)xxeElement;
+        int index = xxeWtimerInfo->actualWtimerIndex;
+        if (index == i){
+          // this is an actual wtimer element -> print
+          printf("localPet %d - XXE profile wtimer: %s\t"
+            "  id: %d\telement: %d\twtime = %gs\t wtimeSum = %gs\t"
+            "sumTermCount: %d\n", 
+            localPet, xxeWtimerInfo->timerString, xxeWtimerInfo->timerId, i,
+            xxeWtimerInfo->wtime, xxeWtimerInfo->wtimeSum,
+            xxeWtimerInfo->sumTermCount);
+        }
+      }
+      break;
+//debugging section ----------------------------------------          
+    case productSumSuperScalarRRA:
+      ProductSumSuperScalarRRAInfo *xxeProductSumSuperScalarRRAInfo;
+      if((localPet==3 && ((i>37 && i<41 )|| (i>53 && i<57)))||
+         (localPet==4 && ((i>39 && i<43 )|| (i>47 && i<51)))){
+        xxeProductSumSuperScalarRRAInfo =
+          (ProductSumSuperScalarRRAInfo *)xxeElement;
+        int *rraOffsetList = xxeProductSumSuperScalarRRAInfo->rraOffsetList;
+        void **factorList = xxeProductSumSuperScalarRRAInfo->factorList;
+        void **valueList = xxeProductSumSuperScalarRRAInfo->valueList;
+        switch (xxeProductSumSuperScalarRRAInfo->opSubId){
+        case I4:
           {
-            xxeWtimerInfo = (WtimerInfo *)xxeElement;
-            int index = xxeWtimerInfo->actualWtimerIndex;
-            if (index == i){
-              // this is an actual wtimer element -> print
-              printf("localPet %d - XXE profile wtimer: %s\t"
-                "  id: %d\telement: %d\twtime = %gs\t wtimeSum = %gs\t"
-                "sumTermCount: %d\n", 
-                localPet, xxeWtimerInfo->timerString, xxeWtimerInfo->timerId, i,
-                xxeWtimerInfo->wtime, xxeWtimerInfo->wtimeSum,
-                xxeWtimerInfo->sumTermCount);
+            ESMC_I4 *element, *factor, *value;
+            for (int k=0; k<xxeProductSumSuperScalarRRAInfo->termCount; k++){
+              factor = (ESMC_I4 *)factorList[k];
+              value = (ESMC_I4 *)valueList[k];
+              printf("XXE profile debug: k=%d, rraOffsetList[]=%d, "
+                "factor=%p, value=%p\n", k, rraOffsetList[k],
+                factor, value);
             }
           }
           break;
-// debugging section ----------------------------------------          
-        case productSumSuperScalarRRA:
-          ProductSumSuperScalarRRAInfo *xxeProductSumSuperScalarRRAInfo;
-          if((localPet==3 && ((i>37 && i<41 )|| (i>53 && i<57)))||
-             (localPet==4 && ((i>39 && i<43 )|| (i>47 && i<51)))){
-            xxeProductSumSuperScalarRRAInfo =
-              (ProductSumSuperScalarRRAInfo *)xxeElement;
-            int *rraOffsetList = xxeProductSumSuperScalarRRAInfo->rraOffsetList;
-            void **factorList = xxeProductSumSuperScalarRRAInfo->factorList;
-            void **valueList = xxeProductSumSuperScalarRRAInfo->valueList;
-            switch (xxeProductSumSuperScalarRRAInfo->opSubId){
-            case I4:
-              {
-                ESMC_I4 *element, *factor, *value;
-                for (int k=0; k<xxeProductSumSuperScalarRRAInfo->termCount; k++){
-                  factor = (ESMC_I4 *)factorList[k];
-                  value = (ESMC_I4 *)valueList[k];
-                  printf("XXE profile debug: k=%d, rraOffsetList[]=%d, "
-                    "factor=%p, value=%p\n", k, rraOffsetList[k],
-                    factor, value);
-                }
-              }
-              break;
-            case I8:
-              {
-                ESMC_I8 *element, *factor, *value;
-                for (int k=0; k<xxeProductSumSuperScalarRRAInfo->termCount; k++){
-                  factor = (ESMC_I8 *)factorList[k];
-                  value = (ESMC_I8 *)valueList[k];
-                  printf("XXE profile debug: k=%d, rraOffsetList[]=%d, "
-                    "factor=%p, value=%p\n", k, rraOffsetList[k],
-                    factor, value);
-                }
-              }
-              break;
-            case R4:
-              {
-                ESMC_R4 *element, *factor, *value;
-                for (int k=0; k<xxeProductSumSuperScalarRRAInfo->termCount; k++){
-                  factor = (ESMC_R4 *)factorList[k];
-                  value = (ESMC_R4 *)valueList[k];
-                  printf("XXE profile debug: k=%d, rraOffsetList[]=%d, "
-                    "factor=%p, value=%p\n", k, rraOffsetList[k],
-                    factor, value);
-                }
-              }
-              break;
-            case R8:
-              {
-                ESMC_R8 *element, *factor, *value;
-                for (int k=0; k<xxeProductSumSuperScalarRRAInfo->termCount; k++){
-                  factor = (ESMC_R8 *)factorList[k];
-                  value = (ESMC_R8 *)valueList[k];
-                  printf("XXE profile debug: k=%d, rraOffsetList[]=%d, "
-                    "factor=%p, value=%p\n", k, rraOffsetList[k],
-                    factor, value);
-                }
-              }
-              break;
-            default:
-              break;
+        case I8:
+          {
+            ESMC_I8 *element, *factor, *value;
+            for (int k=0; k<xxeProductSumSuperScalarRRAInfo->termCount; k++){
+              factor = (ESMC_I8 *)factorList[k];
+              value = (ESMC_I8 *)valueList[k];
+              printf("XXE profile debug: k=%d, rraOffsetList[]=%d, "
+                "factor=%p, value=%p\n", k, rraOffsetList[k],
+                factor, value);
             }
           }
           break;
-// debugging section ----------------------------------------          
+        case R4:
+          {
+            ESMC_R4 *element, *factor, *value;
+            for (int k=0; k<xxeProductSumSuperScalarRRAInfo->termCount; k++){
+              factor = (ESMC_R4 *)factorList[k];
+              value = (ESMC_R4 *)valueList[k];
+              printf("XXE profile debug: k=%d, rraOffsetList[]=%d, "
+                "factor=%p, value=%p\n", k, rraOffsetList[k],
+                factor, value);
+            }
+          }
+          break;
+        case R8:
+          {
+            ESMC_R8 *element, *factor, *value;
+            for (int k=0; k<xxeProductSumSuperScalarRRAInfo->termCount; k++){
+              factor = (ESMC_R8 *)factorList[k];
+              value = (ESMC_R8 *)valueList[k];
+              printf("XXE profile debug: k=%d, rraOffsetList[]=%d, "
+                "factor=%p, value=%p\n", k, rraOffsetList[k],
+                factor, value);
+            }
+          }
+          break;
         default:
           break;
         }
       }
+      break;
+//debugging section ----------------------------------------          
+    default:
+      break;
     }
-    vm->vmk_barrier();
   }
 
   // return successfully
@@ -3244,10 +3289,13 @@ int XXE::execReady(
   SendnbInfo *xxeSendnbInfo;
   RecvnbInfo *xxeRecvnbInfo;
   WaitOnIndexInfo *xxeWaitOnIndexInfo;
+  WaitOnAnyIndexSubInfo *xxeWaitOnAnyIndexSubInfo;
   WaitOnIndexRangeInfo *xxeWaitOnIndexRangeInfo;
   CommhandleInfo *xxeCommhandleInfo;
   ProductSumVectorInfo *xxeProductSumVectorInfo;
   WtimerInfo *xxeWtimerInfo;
+  XxeSubInfo *xxeSubInfo;
+  XxeSubMultiInfo *xxeSubMultiInfo;
   
   int i = 0;  // prime index counter
   while(i!=count){
@@ -3261,6 +3309,20 @@ int XXE::execReady(
 //    printf("gjt: %d, opId=%d\n", i, stream[i].opId);
       int breakFlag = 0;  // reset
       switch(stream[i].opId){
+      case xxeSub:
+        xxeSubInfo = (XxeSubInfo *)xxeElement;
+        xxeSubInfo->xxe->execReady(); // recursive call
+        break;
+      case xxeSubMulti:
+        xxeSubMultiInfo = (XxeSubMultiInfo *)xxeElement;
+        for (int k=0; k<xxeSubMultiInfo->count; k++)
+          xxeSubMultiInfo->xxe[k]->execReady(); // recursive call
+        break;
+      case waitOnAnyIndexSub:
+        xxeWaitOnAnyIndexSubInfo = (WaitOnAnyIndexSubInfo *)xxeElement;
+        for (int k=0; k<xxeWaitOnAnyIndexSubInfo->count; k++)
+          xxeWaitOnAnyIndexSubInfo->xxe[k]->execReady(); // recursive call
+        break;
       case send:
         break;
       case recv:
@@ -4021,12 +4083,12 @@ int XXE::growCommhandle(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::XXE::growXxeSubStream()"
+#define ESMC_METHOD "ESMCI::XXE::growXxeSub()"
 //BOPI
-// !IROUTINE:  ESMCI::XXE::growXxeSubStream
+// !IROUTINE:  ESMCI::XXE::growXxeSub
 //
 // !INTERFACE:
-int XXE::growXxeSubStream(
+int XXE::growXxeSub(
 //
 // !RETURN VALUE:
 //    int return code
@@ -4036,7 +4098,7 @@ int XXE::growXxeSubStream(
   int increase){    // in - number of additional elements
 //
 // !DESCRIPTION:
-//  Increase the length of the XXE subStream storage.
+//  Increase the length of the XXE Sub storage.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -4055,12 +4117,12 @@ int XXE::growXxeSubStream(
     return rc;
   }
   
-  int xxeSubStreamMaxCountNew = xxeSubStreamMaxCount + increase;
-  XXE **xxeSubStreamNew = new XXE*[xxeSubStreamMaxCountNew];
-  memcpy(xxeSubStreamNew, xxeSubStream, xxeSubStreamCount*sizeof(XXE *));
-  delete [] xxeSubStream;               // delete previous xxeSubStream
-  xxeSubStream = xxeSubStreamNew;       // plug in newly allocated xxeSubStream
-  xxeSubStreamMaxCount = xxeSubStreamMaxCountNew;   // adjust max value
+  int xxeSubMaxCountNew = xxeSubMaxCount + increase;
+  XXE **xxeSubListNew = new XXE*[xxeSubMaxCountNew];
+  memcpy(xxeSubListNew, xxeSubList, xxeSubCount*sizeof(XXE *));
+  delete [] xxeSubList;               // delete previous xxeSubList
+  xxeSubList = xxeSubListNew;       // plug in newly allocated xxeSubList
+  xxeSubMaxCount = xxeSubMaxCountNew;   // adjust max value
 
   // return successfully
   rc = ESMF_SUCCESS;
