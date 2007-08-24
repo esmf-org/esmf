@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.64 2007/08/23 16:29:38 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.65 2007/08/24 16:42:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -128,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.64 2007/08/23 16:29:38 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.65 2007/08/24 16:42:20 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -598,7 +598,7 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication
+! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute Array sparse matrix multiplication with local factors
 !
 ! !INTERFACE:
 ! ! Private name; call using ESMF_ArraySparseMatMulStore()
@@ -937,7 +937,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySparseMatMulStoreNF()"
 !BOP
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication
+! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute Array sparse matrix multiplication without local factors
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySparseMatMulStore()
