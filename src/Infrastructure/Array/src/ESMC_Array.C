@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.118 2007/08/22 23:50:15 theurich Exp $
+// $Id: ESMC_Array.C,v 1.119 2007/08/24 18:20:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.118 2007/08/22 23:50:15 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.119 2007/08/24 18:20:14 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3935,6 +3935,8 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   XXE::ProductSumScalarInfo *xxeProductSumScalarInfo;
   XXE::ProductSumScalarRRAInfo *xxeProductSumScalarRRAInfo;
   XXE::ProductSumSuperScalarRRAInfo *xxeProductSumSuperScalarRRAInfo;
+  XXE::ProductSumSuperScalarContigRRAInfo
+    *xxeProductSumSuperScalarContigRRAInfo;
   XXE::MemCpyInfo *xxeMemCpyInfo;
   XXE::MemCpySrcRRAInfo *xxeMemCpySrcRRAInfo;
   XXE::MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo;
@@ -4470,7 +4472,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
 printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
-  " dt_byte=%g s\n", localPet, dt_tk, dt_byte);
+  " dt_byte=%g s for count=%d\n", localPet, dt_tk, dt_byte, count);
         // decide for the fastest option
         if (dt_byte < dt_tk){
           // use byte option for memGatherSrcRRA
@@ -4706,11 +4708,11 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       // xxe garbCo
       xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; 
       ++(xxe->storageCount);
-    if (xxe->storageCount >= xxe->storageMaxCount){
-      localrc = xxe->growStorage(10000);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-    }
+      if (xxe->storageCount >= xxe->storageMaxCount){
+        localrc = xxe->growStorage(10000);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+          ESMF_ERR_PASSTHRU, &rc)) return rc;
+      }
       // </XXE profiling element>
       
       // post XXE::waitOnIndex for recvnb operation associated with diff DE "k"
@@ -4836,18 +4838,27 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
         }
       } // kk - partnerDeCount[j][k]
 #else
-      // enter super-scalar "+=*" operation into XXE stream
-      xxe->stream[xxe->count].opId = XXE::productSumSuperScalarRRA;
+#define USEproductSumSuperScalarRRA
+      int xxeIndex = xxe->count;  // need this beyond the increment
+      ++(xxe->count);
+      if (xxe->count >= xxe->max){
+        localrc = xxe->growStream(1000);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+          ESMF_ERR_PASSTHRU, &rc)) return rc;
+      }
+
+      // try super-scalar "+=*" operation in XXE stream
+      xxe->stream[xxeIndex].opId = XXE::productSumSuperScalarRRA;
       // todo: replace the following with using ESMC_TypeKind in XXE!
       if (typekindArg == ESMC_TYPEKIND_R4)
-        xxe->stream[xxe->count].opSubId = XXE::R4;
+        xxe->stream[xxeIndex].opSubId = XXE::R4;
       else if (typekindArg == ESMC_TYPEKIND_R8)
-        xxe->stream[xxe->count].opSubId = XXE::R8;
+        xxe->stream[xxeIndex].opSubId = XXE::R8;
       else if (typekindArg == ESMC_TYPEKIND_I4)
-        xxe->stream[xxe->count].opSubId = XXE::I4;
+        xxe->stream[xxeIndex].opSubId = XXE::I4;
       else if (typekindArg == ESMC_TYPEKIND_I8)
-        xxe->stream[xxe->count].opSubId = XXE::I8;
-      xxeElement = &(xxe->stream[xxe->count]);
+        xxe->stream[xxeIndex].opSubId = XXE::I8;
+      xxeElement = &(xxe->stream[xxeIndex]);
       xxeProductSumSuperScalarRRAInfo =
         (XXE::ProductSumSuperScalarRRAInfo *)xxeElement;
       xxeProductSumSuperScalarRRAInfo->rraIndex = srcLocalDeCount
@@ -4877,13 +4888,6 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       char *valueListChar = new char[termCount*sizeof(void *)];
       void **valueList = (void **)valueListChar;
       xxeProductSumSuperScalarRRAInfo->valueList = valueList;
-      xxe->storage[xxe->storageCount] = valueListChar; // for xxe garb coll.
-      ++(xxe->storageCount);
-      if (xxe->storageCount >= xxe->storageMaxCount){
-        localrc = xxe->growStorage(10000);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
-      }
       for (int kk=0; kk<termCount; kk++){
         DstInfo *dstInfo = &(dstInfoTable[j][k][kk]);
         int linIndex = dstInfo->linIndex;
@@ -4891,17 +4895,47 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
         factorList[kk] = (void *)
           (localDeFactorList[j] + (dstInfo->localDeFactorListIndex) * dataSize);
         valueList[kk] = (void *)(buffer[j][k] + kk*dataSize);
-          + j; // localDe index into dstArray shifted by srcArray localDeCount
       } // for kk - termCount
-      xxe->optimizeElement(xxe->count);
-      ++(xxe->count);
-      if (xxe->count >= xxe->max){
-        localrc = xxe->growStream(1000);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
-      }
-#endif
+      xxe->optimizeElement(xxeIndex);
+      double dt_sScalar;
+      localrc = xxe->exec(rraCount, rraList, &dt_sScalar, xxeIndex, xxeIndex);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        &rc)) return rc;
       
+      // try super-scalar contig "+=*" operation in XXE stream
+      xxe->stream[xxeIndex].opId = XXE::productSumSuperScalarContigRRA;
+      xxeProductSumSuperScalarContigRRAInfo =
+        (XXE::ProductSumSuperScalarContigRRAInfo *)xxeElement;
+      // only change members that are different compared to super-scalar
+      xxeProductSumSuperScalarContigRRAInfo->valueList = (void *)(buffer[j][k]);
+      xxe->optimizeElement(xxeIndex);
+      double dt_sScalarC;
+      localrc = xxe->exec(rraCount, rraList, &dt_sScalarC, xxeIndex, xxeIndex);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        &rc)) return rc;
+printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
+  " dt_sScalarC=%g s for termCount=%d\n", localPet, dt_sScalar, dt_sScalarC,
+  termCount);
+      // decide for the dt_sScalarC option
+      if (dt_sScalar < dt_sScalarC){
+        // use productSumSuperScalarRRA
+        xxe->stream[xxeIndex].opId = XXE::productSumSuperScalarRRA;
+        xxeProductSumSuperScalarRRAInfo->valueList = valueList;
+        xxe->storage[xxe->storageCount] = valueListChar; // for xxe garb coll.
+        ++(xxe->storageCount);
+        if (xxe->storageCount >= xxe->storageMaxCount){
+          localrc = xxe->growStorage(10000);
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+            ESMF_ERR_PASSTHRU, &rc)) return rc;
+        }
+      }else{
+        // use productSumSuperScalarContigRRA
+        // already set from last trial, just need to remove some garbage:
+        delete [] valueListChar;  // garbage from productSumSuperScalarRRA try
+      }
+      
+#endif
+            
       // <XXE profiling element>
       xxe->stream[xxe->count].opId = XXE::wtimer;
       xxeElement = &(xxe->stream[xxe->count]);
