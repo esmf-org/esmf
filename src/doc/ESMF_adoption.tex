@@ -1,4 +1,4 @@
-% $Id: ESMF_adoption.tex,v 1.9 2006/12/13 20:17:51 cdeluca Exp $
+% $Id: ESMF_adoption.tex,v 1.10 2007/08/24 16:03:57 cdeluca Exp $
 
 \section{How to Adapt Applications for ESMF}
 \label{sec:Adoption}
@@ -30,8 +30,9 @@ external to the component (the AppDriver, or a parent component) will
 be responsible for marking which of these items are actually going to
 be needed.  Then the component can choose to either produce all possible
 data items (simpler but less efficient) or only produce the data items
-marked as being needed.  The component should consult the CF data naming
-conventions when it is listing what data it can produce.
+marked as being needed.  The component should consult the \htmladdnormallink
+{CF data naming conventions}{http://www.cfconventions.org/} when it is listing
+what data it can produce.
 
 \item Decide what data is needed 
 
@@ -43,7 +44,7 @@ fields from other components in the application.
 
 A component should communicate to other components only through the
 framework.  All global data items should be private to Fortran modules,
-and ideally would be isolated to a single derived type which is allocated
+and ideally should be isolated to a single derived type which is allocated
 at run time.   
 
 \item Divide the code up into start/middle/end phases 
@@ -76,7 +77,8 @@ close open files, and generally close down the computation gracefully.
 Components need to provide only a single externally visible entry point.
 It will be called at start time, and its job is to register with the
 framework which routines satisfy the initialize, run, and finalize
-requirements.  It can also register the address of its private data block.
+requirements.  If it has a single derived type that holds its private data,
+that can be registered too.
 
 \item Create ESMF Fields and Bundles for holding data
 
@@ -93,8 +95,7 @@ To create an ESMF Field the code must create an ESMF Array object to
 contain the data values, and usually an ESMF Grid object to describe the
 computational grid where the values are located.  If this is an
 observational data stream the locations of the data values will be held in
-an ESMF Location Stream object instead of a Grid.  (Location Streams
-are not yet fully implemented.)
+an ESMF Location Stream object instead of a Grid. 
 
 \item Be able to read an ESMF clock
 
@@ -106,8 +107,8 @@ current time using framework methods.
 \item Decide how much of the lower level infrastructure to use
 
 The ESMF framework provides a rich set of time management functions,
-data management and query functions, IO functions, and other utility
-routines which help to insulate the user's code from the vast differences
+data management and query functions, and other utility
+routines which help to insulate the user's code from the differences
 in hardware architectures, system software, and runtime environments.
 It is up to the user to select which parts of these functions they
 choose to use.
@@ -164,7 +165,8 @@ This will close down the framework and release any associated resources.
 The main program is responsible for creating a top-level
 Gridded Component, which in turn creates other Gridded and Coupler 
 Components.  We encourage this hierarchical design because it
-aids in extensibility.
+aids in extensibility - the top level Gridded Component can be
+nested in another larger application.
 The top-level component contains the main time loop and is 
 responsible for calling the
 {\tt SetServices} entry point for each child component it creates.
