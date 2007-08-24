@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.32 2007/07/26 19:41:18 cdeluca Exp $
+% $Id: Grid_desc.tex,v 1.33 2007/08/24 16:09:00 murphysj Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ custom stagger locations.\\ [.03in] \hline
 \subsubsection{Grid Representation in ESMF}
 
 ESMF Grids are based on the concepts described in {\it A Standard
-Descriptor of Grids Used in Earth System Models} [Balaji 2006].  In this document
+Description of Grids Used in Earth System Models} [Balaji 2006].  In this document
 Balaji introduces the mosaic concept as a means of describing
 a wide variety of Earth system model grids.  A {\bf mosaic} is
 composed of grid tiles connected at their edges.  Mosaic grids
@@ -144,13 +144,13 @@ as decomposition).  The user specifies which dimensions
 are to be distributed through a coordinate dependency (coordDep)
 argument.
 
-The main distribution options are block, regular and arbitrary.
+The main distribution options are regular, irregular, and arbitrary.
 A {\bf regular} distribution is one in which the same number of
 contiguous grid points are assigned to each DE in the
 distributed dimension.  A {\bf irregular} distribution is one in which
 unequal numbers of contiguous gridpoints are assigned to each
 DE in the distributed dimension.  An {\bf arbitrary} distribution is
-one in which any gridpoint can be assigned to any DE.  Any ofthese
+one in which any gridpoint can be assigned to any DE.  Any of these
 distribution options can be applied to any of the grid shapes (i.e.,
 rectangle) or types (i.e., rectilinear).  Arbitrary distributions
 have not been implemented as of v3.0.3.
@@ -176,7 +176,7 @@ that define the grid's physical span.  The coordinates of {\bf rectilinear} grid
 are unequally spaced along their axes, and can be fully specified by giving
 the spacing of grid points along each axis.  The coordinates of {\bf curvilinear 
 grids} must be specified by giving the explicit set of coordinates for each
-grid point.  Curvilinear grids are often uniform or rectangular grids that 
+grid point.  Curvilinear grids are often uniform or rectilinear grids that 
 have been warped; for example, to place a pole over a land mass so that it
 does not affect the computations performed on an ocean model grid.  Figure
 \ref{fig:LogRectGrids} shows examples of each type of grid.
