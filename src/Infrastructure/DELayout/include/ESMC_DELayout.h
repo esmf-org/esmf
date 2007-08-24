@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.42 2007/08/22 23:27:24 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.43 2007/08/24 18:18:00 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -214,6 +214,7 @@ class XXE{
       productSumVector,
       productSumScalar, productSumScalarRRA,
       productSumSuperScalarRRA,
+      productSumSuperScalarContigRRA,
       memCpy, memCpySrcRRA,
       memGatherSrcRRA,
       // --- sub-streams
@@ -378,10 +379,19 @@ class XXE{
       int *rraOffsetList;
       void **factorList;
       void **valueList;
-      ESMC_R4 *factorValueList;
       int rraIndex;
       int termCount;
     }ProductSumSuperScalarRRAInfo;
+
+    typedef struct{
+      OpId opId;
+      OpSubId opSubId;
+      int *rraOffsetList;
+      void **factorList;
+      void *valueList;
+      int rraIndex;
+      int termCount;
+    }ProductSumSuperScalarContigRRAInfo;
 
     typedef struct{
       OpId opId;
