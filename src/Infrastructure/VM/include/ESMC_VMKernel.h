@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.50 2007/08/02 22:47:27 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.51 2007/08/24 23:34:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -326,6 +326,8 @@ class VMK{
       vmk_commhandle **commhandle);
     
     // non-blocking service calls
+    int commtest(vmk_commhandle **commhandle, int *completeFlag,
+      vmk_status *status=NULL);
     int commwait(vmk_commhandle **commhandle, vmk_status *status=NULL,
       int nanopause=0);
     void commqueuewait();

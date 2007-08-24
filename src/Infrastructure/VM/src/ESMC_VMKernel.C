@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.96 2007/08/02 22:47:31 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.97 2007/08/24 23:34:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -2311,6 +2311,78 @@ int VMK::commqueueitem_unlink(vmk_commhandle *commhandle){
   }
   pthread_mutex_unlock(pth_mutex2);
   return found;
+}
+
+
+int VMK::commtest(vmk_commhandle **commhandle, int *completeFlag,
+  vmk_status *status){
+  // test all of the communications pointed to by *commhandle. For completed
+  // ones delete all of the inside contents of *commhandle (even if it is a
+  // tree)
+  // finally unlink the *commhandle container from the commqueue and delete the
+  // container (only) if the *commhandle was part of the commqueue!
+//fprintf(stderr, "VMK::commwait: nhandles=%d\n", nhandles);
+//fprintf(stderr, "VMK::commwait: *commhandle=%p\n", *commhandle);
+  int localrc=0;
+  if ((commhandle!=NULL) && ((*commhandle)!=NULL)){
+    // wait for all non-blocking requests in commhandle to complete
+    int localCompleteFlag = 0;
+    if ((*commhandle)->type==0){
+      // this is a commhandle container
+      for (int i=0; i<(*commhandle)->nelements; i++){
+        localrc = commwait(&((*commhandle)->handles[i]));  // recursive call
+        delete (*commhandle)->handles[i];
+      }
+      delete [] (*commhandle)->handles;
+    }else if ((*commhandle)->type==1){
+      // this commhandle contains MPI_Requests
+      if (status)
+        status->comm_type = VM_COMM_TYPE_MPI1;
+      MPI_Status *mpi_s;
+      if (status)
+        mpi_s = &(status->mpi_s);
+      else
+        mpi_s = MPI_STATUS_IGNORE;
+      // TODO: status will only reflect the last communiction in the i-loop!
+      for (int i=0; i<(*commhandle)->nelements; i++){
+//fprintf(stderr, "MPI_Wait: commhandle=%p\n", &((*commhandle)->mpireq[i]));
+        if (mpi_mutex_flag)
+          pthread_mutex_lock(pth_mutex);
+        localrc = MPI_Test(&((*commhandle)->mpireq[i]), &localCompleteFlag,
+          mpi_s);
+        if (mpi_mutex_flag)
+          pthread_mutex_unlock(pth_mutex);
+        if (status){
+          if (lpid[mpi_s->MPI_SOURCE] == mpi_s->MPI_SOURCE)
+            status->srcPet = mpi_s->MPI_SOURCE;
+          else{
+            for (int k=0; k<npets; k++)
+              if (lpid[k] == mpi_s->MPI_SOURCE)
+                status->srcPet = mpi_s->MPI_SOURCE;
+          }
+          status->tag     = mpi_s->MPI_TAG;
+          status->error   = mpi_s->MPI_ERROR;
+        }
+      }
+      if (localCompleteFlag)
+        delete [] (*commhandle)->mpireq;
+    }else if ((*commhandle)->type==-1){
+      // this is a dummy commhandle and there is nothing to wait for...
+    }else{
+      printf("VMK: only MPI non-blocking implemented\n");
+      localrc = VMK_ERROR;
+    }
+    // if this *commhandle is in the request queue x-> unlink and delete
+    if (localCompleteFlag){
+      if (commqueueitem_unlink(*commhandle)){ 
+        delete *commhandle; // delete the container commhandle that was linked
+        *commhandle = NULL; // ensure this container will not point to anything
+      }
+    }
+    if (completeFlag != NULL)
+      *completeFlag = localCompleteFlag;
+  }
+  return localrc;
 }
 
 
