@@ -1,4 +1,4 @@
-// $Id: ESMC_Zoltan.C,v 1.3 2007/08/08 22:46:52 dneckels Exp $
+// $Id: ESMC_Zoltan.C,v 1.4 2007/08/24 19:15:45 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -11,7 +11,6 @@
 //==============================================================================
 #include <ESMC_Zoltan.h>
 
-#define ESMC_ZOLTAN
 
 #include <ESMC_Mesh.h>
 #include <ESMC_BBox.h>
@@ -21,9 +20,7 @@
 #include <ESMC_MeshObjConn.h>
 #include <ESMC_MeshSkin.h>
 
-#ifdef ESMC_ZOLTAN
 #include <Zoltan/zoltan.h>
-#endif
 
 #include <mpi.h>
 
@@ -41,10 +38,9 @@
 namespace ESMCI {
 namespace MESH {
 
-#ifdef ESMC_ZOLTAN
 typedef std::vector<MeshObj*> MeshObjVect;
 
-struct zoltan_user_data {
+struct zoltan_rend_data {
   Mesh *srcMesh;
   Mesh *dstMesh;
   BBox *mesh_isect;
@@ -92,7 +88,7 @@ static void build_lists(BBox &isect, Mesh &src, Mesh &dst, MeshObjVect &eSrc, Me
 // Zoltan Mesh Functions
 
 static int GetNumAssignedObj(void *user, int *err) {
-  zoltan_user_data &udata = *(static_cast<zoltan_user_data*>(user));
+  zoltan_rend_data &udata = *(static_cast<zoltan_rend_data*>(user));
   *err = 0;
   return udata.elemSrc.size() + udata.nodesDst.size();
 }
@@ -100,7 +96,7 @@ static int GetNumAssignedObj(void *user, int *err) {
 static void GetObjList(void *user, int numGlobalIds, int numLids, ZOLTAN_ID_PTR gids, ZOLTAN_ID_PTR lids,
           int wgt_dim, float *obj_wghts, int *err) 
 {
-  zoltan_user_data &udata = *(static_cast<zoltan_user_data*>(user));
+  zoltan_rend_data &udata = *(static_cast<zoltan_rend_data*>(user));
 
   UInt i = 0;
   MeshObjVect::iterator ni = udata.elemSrc.begin(), ne = udata.elemSrc.end();
@@ -123,7 +119,7 @@ static void GetObjList(void *user, int numGlobalIds, int numLids, ZOLTAN_ID_PTR 
 }
 
 static int GetNumGeom(void *user, int *err) {
-  zoltan_user_data &udata = *(static_cast<zoltan_user_data*>(user));
+  zoltan_rend_data &udata = *(static_cast<zoltan_rend_data*>(user));
   *err = 0;
 
   return udata.srcMesh->spatial_dim();
@@ -132,7 +128,7 @@ static int GetNumGeom(void *user, int *err) {
 static void GetObject(void *user, int numGlobalIds, int numLids, int numObjs,
   ZOLTAN_ID_PTR gids, ZOLTAN_ID_PTR lids, int numDim, double *pts, int *err) 
 {
-  zoltan_user_data &udata = *(static_cast<zoltan_user_data*>(user));
+  zoltan_rend_data &udata = *(static_cast<zoltan_rend_data*>(user));
   MEField<> *coord_field_src = udata.srcMesh->GetCoordField();
   MEField<> *coord_field_dst = udata.dstMesh->GetCoordField();
   *err = 0;
@@ -158,7 +154,6 @@ static void GetObject(void *user, int numGlobalIds, int numLids, int numObjs,
     for (UInt d = 0; d < (UInt) numDim; d++) pts[i*numDim + d] = c[d];
   }
 }
-#endif
 
 
 
@@ -166,7 +161,6 @@ void ZoltanRendezvous(Mesh &srcMesh, Mesh &dstMesh, Mesh &srcR, Mesh &dstR,
         UInt num_fields, MEField<> **sfields, MEField<> **dfields,
         const UInt zinterp[])
 {
-#ifdef ESMC_ZOLTAN
   std::vector<MEField<> *> sfields_uniq;
   std::copy(&sfields[0], &sfields[num_fields], std::back_inserter(sfields_uniq));
   std::sort(sfields_uniq.begin(), sfields_uniq.end());
@@ -196,7 +190,6 @@ void ZoltanRendezvous(Mesh &srcMesh, Mesh &dstMesh, Mesh &srcR, Mesh &dstR,
    
   // RCB
   Zoltan_Set_Param(zz, "RCB_LOCK_DIRECTIONS", "1");
-  Zoltan_Set_Param(zz, "RCB_REDUCE_DIMENSIONS", "1");
   Zoltan_Set_Param(zz, "KEEP_CUTS", "0");
   Zoltan_Set_Param(zz, "RCB_OUTPUT_LEVEL", "0");
   //Zoltan_Set_Param(zz, "RCB_RECTILINEAR_BLOCKS", "1");
@@ -241,7 +234,7 @@ void ZoltanRendezvous(Mesh &srcMesh, Mesh &dstMesh, Mesh &srcR, Mesh &dstR,
 std::cout << "P:" << rank << " mesh_isec=" << *mesh_isect << std::endl;
 
 
-  zoltan_user_data zud;
+  zoltan_rend_data zud;
   // Build the two lists of nodes that are in the box
   build_lists(*mesh_isect, srcMesh, dstMesh, zud.elemSrc, zud.nodesDst);
 
@@ -386,8 +379,6 @@ std::cout << "P:" << rank << ", numIMp:" << numImport << ", numExport:" << numEx
 
   // At this point we can send over fields (for instance coords)
   //srcR.Print();
-
-
 
 
   // **** Migrate the destination nodes
@@ -577,7 +568,6 @@ std::cout << "Sym node, rank=" << i << std::endl;
   delete mesh_isect;
 
   Zoltan_Destroy(&zz);
-#endif
 }
 
 } // namespace

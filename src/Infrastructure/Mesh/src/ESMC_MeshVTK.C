@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshVTK.C,v 1.2 2007/08/20 19:26:53 dneckels Exp $
+// $Id: ESMC_MeshVTK.C,v 1.3 2007/08/24 19:15:44 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -58,6 +58,9 @@ static const MeshObjTopo *vtk2topo(UInt vtk_type, UInt sdim) {
 
       case VTK_HEXAHEDRON:
         return GetTopo("HEX");
+
+      case VTK_QUAD:
+        return GetTopo("SHELL");
 
       default:
         Throw() "vtk type unknown:" << vtk_type;
@@ -408,10 +411,10 @@ void ReadVTKMesh(Mesh &mesh, const std::string &filename) {
     /*------------------------------------------------------------*/
     // Read the connectivity for elements
     /*------------------------------------------------------------*/
-    std::vector<UInt> conn(nelem*width);
+    std::vector<UInt> conn(width);
   
+    UInt wi = 0;
     for (UInt i = 0; i < nelem; i++) {
-      UInt wi = width*i;
   
       ThrowRequire(1 == fscanf(fp(), "%u ", &conn[wi]));
   
@@ -419,19 +422,10 @@ void ReadVTKMesh(Mesh &mesh, const std::string &filename) {
         ThrowRequire(1 == fscanf(fp(), "%u ", &conn[wi+n+1]));
       } 
       fscanf(fp(), "\n");
+
+      wi += conn[wi] + 1; // skip forward
     }
   
-    
-#ifdef DBG_VTKREAD
-  for (UInt i = 0; i < nelem; i++) {
-      UInt wi = width*i;
-      std::cout << conn[wi] << " ";
-      for (UInt n = 0; n < conn[wi]; n++) {
-        std::cout << conn[wi+n+1] << " ";
-      } 
-     std::cout << std::endl;
-  }
-#endif
   
     /*------------------------------------------------------------*/
     // Read the element types
@@ -508,6 +502,7 @@ void ReadVTKMesh(Mesh &mesh, const std::string &filename) {
     mesh.set_spatial_dimension(sdim);
 
     // Add the elements
+    UInt cur_off = 0;
     for (UInt i = 0; i < nelem; i++) {
 
       const MeshObjTopo *topo = vtk2topo(ctypes[i], sdim);
@@ -515,13 +510,16 @@ void ReadVTKMesh(Mesh &mesh, const std::string &filename) {
       MeshObj *elem = new MeshObj(MeshObj::ELEMENT, -(i+1), i);
 
       // Collect an array of the nodes.
+      cur_off += 1; // skip num_nodes field
       std::vector<MeshObj*> elemnodes; elemnodes.reserve(topo->num_nodes);
       for (UInt n = 0; n < topo->num_nodes; n++)
-        elemnodes.push_back(nodevect[conn[i*width+1+n]]);
+        elemnodes.push_back(nodevect[conn[cur_off+n]]);
 
       elem->set_owner(Par::Rank());
 
       mesh.add_element(elem, elemnodes, etype2blk[ctypes[i]], topo);
+
+      cur_off += topo->num_nodes;
     }
 
     // Register coords
@@ -637,6 +635,22 @@ void ReadVTKMesh(Mesh &mesh, const std::string &filename) {
     } else {
 
       // Regular variable
+
+      if (data_type == VTK_NODE_DATA) {
+        IOField<NodalField> *nfield = mesh.RegisterNodalField(vname);
+
+        MeshDB::iterator ei = mesh.node_begin(), ee = mesh.node_end();
+        for (; ei != ee; ++ei) {
+
+          MeshObj &obj = *ei;
+
+          double *d = nfield->data(obj);
+          d[0] = data[obj.get_data_index()];
+ 
+        }
+
+      } else {
+      }
     }
 
   } // while processing data
