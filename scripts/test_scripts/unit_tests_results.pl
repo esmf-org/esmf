@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: unit_tests_results.pl,v 1.8 2006/03/07 20:48:00 svasquez Exp $
+# $Id: unit_tests_results.pl,v 1.9 2007/08/27 16:56:30 svasquez Exp $
 # This script runs at the end of the "run_unit_tests", "run_unit_tests_uni" and "check_results" targets.
 # The purpose is to give the user the results of running the unit tests.
 # The results are either complete results or a summary.
@@ -274,6 +274,9 @@ use File::Find
                                	}
                                	$pass_count=grep( /PASS/, @file_lines);
                                	$pass_count = int $pass_count/$pet_count;
+				if ($regrid_test_count == 0) {
+					goto DONE;
+				}
 				if ($pass_count == $regrid_test_count){
 					push(pass_list, @regrid_test);
 				}
