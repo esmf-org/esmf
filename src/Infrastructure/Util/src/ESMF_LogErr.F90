@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.40 2007/08/27 19:30:24 svasquez Exp $
+! $Id: ESMF_LogErr.F90,v 1.41 2007/08/27 20:13:36 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -1454,10 +1454,16 @@ end subroutine ESMF_LogMsgSetError
 
     ! Test if it is open and not logtype of ESMF_LOG_SINGLE 
     ! If logtype=ESMF_LOG_SINGLE a previous PET already opened the log file.
-    if ((alog%FileIsOpen .eq. ESMF_TRUE) .AND. (alog%logtype .ne. ESMF_LOG_SINGLE)) then
-        print *, "This ESMF_Log is already open with file '", &
-                 trim(ESMF_LogTable(log%logTableIndex)%nameLogErrFile), "'"
-        return
+    if (alog%FileIsOpen .eq. ESMF_TRUE) then
+	if ((.not.(present(logtype))) .or.(((present(logtype)) &
+		.and. (logtype .ne. ESMF_LOG_SINGLE)))) then
+        	print *, "This ESMF_Log is already open with file '", &
+                trim(ESMF_LogTable(log%logTableIndex)%nameLogErrFile), "'"
+	  	if (present(rc)) then
+              		rc=ESMF_FAILURE
+			return
+		endif
+	endif
     endif
 
     alog%maxElements = 10
