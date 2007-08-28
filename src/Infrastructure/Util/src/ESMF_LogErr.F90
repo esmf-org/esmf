@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.41 2007/08/27 20:13:36 svasquez Exp $
+! $Id: ESMF_LogErr.F90,v 1.42 2007/08/28 19:23:56 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -1444,26 +1444,21 @@ end subroutine ESMF_LogMsgSetError
         
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
 
-    if ((present(logtype)) .and. (logtype .eq. ESMF_LOG_NONE)) then
-          print *, "ESMF_LOG_NONE is not a valid option of logtype."
-	  if (present(rc)) then
-              rc=ESMF_RC_NOT_VALID
-	  endif
-	  return
+    if (present(logtype)) then
+	if (logtype .eq. ESMF_LOG_NONE) then
+	    print *, "ESMF_LOG_NONE is not a valid option of logtype."
+	    if (present(rc)) then
+               rc=ESMF_RC_NOT_VALID
+	       return
+	    endif
+	 endif
     endif
 
-    ! Test if it is open and not logtype of ESMF_LOG_SINGLE 
-    ! If logtype=ESMF_LOG_SINGLE a previous PET already opened the log file.
+    ! Test if it is open or closed
     if (alog%FileIsOpen .eq. ESMF_TRUE) then
-	if ((.not.(present(logtype))) .or.(((present(logtype)) &
-		.and. (logtype .ne. ESMF_LOG_SINGLE)))) then
-        	print *, "This ESMF_Log is already open with file '", &
-                trim(ESMF_LogTable(log%logTableIndex)%nameLogErrFile), "'"
-	  	if (present(rc)) then
-              		rc=ESMF_FAILURE
-			return
-		endif
-	endif
+       	print *, "This ESMF_Log is already open with file '", &
+      		 trim(ESMF_LogTable(log%logTableIndex)%nameLogErrFile), "'"
+	return
     endif
 
     alog%maxElements = 10
