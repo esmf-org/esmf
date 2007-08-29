@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.13 2007/08/21 17:35:21 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.14 2007/08/29 17:30:10 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -112,6 +112,13 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 		    bool _self_alloc // (in)
 		    );
 
+  // Get Array holding coordinates
+ int getCoordArrayInternal(
+		    int _staggerloc, // (in)
+		    int _coord,      // (in)
+		    Array **_array   // (in)
+		    );
+
   // add/delete protogrid  
   int addProtoGrid();
   int delProtoGrid();
@@ -148,7 +155,6 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 
   // accessor methods
   const ESMC_GridStatus getStatus(void) const {return status;}
-  ProtoGrid *getProtoGrid(void) {return proto;}
   const int getRank(void) const {return rank;}
   const int getDistRank(void) const {return distRank;}
   const int getUndistRank(void) const {return undistRank;}
@@ -204,7 +210,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 
 
   // make a create empty grid usable
- static int commit(Grid *grid);
+  int commit();
 
 
   // deallocate a grid and all internal structures
@@ -227,39 +233,32 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 		     int *_LWidth // should be size>=grid rank
 		     );
 
-  // Get Array holding coordinates
- int getCoordArrayInternal(
-		    int _staggerloc, // (in)
-		    int _coord,      // (in)
-		    Array **_array   // (in)
-		    );
 
  // Set Array for holding coordinates
- static int setCoordArray(
-			  Grid *_grid, 
-			  int *_staggerloc,
-			  int *_coord,
-			  Array *_array,
-			  ESMC_DataCopy *_docopy
-			  );
+ int setCoordArray(
+                   int *_staggerloc,
+                   int *_coord,
+                   Array *_array,
+                   ESMC_DataCopy *_docopy
+                   );
 
  // Allocate coordinate Arrays for every coord in a staggerloc
- static int allocCoordArray(
-			    Grid *_grid, 
-			    int *_staggerloc,
-			    InterfaceInt *_staggerLWidthArg,
-			    InterfaceInt *_staggerUWidthArg,
-			    InterfaceInt *_staggerAlign
-			    );
+ int allocCoordArray(
+                     int *_staggerloc,
+                     InterfaceInt *_staggerLWidthArg,
+                     InterfaceInt *_staggerUWidthArg,
+                     InterfaceInt *_staggerAlign
+                     );
 
  // Get the Array containing the coordinates
- static int getCoordArray(  Grid *_grid, 
-			    int *_staggerloc,
-			    int *_coord,
-			    Array **_array,
-			    ESMC_DataCopy *_docopy
-			    );
+ Array *getCoordArray(
+                      int *_staggerloc,
+                      int _coord,
+                      ESMC_DataCopy *_docopy,
+                      int *rcArg
+                      );
  
+
  // setup internal structures in _grid based on parameters
  friend int construct(
 		      Grid *_grid, 

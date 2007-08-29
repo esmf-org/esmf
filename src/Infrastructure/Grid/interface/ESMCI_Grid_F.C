@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.11 2007/08/21 13:23:45 oehmke Exp $
+// $Id: ESMCI_Grid_F.C,v 1.12 2007/08/29 17:30:10 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ extern "C" {
     localrc = ESMC_RC_NOT_IMPL;
 
     // call into C++
-    localrc= ESMCI::Grid::commit(*grid);
+    localrc=(*grid)->commit();
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
@@ -308,9 +308,8 @@ extern "C" {
     localrc = ESMC_RC_NOT_IMPL;
 
     // call into C++
-    localrc= ESMCI::Grid::getCoordArray(*grid, ESMC_NOT_PRESENT_FILTER(staggerloc),
-      ESMC_NOT_PRESENT_FILTER(coord), array, ESMC_NOT_PRESENT_FILTER(docopy));
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    *array = (*grid)->getCoordArray(ESMC_NOT_PRESENT_FILTER(staggerloc),
+      *coord, ESMC_NOT_PRESENT_FILTER(docopy), 
       ESMC_NOT_PRESENT_FILTER(rc));
 }
 
@@ -331,7 +330,7 @@ extern "C" {
     localrc = ESMC_RC_NOT_IMPL;
 
     // call into C++
-    localrc= ESMCI::Grid::allocCoordArray(*grid, ESMC_NOT_PRESENT_FILTER(staggerloc),
+    localrc= (*grid)->allocCoordArray(ESMC_NOT_PRESENT_FILTER(staggerloc),
       *staggerLWidthArg, *staggerUWidthArg, *staggerAlignArg);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -356,7 +355,7 @@ extern "C" {
     localrc = ESMC_RC_NOT_IMPL;
 
     // call into C++
-    localrc= ESMCI::Grid::setCoordArray(*grid, ESMC_NOT_PRESENT_FILTER(staggerloc),
+    localrc= (*grid)->setCoordArray(ESMC_NOT_PRESENT_FILTER(staggerloc),
       ESMC_NOT_PRESENT_FILTER(coord), *array, ESMC_NOT_PRESENT_FILTER(docopy));
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -430,6 +429,7 @@ extern "C" {
     ESMCI::Grid *grid;
     ESMCI::Array *array;
     int offset[ESMF_MAXDIM];
+    ESMC_DataCopy docopy;
 
     // Get Grid pointer
     grid=*_grid;
@@ -501,16 +501,17 @@ extern "C" {
     }
 
 
-
     // Get Array From Grid
-    localrc=grid->getCoordArrayInternal(staggerloc, coord, &array);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-      ESMC_NOT_PRESENT_FILTER(_rc));
-    if (array == ESMC_NULL_POINTER) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD,
+   docopy=ESMC_DATA_REF;
+   array=grid->getCoordArray(&staggerloc, coord+1, &docopy, &localrc);
+   if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+                                            ESMC_NOT_PRESENT_FILTER(_rc))) return;
+ 
+   if (array == ESMC_NULL_POINTER) {
+     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD,
           "- unset coord array", ESMC_NOT_PRESENT_FILTER(_rc));
-        return;
-    }
+     return;
+   }
 
     // Array info
     arrayLbounds=array->getLBounds();
