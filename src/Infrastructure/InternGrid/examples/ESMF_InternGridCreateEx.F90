@@ -1,4 +1,4 @@
-! $Id: ESMF_InternGridCreateEx.F90,v 1.2 2007/06/23 04:37:05 cdeluca Exp $
+! $Id: ESMF_InternGridCreateEx.F90,v 1.3 2007/08/30 05:06:38 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
       program ESMF_IGridCreateEx
 
 !-------------------------------------------------------------------------
-!EXAMPLE        String used by test script to count examples.
+!EXremoveAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
 ! !PROGRAM: ESMF_IGridCreateEx - IGrid creation

@@ -1,4 +1,4 @@
-! $Id: ESMF_InternGridUTest.F90,v 1.2 2007/06/23 04:37:05 cdeluca Exp $
+! $Id: ESMF_InternGridUTest.F90,v 1.3 2007/08/30 05:06:38 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InternGridUTest.F90,v 1.2 2007/06/23 04:37:05 cdeluca Exp $'
+      '$Id: ESMF_InternGridUTest.F90,v 1.3 2007/08/30 05:06:38 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -102,14 +102,14 @@
 
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       layout = ESMF_DELayoutCreate(vm, rc=status)
       write(failMsg, *) "Returned ESMF_FAILURE"
       write(name, *) "Creating a DELayout Test"
       call ESMF_Test((status.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       igrid = ESMF_IGridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=igrid_min, &
                               maxGlobalCoordPerDim=igrid_max, &
@@ -121,7 +121,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       call ESMF_IGridDistribute(igrid, delayout=layout, rc=status)
       write(failMsg, *) "Returned ESMF_FAILURE"
       write(name, *) "Distributing a IGrid Test"
@@ -129,7 +129,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! Printing a IGrid
       call ESMF_IGridPrint(igrid, "", rc=rc)
       write(failMsg, *) ""
@@ -137,7 +137,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! Destroying a IGrid
       call ESMF_IGridDestroy(igrid, rc=rc)
       write(failMsg, *) ""
@@ -146,7 +146,7 @@
 
 #ifdef ESMF_EXHAUSTIVE
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Create a igrid to use in next test
       igrid = ESMF_IGridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=igrid_min, &
@@ -159,7 +159,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! The following code works ok because the layout is explicitly 
       ! destroyed first before being used in the igrid distribute (which is 
       ! expected to fail).  but this still crashes randomly if the layout
@@ -173,7 +173,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
 
       igrid_min(1) = 7.0
       igrid_max(1) = -10.0
@@ -191,7 +191,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       call ESMF_IGridDistribute(igrid, delayout=layout, rc=status)
       write(failMsg, *) "Returned ESMF_FAILURE"
       write(name, *) "Distributing a IGrid  with negative x_max Test"
@@ -199,7 +199,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Get Coord from a IGrid
       call ESMF_IGridGetCoord(igrid, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -207,7 +207,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Setting the horzIGridType of a IGrid
       horz_igridtype = ESMF_IGRID_TYPE_LATLON
       call ESMF_IGridSet(igrid, horzigridtype=horz_igridtype,rc=rc)
@@ -216,7 +216,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Printing a IGrid
       call ESMF_IGridPrint(igrid, "", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -224,7 +224,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Test creating an internal IGrid
       igrid = ESMF_IGridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=igrid_min, &
@@ -237,14 +237,14 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       call ESMF_IGridDistribute(igrid, delayout=layout, rc=status)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Distributing an Internal IGrid Test"
       call ESMF_Test((status.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Printing a IGrid
       call ESMF_IGridPrint(igrid, "", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -252,7 +252,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Test destroy subroutine
       call  ESMF_IGridDestroy(igrid, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -261,7 +261,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Test creation of empty igrid
       igrid1 =  ESMF_IGridCreate(rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -270,7 +270,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Test adding a name to an empty IGrid
       call ESMF_IGridSet(igrid1, name="IGRID_ONE", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -279,7 +279,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Test getting the name from an empty IGrid
       call ESMF_IGridGet(igrid1, name=gname, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -288,7 +288,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Verify the name from an empty IGrid is correct
       write(failMsg, *) "Returned wrong name"
       write(name, *) "Verifying a name from a IGrid Test"
@@ -297,7 +297,7 @@
       print *, "gname= ", gname
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Get Attribute count from a IGrid
       call ESMF_IGridGetAttributeCount(igrid1, attribute, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS" 
@@ -305,14 +305,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Verify Attribute count from a IGrid
       write(failMsg, *) "Attribute count is incorrect" 
       write(name, *) "Verify Attribute count from a IGrid Test"
       call ESMF_Test((attribute.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Set Attributes in a empty IGrid 
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting Attributes in a IGrid Test"
@@ -321,7 +321,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !-------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Set an Attribute in a IGrid
       call ESMF_IGridSetAttribute(igrid1, "test_attribute", 123456789, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -329,7 +329,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  
       !-------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Set an Attribute in a IGrid
       call ESMF_IGridSetAttribute(igrid1, "test_attribute1", 0, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -337,7 +337,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  
       !-------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Set an Attribute in an IGrid
       call ESMF_IGridSetAttribute(igrid1, "test_attribute2", 0.0, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -345,7 +345,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  
       !-------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Set an Attribute in a IGrid
       call ESMF_IGridSetAttribute(igrid1, "test_attribute3", 6789, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS" 
@@ -353,7 +353,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !-------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Set an Attribute in a IGrid
       call ESMF_IGridSetAttribute(igrid1, "test_attribute4", 5.87, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -361,7 +361,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
        
       !-------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Get Attribute count from a IGrid
       call ESMF_IGridGetAttributeCount(igrid1, attribute, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS" 
@@ -369,14 +369,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
        
       !-------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Verify Attribute count from a IGrid
       write(failMsg, *) "Attribute count is incorrect" 
       write(name, *) "Verify Attribute count from a IGrid Test"
       call ESMF_Test((attribute.eq.5), name, failMsg, result, ESMF_SRCLINE)
  
       !-------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Get an Attribute from a IGrid
       call ESMF_IGridGetAttribute(igrid1, "test_attribute", attribute, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -384,14 +384,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  
       !-------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Verify the value of the Attribute
       write(failMsg, *) "Attribute value is wrong"
       write(name, *) "Verify Attribute value from a IGrid Test"
       call ESMF_Test((attribute.eq.123456789), name, failMsg, result, ESMF_SRCLINE)
  
       !-------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Get an Attribute from a IGrid
       call ESMF_IGridGetAttribute(igrid1, "test_attribute", attribute, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -399,14 +399,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  
       !-------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Verify the value of the Attribute
       write(failMsg, *) "Attribute value is wrong"
       write(name, *) "Verify Attribute value from a IGrid Test"
       call ESMF_Test((attribute.eq.123456789), name, failMsg, result, ESMF_SRCLINE)
 
       !-------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Get Attribute Info from a IGrid Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Get Attribute Info from a IGrid Test"
@@ -415,21 +415,21 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Verify typekind of Attribute
       write(failMsg, *) "Attribute typekind is wrong"
       write(name, *) "Verify Attribute typekind from a IGrid Test"
       call ESMF_Test((att_typekind.eq.ESMF_TYPEKIND_I4), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Verify count of Attribute
       write(failMsg, *) "Attribute count is wrong"
       write(name, *) "Verify Attribute count from a IGrid Test"
       call ESMF_Test((att_count.eq.1), name, failMsg, result, ESMF_SRCLINE)
  
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       !  Get an Attribute from IGrid with wrong data type
       call ESMF_IGridGetAttribute(igrid1, "test_attribute4", attribute, rc=rc)
       write(failMsg, *) "Should not return ESMF_SUCCESS"
@@ -437,7 +437,7 @@
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Test destroy subroutine
       call  ESMF_IGridDestroy(igrid1, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"

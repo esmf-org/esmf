@@ -1,4 +1,4 @@
-// $Id: ESMCI.h,v 1.7 2007/08/23 17:16:06 cdeluca Exp $
+// $Id: ESMCI.h,v 1.8 2007/08/30 05:06:43 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -51,12 +51,12 @@
 // array, igrid, field, bundle, comms
 #include "ESMC_InternArray.h"
 #include "ESMC_Grid.h"
-#include "ESMC_InternGrid.h"
+//#include "ESMC_InternGrid.h"
 //#include "ESMC_FieldDataMap.h"
 #include "ESMC_Field.h"
 //#include "ESMC_BundleDataMap.h"
 #include "ESMC_Bundle.h"
-#include "ESMC_InternArrayComm.h"
+//#include "ESMC_InternArrayComm.h"
 
 // config
 #include "ESMCI_Config.h"

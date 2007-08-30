@@ -1,4 +1,4 @@
-! $Id: ESMF.F90,v 1.43 2007/07/06 15:05:44 oehmke Exp $
+! $Id: ESMF.F90,v 1.44 2007/08/30 05:06:43 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -49,11 +49,11 @@ module ESMF_Mod
     use ESMF_InternArrayGetMod
 
     use ESMF_InternDGMod
-    use ESMF_PhysCoordMod
-    use ESMF_PhysGridMod
-    use ESMF_IGridTypesMod
-    use ESMF_LogRectIGridMod
-    use ESMF_IGridMod
+!    use ESMF_PhysCoordMod
+!    use ESMF_PhysGridMod
+!    use ESMF_IGridTypesMod
+!    use ESMF_LogRectIGridMod
+!    use ESMF_IGridMod
     use ESMF_GridMod
     use ESMF_StaggerLocMod
 
@@ -64,26 +64,26 @@ module ESMF_Mod
     use ESMF_RHandleMod
 
     use ESMF_FieldDataMapMod
-    use ESMF_InternArrayCommMod
+ !   use ESMF_InternArrayCommMod
 
     use ESMF_FieldMod
-    use ESMF_FieldGetMod
-    use ESMF_FieldSetMod
-    use ESMF_FieldCreateMod
+!    use ESMF_FieldGetMod
+!    use ESMF_FieldSetMod
+!    use ESMF_FieldCreateMod
     use ESMF_BundleDataMapMod
     use ESMF_BundleMod
-    use ESMF_BundleGetMod
+!    use ESMF_BundleGetMod
 
-    use ESMF_RegridTypesMod
-    use ESMF_RegridMod
+!    use ESMF_RegridTypesMod
+!    use ESMF_RegridMod
 
-    use ESMF_FieldCommMod
-    use ESMF_BundleCommMod
+!    use ESMF_FieldCommMod
+!    use ESMF_BundleCommMod
 
     use ESMF_StateTypesMod
     use ESMF_StateMod
     use ESMF_StateGetMod
-    use ESMF_StateReconcileMod
+ !   use ESMF_StateReconcileMod
     use ESMF_CompMod
     use ESMF_GridCompMod
     use ESMF_CplCompMod

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2007/03/06 00:10:58 theurich Exp $ 
+# $Id: makefile,v 1.20 2007/08/30 05:06:32 cdeluca Exp $ 
 
 #
 ALL: build_here 
@@ -7,7 +7,9 @@ AUTOGEN   = ESMF_FieldGet.F90 ESMF_FieldSet.F90 ESMF_FieldCreate.F90
 CFLAGS    =
 FFLAGS    =
 SOURCEC	  = 
-SOURCEF	  = ESMF_Field.F90 $(AUTOGEN)
+SOURCEF	  = ESMF_Field.F90 
+# TODO:FIELDINTEGRATION Turn other Field methods back on.
+# $(AUTOGEN)
 SOURCEH	  = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))

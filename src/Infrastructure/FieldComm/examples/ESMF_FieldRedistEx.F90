@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistEx.F90,v 1.15 2007/06/23 04:00:25 cdeluca Exp $
+! $Id: ESMF_FieldRedistEx.F90,v 1.16 2007/08/30 05:06:33 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
      program FieldRedistEx
 
 !-------------------------------------------------------------------------
-!EXAMPLE        String used by test script to count examples.
+!EXremoveAMPLE        String used by test script to count examples.
 !==============================================================================
 !
 ! !PROGRAM: ESMF_FieldRedistEx - Field Redistribution

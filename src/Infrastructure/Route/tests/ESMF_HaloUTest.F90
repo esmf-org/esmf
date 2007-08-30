@@ -1,4 +1,4 @@
-! $Id: ESMF_HaloUTest.F90,v 1.5 2007/03/31 05:51:24 cdeluca Exp $
+! $Id: ESMF_HaloUTest.F90,v 1.6 2007/08/30 05:06:40 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_HaloUTest.F90,v 1.5 2007/03/31 05:51:24 cdeluca Exp $'
+      '$Id: ESMF_HaloUTest.F90,v 1.6 2007/08/30 05:06:40 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -67,7 +67,7 @@
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! create fields for later on
       call CreateFields(field1, field2, rc)
       write(name, *) "Creating src and dest fields"
@@ -75,7 +75,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! fill data region of source field with known data
       val1 = 1.0
       call FillConstantField(field1, val1, rc)
@@ -84,7 +84,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! fill halo region of source field with known data
       val2 = -1.0
       call FillConstantHalo(field1, val2, rc)
@@ -93,7 +93,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! store
       call ESMF_FieldHaloStore(field1, routehandle=halo_rh, rc=rc)
       write(name, *) "Computing route for halo"
@@ -101,7 +101,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! run
       call ESMF_FieldHalo(field1, routehandle=halo_rh, rc=rc)
       write(name, *) "Executing halo"
@@ -113,7 +113,7 @@
       !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! validate resulting field
       call ValidateConstantField(field1, val1, rc)
       write(name, *) "Validating constant data in dest fields"
@@ -122,7 +122,7 @@
 
 #if ESMF_EXHAUSTIVE
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! fill computational area of field with known data
       call FillIndexField(field1, rc)
       write(name, *) "Filling src field with indexed data values"
@@ -130,7 +130,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! fill halo region with constant value
       val2 = -1.0
       call FillConstantHalo(field1, val2, rc)
@@ -139,7 +139,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! run
       call ESMF_FieldHalo(field1, routehandle=halo_rh, rc=rc)
       write(name, *) "Executing halo 2"
@@ -151,7 +151,7 @@
       !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! validate field, data regions only
       call ValidateIndexField(field1, rc)
       write(name, *) "Validating indexed data in dest fields"
@@ -159,14 +159,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       call ValidateIndexHalo(field1, val2, rc)
       write(name, *) "Validating halo area in dest fields"
       write(failMsg, *) "Validating indexed data in dest fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! release first route handle, compute another below
       call ESMF_FieldHaloRelease(halo_rh, rc=rc)
       write(name, *) "Releasing route"
@@ -174,7 +174,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! fill source field with known data
       val1 = 1.0
       call FillConstantField(field2, val1, rc)
@@ -183,7 +183,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! fill destination field with known data
       val2 = -1.0
       call FillConstantHalo(field2, val2, rc)
@@ -192,7 +192,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! store
       call ESMF_FieldHaloStore(field2, routehandle=halo_rh, rc=rc)
       write(name, *) "Computing route for halo, 2 to 1"
@@ -200,7 +200,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! run
       call ESMF_FieldHalo(field2, routehandle=halo_rh, rc=rc)
       write(name, *) "Executing halo"
@@ -212,7 +212,7 @@
       !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! validate destination field
       call ValidateConstantField(field2, val1, rc)
       write(name, *) "Validating constant data in dest fields"
@@ -220,7 +220,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! fill source field with known data
       call FillIndexField(field2, rc)
       write(name, *) "Filling src field with indexed data values"
@@ -228,7 +228,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! fill halo area with known data
       val2 = -1.0
       call FillConstantHalo(field2, val2, rc)
@@ -237,7 +237,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! run
       call ESMF_FieldHalo(field2, routehandle=halo_rh, rc=rc)
       write(name, *) "Executing halo 2 -> 1"
@@ -249,7 +249,7 @@
       !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! validate destination field
       call ValidateIndexField(field2, rc)
       write(name, *) "Validating indexed data in dest fields"
@@ -257,7 +257,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       call ValidateIndexHalo(field2, val2, rc)
       write(name, *) "Validating halo area in dest fields"
       write(failMsg, *) "Validating indexed data in dest fields"
@@ -266,7 +266,7 @@
 #endif
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! release
       call ESMF_FieldHaloRelease(halo_rh, rc=rc)
       write(name, *) "Releasing route"
@@ -274,7 +274,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! cleanup
       call Cleanup(field1, field2, rc)
       write(name, *) "Deleting fields at cleanup time"

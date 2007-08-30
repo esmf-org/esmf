@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.80 2007/08/01 01:28:54 theurich Exp $
+# $Id: makefile,v 1.81 2007/08/30 05:06:26 cdeluca Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -7,7 +7,7 @@
 #===============================================================================
 
 #-------------------------------------------------------------------------------
-# The ESMF_DIR environment variable MUST be set by user!!!
+# The ESMF_DIR environment variable MUST be set by the user!
 #-------------------------------------------------------------------------------
 ifndef ESMF_DIR
 $(error ESMF_DIR needs to be set to the top ESMF directory)
@@ -15,19 +15,19 @@ endif
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-# all common rules, definitions are in common.mk
+# All common rules and definitions are in common.mk.
 #-------------------------------------------------------------------------------
 include $(ESMF_DIR)/build/common.mk
 # default target inherited from common.mk is 'lib'
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-# Include dependencies, if they exist
+# Include dependencies, if they exist.
 -include $(ESMF_DIR)/$(LOCDIR)/makefile.dep
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-# things specific to framework build
+# Things specific to framework build.
 #-------------------------------------------------------------------------------
 DIRS = src
 
@@ -50,7 +50,7 @@ all:  lib build_unit_tests build_examples build_system_tests build_demos
 
 
 #-------------------------------------------------------------------------------
-# Prints information about the system and version of ESMF being compiled
+# Prints information about the system and version of ESMF being compiled.
 #-------------------------------------------------------------------------------
 script_info:
 	-@echo " "
@@ -304,11 +304,11 @@ installcheck:
 	-@echo " "
 
 # ------------------------------------------------------------------
-# add dummy rules here to avoid gnumake trying to remake the actual
+# Add dummy rules here to avoid gnumake trying to remake the actual
 # makefiles themselves; this might not be much of an overhead but 
 # since we call make so many times recursively and it does the makefile
 # remake rule check on each invocation of make, it effectively renders
-# gmake -d (debug mode) almost unreadable.  this cuts the remake rule
+# gmake -d (debug mode) almost unreadable.  This cuts the remake rule
 # output down immensely.  nsc 05nov04
 
 GNUmakefile:

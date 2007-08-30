@@ -1,4 +1,4 @@
-! $Id: ESMF_InternGridWrapUTest.F90,v 1.3 2007/06/27 20:36:07 cdeluca Exp $
+! $Id: ESMF_InternGridWrapUTest.F90,v 1.4 2007/08/30 05:06:39 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InternGridWrapUTest.F90,v 1.3 2007/06/27 20:36:07 cdeluca Exp $'
+      '$Id: ESMF_InternGridWrapUTest.F90,v 1.4 2007/08/30 05:06:39 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -72,7 +72,7 @@
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
     !--------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     call ESMF_VMGetGlobal(vm, rc)
     write(name, *) "ESMF_VMGetGlobal Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -80,7 +80,7 @@
                     name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     layout = ESMF_DELayoutCreate(vm, (/ 3, 2 /), rc=rc)
     write(name, *) "ESMF_DELayoutCreate Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -90,7 +90,7 @@
     origin = (/ 0.0, 0.0 /)
 
     !--------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     igrid = ESMF_IGridCreateHorzXYUni((/ 50, 30 /), origin, &
                                     deltaPerDim=(/ 1.0d0, 1.0d0 /), &
 	                            periodic=(/ ESMF_FALSE, ESMF_FALSE /), &
@@ -101,7 +101,7 @@
                     name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     call ESMF_IGridDistribute(igrid, delayout=layout, rc=rc)
     write(name, *) "ESMF_IGridDistribute Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -114,7 +114,7 @@
     ! this is support request 1095990, bug 1156870.
     !--------------------------------------------------------------------------
     !--------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     ! get igrid information used to calculate global indices
     call ESMF_IGridGetDELocalInfo(igrid, horzrelloc=ESMF_CELL_CENTER, &
                                  localCellCountPerDim=igridCount, &
@@ -126,7 +126,7 @@
                     name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     igrid = ESMF_IGridCreateHorzXYUni((/ 50, 30 /), origin, &
                                     deltaPerDim=(/ 1.0d0, 1.0d0 /), &
 	                            periodic=(/ ESMF_FALSE, ESMF_TRUE /), &
@@ -137,7 +137,7 @@
                     name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     call ESMF_IGridDistribute(igrid, delayout=layout, rc=rc)
     write(name, *) "ESMF_IGridDistribute Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -145,7 +145,7 @@
                     name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     ! get igrid information used to calculate global indices
     call ESMF_IGridGetDELocalInfo(igrid, horzrelloc=ESMF_CELL_CENTER, &
                                  localCellCountPerDim=igridCount, &
@@ -157,7 +157,7 @@
                     name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     igrid = ESMF_IGridCreateHorzXYUni((/ 50, 30 /), origin, &
                                     deltaPerDim=(/ 1.0d0, 1.0d0 /), &
 	                            periodic=(/ ESMF_TRUE, ESMF_FALSE /), &
@@ -168,7 +168,7 @@
                     name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     call ESMF_IGridDistribute(igrid, delayout=layout, rc=rc)
     write(name, *) "ESMF_IGridDistribute Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -176,7 +176,7 @@
                     name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     ! get igrid information used to calculate global indices
     call ESMF_IGridGetDELocalInfo(igrid, horzrelloc=ESMF_CELL_CENTER, &
                                  localCellCountPerDim=igridCount, &
@@ -188,7 +188,7 @@
                     name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     igrid = ESMF_IGridCreateHorzXYUni((/ 50, 30 /), origin, &
                                     deltaPerDim=(/ 1.0d0, 1.0d0 /), &
 	                            periodic=(/ ESMF_TRUE, ESMF_TRUE /), &
@@ -199,7 +199,7 @@
                     name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     call ESMF_IGridDistribute(igrid, delayout=layout, rc=rc)
     write(name, *) "ESMF_IGridDistribute Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -207,7 +207,7 @@
                     name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_removeUTest
     ! get igrid information used to calculate global indices
     call ESMF_IGridGetDELocalInfo(igrid, horzrelloc=ESMF_CELL_CENTER, &
                                  localCellCountPerDim=igridCount, &

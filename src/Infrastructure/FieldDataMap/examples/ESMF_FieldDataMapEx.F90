@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMapEx.F90,v 1.10 2007/06/23 04:00:27 cdeluca Exp $
+! $Id: ESMF_FieldDataMapEx.F90,v 1.11 2007/08/30 05:06:34 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 
       ! local variables 
       type(ESMF_FieldDataMap) :: fieldDM
-      type(ESMF_RelLoc) :: relativeLocation
+      type(ESMF_StaggerLoc) :: staggerLocation
       integer :: dataRank, dataIndexList(ESMF_MAXDIM)
       ! integer :: counts(ESMF_MAXDIM)
       ! type(ESMF_IndexOrder) :: indexOrder
@@ -76,9 +76,9 @@
 
 
 !BOC
-      relativeLocation = ESMF_CELL_NECORNER
+      staggerLocation = ESMF_STAGGERLOC_CORNER
       call ESMF_FieldDataMapSetDefault(fieldDM, ESMF_INDEX_IJK, &
-                                       horzRelloc=relativeLocation, rc=rc)
+                                       staggerloc=staggerLocation, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -109,9 +109,9 @@
 !EOP
 
 !BOC
-      relativeLocation = ESMF_CELL_CENTER
+      staggerLocation = ESMF_STAGGERLOC_CENTER
       call ESMF_FieldDataMapSet(fieldDM, dataRank=2, &
-                                horzRelloc=relativeLocation, rc=rc)
+                                staggerloc=staggerLocation, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -131,7 +131,7 @@
 
 !BOC
       call ESMF_FieldDataMapGet(fieldDM, dataRank, dataIndexList, &
-                                horzRelloc=relativeLocation, rc=rc)
+                                staggerloc=staggerLocation, rc=rc)
       print *, "Returned values from Field DataMap:"
       print *, "data rank: ", dataRank
       print *, "mapping of igrid to data indices: ", dataIndexList

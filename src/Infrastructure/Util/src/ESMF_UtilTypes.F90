@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.54 2007/07/25 22:23:28 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.55 2007/08/30 05:06:42 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -67,9 +67,11 @@
 
       integer, parameter :: ESMF_SUCCESS = 0, ESMF_FAILURE = -1
       integer, parameter :: ESMF_MAXSTR = 128
+! TODO:FIELDINTEGRATION Adjust MAXGRIDDIM
       integer, parameter :: ESMF_MAXDIM = 7, &
                             ESMF_MAXDECOMPDIM = 3, &
-                            ESMF_MAXIGRIDDIM = 3
+                            ESMF_MAXIGRIDDIM = 3, &
+                            ESMF_MAXGRIDDIM = 3
      
 !EOPI
 
@@ -516,7 +518,8 @@
 
       public ESMF_FAILURE, ESMF_SUCCESS
       public ESMF_MAXSTR
-      public ESMF_MAXDIM, ESMF_MAXDECOMPDIM, ESMF_MAXIGRIDDIM
+! TODO:FIELDINTEGRATION Adjust MAXGRIDDIM
+      public ESMF_MAXDIM, ESMF_MAXDECOMPDIM, ESMF_MAXIGRIDDIM, ESMF_MAXGRIDDIM
      
       public ESMF_MAJOR_VERSION, ESMF_MINOR_VERSION
       public ESMF_REVISION, ESMF_PATCHLEVEL

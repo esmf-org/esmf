@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGlobalEx.F90,v 1.12 2007/06/23 04:00:17 cdeluca Exp $
+! $Id: ESMF_FieldGlobalEx.F90,v 1.13 2007/08/30 05:06:31 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
     program ESMF_FieldGlobalEx
 
 !------------------------------------------------------------------------------
-!EXAMPLE        String used by test script to count examples.
+!EXremoveAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
 ! !PROGRAM: ESMF_FieldGlobalEx - Field creation using global indexing

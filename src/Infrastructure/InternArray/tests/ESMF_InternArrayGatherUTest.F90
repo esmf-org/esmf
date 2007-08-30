@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayGatherUTest.F90,v 1.9 2007/06/23 04:00:30 cdeluca Exp $
+! $Id: ESMF_InternArrayGatherUTest.F90,v 1.10 2007/08/30 05:06:37 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InternArrayGatherUTest.F90,v 1.9 2007/06/23 04:00:30 cdeluca Exp $'
+      '$Id: ESMF_InternArrayGatherUTest.F90,v 1.10 2007/08/30 05:06:37 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -70,7 +70,7 @@
 
     !Create the DELayout
    !===========================
-   !NEX_UTest
+   !NEX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) " DELayout Create Test"
     layout = ESMF_DELayoutCreate(vm, (/petCount,1/), rc=rc)
@@ -82,7 +82,7 @@
 
     !Create the igrid
    !===========================
-   !NEX_UTest
+   !NEX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) " IGrid Create Test"
     igrid = ESMF_IGridCreateHorzXYUni((/nlen,1/), &
@@ -93,7 +93,7 @@
 
    !Distribute the igrid
    !===========================
-   !NEX_UTest
+   !NEX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) " IGrid Distribute Test"
     call ESMF_IGridDistribute(igrid, delayout=layout, rc=rc)
@@ -101,7 +101,7 @@
 
    !Datamap Set
    !===========================
-   !NEX_UTest
+   !NEX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) " Field Datamap set Test"
     call ESMF_FieldDataMapSetDefault(datamap, 1, rc=rc)
@@ -109,7 +109,7 @@
 
    !Specify settings for the field array
    !====================================
-   !NEX_UTest
+   !NEX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Array Spec Set Field Test"
     call ESMF_ArraySpecSet(arrayspec, rank=1, &
@@ -119,7 +119,7 @@
 
    !Create the field 
    !=======================================
-   !NEX_UTest
+   !NEX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Create Field Test"
     field = ESMF_FieldCreate(igrid, arrayspec, &
@@ -129,7 +129,7 @@
 
    !Validate
    !=======================================
-   !NEX_UTest
+   !NEX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Validate Field Test"
     call ESMF_FieldValidate(field, rc=rc)
@@ -137,7 +137,7 @@
 
    !Get the Field array
    !=======================================
-   !NEX_UTest
+   !NEX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Get the Field Array Test"
     call ESMF_FieldGet(field=field, array=array1, rc=rc)
@@ -145,7 +145,7 @@
  
    !Get the Data Pointer
    !=======================================
-   !NEX_UTest
+   !NEX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Get the Data Pointer Test"
     call ESMF_InternArrayGetData(array1, f90ptr1, ESMF_DATA_REF, rc=rc)
@@ -164,7 +164,7 @@
    !-------------------------------------------------------------------------------
   !  Print an Array
 
-    !NEX_UTest
+    !NEX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Print an Array Test"
     call ESMF_InternArrayPrint(array1, rc=rc)
@@ -173,7 +173,7 @@
    !-------------------------------------------------------------------------------
   !  Gather the arrays
 
-    !NEX_UTest
+    !NEX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Test ArrayGather"
     ! Commented out because it hangs on some platforms

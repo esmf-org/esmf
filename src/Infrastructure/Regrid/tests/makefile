@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.40 2007/08/17 20:53:26 cdeluca Exp $
+# $Id: makefile,v 1.41 2007/08/30 05:06:39 cdeluca Exp $
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -16,24 +16,27 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/Regrid/tests
 
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_RegridUTest \
-		$(ESMF_TESTDIR)/ESMF_RegridOptionsUTest \
-		$(ESMF_TESTDIR)/ESMF_RegridBandingUTest \
-		$(ESMF_TESTDIR)/ESMF_RegridTimeUTest \
-		$(ESMF_TESTDIR)/ESMF_RegridToolUTest
+TESTS_BUILD   = 
+#		$(ESMF_TESTDIR)/ESMF_RegridUTest \
+#		$(ESMF_TESTDIR)/ESMF_RegridOptionsUTest \
+#		$(ESMF_TESTDIR)/ESMF_RegridBandingUTest \
+#		$(ESMF_TESTDIR)/ESMF_RegridTimeUTest \
+#		$(ESMF_TESTDIR)/ESMF_RegridToolUTest
 
-TESTS_RUN     = RUN_ESMF_RegridToolUTest \
-		RUN_ESMF_RegridTimeUTest \
-		RUN_ESMF_RegridUTest \
-		RUN_ESMF_RegridOptionsUTest \
-		RUN_ESMF_RegridBandingUTest \
-		RUN_ESMF_RegridTimeUTest
+TESTS_RUN     = 
+#		RUN_ESMF_RegridToolUTest \
+#		RUN_ESMF_RegridTimeUTest \
+#		RUN_ESMF_RegridUTest \
+#		RUN_ESMF_RegridOptionsUTest \
+#		RUN_ESMF_RegridBandingUTest \
+#		RUN_ESMF_RegridTimeUTest
 
-TESTS_RUN_UNI =	RUN_ESMF_RegridToolUTestUNI \
-		RUN_ESMF_RegridTimeUTestUNI \
-		RUN_ESMF_RegridUTestUNI \
-		RUN_ESMF_RegridOptionsUTestUNI \
-		RUN_ESMF_RegridBandingUTestUNI
+TESTS_RUN_UNI =	
+#		RUN_ESMF_RegridToolUTestUNI \
+#		RUN_ESMF_RegridTimeUTestUNI \
+#		RUN_ESMF_RegridUTestUNI \
+#		RUN_ESMF_RegridOptionsUTestUNI \
+#		RUN_ESMF_RegridBandingUTestUNI
 
 
 include $(ESMF_DIR)/makefile

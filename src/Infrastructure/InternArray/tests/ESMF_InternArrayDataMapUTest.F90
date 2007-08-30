@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayDataMapUTest.F90,v 1.4 2007/03/31 05:51:13 cdeluca Exp $
+! $Id: ESMF_InternArrayDataMapUTest.F90,v 1.5 2007/08/30 05:06:36 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InternArrayDataMapUTest.F90,v 1.4 2007/03/31 05:51:13 cdeluca Exp $'
+      '$Id: ESMF_InternArrayDataMapUTest.F90,v 1.5 2007/08/30 05:06:36 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -79,7 +79,7 @@
       datarank = 1
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! Test ArrayDataMap Initialization
       call ESMF_ArrayDataMapSetDefault(ArrayDataMap, datarank, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -87,7 +87,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! Test ArrayDataMap Invalid
       call ESMF_ArrayDataMapSetInvalid(ArrayDataMap, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -99,7 +99,7 @@
 
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Test ArrayDataMap Initialization
       call ESMF_ArrayDataMapSetDefault(ArrayDataMap, datarank, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -107,7 +107,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Test ArrayDataMap Get
       call ESMF_ArrayDataMapGet(ArrayDataMap,  datarank=datarank, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS and/or datarank incorrect"
@@ -116,7 +116,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Test ArrayDataMap Print
       call ESMF_ArrayDataMapPrint(ArrayDataMap, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -124,7 +124,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Test ArrayDataMap Validate
       call ESMF_ArrayDataMapValidate(ArrayDataMap, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -132,7 +132,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Test ArrayDataMap Set
       call ESMF_ArrayDataMapSet(ArrayDataMap, datarank=2, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -140,7 +140,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Test ArrayDataMap Get
       call ESMF_ArrayDataMapGet(ArrayDataMap,  datarank, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS and/or horzRelloc incorrect"
@@ -149,7 +149,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Test ArrayDataMap Print
       call ESMF_ArrayDataMapPrint(ArrayDataMap, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"

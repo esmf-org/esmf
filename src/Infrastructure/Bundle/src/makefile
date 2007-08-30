@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2007/03/06 00:10:58 theurich Exp $ 
+# $Id: makefile,v 1.11 2007/08/30 05:06:28 cdeluca Exp $ 
 
 
 ALL: build_here 
@@ -6,7 +6,9 @@ ALL: build_here
 AUTOGEN   = ESMF_BundleGet.F90
 
 SOURCEC	  = 
-SOURCEF	  = ESMF_Bundle.F90  $(AUTOGEN)
+SOURCEF	  = ESMF_Bundle.F90  
+# TODO:FIELDINTEGRATION Turn comm methods back on.
+# $(AUTOGEN)
 SOURCEH	  = 
 
 

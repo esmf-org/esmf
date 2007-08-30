@@ -1,4 +1,4 @@
-// $Id: ESMC_Macros.h,v 1.19 2007/07/25 22:23:28 theurich Exp $
+// $Id: ESMC_Macros.h,v 1.20 2007/08/30 05:06:42 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,6 +36,9 @@
 #define ESMF_MAXDIM 7
 #define ESMF_MAXDECOMPDIM 3
 #define ESMF_MAXIGRIDDIM 3
+// TODO:FIELDINTEGRATION: Remove the MAXIGRIDDIM and increase the 
+// number of MAXGRIDDIM to 7.
+#define ESMF_MAXGRIDDIM 3
 
 #if 0
 // this is now in ESMF_Macros.inc

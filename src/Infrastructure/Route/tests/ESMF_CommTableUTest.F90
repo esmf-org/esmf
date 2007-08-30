@@ -1,4 +1,4 @@
-! $Id: ESMF_CommTableUTest.F90,v 1.6 2007/03/31 05:51:24 cdeluca Exp $
+! $Id: ESMF_CommTableUTest.F90,v 1.7 2007/08/30 05:06:39 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_CommTableUTest.F90,v 1.6 2007/03/31 05:51:24 cdeluca Exp $'
+    '$Id: ESMF_CommTableUTest.F90,v 1.7 2007/08/30 05:06:39 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -76,7 +76,7 @@
 
 
       !------------------------------------------------------------------------
-      !NEX_UTest_Multi_Proc_Only
+      !NEX_removeUTest_Multi_Proc_Only
       ! test dynamic allocation of ESMF_CommTable
       rtable = ESMF_CommTableCreate(myvmid, vmcount, rc)
       write(name, *) "ESMF_CommTableCreate"
@@ -94,7 +94,7 @@
       !                name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest_Multi_Proc_Only
+      !NEX_removeUTest_Multi_Proc_Only
       ! test print method via option string
       call ESMF_CommTablePrint(rtable, print_options, rc)
       write(name, *) "ESMF_CommTablePrint"

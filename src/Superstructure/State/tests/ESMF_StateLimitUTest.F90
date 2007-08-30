@@ -1,4 +1,4 @@
-! $Id: ESMF_StateLimitUTest.F90,v 1.8 2007/06/23 04:01:12 cdeluca Exp $
+! $Id: ESMF_StateLimitUTest.F90,v 1.9 2007/08/30 05:06:45 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateLimitUTest.F90,v 1.8 2007/06/23 04:01:12 cdeluca Exp $'
+      '$Id: ESMF_StateLimitUTest.F90,v 1.9 2007/08/30 05:06:45 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -88,7 +88,7 @@
       nprime = 4
       
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! create first igrid
       igrid(1) = CreateLatLonIGrid(nx, ny, nz, m, n, "MxN", rc=rc)
       write(name, *) "Creating igrid 1"
@@ -96,7 +96,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! create fields
       call CreateFields(igrid(1), &
                         sfield(1), sfield(2), sfield(3), sfield(4), sfield(5), &
@@ -112,7 +112,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! create fields, cont.
       call CreateFields(igrid(1), &
                         sfield(6), sfield(7), sfield(8), sfield(9), sfield(10),&
@@ -128,7 +128,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! create fields, cont.
       call CreateFields(igrid(1), &
                         sfield(11), sfield(12), sfield(13), sfield(14), sfield(15),&
@@ -144,7 +144,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! create fields, cont.
       call CreateFields(igrid(1), &
                         sfield(16), sfield(17), sfield(18), sfield(19), sfield(20), &
@@ -160,7 +160,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! create src bundle
       call CreateBundle(bundle(1), sfield(1), sfield(2), sfield(3), &
                                    sfield(4), sfield(5), rc=rc)
@@ -169,7 +169,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! add more fields
       call AddBundle(bundle(1), sfield(6), sfield(7), sfield(8), &
                                 sfield(9), sfield(10), rc=rc)
@@ -178,7 +178,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! add more fields
       call AddBundle(bundle(1), sfield(11), sfield(12), sfield(13), &
                                 sfield(14), sfield(15), rc=rc)
@@ -187,7 +187,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! add more fields
       call AddBundle(bundle(1), sfield(16), sfield(17), sfield(18), &
                                 sfield(19), sfield(20), rc=rc)
@@ -197,7 +197,7 @@
 
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       !igrid(2) = CreateLatLonIGrid(nx, ny, nz, mprime, nprime, "M'xN'", 1, 1, rc)
       igrid(2) = CreateLatLonIGrid(nx, ny, nz, mprime, nprime, "M'xN'", rc=rc)
       write(name, *) "Creating igrid 2"
@@ -205,7 +205,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! create fields
       call CreateFields(igrid(2), &
                         dfield(1), dfield(2), dfield(3), dfield(4), dfield(5),&
@@ -221,7 +221,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! create fields, cont.
       call CreateFields(igrid(2), &
                         dfield(6), dfield(7), dfield(8), dfield(9), dfield(10),&
@@ -237,7 +237,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! create fields, cont.
       call CreateFields(igrid(2), &
                         dfield(11), dfield(12), dfield(13), dfield(14), dfield(15),&
@@ -253,7 +253,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! create fields, cont.
       call CreateFields(igrid(2), &
                         dfield(16), dfield(17), dfield(18), dfield(19), dfield(20),&
@@ -269,7 +269,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! create fields, cont.
       call CreateFields(igrid(2), &
                         dfield(21), dfield(22), dfield(23), dfield(24), dfield(25),&
@@ -285,7 +285,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! create fields, cont.
       call CreateFields(igrid(2), &
                         dfield(26), dfield(27), dfield(28), dfield(29), dfield(30),&
@@ -301,7 +301,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! create dst bundle
       call CreateBundle(bundle(2), dfield(1), dfield(2), dfield(3), &
                                    dfield(4), dfield(5), rc=rc)
@@ -310,7 +310,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! add more fields
       call AddBundle(bundle(2), dfield(6), dfield(7), dfield(8), &
                                 dfield(9), dfield(10), rc=rc)
@@ -319,7 +319,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! add more fields
       call AddBundle(bundle(2), dfield(11), dfield(12), dfield(13), &
                                 dfield(14), dfield(15), rc=rc)
@@ -328,7 +328,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! add more fields
       call AddBundle(bundle(2), dfield(16), dfield(17), dfield(18), &
                                 dfield(19), dfield(20), rc=rc)
@@ -337,7 +337,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! add more fields
       call AddBundle(bundle(2), dfield(21), dfield(22), dfield(23), &
                                 dfield(24), dfield(25), rc=rc)
@@ -346,7 +346,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! add more fields
       call AddBundle(bundle(2), dfield(26), dfield(27), dfield(28), &
                                 dfield(29), dfield(30), rc=rc)
@@ -360,7 +360,7 @@
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! get VM for Reconcile call below
       call ESMF_VMGetGlobal(vm, rc=rc)
       write(name, *) "Getting global VM"
@@ -368,7 +368,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! create an empty state and start there
 
       state = ESMF_StateCreate("reconcile size test", rc=rc)
@@ -377,7 +377,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! reconcile
       call ESMF_StateReconcile(state, vm=vm, rc=rc)
       write(name, *) "Calling StateReconcile"
@@ -386,7 +386,7 @@
 
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! now add stuff
       
       call ESMF_StateAddBundle(state, &
@@ -397,7 +397,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! reconcile
       call ESMF_StateReconcile(state, vm=vm, rc=rc)
       write(name, *) "Calling StateReconcile"
@@ -406,7 +406,7 @@
 
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! and more stuff
 
       call ESMF_StateAddField(state, &
@@ -417,7 +417,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! reconcile
       call ESMF_StateReconcile(state, vm=vm, rc=rc)
       write(name, *) "Calling StateReconcile"
@@ -426,7 +426,7 @@
 
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! and more stuff
       placeholders(1) = "Temperature Field"
       placeholders(2) = "Density Field"
@@ -442,7 +442,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! reconcile
       call ESMF_StateReconcile(state, vm=vm, rc=rc)
       write(name, *) "Calling StateReconcile"
@@ -451,7 +451,7 @@
 
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! and still more stuff
 
       call ESMF_StateAddField(state, &
@@ -462,7 +462,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! reconcile
       call ESMF_StateReconcile(state, vm=vm, rc=rc)
       write(name, *) "Calling StateReconcile"
@@ -470,7 +470,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! now add too much stuff - this should provoke an error
       ! at reconcile time.
       
@@ -482,7 +482,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! reconcile
       call ESMF_StateReconcile(state, vm=vm, rc=rc)
       write(name, *) "Calling StateReconcile expecting failure"
@@ -491,7 +491,7 @@
 
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       call ESMF_StateDestroy(state, rc=rc)
       write(name, *) "Calling StateDestroy"
       write(failMsg, *) "Error return from StateDestroy"
@@ -503,7 +503,7 @@
 
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! cleanup
       call BundleCleanup(bundle(1), bundle(2), rc=rc)
       write(name, *) "Deleting bundles at cleanup time"
@@ -511,7 +511,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       ! cleanup
       combined_rc = ESMF_SUCCESS
       call FieldCleanup(sfield(1), sfield(2), sfield(3), sfield(4), &

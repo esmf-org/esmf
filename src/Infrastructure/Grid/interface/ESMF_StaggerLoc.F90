@@ -1,4 +1,4 @@
-! $Id: ESMF_StaggerLoc.F90,v 1.2 2007/06/28 22:47:10 oehmke Exp $
+! $Id: ESMF_StaggerLoc.F90,v 1.3 2007/08/30 05:06:35 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -149,7 +149,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StaggerLoc.F90,v 1.2 2007/06/28 22:47:10 oehmke Exp $'
+      '$Id: ESMF_StaggerLoc.F90,v 1.3 2007/08/30 05:06:35 cdeluca Exp $'
 
 
 !==============================================================================
@@ -173,7 +173,7 @@
       integer, optional :: rc 
 
 ! !DESCRIPTION:
-!   Sets a custom stagger location to a position in a cell by using the array
+!    Sets a custom stagger location to a position in a cell by using the array
 !    {\tt loc}. The values in the array should only be 0,1. If loc(i) is 0 it 
 !    means the position should be in the center in that dimension. If loc(i) is 1 then
 !    for dimension i, the position should be on the positive side of the cell. 

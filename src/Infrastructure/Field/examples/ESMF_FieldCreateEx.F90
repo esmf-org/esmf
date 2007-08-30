@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.43 2007/06/27 20:36:06 cdeluca Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.44 2007/08/30 05:06:30 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
     program ESMF_FieldCreateEx
 
 !------------------------------------------------------------------------------
-!EXAMPLE        String used by test script to count examples.
+!EXremoveAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
 ! !PROGRAM: ESMF_FieldCreateEx - Field creation
@@ -81,7 +81,7 @@
 !\subsubsection{Field Create with IGrid and InternArray}
       
 !  The user has already created an {\tt ESMF\_IGrid} and an
-!  {\tt ESMF\_InterArray} with data.  This create associates the
+!  {\tt ESMF\_InternArray} with data.  This create associates the
 !  two objects.  An {\tt ESMF\_FieldDataMap} is created with all defaults.
 !EOE
       

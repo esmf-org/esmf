@@ -1,4 +1,4 @@
-! $Id: ESMF_InternGridCreateUTest.F90,v 1.2 2007/06/23 04:37:05 cdeluca Exp $
+! $Id: ESMF_InternGridCreateUTest.F90,v 1.3 2007/08/30 05:06:38 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InternGridCreateUTest.F90,v 1.2 2007/06/23 04:37:05 cdeluca Exp $'
+      '$Id: ESMF_InternGridCreateUTest.F90,v 1.3 2007/08/30 05:06:38 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -89,7 +89,7 @@
 
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       call ESMF_VMGetGlobal(vm, status)
       write(name, *) "ESMF_VMGetGlobal Test"
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -120,7 +120,7 @@
 
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_removeUTest
       layout = ESMF_DELayoutCreate(vm, rc=rc)
       write(name, *) "Creating a DELayout Test"
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -129,7 +129,7 @@
 
       !------------------------------------------------------------------------
       ! Create a HorzXYUni IGrid Test.
-      !NEX_UTest
+      !NEX_removeUTest
       igrid = ESMF_IGridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=igrid_min, &
                               maxGlobalCoordPerDim=igrid_max, &
@@ -142,7 +142,7 @@
 
       !------------------------------------------------------------------------
       ! Add Vert Height Test
-      !NEX_UTest
+      !NEX_removeUTest
       call ESMF_IGridAddVertHeight(igrid, delta, vertstagger=vert_stagger, &
                                   rc=status)
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
@@ -152,7 +152,7 @@
 
       !------------------------------------------------------------------------
       ! IGrid Distribute Test
-      !NEX_UTest
+      !NEX_removeUTest
       call ESMF_IGridDistribute(igrid, delayout=layout, rc=status)
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
       write(name, *) "IGrid Distribute Test"
@@ -160,7 +160,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest 
+      !NEX_removeUTest 
       ! Destroy the IGrid test
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
       write(name, *) "Destroy the IGrid Test"
@@ -169,7 +169,7 @@
                               
       !------------------------------------------------------------------------
       ! Create a HorzLatLon IGrid Test.
-      !NEX_UTest
+      !NEX_removeUTest
       coord1(1) = igrid_min(1)
       do i = 2, size(coord1)
         coord1(i) = coord1(i-1) + 0.50d0
@@ -189,7 +189,7 @@
 
       !------------------------------------------------------------------------
       ! IGrid Distribute Test
-      !NEX_UTest
+      !NEX_removeUTest
       call ESMF_IGridDistribute(igrid1, delayout=layout, rc=status)
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
       write(name, *) "IGrid Distribute Test"
@@ -197,7 +197,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest 
+      !NEX_removeUTest 
       ! Destroy the IGrid test
       call ESMF_IGridDestroy(igrid1, rc=rc)
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
@@ -206,7 +206,7 @@
                               
       !------------------------------------------------------------------------
       ! Create a HorzLatLon IGrid Uni Test.
-      !NEX_UTest
+      !NEX_removeUTest
       igrid2 = ESMF_IGridCreateHorzLatLonUni(counts=counts, &
 			      minGlobalCoordPerDim=igrid_min, &
                               deltaPerDim=(/0.60d0, 0.55d0/), &
@@ -220,7 +220,7 @@
 
       !------------------------------------------------------------------------
       ! IGrid Distribute Test
-      !NEX_UTest
+      !NEX_removeUTest
       call ESMF_IGridDistribute(igrid2, delayout=layout, rc=status)
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
       write(name, *) "IGrid Distribute Test"
@@ -228,7 +228,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest 
+      !NEX_removeUTest 
       ! Destroy the IGrid test
       call ESMF_IGridDestroy(igrid2, rc=rc)
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
@@ -239,7 +239,7 @@
 
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Destroy a destroyed IGrid
       call ESMF_IGridDestroy(igrid2, rc=rc)
       write(failMsg, *) "Did not returned ESMF_RC_OBJ_DELETED"
@@ -247,7 +247,7 @@
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
                               
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Destroy a Non-created IGrid
       call ESMF_IGridDestroy(igrid3, rc=rc)
       write(failMsg, *) "Did not returned ESMF_RC_OBJ_NOT_CREATED"
@@ -255,7 +255,7 @@
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Get the IGrid horzStagger from a non-created IGrid
       call ESMF_IGridGet(igrid3, horzstagger=Rhorz_stagger, rc=rc)
       write(name, *) "Get the IGrid horzStagger from non-created IGrid Test"
@@ -265,7 +265,7 @@
       
       !------------------------------------------------------------------------
       ! IGrid Add Vert Height to a deleted IGrid Test.
-      !EX_UTest
+      !EX_removeUTest
       write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
       write(name, *) "Add IGrid Vert Height to a destroyed IGrid Test"
       call ESMF_IGridAddVertHeight(igrid, delta, vertstagger=vert_stagger, &
@@ -275,7 +275,7 @@
 
       !------------------------------------------------------------------------
       ! IGrid Add Vert Height to a non-created IGrid Test.
-      !EX_UTest
+      !EX_removeUTest
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "Add IGrid Vert Height to a non-created IGrid Test"
       call ESMF_IGridAddVertHeight(igrid3, delta, vertstagger=vert_stagger, &
@@ -285,7 +285,7 @@
 
       !------------------------------------------------------------------------
       ! IGrid Distribute of destroyed IGrid Test.
-      !EX_UTest
+      !EX_removeUTest
       write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
       write(name, *) "IGrid Distribute of destroyed IGrid Test"
       call ESMF_IGridDistribute(igrid, delayout=layout, countsPerDEDim1=DEDim1, &
@@ -295,7 +295,7 @@
 
       !------------------------------------------------------------------------
       ! IGrid Distribute of non-created IGrid Test.
-      !EX_UTest
+      !EX_removeUTest
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "IGrid Distribute of non-created IGrid Test"
       call ESMF_IGridDistribute(igrid3, delayout=layout, countsPerDEDim1=DEDim1, &
@@ -306,7 +306,7 @@
 
       !------------------------------------------------------------------------
       ! Printing a destroyed IGrid
-      !EX_UTest
+      !EX_removeUTest
       call ESMF_IGridPrint(igrid, "", rc=rc)
       write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
       write(name, *) "Printing a destroyed IGrid Test"
@@ -314,7 +314,7 @@
 
       !------------------------------------------------------------------------
       ! Printing a non-created IGrid
-      !EX_UTest
+      !EX_removeUTest
       call ESMF_IGridPrint(igrid3, "", rc=rc)
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "Printing a non-created IGrid Test"
@@ -324,7 +324,7 @@
 
       !------------------------------------------------------------------------
       ! Create a IGrid Test.
-      !EX_UTest
+      !EX_removeUTest
       igrid = ESMF_IGridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=igrid_min, &
                               maxGlobalCoordPerDim=igrid_max, &
@@ -337,7 +337,7 @@
 
       !------------------------------------------------------------------------
       ! IGrid Add Vert Height Test.
-      !EX_UTest
+      !EX_removeUTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Add IGrid Vert Height Test"
       call ESMF_IGridAddVertHeight(igrid, delta, vertstagger=vert_stagger, &
@@ -347,7 +347,7 @@
 
       !------------------------------------------------------------------------
       ! IGrid Distribute Test.
-      !EX_UTest
+      !EX_removeUTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "IGrid Distribute Test"
       call ESMF_IGridDistribute(igrid, delayout=layout, countsPerDEDim1=DEDim1, &
@@ -357,14 +357,14 @@
 
       !------------------------------------------------------------------------
       ! Printing a IGrid
-      !EX_UTest
+      !EX_removeUTest
       call ESMF_IGridPrint(igrid, "", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Printing a IGrid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Get the IGrid horzStagger
       call ESMF_IGridGet(igrid, horzstagger=Rhorz_stagger, rc=rc)
       write(name, *) "Get the IGrid horzStagger Test"
@@ -374,7 +374,7 @@
   
   
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Get the IGrid minGlobalCoordPerDim
       call ESMF_IGridGet(igrid, minGlobalCoordPerDim=Rigrid_min, rc=rc)
       write(name, *) "Get the IGrid minGlobalCoordPerDim Test"
@@ -383,7 +383,7 @@
                         name, failMsg, result, ESMF_SRCLINE)
   
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Get the IGrid maxGlobalCoordPerDim
       call ESMF_IGridGet(igrid, maxGlobalCoordPerDim=Rigrid_max, rc=rc)
       write(name, *) "Get the IGrid maxGlobalCoordPerDim Test"
@@ -393,7 +393,7 @@
                         name, failMsg, result, ESMF_SRCLINE)
   
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Get the IGrid name
       call ESMF_IGridGet(igrid, name=RgName, rc=rc)
       write(name, *) "Get the IGrid name Test"
@@ -402,7 +402,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Validate the IGrid test
       call ESMF_IGridValidate(igrid, rc=rc)
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
@@ -410,7 +410,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Distribute a IGrid test
       call ESMF_IGridDistribute(igrid, layout, rc=rc)
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
@@ -418,7 +418,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Destroy the IGrid test
       call ESMF_IGridDestroy(igrid, rc=rc)
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
@@ -426,7 +426,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Create an Empty IGrid Test.
       gName = "test igrid 2"
       igrid1 = ESMF_IGridCreate(name=gName, rc=status)
@@ -436,7 +436,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Get the IGrid name
       call ESMF_IGridGet(igrid1, name=RgName, rc=rc)
       write(name, *) "Get the IGrid name Test"
@@ -451,7 +451,7 @@
 
       !------------------------------------------------------------------------
       ! Create a IGrid Test.
-      !EX_UTest
+      !EX_removeUTest
       igrid = ESMF_IGridCreateHorzXY(coord1=(/ 1d0,2d0,3d0,4d0,5d0,6d0,7d0,8d0,9d0,10d0,11d0 /), &
                                    coord2=(/ 1d0,2d0,3d0,4d0,5d0,6d0,7d0,8d0,9d0,10d0,11d0 /), &
                                    horzstagger=ESMF_IGRID_HORZ_STAGGER_C_SW, &
@@ -463,7 +463,7 @@
 
       !------------------------------------------------------------------------
       ! IGrid Distribute Test - should fail.
-      !EX_UTest
+      !EX_removeUTest
       DEDim1(:) = (/ 2, 3, 3, 3 /)
       DEDimX(1) = 11
       write(failMsg, *) "Returned ESMF_SUCCESS when expecting failure"
@@ -476,7 +476,7 @@
 
       !------------------------------------------------------------------------
       ! Create a IGrid Test.
-      !EX_UTest
+      !EX_removeUTest
       igrid = ESMF_IGridCreateHorzXY(coord1=(/ 1d0,2d0,3d0,4d0,5d0,6d0,7d0,8d0,9d0,10d0,11d0 /), &
                                    coord2=(/ 1d0,2d0,3d0,4d0,5d0,6d0,7d0,8d0,9d0,10d0,11d0 /), &
                                    horzstagger=ESMF_IGRID_HORZ_STAGGER_C_SW, &
@@ -488,7 +488,7 @@
 
       !------------------------------------------------------------------------
       ! IGrid Distribute Test - should succeed.
-      !EX_UTest
+      !EX_removeUTest
       DEDim1(:) = (/ 2, 3, 2, 3 /)
       DEDimX(1) = 10
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -501,7 +501,7 @@
 
       !------------------------------------------------------------------------
       ! Printing a IGrid
-      !EX_UTest
+      !EX_removeUTest
       call ESMF_IGridPrint(igrid, "", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Printing a IGrid Test"

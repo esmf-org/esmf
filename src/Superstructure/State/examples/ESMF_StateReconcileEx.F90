@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.15 2007/06/23 07:00:55 cdeluca Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.16 2007/08/30 05:06:44 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -82,7 +82,7 @@ end module ESMF_StateReconcileEx_Mod
     program ESMF_StateReconcileEx
 
 !------------------------------------------------------------------------------
-!EXAMPLE        String used by test script to count examples.
+!EXremoveAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
 ! !PROGRAM: ESMF_StateReconcileEx - State reconciliation
