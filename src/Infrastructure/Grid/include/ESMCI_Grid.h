@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.14 2007/08/29 17:30:10 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.15 2007/08/30 23:18:28 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -233,6 +233,16 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 		     int *_LWidth // should be size>=grid rank
 		     );
 
+
+int getDistExclusiveLBound(
+                           int localDEArg, 
+                           int *lBndArg    
+                           );
+
+int getDistExclusiveUBound(
+                           int localDEArg, 
+                           int *lBndArg    
+                           );
 
  // Set Array for holding coordinates
  int setCoordArray(

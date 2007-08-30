@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.22 2007/08/29 17:30:11 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.23 2007/08/30 23:18:28 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.22 2007/08/29 17:30:11 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.23 2007/08/30 23:18:28 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -740,6 +740,182 @@ Array *Grid::getCoordArray(
   return array;
   }
 //-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::getDistExclusiveLBound()"
+//BOPI
+// !IROUTINE:  Grid::getDistExclusiveLBound()"
+//
+// !INTERFACE:
+int Grid::getDistExclusiveLBound(
+//
+// !RETURN VALUE:
+//   return code
+//
+// !ARGUMENTS:
+//
+  int localDEArg,     // (in)
+  int *lBndArg      // (out) needs to be of size > distRank
+  ){
+//
+// !DESCRIPTION:
+//  The exclusive lower bound for this localde.
+// TODO: eventually this should return all the grid bounds, not just
+//       the distributed ones.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int rc,localrc;
+
+  // initialize return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+  
+  // Check status
+  if (status < ESMC_GRIDSTATUS_SHAPE_READY) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Grid not fully created", &rc);
+    return rc;
+  }
+
+
+  // Ensure localDEArg isn't out of range for this PET
+  if ((localDEArg < 0) || (localDEArg >=distgrid->getDELayout()->getLocalDeCount())) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+          "- localDE outside range on this processor", &rc);
+        return rc;
+  }
+
+  // Set lower bound based on indexflag
+  if (indexflag==ESMF_INDEX_DELOCAL) {
+    for (int i=0; i<distRank; i++)
+      lBndArg[i] = 1; // excl. region starts at (1,1,1...) 
+  } else {
+    // Get some useful information
+    const int *localDeList = distgrid->getDELayout()->getLocalDeList();
+
+    // Get the Global DE from the local DE
+    int de = localDeList[localDEArg];
+
+    // Set Bound based on distgrid info
+    for (int i=0; i<distRank; i++){
+        
+      // obtain indexList for this DE and dim
+      const int *indexList =
+        distgrid->getIndexListPDimPLocalDe(localDEArg, i+1, &localrc);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU, &rc))
+        return rc;
+      
+      // make sure this dimension is contiguous         
+      const int contig=distgrid->getContigFlagPDimPDe(de, i+1, &localrc);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+                                                ESMF_ERR_PASSTHRU, &rc)) return rc;
+      if (!contig) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+                     "- doesn't handle non-contiguous DEs yet ", &rc);
+        return rc;
+      }
+      
+      // Set lower bounds of exclusive region to match indexList[0]
+      lBndArg[i] = indexList[0];
+    } // i
+  }
+  
+  // tell the calling subroutine that we've had a successful outcome
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::getDistExclusiveUBound()"
+//BOPI
+// !IROUTINE:  Grid::getDistExclusiveUBound()"
+//
+// !INTERFACE:
+int Grid::getDistExclusiveUBound(
+//
+// !RETURN VALUE:
+//   return code
+//
+// !ARGUMENTS:
+//
+  int localDEArg,     // (in)
+  int *uBndArg      // (out) needs to be of size > distRank
+  ){
+//
+// !DESCRIPTION:
+//  The exclusive upper bound for this localde
+// TODO: eventually this should return all the grid bounds, not just
+//       the distributed ones.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int rc,localrc;
+
+  // initialize return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+  
+  // Check status
+  if (status < ESMC_GRIDSTATUS_SHAPE_READY) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Grid not fully created", &rc);
+    return rc;
+  }
+
+
+  // Ensure localDEArg isn't out of range for this PET
+  if ((localDEArg < 0) || (localDEArg >=distgrid->getDELayout()->getLocalDeCount())) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+          "- localDE outside range on this processor", &rc);
+        return rc;
+  }
+
+  // Get some useful information
+  const int *localDeList = distgrid->getDELayout()->getLocalDeList();
+  const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
+
+  // Get the Global DE from the local DE
+  int de = localDeList[localDEArg];
+
+  // exlc. region for each DE ends at indexCountPDimPDe of the associated
+  // DistGrid
+    for (int i=0; i<distRank; i++)
+      uBndArg[i]=indexCountPDimPDe[de*distRank+i];
+
+  // Set upper bound based on indexflag
+  if (indexflag==ESMF_INDEX_GLOBAL) {
+
+      for (int i=0; i<distRank; i++){
+
+        // obtain indexList for this DE and dim
+        const int *indexList =
+          distgrid->getIndexListPDimPLocalDe(localDEArg, i+1, &localrc);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU, &rc))
+          return rc;
+
+        // make sure is contiguous         
+        const int contig=distgrid->getContigFlagPDimPDe(de, i+1, &localrc);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+                              ESMF_ERR_PASSTHRU, &rc)) return rc;
+        if (!contig) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+                     "- doesn't handle non-contiguous DEs yet ", &rc);
+          return rc;
+        }
+
+        // shift bounds of exclusive region to match indexList[0]
+        uBndArg[i] += indexList[0] - 1;
+      } // i
+  }
+
+  // tell the calling subroutine that we've had a successful outcome
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
 
 
 //-----------------------------------------------------------------------------
