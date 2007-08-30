@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.20 2007/08/23 17:15:54 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.21 2007/08/30 23:08:03 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -123,6 +123,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
   public ESMF_GridGetCoord
   public ESMF_GridGetLocalTileCoord
   public ESMF_GridGetLocalTileInfo
+  public ESMF_GridGetLocalTileSLocInfo
   public ESMF_GridSet
   public ESMF_GridSetCoord
 
@@ -136,7 +137,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.20 2007/08/23 17:15:54 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.21 2007/08/30 23:08:03 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -3110,6 +3111,142 @@ endif
     if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGetLocalTileInfo
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD  
+#define ESMF_METHOD "ESMF_GridGetLocalTileSLocInfo"
+!BOP
+! !IROUTINE: ESMF_GridGetLocalTileSLocInfo - Get information about a stagger location on a local tile
+
+! !INTERFACE:
+      subroutine ESMF_GridGetLocalTileSLocInfo(grid, localDE, staggerLoc, &
+          exclusiveLBound, exclusiveUBound, staggerLBound, staggerUBound, rc)
+
+!
+! !ARGUMENTS:
+      type(ESMF_Grid),        intent(in)            :: grid
+      integer,                intent(in),  optional :: localDE
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerLoc
+      integer,                intent(out), optional :: exclusiveLBound(:)
+      integer,                intent(out), optional :: exclusiveUBound(:)
+      integer,                intent(out), optional :: staggerLBound(:)
+      integer,                intent(out), optional :: staggerUBound(:)
+      integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!  This method gets information about the range of index space which a particular
+!  piece of coordinate data occupies. Note that unlike the output from the 
+!  Array, these values also include the undistributed dimensions and are
+!  ordered to reflect the order of the indices in the coordinate. So, for example,
+!  {\tt totalLBound} and {\tt totalUBound} should match the bounds of the fortran array
+!  retreived by {\tt ESMF\_GridGetLocalTileCoord}. 
+!
+!The arguments are:
+!\begin{description}
+!\item[{grid}]
+!    Grid to get the information from.
+!\item[{[localDE]}]
+!     The local DE from which to get the information.  If not set, defaults to 
+!     the first DE on this processor. (localDE starts at 0)
+!\item[{coord}]
+!     The coordinate component to get the information for (e.g. 1=x). 
+!\item[{staggerLoc}]
+!     The stagger location to get the information for. 
+!     Please see Section~\ref{sec:opt:staggerloc} for a list 
+!     of predefined stagger locations. If not present, defaults to
+!     ESMF\_STAGGERLOC\_CENTER.
+!\item[{[exclusiveLBound]}]
+!     Upon return this holds the lower bounds of the exclusive region.
+!     {\tt exclusiveLBound} must be allocated to be of size equal to the coord rank.
+!\item[{[exclusiveUBound]}]
+!     Upon return this holds the upper bounds of the exclusive region.
+!     {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!\item[{[staggerLBound]}]
+!     Upon return this holds the lower bounds of the stagger region.
+!     {\tt staggerLBound} must be allocated to be of size equal to the coord rank.
+!\item[{[staggerUBound]}]
+!     Upon return this holds the upper bounds of the stagger region.
+!     {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!\item[{[computationalLBound]}]
+!     Upon return this holds the lower bounds of the computational region. 
+!     {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
+!\item[{[computationalUBound]}]
+!     Upon return this holds the upper bounds of the computational region.
+!     {\tt computationalUBound} must be allocated to be of size equal to the coord rank.
+!\item[{[totalLBound]}]
+!     Upon return this holds the lower bounds of the total region.
+!     {\tt totalLBound} must be allocated to be of size equal to the coord rank.
+!\item[{[totalUBound]}]
+!     Upon return this holds the upper bounds of the total region.
+!     {\tt totalUBound} must be allocated to be of size equal to the coord rank.
+!\item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!\end{description}
+!
+!EOP
+
+    integer :: status ! local error status
+    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: staggerLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: staggerUBoundArg ! helper variable
+    integer :: tmp_staggerloc
+
+    ! Initialize return code
+    status = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
+
+    ! handle staggerloc
+    if (present(staggerLoc)) then
+       tmp_staggerloc=staggerLoc%staggerloc
+    else
+       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc  ! default
+    endif
+
+    ! process optional arguments
+    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    staggerLBoundArg=ESMF_InterfaceIntCreate(staggerLBound, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    staggerUBoundArg=ESMF_InterfaceIntCreate(staggerUBound, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_GridGetLocalTileSLocInfo(grid, localDE, tmp_staggerLoc, &
+      exclusiveLBoundArg, exclusiveUBoundArg, staggerLBoundArg, staggerUBoundArg,&
+      status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Deallocate interface ints
+    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(staggerLBoundArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(staggerUBoundArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetLocalTileSLocInfo
+
 
 
 

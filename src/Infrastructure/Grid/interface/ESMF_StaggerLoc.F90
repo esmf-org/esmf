@@ -1,4 +1,4 @@
-! $Id: ESMF_StaggerLoc.F90,v 1.3 2007/08/30 05:06:35 cdeluca Exp $
+! $Id: ESMF_StaggerLoc.F90,v 1.4 2007/08/30 23:08:03 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -149,9 +149,48 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StaggerLoc.F90,v 1.3 2007/08/30 05:06:35 cdeluca Exp $'
+      '$Id: ESMF_StaggerLoc.F90,v 1.4 2007/08/30 23:08:03 oehmke Exp $'
 
 
+!==============================================================================
+
+
+!==============================================================================
+!
+! INTERFACE BLOCKS
+!
+!==============================================================================
+!BOPI
+! !INTERFACE:
+      interface operator (==)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_StaggerLocEqual
+
+! !DESCRIPTION:
+!     This interface overloads the equality operator for the specific
+!     ESMF StaggerLoc.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (/=)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_StaggerLocNotEqual
+
+! !DESCRIPTION:
+!     This interface overloads the inequality operator for the specific
+!     ESMF StaggerLoc.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+!
 !==============================================================================
 
       contains
@@ -312,6 +351,83 @@
 
 
       end subroutine ESMF_StaggerLocCustom
+
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StaggerLocEqual"
+!BOPI
+! !IROUTINE: ESMF_StaggerLocEqual - equality of StaggerLoc statuses
+!
+! !INTERFACE:
+      function ESMF_StaggerLocEqual(StaggerLoc1, StaggerLoc2)
+
+! !RETURN VALUE:
+      logical :: ESMF_StaggerLocEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_StaggerLoc), intent(in) :: &
+         StaggerLoc1,      &! Two igrid statuses to compare for
+         StaggerLoc2        ! equality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF StaggerLoc statuses to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[StaggerLoc1, StaggerLoc2]
+!          Two igrid statuses to compare for equality
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+      ESMF_StaggerLocEqual = (StaggerLoc1%staggerloc == &
+                              StaggerLoc2%staggerloc)
+
+      end function ESMF_StaggerLocEqual
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StaggerLocNotEqual"
+!BOPI
+! !IROUTINE: ESMF_StaggerLocNotEqual - non-equality of StaggerLoc statuses
+!
+! !INTERFACE:
+      function ESMF_StaggerLocNotEqual(StaggerLoc1, StaggerLoc2)
+
+! !RETURN VALUE:
+      logical :: ESMF_StaggerLocNotEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_StaggerLoc), intent(in) :: &
+         StaggerLoc1,      &! Two StaggerLoc Statuses to compare for
+         StaggerLoc2        ! inequality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF StaggerLoc statuses to see if
+!     they are unequal.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[StaggerLoc1, StaggerLoc2]
+!          Two statuses of StaggerLocs to compare for inequality
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+      ESMF_StaggerLocNotEqual = (StaggerLoc1%staggerloc /= &
+                                 StaggerLoc2%staggerloc)
+
+      end function ESMF_StaggerLocNotEqual
+
+
+!------------------------------------------------------------------------------
+
 
 
 
