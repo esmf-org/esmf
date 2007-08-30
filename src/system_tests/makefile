@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.30 2007/08/23 17:16:08 cdeluca Exp $ 
+# $Id: makefile,v 1.31 2007/08/30 20:05:43 cdeluca Exp $ 
 
 ALL: build_system_tests
 
@@ -10,16 +10,6 @@ include $(ESMF_DIR)/makefile
 DIRS     = \
            ESMF_CompCreate \
            ESMF_ArraySparseMatMul \
-           ESMF_FieldRedist \
-           ESMF_FieldHalo \
-           ESMF_FieldHaloPer \
-           ESMF_BundleRedistArb2Arb \
-           ESMF_BundleRedistBlk2Arb \
-           ESMF_BundleRedistBlk2Blk \
-           ESMF_FieldRedistArb2Arb \
-           ESMF_FieldRedistBlk2Arb \
-           ESMF_FieldRedistBlk2Blk \
-           ESMF_SimpleCoupling \
            ESMF_DistDir
 
 # Tests not yet ready
@@ -32,9 +22,22 @@ DIRS     = \
 #           ESMF_FieldRegridMulti \
 #           ESMF_FieldRegridOrder \
 #           ESMF_FieldExcl \
-# Removed while inserting new grid into components. cmd 8/07.
+# TODO:FIELDINTEGRATION Restore when Field and Bundle comms are restored. 
 #           ESMF_FlowWithCoupling \
 #           ESMF_FlowComp \
+#           ESMF_FieldRedist \
+#           ESMF_FieldHalo \
+#           ESMF_FieldHaloPer \
+#           ESMF_BundleRedistArb2Arb \
+#           ESMF_BundleRedistBlk2Arb \
+#	    ESMF_BundleRedistBlk2Blk \
+#           ESMF_FieldRedistArb2Arb \
+#           ESMF_FieldRedistBlk2Arb \
+#           ESMF_FieldRedistBlk2Blk \
+#           ESMF_SimpleCoupling \
+
+
+
 
 CLEANDIRS   =
 CLEANFILES  =

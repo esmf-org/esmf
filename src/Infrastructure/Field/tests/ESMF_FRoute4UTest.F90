@@ -1,4 +1,4 @@
-! $Id: ESMF_FRoute4UTest.F90,v 1.23 2007/06/27 20:36:06 cdeluca Exp $
+! $Id: ESMF_FRoute4UTest.F90,v 1.24 2007/08/30 20:05:42 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRoute4UTest.F90,v 1.23 2007/06/27 20:36:06 cdeluca Exp $'
+      '$Id: ESMF_FRoute4UTest.F90,v 1.24 2007/08/30 20:05:42 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -88,7 +88,7 @@
       quart = npets / 4
 
       !------------------------------------------------------------------------
-      !NEX_UTest_Multi_Proc_Only
+      !NEX_removeUTest_Multi_Proc_Only
       ! Make a Nx4 and Nx2 layout
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Creating a DELayout Test"
@@ -100,7 +100,7 @@
       endif
 
       !------------------------------------------------------------------------
-      !NEX_UTest_Multi_Proc_Only
+      !NEX_removeUTest_Multi_Proc_Only
       print *, "Layout 1:"
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Printing a DELayout Test"
@@ -108,7 +108,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest_Multi_Proc_Only
+      !NEX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Creating a DELayout Test"
       layout2 = ESMF_DELayoutCreate(vm, (/ half, 2 /), rc=rc)
@@ -119,7 +119,7 @@
       endif
 
       !------------------------------------------------------------------------
-      !NEX_UTest_Multi_Proc_Only
+      !NEX_removeUTest_Multi_Proc_Only
       print *, "Layout 1:"
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Printing a DELayout Test"
@@ -128,14 +128,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest_Multi_Proc_Only
+      !NEX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "DELayout Get Test"
       call ESMF_DELayoutGetDeprecated(layout1, localDE=myde, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest_Multi_Proc_Only
+      !NEX_removeUTest_Multi_Proc_Only
       counts(1) = 48
       counts(2) = 24
       min(1) = 0.0
@@ -155,14 +155,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest_Multi_Proc_Only
+      !NEX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "IGrid distribute Test "
       call ESMF_IGridDistribute(igrid1, delayout=layout1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest_Multi_Proc_Only
+      !NEX_removeUTest_Multi_Proc_Only
       ! Destroy IGrid Test
       write(failMsg, *) ""
       write(name, *) "Destroy IGrid Test"
@@ -173,7 +173,7 @@
 #ifdef ESMF_EXHAUSTIVE
      
       
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       igrid1 = ESMF_IGridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
@@ -184,14 +184,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCESS"
       write(name, *) "IGrid distribute Test "
       call ESMF_IGridDistribute(igrid1, delayout=layout1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       ! Verifing that an uninitialized IGrid can be printed
       call ESMF_IGridPrint(igrid3, "", rc=rc)
       write(failMsg, *) ""
@@ -211,7 +211,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       ! Verifing that an Array can be created
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Get DE Local Info Test"
@@ -224,7 +224,7 @@
       !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       ! second array
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Get DE Local Info Test"
@@ -235,7 +235,7 @@
       !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       ! Test requirement FLD1.1.1
       ! Fields may be created by specifying attributes, a igrid, data array
       ! dimensions and descriptors, optional masks (e.g. for active cells),
@@ -247,7 +247,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       ! Verifing that a Field can be created with a IGrid and Array
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Field DataMap Set Test"
@@ -255,7 +255,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a Field with a IGrid and Array Test"
       f1 = ESMF_FieldCreate(igrid1, arrayspec, allocflag=ESMF_ALLOC, &
@@ -264,7 +264,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       ! second field
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a Field with a IGrid and Array Test"
@@ -274,7 +274,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       ! route test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Field Redist Store Test"
@@ -282,7 +282,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Field Redist Test"
       call ESMF_FieldRedist(f1, f2, rh, rc=rc)
@@ -300,7 +300,7 @@
       !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Field Redist Release Test"
       call ESMF_FieldRedistRelease(rh, rc)
@@ -308,7 +308,7 @@
 
       !------------------------------------------------------------------------
       ! results
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Field Print Test"
       call ESMF_FieldPrint(f2, rc=rc)
@@ -317,28 +317,28 @@
       !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Field Destroy Test"
       call ESMF_FieldDestroy(f1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Field Destroy Test"
       call ESMF_FieldDestroy(f2, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "IGrid Destroy Test"
       call ESMF_IGridDestroy(igrid1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_removeUTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "IGrid Destroy Test"
       call ESMF_IGridDestroy(igrid2, rc=rc)

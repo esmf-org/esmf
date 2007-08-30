@@ -1,10 +1,10 @@
-! $Id: ESMF_BundleRedistArb2ArbSTest.F90,v 1.9 2007/06/23 04:01:18 cdeluca Exp $
+! $Id: ESMF_BundleRedistArb2ArbSTest.F90,v 1.10 2007/08/30 20:05:43 cdeluca Exp $
 !
 ! System test BundleRedistArb2Arb
 !  Description on Sourceforge under System Test #XXXXX
 
 !-------------------------------------------------------------------------
-!SYSTEM_TEST        String used by test script to count system tests.
+!SYSTEM_removeTEST        String used by test script to count system tests.
 !=========================================================================
 
 !BOP
