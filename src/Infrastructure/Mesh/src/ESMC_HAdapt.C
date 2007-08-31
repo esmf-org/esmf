@@ -1,4 +1,4 @@
-// $Id: ESMC_HAdapt.C,v 1.3 2007/08/23 21:22:13 dneckels Exp $
+// $Id: ESMC_HAdapt.C,v 1.4 2007/08/31 19:15:05 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -112,6 +112,8 @@ void HAdapt::RefineUniformly(bool keep_parents) {
     } // for kernel
 
   } // !keep_parents
+
+  mesh.remove_unused_kernels();
 }
 
 void HAdapt::ZeroMarker() const {
