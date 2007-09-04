@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.121 2007/09/04 14:45:43 theurich Exp $
+// $Id: ESMC_Array.C,v 1.122 2007/09/04 15:13:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.121 2007/09/04 14:45:43 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.122 2007/09/04 15:13:16 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1995,6 +1995,8 @@ int Array::sparseMatMulStore(
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
   
+#define ASMMSTORETIMING
+#ifdef ASMMSTORETIMING
   double t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10X, t10Y, t11;//gjt - profile
   double t4a, t4b, t4c, t5a, t5b, t5c;  //gjt - profile
   double t4c1=0., t4c2=0., t4c3=0., t4c4=0., t4c5=0.;  //gjt - profile
@@ -2005,6 +2007,7 @@ int Array::sparseMatMulStore(
   double t10Xc1, t10Xc2; //gjt - profile
   double t10Yf, t10Yg; //gjt - profile
   VMK::wtime(&t0);   //gjt - profile
+#endif
   
   // every Pet must provide srcArray and dstArray
   if (srcArray == NULL){
@@ -2146,8 +2149,10 @@ int Array::sparseMatMulStore(
     dstArray->larrayBaseAddrList,
     dstArray->delayout->getLocalDeCount() * sizeof(char *));
 
+#ifdef ASMMSTORETIMING
   VMK::wtime(&t1);   //gjt - profile
-  
+#endif
+    
   //---------------------------------------------------------------------------
   // Phase II
   //---------------------------------------------------------------------------
@@ -2187,8 +2192,10 @@ int Array::sparseMatMulStore(
   int *dstCellCountList = new int[petCount];
   vm->vmk_allgather(&dstCellCount, dstCellCountList, sizeof(int));
   
+#ifdef ASMMSTORETIMING
   VMK::wtime(&t2);   //gjt - profile
-
+#endif
+  
   // local structs to simplify code
 
   struct Interval{
@@ -2288,7 +2295,7 @@ int Array::sparseMatMulStore(
   int *srcSeqIndexMinMaxList = new int[2*petCount];
   vm->vmk_allgather(srcSeqIndexMinMax, srcSeqIndexMinMaxList, 2*sizeof(int));
 
-#if 0  
+#ifdef ASMMSTOREPRINT
   for (int i=0; i<srcLocalDeCount; i++)
     for (int j=0; j<srcDistGridLocalDeCellCount[i]; j++)
       printf("gjt: localPet %d, srcLinSeqList[%d][%d] = %d, %d\n", 
@@ -2363,9 +2370,11 @@ int Array::sparseMatMulStore(
   int *dstSeqIndexMinMaxList = new int[2*petCount];
   vm->vmk_allgather(dstSeqIndexMinMax, dstSeqIndexMinMaxList, 2*sizeof(int));
   
+#ifdef ASMMSTORETIMING
   VMK::wtime(&t3);   //gjt - profile
+#endif
 
-#if 0
+#ifdef ASMMSTOREPRINT
   for (int i=0; i<dstLocalDeCount; i++)
     for (int j=0; j<dstDistGridLocalDeCellCount[i]; j++)
       printf("gjt: localPet %d, dstLinSeqList[%d][%d] = %d, %d\n", 
@@ -2394,8 +2403,10 @@ int Array::sparseMatMulStore(
     }
   }
     
+#ifdef ASMMSTORETIMING
   VMK::wtime(&t4a);   //gjt - profile
-
+#endif
+  
   // set up a distributed directory for srcArray seqIndex look-up
   int indicesPerPet = (srcSeqIndexMaxGlobal - srcSeqIndexMinGlobal + 1)
     / petCount;
@@ -2416,7 +2427,7 @@ int Array::sparseMatMulStore(
     srcSeqIndexInterval[petCount-1].max - srcSeqIndexInterval[petCount-1].min
     + 1;
   
-#if 0
+#ifdef ASMMSTOREPRINT
   printf("gjt: localPet %d, srcCellCountList[localPet] = %d, "
     "srcSeqIndexMinMax = %d / %d, srcSeqIndexMinGlobal/MaxGlobal = %d, %d, "
     "srcSeqIndexInterval[localPet].min/.max = %d, %d\n",
@@ -2439,26 +2450,9 @@ int Array::sparseMatMulStore(
   for (int i=0; i<petCount; i++)
     srcSeqIntervFactorListCount[i] = 0; // reset
   for (int j=0; j<factorListCount; j++){
-    // loop over all factorList entries
+    // loop over all factorList entries, find matching interval via bisection
+    // and count factor towards that PETs factor list count.
     int srcSeqIndex = factorIndexList->array[j*2];
-#if 0
-    int i;
-    for (i=0; i<petCount; i++){
-      // loop over all Pets
-      if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
-        srcSeqIndex <= srcSeqIndexInterval[i].max){
-        // srcSeqIndex lies within srcSeqIndex for this Pet
-        ++srcSeqIntervFactorListCount[i]; // count this factor for this Pet
-        break;  // no other Pet can have this factor in its interval
-      }
-    }
-    if (i==petCount){
-      // srcSeqIndex lies outside srcArray bounds
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-        "- Found srcSeqIndex outside srcArray bounds", &rc);
-      return rc;
-    }
-#else
     int iMin=0, iMax=petCount-1;
     int i=petCount/2;
     int foundFlag=0;  // reset
@@ -2484,7 +2478,6 @@ int Array::sparseMatMulStore(
         "- Found srcSeqIndex outside srcArray bounds", &rc);
       return rc;
     }
-#endif
   }
   int *srcSeqIntervFactorCounter = new int[petCount];
   for (int i=0; i<petCount; i++){
@@ -2492,20 +2485,9 @@ int Array::sparseMatMulStore(
     srcSeqIntervFactorCounter[i] = 0;  // reset
   }
   for (int j=0; j<factorListCount; j++){
-    // loop over all factorList entries
+    // loop over all factorList entries, find matching interval via bisection
+    // and factor list index
     int srcSeqIndex = factorIndexList->array[j*2];
-#if 0
-    for (int i=0; i<petCount; i++){
-      // loop over all Pets
-      if (srcSeqIndex >= srcSeqIndexInterval[i].min &&
-        srcSeqIndex <= srcSeqIndexInterval[i].max){
-        // srcSeqIndex lies within srcSeqIndex for this Pet
-        int *k = &(srcSeqIntervFactorCounter[i]);
-        srcSeqIntervFactorListIndex[i][(*k)++] = j; // store factorList index
-        break;  // no other Pet can have this factor in its interval
-      }
-    }
-#else
     int iMin=0, iMax=petCount-1;
     int i=petCount/2;
     do{
@@ -2524,12 +2506,13 @@ int Array::sparseMatMulStore(
         srcSeqIntervFactorListIndex[i][(*k)++] = j; // store factorList index
       break;
     }while (iMin != iMax);
-#endif
   }
   delete [] srcSeqIntervFactorCounter;
   
+#ifdef ASMMSTORETIMING
   VMK::wtime(&t4b);   //gjt - profile
-
+#endif
+  
   // all Pets construct their local srcSeqIndexFactorLookup[]
   int srcSeqIndexFactorCount = 0; // reset
   for (int factorPetIndex=0; factorPetIndex<factorPetCount; factorPetIndex++){
@@ -2545,8 +2528,10 @@ int Array::sparseMatMulStore(
           thisPetFactorCountList[j] = 0; // reset
         if (i == rootPet){
           
+#ifdef ASMMSTORETIMING
   VMK::wtime(&t4c1);   //gjt - profile
-  
+#endif
+    
           // rootPet -> rootPet "communication"
           for (int jj=0; jj<srcSeqIntervFactorListCount[i]; jj++){
             // loop over factorList entries in this Pet's srcSeqIndex interv
@@ -2599,7 +2584,7 @@ int Array::sparseMatMulStore(
                 factorIndexList->array[j*2+1]; // dstSeqIndex
               *((ESMC_R8 *)srcSeqIndexFactorLookup[k].factorList[kk].factor) =
                 ((ESMC_R8 *)factorList)[j];
-#if 0
+#ifdef ASMMSTOREPRINT
 printf("srcArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n", factorListCount, srcSeqIndex, factorIndexList->array[j*2+1], ((ESMC_R8 *)factorList)[j]);   
 #endif              
             }
@@ -2629,12 +2614,16 @@ printf("srcArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
             }
           } // if - typekindArg
           
+#ifdef ASMMSTORETIMING
   VMK::wtime(&t4c2);   //gjt - profile
-          
+#endif
+            
         }else{
           
+#ifdef ASMMSTORETIMING
   VMK::wtime(&t4c3);   //gjt - profile
   VMK::wtime(&t4c3a);   //gjt - profile
+#endif
           // rootPet -> not rootPet communication
           int totalCountIndex = srcSeqIndexInterval[i].count;
           for (int jj=0; jj<srcSeqIntervFactorListCount[i]; jj++){
@@ -2647,14 +2636,18 @@ printf("srcArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
             ++thisPetFactorCountList[totalCountIndex];
           }
           
+#ifdef ASMMSTORETIMING
   VMK::wtime(&t4c3b);   //gjt - profile
-  
+#endif
+    
           // send info to Pet "i"
           vm->vmk_send(thisPetFactorCountList, 
             (srcSeqIndexInterval[i].count + 1) * sizeof(int), i);
             
+#ifdef ASMMSTORETIMING
   VMK::wtime(&t4c3c);   //gjt - profile
-
+#endif
+  
           // prepare to send remaining information to Pet "i" in one long stream
           int thisPetTotalFactorCount =
             thisPetFactorCountList[srcSeqIndexInterval[i].count];
@@ -2684,7 +2677,7 @@ printf("srcArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
               *intStream++ = factorIndexList->array[j*2+1]; // dstSeqIndex
               factorStream = (ESMC_R8 *)intStream;
               *factorStream++ = ((ESMC_R8 *)factorList)[j];
-#if 0
+#ifdef ASMMSTOREPRINT
 printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\n", factorListCount, srcSeqIndex, factorIndexList->array[j*2+1], ((ESMC_R8 *)factorList)[j]);   
 #endif              
             }
@@ -2714,16 +2707,25 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
             }
           }
           // ready to send information to Pet "i" in one long stream
+#ifdef ASMMSTORETIMING
   VMK::wtime(&t4c3d);   //gjt - profile
   VMK::wtime(&t4c4);   //gjt - profile
-          vm->vmk_send(stream, byteCount, i);
-  VMK::wtime(&t4c5);   //gjt - profile
+#endif
   
+          vm->vmk_send(stream, byteCount, i);
+          
+#ifdef ASMMSTORETIMING
+  VMK::wtime(&t4c5);   //gjt - profile
+#endif
+  
+#ifdef ASMMSTORETIMING
   dt4c34 += t4c4 - t4c3;
   dt4c45 += t4c5 - t4c4;
   dt4c3ab += t4c3b - t4c3a;
   dt4c3bc += t4c3c - t4c3b;
   dt4c3cd += t4c3d - t4c3c;
+#endif
+  
           // garbage collection
           delete [] stream;
         }
@@ -2821,7 +2823,9 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     } // localPet not rootPet
   } // factorPetIndex
   
+#ifdef ASMMSTORETIMING
   VMK::wtime(&t4c);   //gjt - profile
+#endif
 
   // communicate between Pets to set up "de" member in srcSeqIndexFactorLookup[]
   for (int i=0; i<petCount; i++){
@@ -2887,12 +2891,14 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     }
   }
       
+#ifdef ASMMSTORETIMING
   printf("gjt - profile for PET %d:\n"
     " t4a=%g\n t4b=%g\n t4c1=%g\n t4c2=%g\n dt4c3ab=%g\n dt4c3bc=%g\n "
     "dt4c3cd=%g\n dt4c34=%g\n dt4c45=%g\n t4c=%g\n",
     localPet, t4a-t3, t4b-t3, t4c1-t3, t4c2-t3, dt4c3ab, dt4c3bc, dt4c3cd, 
     dt4c34, dt4c45, t4c-t3);
   VMK::wtime(&t4);   //gjt - profile
+#endif
 
   // determine the dstSeqIndexMinGlobal and MaxGlobal
   // todo: for nb-allgather(dstSeqIndexMinMaxList) here insert commwait()
@@ -2915,8 +2921,10 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     }
   }
     
+#ifdef ASMMSTORETIMING
   VMK::wtime(&t5a);   //gjt - profile
-
+#endif
+  
   // set up a distributed directory for dstArray seqIndex look-up
   indicesPerPet = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1) / petCount;
   extraIndices = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1) % petCount;
@@ -2935,7 +2943,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     dstSeqIndexInterval[petCount-1].max - dstSeqIndexInterval[petCount-1].min
     + 1;
   
-#if 0
+#ifdef ASMMSTOREPRINT
     printf("gjt: localPet %d, dstCellCountList[localPet] = %d, "
     "dstSeqIndexMinMax = %d / %d, dstSeqIndexMinGlobal/MaxGlobal = %d, %d, "
     "dstSeqIndexInterval[localPet].min/.max = %d, %d\n",
@@ -2958,26 +2966,9 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   for (int i=0; i<petCount; i++)
     dstSeqIntervFactorListCount[i] = 0; // reset
   for (int j=0; j<factorListCount; j++){
-    // loop over all factorList entries
+    // loop over all factorList entries, find matching interval via bisection
+    // and count factor towards that PETs factor list count.
     int dstSeqIndex = factorIndexList->array[j*2+1];
-#if 0
-    int i;
-    for (i=0; i<petCount; i++){
-      // loop over all Pets
-      if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
-        dstSeqIndex <= dstSeqIndexInterval[i].max){
-        // dstSeqIndex lies within dstSeqIndex for this Pet
-        ++dstSeqIntervFactorListCount[i]; // count this factor for this Pet
-        break;  // no other Pet can have this factor in its interval
-      }
-    }
-    if (i==petCount){
-      // dstSeqIndex lies outside dstArray bounds
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-        "- Found dstSeqIndex outside dstArray bounds", &rc);
-      return rc;
-    }
-#else
     int iMin=0, iMax=petCount-1;
     int i=petCount/2;
     int foundFlag=0;  // reset
@@ -3003,7 +2994,6 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
         "- Found dstSeqIndex outside dstArray bounds", &rc);
       return rc;
     }
-#endif
   }
   int *dstSeqIntervFactorCounter = new int[petCount];
   for (int i=0; i<petCount; i++){
@@ -3011,20 +3001,9 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     dstSeqIntervFactorCounter[i] = 0;  // reset
   }
   for (int j=0; j<factorListCount; j++){
-    // loop over all factorList entries
+    // loop over all factorList entries, find matching interval via bisection
+    // and factor list index
     int dstSeqIndex = factorIndexList->array[j*2+1];
-#if 0
-    for (int i=0; i<petCount; i++){
-      // loop over all Pets
-      if (dstSeqIndex >= dstSeqIndexInterval[i].min &&
-        dstSeqIndex <= dstSeqIndexInterval[i].max){
-        // dstSeqIndex lies within dstSeqIndex for this Pet
-        int *k = &(dstSeqIntervFactorCounter[i]);
-        dstSeqIntervFactorListIndex[i][(*k)++] = j; // store factorList index
-        break;  // no other Pet can have this factor in its interval
-      }
-    }
-#else
     int iMin=0, iMax=petCount-1;
     int i=petCount/2;
     do{
@@ -3043,12 +3022,13 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
       dstSeqIntervFactorListIndex[i][(*k)++] = j; // store factorList index
       break;
     }while (iMin != iMax);
-#endif
   }
   delete [] dstSeqIntervFactorCounter;
   
+#ifdef ASMMSTORETIMING
   VMK::wtime(&t5b);   //gjt - profile
-
+#endif
+  
   // all Pets construct their local dstSeqIndexFactorLookup[]
   int dstSeqIndexFactorCount = 0; // reset
   for (int factorPetIndex=0; factorPetIndex<factorPetCount; factorPetIndex++){
@@ -3115,7 +3095,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
                 factorIndexList->array[j*2]; // srcSeqIndex
               *((ESMC_R8 *)dstSeqIndexFactorLookup[k].factorList[kk].factor) =
                 ((ESMC_R8 *)factorList)[j];
-#if 0
+#ifdef ASMMSTOREPRINT
 printf("dstArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n", factorListCount, dstSeqIndex, factorIndexList->array[j*2], ((ESMC_R8 *)factorList)[j]);
 #endif        
             }
@@ -3188,7 +3168,7 @@ printf("dstArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
               *intStream++ = factorIndexList->array[j*2]; // srcSeqIndex
               factorStream = (ESMC_R8 *)intStream;
               *factorStream++ = ((ESMC_R8 *)factorList)[j];
-#if 0
+#ifdef ASMMSTOREPRINT
 printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\n", factorListCount, dstSeqIndex, factorIndexList->array[j*2], ((ESMC_R8 *)factorList)[j]);
 #endif
             }
@@ -3316,8 +3296,10 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     } // localPet not rootPet
   } // factorPetIndex
   
+#ifdef ASMMSTORETIMING
   VMK::wtime(&t5c);   //gjt - profile
-
+#endif
+  
   // communicate between Pets to set up "de" member in dstSeqIndexFactorLookup[]
   for (int i=0; i<petCount; i++){
     // Pet "i" is the active dstSeqIndex interval
@@ -3382,9 +3364,11 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     }
   }
     
+#ifdef ASMMSTORETIMING
   printf("gjt - profile for PET %d:\n"
     " t5a=%g\n t5b=%g\n t5c=%g\n", localPet, t5a-t4, t5b-t4, t5c-t4);
   VMK::wtime(&t5);   //gjt - profile
+#endif
 
   // fill in the partnerDe member in srcSeqIndexFactorLookup using dst distdir
   for (int i=0; i<petCount; i++){
@@ -3552,7 +3536,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     }
   }
   
-#if 0
+#ifdef ASMMSTOREPRINT
   // some serious printing for src info
   for (int i=0; i<srcSeqIndexInterval[localPet].count; i++){
     printf("gjt srcDistDir: localPet %d, srcSeqIndex = %d, "
@@ -3587,8 +3571,10 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   }
 #endif
   
+#ifdef ASMMSTORETIMING
   VMK::wtime(&t6);   //gjt - profile
-
+#endif
+  
   struct SeqIndexIndexInfo{
     int seqIndex;
     int listIndex1;
@@ -3854,7 +3840,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     }
   }
 
-#if 0
+#ifdef ASMMSTOREPRINT
   // more serious printing
   for (int j=0; j<srcLocalDeCount; j++){
     for (int k=0; k<srcDistGridLocalDeCellCount[j]; k++){
@@ -3888,8 +3874,10 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   }
 #endif
 
+#ifdef ASMMSTORETIMING
   VMK::wtime(&t7);   //gjt - profile
-
+#endif
+  
   //---------------------------------------------------------------------------
   // Phase III
   //---------------------------------------------------------------------------
@@ -3948,8 +3936,10 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   XXE::WaitOnIndexInfo *xxeWaitOnIndexInfo;
   XXE::WaitOnAnyIndexSubInfo *xxeWaitOnAnyIndexSubInfo;
     
+#ifdef ASMMSTORETIMING
   VMK::wtime(&t8);   //gjt - profile
-  
+#endif
+    
   // <XXE profiling element>
   xxe->stream[xxe->count].opId = XXE::wtimer;
   xxeElement = &(xxe->stream[xxe->count]);
@@ -4013,9 +4003,11 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
       }
     }
 
+#ifdef ASMMSTORETIMING
     VMK::wtime(&t10Xa);   //gjt - profile
-    
-#if 0
+#endif
+        
+#ifdef ASMMSTOREPRINT
 printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
 #endif
     int *index2Ref2 = new int[localDeFactorCount];  // large enough
@@ -4046,8 +4038,10 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       }
     }
     
+#ifdef ASMMSTORETIMING
     VMK::wtime(&t10Xb);   //gjt - profile
-    
+#endif
+        
     // invert the look-up direction
     // prepare to sort each "diffPartnerDeCount[j] group"
     // at the same time determine linIndexTermCount and linIndexTermFactorCount
@@ -4065,7 +4059,9 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       dstInfoTable[j][i] = new DstInfo[partnerDeCount[j][i]];
       dstInfoTableInit[i] = 0;   // reset
     }
+#ifdef ASMMSTORETIMING
     VMK::wtime(&t10Xc1);   //gjt - profile
+#endif
     for (int i=0; i<localDeFactorCount; i++){
       int partnerDeListIndex = partnerDeRef[i];
       int index2 = dstInfoTableInit[partnerDeListIndex]++;
@@ -4082,16 +4078,16 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         .factor, dataSize);
       dstInfoTable[j][partnerDeListIndex][index2].localDeFactorListIndex = i;
     }
-    
+#ifdef ASMMSTORETIMING
     VMK::wtime(&t10Xc2);   //gjt - profile
-    
+#endif    
     // sort each "diffPartnerDeCount[j] group" wrt partnerSeqIndex and seqIndex
     // in this order (opposite of src)
     for (int i=0; i<diffPartnerDeCount[j]; i++)
       qsort(dstInfoTable[j][i], partnerDeCount[j][i], 
         sizeof(DstInfo), DstInfo::cmp);
 
-#if 0
+#ifdef ASMMSTOREPRINT
     // print:
     printf("dstArray: %d, %d\n", j, diffPartnerDeCount[j]); 
     for (int i=0; i<diffPartnerDeCount[j]; i++)
@@ -4101,8 +4097,10 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
           dstInfoTable[j][i][k].partnerSeqIndex);
 #endif
     
+#ifdef ASMMSTORETIMING
     VMK::wtime(&t10Xd);   //gjt - profile
-    
+#endif
+        
     // <XXE profiling element>
     xxe->stream[xxe->count].opId = XXE::wtimer;
     xxeElement = &(xxe->stream[xxe->count]);
@@ -4145,7 +4143,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       int srcDe = partnerDeList[i];
       int srcPet;   //TODO: DE-based comms
       srcArray->delayout->getDEMatchPET(srcDe, *vm, NULL, &srcPet, 1);
-#if 0
+#ifdef ASMMSTOREPRINT
       printf("gjt: XXE::recvnb on localPet %d from Pet %d\n", localPet, srcPet);
 #endif
       recvnbIndex[j][i] = xxe->count;  // need index for the associated wait
@@ -4205,17 +4203,20 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     delete [] partnerDeList;
     delete [] dstInfoTableInit;
     
+#ifdef ASMMSTORETIMING
     VMK::wtime(&t10Xe);   //gjt - profile
     printf("gjt - profile for PET %d, j-loop %d:\n"
       " t10Xa=%g\n t10Xb=%g\n t10Xc1=%g\n t10Xc2=%g\n t10Xd=%g\n t10Xe=%g\n",
       localPet, j,
       t10Xa-t8, t10Xb-t8, t10Xc1-t8, t10Xc2-t8, t10Xd-t8, t10Xe-t8);
-    
+#endif    
     
   } // for j - dstLocalDeCount
   
+#ifdef ASMMSTORETIMING
   VMK::wtime(&t10X);   //gjt - profile
-
+#endif
+  
   // determine send pattern for all localDEs in srcArray and fill in XXE
   for (int j=0; j<srcLocalDeCount; j++){
     int *index2Ref = new int[srcDistGridLocalDeCellCount[j]];  // large enough
@@ -4294,7 +4295,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     // in this order (opposite of dst)
     for (int i=0; i<diffPartnerDeCount; i++)
       qsort(srcInfoTable[i], partnerDeCount[i], sizeof(SrcInfo), SrcInfo::cmp);
-#if 0
+#ifdef ASMMSTOREPRINT
     // print:
     for (int i=0; i<diffPartnerDeCount; i++)
       for (int k=0; k<partnerDeCount[i]; k++)
@@ -4355,12 +4356,12 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       int dstDe = partnerDeList[i];
       int dstPet;   //TODO: DE-based comms
       dstArray->delayout->getDEMatchPET(dstDe, *vm, NULL, &dstPet, 1);
-#if 0
+#ifdef ASMMSTOREPRINT
       printf("gjt: XXE::sendnb from localPet %d to Pet %d\n", localPet, dstPet);
 #endif
 
       if (count == 1){
-#if 0
+#ifdef ASMMSTOREPRINT
         printf("gjt: single contiguous linIndex run in srcArray\n");
 #endif
         // sendnbRRA out of single contiguous linIndex run
@@ -4379,7 +4380,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
             ESMF_ERR_PASSTHRU, &rc)) return rc;
         }
       }else{
-#if 0
+#ifdef ASMMSTOREPRINT
         printf("gjt: non-contiguous linIndex in srcArray -> need buffer \n");
 #endif
         // need intermediate buffer and memCpySrcRRAs
@@ -4568,51 +4569,10 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
   } // for j - srcLocalDeCount
 
   
+#ifdef ASMMSTORETIMING
   VMK::wtime(&t9);   //gjt - profile
-  
-#if 0
-  // -------- <testing the use of XXE subStream> ---------
-  xxe->stream[xxe->count].opId = XXE::xxeSub;
-  xxeElement = &(xxe->stream[xxe->count]);
-  xxeSubInfo = (XXE::XxeSubInfo *)xxeElement;
-  xxeSubInfo->xxe = new XXE(10, 10, 20);
-  XXE *xxeSub = xxeSubInfo->xxe;
-  ++(xxe->count);
-  if (xxe->count >= xxe->max){
-    localrc = xxe->growStream(1000);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-  }
-  xxe->xxeSubList[xxe->xxeSubCount] = xxeSub; // xxe garbage collection
-  ++(xxe->xxeSubCount);
-  if (xxe->xxeSubCount >= xxe->xxeSubMaxCount){
-    localrc = xxe->growXxeSub(1000);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-  }
-  xxeSub->stream[xxeSub->count].opId = XXE::print;
-  xxeElement = &(xxeSub->stream[xxeSub->count]);
-  xxePrintInfo = (XXE::PrintInfo *)xxeElement;
-  xxePrintInfo->printString = new char[80];
-  strcpy(xxePrintInfo->printString, "Hi from XXE sub-stream\n");
-  ++(xxeSub->count);
-  if (xxeSub->count >= xxeSub->max){
-    localrc = xxeSub->growStream(10);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-  }
-  xxeSub->storage[xxeSub->storageCount] =
-    xxePrintInfo->printString; // xxe garb coll
-  ++(xxeSub->storageCount);
-  if (xxeSub->storageCount >= xxeSub->storageMaxCount){
-    localrc = xxeSub->growStorage(10);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-  }
-  // -------- </testing the use of XXE subStream> ---------
 #endif
-  
-  
+    
   // use recv pattern for all localDEs in dstArray and issue XXE::"+=*"
   for (int j=0; j<dstLocalDeCount; j++){
 
@@ -4925,8 +4885,10 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
       
     } // k - diffPartnerDeCount[j]    
     
+#ifdef ASMMSTORETIMING
     VMK::wtime(&t10Yf);   //gjt - profile
-    
+#endif
+        
     // <XXE profiling element>
     xxe->stream[xxe->count].opId = XXE::wtimer;
     xxeElement = &(xxe->stream[xxe->count]);
@@ -4960,11 +4922,13 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
     delete [] recvnbIndex[j];
     delete [] buffer[j];
         
+#ifdef ASMMSTORETIMING
     VMK::wtime(&t10Yg);   //gjt - profile
   printf("gjt - profile for PET %d, j-loop %d:\n"
     " t10Yf=%g\n t10Yg=%g\n", localPet, j,
     t10Yf-t9, t10Yg-t9);
-    
+#endif
+      
   } // for j - dstLocalDeCount
 
   // garbage collection
@@ -4975,8 +4939,10 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
   delete [] localDeFactorList;
   delete [] buffer;
     
+#ifdef ASMMSTORETIMING
   VMK::wtime(&t10Y);   //gjt - profile
-
+#endif
+  
   // <XXE profiling element>
   xxe->stream[xxe->count].opId = XXE::wtimer;
   xxeElement = &(xxe->stream[xxe->count]);
@@ -5112,13 +5078,15 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
   delete [] dstSeqIntervFactorListIndex;
   delete [] rraList;
     
+#ifdef ASMMSTORETIMING
   VMK::wtime(&t11);   //gjt - profile
   printf("gjt - profile for PET %d:\n"
     " t1=%g\n t2=%g\n t3=%g\n t4=%g\n t5=%g\n t6=%g\n"
     " t7=%g\n t8=%g\n t10X=%g\n t9=%g\n t10Y=%g\n t11=%g\n", localPet,
     t1-t0, t2-t0, t3-t0, t4-t0, 
     t5-t0, t6-t0, t7-t0, t8-t0, t10Y-t0, t9-t0, t10Y-t0, t11-t0);
-
+#endif
+  
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
