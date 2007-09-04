@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.120 2007/08/24 23:35:38 theurich Exp $
+// $Id: ESMC_Array.C,v 1.121 2007/09/04 14:45:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.120 2007/08/24 23:35:38 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.121 2007/09/04 14:45:43 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1975,7 +1975,7 @@ int Array::sparseMatMulStore(
 //                distribution.
 //  - Phase III:  Use the information in "work" distribution to precompute the
 //                XXE stream and take associated data into "run" distribution
-//                according to the "execution pattern". Corrently the
+//                according to the "execution pattern". Currently the
 //                "dstArray execution pattern" has been implemented.
 //
 //EOPI
@@ -2151,29 +2151,6 @@ int Array::sparseMatMulStore(
   //---------------------------------------------------------------------------
   // Phase II
   //---------------------------------------------------------------------------
-
-  // create and initialize the RouteHandle
-  *routehandle = ESMC_RouteHandleCreate(&localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;
-  // todo: I have no idea what some of these settings do, just copied it for now
-  // todo: from what I saw being set in ESMF_IArrayHaloStoreIndex()
-  localrc =
-    (*routehandle)->ESMC_RouteHandleSetType(ESMC_ARRAYSPARSEMATMULHANDLE);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;
-  localrc = (*routehandle)->ESMC_RouteHandleSetRouteCount(1);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;
-  localrc = (*routehandle)->ESMC_RouteHandleSetRMapType(ESMC_1TO1HANDLEMAP);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;
-  localrc = (*routehandle)->ESMC_RouteHandleSetTVCount(0);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;
-  localrc = (*routehandle)->ESMC_RouteHandleSetTVMapType(ESMC_NOHANDLEMAP);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;
 
   // determine local srcCellCount
   int srcLocalDeCount = srcArray->delayout->getLocalDeCount();
@@ -3917,6 +3894,30 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   // Phase III
   //---------------------------------------------------------------------------
 
+  // create and initialize the RouteHandle
+  *routehandle = ESMC_RouteHandleCreate(&localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  // todo: I have no idea what some of these settings do, just copied it for now
+  // todo: from what I saw being set in ESMF_IArrayHaloStoreIndex()
+  // todo: All I need here is a valid RouteHandle so I can attach an XXE object.
+  localrc =
+    (*routehandle)->ESMC_RouteHandleSetType(ESMC_ARRAYSPARSEMATMULHANDLE);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  localrc = (*routehandle)->ESMC_RouteHandleSetRouteCount(1);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  localrc = (*routehandle)->ESMC_RouteHandleSetRMapType(ESMC_1TO1HANDLEMAP);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  localrc = (*routehandle)->ESMC_RouteHandleSetTVCount(0);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  localrc = (*routehandle)->ESMC_RouteHandleSetTVMapType(ESMC_NOHANDLEMAP);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+
   // allocate XXE and attach to RouteHandle
   XXE *xxe = new XXE(1000, 10000, 1000);
   localrc = (*routehandle)->ESMC_RouteHandleSetStorage(xxe);
@@ -5157,8 +5158,10 @@ int Array::sparseMatMul(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
+#ifdef ASMMTIMING
   double t0, t1, t2, t3, t4, t5, t6;            //gjt - profile
   VMK::wtime(&t0);      //gjt - profile
+#endif
 
   // basic error checking for input
   if (srcArray == NULL){
@@ -5172,8 +5175,10 @@ int Array::sparseMatMul(
     return rc;
   }
   
+#ifdef ASMMTIMING
   VMK::wtime(&t1);      //gjt - profile
-
+#endif
+  
   // get a handle on the XXE stored in routehandle
   XXE *xxe = (XXE *)(*routehandle)->ESMC_RouteHandleGetStorage();
 
@@ -5197,8 +5202,10 @@ int Array::sparseMatMul(
     //       between argument Array pair and Array pair used during XXE precomp.
   }
   
+#ifdef ASMMTIMING
   VMK::wtime(&t2);      //gjt - profile
-
+#endif
+  
   // conditionally zero out total regions of the dstArray for all localDEs
   if (zeroflag==ESMF_TRUE){
     for (int i=0; i<dstArray->delayout->getLocalDeCount(); i++){
@@ -5210,8 +5217,10 @@ int Array::sparseMatMul(
     }
   }
   
+#ifdef ASMMTIMING
   VMK::wtime(&t3);      //gjt - profile
-
+#endif
+  
   // prepare for relative run-time addressing (RRA)
   int rraCount = srcArray->delayout->getLocalDeCount();
   rraCount += dstArray->delayout->getLocalDeCount();
@@ -5223,24 +5232,30 @@ int Array::sparseMatMul(
     dstArray->larrayBaseAddrList,
     dstArray->delayout->getLocalDeCount() * sizeof(char *));
 
+#ifdef ASMMTIMING
   VMK::wtime(&t4);      //gjt - profile
-
+#endif
+  
   // execute XXE stream
   localrc = xxe->exec(rraCount, rraList);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
+#ifdef ASMMTIMING
   VMK::wtime(&t5);      //gjt - profile
-
+#endif
+  
   // garbage collection
   delete [] rraList;
   
+#ifdef ASMMTIMING
   VMK::wtime(&t6);      //gjt - profile
   int localPet = 999;   // for now in order to save on overhead
   printf("gjt - exec() profile for PET %d: "
     "dt1 = %g\tdt2 = %g\tdt3 = %g\tdt4 = %g\tdt5 = %g\tdt6 = %g\n",
     localPet, t1-t0, t2-t0, t3-t0, t4-t0, t5-t0, t6-t0);
-
+#endif
+  
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
