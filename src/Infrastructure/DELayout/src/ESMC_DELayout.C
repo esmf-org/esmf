@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.77 2007/08/24 23:34:51 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.78 2007/09/04 14:43:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.77 2007/08/24 23:34:51 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.78 2007/09/04 14:43:19 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -3351,87 +3351,86 @@ int XXE::execReady(
           }
         }
         break;
-        // --- cases below this line must cannot be used in execution ---  
+        // --- cases below this line cannot be used in execution -> must replace
       case waitOnAllSendnb:
-        sendnbLowerIndex = i; // all sendnb below this index are considered
+        sendnbLowerIndex = i; // all sendnb prior this index are considered
         {
 #if 0
           printf("case: waitOnAllSendnb: %d outstanding sendnb\n",
             sendnbCount);
 #endif
-          // start a new stream
-          StreamElement *newstream = new StreamElement[max];  // prepare stream
+          // replace stream
+          int oldCount = count;               // hold on to old count
+          StreamElement *oldStream = stream;  // hold on to old stream
+          stream = new StreamElement[max];    // prepare new stream
           // fill in StreamElements from before this StreamElement
-          memcpy(newstream, stream, i*sizeof(StreamElement));
+          memcpy(stream, oldStream, i*sizeof(StreamElement));
           // insert explicit waitOnIndex StreamElements
-          int xxeCount = i;
+          count = i;
           for (int j=0; j<sendnbCount; j++){
-            newstream[xxeCount].opId = waitOnIndex;
-            xxeElement = &(newstream[xxeCount]);
+            stream[count].opId = waitOnIndex;
+            xxeElement = &(stream[count]);
             xxeWaitOnIndexInfo = (WaitOnIndexInfo *)xxeElement;
             xxeWaitOnIndexInfo->index = sendnbIndexList[j];
-            ++xxeCount;
-            if (xxeCount >= max){
-              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-                "- xxeCount out of range", &rc);
-              return rc;
+            ++count;
+            if (count >= max){
+              localrc = growStream(1000);
+              if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+                ESMF_ERR_PASSTHRU, &rc)) return rc;
             }
           }
           // fill in StreamElements from after this StreamElement
-          if (sendnbCount+count-1 >= max){
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-              "- count out of range", &rc);
-            return rc;
+          // (excluding this StreamElement)
+          if (sendnbCount+oldCount-1 >= max){
+            localrc = growStream(sendnbCount+oldCount-max);
+            if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+              ESMF_ERR_PASSTHRU, &rc)) return rc;
           }
-          memcpy(newstream+xxeCount, stream+i+1, (count-i-1)
+          memcpy(stream+count, oldStream+i+1, (oldCount-i-1)
             * sizeof(StreamElement));
-          // replace stream
-          delete [] stream; // delete original stream
-          stream = newstream; // replace by new stream
-          count = sendnbCount + count -1;        // account for modification
+          count = sendnbCount + oldCount -1;  // account for modification
+          delete [] oldStream;                // delete original stream
         }
         breakFlag = 1;  // set
         break;
       case waitOnAllRecvnb:
-        recvnbLowerIndex = i; // all recvnb below this index are considered
+        recvnbLowerIndex = i; // all recvnb prior this index are considered
         {
 #if 0
           printf("case: waitOnAllRecvnb: %d outstanding recvnb\n",
             recvnbCount);
 #endif
-          // start a new stream
-          StreamElement *newstream = new StreamElement[max];  // prepare stream
+          // replace stream
+          int oldCount = count;               // hold on to old count
+          StreamElement *oldStream = stream;  // hold on to old stream
+          stream = new StreamElement[max];    // prepare new stream
           // fill in StreamElements from before this StreamElement
-          // (excluding this StreamElement)
-          memcpy(newstream, stream, i*sizeof(StreamElement));
+          memcpy(stream, oldStream, i*sizeof(StreamElement));
           // insert explicit waitOnIndex StreamElements
-          int xxeCount = i;
+          count = i;
           for (int j=0; j<recvnbCount; j++){
-            //printf("inserting waitOnIndex for: %d\n", recvnbIndexList[j]);
-            newstream[xxeCount].opId = waitOnIndex;
-            xxeElement = &(newstream[xxeCount]);
+            stream[count].opId = waitOnIndex;
+            xxeElement = &(stream[count]);
             xxeWaitOnIndexInfo = (WaitOnIndexInfo *)xxeElement;
             xxeWaitOnIndexInfo->index = recvnbIndexList[j];
-            ++xxeCount;
-            if (xxeCount >= max){
-              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-                "- xxeCount out of range", &rc);
-              return rc;
+            ++count;
+            if (count >= max){
+              localrc = growStream(1000);
+              if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+                ESMF_ERR_PASSTHRU, &rc)) return rc;
             }
           }
           // fill in StreamElements from after this StreamElement
           // (excluding this StreamElement)
           if (recvnbCount+count-1 >= max){
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-              "- count out of range", &rc);
-            return rc;
+            localrc = growStream(recvnbCount+oldCount-max);
+            if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+              ESMF_ERR_PASSTHRU, &rc)) return rc;
           }
-          memcpy(newstream+xxeCount, stream+i+1, (count-i-1)
+          memcpy(stream+count, oldStream+i+1, (oldCount-i-1)
             * sizeof(StreamElement));
-          // replace stream
-          delete [] stream; // delete original stream
-          stream = newstream; // replace by new stream
-          count = recvnbCount + count -1;        // account for modification
+          count = recvnbCount + oldCount -1;  // account for modification
+          delete [] oldStream;                // delete original stream
         }
         breakFlag = 1;  // set
         break;
