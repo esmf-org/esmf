@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.122 2007/09/04 15:13:16 theurich Exp $
+// $Id: ESMC_Array.C,v 1.123 2007/09/04 18:05:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.122 2007/09/04 15:13:16 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.123 2007/09/04 18:05:27 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -5084,7 +5084,7 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
     " t1=%g\n t2=%g\n t3=%g\n t4=%g\n t5=%g\n t6=%g\n"
     " t7=%g\n t8=%g\n t10X=%g\n t9=%g\n t10Y=%g\n t11=%g\n", localPet,
     t1-t0, t2-t0, t3-t0, t4-t0, 
-    t5-t0, t6-t0, t7-t0, t8-t0, t10Y-t0, t9-t0, t10Y-t0, t11-t0);
+    t5-t0, t6-t0, t7-t0, t8-t0, t10X-t0, t9-t0, t10Y-t0, t11-t0);
 #endif
   
   // return successfully
