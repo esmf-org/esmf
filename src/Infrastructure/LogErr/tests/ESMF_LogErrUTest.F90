@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.42 2007/08/09 18:55:21 svasquez Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.43 2007/09/05 21:42:15 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.42 2007/08/09 18:55:21 svasquez Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.43 2007/09/05 21:42:15 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -68,8 +68,9 @@
       integer :: rc2, ran_num, i, input_status, my_pet
       real :: r1
       logical :: is_error
-      type(ESMF_Log) :: log1, log2
+      type(ESMF_Log) :: log1, log2, log3, log4, log5, log6
       type(ESMF_VM):: vm
+      type(ESMF_LogType) :: logtype
 
 
 !------------------------------------------------------------------------------
@@ -96,6 +97,38 @@
 
       !------------------------------------------------------------------------
       !NEX_UTest
+      ! Test Log Open
+      logtype = ESMF_LOG_SINGLE
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_LogOpen(log5, "Single_Log_File", logtype=logtype,  rc=rc)
+      write(name, *) "Open ESMF_LOG_SINGLE Log Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
+
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Test Log Write
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_LogWrite(log=log5, msg="Log Single Msg",msgtype=ESMF_LOG_INFO, &
+                         rc=rc)
+      write(name, *) "Write to Single Log Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Test Log Open
+      logtype = ESMF_LOG_NONE
+      write(failMsg, *) "Did not return ESMF_RC_NOT_VALID"
+      call ESMF_LogOpen(log5, "None_Log_File", logtype=logtype,  rc=rc)
+      write(name, *) "Open ESMF_LOG_NONE Log Test"
+      call ESMF_Test((rc.eq.ESMF_RC_NOT_VALID), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
+
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
       ! Test Log Write
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       call ESMF_LogWrite(log=log1, msg="Log Write 2",msgtype=ESMF_LOG_INFO, &
@@ -116,13 +149,30 @@
 
 #ifdef ESMF_EXHAUSTIVE
 
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Log Close of never pened file
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_LogClose(log4, rc)
+      write(name, *) "Close Log File of never opened file Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test LogFlush of an unopened log
+      write(failMsg, *) "Did not return ESMF_FAILURE"
+      write(name, *) " LogFlush of unopened log Test"
+      call ESMF_LogFlush(log6, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
+
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test Log Write
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      call ESMF_LogWrite(msg="Log Write 2",msgtype=ESMF_LOG_INFO)
-      ! TODO:  this should be the format, with an rc argument
-      !call ESMF_LogWrite(msg="Log Write 2",msgtype=ESMF_LOG_INFO,rc=rc)
+      call ESMF_LogWrite(msg="Log Write 2",msgtype=ESMF_LOG_INFO,rc=rc)
       write(name, *) "Use of default log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
