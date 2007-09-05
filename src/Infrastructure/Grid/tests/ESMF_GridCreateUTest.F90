@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.52 2007/07/20 00:27:29 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.53 2007/09/05 18:31:56 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.52 2007/07/20 00:27:29 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.53 2007/09/05 18:31:56 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -71,6 +71,35 @@ program ESMF_GridCreateUTest
   distgrid=ESMF_DistGridCreate(minIndex=(/1,1/),maxIndex=(/10,10/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing Grid Validate"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! First make sure validate fails for an uncreated Grid
+  call ESMF_GridValidate(grid,rc=localrc)
+  if (localrc .eq. ESMF_SUCCESS) correct=.false.
+
+  ! Now make sure that a created grid validates successfully
+  !! Create Grid
+  grid=ESMF_GridCreate(distgrid=distgrid, coordTypeKind=ESMF_TYPEKIND_I4,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  !! Check that validate returns true
+  call ESMF_GridValidate(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) correct=.false.
+  
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
@@ -136,17 +165,6 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-  !-----------------------------------------------------------------------------
-
-
-  !-----------------------------------------------------------------------------
-  !NEX____UTest
-  ! This test crashes bug 1745580 has been opened
-  !
-  !write(name, *) "Getting a name from a grid"
-  !write(failMsg, *) "Did not return ESMF_SUCCESS"
-  !
-  !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------

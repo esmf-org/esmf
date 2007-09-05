@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.21 2007/08/30 23:08:03 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.22 2007/09/05 18:31:55 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -126,6 +126,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
   public ESMF_GridGetLocalTileSLocInfo
   public ESMF_GridSet
   public ESMF_GridSetCoord
+  public ESMF_GridValidate
 
 
 ! - ESMF-private methods:
@@ -137,7 +138,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.21 2007/08/30 23:08:03 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.22 2007/09/05 18:31:55 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -534,9 +535,6 @@ end interface
 !    any information is missing, the {\tt ESMF\_GridCommit} call will fail.
 !    If the {\tt defaultflag} argument is not passed in, {\it no} defaults
 !    are used.
-!
-!    This subroutine calls {\tt ESMF\_GridValidate} internally 
-!    to ensure that the values in the grid are consistent before returning.
 !
 !     The arguments are:
 !     \begin{description}
@@ -4250,7 +4248,64 @@ endif
     end subroutine ESMF_GridSetShapeIrreg
 
 
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridValidate()"
+!BOP
+! !IROUTINE: ESMF_GridValidate - Validate Grid internals
 
+! !INTERFACE:
+  subroutine ESMF_GridValidate(grid, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Grid), intent(in)              :: grid
+    integer,         intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Validates that the {\tt Grid} is internally consistent.
+!      Note that one of the checks that the Grid validate does
+!      is the Grid status. Currently, the validate will return
+!      an error if the grid is not at least 
+!      {\tt ESMF\_GRIDSTATUS\_SHAPE\_READY}. This means 
+!      if a Grid was created with {\tt ESMF\_GridCreateEmpty}
+!      it must also have been commited with {\tt ESMF\_GridCommit}
+!      to be valid. If a Grid was created with another create
+!      call it should automatically have the correct status level
+!      to pass the status part of the validate. 
+!      The Grid validate at this time doesn't check for the presence
+!      or consistency of the Grid coordinates.  
+!      The method returns an error code if problems are found.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Specified {\tt ESMF\_Grid} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
+    
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_GridValidate(grid, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_GridValidate
+!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------

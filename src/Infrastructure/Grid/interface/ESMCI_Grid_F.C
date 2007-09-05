@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.13 2007/08/30 23:08:03 oehmke Exp $
+// $Id: ESMCI_Grid_F.C,v 1.14 2007/09/05 18:31:55 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -971,14 +971,44 @@ extern "C" {
   void FTN(c_esmc_griddestroy)(ESMCI::Grid **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_griddestroy()"
+
     //Initialize return code
-    *rc = ESMC_RC_NOT_IMPL;
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+
     // call into C++
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Grid::destroy(ptr),
          ESMF_ERR_PASSTHRU, ESMC_NOT_PRESENT_FILTER(rc));
   } 
 
   ///////////////////////////////////////////////////////////////////////////////////
+
+
+
+  ///////////////////////////////////////////////////////////////////////////////////
+
+
+  
+  void FTN(c_esmc_gridvalidate)(ESMCI::Grid **grid, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridvalidate()"
+
+    //Initialize return code
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+
+    // Check status
+   if ((*grid)->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
+          "- grid status below ESMC_GRIDSTATUS_SHAPE_READY ", ESMC_NOT_PRESENT_FILTER(rc));
+        return;
+    }
+
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  } 
+
+  ///////////////////////////////////////////////////////////////////////////////////
+
+
   
 #undef  ESMC_METHOD
 }
