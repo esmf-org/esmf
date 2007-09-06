@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2007/08/30 05:06:45 cdeluca Exp $
+# $Id: makefile,v 1.12 2007/09/06 16:40:56 theurich Exp $
 
 # Leave alone.
 ALL: build_here 
@@ -12,9 +12,7 @@ FFLAGS    =
 AUTOGEN   = ESMF_StateGet.F90
 
 SOURCEC	  = 
-SOURCEF	  = ESMF_StateTypes.F90 ESMF_State.F90 $(AUTOGEN)
-# TODO:FIELDINTEGRATION Restore reconcile code.
-# ESMF_StateReconcile.F90
+SOURCEF	  = ESMF_StateTypes.F90 ESMF_State.F90 ESMF_StateReconcile.F90 $(AUTOGEN)
 SOURCEH	  = 
 STOREH    = ESMC_State.h
 TEXFILES  = $(addsuffix _fapi.tex, $(basename $(AUTOGEN)))
