@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.23 2007/08/02 18:41:58 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.24 2007/09/08 00:08:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -23,7 +23,8 @@ program ESMF_ArrayEx
   ! local variables
   integer:: rc, de, i, j, k, petCount, localDeCount, localPet
 !  integer:: dim, nodeCount, dimCount
-!  integer:: deNeighborCount, linkCount, idm1, idm3
+!  integer:: deNeighborCount, linkCount
+  integer:: idm1, idm3
   type(ESMF_VM):: vm
   type(ESMF_DELayout):: delayout
   type(ESMF_DistGrid):: distgrid, distgrid3D, distgrid2D, distgrid1D
@@ -37,8 +38,9 @@ program ESMF_ArrayEx
   type(ESMF_LocalArray), allocatable:: larrayList(:)
   type(ESMF_LocalArray), allocatable:: larrayList1(:), larrayList2(:)
   real(ESMF_KIND_R8), pointer:: myF90Array(:,:)
+  real(ESMF_KIND_R8), pointer:: myF90Array1D(:)
 !  real(ESMF_KIND_R8), pointer:: myF90Array1(:,:), myF90Array2(:,:)
-!  real(ESMF_KIND_R8), pointer:: myF90Array3(:,:,:)
+  real(ESMF_KIND_R8), pointer:: myF90Array3(:,:,:)
   real(ESMF_KIND_R8), pointer:: myF90Array2D(:,:), myF90Array3D(:,:,:)
   real(ESMF_KIND_R8):: dummySum
   type(ESMF_IndexFlag):: indexflag
@@ -46,7 +48,8 @@ program ESMF_ArrayEx
 !  integer, allocatable:: minIndex(:,:), maxIndex(:,:), regDecomp(:,:)
 !  integer, allocatable:: deBlockList(:,:), connectionList(:,:), connectionTransformList(:,:)
 !  integer, allocatable:: deNeighborList(:), deNeighborInterface(:,:)
-!  integer, allocatable:: linkList(:,:), inverseDimmap(:)
+!  integer, allocatable:: linkList(:,:)
+  integer, allocatable:: inverseDimmap(:)
   integer, allocatable:: localDeList(:)
   integer, allocatable:: exclusiveLBound(:,:), exclusiveUBound(:,:)
   integer, allocatable:: totalLWidth(:,:), totalUWidth(:,:)
@@ -134,13 +137,16 @@ program ESMF_ArrayEx
 !  |  (1,1)
 !  |    +-----------+-----------+------+
 !  |    | DE 0      | DE 2      | DE 4 |
+!  |    |           |           |      |
 !  |    |  *    *   |  *    *   |  *   |
 !  |    |           |           |      |
 !  |    |  *    *   |  *    *   |  *   |
 !  |    |           |           |      |
 !  |    |  *    *   |  *    *   |  *   |
 !  |    +-----------+-----------+------+
+!  |    |           |           |      |
 !  |    | DE 1      | DE 3      | DE 5 |
+!  |    |           |           |      |
 !  |    |  *    *   |  *    *   |  *   |
 !  |    |           |           |      |
 !  |    |  *    *   |  *    *   |  *   |
@@ -458,6 +464,8 @@ program ESMF_ArrayEx
     indexflag=ESMF_INDEX_GLOBAL, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!  call ESMF_ArrayPrint(array, rc=rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
   call ESMF_ArrayGet(array, larrayList=larrayList, rc=rc)
 !EOC  
@@ -562,6 +570,10 @@ program ESMF_ArrayEx
 !EOC
 
   deallocate(larrayList)
+  deallocate(localDeList)
+  call ESMF_ArrayDestroy(array, rc=rc) ! finally destroy the array object
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
   
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 !!!! UNTIL FURTHER IMPLEMENTATION SKIP SECTIONS OF THIS EXAMPLE >>>>>>>>>>>>>>>>
@@ -1606,6 +1618,7 @@ program ESMF_ArrayEx
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 !BOE
 ! \subsubsection{1D and 3D Arrays}
+!
 ! All previous examples were written for the 2D case. There is, however, no
 ! restriction within the Array or DistGrid class that limits the dimensionality
 ! of Array objects beyond the language specific limitations. 
@@ -1741,6 +1754,7 @@ program ESMF_ArrayEx
 !BOE
 !
 ! \subsubsection{Array and DistGrid rank -- 2D+1 Arrays}
+!
 ! All of the Array create interfaces require the specification of at least the 
 ! {\tt arrayspec} and the {\tt distgrid} arguments. Both arguments contain a
 ! sense of dimensionality. The interaction between these two arguments deserves
@@ -1793,16 +1807,12 @@ program ESMF_ArrayEx
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     totalLWidth=(/0,1/), totalUWidth=(/0,1/), staggerLoc=1, &
     lbounds=(/1/), ubounds=(/2/), rc=rc)
-    
-  call ESMF_ArrayPrint(array, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
     
-!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-!!!! UNTIL FURTHER IMPLEMENTATION SKIP SECTIONS OF THIS EXAMPLE >>>>>>>>>>>>>>>>
-#ifdef NOSKIP   
-!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
+!  call ESMF_ArrayPrint(array, rc=rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    
 !BOE
 ! This will create {\tt array} with 2+1 dimensions, i.e. a 2D DistGrid is used
 ! to describe the index space and decomposition into DEs and an extra Array 
@@ -1839,7 +1849,14 @@ program ESMF_ArrayEx
 !EOC
 !BOE
 ! Native language access to an Array with tensor dimensions is in principle
-! the same as without extra dimensions. The following loop shows how a Fortran90
+! the same as without extra dimensions.
+!EOE
+!BOC
+  call ESMF_ArrayGet(array, localDeCount=localDeCount, rc=rc)
+  allocate(larrayList(localDeCount))
+  call ESMF_ArrayGet(array, larrayList=larrayList, rc=rc)
+!BOE
+! The following loop shows how a Fortran90
 ! pointer to the DE-local data chunks can be obtained and used to set data 
 ! values in the exclusive regions. The {\tt myF90Array3} variable must be of 
 ! rank 3 to match the Array rank of {\tt array}.
@@ -1851,12 +1868,16 @@ program ESMF_ArrayEx
     exclusiveUBound=exclusiveUBound, rc=rc)
   do de=1, localDeCount
     call ESMF_LocalArrayGetData(larrayList(de), myF90Array3, ESMF_DATA_REF, rc=rc)
-    myF90Array3(exclusiveLBound(de,1):exclusiveUBound(de,1), &
-      exclusiveLBound(de,2):exclusiveUBound(de,2), 1) = 1
-    myF90Array3(exclusiveLBound(de,1):exclusiveUBound(de,1), &
-      exclusiveLBound(de,2):exclusiveUBound(de,2), 2) = 2
+    myF90Array3 = 0.0 ! initialize
+    myF90Array3(exclusiveLBound(1,de):exclusiveUBound(1,de), &
+      exclusiveLBound(2,de):exclusiveUBound(2,de), 1) = 5.1 ! dummy assignment
+    myF90Array3(exclusiveLBound(1,de):exclusiveUBound(1,de), &
+      exclusiveLBound(2,de):exclusiveUBound(2,de), 2) = 2.5 ! dummy assignment
   enddo
+  deallocate(larrayList)
 !EOC
+!  call ESMF_ArrayPrint(array, rc=rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
 ! For some applications the default association rules between DistGrid and Array
 ! dimensions may not satisfy the user's needs. The optional {\tt dimmap} 
@@ -1917,21 +1938,188 @@ program ESMF_ArrayEx
 !BOC
   allocate(inverseDimmap(3))  ! arrayRank = 3
   call ESMF_ArrayGet(array, inverseDimmap=inverseDimmap, &
-    exclusiveLBound=exclusiveLBound, exclusiveUBound=exclusiveUBound, rc=rc)
+    exclusiveLBound=exclusiveLBound, exclusiveUBound=exclusiveUBound, &
+    localDeCount=localDeCount, rc=rc)  
   if (inverseDimmap(2) /= 0) then   ! check if extra dimension at expected index
     ! indicate problem and bail out
   endif
+  ! obtain larrayList for local DEs
+  allocate(larrayList(localDeCount))
+  call ESMF_ArrayGet(array, larrayList=larrayList, rc=rc)
   ! prepare inverse dimmap variables for kernel loop
   idm1=inverseDimmap(1)
   idm3=inverseDimmap(3)
   do de=1, localDeCount
     call ESMF_LocalArrayGetData(larrayList(de), myF90Array3, ESMF_DATA_REF, rc=rc)
-    myF90Array3(exclusiveLBound(de,idm1):exclusiveUBound(de,idm1), &
-      1, exclusiveLBound(de,idm3):exclusiveUBound(de,idm3)) = 10.5 ! dummy assignment
-    myF90Array3(exclusiveLBound(de,idm1):exclusiveUBound(de,idm1), &
-      2, exclusiveLBound(de,idm3):exclusiveUBound(de,idm3)) = 23.3 ! dummy assignment
+    myF90Array3(exclusiveLBound(idm1,de):exclusiveUBound(idm1,de), &
+      1, exclusiveLBound(idm3,de):exclusiveUBound(idm3,de)) = 10.5 ! dummy assignment
+    myF90Array3(exclusiveLBound(idm1,de):exclusiveUBound(idm1,de), &
+      2, exclusiveLBound(idm3,de):exclusiveUBound(idm3,de)) = 23.3 ! dummy assignment
   enddo
+  deallocate(exclusiveLBound, exclusiveUBound)
+  deallocate(inverseDimmap)
+  deallocate(larrayList)
+  call ESMF_ArrayDestroy(array, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
+
+!BOE
+!
+! \subsubsection{Arrays with replicated dimensions}
+!
+! Up until the previous section the DistGrid {\tt dimCount} was always assumed
+! equal to the Array {\tt rank}. The previous section introduced the concept
+! of Array {\em tensor} dimensions when {\tt dimCount < rank}. In this section
+! the general case of completely arbitrary {\tt dimCount} and {\tt rank} and 
+! their relationship to {\tt dimmap} will be considered.
+!
+! The Array class allows completely arbitrary mapping between Array and
+! DistGrid dimensions. Most cases considered in the previous sections used
+! the default mapping which assigns the DistGrid dimensions in sequence to the
+! lower Array dimensions. Extra Array dimensions, if present, are considered
+! non-distributed tensor dimensions for which the optional {\tt lbounds} and
+! {\tt ubounds} arguments must be specified.
+!
+! The optional {\tt dimmap} argument provides the option to override the default
+! DistGrid to Array dimension mapping. The entries of the {\tt dimmap} array
+! correspond to the DistGrid dimensions in sequence and assign a unique Array
+! dimension to each DistGrid dimension. DistGrid and Array dimensions are 
+! indexed starting at {\tt 1} for the lowest dimension. A value of {\tt "0"}
+! in the {\tt dimmap} array indicates that the respective DistGrid dimension is
+! {\em not} mapped against any Array dimension. What this means is that the 
+! Array will be replicated along this DistGrid dimension.
+! 
+! As a first example consider the case where a 1D Array
+!EOE
+!BOC
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=1, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!EOC
+!BOE
+! is created on the 2D DistGrid used during the previous section.
+!EOE
+!BOC
+  array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!EOC
+!  call ESMF_ArrayPrint(array, rc=rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOE
+! Here the default DistGrid to Array dimension mapping is used which assigns
+! the Array dimensions in sequence to the DistGrid dimensions starting with
+! dimension "1". Extra DistGrid dimensions are considerd replicator dimensions
+! because the Array will be replicated along those dimensions. In the above
+! example the 2nd DistGrid dimension will cause 1D Array pieces to be
+! replicated along the DEs of the 2nd DistGrid dimension. Replication in the
+! context of {\tt ESMF\_ArrayCreate()} does not mean that data values are
+! communicated and replicated between different DEs, but it means that different
+! DEs provide memory allocations for {\em identical} exclusive cells.
+!
+! Access to the data storage of an Array that has been replicated along 
+! DistGrid dimensions is not different from Arrays without replication.
+!EOE
+!BOC
+  call ESMF_ArrayGet(array, localDeCount=localDeCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  allocate(larrayList(localDeCount))
+  allocate(localDeList(localDeCount))
+  call ESMF_ArrayGet(array, larrayList=larrayList, localDeList=localDeList, &
+    rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!EOC
+!BOE
+! The {\tt array} object was created without additional padding which means
+! that the bounds of the Fortran array pointer correspond to the bounds of
+! the exclusive region. The following loop will cycle through all local DEs, 
+! print the DE number as well as the Fortran array pointer bounds. The bounds
+! should be:
+! \begin{verbatim}
+!          lbound       ubound
+!
+! DE 0:      1            3         --+
+! DE 2:      1            3         --|  1st replication set
+! DE 4:      1            3         --+
+!
+! DE 1:      1            2         --+
+! DE 3:      1            2         --|  2nd replication set
+! DE 5:      1            2         --+
+! \end{verbatim}
+!EOE
+!BOC
+  do de=1, localDeCount
+    call ESMF_LocalArrayGetData(larrayList(de), myF90Array1D, ESMF_DATA_REF, &
+      rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    print *, "DE ",localDeList(de)," [", lbound(myF90Array1D), &
+      ubound(myF90Array1D),"]"
+  enddo
+  deallocate(larrayList)
+  deallocate(localDeList)
+  call ESMF_ArrayDestroy(array, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!EOC
+!BOE
+! The Fortran array pointer in the above loop was of rank 1 because the
+! Array object was of rank 1. However, the {\tt distgrid} object associated
+! with {\tt array} is 2-dimensional! Consequently DistGrid based information
+! queried from {\tt array} will be 2D. The {\tt dimmap} and {\tt inverseDimmap}
+! arrays provide the necessary mapping to correctly associated dereference
+! DistGrid based information with Array dimensions.
+!
+! The next example creates a 2D Array
+!EOE
+!BOC
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!EOC
+!BOE
+! on the previously used 2D DistGrid. By default, i.e. without the {\tt dimmap}
+! argument, both DistGrid dimensions would be associated with the two Array
+! dimensions. However, the following the {\tt dimmap} specified in the following
+! call will only associate the second DistGrid dimension with the first Array 
+! dimension. This will render the first DistGrid dimension a replicator
+! dimension and the second Array dimension a tensor dimension for which 1D
+! {\tt lbounds} and {\tt ubounds} arguments must be supplied.
+!EOE
+!BOC
+  array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+    dimmap=(/0,1/), lbounds=(/11/), ubounds=(/14/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!EOC
+!  call ESMF_ArrayPrint(array, rc=rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+  call ESMF_ArrayDestroy(array, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!EOC
+!BOE
+! Finally, the same {\tt arrayspec} and {\tt distgrid} arguments are used to
+! create a 2D Array that is fully replicated in both dimensions of the DistGrid.
+! Both Array dimensions are now tensor dimensions and both DistGrid dimensions
+! are replicator dimensions.
+!EOE
+!BOC
+  array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+    dimmap=(/0,0/), lbounds=(/11,21/), ubounds=(/14,22/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!EOC
+!  call ESMF_ArrayPrint(array, rc=rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+  call ESMF_ArrayDestroy(array, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!EOC
+!BOE
+! The result will be an Array with local lower bound (/11,21/) and upper bound
+! (/14,22/) on all 6 DEs of the DistGrid.
+!EOE
+
+
+!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+!!!! UNTIL FURTHER IMPLEMENTATION SKIP SECTIONS OF THIS EXAMPLE >>>>>>>>>>>>>>>>
+#ifdef NOSKIP   
+!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
 
 !BOEI
 !
