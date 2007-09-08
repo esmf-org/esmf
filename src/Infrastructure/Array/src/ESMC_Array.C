@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.123 2007/09/04 18:05:27 theurich Exp $
+// $Id: ESMC_Array.C,v 1.124 2007/09/08 00:06:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.123 2007/09/04 18:05:27 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.124 2007/09/08 00:06:42 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -782,13 +782,42 @@ Array *Array::create(
   }
   const DELayout *delayout = distgrid->getDELayout();
   int dimCount = distgrid->getDimCount();
-  if (dimCount > rank){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-      "- dimCount of distgrid argument must be <= rank of Array", rc);
-    return ESMC_NULL_POINTER;
+  // check if dimmap was provided and matches rest of arguments
+  int *dimmapArray = new int[dimCount];
+  for (int i=0; i<dimCount; i++){
+    if (i < rank)
+      dimmapArray[i] = i+1; // default (basis 1)
+    else
+      dimmapArray[i] = 0;   // default (replicator dims beyond rank)
   }
+  if (dimmap != NULL){
+    if (dimmap->dimCount != 1){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- dimmap array must be of rank 1", rc);
+      return ESMC_NULL_POINTER;
+    }
+    if (dimmap->extent[0] != dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- dimmap and distgrid mismatch", rc);
+      return ESMC_NULL_POINTER;
+    }
+    for (int i=0; i<dimCount; i++){
+      if (dimmapArray[i] < 0 || dimmapArray[i] > rank){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          "- invalid dimmap element", rc);
+        return ESMC_NULL_POINTER;
+      }
+      dimmapArray[i] = dimmap->array[i];  // copy dimmap array element
+    }
+  }
+  // determine replicatorCount
+  int replicatorCount = 0;  // initialize
+  for (int i=0; i<dimCount; i++)
+    if (dimmapArray[i] == 0) ++replicatorCount;
+  // determine tensorCount
+  int tensorCount = rank - (dimCount - replicatorCount);
+  if (tensorCount < 0) tensorCount = 0;
   // check for lbounds and ubounds arguments and that they match dimCount, rank
-  int tensorCount = rank - dimCount;  // number of tensor dimensions
   if (tensorCount > 0 && lboundsArg == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
       "- Valid lbounds argument required to create Array with tensor dims", rc);
@@ -827,36 +856,14 @@ Array *Array::create(
     }
     uboundsArray = uboundsArg->array;
   }
-  // check if dimmap was provided and matches rest of arguments
-  int *dimmapArray = new int[dimCount];
-  for (int i=0; i<dimCount; i++)
-    dimmapArray[i] = i+1; // default  (basis 1)
-  if (dimmap != NULL){
-    if (dimmap->dimCount != 1){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-        "- dimmap array must be of rank 1", rc);
-      return ESMC_NULL_POINTER;
-    }
-    if (dimmap->extent[0] != dimCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-        "- dimmap and distgrid mismatch", rc);
-      return ESMC_NULL_POINTER;
-    }
-    for (int i=0; i<dimCount; i++){
-      if (dimmap->array[i] < 1 || dimmap->array[i] > rank){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-          "- dimmap / rank mismatch", rc);
-        return ESMC_NULL_POINTER;
-      }
-      dimmapArray[i] = dimmap->array[i];  // copy dimmap array element
-    }
-  }
   // generate inverseDimmap
   int *inverseDimmapArray = new int[rank];
   for (int i=0; i<rank; i++)
-    inverseDimmapArray[i] = 0; // reset  (basis 1), 0 indicates not distr. dim
-  for (int i=0; i<dimCount; i++)
-    inverseDimmapArray[dimmapArray[i]-1] = i+1;
+    inverseDimmapArray[i] = 0; // reset  (basis 1), 0 indicates tensor dim
+  for (int i=0; i<dimCount; i++){
+    if (dimmapArray[i] > 0)
+      inverseDimmapArray[dimmapArray[i]-1] = i+1;
+  }
   // delayout -> deCount, localDeCount, localDeList
   int deCount = delayout->getDeCount();
   int localDeCount = delayout->getLocalDeCount();
@@ -5126,6 +5133,7 @@ int Array::sparseMatMul(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
+#define ASMMTIMING___disable
 #ifdef ASMMTIMING
   double t0, t1, t2, t3, t4, t5, t6;            //gjt - profile
   VMK::wtime(&t0);      //gjt - profile
@@ -5260,7 +5268,8 @@ int Array::sparseMatMulRelease(
   // get XXE from routehandle
   XXE *xxe = (XXE *)routehandle->ESMC_RouteHandleGetStorage();
   
-#if 1  
+#define XXEPROFILEPRINT
+#ifdef XXEPROFILEPRINT
   // print XXE stream profile
   VM *vm = VM::getCurrent(&localrc);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
