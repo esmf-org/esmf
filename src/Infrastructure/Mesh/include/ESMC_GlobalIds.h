@@ -1,4 +1,4 @@
-// $Id: ESMC_Zoltan.h,v 1.2 2007/08/07 20:45:56 dneckels Exp $
+// $Id: ESMC_GlobalIds.h,v 1.1 2007/09/10 17:38:27 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -14,26 +14,18 @@
 //-------------------------------------------------------------------------
 // these lines prevent this file from being read more than once if it
 // ends up being included multiple times
+#ifndef ESMC_GlobalIds_h
+#define ESMC_GlobalIds_h
 
-#ifndef ESMC_Zoltan_h
-#define ESMC_Zoltan_h
-
-#include <ESMC_MeshField.h>
-#include <ESMC_CommReg.h>
-#include <ESMC_Search.h>
+#include <vector>
 
 namespace ESMCI {
 namespace MESH {
 
-class Mesh;
-class CommReg;
+// Retrieve a list of new global ids, given the set of current ids
+void GlobalIds(const std::vector<long> &current_ids,
+                          std::vector<long> &new_ids);
 
-typedef enum {ZOLT_BILIN=0, ZOLT_PATCH=1} Zolt_Interp;
-// Rendezvous the two meshes.  Forms a load balanced geometric partition for both meshes.
-// Copies the meshes there (building srcR and dstR)
-void ZoltanRendezvous(Mesh &srcmesh, Mesh &destMesh, Mesh &srcR, Mesh &dstR,
-  UInt num_fields, MEField<> **sfields, MEField<> **dfields,
-  const UInt zinterp[]);
 
 } // namespace
 } // namespace

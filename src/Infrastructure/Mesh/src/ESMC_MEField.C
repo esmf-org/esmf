@@ -1,4 +1,4 @@
-// $Id: ESMC_MEField.C,v 1.1 2007/08/07 17:48:00 dneckels Exp $
+// $Id: ESMC_MEField.C,v 1.2 2007/09/10 17:38:29 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -19,13 +19,14 @@ namespace MESH {
 // ********** New style fields ************
 // MEFieldBase (no templates)
 MEFieldBase::MEFieldBase(const std::string &_name, const MEFamily &_mef,
-    UInt _obj_type, const Context &_ctxt, UInt dim, bool out, const _fieldTypeBase &_ftype) :
+    UInt _obj_type, const Context &_ctxt, UInt dim, bool out, bool _interp, const _fieldTypeBase &_ftype) :
 fname(_name),
 mef(_mef),
 obj_type(_obj_type),
 my_ctxt(_ctxt),
 fdim(dim),
 output(out),
+interp(_interp),
 ftype(_ftype),
 ordinal(0)
 {
@@ -37,11 +38,12 @@ MEFieldBase::~MEFieldBase() {
 // ****** MEField ********
 template<typename _FIELD>
 MEField<_FIELD>::MEField(const std::string &_name, const MEFamily &_mef,
-    UInt _obj_type, const Context &_ctxt, UInt dim, bool out, const _fieldTypeBase &_ftype) :
-MEFieldBase(_name, _mef, _obj_type, _ctxt, dim, out, _ftype),
+    UInt _obj_type, const Context &_ctxt, UInt dim, bool out, bool interp, const _fieldTypeBase &_ftype) :
+MEFieldBase(_name, _mef, _obj_type, _ctxt, dim, out, interp, _ftype),
 fidx_table(),
 fields(),
-primaryfield(NULL)
+primaryfield(NULL),
+interpfield(NULL)
 {
 }
 

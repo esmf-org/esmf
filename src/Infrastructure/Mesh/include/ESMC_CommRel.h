@@ -1,4 +1,4 @@
-// $Id: ESMC_CommRel.h,v 1.1 2007/08/07 17:47:54 dneckels Exp $
+// $Id: ESMC_CommRel.h,v 1.2 2007/09/10 17:38:26 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -87,7 +87,7 @@ CommRel(const std::string &name, MeshDB &dom, MeshDB &ran);
 // Pack and send the field values.  Field is from domain mesh.  A field
 // of the same name and size must exist on the other end.  If multiple copies
 // arrive, this function copies over.  sfields[i] -> rfields[i]
-void send_fields(UInt nfields, _field **sfield, _field **rfields);
+void send_fields(UInt nfields, _field *const *sfield, _field *const *rfields);
 
 // Copy fields from owner to ghosted copies.  Assumes sym spec
 void halo_fields(UInt nfields, _field **sfield) const;

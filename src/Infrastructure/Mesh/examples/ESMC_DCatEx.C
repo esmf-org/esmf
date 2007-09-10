@@ -1,4 +1,4 @@
-// $Id: ESMC_DCatEx.C,v 1.1 2007/08/20 19:32:45 dneckels Exp $
+// $Id: ESMC_DCatEx.C,v 1.2 2007/09/10 17:38:26 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -16,42 +16,32 @@
 /*
  * Program concatenates a set of parallel mesh files into a single file
 */
-
-#include <unistd.h>
-#include <stdlib.h>
-//#include <ctype.h>
-#include <stdio.h>
-#include <string.h>
-#include <iostream>
-
-#include <stdexcept>
 #include <ESMC_MeshExodus.h>
 #include <ESMC_Mesh.h>
 #include <ESMC_MeshSkin.h>
-
 #include <ESMC_ShapeFunc.h>
 #include <ESMC_Mapping.h>
 #include <ESMC_Search.h>
-#include <ESMC_Transfer.h>
-
 #include <ESMC_MeshField.h>
-
 #include <ESMC_MeshUtils.h>
 #include <ESMC_MasterElement.h>
 #include <ESMC_MeshRead.h>
-
 #include <ESMC_MeshPartition.h>
-
 #include <ESMC_ParEnv.h>
+#include <ESMC_MeshTypes.h>
 
+#include <stdexcept>
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
 #include <iterator>
 #include <ostream>
 #include <sstream>
 #include <iomanip>
-
 #include <cmath>
 
-#include <ESMC_MeshTypes.h>
 
 using namespace ESMCI::MESH;
 

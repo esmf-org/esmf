@@ -1,4 +1,4 @@
-// $Id: ESMC_BBox.h,v 1.1 2007/08/07 17:47:54 dneckels Exp $
+// $Id: ESMC_BBox.h,v 1.2 2007/09/10 17:38:26 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -21,7 +21,6 @@
 #include <ESMC_MeshDB.h>
 #include <ESMC_MeshObj.h>
 #include <ESMC_MEField.h>  // for coords
-
 #include <ESMC_MeshTypes.h>
 
 #include <iostream>
@@ -45,6 +44,12 @@ BBox(const MEField<> &coords, const MeshObj &obj, double normexp = 0.0);
 
 // Build a box around the whole mesh.  Not a cheap operation (loops nodes)
 BBox(const MEField<> &coords, const MeshDB &mesh);
+
+BBox(_field &coords, const MeshDB &mesh);
+
+BBox(const BBox &rhs);
+BBox &operator=(const BBox &rhs);
+
 const double *getMin() const { return &min[0];}
 const double *getMax() const { return &max[0];}
 void setMin(UInt i, double val) { min[i] = val;}
@@ -61,12 +66,12 @@ UInt dim;
 };
 
 // Return the box intersection
-BBox *BBoxIntersection(const BBox &b1, const BBox &b2);
+BBox BBoxIntersection(const BBox &b1, const BBox &b2);
 
 bool BBoxPointIn(const BBox &b1, double point[], double tol);
 
 // Form a bounding box by taking the (outer) union of a parallel suite
-BBox *BBoxParUnion(const BBox &b1);
+BBox BBoxParUnion(const BBox &b1);
 
 // Return true if the two boxes have nontrivial intersection
 bool BBoxIntersect(const BBox &b1, const BBox &b2, double tol);

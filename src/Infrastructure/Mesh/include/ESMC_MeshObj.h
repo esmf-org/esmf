@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshObj.h,v 1.1 2007/08/07 17:47:56 dneckels Exp $
+// $Id: ESMC_MeshObj.h,v 1.2 2007/09/10 17:38:27 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -104,7 +104,7 @@ public:
  friend class Mesh;
  friend class MeshDB;
  friend class Kernel;
- typedef enum {NONE = 0x0, NODE = 0x01, EDGE=0x02, FACE=0x04, ELEMENT=0x08, IPOINT= 0x10, ANY=0xFF } MeshObjType;
+ typedef enum {NONE = 0x0, NODE = 0x01, EDGE=0x02, FACE=0x04, ELEMENT=0x08, INTERP= 0x10, ANY=0xFF } MeshObjType;
  typedef enum {USES=0x01, USED_BY=0x02, PARENT=0x04, CHILD=0x08} RelationType;
 /*
  MeshObj() :

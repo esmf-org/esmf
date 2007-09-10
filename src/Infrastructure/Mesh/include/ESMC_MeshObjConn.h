@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshObjConn.h,v 1.1 2007/08/07 17:47:56 dneckels Exp $
+// $Id: ESMC_MeshObjConn.h,v 1.2 2007/09/10 17:38:27 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -111,7 +111,8 @@ bool get_obj_nodes(const MeshObj &obj, std::vector<MeshObj*> &nodes, bool must_f
 // using its nodal USES relations.  Does not return the current proc.
 // For a node, we get the smallest topology supporting the node, and run the
 // intersection test on that.
-void get_shared_procs(const MeshObj &obj, const CommRel &node_sym_spec, std::vector<UInt> &procs);
+// If the object is already resolved an should be in comm, just go straight to comm
+void get_shared_procs(const MeshObj &obj, const CommRel &node_sym_spec, std::vector<UInt> &procs, bool obj_in_comm=false);
 
 // Return the processors (other than this) that a node is shared with (different from above)
 void get_node_sharing(MeshObj &node, const CommRel &node_sym_spec, std::vector<UInt> &procs);

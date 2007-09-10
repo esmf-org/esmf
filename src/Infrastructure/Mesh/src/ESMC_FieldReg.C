@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldReg.C,v 1.3 2007/08/20 19:34:51 dneckels Exp $
+// $Id: ESMC_FieldReg.C,v 1.4 2007/09/10 17:38:28 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@ void FieldReg::MatchFields(UInt nfields, MEField<> **fds, std::vector<MEField<>*
 }
 
 MEField<> *FieldReg::RegisterField(const std::string &name, const MEFamily &mef,
-        UInt obj_type, const Context &ctxt, UInt dim, bool out, const _fieldTypeBase &ftype)
+        UInt obj_type, const Context &ctxt, UInt dim, bool out, bool interp, const _fieldTypeBase &ftype)
 {
 
   if (is_committed)
@@ -73,7 +73,7 @@ MEField<> *FieldReg::RegisterField(const std::string &name, const MEFamily &mef,
   MEField<> *nf;
   if (fi == fmap.end() || fi->first != name) {
     // Create the new field
-    nf = new MEField<>(name, mef, obj_type, ctxt, dim, out, ftype);
+    nf = new MEField<>(name, mef, obj_type, ctxt, dim, out, interp, ftype);
     fmap.insert(fi, std::make_pair(name, nf));
     Fields.push_back(nf);
   } else {
@@ -108,6 +108,12 @@ MEField<> *FieldReg::GetField(const std::string &fname) const {
   return fi == fmap.end() ? NULL : fi->second;
 }
 
+_field *FieldReg::Getfield(const std::string &fname) const {
+  fMapType::const_iterator fi = _fmap.find(fname);
+  
+  return fi == _fmap.end() ? NULL : fi->second;
+}
+
 void FieldReg::CreateDBFields() {
 
 
@@ -137,6 +143,10 @@ void FieldReg::CreateDBFields() {
 }
 
 void FieldReg::PopulateDBFields(MeshDB &mesh) {
+  UInt nnodes = mesh.num_nodes();
+
+  if (nnodes == 0) return;
+
   // Nodal field first
   {
     UInt n = ndfields.size();
@@ -274,6 +284,7 @@ static void parallel_union_field_info(std::vector<UInt> &nvalSet, std::vector<UI
 }
 
 void FieldReg::Commit(MeshDB &mesh) {
+  Trace __trace("FieldReg::Commit(MeshDB &mesh)");
 
   // Step 0: Get the imprint contexts that will be used; share in parallel
   // and define these contexts.
@@ -327,8 +338,31 @@ void FieldReg::Commit(MeshDB &mesh) {
         f.Addfield(Registerfield(buf, fatt, f.FType(), nval*f.dim()), nval);
 //std::cout << "Creating subfield:" << buf << std::endl;
       }
-    }
+      
+      // If field is to be interpolated, register an interpolant field.  This should be parallel
+      // safe.
+      if (f.has_interp()) {
+        
+        // IF the field is nodal, we will simply use the nodal field for interpolations,
+        // otherwise we must create a special field for interpolation.
+        if (!f.is_nodal()) {
+          char buf[1024];
+          std::sprintf(buf, "_interp_%s", f.name().c_str());
+          UInt c_id = mesh.DefineContext(buf);
+          Context ctxt;
+          ctxt.set(c_id);
+          Attr fatt(MeshObj::NODE | MeshObj::INTERP, ctxt);
+          f.SetInterp(Registerfield(buf, fatt, f.FType(), f.dim()));
+        } else {
+          f.SetInterp(f.GetNodalfield());
+        }
+      }
+      
+    } // for fi
    }
+
+
+
 
   // Step 1: Imprint the objects for low level fields
   {
@@ -362,7 +396,7 @@ void FieldReg::Commit(MeshDB &mesh) {
         ki = kn;
       } // for k
 
-    }
+    } // for f
    }
 
   // Linearize fields.  Use the ordering implied by MEField, since this is the order
@@ -376,6 +410,22 @@ void FieldReg::Commit(MeshDB &mesh) {
  {
    for (UInt i = 0; i < nfields; i++) 
      fields[i]->set_ordinal(i);
+ }
+ 
+ // Loop through _fields; there may be some that are not associated with MEFields,
+ // so we need to count and number these.
+ {
+  fMapType::iterator fi = _fmap.begin(), fe = _fmap.end();
+  
+  for (; fi != fe; ++fi) {
+    _field *_f = fi->second;
+    
+    if (_f->GetOrdinal() < 0) {
+      _f->set_ordinal(nfields++);
+      fields.push_back(_f);
+    }
+  }
+  
  }
 
   is_committed = true;

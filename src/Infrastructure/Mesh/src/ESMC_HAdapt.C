@@ -1,4 +1,4 @@
-// $Id: ESMC_HAdapt.C,v 1.4 2007/08/31 19:15:05 dneckels Exp $
+// $Id: ESMC_HAdapt.C,v 1.5 2007/09/10 17:38:29 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -32,11 +32,11 @@ mesh(_mesh)
 
   {
     node_marker = mesh.RegisterField("_node_hadapt_marker", MEFamilyStd::instance(),
-                                     MeshObj::ELEMENT, ctxt, 1, false, _fieldType<char>::instance());
+                                     MeshObj::ELEMENT, ctxt, 1, false, false, _fieldType<char>::instance());
   }
   {
     elem_marker = mesh.RegisterField("_hadapt_marker", MEFamilyDG0::instance(),
-                                     MeshObj::ELEMENT, ctxt, 1, false, _fieldType<char>::instance());
+                                     MeshObj::ELEMENT, ctxt, 1, false, false, _fieldType<char>::instance());
   }
 }
 

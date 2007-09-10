@@ -1,4 +1,4 @@
-// $Id: ESMC_Rebalance.C,v 1.5 2007/08/23 21:22:15 dneckels Exp $
+// $Id: ESMC_Rebalance.C,v 1.6 2007/09/10 17:38:29 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -16,11 +16,8 @@
 #include <ESMC_MeshObjConn.h>
 #include <ESMC_MeshField.h>
 
-#define ESMC_ZOLTAN
 
-#ifdef ESMC_ZOLTAN
-#include <Zoltan/zoltan.h>
-#endif
+#include <Mesh/src/Zoltan/zoltan.h>
 
 namespace ESMCI {
 namespace MESH {
@@ -113,6 +110,8 @@ bool Rebalance(Mesh &mesh) {
   delete_local_obj(mesh, mig, MeshObj::EDGE);
   delete_local_obj(mesh, mig, MeshObj::NODE);
 
+  mesh.remove_unused_kernels();
+
 
   // Deal with the interior edge problem: We may need to delete
   // the interior edges on some processors.
@@ -122,6 +121,7 @@ bool Rebalance(Mesh &mesh) {
   mesh.build_sym_comm_rel(MeshObj::NODE);
   mesh.build_sym_comm_rel(MeshObj::EDGE);
   mesh.build_sym_comm_rel(MeshObj::FACE);
+
 
   return true;
 }
@@ -370,7 +370,6 @@ static int num_children(MeshObj &obj) {
 
 
 // Zoltan Mesh Functions
-#ifdef ESMC_ZOLTAN
 
 static int GetNumAssignedObj(void *user, int *err) {
   zoltan_user_data &udata = *(static_cast<zoltan_user_data*>(user));
@@ -424,9 +423,6 @@ static void GetObject(void *user, int numGlobalIds, int numLids, int numObjs,
     for (UInt d = 0; d < (UInt) numDim; d++) pts[i*numDim + d] = c[d];
   }
 }
-#endif
-
-
 
 
 /*--------------------------------------------------------*/
@@ -434,7 +430,6 @@ static void GetObject(void *user, int numGlobalIds, int numLids, int numObjs,
 // sym specs.
 /*--------------------------------------------------------*/
 static bool form_rebalance_comm(Mesh &mesh, CommReg &migration) {
-#ifdef ESMC_ZOLTAN
 
   float ver;
   int rc = Zoltan_Initialize(0, NULL, &ver);
@@ -520,9 +515,6 @@ static bool form_rebalance_comm(Mesh &mesh, CommReg &migration) {
  // Zoltan_Destroy(&zz);
 
   return changes != 0;
-#else
-  return false;
-#endif
 }
 
 } // namespace

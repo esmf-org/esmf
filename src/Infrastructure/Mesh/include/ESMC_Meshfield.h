@@ -1,3 +1,19 @@
+// $Id: ESMC_Meshfield.h,v 1.2 2007/09/10 17:38:27 dneckels Exp $
+//
+// Earth System Modeling Framework
+// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+// Laboratory, University of Michigan, National Centers for Environmental 
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// NASA Goddard Space Flight Center.
+// Licensed under the University of Illinois-NCSA License.
+
+
+// (all lines below between the !BOP and !EOP markers will be included in
+//  the automated document processing.)
+//-------------------------------------------------------------------------
+// these lines prevent this file from being read more than once if it
+// ends up being included multiple times
 #ifndef ESMC_Meshfield_h
 #define ESMC_Meshfield_h
 
@@ -171,7 +187,7 @@ class _field {
 public:
 _field(const std::string &name, const Attr &attr, const _fieldTypeBase &_ftype, UInt dim); 
 const std::string &name() const { return fname;}
-UInt GetOrdinal() { return ordinal; }
+int GetOrdinal() { return ordinal; }
 const Attr &GetAttr() const { return my_attr;}
 UInt dim() const { return fdim; }
 
@@ -196,7 +212,7 @@ private:
 std::string fname;
 Attr my_attr;
 UInt fdim;
-UInt ordinal; // ordinal in field registry
+int ordinal; // ordinal in field registry
 UInt stride; // fdim*sizeof(T) --save to avoid recomputing
 const std::type_info &ti;
 };

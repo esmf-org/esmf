@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshPartition.C,v 1.2 2007/08/20 19:34:51 dneckels Exp $
+// $Id: ESMC_MeshPartition.C,v 1.3 2007/09/10 17:38:29 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -254,7 +254,7 @@ std::cout << "new_nodeid=" << new_nodes[node_index[node.get_data_index()]]->get_
                    MeshObj::ELEMENT, ctxt, piece.spatial_dim());
     // Save the node ownership
     MEField<> *pn = piece.RegisterField("_OWNER", MEFamilyStd::instance(),
-                   MeshObj::ELEMENT, ctxt, 1, true, _fieldType<int>::instance());
+                   MeshObj::ELEMENT, ctxt, 1, true, false, _fieldType<int>::instance());
 
     piece.Commit();
     MeshDB::const_iterator ni = piece.node_begin(), ne = piece.node_end();
@@ -411,7 +411,7 @@ void MeshConcat(Mesh &mesh, std::vector<Mesh*> &srcmesh) {
   
   // ONe last niftiness.  Add processor as an element var
   MEField<> *eown = mesh.RegisterField("_processor", MEFamilyDG0::instance(), MeshObj::ELEMENT,
-              ctxt, 1, true, _fieldType<int>::instance());
+              ctxt, 1, true, false, _fieldType<int>::instance());
 
   // Build storage
   mesh.Commit();

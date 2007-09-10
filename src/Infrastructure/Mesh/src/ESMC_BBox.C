@@ -1,4 +1,4 @@
-// $Id: ESMC_BBox.C,v 1.1 2007/08/07 17:47:59 dneckels Exp $
+// $Id: ESMC_BBox.C,v 1.2 2007/09/10 17:38:28 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -36,6 +36,20 @@ BBox::BBox(UInt _dim, const double _min[], const double _max[]) :
     max[i] = _max[i];
     if (min[i] > max[i]) isempty = true;
   }
+}
+
+BBox::BBox(const BBox &rhs) {
+  *this = rhs;
+}
+
+BBox &BBox::operator=(const BBox &rhs) {
+  if (this == &rhs) return *this;
+  std::copy(&rhs.max[0], &rhs.max[3], &max[0]);
+  std::copy(&rhs.min[0], &rhs.min[3], &min[0]);
+  dim = rhs.dim;
+  isempty = rhs.isempty;
+
+  return *this;
 }
 
 BBox::BBox(const MEField<> &coords, const MeshObj &obj, double normexp) :
@@ -116,6 +130,27 @@ BBox::BBox(const MEField<> &coords, const MeshDB &mesh) :
   }
 }
 
+BBox::BBox(_field &coords, const MeshDB &mesh) {
+  
+  dim = mesh.spatial_dim();
+
+  for (UInt i =0; i < dim; i++) {
+    min[i] = std::numeric_limits<double>::max();
+    max[i] = -std::numeric_limits<double>::max();
+  }
+
+  // Loop nodes
+  MeshDB::const_iterator ni = mesh.node_begin(), ne = mesh.node_end();
+  for (; ni != ne; ni++) {
+    const double *coord = coords.data(*ni);
+    for (UInt i = 0; i < dim; i++) {
+      if (coord[i] < min[i]) min[i] = coord[i];
+      if (coord[i] > max[i]) max[i] = coord[i];
+    }
+  }
+  
+}
+
 void BBox::checkEmpty() {
   isempty = false;
   for (UInt i = 0; i < dim; i++) {
@@ -143,36 +178,36 @@ bool BBoxIntersect(const BBox &b1, const BBox &b2, double tol) {
   return true;
 }
 
-BBox *BBoxIntersection(const BBox &b1, const BBox &b2) {
-  BBox *newbox = new BBox(b1.dimension());
+BBox BBoxIntersection(const BBox &b1, const BBox &b2) {
+  BBox newbox(b1.dimension());
 
   ThrowAssert(b1.dimension() == b2.dimension());
   for (UInt i = 0; i < b1.dimension(); i++) {
-    newbox->setMin(i, std::max(b1.getMin()[i], b2.getMin()[i]));
-    newbox->setMax(i, std::min(b1.getMax()[i], b2.getMax()[i]));
+    newbox.setMin(i, std::max(b1.getMin()[i], b2.getMin()[i]));
+    newbox.setMax(i, std::min(b1.getMax()[i], b2.getMax()[i]));
   }
 
-  newbox->checkEmpty();
+  newbox.checkEmpty();
 
   return newbox;
 }
 
-BBox *BBoxParUnion(const BBox &b1) {
+BBox BBoxParUnion(const BBox &b1) {
   double val, valres;
-  BBox *newbox = new BBox(b1.dimension());
+  BBox newbox(b1.dimension());
 
 
   for (UInt i = 0; i < b1.dimension(); i++) {
     // Find max 
     val = b1.getMax()[i];
     MPI_Allreduce(&val, &valres, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
-    newbox->setMax(i, valres);
+    newbox.setMax(i, valres);
     val = b1.getMin()[i];
     MPI_Allreduce(&val, &valres, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
-    newbox->setMin(i, valres);
+    newbox.setMin(i, valres);
   }
 
-  newbox->checkEmpty();
+  newbox.checkEmpty();
 
   return newbox;
 }

@@ -1,5 +1,5 @@
 //==============================================================================
-// $Id: ESMC_RefineEx.C,v 1.6 2007/08/24 19:15:44 dneckels Exp $
+// $Id: ESMC_RefineEx.C,v 1.7 2007/09/10 17:38:26 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -19,7 +19,6 @@
 #include <ESMC_ShapeFunc.h>
 #include <ESMC_Mapping.h>
 #include <ESMC_Search.h>
-#include <ESMC_Transfer.h>
 
 #include <ESMC_MeshUtils.h>
 #include <ESMC_MasterElement.h>
@@ -134,7 +133,7 @@ void get_avgerage_nodecoord(double &diameter, double ave[], Mesh &mesh, MeshObj 
 //   h: size down to which we refine.
 //   load_bal: load balance interval (number of steps between load balancing).
 /*-------------------------------------------------------------------------------------*/
-void test_adapt_wave_exec(HAdapt &hadapt, Mesh &mesh) {
+void adapt_wave(HAdapt &hadapt, Mesh &mesh) {
 
   int nout = 0;
   UInt sdim = mesh.spatial_dim();
@@ -164,9 +163,9 @@ void test_adapt_wave_exec(HAdapt &hadapt, Mesh &mesh) {
     if (Par::Rank() == 0) std::cout << "**** Running step " << nstep << std::endl;
 
     // Loop and mark elements.
-    Mesh::iterator b_obj = mesh.elem_begin(), e_obj = mesh.elem_end(), i_obj;
-    for (i_obj = b_obj; i_obj != e_obj; ++i_obj) {
-      MeshObj &elem = (*i_obj);
+    Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj &elem = (*ei);
 
       // First, is the element within epsilon of the circle?
       double ave[3];
@@ -269,20 +268,17 @@ int main(int argc, char *argv[]) {
 
   // Uniformly refine.  Destroy parents so that the refined mesh
   // is the genesis mesh.
-  for (UInt i = 0; i < 3; i++) {
+  for (UInt i = 0; i < 4; i++) {
     hadapt.RefineUniformly(false);
+    Rebalance(srcmesh);
   }
-
-  // Now rebalance across processors
-  Rebalance(srcmesh);
-
 
   std::cout << "********* Mesh Print: *********" << std::endl;
   srcmesh.Print(Par::Out());
 
 
   // Run the adaptivity test.
-  test_adapt_wave_exec(hadapt, srcmesh);
+  adapt_wave(hadapt, srcmesh);
 
   } 
    catch (std::exception &x) {

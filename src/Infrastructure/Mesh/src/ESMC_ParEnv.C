@@ -1,4 +1,4 @@
-// $Id: ESMC_ParEnv.C,v 1.1 2007/08/07 17:48:01 dneckels Exp $
+// $Id: ESMC_ParEnv.C,v 1.2 2007/09/10 17:38:29 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -57,6 +57,7 @@ void Par::Init(int &argc, char **&argv, const std::string &logfile, bool _serial
 void Par::Abort() {
   Par::Out() << Trace::StackTrace() << std::endl;
   std::cerr << Trace::StackTrace() << std::endl;
+  std::cerr << "Process:" << Par::Rank() << " aborting!!" << std::endl;
   ParLog::flush();
   if (!serial)
     MPI_Abort(MPI_COMM_WORLD, 911);

@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshExodus.C,v 1.2 2007/08/07 20:46:00 dneckels Exp $
+// $Id: ESMC_MeshExodus.C,v 1.3 2007/09/10 17:38:29 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -36,9 +36,38 @@ extern "C" {
 
 namespace ESMCI {
 namespace MESH {
+
+
+static UInt share_parametric_dim(UInt pdim) {
+
+  UInt nproc = Par::Size();
+
+  if (nproc == 1) return pdim;
+
+  int rank = pdim == 0 ? nproc : Par::Rank();
+  int lowest_rank = nproc;
+
+  // Find the minimum processor number that has a valid pdim
+
+  MPI_Allreduce(&rank, &lowest_rank, 1, MPI_INT, MPI_MIN, Par::Comm());
+
+  // Someone needs to have a valid pdim.
+  ThrowRequire(lowest_rank < nproc);
+
+  // Let that rank scatter the pdim
+  int i_pdim = pdim;
+  int i_pdim_r = 0;
+
+  MPI_Scatter(&i_pdim, 1, MPI_INT, &i_pdim_r, 1, MPI_INT, lowest_rank, Par::Comm());
+
+  return i_pdim_r;
+
+}
  
 void LoadExMesh(Mesh &mesh, const std::string &filename, int nstep) {
+  Trace __trace("LoadExMesh(Mesh &mesh, const std::string &filename, int nstep)");
 #ifdef ESMC_EXODUS
+
   char   title[250];
   int    ws1, ws2, exoid, exoerr;
   int    i, j, k, m, nblocks, nns, nss, nelems,
@@ -187,7 +216,16 @@ std::cout << std::endl;
 
   delete [] gg;
 
-  mesh.set_parametric_dimension(GetMeshObjTopo(*mesh.elem_begin())->parametric_dim);
+  UInt pdim_tmp = 0;
+  if (nelems > 0) {
+    pdim_tmp = GetMeshObjTopo(*mesh.elem_begin())->parametric_dim;
+  }
+
+  // In case someone doesn't have an element, share this
+  pdim_tmp = share_parametric_dim(pdim_tmp);
+
+  mesh.set_parametric_dimension(pdim_tmp);
+
   // Now popoulate existing sidesets
   int *elist, *esides;
   for (int l = 0; l < nss; l++) {
@@ -366,6 +404,8 @@ std::cout << std::endl;
 // Load data into an array from the mesh, switching on the correct typeid
 template<typename iter, typename FIELD>
 void get_data(iter ni, iter ne, const FIELD &llf, double data[], UInt d) {
+  Trace __trace("get_data(iter ni, iter ne, const FIELD &llf, double data[], UInt d)");
+
   UInt i = 0;
   if (llf.tinfo() == typeid(double)) {
     for (; ni != ne; ++ni) {
@@ -413,6 +453,7 @@ void get_data(iter ni, iter ne, const FIELD &llf, double data[], UInt d) {
 }
 
 void WriteExMesh(const Mesh &mesh, const std::string &filename, int nstep, double tstep) {
+  Trace __trace("WriteExMesh(const Mesh &mesh, const std::string &filename, int nstep, double tstep)");
 #ifdef ESMC_EXODUS
 
   int wsize = sizeof(double);
@@ -508,7 +549,7 @@ void WriteExMesh(const Mesh &mesh, const std::string &filename, int nstep, doubl
       if (nodeid == 0) continue;
   
       int nnd = mesh.num_nodes(nodeid);
-std::cout << "Saving nodeset:" << nodeid << ", with " << nnd << " members" << std::endl;
+//std::cout << "Saving nodeset:" << nodeid << ", with " << nnd << " members" << std::endl;
       int errval = ex_put_node_set_param(ex_id, nodeid, nnd, 0);
       ex_err("david", "err:", errval);
       // Build the connectivity list
@@ -586,7 +627,7 @@ std::cout << "Saving nodeset:" << nodeid << ", with " << nnd << " members" << st
 
 
   if (nstep != 0) ex_put_time(ex_id, nstep, &tstep);
-std::cout << "nstep=" << nstep << ", tstep=" << tstep << std::endl;
+//std::cout << "nstep=" << nstep << ", tstep=" << tstep << std::endl;
   // Now look into nodal variables.  If a variable is not element, then
   // project it onto the std lagrange variable for saving to file.( TODO)
   // For now, just save all nodal variables.
@@ -606,12 +647,12 @@ std::cout << "nstep=" << nstep << ", tstep=" << tstep << std::endl;
           std::sprintf(buf, "%s_%d", mf.name().c_str(), d);
           var_names.push_back(buf);
           var_names_ptr.push_back(const_cast<char*>(var_names[cur_var++].c_str()));
-          std::cout << "will output variable:" << buf << std::endl;
+          //std::cout << "will output variable:" << buf << std::endl;
         }
       } else {
           var_names.push_back(mf.name());
           var_names_ptr.push_back(const_cast<char*>(var_names[cur_var++].c_str()));
-          std::cout << "will output variable:" << mf.name() << std::endl;
+          //std::cout << "will output variable:" << mf.name() << std::endl;
       }
     }
   }
@@ -663,12 +704,12 @@ std::cout << "nstep=" << nstep << ", tstep=" << tstep << std::endl;
           std::sprintf(buf, "%s_%d", mf.name().c_str(), d);
           var_names.push_back(buf);
           var_names_ptr.push_back(const_cast<char*>(var_names[cur_var++].c_str()));
-          std::cout << "will output element variable:" << buf << std::endl;
+          //std::cout << "will output element variable:" << buf << std::endl;
         }
       } else {
           var_names.push_back(mf.name());
           var_names_ptr.push_back(const_cast<char*>(var_names[cur_var++].c_str()));
-          std::cout << "will output element variable:" << mf.name() << std::endl;
+          //std::cout << "will output element variable:" << mf.name() << std::endl;
       }
     }
   }
@@ -740,7 +781,9 @@ std::cout << "nstep=" << nstep << ", tstep=" << tstep << std::endl;
 }
 
 void WriteExMeshTimeStep(int nstep, double tstep, const Mesh &mesh, const std::string &filename) {
+  Trace __trace("WriteExMeshTimeStep(int nstep, double tstep, const Mesh &mesh, const std::string &filename)");
 #ifdef ESMC_EXODUS
+
   int    ws1, ws2, ex_id;
   float  version;
 
@@ -771,12 +814,12 @@ void WriteExMeshTimeStep(int nstep, double tstep, const Mesh &mesh, const std::s
           std::sprintf(buf, "%s_%d", mf.name().c_str(), d);
           var_names.push_back(buf);
           var_names_ptr.push_back(const_cast<char*>(var_names[cur_var++].c_str()));
-          std::cout << "will output variable:" << buf << std::endl;
+          //std::cout << "will output variable:" << buf << std::endl;
         }
       } else {
           var_names.push_back(mf.name());
           var_names_ptr.push_back(const_cast<char*>(var_names[cur_var++].c_str()));
-          std::cout << "will output variable:" << mf.name() << std::endl;
+          //std::cout << "will output variable:" << mf.name() << std::endl;
       }
     }
   }
@@ -826,12 +869,12 @@ void WriteExMeshTimeStep(int nstep, double tstep, const Mesh &mesh, const std::s
           std::sprintf(buf, "%s_%d", mf.name().c_str(), d);
           var_names.push_back(buf);
           var_names_ptr.push_back(const_cast<char*>(var_names[cur_var++].c_str()));
-          std::cout << "will output element variable:" << buf << std::endl;
+          //std::cout << "will output element variable:" << buf << std::endl;
         }
       } else {
           var_names.push_back(mf.name());
           var_names_ptr.push_back(const_cast<char*>(var_names[cur_var++].c_str()));
-          std::cout << "will output element variable:" << mf.name() << std::endl;
+          //std::cout << "will output element variable:" << mf.name() << std::endl;
       }
     }
   }

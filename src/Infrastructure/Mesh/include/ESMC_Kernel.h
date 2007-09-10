@@ -1,4 +1,4 @@
-// $Id: ESMC_Kernel.h,v 1.1 2007/08/07 17:47:55 dneckels Exp $
+// $Id: ESMC_Kernel.h,v 1.2 2007/09/10 17:38:27 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -52,7 +52,7 @@ public:
 
   // Amongst (possibley) other things, set aside field storage.
   // Send the list of all fields (whether they live here or not)
-  void Commit(UInt nFields, MEFieldBase **Fields);
+  void Commit(UInt nFields, MEFieldBase **Fields, UInt nfields, _field **fields);
 
   UInt type() const { return my_attr.get_type();}
   bool empty() const { return count == 0; }

@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshDB.C,v 1.2 2007/08/20 19:34:51 dneckels Exp $
+// $Id: ESMC_MeshDB.C,v 1.3 2007/09/10 17:38:29 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -151,9 +151,11 @@ public:
 };
 
 void MeshDB::push_back_sorted(MeshObj &obj, const Attr &attr, const MeshObjTopo *topo) {
+ 
   //int ikey = obj.get_int(key);
   KernelList::iterator lb = std::lower_bound(setRoster.begin(), setRoster.end(), attr, md_attr_comp());
   Kernel *md;
+ 
   if (lb == setRoster.end() ||
       attr != lb->GetAttr()) {
     md = new Kernel(*this, attr);
@@ -165,7 +167,7 @@ void MeshDB::push_back_sorted(MeshObj &obj, const Attr &attr, const MeshObjTopo 
     setRoster.insert(lb, *md);
 
     // Commit the new kernel, if mesh is committed
-    if (committed) md->Commit(Fields.size(), &Fields[0]);
+    if (committed) md->Commit(Fields.size(), &Fields[0], fields.size(), &fields[0]);
 
 //std::cout << "New Kernel, attr=" << attr << std::endl;
   } else md = &(*lb);
@@ -864,7 +866,8 @@ void MeshDB::linearize_data_index() {
   }
 }
 
-void MeshDB::Commit(UInt _nFields, MEFieldBase **_Fields) {
+void MeshDB::Commit(UInt _nFields, MEFieldBase **_Fields, UInt _nfields, _field **_fields) {
+  Trace __trace("MeshDB::Commit(UInt _nFields, MEFieldBase **_Fields)");
 
   if (committed)
     Throw() << "MeshDB already committed!!";
@@ -883,13 +886,15 @@ void MeshDB::Commit(UInt _nFields, MEFieldBase **_Fields) {
   KernelList::iterator ki = set_begin(), ke = set_end();
 
   for (; ki != ke; ++ki) {
-    ki->Commit(_nFields, _Fields);
+    ki->Commit(_nFields, _Fields, _nfields, _fields);
   }
 
   remove_unused_kernels();
 
   // Save fields in case we need to commit new kernels
   std::copy(_Fields, _Fields + _nFields, std::back_inserter(Fields));
+  
+  std::copy(_fields, _fields + _nfields, std::back_inserter(fields));
 
   committed = true;
 }

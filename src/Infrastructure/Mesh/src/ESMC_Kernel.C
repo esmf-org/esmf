@@ -1,4 +1,4 @@
-// $Id: ESMC_Kernel.C,v 1.2 2007/08/20 19:34:51 dneckels Exp $
+// $Id: ESMC_Kernel.C,v 1.3 2007/09/10 17:38:29 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,9 +42,6 @@ std::ostream &operator<<(std::ostream &os, const MeshObj &obj) {
   return os;
 }
 
-
-
-
 Kernel::Kernel(MeshDB &_mesh, const Attr &rhs) :
     ListNode<Kernel>(),
     objects(),
@@ -68,7 +65,8 @@ void Kernel::AddME(UInt f_ord, MasterElementBase *me) {
   MEFieldme[f_ord] = me;
 }
 
-void Kernel::Commit(UInt nFields, MEFieldBase **fds) {
+void Kernel::Commit(UInt nFields, MEFieldBase **fds, UInt nfields, _field **_fields) {
+  Trace __trace("Kernel::Commit(UInt nFields, MEFieldBase **fds)");
 
   if (is_committed)
     Throw() << "Kernel already committed!!";
@@ -83,7 +81,6 @@ void Kernel::Commit(UInt nFields, MEFieldBase **fds) {
   for (UInt i = 0; i < nFields; i++) {
     MEField<> *meF = static_cast<MEField<>*>(fds[i]);
     ThrowRequire(meF);
-    meF->Getfields(fields); // will be unique fields
 
     // Also, store of the Master Elements
     if (this->type() == meF->GetType() && this->GetContext().any(meF->GetContext())) {
@@ -93,8 +90,9 @@ void Kernel::Commit(UInt nFields, MEFieldBase **fds) {
           this->AddME(meF->GetOrdinal(), &me);
     } // if field matches
   }
+  
+  std::copy(_fields, _fields + nfields, std::back_inserter(fields));
     
-
   for (UInt i = 0; i < nstore; i++) {
     _fieldStore *s = new _fieldStore();
     stores.push_back(*s);

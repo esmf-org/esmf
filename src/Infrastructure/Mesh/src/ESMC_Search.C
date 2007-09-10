@@ -1,4 +1,4 @@
-// $Id: ESMC_Search.C,v 1.1 2007/08/07 17:48:02 dneckels Exp $
+// $Id: ESMC_Search.C,v 1.2 2007/09/10 17:38:29 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -107,59 +107,76 @@ public:
 };
 
 // The main routine
-void Search(const Mesh &src, const Mesh &dest, SearchResult &result, double stol,
+void Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResult &result, double stol,
      std::vector<const MeshObj*> *to_investigate) {
+  Trace __trace("Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResult &result, double stol, std::vector<const MeshObj*> *to_investigate");
+
 
   MEField<> &coord_field = *src.GetCoordField();
-  MEField<> &dstcoord_field = *dest.GetCoordField();
+  
+  // Destination coordinate is only a _field, not an MEField, since there
+  // are no master elements.
+  _field *dcptr = dest.Getfield("coordinates_1");
+  ThrowRequire(dcptr);
+  _field &dstcoord_field = *dcptr;
+   
+  //MEField<> &dstcoord_field = *dest.GetCoordField();
 
   if (src.spatial_dim() != dest.spatial_dim()) {
-    throw("Meshes must have same spatial dim for search");
+    Throw() << "Meshes must have same spatial dim for search";
   }
 
-  // Get a bounding box for the dest mesh
+  // TODO: only grab objects in the current interpolation realm.
+
+  // Get a bounding box for the dest mesh.
   BBox dstBBox(dstcoord_field, dest);
 
-  //std::cout << "Dest bbox:" << dstBBox;
-
- // result.clear();
-  //result.reserve((UInt)(src.num_elems())); // Assume some nodes will point to 2 elements
-
+  // Load the destination objects into a list
   std::vector<const MeshObj*> dest_nlist;
   {
+
     if (to_investigate == NULL) {
-      MeshDB::const_iterator ni = dest.node_begin(), ne = dest.node_end();
-      for (; ni != ne; ++ni) dest_nlist.push_back(&*ni);
+      MeshDB::const_iterator ni = dest.obj_begin(), ne = dest.obj_end();
+      for (; ni != ne; ++ni) {
+        if (dst_obj_type & ni->get_type())
+          dest_nlist.push_back(&*ni);
+      }
     } else {
       std::vector<const MeshObj*>::const_iterator ni = to_investigate->begin(),
                        ne = to_investigate->end();
       for (; ni != ne; ++ni) dest_nlist.push_back(*ni);
       if (dest_nlist.size() == 0) return;
     }
-    //std::copy(dest.node_begin(), dest.node_end(), back_inserter(dest_nlist));
+
   }
 
   UInt sdim = dest.spatial_dim();
+  
   // Build the search table
   std::vector<std::vector<Search_index*> > sidx(sdim);
+
   // Set aside proper space
   for (UInt i = 0; i < sdim; i++) sidx[i].reserve(dest.num_nodes());
 
   // Load up the nodes in the search table
-  //MeshDB::const_iterator ni = dest.node_begin(), ne = dest.node_end();
   std::vector<const MeshObj*>::const_iterator ni = dest_nlist.begin(),
             ne = dest_nlist.end();
   UInt node_num = 0;
+  
   for (; ni != ne; ++ni) {
+  
     // Get the coords
     const MeshObj &node = **ni;
+    
     double *node_coord = dstcoord_field.data(node);
-    //const std::vector<double> &node_coord = node.get_double_data("coord");
+  
     Search_index *si = new Search_index(node_num, &node_coord[0]);
+    
     for (UInt i = 0; i < sdim; i++) {  
       sidx[i].push_back(si);
     }
     node_num++;
+    
   } // for ni
 
   // Now sort each list
@@ -172,16 +189,17 @@ void Search(const Mesh &src, const Mesh &dest, SearchResult &result, double stol
   KernelList::const_iterator ki = src.set_begin(), ke = src.set_end();
   for (; ki != ke; ++ki) {
     const Kernel &ker = *ki;
+    
     if (ker.type() != MeshObj::ELEMENT || !ker.is_active()) continue;
+    
     Kernel::obj_const_iterator ei = ker.obj_begin(), ee = ker.obj_end();
+    
     MasterElement<> &cme = *GetME(coord_field, ker)(METraits<>());
+    
     std::vector<double> node_coord(cme.num_functions()*src.spatial_dim());
+    
     for (; ei != ee; ++ei) {
       const MeshObj &elem = *ei;
-  //std::cout << "Processing element:" << elem.get_id() << std::endl;
-  
-     
-  
    
      BBox bounding_box(coord_field, elem, 0.5);
   
@@ -192,7 +210,6 @@ void Search(const Mesh &src, const Mesh &dest, SearchResult &result, double stol
        //std::cout << bounding_box;
        continue;
      }
-  
   
      GatherElemData(cme, coord_field, elem, &node_coord[0]);
   
@@ -325,7 +342,7 @@ void Search(const Mesh &src, const Mesh &dest, SearchResult &result, double stol
        std::cout << "Bailing, since stol=" << stol << " which is above limit" << std::endl;
      } else {
        std::cout << "Going again to resolve " << iagain.size() << " items, with stol=" << stol*1e-2 << std::endl;
-       Search(src, dest, result, stol*1e+2, &iagain);
+       Search(src, dest, dst_obj_type, result, stol*1e+2, &iagain);
      }
   }
     

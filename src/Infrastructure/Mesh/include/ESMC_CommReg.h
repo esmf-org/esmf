@@ -1,4 +1,4 @@
-// $Id: ESMC_CommReg.h,v 1.1 2007/08/07 17:47:54 dneckels Exp $
+// $Id: ESMC_CommReg.h,v 1.2 2007/09/10 17:38:26 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ void Transpose();
 
 // Send the field(s) down the pipeline.  Sends the sub _fields
 // using the necessary spec.
-void SendFields(UInt nfields, MEField<> **sfields, MEField<> **rfields);
+void SendFields(UInt nfields, MEField<> *const *sfields, MEField<> *const *rfields);
 
 void HaloFields(UInt nfields, MEField<> **sfields);
 

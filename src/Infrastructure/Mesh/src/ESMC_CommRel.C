@@ -1,4 +1,4 @@
-// $Id: ESMC_CommRel.C,v 1.1 2007/08/07 17:48:00 dneckels Exp $
+// $Id: ESMC_CommRel.C,v 1.2 2007/09/10 17:38:28 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -219,19 +219,6 @@ MPI_Barrier(MPI_COMM_WORLD);
    if (!msg.empty()) throw("CommRel, didn't use up buffer!");
 
    // for now, just report result
-/*
-for (UInt y = 0;y < msg.commSize(); y++) {
-if (msg.commRank() == y) {
-std::cout << "P:" << msg.commRank() << " bootStrap:";
-bootStrap.Print();
-std::cout << std::endl;
-std::cout << "P:" << msg.commRank() << " new additions:";
-std::copy(new_domain_objs.begin(), new_domain_objs.end(), std::ostream_iterator<CommNode>(std::cout, ", "));
-std::cout << std::endl;
-}
-MPI_Barrier(MPI_COMM_WORLD);
-*/
-
   // Now to create this guy we add all items, range, domain, new_domain
   domain.clear(); range.clear();
   domain_processors.clear(); range_processors.clear();
@@ -250,17 +237,6 @@ MPI_Barrier(MPI_COMM_WORLD);
   // No range to build
 
   // Done, thanks bootStrap
-/*
-for (UInt y = 0;y < msg.commSize(); y++) {
-if (msg.commRank() == y) {
-std::cout << "P:" << msg.commRank() << " This:";
-Print();
-std::cout << std::endl;
-}
-MPI_Barrier(MPI_COMM_WORLD);
-}
-*/
-
 
 }
 
@@ -681,7 +657,7 @@ static void field_unpack(SparseMsg::buffer &b, _field &f, const MeshObj &obj) {
 
 }
 
-void CommRel::send_fields(UInt nfields, _field **sfields, _field **rfields) {
+void CommRel::send_fields(UInt nfields, _field *const *sfields, _field *const *rfields) {
   SparseMsg msg;
   UInt ndproc = domain_processors.size();
   UInt csize = msg.commSize();
@@ -1012,7 +988,7 @@ CommRel &CommRel::dependants(CommRel &dcom, UInt obj_type) {
     
     std::vector<MeshObj*> dep_objs;
     MeshObjConn::common_objs(&cn.obj, &cn.obj + 1, MeshObj::USES, obj_type, dep_objs);
-Par::Out()<< "found " << dep_objs.size() << " of type" << MeshObjTypeString(obj_type) << std::endl;
+//Par::Out()<< "found " << dep_objs.size() << " of type" << MeshObjTypeString(obj_type) << std::endl;
     for (UInt n = 0; n < dep_objs.size(); n++) {
       comm.push_back(CommNode(dep_objs[n], cn.processor));
     }

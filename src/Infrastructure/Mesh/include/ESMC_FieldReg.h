@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldReg.h,v 1.2 2007/08/07 20:45:56 dneckels Exp $
+// $Id: ESMC_FieldReg.h,v 1.3 2007/09/10 17:38:26 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -48,12 +48,15 @@ MEField<> *RegisterField(const std::string &name,
        UInt obj_type, // ELEMENT, FACE ??
        const Context &ctxt, // set 
        UInt dim,
-       bool out = false,
+       bool out = false,        // whether to output
+       bool interp = false,     // whether to create a field for interpolation
        const _fieldTypeBase &ftype = _fieldType<double>::instance()
        );
 
 
 MEField<> *GetField(const std::string &fname) const;
+
+_field *Getfield(const std::string &fname) const;
 
 // Create a list of fields with the same names, but from this mesh
 void MatchFields(UInt nfields, MEField<> **fds, std::vector<MEField<>*> &res) const;
@@ -73,7 +76,7 @@ void ReleaseDBFields();
 // Commit the registry
 void Commit(MeshDB &);
 
-UInt Numfields() const { return Fields.size();}
+UInt NumFields() const { return Fields.size();}
 MEFieldBase **ListOfFields() { return &Fields[0]; }
 
 typedef std::map<std::string, MEField<>*> FMapType;
@@ -86,9 +89,10 @@ MEField_const_iterator Field_end() const { return fmap.end();}
 MEField_iterator Field_begin() { return fmap.begin();}
 MEField_iterator Field_end() { return fmap.end();}
 
-UInt numfields() const { return fields.size(); }
+UInt Numfields() const { return fields.size(); }
 _field **ListOffields() { return &fields[0]; }
 
+_field *Registerfield(const std::string &name, const Attr &attr, const _fieldTypeBase &_ftype, UInt dim);
 
 protected:
 // Register a bootstrap type field;
@@ -96,7 +100,7 @@ friend void LoadExMesh(Mesh &mesh, const std::string &filename, int nstep);
 IOField<NodalField> *RegisterNodalField(const MeshDB &mesh, const std::string &name, UInt dim);
 IOField<ElementField> *RegisterElementField(const MeshDB &mesh, const std::string &name, UInt dim);
 private:
-_field *Registerfield(const std::string &name, const Attr &attr, const _fieldTypeBase &_ftype, UInt dim);
+
 bool is_committed;
 FMapType fmap;
 typedef std::map<std::string, _field*> fMapType;

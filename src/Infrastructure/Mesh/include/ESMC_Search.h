@@ -1,4 +1,4 @@
-// $Id: ESMC_Search.h,v 1.1 2007/08/07 17:47:59 dneckels Exp $
+// $Id: ESMC_Search.h,v 1.2 2007/09/10 17:38:27 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@ struct Search_result {
 typedef std::vector<Search_result*> SearchResult;
 
 
-void Search(const Mesh &src, const Mesh &dest, SearchResult &result,
+void Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResult &result,
             double stol = 1e-8, std::vector<const MeshObj*> *to_investigate = NULL);
 
 void PrintSearchResult(const SearchResult &result);

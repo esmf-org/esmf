@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshObjConn.C,v 1.3 2007/08/09 17:33:11 dneckels Exp $
+// $Id: ESMC_MeshObjConn.C,v 1.4 2007/09/10 17:38:29 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -337,11 +337,15 @@ bool get_obj_nodes(const MeshObj &obj, std::vector<MeshObj*> &nodes, bool must_f
   return true;
 }
 
-void get_shared_procs(const MeshObj &obj, const CommRel &node_sym_spec, std::vector<UInt> &procs)
+void get_shared_procs(const MeshObj &obj, const CommRel &node_sym_spec, std::vector<UInt> &procs, bool obj_in_comm)
 {
+  Trace __trace("get_shared_procs(const MeshObj &obj, const CommRel &node_sym_spec, std::vector<UInt> &procs)");
+
   procs.clear();
 
   std::vector<MeshObj*> nodes;
+
+  if (!obj_in_comm) {
 
   // First try to get support for the object itself
   if (!get_obj_nodes(obj, nodes, false)) {
@@ -357,6 +361,8 @@ void get_shared_procs(const MeshObj &obj, const CommRel &node_sym_spec, std::vec
     // Get node support of this parent object
     get_obj_nodes(*lb->obj, nodes);
   }
+
+  } else nodes.push_back(const_cast<MeshObj*>(&obj));
 
   if (nodes.size() == 0) return;
 

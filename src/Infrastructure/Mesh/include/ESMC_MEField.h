@@ -1,4 +1,4 @@
-// $Id: ESMC_MEField.h,v 1.1 2007/08/07 17:47:55 dneckels Exp $
+// $Id: ESMC_MEField.h,v 1.2 2007/09/10 17:38:27 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@ class MEFamily;
 class MEFieldBase {
 protected:
 MEFieldBase(const std::string &name, const MEFamily &mef, UInt obj_type, const Context &ctxt,
-             UInt dim, bool out, const _fieldTypeBase &_ftype);
+             UInt dim, bool out, bool interp, const _fieldTypeBase &_ftype);
 ~MEFieldBase();
 public:
 
@@ -44,8 +44,11 @@ const std::string &name() const { return fname;}
 // Vector dimension of field.
 UInt dim() const { return fdim;}
 
+UInt ObjType() const { return obj_type; }
+
 bool is_nodal() const { return mef.is_nodal(); }
 bool is_elemental() const { return mef.is_elemental(); }
+bool has_interp() const { return interp; }
 
 UInt GetOrdinal() const { return ordinal; }
 void SetOutput(bool val) { output = val;}
@@ -61,6 +64,7 @@ UInt obj_type;
 const Context my_ctxt;
 UInt fdim;
 bool output;
+bool interp;
 const _fieldTypeBase &ftype;
 UInt ordinal;
 };
@@ -72,10 +76,14 @@ public:
 typedef _FIELD field_type;
 friend class FieldReg;
 MEField(const std::string &name, const MEFamily &mef, UInt obj_type, const Context &ctxt,
-             UInt dim, bool out, const _fieldTypeBase &_ftype);
+             UInt dim, bool out, bool interp, const _fieldTypeBase &_ftype);
 ~MEField();
 
 void Addfield(_FIELD *f, UInt nval);
+
+void SetInterp(_FIELD *f) { ThrowRequire(!interpfield); interpfield = f;}
+
+_FIELD *GetInterp() { return interpfield; }
 
 // Return number of low level fields
 UInt Numfields() const;
@@ -112,6 +120,7 @@ private:
 std::vector<UInt> fidx_table;
 std::vector<_FIELD*> fields;
 _FIELD *primaryfield; // if nodal or elemental
+_FIELD *interpfield;
 };
 
 } // namespace

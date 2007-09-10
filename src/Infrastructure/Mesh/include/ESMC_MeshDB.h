@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshDB.h,v 1.2 2007/08/09 17:33:09 dneckels Exp $
+// $Id: ESMC_MeshDB.h,v 1.3 2007/09/10 17:38:27 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -285,7 +285,7 @@ MeshDB::iterator node_end_all() {
   return obj_end_all(MeshObj::NODE); }
 
 // Sets up numbering tables for data indexing
-void Commit(UInt nFields, MEFieldBase **Fields);
+void Commit(UInt nFields, MEFieldBase **Fields, UInt nfields, _field **fields);
 
 // Set linear data index 
 void linearize_data_index();
@@ -460,6 +460,7 @@ std::string fname;
 bool committed;
 bool use_sides; // includes edges
 std::vector<MEFieldBase*> Fields;
+std::vector<_field*> fields;
 };
 
 

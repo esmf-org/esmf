@@ -1,4 +1,4 @@
-// $Id: ESMC_Meshfield.C,v 1.1 2007/08/07 17:48:01 dneckels Exp $
+// $Id: ESMC_Meshfield.C,v 1.2 2007/09/10 17:38:29 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ _field::_field(const std::string &name, const Attr &attr, const _fieldTypeBase &
 fname(name),
 my_attr(attr),
 fdim(dim),
-ordinal(0),
+ordinal(-1),
 stride(0),
 ti(_ftype.type())
 {

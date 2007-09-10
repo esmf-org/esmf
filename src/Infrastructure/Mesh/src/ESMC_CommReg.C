@@ -1,4 +1,4 @@
-// $Id: ESMC_CommReg.C,v 1.1 2007/08/07 17:48:00 dneckels Exp $
+// $Id: ESMC_CommReg.C,v 1.2 2007/09/10 17:38:28 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ CommRel &CommReg::GetCommRel(UInt objtype) {
   return const_cast<CommRel&>(static_cast<const CommReg*>(this)->GetCommRel(objtype));
 }
 
-void CommReg::SendFields(UInt nfields, MEField<> **sfields, MEField<> **rfields) {
+void CommReg::SendFields(UInt nfields, MEField<> *const *sfields, MEField<> *const *rfields) {
   // Get all the subfields and send out over the specs.
   std::vector<_field*> sf;
   std::vector<_field*> rf;
