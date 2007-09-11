@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.24 2007/09/08 00:08:22 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.25 2007/09/11 23:38:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -2063,8 +2063,8 @@ program ESMF_ArrayEx
 ! Array object was of rank 1. However, the {\tt distgrid} object associated
 ! with {\tt array} is 2-dimensional! Consequently DistGrid based information
 ! queried from {\tt array} will be 2D. The {\tt dimmap} and {\tt inverseDimmap}
-! arrays provide the necessary mapping to correctly associated dereference
-! DistGrid based information with Array dimensions.
+! arrays provide the necessary mapping to correctly associate DistGrid based 
+! information with Array dimensions.
 !
 ! The next example creates a 2D Array
 !EOE
@@ -2075,7 +2075,7 @@ program ESMF_ArrayEx
 !BOE
 ! on the previously used 2D DistGrid. By default, i.e. without the {\tt dimmap}
 ! argument, both DistGrid dimensions would be associated with the two Array
-! dimensions. However, the following the {\tt dimmap} specified in the following
+! dimensions. However, the {\tt dimmap} specified in the following
 ! call will only associate the second DistGrid dimension with the first Array 
 ! dimension. This will render the first DistGrid dimension a replicator
 ! dimension and the second Array dimension a tensor dimension for which 1D
@@ -2103,16 +2103,41 @@ program ESMF_ArrayEx
     dimmap=(/0,0/), lbounds=(/11,21/), ubounds=(/14,22/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
-!  call ESMF_ArrayPrint(array, rc=rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOE
+! The result will be an Array with local lower bound (/11,21/) and upper bound
+! (/14,22/) on all 6 DEs of the DistGrid.
+!
+! The {\tt ESMF\_ArrayScatter()} operation can be used to fill the entire 
+! Array object with data coming from a single root Pet. The shape of the
+! Fortran source array used in the Scatter() call must be that of the 
+! contracted Array, i.e. contracted DistGrid dimensions do not count. For the
+! {\tt array} just created this means that the source array on {\tt rootPet}
+! must be of shape 4 x 2.
+!EOE
+!BOC
+  allocate(myF90Array2D(4,2))
+  
+  do j=1,2
+    do i=1,4
+      myF90Array2D(i,j) = i * 100.d0 + j * 1.2345d0 ! initialize
+    enddo
+  enddo
+  
+  call ESMF_ArrayScatter(array, farray=myF90Array2D, rootPet=0, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+  deallocate(myF90Array2D)
+!EOC
+!BOE
+! This will have filled each local 4 x 2 Array piece with the replicated
+! data of {\tt myF90Array2D}.
+!EOE
+  call ESMF_ArrayPrint(array, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
   call ESMF_ArrayDestroy(array, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
-!BOE
-! The result will be an Array with local lower bound (/11,21/) and upper bound
-! (/14,22/) on all 6 DEs of the DistGrid.
-!EOE
 
 
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.125 2007/09/11 15:45:04 theurich Exp $
+// $Id: ESMC_Array.C,v 1.126 2007/09/11 23:38:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.125 2007/09/11 15:45:04 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.126 2007/09/11 23:38:07 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -166,13 +166,19 @@ Array::Array(
   const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
   
   for (int i=0; i<deCount; i++){
-    int distGridDeCellCount = distgrid->getCellCountPDe(i, &localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
-      return;
-    deCellCount[i] = distGridDeCellCount;  // prime deCellCount element
-    for (int k=0; k<tensorCount; k++){
-      // multiply in tensor extents
-      deCellCount[i] *= (ubounds[k] - lbounds[k] + 1);
+    deCellCount[i] = 1;   // prime deCellCount element
+    int tensorIndex = 0;  // reset
+    for (int jj=0; jj<rank; jj++){
+      int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor dims
+      if (j){
+        // decomposed dimension 
+        --j;  // shift to basis 0
+        deCellCount[i] *= indexCountPDimPDe[i*dimCount+j];
+      }else{
+        // tensor dimension
+        deCellCount[i] *= (ubounds[tensorIndex] - lbounds[tensorIndex] + 1);
+        ++ tensorIndex;
+      }
     }
   }
   
@@ -1542,7 +1548,7 @@ int Array::scatter(
   }
   const int *patchListPDe = distgrid->getPatchListPDe();
 
-  // get minIndexPDimPPatch and maxIndex for patch
+  // get minIndexPDimPPatch and maxIndexPDimPPatch for patch
   const int *minIndexPDimPPatch =
     distgrid->getMinIndexPDimPPatch(patch, &localrc);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
@@ -1650,7 +1656,7 @@ int Array::scatter(
               }
               commhListCount++;
             }else{
-              // this DE is _is_ local -> look up indexList locally
+              // this DE _is_ local -> look up indexList locally
               const int *localIndexList =
                 distgrid->getIndexListPDimPLocalDe(deList[de], j+1, &localrc);
               if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
@@ -1673,7 +1679,6 @@ int Array::scatter(
 
         // prepare contiguous sendBuffer for this DE
         sendBuffer[de] = new char[deCellCount[de]*dataSize];
-        int sendBufferIndex = 0;  // reset
         // reset counters for multi-dim while-loop
         tensorIndex=0;  // reset
         for (int jj=0; jj<rank; jj++){
@@ -1698,6 +1703,7 @@ int Array::scatter(
         
         // loop over all cells in exclusive region for this DE 
         // via multi-dim while-loop
+        int sendBufferIndex = 0;  // reset
         while(ii[rank-1] < iiEnd[rank-1]){        
           // determine linear index for this cell into array
           int linearIndex = indexList[rank-1][ii[rank-1]];  // init
