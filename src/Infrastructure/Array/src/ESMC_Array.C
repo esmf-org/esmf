@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.124 2007/09/08 00:06:42 theurich Exp $
+// $Id: ESMC_Array.C,v 1.125 2007/09/11 15:45:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.124 2007/09/08 00:06:42 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.125 2007/09/11 15:45:04 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2002,7 +2002,7 @@ int Array::sparseMatMulStore(
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
   
-#define ASMMSTORETIMING
+#define ASMMSTORETIMING___disable
 #ifdef ASMMSTORETIMING
   double t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10X, t10Y, t11;//gjt - profile
   double t4a, t4b, t4c, t5a, t5b, t5c;  //gjt - profile
@@ -4667,7 +4667,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
     
     for (int k=0; k<diffPartnerDeCount[j]; k++){
         
-      printf("gjt checking #1 localPet=%d: k=%d, %d\n", localPet, 
+      printf("gjt ASMMStore() checking #1 localPet=%d: k=%d, %d\n", localPet, 
         k, partnerDeCount[j][k]);
       
       // register the associated recvnb XXE element in xxeWaitOnAnyIndexSubInfo
