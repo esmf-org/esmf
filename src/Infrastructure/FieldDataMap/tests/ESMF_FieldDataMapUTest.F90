@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMapUTest.F90,v 1.14 2007/08/30 05:06:34 cdeluca Exp $
+! $Id: ESMF_FieldDataMapUTest.F90,v 1.15 2007/09/11 03:59:32 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-   '$Id: ESMF_FieldDataMapUTest.F90,v 1.14 2007/08/30 05:06:34 cdeluca Exp $'
+   '$Id: ESMF_FieldDataMapUTest.F90,v 1.15 2007/09/11 03:59:32 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -102,19 +102,18 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! Test FieldDataMap Get
-      !TODO:FIELDINTEGRATION Restore test once equality operator works w/staggerloc.
-      !call ESMF_FieldDataMapGet(fieldDataMap1, staggerloc=staggerloc, rc=rc)
-      !write(failMsg, *) "Did not return ESMF_SUCCESS and/or staggerloc incorrect"
-      !write(name, *) "Get FieldDataMap Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(staggerloc.eq.ESMF_STAGGERLOC_CENTER),&
-      !                  name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldDataMapGet(fieldDataMap1, staggerloc=staggerloc, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS and/or staggerloc incorrect"
+      write(name, *) "Get FieldDataMap Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(staggerloc==ESMF_STAGGERLOC_CENTER), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test FieldDataMap Print
-      !call ESMF_FieldDataMapPrint(fieldDataMap1, rc=rc)
+      call ESMF_FieldDataMapPrint(fieldDataMap1, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Print FieldDataMap Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -126,15 +125,6 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Validate FieldDataMap Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      ! TODO:FIELDINTEGRATION: Restore test with ESMF_STAGGERLOC_UNDEFINED value.
-      !EX_removeUTest
-      ! Test FieldDataMap Set
-      !call ESMF_FieldDataMapSet(fieldDataMap1, staggerloc=ESMF_STAGGERLOC_UNDEFINED, rc=rc)
-      !write(failMsg, *) "Did not return ESMF_SUCCESS"
-      !write(name, *) "Set FieldDataMap Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
