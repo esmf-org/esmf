@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.109 2007/07/07 04:18:54 samsoncheung Exp $
+! $Id: ESMF_State.F90,v 1.110 2007/09/11 17:30:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.109 2007/07/07 04:18:54 samsoncheung Exp $'
+      '$Id: ESMF_State.F90,v 1.110 2007/09/11 17:30:58 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1242,11 +1242,22 @@ end interface
         allocate(stypep, stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "State type", &
                                        ESMF_CONTEXT, rc)) return
-      
+
+! TODO: The following version of calling the StateConstruct() procedure ommits
+! the nameList argument. Using the nameList argument lead to SEGV on columbia
+! with ifort version 9.1.045. It seems very much like a compiler bug but for 
+! now the fastest way to deal with it is the following code change. *gjt*
         call ESMF_StateConstruct(stypep, stateName, statetype, &
                    bundleList, fieldList, arrayList, nestedStateList, &
-                   nameList, itemCount, &
-                   neededflag, readyflag, validflag, reqforrestartflag, localrc)
+                   itemcount=itemCount, &
+		   neededflag=neededflag, readyflag=readyflag, &
+		   validflag=validflag, reqforrestartflag=reqforrestartflag, &
+                   rc=localrc)
+!        call ESMF_StateConstruct(stypep, stateName, statetype, &
+!                   bundleList, fieldList, arrayList, nestedStateList, &
+!                   nameList, itemCount, &
+!                   neededflag, readyflag, validflag, reqforrestartflag, &
+!                   rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then 
