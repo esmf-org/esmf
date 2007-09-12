@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.81 2007/08/30 05:06:26 cdeluca Exp $
+# $Id: makefile,v 1.82 2007/09/12 04:53:11 cdeluca Exp $
 #===============================================================================
 #                            makefile
 # 
-# This is the primary makefile for building Earth System Modeling Framework
-# (ESMF) utilities.  
+# This is the primary makefile for building the Earth System Modeling Framework
+# (ESMF).  
 #===============================================================================
 
 #-------------------------------------------------------------------------------
