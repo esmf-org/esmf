@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.44 2007/08/24 23:34:51 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.45 2007/09/13 20:36:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -237,20 +237,22 @@ class XXE{
       OpSubId opSubId;        // id of sub-operation
       char opInfo[7*8];       // 7 x 8-byte to hold info associated with op
     };
+    
   public:
     StreamElement *stream;
     int count;
-    int max;
     char **storage;
     int storageCount;
-    int storageMaxCount;
     vmk_commhandle ***commhandle;
     int commhandleCount;
-    int commhandleMaxCount;
     XXE **xxeSubList;
     int xxeSubCount;
-    int xxeSubMaxCount;
     ESMC_TypeKind typekind[10];
+  private:
+    int max;
+    int storageMaxCount;
+    int commhandleMaxCount;
+    int xxeSubMaxCount;
     
   public:
     XXE(int maxArg=1000, int storageMaxCountArg=1000,
@@ -293,7 +295,12 @@ class XXE{
     int growCommhandle(int increase);
     int growXxeSub(int increase);
     
-  // types to interprete the StreamElement data
+    int incCount();
+    int incStorageCount();
+    int incCommhandleCount();
+    int incXxeSubCount();
+    
+  // types with which to interpret the StreamElement elements
   public:
       
     typedef struct{

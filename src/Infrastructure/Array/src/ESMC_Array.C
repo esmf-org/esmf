@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.126 2007/09/11 23:38:07 theurich Exp $
+// $Id: ESMC_Array.C,v 1.127 2007/09/13 20:36:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.126 2007/09/11 23:38:07 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.127 2007/09/13 20:36:04 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3962,19 +3962,13 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   strcpy(xxeWtimerInfo->timerString, "Wtimer 0");
   xxeWtimerInfo->actualWtimerId = 0;
   xxeWtimerInfo->relativeWtimerId = 0;
-  ++(xxe->count);
-  if (xxe->count >= xxe->max){
-    localrc = xxe->growStream(1000);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-  }
+  localrc = xxe->incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
   xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
-  ++(xxe->storageCount);
-  if (xxe->storageCount >= xxe->storageMaxCount){
-    localrc = xxe->growStorage(10000);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-  }
+  localrc = xxe->incStorageCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
   // </XXE profiling element>
 
   // prepare arrays used in recvnb loop _and_ +=* loop
@@ -4062,12 +4056,9 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     int *dstInfoTableInit = new int[diffPartnerDeCount[j]];
     localDeFactorList[j] = new char[localDeFactorCount * dataSize];
     xxe->storage[xxe->storageCount] = localDeFactorList[j]; // xxe garb. coll.
-    ++(xxe->storageCount);
-    if (xxe->storageCount >= xxe->storageMaxCount){
-      localrc = xxe->growStorage(10000);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-    }
+    localrc = xxe->incStorageCount();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
     for (int i=0; i<diffPartnerDeCount[j]; i++){
       dstInfoTable[j][i] = new DstInfo[partnerDeCount[j][i]];
       dstInfoTableInit[i] = 0;   // reset
@@ -4123,19 +4114,13 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     strcpy(xxeWtimerInfo->timerString, "Wt: recnbL");
     xxeWtimerInfo->actualWtimerId = xxe->count;
     xxeWtimerInfo->relativeWtimerId = 0;
-    ++(xxe->count);
-    if (xxe->count >= xxe->max){
-      localrc = xxe->growStream(1000);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-    }
+    localrc = xxe->incCount();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
     xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
-    ++(xxe->storageCount);
-    if (xxe->storageCount >= xxe->storageMaxCount){
-      localrc = xxe->growStorage(10000);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-    }
+    localrc = xxe->incStorageCount();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
     // </XXE profiling element>
     
     
@@ -4147,12 +4132,9 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       // large contiguous 1st level receive buffer
       buffer[j][i] = new char[partnerDeCount[j][i] * dataSize];
       xxe->storage[xxe->storageCount] = buffer[j][i]; // xxe garbage collection
-      ++(xxe->storageCount);
-      if (xxe->storageCount >= xxe->storageMaxCount){
-        localrc = xxe->growStorage(10000);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
-      }
+      localrc = xxe->incStorageCount();
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
       int srcDe = partnerDeList[i];
       int srcPet;   //TODO: DE-based comms
       srcArray->delayout->getDEMatchPET(srcDe, *vm, NULL, &srcPet, 1);
@@ -4168,20 +4150,14 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       xxeRecvnbInfo->srcPet = srcPet;
       xxeRecvnbInfo->commhandle = new vmk_commhandle*;
       *(xxeRecvnbInfo->commhandle) = new vmk_commhandle;
-      ++(xxe->count);
-      if (xxe->count >= xxe->max){
-        localrc = xxe->growStream(1000);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
-      }
+      localrc = xxe->incCount();
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
       // keep track of commhandles for xxe garbage collection
       xxe->commhandle[xxe->commhandleCount] = xxeRecvnbInfo->commhandle;
-      ++(xxe->commhandleCount);
-      if (xxe->commhandleCount >= xxe->commhandleMaxCount){
-        localrc = xxe->growCommhandle(1000);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
-      }
+      localrc = xxe->incCommhandleCount();
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
     } // for i - diffPartnerDeCount[j]
         
     // <XXE profiling element>
@@ -4193,19 +4169,13 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     strcpy(xxeWtimerInfo->timerString, "Wt: /recnbL");
     xxeWtimerInfo->actualWtimerId = xxe->count;
     xxeWtimerInfo->relativeWtimerId = 0;
-    ++(xxe->count);
-    if (xxe->count >= xxe->max){
-      localrc = xxe->growStream(1000);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-    }
+    localrc = xxe->incCount();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
     xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
-    ++(xxe->storageCount);
-    if (xxe->storageCount >= xxe->storageMaxCount){
-      localrc = xxe->growStorage(10000);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-    }
+    localrc = xxe->incStorageCount();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
     // </XXE profiling element>
     
     // garbage collection
@@ -4325,19 +4295,13 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     strcpy(xxeWtimerInfo->timerString, "Wt: sendnbL");
     xxeWtimerInfo->actualWtimerId = xxe->count;
     xxeWtimerInfo->relativeWtimerId = 0;
-    ++(xxe->count);
-    if (xxe->count >= xxe->max){
-      localrc = xxe->growStream(1000);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-    }
+    localrc = xxe->incCount();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
     xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
-    ++(xxe->storageCount);
-    if (xxe->storageCount >= xxe->storageMaxCount){
-      localrc = xxe->growStorage(10000);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-    }
+    localrc = xxe->incStorageCount();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
     // </XXE profiling element>
 
     // construct send pattern and fill in corresponding XXE StreamElements    
@@ -4386,12 +4350,9 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         xxeSendnbRRAInfo->size = partnerDeCount[i] * dataSize;
         xxeSendnbRRAInfo->dstPet = dstPet;
         xxeSendnbRRAInfo->rraIndex = j; // localDe index into srcArray
-        ++(xxe->count);
-        if (xxe->count >= xxe->max){
-          localrc = xxe->growStream(1000);
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-            ESMF_ERR_PASSTHRU, &rc)) return rc;
-        }
+        localrc = xxe->incCount();
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+          ESMF_ERR_PASSTHRU, &rc)) return rc;
       }else{
 #ifdef ASMMSTOREPRINT
         printf("gjt: non-contiguous linIndex in srcArray -> need buffer \n");
@@ -4399,12 +4360,9 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         // need intermediate buffer and memCpySrcRRAs
         char *buffer = new char[partnerDeCount[i] * dataSize];
         xxe->storage[xxe->storageCount] = buffer; // for xxe garbage collection
-        ++(xxe->storageCount);
-        if (xxe->storageCount >= xxe->storageMaxCount){
-          localrc = xxe->growStorage(10000);
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-            ESMF_ERR_PASSTHRU, &rc)) return rc;
-        }
+        localrc = xxe->incStorageCount();
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+          ESMF_ERR_PASSTHRU, &rc)) return rc;
 #ifdef USEmemCpySrcRRA
         char *bufferPointer = buffer;
         for (int k=0; k<count; k++){
@@ -4418,12 +4376,9 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
             (linIndexContigBlockList[k].linIndex * dataSize);
           xxeMemCpySrcRRAInfo->size = byteCount;
           xxeMemCpySrcRRAInfo->rraIndex = j; // localDe index into srcArray
-          ++(xxe->count);
-          if (xxe->count >= xxe->max){
-            localrc = xxe->growStream(1000);
-            if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-              ESMF_ERR_PASSTHRU, &rc)) return rc;
-          }
+          localrc = xxe->incCount();
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+            ESMF_ERR_PASSTHRU, &rc)) return rc;
           bufferPointer += byteCount;
         }
 #else
@@ -4438,29 +4393,20 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         int *rraOffsetList = (int *)rraOffsetListChar;
         xxeMemGatherSrcRRAInfo->rraOffsetList = rraOffsetList;
         xxe->storage[xxe->storageCount] = rraOffsetListChar; // f xxe garb coll.
-        ++(xxe->storageCount);
-        if (xxe->storageCount >= xxe->storageMaxCount){
-          localrc = xxe->growStorage(10000);
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-            ESMF_ERR_PASSTHRU, &rc)) return rc;
-        }
+        localrc = xxe->incStorageCount();
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+          ESMF_ERR_PASSTHRU, &rc)) return rc;
         char *countListChar = new char[count*sizeof(int)];
         int *countList = (int *)countListChar;
         xxeMemGatherSrcRRAInfo->countList = countList;
         xxe->storage[xxe->storageCount] = countListChar; // for xxe garb coll.
-        ++(xxe->storageCount);
-        if (xxe->storageCount >= xxe->storageMaxCount){
-          localrc = xxe->growStorage(10000);
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-            ESMF_ERR_PASSTHRU, &rc)) return rc;
-        }
+        localrc = xxe->incStorageCount();
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+          ESMF_ERR_PASSTHRU, &rc)) return rc;
         int xxeIndex = xxe->count;  // need this beyond the increment
-        ++(xxe->count);
-        if (xxe->count >= xxe->max){
-          localrc = xxe->growStream(1000);
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-            ESMF_ERR_PASSTHRU, &rc)) return rc;
-        }
+        localrc = xxe->incCount();
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+          ESMF_ERR_PASSTHRU, &rc)) return rc;
         // try typekind specific memGatherSrcRRA
         if (typekindArg == ESMC_TYPEKIND_R4)
           xxe->stream[xxeIndex].opSubId = XXE::R4;
@@ -4521,12 +4467,9 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
         xxeSendnbInfo->buffer = buffer;
         xxeSendnbInfo->size = partnerDeCount[i] * dataSize;
         xxeSendnbInfo->dstPet = dstPet;
-        ++(xxe->count);
-        if (xxe->count >= xxe->max){
-          localrc = xxe->growStream(1000);
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-            ESMF_ERR_PASSTHRU, &rc)) return rc;
-        }
+        localrc = xxe->incCount();
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+          ESMF_ERR_PASSTHRU, &rc)) return rc;
       }
       // add commhandle to last xxe element (sendnbRRA or sendnb) and keep track
       // of commhandle for xxe garbage collection
@@ -4534,12 +4477,9 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       xxeCommhandleInfo->commhandle = new vmk_commhandle*;
       *(xxeCommhandleInfo->commhandle) = new vmk_commhandle;
       xxe->commhandle[xxe->commhandleCount] = xxeCommhandleInfo->commhandle;
-      ++(xxe->commhandleCount);
-      if (xxe->commhandleCount >= xxe->commhandleMaxCount){
-        localrc = xxe->growCommhandle(1000);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
-      }
+      localrc = xxe->incCommhandleCount();
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
       delete [] linIndexContigBlockList;
     } // for i - diffPartnerDeCount
     // garbage collection
@@ -4564,19 +4504,13 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
     strcpy(xxeWtimerInfo->timerString, "Wt: /sendnbL");
     xxeWtimerInfo->actualWtimerId = xxe->count;
     xxeWtimerInfo->relativeWtimerId = 0;
-    ++(xxe->count);
-    if (xxe->count >= xxe->max){
-      localrc = xxe->growStream(1000);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-    }
+    localrc = xxe->incCount();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
     xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
-    ++(xxe->storageCount);
-    if (xxe->storageCount >= xxe->storageMaxCount){
-      localrc = xxe->growStorage(10000);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-    }
+    localrc = xxe->incStorageCount();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
     // </XXE profiling element>
     
   } // for j - srcLocalDeCount
@@ -4598,19 +4532,13 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
     strcpy(xxeWtimerInfo->timerString, "Wt: w+=*L");
     xxeWtimerInfo->actualWtimerId = xxe->count;
     xxeWtimerInfo->relativeWtimerId = 0;
-    ++(xxe->count);
-    if (xxe->count >= xxe->max){
-      localrc = xxe->growStream(1000);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-    }
+    localrc = xxe->incCount();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
     xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
-    ++(xxe->storageCount);
-    if (xxe->storageCount >= xxe->storageMaxCount){
-      localrc = xxe->growStorage(10000);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-    }
+    localrc = xxe->incStorageCount();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
     // </XXE profiling element>
   
 #if 0
@@ -4622,12 +4550,9 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       xxeElement = &(xxe->stream[xxe->count]);
       xxeWaitOnIndexInfo = (XXE::WaitOnIndexInfo *)xxeElement;
       xxeWaitOnIndexInfo->index = recvnbIndex[j][k];
-      ++(xxe->count);
-      if (xxe->count >= xxe->max){
-        localrc = xxe->growStream(1000);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
-      }
+      localrc = xxe->incCount();
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
     }
 #endif    
 
@@ -4642,40 +4567,24 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
     xxeWaitOnAnyIndexSubInfo->index = (int *)indexChar;
     char *completeFlagChar = new char[diffPartnerDeCount[j]*sizeof(int)];
     xxeWaitOnAnyIndexSubInfo->completeFlag = (int *)completeFlagChar;
-    ++(xxe->count);
-    if (xxe->count >= xxe->max){
-      localrc = xxe->growStream(1000);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-    }
+    localrc = xxe->incCount();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
     xxe->storage[xxe->storageCount] = xxeChar; // xxe garbCo
-    ++(xxe->storageCount);
-    if (xxe->storageCount >= xxe->storageMaxCount){
-      localrc = xxe->growStorage(10000);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-    }
+    localrc = xxe->incStorageCount();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
     xxe->storage[xxe->storageCount] = indexChar; // xxe garbCo
-    ++(xxe->storageCount);
-    if (xxe->storageCount >= xxe->storageMaxCount){
-      localrc = xxe->growStorage(10000);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-    }
+    localrc = xxe->incStorageCount();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
     xxe->storage[xxe->storageCount] = completeFlagChar; // xxe garbCo
-    ++(xxe->storageCount);
-    if (xxe->storageCount >= xxe->storageMaxCount){
-      localrc = xxe->growStorage(10000);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-    }
-
+    localrc = xxe->incStorageCount();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
     
     for (int k=0; k<diffPartnerDeCount[j]; k++){
         
-      printf("gjt ASMMStore() checking #1 localPet=%d: k=%d, %d\n", localPet, 
-        k, partnerDeCount[j][k]);
-      
       // register the associated recvnb XXE element in xxeWaitOnAnyIndexSubInfo
       xxeWaitOnAnyIndexSubInfo->index[k] = recvnbIndex[j][k];
       
@@ -4683,13 +4592,10 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       xxeWaitOnAnyIndexSubInfo->xxe[k] = new XXE(1000, 1000, 1000);
       XXE *xxeSub = xxeWaitOnAnyIndexSubInfo->xxe[k];
       xxe->xxeSubList[xxe->xxeSubCount] = xxeSub; // xxe garbage collection
-      ++(xxe->xxeSubCount);
-      if (xxe->xxeSubCount >= xxe->xxeSubMaxCount){
-        localrc = xxe->growXxeSub(1000);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
-      }
-          
+      localrc = xxe->incXxeSubCount();
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
+
       // <XXE profiling element>
       xxeSub->stream[xxeSub->count].opId = XXE::wtimer;
       xxeElement = &(xxeSub->stream[xxeSub->count]);
@@ -4699,20 +4605,14 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       strcpy(xxeWtimerInfo->timerString, "xxeSub Element Start");
       xxeWtimerInfo->actualWtimerId = 0;
       xxeWtimerInfo->relativeWtimerId = 0;
-      ++(xxeSub->count);
-      if (xxeSub->count >= xxeSub->max){
-        localrc = xxeSub->growStream(1000);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
-      }
+      localrc = xxeSub->incCount();
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
       xxeSub->storage[xxeSub->storageCount] =
         xxeWtimerInfo->timerString; // xxe garbCo
-      ++(xxeSub->storageCount);
-      if (xxeSub->storageCount >= xxeSub->storageMaxCount){
-        localrc = xxeSub->growStorage(10000);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
-      }
+      localrc = xxeSub->incStorageCount();
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
       // </XXE profiling element>
   
       // <XXE profiling element>
@@ -4724,20 +4624,14 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       strcpy(xxeWtimerInfo->timerString, "Wt: pSSRRA");
       xxeWtimerInfo->actualWtimerId = xxeSub->count;
       xxeWtimerInfo->relativeWtimerId = 0;
-      ++(xxeSub->count);
-      if (xxeSub->count >= xxeSub->max){
-        localrc = xxeSub->growStream(1000);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
-      }
+      localrc = xxeSub->incCount();
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
       // xxe garb coll
       xxeSub->storage[xxeSub->storageCount] = xxeWtimerInfo->timerString;
-      ++(xxeSub->storageCount);
-      if (xxeSub->storageCount >= xxeSub->storageMaxCount){
-        localrc = xxeSub->growStorage(10000);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
-      }
+      localrc = xxeSub->incStorageCount();
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
       // </XXE profiling element>
 
 #ifdef USEproductSumScalarRRA
@@ -4764,21 +4658,15 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
           (buffer[j][k] + kk*dataSize);
         xxeProductSumScalarRRAInfo->rraIndex = srcLocalDeCount
           + j; // localDe index into dstArray shifted by srcArray localDeCount
-        ++(xxeSub->count);
-        if (xxeSub->count >= xxeSub->max){
-          localrc = xxeSub->growStream(1000);
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-            ESMF_ERR_PASSTHRU, &rc)) return rc;
-        }
+        localrc = xxeSub->incCount();
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+          ESMF_ERR_PASSTHRU, &rc)) return rc;
       } // kk - partnerDeCount[j][k]
 #else
       int xxeIndex = xxeSub->count;  // need this beyond the increment
-      ++(xxeSub->count);
-      if (xxeSub->count >= xxeSub->max){
-        localrc = xxeSub->growStream(1000);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
-      }
+      localrc = xxeSub->incCount();
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
 
       // try super-scalar "+=*" operation in XXE stream
       xxeSub->stream[xxeIndex].opId = XXE::productSumSuperScalarRRA;
@@ -4802,22 +4690,16 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       int *rraOffsetList = (int *)rraOffsetListChar;
       xxeProductSumSuperScalarRRAInfo->rraOffsetList = rraOffsetList;
       xxeSub->storage[xxeSub->storageCount] = rraOffsetListChar; // garb coll.
-      ++(xxeSub->storageCount);
-      if (xxeSub->storageCount >= xxeSub->storageMaxCount){
-        localrc = xxeSub->growStorage(10000);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
-      }
+      localrc = xxeSub->incStorageCount();
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
       char *factorListChar = new char[termCount*sizeof(void *)];
       void **factorList = (void **)factorListChar;
       xxeProductSumSuperScalarRRAInfo->factorList = factorList;
       xxeSub->storage[xxeSub->storageCount] = factorListChar; // garb coll.
-      ++(xxeSub->storageCount);
-      if (xxeSub->storageCount >= xxeSub->storageMaxCount){
-        localrc = xxeSub->growStorage(10000);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
-      }
+      localrc = xxeSub->incStorageCount();
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
       char *valueListChar = new char[termCount*sizeof(void *)];
       void **valueList = (void **)valueListChar;
       xxeProductSumSuperScalarRRAInfo->valueList = valueList;
@@ -4857,12 +4739,9 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
         xxeSub->stream[xxeIndex].opId = XXE::productSumSuperScalarRRA;
         xxeProductSumSuperScalarRRAInfo->valueList = valueList;
         xxeSub->storage[xxeSub->storageCount] = valueListChar; // garb coll.
-        ++(xxeSub->storageCount);
-        if (xxeSub->storageCount >= xxeSub->storageMaxCount){
-          localrc = xxeSub->growStorage(10000);
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-            ESMF_ERR_PASSTHRU, &rc)) return rc;
-        }
+        localrc = xxeSub->incStorageCount();
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+          ESMF_ERR_PASSTHRU, &rc)) return rc;
       }else{
         // use productSumSuperScalarContigRRA
         // already set from last trial, just need to remove some garbage:
@@ -4880,20 +4759,14 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
       strcpy(xxeWtimerInfo->timerString, "Wt: /pSSRRA");
       xxeWtimerInfo->actualWtimerId = xxeSub->count;
       xxeWtimerInfo->relativeWtimerId = 0;
-      ++(xxeSub->count);
-      if (xxeSub->count >= xxeSub->max){
-        localrc = xxeSub->growStream(1000);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
-      }
+      localrc = xxeSub->incCount();
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
       // xxe garb coll
       xxeSub->storage[xxeSub->storageCount] = xxeWtimerInfo->timerString;
-      ++(xxeSub->storageCount);
-      if (xxeSub->storageCount >= xxeSub->storageMaxCount){
-        localrc = xxeSub->growStorage(10000);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
-      }
+      localrc = xxeSub->incStorageCount();
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
       // </XXE profiling element>
       
     } // k - diffPartnerDeCount[j]    
@@ -4911,19 +4784,13 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
     strcpy(xxeWtimerInfo->timerString, "Wt: /w+=*L");
     xxeWtimerInfo->actualWtimerId = xxe->count;
     xxeWtimerInfo->relativeWtimerId = 0;
-    ++(xxe->count);
-    if (xxe->count >= xxe->max){
-      localrc = xxe->growStream(1000);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-    }
+    localrc = xxe->incCount();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
     xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
-    ++(xxe->storageCount);
-    if (xxe->storageCount >= xxe->storageMaxCount){
-      localrc = xxe->growStorage(10000);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-    }
+    localrc = xxe->incStorageCount();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
     // </XXE profiling element>
     
     // garbage collection
@@ -4965,29 +4832,20 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
   strcpy(xxeWtimerInfo->timerString, "Wt: bef wOAS");
   xxeWtimerInfo->actualWtimerId = xxe->count;
   xxeWtimerInfo->relativeWtimerId = 0;
-  ++(xxe->count);
-  if (xxe->count >= xxe->max){
-    localrc = xxe->growStream(1000);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-  }
+  localrc = xxe->incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
   xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
-  ++(xxe->storageCount);
-  if (xxe->storageCount >= xxe->storageMaxCount){
-    localrc = xxe->growStorage(10000);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-  }
+  localrc = xxe->incStorageCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
   // </XXE profiling element>
 
   // post XXE::waitOnAllSendnb
   xxe->stream[xxe->count].opId = XXE::waitOnAllSendnb;
-  ++(xxe->count);
-  if (xxe->count >= xxe->max){
-    localrc = xxe->growStream(1000);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-  }
+  localrc = xxe->incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
 
   // <XXE profiling element>
   xxe->stream[xxe->count].opId = XXE::wtimer;
@@ -4998,19 +4856,13 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
   strcpy(xxeWtimerInfo->timerString, "Wtimer End");
   xxeWtimerInfo->actualWtimerId = xxe->count;
   xxeWtimerInfo->relativeWtimerId = 0;
-  ++(xxe->count);
-  if (xxe->count >= xxe->max){
-    localrc = xxe->growStream(1000);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-  }
+  localrc = xxe->incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
   xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
-  ++(xxe->storageCount);
-  if (xxe->storageCount >= xxe->storageMaxCount){
-    localrc = xxe->growStorage(10000);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-  }
+  localrc = xxe->incStorageCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
   // </XXE profiling element>
 
   // <XXE profiling element>
@@ -5022,19 +4874,13 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
   strcpy(xxeWtimerInfo->timerString, "Wtimer End2");
   xxeWtimerInfo->actualWtimerId = xxe->count;
   xxeWtimerInfo->relativeWtimerId = 0;
-  ++(xxe->count);
-  if (xxe->count >= xxe->max){
-    localrc = xxe->growStream(1000);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-  }
+  localrc = xxe->incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
   xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
-  ++(xxe->storageCount);
-  if (xxe->storageCount >= xxe->storageMaxCount){
-    localrc = xxe->growStorage(10000);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-  }
+  localrc = xxe->incStorageCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
   // </XXE profiling element>
 
 #if 0  

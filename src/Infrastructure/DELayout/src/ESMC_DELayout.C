@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.78 2007/09/04 14:43:19 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.79 2007/09/13 20:36:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.78 2007/09/04 14:43:19 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.79 2007/09/13 20:36:06 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -3055,71 +3055,6 @@ int XXE::printProfile(
         }
       }
       break;
-//debugging section ----------------------------------------          
-    case productSumSuperScalarRRA:
-      ProductSumSuperScalarRRAInfo *xxeProductSumSuperScalarRRAInfo;
-      if((localPet==3 && ((i>37 && i<41 )|| (i>53 && i<57)))||
-         (localPet==4 && ((i>39 && i<43 )|| (i>47 && i<51)))){
-        xxeProductSumSuperScalarRRAInfo =
-          (ProductSumSuperScalarRRAInfo *)xxeElement;
-        int *rraOffsetList = xxeProductSumSuperScalarRRAInfo->rraOffsetList;
-        void **factorList = xxeProductSumSuperScalarRRAInfo->factorList;
-        void **valueList = xxeProductSumSuperScalarRRAInfo->valueList;
-        switch (xxeProductSumSuperScalarRRAInfo->opSubId){
-        case I4:
-          {
-            ESMC_I4 *element, *factor, *value;
-            for (int k=0; k<xxeProductSumSuperScalarRRAInfo->termCount; k++){
-              factor = (ESMC_I4 *)factorList[k];
-              value = (ESMC_I4 *)valueList[k];
-              printf("XXE profile debug: k=%d, rraOffsetList[]=%d, "
-                "factor=%p, value=%p\n", k, rraOffsetList[k],
-                factor, value);
-            }
-          }
-          break;
-        case I8:
-          {
-            ESMC_I8 *element, *factor, *value;
-            for (int k=0; k<xxeProductSumSuperScalarRRAInfo->termCount; k++){
-              factor = (ESMC_I8 *)factorList[k];
-              value = (ESMC_I8 *)valueList[k];
-              printf("XXE profile debug: k=%d, rraOffsetList[]=%d, "
-                "factor=%p, value=%p\n", k, rraOffsetList[k],
-                factor, value);
-            }
-          }
-          break;
-        case R4:
-          {
-            ESMC_R4 *element, *factor, *value;
-            for (int k=0; k<xxeProductSumSuperScalarRRAInfo->termCount; k++){
-              factor = (ESMC_R4 *)factorList[k];
-              value = (ESMC_R4 *)valueList[k];
-              printf("XXE profile debug: k=%d, rraOffsetList[]=%d, "
-                "factor=%p, value=%p\n", k, rraOffsetList[k],
-                factor, value);
-            }
-          }
-          break;
-        case R8:
-          {
-            ESMC_R8 *element, *factor, *value;
-            for (int k=0; k<xxeProductSumSuperScalarRRAInfo->termCount; k++){
-              factor = (ESMC_R8 *)factorList[k];
-              value = (ESMC_R8 *)valueList[k];
-              printf("XXE profile debug: k=%d, rraOffsetList[]=%d, "
-                "factor=%p, value=%p\n", k, rraOffsetList[k],
-                factor, value);
-            }
-          }
-          break;
-        default:
-          break;
-        }
-      }
-      break;
-//debugging section ----------------------------------------          
     default:
       break;
     }
@@ -3208,7 +3143,7 @@ int XXE::optimizeElement(
       // must be not in the inter-element interaction but must be an
       // intra-element issue, so that rearranging elements does not change
       // anything. The most likely intra-element interaction I can think of
-      // are cache effects.
+      // are cache effects. *gjt*
       ListSort *list = new ListSort[termCount];
       for (int k=0; k<termCount; k++){
         list[k].sortIndex = rraOffsetList[k];
@@ -4129,5 +4064,144 @@ int XXE::growXxeSub(
 }
 //-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::incCount()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::incCount
+//
+// !INTERFACE:
+int XXE::incCount(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  ){
+//
+// !DESCRIPTION:
+//  Increment the count by one.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  ++count;
+  if (count >= max)
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(growStream(1000), 
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::incStorageCount()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::incStorageCount
+//
+// !INTERFACE:
+int XXE::incStorageCount(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  ){
+//
+// !DESCRIPTION:
+//  Increment the storageCount by one.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  ++storageCount;
+  if (storageCount >= storageMaxCount)
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(growStorage(10000), 
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::incCommhandleCount()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::incCommhandleCount
+//
+// !INTERFACE:
+int XXE::incCommhandleCount(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  ){
+//
+// !DESCRIPTION:
+//  Increment the commhandleCount by one.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  ++commhandleCount;
+  if (commhandleCount >= commhandleMaxCount)
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(growCommhandle(1000), 
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::incXxeSubCount()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::incXxeSubCount
+//
+// !INTERFACE:
+int XXE::incXxeSubCount(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  ){
+//
+// !DESCRIPTION:
+//  Increment the xxeSubCount by one.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  ++xxeSubCount;
+  if (xxeSubCount >= xxeSubMaxCount)
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(growXxeSub(1000), 
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
 
 } // namespace ESMCI
