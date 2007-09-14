@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.129 2007/09/14 19:12:16 theurich Exp $
+// $Id: ESMC_Array.C,v 1.130 2007/09/14 22:27:29 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.129 2007/09/14 19:12:16 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.130 2007/09/14 22:27:29 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3968,6 +3968,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   strcpy(xxeWtimerInfo->timerString, "Wtimer 0");
   xxeWtimerInfo->actualWtimerId = 0;
   xxeWtimerInfo->relativeWtimerId = 0;
+  xxeWtimerInfo->relativeWtimerXXE = NULL;
   localrc = xxe->incCount();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -4120,6 +4121,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     strcpy(xxeWtimerInfo->timerString, "Wt: recnbL");
     xxeWtimerInfo->actualWtimerId = xxe->count;
     xxeWtimerInfo->relativeWtimerId = 0;
+    xxeWtimerInfo->relativeWtimerXXE = NULL;
     localrc = xxe->incCount();
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -4174,6 +4176,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     strcpy(xxeWtimerInfo->timerString, "Wt: /recnbL");
     xxeWtimerInfo->actualWtimerId = xxe->count;
     xxeWtimerInfo->relativeWtimerId = 0;
+    xxeWtimerInfo->relativeWtimerXXE = NULL;
     localrc = xxe->incCount();
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -4300,6 +4303,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     strcpy(xxeWtimerInfo->timerString, "Wt: sendnbL");
     xxeWtimerInfo->actualWtimerId = xxe->count;
     xxeWtimerInfo->relativeWtimerId = 0;
+    xxeWtimerInfo->relativeWtimerXXE = NULL;
     localrc = xxe->incCount();
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -4509,6 +4513,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
     strcpy(xxeWtimerInfo->timerString, "Wt: /sendnbL");
     xxeWtimerInfo->actualWtimerId = xxe->count;
     xxeWtimerInfo->relativeWtimerId = 0;
+    xxeWtimerInfo->relativeWtimerXXE = NULL;
     localrc = xxe->incCount();
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -4537,6 +4542,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
     strcpy(xxeWtimerInfo->timerString, "Wt: w+=*L");
     xxeWtimerInfo->actualWtimerId = xxe->count;
     xxeWtimerInfo->relativeWtimerId = 0;
+    xxeWtimerInfo->relativeWtimerXXE = NULL;
     localrc = xxe->incCount();
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -4592,9 +4598,10 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
       xxeWtimerInfo->timerId = 0;
       xxeWtimerInfo->timerString = new char[80];
-      strcpy(xxeWtimerInfo->timerString, "xxeSub Element Start");
+      sprintf(xxeWtimerInfo->timerString, "xxeSub k=%d", k);
       xxeWtimerInfo->actualWtimerId = 0;
       xxeWtimerInfo->relativeWtimerId = 0;
+      xxeWtimerInfo->relativeWtimerXXE = xxe; // reference back into main XXE
       localrc = xxeSub->incCount();
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -4614,6 +4621,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       strcpy(xxeWtimerInfo->timerString, "Wt: pSSRRA");
       xxeWtimerInfo->actualWtimerId = xxeSub->count;
       xxeWtimerInfo->relativeWtimerId = 0;
+      xxeWtimerInfo->relativeWtimerXXE = xxe; // reference back into main XXE
       localrc = xxeSub->incCount();
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -4752,6 +4760,7 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
       strcpy(xxeWtimerInfo->timerString, "Wt: /pSSRRA");
       xxeWtimerInfo->actualWtimerId = xxeSub->count;
       xxeWtimerInfo->relativeWtimerId = 0;
+      xxeWtimerInfo->relativeWtimerXXE = xxe; // reference back into main XXE
       localrc = xxeSub->incCount();
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -4777,6 +4786,7 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
     strcpy(xxeWtimerInfo->timerString, "Wt: /w+=*L");
     xxeWtimerInfo->actualWtimerId = xxe->count;
     xxeWtimerInfo->relativeWtimerId = 0;
+    xxeWtimerInfo->relativeWtimerXXE = NULL;
     localrc = xxe->incCount();
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -4825,6 +4835,7 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
   strcpy(xxeWtimerInfo->timerString, "Wt: bef wOAS");
   xxeWtimerInfo->actualWtimerId = xxe->count;
   xxeWtimerInfo->relativeWtimerId = 0;
+  xxeWtimerInfo->relativeWtimerXXE = NULL;
   localrc = xxe->incCount();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -4849,6 +4860,7 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
   strcpy(xxeWtimerInfo->timerString, "Wtimer End");
   xxeWtimerInfo->actualWtimerId = xxe->count;
   xxeWtimerInfo->relativeWtimerId = 0;
+  xxeWtimerInfo->relativeWtimerXXE = NULL;
   localrc = xxe->incCount();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -4867,6 +4879,7 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
   strcpy(xxeWtimerInfo->timerString, "Wtimer End2");
   xxeWtimerInfo->actualWtimerId = xxe->count;
   xxeWtimerInfo->relativeWtimerId = 0;
+  xxeWtimerInfo->relativeWtimerXXE = NULL;
   localrc = xxe->incCount();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
