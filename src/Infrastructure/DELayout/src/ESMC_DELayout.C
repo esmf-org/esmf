@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.79 2007/09/13 20:36:06 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.80 2007/09/14 18:21:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.79 2007/09/13 20:36:06 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.80 2007/09/14 18:21:10 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2784,12 +2784,12 @@ int XXE::exec(
           break;
         case R4:
           {
-            ESMC_R4 *element, *factor;
+            ESMC_R4 *element, factor;
             ESMC_R4 *value = (ESMC_R4 *)valueList;
             for (int k=0; k<termCount; k++){
               element = (ESMC_R4 *)(rraBase + rraOffsetList[k]);
-              factor = (ESMC_R4 *)factorList[k];
-              *element += *factor * value[k];
+              factor = *((ESMC_R4 *)factorList[k]);
+              *element += factor * value[k];
             }
           }
           break;
@@ -3902,7 +3902,13 @@ int XXE::growStream(
   }
   
   int maxNew = max + increase;
-  StreamElement *streamNew = new StreamElement[maxNew];
+  StreamElement *streamNew;
+  try{
+    streamNew = new StreamElement[maxNew];
+  }catch (...){
+    ESMC_LogDefault.ESMC_LogAllocError(&rc);
+    return rc;
+  }
   memcpy(streamNew, stream, count*sizeof(StreamElement)); // copy prev. elements
   delete [] stream;     // delete previous stream
   stream = streamNew;   // plug in newly allocated stream
@@ -3952,7 +3958,13 @@ int XXE::growStorage(
   }
   
   int storageMaxCountNew = storageMaxCount + increase;
-  char **storageNew = new char*[storageMaxCountNew];
+  char **storageNew;
+  try{
+    storageNew = new char*[storageMaxCountNew];
+  }catch (...){
+    ESMC_LogDefault.ESMC_LogAllocError(&rc);
+    return rc;
+  }
   memcpy(storageNew, storage, storageCount*sizeof(char *)); //copy prev elements
   delete [] storage;      // delete previous storage
   storage = storageNew;   // plug in newly allocated storage
@@ -4002,7 +4014,13 @@ int XXE::growCommhandle(
   }
   
   int commhandleMaxCountNew = commhandleMaxCount + increase;
-  vmk_commhandle ***commhandleNew = new vmk_commhandle**[commhandleMaxCountNew];
+  vmk_commhandle ***commhandleNew;
+  try{
+    commhandleNew = new vmk_commhandle**[commhandleMaxCountNew];
+  }catch (...){
+    ESMC_LogDefault.ESMC_LogAllocError(&rc);
+    return rc;
+  }
   memcpy(commhandleNew, commhandle, commhandleCount*sizeof(vmk_commhandle **)); 
   delete [] commhandle;                         // delete previous commhandle
   commhandle = commhandleNew;           // plug in newly allocated commhandle
@@ -4052,7 +4070,13 @@ int XXE::growXxeSub(
   }
   
   int xxeSubMaxCountNew = xxeSubMaxCount + increase;
-  XXE **xxeSubListNew = new XXE*[xxeSubMaxCountNew];
+  XXE **xxeSubListNew;
+  try{
+    xxeSubListNew = new XXE*[xxeSubMaxCountNew];
+  }catch (...){
+    ESMC_LogDefault.ESMC_LogAllocError(&rc);
+    return rc;
+  }
   memcpy(xxeSubListNew, xxeSubList, xxeSubCount*sizeof(XXE *));
   delete [] xxeSubList;               // delete previous xxeSubList
   xxeSubList = xxeSubListNew;       // plug in newly allocated xxeSubList
