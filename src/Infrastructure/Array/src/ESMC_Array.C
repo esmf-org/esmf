@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.130 2007/09/14 22:27:29 theurich Exp $
+// $Id: ESMC_Array.C,v 1.131 2007/09/14 23:07:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.130 2007/09/14 22:27:29 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.131 2007/09/14 23:07:56 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3959,6 +3959,8 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   VMK::wtime(&t8);   //gjt - profile
 #endif
     
+#define ASMMPROFILE___disable
+#ifdef ASMMPROFILE
   // <XXE profiling element>
   xxe->stream[xxe->count].opId = XXE::wtimer;
   xxeElement = &(xxe->stream[xxe->count]);
@@ -3977,7 +3979,8 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   // </XXE profiling element>
-
+#endif
+  
   // prepare arrays used in recvnb loop _and_ +=* loop
   int *diffPartnerDeCount = new int[dstLocalDeCount];
   int **recvnbIndex = new int*[dstLocalDeCount];
@@ -4112,6 +4115,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     VMK::wtime(&t10Xd);   //gjt - profile
 #endif
         
+#ifdef ASMMPROFILE
     // <XXE profiling element>
     xxe->stream[xxe->count].opId = XXE::wtimer;
     xxeElement = &(xxe->stream[xxe->count]);
@@ -4130,7 +4134,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     // </XXE profiling element>
-    
+#endif
+        
     // construct recv pattern and fill in corresponding XXE StreamElements
     recvnbIndex[j] = new int[diffPartnerDeCount[j]];
     buffer[j] = new char*[diffPartnerDeCount[j]];
@@ -4167,6 +4172,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         ESMF_ERR_PASSTHRU, &rc)) return rc;
     } // for i - diffPartnerDeCount[j]
         
+#ifdef ASMMPROFILE
     // <XXE profiling element>
     xxe->stream[xxe->count].opId = XXE::wtimer;
     xxeElement = &(xxe->stream[xxe->count]);
@@ -4185,7 +4191,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     // </XXE profiling element>
-    
+#endif
+        
     // garbage collection
     delete [] index2Ref;
     delete [] index2Ref2;
@@ -4294,6 +4301,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
           " %d\n", i, k, srcInfoTable[i][k].seqIndex, 
           srcInfoTable[i][k].partnerSeqIndex);
 #endif
+    
+#ifdef ASMMPROFILE
     // <XXE profiling element>
     xxe->stream[xxe->count].opId = XXE::wtimer;
     xxeElement = &(xxe->stream[xxe->count]);
@@ -4312,7 +4321,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     // </XXE profiling element>
-
+#endif
+    
     // construct send pattern and fill in corresponding XXE StreamElements    
     struct LinIndexContigBlock{
       int linIndex;
@@ -4504,6 +4514,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
     delete [] srcInfoTable;
     delete [] srcInfoTableInit;
     
+#ifdef ASMMPROFILE
     // <XXE profiling element>
     xxe->stream[xxe->count].opId = XXE::wtimer;
     xxeElement = &(xxe->stream[xxe->count]);
@@ -4522,7 +4533,8 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     // </XXE profiling element>
-    
+#endif
+        
   } // for j - srcLocalDeCount
 
   
@@ -4533,6 +4545,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
   // use recv pattern for all localDEs in dstArray and issue XXE::"+=*"
   for (int j=0; j<dstLocalDeCount; j++){
 
+#ifdef ASMMPROFILE
     // <XXE profiling element>
     xxe->stream[xxe->count].opId = XXE::wtimer;
     xxeElement = &(xxe->stream[xxe->count]);
@@ -4551,7 +4564,8 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     // </XXE profiling element>
-  
+#endif
+      
     // use waitOnAnyIndexSub to wait on and process the incoming data
     xxe->stream[xxe->count].opId = XXE::waitOnAnyIndexSub;
     xxeElement = &(xxe->stream[xxe->count]);
@@ -4592,6 +4606,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
 
+#ifdef ASMMPROFILE
       // <XXE profiling element>
       xxeSub->stream[xxeSub->count].opId = XXE::wtimer;
       xxeElement = &(xxeSub->stream[xxeSub->count]);
@@ -4611,7 +4626,9 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       // </XXE profiling element>
-  
+#endif
+        
+#ifdef ASMMPROFILE
       // <XXE profiling element>
       xxeSub->stream[xxeSub->count].opId = XXE::wtimer;
       xxeElement = &(xxeSub->stream[xxeSub->count]);
@@ -4631,7 +4648,8 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       // </XXE profiling element>
-
+#endif
+      
 #ifdef USEproductSumScalarRRA
       for (int kk=0; kk<partnerDeCount[j][k]; kk++){
         DstInfo *dstInfo = &(dstInfoTable[j][k][kk]);
@@ -4751,6 +4769,7 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
       
 #endif
             
+#ifdef ASMMPROFILE
       // <XXE profiling element>
       xxeSub->stream[xxeSub->count].opId = XXE::wtimer;
       xxeElement = &(xxeSub->stream[xxeSub->count]);
@@ -4770,13 +4789,15 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       // </XXE profiling element>
-
+#endif
+      
     } // k - diffPartnerDeCount[j]    
     
 #ifdef ASMMSTORETIMING
     VMK::wtime(&t10Yf);   //gjt - profile
 #endif
         
+#ifdef ASMMPROFILE
     // <XXE profiling element>
     xxe->stream[xxe->count].opId = XXE::wtimer;
     xxeElement = &(xxe->stream[xxe->count]);
@@ -4795,6 +4816,7 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     // </XXE profiling element>
+#endif
     
     // garbage collection
     delete [] partnerDeCount[j];
@@ -4826,6 +4848,7 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
   VMK::wtime(&t10Y);   //gjt - profile
 #endif
   
+#ifdef ASMMPROFILE
   // <XXE profiling element>
   xxe->stream[xxe->count].opId = XXE::wtimer;
   xxeElement = &(xxe->stream[xxe->count]);
@@ -4844,13 +4867,15 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   // </XXE profiling element>
-
+#endif
+  
   // post XXE::waitOnAllSendnb
   xxe->stream[xxe->count].opId = XXE::waitOnAllSendnb;
   localrc = xxe->incCount();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
 
+#ifdef ASMMPROFILE
   // <XXE profiling element>
   xxe->stream[xxe->count].opId = XXE::wtimer;
   xxeElement = &(xxe->stream[xxe->count]);
@@ -4869,7 +4894,9 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   // </XXE profiling element>
-
+#endif
+  
+#ifdef ASMMPROFILE
   // <XXE profiling element>
   xxe->stream[xxe->count].opId = XXE::wtimer;
   xxeElement = &(xxe->stream[xxe->count]);
@@ -4888,7 +4915,8 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   // </XXE profiling element>
-
+#endif
+  
 #if 0  
   // optimize the XXE entire stream
   localrc = xxe->optimize();
