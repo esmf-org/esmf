@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.128 2007/09/14 18:31:18 theurich Exp $
+// $Id: ESMC_Array.C,v 1.129 2007/09/14 19:12:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.128 2007/09/14 18:31:18 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.129 2007/09/14 19:12:16 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4703,7 +4703,6 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
         // need to fill in sensible values or else timing will be bogus
         *(ESMC_R4 *)(rraList[srcLocalDeCount]+rraOffsetList[kk]) = 0.; //element
         *(ESMC_R4 *)valueList[kk] = 0.01; // value
-        *(ESMC_R4 *)factorList[kk] = 0.1; // factor
       } // for kk - termCount
       xxeSub->optimizeElement(xxeIndex);
       double dt_sScalar;
