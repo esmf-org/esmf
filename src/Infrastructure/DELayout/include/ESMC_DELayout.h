@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.46 2007/09/14 22:26:32 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.47 2007/09/14 22:48:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -235,7 +235,7 @@ class XXE{
     struct StreamElement{
       OpId opId;              // id of operation
       OpSubId opSubId;        // id of sub-operation
-      char opInfo[7*8];       // 7 x 8-byte to hold info associated with op
+      char opInfo[8*8];       // 7 x 8-byte to hold info associated with op
     };
     
   public:
