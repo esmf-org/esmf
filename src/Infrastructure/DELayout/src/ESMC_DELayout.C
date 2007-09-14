@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.81 2007/09/14 22:26:32 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.82 2007/09/14 22:57:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.81 2007/09/14 22:26:32 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.82 2007/09/14 22:57:15 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2762,45 +2762,45 @@ int XXE::exec(
         switch (xxeProductSumSuperScalarContigRRAInfo->opSubId){
         case I4:
           {
-            ESMC_I4 *element, *factor;
+            ESMC_I4 *element, factor;
             ESMC_I4 *value = (ESMC_I4 *)valueList;
             for (int k=0; k<termCount; k++){
               element = (ESMC_I4 *)(rraBase + rraOffsetList[k]);
-              factor = (ESMC_I4 *)factorList[k];
-              *element += *factor * value[k];
+              factor = *(ESMC_I4 *)factorList[k];
+              *element += factor * value[k];
             }
           }
           break;
         case I8:
           {
-            ESMC_I8 *element, *factor;
+            ESMC_I8 *element, factor;
             ESMC_I8 *value = (ESMC_I8 *)valueList;
             for (int k=0; k<termCount; k++){
               element = (ESMC_I8 *)(rraBase + rraOffsetList[k]);
-              factor = (ESMC_I8 *)factorList[k];
-              *element += *factor * value[k];
+              factor = *(ESMC_I8 *)factorList[k];
+              *element += factor * value[k];
             }
           }
           break;
         case R4:
           {
-            ESMC_R4 *element, *factor;
+            ESMC_R4 *element, factor;
             ESMC_R4 *value = (ESMC_R4 *)valueList;
             for (int k=0; k<termCount; k++){
               element = (ESMC_R4 *)(rraBase + rraOffsetList[k]);
-              factor = (ESMC_R4 *)factorList[k];
-              *element += *factor * value[k];
+              factor = *(ESMC_R4 *)factorList[k];
+              *element += factor * value[k];
             }
           }
           break;
         case R8:
           {
-            ESMC_R8 *element, *factor;
+            ESMC_R8 *element, factor;
             ESMC_R8 *value = (ESMC_R8 *)valueList;
             for (int k=0; k<termCount; k++){
               element = (ESMC_R8 *)(rraBase + rraOffsetList[k]);
-              factor = (ESMC_R8 *)factorList[k];
-              *element += *factor * value[k];
+              factor = *(ESMC_R8 *)factorList[k];
+              *element += factor * value[k];
             }
           }
           break;
