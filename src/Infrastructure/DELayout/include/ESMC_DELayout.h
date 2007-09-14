@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.45 2007/09/13 20:36:05 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.46 2007/09/14 22:26:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -462,7 +462,8 @@ class XXE{
       int relativeWtimerId;
       // members below are for internal use
       int actualWtimerIndex;
-      int relativeWtimerIndex;
+      double *relativeWtime;
+      XXE *relativeWtimerXXE;
       int sumTermCount;
       double wtime;
       double wtimeSum;

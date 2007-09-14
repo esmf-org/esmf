@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.80 2007/09/14 18:21:10 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.81 2007/09/14 22:26:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.80 2007/09/14 18:21:10 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.81 2007/09/14 22:26:32 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2784,12 +2784,12 @@ int XXE::exec(
           break;
         case R4:
           {
-            ESMC_R4 *element, factor;
+            ESMC_R4 *element, *factor;
             ESMC_R4 *value = (ESMC_R4 *)valueList;
             for (int k=0; k<termCount; k++){
               element = (ESMC_R4 *)(rraBase + rraOffsetList[k]);
-              factor = *((ESMC_R4 *)factorList[k]);
-              *element += factor * value[k];
+              factor = (ESMC_R4 *)factorList[k];
+              *element += *factor * value[k];
             }
           }
           break;
@@ -2943,9 +2943,7 @@ int XXE::exec(
         double *wtimeActual = &(xxeWtimerInfoActual->wtime);
         double *wtimeSumActual = &(xxeWtimerInfoActual->wtimeSum);
         int *sumTermCountActual = &(xxeWtimerInfoActual->sumTermCount);
-        index = xxeWtimerInfo->relativeWtimerIndex;
-        xxeWtimerInfoRelative = (WtimerInfo *)(&(stream[index]));
-        double wtimeRelative = xxeWtimerInfoRelative->wtime;
+        double wtimeRelative = *(xxeWtimerInfo->relativeWtime);
         // this xxe wtimer stream element
         VMK::wtime(wtime);
         *wtime -= wtimeRelative;
@@ -3220,7 +3218,7 @@ int XXE::execReady(
   int recvnbCount = 0;
   int recvnbLowerIndex = -1;  // prime lower index indicator blow 0
   
-  void *xxeElement, *xxeIndexElement;
+  void *xxeElement, *xxeIndexElement, *xxeElement2;
   SendnbInfo *xxeSendnbInfo;
   RecvnbInfo *xxeRecvnbInfo;
   WaitOnIndexInfo *xxeWaitOnIndexInfo;
@@ -3228,7 +3226,7 @@ int XXE::execReady(
   WaitOnIndexRangeInfo *xxeWaitOnIndexRangeInfo;
   CommhandleInfo *xxeCommhandleInfo;
   ProductSumVectorInfo *xxeProductSumVectorInfo;
-  WtimerInfo *xxeWtimerInfo;
+  WtimerInfo *xxeWtimerInfo, *xxeWtimerInfo2;
   XxeSubInfo *xxeSubInfo;
   XxeSubMultiInfo *xxeSubMultiInfo;
   
@@ -3246,17 +3244,25 @@ int XXE::execReady(
       switch(stream[i].opId){
       case xxeSub:
         xxeSubInfo = (XxeSubInfo *)xxeElement;
-        xxeSubInfo->xxe->execReady(); // recursive call
+        localrc = xxeSubInfo->xxe->execReady(); // recursive call
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          &rc)) return rc;
         break;
       case xxeSubMulti:
         xxeSubMultiInfo = (XxeSubMultiInfo *)xxeElement;
-        for (int k=0; k<xxeSubMultiInfo->count; k++)
-          xxeSubMultiInfo->xxe[k]->execReady(); // recursive call
+        for (int k=0; k<xxeSubMultiInfo->count; k++){
+          localrc = xxeSubMultiInfo->xxe[k]->execReady(); // recursive call
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+            &rc)) return rc;
+        }
         break;
       case waitOnAnyIndexSub:
         xxeWaitOnAnyIndexSubInfo = (WaitOnAnyIndexSubInfo *)xxeElement;
-        for (int k=0; k<xxeWaitOnAnyIndexSubInfo->count; k++)
-          xxeWaitOnAnyIndexSubInfo->xxe[k]->execReady(); // recursive call
+        for (int k=0; k<xxeWaitOnAnyIndexSubInfo->count; k++){
+          localrc = xxeWaitOnAnyIndexSubInfo->xxe[k]->execReady(); // recu. call
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+            &rc)) return rc;
+        }
         break;
       case send:
         break;
@@ -3401,16 +3407,34 @@ int XXE::execReady(
       xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
       int actualWtimerId = xxeWtimerInfo->actualWtimerId;
       int relativeWtimerId = xxeWtimerInfo->relativeWtimerId;
+      XXE *xxe = xxeWtimerInfo->relativeWtimerXXE;
       int resolveCounter = 0; // reset
       int j;
+      if (xxe != NULL){
+        // look through the referenced XXE
+        for (int ii=0; ii<xxe->count; ii++){
+          if (xxe->stream[ii].opId == wtimer){
+            xxeElement2 = &(xxe->stream[ii]);
+            xxeWtimerInfo2 = (XXE::WtimerInfo *)xxeElement2;
+            if (xxeWtimerInfo2->timerId == relativeWtimerId){
+              xxeWtimerInfo->relativeWtime = &(xxeWtimerInfo2->wtime);
+              ++resolveCounter;
+                break;
+            }
+          }
+        }
+      }
       for (j=0; j<iCount; j++){
         if (idList[j] == actualWtimerId){
           xxeWtimerInfo->actualWtimerIndex = indexList[j];
           ++resolveCounter;
         }
-        if (idList[j] == relativeWtimerId){
-          xxeWtimerInfo->relativeWtimerIndex = indexList[j];
-          ++resolveCounter;
+        if (xxe == NULL){
+          if (idList[j] == relativeWtimerId){
+            xxeWtimerInfo->relativeWtime =
+              &(((WtimerInfo *)(&(stream[indexList[j]])))->wtime);
+            ++resolveCounter;
+          }
         }
         if (resolveCounter==2) break; // resolved both Ids
       }
