@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.127 2007/09/13 20:36:04 theurich Exp $
+// $Id: ESMC_Array.C,v 1.128 2007/09/14 18:31:18 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.127 2007/09/13 20:36:04 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.128 2007/09/14 18:31:18 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3920,7 +3920,13 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     return rc;
 
   // allocate XXE and attach to RouteHandle
-  XXE *xxe = new XXE(1000, 10000, 1000);
+  XXE *xxe;
+  try{
+    xxe = new XXE(1000, 10000, 1000);
+  }catch (...){
+    ESMC_LogDefault.ESMC_LogAllocError(&rc);
+    return rc;
+  }
   localrc = (*routehandle)->ESMC_RouteHandleSetStorage(xxe);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
@@ -4122,7 +4128,6 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     // </XXE profiling element>
-    
     
     // construct recv pattern and fill in corresponding XXE StreamElements
     recvnbIndex[j] = new int[diffPartnerDeCount[j]];
@@ -4541,21 +4546,6 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     // </XXE profiling element>
   
-#if 0
-    ////////// for now put this into the main XXE stream as a loop before
-    ////////// the xxeSub that will do the receive processing
-    for (int k=0; k<diffPartnerDeCount[j]; k++){
-      // post XXE::waitOnIndex for recvnb operation associated with diff DE "k"
-      xxe->stream[xxe->count].opId = XXE::waitOnIndex;
-      xxeElement = &(xxe->stream[xxe->count]);
-      xxeWaitOnIndexInfo = (XXE::WaitOnIndexInfo *)xxeElement;
-      xxeWaitOnIndexInfo->index = recvnbIndex[j][k];
-      localrc = xxe->incCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-    }
-#endif    
-
     // use waitOnAnyIndexSub to wait on and process the incoming data
     xxe->stream[xxe->count].opId = XXE::waitOnAnyIndexSub;
     xxeElement = &(xxe->stream[xxe->count]);
@@ -4710,6 +4700,10 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
         factorList[kk] = (void *)
           (localDeFactorList[j] + (dstInfo->localDeFactorListIndex) * dataSize);
         valueList[kk] = (void *)(buffer[j][k] + kk*dataSize);
+        // need to fill in sensible values or else timing will be bogus
+        *(ESMC_R4 *)(rraList[srcLocalDeCount]+rraOffsetList[kk]) = 0.; //element
+        *(ESMC_R4 *)valueList[kk] = 0.01; // value
+        *(ESMC_R4 *)factorList[kk] = 0.1; // factor
       } // for kk - termCount
       xxeSub->optimizeElement(xxeIndex);
       double dt_sScalar;
@@ -4733,7 +4727,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
 printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
   " dt_sScalarC=%g s for termCount=%d\n", localPet, dt_sScalar, dt_sScalarC,
   termCount);
-      // decide for the dt_sScalarC option
+      // decide for the fastest option
       if (dt_sScalar < dt_sScalarC){
         // use productSumSuperScalarRRA
         xxeSub->stream[xxeIndex].opId = XXE::productSumSuperScalarRRA;
@@ -4768,7 +4762,7 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       // </XXE profiling element>
-      
+
     } // k - diffPartnerDeCount[j]    
     
 #ifdef ASMMSTORETIMING
