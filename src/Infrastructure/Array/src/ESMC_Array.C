@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.131 2007/09/14 23:07:56 theurich Exp $
+// $Id: ESMC_Array.C,v 1.132 2007/09/17 20:04:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.131 2007/09/14 23:07:56 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.132 2007/09/17 20:04:59 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -354,25 +354,53 @@ Array *Array::create(
   }
   const DELayout *delayout = distgrid->getDELayout();
   int dimCount = distgrid->getDimCount();
-  if (dimCount > rank){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-      "- dimCount of distgrid argument must be <= rank of Array", rc);
-    return ESMC_NULL_POINTER;
-  }  
+  // check if dimmap was provided and matches rest of arguments
+  int *dimmapArray = new int[dimCount];
+  for (int i=0; i<dimCount; i++){
+    if (i < rank)
+      dimmapArray[i] = i+1; // default (basis 1)
+    else
+      dimmapArray[i] = 0;   // default (replicator dims beyond rank)
+  }
+  if (dimmap != NULL){
+    if (dimmap->dimCount != 1){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- dimmap array must be of rank 1", rc);
+      return ESMC_NULL_POINTER;
+    }
+    if (dimmap->extent[0] != dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- dimmap and distgrid mismatch", rc);
+      return ESMC_NULL_POINTER;
+    }
+    for (int i=0; i<dimCount; i++){
+      if (dimmapArray[i] < 0 || dimmapArray[i] > rank){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          "- invalid dimmap element", rc);
+        return ESMC_NULL_POINTER;
+      }
+      dimmapArray[i] = dimmap->array[i];  // copy dimmap array element
+    }
+  }
+  // determine replicatorCount
+  int replicatorCount = 0;  // initialize
+  for (int i=0; i<dimCount; i++)
+    if (dimmapArray[i] == 0) ++replicatorCount;
+  // determine tensorCount
+  int tensorCount = rank - (dimCount - replicatorCount);
+  if (tensorCount < 0) tensorCount = 0;
+  // generate inverseDimmap
+  int *inverseDimmapArray = new int[rank];
+  for (int i=0; i<rank; i++)
+    inverseDimmapArray[i] = 0; // reset  (basis 1), 0 indicates tensor dim
+  for (int i=0; i<dimCount; i++){
+    if (dimmapArray[i] > 0)
+      inverseDimmapArray[dimmapArray[i]-1] = i+1;
+  }
   // check for lbounds and ubounds arguments and that they match dimCount, rank
-//todo: provide a default here that leaves the bounds of the incoming LocalArray
-//      unchanged for tensor dimensions and don't require these arguments
-  int tensorCount = rank - dimCount;  // number of tensor dimensions
-  if (tensorCount > 0 && lboundsArg == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- Valid lbounds argument required to create Array with tensor dims", rc);
-    return ESMC_NULL_POINTER;
-  }
-  if (tensorCount > 0 && uboundsArg == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- Valid ubounds argument required to create Array with tensor dims", rc);
-    return ESMC_NULL_POINTER;
-  }
+  // by default use lbounds and ubounds of LocalArray for localDe 0 for tensor
+  // dims.
+  int lboundsArrayAllocFlag = 0;  // reset
   int *lboundsArray = NULL; // reset
   if (lboundsArg != NULL){
     if (lboundsArg->dimCount != 1){
@@ -386,7 +414,22 @@ Array *Array::create(
       return ESMC_NULL_POINTER;
     }
     lboundsArray = lboundsArg->array;
+  }else if (tensorCount > 0){
+    int *lbounds = new int[rank];
+    localrc = larrayListArg[0]->ESMC_LocalArrayGetLbounds(rank, lbounds);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
+      return ESMC_NULL_POINTER;
+    lboundsArrayAllocFlag = 1;  // set
+    lboundsArray = new int[tensorCount];
+    int tensorIndex = 0;  // reset
+    for (int i=0; i<rank; i++)
+      if (inverseDimmapArray[i] == 0){
+        lboundsArray[tensorIndex] = lbounds[i];
+        ++tensorIndex;
+      }
+    delete [] lbounds;
   }
+  int uboundsArrayAllocFlag = 0;  // reset
   int *uboundsArray = NULL; // reset
   if (uboundsArg != NULL){
     if (uboundsArg->dimCount != 1){
@@ -400,37 +443,21 @@ Array *Array::create(
       return ESMC_NULL_POINTER;
     }
     uboundsArray = uboundsArg->array;
-  }
-  // check if dimmap was provided and matches rest of arguments
-  int *dimmapArray = new int[dimCount];
-  for (int i=0; i<dimCount; i++)
-    dimmapArray[i] = i+1; // default  (basis 1)
-  if (dimmap != NULL){
-    if (dimmap->dimCount != 1){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-        "- dimmap array must be of rank 1", rc);
+  }else if (tensorCount > 0){
+    int *ubounds = new int[rank];
+    localrc = larrayListArg[0]->ESMC_LocalArrayGetUbounds(rank, ubounds);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
       return ESMC_NULL_POINTER;
-    }
-    if (dimmap->extent[0] != dimCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-        "- dimmap and distgrid mismatch", rc);
-      return ESMC_NULL_POINTER;
-    }
-    for (int i=0; i<dimCount; i++){
-      if (dimmap->array[i] < 1 || dimmap->array[i] > rank){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-          "- dimmap / rank mismatch", rc);
-        return ESMC_NULL_POINTER;
+    uboundsArrayAllocFlag = 1;  // set
+    uboundsArray = new int[tensorCount];
+    int tensorIndex = 0;  // reset
+    for (int i=0; i<rank; i++)
+      if (inverseDimmapArray[i] == 0){
+        uboundsArray[tensorIndex] = ubounds[i];
+        ++tensorIndex;
       }
-      dimmapArray[i] = dimmap->array[i];  // copy dimmap array element
-    }
+    delete [] ubounds;
   }
-  // generate inverseDimmap
-  int *inverseDimmapArray = new int[rank];
-  for (int i=0; i<rank; i++)
-    inverseDimmapArray[i] = 0; // reset  (basis 1), 0 indicates not distr. dim
-  for (int i=0; i<dimCount; i++)
-    inverseDimmapArray[dimmapArray[i]-1] = i+1;
   // delayout -> deCount, localDeCount, localDeList
   int deCount = delayout->getDeCount();
   int localDeCount = delayout->getLocalDeCount();
@@ -726,6 +753,8 @@ Array *Array::create(
   delete [] inverseDimmapArray;
   delete [] staggerLoc;
   delete [] vectorDim;
+  if (lboundsArrayAllocFlag) delete [] lboundsArray;
+  if (uboundsArrayAllocFlag) delete [] uboundsArray;
   
   // return successfully
   *rc = ESMF_SUCCESS;
@@ -823,6 +852,14 @@ Array *Array::create(
   // determine tensorCount
   int tensorCount = rank - (dimCount - replicatorCount);
   if (tensorCount < 0) tensorCount = 0;
+  // generate inverseDimmap
+  int *inverseDimmapArray = new int[rank];
+  for (int i=0; i<rank; i++)
+    inverseDimmapArray[i] = 0; // reset  (basis 1), 0 indicates tensor dim
+  for (int i=0; i<dimCount; i++){
+    if (dimmapArray[i] > 0)
+      inverseDimmapArray[dimmapArray[i]-1] = i+1;
+  }
   // check for lbounds and ubounds arguments and that they match dimCount, rank
   if (tensorCount > 0 && lboundsArg == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -861,14 +898,6 @@ Array *Array::create(
       return ESMC_NULL_POINTER;
     }
     uboundsArray = uboundsArg->array;
-  }
-  // generate inverseDimmap
-  int *inverseDimmapArray = new int[rank];
-  for (int i=0; i<rank; i++)
-    inverseDimmapArray[i] = 0; // reset  (basis 1), 0 indicates tensor dim
-  for (int i=0; i<dimCount; i++){
-    if (dimmapArray[i] > 0)
-      inverseDimmapArray[dimmapArray[i]-1] = i+1;
   }
   // delayout -> deCount, localDeCount, localDeList
   int deCount = delayout->getDeCount();

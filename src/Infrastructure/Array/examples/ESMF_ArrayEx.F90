@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.25 2007/09/11 23:38:07 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.26 2007/09/17 20:04:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -38,10 +38,9 @@ program ESMF_ArrayEx
   type(ESMF_LocalArray), allocatable:: larrayList(:)
   type(ESMF_LocalArray), allocatable:: larrayList1(:), larrayList2(:)
   real(ESMF_KIND_R8), pointer:: myF90Array(:,:)
-  real(ESMF_KIND_R8), pointer:: myF90Array1D(:)
 !  real(ESMF_KIND_R8), pointer:: myF90Array1(:,:), myF90Array2(:,:)
-  real(ESMF_KIND_R8), pointer:: myF90Array3(:,:,:)
-  real(ESMF_KIND_R8), pointer:: myF90Array2D(:,:), myF90Array3D(:,:,:)
+  real(ESMF_KIND_R8), pointer:: myF90Array1D(:), myF90Array3D(:,:,:)
+  real(ESMF_KIND_R8), pointer:: myF90Array2D(:,:), myF90Array2D2(:,:)
   real(ESMF_KIND_R8):: dummySum
   type(ESMF_IndexFlag):: indexflag
 !  integer, allocatable:: dimExtent(:,:), indexList(:), regDecompDeCoord(:)
@@ -992,11 +991,18 @@ program ESMF_ArrayEx
   enddo
 !EOCI
 !BOEI
-! Done, {\tt array} can be destroyed.
+! Done, {\tt array} and {\tt distgrid} can be destroyed.
 !EOEI
 !BOCI  
   call ESMF_ArrayDestroy(array, rc=rc) ! finally destroy the array object
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOCI  
+
+#else
+  ! need to clean up distgrid that was created several sections ago
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -1611,6 +1617,7 @@ program ESMF_ArrayEx
   call ESMF_ArrayBundleDestroy(arrayBundle, rc=rc)
   call ESMF_ArrayDestroy(array1, rc=rc)
   call ESMF_ArrayDestroy(array2, rc=rc)
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
 !EOCI
 
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -1784,7 +1791,14 @@ program ESMF_ArrayEx
 ! possible to store {\tt array1} and {\tt array2} of section
 ! \ref{ArrayEx_staggeredArrays} in a single Array object using one 
 ! additional tensor dimension of size 2. The same {\tt distgrid} object as 
-! before can be used to create the Array. The rank in the {\tt arrayspec} 
+! before can be used to create the Array. 
+!EOE
+!BOC
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
+    regDecomp=(/2,3/), rc=rc)
+!EOC
+!BOE
+! The rank in the {\tt arrayspec} 
 ! argument, however, must be changed from 2 to 3 in order to provide for the 
 ! extra Array dimension. 
 !EOE
@@ -1858,7 +1872,7 @@ program ESMF_ArrayEx
 !BOE
 ! The following loop shows how a Fortran90
 ! pointer to the DE-local data chunks can be obtained and used to set data 
-! values in the exclusive regions. The {\tt myF90Array3} variable must be of 
+! values in the exclusive regions. The {\tt myF90Array3D} variable must be of 
 ! rank 3 to match the Array rank of {\tt array}.
 ! However, variables such as {\tt exclusiveUBound} that store the information
 ! about the decomposition, remain to be allocated for a 2D decomposition.
@@ -1867,11 +1881,11 @@ program ESMF_ArrayEx
   call ESMF_ArrayGet(array, exclusiveLBound=exclusiveLBound, &
     exclusiveUBound=exclusiveUBound, rc=rc)
   do de=1, localDeCount
-    call ESMF_LocalArrayGetData(larrayList(de), myF90Array3, ESMF_DATA_REF, rc=rc)
-    myF90Array3 = 0.0 ! initialize
-    myF90Array3(exclusiveLBound(1,de):exclusiveUBound(1,de), &
+    call ESMF_LocalArrayGetData(larrayList(de), myF90Array3D, ESMF_DATA_REF, rc=rc)
+    myF90Array3D = 0.0 ! initialize
+    myF90Array3D(exclusiveLBound(1,de):exclusiveUBound(1,de), &
       exclusiveLBound(2,de):exclusiveUBound(2,de), 1) = 5.1 ! dummy assignment
-    myF90Array3(exclusiveLBound(1,de):exclusiveUBound(1,de), &
+    myF90Array3D(exclusiveLBound(1,de):exclusiveUBound(1,de), &
       exclusiveLBound(2,de):exclusiveUBound(2,de), 2) = 2.5 ! dummy assignment
   enddo
   deallocate(larrayList)
@@ -1950,10 +1964,10 @@ program ESMF_ArrayEx
   idm1=inverseDimmap(1)
   idm3=inverseDimmap(3)
   do de=1, localDeCount
-    call ESMF_LocalArrayGetData(larrayList(de), myF90Array3, ESMF_DATA_REF, rc=rc)
-    myF90Array3(exclusiveLBound(idm1,de):exclusiveUBound(idm1,de), &
+    call ESMF_LocalArrayGetData(larrayList(de), myF90Array3D, ESMF_DATA_REF, rc=rc)
+    myF90Array3D(exclusiveLBound(idm1,de):exclusiveUBound(idm1,de), &
       1, exclusiveLBound(idm3,de):exclusiveUBound(idm3,de)) = 10.5 ! dummy assignment
-    myF90Array3(exclusiveLBound(idm1,de):exclusiveUBound(idm1,de), &
+    myF90Array3D(exclusiveLBound(idm1,de):exclusiveUBound(idm1,de), &
       2, exclusiveLBound(idm3,de):exclusiveUBound(idm3,de)) = 23.3 ! dummy assignment
   enddo
   deallocate(exclusiveLBound, exclusiveUBound)
@@ -2132,13 +2146,90 @@ program ESMF_ArrayEx
 ! This will have filled each local 4 x 2 Array piece with the replicated
 ! data of {\tt myF90Array2D}.
 !EOE
-  call ESMF_ArrayPrint(array, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!  call ESMF_ArrayPrint(array, rc=rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
   call ESMF_ArrayDestroy(array, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
 
+!BOE
+! Replicated Arrays can also be created from existing local Fortran arrays.
+! The following Fortran array allocation will provide a 3 x 10 array on each
+! PET. 
+!EOE
+!BOC
+  allocate(myF90Array2D(3,10))
+!EOC
+!BOE
+! Assuming a petCount of 4 the following DistGrid defines a 2D index space
+! that is distributed across the PETs along the first dimension.
+!EOE
+!BOC
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/40,10/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!EOC
+!BOE
+! The following call creates an Array object on the above distgrid using
+! the locally existing {\tt myF90Array2D} Fortran arrays. The difference 
+! compared to the case with automatic memory allocation is that instead of
+! {\tt arrayspec} the Fortran array is provided as argument. Futhermore,
+! the {\tt lbounds} and {\tt ubounds} arguments can be omitted, defaulting
+! into Array tensor dimension lbounds of 1 and an upper bound equal to the
+! size of the respective Fortran array dimension.
+!EOE
+!BOC
+  array = ESMF_ArrayCreate(farray=myF90Array2D, distgrid=distgrid, &
+    dimmap=(/0,2/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!EOC
+!BOE
+! The {\tt array} object associates the 2nd DistGrid dimension with the 2nd
+! Array dimension. The first DistGrid dimension is not associated with any
+! Array dimension and will lead to replication of the Array along the DEs of
+! this direction. Still, the local arrays that comprise the {\tt array} 
+! object refer to independent pieces of memory and can be initialized 
+! indpendently.
+!EOE
+!BOC
+  myF90Array2D = localPet ! initialize
+!EOC
+!  call ESMF_ArrayPrint(array, rc=rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOE
+! However, the notion of replication becomes visible when a local array of shape
+! 3 x 10 is scattered across the Array object.
+!EOE
+!BOC
+  allocate(myF90Array2D2(5:7,11:20))
+  
+  do j=11,20
+    do i=5,7
+      myF90Array2D2(i,j) = i * 100.d0 + j * 1.2345d0 ! initialize
+    enddo
+  enddo
+  
+  call ESMF_ArrayScatter(array, farray=myF90Array2D2, rootPet=0, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  deallocate(myF90Array2D2)
+!EOC
+!BOE
+! The Array pieces on every DE will receive the same source data, resulting
+! in a replication of data along DistGrid dimension 1.
+!EOE
+!  call ESMF_ArrayPrint(array, rc=rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+  call ESMF_ArrayDestroy(array, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  deallocate(myF90Array2D)
+!EOC
 
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 !!!! UNTIL FURTHER IMPLEMENTATION SKIP SECTIONS OF THIS EXAMPLE >>>>>>>>>>>>>>>>
@@ -2273,6 +2364,9 @@ program ESMF_ArrayEx
 ! account in Array reduce operations.
 !
 !EOEI
+
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+
 
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #endif
