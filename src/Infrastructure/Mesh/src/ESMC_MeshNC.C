@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshNC.C,v 1.2 2007/08/15 21:17:36 dneckels Exp $
+// $Id: ESMC_MeshNC.C,v 1.3 2007/09/17 19:05:39 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -411,7 +411,7 @@ std::cout << "size of ll:" << ll.size() << std::endl;
   mesh.remove_unused_nodes();
   mesh.linearize_data_index();
 
-  IOField<NodalField> *node_coord = mesh.RegisterNodalField("coordinates", mesh.spatial_dim());
+  IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", mesh.spatial_dim());
 
   MeshDB::const_iterator Ni = mesh.node_begin(), Ne = mesh.node_end();
   {

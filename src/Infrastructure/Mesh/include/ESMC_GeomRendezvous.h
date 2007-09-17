@@ -1,4 +1,4 @@
-// $Id: ESMC_GeomRendezvous.h,v 1.2 2007/09/10 17:38:27 dneckels Exp $
+// $Id: ESMC_GeomRendezvous.h,v 1.3 2007/09/17 19:05:39 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -41,11 +41,12 @@ public:
  * to the geometric rendezvous.
  */
   struct DstConfig {
-         DstConfig(UInt _iter_otype, UInt _otype, const Context &_ctxt, double _gtol = 1e-6) :
-           iter_obj_type(_iter_otype), obj_type(_otype), ctxt(_ctxt), geom_tol(_gtol) {}
+         DstConfig(UInt _iter_otype, UInt _otype, const Context &_ctxt, bool _neighbors = false, double _gtol = 1e-6) :
+           iter_obj_type(_iter_otype), obj_type(_otype), ctxt(_ctxt), neighbors(_neighbors), geom_tol(_gtol) {}
          UInt iter_obj_type; // Object to iterate when building intersection 
          UInt obj_type; // One of node, node + interp, interp
          Context ctxt; // Context to match when iterating 
+         bool neighbors; // true = send neigbors with elements (for patch methods)
          double geom_tol;
   };
 

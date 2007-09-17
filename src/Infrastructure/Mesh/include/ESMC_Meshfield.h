@@ -1,4 +1,4 @@
-// $Id: ESMC_Meshfield.h,v 1.2 2007/09/10 17:38:27 dneckels Exp $
+// $Id: ESMC_Meshfield.h,v 1.3 2007/09/17 19:05:39 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -103,7 +103,7 @@ public:
 };
 
 template<typename SCALAR>
-class _fieldType : _fieldTypeBase {
+class _fieldType : public _fieldTypeBase {
 public:
   ~_fieldType();
   void non_virtual_func();

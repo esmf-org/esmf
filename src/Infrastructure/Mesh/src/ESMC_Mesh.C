@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.C,v 1.4 2007/09/10 17:38:29 dneckels Exp $
+// $Id: ESMC_Mesh.C,v 1.5 2007/09/17 19:05:39 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -1415,54 +1415,84 @@ void Mesh::Commit() {
 }
 
 void Mesh::CreateGhost() {
-#ifdef NOT
   if (sghost) return; // must already be scratched
-  sghost = new scratch_data();
+  sghost = new CommReg("_ghost", *this, *this);
 
   std::vector<CommRel::CommNode> selem;
 
   // Loop through the shared nodes; add all attached elements.
   KernelList::iterator ms = set_begin(), me = set_end();
   for (; ms != me; ++ms) {
+    
     if (ms->type() == (UInt) MeshObj::NODE && ms->GetAttr().is_shared()) {
+      
       Kernel::obj_iterator oi = ms->obj_begin(), oe = ms->obj_end();
       for (; oi != oe; ++oi) {
+        
         MeshObj &node = *oi;
         std::vector<MeshObj*> elem;
         std::vector<MeshObj*> on(1);
         on[0] = &node;
+        
         // Get all the elements this node is used by.
         MeshObjConn::common_objs(on.begin(),on.end(), MeshObj::USED_BY, MeshObj::ELEMENT, elem);
+        
+        // Find the procs this node goes to and send the element there
         std::vector<UInt> nprocs;
         MeshObjConn::get_node_sharing(node, GetSymNodeRel(), nprocs);
         for (UInt i = 0; i < nprocs.size(); i++) {
+          
+          // Add the elements (if not already present)
           for (UInt e = 0; e < elem.size(); e++) {
-            selem.push_back(CommRel::CommNode(elem[e], nprocs[i]));
+            CommRel::CommNode cnode(elem[e], nprocs[i]);
+            
+            std::vector<CommRel::CommNode>::iterator lb = 
+              std::lower_bound(selem.begin(), selem.end(), cnode);
+              
+            if (lb == selem.end() || *lb != cnode)
+              selem.push_back(CommRel::CommNode(elem[e], nprocs[i]));
+              
           }
-        }
-      }
-    }
+        
+        } // for i
+        
+      } // for oi 
+      
+    } // if kernel matches
+    
   } // ms
 
-  // Now sort and unique list
-  std::sort(selem.begin(), selem.end());
-  selem.erase(std::unique(selem.begin(), selem.end()), selem.end());
+  CommRel &ecomm = sghost->GetCommRel(MeshObj::ELEMENT);
+  
+  ecomm.add_domain(selem);
+  
+  ecomm.dependants(sghost->GetCommRel(MeshObj::NODE), MeshObj::NODE);
+  ecomm.dependants(sghost->GetCommRel(MeshObj::EDGE), MeshObj::EDGE);
+  ecomm.dependants(sghost->GetCommRel(MeshObj::FACE), MeshObj::FACE);
 
-  sghost->elem_ghost = new CommRel("elem_ghost", *this, *this);
-  sghost->elem_ghost->add_domain(selem);
-  std::vector<CommRel::CommNode>().swap(selem);
+  // Ship objects over;
+   // First the sourcemesh
+  sghost->GetCommRel(MeshObj::NODE).build_range(true);
+  sghost->GetCommRel(MeshObj::EDGE).build_range(true);
+  sghost->GetCommRel(MeshObj::FACE).build_range(true);
+  sghost->GetCommRel(MeshObj::ELEMENT).build_range(true);
 
-  sghost->node_ghost = sghost->elem_ghost->dependants();
-  sghost->node_ghost->build_range();
-  sghost->elem_ghost->build_range();
-#endif
+
+  // Send coordinates
+  MEField<> *cd = GetCoordField();
+  sghost->SendFields(1, &cd, &cd);
+
 }
 
 void Mesh::RemoveGhost() {
   if (!sghost) return; // must already be scratched
-  delete sghost->node_ghost;
-  delete sghost->elem_ghost;
-  delete sghost;
+  
+  sghost->GetCommRel(MeshObj::ELEMENT).delete_range();
+  sghost->GetCommRel(MeshObj::FACE).delete_range();
+  sghost->GetCommRel(MeshObj::EDGE).delete_range();
+  sghost->GetCommRel(MeshObj::NODE).delete_range();
+  
+  delete sghost; sghost = 0; // does delete do this?? don't remember...
 }
 
 void Mesh::build_sym_comm_rel(UInt obj_type) {

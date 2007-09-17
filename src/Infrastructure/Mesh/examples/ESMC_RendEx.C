@@ -1,5 +1,5 @@
 //==============================================================================
-// $Id: ESMC_RendEx.C,v 1.2 2007/09/10 17:38:26 dneckels Exp $
+// $Id: ESMC_RendEx.C,v 1.3 2007/09/17 19:05:38 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -40,9 +40,8 @@
 
 using namespace ESMCI::MESH;
 
-MEField<> *s, *d;
 
-void fill_src(const Mesh &mesh, MEField<> *s) {
+void fill_src(const Mesh &mesh, MEField<> *s, double t) {
   int rank = Par::Rank();
 
   Mesh::const_iterator ni = mesh.node_begin(), ne = mesh.node_end();
@@ -54,7 +53,7 @@ void fill_src(const Mesh &mesh, MEField<> *s) {
     double *c = cfield->data(node);
     double *data = s->data(node);
 
-    data[0] = sin(12*c[0]+6*c[1])*cos(4*c[2]);
+    data[0] = sin((7*c[0]+t*6*c[1])*M_PI)*cos(4*c[2]*M_PI);
   }
 }
 
@@ -119,8 +118,10 @@ int main(int argc, char *argv[]) {
 
   // Register the source and destination fields on the entire mesh
   Context Omega; Omega.flip();
-  s = srcmesh.RegisterField("source", MEFamilyStd::instance(), MeshObj::ELEMENT, Omega, 1, true, true);
-  d = dstmesh.RegisterField("dest", MEFamilyStd::instance(), MeshObj::ELEMENT, Omega, 1, true, true);
+  MEField<> *s = srcmesh.RegisterField("source", MEFamilyStd::instance(), MeshObj::ELEMENT, Omega, 1, true);
+  
+  MEField<> *d = dstmesh.RegisterField("dest", MEFamilyStd::instance(), MeshObj::ELEMENT, Omega, 1, true, true);
+  MEField<> *d1 = dstmesh.RegisterField("dest1", MEFamilyStd::instance(), MeshObj::ELEMENT, Omega, 1, true, true);
 
   // Commit the meshes
   srcmesh.Commit();
@@ -134,47 +135,64 @@ int main(int argc, char *argv[]) {
         std::cout << "Refined source Mesh" << std::endl;
     // Now rebalance across processors.  Do this during refinement so refinement
     // will be load balanced.
-    Rebalance(srcmesh);
+    if ((i%2) == 0) Rebalance(srcmesh);
   }
+  Rebalance(srcmesh);
 
   // Now refine dstmesh
   for (UInt i = 0; i < 7; i++) {
     dst_hadapt.RefineUniformly(false);
     if (Par::Rank() == 0)
         std::cout << "Refined destination Mesh" << std::endl;
-    Rebalance(dstmesh);
+    if ((i % 2) == 0) Rebalance(dstmesh);
   }
+  Rebalance(dstmesh);
 
   // Adjust the destination coordinates so that the destination mesh is an arcing manifold
   set_dest_coords(dstmesh);
 
-  fill_src(srcmesh, s);
+  double T = 0, tstep = 0.3, TEND = 5;
+  fill_src(srcmesh, s, T);
 
-  Par::Out() << "*** Source Mesh:" << std::endl;
-  srcmesh.Print(Par::Out());
+  //Par::Out() << "*** Source Mesh:" << std::endl;
+  //srcmesh.Print(Par::Out());
 
-  Par::Out() << "*** Dest Mesh:" << std::endl;
-  dstmesh.Print(Par::Out());
-  MPI_Barrier(Par::Comm());
+  //Par::Out() << "*** Dest Mesh:" << std::endl;
+  //dstmesh.Print(Par::Out());
+  //MPI_Barrier(Par::Comm());
 
-  WriteMesh(srcmesh, "src_mesh");
-  WriteMesh(dstmesh, "dest_mesh");
 
 
   if (Par::Rank() == 0) std::cout << "Calling Zoltan!!" << std::endl;
 
   std::vector<Interp::FieldPair> fpairs;
-  fpairs.push_back(std::make_pair(s, d));
+  fpairs.push_back(Interp::FieldPair(s, d));
+  fpairs.push_back(Interp::FieldPair(s, d1, Interp::INTERP_PATCH));
+  
+  // Ghost elements across parallel boundaries (needed by INTERP_PATCH)
+  srcmesh.CreateGhost();
   
   Interp interp(srcmesh, dstmesh, fpairs);
   
-  // Perform the interpolation
-  interp();
-  
-  //UInt itype = ZOLT_BILIN;
-  //ZoltanRendezvous(srcmesh, dstmesh, srcR, dstR, 1, &s, &d, &itype);
 
-  WriteMesh(dstmesh, "results_dest");
+  UInt nstep = 0;
+  while (T < TEND) {
+    fill_src(srcmesh, s, T);
+    // Send field values to the ghosted cells
+    srcmesh.GhostComm().SendFields(1, &s, &s);
+    // Perform the interpolation
+    interp();
+  
+    char buf[512];
+    std::sprintf(buf, "results_dest_%03d", nstep++);
+    WriteMesh(dstmesh, buf);
+  
+    if (Par::Rank() == 0) std::cout << "t=" << T << std::endl;
+    T += tstep;
+  }
+
+  srcmesh.RemoveGhost();
+
 
   } 
    catch (std::exception &x) {

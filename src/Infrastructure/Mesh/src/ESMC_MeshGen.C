@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshGen.C,v 1.3 2007/08/23 21:22:14 dneckels Exp $
+// $Id: ESMC_MeshGen.C,v 1.4 2007/09/17 19:05:39 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@ static void gen2d(Mesh &mesh, const MeshObjTopo *topo) {
       }
 
       // Set up the coordinates to match the unit cube.
-      IOField<NodalField> *node_coord = mesh.RegisterNodalField("coordinates", sdim);
+      IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", sdim);
 
       if (Par::Rank() == 0) {
         double *c = node_coord->data(*node[0]);
@@ -118,7 +118,7 @@ static void gen2d(Mesh &mesh, const MeshObjTopo *topo) {
       }
 
       // Set up the coordinates to match the unit cube.
-      IOField<NodalField> *node_coord = mesh.RegisterNodalField("coordinates", mesh.spatial_dim());
+      IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", mesh.spatial_dim());
 
       if (Par::Rank() == 0) {
         double *c = node_coord->data(*node[0]);
@@ -189,7 +189,7 @@ static void gen3d(Mesh &mesh, const MeshObjTopo *topo) {
       }
 
       // Set up the coordinates to match the unit cube.
-      IOField<NodalField> *node_coord = mesh.RegisterNodalField("coordinates", sdim);
+      IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", sdim);
 
       if (Par::Rank() == 0) {
         double *c = node_coord->data(*node[0]);
@@ -285,7 +285,7 @@ static void gen3d(Mesh &mesh, const MeshObjTopo *topo) {
       }
 
       // Set up the coordinates to match the unit cube.
-      IOField<NodalField> *node_coord = mesh.RegisterNodalField("coordinates", sdim);
+      IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", sdim);
 
       if (Par::Rank() == 0) {
         double *c = node_coord->data(*node[0]);

@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshVTK.C,v 1.3 2007/08/24 19:15:44 dneckels Exp $
+// $Id: ESMC_MeshVTK.C,v 1.4 2007/09/17 19:05:40 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -523,7 +523,7 @@ void ReadVTKMesh(Mesh &mesh, const std::string &filename) {
     }
 
     // Register coords
-    IOField<NodalField> *node_coord = mesh.RegisterNodalField("coordinates", mesh.spatial_dim());
+    IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", mesh.spatial_dim());
 
     // Copy coordinates into field
     {
@@ -637,7 +637,7 @@ void ReadVTKMesh(Mesh &mesh, const std::string &filename) {
       // Regular variable
 
       if (data_type == VTK_NODE_DATA) {
-        IOField<NodalField> *nfield = mesh.RegisterNodalField(vname);
+        IOField<NodalField> *nfield = mesh.RegisterNodalField(mesh, vname);
 
         MeshDB::iterator ei = mesh.node_begin(), ee = mesh.node_end();
         for (; ei != ee; ++ei) {

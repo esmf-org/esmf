@@ -1,4 +1,4 @@
-// $Id: ESMC_CommRel.C,v 1.2 2007/09/10 17:38:28 dneckels Exp $
+// $Id: ESMC_CommRel.C,v 1.3 2007/09/17 19:05:39 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -255,6 +255,11 @@ void CommRel::add_domain(const std::vector<CommNode> &obj)
 
 }
 
+void CommRel::domain_insert(MapType::iterator lb, CommNode &cnode) {
+  
+  domain.insert(lb, cnode);
+  
+}
 
 class robj_sort : public std::binary_function<const MeshObj*, const MeshObj*, bool> {
 public:
@@ -334,7 +339,6 @@ void CommRel::build_domain_procs() {
 
 void CommRel::sort_domain()
 {
-  if (!symmetric) Throw() << "Domain sort only for symmetric spec";
   std::sort(domain.begin(), domain.end());
 }
 
@@ -465,6 +469,49 @@ std::cout << "P:" << msg.commRank() << " putting in nid=" << send_size_all[domai
   // and populate.
   rmesh->set_spatial_dimension(domMesh->spatial_dim());
 
+}
+
+void CommRel::delete_range() {
+
+  UInt obj_type = 0;
+
+  CommRel::MapType::iterator oi = domain_begin(), oe = domain_end();
+  
+  for (; oi != oe; ++oi) {
+    MeshObj &obj = *oi->obj;
+    
+    obj_type = obj.get_type();
+
+    // Only delete if object not used or child of ELEMENT (think child node hosted on a proc by element)
+    bool ok_delete = true;
+    if (obj_type != MeshObj::ELEMENT) {
+      MeshObjRelationList::iterator ri = obj.Relations.begin(), re = obj.Relations.end();
+      
+      for (; ok_delete && ri != re; ++ri) {
+        if (ri->type == MeshObj::USED_BY || 
+          (ri->type == MeshObj::PARENT && ri->obj->get_type() == MeshObj::ELEMENT))
+          ok_delete = false;
+      }
+    }
+    
+    if (ok_delete) {
+      const Attr &oattr = GetAttr(obj);
+      const Context &ctxt = GetMeshObjContext(obj);
+      Context newctxt(ctxt);
+      newctxt.set(Attr::PENDING_DELETE_ID);
+      if (newctxt != ctxt) {
+        Attr attr(oattr, newctxt);
+        ranMesh->update_obj(&obj, attr);
+      }
+    }
+  }
+
+  // Go straight to delete; no parallel resolution needed, since we are handling this explicitly
+  if (obj_type != 0) ranMesh->MeshDB::ResolvePendingDelete(obj_type);
+  
+  // Clean up range of commrel
+  MapType().swap(range);
+  std::vector<UInt>().swap(range_processors);
 }
 
 void CommRel::Print(std::ostream &os) const {
@@ -657,10 +704,26 @@ static void field_unpack(SparseMsg::buffer &b, _field &f, const MeshObj &obj) {
 
 }
 
-void CommRel::send_fields(UInt nfields, _field *const *sfields, _field *const *rfields) {
+void CommRel::send_fields(UInt _nfields, _field *const *_sfields, _field *const *_rfields) {
   SparseMsg msg;
   UInt ndproc = domain_processors.size();
   UInt csize = msg.commSize();
+  
+  // Keep track of the pairs we have processed; don't process a pair twice (there
+  // is no guarantee the user won't send a pair twice).
+  std::set<std::string> pairs_proc;
+  UInt nfields = 0;
+  std::vector<_field*> sfields, rfields;
+  for (UInt f = 0; f < _nfields; f++) {
+    std::string fpair_name = _sfields[f]->name() + "_" + _rfields[f]->name();
+    std::pair<std::set<std::string>::iterator,bool> si = pairs_proc.insert(fpair_name);
+    
+    if (si.second) {
+      sfields.push_back(_sfields[f]);
+      rfields.push_back(_rfields[f]);
+      nfields++;
+    } //else std::cout << "Found duplicate pair:" << fpair_name << std::endl;
+  } 
 
   if (ndproc > 0) {
     msg.setPattern(ndproc, &domain_processors[0]);

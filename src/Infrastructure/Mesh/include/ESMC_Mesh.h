@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.h,v 1.3 2007/08/09 17:33:09 dneckels Exp $
+// $Id: ESMC_Mesh.h,v 1.4 2007/09/17 19:05:39 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -67,27 +67,19 @@ void ResolvePendingCreate();
 
 const CommRel &GetSymNodeRel() const;
 
-// Build ScratchGhost
-struct scratch_data {
-  CommRel *node_ghost;
-  CommRel *elem_ghost;
-};
 void CreateGhost();
 void RemoveGhost();
+
+bool HasGhost() const { return sghost != NULL; }
+
+CommReg &GhostComm() { ThrowRequire(sghost); return *sghost; }
 
 // Create the sym rel
 void build_sym_comm_rel(UInt obj_type);
 
-IOField<NodalField> *RegisterNodalField(const std::string &name, UInt dim=1) {
-  return FieldReg::RegisterNodalField(*this, name, dim);
-}
-IOField<ElementField> *RegisterElementField(const std::string &name, UInt dim=1) {
-  return FieldReg::RegisterElementField(*this, name, dim);
-}
-
 private:
 void assign_new_ids();
-scratch_data *sghost;
+CommReg *sghost;
 bool committed;
 };
 

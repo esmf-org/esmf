@@ -1,4 +1,4 @@
-// $Id: ESMC_GeomRendezvous.C,v 1.2 2007/09/10 17:38:28 dneckels Exp $
+// $Id: ESMC_GeomRendezvous.C,v 1.3 2007/09/17 19:05:39 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -15,6 +15,7 @@
 #include <ESMC_MeshUtils.h>
 #include <ESMC_ParEnv.h>
 #include <ESMC_MeshRead.h>
+#include <ESMC_MeshObjConn.h>
 
 #include <Mesh/src/Zoltan/zoltan.h>
 
@@ -98,7 +99,7 @@ static void GetObject(void *user, int numGlobalIds, int numLids, int numObjs,
 }
 
 /*-----------------------------------------------------------------------------------*/
-// GomRend functions
+// GeomRend functions
 /*-----------------------------------------------------------------------------------*/
 
 GeomRend::GeomRend(Mesh &_srcmesh, Mesh &_dstmesh, const DstConfig &cfg) :
@@ -221,12 +222,12 @@ void GeomRend::set_zolt_param(Zoltan_Struct *zz) {
   Zoltan_Set_Param(zz, "NUM_GID_ENTRIES", "2"); // Two integers for an id
   Zoltan_Set_Param(zz, "NUM_LID_ENTRIES", "1");
   Zoltan_Set_Param(zz, "RETURN_LISTS", "ALL");
-  Zoltan_Set_Param(zz, "RCB_RECTILINEAR_BLOCKS", "1");
+  //Zoltan_Set_Param(zz, "RCB_RECTILINEAR_BLOCKS", "1");
   Zoltan_Set_Param(zz, "AVERAGE_CUTS", "1");
 
    
   // RCB
-  Zoltan_Set_Param(zz, "RCB_LOCK_DIRECTIONS", "1");
+  //Zoltan_Set_Param(zz, "RCB_LOCK_DIRECTIONS", "1");
   Zoltan_Set_Param(zz, "KEEP_CUTS", "1");
   Zoltan_Set_Param(zz, "RCB_OUTPUT_LEVEL", "0");
 
@@ -276,6 +277,51 @@ static void rcb_isect(Zoltan_Struct *zz, MEField<> &coord, std::vector<MeshObj*>
   } // for si
 }
 
+static void add_neighbors(CommRel &src_mig) {
+  
+  // To do this, create a temporary dependents spec
+  CommRel ndep;
+  
+  src_mig.dependants(ndep, MeshObj::NODE);
+  
+  ndep.sort_domain();
+  
+  // Loop these nodes; make sure that ANY element attached is going
+  CommRel::MapType::iterator di = ndep.domain_begin(), de = ndep.domain_end();
+  
+  for (; di != de;) {
+    
+    MeshObj *node = di->obj;
+    
+    // Get elements attached to node:
+    std::vector<MeshObj*> on(1);
+    on[0] = node;
+    std::vector<MeshObj*> elem;       
+    
+    MeshObjConn::common_objs(on.begin(),on.end(), MeshObj::USED_BY, MeshObj::ELEMENT, elem);
+    
+    // Loop occurences of this node
+    while (di != de && di->obj == node) {
+      
+      UInt proc = di->processor;
+      
+      CommRel::CommNode cnode(node, proc);
+      
+      CommRel::MapType::iterator lb = 
+        std::lower_bound(src_mig.domain_begin(), src_mig.domain_end(), cnode);
+        
+      if (lb == src_mig.domain_end() || *lb != cnode) {
+       // std::cout << "Inserting neighbor:" << cnode.obj->get_id() << std::endl;
+        src_mig.domain_insert(lb, cnode);
+      }
+      
+      ++di;
+    }
+    
+  } // for di
+  
+}
+
 void GeomRend::build_src_mig(Zoltan_Struct *zz, ZoltanUD &zud) {
   Trace __trace("GeomRend::build_src_mig(Zoltan_Struct *zz, ZoltanUD &zud)");
 
@@ -290,6 +336,9 @@ void GeomRend::build_src_mig(Zoltan_Struct *zz, ZoltanUD &zud) {
   src_migration.Init("src_migration", srcmesh, srcmesh_rend, false);
   src_migration.add_domain(mignode);
 
+  // Add the neighbors to the spec, if necessary
+  if (dcfg.neighbors)
+    add_neighbors(src_migration);
 
 #ifdef GEOM_DEBUG
 Par::Out() << "** source mig:" << std::endl;
@@ -480,6 +529,9 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF)
 
   ThrowRequire(built == false);
   built = true;
+  
+  // Should not use neighbors flag unless source has ghosting enabled
+  ThrowRequire(!dcfg.neighbors || srcmesh.HasGhost());
 	
   ZoltanUD zud(sdim, srcmesh.GetCoordField(), dstmesh.GetCoordField());
 

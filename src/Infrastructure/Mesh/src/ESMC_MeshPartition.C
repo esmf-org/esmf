@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshPartition.C,v 1.3 2007/09/10 17:38:29 dneckels Exp $
+// $Id: ESMC_MeshPartition.C,v 1.4 2007/09/17 19:05:40 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -379,8 +379,11 @@ void MeshConcat(Mesh &mesh, std::vector<Mesh*> &srcmesh) {
 
   // Use mesh 1
   Context ctxt; ctxt.flip();
+  
+  // Loop all fields (in case some files are empty)
+  for (UInt i = 0; i < npart; i++) 
   {
-    FieldReg::MEField_const_iterator fi = srcmesh[0]->Field_begin(), fe = srcmesh[0]->Field_end();
+    FieldReg::MEField_const_iterator fi = srcmesh[i]->Field_begin(), fe = srcmesh[i]->Field_end();
   
     for (; fi != fe; ++fi) {
       const MEField<> &ofield = *fi;
@@ -388,23 +391,31 @@ void MeshConcat(Mesh &mesh, std::vector<Mesh*> &srcmesh) {
   //std::cout << "Creating field:" << ofield.name() << std::endl;
       MEField<> *nfield = mesh.RegisterField(ofield.name(), MEFamilyStd::instance(), MeshObj::ELEMENT, ctxt, ofield.dim(), true);
       if (nfield->name() == "coordinates") nfield->SetOutput(false);
-      fields.push_back(nField(nfield));
+      std::vector<nField>::iterator lb =
+        std::lower_bound(fields.begin(), fields.end(), nfield);
+      if (lb == fields.end() || *lb != nfield)
+        fields.insert(lb, nfield);
     }
   }
 
   typedef MEField<>* eField;
   std::vector<eField> efields;
 
-  // Use mesh 1
+  for (UInt i = 0; i < npart; i++)
   {
-    FieldReg::MEField_const_iterator fi = srcmesh[0]->Field_begin(), fe = srcmesh[0]->Field_end();
+    FieldReg::MEField_const_iterator fi = srcmesh[i]->Field_begin(), fe = srcmesh[i]->Field_end();
   
     for (; fi != fe; ++fi) {
       const MEField<> &ofield = *fi;
       if (!ofield.is_elemental()) continue;
   //std::cout << "Creating field:" << ofield.name() << std::endl;
       MEField<> *efield = mesh.RegisterField(ofield.name(), MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, ofield.dim(), true);
-      efields.push_back(eField(efield));
+      
+      std::vector<eField>::iterator lb =
+        std::lower_bound(efields.begin(), efields.end(), efield);
+        
+      if (lb == efields.begin() || *lb != efield)
+        efields.insert(lb, efield);
     }
   }
 
@@ -419,6 +430,8 @@ void MeshConcat(Mesh &mesh, std::vector<Mesh*> &srcmesh) {
   // Now set the values
   for (UInt i = 0; i < npart; i++) {
     Mesh &src = *srcmesh[i];
+    
+    if (src.num_elems() == 0) continue;
     std::vector<nField> ofield;
     std::vector<eField> oefield;
 

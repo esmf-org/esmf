@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshExodus.C,v 1.3 2007/09/10 17:38:29 dneckels Exp $
+// $Id: ESMC_MeshExodus.C,v 1.4 2007/09/17 19:05:39 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -18,6 +18,7 @@
 #include <sstream>
 #include <iomanip>
 #include <iterator>
+#include <string>
 
 #include <ESMC_MeshField.h>
 #include <ESMC_MeshUtils.h>
@@ -258,7 +259,7 @@ std::cout << std::endl;
 
 
   // Set up a coordinates field
-  IOField<NodalField> *node_coord = mesh.RegisterNodalField("coordinates", mesh.spatial_dim());
+  IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", mesh.spatial_dim());
 
   // Use data_index, since we have stored the original orderinng there.
   MeshDB::const_iterator ni = mesh.node_begin(), ne = mesh.node_end();
@@ -310,7 +311,7 @@ std::cout << std::endl;
       std::vector<double> tdata(num_nodes, 0);
       for (UInt i = 0; i < (UInt) num_nodal_vars; i++) {
         // Load this field too!! if (snames[i] != "_OWNER") {
-          IOField<NodalField> *nfield = mesh.RegisterNodalField(snames[i]);
+          IOField<NodalField> *nfield = mesh.RegisterNodalField(mesh, snames[i]);
           nfield->set_output_status(true);
           //ex_get_nodal_var(exoid, time, i+1, num_nodes, nfield->raw_data());
           ex_get_nodal_var(exoid, nstep, i+1, num_nodes, &tdata[0]);
@@ -367,7 +368,7 @@ std::cout << std::endl;
       std::vector<double> tdata(nelems, 0);
       for (UInt i = 0; i < (UInt) num_elem_vars; i++) {
         // Load this field too!! if (snames[i] != "_OWNER") {
-          IOField<ElementField> *efield = mesh.RegisterElementField(snames[i]);
+          IOField<ElementField> *efield = mesh.RegisterElementField(mesh, snames[i]);
           efield->set_output_status(true);
           //ex_get_nodal_var(exoid, time, i+1, num_nodes, nfield->raw_data());
           UInt cur_elem = 0;
@@ -634,7 +635,6 @@ void WriteExMesh(const Mesh &mesh, const std::string &filename, int nstep, doubl
   {
   FieldReg::MEField_const_iterator nv = mesh.Field_begin(), ne = mesh.Field_end();
   UInt nvars_to_output = 0;
-  std::vector<std::string> var_names;
   std::vector<char*> var_names_ptr;
   UInt cur_var = 0;
   for (; nv != ne; ++nv) {
@@ -643,19 +643,25 @@ void WriteExMesh(const Mesh &mesh, const std::string &filename, int nstep, doubl
       nvars_to_output += mf.dim();
       if (mf.dim() > 1) {
         for (UInt d = 0; d < mf.dim(); d++) {  
-          char buf[512];
+          char *buf = new char[1024];
           std::sprintf(buf, "%s_%d", mf.name().c_str(), d);
-          var_names.push_back(buf);
-          var_names_ptr.push_back(const_cast<char*>(var_names[cur_var++].c_str()));
+          var_names_ptr.push_back(buf);
           //std::cout << "will output variable:" << buf << std::endl;
         }
       } else {
-          var_names.push_back(mf.name());
-          var_names_ptr.push_back(const_cast<char*>(var_names[cur_var++].c_str()));
-          //std::cout << "will output variable:" << mf.name() << std::endl;
+          char *buf = new char[1024];
+          std::strcpy(buf, mf.name().c_str());
+          var_names_ptr.push_back(buf);
+          //std::cout << "will output variable:" << mf.name() << " =? " << var_names_ptr.back() << std::endl;
       }
     }
   }
+
+/*
+for (UInt i = 0; i < nvars_to_output; i++) {
+  std::cout << "P:" << Par::Rank() << ", var=<" << var_names_ptr[i] << ">" << std::endl;
+}
+*/
 
   if (nvars_to_output > 0) {
     UInt nnodes = mesh.num_nodes();
@@ -684,6 +690,9 @@ void WriteExMesh(const Mesh &mesh, const std::string &filename, int nstep, doubl
       }
     }
   }
+  
+    for (UInt i = 0; i < var_names_ptr.size(); i++)
+      delete [] var_names_ptr[i];
   } // if nstep != 0
   }
 
@@ -691,7 +700,6 @@ void WriteExMesh(const Mesh &mesh, const std::string &filename, int nstep, doubl
   {
   FieldReg::MEField_const_iterator nv = mesh.Field_begin(), ne = mesh.Field_end();
   UInt nvars_to_output = 0;
-  std::vector<std::string> var_names;
   std::vector<char*> var_names_ptr;
   UInt cur_var = 0;
   for (; nv != ne; ++nv) {
@@ -700,15 +708,15 @@ void WriteExMesh(const Mesh &mesh, const std::string &filename, int nstep, doubl
       nvars_to_output += mf.dim();
       if (mf.dim() > 1) {
         for (UInt d = 0; d < mf.dim(); d++) {  
-          char buf[512];
+          char *buf = new char[1024];
           std::sprintf(buf, "%s_%d", mf.name().c_str(), d);
-          var_names.push_back(buf);
-          var_names_ptr.push_back(const_cast<char*>(var_names[cur_var++].c_str()));
+          var_names_ptr.push_back(buf);
           //std::cout << "will output element variable:" << buf << std::endl;
         }
       } else {
-          var_names.push_back(mf.name());
-          var_names_ptr.push_back(const_cast<char*>(var_names[cur_var++].c_str()));
+          char *buf = new char[1024];
+          std::strcpy(buf, mf.name().c_str());
+          var_names_ptr.push_back(buf);
           //std::cout << "will output element variable:" << mf.name() << std::endl;
       }
     }
@@ -772,6 +780,9 @@ void WriteExMesh(const Mesh &mesh, const std::string &filename, int nstep, doubl
       } // nv
     } // blocks
   } // nstep != 0
+  
+    for (UInt i = 0; i < nvars_to_output; i++)
+      delete [] var_names_ptr[i];
   }
 
   } // element vars
@@ -801,7 +812,6 @@ void WriteExMeshTimeStep(int nstep, double tstep, const Mesh &mesh, const std::s
   {
   FieldReg::MEField_const_iterator nv = mesh.Field_begin(), ne = mesh.Field_end();
   UInt nvars_to_output = 0;
-  std::vector<std::string> var_names;
   std::vector<char*> var_names_ptr;
   UInt cur_var = 0;
   for (; nv != ne; ++nv) {
@@ -810,15 +820,15 @@ void WriteExMeshTimeStep(int nstep, double tstep, const Mesh &mesh, const std::s
       nvars_to_output += mf.dim();
       if (mf.dim() > 1) {
         for (UInt d = 0; d < mf.dim(); d++) {  
-          char buf[512];
+          char *buf = new char[1024];
           std::sprintf(buf, "%s_%d", mf.name().c_str(), d);
-          var_names.push_back(buf);
-          var_names_ptr.push_back(const_cast<char*>(var_names[cur_var++].c_str()));
+          var_names_ptr.push_back(buf);
           //std::cout << "will output variable:" << buf << std::endl;
         }
       } else {
-          var_names.push_back(mf.name());
-          var_names_ptr.push_back(const_cast<char*>(var_names[cur_var++].c_str()));
+          char *buf = new char[1024];
+          std::strcpy(buf, mf.name().c_str());
+          var_names_ptr.push_back(buf);
           //std::cout << "will output variable:" << mf.name() << std::endl;
       }
     }
@@ -849,6 +859,8 @@ void WriteExMeshTimeStep(int nstep, double tstep, const Mesh &mesh, const std::s
         }
       }
     }
+    for (UInt i = 0; i < nvars_to_output; i++) 
+      delete [] var_names_ptr[i];
   }
   }
 
@@ -856,7 +868,6 @@ void WriteExMeshTimeStep(int nstep, double tstep, const Mesh &mesh, const std::s
   {
   FieldReg::MEField_const_iterator nv = mesh.Field_begin(), ne = mesh.Field_end();
   UInt nvars_to_output = 0;
-  std::vector<std::string> var_names;
   std::vector<char*> var_names_ptr;
   UInt cur_var = 0;
   for (; nv != ne; ++nv) {
@@ -865,15 +876,15 @@ void WriteExMeshTimeStep(int nstep, double tstep, const Mesh &mesh, const std::s
       nvars_to_output += mf.dim();
       if (mf.dim() > 1) {
         for (UInt d = 0; d < mf.dim(); d++) {  
-          char buf[512];
+          char *buf = new char[1024];
           std::sprintf(buf, "%s_%d", mf.name().c_str(), d);
-          var_names.push_back(buf);
-          var_names_ptr.push_back(const_cast<char*>(var_names[cur_var++].c_str()));
+          var_names_ptr.push_back(buf);
           //std::cout << "will output element variable:" << buf << std::endl;
         }
       } else {
-          var_names.push_back(mf.name());
-          var_names_ptr.push_back(const_cast<char*>(var_names[cur_var++].c_str()));
+          char *buf = new char[1024];
+          std::strcpy(buf, mf.name().c_str());
+          var_names_ptr.push_back(buf);
           //std::cout << "will output element variable:" << mf.name() << std::endl;
       }
     }
@@ -919,6 +930,8 @@ void WriteExMeshTimeStep(int nstep, double tstep, const Mesh &mesh, const std::s
         } // blocks
       }
     }
+    for (UInt i = 0; i < nvars_to_output; i++)
+      delete [] var_names_ptr[i];
   }
   }
 

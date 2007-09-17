@@ -1,4 +1,4 @@
-// $Id: ESMC_HAdapt.C,v 1.5 2007/09/10 17:38:29 dneckels Exp $
+// $Id: ESMC_HAdapt.C,v 1.6 2007/09/17 19:05:39 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -615,6 +615,8 @@ void HAdapt::MarkerResolution() {
 
 void HAdapt::RefineMesh() {
   Trace __trace("HAdapt::RefineMesh()");
+  
+  ThrowRequire(!mesh.HasGhost()); // Cannot refine when ghosts present
 
   std::vector<MeshObj*>::iterator ri = refine_list.begin(), re = refine_list.end();
 
@@ -631,6 +633,8 @@ void HAdapt::RefineMesh() {
 
 void HAdapt::UnrefineMesh() {
   Trace __trace("HAdpat::UnrefineMesh()");
+  
+  ThrowRequire(!mesh.HasGhost()); // Cannot refine when ghosts present
 
   std::vector<MeshObj*>::iterator ri = unrefine_list.begin(), re = unrefine_list.end();
 

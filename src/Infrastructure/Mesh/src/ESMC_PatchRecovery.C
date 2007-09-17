@@ -1,4 +1,4 @@
-// $Id: ESMC_PatchRecovery.C,v 1.5 2007/08/20 22:21:41 dneckels Exp $
+// $Id: ESMC_PatchRecovery.C,v 1.6 2007/09/17 19:05:40 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -17,7 +17,6 @@
 #include <ESMC_Polynomial.h>
 #include <ESMC_MeshField.h>
 
-#include <ESMC_MeshTypes.h>
 
 #include <set>
 #include <iostream>
@@ -529,7 +528,7 @@ void ElemPatch<NFIELD,Real>::Eval(UInt npts,
 
 // ********** Instantiations ************
 
-template class PatchRecov<MEField<> ,double>;
+template class PatchRecov<MEField<>, double>;
 template class PatchRecov<MEField<SField> ,fad_type>;
 
 template class ElemPatch<MEField<> ,double>;

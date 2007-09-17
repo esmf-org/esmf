@@ -1,4 +1,4 @@
-// $Id: ESMC_Interp.h,v 1.1 2007/09/10 17:38:27 dneckels Exp $
+// $Id: ESMC_Interp.h,v 1.2 2007/09/17 19:05:39 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,11 +42,21 @@ class Geom;
  * In particular, they must all be defined on the same part of the meshes,
  * and the destination fields must all be either nodal or interpolatory,
  * but not mixed.
+ * Note: if INTERP_PATCH is used, it is up to the caller to make sure they
+ * have ghosting enabled on the mesh.  It will also be their responsibility
+ * to make sure the data is halo'ed to the ghosts before the Interp() operation.
  */ 
 class Interp {
 public:
 
-typedef std::pair<MEField<>*,MEField<>*> FieldPair;
+enum {INTERP_STD = 0, INTERP_PATCH};
+
+struct FieldPair {
+  FieldPair(MEField<> *_sF, MEField<> *_dF, UChar _idata=INTERP_STD)
+  : first(_sF), second(_dF), idata(_idata) {}
+  MEField<> *first, *second;
+  UChar idata; // interpolation specification.
+};
 
 /* 
  * Build the interpolation object.  The MEFields must be compatible in the
@@ -72,6 +82,11 @@ bool is_parallel;
 std::vector<MEField<>*> srcF;
 std::vector<MEField<>*> dstF;
 std::vector<_field*> dstf; // interp fields
+std::vector<int> iflag;
+bool has_std;  // true if a standard interpolation exists
+bool has_patch; // true if a patch interp exists
+Mesh &srcmesh;
+Mesh &dstmesh;
 };
   
 } // namespace

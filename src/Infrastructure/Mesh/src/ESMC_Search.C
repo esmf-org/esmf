@@ -1,4 +1,4 @@
-// $Id: ESMC_Search.C,v 1.2 2007/09/10 17:38:29 dneckels Exp $
+// $Id: ESMC_Search.C,v 1.3 2007/09/17 19:05:40 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -291,9 +291,9 @@ void Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResult &
      for (UInt d = 0; d < sdim; d++) {
        if (d == sdim-1) {
          std::for_each(sidx[d].begin(), sidx[d].end(), delAndNullifyFound);
-         sidx[d].erase(remove(sidx[d].begin(), sidx[d].end(), static_cast<Search_index*>(0)), sidx[d].end());
+         sidx[d].erase(std::remove(sidx[d].begin(), sidx[d].end(), static_cast<Search_index*>(0)), sidx[d].end());
        } else {
-         sidx[d].erase(remove_if(sidx[d].begin(), sidx[d].end(), Search_found()), sidx[d].end());
+         sidx[d].erase(std::remove_if(sidx[d].begin(), sidx[d].end(), Search_found()), sidx[d].end());
        }
      }
      

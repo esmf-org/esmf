@@ -1,4 +1,4 @@
-// $Id: ESMC_CommRel.h,v 1.2 2007/09/10 17:38:26 dneckels Exp $
+// $Id: ESMC_CommRel.h,v 1.3 2007/09/17 19:05:39 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -37,6 +37,7 @@ namespace MESH {
 */
 class CommRel {
 public:
+
 // Store a particular parallel connection
 struct CommNode {
   CommNode(std::pair<MeshObj*, UInt> &val) : obj(val.first), processor(val.second) {}
@@ -63,6 +64,8 @@ struct CommNode {
   UInt processor;
   friend std::ostream &operator<<(std::ostream &os, const CommNode &cn);
 };
+
+typedef std::vector<CommNode> MapType;
 
 // Sort commrel's by proc only
 class range_sort : public std::binary_function<CommRel::CommNode,CommRel::CommNode,bool> {
@@ -119,14 +122,15 @@ void add_domain(const std::vector<CommNode> &obj);
 // Take items out of domain.  Objects should be unique.
 void remove_domain(std::vector<MeshObj*> &robjs);
 
+void domain_insert(MapType::iterator lb, CommNode &cnode);
 
 // Add the comm rhs to this.  For now, requires symmetric comm.
 void Append(const CommRel &rhs);
 
 // Sort the domain objects.  Should be done, for instance, with symmetric
 // comms, since this will guarantee the objects line up on each processor.
-// If comm is not symmetric, we communicate the new ordering to the range,
-// which must sort itself to keep the conformal mapping.
+// If comm is not symmetric, this should only be done before building the
+// range.  TODO: if range exists, sort it as well.
 void sort_domain();
 
 // Add items to range
@@ -143,6 +147,9 @@ void complete_range();
 // over to the (different) range mesh.  This should proceed by first sending
 // a nodal spec, then by sending an element spec.
 void build_range(bool ghosting = false);
+
+// Delete the range of the spec (only if objects not used or children of others)
+void delete_range();
 
 // For an element (or side) domain CommRel (range need not be built yet), build the
 // domain side object for the dependents, i.e. nodes.  Names this the same as
@@ -167,7 +174,6 @@ void commit_range(const std::vector<MeshObj::id_type> &rid);
 // and checking id's
 bool verify_symmetric_comm();
 
-typedef std::vector<CommNode> MapType;
 MapType::iterator domain_begin() {return domain.begin();}
 MapType::iterator domain_end() {return domain.end();}
 MapType::const_iterator domain_begin() const {return domain.begin();}

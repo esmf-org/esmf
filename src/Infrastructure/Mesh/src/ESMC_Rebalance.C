@@ -1,4 +1,4 @@
-// $Id: ESMC_Rebalance.C,v 1.6 2007/09/10 17:38:29 dneckels Exp $
+// $Id: ESMC_Rebalance.C,v 1.7 2007/09/17 19:05:40 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -29,8 +29,6 @@ static void set_new_obj_owners(Mesh &mesh, CommReg &migration, UInt obj_type);
 static void set_new_elem_owners(Mesh &mesh, CommReg &migration);
 
 static void build_obj_migration(Mesh &mesh, CommReg &migration, UInt obj_type);
-
-static void delete_local_obj(Mesh &mesh, CommReg &mig, UInt obj_type);
 
 /*--------------------------------------------------------*/
 // Rebalance mesh
@@ -105,13 +103,12 @@ bool Rebalance(Mesh &mesh) {
   // we KNOW will go, then start zapping lower order objects with no
   // USED_BY/CHILD left.
 
-  delete_local_obj(mesh, mig, MeshObj::ELEMENT);
-  delete_local_obj(mesh, mig, MeshObj::FACE);
-  delete_local_obj(mesh, mig, MeshObj::EDGE);
-  delete_local_obj(mesh, mig, MeshObj::NODE);
+  mig.GetCommRel(MeshObj::ELEMENT).delete_range();
+  mig.GetCommRel(MeshObj::FACE).delete_range();
+  mig.GetCommRel(MeshObj::EDGE).delete_range();
+  mig.GetCommRel(MeshObj::NODE).delete_range();
 
   mesh.remove_unused_kernels();
-
 
   // Deal with the interior edge problem: We may need to delete
   // the interior edges on some processors.
@@ -124,43 +121,6 @@ bool Rebalance(Mesh &mesh) {
 
 
   return true;
-}
-
-static void delete_local_obj(Mesh &mesh, CommReg &mig, UInt obj_type) {
-  CommRel &crel = mig.GetCommRel(obj_type);
-
-  CommRel::MapType::iterator oi = crel.domain_begin(), oe = crel.domain_end();
-  
-  for (; oi != oe; ++oi) {
-    MeshObj &obj = *oi->obj;
-
-    // Only delete if object not used or child of ELEMENT (think child node hosted on a proc by element)
-    bool ok_delete = true;
-    if (obj_type != MeshObj::ELEMENT) {
-      MeshObjRelationList::iterator ri = obj.Relations.begin(), re = obj.Relations.end();
-      
-      for (; ok_delete && ri != re; ++ri) {
-        if (ri->type == MeshObj::USED_BY || 
-          (ri->type == MeshObj::PARENT && ri->obj->get_type() == MeshObj::ELEMENT))
-          ok_delete = false;
-      }
-    }
-    
-    if (ok_delete) {
-      const Attr &oattr = GetAttr(obj);
-      const Context &ctxt = GetMeshObjContext(obj);
-      Context newctxt(ctxt);
-      newctxt.set(Attr::PENDING_DELETE_ID);
-      if (newctxt != ctxt) {
-        Attr attr(oattr, newctxt);
-        mesh.update_obj(&obj, attr);
-      }
-    }
-  }
-
-  // Go straight to delete; no parallel resolution needed, since we are handling this explicitly
-  mesh.MeshDB::ResolvePendingDelete(obj_type);
-
 }
 
 static void add_obj_children(MeshObj &obj, std::vector<CommRel::CommNode> &cnodes, UInt P) {

@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldReg.C,v 1.4 2007/09/10 17:38:28 dneckels Exp $
+// $Id: ESMC_FieldReg.C,v 1.5 2007/09/17 19:05:39 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -77,7 +77,13 @@ MEField<> *FieldReg::RegisterField(const std::string &name, const MEFamily &mef,
     fmap.insert(fi, std::make_pair(name, nf));
     Fields.push_back(nf);
   } else {
-    Throw() << "MEField name:" << name << " already registered";
+    // Check. If specs match, then just return the fields, otherwise
+    // throw error.
+    nf = fi->second;
+    
+    // TODO: a more thourough check of specs (context, etc...)
+    if (obj_type != nf->ObjType() || dim != nf->dim())
+      Throw() << "MEField name:" << name << " already registered, with different specs";
   }
 
   return nf;
@@ -433,11 +439,13 @@ void FieldReg::Commit(MeshDB &mesh) {
 
 
 IOField<NodalField> *FieldReg::RegisterNodalField(const MeshDB &mesh, const std::string &name, UInt dim) {
+  
   ndfields.push_back(new IOField<NodalField>(mesh, name, dim));
   return ndfields.back();
 }
 
 IOField<ElementField> *FieldReg::RegisterElementField(const MeshDB &mesh, const std::string &name, UInt dim) {
+  
   efields.push_back(new IOField<ElementField>(mesh, name, dim));
   return efields.back();
 }

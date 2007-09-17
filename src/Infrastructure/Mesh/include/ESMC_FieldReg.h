@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldReg.h,v 1.3 2007/09/10 17:38:26 dneckels Exp $
+// $Id: ESMC_FieldReg.h,v 1.4 2007/09/17 19:05:39 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -94,11 +94,16 @@ _field **ListOffields() { return &fields[0]; }
 
 _field *Registerfield(const std::string &name, const Attr &attr, const _fieldTypeBase &_ftype, UInt dim);
 
+// Register low-level iofields.  TODO: this interface is currently contorted by
+// having to pass the mesh as an arg.  This is, in reality, a dependency issue.  
+// Needs to be resolved.
+IOField<NodalField> *RegisterNodalField(const MeshDB &mesh, const std::string &name, UInt dim=1);
+IOField<ElementField> *RegisterElementField(const MeshDB &mesh, const std::string &name, UInt dim=1);
+
 protected:
 // Register a bootstrap type field;
 friend void LoadExMesh(Mesh &mesh, const std::string &filename, int nstep);
-IOField<NodalField> *RegisterNodalField(const MeshDB &mesh, const std::string &name, UInt dim);
-IOField<ElementField> *RegisterElementField(const MeshDB &mesh, const std::string &name, UInt dim);
+
 private:
 
 bool is_committed;
