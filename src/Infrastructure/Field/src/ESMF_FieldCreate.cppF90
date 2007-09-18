@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cpp,v 1.26 2007/06/23 04:00:21 cdeluca Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.1 2007/09/18 22:21:01 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cpp,v 1.26 2007/06/23 04:00:21 cdeluca Exp $'
+      '$Id: ESMF_FieldCreate.cppF90,v 1.1 2007/09/18 22:21:01 cdeluca Exp $'
 
 !==============================================================================
 ! 

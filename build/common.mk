@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.197 2007/08/22 22:09:01 theurich Exp $
+#  $Id: common.mk,v 1.198 2007/09/18 22:20:57 cdeluca Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2204,7 +2204,7 @@ endif
 #-------------------------------------------------------------------------------
 # Suffixes
 #-------------------------------------------------------------------------------
-.SUFFIXES: .f .f90 .F .F90 $(SUFFIXES) .C .cc .cpp .r .rm .so .cppF90
+.SUFFIXES: .f .f90 .F .F90 $(SUFFIXES) .C .cc .r .rm .so .cppF90
 
 #-------------------------------------------------------------------------------
 #  Compile rules for F90, C++, and c files for both to .o and .a files

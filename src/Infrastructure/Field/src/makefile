@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 2007/08/30 05:06:32 cdeluca Exp $ 
+# $Id: makefile,v 1.21 2007/09/18 22:21:06 cdeluca Exp $ 
 
 #
 ALL: build_here 
@@ -37,11 +37,11 @@ CLEANFILES  = $(AUTOGEN) $(addprefix ../doc/, $(TEXFILES) )
 CLOBBERDIRS =
 
 
-ESMF_FieldGet.o: ESMF_Field.o ESMF_FieldGet.cpp ESMF_FieldGetMacros.h
+ESMF_FieldGet.o: ESMF_Field.o ESMF_FieldGet.cppF90 ESMF_FieldGetMacros.h
 
-ESMF_FieldSet.o: ESMF_Field.o ESMF_FieldSet.cpp ESMF_FieldSetMacros.h
+ESMF_FieldSet.o: ESMF_Field.o ESMF_FieldSet.cppF90 ESMF_FieldSetMacros.h
 
 ESMF_FieldCreate.o: ESMF_Field.o ESMF_FieldGet.o ESMF_FieldSet.o \
-                    ESMF_FieldCreate.cpp ESMF_FieldCreateMacros.h
+                    ESMF_FieldCreate.cppF90 ESMF_FieldCreateMacros.h
 
 

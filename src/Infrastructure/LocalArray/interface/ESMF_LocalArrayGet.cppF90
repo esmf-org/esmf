@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayGet.cpp,v 1.6 2007/03/31 05:51:16 cdeluca Exp $
+! $Id: ESMF_LocalArrayGet.cppF90,v 1.1 2007/09/18 22:21:13 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArrayGet.cpp,v 1.6 2007/03/31 05:51:16 cdeluca Exp $'
+      '$Id: ESMF_LocalArrayGet.cppF90,v 1.1 2007/09/18 22:21:13 cdeluca Exp $'
 
 !------------------------------------------------------------------------------
 !     ! Internal wrapper structures for passing f90 pointers to C++ and

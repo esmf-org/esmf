@@ -1,4 +1,4 @@
-! $Id: ESMF_TypeKindGet.cpp,v 1.5 2007/03/20 22:02:40 theurich Exp $
+! $Id: ESMF_FortranWordsize.cppF90,v 1.1 2007/09/18 22:21:15 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
@@ -9,10 +9,10 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-^define ESMF_FILENAME "ESMF_TypeKindGet.F90"
+^define ESMF_FILENAME "ESMF_FortranWordsize.F90"
 
-!     ESMF TypeKindGet module
-      module ESMF_TypeKindGetMod
+!     ESMF FortranWordsize module
+      module ESMF_FortranWordsizeMod
 
 !==============================================================================
 !
@@ -23,12 +23,12 @@
 ! INCLUDES
 ! < ignore blank lines below.  they are created by the files which
 ! define various macros. >
-^include "ESMF.h"
 #include "ESMF_TypeKindMacros.hcppF90"
-#include "ESMF_TypeKindGetMacros.h"
+#include "ESMF_FortranWordsizeMacros.h"
+^include "ESMF.h"
 !------------------------------------------------------------------------------
 ! !USES:
-     use ESMF_UtilTypesMod
+     use ESMF_UtilTypesMod      
      use ESMF_LogErrMod
 
      implicit none
@@ -40,22 +40,23 @@
 !------------------------------------------------------------------------------
 ! !PUBLIC FUNCTION:
 
-      public ESMF_TypeKindGet
+      public ESMF_FortranWordsize
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_TypeKindGet"
+^define ESMF_METHOD "ESMF_FortranWordsize"
 !BOP
-! !IROUTINE: ESMF_TypeKindGet -- Generic interface to return the correct
-!                                ESMF_TypeKind parameter of a scalar.
+! !IROUTINE: ESMF_FortranWordsize -- Generic interface to find Fortran data sizes
 !
 ! !INTERFACE:
 
-    interface ESMF_TypeKindGet
 
-TypeKindInterfaceMacro(ESMF_TypeKindGet)
-
+    interface ESMF_FortranWordsize
 !EOP
+
+      ! < interfaces for each TK >
+TypeKindInterfaceMacro(ESMF_FortranWordsize)
+
     end interface
 
     contains
@@ -63,6 +64,11 @@ TypeKindInterfaceMacro(ESMF_TypeKindGet)
 !==============================================================================
 !------------------------------------------------------------------------------
 
-TypeKindDeclarationMacro(ESMF_TypeKindGet)
+TypeKindDeclarationMacro(ESMF_FortranWordsize)
 
-    end module ESMF_TypeKindGetMod
+!! < end of automatically generated functions >
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+
+    end module ESMF_FortranWordsizeMod

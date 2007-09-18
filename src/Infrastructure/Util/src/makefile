@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2007/05/04 21:37:34 tjcnrl Exp $ 
+# $Id: makefile,v 1.17 2007/09/18 22:21:17 cdeluca Exp $ 
 
 # default rule if no explicit target is given to make
 ALL: build_here
@@ -40,5 +40,5 @@ CLOBBERDIRS =
 
 ESMF_InitMacros.o: ESMF_LogErr.o ESMF_UtilTypes.o 
 ESMF_LogErr.o: ESMF_UtilTypes.o 
-ESMF_FortranWordsize.o: ESMF_FortranWordsize.cpp ESMF_TypeKindMacros.hcppF90 ESMF_FortranWordsizeMacros.h
-ESMF_TypeKindGet.o: ESMF_TypeKindGet.cpp ESMF_TypeKindMacros.hcppF90 ESMF_TypeKindGet.h
+ESMF_FortranWordsize.o: ESMF_FortranWordsize.cppF90 ESMF_TypeKindMacros.hcppF90 ESMF_FortranWordsizeMacros.h
+ESMF_TypeKindGet.o: ESMF_TypeKindGet.cppF90 ESMF_TypeKindMacros.hcppF90 ESMF_TypeKindGet.h

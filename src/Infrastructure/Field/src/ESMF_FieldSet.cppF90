@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleGet.cpp,v 1.14 2007/03/31 05:50:53 cdeluca Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.1 2007/09/18 22:21:06 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,16 +9,16 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-^define ESMF_FILENAME "ESMF_BundleGet.F90"
+^define ESMF_FILENAME "ESMF_FieldSet.F90"
 !
-!     ESMF BundleGet module
-      module ESMF_BundleGetMod
+!     ESMF FieldSet module
+      module ESMF_FieldSetMod
 !
 !==============================================================================
 !
-! This file contains the Bundle class methods which are automatically
+! This file contains the Field class methods which are automatically
 !  generated from macros to handle the type/kind/rank overloading.
-!  See ESMF_Bundle.F90 for non-macroized functions and subroutines.
+!  See ESMF_Field.F90 for non-macroized functions and subroutines.
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -26,7 +26,7 @@
 !   define various macros. >
 ^include "ESMF.h"
 #include "ESMF_TypeKindRankMacros.hcppF90"
-#include "ESMF_BundleGetMacros.h"
+#include "ESMF_FieldSetMacros.h"
 
 !------------------------------------------------------------------------------
 ! !USES:
@@ -35,9 +35,8 @@
       use ESMF_LogErrMod
       use ESMF_LocalArrayMod
       use ESMF_InternArrayMod
-      use ESMF_InternArrayGetMod
+      use ESMF_InternArrayCreateMod
       use ESMF_FieldMod
-      use ESMF_BundleMod
       use ESMF_InitMacrosMod
       implicit none
 
@@ -48,12 +47,12 @@
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_BundleGetDataPointer
+      public ESMF_FieldSetDataPointer
  
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleGet.cpp,v 1.14 2007/03/31 05:50:53 cdeluca Exp $'
+      '$Id: ESMF_FieldSet.cppF90,v 1.1 2007/09/18 22:21:06 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -65,21 +64,21 @@
 !------------------------------------------------------------------------------
 
 !BOPI
-! !IROUTINE: ESMF_BundleGetDataPointer -- Get a Fortran pointer to the data contents
+! !IROUTINE: ESMF_FieldSetDataPointer -- Set a Fortran pointer to the data contents
 
 ! !INTERFACE:
-     interface ESMF_BundleGetDataPointer
+     interface ESMF_FieldSetDataPointer
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       ! < declarations of interfaces for each T/K/R >
-TypeKindRankInterfaceMacro(BundleGetDataPointer)
+TypeKindRankInterfaceMacro(FieldSetDataPointer)
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_BundleGetDataPointer} subroutines.   
+!  types of {\tt ESMF\_FieldSetDataPointer} subroutines.   
 !  
-!EOPI
+!EOPI 
 end interface
 
 !==============================================================================
@@ -90,10 +89,9 @@ end interface
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-      
+
       ! < declarations of subroutines for each T/K/R >
-TypeKindRankDeclarationMacro(BundleGetDataPointer)
+TypeKindRankDeclarationMacro(FieldSetDataPointer)
 
 
-        end module ESMF_BundleGetMod
-
+        end module ESMF_FieldSetMod

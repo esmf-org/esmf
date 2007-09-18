@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2007/03/06 00:10:59 theurich Exp $
+# $Id: makefile,v 1.14 2007/09/18 22:21:14 cdeluca Exp $
 
 # leave alone.
 ALL: build_here 
@@ -38,7 +38,7 @@ CLEANDIRS   =
 CLEANFILES  = $(AUTOGEN)
 CLOBBERDIRS =
 
-ESMF_LocalArrayCreate.F90: ESMF_LocalArrayCreate.cpp ESMF_LocalArrayMacros.h ESMF_LocalAllocMacros.h
+ESMF_LocalArrayCreate.F90: ESMF_LocalArrayCreate.cppF90 ESMF_LocalArrayMacros.h ESMF_LocalAllocMacros.h
 
-ESMF_LocalArrayGet.F90: ESMF_LocalArrayGet.cpp ESMF_LocalArrayMacros.h ESMF_LocalAllocMacros.h
+ESMF_LocalArrayGet.F90: ESMF_LocalArrayGet.cppF90 ESMF_LocalArrayMacros.h ESMF_LocalAllocMacros.h
 
