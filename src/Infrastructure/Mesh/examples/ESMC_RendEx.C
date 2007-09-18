@@ -1,5 +1,5 @@
 //==============================================================================
-// $Id: ESMC_RendEx.C,v 1.4 2007/09/18 19:24:22 dneckels Exp $
+// $Id: ESMC_RendEx.C,v 1.5 2007/09/18 20:11:16 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -152,34 +152,20 @@ int main(int argc, char *argv[]) {
   set_dest_coords(dstmesh);
 
   double T = 0, tstep = 0.3, TEND = 5;
-  fill_src(srcmesh, s, T);
 
-  //Par::Out() << "*** Source Mesh:" << std::endl;
-  //srcmesh.Print(Par::Out());
-
-  //Par::Out() << "*** Dest Mesh:" << std::endl;
-  //dstmesh.Print(Par::Out());
-  //MPI_Barrier(Par::Comm());
-
-
-
-  if (Par::Rank() == 0) std::cout << "Calling Zoltan!!" << std::endl;
-
-  std::vector<Interp::FieldPair> fpairs;
-  fpairs.push_back(Interp::FieldPair(s, d));
-  //fpairs.push_back(Interp::FieldPair(s, d1, Interp::INTERP_PATCH));
-  
   // Ghost elements across parallel boundaries (needed by INTERP_PATCH)
   srcmesh.CreateGhost();
   
   Interp interp(srcmesh, dstmesh, fpairs);
-  
 
   UInt nstep = 0;
   while (T < TEND) {
+
     fill_src(srcmesh, s, T);
+
     // Send field values to the ghosted cells
     srcmesh.GhostComm().SendFields(1, &s, &s);
+
     // Perform the interpolation
     interp();
   
