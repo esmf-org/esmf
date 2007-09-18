@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.39 2007/08/30 05:06:34 cdeluca Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.40 2007/09/18 23:19:15 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -116,7 +116,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.39 2007/08/30 05:06:34 cdeluca Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.40 2007/09/18 23:19:15 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -354,10 +354,9 @@
         ! individual data item information
         call ESMF_ArrayDataMapPrint(fielddatamap%adm, options, rc=localrc)
 
-! TODO:FIELDINTEGRATION: Needs relloc method replaced with staggerloc.
-!        call ESMF_StaggerLocString(fielddatamap%staggerloc, str, rc=localrc)
+        call ESMF_StaggerLocString(fielddatamap%staggerloc, str, rc=localrc)
+        write (*, *)  "Stagger location = ", trim(str)
 
-!        write (*, *)  "Stagger location = ", trim(str)
         call ESMF_InterleaveTypeString(fielddatamap%interleave, str, rc=localrc)
         write (*, *)  "Interleave type = ", trim(str)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
