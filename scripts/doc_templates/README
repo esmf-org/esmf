@@ -1,4 +1,4 @@
-% $Id: README,v 1.6 2003/03/03 15:53:56 eschwab Exp $
+% $Id: README,v 1.7 2007/09/18 21:38:16 cdeluca Exp $
 
 ================================================================================
             Earth System Modeling Framework Document Templates
@@ -43,11 +43,6 @@ current distribution in order to accommodate the document format.
 The ProTeX website:
 http://dao.gsfc.nasa.gov/dao/software/ProTeX
 has additional templates and examples.
-
-Further discussion of the documents is included in the Earth System
-Modeling Framework Developer's Guide:
-
-http://www.esmf.ucar.edu -> Milestones and Archives -> Milestone A
 
 2. Implied development cycle
    -------------------------

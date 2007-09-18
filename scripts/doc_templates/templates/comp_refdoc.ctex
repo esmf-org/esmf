@@ -1,4 +1,4 @@
-% $Id: comp_refdoc.ctex,v 1.6 2007/03/31 05:50:45 cdeluca Exp $
+% $Id: comp_refdoc.ctex,v 1.7 2007/09/18 21:38:16 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -49,8 +49,8 @@
 #endif
 
 \section{Installation and General Usage}
-See the \htmladdnormallink{ESMF User's Guide}{http://www.esmf.ucar.edu/esmf_docs/ESMF_usrdoc/} for installation instructions and a discussion of overall 
-usage of the ESMF libraries.
+See the {\it ESMF User's Guide} for installation instructions
+and a discussion of overall usage of the ESMF libraries.
 
 %\section{Architecture}
 #ifdef STANDALONE

@@ -538,12 +538,15 @@ MORE HELP:
 Information about the ESMF project can be found at the ESMF web site:
         http://www.esmf.ucar.edu
 
-The latest documentation for the project can be found at:
-        http://www.esmf.ucar.edu -> Downloads & Documentation
+Software documentation for the last public release is at:
+        http://www.esmf.ucar.edu -> Users -> Documentation
+
+Software documentation for all releases is at:
+        http://www.esmf.ucar.edu -> Download -> View All Releases
 
 The ESMF User's Guide contains information on building and installing the ESMF.
 The ESMF Reference Manual contains information on the architecture of the ESMF,
-example code, and details of the APIs (Application Programming Interfaces).
+example code, and details of the API (Application Programming Interface).
 
 The ESMF library source code is also available for download at:
 	http://sourceforge.net/projects/esmf
@@ -555,7 +558,7 @@ the bugs, support, and task lists for ESMF.
 Use test cases demonstrating how ESMF can be used in realistic situations are
 available as a separate module through CVS. Please follow the instructions on 
 the ESMF web site:
-        http://www.esmf.ucar.edu -> Development -> Test and Validation
+        http://www.esmf.ucar.edu -> Developers -> Test & Validation
 
 Contributions from ESMF users are available at:
 	http://sourceforge.net/projects/esmfcontrib
@@ -564,4 +567,4 @@ Please contact esmf_support@ucar.edu with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.86 2007/07/25 22:20:33 theurich Exp $
+ $Id: README,v 1.87 2007/09/18 21:38:16 cdeluca Exp $

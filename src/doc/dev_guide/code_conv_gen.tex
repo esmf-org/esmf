@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_gen.tex,v 1.11 2007/04/12 21:18:56 cdeluca Exp $
+% CVS $Id: code_conv_gen.tex,v 1.12 2007/09/18 21:38:17 cdeluca Exp $
 
 \subsection{Docs: Code and Documentation Templates and Associated Scripts}
 \label{sec:code_templates}
@@ -40,14 +40,23 @@ file (ESMC\_class.h) in the component include directory, if one does not exist.
 
 \subsubsection{Accessibility}
 
-ESMF documents are available on the ESMF Web site on the
-{\bf Downloads \& Documentation} page.  They are available
-to developers for editing through the ESMF repository on the SourceForge site.
+Software documentation for the last public release is at:
+\begin{verbatim}
+  http://www.esmf.ucar.edu -> Users -> Documentation
+\end{verbatim} 
+
+Software documentation for all releases is at:
+\begin{verbatim}
+  http://www.esmf.ucar.edu -> Download -> View All Releases
+\end{verbatim}
+
+Documents are available to developers for editing through the
+ESMF repository on the SourceForge site.
 
 \subsubsection{File format}
 
 Documents will be available in both web-browsable (e.g. html) and
-print-friendly formats.  They will be written in \LaTeX and based on a
+printer-friendly formats.  They will be written in \LaTeX and based on a
 set of templates. \LaTeX was chosen because:
 
 \begin{itemize}
@@ -61,28 +70,9 @@ auto-documentation tool \htmladdnormallink{ProTeX}
 which we shall use.
 \end{itemize}
 
-\subsubsection{General Rules for Fonts and Capitalization}
+\subsubsection{Typeface and Diagram Conventions}
 
-The following conventions for fonts and capitalization are used
-in ESMF documents. \newline
-
-\begin{tabular}{lll}
-{\bf Style} & {\bf Meaning} & {\bf Example} \\ \hline
-{\it italics}  & documents and section names & {\it ESMF Reference Manual}\\
-{\tt courier}  & code fragments & {\tt ESMF\_TRUE}\\
-{\tt courier()}  & ESMF method name & {\tt ESMF\_FieldGet()} \\
-{\bf boldface} & first definitions & An {\bf address space} is ...\\
-{\bf boldface} & web links & {\bf Development} Web page \\
-{Capitals}     & ESMF class name & DataMap \\
-\end{tabular} 
- 
-ESMF class names frequently coincide with words commonly
-used within the Earth system domain (field, grid, component, array, 
-etc.)  The convention we adopt in this manual is that if a word is 
-used in the context of an ESMF class name it is capitalized, and 
-if the word is used in a more general context it remains in lower 
-case.  We would write, for example, that an ESMF Field class 
-represents a physical field.
+\input{ESMF_typefaceconventions}
 
 \subsubsection{Style Rules for \LaTeX}
 
@@ -108,7 +98,7 @@ Measurements and analyses of ESMF performance are documented in
 performance reports.  These reports are used to communicate 
 information about framework performance, and are used to
 define and assess the success of optimization efforts.
-They are posted on the ESMF Web site under the {\bf Performance}
+They are posted on the ESMF website under the {\bf Performance}
 link.  Reports typically contain the following sections:  Objective,
 Description of the Benchmark,  Results, Optimizations 
 and Conclusions.
@@ -367,14 +357,14 @@ The first line of every file in ESMF
   must be its CVS version identification. For example, each \LaTeX
   file must begin:
 \begin{verbatim}
-% $Id: code_conv_gen.tex,v 1.11 2007/04/12 21:18:56 cdeluca Exp $ 
+% $Id: code_conv_gen.tex,v 1.12 2007/09/18 21:38:17 cdeluca Exp $ 
 \end{verbatim}
 
 In addition, for source code, the CVS identifier must have the 
 ability to be written to a variable for output to a configuration log.  
 Therefore each F90 module must contain a declaration:
 \begin{verbatim}
-character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.11 2007/04/12 21:18:56 cdeluca Exp $'
+character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.12 2007/09/18 21:38:17 cdeluca Exp $'
 \end{verbatim}
 
 \subsubsection{License and Copyright Information}

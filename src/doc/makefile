@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.48 2006/12/13 20:19:06 cdeluca Exp $ 
+# $Id: makefile,v 1.49 2007/09/18 21:38:17 cdeluca Exp $ 
 
 ALL: doc
 
@@ -39,7 +39,7 @@ TEXINPUTS_VALUE = ".:$(ESMF_DIR)/src/doc:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/de
 # all of the dependent files, but even a partial listing  will be helpful.
 
 REFDOC_DEP_FILES = 
-USRDOC_DEP_FILES = ESMF_desc.tex ESMF_install.tex  ESMF_techoverview.tex
+USRDOC_DEP_FILES = ESMF_install.tex  ESMF_techoverview.tex
 
 include $(ESMF_DIR)/makefile
 
