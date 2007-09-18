@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.27 2007/07/19 20:58:33 theurich Exp $
+// $Id: ESMC_DistGrid.h,v 1.28 2007/09/18 20:28:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -57,6 +57,8 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     int *minIndexPDimPPatch;      // lower corner indices [dimCount*patchCount]
     int *maxIndexPDimPPatch;      // upper corner indices [dimCount*patchCount]
     int *cellCountPPatch;         // number of cells [patchCount]
+    int *minIndexPDimPDe;         // lower corner indices [dimCount*deCount]
+    int *maxIndexPDimPDe;         // upper corner indices [dimCount*deCount]
     int *cellCountPDe;            // number of cells [deCount]
     int *patchListPDe;            // patch indices [deCount]
     int *contigFlagPDimPDe;       // flag contiguous indices [dimCount*deCount]
@@ -78,9 +80,10 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
   private:
     // construct() and destruct()
     int construct(int dimCount, int patchCount, int *dePatchList,
-      int *minIndex, int *maxIndex, int *contigFlagPDimPDe, 
-      int *indexCountPDimPDe, int **indexList, ESMC_Logical regDecompFlagArg,
-      InterfaceInt *connectionList, DELayout *delayout, VM *vm);
+      int *minIndex, int *maxIndex, int *minIndexPDimPDe, int *maxIndexPDimPDe,
+      int *contigFlagPDimPDe, int *indexCountPDimPDe, int **indexList,
+      ESMC_Logical regDecompFlagArg, InterfaceInt *connectionList,
+      DELayout *delayout, VM *vm);
     int destruct();
   public:
     // create() and destroy()
@@ -120,6 +123,10 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     const int *getMaxIndexPDimPPatch()  const {return maxIndexPDimPPatch;}
     const int *getMaxIndexPDimPPatch(int patch, int *rc) const;
     const int *getCellCountPPatch()     const {return cellCountPPatch;}
+    const int *getMinIndexPDimPDe()     const {return minIndexPDimPDe;}
+    const int *getMinIndexPDimPDe(int de, int *rc) const;
+    const int *getMaxIndexPDimPDe()     const {return maxIndexPDimPDe;}
+    const int *getMaxIndexPDimPDe(int de, int *rc) const;
     const int *getCellCountPDe()        const {return cellCountPDe;}
     int getCellCountPDe(int de, int *rc) const;
     const int *getPatchListPDe()        const {return patchListPDe;}
