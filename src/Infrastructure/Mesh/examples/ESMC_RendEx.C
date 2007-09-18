@@ -1,5 +1,5 @@
 //==============================================================================
-// $Id: ESMC_RendEx.C,v 1.3 2007/09/17 19:05:38 dneckels Exp $
+// $Id: ESMC_RendEx.C,v 1.4 2007/09/18 19:24:22 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -167,7 +167,7 @@ int main(int argc, char *argv[]) {
 
   std::vector<Interp::FieldPair> fpairs;
   fpairs.push_back(Interp::FieldPair(s, d));
-  fpairs.push_back(Interp::FieldPair(s, d1, Interp::INTERP_PATCH));
+  //fpairs.push_back(Interp::FieldPair(s, d1, Interp::INTERP_PATCH));
   
   // Ghost elements across parallel boundaries (needed by INTERP_PATCH)
   srcmesh.CreateGhost();
