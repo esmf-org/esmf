@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.8 2007/09/05 18:31:55 oehmke Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.9 2007/09/18 19:54:59 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.8 2007/09/05 18:31:55 oehmke Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.9 2007/09/18 19:54:59 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -58,6 +58,8 @@ program ESMF_GridCoordUTest
   real(ESMF_KIND_R8), pointer :: fptr(:,:), outfptr(:,:), fptr3D(:,:,:)
   integer :: lbnd(2),ubnd(2),lbnd3d(3),ubnd3d(3)
   integer :: petMap2D(2,2,1)
+  integer :: petMapReg2D(2,1,2)
+  character(len=ESMF_MAXSTR) :: string
 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -288,11 +290,29 @@ program ESMF_GridCoordUTest
 
   ! Check that output is as expected
   correct=.true.
-  if (.not. (ESMF_STAGGERLOC_CORNER == ESMF_STAGGERLOC_CORNER)) correct=.false.
-  if (      (ESMF_STAGGERLOC_CORNER == ESMF_STAGGERLOC_CENTER)) correct=.false.
-  if (.not. (ESMF_STAGGERLOC_CORNER /= ESMF_STAGGERLOC_EDGE1)) correct=.false.
-  if (      (ESMF_STAGGERLOC_EDGE1  /= ESMF_STAGGERLOC_EDGE1)) correct=.false.
+  if (.not. (ESMF_STAGGERLOC_CORNER .eq. ESMF_STAGGERLOC_CORNER)) correct=.false.
+  if (      (ESMF_STAGGERLOC_CORNER .eq. ESMF_STAGGERLOC_CENTER)) correct=.false.
+  if (.not. (ESMF_STAGGERLOC_CORNER .ne. ESMF_STAGGERLOC_EDGE1)) correct=.false.
+  if (      (ESMF_STAGGERLOC_EDGE1  .ne. ESMF_STAGGERLOC_EDGE1)) correct=.false.
 
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test StaggerLocString"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! Check that output is as expected
+  correct=.true.
+  call ESMF_StaggerLocString(ESMF_STAGGERLOC_CENTER, string, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  if (trim(string) .ne. trim("Center")) correct=.false.
+  
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -2107,6 +2127,57 @@ program ESMF_GridCoordUTest
 
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!! Test 2D Plus 1 Default Bounds For CreateShapeReg !!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test 2D plus 1 GridCreateShapeReg Bounds"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! Init correct flag
+  correct=.true.
+
+  ! if petCount >1, setup petMap
+  if (petCount .gt. 1) then
+     petMapReg2D(:,1,1)=(/0,1/)
+     petMapReg2D(:,1,2)=(/2,3/)
+     grid2D=ESMF_GridCreateShape(minIndex=(/1,2,3/),maxIndex=(/4,5,10/), &
+                              regDecomp=(/2,1,2/), &
+                              indexflag=ESMF_INDEX_GLOBAL, &
+                              petMap=petMapReg2D, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  else
+     grid2D=ESMF_GridCreateShape(minIndex=(/1,2,3/),maxIndex=(/4,5,10/), &
+                              regDecomp=(/2,1,2/), &
+                              indexflag=ESMF_INDEX_GLOBAL, &
+                              rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  endif
+
+  ! Allocate Staggers
+  call ESMF_GridAllocCoord(grid2D, &
+               staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! check coord 1
+  call check2DP1Bnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
+           localPet=localPet, petCount=petCount,                          &
+           ielbnd0=(/1,2,3/),ieubnd0=(/2,5,6/),iloff0=(/0,0,0/),iuoff0=(/0,0,0/), &
+           ielbnd1=(/3,2,3/),ieubnd1=(/4,5,6/),iloff1=(/0,0,0/),iuoff1=(/0,0,0/), &
+           ielbnd2=(/1,2,7/),ieubnd2=(/2,5,10/),iloff2=(/0,0,0/),iuoff2=(/0,0,0/), &
+           ielbnd3=(/3,2,7/),ieubnd3=(/4,5,10/),iloff3=(/0,0,0/),iuoff3=(/0,0,0/), &
+           correct=correct, rc=rc) 
+
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Test 3D coordinate allocation !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -2562,7 +2633,7 @@ subroutine check2DP1Bnds2x2(grid, coord, staggerloc, localPet, petCount, &
              computationalLBound=clbnd, computationalUBound=cubnd,  &
              totalLBound=tlbnd, totalUBound=tubnd, rc=localrc)
              if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-!    write(*,*) "1:",slbnd,",",subnd, correct
+!    write(*,*) "1:",slbnd,",",subnd, rc,correct
 
      !! set pointer to null
      nullify(fptr)
@@ -2730,6 +2801,8 @@ subroutine check2DP1Bnds2x2(grid, coord, staggerloc, localPet, petCount, &
              computationalLBound=clbnd, computationalUBound=cubnd,  &
              totalLBound=tlbnd, totalUBound=tubnd, rc=localrc)
              if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+!    write(*,*) localPet,":",slbnd,",",subnd, "rc=",rc, "correct=",correct
 
       ! set pointer to null
       nullify(fptr)
