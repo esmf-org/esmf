@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.132 2007/09/17 20:04:59 theurich Exp $
+// $Id: ESMC_Array.C,v 1.133 2007/09/18 20:31:18 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.132 2007/09/17 20:04:59 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.133 2007/09/18 20:31:18 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1577,13 +1577,11 @@ int Array::scatter(
   }
   const int *patchListPDe = distgrid->getPatchListPDe();
 
-  // get minIndexPDimPPatch and maxIndexPDimPPatch for patch
-  const int *minIndexPDimPPatch =
-    distgrid->getMinIndexPDimPPatch(patch, &localrc);
+  // get minIndexPDim and maxIndexPDim for patch
+  const int *minIndexPDim = distgrid->getMinIndexPDimPPatch(patch, &localrc);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
-  const int *maxIndexPDimPPatch =
-    distgrid->getMaxIndexPDimPPatch(patch, &localrc);
+  const int *maxIndexPDim = distgrid->getMaxIndexPDimPPatch(patch, &localrc);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -1606,7 +1604,7 @@ int Array::scatter(
       if (j){
         // decomposed dimension
         --j;  // shift to basis 0
-        if (counts[i] != maxIndexPDimPPatch[j] - minIndexPDimPPatch[j] + 1){
+        if (counts[i] != maxIndexPDim[j] - minIndexPDim[j] + 1){
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
             "- Extent mismatch between array argument and Array object", &rc);
           return rc;
@@ -1626,18 +1624,20 @@ int Array::scatter(
   // size in bytes of each piece of data
   int dataSize = ESMC_TypeKindSize(typekind);
 
-  // prepare for comms
-  vmk_commhandle **commh = new vmk_commhandle*; // used by all comm calls
-  vmk_commhandle **commhList = 
-    new vmk_commhandle*[rank]; // used for indexList comm
-  
   // distgrid and delayout values
   const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
+  const int *contigFlagPDimPDe = distgrid->getContigFlagPDimPDe();
+  const int *minIndexPDimPDe = distgrid->getMinIndexPDimPDe();
   int dimCount = distgrid->getDimCount();
   int deCount = delayout->getDeCount();
   int localDeCount = delayout->getLocalDeCount();
   const int *localDeList = delayout->getLocalDeList();
   const int *deList = delayout->getDeList();
+  
+  // prepare for comms
+  vmk_commhandle **commh = new vmk_commhandle*; // used by all comm calls
+  vmk_commhandle **commhList = 
+    new vmk_commhandle*[dimCount]; // used for indexList comm
   
   // rootPet is the only sender for scatter, but may need info from other PETs
   char **sendBuffer;
@@ -1652,27 +1652,20 @@ int Array::scatter(
       int de = i;
       if (patchListPDe[de] == patch){
         // this DE is located on receiving patch
-        int **indexList = new int*[rank];
+        int **indexList = new int*[dimCount];
         int tensorIndex=0;  // reset
-        // get contigFlag for first dimension for this de (dim is basis 1)
-        int contigFlag = distgrid->getContigFlagPDimPDe(de, 1, &localrc);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-          &rc)) return rc;
         int commhListCount = 0;  // reset
-        for (int jj=0; jj<rank; jj++){
-          int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor
-          if (j){
-            // decomposed dimension 
-            --j;  // shift to basis 0
-            // obtain indexList for this DE and dim
-            indexList[jj] = new int[indexCountPDimPDe[de*dimCount+j]];
+        for (int j=0; j<dimCount; j++){
+          if(contigFlagPDimPDe[de*dimCount+j]==0){
+            // non-contiguous -> obtain indexList for this DE and dim
+            indexList[j] = new int[indexCountPDimPDe[de*dimCount+j]];
             // check if this DE is local or not            
             if (deList[de] == -1){
               // this DE is _not_ local -> receive indexList from respective Pet
               int srcPet;
               delayout->getDEMatchPET(de, *vm, NULL, &srcPet, 1);
               commhList[commhListCount] = new vmk_commhandle;
-              localrc = vm->vmk_recv(indexList[jj],
+              localrc = vm->vmk_recv(indexList[j],
                 sizeof(int)*indexCountPDimPDe[de*dimCount+j], srcPet, 
                 &(commhList[commhListCount]));
               if (localrc){
@@ -1690,21 +1683,11 @@ int Array::scatter(
                 distgrid->getIndexListPDimPLocalDe(deList[de], j+1, &localrc);
               if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
                 ESMF_ERR_PASSTHRU, &rc)) return rc;
-              memcpy(indexList[jj], localIndexList, sizeof(int)*
+              memcpy(indexList[j], localIndexList, sizeof(int)*
                 indexCountPDimPDe[de*dimCount+j]);
-              // shift basis 1 -> basis 0
-              for (int k=0; k<indexCountPDimPDe[de*dimCount+j]; k++)
-                indexList[jj][k] -= minIndexPDimPPatch[j];
             }
-          }else{
-            // tensor dimension
-            int extent = ubounds[tensorIndex] - lbounds[tensorIndex] + 1;
-            indexList[jj] = new int[extent];
-            for (int k=0; k<extent; k++)
-              indexList[jj][k] = k;   // basis 0
-            ++tensorIndex;
           }
-        } // jj
+        } // j
 
         // prepare contiguous sendBuffer for this DE
         sendBuffer[de] = new char[deCellCount[de]*dataSize];
@@ -1725,9 +1708,9 @@ int Array::scatter(
         }
         
         // wait for all outstanding indexList receives for this DE
-        for (int jj=0; jj<commhListCount; jj++){
-          vm->commwait(&(commhList[jj]));
-          delete commhList[jj];
+        for (int j=0; j<commhListCount; j++){
+          vm->commwait(&(commhList[j]));
+          delete commhList[j];
         }
         
         // loop over all cells in exclusive region for this DE 
@@ -1735,14 +1718,26 @@ int Array::scatter(
         int sendBufferIndex = 0;  // reset
         while(ii[rank-1] < iiEnd[rank-1]){        
           // determine linear index for this cell into array
-          int linearIndex = indexList[rank-1][ii[rank-1]];  // init
-          for (int j=rank-2; j>=0; j--){
-            linearIndex *= counts[j];
-            linearIndex += indexList[j][ii[j]];
+          int linearIndex = 0;  // reset
+          for (int jj=rank-1; jj>=0; jj--){
+            linearIndex *= counts[jj];  // first time zero o.k.
+            int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor
+            if (j){
+              // decomposed dimension 
+              --j;  // shift to basis 0
+              if (contigFlagPDimPDe[de*dimCount+j])
+                linearIndex += minIndexPDimPDe[de*dimCount+j] + ii[jj];
+              else
+                linearIndex += indexList[j][ii[jj]];
+              // shift basis 1 -> basis 0
+              linearIndex -= minIndexPDim[j];
+            }else{
+              // tensor dimension
+              linearIndex += ii[jj];
+            }
           }
-        
           // copy this element into the contiguous sendBuffer for this DE
-          if (contigFlag){
+          if (contigFlagPDimPDe[de*dimCount]){
             // contiguous data in first dimension
             memcpy(sendBuffer[de]+sendBufferIndex*dataSize,
               array+linearIndex*dataSize, iiEnd[0]*dataSize);
@@ -1755,7 +1750,6 @@ int Array::scatter(
             ++ii[0];
             ++sendBufferIndex;
           }
-                
           // multi-dim index increment
           for (int j=0; j<rank-1; j++){
             if (ii[j] == iiEnd[j]){
@@ -1781,8 +1775,9 @@ int Array::scatter(
         }
         
         // clean-up
-        for (int j=0; j<rank; j++)
-          delete [] indexList[j];
+        for (int j=0; j<dimCount; j++)
+          if(contigFlagPDimPDe[de*dimCount+j]==0)
+            delete [] indexList[j];
         delete [] indexList;
       } // DE on patch
     } // i -> de
@@ -1795,26 +1790,20 @@ int Array::scatter(
       int de = localDeList[i];
       if (patchListPDe[de] == patch){
         // this DE is located on receiving patch -> must send info to rootPet
-        int **indexList = new int*[rank];
-        for (int jj=0; jj<rank; jj++){
-          int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor
-          if (j){
-            // decomposed dimension 
-            --j;  // shift to basis 0
-            // obtain local indexList for this DE and dim
-            indexList[jj] = new int[indexCountPDimPDe[de*dimCount+j]];
+        int **indexList = new int*[dimCount];
+        for (int j=0; j<dimCount; j++){
+          if(contigFlagPDimPDe[de*dimCount+j]==0){
+            // non-contigous -> obtain local indexList for this DE and dim
+            indexList[j] = new int[indexCountPDimPDe[de*dimCount+j]];
             const int *localIndexList =
               distgrid->getIndexListPDimPLocalDe(i, j+1, &localrc);
             if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
               ESMF_ERR_PASSTHRU, &rc)) return rc;
-            memcpy(indexList[jj], localIndexList, sizeof(int)*
+            memcpy(indexList[j], localIndexList, sizeof(int)*
               indexCountPDimPDe[de*dimCount+j]);
-            // shift basis 1 -> basis 0
-            for (int k=0; k<indexCountPDimPDe[de*dimCount+j]; k++)
-              indexList[jj][k] -= minIndexPDimPPatch[j];
             // send indexList of local DE to rootPet
             *commh = NULL;  // invalidate
-            localrc = vm->vmk_send(indexList[jj],
+            localrc = vm->vmk_send(indexList[j],
               sizeof(int)*indexCountPDimPDe[de*dimCount+j], rootPet, commh);
             if (localrc){
               char *message = new char[160];
@@ -1825,15 +1814,13 @@ int Array::scatter(
               return rc;
             }
           }
-        } // jj
+        } // j
         // wait for all outstanding indexList sends
         vm->commqueuewait();
         // clean-up
-        for (int jj=0; jj<rank; jj++){
-          int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor
-          if (j)
-            delete [] indexList[jj];
-        }
+        for (int j=0; j<dimCount; j++)
+          if(contigFlagPDimPDe[de*dimCount+j]==0)
+            delete [] indexList[j];
         delete [] indexList;
       } // DE on patch
     } // i -> de
