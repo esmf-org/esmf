@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.31 2007/09/18 20:28:37 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.32 2007/09/19 22:15:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.31 2007/09/18 20:28:37 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistGrid.C,v 1.32 2007/09/19 22:15:51 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1501,7 +1501,7 @@ int DistGrid::print()const{
   }
       
   printf("connectionCount = %d\n", connectionCount);
-  printf("~ cached values ~\n");
+  printf("~ lower class' values ~\n");
   printf("deCount = %d\n", deCount);
   printf("localPet = %d\n", vm->getLocalPet());
   printf("petCount = %d\n", vm->getPetCount());
