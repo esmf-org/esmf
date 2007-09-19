@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.133 2007/09/18 20:31:18 theurich Exp $
+// $Id: ESMC_Array.C,v 1.134 2007/09/19 18:09:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.133 2007/09/18 20:31:18 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.134 2007/09/19 18:09:22 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1656,8 +1656,9 @@ int Array::scatter(
         int tensorIndex=0;  // reset
         int commhListCount = 0;  // reset
         for (int j=0; j<dimCount; j++){
-          if(contigFlagPDimPDe[de*dimCount+j]==0){
-            // non-contiguous -> obtain indexList for this DE and dim
+          if(dimmap!=0 && contigFlagPDimPDe[de*dimCount+j]==0){
+            // associated and non-contiguous dimension
+            // -> obtain indexList for this DE and dim
             indexList[j] = new int[indexCountPDimPDe[de*dimCount+j]];
             // check if this DE is local or not            
             if (deList[de] == -1){
@@ -1792,8 +1793,9 @@ int Array::scatter(
         // this DE is located on receiving patch -> must send info to rootPet
         int **indexList = new int*[dimCount];
         for (int j=0; j<dimCount; j++){
-          if(contigFlagPDimPDe[de*dimCount+j]==0){
-            // non-contigous -> obtain local indexList for this DE and dim
+          if(dimmap!=0 && contigFlagPDimPDe[de*dimCount+j]==0){
+            // associated and non-contiguous dimension
+            // -> obtain local indexList for this DE and dim and send to rootPet
             indexList[j] = new int[indexCountPDimPDe[de*dimCount+j]];
             const int *localIndexList =
               distgrid->getIndexListPDimPLocalDe(i, j+1, &localrc);
