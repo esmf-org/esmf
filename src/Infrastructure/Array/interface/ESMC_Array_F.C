@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.64 2007/08/10 21:07:41 theurich Exp $
+// $Id: ESMC_Array_F.C,v 1.65 2007/09/20 23:09:46 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -541,6 +541,43 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Array::sparseMatMul(
       *srcArray, *dstArray, routehandle, *zeroflag, *checkflag),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
+  void FTN(c_esmc_arraygather)(ESMCI::Array **array, void *farray,
+    ESMC_TypeKind *typekind, int *rank, int *counts,
+    int *patch, int *rootPet, ESMCI::VM **vm, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraygather()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    ESMCI::VM *opt_vm;
+    // deal with optional arguments
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
+    else opt_vm = *vm;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*array)->gather(
+      farray, *typekind, *rank, counts, ESMC_NOT_PRESENT_FILTER(patch),
+      *rootPet, opt_vm),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
+  void FTN(c_esmc_arraygathernotroot)(ESMCI::Array **array,
+    int *patch, int *rootPet, ESMCI::VM **vm, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraygathernotroot()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    ESMCI::VM *opt_vm;
+    // deal with optional arguments
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
+    else opt_vm = *vm;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*array)->gather(
+      NULL, ESMF_NOKIND, 0, NULL, ESMC_NOT_PRESENT_FILTER(patch),
+      *rootPet, opt_vm),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGather.cppF90,v 1.6 2007/06/27 20:24:53 theurich Exp $
+! $Id: ESMF_ArrayGather.cppF90,v 1.7 2007/09/20 23:09:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_ArrayGatherMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGather.cppF90,v 1.6 2007/06/27 20:24:53 theurich Exp $'
+    '$Id: ESMF_ArrayGather.cppF90,v 1.7 2007/09/20 23:09:46 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -113,10 +113,10 @@ contains
 
 #define ArrayGatherDoc() \
 ! -------------------------- ESMF-public method ----------------------------- @\
-!BOPI @\
+!BOP @\
 ! @\
 ! !IROUTINE: ESMF_ArrayGather - Gather a Fortran90 array from an ESMF_Array @\
-@\
+! @\
 ! !INTERFACE: @\
 ! subroutine ESMF_ArrayGather<rank><type><kind>(array, farray, patch, & @\
 !   rootPet, vm, rc) @\
@@ -131,7 +131,7 @@ contains
 ! @\
 ! @\
 ! !DESCRIPTION: @\
-!   Gather the data of an {ESMF\_Array} object into the {\tt farray} located on
+!   Gather the data of an {ESMF\_Array} object into the {\tt farray} located on @\
 !   {\tt rootPET}. A single DistGrid patch of {\tt array} must be @\
 !   gathered into {\tt farray}. The optional {\tt patch} @\
 !   argument allows selection of the patch. For Arrays defined on a single @\
@@ -145,13 +145,13 @@ contains
 !   The arguments are: @\
 !   \begin{description} @\
 !   \item[array] @\
-!     The {\tt ESMF\_Array} object from which data will be gathered.
+!     The {\tt ESMF\_Array} object from which data will be gathered. @\
 !   \item[{[farray]}] @\
-!     The Fortran90 array into which to gather data. Only root
-!     must provide a valid {\tt farray}.
+!     The Fortran90 array into which to gather data. Only root @\
+!     must provide a valid {\tt farray}. @\
 !   \item[{[patch]}] @\
-!     The DistGrid patch in {\tt array} from which to gather {\tt farray}.
-!     By default {\tt farray} will be gathered from patch 1.
+!     The DistGrid patch in {\tt array} from which to gather {\tt farray}. @\
+!     By default {\tt farray} will be gathered from patch 1. @\
 !   \item[rootPet] @\
 !     PET that holds the valid destination array, i.e. {\tt farray}. @\
 !   \item[{[vm]}] @\
@@ -161,7 +161,7 @@ contains
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !   \end{description} @\
 ! @\
-!EOPI @\
+!EOP @\
 !---------------------------------------------------------------------------- @\
 
 #define ArrayGatherMacro(mtype, mtypekind, mrank, mdim, mlen, mrng, mloc) \
@@ -223,13 +223,13 @@ contains
     lb = 1 ! @\
 @\
     ! Call into the C++ interface, which will sort out optional arguments @\
-!    call c_ESMC_ArrayGather(array, farray(mloc), & @\
-!      ESMF_TYPEKIND_##mtypekind, mrank, counts, patch, rootPet, vm, status) @\
-!    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & @\
-!      ESMF_CONTEXT, rcToReturn=rc)) return @\
+    call c_ESMC_ArrayGather(array, farray(mloc), & @\
+      ESMF_TYPEKIND_##mtypekind, mrank, counts, patch, rootPet, vm, status) @\
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     ! Return successfully @\
-    !if (present(rc)) rc = ESMF_SUCCESS todo: enable once implemented @\
+    if (present(rc)) rc = ESMF_SUCCESS @\
 @\
   end subroutine ESMF_ArrayGather##mrank##D##mtypekind @\
 !---------------------------------------------------------------------------- @\
@@ -251,7 +251,7 @@ TypeKindRankDeclarationMacro(ArrayGather)
     ! Local variables
     integer                       :: status         ! local error status
 
-    ! Initialize return code; assume failure until success is certain
+    ! Initialize return code
     status = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -260,12 +260,12 @@ TypeKindRankDeclarationMacro(ArrayGather)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Call into the C++ interface, which will sort out optional arguments
-!    call c_ESMC_ArrayGatherNotRoot(array, patch, rootPet, vm, status)
-!    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-!      ESMF_CONTEXT, rcToReturn=rc)) return
+    call c_ESMC_ArrayGatherNotRoot(array, patch, rootPet, vm, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
-    !if (present(rc)) rc = ESMF_SUCCESS  todo: enable once implemented
+    if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArrayGatherNotRoot
 !----------------------------------------------------------------------------

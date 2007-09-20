@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.70 2007/08/10 21:07:41 theurich Exp $
+// $Id: ESMC_Array.h,v 1.71 2007/09/20 23:09:46 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -157,6 +157,8 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     int serialize(char *buffer, int *length, int *offset) const;
     int deserialize(char *buffer, int *offset);
     // comms
+    int gather(void *array, ESMC_TypeKind typekind, int rank,
+      int *counts, int *patch, int rootPet, VM *vm);
     int scatter(void *array, ESMC_TypeKind typekind, int rank,
       int *counts, int *patch, int rootPet, VM *vm);
     static int sparseMatMulStore(Array *srcArray, Array *dstArray,
