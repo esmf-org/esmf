@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.32 2007/09/19 22:15:51 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.33 2007/09/20 21:41:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.32 2007/09/19 22:15:51 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistGrid.C,v 1.33 2007/09/20 21:41:28 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1393,6 +1393,120 @@ int DistGrid::destruct(void){
       delete [] arbSeqIndexListPLocalDe[i];
   delete [] arbSeqIndexListPLocalDe;
 
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//
+// fill()
+//
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DistGrid::fillIndexListPDimPDe()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::fillIndexListPDimPDe
+//
+// !INTERFACE:
+int DistGrid::fillIndexListPDimPDe(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int *indexList,                   // out - only on rootPet
+  int de,                           // in  - DE   = {0, ..., deCount-1}
+  int dim,                          // in  - dim  = {1, ..., dimCount}
+  vmk_commhandle **commh,           // inout -
+  int rootPet,                      // in  -
+  VM *vm                            // [in] - default: currentVM
+  )const{
+//
+// !DESCRIPTION:
+//    Fill indexList with values on rootPet for de and dim.
+//
+//    Only rootPet must supply a sufficiently allocated indexList pointer.
+//    All PETs are allowed to call into this method once for each DE/dim
+//    request. Only the rootPet and the PET on which DE is local _must_ issue
+//    a call to this method. If on input *commh == NULL a new commhandle will
+//    be allocated internally and *commh will point to this new allocation on
+//    return. This behavior can be used by the calling code to test if
+//    the method did issue communications on behalf of the calling PET.
+//    If on input *commh != NULL the method will reuse the already
+//    allocated commhandle. In either case it is the caller's responsibility to
+//    issue the appropriate wait calls and delete the commhandles when finished.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // by default use the currentVM for vm
+  if (vm == ESMC_NULL_POINTER){
+    vm = VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      return rc;
+  }
+  
+  // query the VM
+  int localPet = vm->getLocalPet();
+  // query lower classes
+  const int *deList = delayout->getDeList();
+      
+  if (localPet == rootPet){
+    // check if this DE is local or not            
+    if (deList[de] == -1){
+      // this DE is _not_ local -> receive indexList from respective Pet
+      int srcPet;
+      delayout->getDEMatchPET(de, *vm, NULL, &srcPet, 1);
+      if (*commh == NULL) *commh = new vmk_commhandle;
+      localrc = vm->vmk_recv(indexList,
+        sizeof(int)*indexCountPDimPDe[de*dimCount+dim-1], srcPet, commh);
+      if (localrc){
+        char *message = new char[160];
+        sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          message, &rc);
+        delete [] message;
+        return rc;
+      }
+    }else{
+      // this DE _is_ local -> look up indexList locally
+      const int *localIndexList =
+        getIndexListPDimPLocalDe(deList[de], dim, &localrc);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
+      memcpy(indexList, localIndexList, sizeof(int)*
+        indexCountPDimPDe[de*dimCount+dim-1]);
+    }
+  }else{
+    if (deList[de] != -1){
+      // this DE _is_ local -> send indexList to rootPet
+      const int *localIndexList =
+        getIndexListPDimPLocalDe(deList[de], dim, &localrc);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
+      if (*commh == NULL) *commh = new vmk_commhandle;
+      localrc = vm->vmk_send(localIndexList,
+        sizeof(int)*indexCountPDimPDe[de*dimCount+dim-1], rootPet, commh);
+      if (localrc){
+        char *message = new char[160];
+        sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          message, &rc);
+        delete [] message;
+        return rc;
+      }
+    }
+  }
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
