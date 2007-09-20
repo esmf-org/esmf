@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.97 2007/08/24 23:34:11 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.98 2007/09/20 21:25:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -2529,7 +2529,7 @@ void VMK::commcancel(vmk_commhandle **commhandle){
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-int VMK::vmk_send(void *message, int size, int dest, int tag){
+int VMK::vmk_send(const void *message, int size, int dest, int tag){
   // p2p send
 #if (VERBOSITY > 9)
   printf("sending to: %d, %d\n", dest, lpid[dest]);
@@ -2546,11 +2546,13 @@ int VMK::vmk_send(void *message, int size, int dest, int tag){
   switch(commarray[mypet][dest].comm_type){
   case VM_COMM_TYPE_MPI1:
     // MPI-1 implementation
+    void *messageC; // for MPI C interface convert (const void *) -> (void *)
+    memcpy(&messageC, &message, sizeof(void *));
     // use mutex to serialize mpi comm calls if mpi thread support requires it
     if (mpi_mutex_flag)
       pthread_mutex_lock(pth_mutex);
     if (tag == -1) tag = 1000*mypet+dest;   // default tag to simplify debugging
-    localrc = MPI_Send(message, size, MPI_BYTE, lpid[dest], tag, mpi_c);
+    localrc = MPI_Send(messageC, size, MPI_BYTE, lpid[dest], tag, mpi_c);
     if (mpi_mutex_flag)
       pthread_mutex_unlock(pth_mutex);
     break;
@@ -2667,7 +2669,7 @@ int VMK::vmk_send(void *message, int size, int dest, int tag){
 }
 
 
-int VMK::vmk_send(void *message, int size, int dest, 
+int VMK::vmk_send(const void *message, int size, int dest, 
   vmk_commhandle **commhandle, int tag){
   // p2p send
 //fprintf(stderr, "vmk_send: commhandle=%p\n", *commhandle);
@@ -2694,12 +2696,14 @@ int VMK::vmk_send(void *message, int size, int dest,
     (*commhandle)->type=1;
     (*commhandle)->mpireq = new MPI_Request[1];
     // MPI-1 implementation
+    void *messageC; // for MPI C interface convert (const void *) -> (void *)
+    memcpy(&messageC, &message, sizeof(void *));
     // use mutex to serialize mpi comm calls if mpi thread support requires it
     if (mpi_mutex_flag)
       pthread_mutex_lock(pth_mutex);
 //fprintf(stderr, "MPI_Isend: commhandle=%p\n", (*commhandle)->mpireq);
     if (tag == -1) tag = 1000*mypet+dest;   // default tag to simplify debugging
-    localrc = MPI_Isend(message, size, MPI_BYTE, lpid[dest], tag, mpi_c, 
+    localrc = MPI_Isend(messageC, size, MPI_BYTE, lpid[dest], tag, mpi_c, 
       (*commhandle)->mpireq);
     if (mpi_mutex_flag)
       pthread_mutex_unlock(pth_mutex);

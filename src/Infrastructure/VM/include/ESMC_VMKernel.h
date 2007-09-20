@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.51 2007/08/24 23:34:11 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.52 2007/09/20 21:25:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -125,7 +125,7 @@ typedef struct{
 
 typedef struct{
   // source and destination pointers
-  volatile void *ptr_src;
+  volatile const void *ptr_src;
   volatile void *ptr_dest;
   // hack sync variables
   shmsync shms;
@@ -269,8 +269,8 @@ class VMK{
     pthread_t getLocalPthreadId() const {return mypthid;}
 
     // p2p communication calls
-    int vmk_send(void *message, int size, int dest, int tag=-1);
-    int vmk_send(void *message, int size, int dest,
+    int vmk_send(const void *message, int size, int dest, int tag=-1);
+    int vmk_send(const void *message, int size, int dest,
       vmk_commhandle **commhandle, int tag=-1);
     int vmk_recv(void *message, int size, int source, int tag=-1, 
       vmk_status *status=NULL);
