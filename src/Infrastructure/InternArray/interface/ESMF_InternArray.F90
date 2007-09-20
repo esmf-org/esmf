@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArray.F90,v 1.20 2007/06/27 22:30:38 cdeluca Exp $
+! $Id: ESMF_InternArray.F90,v 1.21 2007/09/20 17:44:22 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -127,7 +127,7 @@ module ESMF_InternArrayMod
   public ESMF_InternArrayPrint
 !EOPI
 
-! - ESMF-private methods:
+! - ESMF-internal methods:
   public ESMF_InternArrayGetInit
   public ESMF_InternArraySetInitCreated
 
@@ -142,7 +142,7 @@ module ESMF_InternArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArray.F90,v 1.20 2007/06/27 22:30:38 cdeluca Exp $'
+    '$Id: ESMF_InternArray.F90,v 1.21 2007/09/20 17:44:22 cdeluca Exp $'
 !
 !==============================================================================
 !
@@ -2631,7 +2631,7 @@ end subroutine
 
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InternArrayGetInit"
 !BOPI
@@ -2667,7 +2667,7 @@ end subroutine
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HaloDirectionInit()"
 !BOPI
@@ -2696,7 +2696,7 @@ end subroutine
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HaloDirectionGetInit"
 !BOPI
@@ -2732,7 +2732,7 @@ end subroutine
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MaskInit()"
 !BOPI
@@ -2762,7 +2762,7 @@ end subroutine
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MaskGetInit"
 !BOPI

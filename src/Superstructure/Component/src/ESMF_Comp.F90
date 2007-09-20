@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.164 2007/08/23 17:16:00 cdeluca Exp $
+! $Id: ESMF_Comp.F90,v 1.165 2007/09/20 17:44:23 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -269,7 +269,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.164 2007/08/23 17:16:00 cdeluca Exp $'
+      '$Id: ESMF_Comp.F90,v 1.165 2007/09/20 17:44:23 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -387,7 +387,7 @@ end interface
 
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CompClassGetInit"
 !BOPI

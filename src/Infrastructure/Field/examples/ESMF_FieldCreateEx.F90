@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.44 2007/08/30 05:06:30 cdeluca Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.45 2007/09/20 17:44:21 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -31,6 +31,7 @@
     integer :: rc
     integer :: mycell
     integer :: igridCount(2)
+    type(ESMF_Grid) :: grid
     type(ESMF_IGrid) :: igrid
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_InternArray) :: iarray1, iarray2
@@ -52,14 +53,14 @@
 !-------------------------------------------------------------------------
 !   ! Example 1:
 !   !
-!   !  The user has already created a IGrid and has Field data
-!   !  stored in an InternArray object.  This version of create simply
-!   !  associates the data with the IGrid.  The data is referenced
+!   !  We first create a Grid with a regular distribution that is
+!   !  10x20 DEs.  This version of create simply
+!   !  associates the data with the Grid.  The data is referenced
 !   !  by default.  The DataMap is created with defaults.
- 
-    call ESMF_VMGetGlobal(vm, rc)
-    layout = ESMF_DELayoutCreate(vm, rc=rc)
-    origin = (/ 0.0, 0.0 /)
+
+    grid = ESMF_GridCreateShape(name="atmgrid", /10,20/) 
+
+
     igrid = ESMF_IGridCreateHorzXYUni((/ 10, 20 /), origin, &
                                     deltaPerDim=(/ 1.0d0, 1.0d0 /), &
                                     name="atmigrid", rc=rc)

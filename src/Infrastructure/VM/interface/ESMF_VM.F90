@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.94 2007/08/02 22:47:28 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.95 2007/09/20 17:44:23 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -153,7 +153,7 @@ module ESMF_VMMod
   
   public ESMF_CommHandleValidate
   
-! - ESMF-private methods:
+! - ESMF-internal methods:
   public ESMF_VMInitialize
   public ESMF_VMFinalize
   public ESMF_VMAbort
@@ -183,7 +183,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.94 2007/08/02 22:47:28 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.95 2007/09/20 17:44:23 cdeluca Exp $"
 
 !==============================================================================
 
@@ -3494,7 +3494,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 !BOPI
 ! !IROUTINE: ESMF_VMGetCurrentID - Get Current VMId
 
@@ -3536,7 +3536,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 !BOPI
 ! !IROUTINE: ESMF_VMGetVMId - Get VMId
 
@@ -6248,7 +6248,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method -------------------------------
+! -------------------------- ESMF-internal method ------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMThreadBarrier()"
 !BOPI
@@ -6599,7 +6599,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMInitialize()"
 !BOPI
@@ -6651,7 +6651,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMFinalize()"
 !BOPI
@@ -6701,7 +6701,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMAbort()"
 !BOPI
@@ -6745,7 +6745,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMShutdown()"
 !BOPI
@@ -6793,7 +6793,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMGetInit"
 !BOPI
@@ -6830,7 +6830,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMSetInitCreated()"
 !BOPI
@@ -6871,7 +6871,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMGetThis()"
 !BOPI
@@ -6915,7 +6915,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMSetThis()"
 !BOPI
@@ -6964,7 +6964,7 @@ module ESMF_VMMod
 !==============================================================================
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMPlanConstruct()"
 !BOPI
@@ -7026,7 +7026,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMPlanDestruct()"
 !BOPI
@@ -7076,7 +7076,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMPlanGetInit"
 !BOPI
@@ -7113,7 +7113,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMPlanGetThis()"
 !BOPI
@@ -7157,7 +7157,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMPlanSetThis()"
 !BOPI
@@ -7201,7 +7201,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMPlanMaxPEs()"
 !BOPI
@@ -7273,7 +7273,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMPlanMaxThreads()"
 !BOPI
@@ -7345,7 +7345,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMPlanMinThreads()"
 !BOPI
@@ -7422,7 +7422,7 @@ module ESMF_VMMod
 !==============================================================================
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMIdCompare()"
 !BOPI
@@ -7472,7 +7472,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMIdPrint()"
 !BOPI
@@ -7516,7 +7516,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMIdCreate()"
 !BOPI
@@ -7560,7 +7560,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMIdDestroy()"
 !BOPI
@@ -7605,7 +7605,7 @@ module ESMF_VMMod
 
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMRecvVMId()"
 !BOPI
@@ -7655,7 +7655,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMSendVMId()"
 !BOPI
@@ -7710,7 +7710,7 @@ module ESMF_VMMod
 !==============================================================================
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CommHandleValidate()"
 !BOPI
@@ -7760,7 +7760,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CommHandleGetInit"
 !BOPI

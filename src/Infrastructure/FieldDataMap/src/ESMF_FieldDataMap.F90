@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.40 2007/09/18 23:19:15 cdeluca Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.41 2007/09/20 17:44:21 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !   FieldDataMaps are used to indicate where data 
 !   values are located relative to an individual cell/element, and will
 !   store interleave information for vector and higher order data items.
-!   They also contain an ArrayDataMap which contains the data to grid
+!   They also contain an ArrayDataMap which contains the data to Grid
 !   rank mappings.
 !
 !------------------------------------------------------------------------------
@@ -62,10 +62,10 @@
 
 !------------------------------------------------------------------------------
 !  ! ESMF_FieldDataMap
-!  ! The data map type, which should fully describe the mapping
-!  ! between index orders in the igrid and the memory layout of
+!  ! The data map type, which fully describes the mapping
+!  ! between index orders in the Grid and the memory layout of
 !  ! the data array, plus other metadata info such as where the
-!  ! data is relative to the igrid, and any interleaving info needed.
+!  ! data is relative to the Grid, and any interleaving info needed.
 
       type ESMF_FieldDataMap
       sequence
@@ -116,7 +116,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.40 2007/09/18 23:19:15 cdeluca Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.41 2007/09/20 17:44:21 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 

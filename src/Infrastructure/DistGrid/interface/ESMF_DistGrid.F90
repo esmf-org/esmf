@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.28 2007/08/03 21:31:16 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.29 2007/09/20 17:44:21 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@ module ESMF_DistGridMod
   public ESMF_Connection
   public ESMF_ConnectionTransform
 
-! - ESMF-private methods:
+! - ESMF-internal methods:
   public ESMF_DistGridGetInit
   public ESMF_DistGridSetInitCreated
   
@@ -110,7 +110,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.28 2007/08/03 21:31:16 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.29 2007/09/20 17:44:21 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -2375,7 +2375,7 @@ contains
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridGetInit"
 !BOPI

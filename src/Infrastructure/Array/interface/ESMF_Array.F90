@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.65 2007/08/24 16:42:20 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.66 2007/09/20 17:44:20 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -116,7 +116,7 @@ module ESMF_ArrayMod
   public ESMF_ArrayBundleSparseMatMul
   public ESMF_ArrayBundleValidate
 
-! - ESMF-private methods:
+! - ESMF-internal methods:
   public ESMF_ArrayGetInit            ! implemented in ESMF_ArrayCreateMod 
   public ESMF_ArraySetInitCreated     ! implemented in ESMF_ArrayCreateMod 
   public ESMF_ArrayBundleGetInit
@@ -128,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.65 2007/08/24 16:42:20 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.66 2007/09/20 17:44:20 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -2492,7 +2492,7 @@ contains
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleGetInit()"
 !BOPI

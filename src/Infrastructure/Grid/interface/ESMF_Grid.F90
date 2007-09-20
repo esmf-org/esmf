@@ -33,12 +33,11 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-      use ESMF_UtilTypesMod   ! ESMF base class
-      use ESMF_BaseMod        ! ESMF base class
-      use ESMF_IOSpecMod      ! ESMF I/O class
+      use ESMF_UtilTypesMod   
+      use ESMF_BaseMod          ! ESMF base class
       use ESMF_LogErrMod
       use ESMF_ArrayMod
-      use ESMF_LocalArrayMod  ! ESMF local array class
+      use ESMF_LocalArrayMod    ! ESMF local array class
       use ESMF_InitMacrosMod    ! ESMF initializer macros
       use ESMF_LogErrMod        ! ESMF error handling
       use ESMF_VMMod
@@ -129,7 +128,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
   public ESMF_GridValidate
 
 
-! - ESMF-private methods:
+! - ESMF-internal methods:
   public ESMF_GridGetInit  
 
 !EOPI
@@ -138,7 +137,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.23 2007/09/18 19:54:59 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.24 2007/09/20 17:44:21 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -683,7 +682,6 @@ end interface
     type(ESMF_InterfaceInt) :: coordRankArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
 
-
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -890,7 +888,7 @@ end interface
 !     If not specified then the type/kind will be 8 byte reals. 
 ! \item[{[minIndex]}] 
 !      Tuple to start the index ranges at. If not present, defaults
-!      to (1,1,..1)
+!      to /1,1,1,.../.
 ! \item[{countsPerDEDim1}] 
 !     This arrays specifies the number of cells per DE for index dimension 1
 !     for the exclusive region (the center stagger location).
@@ -983,7 +981,7 @@ end interface
 !     array specifies the number of dimensions of the first
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/1,2,3/). 
+!     arrays map to. If not present the default is /1,2,3/. 
 ! \item[{[coordDep2]}] 
 !     This array specifies the dependence of the second 
 !     coordinate component on the three index dimensions
@@ -991,7 +989,7 @@ end interface
 !     array specifies the number of dimensions of the second
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/1,2,3/). 
+!     arrays map to. If not present the default is /1,2,3/. 
 ! \item[{[coordDep3]}] 
 !     This array specifies the dependence of the third 
 !     coordinate component on the three index dimensions
@@ -999,7 +997,7 @@ end interface
 !     array specifies the number of dimensions of the third
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/1,2,3/). 
+!     arrays map to. If not present the default is /1,2,3/. 
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
 ! \item[{[petMap]}]
@@ -1597,11 +1595,11 @@ end interface
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateShapeReg"
 !BOP
-! !IROUTINE: ESMF_GridCreateShape - Create a Grid with an irregular distribution
+! !IROUTINE: ESMF_GridCreateShape - Create a Grid with a regular distribution
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreateShape()
-      function ESMF_GridCreateShapeReg(name,coordTypeKind, &
+      function ESMF_GridCreateShapeReg(name, coordTypeKind, &
                         regDecomp, decompFlag, minIndex, maxIndex, &
                         connDim1, connDim2, connDim3, &
                         poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
@@ -1615,7 +1613,7 @@ end interface
       type(ESMF_Grid) :: ESMF_GridCreateShapeReg
 !
 ! !ARGUMENTS:
-      character (len=*), intent(in), optional :: name 
+       character (len=*), intent(in), optional :: name 
        type(ESMF_TypeKind),  intent(in),    optional  :: coordTypeKind
        integer,               intent(in),   optional  :: regDecomp(:)
        type(ESMF_DecompFlag), intent(in),   optional  :: decompflag(:)
@@ -1643,34 +1641,34 @@ end interface
 ! This method creates a single tile, regularly distributed grid 
 ! (see Figure \ref{fig:GridDecomps}).
 ! To specify the distribution, the user passes in an array 
-! ({\tt regDecomp}) specifying the number of pieces to divide each 
-! dimension into. If the number of pieces is 1 than the dimension is undistibuted.
-! The array {\tt decompFlag} indicates how the division into pieces is to
-! occur with the default being dividing the range as evenly as possible.
+! ({\tt regDecomp}) specifying the number of DEs to divide each 
+! dimension into. If the number of DEs is 1 than the dimension is undistributed.
+! The array {\tt decompFlag} indicates how the division into DEs is to
+! occur.  The default is to divide the range as evenly as possible.
 !
-! If {\tt regDecomp} is not specified then the Grid is divided among the PETs
+! If {\tt regDecomp} is not specified then the Grid is divided among the DEs
 ! along the first dimension and the rest of the dimensions are undistributed.  
 
 ! The arguments are:
 ! \begin{description}
 ! \item[{[name]}]
-!          {\tt ESMF\_Grid} name.
+!      {\tt ESMF\_Grid} name.
 ! \item[{[coordTypeKind]}] 
-!     The type/kind of the grid coordinate data. 
-!     If not specified then the type/kind will be 8 byte reals. 
+!      The type/kind of the grid coordinate data. 
+!      If not specified then the type/kind will be 8 byte reals. 
 ! \item[{[regDecomp]}] 
 !      List that has the same number of elements as {\tt maxIndex}.
 !      Each entry is the number of decounts for that dimension.
 !      If not specified, the default decomposition will be petCountx1x1..x1. 
 ! \item[{[decompflag]}]
-!     List of decomposition flags indicating how each dimension of the
-!     patch is to be divided between the DEs. The default setting
-!     is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. 
+!      List of decomposition flags indicating how each dimension of the
+!      patch is to be divided between the DEs. The default setting
+!      is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. 
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
-!       to (1,1,1...).
+!      to /1,1,1,.../.
 ! \item[{maxIndex}] 
-!        The upper extent of the grid array.
+!      The upper extent of the grid array.
 ! \item[{[connDim1]}] 
 !      Fortran array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
@@ -1750,7 +1748,7 @@ end interface
 !     array specifies the number of dimensions of the first
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/1,2,3/). 
+!     arrays map to. If not present the default is /1,2,3/. 
 ! \item[{[coordDep2]}] 
 !     This array specifies the dependence of the second 
 !     coordinate component on the three index dimensions
@@ -1758,7 +1756,7 @@ end interface
 !     array specifies the number of dimensions of the second
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/1,2,3/). 
+!     arrays map to. If not present the default is /1,2,3/. 
 ! \item[{[coordDep3]}] 
 !     This array specifies the dependence of the third 
 !     coordinate component on the three index dimensions
@@ -1766,7 +1764,7 @@ end interface
 !     array specifies the number of dimensions of the third
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/1,2,3/). 
+!     arrays map to. If not present the default is /1,2,3/. 
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
 ! \item[{[petMap]}]
@@ -2571,7 +2569,7 @@ end subroutine ESMF_GridGet
 
       end subroutine ESMF_GridGetCoordIntoArray
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetInit"
 !BOPI
@@ -3812,7 +3810,7 @@ endif
 !  Array, these values also include the undistributed dimensions and are
 !  ordered to reflect the order of the indices in the coordinate. So, for example,
 !  {\tt totalLBound} and {\tt totalUBound} should match the bounds of the fortran array
-!  retreived by {\tt ESMF\_GridGetLocalTileCoord}. 
+!  retrieved by {\tt ESMF\_GridGetLocalTileCoord}. 
 !
 !The arguments are:
 !\begin{description}
@@ -4218,7 +4216,7 @@ endif
 !     If not specified then the type/kind will be 8 byte reals. 
 ! \item[{[minIndex]}] 
 !      Tuple to start the index ranges at. If not present, defaults
-!      to (1,1,..1)
+!      to /1,1,1,.../.
 ! \item[{countsPerDEDim1}] 
 !     This arrays specifies the number of cells per DE for index dimension 1
 !     for the exclusive region (the center stagger location).
@@ -4315,7 +4313,7 @@ endif
 !     array specifies the number of dimensions of the first
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/1,2,3/). 
+!     arrays map to. If not present the default is /1,2,3/. 
 ! \item[{[coordDep2]}] 
 !     This array specifies the dependence of the second 
 !     coordinate component on the three index dimensions
@@ -4323,7 +4321,7 @@ endif
 !     array specifies the number of dimensions of the second
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/1,2,3/). 
+!     arrays map to. If not present the default is /1,2,3/. 
 ! \item[{[coordDep3]}] 
 !     This array specifies the dependence of the third 
 !     coordinate component on the three index dimensions
@@ -4331,7 +4329,7 @@ endif
 !     array specifies the number of dimensions of the third
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/1,2,3/). 
+!     arrays map to. If not present the default is /1,2,3/. 
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
 ! \item[{[petMap]}]
@@ -5029,7 +5027,7 @@ endif
 !          array specifies the number of dimensions of the metric.
 !          The values specify which of the grid index dimensions the corresponding
 !           map to. If a value is 0, then that dimension doesn't correspond to 
-!          a grid dimension. If not present the default is (/1,2,3,.../). 
+!          a grid dimension. If not present the default is /1,2,3,.../. 
 !     \item[{[doCopy]}]
 !          Default to {\tt ESMF\_DATA\_REF}, makes the grid reference the passed
 !          in array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
@@ -5084,7 +5082,7 @@ endif
 !          array specifies the number of dimensions of the metric.
 !          The values specify which of the grid index dimensions the corresponding
 !           map to. If a value is 0, then that dimension doesn't correspond to 
-!          a grid dimension. If not present the default is (/1,2,3,.../). 
+!          a grid dimension. If not present the default is /1,2,3,.../. 
 !     \item[{[doCopy]}]
 !          Default to {\tt ESMF\_DATA\_REF}, makes the grid reference the passed
 !          in array. If set to {\tt ESMF\_DATA\_COPY} this routine makes a copy
@@ -5147,7 +5145,7 @@ endif
 !          array specifies the number of dimensions of the metric.
 !          The values specify which of the grid index dimensions the corresponding
 !           map to. If a value is 0, then that dimension doesn't correspond to 
-!          a grid dimension. If not present the default is (/1,2,3,.../). 
+!          a grid dimension. If not present the default is /1,2,3,.../. 
 !     \item[{[lbounds]}] 
 !          Lower bounds for undistributed array dimensions.
 !     \item[{[ubounds]}] 
@@ -5245,7 +5243,7 @@ endif
 !          array specifies the number of dimensions of the metric.
 !          The values specify which of the grid index dimensions the corresponding
 !           map to. If a value is 0, then that dimension doesn't correspond to 
-!          a grid dimension. If not present the default is (/1,2,3,.../). 
+!          a grid dimension. If not present the default is /1,2,3,.../. 
 !     \item[{[lbounds]}] 
 !          Lower bounds for undistributed array dimensions.
 !     \item[{[ubounds]}] 
@@ -5392,7 +5390,7 @@ endif
 !     If not specified then the type/kind will be 8 byte reals. 
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
-!       to (1,1,1...).
+!       to /1,1,1,.../.
 ! \item[{maxIndex}] 
 !        The upper extent of the grid array.
 ! \item[{regDecomp]}] 
@@ -5463,7 +5461,7 @@ endif
 !     array specifies the number of dimensions of the first
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/1/). 
+!     arrays map to. If not present the default is /1/. 
 ! \item[{[coordDep2]}] 
 !     This array specifies the dependence of the second 
 !     coordinate component on the three index dimensions
@@ -5471,7 +5469,7 @@ endif
 !     array specifies the number of dimensions of the second
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/2/). 
+!     arrays map to. If not present the default is /2/. 
 ! \item[{[coordDep3]}] 
 !     This array specifies the dependence of the third 
 !     coordinate component on the three index dimensions
@@ -5479,7 +5477,7 @@ endif
 !     array specifies the number of dimensions of the third
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/3/). 
+!     arrays map to. If not present the default is /3/. 
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
 ! \item[{[haloDepth}]
@@ -5556,7 +5554,7 @@ endif
 !     If not specified then the type/kind will be 8 byte reals.  
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
-!       to (1,1,1...).
+!       to /1,1,1,.../.
 ! \item[{maxIndex}] 
 !        The upper extent of the grid array.
 ! \item[{[localIndices]}] 
@@ -5776,20 +5774,21 @@ endif
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Grid} object. This subroutine constructs a 
-! grid of size {\tt minIndex} to {\tt maxIndex}  with the default distGrid configuration.
-! The grid will contain a set of stagger locations  as defined by the parameter
-! {\tt staggerLocs}.  
+! grid of size {\tt minIndex} to {\tt maxIndex}  with the default distGrid
+! configuration.  The grid will contain a set of stagger locations as defined
+! by the parameter {\tt staggerLocs}.  At the completion of this
+! call the grid does not yet contain any storage for coordinate arrays.   
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data. 
-!     If not specified then the type/kind will be 8 byte reals.  
+!      The type/kind of the grid coordinate data. 
+!      If not specified then the type/kind will be 8 byte reals.  
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
-!       to (1,1,1...).
+!       to /1,1,1,.../.
 ! \item[{maxIndex}] 
 !        The upper extent of the grid array.
 ! \item[{[regDecomp]}] 
@@ -5805,7 +5804,7 @@ endif
 ! \item[{[lbounds]}] 
 !      Lower bounds for undistributed array dimensions. If {\tt ubounds}
 !      is specified, but {\tt lbounds} is not then the lower bounds
-!      default to {1,1,1,...}
+!      default to /1,1,1,.../.
 ! \item[{[ubounds]}] 
 !      Upper bounds for undistributed array dimensions.
 ! \item[{[coordRank]}]
@@ -5903,11 +5902,11 @@ endif
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
    function ESMF_GridCreateIrreg(name,coordTypeKind, minIndex, countsPerDE, dimmap, &
-                         lbounds, ubounds, coordRank, &
+                        lbounds, ubounds, coordRank, &
                         coordDimMap, &
                         indexflag, gridType, noData, &
                         computationalLWidth, computationalUWidth, petMap, &
-                         connectionList, connectionTransformList, rc)
+                        connectionList, connectionTransformList, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateIrreg
@@ -5934,9 +5933,10 @@ endif
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Grid} object. This subroutine constructs a 
-! grid of size {\tt minIndex} to {\tt maxIndex}  with the default distGrid configuration.
-! The grid will contain a set of stagger locations  as defined by the parameter
-! {\tt staggerLocs}.  
+! grid of size {\tt minIndex} to {\tt maxIndex}  with the default distGrid
+! configuration.  The grid will contain a set of stagger locations  as
+! defined by the parameter {\tt staggerLocs}.  At the completion of this
+! call the grid does not yet contain any storage for coordinate arrays.   
 !
 ! The arguments are:
 ! \begin{description}
@@ -5947,7 +5947,7 @@ endif
 !     If not specified then the type/kind will be 8 byte reals. 
 ! \item[{[minIndex]}] 
 !      Tuple to start the index ranges at. If not present, defaults
-!      to (1,1,..1)
+!      to /1,1,1,.../.
 ! \item[{countPerDE}] 
 !        This is a 2D array. The first dimension is the size of the number
 !         of distributed dimensions in the grid. The second is the size
@@ -5964,7 +5964,7 @@ endif
 ! \item[{[lbounds]}] 
 !      Lower bounds for undistributed array dimensions. If {\tt ubounds}
 !      is specified, but {\tt lbounds} is not then the lower bounds
-!      default to {1,1,1,...}
+!      default to /1,1,1,.../.
 ! \item[{[ubounds]}] 
 !      Upper bounds for undistributed array dimensions.
 ! \item[{[coordRank]}]
@@ -6110,7 +6110,7 @@ endif
 !     If not specified then the type/kind will be 8 byte reals. 
 ! \item[{[minIndex]}] 
 !      Tuple to start the index ranges at. If not present, defaults
-!      to (1,1,..1)
+!      to /1,1,1,.../.
 ! \item[{countPerDE}] 
 !        This is a 2D array. The first dimension is the size of the number
 !         of distributed dimensions in the grid. The second is the size
@@ -6276,7 +6276,7 @@ endif
 !     If not specified then the type/kind will be 8 byte reals. 
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
-!       to (1,1,1...).
+!       to /1,1,1,.../.
 ! \item[{maxIndex}] 
 !        The upper extent of the grid array.
 ! \item[{[localIndices]}] 
@@ -6350,7 +6350,7 @@ endif
 !     array specifies the number of dimensions of the first
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/1/). 
+!     arrays map to. If not present the default is /1/. 
 ! \item[{[coordDep2]}] 
 !     This array specifies the dependence of the second 
 !     coordinate component on the three index dimensions
@@ -6358,7 +6358,7 @@ endif
 !     array specifies the number of dimensions of the second
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/2/). 
+!     arrays map to. If not present the default is /2/. 
 ! \item[{[coordDep3]}] 
 !     This array specifies the dependence of the third 
 !     coordinate component on the three index dimensions
@@ -6366,7 +6366,7 @@ endif
 !     array specifies the number of dimensions of the third
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is (/3/). 
+!     arrays map to. If not present the default is /3/. 
 ! \item[{[haloDepth}]
 !       Sets the depth of the computational padding around the exclusive
 !       regions on each DE.  The actual value for any edge is the maximum
@@ -6564,7 +6564,7 @@ endif
 !          array specifies the number of dimensions of the metric.
 !          The values specify which of the grid index dimensions the corresponding
 !           map to. If a value is 0, then that dimension doesn't correspond to 
-!          a grid dimension. If not present the default is (/1,2,3,.../). 
+!          a grid dimension. If not present the default is /1,2,3,.../. 
 !     \item[{fptr}]
 !          The pointer to the metric data. 
 !     \item[{[doCopy]}]

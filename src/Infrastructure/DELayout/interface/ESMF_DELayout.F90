@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.68 2007/08/03 20:57:45 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.69 2007/09/20 17:44:21 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -112,7 +112,7 @@ module ESMF_DELayoutMod
   public ESMF_DELayoutSerialize
   public ESMF_DELayoutDeserialize
 
-! - ESMF-private methods:
+! - ESMF-internal methods:
   public ESMF_DELayoutGetInit
   public ESMF_DELayoutSetInitCreated
 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.68 2007/08/03 20:57:45 theurich Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.69 2007/09/20 17:44:21 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -1568,7 +1568,7 @@ contains
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DELayoutSerialize"
 
@@ -1632,7 +1632,7 @@ contains
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DELayoutDeserialize"
 
@@ -1693,7 +1693,7 @@ contains
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DELayoutGetInit"
 !BOPI

@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayDataMap.F90,v 1.11 2007/06/23 04:00:30 cdeluca Exp $
+! $Id: ESMF_InternArrayDataMap.F90,v 1.12 2007/09/20 17:44:22 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -214,7 +214,7 @@ module ESMF_InternArrayDataMapMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
   character(*), parameter, private :: version =  &
-    '$Id: ESMF_InternArrayDataMap.F90,v 1.11 2007/06/23 04:00:30 cdeluca Exp $'
+    '$Id: ESMF_InternArrayDataMap.F90,v 1.12 2007/09/20 17:44:22 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -922,7 +922,7 @@ end function
 
         end subroutine ESMF_ArrayDataMapValidate
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayDataMapInit()"
 !BOPI
@@ -953,7 +953,7 @@ end function
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayDataMapGetInit"
 !BOPI

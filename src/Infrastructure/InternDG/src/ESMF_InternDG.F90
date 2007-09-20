@@ -1,4 +1,4 @@
-! $Id: ESMF_InternDG.F90,v 1.12 2007/06/26 23:22:36 cdeluca Exp $
+! $Id: ESMF_InternDG.F90,v 1.13 2007/09/20 17:44:22 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -216,7 +216,7 @@ module ESMF_InternDGMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternDG.F90,v 1.12 2007/06/26 23:22:36 cdeluca Exp $'
+    '$Id: ESMF_InternDG.F90,v 1.13 2007/09/20 17:44:22 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -3442,7 +3442,7 @@ module ESMF_InternDGMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InternDGGetInit"
 !BOPI

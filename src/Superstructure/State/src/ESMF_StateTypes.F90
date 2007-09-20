@@ -1,4 +1,4 @@
-! $Id: ESMF_StateTypes.F90,v 1.20 2007/07/03 23:28:55 oehmke Exp $
+! $Id: ESMF_StateTypes.F90,v 1.21 2007/09/20 17:44:24 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -282,7 +282,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateTypes.F90,v 1.20 2007/07/03 23:28:55 oehmke Exp $'
+      '$Id: ESMF_StateTypes.F90,v 1.21 2007/09/20 17:44:24 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -433,7 +433,7 @@ end function
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DataHolderInit()"
 !BOPI
@@ -462,7 +462,7 @@ end function
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DataHolderGetInit"
 !BOPI
@@ -541,7 +541,7 @@ end function
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateItemInit()"
 !BOPI
@@ -570,7 +570,7 @@ end function
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateItemGetInit"
 !BOPI
@@ -650,7 +650,7 @@ end function
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateClassGetInit"
 !BOPI
@@ -687,7 +687,7 @@ end function
 
 
 
-! -------------------------- ESMF-private method ------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetInit"
 !BOPI
