@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.50 2007/08/30 05:06:46 cdeluca Exp $
+! $Id: ESMF_StateUTest.F90,v 1.51 2007/09/21 22:46:47 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,24 +34,25 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.50 2007/08/30 05:06:46 cdeluca Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.51 2007/09/21 22:46:47 oehmke Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
-      integer :: x, rc, num, number
-      logical :: IsNeeded
+      integer :: x, rc, num, number,localrc
+      logical :: IsNeeded, correct
       character(ESMF_MAXSTR) :: statename, bundlename, bname
       character(ESMF_MAXSTR) :: fieldname, fname, aname, arrayname
-      type(ESMF_Field) :: field1, field2, field3(3), field4, field5(3)
-      type(ESMF_Bundle) :: bundle1, bundle2(1), bundle3, bundle5
-      type(ESMF_State) :: state1, state2, state3, state4
+      type(ESMF_Field) :: field1, field2, field3(3), field4, field5(3),fieldGDP
+      type(ESMF_Bundle) :: bundle1, bundle2(1), bundle3, bundle5, bundleGDP
+      type(ESMF_State) :: state1, state2, state3, state4,stateGDP
       type(ESMF_StateItemType) :: stateItemType
       type(ESMF_NeededFlag) :: needed
       real, dimension(:,:), pointer :: f90ptr1
+      real(ESMF_KIND_R8), pointer :: ptrGDP1(:,:),ptrGDP2(:,:)
       
       type(ESMF_ArraySpec)  :: arrayspec
       type(ESMF_DistGrid)   :: distgrid
-      type(ESMF_Array)      :: array, array2
+      type(ESMF_Array)      :: array, array2,arrayGDP
       type(ESMF_InternArray) :: iarray
 
 
@@ -976,6 +977,65 @@
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, &
         ESMF_SRCLINE)
       print *, "rc = ", rc
+
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      !!                    Test StateGetDataPointer                        !!
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      stateGDP = ESMF_StateCreate("stateGDP", ESMF_STATE_EXPORT, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+ 
+      call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+      distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/15,23/), rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+      arrayGDP = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+               indexflag=ESMF_INDEX_GLOBAL, name="arrayGDP", rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+      call ESMF_StateAddArray(stateGDP, arrayGDP, rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+ 
+      ! init variables
+      localrc=ESMF_SUCCESS
+      correct=.true.
+      nullify(ptrGDP1)
+      nullify(ptrGDP2)
+
+      ! Get Array Data Pointer From State
+      call ESMF_StateGetDataPointer(state=stateGDP, itemName="arrayGDP", &
+                                    dataPointer=ptrGDP1, copyflag=ESMF_DATA_REF, rc=localrc) 
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      ! Get Array Data Pointer From Array
+      call ESMF_ArrayGet(array=arrayGDP, farrayPtr=ptrGDP2, rc=localrc)    
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      ! Make sure the pointers are the same
+      if (.not. associated(ptrGDP1,ptrGDP2)) correct=.false.
+
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting Array data pointer from state"
+      call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      ! TODO: Add Tests for StateGetDataPointer for Field and Bundle when they're
+      !       working again. 
+
+      call ESMF_StateDestroy(stateGDP, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+      call ESMF_ArrayDestroy(arrayGDP, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+      call ESMF_DistGridDestroy(distgrid, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
 
 #endif
 

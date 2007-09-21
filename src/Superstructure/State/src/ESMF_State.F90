@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.110 2007/09/11 17:30:58 theurich Exp $
+! $Id: ESMF_State.F90,v 1.111 2007/09/21 22:46:47 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.110 2007/09/11 17:30:58 theurich Exp $'
+      '$Id: ESMF_State.F90,v 1.111 2007/09/21 22:46:47 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -4964,13 +4964,13 @@ end interface
 
         !todo: remove comment-out when ArrayValidate available
         !call ESMF_ArrayValidate(arrays(i), rc=localrc)
-        if (localrc .ne. ESMF_SUCCESS) then
-            write(errmsg, *) "item", i
-            call ESMF_LogMsgSetError(localrc, errmsg, &
-                                        ESMF_CONTEXT, rc)
-            deallocate(atodo, stat=localrc)
-            return
-        endif
+        !if (localrc .ne. ESMF_SUCCESS) then
+        !    write(errmsg, *) "item", i
+        !    call ESMF_LogMsgSetError(localrc, errmsg, &
+        !                                ESMF_CONTEXT, rc)
+        !    deallocate(atodo, stat=localrc)
+        !    return
+        !endif
         call ESMF_ArrayGet(arrays(i), name=aname, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
