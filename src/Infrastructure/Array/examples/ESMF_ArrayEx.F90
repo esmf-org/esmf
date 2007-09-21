@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.26 2007/09/17 20:04:59 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.27 2007/09/21 04:12:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -2222,7 +2222,60 @@ program ESMF_ArrayEx
 !EOE
 !  call ESMF_ArrayPrint(array, rc=rc)
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOE
+! When the inverse operation, i.e. {\tt ESMF\_ArrayGather()}, is applied to
+! a replicated Array there is an intrinsic ambiguity that needs to be 
+! considered. ESMF defines the gathering of data of a replicated Array
+! as the collection of data originating from the numerically larger DEs. This
+! means that data in replicated cells associated with numerically smaller DEs
+! will be ignored during {\tt ESMF\_ArrayGather()}.
+! For the current example this means that changing the Array contents on PET 1,
+! which here corresponds to DE 1,
+!EOE
 !BOC
+  if (localPet==1) then
+    myF90Array2D = real(1.2345, ESMF_KIND_R8)
+  endif
+!EOC
+!BOE
+! will not affect the result of
+!EOE
+  call ESMF_ArrayPrint(array, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+  allocate(myF90Array2D2(3,10))
+  myF90Array2D2 = 0.d0    ! initialize to a known value
+  call ESMF_ArrayGather(array, farray=myF90Array2D2, rootPet=0, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!EOC
+  print *, "localPet = ", localPet, "myF90Array2D2: ", myF90Array2D2
+  
+!BOE
+! The result remains completely defined by the unmodified values of Array in 
+! DE 3, the numerically largest DE. However, overriding the DE-local Array
+! piece on DE 3
+!EOE
+!BOC
+  if (localPet==3) then
+    myF90Array2D = real(5.4321, ESMF_KIND_R8)
+  endif
+!EOC
+  call ESMF_ArrayPrint(array, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOE
+! will change the outcome of
+!EOE
+!BOC
+  call ESMF_ArrayGather(array, farray=myF90Array2D2, rootPet=0, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!EOC
+!BOE
+! as expected.
+!EOE
+  print *, "localPet = ", localPet, "myF90Array2D2: ", myF90Array2D2
+!BOC
+  deallocate(myF90Array2D2)
+
   call ESMF_ArrayDestroy(array, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_DistGridDestroy(distgrid, rc=rc)
