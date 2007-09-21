@@ -137,7 +137,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.24 2007/09/20 17:44:21 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.25 2007/09/21 22:43:16 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -2660,7 +2660,7 @@ end subroutine ESMF_GridGet
 
  ! Local variables 
  type(ESMF_Array) :: array 
- integer :: status ! local error status 
+ integer :: localrc ! local error status 
  integer :: localDeCount, rank 
  type(ESMF_TypeKind) :: typekind 
  type(ESMF_LocalArray), allocatable :: larrayList(:) 
@@ -2669,7 +2669,7 @@ end subroutine ESMF_GridGet
  integer :: coordRank(ESMF_MAXDIM)
 
  ! Initialize return code 
- status = ESMF_RC_NOT_IMPL 
+ localrc = ESMF_RC_NOT_IMPL 
  if (present(rc)) rc = ESMF_RC_NOT_IMPL 
 
  ! Check init status of arguments 
@@ -2677,8 +2677,8 @@ end subroutine ESMF_GridGet
 
  ! Check consistency 
  call ESMF_GridGet(grid, coordTypeKind=typekind, rank=rank, coordRank=coordRank, &
-                   localDECount=localDECount, rc=status) 
- if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
+                   localDECount=localDECount, rc=localrc) 
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
  
  ! Require farrayPtr typekind to match Grid typekind 
@@ -2751,19 +2751,19 @@ endif
 
  ! Get the Array 
  call ESMF_GridGetCoordIntoArray(grid, staggerLoc,coord, array, &
-                                ESMF_DATA_REF, rc=status)
- if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
+                                ESMF_DATA_REF, rc=localrc)
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
 
  ! Obtain the native F90 array pointer via the LocalArray interface 
  allocate(larrayList(localDeCount))
  
- call ESMF_ArrayGet(array, larrayList=larrayList, rc=status) 
- if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
+ call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
  
- call ESMF_LocalArrayGetData(larrayList(lDE+1), fptr, doCopy, rc=status) 
- if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
+ call ESMF_LocalArrayGetData(larrayList(lDE+1), fptr, doCopy, rc=localrc) 
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return 
  deallocate(larrayList) 
 
@@ -2828,7 +2828,7 @@ endif
 
  ! Local variables 
  type(ESMF_Array) :: array 
- integer :: status ! local error status 
+ integer :: localrc ! local error status 
  integer :: localDeCount, rank 
  type(ESMF_TypeKind) :: typekind 
  type(ESMF_LocalArray), allocatable :: larrayList(:) 
@@ -2837,7 +2837,7 @@ endif
  integer :: coordRank(ESMF_MAXDIM)
 
  ! Initialize return code 
- status = ESMF_RC_NOT_IMPL 
+ localrc = ESMF_RC_NOT_IMPL 
  if (present(rc)) rc = ESMF_RC_NOT_IMPL 
 
  ! Check init status of arguments 
@@ -2845,8 +2845,8 @@ endif
 
  ! Check consistency 
  call ESMF_GridGet(grid, coordTypeKind=typekind, rank=rank, coordRank=coordRank, &
-                   localDECount=localDECount, rc=status) 
- if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
+                   localDECount=localDECount, rc=localrc) 
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
  
  ! Require farrayPtr typekind to match Grid typekind 
@@ -2919,19 +2919,19 @@ endif
 
  ! Get the Array 
  call ESMF_GridGetCoordIntoArray(grid, staggerLoc,coord, array, &
-                                ESMF_DATA_REF, rc=status)
- if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
+                                ESMF_DATA_REF, rc=localrc)
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
 
  ! Obtain the native F90 array pointer via the LocalArray interface 
  allocate(larrayList(localDeCount))
  
- call ESMF_ArrayGet(array, larrayList=larrayList, rc=status) 
- if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
+ call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
  
- call ESMF_LocalArrayGetData(larrayList(lDE+1), fptr, doCopy, rc=status) 
- if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
+ call ESMF_LocalArrayGetData(larrayList(lDE+1), fptr, doCopy, rc=localrc) 
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return 
  deallocate(larrayList) 
 
@@ -2996,7 +2996,7 @@ endif
 
  ! Local variables 
  type(ESMF_Array) :: array 
- integer :: status ! local error status 
+ integer :: localrc ! local error status 
  integer :: localDeCount, rank 
  type(ESMF_TypeKind) :: typekind 
  type(ESMF_LocalArray), allocatable :: larrayList(:) 
@@ -3005,7 +3005,7 @@ endif
  integer :: coordRank(ESMF_MAXDIM)
 
  ! Initialize return code 
- status = ESMF_RC_NOT_IMPL 
+ localrc = ESMF_RC_NOT_IMPL 
  if (present(rc)) rc = ESMF_RC_NOT_IMPL 
 
  ! Check init status of arguments 
@@ -3013,8 +3013,8 @@ endif
 
  ! Check consistency 
  call ESMF_GridGet(grid, coordTypeKind=typekind, rank=rank, coordRank=coordRank, &
-                   localDECount=localDECount, rc=status) 
- if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
+                   localDECount=localDECount, rc=localrc) 
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
  
  ! Require farrayPtr typekind to match Grid typekind 
@@ -3087,19 +3087,19 @@ endif
 
  ! Get the Array 
  call ESMF_GridGetCoordIntoArray(grid, staggerLoc,coord, array, &
-                                ESMF_DATA_REF, rc=status)
- if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
+                                ESMF_DATA_REF, rc=localrc)
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
 
  ! Obtain the native F90 array pointer via the LocalArray interface 
  allocate(larrayList(localDeCount))
  
- call ESMF_ArrayGet(array, larrayList=larrayList, rc=status) 
- if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
+ call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
  
- call ESMF_LocalArrayGetData(larrayList(lDE+1), fptr, doCopy, rc=status) 
- if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
+ call ESMF_LocalArrayGetData(larrayList(lDE+1), fptr, doCopy, rc=localrc) 
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return 
  deallocate(larrayList) 
 
@@ -3164,7 +3164,7 @@ endif
 
  ! Local variables 
  type(ESMF_Array) :: array 
- integer :: status ! local error status 
+ integer :: localrc ! local error status 
  integer :: localDeCount, rank 
  type(ESMF_TypeKind) :: typekind 
  type(ESMF_LocalArray), allocatable :: larrayList(:) 
@@ -3173,7 +3173,7 @@ endif
  integer :: coordRank(ESMF_MAXDIM)
 
  ! Initialize return code 
- status = ESMF_RC_NOT_IMPL 
+ localrc = ESMF_RC_NOT_IMPL 
  if (present(rc)) rc = ESMF_RC_NOT_IMPL 
 
  ! Check init status of arguments 
@@ -3181,8 +3181,8 @@ endif
 
  ! Check consistency 
  call ESMF_GridGet(grid, coordTypeKind=typekind, rank=rank, coordRank=coordRank, &
-                   localDECount=localDECount, rc=status) 
- if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
+                   localDECount=localDECount, rc=localrc) 
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
  
  ! Require farrayPtr typekind to match Grid typekind 
@@ -3255,19 +3255,19 @@ endif
 
  ! Get the Array 
  call ESMF_GridGetCoordIntoArray(grid, staggerLoc,coord, array, &
-                                ESMF_DATA_REF, rc=status)
- if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
+                                ESMF_DATA_REF, rc=localrc)
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
 
  ! Obtain the native F90 array pointer via the LocalArray interface 
  allocate(larrayList(localDeCount))
  
- call ESMF_ArrayGet(array, larrayList=larrayList, rc=status) 
- if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
+ call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
  
- call ESMF_LocalArrayGetData(larrayList(lDE+1), fptr, doCopy, rc=status) 
- if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
+ call ESMF_LocalArrayGetData(larrayList(lDE+1), fptr, doCopy, rc=localrc) 
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return 
  deallocate(larrayList) 
 
@@ -3332,7 +3332,7 @@ endif
 
  ! Local variables 
  type(ESMF_Array) :: array 
- integer :: status ! local error status 
+ integer :: localrc ! local error status 
  integer :: localDeCount, rank 
  type(ESMF_TypeKind) :: typekind 
  type(ESMF_LocalArray), allocatable :: larrayList(:) 
@@ -3341,7 +3341,7 @@ endif
  integer :: coordRank(ESMF_MAXDIM)
 
  ! Initialize return code 
- status = ESMF_RC_NOT_IMPL 
+ localrc = ESMF_RC_NOT_IMPL 
  if (present(rc)) rc = ESMF_RC_NOT_IMPL 
 
  ! Check init status of arguments 
@@ -3349,8 +3349,8 @@ endif
 
  ! Check consistency 
  call ESMF_GridGet(grid, coordTypeKind=typekind, rank=rank, coordRank=coordRank, &
-                   localDECount=localDECount, rc=status) 
- if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
+                   localDECount=localDECount, rc=localrc) 
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
  
  ! Require farrayPtr typekind to match Grid typekind 
@@ -3423,19 +3423,19 @@ endif
 
  ! Get the Array 
  call ESMF_GridGetCoordIntoArray(grid, staggerLoc,coord, array, &
-                                ESMF_DATA_REF, rc=status)
- if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
+                                ESMF_DATA_REF, rc=localrc)
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
 
  ! Obtain the native F90 array pointer via the LocalArray interface 
  allocate(larrayList(localDeCount))
  
- call ESMF_ArrayGet(array, larrayList=larrayList, rc=status) 
- if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
+ call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
  
- call ESMF_LocalArrayGetData(larrayList(lDE+1), fptr, doCopy, rc=status) 
- if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
+ call ESMF_LocalArrayGetData(larrayList(lDE+1), fptr, doCopy, rc=localrc) 
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return 
  deallocate(larrayList) 
 
@@ -3500,7 +3500,7 @@ endif
 
  ! Local variables 
  type(ESMF_Array) :: array 
- integer :: status ! local error status 
+ integer :: localrc ! local error status 
  integer :: localDeCount, rank 
  type(ESMF_TypeKind) :: typekind 
  type(ESMF_LocalArray), allocatable :: larrayList(:) 
@@ -3509,7 +3509,7 @@ endif
  integer :: coordRank(ESMF_MAXDIM)
 
  ! Initialize return code 
- status = ESMF_RC_NOT_IMPL 
+ localrc = ESMF_RC_NOT_IMPL 
  if (present(rc)) rc = ESMF_RC_NOT_IMPL 
 
  ! Check init status of arguments 
@@ -3517,8 +3517,8 @@ endif
 
  ! Check consistency 
  call ESMF_GridGet(grid, coordTypeKind=typekind, rank=rank, coordRank=coordRank, &
-                   localDECount=localDECount, rc=status) 
- if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
+                   localDECount=localDECount, rc=localrc) 
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
  
  ! Require farrayPtr typekind to match Grid typekind 
@@ -3591,19 +3591,19 @@ endif
 
  ! Get the Array 
  call ESMF_GridGetCoordIntoArray(grid, staggerLoc,coord, array, &
-                                ESMF_DATA_REF, rc=status)
- if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
+                                ESMF_DATA_REF, rc=localrc)
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
 
  ! Obtain the native F90 array pointer via the LocalArray interface 
  allocate(larrayList(localDeCount))
  
- call ESMF_ArrayGet(array, larrayList=larrayList, rc=status) 
- if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
+ call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
  
- call ESMF_LocalArrayGetData(larrayList(lDE+1), fptr, doCopy, rc=status) 
- if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & 
+ call ESMF_LocalArrayGetData(larrayList(lDE+1), fptr, doCopy, rc=localrc) 
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return 
  deallocate(larrayList) 
 
@@ -3692,7 +3692,7 @@ endif
 !
 !EOP
 
-    integer :: status ! local error status
+    integer :: localrc ! local error status
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: staggerLBoundArg ! helper variable
@@ -3704,7 +3704,7 @@ endif
     integer :: tmp_staggerloc
 
     ! Initialize return code
-    status = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
@@ -3718,63 +3718,63 @@ endif
     endif
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    staggerLBoundArg=ESMF_InterfaceIntCreate(staggerLBound, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    staggerLBoundArg=ESMF_InterfaceIntCreate(staggerLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    staggerUBoundArg=ESMF_InterfaceIntCreate(staggerUBound, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    staggerUBoundArg=ESMF_InterfaceIntCreate(staggerUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_GridGetLocalTileInfo(grid, coord, localDE, tmp_staggerLoc, &
       exclusiveLBoundArg, exclusiveUBoundArg, staggerLBoundArg, staggerUBoundArg,&
       computationalLBoundArg, computationalUBoundArg, &
-      totalLBoundArg, totalUBoundArg, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      totalLBoundArg, totalUBoundArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(staggerLBoundArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(staggerLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(staggerUBoundArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(staggerUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
@@ -3856,7 +3856,7 @@ endif
 !
 !EOP
 
-    integer :: status ! local error status
+    integer :: localrc ! local error status
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: staggerLBoundArg ! helper variable
@@ -3864,7 +3864,7 @@ endif
     integer :: tmp_staggerloc
 
     ! Initialize return code
-    status = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
@@ -3878,38 +3878,38 @@ endif
     endif
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    staggerLBoundArg=ESMF_InterfaceIntCreate(staggerLBound, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    staggerLBoundArg=ESMF_InterfaceIntCreate(staggerLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    staggerUBoundArg=ESMF_InterfaceIntCreate(staggerUBound, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    staggerUBoundArg=ESMF_InterfaceIntCreate(staggerUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_GridGetLocalTileSLocInfo(grid, localDE, tmp_staggerLoc, &
       exclusiveLBoundArg, exclusiveUBoundArg, staggerLBoundArg, staggerUBoundArg,&
-      status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(staggerLBoundArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(staggerLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(staggerUBoundArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(staggerUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
@@ -3924,7 +3924,7 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetFromDistGrid"
 !BOP
-! !IROUTINE: ESMF_GridSet - Set the values in a Grid which has been created with CreateEmpty. 
+! !IROUTINE: ESMF_GridSet - Set the values in a Grid which has been created with CreateEmpty 
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridSet()
@@ -4991,7 +4991,7 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAddMetricFromArray"
 !BOPI
-! !IROUTINE: ESMF_GridAddMetricFromArray - Add a new metric from an Array.
+! !IROUTINE: ESMF_GridAddMetricFromArray - Add a new metric from an Array
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridAddMetric()
@@ -5045,7 +5045,7 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAddMetricFromFptr"
 !BOPI
-! !IROUTINE: ESMF_GridSetMetricFromFptr - Sets metric data from a Fortran pointer.
+! !IROUTINE: ESMF_GridSetMetricFromFptr - Sets metric data from a Fortran pointer
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridAddMetric()
@@ -5099,7 +5099,7 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAddMetricNoValues"
 !BOPI
-! !IROUTINE: ESMF_GridAddMetricNoValues - Allocates space for metric, but doesn't set data.
+! !IROUTINE: ESMF_GridAddMetricNoValues - Allocates space for metric, but doesn't set data
 
 ! !INTERFACE:
 ! Private name; call using ESMF_GridAddMetric()
@@ -5192,7 +5192,7 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAddMetricSub"
 !BOPI
-! !IROUTINE: ESMF_GridAddMetricSub - Add a subroutine interface to generate metric data.
+! !IROUTINE: ESMF_GridAddMetricSub - Add a subroutine interface to generate metric data
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridAddMetric()
@@ -5298,7 +5298,7 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCalcStaggerLocCoord"
 !BOPI
-! !IROUTINE: ESMF_GridCalcStaggerLocCoord - Calculates the coordinates of a set of stagger locations from another stagger location's coordinates .
+! !IROUTINE: ESMF_GridCalcStaggerLocCoord - Calculates the coordinates of a set of stagger locations from another stagger location's coordinates
 
 ! !INTERFACE:
       subroutine ESMF_GridCalcStaggerLocCoord(grid, srcStaggerLoc, dstStaggerLocs, &
@@ -6528,7 +6528,7 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetMetricIntoFptr"
 !BOPI
-! !IROUTINE: ESMF_GridGetMetricIntoFptr -  Gets metric data from a grid and puts it into a Fortran pointer.
+! !IROUTINE: ESMF_GridGetMetricIntoFptr -  Gets metric data from a grid and puts it into a Fortran pointer
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetMetric()
@@ -6646,7 +6646,7 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridHalo"
 !BOPI
-! !IROUTINE: ESMF_GridHalo - Do a halo operation on the coordinate arrays in a grid.
+! !IROUTINE: ESMF_GridHalo - Do a halo operation on the coordinate arrays in a grid
 
 ! !INTERFACE:
       subroutine ESMF_GridHalo(grid, regionFlag, haloLDepth, haloUDepth, rc)
@@ -6819,7 +6819,7 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridLocalTileGetMetric"
 !BOPI
-! !IROUTINE: ESMF_GridLocalTileGetMetric - get the fortran data pointer for the piece of  metic data on this tile on this DE.
+! !IROUTINE: ESMF_GridLocalTileGetMetric - Get the fortran data pointer for the piece of  metic data on this tile on this DE
 
 ! !INTERFACE:
       subroutine ESMF_GridLocalTileGetMetric(grid, name, tile, localDE, &
@@ -6919,7 +6919,7 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridLocalTileSetMetric"
 !BOPI
-! !IROUTINE: ESMF_GridLocalTileSetMetric - set the metic data on this tile on this DE using a fortran pointer.
+! !IROUTINE: ESMF_GridLocalTileSetMetric - Set the metic data on this tile on this DE using a fortran pointer
 
 ! !INTERFACE:
       subroutine ESMF_GridLocalTileSetMetric(grid, name, tile, localDE, &
@@ -7113,7 +7113,7 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridMetricGet"
 !BOPI
-! !IROUTINE: ESMF_GridMetricGet - Get information about a particular metric. 
+! !IROUTINE: ESMF_GridMetricGet - Get information about a particular metric
 
 ! !INTERFACE:
      subroutine ESMF_GridMetricGet(grid, name, staggerLoc, &
@@ -7169,7 +7169,7 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetMetricIntoArray"
 !BOPI
-! !IROUTINE: ESMF_GridGetMetricIntoArray - Gets metric data from a grid and puts it into an Array.
+! !IROUTINE: ESMF_GridGetMetricIntoArray - Gets metric data from a grid and puts it into an Array
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetMetric()
@@ -7213,7 +7213,7 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridLocalTileMetricGet"
 !BOPI
-! !IROUTINE: ESMF_GridLocalTileMetricGet - get various types of information about the part of some metric data which lies on this DE.
+! !IROUTINE: ESMF_GridLocalTileMetricGet - Get various types of information about the part of some metric data which lies on this DE
 
 ! !INTERFACE:
       subroutine ESMF_GridLocalTileMetricGet(grid, name, tile, coord, localDE, staggerLoc, &
@@ -7528,7 +7528,7 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetMetricFromArray"
 !BOPI
-! !IROUTINE: ESMF_GridSetMetricFromArray - Add a new metric from an Array.
+! !IROUTINE: ESMF_GridSetMetricFromArray - Add a new metric from an Array
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridSetMetric()

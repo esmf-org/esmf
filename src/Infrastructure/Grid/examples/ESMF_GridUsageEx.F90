@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.18 2007/07/26 19:41:18 cdeluca Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.19 2007/09/21 22:43:16 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -824,11 +824,22 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !\subsubsection{Associating Coordinates with Stagger Locations}
 !\label{sec:usage:staggerloc}
 !
+! A useful finite difference technique is to place different physical 
+! quantities at different locations within a grid cell. This
+! {\em {staggering}} of the physical variables on the mesh is introduced so
+! that the difference of a field is naturally defined at the location of 
+! another variable. This method was first formalized by Mesinger and Arakawa 
+! (1976).
+!
+! To support the staggering of variables, the Grid provides
+! the idea of {\em stagger locations}. 
 ! Stagger locations refer to the places in a Grid cell that 
 ! contain coordinates and, once a Grid is associated with a 
 ! Field object, field data. Typically data can be located
 ! at the cell center, at the cell corners, or at the cell faces, in 2D, 3D, and
-! higher dimensions.  Users can put coordinates, which are necessary
+! higher dimensions. (Note that any Arakawa stagger can be constructed
+! of a set of Grid stagger locations.) Users can put coordinates, 
+! which are necessary
 ! for operations such as regrid, at multiple stagger
 ! locations in a Grid.  The new Grid class is not yet integrated with
 ! the Field class, but once it is the user will be able to put Field data
@@ -853,9 +864,8 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! where in the cell to get the data. There are predefined stagger locations
 ! (see Section~\ref{sec:opt:staggerloc}), or,
 ! should the user wish to specify their own, there
-! is also a set of methods for generating custom locations. 
-! See Section~\ref{ref:stagger} for a more in depth
-! description of stagger locations and stagger specification.
+! is also a set of methods for generating custom locations 
+! (See Section~\ref{sec:usage:staggerloc:adv}).
 !
 ! The following example
 ! adds coordinate storage to the corner stagger location in a grid using 
@@ -1802,16 +1812,69 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !\subsubsection{Specifying Custom Stagger Locations}
 !\label{sec:usage:staggerloc:adv}
 !
-! This section discusses the advanced options for adding  
-! coordinates to different stagger locations in a grid.
-! To construct a custom stagger location the subroutine 
+! Although ESMF provides a set of predefined stagger locations (See Section~\ref{sec:opt:staggerloc}),
+! the user may need one outside this set. This section describes the construction of
+! custom stagger locations. 
+!
+! To completely specify stagger for an arbitrary number of dimensions, we define the 
+! stagger location in terms of a set of cartesian coordinates. The cell is represented
+! by a n-dimensional cube with sides of length 2, and the coordinate origin located at
+! the center of the cell. The geometry of the cell is for reference purposes only, 
+! and does not literally represent the actual shape of the cell. Think of this method
+! instead as an easy way to specify a part (e.g. center, corner, face) of a higher 
+! dimensional cell which is extensible to any number of dimensions. 
+!
+! To illustrate this approach, consider a 2D cell. In 2 dimensions
+! the cell is represented by a square. An xy axis is placed at its center, with the 
+! positive x-axis oriented {\em East} and the positive y-axis oriented {\em North}.
+! The resulting coordinate for the lower left corner is at $(-1,-1)$, and upper right
+! corner at $(1,1)$.
+! However, because our staggers are symmetric they don't need to distinguish between
+! the $-1$, and the $1$, so we only need concern ourselves with the first quadrant of
+! this cell. We only need to use the $1$, and the $0$, and many of the cell locations
+! collapse together (e.g. we only need to represent one corner). 
+!
+! \begin{verbatim}
+!                                (0,1)-EDGE2     (1,1)-CORNER
+!  1  *-------*-------*         1  *---------------* 
+!     |               |                            |
+!     |               |                            | 
+!     |       |       |                            | 
+!  0  *       +-      *                            |  
+!     |               |                            | 
+!     |               |            |               |  EDGE1
+!     |               |            |               |   |
+! -1  *-------*-------*         0  *----           * (1,0)
+!    -1       0       1            0               1
+!
+!        Full Cell               Just The 1st Quadrant
+!                                
+! \end{verbatim}
+! 
+! The cell center is represented by the coordinate pair $(0,0)$ indicating the origin.
+! The cell corner is $+1$ in each direction, giving a coordinate pair of $(1,1)$.
+! The edges are each $+1$ in one dimension and $0$ in the other indicating that 
+! they're even with the center in one dimension and offset in the other. 
+!
+! For three dimensions, the vertical component of the stagger location can be added by 
+! simply adding an additional coordinate. The three dimensional generalization of the
+! cell center becomes $(0,0,0)$ and the cell corner becomes $(1,1,1)$. The rest of
+! the 3D stagger locations are combinations of $+1$ offsets from the center. 
+!
+! To generalize this to $d$ dimensions, to represent a $d$ dimensional stagger
+! location. A set of $d$ $0$ and $1$ is used to specify for each dimension
+! whether a stagger location is aligned with the cell center in that dimension ($0$),
+! or offset by $+1$ in that dimension ($1$). Using this scheme we can represent
+! any symmetric stagger location.  
+!
+! To construct a custom stagger location in ESMF the subroutine 
 ! {\tt ESMF\_StaggerLocSet()} is used to specify, 
 ! for each dimension, whether the stagger is located at the interior (0) 
-! or on the boundary (1) of the cell. Further description of the method is
-! available in Section~\ref{ref:stagger}. This method allows users
+! or on the boundary (1) of the cell. This method allows users
 ! to construct stagger locations for which
 ! there is no predefined value. In this example, it's used to 
 ! set the 4D center and 4D corner locations. 
+!
 !EOE
 
 !!!!!!!!!!!!!!!!!!!!!!!
@@ -1843,7 +1906,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 
-!BOE
+!
 !
 !There is an added complication with the data (e.g. coordinates) stored at stagger locations in 
 !that they can require different amounts of storage depending

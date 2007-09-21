@@ -1,4 +1,4 @@
-! $Id: ESMF_StaggerLoc.F90,v 1.7 2007/09/18 23:19:16 cdeluca Exp $
+! $Id: ESMF_StaggerLoc.F90,v 1.8 2007/09/21 22:43:16 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -60,7 +60,6 @@
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
-  public ESMF_StaggerLocSetDim
   public ESMF_StaggerLocString
   public ESMF_StaggerLocSet
   public operator(.eq.), operator(.ne.) 
@@ -98,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StaggerLoc.F90,v 1.7 2007/09/18 23:19:16 cdeluca Exp $'
+      '$Id: ESMF_StaggerLoc.F90,v 1.8 2007/09/21 22:43:16 oehmke Exp $'
 
 
 !==============================================================================
@@ -200,6 +199,26 @@
 !EOPI
       end interface
 
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_StaggerLocSet -- Generic interface
+
+! !INTERFACE:
+interface ESMF_StaggerLocSet
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_StaggerLocSetAllDim
+      module procedure ESMF_StaggerLocSetDim
+      
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_StaggerLocSet} functions.   
+!EOPI 
+end interface
+
 !
 !==============================================================================
 
@@ -214,7 +233,7 @@
 ! !IROUTINE: ESMF_StaggerLocSet - Set a StaggerLoc to a particular position in the cell
 
 ! !INTERFACE:
-      subroutine ESMF_StaggerLocSet(staggerloc,loc,rc)
+      subroutine ESMF_StaggerLocSetAllDim(staggerloc,loc,rc)
 !
 ! !ARGUMENTS:
       type (ESMF_StaggerLoc), intent(inout) :: staggerloc
@@ -225,16 +244,17 @@
 !    Sets a custom {\tt staggerloc} to a position in a cell by using the array
 !    {\tt loc}. The values in the array should only be 0,1. If loc(i) is 0 it 
 !    means the position should be in the center in that dimension. If loc(i) is 1 then
-!    for dimension i, the position should be on the positive side of the cell. 
-!    Using this scheme, {\tt ESMF\_StaggerLoc} should be able to specify
-!    any of the common grid positions.  
+!    for dimension i, the position should be on the side of the cell. 
+!    Please see Section~\ref{sec:usage:staggerloc:adv}
+!    for diagrams and further discussion of custom stagger locations. 
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[staggerloc]
 !          Grid location to be initialized
 !     \item[loc]
-!          Array holding position data, note that dimensions beyond
-!          those specified in loc are set to 0. 
+!          Array holding position data. Each entry in {\tt loc} should only
+!          be  0 or 1. note that dimensions beyond those specified are set to 0. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -261,7 +281,7 @@
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StaggerLocSet
+      end subroutine ESMF_StaggerLocSetAllDim
 
 
 !------------------------------------------------------------------------------
@@ -284,8 +304,9 @@
 !    If {\tt loc} is 0 it means the position 
 !    should be in the center in that dimension. If {\tt loc} is +1 then
 !    for the dimension, the position should be on the positive side of the cell. 
-!    Using this scheme, {\tt ESMF\_StaggerLoc} should be able to specify
-!    any of the common grid positions.  
+!    Please see Section~\ref{sec:usage:staggerloc:adv}
+!    for diagrams and further discussion of setting custom stagger locations. 
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[staggerloc]
@@ -293,7 +314,7 @@
 !     \item[dim]
 !          Dimension to be changed (1-7).
 !     \item[loc]
-!          Position data should be either 0,+1.
+!          Position data should be either 0,1.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -372,13 +393,13 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StaggerLocCustom"
 !BOPI
-! !IROUTINE: ESMF_StaggerLocCustom - create a custom stagger location which doesn't necessarily correspond to one of the standard points in a cell.
+! !IROUTINE: ESMF_StaggerLocCustom - Create a custom stagger location which doesn't necessarily correspond to one of the standard points in a cell
 
 ! !INTERFACE:
-      subroutine ESMF_StaggerLocCustom(stagLoc,label,offsets,rc)
+      subroutine ESMF_StaggerLocCustom(staggerloc,label,offsets,rc)
 !
 ! !ARGUMENTS:
-      type (ESMF_StaggerLoc), intent(inout) :: stagLoc
+      type (ESMF_StaggerLoc), intent(inout) :: staggerloc
       integer , intent(in) :: label
       integer, intent(in),optional :: offsets(:)
       integer, optional :: rc 
@@ -391,7 +412,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[stagLoc]
+!     \item[staggerloc]
 !          Grid location to be initialized
 !     \item[label]
 !          An integer which distinguishes this custom stagger from others. 
@@ -416,7 +437,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StaggerLocEqual"
 !BOPI
-! !IROUTINE: ESMF_StaggerLocEqual - equality of StaggerLoc statuses
+! !IROUTINE: ESMF_StaggerLocEqual - Equality of StaggerLoc statuses
 !
 ! !INTERFACE:
       function ESMF_StaggerLocEqual(StaggerLoc1, StaggerLoc2)
@@ -450,7 +471,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StaggerLocNotEqual"
 !BOPI
-! !IROUTINE: ESMF_StaggerLocNotEqual - non-equality of StaggerLoc statuses
+! !IROUTINE: ESMF_StaggerLocNotEqual - Non-equality of StaggerLoc statuses
 !
 ! !INTERFACE:
       function ESMF_StaggerLocNotEqual(StaggerLoc1, StaggerLoc2)
@@ -486,7 +507,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StaggerLocGreater"
 !BOPI
-! !IROUTINE: ESMF_StaggerLocGreater - equality of StaggerLoc statuses
+! !IROUTINE: ESMF_StaggerLocGreater - Equality of StaggerLoc statuses
 !
 ! !INTERFACE:
       function ESMF_StaggerLocGreater(StaggerLoc1, StaggerLoc2)
@@ -520,7 +541,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StaggerLocLess"
 !BOPI
-! !IROUTINE: ESMF_StaggerLocLess - non-equality of StaggerLoc statuses
+! !IROUTINE: ESMF_StaggerLocLess - Non-equality of StaggerLoc statuses
 !
 ! !INTERFACE:
       function ESMF_StaggerLocLess(StaggerLoc1, StaggerLoc2)
@@ -555,7 +576,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StaggerLocGreaterEqual"
 !BOPI
-! !IROUTINE: ESMF_StaggerLocGreaterEqual - .ge. of StaggerLoc statuses
+! !IROUTINE: ESMF_StaggerLocGreaterEqual - Greater than or equal of StaggerLoc statuses
 !
 ! !INTERFACE:
       function ESMF_StaggerLocGreaterEqual(StaggerLoc1, StaggerLoc2)
@@ -589,7 +610,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StaggerLocLessEqual"
 !BOPI
-! !IROUTINE: ESMF_StaggerLocLessEqual - .le. of StaggerLoc statuses
+! !IROUTINE: ESMF_StaggerLocLessEqual - Less than or equal of StaggerLoc statuses
 !
 ! !INTERFACE:
       function ESMF_StaggerLocLessEqual(StaggerLoc1, StaggerLoc2)

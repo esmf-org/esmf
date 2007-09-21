@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.23 2007/08/30 23:18:28 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.24 2007/09/21 22:43:16 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.23 2007/08/30 23:18:28 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.24 2007/09/21 22:43:16 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -116,7 +116,6 @@ int Grid::allocCoordArray(
 //EOP
 //-----------------------------------------------------------------------------
   // local vars
-  int status;                 // local error status
   int rc, localrc;
   int staggerloc;
   int coord;
@@ -130,7 +129,7 @@ int Grid::allocCoordArray(
   int extent[1];
 
   // initialize return code; assume routine not implemented
-  status = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
   rc = ESMC_RC_NOT_IMPL;
   
   // Make sure the grid has the correct status for this action
@@ -625,16 +624,16 @@ int Grid::destroy(
 //EOP
 //-----------------------------------------------------------------------------
   // local vars
-  int localrc;                // automatic variable for local return code
+  int rc;                // automatic variable for local return code
 
   // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
 
   // return with error for NULL pointer
   if (gridArg == ESMC_NULL_POINTER || *gridArg == ESMC_NULL_POINTER){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to Grid",&localrc);
-    return localrc;
+      "- Not a valid pointer to Grid",&rc);
+    return rc;
   }
 
   // destruct and delete Grid object
@@ -644,8 +643,8 @@ int Grid::destroy(
      // TODO: Change to get rid of return codes
      // deallocation error
      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
-      "- Error occurred in ~Grid ",&localrc);
-    return localrc;
+      "- Error occurred in ~Grid ",&rc);
+    return rc;
   }
 
   // set gridArg to Null
@@ -1096,19 +1095,20 @@ int Grid::set(
 
   // initialize return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
 
   // Make sure that we haven't been created
   if (status != ESMC_GRIDSTATUS_NOT_READY) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
-      "- Can't use set on an already created object", &localrc);
-    return localrc;
+      "- Can't use set on an already created object", &rc);
+    return rc;
   }
   
   // Make sure the protoGrid exists
   if (proto == ESMC_NULL_POINTER) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD,
-      "- Null protoGrid ", &localrc);
-    return localrc;
+      "- Null protoGrid ", &rc);
+    return rc;
   }
   
   // if passed in, set name 
@@ -2111,6 +2111,143 @@ int Grid::setStaggerInfo(
 }
 //-----------------------------------------------------------------------------
 
+#if 0
+//-----------------------------------------------------------------------------
+//
+// serialize() and deserialize()
+//
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::serialize()"
+//BOPI
+// !IROUTINE:  ESMCI::Grid::serialize - Turn Grid into a byte stream
+//
+// !INTERFACE:
+int Grid::serialize(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+  char *buffer,          // inout - byte stream to fill
+  int *length,           // inout - buf length
+  int *offset)const{     // inout - original offset, updated to point 
+                         //         to first free byte after current obj info
+//
+// !DESCRIPTION:
+//    Turn info in grid class into a stream of bytes.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // Prepare pointer variables of different types
+  char *cp;
+  int *ip;
+  ESMC_TypeKind *dkp;
+  ESMC_IndexFlag *ifp;
+
+  // Check if buffer has enough free memory to hold object
+  // TODO: write better check of size
+  //  if ((*length - *offset) < sizeof(Grid)){
+  //  ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+  //    "Buffer too short to add an Grid object", &rc);
+  //  return rc;
+  // }
+
+  // First, serialize the base class,
+  localrc = ESMC_Base::ESMC_Serialize(buffer, length, offset);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  // Serialize the DistGrid
+  localrc = distgrid->serialize(buffer, length, offset);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  // Then, serialize Grid meta data
+  dkp = (ESMC_TypeKind *)(buffer + *offset);
+  *dkp++ = typekind;
+  ip = (int *)dkp;
+  *ip++ = rank;
+  ifp = (ESMC_IndexFlag *)ip;
+  *ifp++ = indexflag;
+  
+  // fix offset  
+  cp = (char *)ifp;
+  *offset = (cp - buffer);
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::deserialize()"
+//BOPI
+// !IROUTINE:  ESMCI::Grid::deserialize - Turn a byte stream into an Grid
+//
+// !INTERFACE:
+int Grid::deserialize(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+  char *buffer,          // in - byte stream to read
+  int *offset){          // inout - original offset, updated to point 
+                         //         to first free byte after current obj info
+//
+// !DESCRIPTION:
+//    Turn a stream of bytes into an object.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // Prepare pointer variables of different types
+  char *cp;
+  int *ip;
+  ESMC_TypeKind *dkp;
+  ESMC_IndexFlag *ifp;
+
+  // First, deserialize the base class
+  localrc = ESMC_Base::ESMC_Deserialize(buffer, offset);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+
+  // Deserialize the DistGrid
+  distgrid = DistGrid::deserialize(buffer, offset);
+  // Pull DELayout out of DistGrid
+  delayout = distgrid->getDELayout();
+  // Then, deserialize Grid meta data
+  dkp = (ESMC_TypeKind *)(buffer + *offset);
+  typekind = *dkp++;
+  ip = (int *)dkp;
+  rank = *ip++;
+  ifp = (ESMC_IndexFlag *)ip;
+  indexflag = *ifp++;
+  
+  // fix offset
+  cp = (char *)ifp;
+  *offset = (cp - buffer);
+  
+  // set values with local dependency
+  larrayList = new ESMC_LocalGrid*[0];     // no DE on proxy object
+  larrayBaseAddrList = new void*[0];        // no DE on proxy object
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+
+#endif
 
 //-----------------------------------------------------------------------------
 //
