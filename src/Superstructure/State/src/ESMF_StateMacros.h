@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_StateMacros.h,v 1.16 2007/09/21 22:46:47 oehmke Exp $
+! $Id: ESMF_StateMacros.h,v 1.17 2007/09/24 21:35:32 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -106,6 +106,7 @@
         integer :: status                   ! local error status @\
         logical :: rcpresent                ! did user specify rc? @\
         logical :: found @\
+        logical :: trueval @\
         character(len=ESMF_MAXSTR) :: errmsg @\
         type(ESMF_StateItem), pointer :: dataitem @\
  @\
@@ -119,6 +120,9 @@
           rc = ESMF_RC_NOT_IMPL @\
         endif @\
  @\
+        ! set temporary true val to work around Cray preprocessor problem@\
+        trueval = .TRUE.@\
+@\
         ! check input variables @\
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc) @\
  @\
@@ -134,7 +138,7 @@
         ! If there is a nested state name then use that as the state @\
          if (present(nestedStateName)) then          @\
             found = ESMF_StateClassFindData(state%statep, dataname=nestedStateName, & @\
-                                      expected=.true., dataitem=dataitem, rc=status)  @\
+                                      expected=trueval, dataitem=dataitem, rc=status)  @\
             if (ESMF_LogMsgFoundError(status, & @\
                                     ESMF_ERR_PASSTHRU, & @\
                                     ESMF_CONTEXT, rc)) return @\
@@ -156,8 +160,8 @@
         endif                                                               @\
                                                                           @\
         ! Find object associated with name @\
-        found=ESMF_StateClassFindData(top%statep, dataname=itemName, expected=.true., & @\
-                                      dataitem=dataitem, rc=status) @\
+        found=ESMF_StateClassFindData(top%statep, dataname=itemName, & @\
+                      expected=trueval, dataitem=dataitem, rc=status) @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
