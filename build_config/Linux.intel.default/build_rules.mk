@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.58 2007/08/03 22:57:30 theurich Exp $
+# $Id: build_rules.mk,v 1.59 2007/09/24 22:11:19 svasquez Exp $
 #
 # Linux.intel.default
 #
@@ -38,7 +38,11 @@ ifeq ($(ESMF_COMM),mpich)
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpiCC
 ESMF_CXXCOMPILEOPTS    += -DESMF_MPICH
+ifeq ($(ESMF_BATCH),sge.batch)
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.sge.batch
+else
 ESMF_MPIRUNDEFAULT      = mpirun
+endif
 else
 ifeq ($(ESMF_COMM),mpich2)
 # Mpich2 ---------------------------------------------------
