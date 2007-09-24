@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.95 2007/09/20 17:44:23 cdeluca Exp $
+! $Id: ESMF_VM.F90,v 1.96 2007/09/24 21:05:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -183,7 +183,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.95 2007/09/20 17:44:23 cdeluca Exp $"
+      "$Id: ESMF_VM.F90,v 1.96 2007/09/24 21:05:58 theurich Exp $"
 
 !==============================================================================
 
@@ -477,38 +477,41 @@ module ESMF_VMMod
       
         
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMAllFullReduceI4()"
 !BOP
-! !IROUTINE: ESMF_VMAllFullReduce - AllFullReduce 4-byte integers
-
+! !IROUTINE: ESMF_VMAllFullReduce - Fully reduce data across VM, result on all PETs
+!
 ! !INTERFACE:
-  ! Private name; call using ESMF_VMAllFullReduce()
-  subroutine ESMF_VMAllFullReduceI4(vm, sendData, recvData, count, &
-    reduceflag,  blockingflag, commhandle, rc)
+!  ! Private name; call using ESMF_VMAllFullReduce()
+!  subroutine ESMF_VMAllFullReduce<type><kind>(vm, sendData, recvData, count, &
+!    reduceflag,  blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,    intent(in)      :: sendData(:)
-    integer(ESMF_KIND_I4),    intent(out)             :: recvData
-    integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
-!         
+!    type(ESMF_VM),            intent(in)              :: vm
+!    <type>(ESMF_KIND_<kind>), target,    intent(in)   :: sendData(:)
+!    <type>(ESMF_KIND_<kind>), intent(out)             :: recvData
+!    integer,                  intent(in)              :: count
+!    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
+!    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+!    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+!    integer,                  intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
-!   array of kind {\tt ESMF\_KIND\_I4} across the {\tt ESMF\_VM} object 
-!   into a single value of the same type. The result is returned on all PETs.
-!   Different reduction operations can be specified.\newline
+!   array of <type><kind> across the {\tt ESMF\_VM} object 
+!   into a single value of the same <type><kind>. The result is
+!   returned on all PETs. Different reduction operations can be specified.
+!   \newline
+!
+!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
+!   \newline
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
 !   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
 !   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
-!   logged.\newline
+!   logged.
+!   \newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -546,6 +549,31 @@ module ESMF_VMMod
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllFullReduceI4()"
+!BOPI
+! !IROUTINE: ESMF_VMAllFullReduce - AllFullReduce 4-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllFullReduce()
+  subroutine ESMF_VMAllFullReduceI4(vm, sendData, recvData, count, &
+    reduceflag,  blockingflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    integer(ESMF_KIND_I4), target,    intent(in)      :: sendData(:)
+    integer(ESMF_KIND_I4),    intent(out)             :: recvData
+    integer,                  intent(in)              :: count
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -583,7 +611,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMAllFullReduceR4()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMAllFullReduce - AllFullReduce 4-byte reals
 
 ! !INTERFACE:
@@ -601,55 +629,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
-!   array of kind {\tt ESMF\_KIND\_R4} across the {\tt ESMF\_VM} object 
-!   into a single value of the same type. The result is returned on all PETs.
-!   Different reduction operations can be specified.\newline
-!
-!   {\sc Todo:} The current version of this method does not provide an 
-!   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
-!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
-!   logged.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
-!        valid source array.
-!   \item[recvData] 
-!        Single data variable to be received. All PETs must specify a
-!        valid result variable.
-!   \item[count] 
-!        Number of elements in sendData. Must be the same on all PETs.
-!   \item[reduceflag] 
-!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
-!        valid reduce operations.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -687,7 +667,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMAllFullReduceR8()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMAllFullReduce - AllFullReduce 8-byte reals
 
 ! !INTERFACE:
@@ -705,55 +685,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
-!   array of kind {\tt ESMF\_KIND\_R8} across the {\tt ESMF\_VM} object 
-!   into a single value of the same type. The result is returned on all PETs.
-!   Different reduction operations can be specified.\newline
-!
-!   {\sc Todo:} The current version of this method does not provide an 
-!   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
-!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
-!   logged.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
-!        valid source array.
-!   \item[recvData] 
-!        Single data variable to be received. All PETs must specify a
-!        valid result variable.
-!   \item[count] 
-!        Number of elements in sendData. Must be the same on all PETs.
-!   \item[reduceflag] 
-!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
-!        valid reduce operations.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -789,30 +721,32 @@ module ESMF_VMMod
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMAllGatherI4()"
 !BOP
-! !IROUTINE: ESMF_VMAllGather - AllGather 4-byte integers
-
+! !IROUTINE: ESMF_VMAllGather - Gather data across VM, result on all PETs
+!
 ! !INTERFACE:
-  ! Private name; call using ESMF_VMAllGather()
-  subroutine ESMF_VMAllGatherI4(vm, sendData, recvData, count, &
-    blockingflag, commhandle, rc)
+!  ! Private name; call using ESMF_VMAllGather()
+!  subroutine ESMF_VMAllGather<type><kind>(vm, sendData, recvData, count, &
+!    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
-    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: count
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
-!         
+!    type(ESMF_VM),            intent(in)              :: vm
+!    <type>(ESMF_KIND_<kind>), target,   intent(in)    :: sendData(:)
+!    <type>(ESMF_KIND_<kind>), target,   intent(out)   :: recvData(:)
+!    integer,                  intent(in)              :: count
+!    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+!    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+!    integer,                  intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
-!   of kind {\tt ESMF\_KIND\_I4} from all PETs of an {\tt ESMF\_VM} object 
-!   into an array on all PETs.\newline
+!   from all PETs of an {\tt ESMF\_VM} object into an array on all PETs.
+!   \newline
+!
+!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}, 
+!   {\tt ESMF\_TYPEKIND\_LOGICAL}.
+!   \newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -848,6 +782,30 @@ module ESMF_VMMod
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllGatherI4()"
+!BOPI
+! !IROUTINE: ESMF_VMAllGather - AllGather 4-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllGather()
+  subroutine ESMF_VMAllGatherI4(vm, sendData, recvData, count, &
+    blockingflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
+    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
+    integer,                  intent(in)              :: count
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -896,7 +854,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMAllGatherR4()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMAllGather - AllGather 4-byte reals
 
 ! !INTERFACE:
@@ -913,46 +871,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
-!   of kind {\tt ESMF\_KIND\_R4} from all PETs of an {\tt ESMF\_VM} object 
-!   into an array on all PETs.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
-!        valid source array.
-!   \item[recvData] 
-!        Contiguous data array for data to be received. All PETs must specify a
-!        valid {\tt recvData} argument.
-!   \item[count] 
-!        Number of elements to be gathered from each PET. Must be the
-!        same on all PETs.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -1001,7 +920,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMAllGatherR8()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMAllGather - AllGather 8-byte reals
 
 ! !INTERFACE:
@@ -1018,46 +937,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
-!   of kind {\tt ESMF\_KIND\_R8} from all PETs of an {\tt ESMF\_VM} object 
-!   into an array on all PETs.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
-!        valid source array.
-!   \item[recvData] 
-!        Contiguous data array for data to be received. All PETs must specify a
-!        valid {\tt recvData} argument.
-!   \item[count] 
-!        Number of elements to be gathered from each PET. Must be the
-!        same on all PETs.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -1106,7 +986,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMAllGatherLogical()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMAllGather - AllGather ESMF_Logical
 
 ! !INTERFACE:
@@ -1123,46 +1003,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
-!   of kind {\tt ESMF\_Logical} from all PETs of an {\tt ESMF\_VM} object 
-!   into an array on all PETs.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
-!        valid source array.
-!   \item[recvData] 
-!        Contiguous data array for data to be received. All PETs must specify a
-!        valid {\tt recvData} argument.
-!   \item[count] 
-!        Number of elements to be gathered from each PET. Must be the
-!        same on all PETs.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -1209,38 +1050,40 @@ module ESMF_VMMod
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMAllGatherVI4()"
 !BOP
-! !IROUTINE: ESMF_VMAllGatherV - AllGatherV 4-byte integers
-
+! !IROUTINE: ESMF_VMAllGatherV - GatherV data across VM, result on all PETs
+!
 ! !INTERFACE:
-  ! Private name; call using ESMF_VMAllGatherV()
-  subroutine ESMF_VMAllGatherVI4(vm, sendData, sendCount, recvData, &
-    recvCounts, recvOffsets, blockingflag, commhandle, rc)
+!  ! Private name; call using ESMF_VMAllGatherV()
+!  subroutine ESMF_VMAllGatherV<type><kind>(vm, sendData, sendCount, recvData, &
+!    recvCounts, recvOffsets, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
-    integer,                  intent(in)              :: sendCount
-    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: recvCounts(:)
-    integer,                  intent(in)              :: recvOffsets(:)
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
-!         
+!    type(ESMF_VM),            intent(in)              :: vm
+!    <type>(ESMF_KIND_<kind>), target,   intent(in)    :: sendData(:)
+!    integer,                  intent(in)              :: sendCount
+!    <type>(ESMF_KIND_<kind>), target,   intent(out)   :: recvData(:)
+!    integer,                  intent(in)              :: recvCounts(:)
+!    integer,                  intent(in)              :: recvOffsets(:)
+!    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+!    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+!    integer,                  intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
-!   of kind {\tt ESMF\_Logical} from all PETs of an {\tt ESMF\_VM} object 
-!   into an array on all PETs.\newline
+!   from all PETs of an {\tt ESMF\_VM} object into an array on all PETs.
+!   \newline
+!
+!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}. 
+!   \newline
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
 !   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
 !   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
-!   logged.\newline
+!   logged.
+!   \newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -1282,6 +1125,32 @@ module ESMF_VMMod
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllGatherVI4()"
+!BOPI
+! !IROUTINE: ESMF_VMAllGatherV - AllGatherV 4-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllGatherV()
+  subroutine ESMF_VMAllGatherVI4(vm, sendData, sendCount, recvData, &
+    recvCounts, recvOffsets, blockingflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
+    integer,                  intent(in)              :: sendCount
+    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
+    integer,                  intent(in)              :: recvCounts(:)
+    integer,                  intent(in)              :: recvOffsets(:)
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -1319,7 +1188,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMAllGatherVR4()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMAllGatherV - AllGatherV 4-byte reals
 
 ! !INTERFACE:
@@ -1338,58 +1207,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
-!   of kind {\tt ESMF\_Logical} from all PETs of an {\tt ESMF\_VM} object 
-!   into an array on all PETs.\newline
-!
-!   {\sc Todo:} The current version of this method does not provide an 
-!   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
-!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
-!   logged.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
-!        valid source array.
-!   \item[sendCount] 
-!        Number of {\tt sendData} elements to send from local PET to all other
-!        PETs.
-!   \item[recvData] 
-!        Single data variable to be received. All PETs must specify a
-!        valid result variable.
-!   \item[recvCounts] 
-!        Number of {\tt recvData} elements to be received from corresponding
-!        source PET.
-!   \item[recvOffsets] 
-!        Offsets in units of elements in {\tt recvData} marking the start of
-!        element sequence to be received from source PET.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -1427,7 +1245,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMAllGatherVR8()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMAllGatherV - AllGatherV 8-byte reals
 
 ! !INTERFACE:
@@ -1446,58 +1264,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
-!   of kind {\tt ESMF\_Logical} from all PETs of an {\tt ESMF\_VM} object 
-!   into an array on all PETs.\newline
-!
-!   {\sc Todo:} The current version of this method does not provide an 
-!   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
-!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
-!   logged.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
-!        valid source array.
-!   \item[sendCount] 
-!        Number of {\tt sendData} elements to send from local PET to all other
-!        PETs.
-!   \item[recvData] 
-!        Single data variable to be received. All PETs must specify a
-!        valid result variable.
-!   \item[recvCounts] 
-!        Number of {\tt recvData} elements to be received from corresponding
-!        source PET.
-!   \item[recvOffsets] 
-!        Offsets in units of elements in {\tt recvData} marking the start of
-!        element sequence to be received from source PET.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -1533,32 +1300,34 @@ module ESMF_VMMod
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMAllReduceI4()"
 !BOP
-! !IROUTINE: ESMF_VMAllReduce - AllReduce 4-byte integers
-
+! !IROUTINE: ESMF_VMAllReduce - Reduce data across VM, result on all PETs
+!
 ! !INTERFACE:
-  ! Private name; call using ESMF_VMAllReduce()
-  subroutine ESMF_VMAllReduceI4(vm, sendData, recvData, count, reduceflag, &
-    blockingflag, commhandle, rc)
+!  ! Private name; call using ESMF_VMAllReduce()
+!  subroutine ESMF_VMAllReduce<type><kind>(vm, sendData, recvData, count, &
+!    reduceflag, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
-    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+!    type(ESMF_VM),            intent(in)              :: vm
+!    <type>(ESMF_KIND_<kind>), target,   intent(in)    :: sendData(:)
+!    <type>(ESMF_KIND_<kind>), target,   intent(out)   :: recvData(:)
+!    integer,                  intent(in)              :: count
+!    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
+!    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+!    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+!    integer,                  intent(out),  optional  :: rc
 !         
-!
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
-!   array of kind {\tt ESMF\_KIND\_I4} across the {\tt ESMF\_VM} object 
-!   into a contiguous data array of the same type. The result array is returned 
-!   on all PETs. Different reduction operations can be specified.\newline
+!   array across the {\tt ESMF\_VM} object into a contiguous data array of the
+!   same <type><kind>. The result array is returned on all PETs. 
+!   Different reduction operations can be specified.
+!   \newline
+!
+!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}. 
+!   \newline
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
@@ -1603,6 +1372,31 @@ module ESMF_VMMod
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllReduceI4()"
+!BOPI
+! !IROUTINE: ESMF_VMAllReduce - AllReduce 4-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllReduce()
+  subroutine ESMF_VMAllReduceI4(vm, sendData, recvData, count, reduceflag, &
+    blockingflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
+    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
+    integer,                  intent(in)              :: count
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -1640,7 +1434,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMAllReduceR4()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMAllReduce - AllReduce 4-byte reals
 
 ! !INTERFACE:
@@ -1658,56 +1452,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
-!   array of kind {\tt ESMF\_KIND\_R4} across the {\tt ESMF\_VM} object 
-!   into a contiguous data array of the same type. The result array is returned 
-!   on all PETs. Different reduction operations can be specified.\newline
-!
-!   {\sc Todo:} The current version of this method does not provide an 
-!   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
-!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
-!   logged.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
-!        valid source array.
-!   \item[recvData] 
-!        Contiguous data array for data to be received. All PETs must specify a
-!        valid destination array.
-!   \item[count] 
-!        Number of elements in sendData and recvData. Must be the same on all
-!        PETs.
-!   \item[reduceflag] 
-!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
-!        valid reduce operations.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -1745,7 +1490,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMAllReduceR8()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMAllReduce - AllReduce 8-byte reals
 
 ! !INTERFACE:
@@ -1763,56 +1508,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
-!   array of kind {\tt ESMF\_KIND\_R8} across the {\tt ESMF\_VM} object 
-!   into a contiguous data array of the same type. The result array is returned 
-!   on all PETs. Different reduction operations can be specified.\newline
-!
-!   {\sc Todo:} The current version of this method does not provide an 
-!   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
-!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
-!   logged.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
-!        valid source array.
-!   \item[recvData] 
-!        Contiguous data array for data to be received. All PETs must specify a
-!        valid destination array.
-!   \item[count] 
-!        Number of elements in sendData and recvData. Must be the same on all
-!        PETs.
-!   \item[reduceflag] 
-!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
-!        valid reduce operations.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -1848,34 +1544,35 @@ module ESMF_VMMod
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMAllToAllVI4()"
 !BOP
-! !IROUTINE: ESMF_VMAllToAllV - AllToAllV 4-byte integers
-
+! !IROUTINE: ESMF_VMAllToAllV - AllToAllV communications across VM
+!
 ! !INTERFACE:
-  ! Private name; call using ESMF_VMAllToAllV()
-  subroutine ESMF_VMAllToAllVI4(vm, sendData, sendCounts, sendOffsets, &
-    recvData, recvCounts, recvOffsets, blockingflag, commhandle, rc)
+!  ! Private name; call using ESMF_VMAllToAllV()
+!  subroutine ESMF_VMAllToAllV<type><kind>(vm, sendData, sendCounts, sendOffsets, &
+!    recvData, recvCounts, recvOffsets, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
-    integer,                  intent(in)              :: sendCounts(:)
-    integer,                  intent(in)              :: sendOffsets(:)
-    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: recvCounts(:)
-    integer,                  intent(in)              :: recvOffsets(:)
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
-!         
+!    type(ESMF_VM),            intent(in)              :: vm
+!    <type>(ESMF_KIND_<kind>), target,   intent(in)    :: sendData(:)
+!    integer,                  intent(in)              :: sendCounts(:)
+!    integer,                  intent(in)              :: sendOffsets(:)
+!    <type>(ESMF_KIND_<kind>), target,   intent(out)   :: recvData(:)
+!    integer,                  intent(in)              :: recvCounts(:)
+!    integer,                  intent(in)              :: recvOffsets(:)
+!    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+!    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+!    integer,                  intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that performs a total exchange
 !   operation, sending pieces of the contiguous data buffer {\tt semdData} to
 !   all other PETs while receiving data into the contiguous data buffer
 !   {\tt recvData} from all other PETs.\newline
+!
+!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}. 
+!   \newline
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
@@ -1926,6 +1623,33 @@ module ESMF_VMMod
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllToAllVI4()"
+!BOPI
+! !IROUTINE: ESMF_VMAllToAllV - AllToAllV 4-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllToAllV()
+  subroutine ESMF_VMAllToAllVI4(vm, sendData, sendCounts, sendOffsets, &
+    recvData, recvCounts, recvOffsets, blockingflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
+    integer,                  intent(in)              :: sendCounts(:)
+    integer,                  intent(in)              :: sendOffsets(:)
+    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
+    integer,                  intent(in)              :: recvCounts(:)
+    integer,                  intent(in)              :: recvOffsets(:)
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -1963,7 +1687,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMAllToAllVR4()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMAllToAllV - AllToAllV 4-byte reals
 
 ! !INTERFACE:
@@ -1983,62 +1707,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that performs a total exchange
-!   operation, sending pieces of the contiguous data buffer {\tt semdData} to
-!   all other PETs while receiving data into the contiguous data buffer
-!   {\tt recvData} from all other PETs.\newline
-!
-!   {\sc Todo:} The current version of this method does not provide an 
-!   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
-!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
-!   logged.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
-!        valid source array.
-!   \item[sendCounts] 
-!        Number of {\tt sendData} elements to send from local PET to
-!        destination PET.
-!   \item[sendOffsets] 
-!        Offsets in units of elements in {\tt sendData} marking to start of
-!        element sequence to be send from local PET to destination PET.
-!   \item[recvData] 
-!        Single data variable to be received. All PETs must specify a
-!        valid result variable.
-!   \item[recvCounts] 
-!        Number of {\tt recvData} elements to be received by local PET from
-!        source PET.
-!   \item[recvOffsets] 
-!        Offsets in units of elements in {\tt recvData} marking to start of
-!        element sequence to be received by local PET from source PET.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -2076,7 +1745,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMAllToAllVR8()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMAllToAllV - AllToAllV 4-byte reals
 
 ! !INTERFACE:
@@ -2096,62 +1765,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that performs a total exchange
-!   operation, sending pieces of the contiguous data buffer {\tt semdData} to
-!   all other PETs while receiving data into the contiguous data buffer
-!   {\tt recvData} from all other PETs.\newline
-!
-!   {\sc Todo:} The current version of this method does not provide an 
-!   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
-!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
-!   logged.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
-!        valid source array.
-!   \item[sendCounts] 
-!        Number of {\tt sendData} elements to send from local PET to
-!        destination PET.
-!   \item[sendOffsets] 
-!        Offsets in units of elements in {\tt sendData} marking to start of
-!        element sequence to be send from local PET to destination PET.
-!   \item[recvData] 
-!        Single data variable to be received. All PETs must specify a
-!        valid result variable.
-!   \item[recvCounts] 
-!        Number of {\tt recvData} elements to be received by local PET from
-!        source PET.
-!   \item[recvOffsets] 
-!        Offsets in units of elements in {\tt recvData} marking to start of
-!        element sequence to be received by local PET from source PET.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -2235,30 +1849,33 @@ module ESMF_VMMod
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMBroadcastI4()"
 !BOP
-! !IROUTINE: ESMF_VMBroadcast - Broadcast 4-byte integers
-
+! !IROUTINE: ESMF_VMBroadcast - Broadcast data across VM
+!
 ! !INTERFACE:
-  ! Private name; call using ESMF_VMBroadcast()
-  subroutine ESMF_VMBroadcastI4(vm, bcstData, count, root, &
-    blockingflag, commhandle, rc)
+!  ! Private name; call using ESMF_VMBroadcast()
+!  subroutine ESMF_VMBroadcast<type><kind>(vm, bcstData, count, root, &
+!    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(inout)    :: bcstData(:)
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
-!         
+!    type(ESMF_VM),            intent(in)              :: vm
+!    <type>(ESMF_KIND_<kind>), target,   intent(inout) :: bcstData(:)
+!    integer,                  intent(in)              :: count
+!    integer,                  intent(in)              :: root
+!    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+!    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+!    integer,                  intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that broadcasts a contiguous 
-!   data array of kind {\tt ESMF\_KIND\_I4} from PET {\tt root} to all 
-!   other PETs of the {\tt ESMF\_VM} object.\newline
+!   data array from PET {\tt root} to all other PETs of the {\tt ESMF\_VM}
+!   object.
+!   \newline
+!
+!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}, 
+!   {\tt ESMF\_TYPEKIND\_LOGICAL}.
+!   \newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -2294,6 +1911,30 @@ module ESMF_VMMod
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMBroadcastI4()"
+!BOPI
+! !IROUTINE: ESMF_VMBroadcast - Broadcast 4-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMBroadcast()
+  subroutine ESMF_VMBroadcastI4(vm, bcstData, count, root, &
+    blockingflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    integer(ESMF_KIND_I4), target,   intent(inout)    :: bcstData(:)
+    integer,                  intent(in)              :: count
+    integer,                  intent(in)              :: root
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -2342,7 +1983,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMBroadcastR4()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMBroadcast - Broadcast 4-byte reals
 
 ! !INTERFACE:
@@ -2359,46 +2000,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that broadcasts a contiguous 
-!   data array of kind {\tt ESMF\_KIND\_R4} from PET {\tt root} to all
-!   other PETs of the {\tt ESMF\_VM} object.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[bcstData]
-!        Contiguous data array. On {\tt root} PET {\tt bcstData} holds data that
-!        is to be broadcasted to all other PETs. On all other PETs 
-!        {\tt bcstData} is used to receive the broadcasted data.
-!   \item[count] 
-!        Number of elements in sendData and recvData. Must be the same on all
-!        PETs.
-!   \item[root] 
-!        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -2448,7 +2050,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMBroadcastR8()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMBroadcast - Broadcast 8-byte reals
 
 ! !INTERFACE:
@@ -2465,46 +2067,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that broadcasts a contiguous 
-!   data array of kind {\tt ESMF\_KIND\_R8} from PET {\tt root} to all
-!   other PETs of the {\tt ESMF\_VM} object.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[bcstData]
-!        Contiguous data array. On {\tt root} PET {\tt bcstData} holds data that
-!        is to be broadcasted to all other PETs. On all other PETs 
-!        {\tt bcstData} is used to receive the broadcasted data.
-!   \item[count] 
-!        Number of elements in sendData and recvData. Must be the same on all
-!        PETs.
-!   \item[root] 
-!        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -2552,7 +2115,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMBroadcastLogical()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMBroadcast - Broadcast ESMF_Logical
 
 ! !INTERFACE:
@@ -2569,46 +2132,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that broadcasts a contiguous 
-!   data array of kind {\tt ESMF\_Logical} from PET {\tt root} to all
-!   other PETs of the {\tt ESMF\_VM} object.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[bcstData]
-!        Contiguous data array. On {\tt root} PET {\tt bcstData} holds data that
-!        is to be broadcasted to all other PETs. On all other PETs 
-!        {\tt bcstData} is used to receive the broadcasted data.
-!   \item[count] 
-!        Number of elements in sendData and recvData. Must be the same on all
-!        PETs.
-!   \item[root] 
-!        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -2655,31 +2179,34 @@ module ESMF_VMMod
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMGatherI4()"
 !BOP
-! !IROUTINE: ESMF_VMGather - Gather 4-byte integers
-
+! !IROUTINE: ESMF_VMGather - Gather data from across VM
+!
 ! !INTERFACE:
-  ! Private name; call using ESMF_VMGather()
-  subroutine ESMF_VMGatherI4(vm, sendData, recvData, count, root, &
-    blockingflag, commhandle, rc)
+!  ! Private name; call using ESMF_VMGather()
+!  subroutine ESMF_VMGather<type><kind>(vm, sendData, recvData, count, root, &
+!    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
-    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
-!         
+!    type(ESMF_VM),            intent(in)              :: vm
+!    <type>(ESMF_KIND_<kind>), target,   intent(in)    :: sendData(:)
+!    <type>(ESMF_KIND_<kind>), target,   intent(out)   :: recvData(:)
+!    integer,                  intent(in)              :: count
+!    integer,                  intent(in)              :: root
+!    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+!    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+!    integer,                  intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
-!   of kind {\tt ESMF\_KIND\_I4} from all PETs of an {\tt ESMF\_VM} object 
-!   (including {\tt root}) into an array on the {\tt root} PET.\newline
+!   from all PETs of an {\tt ESMF\_VM} object (including {\tt root}) into an
+!   array on the {\tt root} PET.
+!   \newline
+!
+!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}, 
+!   {\tt ESMF\_TYPEKIND\_LOGICAL}.
+!   \newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -2717,6 +2244,31 @@ module ESMF_VMMod
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGatherI4()"
+!BOPI
+! !IROUTINE: ESMF_VMGather - Gather 4-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMGather()
+  subroutine ESMF_VMGatherI4(vm, sendData, recvData, count, root, &
+    blockingflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
+    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
+    integer,                  intent(in)              :: count
+    integer,                  intent(in)              :: root
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -2765,7 +2317,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMGatherR4()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMGather - Gather 4-byte reals
 
 ! !INTERFACE:
@@ -2783,48 +2335,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
-!   of kind {\tt ESMF\_KIND\_R4} from all PETs of an {\tt ESMF\_VM} object 
-!   (including {\tt root}) into an array on the {\tt root} PET.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
-!        valid source array.
-!   \item[recvData] 
-!        Contiguous data array for data to be received. Only the {\tt recvData}
-!        array specified by the {\tt root} PET will be used by this method.
-!   \item[count] 
-!        Number of elements to be send from each PET to {\tt root}. Must be the
-!        same on all PETs.
-!   \item[root] 
-!        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -2873,7 +2384,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMGatherR8()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMGather - Gather 8-byte reals
 
 ! !INTERFACE:
@@ -2891,48 +2402,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
-!   of kind {\tt ESMF\_KIND\_R8} from all PETs of an {\tt ESMF\_VM} object 
-!   (including {\tt root}) into an array on the {\tt root} PET.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
-!        valid source array.
-!   \item[recvData] 
-!        Contiguous data array for data to be received. Only the {\tt recvData}
-!        array specified by the {\tt root} PET will be used by this method.
-!   \item[count] 
-!        Number of elements to be send from each PET to {\tt root}. Must be the
-!        same on all PETs.
-!   \item[root] 
-!        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -2981,7 +2451,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMGatherLogical()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMGather - Gather ESMF_Logical
 
 ! !INTERFACE:
@@ -2999,48 +2469,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
-!   of kind {\tt ESMF\_Logical} from all PETs of an {\tt ESMF\_VM} object 
-!   (including {\tt root}) into an array on the {\tt root} PET.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
-!        valid source array.
-!   \item[recvData] 
-!        Contiguous data array for data to be received. Only the {\tt recvData}
-!        array specified by the {\tt root} PET will be used by this method.
-!   \item[count] 
-!        Number of elements to be send from each PET to {\tt root}. Must be the
-!        same on all PETs.
-!   \item[root] 
-!        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -3087,31 +2516,32 @@ module ESMF_VMMod
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMGatherVI4()"
 !BOP
-! !IROUTINE: ESMF_VMGatherV - GatherV 4-byte integers
-
+! !IROUTINE: ESMF_VMGatherV - GatherV data from across VM
+!
 ! !INTERFACE:
-  ! Private name; call using ESMF_VMGatherV()
-  subroutine ESMF_VMGatherVI4(vm, sendData, sendCount, recvData, &
-    recvCounts, recvOffsets, root, rc)
+!  ! Private name; call using ESMF_VMGatherV()
+!  subroutine ESMF_VMGatherV<type><kind>(vm, sendData, sendCount, recvData, &
+!    recvCounts, recvOffsets, root, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
-    integer,                  intent(in)              :: sendCount
-    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: recvCounts(:)
-    integer,                  intent(in)              :: recvOffsets(:)
-    integer,                  intent(in)              :: root
-    integer,                  intent(out),  optional  :: rc
-!         
+!    type(ESMF_VM),            intent(in)              :: vm
+!    <type>(ESMF_KIND_<kind>), target,   intent(in)    :: sendData(:)
+!    integer,                  intent(in)              :: sendCount
+!    <type>(ESMF_KIND_<kind>), target,   intent(out)   :: recvData(:)
+!    integer,                  intent(in)              :: recvCounts(:)
+!    integer,                  intent(in)              :: recvOffsets(:)
+!    integer,                  intent(in)              :: root
+!    integer,                  intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
-!   of kind {\tt ESMF\_Logical} from all PETs of an {\tt ESMF\_VM} object 
-!   into an array on root PET.\newline
+!   from all PETs of an {\tt ESMF\_VM} object into an array on root PET.
+!   \newline
+!
+!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
+!   \newline
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
@@ -3145,6 +2575,31 @@ module ESMF_VMMod
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGatherVI4()"
+!BOPI
+! !IROUTINE: ESMF_VMGatherV - GatherV 4-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMGatherV()
+  subroutine ESMF_VMGatherVI4(vm, sendData, sendCount, recvData, &
+    recvCounts, recvOffsets, root, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
+    integer,                  intent(in)              :: sendCount
+    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
+    integer,                  intent(in)              :: recvCounts(:)
+    integer,                  intent(in)              :: recvOffsets(:)
+    integer,                  intent(in)              :: root
+    integer,                  intent(out),  optional  :: rc
+!         
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -3171,7 +2626,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMGatherVR4()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMGatherV - GatherV 4-byte reals
 
 ! !INTERFACE:
@@ -3189,44 +2644,7 @@ module ESMF_VMMod
     integer,                  intent(in)              :: root
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
-!   of kind {\tt ESMF\_Logical} from all PETs of an {\tt ESMF\_VM} object 
-!   into an array on root PET.\newline
-!
-!   {\sc Todo:} The current version of this method does not provide an 
-!   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
-!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
-!   logged.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
-!        valid source array.
-!   \item[sendCount] 
-!        Number of {\tt sendData} elements to send from local PET to all other
-!        PETs.
-!   \item[recvData] 
-!        Single data variable to be received. All PETs must specify a
-!        valid result variable.
-!   \item[recvCounts] 
-!        Number of {\tt recvData} elements to be received from corresponding
-!        source PET.
-!   \item[recvOffsets] 
-!        Offsets in units of elements in {\tt recvData} marking the start of
-!        element sequence to be received from source PET.
-!   \item[root]
-!        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -3253,7 +2671,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMGatherVR8()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMGatherV - AllGatherV 8-byte reals
 
 ! !INTERFACE:
@@ -3271,44 +2689,7 @@ module ESMF_VMMod
     integer,                  intent(in)              :: root
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
-!   of kind {\tt ESMF\_Logical} from all PETs of an {\tt ESMF\_VM} object 
-!   into an array on all PETs.\newline
-!
-!   {\sc Todo:} The current version of this method does not provide an 
-!   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
-!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
-!   logged.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
-!        valid source array.
-!   \item[sendCount] 
-!        Number of {\tt sendData} elements to send from local PET to all other
-!        PETs.
-!   \item[recvData] 
-!        Single data variable to be received. All PETs must specify a
-!        valid result variable.
-!   \item[recvCounts] 
-!        Number of {\tt recvData} elements to be received from corresponding
-!        source PET.
-!   \item[recvOffsets] 
-!        Offsets in units of elements in {\tt recvData} marking the start of
-!        element sequence to be received from source PET.
-!   \item[root]
-!        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -3705,28 +3086,32 @@ module ESMF_VMMod
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMRecvI4()"
 !BOP
-! !IROUTINE: ESMF_VMRecv - Receive 4-byte integers
-
+! !IROUTINE: ESMF_VMRecv - Receive data from src PET
+!
 ! !INTERFACE:
-  ! Private name; call using ESMF_VMRecv()
-  subroutine ESMF_VMRecvI4(vm, recvData, count, src, blockingflag, &
-    commhandle, rc)
+!  ! Private name; call using ESMF_VMRecv()
+!  subroutine ESMF_VMRecv<type><kind>(vm, recvData, count, src, blockingflag, &
+!    commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)  
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: src
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc           
+!    type(ESMF_VM),            intent(in)              :: vm
+!    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)  
+!    integer,                  intent(in)              :: count
+!    integer,                  intent(in)              :: src
+!    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+!    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+!    integer,                  intent(out),  optional  :: rc           
 !
 ! !DESCRIPTION:
-!   Receive contiguous data of kind {\tt ESMF\_KIND\_I4} from a PET within the
-!   same {\tt ESMF\_VM} object.\newline
+!   Receive contiguous data from {\tt src} PET within the same {\tt ESMF\_VM} 
+!   object.
+!   \newline
+!
+!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8},
+!   {\tt ESMF\_TYPEKIND\_LOGICAL}, {\tt ESMF\_TYPEKIND\_CHARACTER}.
+!   \newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -3759,6 +3144,30 @@ module ESMF_VMMod
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMRecvI4()"
+!BOP!
+! !IROUTINE: ESMF_VMRecv - Receive 4-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMRecv()
+  subroutine ESMF_VMRecvI4(vm, recvData, count, src, blockingflag, &
+    commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)  
+    integer,                  intent(in)              :: count
+    integer,                  intent(in)              :: src
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc           
+!
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -3806,7 +3215,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMRecvR4()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMRecv - Receive 4-byte reals
 
 ! !INTERFACE:
@@ -3823,41 +3232,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc           
 !
-! !DESCRIPTION:
-!   Receive contiguous data of kind {\tt ESMF\_KIND\_R4} from a PET within the
-!   same {\tt ESMF\_VM} object.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[recvData] 
-!        Contiguous data array for data to be received.
-!   \item[count] 
-!        Number of elements to be received.
-!   \item[src] 
-!        Id of the source PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -3905,7 +3280,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMRecvR8()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMRecv - Receive 8-byte reals
 
 ! !INTERFACE:
@@ -3922,41 +3297,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc           
 !
-! !DESCRIPTION:
-!   Receive contiguous data of kind {\tt ESMF\_KIND\_R8} from a PET within the
-!   same {\tt ESMF\_VM} object.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[recvData] 
-!        Contiguous data array for data to be received.
-!   \item[count] 
-!        Number of elements to be received.
-!   \item[src] 
-!        Id of the source PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -4004,7 +3345,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMRecvLogical()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMRecv - Receive ESMF_Logical
 
 ! !INTERFACE:
@@ -4021,41 +3362,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc           
 !
-! !DESCRIPTION:
-!   Receive contiguous data of type {\tt ESMF\_Logical} from a PET within the
-!   same {\tt ESMF\_VM} object.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[recvData] 
-!        Contiguous data array for data to be received.
-!   \item[count] 
-!        Number of elements to be received.
-!   \item[src] 
-!        Id of the source PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -4103,7 +3410,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMRecvCharacter()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMRecv - Receive Character
 
 ! !INTERFACE:
@@ -4120,41 +3427,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc           
 !
-! !DESCRIPTION:
-!   Receive contiguous data of type character from a PET within the
-!   same {\tt ESMF\_VM} object.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[recvData] 
-!        Contiguous data array for data to be received.
-!   \item[count] 
-!        Number of elements to be received.
-!   \item[src] 
-!        Id of the source PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -4200,33 +3473,35 @@ module ESMF_VMMod
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMReduceI4()"
 !BOP
-! !IROUTINE: ESMF_VMReduce - Reduce 4-byte integers
-
+! !IROUTINE: ESMF_VMReduce - Reduce data from across VM
+!
 ! !INTERFACE:
-  ! Private name; call using ESMF_VMReduce()
-  subroutine ESMF_VMReduceI4(vm, sendData, recvData, count, reduceflag, &
-    root, blockingflag, commhandle, rc)
+!  ! Private name; call using ESMF_VMReduce()
+!  subroutine ESMF_VMReduce<type><kind>(vm, sendData, recvData, count, &
+!    reduceflag, root, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
-    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
-    integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
-!         
+!    type(ESMF_VM),            intent(in)              :: vm
+!    <type>(ESMF_KIND_<kind>), target,   intent(in)    :: sendData(:)
+!    <type>(ESMF_KIND_<kind>), target,   intent(out)   :: recvData(:)
+!    integer,                  intent(in)              :: count
+!    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
+!    integer,                  intent(in)              :: root
+!    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+!    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+!    integer,                  intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
-!   array of kind {\tt ESMF\_KIND\_I4} across the {\tt ESMF\_VM} object 
-!   into a contiguous data array of the same type. The result array is returned 
-!   on root PET. Different reduction operations can be specified.\newline
+!   array across the {\tt ESMF\_VM} object into a contiguous data array of 
+!   the same <type><kind>. The result array is returned  on root PET. 
+!   Different reduction operations can be specified.
+!   \newline
+!
+!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
+!   \newline
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
@@ -4274,6 +3549,32 @@ module ESMF_VMMod
 !
 !EOP
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMReduceI4()"
+!BOPI
+! !IROUTINE: ESMF_VMReduce - Reduce 4-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMReduce()
+  subroutine ESMF_VMReduceI4(vm, sendData, recvData, count, reduceflag, &
+    root, blockingflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
+    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
+    integer,                  intent(in)              :: count
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
+    integer,                  intent(in)              :: root
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!EOPI
+!------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
     ! initialize return code; assume routine not implemented
@@ -4310,7 +3611,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMReduceR4()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMReduce - Reduce 4-byte reals
 
 ! !INTERFACE:
@@ -4329,58 +3630,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
-!   array of kind {\tt ESMF\_KIND\_R4} across the {\tt ESMF\_VM} object 
-!   into a contiguous data array of the same type. The result array is returned 
-!   on root PET. Different reduction operations can be specified.\newline
-!
-!   {\sc Todo:} The current version of this method does not provide an 
-!   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
-!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
-!   logged.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
-!        valid source array.
-!   \item[recvData] 
-!        Contiguous data array for data to be received. All PETs must specify a
-!        valid destination array.
-!   \item[count] 
-!        Number of elements in sendData and recvData. Must be the same on all
-!        PETs.
-!   \item[reduceflag] 
-!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
-!        valid reduce operations.
-!   \item[root] 
-!        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -4418,7 +3668,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMReduceR8()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMReduce - Reduce 8-byte reals
 
 ! !INTERFACE:
@@ -4437,58 +3687,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
-!   array of kind {\tt ESMF\_KIND\_R8} across the {\tt ESMF\_VM} object 
-!   into a contiguous data array of the same type. The result array is returned 
-!   on root PET. Different reduction operations can be specified.\newline
-!
-!   {\sc Todo:} The current version of this method does not provide an 
-!   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
-!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
-!   logged.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
-!        valid source array.
-!   \item[recvData] 
-!        Contiguous data array for data to be received. All PETs must specify a
-!        valid destination array.
-!   \item[count] 
-!        Number of elements in sendData and recvData. Must be the same on all
-!        PETs.
-!   \item[reduceflag] 
-!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
-!        valid reduce operations.
-!   \item[root] 
-!        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -4524,31 +3723,34 @@ module ESMF_VMMod
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMScatterI4()"
 !BOP
-! !IROUTINE: ESMF_VMScatter - Scatter 4-byte integers
-
+! !IROUTINE: ESMF_VMScatter - Scatter data across VM
+!
 ! !INTERFACE:
-  ! Private name; call using ESMF_VMScatter()
-  subroutine ESMF_VMScatterI4(vm, sendData, recvData, count, root, &
-    blockingflag, commhandle, rc)
+!  ! Private name; call using ESMF_VMScatter()
+!  subroutine ESMF_VMScatter<type><kind>(vm, sendData, recvData, count, root, &
+!    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
-    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
-!         
+!    type(ESMF_VM),            intent(in)              :: vm
+!    <type>(ESMF_KIND_<kind>), target,   intent(in)    :: sendData(:)
+!    <type>(ESMF_KIND_<kind>), target,   intent(out)   :: recvData(:)
+!    integer,                  intent(in)              :: count
+!    integer,                  intent(in)              :: root
+!    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+!    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+!    integer,                  intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that scatters contiguous data 
-!   of kind {\tt ESMF\_KIND\_I4} from the {\tt root} PET to all PETs of an 
-!   {\tt ESMF\_VM} object (including {\tt root}).\newline
+!   from the {\tt root} PET to all PETs across the {\tt ESMF\_VM} object
+!   (including {\tt root}).
+!   \newline
+!
+!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8},
+!   {\tt ESMF\_TYPEKIND\_LOGICAL}.
+!   \newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -4586,6 +3788,31 @@ module ESMF_VMMod
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMScatterI4()"
+!BOPI
+! !IROUTINE: ESMF_VMScatter - Scatter 4-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMScatter()
+  subroutine ESMF_VMScatterI4(vm, sendData, recvData, count, root, &
+    blockingflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
+    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
+    integer,                  intent(in)              :: count
+    integer,                  intent(in)              :: root
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -4634,7 +3861,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMScatterR4()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMScatter - Scatter 4-byte reals
 
 ! !INTERFACE:
@@ -4652,48 +3879,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that scatters contiguous data 
-!   of kind {\tt ESMF\_KIND\_R4} from the {\tt root} PET to all PETs of an 
-!   {\tt ESMF\_VM} object (including {\tt root}).\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contiguous data array holding data to be send. Only the {\tt sendData}
-!        array specified by the {\tt root} PET will be used by this method.
-!   \item[recvData] 
-!        Contiguous data array for data to be received. All PETs must specify a
-!        valid destination array.
-!   \item[count] 
-!        Number of elements to be send from {\tt root} to each of the PETs. Must
-!        be the same on all PETs.
-!   \item[root] 
-!        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -4742,7 +3928,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMScatterR8()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMScatter - Scatter 8-byte reals
 
 ! !INTERFACE:
@@ -4760,48 +3946,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that scatters contiguous data 
-!   of kind {\tt ESMF\_KIND\_R8} from the {\tt root} PET to all PETs of an 
-!   {\tt ESMF\_VM} object (including {\tt root}).\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contiguous data array holding data to be send. Only the {\tt sendData}
-!        array specified by the {\tt root} PET will be used by this method.
-!   \item[recvData] 
-!        Contiguous data array for data to be received. All PETs must specify a
-!        valid destination array.
-!   \item[count] 
-!        Number of elements to be send from {\tt root} to each of the PETs. Must
-!        be the same on all PETs.
-!   \item[root] 
-!        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -4850,7 +3995,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMScatterLogical()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMScatter - Scatter ESMF_Logical
 
 ! !INTERFACE:
@@ -4868,48 +4013,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that scatters contiguous data 
-!   of kind {\tt ESMF\_Logical} from the {\tt root} PET to all PETs of an 
-!   {\tt ESMF\_VM} object (including {\tt root}).\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contiguous data array holding data to be send. Only the {\tt sendData}
-!        array specified by the {\tt root} PET will be used by this method.
-!   \item[recvData] 
-!        Contiguous data array for data to be received. All PETs must specify a
-!        valid destination array.
-!   \item[count] 
-!        Number of elements to be send from {\tt root} to each of the PETs. Must
-!        be the same on all PETs.
-!   \item[root] 
-!        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -4956,31 +4060,33 @@ module ESMF_VMMod
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMScatterVI4()"
 !BOP
-! !IROUTINE: ESMF_VMScatterV - Scatter 4-byte integers
-
+! !IROUTINE: ESMF_VMScatterV - ScatterV across VM
+!
 ! !INTERFACE:
-  ! Private name; call using ESMF_VMScatterV()
-  subroutine ESMF_VMScatterVI4(vm, sendData, sendCounts, sendOffsets, &
-    recvData, recvCount, root, rc)
+!  ! Private name; call using ESMF_VMScatterV()
+!  subroutine ESMF_VMScatterV<type><kind>(vm, sendData, sendCounts, sendOffsets, &
+!    recvData, recvCount, root, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
-    integer,                  intent(in)              :: sendCounts(:)
-    integer,                  intent(in)              :: sendOffsets(:)
-    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: recvCount
-    integer,                  intent(in)              :: root
-    integer,                  intent(out),  optional  :: rc
-!         
+!    type(ESMF_VM),            intent(in)              :: vm
+!    <type>(ESMF_KIND_<kind>), target,   intent(in)       :: sendData(:)
+!    integer,                  intent(in)              :: sendCounts(:)
+!    integer,                  intent(in)              :: sendOffsets(:)
+!    <type>(ESMF_KIND_<kind>), target,   intent(out)      :: recvData(:)
+!    integer,                  intent(in)              :: recvCount
+!    integer,                  intent(in)              :: root
+!    integer,                  intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that scatters contiguous data 
-!   of kind {\tt ESMF\_KIND\_I4} from the {\tt root} PET to all PETs of an 
-!   {\tt ESMF\_VM} object (including {\tt root}).\newline
+!   from the {\tt root} PET to all PETs across the {\tt ESMF\_VM} object
+!   (including {\tt root}).
+!   \newline
+!
+!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
+!   \newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -5008,6 +4114,31 @@ module ESMF_VMMod
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMScatterVI4()"
+!BOPI
+! !IROUTINE: ESMF_VMScatterV - ScatterV 4-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMScatterV()
+  subroutine ESMF_VMScatterVI4(vm, sendData, sendCounts, sendOffsets, &
+    recvData, recvCount, root, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
+    integer,                  intent(in)              :: sendCounts(:)
+    integer,                  intent(in)              :: sendOffsets(:)
+    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
+    integer,                  intent(in)              :: recvCount
+    integer,                  intent(in)              :: root
+    integer,                  intent(out),  optional  :: rc
+!         
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -5034,8 +4165,8 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMScatterVR4()"
-!BOP
-! !IROUTINE: ESMF_VMScatterV - Scatter 4-byte reals
+!BOPI
+! !IROUTINE: ESMF_VMScatterV - ScatterV 4-byte reals
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMScatterV()
@@ -5052,38 +4183,7 @@ module ESMF_VMMod
     integer,                  intent(in)              :: root
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that scatters contiguous data 
-!   of kind {\tt ESMF\_KIND\_R4} from the {\tt root} PET to all PETs of an 
-!   {\tt ESMF\_VM} object (including {\tt root}).\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contiguous data array holding data to be send. Only the {\tt sendData}
-!        array specified by the {\tt root} PET will be used by this method.
-!   \item[sendCounts] 
-!        Number of {\tt sendData} elements to be send to corresponding
-!        receive PET.
-!   \item[sendOffsets] 
-!        Offsets in units of elements in {\tt sendData} marking the start of
-!        element sequence to be send to receive PET.
-!   \item[recvData] 
-!        Single data variable to be received. All PETs must specify a
-!        valid result variable.
-!   \item[recvCount] 
-!        Number of {\tt recvData} elements to receive by local PET from root
-!        PET.
-!   \item[root]
-!        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -5110,8 +4210,8 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMScatterVR8()"
-!BOP
-! !IROUTINE: ESMF_VMScatterV - Scatter 8-byte reals
+!BOPI
+! !IROUTINE: ESMF_VMScatterV - ScatterV 8-byte reals
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMScatterV()
@@ -5128,38 +4228,7 @@ module ESMF_VMMod
     integer,                  intent(in)              :: root
     integer,                  intent(out),  optional  :: rc
 !         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that scatters contiguous data 
-!   of kind {\tt ESMF\_KIND\_R8} from the {\tt root} PET to all PETs of an 
-!   {\tt ESMF\_VM} object (including {\tt root}).\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contiguous data array holding data to be send. Only the {\tt sendData}
-!        array specified by the {\tt root} PET will be used by this method.
-!   \item[sendCounts] 
-!        Number of {\tt sendData} elements to be send to corresponding
-!        receive PET.
-!   \item[sendOffsets] 
-!        Offsets in units of elements in {\tt sendData} marking the start of
-!        element sequence to be send to receive PET.
-!   \item[recvData] 
-!        Single data variable to be received. All PETs must specify a
-!        valid result variable.
-!   \item[recvCount] 
-!        Number of {\tt recvData} elements to receive by local PET from root
-!        PET.
-!   \item[root]
-!        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -5184,30 +4253,28 @@ module ESMF_VMMod
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMSendI4()"
 !BOP
-! !IROUTINE: ESMF_VMSend - Send 4-byte integers
-
+! !IROUTINE: ESMF_VMSend - Send data to dst PET
+!
 ! !INTERFACE:
-  ! Private name; call using ESMF_VMSend()
-  subroutine ESMF_VMSendI4(vm, sendData, count, dst, blockingflag, &
-    commhandle, rc)
+!  ! Private name; call using ESMF_VMSend()
+!  subroutine ESMF_VMSend<type><kind>(vm, sendData, count, dst, blockingflag, &
+!    commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)  
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: dst
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc           
+!    type(ESMF_VM),            intent(in)              :: vm
+!    <type>(ESMF_KIND_<kind>), target,   intent(in)    :: sendData(:)  
+!    integer,                  intent(in)              :: count
+!    integer,                  intent(in)              :: dst
+!    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+!    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+!    integer,                  intent(out),  optional  :: rc           
 !
 ! !DESCRIPTION:
-!   Send contiguous data of kind {\tt ESMF\_KIND\_I4} to a PET within the same
-!   {\tt ESMF\_VM} object.\newline
+!   Send contiguous data to {\tt dst} PET within the same {\tt ESMF\_VM} object.
+!   \newline
 !
-!   The arguments are:
+;!   The arguments are:
 !   \begin{description}
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
@@ -5238,6 +4305,29 @@ module ESMF_VMMod
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMSendI4()"
+!BOPI
+! !IROUTINE: ESMF_VMSend - Send 4-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMSend()
+  subroutine ESMF_VMSendI4(vm, sendData, count, dst, blockingflag, &
+    commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)  
+    integer,                  intent(in)              :: count
+    integer,                  intent(in)              :: dst
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc           
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -5285,7 +4375,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMSendR4()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMSend - Send 4-byte reals
 
 ! !INTERFACE:
@@ -5302,41 +4392,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc           
 !
-! !DESCRIPTION:
-!   Send contiguous data of kind {\tt ESMF\_KIND\_R4} to a PET within the same
-!   {\tt ESMF\_VM} object.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData] 
-!        Contiguous data array holding data to be send.
-!   \item[count] 
-!        Number of elements to be send.
-!   \item[dst] 
-!        Id of the destination PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -5384,7 +4440,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMSendR8()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMSend - Send 8-byte reals
 
 ! !INTERFACE:
@@ -5401,41 +4457,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc           
 !
-! !DESCRIPTION:
-!   Send contiguous data of kind {\tt ESMF\_KIND\_R8} to a PET within the same
-!   {\tt ESMF\_VM} object.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData] 
-!        Contiguous data array holding data to be send.
-!   \item[count] 
-!        Number of elements to be send.
-!   \item[dst] 
-!        Id of the destination PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -5483,7 +4505,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMSendLogical()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMSend - Send ESMF_Logical
 
 ! !INTERFACE:
@@ -5500,41 +4522,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc           
 !
-! !DESCRIPTION:
-!   Send contiguous data of type {\tt ESMF\_Logical} to a PET within the same
-!   {\tt ESMF\_VM} object.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData] 
-!        Contiguous data array holding data to be send.
-!   \item[count] 
-!        Number of elements to be send.
-!   \item[dst] 
-!        Id of the destination PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -5582,7 +4570,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMSendCharacter()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMSend - Send Character
 
 ! !INTERFACE:
@@ -5599,41 +4587,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc           
 !
-! !DESCRIPTION:
-!   Send contiguous data of type character to a PET within the same
-!   {\tt ESMF\_VM} object.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData] 
-!        Contiguous data array holding data to be send.
-!   \item[count] 
-!        Number of elements to be send.
-!   \item[dst] 
-!        Id of the destination PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: size
@@ -5679,33 +4633,36 @@ module ESMF_VMMod
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMSendRecvI4()"
 !BOP
-! !IROUTINE: ESMF_VMSendRecv - SendRecv 4-byte integers
-
+! !IROUTINE: ESMF_VMSendRecv - Send and Recv data to and from PETs
+!
 ! !INTERFACE:
-  ! Private name; call using ESMF_VMSendRecv()
-  subroutine ESMF_VMSendRecvI4(vm, sendData, sendCount, dst, &
-    recvData, recvCount, src, blockingflag, commhandle, rc)
+!  ! Private name; call using ESMF_VMSendRecv()
+!  subroutine ESMF_VMSendRecv<type><kind>(vm, sendData, sendCount, dst, &
+!    recvData, recvCount, src, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)  
-    integer,                  intent(in)              :: sendCount
-    integer,                  intent(in)              :: dst
-    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)  
-    integer,                  intent(in)              :: recvCount
-    integer,                  intent(in)              :: src
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc           
+!    type(ESMF_VM),            intent(in)              :: vm
+!    <type>(ESMF_KIND_<kind>), target,   intent(in)    :: sendData(:)  
+!    integer,                  intent(in)              :: sendCount
+!    integer,                  intent(in)              :: dst
+!    <type>(ESMF_KIND_<kind>), target,   intent(out)   :: recvData(:)  
+!    integer,                  intent(in)              :: recvCount
+!    integer,                  intent(in)              :: src
+!    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+!    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+!    integer,                  intent(out),  optional  :: rc           
 !
 ! !DESCRIPTION:
-!   Send contiguous data of kind {\tt ESMF\_KIND\_I4} to a PET within the same
-!   {\tt ESMF\_VM} object while receiving contiguous data of kind 
-!   {\tt ESMF\_KIND\_I4} from a PET within the same {\tt ESMF\_VM} object.
-!   The {\tt sendData} and {\tt recvData} arrays must be disjoint!\newline
+!   Send contiguous data to {\tt dst} PET within the same {\tt ESMF\_VM} object
+!   while receiving contiguous data from {\tt src} PET within the same 
+!   {\tt ESMF\_VM} object. The {\tt sendData} and {\tt recvData} arrays must be
+!   disjoint!\newline
+!
+!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8},
+!   {\tt ESMF\_TYPEKIND\_LOGICAL}, {\tt ESMF\_TYPEKIND\_CHARACTER}.
+!   \newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -5744,6 +4701,33 @@ module ESMF_VMMod
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMSendRecvI4()"
+!BOPI
+! !IROUTINE: ESMF_VMSendRecv - SendRecv 4-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMSendRecv()
+  subroutine ESMF_VMSendRecvI4(vm, sendData, sendCount, dst, &
+    recvData, recvCount, src, blockingflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)  
+    integer,                  intent(in)              :: sendCount
+    integer,                  intent(in)              :: dst
+    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)  
+    integer,                  intent(in)              :: recvCount
+    integer,                  intent(in)              :: src
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc           
+!
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: sendSize
@@ -5795,7 +4779,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMSendRecvR4()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMSendRecv - SendRecv 4-byte real
 
 ! !INTERFACE:
@@ -5815,49 +4799,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc           
 !
-! !DESCRIPTION:
-!   Send contiguous data of kind {\tt ESMF\_KIND\_R4} to a PET within the same
-!   {\tt ESMF\_VM} object while receiving contiguous data of kind 
-!   {\tt ESMF\_KIND\_R4} from a PET within the same {\tt ESMF\_VM} object.
-!   The {\tt sendData} and {\tt recvData} arrays must be disjoint!\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData] 
-!        Contiguous data array holding data to be send.
-!   \item[sendCount] 
-!        Number of elements to be send.
-!   \item[dst] 
-!        Id of the destination PET within the {\tt ESMF\_VM} object.
-!   \item[recvData] 
-!        Contiguous data array for data to be received.
-!   \item[recvCount] 
-!        Number of elements to be received.
-!   \item[src] 
-!        Id of the source PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: sendSize
@@ -5909,7 +4851,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMSendRecvR8()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMSendRecv - SendRecv 8-byte real
 
 ! !INTERFACE:
@@ -5929,49 +4871,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc           
 !
-! !DESCRIPTION:
-!   Send contiguous data of kind {\tt ESMF\_KIND\_R8} to a PET within the same
-!   {\tt ESMF\_VM} object while receiving contiguous data of kind 
-!   {\tt ESMF\_KIND\_R8} from a PET within the same {\tt ESMF\_VM} object.
-!   The {\tt sendData} and {\tt recvData} arrays must be disjoint!\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData] 
-!        Contiguous data array holding data to be send.
-!   \item[sendCount] 
-!        Number of elements to be send.
-!   \item[dst] 
-!        Id of the destination PET within the {\tt ESMF\_VM} object.
-!   \item[recvData] 
-!        Contiguous data array for data to be received.
-!   \item[recvCount] 
-!        Number of elements to be received.
-!   \item[src] 
-!        Id of the source PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: sendSize
@@ -6023,7 +4923,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMSendRecvLogical()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMSendRecv - SendRecv ESMF_Logical
 
 ! !INTERFACE:
@@ -6043,49 +4943,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc           
 !
-! !DESCRIPTION:
-!   Send contiguous data of type {\tt ESMF\_Logical} to a PET within the same
-!   {\tt ESMF\_VM} object while receiving contiguous data of kind 
-!   {\tt ESMF\_Logical} from a PET within the same {\tt ESMF\_VM} object.
-!   The {\tt sendData} and {\tt recvData} arrays must be disjoint!\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData] 
-!        Contiguous data array holding data to be send.
-!   \item[sendCount] 
-!        Number of elements to be send.
-!   \item[dst] 
-!        Id of the destination PET within the {\tt ESMF\_VM} object.
-!   \item[recvData] 
-!        Contiguous data array for data to be received.
-!   \item[recvCount] 
-!        Number of elements to be received.
-!   \item[src] 
-!        Id of the source PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: sendSize
@@ -6137,7 +4995,7 @@ module ESMF_VMMod
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMSendRecvCharacter()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMSendRecv - SendRecv Character
 
 ! !INTERFACE:
@@ -6157,49 +5015,7 @@ module ESMF_VMMod
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc           
 !
-! !DESCRIPTION:
-!   Send contiguous data of type character to a PET within the same
-!   {\tt ESMF\_VM} object while receiving contiguous data of kind 
-!   {\tt ESMF\_Logical} from a PET within the same {\tt ESMF\_VM} object.
-!   The {\tt sendData} and {\tt recvData} arrays must be disjoint!\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData] 
-!        Contiguous data array holding data to be send.
-!   \item[sendCount] 
-!        Number of elements to be send.
-!   \item[dst] 
-!        Id of the destination PET within the {\tt ESMF\_VM} object.
-!   \item[recvData] 
-!        Contiguous data array for data to be received.
-!   \item[recvCount] 
-!        Number of elements to be received.
-!   \item[src] 
-!        Id of the source PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commhandle]}]
-!        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
-!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
-!        calling PET until the communication call has finished PET-locally. If
-!        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
-!        communication calls of the VM context.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: sendSize
