@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.15 2007/09/25 06:05:57 cdeluca Exp $
+// $Id: ESMCI_Grid_F.C,v 1.16 2007/09/25 15:53:51 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -89,7 +89,6 @@ extern "C" {
 					  ESMCI::InterfaceInt **coordRankArg,
 					  ESMCI::InterfaceInt **coordDimMapArg,		  
 					  ESMC_IndexFlag *indexflag,
-					  int *gridtype,
 					  int *rc){
     int localrc;
 #undef  ESMC_METHOD
@@ -102,7 +101,7 @@ extern "C" {
     *ptr = ESMCI::Grid::create(*nameLen, ESMC_NOT_PRESENT_FILTER(name),
       ESMC_NOT_PRESENT_FILTER(coordTypeKind), *distgrid, *dimmapArg,
       *lboundsArg, *uboundsArg, *coordRankArg, *coordDimMapArg,
-      ESMC_NOT_PRESENT_FILTER(indexflag), ESMC_NOT_PRESENT_FILTER(gridtype),
+      ESMC_NOT_PRESENT_FILTER(indexflag),
       &localrc);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -121,7 +120,6 @@ extern "C" {
 			   ESMCI::InterfaceInt **_coordRank,
 			   ESMCI::InterfaceInt **_coordDimMap,		  
 			   ESMC_IndexFlag *_indexflag,
-			   int *_gridtype,
                            int *_localDECount, int *_distRank, int *_undistRank, 
 			   int *_rc){
 #undef  ESMC_METHOD
@@ -282,9 +280,6 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(_indexflag) != ESMC_NULL_POINTER)
       *_indexflag = grid->getIndexFlag();
 
-    // gridtype
-    if (ESMC_NOT_PRESENT_FILTER(_gridtype) != ESMC_NULL_POINTER)
-      *_gridtype = grid->getGridType();
 
     // return success
     if (_rc!=NULL) *_rc = ESMF_SUCCESS;
@@ -374,7 +369,6 @@ extern "C" {
 					  ESMCI::InterfaceInt **coordRankArg,
 					  ESMCI::InterfaceInt **coordDimMapArg,		  
 					  ESMC_IndexFlag *indexflag,
-					  int *gridtype,
 					  int *rc){
     int localrc;
 #undef  ESMC_METHOD
@@ -396,7 +390,7 @@ extern "C" {
     localrc = (*grid)->set(*nameLen, ESMC_NOT_PRESENT_FILTER(name),
       ESMC_NOT_PRESENT_FILTER(coordTypeKind), tmp_distgrid, *dimmapArg,
       *lboundsArg, *uboundsArg, *coordRankArg, *coordDimMapArg,
-      ESMC_NOT_PRESENT_FILTER(indexflag), ESMC_NOT_PRESENT_FILTER(gridtype));
+      ESMC_NOT_PRESENT_FILTER(indexflag));
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }

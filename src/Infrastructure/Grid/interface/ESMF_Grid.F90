@@ -137,7 +137,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.26 2007/09/25 06:05:57 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.27 2007/09/25 15:53:52 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -597,7 +597,7 @@ end interface
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
       function ESMF_GridCreateFromDistGrid(name,coordTypeKind,distgrid, dimmap, &
-                        lbounds, ubounds, coordRank, coordDimMap, indexflag, gridType, rc)
+                        lbounds, ubounds, coordRank, coordDimMap, indexflag, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFromDistGrid
@@ -612,7 +612,6 @@ end interface
        integer,               intent(in),   optional  :: coordRank(:)
        integer,               intent(in),   optional  :: coordDimMap(:,:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
-       integer,               intent(in),   optional  :: gridType ! NOT IMPLEMENTED
        integer,               intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -666,9 +665,6 @@ end interface
 !      Indicates whether the indices in the grid are to be interpreted to form
 !      a flat pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}), or are to 
 !      be taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.      
-! \item[{[gridType]}]
-!      Flag that indicates the type of the grid. If not given, defaults
-!       to ESMF\_GRIDTYPE\_UNKNOWN. [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -727,7 +723,7 @@ end interface
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridcreatefromdistgrid(grid%this, nameLen, name, &
       coordTypeKind, distgrid, dimmapArg, lboundsArg, uboundsArg, coordRankArg, coordDimMapArg, &
-      indexflag, gridtype, localrc)
+      indexflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -829,7 +825,7 @@ end interface
                         poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
                         bipolePos1, bipolePos2, bipolePos3, &
                         coordDep1, coordDep2, coordDep3, &
-                        indexflag, gridType, petMap, rc)
+                        indexflag, petMap, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateShapeIrreg
@@ -854,7 +850,6 @@ end interface
        integer,               intent(in),   optional  :: coordDep2(:)
        integer,               intent(in),   optional  :: coordDep3(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
-       integer,               intent(in),   optional  :: gridType           ! N. IMP.
        integer,               intent(in),   optional  :: petMap(:,:,:)
        integer,               intent(out),  optional  :: rc
 !
@@ -1559,13 +1554,13 @@ end interface
        ESMF_GridCreateShapeIrreg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
                                     distgrid, dimmap, lbounds, ubounds, &
                                     coordRank, coordDimMap, indexflag, &
-                                    gridType, localrc)
+                                    localrc)
     else
        ESMF_GridCreateShapeIrreg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
                                     distgrid=distgrid, dimmap=dimmap, &
                                     coordRank=coordRank, coordDimMap=coordDimMap, &
                                     indexflag=indexflag, &
-                                    gridtype=gridType, rc=localrc)
+                                    rc=localrc)
     endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1606,7 +1601,7 @@ end interface
                         poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
                         bipolePos1, bipolePos2, bipolePos3, &
                         coordDep1, coordDep2, coordDep3, &
-                        indexflag, gridType, petMap, rc)
+                        indexflag, petMap, rc)
 
 
 !
@@ -1633,7 +1628,6 @@ end interface
        integer,               intent(in),   optional  :: coordDep2(:)
        integer,               intent(in),   optional  :: coordDep3(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
-       integer,               intent(in),   optional  :: gridType           ! N. IMP.
        integer,               intent(in),   optional  :: petMap(:,:,:)
        integer,               intent(out),  optional  :: rc
 !
@@ -2236,13 +2230,13 @@ end interface
        ESMF_GridCreateShapeReg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
                                     distgrid, dimmap, lbounds, ubounds, &
                                     coordRank, coordDimMap, indexflag, &
-                                    gridType, localrc)
+                                    localrc)
     else
        ESMF_GridCreateShapeReg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
                                     distgrid=distgrid, dimmap=dimmap, &
                                     coordRank=coordRank, coordDimMap=coordDimMap, &
                                     indexflag=indexflag, &
-                                    gridtype=gridType, rc=localrc)
+                                    rc=localrc)
     endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2330,7 +2324,7 @@ end interface
           rank, distRank, undistRank,  &
           tileCount, staggerlocsCount, localDECount, distgrid, &
           dimmap, lbounds, ubounds, coordRank, coordDimMap, &
-          indexFlag, gridType, rc)
+          indexFlag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),       intent(in)            :: grid
@@ -2349,7 +2343,6 @@ end interface
       integer,               intent(out), optional :: coordRank(:)
       integer,               intent(out), optional :: coordDimMap(:,:)
       type(ESMF_IndexFlag),  intent(out), optional :: indexflag
-      integer,               intent(out), optional :: gridType  ! NOT IMPLEMENTED
       integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2397,9 +2390,6 @@ end interface
 !   dimensions. 
 ! \item[{[indexflag]}]
 !    Flag that indicates how the DE-local indices are to be defined.
-!\item[{[gridType]}]
-!   Flag that indicates the type of the grid. If not given, defaults
-!    to ESMF\_GRIDTYPE\_UNKNOWN. [CURRENTLY NOT IMPLEMENTED]
 !\item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -2455,7 +2445,7 @@ end interface
     call c_ESMC_gridget(grid%this, &
       coordTypeKind, rank, tileCount, distgrid,  staggerlocsCount, &
       dimmapArg, lboundsArg, uboundsArg, coordRankArg, coordDimMapArg, &
-      indexflag, gridtype, localDECount, distRank, undistRank, localrc)
+      indexflag, localDECount, distRank, undistRank, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4645,7 +4635,7 @@ endif
   ! Private name; call using ESMF_GridSet()
     subroutine ESMF_GridSetFromDistGrid(grid,name,coordTypeKind,distgrid, &
                  dimmap, lbounds, ubounds, coordRank, coordDimMap, &
-                 indexflag, gridType, rc)
+                 indexflag, rc)
 !
 ! !RETURN VALUE:
 
@@ -4661,7 +4651,6 @@ endif
        integer,               intent(in),   optional  :: coordRank(:)
        integer,               intent(in),   optional  :: coordDimMap(:,:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
-       integer,               intent(in),   optional  :: gridType ! NOT IMPLEMENTED
        integer,               intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -4696,9 +4685,6 @@ endif
 !      Upper bounds for undistributed array dimensions.
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
-! \item[{[gridType]}]
-!      Flag that indicates the type of the grid. If not given, defaults
-!       to ESMF\_GRIDTYPE\_UNKNOWN. [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -4755,7 +4741,7 @@ endif
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridsetfromdistgrid(grid%this, nameLen, name, &
       coordTypeKind, distgrid, dimmapArg, lboundsArg, uboundsArg, coordRankArg, coordDimMapArg, &
-      indexflag, gridtype, localrc)
+      indexflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4867,7 +4853,7 @@ endif
                         poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
                         bipolePos1, bipolePos2, bipolePos3, &
                         coordDep1, coordDep2, coordDep3, &
-                        indexflag, gridType, petMap, rc)
+                        indexflag, petMap, rc)
 
 !
 ! !ARGUMENTS:
@@ -4891,7 +4877,6 @@ endif
        integer,               intent(in),   optional  :: coordDep2(:)
        integer,               intent(in),   optional  :: coordDep3(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
-       integer,               intent(in),   optional  :: gridType           ! N. IMP.
        integer,               intent(in),   optional  :: petMap(:,:,:)
        integer,               intent(out),  optional  :: rc
 !
@@ -5602,13 +5587,13 @@ endif
        call ESMF_GridSetFromDistGrid(grid, name, coordTypeKind, &
                                     distgrid, dimmap, lbounds, ubounds, &
                                     coordRank, coordDimMap, indexflag, &
-                                    gridType, localrc)
+                                    localrc)
     else
        call ESMF_GridSetFromDistGrid(grid, name, coordTypeKind, &
                                     distgrid=distgrid, dimmap=dimmap, &
                                     coordRank=coordRank, coordDimMap=coordDimMap, &
                                     indexflag=indexflag, &
-                                    gridtype=gridType, rc=localrc)
+                                    rc=localrc)
     endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -5694,8 +5679,6 @@ endif
   end subroutine ESMF_GridValidate
 !------------------------------------------------------------------------------
 
-
-
 ! -------------------------- ESMF-internal method -----------------------------
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetInit"
@@ -5731,7 +5714,6 @@ endif
     end function ESMF_GridGetInit
 
 !------------------------------------------------------------------------------
-
 
       end module ESMF_GridMod
 

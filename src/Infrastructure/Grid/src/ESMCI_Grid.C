@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.24 2007/09/21 22:43:16 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.25 2007/09/25 15:53:52 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.24 2007/09/21 22:43:16 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.25 2007/09/25 15:53:52 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -76,7 +76,7 @@ int construct(Grid *_grid, int _nameLen, char *_name, ESMC_TypeKind *_typekind,
               DistGrid *_distgrid, InterfaceInt *_dimmap,
               InterfaceInt *_lbounds, InterfaceInt *_ubounds, 
               InterfaceInt *_coordRank, InterfaceInt *_coordDimMap,
-              ESMC_IndexFlag *_indexflag, int *_gridType);
+              ESMC_IndexFlag *_indexflag);
 
 
 //-----------------------------------------------------------------------------
@@ -464,7 +464,7 @@ int Grid::commit(
   localrc=construct(this, proto->nameLen, proto->name, proto->typekind, 
                        proto->distgrid, proto->dimmap, proto->lbounds,
                        proto->ubounds, proto->coordRank, proto->coordDimMap,
-                       proto->indexflag,  proto->gridType);
+                       proto->indexflag);
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
             ESMF_ERR_PASSTHRU, &rc)) return rc;        
 
@@ -502,7 +502,6 @@ Grid *Grid::create(
   InterfaceInt *coordRankArg,               // (in) optional
   InterfaceInt *coordDimMapArg,             // (in) optional
   ESMC_IndexFlag *indexflagArg,             // (in) optional
-  int *gridTypeArg,                         // (in) optional
   int *rcArg                                // (out) return code optional
   ){
 //
@@ -533,7 +532,7 @@ Grid *Grid::create(
   // setup the grids internal structure using the passed in paramters. 
   localrc=construct(grid, nameLenArg, nameArg, typekindArg, distgridArg, 
                     dimmapArg, lboundsArg, uboundsArg, 
-                    coordRankArg, coordDimMapArg, indexflagArg, gridTypeArg);
+                    coordRankArg, coordDimMapArg, indexflagArg);
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
             ESMF_ERR_PASSTHRU, rcArg)) return ESMC_NULL_POINTER;        
 
@@ -1074,8 +1073,7 @@ int Grid::set(
   InterfaceInt *uboundsArg,      // (in) optional
   InterfaceInt *coordRankArg,    // (in) optional
   InterfaceInt *coordDimMapArg,  // (in) optional
-  ESMC_IndexFlag *indexflagArg,  // (in) optional
-  int *gridTypeArg               // (in) optional
+  ESMC_IndexFlag *indexflagArg   // (in) optional
   ){
 //
 // !DESCRIPTION:
@@ -1182,12 +1180,6 @@ int Grid::set(
   if (indexflagArg!=NULL) {
     if (proto->indexflag == ESMC_NULL_POINTER) proto->indexflag= new ESMC_IndexFlag;
     *(proto->indexflag)=*indexflagArg;
-  }
-
-  // if passed in, set gridType
-  if (gridTypeArg!=NULL) {
-    if (proto->gridType == ESMC_NULL_POINTER) proto->gridType= new int;
-    *(proto->gridType)=*gridTypeArg;
   }
  
   // return successfully
@@ -1524,8 +1516,7 @@ int Grid::constructInternal(
   int rankArg,                            // (in)
   int *coordRankArg,                      // (in)
   int **coordDimMapArg,                   // (in)
-  ESMC_IndexFlag indexflagArg,            // (in)
-  int gridTypeArg                         // (in)
+  ESMC_IndexFlag indexflagArg             // (in)
   ){
 //
 // !DESCRIPTION:
@@ -1549,8 +1540,6 @@ int Grid::constructInternal(
   rank = rankArg;
 
   indexflag=indexflagArg;
-
-  gridType=gridTypeArg;
 
   // Set the number of stagger locations from the grid rank
   staggerLocCount=_NumStaggerLocsFromRank(rank); 
@@ -1847,7 +1836,6 @@ Grid::Grid(
   isDELBnd = ESMC_NULL_POINTER;
   isDEUBnd = ESMC_NULL_POINTER;
   
-  gridType=0;
   indexflag=ESMF_INDEX_DELOCAL;
   distgrid= ESMC_NULL_POINTER; 
   
@@ -1945,7 +1933,6 @@ ProtoGrid::ProtoGrid(
   coordRank=ESMC_NULL_POINTER;  
   coordDimMap=ESMC_NULL_POINTER; 
   indexflag=ESMC_NULL_POINTER; 
-  gridType=ESMC_NULL_POINTER; 
 }
 //-----------------------------------------------------------------------------
 
@@ -1981,7 +1968,6 @@ ProtoGrid::ProtoGrid(
   if (coordRank != ESMC_NULL_POINTER) _freeInterfaceInt(&coordRank);
   if (coordDimMap != ESMC_NULL_POINTER) _freeInterfaceInt(&coordDimMap);
   if (indexflag != ESMC_NULL_POINTER) delete indexflag; 
-  if (gridType != ESMC_NULL_POINTER) delete gridType; 
 }
 
 
@@ -2112,6 +2098,9 @@ int Grid::setStaggerInfo(
 //-----------------------------------------------------------------------------
 
 #if 0
+//
+//   TODO: Serialize and deserialize still need work before being functional
+//
 //-----------------------------------------------------------------------------
 //
 // serialize() and deserialize()
@@ -2141,15 +2130,24 @@ int Grid::serialize(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  int localoffset
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  // Prepare pointer variables of different types
+  // Prepare pointer variables of different type
   char *cp;
   int *ip;
   ESMC_TypeKind *dkp;
   ESMC_IndexFlag *ifp;
+
+  // Check status
+  if (status < ESMC_GRIDSTATUS_SHAPE_READY) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Grid not fully created", &rc);
+    return rc;
+  }
 
   // Check if buffer has enough free memory to hold object
   // TODO: write better check of size
@@ -2159,26 +2157,54 @@ int Grid::serialize(
   //  return rc;
   // }
 
+  // get localoffset
+  localoffset=*offset
+
   // First, serialize the base class,
-  localrc = ESMC_Base::ESMC_Serialize(buffer, length, offset);
+  localrc = ESMC_Base::ESMC_Serialize(buffer, length, &localoffset);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
+
+  // store status
+  call memcpy(buffer+localoffset,&status,sizeof(ESMC_GridStatus));
+  localoffset += sizeof(ESMC_GridStatus)
+
+  // store typekind
+  call memcpy(buffer+localoffset,&typekind,sizeof(ESMC_TypeKind));
+  localoffset += sizeof(ESMC_GridStatus)
+
+  // store distRank
+  call memcpy(buffer+localoffset,&distRank,sizeof(int));
+  localoffset += sizeof(int)
+
+  // store dimmap
+  call memcpy(buffer+localoffset,dimmap,distRank*sizeof(int));
+  localoffset += (distRank*sizeof(int))
+
+  // store undistRank
+  call memcpy(buffer+localoffset,&undistRank,sizeof(int));
+  localoffset += sizeof(int)
+
+  // store lbounds
+  call memcpy(buffer+localoffset,lbounds,undistRank*sizeof(int));
+  localoffset += (undistRank*sizeof(int))
+
+  // store ubounds
+  call memcpy(buffer+localoffset,ubounds,undistRank*sizeof(int));
+  localoffset += (undistRank*sizeof(int))
+
+
+ // TODO: contiue with rank, coordRank and so on...
+
+
   // Serialize the DistGrid
-  localrc = distgrid->serialize(buffer, length, offset);
+  localrc = distgrid->serialize(buffer, length, &localoffset);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
-  // Then, serialize Grid meta data
-  dkp = (ESMC_TypeKind *)(buffer + *offset);
-  *dkp++ = typekind;
-  ip = (int *)dkp;
-  *ip++ = rank;
-  ifp = (ESMC_IndexFlag *)ip;
-  *ifp++ = indexflag;
-  
-  // fix offset  
-  cp = (char *)ifp;
-  *offset = (cp - buffer);
-  
+
+  // output localoffset
+  *offset=localoffset
+ 
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -2501,8 +2527,7 @@ int construct(
   InterfaceInt *uboundsArg,                 // (in) optional
   InterfaceInt *coordRankArg,               // (in) optional
   InterfaceInt *coordDimMapArg,             // (in) optional
-  ESMC_IndexFlag *indexflagArg,             // (in) optional
-  int *gridTypeArg                          // (in) optional
+  ESMC_IndexFlag *indexflagArg              // (in) optional
   ){
 //
 // !DESCRIPTION:
@@ -2526,7 +2551,6 @@ int construct(
   int *coordRank;
   int **coordDimMap;
   ESMC_IndexFlag indexflag;
-  int gridType;
   int ind;
   char *name;  
 
@@ -2763,21 +2787,12 @@ int construct(
     indexflag=*indexflagArg;
   }
 
-
-  // If gridType wasn't passed in then use default, otherwise 
-  // copy passed in value
-  if (gridTypeArg==NULL) {
-    gridType=0; // default
-  } else {
-    gridType=*gridTypeArg;
-  }
-
   // construct the Grid object using the massaged parameter values
   localrc=gridArg->constructInternal(name, typekind, distgridArg, 
              distRank, dimmap, 
              undistRank, lbounds, ubounds,
              rank, coordRank, coordDimMap, 
-             indexflag, gridType);
+             indexflag);
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
             ESMF_ERR_PASSTHRU, &rc)) return rc;
         

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.15 2007/08/30 23:18:28 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.16 2007/09/25 15:53:51 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -98,7 +98,6 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   // upper boundary of dimension d
   char *isDEUBnd;
 
-  int gridType;
   ESMC_IndexFlag indexflag;
   DistGrid *distgrid;
 
@@ -136,8 +135,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
        int rankArg,                            // (in)
        int *coordRankArg,                     // (in)
        int **coordDimMapArg,                   // (in)
-       ESMC_IndexFlag indexflagArg,             // (in)
-       int gridTypeArg                          // (in)
+       ESMC_IndexFlag indexflagArg             // (in)
        );
 
   // set information about a stagger location
@@ -160,7 +158,6 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   const int getUndistRank(void) const {return undistRank;}
   const int getTileCount(void) const {return distgrid->getPatchCount();}
   const int getStaggerLocCount(void) const {return staggerLocCount;}
-  const int getGridType(void) const {return gridType;}
   const ESMC_IndexFlag getIndexFlag(void) const {return indexflag;}
   const ESMC_TypeKind getTypeKind(void) const {return typekind;}
   const DistGrid *getDistGrid(void) const {return distgrid;}
@@ -184,10 +181,9 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 	  InterfaceInt *_dimmap,                  // (in)
 	  InterfaceInt *_lbounds,                 // (in)
 	  InterfaceInt *_ubounds,                 // (in)
-		InterfaceInt *_coordRank,              // (in)
+	  InterfaceInt *_coordRank,              // (in)
 	  InterfaceInt *_coordDimMap,             // (in)
-	  ESMC_IndexFlag *_indexflag,                  // (in)
-	  int *_gridType                             // (in)
+	  ESMC_IndexFlag *_indexflag                  // (in)
 	  );
 
   // create fully formed grid
@@ -201,7 +197,6 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 	       InterfaceInt *coordRank,              // (in)
 	       InterfaceInt *coordDimMap,             // (in)
 	       ESMC_IndexFlag *indexflag,                  // (in)
-	       int *gridType,                              // (in)
 	       int *rc                                     // (out) return code
 	       );
 
@@ -281,8 +276,7 @@ int getDistExclusiveUBound(
 		      InterfaceInt *_ubounds,  
 		      InterfaceInt *_coordRank,
 		      InterfaceInt *_coordDimMap,
-		      ESMC_IndexFlag *_indexflag, 
-		      int *_gridType
+		      ESMC_IndexFlag *_indexflag 
 		      );
   
 };  // end class ESMC_Grid
@@ -303,7 +297,6 @@ class ProtoGrid {
   InterfaceInt *coordRank;  
   InterfaceInt *coordDimMap; 
   ESMC_IndexFlag *indexflag; 
-  int *gridType;    
 
   // Proto Grid Construct
   ProtoGrid();

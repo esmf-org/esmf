@@ -1,4 +1,4 @@
-! $Id: ESMF_StaggerLoc.F90,v 1.8 2007/09/21 22:43:16 oehmke Exp $
+! $Id: ESMF_StaggerLoc.F90,v 1.9 2007/09/25 15:53:52 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -97,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StaggerLoc.F90,v 1.8 2007/09/21 22:43:16 oehmke Exp $'
+      '$Id: ESMF_StaggerLoc.F90,v 1.9 2007/09/25 15:53:52 oehmke Exp $'
 
 
 !==============================================================================
@@ -305,7 +305,7 @@ end interface
 !    should be in the center in that dimension. If {\tt loc} is +1 then
 !    for the dimension, the position should be on the positive side of the cell. 
 !    Please see Section~\ref{sec:usage:staggerloc:adv}
-!    for diagrams and further discussion of setting custom stagger locations. 
+!    for diagrams and further discussion of custom stagger locations. 
 !
 !     The arguments are:
 !     \begin{description}

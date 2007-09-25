@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.54 2007/09/18 19:54:59 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.55 2007/09/25 15:53:52 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.54 2007/09/18 19:54:59 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.55 2007/09/25 15:53:52 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -54,7 +54,7 @@ program ESMF_GridCreateUTest
   type(ESMF_DistGrid) :: distgrid,distgrid2
   integer :: coordDimMap(2,2), rank, lbounds(2), ubounds(2)
   type(ESMF_IndexFlag) :: indexflag
-  integer :: gridType, dimmap(2), coordRank(2), dimcount
+  integer :: dimmap(2), coordRank(2), dimcount
   integer :: coordRank2(3),coordDimMap2(3,3)
 
   !-----------------------------------------------------------------------------
@@ -114,7 +114,7 @@ program ESMF_GridCreateUTest
   ! get info from Grid
   call ESMF_GridGet(grid, rank=rank, coordTypeKind=typekind, &
          dimmap=dimmap, coordRank=coordRank, coordDimMap=coordDimMap, &
-         indexflag=indexflag, gridtype=gridtype, rc=localrc)
+         indexflag=indexflag, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! check that defaults are as expected
@@ -127,7 +127,6 @@ program ESMF_GridCreateUTest
   if ((coordDimMap(1,1) .ne. 1) .or. (coordDimMap(1,2) .ne. 2) .or. & 
       (coordDimMap(2,1) .ne. 1) .or. (coordDimMap(2,2) .ne. 2)) correct=.false.
 !  if (indexflag .ne. ESMF_INDEX_DELOCAL) correct=.false.
-  if (gridtype .ne. 0) correct=.false.
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
@@ -411,31 +410,6 @@ program ESMF_GridCreateUTest
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
-
-  !-----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Creating a Grid with non-default gridType"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-
-  ! create grid with nondefault parameter
-  rc=ESMF_SUCCESS
-  grid=ESMF_GridCreate(distgrid=distgrid, gridtype=1, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! get info back from grid
-  call ESMF_GridGet(grid, gridtype=gridtype, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! check that output is as expected
-  correct=.true.
-  if (gridtype .ne. 1) correct=.false.
-
-  ! destroy grid
-  call ESMF_GridDestroy(grid,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-  !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
@@ -837,7 +811,7 @@ program ESMF_GridCreateUTest
   ! get info from Grid
   call ESMF_GridGet(grid, rank=rank, coordTypeKind=typekind, &
          dimmap=dimmap, coordRank=coordRank, coordDimMap=coordDimMap, &
-         indexflag=indexflag, gridtype=gridtype, rc=localrc)
+         indexflag=indexflag, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! check that defaults are as expected
@@ -850,7 +824,6 @@ program ESMF_GridCreateUTest
   if ((coordDimMap(1,1) .ne. 1) .or. (coordDimMap(1,2) .ne. 2) .or. & 
       (coordDimMap(2,1) .ne. 1) .or. (coordDimMap(2,2) .ne. 2)) correct=.false.
 !  if (indexflag .ne. ESMF_INDEX_DELOCAL) correct=.false.
-  if (gridtype .ne. 0) correct=.false.
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
