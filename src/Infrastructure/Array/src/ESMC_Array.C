@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.135 2007/09/20 23:09:46 theurich Exp $
+// $Id: ESMC_Array.C,v 1.136 2007/09/25 23:46:54 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.135 2007/09/20 23:09:46 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.136 2007/09/25 23:46:54 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1222,7 +1222,7 @@ int Array::getLinearIndexExclusive(
   )const{
 //
 // !DESCRIPTION:
-//    Get linear index - assuming index input to be be basis 0 in excl. region
+//    Get linear index - assuming index input to be basis 0 in excl. region
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -1230,19 +1230,72 @@ int Array::getLinearIndexExclusive(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   // determine the linearized index
-  //todo: the following assumes rank==dimCount -> will need to skip over not
-  //      distributed dimensions when implemented
-  int joff = localDe*rank;  // offset according to localDe index
-  int linindex = exclusiveLBound[rank-1] - totalLBound[rank-1]
-    + index[rank-1];  // initialize
-  for (int j=rank-2; j>=0; j--){
-    linindex *= totalUBound[joff+j] - totalLBound[joff+j] + 1;
-    linindex += exclusiveLBound[j] - totalLBound[j] + index[j];
+  int dimCount = distgrid->getDimCount();
+  int joff = localDe*dimCount;      // offset according to localDe index
+  int linIndex = 0;                 // reset
+  int tensorIndex = tensorCount-1;  // reset
+  for (int jj=rank-1; jj>=0; jj--){
+    int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor
+    if (j){
+      // decomposed dimension 
+      --j;  // shift to basis 0
+      // first time multiply with zero intentionally:
+      linIndex *= totalUBound[joff+j] - totalLBound[joff+j] + 1;
+      linIndex += exclusiveLBound[joff+j] - totalLBound[joff+j] + index[j];    
+    }else{
+      // tensor dimension
+      // first time multiply with zero intentionally:
+      linIndex *= ubounds[tensorIndex] - lbounds[tensorIndex] + 1;
+      linIndex += index[jj];
+      --tensorIndex;
+    }
   }
-      
+   
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
-  return linindex;    // leave this index basis 0
+  return linIndex;    // leave this index basis 0
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::getSequenceIndexExclusive()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::getSequenceIndexExclusive
+//
+// !INTERFACE:
+int Array::getSequenceIndexExclusive(
+//
+// !RETURN VALUE:
+//    int sequence index
+//
+// !ARGUMENTS:
+//
+  int localDe,                      // in - local DE
+  int *index,                       // in - DE-local index tupple in exclusive
+                                    //      region basis 0
+  int *rc                           // out - return code
+  )const{
+//
+// !DESCRIPTION:
+//    Get sequential index - assuming index input to be basis 0 in excl. region
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  // determine the sequentialized index
+  int seqindex;
+  seqindex = distgrid->getSequenceIndex(localDe, index, &localrc);  
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    return -1;
+        
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return seqindex;
 }
 //-----------------------------------------------------------------------------
 
@@ -2664,8 +2717,8 @@ int Array::sparseMatMulStore(
         // determine the lin. index for cell ii[] in localArray for this DE
         int linIndex = srcArray->getLinearIndexExclusive(i, ii);
         // determine the sequentialized index for cell ii[] in this DE
-        // getSequenceIndex() expects basis 0 ii[] in excl. region
-        int seqIndex = srcArray->distgrid->getSequenceIndex(i, ii);
+        // getSequenceIndexExclusive() expects basis 0 ii[] in excl. region
+        int seqIndex = srcArray->getSequenceIndexExclusive(i, ii);
         // store linIndex and seqIndex in srcLinSeqList for this DE
         srcLinSeqList[i][cellIndex].linIndex = linIndex;
         srcLinSeqList[i][cellIndex].seqIndex = seqIndex;
@@ -2739,8 +2792,8 @@ int Array::sparseMatMulStore(
         // determine the lin. index for cell ii[] in localArray for this DE
         int linIndex = dstArray->getLinearIndexExclusive(i, ii);
         // determine the sequentialized index for cell ii[] in this DE
-        // getSequenceIndex() expects basis 0 ii[] in excl. region
-        int seqIndex = dstArray->distgrid->getSequenceIndex(i, ii);
+        // getSequenceIndexExclusive() expects basis 0 ii[] in excl. region
+        int seqIndex = dstArray->getSequenceIndexExclusive(i, ii);
         // store linIndex and seqIndex in dstLinSeqList for this DE
         dstLinSeqList[i][cellIndex].linIndex = linIndex;
         dstLinSeqList[i][cellIndex].seqIndex = seqIndex;

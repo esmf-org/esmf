@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.71 2007/09/20 23:09:46 theurich Exp $
+// $Id: ESMC_Array.h,v 1.72 2007/09/25 23:46:54 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -148,6 +148,7 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     DistGrid *getDistGrid()                 const {return distgrid;}
     DELayout *getDELayout()                 const {return delayout;}
     int getLinearIndexExclusive(int localDe, int *index, int *rc=NULL) const;
+    int getSequenceIndexExclusive(int localDe, int *index, int *rc=NULL) const;
     const char *getName()               const {return ESMC_BaseGetName();}
     int setName(char *name){return ESMC_BaseSetName(name, "Array");}
     // misc.
