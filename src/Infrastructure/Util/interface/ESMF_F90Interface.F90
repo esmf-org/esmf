@@ -1,4 +1,4 @@
-! $Id: ESMF_F90Interface.F90,v 1.5 2007/03/31 05:51:27 cdeluca Exp $
+! $Id: ESMF_F90Interface.F90,v 1.6 2007/09/25 15:55:53 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -108,7 +108,11 @@ contains
     if (present(farray1D)) then
       allocate(len(1))
       len = shape(farray1D)
-      call c_ESMC_InterfaceIntCreate1D(array, farray1D(1), len, status)
+      if (all(len .ne. 0)) then
+         call c_ESMC_InterfaceIntCreate1D(array, farray1D(1), len, status)
+      else
+         call c_ESMC_InterfaceIntCreate1D(array, 0, len, status)
+      endif
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       deallocate(len)
@@ -116,7 +120,11 @@ contains
     if (present(farray2D)) then
       allocate(len(2))
       len = shape(farray2D)
-      call c_ESMC_InterfaceIntCreate2D(array, farray2D(1,1), len, status)
+      if (all(len .ne. 0)) then
+         call c_ESMC_InterfaceIntCreate2D(array, farray2D(1,1), len, status)
+      else
+         call c_ESMC_InterfaceIntCreate2D(array, 0, len, status)
+      endif
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       deallocate(len)
@@ -124,7 +132,11 @@ contains
     if (present(farray3D)) then
       allocate(len(3))
       len = shape(farray3D)
-      call c_ESMC_InterfaceIntCreate3D(array, farray3D(1,1,1), len, status)
+      if (all(len .ne. 0)) then
+         call c_ESMC_InterfaceIntCreate3D(array, farray3D(1,1,1), len, status)
+      else
+         call c_ESMC_InterfaceIntCreate3D(array, 0, len, status)
+      endif
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       deallocate(len)
