@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.20 2007/09/25 06:05:56 cdeluca Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.21 2007/09/25 06:08:55 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -595,7 +595,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
           fptr=cornerY, rc=rc)
 
    !-------------------------------------------------------------------
-   ! Calcuate and set coordinates in the second dimension.
+   ! Calculate and set coordinates in the second dimension.
    ! Note that the cornerY array needs to be 3D because currently
    ! all coordinate arrays must each have the same rank as the grid, but 
    ! because the coordinate is rectilinear we only need to store a 1D array.
@@ -637,7 +637,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
           staggerLBound=lbnd, staggerUBound=ubnd, fptr=centerY, rc=rc)
 
    !-------------------------------------------------------------------
-   ! Calcuate and set coordinates in the second dimension.
+   ! Calculate and set coordinates in the second dimension.
    ! Note that the centerY array needs to be 3D because currently
    ! all coordinate arrays must each have the same rank as the grid, but 
    ! because the coordinate is rectilinear we only need to store a 1D array.
@@ -657,7 +657,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
           staggerLBound=lbnd, staggerUBound=ubnd, fptr=centerZ, rc=rc)
 
    !-------------------------------------------------------------------
-   ! Calcuate and set the vertical coordinates
+   ! Calculate and set the vertical coordinates
    ! Note that the centerZ array needs to be 3D because currently
    ! all coordinate arrays must each have the same rank as the grid, but 
    ! because the coordinate is rectilinear we only need to store a 1D array.
