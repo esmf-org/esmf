@@ -1,5 +1,5 @@
 
-! $Id: ESMF_Bundle.F90,v 1.112 2007/08/30 05:06:28 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.113 2007/09/25 23:25:25 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -796,15 +796,14 @@ end function
       ! If specified, set the Grid.  All Fields added to this Bundle
       !  must be based on this same Grid.
 
-! TODO:FIELDINTEGRATION Restore method ESMF GridValidate().      
-!      if (present(grid)) then
-!          call ESMF_GridValidate(grid, rc=status)
-!          if (ESMF_LogMsgFoundError(status, &
-!                                  ESMF_ERR_PASSTHRU, &
-!                                  ESMF_CONTEXT, rc)) return
-!          btypep%grid = grid
-!          btypep%gridstatus = ESMF_STATUS_READY
-!      endif
+      if (present(grid)) then
+          call ESMF_GridValidate(grid, rc=status)
+          if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+          btypep%grid = grid
+          btypep%gridstatus = ESMF_STATUS_READY
+      endif
 
       ! Set return values.
       ESMF_BundleCreateNoFields%btypep => btypep
@@ -2138,8 +2137,7 @@ end function
         if (pattern%datarank .ne. candidate%datarank ) return
         if (pattern%typekind .ne. candidate%typekind ) return
         if (pattern%haloWidth .ne. candidate%haloWidth) return
-! TODO:FIELDINTEGRATION Figure out why next line does not work
-!        if (pattern%datastaggerloc .ne. candidate%datastaggerloc) return
+        if (pattern%datastaggerloc .ne. candidate%datastaggerloc) return
 
         ! TODO: finish this
         !do j=1, gridrank
@@ -3704,12 +3702,11 @@ end function
                                  ESMF_CONTEXT, rc)) return
       endif
 
-! TODO:FIELDINTEGRATION Restore method ESMF GridValidate().      
       ! OK to set grid, but validate it first
-!      call ESMF_GridValidate(grid, rc=status)
-!      if (ESMF_LogMsgFoundError(status, &
-!                                  ESMF_ERR_PASSTHRU, &
-!                                  ESMF_CONTEXT, rc)) return
+       call ESMF_GridValidate(grid, rc=status)
+       if (ESMF_LogMsgFoundError(status, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rc)) return
       btype%grid = grid
       btype%gridstatus = ESMF_STATUS_READY
 
