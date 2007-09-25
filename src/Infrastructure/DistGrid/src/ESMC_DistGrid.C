@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.34 2007/09/25 22:26:27 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.35 2007/09/25 23:40:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.34 2007/09/25 22:26:27 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistGrid.C,v 1.35 2007/09/25 23:40:53 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1822,6 +1822,8 @@ int DistGrid::getSequenceIndex(
       seqindex += cellCountPPatch[i];
     ++seqindex;  // shift sequentialized index to basis 1 !!!!
   }
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
   return seqindex;
 }
 //-----------------------------------------------------------------------------
