@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.42 2007/08/23 20:06:47 oehmke Exp $
+! $Id: ESMF_Config.F90,v 1.43 2007/09/25 21:39:46 cdeluca Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -673,11 +673,108 @@
       return
     end subroutine ESMF_ConfigFindLabel
 
+
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigGetAttribute - Get a value
+!
+!
+! !INTERFACE:
+!      subroutine ESMF_ConfigGetAttribute( config, <value argument>, &
+!                                          label, default, rc )
+!
+! !ARGUMENTS:
+!      type(ESMF_Config), intent(inout)       :: config     
+!      <value argument>, see below for supported values
+!      character(len=*), intent(in), optional :: label 
+!      character(len=*), intent(in), optional :: default 
+!      integer, intent(out), optional         :: rc     
+!
+! !DESCRIPTION: 
+!      Gets a value from the {\tt config} object.  When the
+!      value is a sequence of characters
+!      it will be terminated by the first white space.
+!      
+!      Supported values for <value argument> are:
+!      \begin{description}
+!      \item character, intent(out)                 :: value
+!      \item character(len=*), intent(out)          :: value
+!      \item real(ESMF_KIND_R4), intent(out)        :: value    
+!      \item real(ESMF_KIND_R8), intent(out)        :: value
+!      \item integer(ESMF_KIND_I4), intent(out)     :: value
+!      \item integer(ESMF_KIND_I8), intent(out)     :: value
+!      \item logical, intent(out)                   :: value
+!      \end{description}
+!
+!   The arguments are:
+!   \begin{description}
+!   \item [config]
+!     Already created {\tt ESMF\_Config} object.
+!   \item [<value argument>]
+!     Returned value.
+!   \item [{[label]}]
+!     Identifing label. 
+!   \item [{[default]}]
+!     Default value if {\tt label} is not found in {\tt config} object. 
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+
+!EOP -------------------------------------------------------------------
+
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of values
+!
+! !INTERFACE:
+!      subroutine ESMF_ConfigGetAttribute( config, <value list argument>, &
+!                                          count, label, default, rc )
+!
+! !ARGUMENTS:
+!      type(ESMF_Config), intent(inout)       :: config     
+!      <value list argument>, see below for values      
+!      integer, intent(in)                    :: count
+!      character(len=*), intent(in), optional :: label 
+!      character(len=*), intent(in), optional :: default 
+!      integer, intent(out), optional         :: rc     
+!
+! !DESCRIPTION:
+!      Gets a list of values from the {\tt config} object.  
+!
+!      Supported values for <value list argument> are:
+!      \begin{description}
+!      \item real(ESMF_KIND_R4), intent(inout)        :: valueList(:)
+!      \item real(ESMF_KIND_R8), intent(inout)        :: valueList(:) 
+!      \item integer(ESMF_KIND_I4), intent(inout)     :: valueList(:)  
+!      \item integer(ESMF_KIND_I8), intent(inout)     :: valueList(:)  
+!      \item logical, intent(inout)                   :: valueList(:)  
+!      \end{description}
+!
+!   The arguments are:
+!   \begin{description}
+!   \item [config]
+!     Already created {\tt ESMF\_Config} object.
+!   \item [<value list argument>]
+!     Returned value. 
+!   \item [{[label]}]
+!     Identifing label. 
+!   \item [{[default]}]
+!     Default value if {\tt label} is not found in {\tt config} object. 
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP -------------------------------------------------------------------
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetString"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
+!BOPI ------------------------------------------------------------------
 !
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get a character string
 !
@@ -710,7 +807,7 @@
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 
-!EOP -------------------------------------------------------------------
+!EOPI ------------------------------------------------------------------
       character(len=1) :: ch
       integer :: ib, ie, iret
       
@@ -788,7 +885,7 @@
 #define ESMF_METHOD "ESMF_ConfigGetFloatR4"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
+!BOPI -------------------------------------------------------------------
 !
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get a 4-byte real number
 
@@ -822,7 +919,7 @@
 !   \end{description}
 !
 
-!EOP -------------------------------------------------------------------
+!EOPI -------------------------------------------------------------------
 !
       integer :: iret
       character(len=LSZ) :: string
@@ -882,7 +979,7 @@
 #define ESMF_METHOD "ESMF_ConfigGetFloatR8"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
+!BOPI -------------------------------------------------------------------
 !
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get an 8-byte real number
 
@@ -916,7 +1013,7 @@
 !   \end{description}
 !
 
-!EOP -------------------------------------------------------------------
+!EOPI -------------------------------------------------------------------
 !
       integer :: iret
       character(len=LSZ) :: string
@@ -976,7 +1073,7 @@
 #define ESMF_METHOD "ESMF_ConfigGetFloatsR4"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
+!BOPI -------------------------------------------------------------------
 !
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of 4-byte real numbers
 
@@ -1014,7 +1111,7 @@
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP -------------------------------------------------------------------
+!EOPI -------------------------------------------------------------------
       integer :: iret, i 
 
       ! Initialize return code; assume routine not implemented
@@ -1059,7 +1156,7 @@
 #define ESMF_METHOD "ESMF_ConfigGetFloatsR8"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
+!BOPI -------------------------------------------------------------------
 !
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of 8-byte real numbers
 
@@ -1097,7 +1194,7 @@
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP -------------------------------------------------------------------
+!EOPI -------------------------------------------------------------------
       integer :: iret, i 
       
       ! Initialize return code; assume routine not implemented
@@ -1145,7 +1242,7 @@
 #define ESMF_METHOD "ESMF_ConfigGetIntI4"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
+!BOPI -------------------------------------------------------------------
 !
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get a 4-byte integer number
 
@@ -1179,7 +1276,7 @@
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP -------------------------------------------------------------------
+!EOPI -------------------------------------------------------------------
       character(len=LSZ) :: string
       real(ESMF_KIND_R8) :: x
       integer(ESMF_KIND_I4) ::  n
@@ -1242,7 +1339,7 @@
 #define ESMF_METHOD "ESMF_ConfigGetIntI8"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
+!BOPI -------------------------------------------------------------------
 !
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get an 8-byte integer number
 
@@ -1276,7 +1373,7 @@
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP -------------------------------------------------------------------
+!EOPI -------------------------------------------------------------------
       character(len=LSZ) :: string
       real(ESMF_KIND_R8) :: x
       integer(ESMF_KIND_I8) :: n
@@ -1340,7 +1437,7 @@
 #define ESMF_METHOD "ESMF_ConfigGetIntsI4"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
+!BOPI -------------------------------------------------------------------
 !
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of 4-byte integers
 !
@@ -1377,7 +1474,7 @@
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP -------------------------------------------------------------------
+!EOPI -------------------------------------------------------------------
       integer :: iret, i 
       
       ! Initialize return code; assume routine not implemented
@@ -1427,7 +1524,7 @@
 #define ESMF_METHOD "ESMF_ConfigGetIntsI8"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
+!BOPI -------------------------------------------------------------------
 !
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of 8-byte integers
 !
@@ -1464,7 +1561,7 @@
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP -------------------------------------------------------------------
+!EOPI -------------------------------------------------------------------
       integer :: iret, i 
       
       iret = 0
@@ -1509,7 +1606,7 @@
 #define ESMF_METHOD "ESMF_ConfigGetLogical"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
+!BOPI -------------------------------------------------------------------
 !
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get a logical value
 
@@ -1550,7 +1647,7 @@
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP -------------------------------------------------------------------
+!EOPI -------------------------------------------------------------------
       character(len=LSZ) :: string
       integer :: iret
 
@@ -1623,7 +1720,7 @@
 #define ESMF_METHOD "ESMF_ConfigGetLogicals"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
+!BOPI -------------------------------------------------------------------
 !
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of logical values
 !
@@ -1660,7 +1757,7 @@
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP -------------------------------------------------------------------
+!EOPI -------------------------------------------------------------------
       integer :: iret, i 
       
       ! Initialize return code; assume routine not implemented
@@ -1711,7 +1808,7 @@
 #define ESMF_METHOD "ESMF_ConfigGetChar"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
+!BOPI -------------------------------------------------------------------
 !
 ! !IROUTINE: ESMF_ConfigGetChar - Get a character
 !
@@ -1743,7 +1840,7 @@
 !   \end{description}
 !
 !
-!EOP -------------------------------------------------------------------
+!EOPI -------------------------------------------------------------------
       character(len=LSZ) :: string
       integer :: iret
 
@@ -2334,11 +2431,52 @@
 
     end subroutine ESMF_ConfigParseAttributes
 
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigSetAttribute - Set a value
+!
+!
+! !INTERFACE:
+!     subroutine ESMF_ConfigSetAttribute( config, <value argument>, &
+!                                         label, rc )
+!
+! !ARGUMENTS:
+!     type(ESMF_Config), intent(inout)             :: config     
+!     <value argument>, see below for supported values
+!     character(len=*), intent(in), optional       :: label 
+!     integer, intent(out), optional               :: rc   
+!
+!
+! !DESCRIPTION: 
+!  Sets a value in the {\tt config} object.
+!
+!      Supported values for <value argument> are:
+!      \begin{description}
+!      \item integer(ESMF_KIND_I4), intent(in)            :: value
+!      \end{description}
+!
+!   The arguments are:
+!     \begin{description}
+!   \item [config]
+!     Already created {\tt ESMF\_Config} object.
+!   \item [<value argument>]
+!     Value to set. 
+!   \item [{[label]}]
+!     Identifying attribute label. 
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP -------------------------------------------------------------------
+
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigSetIntI4"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
+!BOPI -------------------------------------------------------------------
 !
 ! !IROUTINE: ESMF_ConfigSetAttribute - Set a 4-byte integer number
 
@@ -2369,7 +2507,7 @@
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP -------------------------------------------------------------------
+!EOPI -------------------------------------------------------------------
       character(len=ESMF_MAXSTR) :: logmsg
       character(len=LSZ) :: curVal, newVal
       integer :: iret, i, j, k, m, nchar, ninsert, ndelete, lenThisLine
