@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.96 2007/09/24 21:05:58 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.97 2007/09/25 16:14:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -183,7 +183,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.96 2007/09/24 21:05:58 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.97 2007/09/25 16:14:55 theurich Exp $"
 
 !==============================================================================
 
@@ -4274,7 +4274,7 @@ module ESMF_VMMod
 !   Send contiguous data to {\tt dst} PET within the same {\tt ESMF\_VM} object.
 !   \newline
 !
-;!   The arguments are:
+!   The arguments are:
 !   \begin{description}
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
