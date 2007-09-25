@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.9 2007/09/18 19:54:59 oehmke Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.10 2007/09/25 06:05:57 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.9 2007/09/18 19:54:59 oehmke Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.10 2007/09/25 06:05:57 cdeluca Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -113,12 +113,12 @@ program ESMF_GridCoordUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Set Coord From Array
-  call ESMF_GridSetCoord(grid2D,coord=1, &
+  call ESMF_GridSetCoord(grid2D,coordDim=1, &
                staggerloc=ESMF_STAGGERLOC_CORNER, array=array2D, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Get Coord From Array
-  call ESMF_GridGetCoord(grid2D,coord=1,&
+  call ESMF_GridGetCoord(grid2D,coordDim=1,&
                staggerloc=ESMF_STAGGERLOC_CORNER, array=array2, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -161,7 +161,7 @@ program ESMF_GridCoordUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Set Coord From Array
-  call ESMF_GridSetCoord(grid2D,coord=1, &
+  call ESMF_GridSetCoord(grid2D,coordDim=1, &
                staggerloc=ESMF_STAGGERLOC_CORNER, array=array2D, rc=localrc)
   correct=.true.
   if (localrc .eq. ESMF_SUCCESS) correct=.false. ! we should have returned with an error
@@ -198,7 +198,7 @@ program ESMF_GridCoordUTest
 
 
   ! Set Coord From Array
-  call ESMF_GridSetCoord(grid2D,coord=2, &
+  call ESMF_GridSetCoord(grid2D,coordDim=2, &
                staggerloc=ESMF_STAGGERLOC_CORNER, array=array2D, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -206,8 +206,8 @@ program ESMF_GridCoordUTest
   nullify(fptr)
 
   ! Get Coord From Grid
-  call ESMF_GridGetLocalTileCoord(grid2D, localDE=0, &
-            staggerLoc=ESMF_STAGGERLOC_CORNER, coord=2, fptr=fptr, rc=localrc)
+  call ESMF_GridGetCoord(grid2D, localDE=0, &
+            staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=2, fptr=fptr, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Check that output is as expected
@@ -253,7 +253,7 @@ program ESMF_GridCoordUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Set Coord From Array
-  call ESMF_GridSetCoord(grid2D,coord=2, &
+  call ESMF_GridSetCoord(grid2D,coordDim=2, &
                staggerloc=customStagger, array=array2D, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -261,8 +261,8 @@ program ESMF_GridCoordUTest
   nullify(fptr)
 
   ! Get Coord From Grid
-  call ESMF_GridGetLocalTileCoord(grid2D, localDE=0, &
-            staggerLoc=ESMF_STAGGERLOC_EDGE1, coord=2, fptr=fptr, rc=localrc)
+  call ESMF_GridGetCoord(grid2D, localDE=0, &
+            staggerLoc=ESMF_STAGGERLOC_EDGE1, coordDim=2, fptr=fptr, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Check that output is as expected
@@ -367,7 +367,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D CoordAlloc and GridGetLocalTileInfo, by making sure default CENTER bounds are as expected"
+  write(name, *) "Test 2D CoordAlloc and GridGetCoord, by making sure default CENTER bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -380,7 +380,7 @@ program ESMF_GridCoordUTest
   correct=.true.
 
   ! check coord 1
-  call check2DBnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_CENTER, &
+  call check2DBnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_CENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
            ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/0,0/), &
@@ -389,7 +389,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 2
-  call check2DBnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_CENTER, &
+  call check2DBnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_CENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
            ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/0,0/), &
@@ -403,7 +403,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D CoordAlloc and GridGetLocalTileInfo, by making sure default EDGE1 bounds are as expected"
+  write(name, *) "Test 2D CoordAlloc and GridGetCoord, by making sure default EDGE1 bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -416,7 +416,7 @@ program ESMF_GridCoordUTest
   correct=.true.
 
   ! check coord 1
-  call check2DBnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_EDGE1, &
+  call check2DBnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_EDGE1, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
            ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/1,0/), &
@@ -425,7 +425,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 2
-  call check2DBnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_EDGE1, &
+  call check2DBnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_EDGE1, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
            ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/1,0/), &
@@ -439,7 +439,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D CoordAlloc and GridGetLocalTileInfo, by making sure default EDGE2 bounds are as expected"
+  write(name, *) "Test 2D CoordAlloc and GridGetCoord, by making sure default EDGE2 bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -452,7 +452,7 @@ program ESMF_GridCoordUTest
   correct=.true.
 
   ! check coord 1
-  call check2DBnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_EDGE2, &
+  call check2DBnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_EDGE2, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
            ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/0,0/), &
@@ -461,7 +461,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 2
-  call check2DBnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_EDGE2, &
+  call check2DBnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_EDGE2, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
            ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/0,0/), &
@@ -476,7 +476,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D CoordAlloc and GridGetLocalTileInfo, by making sure default CORNER bounds are as expected"
+  write(name, *) "Test 2D CoordAlloc and GridGetCoord, by making sure default CORNER bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -489,7 +489,7 @@ program ESMF_GridCoordUTest
   correct=.true.
 
   ! check coord 1
-  call check2DBnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_CORNER, &
+  call check2DBnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_CORNER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
            ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/1,0/), &
@@ -498,7 +498,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 2
-  call check2DBnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_CORNER, &
+  call check2DBnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_CORNER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
            ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/1,0/), &
@@ -561,7 +561,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D CoordAlloc and GridGetLocalTileInfo, by making sure set CENTER bounds are as expected"
+  write(name, *) "Test 2D CoordAlloc and GridGetCoord, by making sure set CENTER bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -574,7 +574,7 @@ program ESMF_GridCoordUTest
   correct=.true.
 
   ! check coord 1
-  call check2DBnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_CENTER, &
+  call check2DBnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_CENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/1,2/),iuoff0=(/0,0/), &
            ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,2/),iuoff1=(/3,0/), &
@@ -583,7 +583,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 2
-  call check2DBnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_CENTER, &
+  call check2DBnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_CENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/1,2/),iuoff0=(/0,0/), &
            ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,2/),iuoff1=(/3,0/), &
@@ -599,7 +599,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D CoordAlloc and GridGetLocalTileInfo, by making sure set EDGE1 bounds are as expected"
+  write(name, *) "Test 2D CoordAlloc and GridGetCoord, by making sure set EDGE1 bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -612,7 +612,7 @@ program ESMF_GridCoordUTest
   correct=.true.
 
   ! check coord 1
-  call check2DBnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_EDGE1, &
+  call check2DBnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_EDGE1, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/5,6/),iuoff0=(/0,0/), &
            ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,6/),iuoff1=(/0,0/), &
@@ -621,7 +621,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 2
-  call check2DBnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_EDGE1, &
+  call check2DBnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_EDGE1, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/5,6/),iuoff0=(/0,0/), &
            ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,6/),iuoff1=(/0,0/), &
@@ -636,7 +636,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D CoordAlloc and GridGetLocalTileInfo, by making sure set EDGE2 bounds are as expected"
+  write(name, *) "Test 2D CoordAlloc and GridGetCoord, by making sure set EDGE2 bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -649,7 +649,7 @@ program ESMF_GridCoordUTest
   correct=.true.
 
   ! check coord 1
-  call check2DBnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_EDGE2, &
+  call check2DBnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_EDGE2, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
            ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/7,0/), &
@@ -658,7 +658,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 2
-  call check2DBnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_EDGE2, &
+  call check2DBnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_EDGE2, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
            ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/7,0/), &
@@ -674,7 +674,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D CoordAlloc and GridGetLocalTileInfo, by making sure set CORNER bounds are as expected"
+  write(name, *) "Test 2D CoordAlloc and GridGetCoord, by making sure set CORNER bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -687,7 +687,7 @@ program ESMF_GridCoordUTest
   correct=.true.
 
   ! check coord 1
-  call check2DBnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_CORNER, &
+  call check2DBnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_CORNER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
            ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/1,0/), &
@@ -696,7 +696,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 2
-  call check2DBnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_CORNER, &
+  call check2DBnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_CORNER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
            ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/1,0/), &
@@ -764,7 +764,7 @@ program ESMF_GridCoordUTest
   correct=.true.
 
   ! check coord 1
-  call check2DBnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_CENTER, &
+  call check2DBnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_CENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/1,2/),iuoff0=(/0,0/), &
            ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,2/),iuoff1=(/3,0/), &
@@ -773,7 +773,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 2
-  call check2DBnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_CENTER, &
+  call check2DBnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_CENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1/),ieubnd0=(/3,1/),iloff0=(/2,1/),iuoff0=(/0,0/), &
            ielbnd1=(/1,2/),ieubnd1=(/3,3/),iloff1=(/2,0/),iuoff1=(/0,3/), &
@@ -802,7 +802,7 @@ program ESMF_GridCoordUTest
   correct=.true.
 
   ! check coord 1
-  call check2DBnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_CORNER, &
+  call check2DBnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_CORNER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1/),ieubnd0=(/1,3/),iloff0=(/0,0/),iuoff0=(/0,0/), &
            ielbnd1=(/2,1/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/1,0/), &
@@ -811,7 +811,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 2
-  call check2DBnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_CORNER, &
+  call check2DBnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_CORNER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1/),ieubnd0=(/3,1/),iloff0=(/0,0/),iuoff0=(/0,0/), &
            ielbnd1=(/1,2/),ieubnd1=(/3,3/),iloff1=(/0,0/),iuoff1=(/0,1/), &
@@ -893,7 +893,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetLocalTileInfo, by making sure default CENTER_VCENTER bounds are as expected"
+  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure default CENTER_VCENTER bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -906,7 +906,7 @@ program ESMF_GridCoordUTest
   correct=.true.
 
   ! check coord 1
-  call check2DP1Bnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,0/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/0,0,0/), &
@@ -915,7 +915,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 2
-  call check2DP1Bnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,0/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/0,0,0/), &
@@ -924,7 +924,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 3
-  call check2DP1Bnds2x2(grid2D, coord=3, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=3, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,0/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/0,0,0/), &
@@ -939,7 +939,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetLocalTileInfo, by making sure default EDGE1_VCENTER bounds are as expected"
+  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure default EDGE1_VCENTER bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -952,7 +952,7 @@ program ESMF_GridCoordUTest
   correct=.true.
 
   ! check coord 1
-  call check2DP1Bnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_EDGE1_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_EDGE1_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,0/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/1,0,0/), &
@@ -961,7 +961,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 2
-  call check2DP1Bnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_EDGE1_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_EDGE1_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,0/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/1,0,0/), &
@@ -971,7 +971,7 @@ program ESMF_GridCoordUTest
 
 
   ! check coord 3
-  call check2DP1Bnds2x2(grid2D, coord=3, staggerloc=ESMF_STAGGERLOC_EDGE1_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=3, staggerloc=ESMF_STAGGERLOC_EDGE1_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,0/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/1,0,0/), &
@@ -987,7 +987,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetLocalTileInfo, by making sure default EDGE2_VCENTER bounds are as expected"
+  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure default EDGE2_VCENTER bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -1000,7 +1000,7 @@ program ESMF_GridCoordUTest
   correct=.true.
 
   ! check coord 1
-  call check2DP1Bnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_EDGE2_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_EDGE2_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,0/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/0,0,0/), &
@@ -1009,7 +1009,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 2
-  call check2DP1Bnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_EDGE2_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_EDGE2_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,0/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/0,0,0/), &
@@ -1018,7 +1018,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 3
-  call check2DP1Bnds2x2(grid2D, coord=3, staggerloc=ESMF_STAGGERLOC_EDGE2_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=3, staggerloc=ESMF_STAGGERLOC_EDGE2_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,0/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/0,0,0/), &
@@ -1034,7 +1034,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetLocalTileInfo, by making sure default CORNER_VCENTER bounds are as expected"
+  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure default CORNER_VCENTER bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -1047,7 +1047,7 @@ program ESMF_GridCoordUTest
   correct=.true.
 
   ! check coord 1
-  call check2DP1Bnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_CORNER_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_CORNER_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,0/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/1,0,0/), &
@@ -1056,7 +1056,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 2
-  call check2DP1Bnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_CORNER_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_CORNER_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,0/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/1,0,0/), &
@@ -1065,7 +1065,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 3
-  call check2DP1Bnds2x2(grid2D, coord=3, staggerloc=ESMF_STAGGERLOC_CORNER_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=3, staggerloc=ESMF_STAGGERLOC_CORNER_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,0/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/1,0,0/), &
@@ -1080,7 +1080,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetLocalTileInfo, by making sure default CENTER_VFACE bounds are as expected"
+  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure default CENTER_VFACE bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -1093,7 +1093,7 @@ program ESMF_GridCoordUTest
   correct=.true.
 
   ! check coord 1
-  call check2DP1Bnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_CENTER_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_CENTER_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,1/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/0,0,1/), &
@@ -1102,7 +1102,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 2
-  call check2DP1Bnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_CENTER_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_CENTER_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,1/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/0,0,1/), &
@@ -1111,7 +1111,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 3
-  call check2DP1Bnds2x2(grid2D, coord=3, staggerloc=ESMF_STAGGERLOC_CENTER_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=3, staggerloc=ESMF_STAGGERLOC_CENTER_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,1/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/0,0,1/), &
@@ -1126,7 +1126,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetLocalTileInfo, by making sure default EDGE1_VFACE bounds are as expected"
+  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure default EDGE1_VFACE bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -1139,7 +1139,7 @@ program ESMF_GridCoordUTest
   correct=.true.
 
   ! check coord 1
-  call check2DP1Bnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,1/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/1,0,1/), &
@@ -1148,7 +1148,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 2
-  call check2DP1Bnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,1/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/1,0,1/), &
@@ -1158,7 +1158,7 @@ program ESMF_GridCoordUTest
 
 
   ! check coord 3
-  call check2DP1Bnds2x2(grid2D, coord=3, staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=3, staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,1/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/1,0,1/), &
@@ -1174,7 +1174,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetLocalTileInfo, by making sure default EDGE2_VFACE bounds are as expected"
+  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure default EDGE2_VFACE bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -1187,7 +1187,7 @@ program ESMF_GridCoordUTest
   correct=.true.
 
   ! check coord 1
-  call check2DP1Bnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,1/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/0,0,1/), &
@@ -1196,7 +1196,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 2
-  call check2DP1Bnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,1/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/0,0,1/), &
@@ -1205,7 +1205,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 3
-  call check2DP1Bnds2x2(grid2D, coord=3, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=3, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,1/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/0,0,1/), &
@@ -1221,7 +1221,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetLocalTileInfo, by making sure default CORNER_VFACE bounds are as expected"
+  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure default CORNER_VFACE bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -1234,7 +1234,7 @@ program ESMF_GridCoordUTest
   correct=.true.
 
   ! check coord 1
-  call check2DP1Bnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_CORNER_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_CORNER_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,1/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/1,0,1/), &
@@ -1243,7 +1243,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 2
-  call check2DP1Bnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_CORNER_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_CORNER_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,1/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/1,0,1/), &
@@ -1252,7 +1252,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 3
-  call check2DP1Bnds2x2(grid2D, coord=3, staggerloc=ESMF_STAGGERLOC_CORNER_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=3, staggerloc=ESMF_STAGGERLOC_CORNER_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,1/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/1,0,1/), &
@@ -1336,7 +1336,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetLocalTileInfo, by making sure user set CENTER_VCENTER bounds are as expected"
+  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure user set CENTER_VCENTER bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -1351,7 +1351,7 @@ program ESMF_GridCoordUTest
   ! Adjust bounds by staggerLWidth=(/1,2,3/) staggerUWidth=(/4,5,6/)
 
   ! check coord 1
-  call check2DP1Bnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/1,2,3/),iuoff0=(/0,0,6/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,2,3/),iuoff1=(/4,0,6/), &
@@ -1361,7 +1361,7 @@ program ESMF_GridCoordUTest
 
 
   ! check coord 2
-  call check2DP1Bnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/1,2,3/),iuoff0=(/0,0,6/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,2,3/),iuoff1=(/4,0,6/), &
@@ -1371,7 +1371,7 @@ program ESMF_GridCoordUTest
 
 
   ! check coord 3
-  call check2DP1Bnds2x2(grid2D, coord=3, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=3, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/1,2,3/),iuoff0=(/0,0,6/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,2,3/),iuoff1=(/4,0,6/), &
@@ -1385,7 +1385,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetLocalTileInfo, by making sure user set EDGE1_VCENTER bounds are as expected"
+  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure user set EDGE1_VCENTER bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -1400,7 +1400,7 @@ program ESMF_GridCoordUTest
   ! Adjust bounds by staggerUWidth=(/7,8,9/)
 
   ! check coord 1
-  call check2DP1Bnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_EDGE1_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_EDGE1_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,9/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/7,0,9/), &
@@ -1410,7 +1410,7 @@ program ESMF_GridCoordUTest
 
 
   ! check coord 2
-  call check2DP1Bnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_EDGE1_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_EDGE1_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,9/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/7,0,9/), &
@@ -1420,7 +1420,7 @@ program ESMF_GridCoordUTest
 
 
   ! check coord 3
-  call check2DP1Bnds2x2(grid2D, coord=3, staggerloc=ESMF_STAGGERLOC_EDGE1_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=3, staggerloc=ESMF_STAGGERLOC_EDGE1_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,9/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/7,0,9/), &
@@ -1438,7 +1438,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetLocalTileInfo, by making sure user set EDGE2_VCENTER bounds are as expected"
+  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure user set EDGE2_VCENTER bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -1453,7 +1453,7 @@ program ESMF_GridCoordUTest
   ! Adjust bounds by staggerLWidth=(/1,2,3/)
   
   ! check coord 1
-  call check2DP1Bnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_EDGE2_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_EDGE2_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/1,2,3/),iuoff0=(/0,0,0/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,2,3/),iuoff1=(/0,0,0/), &
@@ -1462,7 +1462,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 2
-  call check2DP1Bnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_EDGE2_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_EDGE2_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/1,2,3/),iuoff0=(/0,0,0/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,2,3/),iuoff1=(/0,0,0/), &
@@ -1472,7 +1472,7 @@ program ESMF_GridCoordUTest
 
 
   ! check coord 3
-  call check2DP1Bnds2x2(grid2D, coord=3, staggerloc=ESMF_STAGGERLOC_EDGE2_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=3, staggerloc=ESMF_STAGGERLOC_EDGE2_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/1,2,3/),iuoff0=(/0,0,0/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,2,3/),iuoff1=(/0,0,0/), &
@@ -1489,7 +1489,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetLocalTileInfo, by making sure user set CORNER_VCENTER bounds are as expected"
+  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure user set CORNER_VCENTER bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -1504,7 +1504,7 @@ program ESMF_GridCoordUTest
   ! Leave bounds at default
 
   ! check coord 1
-  call check2DP1Bnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_CORNER_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_CORNER_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,0/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/1,0,0/), &
@@ -1513,7 +1513,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 2
-  call check2DP1Bnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_CORNER_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_CORNER_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,0/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/1,0,0/), &
@@ -1522,7 +1522,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 3
-  call check2DP1Bnds2x2(grid2D, coord=3, staggerloc=ESMF_STAGGERLOC_CORNER_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=3, staggerloc=ESMF_STAGGERLOC_CORNER_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,0/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/1,0,0/), &
@@ -1537,7 +1537,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetLocalTileInfo, by making sure user set CENTER_VFACE bounds are as expected"
+  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure user set CENTER_VFACE bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -1552,7 +1552,7 @@ program ESMF_GridCoordUTest
   ! Leave bounds at default
 
   ! check coord 1
-  call check2DP1Bnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_CENTER_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_CENTER_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,1/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/0,0,1/), &
@@ -1561,7 +1561,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 2
-  call check2DP1Bnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_CENTER_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_CENTER_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,1/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/0,0,1/), &
@@ -1570,7 +1570,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 3
-  call check2DP1Bnds2x2(grid2D, coord=3, staggerloc=ESMF_STAGGERLOC_CENTER_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=3, staggerloc=ESMF_STAGGERLOC_CENTER_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,1/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/0,0,1/), &
@@ -1585,7 +1585,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetLocalTileInfo, by making sure default EDGE1_VFACE bounds are as expected"
+  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure default EDGE1_VFACE bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -1601,7 +1601,7 @@ program ESMF_GridCoordUTest
   ! Adjust bounds by staggerLWidth=(/1,2,3/)
   
   ! check coord 1
-  call check2DP1Bnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/1,2,3/),iuoff0=(/0,0,0/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,2,3/),iuoff1=(/0,0,0/), &
@@ -1610,7 +1610,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 2
-  call check2DP1Bnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/1,2,3/),iuoff0=(/0,0,0/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,2,3/),iuoff1=(/0,0,0/), &
@@ -1620,7 +1620,7 @@ program ESMF_GridCoordUTest
 
 
   ! check coord 3
-  call check2DP1Bnds2x2(grid2D, coord=3, staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=3, staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/1,2,3/),iuoff0=(/0,0,0/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,2,3/),iuoff1=(/0,0,0/), &
@@ -1635,7 +1635,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetLocalTileInfo, by making sure default EDGE2_VFACE bounds are as expected"
+  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure default EDGE2_VFACE bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -1651,7 +1651,7 @@ program ESMF_GridCoordUTest
   ! Adjust bounds by staggerLWidth=(/1,2,3/) staggerUWidth=(/4,5,6/)
 
   ! check coord 1
-  call check2DP1Bnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/1,2,3/),iuoff0=(/0,0,6/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,2,3/),iuoff1=(/4,0,6/), &
@@ -1661,7 +1661,7 @@ program ESMF_GridCoordUTest
 
 
   ! check coord 2
-  call check2DP1Bnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/1,2,3/),iuoff0=(/0,0,6/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,2,3/),iuoff1=(/4,0,6/), &
@@ -1671,7 +1671,7 @@ program ESMF_GridCoordUTest
 
 
   ! check coord 3
-  call check2DP1Bnds2x2(grid2D, coord=3, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=3, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/1,2,3/),iuoff0=(/0,0,6/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,2,3/),iuoff1=(/4,0,6/), &
@@ -1687,7 +1687,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetLocalTileInfo, by making sure default CORNER_VFACE bounds are as expected"
+  write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure default CORNER_VFACE bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -1703,7 +1703,7 @@ program ESMF_GridCoordUTest
   ! Adjust bounds by staggerUWidth=(/7,8,9/)
 
   ! check coord 1
-  call check2DP1Bnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_CORNER_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_CORNER_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,9/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/7,0,9/), &
@@ -1713,7 +1713,7 @@ program ESMF_GridCoordUTest
 
 
   ! check coord 2
-  call check2DP1Bnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_CORNER_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_CORNER_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,9/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/7,0,9/), &
@@ -1723,7 +1723,7 @@ program ESMF_GridCoordUTest
 
 
   ! check coord 3
-  call check2DP1Bnds2x2(grid2D, coord=3, staggerloc=ESMF_STAGGERLOC_CORNER_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=3, staggerloc=ESMF_STAGGERLOC_CORNER_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,9/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/7,0,9/), &
@@ -1804,7 +1804,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D PLUS 1 GridGetLocalTileInfo with non-default coordDep, by making sure EDGE1_VFACE bounds are as expected"
+  write(name, *) "Test 2D PLUS 1 GridGetCoord with non-default coordDep, by making sure EDGE1_VFACE bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -1820,7 +1820,7 @@ program ESMF_GridCoordUTest
   ! Adjust bounds by staggerLWidth=(/1,2,3/)
   
   ! check coord 1
-  call check2DP1Bnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/3,1,5/),iloff0=(/2,1,3/),iuoff0=(/0,0,0/), &
            ielbnd1=(/1,2,1/),ieubnd1=(/3,3,5/),iloff1=(/2,0,3/),iuoff1=(/0,0,0/), &
@@ -1829,7 +1829,7 @@ program ESMF_GridCoordUTest
            correct=correct, rc=rc) 
 
   ! check coord 2
-  call check2DP1Bnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/5,3,1/),iloff0=(/3,2,1/),iuoff0=(/0,0,0/), &
            ielbnd1=(/1,1,2/),ieubnd1=(/5,3,3/),iloff1=(/3,2,0/),iuoff1=(/0,0,0/), &
@@ -1839,7 +1839,7 @@ program ESMF_GridCoordUTest
 
 
   ! check coord 3
-  call check2DP1Bnds2x2(grid2D, coord=3, staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=3, staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/1,2,3/),iuoff0=(/0,0,0/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,2,3/),iuoff1=(/0,0,0/), &
@@ -1855,7 +1855,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D PLUS 1 GridGetLocalTileInfo with non-default coordDep, by making sure EDGE2_VFACE bounds are as expected"
+  write(name, *) "Test 2D PLUS 1 GridGetCoord with non-default coordDep, by making sure EDGE2_VFACE bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -1871,7 +1871,7 @@ program ESMF_GridCoordUTest
   ! Adjust bounds by staggerLWidth=(/1,2,3/) staggerUWidth=(/4,5,6/)
 
   ! check coord 1
-  call check2DP1Bnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/3,1,5/),iloff0=(/2,1,3/),iuoff0=(/0,0,6/), &
            ielbnd1=(/1,2,1/),ieubnd1=(/3,3,5/),iloff1=(/2,0,3/),iuoff1=(/0,4,6/), &
@@ -1881,7 +1881,7 @@ program ESMF_GridCoordUTest
 
 
   ! check coord 2
-  call check2DP1Bnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/5,3,1/),iloff0=(/3,2,1/),iuoff0=(/6,0,0/), &
            ielbnd1=(/1,1,2/),ieubnd1=(/5,3,3/),iloff1=(/3,2,0/),iuoff1=(/6,0,4/), &
@@ -1891,7 +1891,7 @@ program ESMF_GridCoordUTest
 
 
   ! check coord 3
-  call check2DP1Bnds2x2(grid2D, coord=3, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=3, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/1,2,3/),iuoff0=(/0,0,6/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,2,3/),iuoff1=(/4,0,6/), &
@@ -1907,7 +1907,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D PLUS 1 GridGetLocalTileInfo with non-default coordDep, by making sure CORNER_VFACE bounds are as expected"
+  write(name, *) "Test 2D PLUS 1 GridGetCoord with non-default coordDep, by making sure CORNER_VFACE bounds are as expected"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -1923,7 +1923,7 @@ program ESMF_GridCoordUTest
   ! Adjust bounds by staggerUWidth=(/7,8,9/)
 
   ! check coord 1
-  call check2DP1Bnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_CORNER_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_CORNER_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/3,1,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,9/), &
            ielbnd1=(/1,2,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/0,7,9/), &
@@ -1933,7 +1933,7 @@ program ESMF_GridCoordUTest
 
 
   ! check coord 2
-  call check2DP1Bnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_CORNER_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_CORNER_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/5,3,1/),iloff0=(/0,0,0/),iuoff0=(/9,0,0/), &
            ielbnd1=(/1,1,2/),ieubnd1=(/5,3,3/),iloff1=(/0,0,0/),iuoff1=(/9,0,7/), &
@@ -1943,7 +1943,7 @@ program ESMF_GridCoordUTest
 
 
   ! check coord 3
-  call check2DP1Bnds2x2(grid2D, coord=3, staggerloc=ESMF_STAGGERLOC_CORNER_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=3, staggerloc=ESMF_STAGGERLOC_CORNER_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,9/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,0,0/),iuoff1=(/7,0,9/), &
@@ -2012,7 +2012,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D PLUS 1 GridGetLocalTileInfo with ESMF_INDEX_DELOCAL"
+  write(name, *) "Test 2D PLUS 1 GridGetCoord with ESMF_INDEX_DELOCAL"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! Note that this test depends on coordinates allocated above
@@ -2028,7 +2028,7 @@ program ESMF_GridCoordUTest
   ! Adjust bounds by staggerLWidth=(/1,2,3/) staggerUWidth=(/4,5,6/)
 
   ! check coord 1
-  call check2DP1Bnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/3,1,5/),iloff0=(/2,1,3/),iuoff0=(/0,0,6/), &
            ielbnd1=(/1,1,1/),ieubnd1=(/3,2,5/),iloff1=(/2,0,3/),iuoff1=(/0,4,6/), &
@@ -2038,7 +2038,7 @@ program ESMF_GridCoordUTest
 
 
   ! check coord 2
-  call check2DP1Bnds2x2(grid2D, coord=2, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=2, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/5,3,1/),iloff0=(/3,2,1/),iuoff0=(/6,0,0/), &
            ielbnd1=(/1,1,1/),ieubnd1=(/5,3,2/),iloff1=(/3,2,0/),iuoff1=(/6,0,4/), &
@@ -2048,7 +2048,7 @@ program ESMF_GridCoordUTest
 
 
   ! check coord 3
-  call check2DP1Bnds2x2(grid2D, coord=3, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
+  call check2DP1Bnds2x2(grid2D, coordDim=3, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/1,2,3/),iuoff0=(/0,0,6/), &
            ielbnd1=(/1,1,1/),ieubnd1=(/2,3,5/),iloff1=(/0,2,3/),iuoff1=(/4,0,6/), &
@@ -2063,13 +2063,13 @@ program ESMF_GridCoordUTest
 
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  !!!!!!!!!!!!!!!!!!! Test 2D Plus 1 Bounds with ESMF_GridGetLocalTileSLocInfo  !!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!! Test 2D Plus 1 Bounds with ESMF_GridGet  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test ESMF_GridGetLocalTileSLocInfo getting bounds from grid"
+  write(name, *) "Test ESMF_GridGet getting bounds from grid"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! init success flag
@@ -2165,7 +2165,7 @@ program ESMF_GridCoordUTest
 
 
   ! check coord 1
-  call check2DP1Bnds2x2(grid2D, coord=1, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
+  call check2DP1Bnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,2,3/),ieubnd0=(/2,5,6/),iloff0=(/0,0,0/),iuoff0=(/0,0,0/), &
            ielbnd1=(/3,2,3/),ieubnd1=(/4,5,6/),iloff1=(/0,0,0/),iuoff1=(/0,0,0/), &
@@ -2199,8 +2199,8 @@ program ESMF_GridCoordUTest
   nullify(fptr3D)
 
   ! Get Coord From Grid
-  call ESMF_GridGetLocalTileCoord(grid3D, localDE=0, &
-            staggerLoc=ESMF_STAGGERLOC_CENTER, coord=2, fptr=fptr3D, rc=localrc)
+  call ESMF_GridGetCoord(grid3D, localDE=0, &
+            staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, fptr=fptr3D, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Check that output is as expected
@@ -2224,7 +2224,7 @@ program ESMF_GridCoordUTest
 contains
 
 
-subroutine check2DBnds2x2(grid, coord, staggerloc, localPet, petCount, &
+subroutine check2DBnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
                           ielbnd0,ieubnd0,iloff0,iuoff0, &
                           ielbnd1,ieubnd1,iloff1,iuoff1, &
                           ielbnd2,ieubnd2,iloff2,iuoff2, &
@@ -2233,7 +2233,7 @@ subroutine check2DBnds2x2(grid, coord, staggerloc, localPet, petCount, &
 
   type (ESMF_Grid) :: grid
   type (ESMF_StaggerLoc),intent(in) :: staggerloc
-  integer,intent(in) :: coord, localPet, petCount
+  integer,intent(in) :: coordDim, localPet, petCount
   integer,intent(in) :: ielbnd0(:),ieubnd0(:),iloff0(:),iuoff0(:)
   integer,intent(in) :: ielbnd1(:),ieubnd1(:),iloff1(:),iuoff1(:)
   integer,intent(in) :: ielbnd2(:),ieubnd2(:),iloff2(:),iuoff2(:)
@@ -2257,7 +2257,7 @@ subroutine check2DBnds2x2(grid, coord, staggerloc, localPet, petCount, &
       ! probably have to change also. 
 
       ! check DE 0
-      call ESMF_GridGetLocalTileInfo(grid, coord=coord, localDE=0, &
+      call ESMF_GridGetCoord(grid, coordDim=coordDim, localDE=0, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
              staggerLBound=slbnd, staggerUBound=subnd,           &
@@ -2270,8 +2270,8 @@ subroutine check2DBnds2x2(grid, coord, staggerloc, localPet, petCount, &
      nullify(fptr)
  
      !! Get Coord Array From Grid
-     call ESMF_GridGetLocalTileCoord(grid, localDE=0, &
-              staggerLoc=staggerloc, coord=coord, fptr=fptr, rc=localrc)
+     call ESMF_GridGetCoord(grid, localDE=0, &
+              staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      !! Check that output is as expected
@@ -2300,7 +2300,7 @@ subroutine check2DBnds2x2(grid, coord, staggerloc, localPet, petCount, &
      if (tubnd(2) .lt. ieubnd0(2)+iuoff0(2)) correct=.false.
 
       ! check DE 1
-      call ESMF_GridGetLocalTileInfo(grid2D, coord=coord, localDE=1, &
+      call ESMF_GridGetCoord(grid2D, coordDim=coordDim, localDE=1, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
              staggerLBound=slbnd, staggerUBound=subnd,           &
@@ -2313,8 +2313,8 @@ subroutine check2DBnds2x2(grid, coord, staggerloc, localPet, petCount, &
      nullify(fptr)
 
      !! Get Coord From Grid
-     call ESMF_GridGetLocalTileCoord(grid, localDE=1, &
-              staggerLoc=staggerloc, coord=coord, fptr=fptr, rc=localrc)
+     call ESMF_GridGetCoord(grid, localDE=1, &
+              staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      !! Check that output is as expected
@@ -2344,7 +2344,7 @@ subroutine check2DBnds2x2(grid, coord, staggerloc, localPet, petCount, &
 
 
       ! check DE 2
-      call ESMF_GridGetLocalTileInfo(grid, coord=coord, localDE=2, &
+      call ESMF_GridGetCoord(grid, coordDim=coordDim, localDE=2, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
              staggerLBound=slbnd, staggerUBound=subnd,           &
@@ -2356,8 +2356,8 @@ subroutine check2DBnds2x2(grid, coord, staggerloc, localPet, petCount, &
      nullify(fptr)
 
      !! Get Coord From Grid
-     call ESMF_GridGetLocalTileCoord(grid, localDE=2, &
-              staggerLoc=staggerloc, coord=coord, fptr=fptr, rc=localrc)
+     call ESMF_GridGetCoord(grid, localDE=2, &
+              staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      !! Check that output is as expected
@@ -2387,7 +2387,7 @@ subroutine check2DBnds2x2(grid, coord, staggerloc, localPet, petCount, &
 
 
       ! check DE 3
-      call ESMF_GridGetLocalTileInfo(grid, coord=coord, localDE=3, &
+      call ESMF_GridGetCoord(grid, coordDim=coordDim, localDE=3, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
              staggerLBound=slbnd, staggerUBound=subnd,           &
@@ -2399,8 +2399,8 @@ subroutine check2DBnds2x2(grid, coord, staggerloc, localPet, petCount, &
      nullify(fptr)
 
      !! Get Coord From Grid
-     call ESMF_GridGetLocalTileCoord(grid, localDE=3, &
-              staggerLoc=staggerloc, coord=coord, fptr=fptr, rc=localrc)
+     call ESMF_GridGetCoord(grid, localDE=3, &
+              staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      !! Check that output is as expected
@@ -2429,7 +2429,7 @@ subroutine check2DBnds2x2(grid, coord, staggerloc, localPet, petCount, &
      if (tubnd(2) .lt. ieubnd3(2)+iuoff3(2)) correct=.false.
 
   else  if (petCount .eq. 4) then
-      call ESMF_GridGetLocalTileInfo(grid, coord=coord, localDE=0, &
+      call ESMF_GridGetCoord(grid, coordDim=coordDim, localDE=0, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
              staggerLBound=slbnd, staggerUBound=subnd,           &
@@ -2441,8 +2441,8 @@ subroutine check2DBnds2x2(grid, coord, staggerloc, localPet, petCount, &
       nullify(fptr)
 
      ! Get Coord From Grid
-     call ESMF_GridGetLocalTileCoord(grid, localDE=0, &
-              staggerLoc=staggerloc, coord=coord, fptr=fptr, rc=localrc)
+     call ESMF_GridGetCoord(grid, localDE=0, &
+              staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      ! Check that output is as expected
@@ -2536,7 +2536,7 @@ end subroutine check2DBnds2x2
 
 
 
-subroutine check2DP1Bnds2x2(grid, coord, staggerloc, localPet, petCount, &
+subroutine check2DP1Bnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
                           ielbnd0,ieubnd0,iloff0,iuoff0, &
                           ielbnd1,ieubnd1,iloff1,iuoff1, &
                           ielbnd2,ieubnd2,iloff2,iuoff2, &
@@ -2545,7 +2545,7 @@ subroutine check2DP1Bnds2x2(grid, coord, staggerloc, localPet, petCount, &
 
   type (ESMF_Grid) :: grid
   type (ESMF_StaggerLoc),intent(in) :: staggerloc
-  integer,intent(in) :: coord, localPet, petCount
+  integer,intent(in) :: coordDim, localPet, petCount
   integer,intent(in) :: ielbnd0(:),ieubnd0(:),iloff0(:),iuoff0(:)
   integer,intent(in) :: ielbnd1(:),ieubnd1(:),iloff1(:),iuoff1(:)
   integer,intent(in) :: ielbnd2(:),ieubnd2(:),iloff2(:),iuoff2(:)
@@ -2569,7 +2569,7 @@ subroutine check2DP1Bnds2x2(grid, coord, staggerloc, localPet, petCount, &
       ! probably have to change also. 
 
       ! check DE 0
-      call ESMF_GridGetLocalTileInfo(grid, coord=coord, localDE=0, &
+      call ESMF_GridGetCoord(grid, coordDim=coordDim, localDE=0, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
              staggerLBound=slbnd, staggerUBound=subnd,           &
@@ -2582,8 +2582,8 @@ subroutine check2DP1Bnds2x2(grid, coord, staggerloc, localPet, petCount, &
      nullify(fptr)
  
      !! Get Coord Array From Grid
-     call ESMF_GridGetLocalTileCoord(grid, localDE=0, &
-              staggerLoc=staggerloc, coord=coord, fptr=fptr, rc=localrc)
+     call ESMF_GridGetCoord(grid, localDE=0, &
+              staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      !! Check that output is as expected
@@ -2626,7 +2626,7 @@ subroutine check2DP1Bnds2x2(grid, coord, staggerloc, localPet, petCount, &
      if (tubnd(3) .lt. ieubnd0(3)+iuoff0(3)) correct=.false.
 
       ! check DE 1
-      call ESMF_GridGetLocalTileInfo(grid2D, coord=coord, localDE=1, &
+      call ESMF_GridGetCoord(grid2D, coordDim=coordDim, localDE=1, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
              staggerLBound=slbnd, staggerUBound=subnd,           &
@@ -2639,8 +2639,8 @@ subroutine check2DP1Bnds2x2(grid, coord, staggerloc, localPet, petCount, &
      nullify(fptr)
 
      !! Get Coord From Grid
-     call ESMF_GridGetLocalTileCoord(grid, localDE=1, &
-              staggerLoc=staggerloc, coord=coord, fptr=fptr, rc=localrc)
+     call ESMF_GridGetCoord(grid, localDE=1, &
+              staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      !! Check that output is as expected
@@ -2683,7 +2683,7 @@ subroutine check2DP1Bnds2x2(grid, coord, staggerloc, localPet, petCount, &
      if (tubnd(3) .lt. ieubnd1(3)+iuoff1(3)) correct=.false.
 
       ! check DE 2
-      call ESMF_GridGetLocalTileInfo(grid, coord=coord, localDE=2, &
+      call ESMF_GridGetCoord(grid, coordDim=coordDim, localDE=2, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
              staggerLBound=slbnd, staggerUBound=subnd,           &
@@ -2695,8 +2695,8 @@ subroutine check2DP1Bnds2x2(grid, coord, staggerloc, localPet, petCount, &
      nullify(fptr)
 
      !! Get Coord From Grid
-     call ESMF_GridGetLocalTileCoord(grid, localDE=2, &
-              staggerLoc=staggerloc, coord=coord, fptr=fptr, rc=localrc)
+     call ESMF_GridGetCoord(grid, localDE=2, &
+              staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      !! Check that output is as expected
@@ -2738,7 +2738,7 @@ subroutine check2DP1Bnds2x2(grid, coord, staggerloc, localPet, petCount, &
      if (tubnd(3) .lt. ieubnd2(3)+iuoff2(3)) correct=.false.
 
       ! check DE 3
-      call ESMF_GridGetLocalTileInfo(grid, coord=coord, localDE=3, &
+      call ESMF_GridGetCoord(grid, coordDim=coordDim, localDE=3, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
              staggerLBound=slbnd, staggerUBound=subnd,           &
@@ -2750,8 +2750,8 @@ subroutine check2DP1Bnds2x2(grid, coord, staggerloc, localPet, petCount, &
      nullify(fptr)
 
      !! Get Coord From Grid
-     call ESMF_GridGetLocalTileCoord(grid, localDE=3, &
-              staggerLoc=staggerloc, coord=coord, fptr=fptr, rc=localrc)
+     call ESMF_GridGetCoord(grid, localDE=3, &
+              staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      !! Check that output is as expected
@@ -2794,7 +2794,7 @@ subroutine check2DP1Bnds2x2(grid, coord, staggerloc, localPet, petCount, &
      if (tubnd(3) .lt. ieubnd3(3)+iuoff3(3)) correct=.false.
 
   else  if (petCount .eq. 4) then
-      call ESMF_GridGetLocalTileInfo(grid, coord=coord, localDE=0, &
+      call ESMF_GridGetCoord(grid, coordDim=coordDim, localDE=0, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
              staggerLBound=slbnd, staggerUBound=subnd,           &
@@ -2808,8 +2808,8 @@ subroutine check2DP1Bnds2x2(grid, coord, staggerloc, localPet, petCount, &
       nullify(fptr)
 
      ! Get Coord From Grid
-     call ESMF_GridGetLocalTileCoord(grid, localDE=0, &
-              staggerLoc=staggerloc, coord=coord, fptr=fptr, rc=localrc)
+     call ESMF_GridGetCoord(grid, localDE=0, &
+              staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
@@ -2974,7 +2974,7 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, localPet, petCount, &
       ! probably have to change also. 
 
       ! check DE 0
-      call ESMF_GridGetLocalTileSLocInfo(grid, localDE=0, &
+      call ESMF_GridGet(grid, localDE=0, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
              staggerLBound=slbnd, staggerUBound=subnd, rc=localrc)
@@ -2997,7 +2997,7 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, localPet, petCount, &
 
  
       ! check DE 1
-      call ESMF_GridGetLocalTileSLocInfo(grid2D, localDE=1, &
+      call ESMF_GridGet(grid2D, localDE=1, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
              staggerLBound=slbnd, staggerUBound=subnd, rc=localrc)
@@ -3019,7 +3019,7 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, localPet, petCount, &
      if (subnd(3) .ne. ieubnd1(3)+iuoff1(3)) correct=.false.
 
       ! check DE 2
-      call ESMF_GridGetLocalTileSLocInfo(grid, localDE=2, &
+      call ESMF_GridGet(grid, localDE=2, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
              staggerLBound=slbnd, staggerUBound=subnd, rc=localrc)
@@ -3041,7 +3041,7 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, localPet, petCount, &
      if (subnd(3) .ne. ieubnd2(3)+iuoff2(3)) correct=.false.
 
       ! check DE 3
-      call ESMF_GridGetLocalTileSLocInfo(grid, localDE=3, &
+      call ESMF_GridGet(grid, localDE=3, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
              staggerLBound=slbnd, staggerUBound=subnd, rc=localrc)
@@ -3063,7 +3063,7 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, localPet, petCount, &
      if (subnd(3) .ne. ieubnd3(3)+iuoff3(3)) correct=.false.
 
   else  if (petCount .eq. 4) then
-      call ESMF_GridGetLocalTileSLocInfo(grid, localDE=0, &
+      call ESMF_GridGet(grid, localDE=0, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
              staggerLBound=slbnd, staggerUBound=subnd, rc=localrc)

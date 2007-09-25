@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.14 2007/09/05 18:31:55 oehmke Exp $
+// $Id: ESMCI_Grid_F.C,v 1.15 2007/09/25 06:05:57 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -403,8 +403,8 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
   
-  void FTN(c_esmc_gridgetlocaltileinfo)(ESMCI::Grid **_grid, int *_coord,
-					int *_localDE, int *_staggerloc,  
+  void FTN(c_esmc_gridgetcoordbounds)(ESMCI::Grid **_grid, int *_localDE,
+                                        int *_coord, int *_staggerloc,  
                                         ESMCI::InterfaceInt **_exclusiveLBound,
                                         ESMCI::InterfaceInt **_exclusiveUBound,
                                         ESMCI::InterfaceInt **_staggerLBound,
@@ -415,7 +415,7 @@ extern "C" {
                                         ESMCI::InterfaceInt **_totalUBound,
                                         int *_rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_gridgetlocaltileinfo()"
+#define ESMC_METHOD "c_esmc_gridgetcoordbounds()"
     int localrc;
     int distRank,undistRank,rank;
     int tile, coord,localDE,staggerloc;
@@ -766,7 +766,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
   
-  void FTN(c_esmc_gridgetlocaltileslocinfo)(ESMCI::Grid **_grid, 
+  void FTN(c_esmc_gridgetplocaldepsloc)(ESMCI::Grid **_grid, 
 					int *_localDE, int *_staggerloc,  
                                         ESMCI::InterfaceInt **_exclusiveLBound,
                                         ESMCI::InterfaceInt **_exclusiveUBound,
@@ -774,7 +774,7 @@ extern "C" {
                                         ESMCI::InterfaceInt **_staggerUBound,
                                         int *_rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_gridgetlocaltileslocinfo()"
+#define ESMC_METHOD "c_esmc_gridgetplocaldepsloc()"
     int localrc;
     int distRank,undistRank,rank;
     int localDE,staggerloc;

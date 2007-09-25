@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.29 2007/09/20 17:44:21 cdeluca Exp $
+! $Id: ESMF_DistGrid.F90,v 1.30 2007/09/25 06:05:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -29,7 +29,7 @@ module ESMF_DistGridMod
 ! !MODULE: ESMF_DistGridMod
 !
 
-!   F90 API wrapper of C++ implemenation of DistGrid
+!   F90 API wrapper of C++ implementation of DistGrid
 !
 !------------------------------------------------------------------------------
 
@@ -110,7 +110,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.29 2007/09/20 17:44:21 cdeluca Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.30 2007/09/25 06:05:56 cdeluca Exp $'
 
 !==============================================================================
 ! 

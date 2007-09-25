@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.33 2007/08/24 16:09:00 murphysj Exp $
+% $Id: Grid_desc.tex,v 1.34 2007/09/25 06:05:56 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -317,8 +317,8 @@ for building Grids.
 {\it Set coordinates by copy or reference} \\
 {\tt call ESMF\_GridSetCoord(grid, ...)} \\
 {\it Retrieve ESMF Array of coordinates from Grid and set values} \\
-{\tt call ESMF\_GridGetCoord(grid, ...), set values} \\
+{\tt call ESMF\_GridGetCoord(grid, esmfArray, ...), set values} \\
 {\it Retrieve local bounds and native array from Grid and set values} \\
 {\tt call ESMF\_GridGetLocalTileInfo(grid, lbound, ubound, ...)} \\
-{\tt call ESMF\_GridGetLocalTileCoord(array), set values} \\ \hline
+{\tt call ESMF\_GridGetCoord(grid, array), set values} \\ \hline
 \end{tabular}

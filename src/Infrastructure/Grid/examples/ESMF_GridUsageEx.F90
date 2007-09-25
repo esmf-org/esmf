@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.19 2007/09/21 22:43:16 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.20 2007/09/25 06:05:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -124,20 +124,21 @@ program ESMF_GridCreateEx
 ! specify the number of grid cells per DE in that dimension.
 ! The rank of the grid is determined by the presence of
 ! {\tt countsPerDEDim3}.  If it's present the Grid
-! will be 3D, if just {\tt countsPerDEDim1} and 
+! will be 3D. If just {\tt countsPerDEDim1} and 
 ! {\tt countsPerDEDim2} are specified the Grid 
 ! will be 2D.  If any of these arrays has size
 ! 1 then that index dimension is undistributed.
 !
 ! The following call illustrates the creation of 
-! a 10x20 two dimensional rectangular Grid distributed across six DEs.
-! There are two groups with 5 cells each in the first dimension, and 
-! three groups of sizes 7,7,6 in the second dimension.
+! a 10x20 two dimensional rectangular Grid distributed across six DEs
+! that are arranged 2x3.  In the first dimension there are 3 grid
+! cells on the first DE and 7 cells on the second DE.  The second 
+! dimension has 3 DEs with 11,2, and 7 cells, respectively.
 !EOE
 
 !BOC
-   grid2D=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
-          countsPerDEDim2=(/7,7,6/), rc=rc)   
+   grid2D=ESMF_GridCreateShape(countsPerDEDim1=(/3,7/), &
+          countsPerDEDim2=(/11,2,7/), rc=rc)   
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -155,8 +156,8 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !EOE
 
 !BOC
-   grid3d=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
-          countsPerDEDim2=(/7,7,6/), countsPerDEDim3=(/15,15/), rc=rc)   
+   grid3d=ESMF_GridCreateShape(countsPerDEDim1=(/3,7/), &
+          countsPerDEDim2=(/11,2,7/), countsPerDEDim3=(/15,15/), rc=rc)   
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -173,8 +174,8 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 !EOE
 
 !BOC
-   grid3D=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
-          countsPerDEDim2=(/7,7,6/), countsPerDEDim3=(/30/), rc=rc)   
+   grid3D=ESMF_GridCreateShape(countsPerDEDim1=(/3,7/), &
+          countsPerDEDim2=(/11,2,7/), countsPerDEDim3=(/30/), rc=rc)   
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -209,7 +210,7 @@ if (petcount .eq. 4) then
 
 
    ! Let the 3D grid be be distributed only in the first two dimensions.
-   grid2D=ESMF_GridCreateShape(countsPerDEDim1=(/5,5/), &
+   grid2D=ESMF_GridCreateShape(countsPerDEDim1=(/3,7/), &
            countsPerDEDim2=(/7,6/), petMap=petMap, rc=rc)   
 !EOC
 
@@ -376,7 +377,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    grid2D=ESMF_GridCreateShape(          &
             ! Define an irregular distribution
             countsPerDEDim1=(/3,7/),     &
-            countsPerDEDim2=(/4,7,6/),   &
+            countsPerDEDim2=(/11,2,7/),   &
             indexflag=ESMF_INDEX_GLOBAL, & ! Use global indices
             rc=rc)
 
@@ -389,19 +390,12 @@ call ESMF_GridDestroy(grid2D,rc=rc)
           staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
 
    !-------------------------------------------------------------------
-   ! Get the local bounds of the global indexing for the first 
-   ! coordinate array on the local DE.
+   ! Get the pointer to the first coordinate array and the bounds
+   ! of its global indices on the local DE.   
    !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileInfo(grid2D, coord=1, &
-          staggerloc=ESMF_STAGGERLOC_CENTER,       &
-          staggerLBound=lbnd, staggerUBound=ubnd, rc=rc)
-
-   !-------------------------------------------------------------------
-   ! Get the pointer to the first coordinate array from inside
-   ! the Grid object.
-   !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileCoord(grid2D, coord=1, &
-          staggerloc=ESMF_STAGGERLOC_CENTER, fptr=coordX, rc=rc)
+   call ESMF_GridGetCoord(grid2D, coordDim=1, &
+          staggerloc=ESMF_STAGGERLOC_CENTER, &
+          staggerLBound=lbnd, staggerUBound=ubnd, fptr=coordX, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension [10-100].
@@ -413,21 +407,13 @@ call ESMF_GridDestroy(grid2D,rc=rc)
         coordX(i,lbnd(2)) = i*10.0
    enddo
 
-
    !-------------------------------------------------------------------
-   ! Get the local bounds of the global indexing for the  second
-   ! coordinate array on the local DE.
+   ! Get the pointer to the second coordinate array and the bounds of
+   ! its global indices on the local DE.
    !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileInfo(grid2D, coord=2, &
-          staggerloc=ESMF_STAGGERLOC_CENTER,       &
-          staggerLBound=lbnd, staggerUBound=ubnd, rc=rc)
-
-   !-------------------------------------------------------------------
-   ! Get the pointer to the second coordinate array from inside
-   ! the Grid object.
-   !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileCoord(grid2D, coord=2, &
-          staggerloc=ESMF_STAGGERLOC_CENTER, fptr=coordY, rc=rc)
+   call ESMF_GridGetCoord(grid2D, coordDim=2, &
+          staggerloc=ESMF_STAGGERLOC_CENTER, &
+          staggerLBound=lbnd, staggerUBound=ubnd, fptr=coordY, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the second dimension [10-200]
@@ -476,7 +462,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    grid2D=ESMF_GridCreateShape(          &
             ! Define an irregular distribution
             countsPerDEDim1=(/3,7/),     &
-            countsPerDEDim2=(/4,7,6/),   &
+            countsPerDEDim2=(/11,2,7/),   &
             indexflag=ESMF_INDEX_GLOBAL, & ! Use global indices
             rc=rc)
 
@@ -489,19 +475,12 @@ call ESMF_GridDestroy(grid2D,rc=rc)
           staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
 
    !-------------------------------------------------------------------
-   ! Get the local bounds of the global indexing for the first 
-   ! coordinate array on the local DE.
+   ! Get the pointer to the first coordinate array and the bounds
+   ! of its global indices on the local DE.
    !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileInfo(grid2D, coord=1, &
-          staggerloc=ESMF_STAGGERLOC_CENTER,       &
-          staggerLBound=lbnd, staggerUBound=ubnd, rc=rc)
-
-   !-------------------------------------------------------------------
-   ! Get the pointer to the first coordinate array from inside
-   ! the Grid object.
-   !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileCoord(grid2D, coord=1, &
-          staggerloc=ESMF_STAGGERLOC_CENTER, fptr=coordX, rc=rc)
+   call ESMF_GridGetCoord(grid2D, coordDim=1, &
+          staggerloc=ESMF_STAGGERLOC_CENTER, &
+          staggerLBound=lbnd, staggerUBound=ubnd, fptr=coordX, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension [10-100].
@@ -513,19 +492,12 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    enddo
 
    !-------------------------------------------------------------------
-   ! Get the local bounds of the global indexing for the  second
-   ! coordinate array on the local DE.
+   ! Get the pointer to the second coordinate array and the bounds of 
+   ! its global indices on the local DE.
    !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileInfo(grid2D, coord=2, &
-          staggerloc=ESMF_STAGGERLOC_CENTER,       &
-          staggerLBound=lbnd, staggerUBound=ubnd, rc=rc)
-
-   !-------------------------------------------------------------------
-   ! Get the pointer to the second coordinate array from inside
-   ! the Grid object.
-   !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileCoord(grid2D, coord=2, &
-          staggerloc=ESMF_STAGGERLOC_CENTER, fptr=coordY, rc=rc)
+   call ESMF_GridGetCoord(grid2D, coordDim=2, &
+          staggerloc=ESMF_STAGGERLOC_CENTER, &
+          staggerLBound=lbnd, staggerUBound=ubnd, fptr=coordY, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the second dimension [10-200]
@@ -591,20 +563,13 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    ! Get the local bounds of the global indexing for the first
    ! coordinate array on the local DE. If the number of processors
    ! is less than the total number of DEs then the rest of this
-   ! example would be in a loop over the local DEs. 
+   ! example would be in a loop over the local DEs.  Also get the
+   ! pointer to the first coordinate array. 
    !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileInfo(grid3D, coord=1,   &
+   call ESMF_GridGetCoord(grid3D, coordDim=1,   &
           staggerLoc=ESMF_STAGGERLOC_CORNER_VCENTER, &
           staggerLBound=lbnd_corner,                 &
           staggerUBound=ubnd_corner,                 &
-          rc=rc)
-
-   !-------------------------------------------------------------------
-   ! Get the pointer to the first coordinate array from inside
-   ! the Grid object.
-   !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileCoord(grid3D, coord=1,  &
-          staggerloc=ESMF_STAGGERLOC_CORNER_VCENTER, &
           fptr=cornerX, rc=rc)
 
    !-------------------------------------------------------------------
@@ -620,20 +585,14 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
    !-------------------------------------------------------------------
    ! Get the local bounds of the global indexing for the second
-   ! coordinate array on the local DE.
+   ! coordinate array on the local DE.  Also get the pointer to the
+   ! second coordinate array.
    !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileInfo(grid3D, coord=2,     &
+   call ESMF_GridGetCoord(grid3D, coordDim=2,     &
           staggerLoc=ESMF_STAGGERLOC_CORNER_VCENTER,   &
           staggerLBound=lbnd_corner,                   &
           staggerUBound=ubnd_corner,                   &
-          rc=rc)
-
-   !-------------------------------------------------------------------
-   ! Get the pointer to the second coordinate array from inside
-   ! the Grid object.
-   !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileCoord(grid3D, coord=2, &
-          staggerLoc=ESMF_STAGGERLOC_CORNER_VCENTER, fptr=cornerY, rc=rc)
+          fptr=cornerY, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calcuate and set coordinates in the second dimension.
@@ -652,19 +611,11 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !----------------------------------------------------------------------
    !-------------------------------------------------------------------
    ! Get the local bounds of the global indexing for the first 
-   ! coordinate array on the local DE.
+   ! coordinate array on the local DE, and the pointer to the array.
    !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileInfo(grid3D, coord=1,   &
+   call ESMF_GridGetCoord(grid3D, coordDim=1,   &
           staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
-          staggerLBound=lbnd, staggerUBound=ubnd, rc=rc)
-
-   !-------------------------------------------------------------------
-   ! Get the pointer to the first coordinate array from inside
-   ! the Grid object.
-   !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileCoord(grid3D, coord=1,     &
-             staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
-             fptr=centerX, rc=rc)
+          staggerLBound=lbnd, staggerUBound=ubnd, fptr=centerX, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension.
@@ -677,22 +628,13 @@ call ESMF_GridDestroy(grid2D,rc=rc)
                                           cornerX(i+1,lbnd(2),lbnd(3))) 
    enddo
 
-
    !-------------------------------------------------------------------
    ! Get the local bounds of the global indexing for the second
-   ! coordinate array on the local DE.
+   ! coordinate array on the local DE, and the pointer to the array.
    !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileInfo(grid3D, coord=2,   &
+   call ESMF_GridGetCoord(grid3D, coordDim=2,   &
           staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
-          staggerLBound=lbnd, staggerUBound=ubnd, rc=rc)
-
-   !-------------------------------------------------------------------
-   ! Get the pointer to the second coordinate array from inside
-   ! the Grid object.
-   !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileCoord(grid3D, coord=2,  &
-          staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
-          fptr=centerY, rc=rc)
+          staggerLBound=lbnd, staggerUBound=ubnd, fptr=centerY, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calcuate and set coordinates in the second dimension.
@@ -708,19 +650,11 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
    !-------------------------------------------------------------------
    ! Get the local bounds of the global indexing for the third
-   ! coordinate array on the local DE.
+   ! coordinate array on the local DE, and the pointer to the array.
    !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileInfo(grid3D, coord=3,   &
+   call ESMF_GridGetCoord(grid3D, coordDim=3,   &
           staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
-          staggerLBound=lbnd, staggerUBound=ubnd, rc=rc)
-
-   !-------------------------------------------------------------------
-   ! Get the pointer to the third coordinate array from inside
-   ! the Grid object.
-   !-------------------------------------------------------------------
-   call ESMF_GridGetLocalTileCoord(grid3D, coord=3,  &
-          staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
-          fptr=centerZ, rc=rc)
+          staggerLBound=lbnd, staggerUBound=ubnd, fptr=centerZ, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calcuate and set the vertical coordinates
@@ -852,7 +786,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! they can extend to +1 element beyond the center in some dimensions to allow
 ! for the extra space to surround the center elements. See Section~\ref{sec:usage:staggerloc:adv}
 ! for a description of this extra space and how to adjust if it necessary. 
-! The subroutine {\tt ESMF\_GridGetLocalTileInfo} can be used
+! The subroutine {\tt ESMF\_GridGetCoord} can be used
 ! to retrieve the stagger bounds for the piece of a coordinate
 ! array on a particular DE. 
 !
@@ -1056,7 +990,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !BOC
    call ESMF_GridSetCoord(grid2D, &
           staggerLoc=ESMF_STAGGERLOC_CENTER, &
-          coord=1, array=arrayCoordX, rc=rc)
+          coordDim=1, array=arrayCoordX, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -1096,7 +1030,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !BOC
    call ESMF_GridGetCoord(grid2D,               &
           staggerLoc=ESMF_STAGGERLOC_CORNER,    &
-          coord=2,                              &
+          coordDim=2,                           &
           array=arrayCoordY, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1113,7 +1047,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
 
 !BOE
-! Alternatively, the call {\tt ESMF\_GridGetLocalTileCoord()} gets a Fortran pointer to 
+! Alternatively, the call {\tt ESMF\_GridGetCoord()} gets a Fortran pointer to 
 ! the coordinate data. The user can then operate on this array in the usual
 ! manner. The following call gets a reference to the
 ! Fortran array which holds the data for the second coordinate (e.g. y). 
@@ -1132,7 +1066,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
 
 !BOC
-   call ESMF_GridGetLocalTileCoord(grid2D, coord=2, &
+   call ESMF_GridGetCoord(grid2D, coordDim=2, &
           staggerloc=ESMF_STAGGERLOC_CORNER, fptr=coordY, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1153,7 +1087,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! retrieve the bounds of the piece of that array on
 ! the local DE. This is useful for iterating through the
 ! array to set coordinates, retrieve coordinates, or do calculations. 
-! The method {\tt ESMF\_GridGetLocalTileInfo} allows the user
+! The method {\tt ESMF\_GridGetCoord} allows the user
 ! to retrieve bound information for a particular coordinate
 ! array. 
 !
@@ -1185,7 +1119,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !
 ! The total bounds are the outermost bounds of the coordinate array. The
 ! total bounds should always match the bounds of the Fortran array 
-! retrieved by {\tt ESMF\_GetLocalTileCoords()}. 
+! retrieved by {\tt ESMF\_GetCoord()}. 
 !
 ! The following is an example of retrieving the bounds for the first
 ! coordinate array from the corner stagger location. 
@@ -1202,7 +1136,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
  
 !BOC
-   call ESMF_GridGetLocalTileInfo(grid2D, coord=1,              &
+   call ESMF_GridGetCoord(grid2D, coordDim=1,                   &
           staggerLoc=ESMF_STAGGERLOC_CORNER,                    &
           exclusiveLBound=elbnd, exclusiveUBound=eubnd,         &
           staggerLBound=slbnd, staggerUBound=subnd,             &
@@ -1226,7 +1160,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !BOEI
 ! The second pair of methods enable the user to set or get data using
 ! a Fortran pointer. These methods only work with the local piece of the 
-! Grid on the DE. {\tt ESMF\_GridLocalTileSetCoord} enables the user
+! Grid on the DE. {\tt ESMF\_GridSetCoord} enables the user
 ! to set data into the local piece of the coordinates residing on the DE.
 ! The following call gets a pointer (fptr) to the Fortran array holding the 
 ! first component (e.g. x) coordinates for the corner stagger
@@ -1235,9 +1169,9 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !EOEI
 
 !BOCI
-   call ESMF_GridSetLocalTileCoord(grid3D, tile=2,  &
+   call ESMF_GridSetCoord(grid3D, tile=2,  &
           staggerLoc=ESMF_STAGGERLOC_CORNER,        &
-          coord=1, fptr, doCopy=ESMF_DATA_REF, rc=rc)
+          coordDim=1, fptr, doCopy=ESMF_DATA_REF, rc=rc)
 !EOCI
 #endif
 
@@ -1259,14 +1193,14 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !EOCI
 
 !BOEI
-! The method {\tt ESMF\_GridGetLocalTileCoord}, allows for a uniform 
+! The method {\tt ESMF\_GridGetCoord}, allows for a uniform 
 ! method of retrieving coordinates from the Grid no matter what the factorization of the 
 ! arrays. The following retrieves the coordinates (outCoords) from 
 ! point (1,1,1) in the center stagger location.  
 !EOEI
 
 !BOCI
-   call ESMF_GridGetLocalTileCoord(grid, &
+   call ESMF_GridGetCoord(grid, &
           staggerLoc=ESMF_STAGGERLOC_CENTER, 
           indices=(/1,1,1/), coords=outCoords, rc=rc)
 !EOCI
