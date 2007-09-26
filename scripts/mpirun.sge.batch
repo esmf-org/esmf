@@ -1,5 +1,5 @@
 #!/bin/ksh
-# $Id: mpirun.sge.batch,v 1.1 2007/09/24 22:08:27 svasquez Exp $
+# $Id: mpirun.sge.batch,v 1.2 2007/09/26 20:24:50 svasquez Exp $
 # This script provides an interface such that the simple command
 # mpirun -np #
 # runs # copies of the program in parallel.
@@ -18,6 +18,7 @@ export working_dir=`pwd`
 
 # Extract batch run script
 cat > $ESMF_DIR/scripts/esmf_script << THE_END_OF_BATCH_SCRIPT
+#!/bin/csh -f
 #
 #  Set the name of the job.
 #$ -N esmf_test
@@ -28,13 +29,13 @@ cat > $ESMF_DIR/scripts/esmf_script << THE_END_OF_BATCH_SCRIPT
 #  Set the account to acb
 #$ -A acb
 #
-#$ -pe comp 4
+#$ -pe comp 8
 #
 #  My code is re-runnable
 #$ -r n
 #
-#  The max walltime for this job is 31 minutes
-#$ -l h_rt=00:31:00
+#  The max walltime for this job is 30 minutes
+#$ -l h_rt=00:30:00
 
 
 source /usr/local/bin/setup-mpi.csh
@@ -60,9 +61,15 @@ echo $job_num > proc_id_file
 read word1 word2 proc_id word4 < proc_id_file
 echo $proc_id > proc_id
 
-while qstat | grep $proc_id
+while qstat | grep $proc_id > tmp
 do
-        sleep 30
+	# if the test can't be run delete it.
+	if grep Eqw tmp
+	then
+		qdel $proc_id
+	else
+        	sleep 30
+	endif
 done
 
 # move job output file to stdout.
@@ -72,3 +79,4 @@ mv -f esmf_test.o$proc_id  $prog.stdout
 # Clean up
 rm -f esmf_script
 rm -f proc_id_file
+rm -f tmp
