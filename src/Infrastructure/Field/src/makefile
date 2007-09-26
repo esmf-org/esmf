@@ -1,21 +1,18 @@
-# $Id: makefile,v 1.21 2007/09/18 22:21:06 cdeluca Exp $ 
+# $Id: makefile,v 1.22 2007/09/26 13:37:27 cdeluca Exp $ 
 
 #
 ALL: build_here 
 
-AUTOGEN   = ESMF_FieldGet.F90 ESMF_FieldSet.F90 ESMF_FieldCreate.F90
+AUTOGEN   = ESMF_FieldSet.F90 ESMF_FieldGet.F90 ESMF_FieldCreate.F90
 CFLAGS    =
 FFLAGS    =
 SOURCEC	  = 
-SOURCEF	  = ESMF_Field.F90 
-# TODO:FIELDINTEGRATION Turn other Field methods back on.
-# $(AUTOGEN)
+SOURCEF	  = ESMF_Field.F90 $(AUTOGEN)
 SOURCEH	  = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 TEXFILES  = $(addsuffix _fapi.tex, $(basename $(AUTOGEN)))
-
 
 MANSEC	  = Fieldobj
 LIBBASE	  = libesmf

@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.250 2007/08/30 05:06:32 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.251 2007/09/26 13:37:26 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -188,9 +188,10 @@
    public ESMF_FieldSetInternArray     ! Set a data Array in a Field
    public ESMF_FieldSetLocalArray      ! Set a data Array in a Field
    public ESMF_FieldSetDataValues      ! Set Field data values 
+   public ESMF_FieldSetGrid
 
    public ESMF_FieldSetDataMap         ! Set a DataMap (may reorder if different
-                                       !   DataMap is already present)
+                                       ! DataMap is already present)
 
    public ESMF_FieldSetAttribute       ! Set and Get attributes
    public ESMF_FieldGetAttribute       !  
@@ -225,7 +226,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.250 2007/08/30 05:06:32 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.251 2007/09/26 13:37:26 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -3306,6 +3307,8 @@
       type(ESMF_StaggerLoc) :: staggerloc
       character(len=ESMF_MAXSTR) :: msgbuf
       integer :: gridcounts(ESMF_MAXGRIDDIM)   ! how big the local grid is
+      integer :: exclLBounds(ESMF_MAXGRIDDIM)  ! exclusive grid lower bounds
+      integer :: exclUBounds(ESMF_MAXGRIDDIM)  ! exclusive grid upper bounds
       integer :: arraycounts(ESMF_MAXDIM)      ! how big the local array is
       integer :: maplist(ESMF_MAXDIM)          ! mapping between them
       integer :: otheraxes(ESMF_MAXDIM)        ! counts for non-grid dims
@@ -3368,18 +3371,23 @@
       if (ftypep%gridstatus .eq. ESMF_STATUS_READY) then
 
           ! get grid dim and extents for the local piece
-
-          call ESMF_GridGet(ftypep%grid, rank=gridrank, rc=localrc)
+          call ESMF_GridGet(ftypep%grid, distRank=gridrank, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
-! TODO:FIELDINTEGRATION Write ESMF_GridGetDELocalInfo() or equiv. method for new Grid.
-!          call ESMF_GridGetDELocalInfo(ftypep%grid, staggerloc, &
-!                                    localCellCountPerDim=gridcounts, rc=localrc)
-!          if (ESMF_LogMsgFoundError(localrc, &
-!                                    ESMF_ERR_PASSTHRU, &
-!                                    ESMF_CONTEXT, rc)) return
+! TODO:FIELDINTEGRATION Replace bound calculation with cellCount from GridGet()
+            call ESMF_GridGet(ftypep%grid, staggerloc=staggerloc, &
+                              exclusiveLBound=exclLBounds, &
+                              exclusiveUBound=exclUBounds, &
+                              rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                              ESMF_ERR_PASSTHRU, &
+                              ESMF_CONTEXT, rc)) return
           hasgrid = .TRUE.
+
+          do i = 1, gridrank
+            gridcounts(i) = (exclUBounds(i) - exclLBounds(i)) + 1
+          enddo
 
           ! compute total number of grid items for later
           gridcellcount = 1
@@ -3601,7 +3609,7 @@
         ! Collect results on DE 0 and output to a file
         call ESMF_FieldGet(field, grid=grid, rc=localrc)
 !!$        call ESMF_FieldGet( field, name=fieldname, rc=localrc)
-! TODO:FIELDINTEGRATION Investigate use of DELayout in this call.
+! TODO:FIELDINTEGRATION Find another way to get the localDE.
         call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
         call ESMF_DistGridGet(distgrid, delayout=delayout, rc=localrc)
         call ESMF_DELayoutGetDeprecated(delayout, localDE=de_id, rc=localrc)
@@ -3878,9 +3886,10 @@
       type(ESMF_StaggerLoc) :: localStaggerloc
       type(ESMF_FieldDataMap) :: dmap
       integer, dimension(ESMF_MAXDIM) :: gridcounts, arraycounts
+      integer, dimension(ESMF_MAXDIM) :: exclLBounds, exclUBounds
       integer, dimension(ESMF_MAXDIM) :: dimorder, counts
       integer :: hwidth, minRank
-      integer :: i, j, arrayRank, gridRank, baseGridRank
+      integer :: i, j, arrayRank, gridRank
 
       ! Initialize return code   
       localrc = ESMF_RC_NOT_IMPL
@@ -3902,10 +3911,7 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-! TODO:FIELDINTEGRATION Make sure types of ranks are appropriate for this call.
-! New Grid and old Grid use different terminology for rank, undistributed rank,
-! distributed rank.
-      call ESMF_GridGet(grid, distRank=gridRank, rank=baseGridRank, &
+      call ESMF_GridGet(grid, distRank=gridRank, &
                         rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -3929,7 +3935,7 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      ! make sure localStaggerloc has a value before GridGetDELocalInfo call
+      ! make sure localStaggerloc has a value before GridGet call
       if (present(staggerloc)) then
           localStaggerloc = staggerloc
       else
@@ -3941,14 +3947,19 @@
                                  ESMF_CONTEXT, rc)) return
           endif
       endif
-! TODO:FIELDINTEGRATION Write ESMF_GridGetDELocalInfo() or equiv. method.
-!      call ESMF_GridGetDELocalInfo(ftype%grid, staggerloc=localStaggerloc, &
-!                                   localCellCountPerDim=gridcounts(1:gridRank), &
-!                                   rc=localrc)
-!      if (ESMF_LogMsgFoundError(localrc, &
-!                                  ESMF_ERR_PASSTHRU, &
-!                                  ESMF_CONTEXT, rc)) return
-!
+! TODO:FIELDINTEGRATION Replace bound calculation with cellCount from GridGet()
+      call ESMF_GridGet(ftype%grid, staggerloc=localStaggerloc, &
+                        exclusiveLBound=exclLBounds(1:gridRank), &
+                        exclusiveUBound=exclUBounds(1:gridRank), &
+                        rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      do i = 1, gridRank
+        gridcounts(i) = (exclUBounds(i) - exclLBounds(i)) + 1
+      enddo
+
       ! get information back from datamap
       call ESMF_FieldDataMapGet(ftype%mapping, dataIndexList=dimorder, &
                                 counts=counts, rc=localrc)
@@ -4162,17 +4173,15 @@
                                   ESMF_CONTEXT, rc)) return
 
       ! Check to see grid is valid first.
-! TODO:FIELDINTEGRATION Write ESMF_FieldValidate() method.
-!      call ESMF_GridValidate(grid, "", localrc)
-!      if (ESMF_LogMsgFoundError(localrc, &
-!                                  ESMF_ERR_PASSTHRU, &
-!                                  ESMF_CONTEXT, rc)) return
+
+      call ESMF_GridValidate(grid, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       ftype%grid = grid
       ftype%gridstatus = ESMF_STATUS_READY
 
-! TODO:FIELDINTEGRATION Check that appropriate type of new Grid rank
-! (full rank rather than just distributed rank is used in this call.
-      call ESMF_GridGet(grid, rank=gridRank, rc=localrc)
+      call ESMF_GridGet(grid, distRank=gridRank, rc=localrc)
       if (present(datamap)) then
         ftype%mapping = datamap   ! copy, datamap can be reused by user now
         ! if specified as explicit args to create, they override anything
@@ -4284,17 +4293,14 @@
                                   ESMF_CONTEXT, rc)) return
 
       ! Attach Grid
-! TODO:FIELDINTEGRATION Write ESMF_FieldValidate() method.
-!      call ESMF_GridValidate(grid, "", localrc)
-!      if (ESMF_LogMsgFoundError(localrc, &
-!                                  ESMF_ERR_PASSTHRU, &
-!                                  ESMF_CONTEXT, rc)) return
+      call ESMF_GridValidate(grid, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       ftype%grid = grid
       ftype%gridstatus = ESMF_STATUS_READY
 
-! TODO:FIELDINTEGRATION Make sure appropriate rank (full rank rather than 
-! distributed rank) is used in this call.
-      call ESMF_GridGet(ftype%grid, rank=gridRank, rc=localrc)
+      call ESMF_GridGet(ftype%grid, distRank=gridRank, rc=localrc)
       if (present(datamap)) then
         ! this does a copy, datamap ok for user to delete now
         ftype%mapping = datamap   
@@ -4511,7 +4517,7 @@
 #if 0
 
       ! TODO: replace this with a better way to get the current VM
-! TODO:FIELDINTEGRATION New ESMF_GridGet() does not return the VM.
+! TODO:FIELDINTEGRATION Find a better way to get the VM.
       call ESMF_GridGet(srcField%ftypep%grid, delayout=gridDELayout, rc=localrc)
       call ESMF_DELayoutGet(gridDELayout, vm=vm, rc=localrc)
 

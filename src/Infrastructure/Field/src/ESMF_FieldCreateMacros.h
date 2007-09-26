@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.21 2007/06/23 04:00:22 cdeluca Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.22 2007/09/26 13:37:27 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -32,18 +32,17 @@
 ! @\
 ! !INTERFACE: @\
 !   ! Private name; call using ESMF_FieldCreate() @\
-!   function ESMF_FieldCreateDPtr<rank><type><kind>(igrid, fptr, copyflag, & @\
-!             horzRelloc, vertRelloc, haloWidth, datamap, name, iospec, rc) @\
+!   function ESMF_FieldCreateDPtr<rank><type><kind>(grid, fptr, copyflag, & @\
+!             staggerloc, haloWidth, datamap, name, iospec, rc) @\
 ! @\
 ! !RETURN VALUE: @\
 !      type(ESMF_Field) :: ESMF_FieldCreateDPtr<rank><type><kind> @\
 ! @\
 ! !ARGUMENTS: @\
-!     type(ESMF_IGrid), intent(in) :: igrid @\
+!     type(ESMF_Grid), intent(in) :: grid @\
 !     <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: fptr @\
 !     type(ESMF_CopyFlag), intent(in) :: copyflag @\
-!     type(ESMF_RelLoc), intent(in), optional :: horzRelloc @\
-!     type(ESMF_RelLoc), intent(in), optional :: vertRelloc  @\
+!     type(ESMF_StaggerLoc), intent(in), optional :: staggerloc @\
 !     integer, intent(in), optional :: haloWidth @\
 !     type(ESMF_FieldDataMap), intent(inout), optional :: datamap @\
 !     character (len=*), intent(in), optional :: name  @\
@@ -59,22 +58,20 @@
 ! @\
 !   The arguments are: @\
 !   \begin{description} @\
-!   \item [igrid] @\
-!     Pointer to an {\tt ESMF\_IGrid} object. @\
+!   \item [grid] @\
+!     Pointer to an {\tt ESMF\_Grid} object. @\
 !   \item [fptr] @\
 !     A Fortran array pointer which must be already allocated and the @\
-!     proper size for this portion of the igrid. @\
+!     proper size for this portion of the grid. @\
 !   \item [copyflag] @\
 !     Whether to copy the existing data space or reference directly. Valid @\
 !     values are {\tt ESMF\_DATA\_COPY} or {\tt ESMF\_DATA\_REF}. @\
-!   \item [{[horzRelloc]}] @\
-!     Relative location of data per igrid cell/vertex in the horizontal igrid. @\
-!   \item [{[vertRelloc]}] @\
-!     Relative location of data per igrid cell/vertex in the vertical igrid. @\
+!   \item [{[staggerloc]}] @\
+!     Relative location of data per grid cell/vertex in the grid. @\
 !   \item [{[haloWidth]}] @\
 !     Maximum halo depth along all edges.  Default is 0. @\
 !   \item [{[datamap]}] @\
-!     Describes the mapping of data to the {\tt ESMF\_IGrid}. @\
+!     Describes the mapping of data to the {\tt ESMF\_Grid}. @\
 !   \item [{[name]}] @\
 !     {\tt Field} name. @\
 !   \item [{[iospec]}] @\
@@ -96,16 +93,15 @@
 ! <Created by macro - do not edit directly > @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldCreateDPtr" @\
-      function ESMF_FieldCreateDPtr##mrank##D##mtypekind(igrid, fptr, copyflag, & @\
-                horzRelloc, vertRelloc, haloWidth, datamap, name, iospec, rc) @\
+      function ESMF_FieldCreateDPtr##mrank##D##mtypekind(grid, fptr, copyflag, & @\
+                staggerloc, haloWidth, datamap, name, iospec, rc) @\
  @\
       type(ESMF_Field) :: ESMF_FieldCreateDPtr##mrank##D##mtypekind @\
  @\
-      type(ESMF_IGrid), intent(in) :: igrid @\
+      type(ESMF_Grid), intent(in) :: grid @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fptr @\
       type(ESMF_CopyFlag), intent(in) :: copyflag @\
-      type(ESMF_RelLoc), intent(in), optional :: horzRelloc @\
-      type(ESMF_RelLoc), intent(in), optional :: vertRelloc  @\
+      type(ESMF_StaggerLoc), intent(in), optional :: staggerloc @\
       integer, intent(in), optional :: haloWidth @\
       type(ESMF_FieldDataMap), intent(inout), optional :: datamap @\
       character (len=*), intent(in), optional :: name  @\
@@ -149,8 +145,8 @@
                                        ESMF_CONTEXT, rc)) return @\
  @\
         ! Construction method allocates and initializes field internals. @\
-        call ESMF_FieldConstructIA(ftype, igrid, array, & @\
-                                    horzRelloc, vertRelloc, & @\
+        call ESMF_FieldConstructIA(ftype, grid, array, & @\
+                                    staggerloc, & @\
                                     datamap, name, iospec, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
@@ -184,17 +180,18 @@
  @\
 ! !INTERFACE: @\
 !   ! Private name; call using ESMF_FieldCreate() @\
-!   function ESMF_FieldCreateEPtr<rank><type><kind>(igrid, fptr, allocflag, & @\
-!             horzRelloc, vertRelloc, haloWidth, lbounds, ubounds, & @\
+!   function ESMF_FieldCreateEPtr<rank><type><kind>(grid, fptr, allocflag, & @\
+!             staggerloc, haloWidth, lbounds, ubounds, & @\
 !             datamap, name, iospec, rc) @\
 ! @\
 ! !RETURN VALUE: @\
 !      type(ESMF_Field) :: ESMF_FieldCreateEPtr<rank><type><kind> @\
 ! @\
 ! !ARGUMENTS: @\
-!     type(ESMF_IGrid), intent(in) :: igrid @\
+!     type(ESMF_Grid), intent(in) :: grid @\
 !     <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: fptr @\
 !     type(ESMF_AllocFlag), intent(in), optional :: allocflag @\
+!     type(ESMF_StaggerLoc), intent(in), optional :: staggerloc @\
 !     integer, intent(in), optional :: haloWidth @\
 !     integer, dimension(:), intent(in), optional :: lbounds @\
 !     integer, dimension(:), intent(in), optional :: ubounds @\
@@ -213,8 +210,8 @@
 ! @\
 !  The arguments are: @\
 !  \begin{description} @\
-!  \item [igrid] @\
-!    Pointer to an {\tt ESMF\_IGrid} object. @\
+!  \item [grid] @\
+!    Pointer to an {\tt ESMF\_Grid} object. @\
 !  \item [fptr] @\
 !    A Fortran array pointer which must be unallocated but of the @\
 !    proper rank, type, and kind for the data to be associated with @\
@@ -223,10 +220,8 @@
 !    Whether to allocate space for the array.  @\
 !    See Section~\ref{opt:allocflag} for possible values.  Default @\
 !    is {\tt ESMF\_ALLOC}. @\
-!  \item [{[horzRelloc]}] @\
-!    Relative location of data per igrid cell/vertex in the horizontal igrid. @\
-!  \item [{[vertRelloc]}] @\
-!    Relative location of data per igrid cell/vertex in the vertical igrid. @\
+!  \item [{[staggerloc]}] @\
+!    Relative location of data per grid cell/vertex in the grid. @\
 !  \item [{[haloWidth]}] @\
 !    Maximum halo depth along all edges.  Default is 0. @\
 !  \item[{[lbounds]}]  @\
@@ -236,7 +231,7 @@
 !    An integer array of upper index values.  Must be the same length @\
 !    as the rank. @\
 !  \item [{[datamap]}] @\
-!    Describes the mapping of data to the {\tt ESMF\_IGrid}. @\
+!    Describes the mapping of data to the {\tt ESMF\_Grid}. @\
 !  \item [{[name]}] @\
 !    {\tt Field} name. @\
 !  \item [{[iospec]}] @\
@@ -257,17 +252,16 @@
 #define FieldCreateEPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
-      function ESMF_FieldCreateEPtr##mrank##D##mtypekind(igrid, fptr, allocflag, & @\
-                horzRelloc, vertRelloc, haloWidth, lbounds, ubounds, & @\
+      function ESMF_FieldCreateEPtr##mrank##D##mtypekind(grid, fptr, allocflag, & @\
+                staggerloc, haloWidth, lbounds, ubounds, & @\
                 datamap, name, iospec, rc) @\
  @\
       type(ESMF_Field) :: ESMF_FieldCreateEPtr##mrank##D##mtypekind @\
  @\
-      type(ESMF_IGrid), intent(in) :: igrid @\
+      type(ESMF_Grid), intent(in) :: grid @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fptr @\
       type(ESMF_AllocFlag), intent(in), optional :: allocflag @\
-      type(ESMF_RelLoc), intent(in), optional :: horzRelloc @\
-      type(ESMF_RelLoc), intent(in), optional :: vertRelloc  @\
+      type(ESMF_StaggerLoc), intent(in), optional :: staggerloc @\
 ! TODO: this should not be lbounds, ubounds - but some global addr flag. @\
       integer, intent(in), optional :: haloWidth @\
       integer, dimension(:), intent(in), optional :: lbounds @\
@@ -311,8 +305,8 @@
                                        ESMF_CONTEXT, rc)) return @\
  @\
         ! Construction method allocates and initializes field internals. @\
-        call ESMF_FieldConstructIA(ftype, igrid, arrayspec, allocflag, & @\
-                                    horzRelloc, vertRelloc, haloWidth, & @\
+        call ESMF_FieldConstructIA(ftype, grid, arrayspec, allocflag, & @\
+                                    staggerloc, haloWidth, & @\
                                     datamap, name, iospec, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
