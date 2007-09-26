@@ -115,7 +115,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 
   public ESMF_GridCreate
   public ESMF_GridCreateEmpty
-  public ESMF_GridCreateShape
+  public ESMF_GridCreateShapeTile
 
   public ESMF_GridDestroy
 
@@ -137,7 +137,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.27 2007/09/25 15:53:52 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.28 2007/09/26 22:51:20 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -189,19 +189,19 @@ end interface
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
-! !IROUTINE: ESMF_GridCreateShape -- Generic interface
+! !IROUTINE: ESMF_GridCreateShapeTile -- Generic interface
 
 ! !INTERFACE:
-interface ESMF_GridCreateShape
+interface ESMF_GridCreateShapeTile
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-      module procedure ESMF_GridCreateShapeReg
-      module procedure ESMF_GridCreateShapeIrreg
+      module procedure ESMF_GridCreateShapeTileReg
+      module procedure ESMF_GridCreateShapeTileIrreg
       
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_GridCreateShape} functions.   
+!  types of {\tt ESMF\_GridCreateShapeTile} functions.   
 !EOPI 
 end interface
 
@@ -813,13 +813,13 @@ end interface
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCreateShapeIrreg"
+#define ESMF_METHOD "ESMF_GridCreateShapeTileIrreg"
 !BOP
-! !IROUTINE: ESMF_GridCreateShape - Create a Grid with an irregular distribution
+! !IROUTINE: ESMF_GridCreateShapeTile - Create a Grid with an irregular distribution
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_GridCreateShape()
-      function ESMF_GridCreateShapeIrreg(name,coordTypeKind, minIndex,  &
+  ! Private name; call using ESMF_GridCreateShapeTile()
+      function ESMF_GridCreateShapeTileIrreg(name,coordTypeKind, minIndex,  &
                         countsPerDEDim1,countsPerDeDim2, countsPerDEDim3, &
                         connDim1, connDim2, connDim3, &
                         poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
@@ -828,7 +828,7 @@ end interface
                         indexflag, petMap, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateShapeIrreg
+      type(ESMF_Grid) :: ESMF_GridCreateShapeTileIrreg
 !
 ! !ARGUMENTS:
       character (len=*), intent(in), optional :: name 
@@ -1551,12 +1551,12 @@ end interface
   
    ! Create Grid from specification -----------------------------------------------
    if (undistRank .gt. 0) then
-       ESMF_GridCreateShapeIrreg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
+       ESMF_GridCreateShapeTileIrreg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
                                     distgrid, dimmap, lbounds, ubounds, &
                                     coordRank, coordDimMap, indexflag, &
                                     localrc)
     else
-       ESMF_GridCreateShapeIrreg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
+       ESMF_GridCreateShapeTileIrreg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
                                     distgrid=distgrid, dimmap=dimmap, &
                                     coordRank=coordRank, coordDimMap=coordDimMap, &
                                     indexflag=indexflag, &
@@ -1584,18 +1584,18 @@ end interface
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
-    end function ESMF_GridCreateShapeIrreg
+    end function ESMF_GridCreateShapeTileIrreg
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCreateShapeReg"
+#define ESMF_METHOD "ESMF_GridCreateShapeTileReg"
 !BOP
-! !IROUTINE: ESMF_GridCreateShape - Create a Grid with a regular distribution
+! !IROUTINE: ESMF_GridCreateShapeTile - Create a Grid with a regular distribution
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_GridCreateShape()
-      function ESMF_GridCreateShapeReg(name, coordTypeKind, &
+  ! Private name; call using ESMF_GridCreateShapeTile()
+      function ESMF_GridCreateShapeTileReg(name, coordTypeKind, &
                         regDecomp, decompFlag, minIndex, maxIndex, &
                         connDim1, connDim2, connDim3, &
                         poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
@@ -1606,7 +1606,7 @@ end interface
 
 !
 ! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateShapeReg
+      type(ESMF_Grid) :: ESMF_GridCreateShapeTileReg
 !
 ! !ARGUMENTS:
        character (len=*), intent(in), optional :: name 
@@ -2227,12 +2227,12 @@ end interface
   
    ! Create Grid from specification -----------------------------------------------
    if (undistRank .gt. 0) then
-       ESMF_GridCreateShapeReg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
+       ESMF_GridCreateShapeTileReg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
                                     distgrid, dimmap, lbounds, ubounds, &
                                     coordRank, coordDimMap, indexflag, &
                                     localrc)
     else
-       ESMF_GridCreateShapeReg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
+       ESMF_GridCreateShapeTileReg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
                                     distgrid=distgrid, dimmap=dimmap, &
                                     coordRank=coordRank, coordDimMap=coordDimMap, &
                                     indexflag=indexflag, &
@@ -2258,7 +2258,7 @@ end interface
  
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
-    end function ESMF_GridCreateShapeReg
+    end function ESMF_GridCreateShapeTileReg
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2590,8 +2590,7 @@ end subroutine ESMF_GridGet
       exclusiveLBoundArg, exclusiveUBoundArg, staggerLBoundArg, staggerUBoundArg,&
       localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-
-      ESMF_CONTEXT, rcToReturn=rc)) return
+       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
     call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
@@ -2701,7 +2700,7 @@ end subroutine ESMF_GridGet
 !     \item[{fptr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
-!          Default to {\tt ESMF\_DATA\_COPY},  copys the array. 
+!          Default to {\tt ESMF\_DATA\_COPY},  copies the array. 
 !          If set to {\tt ESMF\_DATA\_REF}, fptr is a reference to the data in the grid arrays. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2785,8 +2784,9 @@ end subroutine ESMF_GridGet
 !     \item[{fptr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
-!          Default to {\tt ESMF\_DATA\_COPY},  copys the array. 
-!          If set to {\tt ESMF\_DATA\_REF}, fptr is a reference to the data in the grid arrays. 
+!          Default to {\tt ESMF\_DATA\_REF}, fptr is a reference to the data in the 
+!          Grid coordinate arrays. If set to {\tt ESMF\_DATA\_COPY}, fptr points to a copy
+!          of the data in the arrays.  
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3059,7 +3059,7 @@ end subroutine ESMF_GridGet
 !     \item[{fptr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
-!          Default to {\tt ESMF\_DATA\_COPY},  copys the array. 
+!          Default to {\tt ESMF\_DATA\_COPY},  copies the array. 
 !          If set to {\tt ESMF\_DATA\_REF}, fptr is a reference to the data in the grid arrays. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3336,7 +3336,7 @@ end subroutine ESMF_GridGet
 !     \item[{fptr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
-!          Default to {\tt ESMF\_DATA\_COPY},  copys the array. 
+!          Default to {\tt ESMF\_DATA\_COPY},  copies the array. 
 !          If set to {\tt ESMF\_DATA\_REF}, fptr is a reference to the data in the grid arrays. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3616,7 +3616,7 @@ endif
 !     \item[{fptr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
-!          Default to {\tt ESMF\_DATA\_COPY},  copys the array. 
+!          Default to {\tt ESMF\_DATA\_COPY},  copies the array. 
 !          If set to {\tt ESMF\_DATA\_REF}, fptr is a reference to the data in the grid arrays. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3895,7 +3895,7 @@ endif
 !     \item[{fptr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
-!          Default to {\tt ESMF\_DATA\_COPY},  copys the array. 
+!          Default to {\tt ESMF\_DATA\_COPY},  copies the array. 
 !          If set to {\tt ESMF\_DATA\_REF}, fptr is a reference to the data in the grid arrays. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4173,7 +4173,7 @@ endif
 !     \item[{fptr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
-!          Default to {\tt ESMF\_DATA\_COPY},  copys the array. 
+!          Default to {\tt ESMF\_DATA\_COPY},  copies the array. 
 !          If set to {\tt ESMF\_DATA\_REF}, fptr is a reference to the data in the grid arrays. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4582,7 +4582,7 @@ endif
 !     \item[{array}]
 !          An array into which to put the coordinate infomation. 
 !     \item[{[doCopy]}]
-!          Default to {\tt ESMF\_DATA\_COPY},  copys the coordinates
+!          Default to {\tt ESMF\_DATA\_COPY},  copies the coordinates
 !          into the arrays. If set to {\tt ESMF\_DATA\_REF},
 !          causes the array to reference the grid array containing the coordinates.
 !          [THE COPY OPTION IS CURRENTLY NOT IMPLEMENTED] 

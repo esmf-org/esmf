@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.25 2007/09/25 15:53:52 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.26 2007/09/26 22:51:20 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.25 2007/09/25 15:53:52 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.26 2007/09/26 22:51:20 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -295,6 +295,11 @@ int Grid::allocCoordArray(
     arrayspec->ESMC_ArraySpecSetRank(coordRank[coord]);
     arrayspec->ESMC_ArraySpecSetTypeKind(typekind);
     
+    //// Initialize dimmap array to 0 to make all unspecified dimensions
+    //// replicated
+    for (int i=0; i<rank; i++) {
+      dimmapIntIntArray[i]=0;
+    }
 
     //// fill in dimmap, lbounds, and ubounds for use in Array::create
     //// dimmap - computed by inverting how coords dims map to distgrid
@@ -1308,6 +1313,7 @@ int Grid::setCoordArray(
 
 
   // Check that the passed in Array's dimmap is consistant with this coord's
+  // TODO: make this work with replicated arrays
   arrayDimMap=arrayArg->getDimmap();
   ok=true;
   for (int i=0; i<coordRank[coord]; i++) {
@@ -2708,12 +2714,12 @@ int construct(
           "- coordRank / rank mismatch", &rc);
         return rc;
       }
-      // TODO: take this out when Array Factorization works
-      if (coordRankArg->array[i] != rank){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
-          "- Array and thus Grid don't currently support factorization", &rc);
-        return rc;
-      }
+      // // TODO: take this out when Array Factorization works
+      // if (coordRankArg->array[i] != rank){
+      //  ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+      //    "- Array and thus Grid don't currently support factorization", &rc);
+      //  return rc;
+      // }
       coordRank[i] = coordRankArg->array[i];  // copy coordRank array element
     }
   } 
