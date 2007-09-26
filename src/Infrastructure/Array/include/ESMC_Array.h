@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.72 2007/09/25 23:46:54 theurich Exp $
+// $Id: ESMC_Array.h,v 1.73 2007/09/26 18:56:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -45,9 +45,10 @@
 
 namespace ESMCI {
 
-// classes
+// classes and structs
 
 class Array;
+struct SeqIndex;
 
 // class definition
 class Array : public ESMC_Base {    // inherits from ESMC_Base class
@@ -79,7 +80,12 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     int *dimmap;                      // [dimCount]
     int *inverseDimmap;               // [rank]
     int *contiguousFlag;              // [localDeCount]
-    int *deCellCount;                 // [deCount] number of cells in total reg.
+    int tensorCellCount;              // number of tensor cells per excl. cell
+    int *deCellCount;                 // [deCount] number of cells in exclusive
+                                      // region only considering DistGrid dims
+                                      // that are associated with the Array dims
+                                      // multiply with tensorCellCount to get
+                                      // tot. number of exclusive cells in Array
     // lower level object references
     DistGrid *distgrid;
     DELayout *delayout;
@@ -143,12 +149,14 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     const int *getStaggerLoc()              const {return staggerLoc;}
     const int *getVectorDim()               const {return vectorDim;}
     const int *getDeCellCount()             const {return deCellCount;}
+    int getTensorCellCount()                const {return tensorCellCount;}
     const int *getDimmap()                  const {return dimmap;}
     const int *getInverseDimmap()           const {return inverseDimmap;}
     DistGrid *getDistGrid()                 const {return distgrid;}
     DELayout *getDELayout()                 const {return delayout;}
     int getLinearIndexExclusive(int localDe, int *index, int *rc=NULL) const;
-    int getSequenceIndexExclusive(int localDe, int *index, int *rc=NULL) const;
+    SeqIndex getSequenceIndexExclusive(int localDe, int *index,
+      int *rc=NULL) const;
     const char *getName()               const {return ESMC_BaseGetName();}
     int setName(char *name){return ESMC_BaseSetName(name, "Array");}
     // misc.
@@ -172,6 +180,22 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     static int sparseMatMulRelease(ESMC_RouteHandle *routehandle);
     
 };  // class Array
+
+struct SeqIndex{
+  int decompSeqIndex;
+  int tensorSeqIndex;
+  static int cmp(const void *a, const void *b){
+    SeqIndex *aObj = (SeqIndex *)a;
+    SeqIndex *bObj = (SeqIndex *)b;
+    if (aObj->decompSeqIndex < bObj->decompSeqIndex) return -1;
+    if (aObj->decompSeqIndex > bObj->decompSeqIndex) return +1;
+    // decompSeqIndex must be equal
+    if (aObj->tensorSeqIndex < bObj->tensorSeqIndex) return -1;
+    if (aObj->tensorSeqIndex > bObj->tensorSeqIndex) return +1;
+    // tensorSeqIndex must be equal
+    return 0;
+  }
+};  // struct seqIndex
 
 } // namespace ESMCI
 
