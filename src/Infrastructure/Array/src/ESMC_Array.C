@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.138 2007/09/26 19:02:26 theurich Exp $
+// $Id: ESMC_Array.C,v 1.139 2007/09/26 20:09:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.138 2007/09/26 19:02:26 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.139 2007/09/26 20:09:19 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1523,9 +1523,12 @@ int Array::serialize(
   *ip++ = rank;
   ifp = (ESMC_IndexFlag *)ip;
   *ifp++ = indexflag;
+  ip = (int *)ifp;
+  *ip++ = tensorCount;
+  *ip++ = tensorCellCount;
   
   // fix offset  
-  cp = (char *)ifp;
+  cp = (char *)ip;
   *offset = (cp - buffer);
   
   // return successfully
@@ -1582,9 +1585,12 @@ int Array::deserialize(
   rank = *ip++;
   ifp = (ESMC_IndexFlag *)ip;
   indexflag = *ifp++;
+  ip = (int *)ifp;
+  tensorCount = *ip++;
+  tensorCellCount = *ip++;
   
   // fix offset
-  cp = (char *)ifp;
+  cp = (char *)ip;
   *offset = (cp - buffer);
   
   // set values with local dependency

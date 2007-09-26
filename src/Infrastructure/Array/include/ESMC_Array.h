@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.73 2007/09/26 18:56:35 theurich Exp $
+// $Id: ESMC_Array.h,v 1.74 2007/09/26 20:09:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -93,6 +93,9 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
   public:
     // constructor and destructor
     Array(){
+      typekind = ESMF_NOKIND;
+      rank = 0;
+      indexflag = ESMF_INDEX_DELOCAL;
       larrayList = NULL;
       larrayBaseAddrList = NULL;
       exclusiveLBound = NULL;
@@ -101,6 +104,7 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
       computationalUBound = NULL;
       totalLBound = NULL;
       totalUBound = NULL;
+      tensorCount = 0;
       lbounds = NULL;
       ubounds = NULL;
       staggerLoc = NULL;
@@ -108,6 +112,7 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
       dimmap = NULL;
       inverseDimmap = NULL;
       contiguousFlag = NULL;
+      tensorCellCount = 0;
       deCellCount = NULL;
     }
     Array(ESMC_TypeKind typekind, int rank, ESMC_LocalArray **larrayList,
