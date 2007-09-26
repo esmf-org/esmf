@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.137 2007/09/26 18:56:20 theurich Exp $
+// $Id: ESMC_Array.C,v 1.138 2007/09/26 19:02:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.137 2007/09/26 18:56:20 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.138 2007/09/26 19:02:26 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4970,8 +4970,10 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         localrc = xxe->exec(rraCount, rraList, &dt_byte, xxeIndex, xxeIndex);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
+#if 0        
 printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
   " dt_byte=%g s for count=%d\n", localPet, dt_tk, dt_byte, count);
+#endif
         // decide for the fastest option
         if (dt_byte < dt_tk){
           // use byte option for memGatherSrcRRA
@@ -5266,9 +5268,11 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
         xxeIndex);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         &rc)) return rc;
+#if 0
 printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
   " dt_sScalarC=%g s for termCount=%d\n", localPet, dt_sScalar, dt_sScalarC,
   termCount);
+#endif
       // decide for the fastest option
       if (dt_sScalar < dt_sScalarC){
         // use productSumSuperScalarRRA
