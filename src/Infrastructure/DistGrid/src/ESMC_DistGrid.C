@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.35 2007/09/25 23:40:53 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.36 2007/09/26 18:46:52 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.35 2007/09/25 23:40:53 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistGrid.C,v 1.36 2007/09/26 18:46:52 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1680,7 +1680,7 @@ int DistGrid::validate()const{
 int DistGrid::getContigFlagPDimPDe(
 //
 // !RETURN VALUE:
-//    int dimContigFlag for de and dim
+//    int contigFlag for de and dim
 //
 // !ARGUMENTS:
 //
@@ -1727,7 +1727,7 @@ int DistGrid::getContigFlagPDimPDe(
 int DistGrid::getCellCountPDe(
 //
 // !RETURN VALUE:
-//    int deCellCount for DE
+//    int cellCount for DE
 //
 // !ARGUMENTS:
 //
