@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.34 2007/09/25 06:05:56 cdeluca Exp $
+% $Id: Grid_desc.tex,v 1.35 2007/09/27 17:18:25 oehmke Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -104,7 +104,7 @@ and curvilinear coordinates.  For more details see section \ref{sec:coordspec}.
 ESMF has shortcuts for the creation of standard Grid topologies 
 or {\bf shapes} up to 3D.  In many cases, these enable the user to
 bypass the step of creating a DistGrid before creating the Grid.  The basic call is 
-{\tt ESMF\_GridCreateShape()}.  With this call, the user can specify for
+{\tt ESMF\_GridCreateShapeTile()}.  With this call, the user can specify for
 each dimension whether there is no connection, it is periodic, it
 is a pole, or it is a bipole.  The assumed connectivities for poles and
 bipoles are described in section \ref{sec:opt:gridconn}.  Connectivities
@@ -112,7 +112,7 @@ are specified using the ESMF\_GridConn parameter, which has values
 such as ESMF\_GRIDCONN\_PERIODIC.
 
 The table below shows the ESMF\_GridConn settings used to create 
-standard shapes in 2D using the ESMF\_GridCreateShape() call.  Two values
+standard shapes in 2D using the ESMF\_GridCreateShapeTile() call.  Two values
 are specified for each dimension, one for the low end and one for 
 the high end of the dimension's index values.  Note that connectivities
 have not been implemented as of v3.0.3 and default to aperiodic bounds.
@@ -273,12 +273,12 @@ a value of {\tt ESMF\_GRIDSTATUS\_SHAPE\_READY}.
 
 The options for specifying the Grid shape are:
 \begin{itemize}
-\item Use the {\tt ESMF\_GridCreateShape()} shortcut method to 
+\item Use the {\tt ESMF\_GridCreateShapeTile()} shortcut method to 
 specify the Grid size and rank, and to select from a limited set
 of edge connectivities.   
 \item Create a DistGrid using the {\tt ESMF\_DistGridCreate()}
 method.  This enables the user to specify connectivities in 
-greater detail than using {\tt ESMF\_GridCreateShape()}.  Then
+greater detail than using {\tt ESMF\_GridCreateShapeTile()}.  Then
 pass the DistGrid into a general {\tt ESMF\_GridCreate()} method.
 \end{itemize}
 
@@ -306,7 +306,7 @@ for building Grids.
 \hline
 {\bf Create Shape} \\
 {\it From shape shortcut} \\
-{\tt grid = ESMF\_GridCreateShape(...)} \\
+{\tt grid = ESMF\_GridCreateShapeTile(...)} \\
 {\it Using DistGrid with general create interface} \\
 {\tt distgrid = ESMF\_DistGridCreate(...)} \\
 {\tt grid = ESMF\_GridCreate(distgrid, ...)} \\

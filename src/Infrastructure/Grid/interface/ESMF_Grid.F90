@@ -137,7 +137,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.30 2007/09/27 06:07:07 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.31 2007/09/27 17:18:25 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -2504,17 +2504,20 @@ end subroutine ESMF_GridGet
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!  This method gets information about the range of index space which a particular
-!  stagger location occupies. This call differs from the coordinate bound calls
-!  (e.g. {\tt ESMF\_GridGetCoord}) in that a given coordinate array may only occupy 
-!  a subset of the Grid's dimensions, and
-!  so these calls may not give all the bounds of the stagger location. The bounds from this call
-!  are the full bounds, and so
-!  for example, give the appropriate bounds for creating a data array on the stagger location.
-!  Note that unlike the output from the Array, these values also include the undistributed dimensions and are
-!  ordered to reflect the order of the indices in the Grid. This call will still give correct
-!  values even if the stagger location does not contain coordinate arrays (e.g. if 
-!  {\tt ESMF\_GridAllocCoord} hasn't yet been called on the stagger location).
+!  This method gets information about the range of index space which a 
+!  particular stagger location occupies. This call differs from the coordinate 
+!  bound calls (e.g. {\tt ESMF\_GridGetCoord}) in that a given coordinate 
+!  array may only occupy a subset of the Grid's dimensions, and
+!  so these calls may not give all the bounds of the stagger location. 
+!  The bounds from this call are the full bounds, and so
+!  for example, give the appropriate bounds for creating an array to hold 
+!  data residing on the stagger location.
+!  Note that unlike the output from the Array, these values also include the 
+!  undistributed dimensions and are
+!  ordered to reflect the order of the indices in the Grid. This call will 
+!  still give correct values even if the stagger location does not contain
+!  coordinate arrays (e.g. if  {\tt ESMF\_GridAllocCoord} hasn't yet 
+!  been called on the stagger location).
 !
 !The arguments are:
 !\begin{description}
@@ -2692,9 +2695,10 @@ end subroutine ESMF_GridGet
 !     \item[{fptr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case fptr is a reference to 
-!          the data in the Grid coordinate arrays. Please see Section~\ref{opt:copyflag} for
-!          further description and a list of other valid values. 
+!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!          fptr is a reference to the data in the Grid coordinate arrays. 
+!          Please see Section~\ref{opt:copyflag} for further description and a
+!          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2777,9 +2781,10 @@ end subroutine ESMF_GridGet
 !     \item[{fptr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case fptr is a reference to 
-!          the data in the Grid coordinate arrays. Please see Section~\ref{opt:copyflag} for
-!          further description and a list of other valid values. 
+!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!          fptr is a reference to the data in the Grid coordinate arrays. 
+!          Please see Section~\ref{opt:copyflag} for further description and a
+!          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3052,9 +3057,10 @@ end subroutine ESMF_GridGet
 !     \item[{fptr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case fptr is a reference to 
-!          the data in the Grid coordinate arrays. Please see Section~\ref{opt:copyflag} for
-!          further description and a list of other valid values. 
+!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!          fptr is a reference to the data in the Grid coordinate arrays. 
+!          Please see Section~\ref{opt:copyflag} for further description and a
+!          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3330,9 +3336,10 @@ end subroutine ESMF_GridGet
 !     \item[{fptr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case fptr is a reference to 
-!          the data in the Grid coordinate arrays. Please see Section~\ref{opt:copyflag} for
-!          further description and a list of other valid values. 
+!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!          fptr is a reference to the data in the Grid coordinate arrays. 
+!          Please see Section~\ref{opt:copyflag} for further description and a
+!          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3611,9 +3618,10 @@ endif
 !     \item[{fptr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case fptr is a reference to 
-!          the data in the Grid coordinate arrays. Please see Section~\ref{opt:copyflag} for
-!          further description and a list of other valid values. 
+!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!          fptr is a reference to the data in the Grid coordinate arrays. 
+!          Please see Section~\ref{opt:copyflag} for further description and a
+!          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3891,9 +3899,10 @@ endif
 !     \item[{fptr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case fptr is a reference to 
-!          the data in the Grid coordinate arrays. Please see Section~\ref{opt:copyflag} for
-!          further description and a list of other valid values. 
+!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!          fptr is a reference to the data in the Grid coordinate arrays. 
+!          Please see Section~\ref{opt:copyflag} for further description and a
+!          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4170,9 +4179,10 @@ endif
 !     \item[{fptr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case fptr is a reference to 
-!          the data in the Grid coordinate arrays. Please see Section~\ref{opt:copyflag} for
-!          further description and a list of other valid values. 
+!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!          fptr is a reference to the data in the Grid coordinate arrays. 
+!          Please see Section~\ref{opt:copyflag} for further description and a
+!          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4580,9 +4590,10 @@ endif
 !     \item[{array}]
 !          An array into which to put the coordinate infomation. 
 !     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case {\tt array} is a reference to 
-!          the Grid coordinate Arrays. Please see Section~\ref{opt:copyflag} for
-!          further description and a list of other valid values. 
+!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case 
+!          {\tt array} will contain a reference to the Grid coordinate Arrays.
+!           Please see Section~\ref{opt:copyflag} for
+!          further description and a list of valid values. 
 !          [THE ESMF\_DATA\_COPY OPTION IS CURRENTLY NOT IMPLEMENTED] 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4801,9 +4812,10 @@ endif
 !\item[{array}]
 !    An array to set the grid coordinate information from.
 !\item[{[doCopy]}]
-!    If not specified, default to {\tt ESMF\_DATA\_REF}, in this case the Grid coordinate
-!    Array is a reference to {\tt array}. Please see Section~\ref{opt:copyflag} for
-!    further description and a list of other valid values. 
+!    If not specified, default to {\tt ESMF\_DATA\_REF}, in this case the Grid 
+!    coordinate Array will be set to a reference to {\tt array}. Please see 
+!    Section~\ref{opt:copyflag} for further description and a list of
+!    valid values. 
 !    [THE ESMF\_DATA\_COPY OPTION IS CURRENTLY NOT IMPLEMENTED] 
 !\item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
