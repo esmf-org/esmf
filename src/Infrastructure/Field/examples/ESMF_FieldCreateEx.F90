@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.45 2007/09/20 17:44:21 cdeluca Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.46 2007/09/27 16:43:05 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -57,9 +57,7 @@
 !   !  10x20 DEs.  This version of create simply
 !   !  associates the data with the Grid.  The data is referenced
 !   !  by default.  The DataMap is created with defaults.
-
-    grid = ESMF_GridCreateShape(name="atmgrid", /10,20/) 
-
+    grid = ESMF_GridCreateShapeTile(name="atmgrid", maxIndex=(/10,20/)) 
 
     igrid = ESMF_IGridCreateHorzXYUni((/ 10, 20 /), origin, &
                                     deltaPerDim=(/ 1.0d0, 1.0d0 /), &
