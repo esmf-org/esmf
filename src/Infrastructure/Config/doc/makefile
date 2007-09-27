@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2006/11/16 23:55:55 cdeluca Exp $
+# $Id: makefile,v 1.5 2007/09/27 17:52:32 theurich Exp $
 
 ALL: onedoc
 
@@ -38,5 +38,6 @@ include $(ESMF_DIR)/makefile
 DIRS = 
 CLEANDIRS   = Config_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
+              Config_refdoc.tex \
               $(PDFFILES)
 CLOBBERDIRS =
