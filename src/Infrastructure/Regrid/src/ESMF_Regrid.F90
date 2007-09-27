@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.119 2007/08/20 22:57:41 cdeluca Exp $
+! $Id: ESMF_Regrid.F90,v 1.120 2007/09/27 19:53:11 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -17,8 +17,9 @@
 !
 !==============================================================================
 !
-! This file contains most of the Regrid class methods.  The Regrid data type
-! and some utility functions are contained in RegridTypesMod.
+! ***THIS CODE IS CURRENTLY NON-FUNCTIONAL WHILE WE BRING IN A NEW,
+! ***MORE GENERAL REGRIDDING ENGINE.  It REMAINS HERE FOR THE TIME BEING
+! ***BECAUSE WE ANTICIPATE REUSING PARTS OF THE INTERFACE.
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -94,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.119 2007/08/20 22:57:41 cdeluca Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.120 2007/09/27 19:53:11 cdeluca Exp $'
 
 !==============================================================================
 !

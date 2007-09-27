@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.106 2007/06/23 07:00:48 cdeluca Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.107 2007/09/27 19:53:11 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -17,7 +17,9 @@
 !
 !==============================================================================
 !
-! This file contains the Regrid class methods for bilinear regridding.
+! ***THIS CODE IS CURRENTLY NON-FUNCTIONAL WHILE WE BRING IN A NEW,
+! ***MORE GENERAL REGRIDDING ENGINE.  It REMAINS HERE FOR THE TIME BEING
+! ***BECAUSE WE ANTICIPATE REUSING PARTS OF THE INTERFACE.
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -63,7 +65,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.106 2007/06/23 07:00:48 cdeluca Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.107 2007/09/27 19:53:11 cdeluca Exp $'
 
 !==============================================================================
 
