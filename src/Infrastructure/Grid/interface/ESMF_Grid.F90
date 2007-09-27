@@ -137,7 +137,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.29 2007/09/27 00:16:07 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.30 2007/09/27 06:07:07 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2644,12 +2644,13 @@ end subroutine ESMF_GridGet
 !
 !     Supported values for the <pointer argument> are: 
 !     \begin{description}
-!     \item real(ESMF_KIND_R4), pointer :: fptr(:)
-!     \item real(ESMF_KIND_R4), pointer :: fptr(:,:)     
-!     \item real(ESMF_KIND_R4), pointer :: fptr(:,:,:)
-!     \item real(ESMF_KIND_R8), pointer :: fptr(:)
-!     \item real(ESMF_KIND_R8), pointer :: fptr(:,:)     
-!     \item real(ESMF_KIND_R8), pointer :: fptr(:,:,:)
+!     \item real(ESMF\_KIND\_R4), pointer :: fptr(:)
+!     \item real(ESMF\_KIND\_R4), pointer :: fptr(:,:)     
+!     \item real(ESMF\_KIND\_R4), pointer :: fptr(:,:,:)
+!     \item real(ESMF\_KIND\_R8), pointer :: fptr(:)
+!     \item real(ESMF\_KIND\_R8), pointer :: fptr(:,:)     
+!     \item real(ESMF\_KIND\_R8), pointer :: fptr(:,:,:)
+!     \end{description}
 !
 !     The arguments are:
 !     \begin{description}

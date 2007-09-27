@@ -1,4 +1,4 @@
-% $Id: Bundle_refdoc.ctex,v 1.20 2004/09/23 21:45:00 nscollins Exp $
+% $Id: Bundle_refdoc.ctex,v 1.21 2007/09/27 06:07:05 theurich Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -95,9 +95,9 @@
 
 \subsection{Class API: Bundle Communications}
 #ifdef STANDALONE
-\input{../../BundleComm/doc/ESMF_BundleComm_fapi}
+%\input{../../BundleComm/doc/ESMF_BundleComm_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/BundleComm/doc/ESMF_BundleComm_fapi}
+%\input{../Infrastructure/BundleComm/doc/ESMF_BundleComm_fapi}
 #endif
 
 #ifdef STANDALONE

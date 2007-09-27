@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.43 2007/09/25 21:39:46 cdeluca Exp $
+! $Id: ESMF_Config.F90,v 1.44 2007/09/27 06:07:07 theurich Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -701,10 +701,10 @@
 !      \begin{description}
 !      \item character, intent(out)                 :: value
 !      \item character(len=*), intent(out)          :: value
-!      \item real(ESMF_KIND_R4), intent(out)        :: value    
-!      \item real(ESMF_KIND_R8), intent(out)        :: value
-!      \item integer(ESMF_KIND_I4), intent(out)     :: value
-!      \item integer(ESMF_KIND_I8), intent(out)     :: value
+!      \item real(ESMF\_KIND\_R4), intent(out)      :: value    
+!      \item real(ESMF\_KIND\_R8), intent(out)      :: value
+!      \item integer(ESMF\_KIND\_I4), intent(out)   :: value
+!      \item integer(ESMF\_KIND\_I8), intent(out)   :: value
 !      \item logical, intent(out)                   :: value
 !      \end{description}
 !
@@ -747,10 +747,10 @@
 !
 !      Supported values for <value list argument> are:
 !      \begin{description}
-!      \item real(ESMF_KIND_R4), intent(inout)        :: valueList(:)
-!      \item real(ESMF_KIND_R8), intent(inout)        :: valueList(:) 
-!      \item integer(ESMF_KIND_I4), intent(inout)     :: valueList(:)  
-!      \item integer(ESMF_KIND_I8), intent(inout)     :: valueList(:)  
+!      \item real(ESMF\_KIND\_R4), intent(inout)      :: valueList(:)
+!      \item real(ESMF\_KIND\_R8), intent(inout)      :: valueList(:) 
+!      \item integer(ESMF\_KIND\_I4), intent(inout)   :: valueList(:)  
+!      \item integer(ESMF\_KIND\_I8), intent(inout)   :: valueList(:)  
 !      \item logical, intent(inout)                   :: valueList(:)  
 !      \end{description}
 !
@@ -2454,7 +2454,7 @@
 !
 !      Supported values for <value argument> are:
 !      \begin{description}
-!      \item integer(ESMF_KIND_I4), intent(in)            :: value
+!      \item integer(ESMF\_KIND\_I4), intent(in)            :: value
 !      \end{description}
 !
 !   The arguments are:

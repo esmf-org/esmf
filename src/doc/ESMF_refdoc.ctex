@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.74 2007/07/02 19:11:28 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.75 2007/09/27 06:07:09 theurich Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -155,11 +155,11 @@
 %\section{Overview of Distributed Data Methods}
 \input{ESMF_inframethodoverview.tex}
 
-#include "../Infrastructure/InternArrayComm/doc/InternArrayHalo_refdoc.ctex"
+%#include "../Infrastructure/InternArrayComm/doc/InternArrayHalo_refdoc.ctex"
 
-#include "../Infrastructure/Regrid/doc/Regrid_refdoc.ctex"
+%#include "../Infrastructure/Regrid/doc/Regrid_refdoc.ctex"
 
-#include "../Infrastructure/InternArrayComm/doc/InternArrayRedist_refdoc.ctex"
+%#include "../Infrastructure/InternArrayComm/doc/InternArrayRedist_refdoc.ctex"
 
 %===============================================================================
 \newpage
