@@ -1,5 +1,5 @@
-#!/bin/ksh
-# $Id: mpirun.sge.batch,v 1.2 2007/09/26 20:24:50 svasquez Exp $
+#!/bin/ksh 
+# $Id: mpirun.sge.batch,v 1.3 2007/09/27 21:37:10 svasquez Exp $
 # This script provides an interface such that the simple command
 # mpirun -np #
 # runs # copies of the program in parallel.
@@ -16,6 +16,7 @@ export prog=$*
 
 export working_dir=`pwd`
 
+
 # Extract batch run script
 cat > $ESMF_DIR/scripts/esmf_script << THE_END_OF_BATCH_SCRIPT
 #!/bin/csh -f
@@ -29,7 +30,7 @@ cat > $ESMF_DIR/scripts/esmf_script << THE_END_OF_BATCH_SCRIPT
 #  Set the account to acb
 #$ -A acb
 #
-#$ -pe comp 8
+#$ -pe wcomp 8
 #
 #  My code is re-runnable
 #$ -r n
@@ -38,7 +39,7 @@ cat > $ESMF_DIR/scripts/esmf_script << THE_END_OF_BATCH_SCRIPT
 #$ -l h_rt=00:30:00
 
 
-source /usr/local/bin/setup-mpi.csh
+#source /usr/local/bin/setup-mpi.csh
 
 cd $working_dir
 
@@ -47,11 +48,11 @@ mpirun -np $np  $prog
 
 THE_END_OF_BATCH_SCRIPT
 
-chmod a+x $ESMF_DIR/scripts/esmf_script
+#chmod a+x $ESMF_DIR/scripts/esmf_script
 
 echo " qsub  $ESMF_DIR/scripts/esmf_script"
 
-job_num=`qsub $ESMF_DIR/scripts/esmf_script `
+job_num=`qsub  $ESMF_DIR/scripts/esmf_script `
 
 # Since this is not an interactive shell, we must grep for the proc_id until 
 # it is gone, indicating the job is done or the walltime has expired.
@@ -69,7 +70,7 @@ do
 		qdel $proc_id
 	else
         	sleep 30
-	endif
+	fi
 done
 
 # move job output file to stdout.
