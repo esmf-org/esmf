@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray_F.C,v 1.22 2007/05/09 02:47:50 rosalind Exp $
+// $Id: ESMC_LocalArray_F.C,v 1.23 2007/09/27 23:37:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ char *name = NULL;
                                      ESMC_TypeKind *dk,
                                      int *counts, int *lbounds, int *ubounds,
                                      int *status)  {
-         (*ptr) = ESMC_LocalArrayCreate_F(*rank, *dk, counts, 
+         (*ptr) = ESMC_LocalArray::ESMC_LocalArrayCreate_F(*rank, *dk, counts, 
                                     NULL, NULL, ESMC_DATA_NONE, name,
                                     lbounds, ubounds, NULL, status);
 
@@ -58,8 +58,8 @@ char *name = NULL;
                                         ESMC_TypeKind *dk, 
                                         ESMC_ArrayOrigin *oflag, int *status) {
              
-             (*ptr) = ESMC_LocalArrayCreateNoData(*rank, *dk, *oflag, 
-                                                  name, status);
+             (*ptr) = ESMC_LocalArray::ESMC_LocalArrayCreateNoData(*rank, *dk,
+                  *oflag, name, status);
 
              (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }
@@ -181,7 +181,7 @@ char *name = NULL;
               *status = ESMF_FAILURE;
               return;
           }
-         *status = ESMC_LocalArrayDestroy(*ptr);
+         *status = ESMC_LocalArray::ESMC_LocalArrayDestroy(*ptr);
      }
 
      void FTN(c_esmc_localarraysetbaseaddr)(ESMC_LocalArray **ptr, void XD *base, int *status) {

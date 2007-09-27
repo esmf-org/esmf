@@ -1,4 +1,5 @@
-// $Id: ESMC_LocalArray.C,v 1.26 2007/06/13 23:10:07 samsoncheung Exp $
+// $Id: ESMC_LocalArray.C,v 1.27 2007/09/27 23:37:04 theurich Exp $
+//
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -6,116 +7,65 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
-
-// ESMC Array method implementation (body) file
-#define ESMF_FILENAME "ESMC_LocalArray.C"
-
+//
+//==============================================================================
+#define ESMC_FILENAME "ESMC_LocalArray.C"
+//==============================================================================
+//
+// ESMC LocalArray method implementation (body) file
+//
 //-----------------------------------------------------------------------------
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ Array methods declared
+// The code in this file implements the C++ LocalArray methods declared
 // in the companion file ESMC_LocalArray.h.  
 //
-// The {\tt ESMF\_Array} object allows C++ to emulate the richer
-// Fortran language Array operations.  It allows strided access, 
-// subsetting operations, known dimension sizes, and typed access 
-// to arrays instead of just a starting address to a block of memory.  
+// The LocalArray class allows C++ to emulate the richer Fortran language array
+// operations. It allows strided access, subsetting operations, known dimension,
+// sizes, and typed access to arrays instead of just a starting address to a
+// block of memory.  
 //
 //-----------------------------------------------------------------------------
-//
 
-// for printf
+// associated header file
+#include "ESMC_LocalArray.h"
+
+// higher level, 3rd party or system headers
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 
+// ESMF headers
 #include "ESMC_Start.h"
 #include "ESMC_LogErr.h"
 
-// associated class definition file
-#include "ESMC_LocalArray.h"
 
 //-----------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = 
-            "$Id: ESMC_LocalArray.C,v 1.26 2007/06/13 23:10:07 samsoncheung Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMC_LocalArray.C,v 1.27 2007/09/27 23:37:04 theurich Exp $";
 //-----------------------------------------------------------------------------
 
-//
+// prototypes for Fortran calls
+extern "C" {
+
+  void FTN(f_esmf_localarrayf90allocate)(ESMC_LocalArray**, int *, 
+    ESMC_TypeKind*, int *, int *, int *, int *);
+ 
+  void FTN(f_esmf_localarrayf90deallocate)(ESMC_LocalArray**, int*, 
+    ESMC_TypeKind *, int *);
+ 
+  void FTN(f_esmf_localarrayadjust)(ESMC_LocalArray**, int *,
+    ESMC_TypeKind*, int *, int *, int *, int *);
+}
+
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 // This section includes all the Local Array create/destroy routines.
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_LocalArrayCreate"
-//BOP
-// !IROUTINE:  ESMC_LocalArrayCreate - Create a new Array
-//
-// !INTERFACE:
-      ESMC_LocalArray *ESMC_LocalArrayCreate(
-//
-// !RETURN VALUE:
-//     pointer to newly allocated ESMC_LocalArray
-//
-// !ARGUMENTS:
-    int rank,                  // dimensionality
-    ESMC_TypeKind dk,          // short/long, etc
-    int *icounts,              // number of items in each dim
-    void *base,                // if non-null, this is already allocated memory
-
-    ESMC_DataCopy docopy,      // if base != NULL, copy data?
-    char *name,                // array name
-    int *rc) {                 // return code
-//
-// !DESCRIPTION:
-//      This routine is the C++ entry point for creating an {\tt ESMF\_Array}
-//      object.  Unlike natural C++ arrays which can be as simple as the
-//      base address pointer and the number of bytes necessary to move to
-//      the next item, {\tt ESMF\_Array}s are richer in the associated metadata
-//      which allows them to behave more like Fortran arrays.  They store
-//      the size of each dimension, allow non-contiguous strides per
-//      dimension, and allow whole-array or subsectional operations.
-//
-//EOP
-
-//   This code needs to make space for the private class data and store the
-//   arguments given.
-//
-//   There will need to be a #if USING_MIXED_FORTRAN_AND_C++ section.  If
-//   we are running with fortran, then it needs to do:
-//   - call a *Fortran* allocate routine to get space - not malloc - and
-//     it needs to create an F90 array pointer of the correct type/kind/rank 
-//     so this array is useable from F90 as well as C++.  
-//     The new F90 pointer is stored in the private 
-//     data for this class as an opaque object; to be returned on demand 
-//     for use by fortran code.
-//
-//   else, if this is a C++ only build then it has to call malloc to get
-//   space, and it can ignore F90 pointers completely.
-//
-//   The return from this routine is a pointer to the new Array data.
-//
-     ESMC_LocalArray *a = new ESMC_LocalArray;
-     int status;
-
-     // Initialize return code; assume routine not implemented
-     if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
-     status = ESMC_RC_NOT_IMPL;
-
-     status = a->ESMC_LocalArrayConstruct(rank, dk, icounts, base, 
-                                          ESMC_FROM_CPLUSPLUS,
-                                          NULL, ESMC_ARRAY_DO_ALLOCATE, 
-                                          docopy, ESMF_TRUE, name,
-                                          NULL, NULL, NULL); 
-     
-     if (rc != NULL)
-         *rc = status;
-
-     return a;
-
- } // end ESMC_LocalArrayCreate
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -124,30 +74,108 @@
 // !IROUTINE:  ESMC_LocalArrayCreate - Create a new Array
 //
 // !INTERFACE:
-      ESMC_LocalArray *ESMC_LocalArrayCreate(
+ESMC_LocalArray *ESMC_LocalArray::ESMC_LocalArrayCreate(
 //
 // !RETURN VALUE:
 //     pointer to newly allocated ESMC_LocalArray
 //
 // !ARGUMENTS:
-    int rank,                  // dimensionality
-    ESMC_TypeKind dk,          // short/long, etc
-    int *icounts,              // number of items in each dim
-    int *lbounds,              // lower index number per dim
-    int *ubounds,              // upper index number per dim
-    void *base,                // if non-null, this is already allocated memory
-    ESMC_DataCopy docopy,      // if base != NULL, copy data?
-    char *name,                // array name
-    int *rc) {                 // return code
+  int rank,                  // dimensionality
+  ESMC_TypeKind dk,          // short/long, etc
+  int *icounts,              // number of items in each dim
+  void *base,                // if non-null, this is already allocated memory
+
+  ESMC_DataCopy docopy,      // if base != NULL, copy data?
+  char *name,                // array name
+  int *rc) {                 // return code
 //
 // !DESCRIPTION:
-//      This routine is the C++ entry point for creating an {\tt ESMF\_Array}
-//      object.  Unlike natural C++ arrays which can be as simple as the
-//      base address pointer and the number of bytes necessary to move to
-//      the next item, {\tt ESMF\_Array}s are richer in the associated metadata
-//      which allows them to behave more like Fortran arrays.  They store
-//      the size of each dimension, allow non-contiguous strides per
-//      dimension, and allow whole-array or subsectional operations.
+//  This routine is the C++ entry point for creating an {\tt ESMC\_LocalArray}
+//  object.  Unlike natural C++ arrays which can be as simple as the
+//  base address pointer and the number of bytes necessary to move to
+//  the next item, {\tt ESMC\_LocalArray}s are richer in the associated metadata
+//  which allows them to behave more like Fortran arrays.  They store
+//  the size of each dimension, allow non-contiguous strides per
+//  dimension, and allow whole-array or subsectional operations.
+//
+//EOP
+
+//   This code needs to make space for the private class data and store the
+//   arguments given.
+//
+//   There will need to be a #if USING_MIXED_FORTRAN_AND_C++ section.  If
+//   we are running with fortran, then it needs to do:
+//   - call a *Fortran* allocate routine to get space - not malloc - and
+//     it needs to create an F90 array pointer of the correct type/kind/rank 
+//     so this array is useable from F90 as well as C++.  
+//     The new F90 pointer is stored in the private 
+//     data for this class as an opaque object; to be returned on demand 
+//     for use by fortran code.
+//
+//   else, if this is a C++ only build then it has to call malloc to get
+//   space, and it can ignore F90 pointers completely.
+//
+//   The return from this routine is a pointer to the new LocalArray data.
+//
+//-----------------------------------------------------------------------------
+  int status;
+  // Initialize return code; assume routine not implemented
+  if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
+  status = ESMC_RC_NOT_IMPL;
+
+  ESMC_LocalArray *a;
+  try{
+    a = new ESMC_LocalArray;
+  }catch(...){
+    // allocation error
+    ESMC_LogDefault.ESMC_LogAllocError(rc);  
+    return ESMC_NULL_POINTER;
+  }
+
+  status = a->ESMC_LocalArrayConstruct(rank, dk, icounts, base, 
+    ESMC_FROM_CPLUSPLUS,  NULL, ESMC_ARRAY_DO_ALLOCATE, docopy, ESMF_TRUE,
+    name, NULL, NULL, NULL); 
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
+    return ESMC_NULL_POINTER;
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return a;
+  
+} // end ESMC_LocalArrayCreate
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_LocalArrayCreate"
+//BOP
+// !IROUTINE:  ESMC_LocalArrayCreate - Create a new Array
+//
+// !INTERFACE:
+ESMC_LocalArray *ESMC_LocalArray::ESMC_LocalArrayCreate(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMC_LocalArray
+//
+// !ARGUMENTS:
+  int rank,                  // dimensionality
+  ESMC_TypeKind dk,          // short/long, etc
+  int *icounts,              // number of items in each dim
+  int *lbounds,              // lower index number per dim
+  int *ubounds,              // upper index number per dim
+  void *base,                // if non-null, this is already allocated memory
+  ESMC_DataCopy docopy,      // if base != NULL, copy data?
+  char *name,                // array name
+  int *rc) {                 // return code
+//
+// !DESCRIPTION:
+//  This routine is the C++ entry point for creating an {\tt ESMC\_LocalArray}
+//  object.  Unlike natural C++ arrays which can be as simple as the
+//  base address pointer and the number of bytes necessary to move to
+//  the next item, {\tt ESMC\_LocalArray}s are richer in the associated metadata
+//  which allows them to behave more like Fortran arrays.  They store
+//  the size of each dimension, allow non-contiguous strides per
+//  dimension, and allow whole-array or subsectional operations.
 //
 //EOP
 
@@ -168,25 +196,33 @@
 //
 //   The return from this routine is a pointer to the new Array data.
 //
-     ESMC_LocalArray *a = new ESMC_LocalArray;
-     int status;
+//-----------------------------------------------------------------------------
+  int status;
+  // Initialize return code; assume routine not implemented
+  if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
+  status = ESMC_RC_NOT_IMPL;
 
-     // Initialize return code; assume routine not implemented
-     if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
-     status = ESMC_RC_NOT_IMPL;
+  ESMC_LocalArray *a;
+  try{
+    a = new ESMC_LocalArray;
+  }catch(...){
+    // allocation error
+    ESMC_LogDefault.ESMC_LogAllocError(rc);  
+    return ESMC_NULL_POINTER;
+  }
 
-     status = a->ESMC_LocalArrayConstruct(rank, dk, icounts, base, 
-                                          ESMC_FROM_CPLUSPLUS,
-                                          NULL, ESMC_ARRAY_DO_ALLOCATE, 
-                                          docopy, ESMF_TRUE, name,
-                                          lbounds, ubounds, NULL); 
-     
-     if (rc != NULL)
-         *rc = status;
+  status = a->ESMC_LocalArrayConstruct(rank, dk, icounts, base, 
+    ESMC_FROM_CPLUSPLUS, NULL, ESMC_ARRAY_DO_ALLOCATE, docopy, ESMF_TRUE, name,
+    lbounds, ubounds, NULL); 
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
+    return ESMC_NULL_POINTER;
 
-     return a;
-
- } // end ESMC_LocalArrayCreate
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return a;
+  
+} // end ESMC_LocalArrayCreate
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -195,18 +231,17 @@
 // !IROUTINE:  ESMC_LocalArrayDestroy - free a LocalArray created with Create
 //
 // !INTERFACE:
-      int ESMC_LocalArrayDestroy(
+int ESMC_LocalArray::ESMC_LocalArrayDestroy(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_LocalArray *array) {
+  ESMC_LocalArray *array) {
 //
 // !DESCRIPTION:
-//      ESMF routine which destroys a LocalArray object previously allocated
-//      via an {\tt ESMC\_LocalArrayCreate} routine.  Define for deep classes
-//      only.
+//  ESMF routine which destroys a LocalArray object previously allocated
+//  via an {\tt ESMC\_LocalArrayCreate} routine.
 //
 //EOP
  
@@ -222,7 +257,8 @@
     rc = ESMF_SUCCESS;
     return rc;
 
- } // end ESMC_LocalArrayDestroy
+} // end ESMC_LocalArrayDestroy
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -231,47 +267,52 @@
 // !IROUTINE:  ESMC_LocalArrayCreateNoData - internal routine for fortran use
 //
 // !INTERFACE:
-      ESMC_LocalArray *ESMC_LocalArrayCreateNoData(
+ESMC_LocalArray *ESMC_LocalArray::ESMC_LocalArrayCreateNoData(
 //
 // !RETURN VALUE:
 //     pointer to newly allocated ESMC_LocalArray
 //
 // !ARGUMENTS:
-    int rank,                  // dimensionality
-    ESMC_TypeKind dk,          // short/long, etc
-    ESMC_ArrayOrigin oflag,    // caller is fortran or C++?
-    char *name,                // array name
-    int *rc) {                 // return code
+  int rank,                  // dimensionality
+  ESMC_TypeKind dk,          // short/long, etc
+  ESMC_ArrayOrigin oflag,    // caller is fortran or C++?
+  char *name,                // array name
+  int *rc) {                 // return code
 //
 // !DESCRIPTION:
-//      This version of Create is only intended for internal use by the
-//      {\tt ESMF\_LocalArrayCreate} fortran routine.  It creates a partially
-//      constructed array, then depends on the caller to come back and
-//      complete the array with the {\tt ESMF\_LocalArraySetInfo} call.  
-//      (It is broken up this way to try to minimize the amount of
-//      macro-generated code needed in the {\tt ESMF\_LocalArray.F90} source
-//      file.)
+//  This version of Create is only intended for internal use by the
+//  {\tt ESMF\_LocalArrayCreate} fortran routine.  It creates a partially
+//  constructed array, then depends on the caller to come back and
+//  complete the array with the {\tt ESMF\_LocalArraySetInfo} call.  
+//  (It is broken up this way to try to minimize the amount of
+//  macro-generated code needed in the {\tt ESMF\_LocalArray.F90} source
+//  file.)
 //
 //EOPI
+//-----------------------------------------------------------------------------
+  int status;
+  // Initialize return code; assume routine not implemented
+  if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
+  status = ESMC_RC_NOT_IMPL;
 
-     ESMC_LocalArray *a = new ESMC_LocalArray;
-     int status;
+  ESMC_LocalArray *a;
+  try{
+    a = new ESMC_LocalArray;
+  }catch(...){
+    // allocation error
+    ESMC_LogDefault.ESMC_LogAllocError(rc);  
+    return ESMC_NULL_POINTER;
+  }
 
-     // Initialize return code; assume routine not implemented
-     if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
-     status = ESMC_RC_NOT_IMPL;
+  status = a->ESMC_LocalArrayConstruct(rank, dk, NULL, NULL, oflag, NULL,
+    ESMC_ARRAY_NO_ALLOCATE, ESMC_DATA_NONE, ESMF_FALSE, name, NULL, NULL, NULL);
 
-     status = a->ESMC_LocalArrayConstruct(rank, dk, NULL, NULL, oflag,
-                            NULL, ESMC_ARRAY_NO_ALLOCATE, 
-                            ESMC_DATA_NONE, ESMF_FALSE, name,
-                            NULL, NULL, NULL);
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return a;
 
-     if (rc != NULL)
-         *rc = status;
-
-     return a;
-
- } // end ESMC_LocalArrayCreateNoData
+} // end ESMC_LocalArrayCreateNoData
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -280,36 +321,36 @@
 // !IROUTINE:  ESMC_LocalArrayCreate_F - internal routine for fortran use
 //
 // !INTERFACE:
-      ESMC_LocalArray *ESMC_LocalArrayCreate_F(
+ESMC_LocalArray *ESMC_LocalArray::ESMC_LocalArrayCreate_F(
 //
 // !RETURN VALUE:
 //     pointer to newly allocated ESMC_LocalArray
 //
 // !ARGUMENTS:
-    int rank,                  // dimensionality
-    ESMC_TypeKind dk,          // short/long, etc
-    int *icounts,              // counts along each dimension
-    struct c_F90ptr *f90ptr,   // opaque type which fortran uses (dope v)
-    void *base,                // real start of memory 
-    ESMC_DataCopy docopy,      // if base is null and this is Copy, alloc here
-    char *name,                // array name, default created if NULL
-    int *lbounds,              // lower index number per dim
-    int *ubounds,              // upper index number per dim
-    int *offsets,              // number of bytes to start of data/dim
-    int *rc) {                 // return code
+  int rank,                  // dimensionality
+  ESMC_TypeKind dk,          // short/long, etc
+  int *icounts,              // counts along each dimension
+  struct c_F90ptr *f90ptr,   // opaque type which fortran uses (dope v)
+  void *base,                // real start of memory 
+  ESMC_DataCopy docopy,      // if base is null and this is Copy, alloc here
+  char *name,                // array name, default created if NULL
+  int *lbounds,              // lower index number per dim
+  int *ubounds,              // upper index number per dim
+  int *offsets,              // number of bytes to start of data/dim
+  int *rc) {                 // return code
 //
 // !DESCRIPTION:
-//      This version of Create is only intended for internal use by the
-//      {\tt ESMF\_LocalArrayCreate} fortran routine.  This routine works in a
-//      similar manner as the regular {\tt ESMC\_LocalArrayCreate} routine, but
-//      the differences include:  it gets a real fortran 90 array pointer as
-//      one of the arguments; instead of calling malloc to make space for
-//      the array contents, it passes the f90 pointer back to a fortran
-//      routine to do the allocation.  This is so the fortran routine
-//      can create the corresponding 'dope vector' in a completely compiler-
-//      independent manner.  If we tried to do it here, we would have to
-//      reverse-engineer the structure for each version of each compiler
-//      we used.
+//  This version of Create is only intended for internal use by the
+//  {\tt ESMF\_LocalArrayCreate} fortran routine.  This routine works in a
+//  similar manner as the regular {\tt ESMC\_LocalArrayCreate} routine, but
+//  the differences include:  it gets a real fortran 90 array pointer as
+//  one of the arguments; instead of calling malloc to make space for
+//  the array contents, it passes the f90 pointer back to a fortran
+//  routine to do the allocation.  This is so the fortran routine
+//  can create the corresponding 'dope vector' in a completely compiler-
+//  independent manner.  If we tried to do it here, we would have to
+//  reverse-engineer the structure for each version of each compiler
+//  we used.
 //
 //EOP
 
@@ -331,32 +372,36 @@
 // 
 //   The return from this routine is a pointer to the new LocalArray data.
 //
-     ESMC_LocalArray *a = new ESMC_LocalArray;
-     int status;
- 
-   // Initialize return code; assume routine not implemented
-   if (rc!= NULL) *rc = ESMC_RC_NOT_IMPL;
-   status = ESMC_RC_NOT_IMPL;
+//-----------------------------------------------------------------------------
+  int status;
+  // Initialize return code; assume routine not implemented
+  if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
+  status = ESMC_RC_NOT_IMPL;
 
-     if (base == NULL) 
-         status = a->ESMC_LocalArrayConstruct(rank, dk, icounts, base, 
-                                              ESMC_FROM_FORTRAN, f90ptr, 
-                                              ESMC_ARRAY_DO_ALLOCATE,
-                                              ESMC_DATA_NONE, ESMF_TRUE, name,
-                                              lbounds, ubounds, offsets); 
-     else
-         status = a->ESMC_LocalArrayConstruct(rank, dk, icounts, base, 
-                                              ESMC_FROM_FORTRAN, f90ptr, 
-                                              ESMC_ARRAY_NO_ALLOCATE, 
-                                              docopy, ESMF_FALSE, name,
-                                              lbounds, ubounds, offsets); 
+  ESMC_LocalArray *a;
+  try{
+    a = new ESMC_LocalArray;
+  }catch(...){
+    // allocation error
+    ESMC_LogDefault.ESMC_LogAllocError(rc);  
+    return ESMC_NULL_POINTER;
+  }
 
-     if (rc != NULL)
-         *rc = status;
+  if (base == NULL) 
+    status = a->ESMC_LocalArrayConstruct(rank, dk, icounts, base, 
+      ESMC_FROM_FORTRAN, f90ptr, ESMC_ARRAY_DO_ALLOCATE, ESMC_DATA_NONE,
+      ESMF_TRUE, name, lbounds, ubounds, offsets); 
+  else
+    status = a->ESMC_LocalArrayConstruct(rank, dk, icounts, base, 
+      ESMC_FROM_FORTRAN, f90ptr, ESMC_ARRAY_NO_ALLOCATE, docopy,
+      ESMF_FALSE, name, lbounds, ubounds, offsets); 
 
-     return a;
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return a;
 
- } // end ESMC_LocalArrayCreate_F
+} // end ESMC_LocalArrayCreate_F
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -365,89 +410,89 @@
 // !IROUTINE:  ESMC_LocalArrayConstruct - fill in an already allocated LocalArray
 //
 // !INTERFACE:
-      int ESMC_LocalArray::ESMC_LocalArrayConstruct(
+int ESMC_LocalArray::ESMC_LocalArrayConstruct(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-    int irank,                 // dimensionality
-    ESMC_TypeKind dk,          // short/long, etc  (*2, *4, *8)
-    int *icounts,              // number of items in each dim
-    void *base,                // base memory address of data block
-    ESMC_ArrayOrigin oflag,    // create called from F90 or C++?
-    struct c_F90ptr *f90ptr,   // opaque type which fortran understands (dopev)
-    ESMC_ArrayDoAllocate aflag, // do we allocate space or not?
-    ESMC_DataCopy docopy,      // do we make a copy of the data?
-    ESMC_Logical dflag,        // do we deallocate space or not?
-    char *name,                // array name, default created if NULL
-    int *lbounds,              // lower index number per dim
-    int *ubounds,              // upper index number per dim
-    int *offsets) {            // offset in bytes to start of each dim
+  int irank,                 // dimensionality
+  ESMC_TypeKind dk,          // short/long, etc  (*2, *4, *8)
+  int *icounts,              // number of items in each dim
+  void *base,                // base memory address of data block
+  ESMC_ArrayOrigin oflag,    // create called from F90 or C++?
+  struct c_F90ptr *f90ptr,   // opaque type which fortran understands (dopev)
+  ESMC_ArrayDoAllocate aflag, // do we allocate space or not?
+  ESMC_DataCopy docopy,      // do we make a copy of the data?
+  ESMC_Logical dflag,        // do we deallocate space or not?
+  char *name,                // array name, default created if NULL
+  int *lbounds,              // lower index number per dim
+  int *ubounds,              // upper index number per dim
+  int *offsets) {            // offset in bytes to start of each dim
 //
 // !DESCRIPTION:
-//      ESMF routine which fills in the contents of an already allocated
-//      {\tt ESMF\_LocalArray} object.  May need to do additional allocations
-//      as needed.  Must call the corresponding {\tt ESMC\_LocalArrayDestruct}
-//      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use {\tt ESMC\_LocalArrayCreate}, which calls
-//      {\tt ESMC\_LocalArrayConstruct}.  Define for deep classes only.
+//  ESMF routine which fills in the contents of an already allocated
+//  {\tt ESMF\_LocalArray} object.  May need to do additional allocations
+//  as needed.  Must call the corresponding {\tt ESMC\_LocalArrayDestruct}
+//  routine to free the additional memory.  Intended for internal
+//  ESMF use only; end-users use {\tt ESMC\_LocalArrayCreate}, which calls
+//  {\tt ESMC\_LocalArrayConstruct}.
 //
 //EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-    int i, status;
-    int totalcount;
-    ESMC_LocalArray *aptr;
-    int rc;
+  // set object members - some defaults may be overridden further down
+  rank = irank;
+  kind = dk;
+  base_addr = base;
+  int totalcount = 1;
+  for (int i=0; i<rank; i++) {
+    counts[i] = icounts ? icounts[i] : 1;        
+    lbound[i] = lbounds ? lbounds[i] : 1;
+    ubound[i] = ubounds ? ubounds[i] : counts[i];
+    bytestride[i] = 1;
+    offset[i] = offsets ? offsets[i] : 0;
+    totalcount *= counts[i];
+  }
+  for (int i=rank; i<ESMF_MAXDIM; i++) {
+    counts[i] = 1;
+    lbound[i] = 1;
+    ubound[i] = 1;
+    bytestride[i] = 1;
+    offset[i] = 0;
+  }
+  origin = oflag;
+  needs_dealloc = dflag;
+  byte_count = ESMC_TypeKindSize(kind) * totalcount; 
 
-    rank = irank;
-    kind = dk;
-
-   // Initialize return code; assume routine not implemented
-   rc = ESMC_RC_NOT_IMPL;
-
-    base_addr = base;
-    totalcount = 1;
-    for (i=0; i<rank; i++) {
-        counts[i]     = icounts ? icounts[i] : 1;        
-        lbound[i] = lbounds ? lbounds[i] : 1;
-        ubound[i] = ubounds ? ubounds[i] : counts[i];
-        bytestride[i] = 1;
-        offset[i]     = offsets ? offsets[i] : 0;
-        totalcount *= counts[i];
-    }
-    for (i=rank; i<ESMF_MAXDIM; i++) {
-        counts[i]     = 1;
-        lbound[i] = 1;
-        ubound[i] = 1;
-        bytestride[i] = 1;
-        offset[i]     = 0;
-    }
-
-    origin = oflag;
-    needs_dealloc = dflag;
-    byte_count = ESMC_TypeKindSize(kind) * totalcount; 
-
-    if (f90ptr != NULL)
-        ESMC_LocalArraySetF90Ptr(f90ptr);
+  // set Fortran dope vector if provided for existing allocation
+  if (f90ptr != NULL)
+    ESMC_LocalArraySetF90Ptr(f90ptr);
  
-    if (aflag == ESMC_ARRAY_DO_ALLOCATE) {
-            aptr = this;
-            FTN(f_esmf_localarrayf90allocate)(&aptr, &rank, &kind, 
-                                              counts, lbound, ubound, &status);
-    } 
+  // call into Fortran to do the allocate if necessary
+  if (aflag == ESMC_ARRAY_DO_ALLOCATE) {
+    ESMC_LocalArray *aptr = this;
+    FTN(f_esmf_localarrayf90allocate)(&aptr, &rank, &kind, counts, 
+      lbound, ubound, &localrc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      return rc;
+  } 
 
-    // call base class routine to set name 
-    ESMC_BaseSetName(name, "LocalArray");
+  // call base class routine to set name 
+  ESMC_BaseSetName(name, "LocalArray");
     
-    // TODO: memcpy from base to base_addr, proper number of bytes?
-    //  if docopy flag is set.
+  // TODO: memcpy from base to base_addr, proper number of bytes?
+  //  if docopy flag is set.
 
-    return ESMF_SUCCESS;
-
-
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
 
  } // end ESMC_LocalArrayConstruct
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -671,7 +716,7 @@
     int *icounts,             // in - counts along each dim
     int *lbounds,             // in - lowest valid index
     int *ubounds,             // in - highest valid index
-    int *offsets) {           // in - numbytes from base to 1st item/dim
+    int *offsets)const{           // in - numbytes from base to 1st item/dim
 //
 // !DESCRIPTION:
 //     Gets a list of values associated with an already created pointer.
@@ -972,51 +1017,56 @@
 //    Turn a stream of bytes into an object.
 //
 //EOPI
-    char *cp;
-    int *ip, i, rc;
-    ESMC_LocalArray *aptr;
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-    // Initialize return code; assume routine not implemented
-    rc = ESMC_RC_NOT_IMPL;
+  char *cp;
+  int *ip;
 
-    // Deserialize the Base class first.
-    rc = ESMC_Base::ESMC_Deserialize(buffer, boffset);
+  // Deserialize the Base class first.
+  localrc = ESMC_Base::ESMC_Deserialize(buffer, boffset);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
 
-    // now the stuff specific to LocalArray
-    ip = (int *)(buffer + *boffset);
-    rank = *ip++;
-    kind = (ESMC_TypeKind)*ip++;
-    origin = (ESMC_ArrayOrigin)*ip++;
-    needs_dealloc = (ESMC_Logical)*ip++;
-    iscontig = (ESMC_Logical)*ip++;
-    // skip base addr altogether for now.
-    byte_count = *ip++;
-    for (i=0; i<ESMF_MAXDIM; i++) {
-        offset[i] = *ip++;
-        lbound[i] = *ip++;
-        ubound[i] = *ip++;
-        counts[i] = *ip++;
-        bytestride[i] = *ip++;
-    }
+  // now the stuff specific to LocalArray
+  ip = (int *)(buffer + *boffset);
+  rank = *ip++;
+  kind = (ESMC_TypeKind)*ip++;
+  origin = (ESMC_ArrayOrigin)*ip++;
+  needs_dealloc = (ESMC_Logical)*ip++;
+  iscontig = (ESMC_Logical)*ip++;
+  // skip base addr altogether for now.
+  byte_count = *ip++;
+  for (int i=0; i<ESMF_MAXDIM; i++) {
+    offset[i] = *ip++;
+    lbound[i] = *ip++;
+    ubound[i] = *ip++;
+    counts[i] = *ip++;
+    bytestride[i] = *ip++;
+  }
 
-    // call a routine which results in the allocation being done
-    // from F90, so a dope vector is constructed which we can access
-    // later from fortran.
-    aptr = this;
-    FTN(f_esmf_localarrayf90allocate)(&aptr, &rank, &kind,
-                                      counts, lbound, ubound, &rc);
+  // call a routine which results in the allocation being done
+  // from F90, so a dope vector is constructed which we can access
+  // later from fortran.
+  ESMC_LocalArray *aptr = this;
+  FTN(f_esmf_localarrayf90allocate)(&aptr, &rank, &kind, counts, lbound, ubound,
+    &localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
 
+  cp = (char *)ip;
+  // TODO: verify the buffer size first.
+  memcpy(base_addr, cp, byte_count);
+  cp += byte_count;
 
-    cp = (char *)ip;
-    // TODO: verify the buffer size first.
-    memcpy(base_addr, cp, byte_count);
-    cp += byte_count;
+  *boffset = (cp - buffer);
 
-    *boffset = (cp - buffer);
-
-    return ESMF_SUCCESS;
-
- } // end ESMC_LocalArrayDeserialize
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+  
+} // end ESMC_LocalArrayDeserialize
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
