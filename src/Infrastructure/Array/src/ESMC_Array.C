@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.139 2007/09/26 20:09:19 theurich Exp $
+// $Id: ESMC_Array.C,v 1.140 2007/09/27 23:39:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.139 2007/09/26 20:09:19 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.140 2007/09/27 23:39:27 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -97,7 +97,7 @@ Array::Array(
 // !DESCRIPTION:
 //    Construct the internal information structure of an ESMC\_Array object.
 //    No error checking wrt consistency of input arguments is needed because
-//    ArraytConstruct() is only to be called by ArrayCreate() interfaces which
+//    ArrayConstruct() is only to be called by ArrayCreate() interfaces which
 //    are responsible for providing consistent arguments to this layer.
 //
 //EOPI
@@ -245,7 +245,7 @@ Array::~Array(){
   // garbage collection
   int localDeCount = delayout->getLocalDeCount();
   for (int i=0; i<localDeCount; i++)
-    ESMC_LocalArrayDestroy(larrayList[i]);
+    ESMC_LocalArray::ESMC_LocalArrayDestroy(larrayList[i]);
   if (larrayList != NULL)
     delete [] larrayList;
   if (larrayBaseAddrList != NULL)
@@ -722,7 +722,9 @@ Array *Array::create(
         ++jjj;
       }
     }
-    // adjust LocalArray object for specific lbounds and ubounds
+    // Adjust LocalArray object for specific lbounds and ubounds.
+    // This will allocate memory for a _new_ LocalArray object for each element,
+    // however, the original memory used for data storage will be referenced!
     larrayList[i] = larrayListArg[i]->
       ESMC_LocalArrayAdjust(temp_lbounds, temp_ubounds, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
@@ -743,9 +745,9 @@ Array *Array::create(
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }catch(...){
-     // allocation error
-     ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMCI::Array.", rc);  
-     return ESMC_NULL_POINTER;
+    // allocation error
+    ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMCI::Array.", rc);  
+    return ESMC_NULL_POINTER;
   }
   
   // garbage collection
@@ -764,7 +766,7 @@ Array *Array::create(
   if (uboundsArrayAllocFlag) delete [] uboundsArray;
   
   // return successfully
-  *rc = ESMF_SUCCESS;
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
   return array;
 }
 //-----------------------------------------------------------------------------
@@ -1116,9 +1118,11 @@ Array *Array::create(
       }
     }
     // allocate LocalArray object with specific lbounds and ubounds
-    larrayList[i] = ESMC_LocalArrayCreate(rank, typekind, temp_counts,
-      temp_lbounds, temp_ubounds);
-    // TODO: need error handling for the above call
+    larrayList[i] = ESMC_LocalArray::ESMC_LocalArrayCreate(rank, typekind,
+      temp_counts, temp_lbounds, temp_ubounds, NULL, ESMC_DATA_REF, NULL,
+      &localrc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      return ESMC_NULL_POINTER;
   }
   delete [] temp_counts;
   delete [] temp_lbounds;
@@ -1135,9 +1139,9 @@ Array *Array::create(
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }catch(...){
-     // allocation error
-     ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMCI::Array.", rc);  
-     return ESMC_NULL_POINTER;
+    // allocation error
+    ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMCI::Array.", rc);  
+    return ESMC_NULL_POINTER;
   }
 
   // garbage collection
@@ -1154,7 +1158,7 @@ Array *Array::create(
   delete [] vectorDim;
   
   // return successfully
-  *rc = ESMF_SUCCESS;
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
   return array;
 }
 //-----------------------------------------------------------------------------
@@ -5957,7 +5961,8 @@ int ESMC_newArray::ESMC_newArrayConstruct(
     if (delayout->serviceOffer(de, NULL) == ESMCI::DELAYOUT_SERVICE_ACCEPT){
       for (int j=0; j<rank; j++)
         temp_counts[j] = localFullUBound[de][j] - localFullLBound[de][j] + 1;
-      localArrays[i] = ESMC_LocalArrayCreate(rank, kind, temp_counts);
+      localArrays[i] =
+        ESMC_LocalArray::ESMC_LocalArrayCreate(rank, kind, temp_counts);
       commhArray[i].commhandleCount = 0;  // reset
       commhArray[i].pthidCount = 0;       // reset
       commhArray[i].buffer = NULL;        // reset

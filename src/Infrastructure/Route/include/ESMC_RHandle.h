@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle.h,v 1.9 2007/03/31 05:51:20 cdeluca Exp $
+// $Id: ESMC_RHandle.h,v 1.10 2007/09/27 23:39:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -148,12 +148,7 @@ typedef enum {
         if (which_tv >= ntvalues) return ESMF_FAILURE;
         if (tv == NULL) return ESMF_SUCCESS;
         tvalues[which_tv] = *tv; return ESMF_SUCCESS; }
-    int ESMC_RouteHandleSetLabel(char *l) {
-        int len = strlen(l) + 1;
-        if (label != NULL) delete [] label;
-        label = new char[len]; 
-        strcpy(label, l);
-        return ESMF_SUCCESS; }
+    int ESMC_RouteHandleSetLabel(char *l);
 
     void *ESMC_RouteHandleGetStorage(void) const{
       return storage;

@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.C,v 1.31 2007/04/26 16:13:57 rosalind Exp $
+// $Id: ESMC_RTable.C,v 1.32 2007/09/27 23:39:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -22,20 +22,23 @@
 //
 //-----------------------------------------------------------------------------
 //
- // insert any higher level, 3rd party or system includes here
- #include "ESMC_Start.h"
- #include <stdio.h>
- #include <stdlib.h>
+// associated class definition file
+#include "ESMC_RTable.h"
 
- // associated class definition file
- #include "ESMC_RTable.h"
- #include "ESMC_LogErr.h"
+// higher level, 3rd party or system headers
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+// ESMF headers
+#include "ESMC_Start.h"
+#include "ESMC_LogErr.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_RTable.C,v 1.31 2007/04/26 16:13:57 rosalind Exp $";
+            "$Id: ESMC_RTable.C,v 1.32 2007/09/27 23:39:28 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
