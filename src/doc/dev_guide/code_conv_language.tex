@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_language.tex,v 1.9 2007/09/18 21:38:18 cdeluca Exp $
+% CVS $Id: code_conv_language.tex,v 1.10 2007/09/27 19:59:29 cdeluca Exp $
 
 \subsection{Lang: Interlanguage Coding Conventions}
 
@@ -309,6 +309,7 @@ Style recommendations include the following:
 
 \subsection{Lang: C/C++ Coding Standard}
 
+\begin{itemize}
 \item {\bf Use of namespaces}
 To avoid conflict in symbols, ESMF C++ code will utilize namespaces to
 add either ESMC (interface code) or ESMCI to symbol names.
@@ -322,7 +323,7 @@ The header file for an {\it ESMC\_Widget} is as follows:
 #ifndef ESMCI_Widget_h
 #define ESMCI_Widget_h
 
-namesapce ESMCI {
+namespace ESMCI {
 
 class Widget {
 public:
@@ -387,6 +388,7 @@ included in the ESMF document templates package described in
 Section~\ref{sec:code_templates}.  This convention may be relaxed
 when absorbing large external code bases that may have their own
 documentation conventions.
+
 \end{itemize}
 
 
