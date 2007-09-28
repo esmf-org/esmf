@@ -1,29 +1,19 @@
-# $Id: makefile,v 1.1 2007/05/02 22:50:15 donstark Exp $ 
+# $Id: makefile,v 1.2 2007/09/28 17:18:58 donstark Exp $
 
-ALL:      build_unit_tests
+ALL: build_here
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
+# This needs to be the path of this directory relative to the
+# top level esmf directory.
+LOCDIR	  = src/test_harness/
 
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
-DIRS	  = 
-LOCDIR	  = src/test_harness
+# Leave this line alone.
+include $(ESMF_DIR)/makefile
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_TestHarnessUTest
+# The DIRS line needs to contain all subdirectories which exist 
+# directly below this directory, and have either library,
+# example/test code, or documents which need to be generated.
+DIRS	  = doc src
 
-
-include ${ESMF_DIR}/makefile
-
-CLEANDIRS   = 
-CLEANFILES  = $(TESTS_BUILD)
+CLEANDIRS   =
+CLEANFILES  =
 CLOBBERDIRS =
-
-UTEST_TestHarness_OBJS = ESMF_TestHarnessMod.o
-
-ESMF_TestHarnessUTest.o: ESMF_TestHarnessMod.o
