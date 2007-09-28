@@ -1,4 +1,4 @@
-// $Id: ESMC_ClockEx.C,v 1.21 2007/04/12 21:07:02 theurich Exp $
+// $Id: ESMC_ClockEx.C,v 1.22 2007/09/28 21:38:25 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -16,8 +16,9 @@
 //
 // This program shows an example of how to set-up a clock
 //EOP
-//-----------------------------------------------------------------------------
-//
+//-------------------------------------------------------------------------
+// !EXAMPLE        String used by test script to count examples.
+//-------------------------------------------------------------------------
 // insert any higher level, 3rd party or system includes here
 #include <ESMCI.h>
 
@@ -27,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_ClockEx.C,v 1.21 2007/04/12 21:07:02 theurich Exp $";
+ static const char *const version = "$Id: ESMC_ClockEx.C,v 1.22 2007/09/28 21:38:25 svasquez Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
