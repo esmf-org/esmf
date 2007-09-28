@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.140 2007/09/27 23:39:27 theurich Exp $
+// $Id: ESMC_Array.C,v 1.141 2007/09/28 21:16:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.140 2007/09/27 23:39:27 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.141 2007/09/28 21:16:30 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2527,6 +2527,13 @@ int Array::sparseMatMulStore(
   if (dstArray == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to dstArray", &rc);
+    return rc;
+  }
+  
+  // srcArray and dstArray may not point to the identical Array object
+  if (srcArray == dstArray){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "- srcArray and dstArray must not be identical", &rc);
     return rc;
   }
   
@@ -5565,6 +5572,13 @@ int Array::sparseMatMul(
   if (dstArray == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to dstArray", &rc);
+    return rc;
+  }
+  
+  // srcArray and dstArray may not point to the identical Array object
+  if (srcArray == dstArray){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "- srcArray and dstArray must not be identical", &rc);
     return rc;
   }
   

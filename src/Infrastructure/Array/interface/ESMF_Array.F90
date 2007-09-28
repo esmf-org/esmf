@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.66 2007/09/20 17:44:20 cdeluca Exp $
+! $Id: ESMF_Array.F90,v 1.67 2007/09/28 21:16:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -128,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.66 2007/09/20 17:44:20 cdeluca Exp $'
+    '$Id: ESMF_Array.F90,v 1.67 2007/09/28 21:16:29 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -621,7 +621,7 @@ contains
 !   {\tt factorIndexList} arguments with {\tt size(factorList) = (/0/)} and
 !   {\tt size(factorIndexList) = (/2,0/)} indicates that a PET does not 
 !   provide matrix elements. Alternatively, PETs that do not provide matrix
-!   elements may also call into the overloaded interface without 
+!   elements may also call into the overloaded interface {\em without}
 !   {\tt factorList} and {\tt factorIndexList} arguments.
 !
 !   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
@@ -635,11 +635,19 @@ contains
 !   {\tt factorList} argument must also match the <type> and <kind> of the
 !   Array arguments.
 !
+!   It is erroneous to specify the identical Array object for {\tt srcArray} and
+!   {\tt dstArray} arguments.
+!
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
 !   {\tt ESMF\_ArraySparseMatMul()} on any pair of Arrays that are congruent
 !   and typekind conform with the {\tt srcArray}, {\tt dstArray} pair. 
 !   Congruent Arrays possess matching DistGrids and the shape of the local
 !   array tiles matches between the Arrays for every DE.
+!
+!   This method is overloaded for: 
+!   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I4},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
+!   \newline
 !
 !   This call is {\em collective} across the current VM.
 !
@@ -958,7 +966,7 @@ contains
 !   {\tt factorIndexList} arguments with {\tt size(factorList) = (/0/)} and
 !   {\tt size(factorIndexList) = (/2,0/)} indicates that a PET does not 
 !   provide matrix elements. Alternatively, PETs that do not provide matrix
-!   elements may also call into the overloaded interface without 
+!   elements may also call into the overloaded interface {\em without}
 !   {\tt factorList} and {\tt factorIndexList} arguments.
 !
 !   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
@@ -972,11 +980,19 @@ contains
 !   {\tt factorList} argument must also match the <type> and <kind> of the
 !   Array arguments.
 !
+!   It is erroneous to specify the identical Array object for {\tt srcArray} and
+!   {\tt dstArray} arguments.
+!
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
 !   {\tt ESMF\_ArraySparseMatMul()} on any pair of Arrays that are congruent
 !   and typekind conform with the {\tt srcArray}, {\tt dstArray} pair. 
 !   Congruent Arrays possess matching DistGrids and the shape of the local
 !   array tiles matches between the Arrays for every DE.
+!
+!   This method is overloaded for: 
+!   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I4},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
+!   \newline
 !
 !   This call is {\em collective} across the current VM.
 !
@@ -1046,6 +1062,9 @@ contains
 !   {\tt ESMF\_ArraySparseMatMulStore()}. Congruent Arrays possess
 !   matching DistGrids and the shape of the local array tiles matches between
 !   the Arrays for every DE.
+!
+!   It is erroneous to specify the identical Array object for {\tt srcArray} and
+!   {\tt dstArray} arguments.
 !
 !   See {\tt ESMF\_ArraySparseMatMulStore()} on how to precompute 
 !   {\tt routehandle}. See section \ref{Array:SparseMatMul} for details on the
