@@ -98,7 +98,7 @@
 contains
 
 !============================================================================
-!23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+!2345678901234567890123456789012345678901234567890123456789012345678901234567890
 ! !IROUTINE: read_testharness_config
 
 ! !INTERFACE:
@@ -282,7 +282,7 @@ contains
   end subroutine read_testharness_config
   !--------------------------------------------------------------------------
 
-!23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+!2345678901234567890123456789012345678901234567890123456789012345678901234567890
 
 !--------------------------------------------------------------------------
 !--------------------------------------------------------------------------
@@ -311,7 +311,8 @@ contains
   type(ESMF_Config)      :: localcf
 
   ! local parameters
-  character(ESMF_MAXSTR), parameter :: descriptor_label = "problem_descriptor_string::"
+  character(ESMF_MAXSTR), parameter :: descriptor_label      &
+                                               = "problem_descriptor_string::"
 
   ! local character types
   type (sized_char_array), allocatable :: ltmpstring(:), lstring(:)
@@ -419,9 +420,9 @@ contains
         return
       endif
 
-      !--------------------------------------------------------------------
+      !----------------------------------------------------------------------
       ! allocate tempory storage so that the file needs to be read only once
-      !--------------------------------------------------------------------
+      !----------------------------------------------------------------------
       allocate ( ltmpstring(string)%string( ncolumns(string) ) )
       ltmpstring(string)%size = ncolumns(string)
     enddo    ! end string
@@ -431,8 +432,8 @@ contains
     ! a local character array structure for later processing
     !------------------------------------------------------------------------
     call ESMF_ConfigFindLabel(localcf, trim(descriptor_label), rc=localrc )
-    if( ESMF_LogMsgFoundError(localrc,                                        &
-           "cannot find config label " // trim(descriptor_label),             &
+    if( ESMF_LogMsgFoundError(localrc,                                      &
+           "cannot find config label " // trim(descriptor_label),           &
            rcToReturn=localrc) ) return
 
     do string=1,nstrings(file)
@@ -463,7 +464,7 @@ contains
     npds = 0
     allocate( pds_flag(nstrings(file)) )
     do string=1,nstrings(file)
-       if( trim( ltmpstring(string)%string(1)%name ) /= '\') then
+       if( trim( ltmpstring(string)%string(1)%name ) /= "&") then
          pds_flag(string) = 1         
          npds = npds + 1
        else
@@ -515,7 +516,7 @@ contains
     !------------------------------------------------------------------------
     allocate( count(npds) )
     do k=1,npds
-      if( trim( ltmpstring( pds_loc(k) )%string(1)%name ) == '\') then
+      if( trim( ltmpstring( pds_loc(k) )%string(1)%name ) == "&") then
         write(lchar,"(i5)")   pds_loc(k)
         call ESMF_LogMsgSetError( ESMF_FAILURE,                             &
                  "no problem descriptor string on line " //                 &
@@ -532,9 +533,9 @@ contains
           pstring =  pstring + 1
           !------------------------------------------------------------------
           ! if find a continuation line add additional elements (minus the
-          ! continuation symbol "\")
+          ! continuation symbol "&")
           !------------------------------------------------------------------
-          if( trim( ltmpstring(pstring)%string(1)%name ) == '\' ) then 
+          if( trim( ltmpstring(pstring)%string(1)%name ) == "&" ) then 
             count(k) = count(k) + ncolumns(pstring) -1
             goto 21
           endif
@@ -549,7 +550,8 @@ contains
     do k=1, npds
       allocate ( lstring(k)%string(count(k)) )    
       do n=1,ncolumns(pds_loc(k))
-        lstring(k)%string(n)%name = trim( ltmpstring(pds_loc(k))%string(n)%name )
+        lstring(k)%string(n)%name = &
+                               trim( ltmpstring(pds_loc(k))%string(n)%name )
       enddo     ! n
         
       pstring =  pds_loc(k)
@@ -564,9 +566,10 @@ contains
         ! if find a continuation line, and add to the line length (minus the 
         ! continuation symbol)
         !--------------------------------------------------------------------
-        if( trim( ltmpstring(pstring)%string(1)%name ) == '\' ) then
+        if( trim( ltmpstring(pstring)%string(1)%name ) == "&" ) then
           do n=2,ncolumns(pstring)
-            lstring(k)%string(nn)%name = trim(ltmpstring(pstring)%string(n)%name )
+            lstring(k)%string(nn)%name = &
+                                   trim(ltmpstring(pstring)%string(n)%name )
             nn = nn + 1
           enddo     ! n
           goto 22
@@ -630,7 +633,7 @@ contains
          harness%Record(file)%string(k)%classfile%size = csize
          do n=1,csize
            harness%Record(file)%string(k)%classfile%string(n)%name =        &
-                                       trim( lstring(k)%string(cpos+n)%name )
+                                      trim( lstring(k)%string(cpos+n)%name )
          enddo      ! n
          cflag = .true.
 
@@ -668,7 +671,7 @@ contains
          harness%Record(file)%string(k)%distfiles%size = dsize
          do n=1,dsize
            harness%Record(file)%string(k)%distfiles%string(n)%name =        & 
-                                       trim( lstring(k)%string(dpos+n)%name )
+                                      trim( lstring(k)%string(dpos+n)%name )
          enddo      ! n
          dflag = .true.
 
@@ -729,17 +732,23 @@ contains
       do k=1,npds
          print*,'                                  '
          print*,k,trim( harness%Record(file)%string(k)%pds )
-         print*,'Class Specifier files',harness%Record(file)%string(k)%classfile%size
+         print*,'Class Specifier files',   &
+                                 harness%Record(file)%string(k)%classfile%size
          do n=1,harness%Record(file)%string(k)%classfile%size
-           print*,n,trim( harness%Record(file)%string(k)%classfile%string(n)%name )
+           print*,n, &
+               trim( harness%Record(file)%string(k)%classfile%string(n)%name )
          enddo   ! n
-         print*,'Distribution Specifier files',harness%Record(file)%string(k)%distfiles%size
+         print*,'Distribution Specifier files', &
+                                 harness%Record(file)%string(k)%distfiles%size
          do n=1,harness%Record(file)%string(k)%distfiles%size
-           print*,n,trim( harness%Record(file)%string(k)%distfiles%string(n)%name )
+           print*,n,   &
+               trim( harness%Record(file)%string(k)%distfiles%string(n)%name )
          enddo     ! n
-         print*,'Grid Specifier files',harness%Record(file)%string(k)%gridfiles%size
+         print*,'Grid Specifier files',   &
+                                 harness%Record(file)%string(k)%gridfiles%size
          do n=1,harness%Record(file)%string(k)%gridfiles%size
-           print*,n,trim( harness%Record(file)%string(k)%gridfiles%string(n)%name )
+           print*,n,   &
+               trim( harness%Record(file)%string(k)%gridfiles%string(n)%name )
          enddo     ! n
       enddo      ! k
          !
@@ -776,7 +785,7 @@ contains
   end subroutine read_descriptor_files
   !--------------------------------------------------------------------------
 
-!23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+!2345678901234567890123456789012345678901234567890123456789012345678901234567890
 
 !--------------------------------------------------------------------------
 !--------------------------------------------------------------------------
@@ -866,7 +875,7 @@ contains
   end subroutine parse_descriptor_string
   !--------------------------------------------------------------------------
 
-!23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+!2345678901234567890123456789012345678901234567890123456789012345678901234567890
 
 !--------------------------------------------------------------------------
 !--------------------------------------------------------------------------
@@ -903,39 +912,6 @@ contains
   select case (report_flag)
      case(-2)
      ! debug report
-  do count=1,problem_descriptor_count
-     print*,'Problem Descriptor String:',problem_descriptor(count)%string
-     print*,'nDistFiles:',problem_descriptor(count)%distfiles%size
-     do  k=1,problem_descriptor(count)%distfiles%size
-        print*,k,problem_descriptor(count)%distfiles%string(k)%name
-     enddo
-
-     print*,'nGridFiles:',problem_descriptor(count)%gridfiles%size
-     do  k=1,problem_descriptor(count)%gridfiles%size
-       print*,k,problem_descriptor(count)%gridfiles%string(k)%name
-     enddo
-     print*,'------------------------------------------'
-
-  print*,'          '
-  print*,'process: ',problem_descriptor(count)%process%name
-  print*,'process tag ',problem_descriptor(count)%process%tag
-  print*,'          '
-  print*,'Source dist rank:',problem_descriptor(count)%src_dist%rank
-  print*,'Source dist topology:',problem_descriptor(count)%src_dist%topology
-  print*,'Source dist order:',problem_descriptor(count)%src_dist%order
-  print*,'----'
-  print*,'Source grid rank:',problem_descriptor(count)%src_grid%rank
-  print*,'Source grid topology:',problem_descriptor(count)%src_grid%topology
-  print*,'Source grid order:',problem_descriptor(count)%src_grid%order
-  print*,'==========='
-  print*,'Destination dist rank:',problem_descriptor(count)%dst_dist%rank
-  print*,'Destination dist topology:',problem_descriptor(count)%dst_dist%topology
-  print*,'Destination dist order:',problem_descriptor(count)%dst_dist%order
-  print*,'----'
-  print*,'Destination grid rank:',problem_descriptor(count)%dst_grid%rank
-  print*,'Destination grid topology:',problem_descriptor(count)%dst_grid%topology
-  print*,'Destination grid order:',problem_descriptor(count)%dst_grid%order
-  enddo
 
      case(-1)
         ! only report failures
