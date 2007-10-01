@@ -13,6 +13,7 @@ test_report: -2
 
 # descriptor file for the nonexhaustive case
 nonexhaustive::
+#  'nonexhaustive_descriptor0.rc'
    'nonexhaustive_descriptor.rc'
 ::   # end of list
 
