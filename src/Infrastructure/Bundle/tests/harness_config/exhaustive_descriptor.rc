@@ -29,6 +29,5 @@
 ########################################################################################
 problem_descriptor_string::
 # Two redistribution examples
-'[B1G1;B2G2] --> [B1G1;B2G2]' -d distgrid.rc -g Redist_igrid.rc     # simple block redistribution
-'[B1G1;B2G2] --> [B2G2;B1G1]' -d distgrid.rc -g Redist_igrid.rc     # another simple block redistribution
+'[B1G1;B2G2] --> [B1G1;B2G2]' -c classfile.rc -d distgrid.rc -g redistgrid.rc     # simple block redistribution
 ::   # end of list
