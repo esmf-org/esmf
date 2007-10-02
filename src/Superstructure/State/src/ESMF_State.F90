@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.111 2007/09/21 22:46:47 oehmke Exp $
+! $Id: ESMF_State.F90,v 1.112 2007/10/02 23:00:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.111 2007/09/21 22:46:47 oehmke Exp $'
+      '$Id: ESMF_State.F90,v 1.112 2007/10/02 23:00:57 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1242,22 +1242,23 @@ end interface
         allocate(stypep, stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "State type", &
                                        ESMF_CONTEXT, rc)) return
-
-! TODO: The following version of calling the StateConstruct() procedure ommits
-! the nameList argument. Using the nameList argument lead to SEGV on columbia
-! with ifort version 9.1.045. It seems very much like a compiler bug but for 
-! now the fastest way to deal with it is the following code change. *gjt*
-        call ESMF_StateConstruct(stypep, stateName, statetype, &
+        
+      !TODO: COLUMBIA_BUG: The following "if (present())" construct is a
+      !      work-around for Intel's ifort version 9.1.045 and 9.1.051
+      !      on NAS' columbia.
+        if (present(nameList)) then 
+          call ESMF_StateConstruct(stypep, stateName, statetype, &
+                   bundleList, fieldList, arrayList, nestedStateList, &
+                   nameList, itemCount, &
+                   neededflag, readyflag, validflag, reqforrestartflag, localrc)
+        else
+          call ESMF_StateConstruct(stypep, stateName, statetype, &
                    bundleList, fieldList, arrayList, nestedStateList, &
                    itemcount=itemCount, &
 		   neededflag=neededflag, readyflag=readyflag, &
 		   validflag=validflag, reqforrestartflag=reqforrestartflag, &
                    rc=localrc)
-!        call ESMF_StateConstruct(stypep, stateName, statetype, &
-!                   bundleList, fieldList, arrayList, nestedStateList, &
-!                   nameList, itemCount, &
-!                   neededflag, readyflag, validflag, reqforrestartflag, &
-!                   rc=localrc)
+        endif
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then 
