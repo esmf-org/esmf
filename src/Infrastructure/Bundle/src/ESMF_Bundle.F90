@@ -1,5 +1,5 @@
 
-! $Id: ESMF_Bundle.F90,v 1.113 2007/09/25 23:25:25 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.114 2007/10/02 04:22:59 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -946,7 +946,7 @@ end function
           ! Check to be sure bundle has grid before trying to return it.
           if (btype%gridstatus .ne. ESMF_STATUS_READY) then
                if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Bundle does not contains a Grid", &
+                                "Bundle does not contain a Grid", &
                                  ESMF_CONTEXT, rc)) return
           endif
           
