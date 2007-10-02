@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.102 2007/08/30 05:06:32 cdeluca Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.103 2007/10/02 04:26:58 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.102 2007/08/30 05:06:32 cdeluca Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.103 2007/10/02 04:26:58 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -54,7 +54,7 @@
       integer, dimension(3) :: cellCounts
       type(ESMF_DELayout) :: delayout
       type(ESMF_VM) :: vm
-      type(ESMF_IGrid) :: igrid, igrid2, igrid3, igrid4, igrid5
+      type(ESMF_Grid) :: grid, grid2, grid3, grid4, grid5
       type(ESMF_ArraySpec) :: arrayspec
       real, dimension(:,:), pointer :: f90ptr2, f90ptr4, f90ptr5
       real(ESMF_KIND_R8) :: minCoord(2), deltas(10)
@@ -89,27 +89,27 @@
 
 
       !------------------------------------------------------------------------
-      ! several calls to field need a valid igrid.  these will be used in
-      ! the igrid create calls.
+      ! several calls to field need a valid grid.  these will be used in
+      ! the grid create calls.
       call ESMF_VMGetGlobal(vm, rc=rc)
       delayout = ESMF_DELayoutCreate(vm, rc=rc)
       minCoord(:) = (/ 0.0, 0.0 /)
 
 
       !------------------------------------------------------------------------
-      !NEX_removeUTest
+      !NEX_UTest
       ! Test Requirement FLD1.1.3 Creation without data 
       ! Fields may be created as in FLD1.1.1 without allocating data or 
       ! specifying an associated data array. In this case specifying the 
-      ! igrid parameters and data array dimensions may be deferred until 
+      ! grid parameters and data array dimensions may be deferred until 
       ! data is attached.
       f1 = ESMF_FieldCreateNoData(rc=rc) 
       write(failMsg, *) ""
-      write(name, *) "Creating a Field with no data Test Req. FLD1.1.3"
+      write(name, *) "Creating a Field with no data"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_removeUTest
+      !NEX_UTest
       ! Verifing that a Field with no data can be destroyed
       call ESMF_FieldDestroy(f1, rc=rc)
       write(failMsg, *) ""
@@ -119,7 +119,7 @@
 #ifdef ESMF_EXHAUSTIVE
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! Verifing that a Field that has not been created doesn't
       ! crash when it is destroyed 
       call ESMF_FieldDestroy(f2, rc=rc)
@@ -128,7 +128,7 @@
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! Get a name from a deleted created Field
       call ESMF_FieldGet(f1, name=fname, rc=rc)
       write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED "
@@ -136,7 +136,7 @@
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! Get a name from a non-created Field
       call ESMF_FieldGet(f2, name=fname, rc=rc)
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
@@ -144,7 +144,7 @@
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       f1 = ESMF_FieldCreateNoData(rc=rc) 
       write(failMsg, *) ""
       write(name, *) "Creating a Field with no data Test Req. FLD1.1.3"
@@ -153,13 +153,13 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! Verifing that an initialized Field can be printed
-      call ESMF_FieldPrint(f1, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Printing an initialized Field with no data Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_FieldPrint(f1, rc=rc)
+!      write(failMsg, *) ""
+!      write(name, *) "Printing an initialized Field with no data Test"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! Verifing that the Field name can be queried from a no data Field
       call ESMF_FieldGet(f1, name=fname, rc=rc)
       write(failMsg, *) "default name not generated"
@@ -167,22 +167,22 @@
       call ESMF_Test((fname.ne.""), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! Getting Attrubute count from a Field
+      !EX_UTest
+      ! Getting Attribute count from a Field
       call ESMF_FieldGetAttributeCount(f1, count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Attribute count from a Field "
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! Verify Attribute Count Test
+      !EX_UTest
+      ! Verify attribute count test
       write(failMsg, *) "Incorrect count"
       write(name, *) "Verify Attribute count from a Field "
       call ESMF_Test((count.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! default names unique
       f2 = ESMF_FieldCreateNoData(rc=rc)
       call ESMF_FieldGet(f1, name=fname1, rc=rc)
@@ -194,7 +194,7 @@
       call ESMF_Test((fname1.ne.fname2), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! Verifing that a Field with no data can be destroyed
       call ESMF_FieldDestroy(f2, rc=rc)
       write(failMsg, *) ""
@@ -203,8 +203,8 @@
       call ESMF_FieldPrint(f2)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! Test Requirement FLD1.4 Deletion 
+      !EX_UTest
+      ! Test Requirement  
       ! Fields may be deleted.
       call ESMF_FieldDestroy(f1, rc=rc)
       write(failMsg, *) ""
@@ -214,13 +214,13 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! Verifing that printing an uninitialized Field is handled properly.
-      call ESMF_FieldPrint(f6, rc=rc)
-      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
-      write(name, *) "Printing an uninitialized Field Test"
-      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_FieldPrint(f6, rc=rc)
+!      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+!      write(name, *) "Printing an uninitialized Field Test"
+!      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! verify that querying the name of a destroyed Field is handled properly.
       call ESMF_FieldGet(f1, name=fname, rc=rc)
       write(failMsg, *) ""
@@ -230,13 +230,13 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! Verifing that printing a destroyed Field is handled properly.
-      call ESMF_FieldPrint(f1, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Printing destroyed Field Test"
-      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_FieldPrint(f1, rc=rc)
+!      write(failMsg, *) ""
+!      write(name, *) "Printing destroyed Field Test"
+!      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! Verifing that a Field can be created with a name
       f2 = ESMF_FieldCreateNoData("pressure", rc=rc)
       write(failMsg, *) ""
@@ -245,7 +245,7 @@
       call ESMF_FieldPrint(f2)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! Verifing that the Field name can be queried.
       Call ESMF_FieldGet(f2, name=fname, rc=rc)
       write(failMsg, *) ""
@@ -254,7 +254,7 @@
       call ESMF_FieldPrint(f2)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! Verifing that recreating a Field is allowed.
       f2 = ESMF_FieldCreateNoData("temperature", rc=rc)
       write(failMsg, *) ""
@@ -263,7 +263,7 @@
       call ESMF_FieldPrint(f2)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! Verifing that a Field can be created after it has been destroyed
       call ESMF_FieldDestroy(f2)
       f2 = ESMF_FieldCreateNoData("precipitation", rc=rc)
@@ -273,17 +273,21 @@
       call ESMF_FieldPrint(f2)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! Verifing that a IGrid can be created
-      igrid =  ESMF_IGridCreateHorzXYUni((/ 10, 20 /), minCoord, &
-                                     name="landigrid", rc=rc)
-      call ESMF_IGridDistribute(igrid, delayout=delayout, rc=rc)
+      !EX_UTest
+      ! Verifing that a Grid can be created
+      grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+                                  regDecomp=(/2,2/), name="landgrid", rc=rc)
+!     TODO:FIELDINTEGRATION Ensure new Grid contains sufficient info for tests
+!      igrid =  ESMF_IGridCreateHorzXYUni((/ 10, 20 /), minCoord, &
+!                                     name="landigrid", rc=rc)
+!      call ESMF_IGridDistribute(igrid, delayout=delayout, rc=rc)
+
       write(failMsg, *) ""
-      write(name, *) "Creating a IGrid to use in Field Tests"
+      write(name, *) "Creating a Grid to use in Field Tests"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! Test requirement FLD1.5.1. Default name attribute 
       ! The only default attribute of a field will be a name. A unique 
       ! name will be generated if not supplied by the user.
@@ -302,65 +306,64 @@
       call ESMF_Test((fname1.ne.fname2), name, failMsg, result, ESMF_SRCLINE)
       !print *, "Field (f1) name = ", trim(fname1)
       print *, "Field (f2) name = ", trim(fname2)
-      call ESMF_FieldPrint(f1)
-      call ESMF_FieldPrint(f2)
+!      call ESMF_FieldPrint(f1)
+!      call ESMF_FieldPrint(f2)
       call ESMF_FieldDestroy(f1)
       call ESMF_FieldDestroy(f2)
 
 
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       f4 = ESMF_FieldCreateNoData(rc=rc) 
       write(failMsg, *) ""
-      write(name, *) "Creating a Field with no data Test Req. FLD1.1.3"
+      write(name, *) "Creating a Field with no data"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! Setting a IGrid associated with Field
-      call ESMF_FieldSetIGrid(f4, igrid, rc=rc) 
+      !EX_UTest
+      ! Setting a Grid associated with Field
+      call ESMF_FieldSetGrid(f4, grid, rc=rc) 
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting a IGrid associated with Field Test"
+      write(name, *) "Setting a Grid associated with Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       call ESMF_FieldValidate(f4, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Testing to see if Field is Valid"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! Verifing that a Field with a IGrid and Array can be destroyed
+      !EX_UTest
+      ! Verifing that a Field with a Grid and Array can be destroyed
       call ESMF_FieldDestroy(f4, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Destroying a Field with a IGrid and Array Test"
+      write(name, *) "Destroying a Field with a Grid and Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! Test requirement FLD1.1.1
-      ! Fields may be created by specifying attributes, a igrid, data array 
+      !EX_UTest
+      ! Fields may be created by specifying attributes, a grid, data array 
       ! dimensions and descriptors, optional masks (e.g. for active cells), 
       ! and an optional I/O specification. In this case a field will 
-      ! allocate its own data. The igrid passed into the argument list 
+      ! allocate its own data. The grid passed into the argument list 
       ! is referenced and not copied.
       call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
       write(name, *) "Creating an ArraySpec Test "
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
-      f2 = ESMF_FieldCreate(igrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+      !EX_UTest
+      f2 = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, &
                                           name="rh", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Creating a Field with a IGrid and ArraySpec Test FLD1.1.1"
+      write(name, *) "Creating a Field with a Grid and ArraySpec Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! Verifing that a destroying a destroyed  Field is handled properly.
       call ESMF_FieldDestroy(f2, rc=rc)  ! should succeed, f2 exists
       call ESMF_FieldDestroy(f2, rc=rc)  ! should fail
@@ -369,33 +372,33 @@
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! verify we can create a 3d data on a 2d igrid
+      !EX_UTest
+      ! verify we can create a 3d data on a 2d grid
       call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R4, rc=rc)
-      f2 = ESMF_FieldCreate(igrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+      f2 = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, &
                                           name="rh", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Creating a Field with a 2d IGrid and 3d ArraySpec"
+      write(name, *) "Creating a Field with a 2d Grid and 3d ArraySpec"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! Requirement FLD1.1.2 Creation with external data 
+      !EX_UTest
+      ! Creation with external data 
       ! Fields may be created as in FLD1.1.1 with a data array passed into 
       ! the argument list. The data array is referenced and not copied.
-      ! Verifing that a Field can be created with a IGrid and DataMap
+      ! Verifing that a Field can be created with a Grid and DataMap
       call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
       call ESMF_FieldDataMapSetDefault(dm, ESMF_INDEX_IJ)
-      f3 = ESMF_FieldCreate(igrid, arrayspec, allocflag=ESMF_ALLOC, &
-                        horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CENTER, &
+      f3 = ESMF_FieldCreate(grid, arrayspec, allocflag=ESMF_ALLOC, &
+                        staggerloc=ESMF_STAGGERLOC_CENTER, &
                         haloWidth=2, datamap=dm, name="Field 0", iospec=ios, rc=rc)
 
       write(failMsg, *) ""
-      write(name, *) "Creating a Field with a IGrid and Array Test FLD1.1.2"
+      write(name, *) "Creating a Field with a Grid and Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       call ESMF_FieldValidate(f3, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Testing to see if Field is Valid"
@@ -403,13 +406,13 @@
 
       !------------------------------------------------------------------------
       !EX_removeUTest
-      ! Create a different size IGrid for testing with an incompatible Array
-      igrid4 =  ESMF_IGridCreateHorzXYUni((/ 100, 20 /), minCoord, &
-                                     name="biglandigrid", rc=rc)
-      call ESMF_IGridDistribute(igrid4, delayout=delayout, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Creating a IGrid to use in Field Tests"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      ! Create a different size Grid for testing with an incompatible Array
+!      igrid4 =  ESMF_IGridCreateHorzXYUni((/ 100, 20 /), minCoord, &
+!                                     name="biglandigrid", rc=rc)
+!      call ESMF_IGridDistribute(igrid4, delayout=delayout, rc=rc)
+!      write(failMsg, *) ""
+!      write(name, *) "Creating a IGrid to use in Field Tests"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
       !E-X-_-U-T-e-s-t
@@ -419,15 +422,15 @@
       !TODO: this test really does not work. 
       ! call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R4, rc=rc)
 !      f6 = ESMF_FieldCreate(igrid4, arrayspec, allocflag=ESMF_ALLOC, &
-!                        horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CENTER, &
+!                        horzRelloc=ESMF_STAGGERLOC_CENTER, vertRelloc=ESMF_STAGGERLOC_CENTER, &
 !                        haloWidth=2, datamap=dm, name="Field 1", iospec=ios, rc=rc)
 !
 !      write(failMsg, *) ""
-!      write(name, *) "Creating a Field with a mismatched IGrid/Array"
+!      write(name, *) "Creating a Field with a mismatched Grid/Array"
 !      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! Verifing the ESMF_FieldSetDataMap
       !  setting a different datamap in an existing field which already has
       !  data is not implemented yet (it is interpreted as a request to 
@@ -459,64 +462,64 @@
      !!call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! Verifing that destroying the Field did not destroy the IGrid
-       call ESMF_IGridValidate(igrid, rc=rc)
+      !EX_UTest
+      ! Verifing that destroying the Field did not destroy the Grid
+       call ESMF_GridValidate(grid, rc=rc)
        write(failMsg, *) ""
-       write(name, *) "Using a IGrid after the Field is destroyed"
+       write(name, *) "Using a Grid after the Field is destroyed"
        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! Verifing that a Field cannot be created with an uninitialized IGrid 
+      !EX_UTest
+      ! Verifing that a Field cannot be created with an uninitialized Grid 
       ! and Array.  f6 is *not* created here and should be invalid.
-      igrid2 = ESMF_IGridCreate(rc=rc)
-      call ESMF_IGridDestroy(igrid2, rc=rc)
-      f6 = ESMF_FieldCreate(igrid2, arrayspec, allocflag=ESMF_ALLOC, &
-                        horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CENTER, &
+      grid2 = ESMF_GridCreateEmpty(rc=rc)
+      call ESMF_GridDestroy(grid2, rc=rc)
+      f6 = ESMF_FieldCreate(grid2, arrayspec, allocflag=ESMF_ALLOC, &
+                        staggerloc=ESMF_STAGGERLOC_CENTER, &
                         haloWidth=3, datamap=dm, name="Field 0", iospec=ios, rc=rc)
 
       write(failMsg, *) ""
-      write(name, *) "Creating a Field with an uninitialized IGrid and Array"
+      write(name, *) "Creating a Field with an uninitialized Grid and Array"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! Verify that a IGrid cannot be gotten from a Field created with no data
+      !EX_UTest
+      ! Verify that a Grid cannot be gotten from a Field created with no data
       f5 = ESMF_FieldCreateNoData(rc=rc)
-      call ESMF_FieldGet(f5, igrid=igrid3, rc=rc)
+      call ESMF_FieldGet(f5, grid=grid3, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Getting a IGrid from a Field created with no data Test"
+      write(name, *) "Getting a Grid from a Field created with no data Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldDestroy(f5, rc=rc)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! Req. 1.6.2 Return igrid 
-      ! A field shall be able to return a reference to its igrid.
+      !EX_UTest
+      ! Return grid 
+      ! A field shall be able to return a reference to its grid.
       ! f3 gets created here and used thru the rest of the tests.
-      gname="oceanigrid"
+      gname="oceangrid"
       call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
-      f3 = ESMF_FieldCreate(igrid, arrayspec, allocflag=ESMF_ALLOC, &
-                        horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CENTER, &
+      f3 = ESMF_FieldCreate(grid, arrayspec, allocflag=ESMF_ALLOC, &
+                        staggerloc=ESMF_STAGGERLOC_CENTER, &
                         haloWidth=1, datamap=dm, name="Field 0", iospec=ios, rc=rc)
-      call ESMF_FieldGet(f3, igrid=igrid3, rc=rc)
+      call ESMF_FieldGet(f3, grid=grid3, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Getting a IGrid from a Field created with no data Test"
-      call ESMF_IGridGet(igrid, name=gname, rc=rc)
-      call ESMF_IGridGet(igrid3, name=gname3, rc=rc)
-      print *, "IGrid (igrid3) name = ", trim(gname3)
+      write(name, *) "Getting a Grid from a Field created with no data Test"
+      call ESMF_GridGet(grid, name=gname, rc=rc)
+      call ESMF_GridGet(grid3, name=gname3, rc=rc)
+      print *, "Grid (grid3) name = ", trim(gname3)
       call ESMF_Test((gname.eq.gname3), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! Req. xxx - getting a data pointer directly from a field
       ! f3 exists and is valid at this point.
-      nullify(f90ptr2)
-      call ESMF_FieldGetDataPointer(f3, f90ptr2, rc=rc)
-      print *, "data = ", f90ptr2(1,1)
-      write(failMsg, *) ""
-      write(name, *) "Getting an F90 pointer directly back from a Field"
-      call ESMF_Test((associated(f90ptr2)), name, failMsg, result, ESMF_SRCLINE)
+      !nullify(f90ptr2)
+      !call ESMF_FieldGetDataPointer(f3, f90ptr2, rc=rc)
+      !print *, "data = ", f90ptr2(1,1)
+      !write(failMsg, *) ""
+      !write(name, *) "Getting an F90 pointer directly back from a Field"
+      !call ESMF_Test((associated(f90ptr2)), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
 
@@ -527,21 +530,21 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! Create a 3D igrid for testing
-      igrid5 =  ESMF_IGridCreateHorzXYUni((/ 10, 20 /), minCoord, &
-                                     name="landigrid", rc=rc)
-      deltas(:) = (/ (i,i=1,10) /)
-      call ESMF_IGridAddVertHeight(igrid5, delta=deltas)
-      call ESMF_IGridDistribute(igrid5, delayout=delayout, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Creating a 3D IGrid to use in Field Tests"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      igrid5 =  ESMF_IGridCreateHorzXYUni((/ 10, 20 /), minCoord, &
+!                                     name="landigrid", rc=rc)
+!      deltas(:) = (/ (i,i=1,10) /)
+!      call ESMF_IGridAddVertHeight(igrid5, delta=deltas)
+!      call ESMF_IGridDistribute(igrid5, delayout=delayout, rc=rc)
+!      write(failMsg, *) ""
+!      write(name, *) "Creating a 3D IGrid to use in Field Tests"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !E-X_UTest
       ! TODO: this fails.
       ! Create a Field with 3D igrid and 3D data array, vertex centered in vert
       !call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R4, rc=rc)
-      !f7 = ESMF_FieldCreate(igrid5, arrayspec, ESMF_ALLOC, ESMF_CELL_CENTER, &
+      !f7 = ESMF_FieldCreate(igrid5, arrayspec, ESMF_ALLOC, ESMF_STAGGERLOC_CENTER, &
       !                      ESMF_CELL_VERTEX, 3, name="Field 7", rc=rc)
       !write(failMsg, *) ""
       !write(name, *) "Creating Field with 3D igrid and 3D data, vert=vertex"
@@ -550,12 +553,12 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! Create a Field with 3D igrid and 3D data array, cell centered
-      call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R4, rc=rc)
-      f7 = ESMF_FieldCreate(igrid5, arrayspec, ESMF_ALLOC, ESMF_CELL_CENTER, &
-                            ESMF_CELL_CELL, 3, name="Field 7", rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Creating Field with 3D igrid and 3D data, vert=cell"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R4, rc=rc)
+!      f7 = ESMF_FieldCreate(igrid5, arrayspec, ESMF_ALLOC, ESMF_STAGGERLOC_CENTER, &
+!                            ESMF_CELL_CELL, 3, name="Field 7", rc=rc)
+!      write(failMsg, *) ""
+!      write(name, *) "Creating Field with 3D igrid and 3D data, vert=cell"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !E-X_UTest
@@ -564,14 +567,14 @@
       ! number of counts in the local decomposition.
       ! Create a Field with 3D igrid and 3D data array
 !      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
-!      f7 = ESMF_FieldCreate(igrid5, arrayspec, ESMF_ALLOC, ESMF_CELL_CENTER, &
+!      f7 = ESMF_FieldCreate(igrid5, arrayspec, ESMF_ALLOC, ESMF_STAGGERLOC_CENTER, &
 !                            ESMF_CELL_VERTEX, 3, name="Field 7", rc=rc)
 !      write(failMsg, *) ""
 !      write(name, *) "Creating Field with 3D igrid and 3D data"
 !      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! Verifing that a Field can be created with a name
       f2 = ESMF_FieldCreateNoData("pressure", rc=rc)
       write(failMsg, *) ""
@@ -582,42 +585,42 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! Setting a (bad) data pointer directly in an empty Field
-      nullify(f90ptr4)
-      call ESMF_FieldSetDataPointer(f2, f90ptr4, rc=rc)
-      write(failMsg, *) "Did not return ESMF_FAILURE"
-      write(name, *) "Setting a null F90 pointer directly in a Field"
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      nullify(f90ptr4)
+!      call ESMF_FieldSetDataPointer(f2, f90ptr4, rc=rc)
+!      write(failMsg, *) "Did not return ESMF_FAILURE"
+!      write(name, *) "Setting a null F90 pointer directly in a Field"
+!      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! Setting a (good) data pointer directly in an empty Field
-      allocate(f90ptr4(4,4))
-      f90ptr4(:,:) = 3.14159
-      call ESMF_FieldSetDataPointer(f2, f90ptr4, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting an F90 pointer directly in a Field"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      allocate(f90ptr4(4,4))
+!      f90ptr4(:,:) = 3.14159
+!      call ESMF_FieldSetDataPointer(f2, f90ptr4, rc=rc)
+!      write(failMsg, *) "Did not return ESMF_SUCCESS"
+!      write(name, *) "Setting an F90 pointer directly in a Field"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! Getting the data pointer back from a Field
-      call ESMF_FieldGetDataPointer(f2, f90ptr4, rc=rc)
-      print *, "data = ", f90ptr4(1,1)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Getting an F90 pointer directly back from a Field"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_FieldGetDataPointer(f2, f90ptr4, rc=rc)
+!      print *, "data = ", f90ptr4(1,1)
+!      write(failMsg, *) "Did not return ESMF_SUCCESS"
+!      write(name, *) "Getting an F90 pointer directly back from a Field"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! Verify the pointers are equal
-      call ESMF_FieldGetDataPointer(f2, f90ptr5, rc=rc)
-      print *, "data = ", f90ptr5(1,1)
-      write(failMsg, *) "The pointers are not equal"
-      write(name, *) "Compare F90 pointers Test"
-      call ESMF_Test((associated(f90ptr4,f90ptr5)), name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_FieldGetDataPointer(f2, f90ptr5, rc=rc)
+!      print *, "data = ", f90ptr5(1,1)
+!      write(failMsg, *) "The pointers are not equal"
+!      write(name, *) "Compare F90 pointers Test"
+!      call ESMF_Test((associated(f90ptr4,f90ptr5)), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! Adding Attributes to a Field
       ! f3 exists and is valid at this point.
       call ESMF_FieldSetAttribute(f3, "Scale Factor", 4, rc)
@@ -626,7 +629,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! Getting Attribute count from a Field
       call ESMF_FieldGetAttributeCount(f3, count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -634,14 +637,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! Verify Attribute Count Test
       write(failMsg, *) "Incorrect count"
       write(name, *) "Verify Attribute count from a Field "
       call ESMF_Test((count.eq.1), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! Getting Attrubute Info from a Field
       call ESMF_FieldGetAttributeInfo(f3, name="Scale Factor", count=count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -649,14 +652,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! Verify Attribute Count Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Verify Attribute count from a Field "
       call ESMF_Test((count.eq.1), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! Get Field Attribute Test
       intattr = 0
       call ESMF_FieldGetAttribute(f3, "Scale Factor", intattr, rc)
@@ -665,7 +668,7 @@
       call ESMF_Test((intattr.eq.4), name, failMsg, result, ESMF_SRCLINE)
  
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! test setting a second attribute
       call ESMF_FieldSetAttribute(f3, "Invalid Data Tag", -999, rc)
       call ESMF_FieldPrint(f3, rc=rc)
@@ -677,8 +680,8 @@
       call ESMF_Test((intattr2.eq.-999), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! getting a non-existant attribute
+      !EX_UTest
+      ! getting a non-existent attribute
 print *, "ready to call no attr"
       call ESMF_FieldGetAttribute(f3, "No such attribute", intattr, rc)
 print *, "back from no attr"
@@ -688,8 +691,8 @@ print *, "back from no attr"
 print *, "done with test"
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! getting a non-existant attribute
+      !EX_UTest
+      ! getting a non-existent attribute
       ! setting an integer list
       call ESMF_FieldSetAttribute(f3, "Multiple Scale Factors", 4, (/4,3,2,1/), rc)
       call ESMF_FieldPrint(f3, rc=rc)
@@ -702,7 +705,7 @@ print *, "done with test"
       call ESMF_Test((intattrlist(1).eq.4), name, failMsg, result, ESMF_SRCLINE)
  
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! test setting a real attribute
       rattr = 3.14159
       call ESMF_FieldSetAttribute(f3, "Pi", 3.14159_ESMF_KIND_R8, rc)
@@ -715,7 +718,7 @@ print *, "done with test"
       call ESMF_Test((rattr-3.14159.lt.0.00001), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! test setting a real list
       rattrlist = (/ 1.1, 2.2 /)
       call ESMF_FieldSetAttribute(f3, "Vertices", 2, rattrlist, rc)
@@ -730,7 +733,7 @@ print *, "done with test"
       call ESMF_Test((rattrlist(1).eq.1.1), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! test setting a logical attribute
       call ESMF_FieldSetAttribute(f3, "Sky is Blue", ESMF_TRUE, rc)
       call ESMF_FieldPrint(f3, rc=rc)
@@ -743,7 +746,7 @@ print *, "done with test"
       call ESMF_Test((lattr.eq.ESMF_TRUE), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! test setting a logical list
       call ESMF_FieldSetAttribute(f3, "FlipFlop", 3, (/ESMF_TRUE,ESMF_FALSE,ESMF_TRUE/), rc)
       call ESMF_FieldPrint(f3, rc=rc)
@@ -761,7 +764,7 @@ print *, "done with test"
       call ESMF_Test((lattrlist(1).eq.ESMF_TRUE), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! test setting a character attribute
       cattr = "It was a dark and stormy night"
       call ESMF_FieldSetAttribute(f3, "Book", cattr, rc)
@@ -773,11 +776,11 @@ print *, "done with test"
       call ESMF_Test((cattr.eq.cattr2), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      ! Requirement 1.2 Local memory layout 
+      ! Local memory layout 
       ! It shall be possible to specify whether the field data is row major 
       ! or column major at field creation and to rearrange it (assumes 
       ! local copy).
-      !EX_removeUTest
+      !EX_UTest
       call ESMF_FieldGet(f3, datamap=dm, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting a DataMap from a Field"
@@ -801,9 +804,10 @@ print *, "done with test"
       ! Cannot be tested until Bug 705716 "Field Query attributes not 
       !  implemented" is fixed.
 
-! igrid destroy to clear previous igrids.
-       call ESMF_IGridDestroy(igrid, rc=rc)
+! grid destroy to clear previous grids.
+       call ESMF_GridDestroy(grid, rc=rc)
 
+#if 0
       !------------------------------------------------------------------------
       ! ESMF 3D Field Validate test to accommodate the single point mismatch 
       ! between center and edge staggerings. This Bug is actually a igrid design 
@@ -837,7 +841,7 @@ print *, "done with test"
                                 decompIds=(/1,2,0/), rc=rc)
 
       ! Get local IGrid counts now for use later
-       call ESMF_IGridGetDELocalInfo(igrid, ESMF_CELL_CENTER,          &
+       call ESMF_IGridGetDELocalInfo(igrid, ESMF_STAGGERLOC_CENTER,          &
                  Vertrelloc=ESMF_CELL_TOPFACE,                       &
                  localCellCountPerDim=cellCounts, rc=rc)
       !EX_removeUTest
@@ -849,7 +853,7 @@ print *, "done with test"
        allocate( fptr(cellCounts(1),cellCounts(2),cellCounts(3)+1) )  
        print*,'cellcounts',cellCounts
        f1 = ESMF_FieldCreate(igrid, fptr, ESMF_DATA_REF,              &
-                 horzRelloc=ESMF_CELL_CENTER,                        &
+                 horzRelloc=ESMF_STAGGERLOC_CENTER,                   &
                  vertRelloc=ESMF_CELL_TOPFACE,                       &
                  name="field", rc=rc)
        print*,'field create',rc
@@ -869,6 +873,9 @@ print *, "done with test"
       ! clean up
        deallocate( fptr )
        call ESMF_FieldDestroy(f1, rc)
+
+#endif
+
 #endif
 
       call ESMF_TestEnd(result, ESMF_SRCLINE)
