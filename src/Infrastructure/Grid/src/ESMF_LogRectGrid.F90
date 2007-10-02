@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.151.2.6 2006/11/30 00:05:59 donstark Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.151.2.7 2007/10/02 22:11:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
 #define ESMF_FILENAME "ESMF_LogRectGrid.F90"
 !
 !     ESMF LogRectGrid Module
-      module ESMF_LogRectGridMod
+module ESMF_LogRectGridMod
 !
 !==============================================================================
 !
@@ -38,38 +38,38 @@
 !------------------------------------------------------------------------------
 ! !USES:
 
-      use ESMF_UtilTypesMod   ! ESMF base class
-      use ESMF_UtilMod        ! ESMF base class
-      use ESMF_BaseMod        ! ESMF base class
-      use ESMF_LogErrMod
-      use ESMF_IOSpecMod      ! ESMF I/O class
-      use ESMF_LocalArrayMod  ! ESMF local array class
-      use ESMF_ArrayDataMapMod     ! ESMF data map class
-      use ESMF_DELayoutMod    ! ESMF layout class
-      use ESMF_ArrayMod
-      use ESMF_ArrayCreateMod
-      use ESMF_ArrayGetMod
-      use ESMF_DistGridMod    ! ESMF distributed grid class
-      use ESMF_PhysCoordMod   ! ESMF physical coord class
-      use ESMF_PhysGridMod    ! ESMF physical grid class
-      use ESMF_GridTypesMod   ! ESMF basic grid types and primitives
-      use ESMF_VMMod
+use ESMF_UtilTypesMod   ! ESMF base class
+use ESMF_UtilMod        ! ESMF base class
+use ESMF_BaseMod        ! ESMF base class
+use ESMF_LogErrMod
+use ESMF_IOSpecMod      ! ESMF I/O class
+use ESMF_LocalArrayMod  ! ESMF local array class
+use ESMF_ArrayDataMapMod     ! ESMF data map class
+use ESMF_DELayoutMod    ! ESMF layout class
+use ESMF_ArrayMod
+use ESMF_ArrayCreateMod
+use ESMF_ArrayGetMod
+use ESMF_DistGridMod    ! ESMF distributed grid class
+use ESMF_PhysCoordMod   ! ESMF physical coord class
+use ESMF_PhysGridMod    ! ESMF physical grid class
+use ESMF_GridTypesMod   ! ESMF basic grid types and primitives
+use ESMF_VMMod
 
 
 !     use ESMF_GridMod; only ESMF_GridGet        ! ESMF grid
-      implicit none
+implicit none
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
-      private
+private
 
-      ! TODO: temporary fix - the new Reconcile code is not compatible (yet)
-      !  with the fast domainOption.  so make it public and have Reconcile
-      !  turn it off the first time it is called.
-      integer :: domainOption = 1
-      public domainOption
+! TODO: temporary fix - the new Reconcile code is not compatible (yet)
+!  with the fast domainOption.  so make it public and have Reconcile
+!  turn it off the first time it is called.
+integer :: domainOption = 1
+public domainOption
 
-      real(ESMF_KIND_R8), parameter :: fake = -999999.99d0
+real(ESMF_KIND_R8), parameter :: fake = -999999.99d0
 
 !------------------------------------------------------------------------------
 !
@@ -79,49 +79,49 @@
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 
-    public ESMF_GridCreateHorzLatLon
-    public ESMF_GridCreateHorzLatLonUni
-    public ESMF_GridCreateHorzXY
-    public ESMF_GridCreateHorzXYUni
-    public ESMF_LRGridAddVert
-    public ESMF_LRGridDistributeBlock
-    public ESMF_LRGridDistributeArbitrary
-    public ESMF_LRGridCreateRead
-    public ESMF_LRGridCreateCopy
-    public ESMF_LRGridCreateCutout
-    public ESMF_LRGridCreateDiffRes
-    public ESMF_LRGridCreateExchange
-    public ESMF_LRGridAddDistGridBlock
-    public ESMF_LRGridAddDistGridArb
-    public ESMF_LRGridAddPhysGridBlock
-    public ESMF_LRGridAddPhysGridArb
-    public ESMF_LRGridAddVertPhysGrid
-    public ESMF_LRGridGetCoord
-    public ESMF_LRGridSetCoord
-    public ESMF_LRGridGetDELocalInfo   ! access DistGrid from above
-    public ESMF_LRGridGetAllAxisIndex  ! access DistGrid from above
-    public ESMF_LRGridGetAIsAllDEs     ! access DistGrid from above
-    public ESMF_LRGridGlobalToDELocalIndex
-    public ESMF_LRGridDELocalToGlobalIndex
-    public ESMF_LRGridGlobalToDELocalAI
-    public ESMF_LRGridDELocalToGlobalAI
-    public ESMF_LRGridGet
-    public ESMF_LRGridSet
-    public ESMF_LRGridGetCellMask
-    public ESMF_LRGridSetCellMask
-    !public ESMF_LRGridGetMask
-    public ESMF_LRGridSetMask
-    !public ESMF_LRGridGetMetric
-    public ESMF_LRGridSetMetric
-    public ESMF_LRGridSetBoundBoxesBlock
-    public ESMF_LRGridSetBoundBoxesArb
-    public ESMF_LRGridValidate
-    public ESMF_LRGridBoxIntersectRecv
-    public ESMF_LRGridBoxIntersectSend
-    public ESMF_LRGridDestruct
-    public ESMF_LRGridSerialize
-    public ESMF_LRGridDeserialize
-    !public ESMF_LRGridSearch
+public ESMF_GridCreateHorzLatLon
+public ESMF_GridCreateHorzLatLonUni
+public ESMF_GridCreateHorzXY
+public ESMF_GridCreateHorzXYUni
+public ESMF_LRGridAddVert
+public ESMF_LRGridDistributeBlock
+public ESMF_LRGridDistributeArbitrary
+public ESMF_LRGridCreateRead
+public ESMF_LRGridCreateCopy
+public ESMF_LRGridCreateCutout
+public ESMF_LRGridCreateDiffRes
+public ESMF_LRGridCreateExchange
+public ESMF_LRGridAddDistGridBlock
+public ESMF_LRGridAddDistGridArb
+public ESMF_LRGridAddPhysGridBlock
+public ESMF_LRGridAddPhysGridArb
+public ESMF_LRGridAddVertPhysGrid
+public ESMF_LRGridGetCoord
+public ESMF_LRGridSetCoord
+public ESMF_LRGridGetDELocalInfo   ! access DistGrid from above
+public ESMF_LRGridGetAllAxisIndex  ! access DistGrid from above
+public ESMF_LRGridGetAIsAllDEs     ! access DistGrid from above
+public ESMF_LRGridGlobalToDELocalIndex
+public ESMF_LRGridDELocalToGlobalIndex
+public ESMF_LRGridGlobalToDELocalAI
+public ESMF_LRGridDELocalToGlobalAI
+public ESMF_LRGridGet
+public ESMF_LRGridSet
+public ESMF_LRGridGetCellMask
+public ESMF_LRGridSetCellMask
+!public ESMF_LRGridGetMask
+public ESMF_LRGridSetMask
+!public ESMF_LRGridGetMetric
+public ESMF_LRGridSetMetric
+public ESMF_LRGridSetBoundBoxesBlock
+public ESMF_LRGridSetBoundBoxesArb
+public ESMF_LRGridValidate
+public ESMF_LRGridBoxIntersectRecv
+public ESMF_LRGridBoxIntersectSend
+public ESMF_LRGridDestruct
+public ESMF_LRGridSerialize
+public ESMF_LRGridDeserialize
+!public ESMF_LRGridSearch
 
 !------------------------------------------------------------------------------
 !
@@ -131,8 +131,8 @@
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.151.2.6 2006/11/30 00:05:59 donstark Exp $'
+character(*), parameter, private :: version = &
+'$Id: ESMF_LogRectGrid.F90,v 1.151.2.7 2007/10/02 22:11:52 theurich Exp $'
 
 !==============================================================================
 !
@@ -141,121 +141,121 @@
 !==============================================================================
 !BOPI
 ! !INTERFACE:
-      interface ESMF_LRGridConstruct
+interface ESMF_LRGridConstruct
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_LRGridConstructSpecd
-         module procedure ESMF_LRGridConstructUniform
+ module procedure ESMF_LRGridConstructSpecd
+ module procedure ESMF_LRGridConstructUniform
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that construct a
 !     complete {\tt ESMF\_Grid}.
 
 !EOPI
-      end interface
+end interface
 !
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface ESMF_GridCreateHorzLatLon
+interface ESMF_GridCreateHorzLatLon
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_GridCreateHorzLatLonCoord
-         module procedure ESMF_GridCreateHorzLatLonDelta
+ module procedure ESMF_GridCreateHorzLatLonCoord
+ module procedure ESMF_GridCreateHorzLatLonDelta
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that create a
 !     complete horizontal lat/lon {\tt ESMF\_Grid}.
 
 !EOPI
-      end interface
+end interface
 !
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface ESMF_GridCreateHorzXY
+interface ESMF_GridCreateHorzXY
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_GridCreateHorzXYCoord
-         module procedure ESMF_GridCreateHorzXYDelta
+ module procedure ESMF_GridCreateHorzXYCoord
+ module procedure ESMF_GridCreateHorzXYDelta
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that create a
 !     complete horizontal XY {\tt ESMF\_Grid}.
 
 !EOPI
-      end interface
+end interface
 !
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface ESMF_LRGridSetCoord
+interface ESMF_LRGridSetCoord
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_LRGridSetCoordFromArray
-         module procedure ESMF_LRGridSetCoordFromBuffer
-         module procedure ESMF_LRGridSetCoordComputeBlock
-         module procedure ESMF_LRGridSetCoordComputeArb
-         module procedure ESMF_LRGridSetCoordCopy
+ module procedure ESMF_LRGridSetCoordFromArray
+ module procedure ESMF_LRGridSetCoordFromBuffer
+ module procedure ESMF_LRGridSetCoordComputeBlock
+ module procedure ESMF_LRGridSetCoordComputeArb
+ module procedure ESMF_LRGridSetCoordCopy
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
 !     coordinates as part of a {\tt ESMF\_Grid}.
 
 !EOPI
-      end interface
+end interface
 !
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface ESMF_LRGridSetMask
+interface ESMF_LRGridSetMask
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_LRGridSetMaskFromArray
-         module procedure ESMF_LRGridSetMaskFromBuffer
-         module procedure ESMF_LRGridSetMaskFromMask
-         module procedure ESMF_LRGridSetMaskCopy
+ module procedure ESMF_LRGridSetMaskFromArray
+ module procedure ESMF_LRGridSetMaskFromBuffer
+ module procedure ESMF_LRGridSetMaskFromMask
+ module procedure ESMF_LRGridSetMaskCopy
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
 !     logical masks as part of a {\tt ESMF\_Grid}.
 
 !EOPI
-      end interface
+end interface
 !
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface ESMF_LRGridSetCellMask
+interface ESMF_LRGridSetCellMask
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_LRGridSetCellMaskBlock
-         module procedure ESMF_LRGridSetCellMaskArb
+ module procedure ESMF_LRGridSetCellMaskBlock
+ module procedure ESMF_LRGridSetCellMaskArb
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
 !     cell masks as part of a {\tt ESMF\_Grid}.
 
 !EOPI
-      end interface
+end interface
 !
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface ESMF_LRGridSetMetric
+interface ESMF_LRGridSetMetric
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_LRGridSetMetricFromArray
-         module procedure ESMF_LRGridSetMetricFromBuffer
-         module procedure ESMF_LRGridSetMetricCompute
-         module procedure ESMF_LRGridSetMetricCopy
+ module procedure ESMF_LRGridSetMetricFromArray
+ module procedure ESMF_LRGridSetMetricFromBuffer
+ module procedure ESMF_LRGridSetMetricCompute
+ module procedure ESMF_LRGridSetMetricCopy
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
 !     metrics as part of an {\tt ESMF\_Grid}.
 
 !EOPI
-      end interface
+end interface
 !
 !------------------------------------------------------------------------------
 !!BOPI
@@ -279,7 +279,7 @@
 
 !==============================================================================
 
-      contains
+contains
 
 !==============================================================================
 !
@@ -292,25 +292,25 @@
 ! !IROUTINE: ESMF_GridCreateHorzLatLon - Create a new horizontal LatLon Grid
 
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridCreateHorzlatLon()
-      function ESMF_GridCreateHorzLatLonCoord(coord1, coord2, &
-                                              horzstagger, dimNames, dimUnits, &
-                                              coordorder, periodic, name, rc)
+! Private name; call using ESMF_GridCreateHorzlatLon()
+function ESMF_GridCreateHorzLatLonCoord(coord1, coord2, &
+				      horzstagger, dimNames, dimUnits, &
+				      coordorder, periodic, name, rc)
 
 !
 ! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateHorzLatLonCoord
+type(ESMF_Grid) :: ESMF_GridCreateHorzLatLonCoord
 !
 ! !ARGUMENTS:
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: coord1
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: coord2
-      type(ESMF_GridHorzStagger), intent(in), optional :: horzstagger
-      character(len=*), dimension(:), intent(in), optional :: dimNames
-      character(len=*), dimension(:), intent(in), optional :: dimUnits
-      type(ESMF_CoordOrder), intent(in), optional :: coordorder
-      type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
-      character(len=*), intent(in), optional :: name
-      integer, intent(out), optional :: rc
+real(ESMF_KIND_R8), dimension(:), intent(in) :: coord1
+real(ESMF_KIND_R8), dimension(:), intent(in) :: coord2
+type(ESMF_GridHorzStagger), intent(in), optional :: horzstagger
+character(len=*), dimension(:), intent(in), optional :: dimNames
+character(len=*), dimension(:), intent(in), optional :: dimUnits
+type(ESMF_CoordOrder), intent(in), optional :: coordorder
+type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
+character(len=*), intent(in), optional :: name
+integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
@@ -364,43 +364,71 @@
 !EOP
 ! !REQUIREMENTS:  TODO
 
-      integer :: localrc                          ! Error status
-      type(ESMF_GridClass), pointer :: grid       ! Pointer to new grid
-      type(ESMF_GridType)           :: horzGridType
-      type(ESMF_CoordSystem)        :: horzCoordSystem
+integer :: localrc                          ! Error status
+type(ESMF_GridClass), pointer :: grid       ! Pointer to new grid
+type(ESMF_GridType)           :: horzGridType
+type(ESMF_CoordSystem)        :: horzCoordSystem
 
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+! Initialize return code; assume failure until success is certain
+if (present(rc)) rc = ESMF_FAILURE
 
-      ! Initialize pointers
-      nullify(grid)
-      nullify(ESMF_GridCreateHorzLatLonCoord%ptr)
+! Initialize pointers
+nullify(grid)
+nullify(ESMF_GridCreateHorzLatLonCoord%ptr)
 
-      ! set applicable default values
-      horzGridType    = ESMF_GRID_TYPE_XY
-      horzCoordSystem = ESMF_COORD_SYSTEM_SPHERICAL
+! set applicable default values
+horzGridType    = ESMF_GRID_TYPE_XY
+horzCoordSystem = ESMF_COORD_SYSTEM_SPHERICAL
 
-      allocate(grid, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Grid object", &
-                                     ESMF_CONTEXT, rc)) return
+allocate(grid, stat=localrc)
+if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Grid object", &
+			     ESMF_CONTEXT, rc)) return
 
-      ! Call construction method to allocate and initialize grid internals.
-      call ESMF_LRGridConstructSpecd(grid, 2, coord1, coord2, &
-                                     horzGridType=horzGridType, &
-                                     horzStagger=horzstagger, &
-                                     horzCoordSystem=horzCoordSystem, &
-                                     dimNames=dimNames, dimunits=dimUnits, &
-                                     coordOrder=coordorder, &
-                                     periodic=periodic, name=name, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+! Call construction method to allocate and initialize grid internals.
+!TODO: COLUMBIA_BUG: The following "if (present())" construct is a
+!      work-around for Intel's ifort version 9.1.045 and 9.1.051
+!      on NAS' columbia.
+if (present(dimNames).and.present(dimUnits)) then
+call ESMF_LRGridConstructSpecd(grid, 2, coord1, coord2, &
+			     horzGridType=horzGridType, &
+			     horzStagger=horzstagger, &
+			     horzCoordSystem=horzCoordSystem, &
+			     dimNames=dimNames, dimunits=dimUnits, &
+			     coordOrder=coordorder, &
+			     periodic=periodic, name=name, rc=localrc)
+else if (present(dimNames)) then
+call ESMF_LRGridConstructSpecd(grid, 2, coord1, coord2, &
+			     horzGridType=horzGridType, &
+			     horzStagger=horzstagger, &
+			     horzCoordSystem=horzCoordSystem, &
+			     dimNames=dimNames, &
+			     coordOrder=coordorder, &
+			     periodic=periodic, name=name, rc=localrc)
+else if (present(dimUnits)) then
+call ESMF_LRGridConstructSpecd(grid, 2, coord1, coord2, &
+			     horzGridType=horzGridType, &
+			     horzStagger=horzstagger, &
+			     horzCoordSystem=horzCoordSystem, &
+			     dimunits=dimUnits, &
+			     coordOrder=coordorder, &
+			     periodic=periodic, name=name, rc=localrc)
+else
+call ESMF_LRGridConstructSpecd(grid, 2, coord1, coord2, &
+			     horzGridType=horzGridType, &
+			     horzStagger=horzstagger, &
+			     horzCoordSystem=horzCoordSystem, &
+			     coordOrder=coordorder, &
+			     periodic=periodic, name=name, rc=localrc)
+endif
+if (ESMF_LogMsgFoundError(localrc, &
+			ESMF_ERR_PASSTHRU, &
+			ESMF_CONTEXT, rc)) return
 
-      ! Set return values.
-      ESMF_GridCreateHorzLatLonCoord%ptr => grid
-      if (present(rc)) rc = ESMF_SUCCESS
+! Set return values.
+ESMF_GridCreateHorzLatLonCoord%ptr => grid
+if (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_GridCreateHorzLatLonCoord
+end function ESMF_GridCreateHorzLatLonCoord
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -409,27 +437,27 @@
 ! !IROUTINE: ESMF_GridCreateHorzLatLon - Create a new horizontal LatLon Grid
 
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridCreateHorzlatLon()
-      function ESMF_GridCreateHorzLatLonDelta(minGlobalCoordPerDim, &
-                                              delta1, delta2, horzstagger, &
-                                              dimNames, dimUnits, &
-                                              coordorder, periodic, name, rc)
+! Private name; call using ESMF_GridCreateHorzlatLon()
+function ESMF_GridCreateHorzLatLonDelta(minGlobalCoordPerDim, &
+				      delta1, delta2, horzstagger, &
+				      dimNames, dimUnits, &
+				      coordorder, periodic, name, rc)
 
 !
 ! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateHorzLatLonDelta
+type(ESMF_Grid) :: ESMF_GridCreateHorzLatLonDelta
 !
 ! !ARGUMENTS:
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: minGlobalCoordPerDim
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: delta1
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: delta2
-      type(ESMF_GridHorzStagger), intent(in), optional :: horzstagger
-      character(len=*), dimension(:), intent(in), optional :: dimNames
-      character(len=*), dimension(:), intent(in), optional :: dimUnits
-      type(ESMF_CoordOrder), intent(in), optional :: coordorder
-      type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
-      character(len=*), intent(in), optional :: name
-      integer, intent(out), optional :: rc
+real(ESMF_KIND_R8), dimension(:), intent(in) :: minGlobalCoordPerDim
+real(ESMF_KIND_R8), dimension(:), intent(in) :: delta1
+real(ESMF_KIND_R8), dimension(:), intent(in) :: delta2
+type(ESMF_GridHorzStagger), intent(in), optional :: horzstagger
+character(len=*), dimension(:), intent(in), optional :: dimNames
+character(len=*), dimension(:), intent(in), optional :: dimUnits
+type(ESMF_CoordOrder), intent(in), optional :: coordorder
+type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
+character(len=*), intent(in), optional :: name
+integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
@@ -489,28 +517,32 @@
 !EOP
 ! !REQUIREMENTS:  TODO
 
-      integer :: localrc                          ! Error status
-      type(ESMF_GridClass), pointer :: grid       ! Pointer to new grid
-      type(ESMF_GridType)           :: horzGridType
-      type(ESMF_CoordSystem)        :: horzCoordSystem
+integer :: localrc                          ! Error status
+type(ESMF_GridClass), pointer :: grid       ! Pointer to new grid
+type(ESMF_GridType)           :: horzGridType
+type(ESMF_CoordSystem)        :: horzCoordSystem
 
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+! Initialize return code; assume failure until success is certain
+if (present(rc)) rc = ESMF_FAILURE
 
-      ! Initialize pointers
-      nullify(grid)
-      nullify(ESMF_GridCreateHorzLatLonDelta%ptr)
+! Initialize pointers
+nullify(grid)
+nullify(ESMF_GridCreateHorzLatLonDelta%ptr)
 
-      ! set applicable default values
-      horzGridType    = ESMF_GRID_TYPE_XY
-      horzCoordSystem = ESMF_COORD_SYSTEM_SPHERICAL
+! set applicable default values
+horzGridType    = ESMF_GRID_TYPE_XY
+horzCoordSystem = ESMF_COORD_SYSTEM_SPHERICAL
 
-      allocate(grid, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Grid object", &
-                                     ESMF_CONTEXT, rc)) return
+allocate(grid, stat=localrc)
+if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Grid object", &
+			     ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize grid internals.
-      call ESMF_LRGridConstructSpecd(grid, 2, &
+      !TODO: COLUMBIA_BUG: The following "if (present())" construct is a
+      !      work-around for Intel's ifort version 9.1.045 and 9.1.051
+      !      on NAS' columbia.
+      if (present(dimNames).and.present(dimUnits)) then
+        call ESMF_LRGridConstructSpecd(grid, 2, &
                                      minGlobalCoordPerDim=minGlobalCoordPerDim, &
                                      delta1=delta1, delta2=delta2, &
                                      horzGridType=horzGridType, &
@@ -519,6 +551,36 @@
                                      dimNames=dimNames, dimunits=dimUnits, &
                                      coordOrder=coordorder, &
                                      periodic=periodic, name=name, rc=localrc)
+      else if (present(dimNames)) then
+        call ESMF_LRGridConstructSpecd(grid, 2, &
+                                     minGlobalCoordPerDim=minGlobalCoordPerDim, &
+                                     delta1=delta1, delta2=delta2, &
+                                     horzGridType=horzGridType, &
+                                     horzStagger=horzstagger, &
+                                     horzCoordSystem=horzCoordSystem, &
+                                     dimNames=dimNames, &
+                                     coordOrder=coordorder, &
+                                     periodic=periodic, name=name, rc=localrc)
+      else if (present(dimUnits)) then
+        call ESMF_LRGridConstructSpecd(grid, 2, &
+                                     minGlobalCoordPerDim=minGlobalCoordPerDim, &
+                                     delta1=delta1, delta2=delta2, &
+                                     horzGridType=horzGridType, &
+                                     horzStagger=horzstagger, &
+                                     horzCoordSystem=horzCoordSystem, &
+                                     dimunits=dimUnits, &
+                                     coordOrder=coordorder, &
+                                     periodic=periodic, name=name, rc=localrc)
+      else
+        call ESMF_LRGridConstructSpecd(grid, 2, &
+                                     minGlobalCoordPerDim=minGlobalCoordPerDim, &
+                                     delta1=delta1, delta2=delta2, &
+                                     horzGridType=horzGridType, &
+                                     horzStagger=horzstagger, &
+                                     horzCoordSystem=horzCoordSystem, &
+                                     coordOrder=coordorder, &
+                                     periodic=periodic, name=name, rc=localrc)
+      endif
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -644,13 +706,44 @@
                                      ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize grid internals.
-      call ESMF_LRGridConstructUniform(grid, 2, counts(1:2), &
+      !TODO: COLUMBIA_BUG: The following "if (present())" construct is a
+      !      work-around for Intel's ifort version 9.1.045 and 9.1.051
+      !      on NAS' columbia.
+      if (present(dimNames).and.present(dimUnits)) then
+        call ESMF_LRGridConstructUniform(grid, 2, counts(1:2), &
                                        minGlobalCoordPerDim, &
                                        maxGlobalCoordPerDim, deltaPerDim, &
-                                       horzGridType, horzstagger, &
+                                       horzGridType, horzStagger, &
                                        horzCoordSystem, &
                                        dimNames, dimUnits, &
-                                       coordorder, periodic, name, localrc)
+                                       coordOrder, periodic, name, localrc)
+      else if (present(dimNames)) then
+        call ESMF_LRGridConstructUniform(grid, 2, counts(1:2), &
+                                       minGlobalCoordPerDim, &
+                                       maxGlobalCoordPerDim, deltaPerDim, &
+                                       horzGridType, horzStagger, &
+                                       horzCoordSystem, &
+                                       dimNames, &
+                                       coordOrder=coordOrder, periodic=periodic, &
+                                       name=name, rc=localrc)
+      else if (present(dimUnits)) then
+        call ESMF_LRGridConstructUniform(grid, 2, counts(1:2), &
+                                       minGlobalCoordPerDim, &
+                                       maxGlobalCoordPerDim, deltaPerDim, &
+                                       horzGridType, horzStagger, &
+                                       horzCoordSystem, &
+                                       dimUnits=dimUnits, &
+                                       coordOrder=coordOrder, periodic=periodic, &
+                                       name=name, rc=localrc)
+      else
+        call ESMF_LRGridConstructUniform(grid, 2, counts(1:2), &
+                                       minGlobalCoordPerDim, &
+                                       maxGlobalCoordPerDim, deltaPerDim, &
+                                       horzGridType, horzStagger, &
+                                       horzCoordSystem, &
+                                       coordOrder=coordOrder, periodic=periodic, &
+                                       name=name, rc=localrc)
+      endif
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -760,13 +853,41 @@
                                      ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize grid internals.
-      call ESMF_LRGridConstructSpecd(grid, 2, coord1, coord2, &
+      !TODO: COLUMBIA_BUG: The following "if (present())" construct is a
+      !      work-around for Intel's ifort version 9.1.045 and 9.1.051
+      !      on NAS' columbia.
+      if (present(dimNames).and.present(dimUnits)) then
+        call ESMF_LRGridConstructSpecd(grid, 2, coord1, coord2, &
                                      horzGridType=horzGridType, &
-                                     horzStagger=horzStagger, &
+                                     horzStagger=horzstagger, &
                                      horzCoordSystem=horzCoordSystem, &
                                      dimNames=dimNames, dimunits=dimUnits, &
-                                     coordOrder=coordOrder, &
+                                     coordOrder=coordorder, &
                                      periodic=periodic, name=name, rc=localrc)
+      else if (present(dimNames)) then
+        call ESMF_LRGridConstructSpecd(grid, 2, coord1, coord2, &
+                                     horzGridType=horzGridType, &
+                                     horzStagger=horzstagger, &
+                                     horzCoordSystem=horzCoordSystem, &
+                                     dimNames=dimNames, &
+                                     coordOrder=coordorder, &
+                                     periodic=periodic, name=name, rc=localrc)
+      else if (present(dimUnits)) then
+        call ESMF_LRGridConstructSpecd(grid, 2, coord1, coord2, &
+                                     horzGridType=horzGridType, &
+                                     horzStagger=horzstagger, &
+                                     horzCoordSystem=horzCoordSystem, &
+                                     dimunits=dimUnits, &
+                                     coordOrder=coordorder, &
+                                     periodic=periodic, name=name, rc=localrc)
+      else
+        call ESMF_LRGridConstructSpecd(grid, 2, coord1, coord2, &
+                                     horzGridType=horzGridType, &
+                                     horzStagger=horzstagger, &
+                                     horzCoordSystem=horzCoordSystem, &
+                                     coordOrder=coordorder, &
+                                     periodic=periodic, name=name, rc=localrc)
+      endif
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -882,7 +1003,11 @@
                                      ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize grid internals.
-      call ESMF_LRGridConstructSpecd(grid, 2, &
+      !TODO: COLUMBIA_BUG: The following "if (present())" construct is a
+      !      work-around for Intel's ifort version 9.1.045 and 9.1.051
+      !      on NAS' columbia.
+      if (present(dimNames).and.present(dimUnits)) then
+        call ESMF_LRGridConstructSpecd(grid, 2, &
                                      minGlobalCoordPerDim=minGlobalCoordPerDim, &
                                      delta1=delta1, delta2=delta2, &
                                      horzGridType=horzGridType, &
@@ -891,6 +1016,36 @@
                                      dimNames=dimNames, dimunits=dimUnits, &
                                      coordOrder=coordOrder, &
                                      periodic=periodic, name=name, rc=localrc)
+      else if (present(dimNames)) then
+        call ESMF_LRGridConstructSpecd(grid, 2, &
+                                     minGlobalCoordPerDim=minGlobalCoordPerDim, &
+                                     delta1=delta1, delta2=delta2, &
+                                     horzGridType=horzGridType, &
+                                     horzStagger=horzStagger, &
+                                     horzCoordSystem=horzCoordSystem, &
+                                     dimNames=dimNames, &
+                                     coordOrder=coordOrder, &
+                                     periodic=periodic, name=name, rc=localrc)
+      else if (present(dimUnits)) then
+        call ESMF_LRGridConstructSpecd(grid, 2, &
+                                     minGlobalCoordPerDim=minGlobalCoordPerDim, &
+                                     delta1=delta1, delta2=delta2, &
+                                     horzGridType=horzGridType, &
+                                     horzStagger=horzStagger, &
+                                     horzCoordSystem=horzCoordSystem, &
+                                     dimunits=dimUnits, &
+                                     coordOrder=coordOrder, &
+                                     periodic=periodic, name=name, rc=localrc)
+      else
+        call ESMF_LRGridConstructSpecd(grid, 2, &
+                                     minGlobalCoordPerDim=minGlobalCoordPerDim, &
+                                     delta1=delta1, delta2=delta2, &
+                                     horzGridType=horzGridType, &
+                                     horzStagger=horzStagger, &
+                                     horzCoordSystem=horzCoordSystem, &
+                                     coordOrder=coordOrder, &
+                                     periodic=periodic, name=name, rc=localrc)
+      endif
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1014,13 +1169,44 @@
                                      ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize grid internals.
-      call ESMF_LRGridConstructUniform(grid, 2, counts(1:2), &
+      !TODO: COLUMBIA_BUG: The following "if (present())" construct is a
+      !      work-around for Intel's ifort version 9.1.045 and 9.1.051
+      !      on NAS' columbia.
+      if (present(dimNames).and.present(dimUnits)) then
+        call ESMF_LRGridConstructUniform(grid, 2, counts(1:2), &
                                        minGlobalCoordPerDim, &
                                        maxGlobalCoordPerDim, deltaPerDim, &
                                        horzGridType, horzStagger, &
                                        horzCoordSystem, &
                                        dimNames, dimUnits, &
                                        coordOrder, periodic, name, localrc)
+      else if (present(dimNames)) then
+        call ESMF_LRGridConstructUniform(grid, 2, counts(1:2), &
+                                       minGlobalCoordPerDim, &
+                                       maxGlobalCoordPerDim, deltaPerDim, &
+                                       horzGridType, horzStagger, &
+                                       horzCoordSystem, &
+                                       dimNames, &
+                                       coordOrder=coordOrder, periodic=periodic, &
+                                       name=name, rc=localrc)
+      else if (present(dimUnits)) then
+        call ESMF_LRGridConstructUniform(grid, 2, counts(1:2), &
+                                       minGlobalCoordPerDim, &
+                                       maxGlobalCoordPerDim, deltaPerDim, &
+                                       horzGridType, horzStagger, &
+                                       horzCoordSystem, &
+                                       dimUnits=dimUnits, &
+                                       coordOrder=coordOrder, periodic=periodic, &
+                                       name=name, rc=localrc)
+      else
+        call ESMF_LRGridConstructUniform(grid, 2, counts(1:2), &
+                                       minGlobalCoordPerDim, &
+                                       maxGlobalCoordPerDim, deltaPerDim, &
+                                       horzGridType, horzStagger, &
+                                       horzCoordSystem, &
+                                       coordOrder=coordOrder, periodic=periodic, &
+                                       name=name, rc=localrc)
+      endif
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return

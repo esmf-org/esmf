@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.91.2.2 2006/11/16 06:15:58 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.91.2.3 2007/10/02 22:11:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research, 
@@ -91,7 +91,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.91.2.2 2006/11/16 06:15:58 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.91.2.3 2007/10/02 22:11:52 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -950,11 +950,23 @@ end interface
         allocate(stypep, stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "State type", &
                                        ESMF_CONTEXT, rc)) return
-      
-        call ESMF_StateConstruct(stypep, stateName, statetype, &
+        
+      !TODO: COLUMBIA_BUG: The following "if (present())" construct is a
+      !      work-around for Intel's ifort version 9.1.045 and 9.1.051
+      !      on NAS' columbia.
+        if (present(nameList)) then 
+          call ESMF_StateConstruct(stypep, stateName, statetype, &
                    bundleList, fieldList, arrayList, nestedStateList, &
                    nameList, itemCount, &
                    neededflag, readyflag, validflag, reqforrestartflag, localrc)
+        else
+          call ESMF_StateConstruct(stypep, stateName, statetype, &
+                   bundleList, fieldList, arrayList, nestedStateList, &
+                   itemcount=itemCount, &
+		   neededflag=neededflag, readyflag=readyflag, &
+		   validflag=validflag, reqforrestartflag=reqforrestartflag, &
+                   rc=localrc)
+        endif
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then 
