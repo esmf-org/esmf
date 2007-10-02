@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.75 2007/09/27 23:39:27 theurich Exp $
+// $Id: ESMC_Array.h,v 1.76 2007/10/02 23:38:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -219,6 +219,10 @@ struct SeqIndex{
 // to check out some communication ideas: DE-nonblocking paradigm!
 //-------------------------------------------------------------------------
 
+
+#ifdef FIRSTNEWARRAYPROTOTYPE
+
+
 class ESMC_newArray;
 
 typedef struct{
@@ -354,6 +358,7 @@ ESMC_newArray *ESMC_newArrayCreate(ESMC_LocalArray *larray, int *haloWidth,
 
 int ESMC_newArrayDestroy(ESMC_newArray **array);
 
+#endif
 
 
 #endif  // ESMC_Array_H

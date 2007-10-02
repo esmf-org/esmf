@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.67 2007/09/28 21:16:29 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.68 2007/10/02 23:38:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -99,7 +99,9 @@ module ESMF_ArrayMod
   public ESMF_ArrayRedistRun
   public ESMF_ArraySparseMatMulStore
   public ESMF_ArraySparseMatMul
+#ifdef FIRSTNEWARRAYPROTOTYPE
   public ESMF_ArrayWait
+#endif
   public ESMF_ArrayPrint
   public ESMF_ArrayValidate
   
@@ -128,7 +130,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.67 2007/09/28 21:16:29 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.68 2007/10/02 23:38:39 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -202,9 +204,12 @@ module ESMF_ArrayMod
     module procedure ESMF_ArrayReduce
     module procedure ESMF_ArrayReduceFarray
 
+#ifdef FIRSTNEWARRAYPROTOTYPE
+
     module procedure ESMF_ArrayReduceScalarBR8       !1st prototype
     module procedure ESMF_ArrayReduceScalarNBRootR8  !1st prototype
     module procedure ESMF_ArrayReduceScalarNBR8      !1st prototype
+#endif
 ! todo: need to write vector version where the user can specify which
 !       dimensions of narray are supposed to be reduced. output is vector
 !       good news is that the vector version does not have to be type/kind
@@ -217,6 +222,8 @@ module ESMF_ArrayMod
   end interface
       
 
+
+#ifdef FIRSTNEWARRAYPROTOTYPE
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
 ! !IROUTINE: ESMF_ArrayWait -- Generic interface
@@ -234,6 +241,7 @@ module ESMF_ArrayMod
 !  types of {\tt ESMF\_ArrayWait} functions.   
 !EOPI 
   end interface
+#endif
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1538,6 +1546,9 @@ contains
 !!!!!!!!!!!!!! old-style newArray calls of 1st prototype calls !!!!!!!!!!!!!!!!!
 
 
+#ifdef FIRSTNEWARRAYPROTOTYPE
+
+
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayReduceScalarBR8()"
@@ -1863,6 +1874,7 @@ contains
 !------------------------------------------------------------------------------
 
 
+#endif
 
 
 !------------------------------------------------------------------------------

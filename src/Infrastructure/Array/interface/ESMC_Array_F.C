@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.65 2007/09/20 23:09:46 theurich Exp $
+// $Id: ESMC_Array_F.C,v 1.66 2007/10/02 23:38:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -659,6 +659,7 @@ extern "C" {
 // to check out some communication ideas: DE-nonblocking paradigm!
 //-------------------------------------------------------------------------
 
+#ifdef FIRSTNEWARRAYPROTOTYPE
 
 
 // the interface subroutine names MUST be in lower case
@@ -939,3 +940,5 @@ extern "C" {
 
 #undef  ESMC_METHOD
 }
+
+#endif

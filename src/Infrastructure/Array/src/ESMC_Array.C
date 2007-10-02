@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.141 2007/09/28 21:16:30 theurich Exp $
+// $Id: ESMC_Array.C,v 1.142 2007/10/02 23:38:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.141 2007/09/28 21:16:30 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.142 2007/10/02 23:38:39 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -5754,9 +5754,12 @@ int Array::sparseMatMulRelease(
 //-------------------------------------------------------------------------
 
 
+#ifdef FIRSTNEWARRAYPROTOTYPE
+
+
 //-----------------------------------------------------------------------------
 //
-// This section includes all the Array routines
+// This section includes all the newArray routines
 //
 //-----------------------------------------------------------------------------
 
@@ -8073,3 +8076,5 @@ void *ESMC_newArrayScalarReduceThread(
   return NULL;
 }
 //-----------------------------------------------------------------------------
+
+#endif
