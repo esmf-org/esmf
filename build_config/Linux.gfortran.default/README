@@ -1,0 +1,6 @@
+Settings for Linux, using the gfortran compiler that comes with the GCC of
+version 4.0.0 and up.
+
+Requires the following environment settings:
+
+ESMF_COMPILER gfortran
