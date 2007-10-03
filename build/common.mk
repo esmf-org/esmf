@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.155.2.35 2007/02/06 19:24:06 theurich Exp $
+#  $Id: common.mk,v 1.155.2.36 2007/10/03 00:35:46 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -21,71 +21,75 @@
 #===============================================================================
 
 #-------------------------------------------------------------------------------
-# Test for deprecated environment variables, print error and stop build here
+# Test for obsolete environment variables, print error and stop build here
 #-------------------------------------------------------------------------------
 
 ifeq ($(origin ESMF_ARCH), environment)
-$(error Deprecated environment variable ESMF_ARCH detected. Please see README.)
+$(error Obsolete environment variable ESMF_ARCH detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
 endif
 
 ifeq ($(origin ESMF_PREC), environment)
-$(error Deprecated environment variable ESMF_PREC detected. Please see README.)
+$(error Obsolete environment variable ESMF_PREC detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
 endif
 
 ifeq ($(origin ESMF_TOP_DIR), environment)
-$(error Deprecated environment variable ESMF_TOP_DIR detected. Please see README.)
-endif
-
-ifeq ($(origin MPI_HOME), environment)
-$(warning Deprecated environment variable MPI_HOME detected. Please see README.)
+$(error Obsolete environment variable ESMF_TOP_DIR detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
 endif
 
 ifeq ($(origin ESMF_NODES), environment)
-$(error Deprecated environment variable ESMF_NODES detected. Please see README.)
+$(error Obsolete environment variable ESMF_NODES detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
 endif
 
 ifeq ($(origin ESMF_C_COMPILER), environment)
-$(error Deprecated environment variable ESMF_C_COMPILER detected. Please see README.)
+$(error Obsolete environment variable ESMF_C_COMPILER detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
 endif
 
 ifeq ($(origin ESMF_C_LIBRARY), environment)
-$(error Deprecated environment variable ESMF_C_LIBRARY detected. Please see README.)
+$(error Obsolete environment variable ESMF_C_LIBRARY detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
 endif
 
 ifeq ($(origin ESMF_CXX_LIBRARY_PATH), environment)
-$(error Deprecated environment variable ESMF_CXX_LIBRARY_PATH detected. Please see README.)
+$(error Obsolete environment variable ESMF_CXX_LIBRARY_PATH detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
 endif
 
 ifeq ($(origin ESMF_CXX_LIBRARIES), environment)
-$(error Deprecated environment variable ESMF_CXX_LIBRARIES detected. Please see README.)
+$(error Obsolete environment variable ESMF_CXX_LIBRARIES detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
+endif
+
+ifeq ($(origin ESMF_STDCXX_LIBRARY), environment)
+$(error Obsolete environment variable ESMF_STDCXX_LIBRARY detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
 endif
 
 ifeq ($(origin ESMF_F90_LIBRARY_PATH), environment)
-$(error Deprecated environment variable ESMF_F90_LIBRARY_PATH detected. Please see README.)
+$(error Obsolete environment variable ESMF_F90_LIBRARY_PATH detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
 endif
 
 ifeq ($(origin ESMF_F90_LIBRARIES), environment)
-$(error Deprecated environment variable ESMF_F90_LIBRARIES detected. Please see README.)
+$(error Obsolete environment variable ESMF_F90_LIBRARIES detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
 endif
 
 ifeq ($(origin ESMF_NO_LD_LIBRARY_PATH), environment)
-$(error Deprecated environment variable ESMF_NO_LD_LIBRARY_PATH detected. Please see README.)
+$(error Obsolete environment variable ESMF_NO_LD_LIBRARY_PATH detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
 endif
 
 ifeq ($(origin ESMF_PROJECT), environment)
-$(error Deprecated environment variable ESMF_PROJECT detected. Please see README.)
+$(error Obsolete environment variable ESMF_PROJECT detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
 endif
 
 ifeq ($(origin ESMF_LIB_INSTALL), environment)
-$(error Deprecated environment variable ESMF_LIB_INSTALL detected. Please see README.)
+$(error Obsolete environment variable ESMF_LIB_INSTALL detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
 endif
 
 ifeq ($(origin ESMF_MOD_INSTALL), environment)
-$(error Deprecated environment variable ESMF_MOD_INSTALL detected. Please see README.)
+$(error Obsolete environment variable ESMF_MOD_INSTALL detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
 endif
 
 ifeq ($(origin ESMF_H_INSTALL), environment)
-$(error Deprecated environment variable ESMF_H_INSTALL detected. Please see README.)
+$(error Obsolete environment variable ESMF_H_INSTALL detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
+endif
+
+ifeq ($(origin MPI_HOME), environment)
+$(warning Environment variable MPI_HOME detected. ESMF no longer uses this environment variable. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
 endif
 
 #-------------------------------------------------------------------------------

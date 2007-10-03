@@ -1,0 +1,5 @@
+#!/bin/sh
+# this script expects the icpc command (or a wrapper to icpc, e.g. mpiCC)
+# and returns the path of the icpc system libraries
+# tested for Intel compiler verison: 8.0, 8.1, 9.0, 9,1
+$1 -dryrun $ESMF_DIR/scripts/hello.C 2>&1 | grep "/lib" | grep -v "\-dryrun" | grep -v "_link" | grep "\-L" | grep -v crtxi | grep -v crtxn | sed 's/\\//g' | sed 's/\-L//g' | xargs
