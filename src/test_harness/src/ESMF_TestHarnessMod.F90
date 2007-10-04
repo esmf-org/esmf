@@ -96,23 +96,23 @@
 
   type grid_record
      character(ESMF_MAXSTR) :: name
-     integer :: topology                     ! key representing the geometry of the grid
-     integer :: rank                         ! rank of the grid
-     integer, pointer :: order(:)        ! axis number, zero for free.
-     integer, pointer :: size(:)         ! number of grid elements along axis
-     integer, pointer :: stagger(:,:)    ! stagger location (axis,rank)
-     logical, pointer :: periodicity(:)  ! (rank) periodicity along axis
-     logical, pointer :: halo(:)         ! (rank) periodicity along axis
-     integer, pointer :: halo_size(:,:)  ! (rank,2) halo size along axis
+     integer :: topology                ! key representing the geometry of the grid
+     integer :: rank                    ! rank of the grid
+     integer, pointer :: order(:)       ! axis number, zero for free.
+     integer, pointer :: size(:)        ! number of grid elements along axis
+     integer, pointer :: stagger(:,:)   ! stagger location (axis,rank)
+     logical, pointer :: periodicity(:) ! (rank) periodicity along axis
+     logical, pointer :: halo(:)        ! (rank) periodicity along axis
+     integer, pointer :: halo_size(:,:) ! (rank,2) halo size along axis
   end type grid_record
 
   type dist_record
      character(ESMF_MAXSTR) :: name
-     integer :: topology                ! key (simple block, block-cyclic, arbitrary)
-     integer :: rank                    ! rank of distribution
-     integer, pointer :: order(:)   ! axis number, zero for free.
-     integer, pointer :: size(:)    ! number of DE for axis number, zero for free.
-     integer, pointer :: period(:)  ! period for block-cyclic, zero for simple block
+     integer :: topology           ! key (simple block, block-cyclic, arbitrary)
+     integer :: rank               ! rank of distribution
+     integer, pointer :: order(:)  ! axis number, zero for free.
+     integer, pointer :: size(:)   ! number of DE for axis number, zero for free.
+     integer, pointer :: period(:) ! period for block-cyclic, zero for simple block
      integer, pointer :: specifier(:,:)  ! 
   end type dist_record
 
@@ -131,20 +131,20 @@
   ! sized char type
   type sized_char_array
      integer :: size
-     type(character_array), allocatable :: string(:)
+     type(character_array), pointer :: string(:)
   end type sized_char_array
 
   type problem_descriptor_strings
-     character(ESMF_MAXSTR) :: pds         ! problem descriptor string
-     type(process_record) :: process       ! method process
+     character(ESMF_MAXSTR) :: pds        ! problem descriptor string
+     type(process_record) :: process      ! method process
      type(sized_char_array) :: classfile  ! distribution specification files
-     type(sized_char_array) :: distfiles   ! distribution specification files
-     type(sized_char_array) :: gridfiles   ! grid specification files
+     type(sized_char_array) :: distfiles  ! distribution specification files
+     type(sized_char_array) :: gridfiles  ! grid specification files
   end type problem_descriptor_strings
 
   type problem_descriptor_records
-     character(ESMF_MAXSTR) :: filename    ! filename of problem descriptor record
-     integer :: numStrings                 ! number of problem descriptor strings in a record
+     character(ESMF_MAXSTR) :: filename   ! filename of problem descriptor record
+     integer :: numStrings                ! # of problem descriptor strings in recd
      type(problem_descriptor_strings), pointer :: string(:)  ! problem descriptor  strings
   end type problem_descriptor_records
 
@@ -178,17 +178,17 @@
 !==============================================================================
 
 
- !----------------------------------------------------------------------------
+ !-----------------------------------------------------------------------------
  ! Routines to parse input files for descriptor string, and specifier files.
- !----------------------------------------------------------------------------
+ !-----------------------------------------------------------------------------
 
-  !-------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
   subroutine interpret_descriptor_string(problem_descriptor, returnrc)
-  !-------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
   ! Parse a single  problem descriptor string for problem description items
   ! such as process (REDISTRIBUTION or REMAPPING), memory topology and rank,
   ! distribution and grid rank.
-  !-------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
 
   ! arguments
   type(problem_descriptor_record), intent(inout) :: problem_descriptor
@@ -204,28 +204,28 @@
   integer :: SrcDistRank, DstDistRank, SrcGridRank, DstGridRank
 
 
-  !-------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
   ! initialize variables
-  !-------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
   returnrc = ESMF_SUCCESS
 
   ! Initialize to failure.
   problem_descriptor%process%name = 'NONE'
   problem_descriptor%process%tag = Harness_Error
 
-  !-------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
   ! Determine testing process (REDISTRIBUTION or REMAPPING)
-  !-------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
   print*,'pds is:',problem_descriptor%string
-  call process_query(problem_descriptor%string,                        &
-                     problem_descriptor%process%name,                  &
-                     problem_descriptor%process%tag,                   &
-                     problem_descriptor%process%location,              &
-                     localrc)
+! call process_query(problem_descriptor%string,                        &
+!                    problem_descriptor%process%name,                  &
+!                    problem_descriptor%process%tag,                   &
+!                    problem_descriptor%process%location,              &
+!                    localrc)
 
-  !-------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
   ! Determine memory layout (Logically Rectangular or General)
-  !-------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
   if ( .NOT. memory_topology(problem_descriptor%string, localrc) ) then
      ! if memory structure is General, i.e. multiple logically rectangular
      ! chunks of memory.
@@ -284,7 +284,8 @@
      !-------------------------------------------------------------------------
      ! Determine source grid rank and order
      !-------------------------------------------------------------------------
-     SrcGridRank = grid_rank(problem_descriptor%string, SrcMemBeg, SrcMemEnd, localrc)
+     SrcGridRank =    &
+            grid_rank(problem_descriptor%string, SrcMemBeg, SrcMemEnd, localrc)
      allocate( problem_descriptor%src_grid%order(SrcGridRank) )
      problem_descriptor%src_grid%rank = SrcGridRank
      call grid_query(problem_descriptor%string,                        &
@@ -295,7 +296,8 @@
      !-------------------------------------------------------------------------
      ! Determine destination grid rank and order
      !-------------------------------------------------------------------------
-     DstGridRank = grid_rank(problem_descriptor%string, DstMemBeg, DstMemEnd, localrc)
+     DstGridRank =    &
+            grid_rank(problem_descriptor%string, DstMemBeg, DstMemEnd, localrc)
      allocate( problem_descriptor%dst_grid%order(DstGridRank) )
      problem_descriptor%dst_Grid%rank = DstGridRank
      call grid_query(problem_descriptor%string,                        &
@@ -309,16 +311,16 @@
      deallocate( SrcMemLoc, DstMemLoc )
   endif       ! memory topology
 
-  !-------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
   end subroutine interpret_descriptor_string
-  !-------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
 
 
-  !-------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
   subroutine read_distgrid(descriptor, returnrc)
-  !-------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
   ! Routine extracts from the distgrid specifier files the DistGrid information
-  !-------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
 
   ! arguments
   type(problem_descriptor_record), intent(inout) :: descriptor
@@ -350,9 +352,9 @@
 
   print*,'src/dst rank of dist is:',src_dist_rank,'/',dst_dist_rank
 
-  !-------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
   ! loop over the number of DistGrid descriptor files, and count the total entries.
-  !-------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
   do count=1, descriptor%distfiles%size
      lfile = descriptor%distfiles%string(count)%name
      call ESMF_ConfigLoadFile( localcf, trim( lfile ), rc=localrc )
@@ -362,20 +364,22 @@
         return
      endif
 
-     !----------------------------------------------------------------------
+     !-------------------------------------------------------------------------
      ! Search for the tag distgrid_block_#D#D to extract the source and
      ! destination ranks sizes.
-     !----------------------------------------------------------------------
+     !-------------------------------------------------------------------------
  10  format('distgrid_block_',i1.0,'D',i1.0,'D')
      write(ltag,10) src_dist_rank,dst_dist_rank
      print*,'looking for tag:', trim( ltag )
      if( src_dist_rank /= dst_dist_rank) then
-        print*,'error,src dist rank ',src_dist_rank,' /= dst dist rank ',dst_dist_rank
+        print*,'error,src dist rank ',src_dist_rank,' /= dst dist rank ',  &
+               dst_dist_rank
         returnrc = ESMF_FAILURE
         return
      endif
      ! obtain the number of config entries
-     call ESMF_ConfigGetDim(localcf,partialcount(count),ncol,trim(ltag),rc=localrc)
+     call ESMF_ConfigGetDim(localcf,partialcount(count),ncol,trim(ltag),   &
+                            rc=localrc)
 
      ! close config file before opening another
      call ESMF_ConfigDestroy(localcf, localrc)
@@ -387,23 +391,23 @@
   deallocate(partialcount)
 
 
-  !-------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
   end subroutine read_distgrid
-  !-------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
 
 
- !----------------------------------------------------------------------------
+ !-----------------------------------------------------------------------------
  ! Routines to search strings
- !----------------------------------------------------------------------------
+ !-----------------------------------------------------------------------------
 
-    !-------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
     integer function char2int( lstring, strloc, localrc )
-    !------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
     ! This function converts a character representation of an integer digit
     ! between 0-9 into its integer equivalent. Optional argument of character
     ! address allows selection of individual characters in a string. Default
     ! assumes conversion of the first character of the string.
-    !------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
 
     ! arguments
     character(len=*), intent(in   )           :: lstring
@@ -422,9 +426,10 @@
        sloc = 1
     endif   
     
-    !------------------------------------------------------------------------
+ !-----------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
     ! Convert string to integer
-    !------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
     ntemp = iachar( lstring(sloc:sloc) )-iachar('0')
     
     ! check to see that values is within the acceptable range
@@ -439,18 +444,18 @@
     
     return
     
-    !------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
     end function char2int
-    !------------------------------------------------------------------------
- !----------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
+ !-----------------------------------------------------------------------------
 
-    !-------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
     integer function findblank( lstring, strloc, increment )
-    !------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
     ! This function searches for the address of the closest blank space to a
     ! specified address in the string. The parameter increment determines if
     ! the search proceedes foward (+1) or backward (-1).
-    !------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
 
     ! arguments
     character(len=*), intent(in) :: lstring
@@ -463,8 +468,8 @@
     ! initialize variables
     findblank = 0
 
-    len_string = len( trim(lstring) )
-    !------------------------------------------------------------------------
+    len_string = len( trim(adjustL(lstring)) )
+    !--------------------------------------------------------------------------
     k = strloc
     do while( (  k + increment >= 1 ).and.(  k + increment <= len_string) )
        k = k + increment 
@@ -476,18 +481,19 @@
     
     return
     
-    !------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
     end function findblank
-    !------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
 
- !-------------------------------------------------------------------------
+ !-----------------------------------------------------------------------------
 
-    !------------------------------------------------------------------------
-    subroutine dist_query(lstring, MemBeg, MemEnd, MemRank, MemTopology, MemOrder, localrc)
-    !------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
+    subroutine dist_query(lstring, MemBeg, MemEnd, MemRank, &
+                          MemTopology, MemOrder, localrc)
+    !--------------------------------------------------------------------------
     ! This subroutine returns distribution topology (B - block, C - block 
     ! cyclic, A - arbitrary) and order as specified by the descriptor string. 
-    !------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
 
     ! arguments
     character(len=ESMF_MAXSTR), intent(in   ) :: lstring
@@ -505,18 +511,18 @@
     ! initialize variables
     localrc = ESMF_RC_NOT_IMPL
     
-    !------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
     ! Check each memory chunk and extract distribution information. 
-    !------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
     pattern3 = 'BCA'
     allocate( MemLoc(MemRank) )
     tmpMemRank = MemRank
     call set_locate(lstring(MemBeg:MemEnd), pattern3, tmpMemRank, MemLoc)
     MemLoc = MemLoc + MemBeg - 1     ! shift to global string position
     
-    !------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
     ! check that distribution tags are consistent
-    !------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
     do i=1,MemRank
        if ( lstring(MemLoc(1):MemLoc(1)) /= lstring(MemLoc(i):MemLoc(i)) ) then
           localrc = ESMF_FAILURE
@@ -551,7 +557,7 @@
     end subroutine dist_query
     !------------------------------------------------------------------------
 
- !-------------------------------------------------------------------------
+ !---------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
     integer function dist_rank(lstring, MemBeg, MemEnd, localrc)
@@ -593,7 +599,8 @@
  !-------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    subroutine grid_query(lstring, MemBeg, MemEnd, MemRank, MemTopology, MemOrder, localrc)
+    subroutine grid_query(lstring, MemBeg, MemEnd, MemRank, &
+                          MemTopology, MemOrder, localrc)
     !------------------------------------------------------------------------
     ! This subroutine returns grid topology (G - tensor, S - spherical, 
     ! U - unstructured) and order as specified by the descriptor string. 
@@ -624,9 +631,9 @@
     call set_locate(lstring(MemBeg:MemEnd), pattern3, tmpMemRank, MemLoc)
     MemLoc = MemLoc + MemBeg - 1     ! shift to global string position
     
-    !------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
     ! check that distribution tags are consistent
-    !------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
     do i=1,MemRank
        if ( lstring(MemLoc(1):MemLoc(1)) /= lstring(MemLoc(i):MemLoc(i)) ) then
           localrc = ESMF_FAILURE
@@ -657,18 +664,18 @@
        endif
     enddo
   
-    !------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
     end subroutine grid_query
-    !------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
 
- !----------------------------------------------------------------------------
+ !-----------------------------------------------------------------------------
 
-    !------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
     integer function grid_rank(lstring, MemBeg, MemEnd, localrc)
-    !------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
     ! This function returns the grid rank as specified by the descriptor
     ! string.
-    !------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
 
     ! arguments
     character(len=ESMF_MAXSTR), intent(in   ) :: lstring
@@ -703,7 +710,8 @@
  !----------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    subroutine memory_locate(lstring, MemCount, MemBeg, MemEnd, MemLoc, localrc)      
+    subroutine memory_locate(lstring, MemCount, MemBeg, MemEnd, MemLoc, &
+                             localrc)      
     !------------------------------------------------------------------------
     ! This subroutine returns the location of the memory delimiters as
     ! specified by the descriptor string.
@@ -736,16 +744,16 @@
  
     deallocate( mloc )
     
-    !------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
     end subroutine memory_locate
-    !------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
 
- !----------------------------------------------------------------------------
+ !-----------------------------------------------------------------------------
 
-    !------------------------------------------------------------------------
-    subroutine memory_rank(lstring, SrcRank, DstRank, SrcBeg, SrcEnd,           &
-                                                      DstBeg, DstEnd, returnrc)
-    !------------------------------------------------------------------------
+    !--------------------------------------------------------------------------
+    subroutine memory_rank(lstring, SrcRank, DstRank, SrcBeg, SrcEnd,         &
+                           DstBeg, DstEnd, returnrc)
+    !--------------------------------------------------------------------------
     ! If the memory topology is structured, this routine returns the memory
     ! rank as specified by the descriptor string. 
     ! 
@@ -815,9 +823,9 @@
        SrcRank = pattern_query(lstring(SrcBeg:SrcEnd),pattern) + 1
        DstRank = pattern_query(lstring(DstBeg:DstEnd),pattern) + 1
        
-       !---------------------------------------------------------------------
+       !------------------------------------------------------------------------
        ! Extract Memory Rank
-       !---------------------------------------------------------------------
+       !------------------------------------------------------------------------
     else ! not flag
        ! Syntax error, brackets not consistent
        print*,'Syntax error, brackets not consistent'
@@ -825,189 +833,200 @@
        return
     endif       ! if memory chunks
      
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     end subroutine memory_rank
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
 
- !----------------------------------------------------------------------------
+ !------------------------------------------------------------------------------
 
-    !------------------------------------------------------------------------
-    logical function memory_topology(lstring, localrc)
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
+    integer function memory_topology(lstring, localrc)
+    !---------------------------------------------------------------------------
     ! function checks the input test string to determine if the memory topology
-    ! is structured (true) or unstructured (false). 
-    !------------------------------------------------------------------------
+    ! consists of a single structured Logically Rectangular block of memory, or 
+    ! multiple structured blocks. Returns the number of single memory blocks. 
+    !---------------------------------------------------------------------------
 
     ! arguments
-    character(len=ESMF_MAXSTR), intent(in   ) :: lstring
+    character(ESMF_MAXSTR), intent(in   ) :: lstring
     integer,          intent(  out) :: localrc
 
     ! local variables
-    character(len=2) :: pattern
-    integer :: nMemory
+    integer :: nsingle, nmult
 
     ! initialize variables
     localrc = ESMF_RC_NOT_IMPL
 
-    !--------------------------------------------------------------------
-    ! Memory Layout (Single Chunk Logically Rectangular or General)
-    !--------------------------------------------------------------------
-    pattern = '()'
-    nMemory = set_query(lstring, pattern)
+    !---------------------------------------------------------------------------
+    ! Memory Layout
+    !---------------------------------------------------------------------------
+    nmult = set_query(lstring,'()' )
+    nsingle = set_query(lstring,'[]' )
+    if( nsingle > 0 ) then
+       !------------------------------------------------------------------------
+       ! are there multiple memory blocks or a single memory block defined
+       !------------------------------------------------------------------------
+       if( nmult > 0 ) then
+          !---------------------------------------------------------------------
+          ! multiple block memory topology
+          !---------------------------------------------------------------------
+          if( pattern_match(lstring, '(', ')') .and.                           &
+                                      pattern_match(lstring, '[', ']') ) then
+             ! symbols are paired properly
+             memory_topology = nmult/2
+          else
+             ! error - symbols not paired properly
+             print*,' error - symbols not paired properly'
+          endif    ! pattern match
 
-    if ( nMemory == 0 ) then
-       memory_topology = .true.
-    else 
-       memory_topology = .false.
+       else
+          !---------------------------------------------------------------------
+          ! single block memory topology
+          !---------------------------------------------------------------------
+          
+          if( pattern_match(lstring, '[', ']') ) then
+             if( nsingle /= 2 ) print*,'error'    ! error
+             ! symbols are paired properly
+             memory_topology = 1
+          else
+             ! error - symbols not paired properly
+             print*,' error - symbols not paired properly'
+             memory_topology = 0
+          endif    ! pattern match
+       endif  
+    else
+      ! error
+      print*,'error'
     endif
 
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     end function memory_topology
-    !----------------------------------------------------------------------
+    !---------------------------------------------------------------------------
 
- !----------------------------------------------------------------------------
+!2345678901234567890123456789012345678901234567890123456789012345678901234567890
+ !------------------------------------------------------------------------------
 
-    !------------------------------------------------------------------------
-    subroutine  process_query(lstring, lname, tag, location, returnrc)
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
+    subroutine  process_query(lstring, lname, tag, symbol_loc, localrc)
+    !---------------------------------------------------------------------------
     ! routine checks the input test string for a method specifier. Acceptable
     ! methods include:
     ! REDIST (-->), BILINEAR REMAP (=B=>), CONSERVATIVE REMAP (=C=>), 
     ! SECOND ORDER CONSERVATIVE REMAP (=S=>), NEAREST NEIGHBOR REMAP (=N=>),
     ! EXCHANGE GRID CONSERVATIVE REMAPPING (=E=>), and a USER SPECIFIED REMAP 
-    ! METHOD (=X=>).
+    ! METHOD (=U=>).
     ! 
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
 
     ! arguments
     character(len=*), intent(in   ) :: lstring
-    character(len=ESMF_MAXSTR), intent(inout) :: lname
-    integer,          intent(inout) :: tag
-    integer,          intent(inout) :: location
-    integer,          intent(  out) :: returnrc
+    character(len=*), intent(inout) :: lname
+    integer,          intent(  out) :: tag
+    integer,          intent(  out) :: symbol_loc(2)
+    integer,          intent(  out) :: localrc
 
     ! local variables
-    character(len=2) :: pattern_remap
-    character(len=3) :: pattern_redist
-    character(len=4) :: pattern4
-    integer :: nRedist, RedistPos(1), nRemap, RemapPos(1)
+    character(ESMF_MAXSTR) :: pattern
+    integer :: iredist, iregrid, direction, ib
 
     ! initialize variables
-    returnrc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
 
-    !--------------------------------------------------------------------
-    ! Determine the Process (REDISTRIBUTION or REMAPPING)
-    !--------------------------------------------------------------------
-    pattern_redist = '-->'
-    nRedist = pattern_query(lstring, pattern_redist)
+    !---------------------------------------------------------------------------
+    ! Determine the Process type (REDISTRIBUTION or REMAPPING)
+    ! Search for the two signifiers and determine which, if any applies.
+    !---------------------------------------------------------------------------
+    iredist = index(lstring,'-->')
+    iregrid = index(lstring,'=>')
 
-    !--------------------------------------------------------------------
-    ! Check if Process is  REDISTRIBUTION
-    !--------------------------------------------------------------------
-    if (nRedist == 1) then
-       ! if redist keep position
-       call pattern_locate(lstring, pattern_redist, nRedist, RedistPos)
-       print*,'process is Redist'
-       lname = 'REDIST'
-       tag  = Harness_Redist
-       location = RedistPos(1)
-    elseif (nRedist > 1) then
-       ! ERROR syntax error in process declaration
-       print*,'ERROR syntax error in process declaration'
-       returnrc = ESMF_FAILURE
-       return
+    if( (iredist /= 0).and.(iregrid == 0) ) then
+       ! redistribution
+       lname = 'REDISTRIBUTION'
+       tag = Harness_Redist
+       symbol_loc(1) = iredist -1
+       symbol_loc(2) = iredist +3
+    elseif( (iredist == 0).and.(iregrid /= 0) ) then
+       ! regrid, now determine what type
+       direction = -1
+       ! find beginning of process symbol
+       ib = findblank( lstring, iregrid, direction )
+       print*,'ib ',ib
+       pattern = lstring(ib:iregrid+1)
+       select case ( trim(adjustL(pattern)) )
 
-    elseif (nRedist == 0) then
-       print*,'process is not redistribution, check to see if it is a remap'
+          case('=B=>')
+             ! remap method Bilinear
+             lname = 'Bilinear REMAP'
+             tag  = Harness_BilinearRemap
+             symbol_loc(1) = ib
+             symbol_loc(2) = iregrid +2
 
-       pattern_remap = '=>'
-       nRemap = pattern_query(lstring, pattern_remap)
-       !-----------------------------------------------------------------
-       ! Check if Process is  REMAP
-       !-----------------------------------------------------------------
-       if (nRemap == 1) then
-          ! if remap, keep position
-          call pattern_locate(lstring, pattern_remap, nRemap, RemapPos)
-          location = RemapPos(1)-2
-          ! If Remapping, what type
-          pattern4 = lstring(RemapPos(1)-2:RemapPos(1)+1)
-          ! looks like remap, so check what method type.
-          select case (pattern4)
+          case('=C=>')
+             ! remap method first order conservative
+             lname = 'Conservative REMAP'
+             tag  = Harness_ConservRemap
+             symbol_loc(1) = ib
+             symbol_loc(2) = iregrid +2
 
-              case('=B=>')
-                 ! remap method Bilinear
-                 print*,'remap method Bilinear'
-                 lname = 'BilinearRemap'
-                 tag  = Harness_BilinearRemap
+          case('=S=>')
+             ! remap method second order conservative
+             lname = '2nd Order Conservative REMAP'
+             tag  = Harness_2ndConservRemap
+             symbol_loc(1) = ib
+             symbol_loc(2) = iregrid +2
 
-              case('=C=>')
-                 ! remap method first order conservative
-                 print*,'remap method first order conservative'
-                 lname = 'ConservRemap'
-                 tag  = Harness_ConservRemap
+          case('=E=>')
+             ! remap method exchange grid
+             lname = 'Exchange Grid REMAP'
+             tag  = Harness_ExchangeRemap
+             symbol_loc(1) = ib
+             symbol_loc(2) = iregrid +2
 
-              case('=S=>')
-                 ! remap method second order conservative
-                 print*,'remap method second order conservative'
-                 lname = '2ndOrderConservRemap'
-                 tag  = Harness_2ndConservRemap
+          case('=N=>')
+             ! remap method nearest neighbor
+             lname = 'Nearest Neighbor REMAP'
+             tag  = Harness_NearNeighRemap
+             symbol_loc(1) = ib
+             symbol_loc(2) = iregrid +2
 
-               case('=E=>')
-                  ! remap method exchange grid
-                  print*,'remap method exchange grid'
-                  lname = 'ExchangeGridRemap'
-                  tag  = Harness_ExchangeRemap
+          case('=U=>')
+             ! remap method undefined/user provided
+             lname = 'User Provided REMAP'
+             tag  = Harness_UserProvRemap
+             symbol_loc(1) = ib
+             symbol_loc(2) = iregrid +2
 
-               case('=N=>')
-                  ! remap method nearest neighbor
-                  print*,'remap method nearest neighbor'
-                  lname = 'NearestNeighborRemap'
-                  tag  = Harness_NearNeighRemap
-
-               case('=X=>')
-                  ! remap method undefined/user provided
-                  print*,'remap method undefined/user provided'
-                  lname = 'UserProvidedRemap'
-                  tag  = Harness_UserProvRemap
-
-               case default
-                  ! syntax error no recognized method specified
-                  location = 0
-                  print*,'syntax error no recognized method specified'
-                  returnrc = ESMF_FAILURE
-                  return
+          case default
+             ! syntax error - no recognized method specified
+             lname = 'ERROR'
+             tag  = Harness_Error
+             symbol_loc(1) = 0
+             symbol_loc(2) = 0
 
           end select  ! remap type
+      elseif( (iredist == 0).and.(iregrid == 0) ) then
+         ! syntax error - no action
+         lname = 'ERROR'
+         tag = Harness_Error
+      elseif( (iredist /= 0).and.(iregrid /= 0) ) then
+         ! syntax error - multiple actions
+         lname = 'ERROR'
+         tag = Harness_Error
+      endif    ! process test
 
-          elseif (nRemap > 1) then
-
-             ! ERROR syntax error in process declaration
-             print*,'ERROR syntax error in process declaration'
-             returnrc = ESMF_FAILURE
-             return
-
-          elseif (nRemap == 0) then
-
-             ! ERROR no process is specified
-             print*,'ERROR no process is specified'
-             returnrc = ESMF_FAILURE
-             return
-
-          endif         ! if remap
-       endif            ! if redist
-
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     end subroutine process_query
-    !------------------------------------------------------------------------
-!--------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
 
-    !----------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+    !---------------------------------------------------------------------------
     subroutine set_locate(lstring, lset, number_hits, hit_loc)
     
-    !----------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     ! Locates in STRING, any elements of SET and places their location 
     ! in hit_loc. 
-    !----------------------------------------------------------------------
+    !---------------------------------------------------------------------------
  
     ! arguments
     character(len=*),     intent(in   ) :: lstring
@@ -1023,22 +1042,22 @@
     ncount = 0
     klast = 0
     len_string = len(lstring)
-    len_set = len(lset)
+    len_set = len( trim(adjustL(lset) ))
 
-    !----------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     ! error check - conduct the scan only if the set and string are not empty.
-    !----------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     if( (len_set > 0) .and. (len_string > 0) ) then
-       !----------------------------------------------------------------
+       !------------------------------------------------------------------------
        ! examine the string to find the find the FIRST instance of an 
        ! element in the set.
-       !----------------------------------------------------------------
-       k = scan(lstring(klast+1:len_string),lset)
+       !------------------------------------------------------------------------
+       k = scan(lstring(klast+1:len_string), trim(adjustL(lset) ))
        do while( k > 0 )
           ncount = ncount + 1 ! count match.
           hit_loc(ncount) = k+klast  ! save location of set match.
           klast = k + klast ! slide forward in string looking for next match.
-          k = scan(lstring(klast+1:len_string),lset)
+          k = scan(lstring(klast+1:len_string), trim(adjustL(lset) ))
        enddo     ! while
     endif
     ! sanity check - if these do not agree something has failed.
@@ -1046,19 +1065,19 @@
     ! return value
     number_hits = ncount
 
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     end subroutine set_locate
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
 
- !---------------------------------------------------------------------------
+ !------------------------------------------------------------------------------
 
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     integer function set_query(lstring,lset)
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     ! Scans a string for any character from a SET of characters. Returns zero
     ! if none of the elements of the set occur in the string or if the set or
     ! string is empty.
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
 
     ! arguments
     character(len=*), intent(in) :: lstring
@@ -1072,42 +1091,101 @@
     ncount = 0
     klast = 0
     len_string = len(lstring)
-    len_set = len(lset)
+    len_set = len( trim(adjustL(lset) ))
     
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     ! error check - conduct the scan only if the set and string are not empty
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     if( (len_set > 0) .and. (len_string > 0) ) then
-       !---------------------------------------------------------------------
+       !------------------------------------------------------------------------
        ! examine the string to find the find the FIRST instance of an 
        ! element in the set.
-       !---------------------------------------------------------------------
-       k = scan(lstring(klast+1:len_string),lset)
+       !------------------------------------------------------------------------
+       k = scan(lstring(klast+1:len_string), trim(adjustL(lset) ))
        do while( k > 0 )
-          !------------------------------------------------------------------
+          !---------------------------------------------------------------------
           ! if scan is nonzero, there is at least one match, increment
           ! through the string checking for additional matches. 
-          !------------------------------------------------------------------
+          !---------------------------------------------------------------------
           ncount = ncount + 1    ! count match
           klast = k + klast      ! slide forward in string looking for next match
-          k = scan(lstring(klast+1:len_string),lset)
+          k = scan(lstring(klast+1:len_string), trim(adjustL(lset) ))
        enddo     ! while
     endif 
     
     set_query = ncount
     
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     end function set_query
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
 
-!----------------------------------------------------------------------------
+ !------------------------------------------------------------------------------
 
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
+    logical function pattern_match(lstring, lcharL, lcharR)
+    !---------------------------------------------------------------------------
+    ! function checks the input string and determines if there are matching 
+    ! pairs of the enclosing symbols ( lcharL, lcharR) and that they are in the 
+    ! proper order.
+    !---------------------------------------------------------------------------
+
+    ! arguments
+    character(len=*), intent(in   ) :: lstring
+    character(len=*), intent(in   ) :: lcharL, lcharR
+
+    ! local variables
+    integer, allocatable :: locL(:), locR(:)
+    integer ::  k, ntestL, ntestR
+    logical :: flag
+
+    ! initialize variables
+    flag = .true.
+
+    !---------------------------------------------------------------------------
+    ! check that the patterns mach up
+    !---------------------------------------------------------------------------
+    ntestL = pattern_query(lstring,trim(adjustL(lcharL)) )
+    ntestR = pattern_query(lstring,trim(adjustL(lcharR)) )
+    if( ntestL == ntestR ) then
+       !------------------------------------------------------------------------
+       ! the numbers match, so now check that the order is left to right
+       !------------------------------------------------------------------------
+       allocate( locL(ntestL), locR(ntestR) )
+       call pattern_locate(lstring,trim(adjustL(lcharL)), ntestL, locL )
+       call pattern_locate(lstring,trim(adjustL(lcharR)), ntestR, locR )
+
+       !------------------------------------------------------------------------
+       ! are any of the symbols out of order
+       !------------------------------------------------------------------------
+       do k=1, ntestL
+          if( locL(k) > locR(k) ) flag = .false.
+       enddo
+       if( flag ) then
+          ! order correct
+          pattern_match = .true.
+       else
+          ! order wrong
+          pattern_match = .false.
+       endif     ! flag 
+       deallocate( locL, locR )
+
+    else
+       ! numbers of symbols don't pair
+       pattern_match = .false.
+    endif
+
+    !---------------------------------------------------------------------------
+    end function pattern_match  
+    !---------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
+
+    !---------------------------------------------------------------------------
     subroutine pattern_locate(lstring, lpattern, number_hits, hit_loc)
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     ! Locates all instances of a PATTERN in STRING, placing the location of
     ! the beginning of the pattern in hit_loc.
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
 
     ! arguments
     character(len=*),     intent(in   ) :: lstring
@@ -1122,27 +1200,27 @@
     ! initialize variables
     ncount = 0
     len_string = len(lstring)
-    len_pattern = len(lpattern)
+    len_pattern = len(  trim(adjustL(lpattern) ))
 
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     ! error check - conduct the search only if the pattern & string are not empty
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     if( (len_pattern > 0) .and. (len_string > 0) ) then
        klast = 0
-       !---------------------------------------------------------------------
+       !------------------------------------------------------------------------
        ! examine the string to find the find the FIRST instance of the pattern
-       !---------------------------------------------------------------------
-       k = index(lstring(klast+1:len_string),lpattern)
+       !------------------------------------------------------------------------
+       k = index(lstring(klast+1:len_string), trim(adjustL(lpattern) ))
 
        do while( k > 0 )
-          !------------------------------------------------------------------
+          !---------------------------------------------------------------------
           ! if index is nonzero, there is at least one match, increment
           ! through the string checking for additional matches.
-          !------------------------------------------------------------------
+          !---------------------------------------------------------------------
           ncount = ncount + 1      ! count match
           klast = k + klast        ! slide forward in string looking for next match
           hit_loc(ncount) = klast  ! save location of the pattern match
-          k = index(lstring(klast+1:len_string),lpattern)
+          k = index(lstring(klast+1:len_string),  trim(adjustL(lpattern) ))
        enddo     ! while
     endif
     ! if they do not agree something has failed.
@@ -1150,18 +1228,19 @@
     ! return value
     number_hits = ncount
 
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     end subroutine pattern_locate
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
 
- !---------------------------------------------------------------------------
+!2345678901234567890123456789012345678901234567890123456789012345678901234567890
+ !------------------------------------------------------------------------------
 
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     integer function pattern_query(lstring,lpattern)
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     ! Searches a string for a PATTERN of characters. Returns zero if the pattern 
     ! is not found, or if the pattern or string is empty.
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
 
     ! arguments
     character(len=*), intent(in) :: lstring
@@ -1175,34 +1254,34 @@
     ncount = 0
     klast = 0
     len_string = len(lstring)
-    len_pattern = len(lpattern)
+    len_pattern = len( trim(adjustL(lpattern)) )
     
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     ! error check - conduct the search only if the pattern & string are not empty
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     if( (len_pattern > 0) .and. (len_string > 0) ) then
-       !---------------------------------------------------------------------
+       !------------------------------------------------------------------------
        ! examine the string to find the find the FIRST instance of the pattern 
-       !---------------------------------------------------------------------
-       k = index(lstring(klast+1:len_string),lpattern)
+       !------------------------------------------------------------------------
+       k = index(lstring(klast+1:len_string), trim(adjustL(lpattern) ))
        do while( k > 0 )
-          !------------------------------------------------------------------
+          !---------------------------------------------------------------------
           ! if index is nonzero, there is at least one match, increment
           ! through the string checking for additional matches. 
-          !------------------------------------------------------------------
+          !---------------------------------------------------------------------
           ncount = ncount + 1    ! count match
           klast = k + klast      ! slide forward in string looking for next match
-          k = index(lstring(klast+1:len_string),lpattern)
+          k = index(lstring(klast+1:len_string), trim(adjustL(lpattern) ))
        enddo     ! while
     endif 
     
     pattern_query = ncount
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     end function pattern_query
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
 
 
-!============================================================================
+!===============================================================================
   end module ESMF_TestHarnessMod
-!============================================================================
+!===============================================================================
 

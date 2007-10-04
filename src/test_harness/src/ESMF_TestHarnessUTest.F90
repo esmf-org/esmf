@@ -123,7 +123,7 @@ contains
 
 
   ! local character strings
-  character(ESMF_MAXSTR) :: ltag, ltmp
+  character(ESMF_MAXSTR) :: ltag
 
   ! local integer variables
   integer :: file, ncolumns
@@ -324,7 +324,7 @@ contains
   logical :: flag = .true.
 
 ! local integer variables
-  integer :: n, nn, k, kk, pos, col, ncount, npds, ntmp
+  integer :: n, nn, k, pos, col, ncount, npds, ntmp
   integer :: file, nfiles,string, pstring
   integer :: cpos, dpos, gpos, csize, dsize, gsize
   integer, allocatable :: count(:), ncolumns(:), nstrings(:)
@@ -809,17 +809,18 @@ contains
   ! local character types
 
   ! local character strings
-  character(ESMF_MAXSTR) :: lstring
+  character(ESMF_MAXSTR) :: lstring, lname
+  character(ESMF_MAXSTR) :: src_string, dst_string
 
   logical :: flag = .true.
 
   ! local integer variables
-  integer :: n, k, col, ncount
   integer :: file, nfiles,string
   integer, allocatable :: nstrings(:)
+  integer :: tag, location(2)
+  integer :: dst_beg, dst_end, src_beg, src_end
 
 
-  integer :: add(8), hits
   ! local logical variable
   logical :: endflag = .false.
 
@@ -834,9 +835,9 @@ contains
 
   !--------------------------------------------------------------------------
   !--------------------------------------------------------------------------
-  do file=1,1
-    do string=1,nstrings(file)
-      lstring = trim( harness%Record(file)%string(string)%pds )
+  do file=1,nfiles
+     do string=1,nstrings(file)
+        lstring = trim( harness%Record(file)%string(string)%pds )
   !--------------------------------------------------------------------------
   ! find the test operation (address of strings)
   ! 1. search for "->" or "=>" - tip of symbol provides ending address
@@ -844,21 +845,27 @@ contains
   ! 3. src_beg = 1, src_end = operation_beg-1
   !    dst_beg = operation_end+1, dst_end = length(trim(string)
   !--------------------------------------------------------------------------
+        call process_query(lstring, lname, tag, location, localrc)  
+        harness%Record(file)%string(string)%process%name = lname
+        harness%Record(file)%string(string)%process%tag = tag
+        src_beg = 1
+        src_end = location(1)
+        dst_beg = location(2)
+        dst_end = len( trim(lstring) )
+        !--------------------------------------------------------------------
+        ! separate string into source and destination strings
+        !--------------------------------------------------------------------
+        src_string = adjustL( lstring(src_beg:src_end) )
+        dst_string = adjustL( lstring(dst_beg:dst_end) )
+        !--------------------------------------------------------------------
+        !--------------------------------------------------------------------
+      print*,' TEST '
+      print*,src_beg, src_end, dst_beg,dst_end 
       print*,'123456789012345678901234567890'
       print*,trim(lstring)
-      print*,'numb of > ',set_query(lstring,'>')
-      hits = 1
-      call set_locate(lstring,'>',hits,add)
-      do k=1,5
-      print*,k,add(k)
-      enddo
-      print*,'beg of -->',findblank(lstring,add(1),-1)
-
-  !--------------------------------------------------------------------------
-  ! separate string into source and destination strings
-  !--------------------------------------------------------------------------
-  ! src_string = lstring(src_beg:src_end)
-  ! dst_string = lstring(dst_beg:dst_end)
+      print*,'process ', harness%Record(file)%string(string)%process%name
+      print*,'src',trim( src_string )
+      print*,'dst',trim( dst_string ) 
   !--------------------------------------------------------------------------
   ! find rank of source and destination strings ( plus addresses of dividers ";")
   ! break into substrings, one for each dimension. Increment through, searching 
@@ -901,7 +908,6 @@ contains
 !     2 = report both successes and failures.
 !--------------------------------------------------------------------------
    ! local variables
-   integer :: count,k
 
    ! initialize local rc
    localrc = ESMF_SUCCESS
