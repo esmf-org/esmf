@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.142 2007/10/02 23:38:39 theurich Exp $
+// $Id: ESMC_Array.C,v 1.143 2007/10/04 16:00:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.142 2007/10/02 23:38:39 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.143 2007/10/04 16:00:59 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -513,9 +513,12 @@ Array *Array::create(
           }
         }
         // shift bounds of exclusive region to match indexList[0]
-        int shift = indexList[0] - exclusiveLBound[i*dimCount+j];
-        exclusiveLBound[i*dimCount+j] += shift;
-        exclusiveUBound[i*dimCount+j] += shift;
+        if (indexCountPDimPDe[de*dimCount+j]){
+          // only shift if there are indices associated
+          int shift = indexList[0] - exclusiveLBound[i*dimCount+j];
+          exclusiveLBound[i*dimCount+j] += shift;
+          exclusiveUBound[i*dimCount+j] += shift;
+        }
       } // j
     } // i
   }
@@ -534,11 +537,6 @@ Array *Array::create(
       return ESMC_NULL_POINTER;
     }
     for (int i=0; i<dimCount; i++){
-      if (computationalLWidthArg->array[i] < 0){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-          "- computationalLWidth may only contain positive values", rc);
-        return ESMC_NULL_POINTER;
-      }
       for (int j=0; j<localDeCount; j++)
         computationalLBound[j*dimCount+i] = exclusiveLBound[j*dimCount+i]
           - computationalLWidthArg->array[i];
@@ -560,11 +558,6 @@ Array *Array::create(
       return ESMC_NULL_POINTER;
     }
     for (int i=0; i<dimCount; i++){
-      if (computationalUWidthArg->array[i] < 0){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-          "- computationalUWidth may only contain positive values", rc);
-        return ESMC_NULL_POINTER;
-      }
       for (int j=0; j<localDeCount; j++)
         computationalUBound[j*dimCount+i] = exclusiveUBound[j*dimCount+i]
           + computationalUWidthArg->array[i];
@@ -609,8 +602,12 @@ Array *Array::create(
     }
   }else{
     // set default
-    memcpy(totalLBound, computationalLBound,
-      localDeCount*dimCount*sizeof(int));
+    for (int i=0; i<localDeCount*dimCount; i++){
+      if (computationalLBound[i] < exclusiveLBound[i])
+        totalLBound[i] = computationalLBound[i];
+      else
+        totalLBound[i] = exclusiveLBound[i];
+    }
   }
   if (totalUWidthArg != NULL){
     totalUBoundFlag = 1;  // set
@@ -642,9 +639,40 @@ Array *Array::create(
     }
   }else{
     // set default
-    memcpy(totalUBound, computationalUBound,
-      localDeCount*dimCount*sizeof(int));
+    for (int i=0; i<localDeCount*dimCount; i++){
+      if (computationalUBound[i] > exclusiveUBound[i])
+        totalUBound[i] = computationalUBound[i];
+      else
+        totalUBound[i] = exclusiveUBound[i];
+    }
   }
+  // check computational bounds against total bounds
+  for (int i=0; i<localDeCount*dimCount; i++){
+    if (totalLBound[i] <= totalUBound[i]){
+      // DE/dim is associated with DistGrid cells
+      if (computationalLBound[i] < totalLBound[i]){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          "- computationaLBound / totalLBound mismatch", rc);
+        return ESMC_NULL_POINTER;
+      }
+      if (computationalLBound[i] > totalUBound[i]){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          "- computationaLBound / totalUBound mismatch", rc);
+        return ESMC_NULL_POINTER;
+      }
+      if (computationalUBound[i] < totalLBound[i]){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          "- computationaUBound / totalLBound mismatch", rc);
+        return ESMC_NULL_POINTER;
+      }
+      if (computationalUBound[i] > totalUBound[i]){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          "- computationaUBound / totalUBound mismatch", rc);
+        return ESMC_NULL_POINTER;
+      }
+    }
+  }
+
   // prepare temporary staggerLoc and vectorDim arrays
   int *staggerLoc = new int[tensorCount];
   if (staggerLocArg)
@@ -950,9 +978,12 @@ Array *Array::create(
           }
         }
         // shift bounds of exclusive region to match indexList[0]
-        int shift = indexList[0] - exclusiveLBound[i*dimCount+j];
-        exclusiveLBound[i*dimCount+j] += shift;
-        exclusiveUBound[i*dimCount+j] += shift;
+        if (indexCountPDimPDe[de*dimCount+j]){
+          // only shift if there are indices associated
+          int shift = indexList[0] - exclusiveLBound[i*dimCount+j];
+          exclusiveLBound[i*dimCount+j] += shift;
+          exclusiveUBound[i*dimCount+j] += shift;
+        }
       } // j
     } // i
   }
@@ -971,11 +1002,6 @@ Array *Array::create(
       return ESMC_NULL_POINTER;
     }
     for (int i=0; i<dimCount; i++){
-      if (computationalLWidthArg->array[i] < 0){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-          "- computationalLWidth may only contain positive values", rc);
-        return ESMC_NULL_POINTER;
-      }
       for (int j=0; j<localDeCount; j++)
         computationalLBound[j*dimCount+i] = exclusiveLBound[j*dimCount+i]
           - computationalLWidthArg->array[i];
@@ -997,11 +1023,6 @@ Array *Array::create(
       return ESMC_NULL_POINTER;
     }
     for (int i=0; i<dimCount; i++){
-      if (computationalUWidthArg->array[i] < 0){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-          "- computationalUWidth may only contain positive values", rc);
-        return ESMC_NULL_POINTER;
-      }
       for (int j=0; j<localDeCount; j++)
         computationalUBound[j*dimCount+i] = exclusiveUBound[j*dimCount+i]
           + computationalUWidthArg->array[i];
@@ -1043,8 +1064,12 @@ Array *Array::create(
     }
   }else{
     // set default
-    memcpy(totalLBound, computationalLBound,
-      localDeCount*dimCount*sizeof(int));
+    for (int i=0; i<localDeCount*dimCount; i++){
+      if (computationalLBound[i] < exclusiveLBound[i])
+        totalLBound[i] = computationalLBound[i];
+      else
+        totalLBound[i] = exclusiveLBound[i];
+    }
   }
   if (totalUWidthArg != NULL){
     if (totalUWidthArg->dimCount != 1){
@@ -1075,9 +1100,40 @@ Array *Array::create(
     }
   }else{
     // set default
-    memcpy(totalUBound, computationalUBound,
-      localDeCount*dimCount*sizeof(int));
+    for (int i=0; i<localDeCount*dimCount; i++){
+      if (computationalUBound[i] > exclusiveUBound[i])
+        totalUBound[i] = computationalUBound[i];
+      else
+        totalUBound[i] = exclusiveUBound[i];
+    }
   }
+  // check computational bounds against total bounds
+  for (int i=0; i<localDeCount*dimCount; i++){
+    if (totalLBound[i] <= totalUBound[i]){
+      // DE/dim is associated with DistGrid cells
+      if (computationalLBound[i] < totalLBound[i]){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          "- computationaLBound / totalLBound mismatch", rc);
+        return ESMC_NULL_POINTER;
+      }
+      if (computationalLBound[i] > totalUBound[i]){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          "- computationaLBound / totalUBound mismatch", rc);
+        return ESMC_NULL_POINTER;
+      }
+      if (computationalUBound[i] < totalLBound[i]){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          "- computationaUBound / totalLBound mismatch", rc);
+        return ESMC_NULL_POINTER;
+      }
+      if (computationalUBound[i] > totalUBound[i]){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          "- computationaUBound / totalUBound mismatch", rc);
+        return ESMC_NULL_POINTER;
+      }
+    }
+  }
+  
   // prepare temporary staggerLoc and vectorDim arrays
   int *staggerLoc = new int[tensorCount];
   if (staggerLocArg)
