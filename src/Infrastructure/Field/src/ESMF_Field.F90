@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.251 2007/09/26 13:37:26 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.252 2007/10/05 00:40:29 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -226,7 +226,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.251 2007/09/26 13:37:26 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.252 2007/10/05 00:40:29 peggyli Exp $'
 
 !==============================================================================
 !
@@ -1995,6 +1995,8 @@
         type(ESMF_FieldType), pointer :: fp 
         integer :: localrc
         !character(len=ESMF_MAXSTR) :: msgbuf
+        character(len=6) :: defaultopts
+
 
 !	Initialize
 	localrc = ESMF_RC_NOT_IMPL
@@ -2002,6 +2004,9 @@
 
         ! check variables
         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
+        ! print option is not implemented, but it has to pass to c_ESMC_BasePrint()
+        defaultopts = "brief"
 
         !nsc call ESMF_LogWrite("Field Print:", ESMF_LOG_INFO)
         write(*,*) "Field Print:"
@@ -2013,10 +2018,6 @@
         endif
 
         fp => field%ftypep
-        call ESMF_BasePrint(fp%base, str, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
 
         call ESMF_StatusString(fp%fieldstatus, str, localrc)
       !jw  write(msgbuf, *)  "Field status = ", trim(str)
@@ -2035,6 +2036,12 @@
       !jw  write(msgbuf, *)  "  Name = '",  trim(name), "'"
       !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write(*, *)  "  Name = '",  trim(name), "'"
+
+        call ESMF_BasePrint(fp%base, defaultopts, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
 
         call ESMF_StatusString(fp%gridstatus, str, localrc)
       !jw  write(msgbuf, *)  "Grid status = ", trim(str)
