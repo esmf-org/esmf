@@ -1,5 +1,5 @@
 
-! $Id: ESMF_Bundle.F90,v 1.114 2007/10/02 04:22:59 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.115 2007/10/05 00:39:55 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -2572,6 +2572,10 @@ end function
       !type(ESMF_Field) :: field
       integer :: i
       integer :: status
+      character(len=6) :: defaultopts
+
+       ! print option is not implemented, but it has to pass to c_ESMC_BasePrint()
+      defaultopts = "brief"
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2594,21 +2598,28 @@ end function
     !jw  write (msgbuf, *)  "  Bundle name = ", trim(bname)
     !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
       write (*, *)  "  Bundle name = ", trim(bname)
+
+    ! pli: print attributes 
+      call c_ESMC_BasePrint(btype%base, defaultopts, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
     
     !jw  write (msgbuf, *)  "  Field count = ", btype%field_count
     !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
       write (*, *)  "  Field count = ", btype%field_count
     
       do i = 1, btype%field_count
-  
-       call ESMF_FieldGet(btype%flist(i), name=fname, rc=status)
+
+       write (*, *)  "    Field", i, ": "
+       call ESMF_FieldPrint(btype%flist(i),rc=status)  
+       !call ESMF_FieldGet(btype%flist(i), name=fname, rc=status)
        if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
      !jw  write (msgbuf, *)  "    Field", i, "name = ", trim(fname)
      !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-       write (*, *)  "    Field", i, "name = ", trim(fname)
       enddo
 
       ! TODO: add more code here for printing more info
