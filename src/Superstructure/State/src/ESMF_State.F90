@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.112 2007/10/02 23:00:57 theurich Exp $
+! $Id: ESMF_State.F90,v 1.113 2007/10/05 00:38:56 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.112 2007/10/02 23:00:57 theurich Exp $'
+      '$Id: ESMF_State.F90,v 1.113 2007/10/05 00:38:56 peggyli Exp $'
 
 !==============================================================================
 ! 
@@ -3161,7 +3161,8 @@ end interface
        integer :: localrc                          ! local error status
        integer :: i
        character(len=ESMF_MAXSTR) :: msgbuf
-
+       
+       ! print option is not implemented, but it has to pass to c_ESMC_BasePrint()
        defaultopts = "brief"
        ! Initialize return code; assume failure until success is certain
        if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -3210,6 +3211,13 @@ end interface
        endif
        !nsc call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
        print *, trim(msgbuf)
+
+       !pli print attribute name/value pairs using c_esmc_baseprint() 
+       call c_ESMC_BasePrint(sp%base, defaultopts, localrc)
+       if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+       
        !nsc write(msgbuf, *) "  Number of members: ", sp%datacount
        !nsc call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
        print *, "  Number of members: ", sp%datacount
