@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.15 2007/09/20 17:44:20 cdeluca Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.16 2007/10/05 21:58:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -106,7 +106,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.15 2007/09/20 17:44:20 cdeluca Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.16 2007/10/05 21:58:43 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -158,13 +158,16 @@ contains
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_ArrayCreate() @\
 ! function ESMF_ArrayCreateAssmdShape<rank><type><kind>(farray, & @\
-!   distgrid, dimmap, computationalLWidth, computationalUWidth, totalLWidth,& @\
+!   distgrid, dimmap, computationalEdgeLWidth, computationalEdgeUWidth, & @\
+!   computationalLWidth, computationalUWidth, totalLWidth, & @\
 !   totalUWidth, indexflag, staggerLoc, vectorDim, lbounds, ubounds, name, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   <type> (ESMF_KIND_<kind>),dimension(<rank>),intent(in),target :: farray @\
 !   type(ESMF_DistGrid),   intent(in)              :: distgrid @\
 !   integer,               intent(in),   optional  :: dimmap(:) @\
+!   integer,               intent(in),   optional  :: computationalEdgeLWidth(:) @\
+!   integer,               intent(in),   optional  :: computationalEdgeUWidth(:) @\
 !   integer,               intent(in),   optional  :: computationalLWidth(:) @\
 !   integer,               intent(in),   optional  :: computationalUWidth(:) @\
 !   integer,               intent(in),   optional  :: totalLWidth(:) @\
@@ -220,6 +223,18 @@ contains
 !      lower dimension of {\tt farray} in sequence. Unmapped {\tt farray} @\
 !      dimensions are considered to be not distributed dimensions and form a @\
 !      tensor of rank = farray.rank - distgrid.dimCount. @\
+! \item[{[computationalEdgeLWidth]}] @\
+!      This vector argument must have dimCount elements, where dimCount is @\
+!      specified in distgrid. It specifies the lower corner of the computational @\
+!      region with respect to the lower corner of the exclusive region for DEs @\
+!      that are located on the edge of a patch. @\
+!      The default is a zero vector. @\
+! \item[{[computationalEdgeUWidth]}] @\
+!      This vector argument must have dimCount elements, where dimCount is @\
+!      specified in distgrid. It specifies the upper corner of the computational @\
+!      region with respect to the upper corner of the exclusive region for DEs @\
+!      that are located on the edge of a patch. @\
+!      The default is a zero vector. @\
 ! \item[{[computationalLWidth]}] @\
 !      This vector argument must have dimCount elements, where dimCount is @\
 !      specified in distgrid. It specifies the lower corner of the computational @\
@@ -280,7 +295,8 @@ contains
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_ArrayCreateAssmdShape" @\
   function ESMF_ArrayCreateAssmdShape##mrank##D##mtypekind(farray, & @\
-    distgrid, dimmap, computationalLWidth, computationalUWidth, totalLWidth, & @\
+    distgrid, dimmap, computationalEdgeLWidth, computationalEdgeUWidth, & @\
+    computationalLWidth, computationalUWidth, totalLWidth, & @\
     totalUWidth, indexflag, staggerLoc, vectorDim, lbounds, ubounds, name, rc) @\
 @\
     type(ESMF_Array) :: ESMF_ArrayCreateAssmdShape##mrank##D##mtypekind @\
@@ -288,6 +304,8 @@ contains
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),intent(in),target :: farray @\
     type(ESMF_DistGrid),   intent(in)              :: distgrid @\
     integer,               intent(in),   optional  :: dimmap(:) @\
+    integer,               intent(in),   optional  :: computationalEdgeLWidth(:) @\
+    integer,               intent(in),   optional  :: computationalEdgeUWidth(:) @\
     integer,               intent(in),   optional  :: computationalLWidth(:) @\
     integer,               intent(in),   optional  :: computationalUWidth(:) @\
     integer,               intent(in),   optional  :: totalLWidth(:) @\
@@ -325,9 +343,9 @@ contains
 @\
     ! Create the Array object by calling into overloaded ArrayCreate() interf. @\
     array = ESMF_ArrayCreate(larrayList, distgrid, dimmap, & @\
-      computationalLWidth, computationalUWidth, totalLWidth, & @\
-      totalUWidth, indexflag, staggerLoc, vectorDim, lbounds, ubounds, & @\
-      name, status) @\
+      computationalEdgeLWidth, computationalEdgeUWidth, computationalLWidth, & @\
+      computationalUWidth, totalLWidth, totalUWidth, indexflag, staggerLoc, & @\
+      vectorDim, lbounds, ubounds, name, status) @\
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
@@ -361,13 +379,16 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
   function ESMF_ArrayCreateLocalArray(larrayList, distgrid, dimmap, &
-    computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
+    computationalEdgeLWidth, computationalEdgeUWidth, computationalLWidth, &
+    computationalUWidth, totalLWidth, totalUWidth, &
     indexflag, staggerLoc, vectorDim, lbounds, ubounds, name, rc)
 !
 ! !ARGUMENTS:
        type(ESMF_LocalArray), intent(in)              :: larrayList(:)
        type(ESMF_DistGrid),   intent(in)              :: distgrid
        integer,               intent(in),   optional  :: dimmap(:)
+       integer,               intent(in),   optional  :: computationalEdgeLWidth(:)
+       integer,               intent(in),   optional  :: computationalEdgeUWidth(:)
        integer,               intent(in),   optional  :: computationalLWidth(:)
        integer,               intent(in),   optional  :: computationalUWidth(:)
        integer,               intent(in),   optional  :: totalLWidth(:)
@@ -422,6 +443,16 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      value. The elements map each dimension of distgrid to a dimension in
 !      arrayspec. The default is to map all of distgrid|s dimensions against the
 !      lower dimension of arrayspec in sequence.
+! \item[{[computationalEdgeLWidth]}]
+!      This vector argument must have dimCount elements, where dimCount is
+!      specified in distgrid. It specifies the lower corner of the computational
+!      region with respect to the lower corner of the exclusive region for DEs
+!      that are located on the edge of a patch.
+! \item[{[computationalEdgeUWidth]}]
+!      This vector argument must have dimCount elements, where dimCount is
+!      specified in distgrid. It specifies the upper corner of the computational
+!      region with respect to the upper corner of the exclusive region for DEs
+!      that are located on the edge of a patch.
 ! \item[{[computationalLWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the lower corner of the computational
@@ -481,6 +512,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     type(ESMF_Array)        :: array      ! opaque pointer to new C++ Array
     integer                 :: larrayCount, i         ! helper variable
     type(ESMF_InterfaceInt) :: dimmapArg              ! helper variable
+    type(ESMF_InterfaceInt) :: computationalEdgeLWidthArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalEdgeUWidthArg ! helper variable
     type(ESMF_InterfaceInt) :: computationalLWidthArg ! helper variable
     type(ESMF_InterfaceInt) :: computationalUWidthArg ! helper variable
     type(ESMF_InterfaceInt) :: totalLWidthArg         ! helper variable
@@ -517,6 +550,14 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     dimmapArg = ESMF_InterfaceIntCreate(dimmap, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalEdgeLWidthArg = &
+      ESMF_InterfaceIntCreate(computationalEdgeLWidth, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalEdgeUWidthArg = &
+      ESMF_InterfaceIntCreate(computationalEdgeUWidth, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLWidthArg = ESMF_InterfaceIntCreate(computationalLWidth, &
       rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -546,14 +587,18 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     if (present(name)) then
       len_name = len(name)
       call c_ESMC_ArrayCreateLocalArray(array, larrayPointerList, larrayCount, &
-        distgrid, dimmapArg, computationalLWidthArg, computationalUWidthArg, &
-        totalLWidthArg, totalUWidthArg, indexflag, staggerLoc, vectorDim, &
+        distgrid, dimmapArg, computationalEdgeLWidthArg, &
+        computationalEdgeUWidthArg, computationalLWidthArg, &
+        computationalUWidthArg, totalLWidthArg, totalUWidthArg, &
+        indexflag, staggerLoc, vectorDim, &
         lboundsArg, uboundsArg, name, len_name, status)
     else
       len_name = 0
       call c_ESMC_ArrayCreateLocalArray(array, larrayPointerList, larrayCount, &
-        distgrid, dimmapArg, computationalLWidthArg, computationalUWidthArg, &
-        totalLWidthArg, totalUWidthArg, indexflag, staggerLoc, vectorDim, &
+        distgrid, dimmapArg, computationalEdgeLWidthArg, &
+        computationalEdgeUWidthArg, computationalLWidthArg, &
+        computationalUWidthArg, totalLWidthArg, totalUWidthArg, &
+        indexflag, staggerLoc, vectorDim, &
         lboundsArg, uboundsArg, "", len_name, status)
     endif    
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -562,6 +607,12 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     ! Garbage collection
     deallocate(larrayPointerList)
     call ESMF_InterfaceIntDestroy(dimmapArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalEdgeLWidthArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalEdgeUWidthArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLWidthArg, rc=status)
@@ -605,6 +656,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
   function ESMF_ArrayCreateAllocate(arrayspec, distgrid, dimmap, &
+    computationalEdgeLWidth, computationalEdgeUWidth, &
     computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
     indexflag, staggerLoc, vectorDim, lbounds, ubounds, name, rc)
 !
@@ -612,6 +664,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
        type(ESMF_ArraySpec),  intent(inout)           :: arrayspec
        type(ESMF_DistGrid),   intent(in)              :: distgrid
        integer,               intent(in),   optional  :: dimmap(:)
+       integer,               intent(in),   optional  :: computationalEdgeLWidth(:)
+       integer,               intent(in),   optional  :: computationalEdgeUWidth(:)
        integer,               intent(in),   optional  :: computationalLWidth(:)
        integer,               intent(in),   optional  :: computationalUWidth(:)
        integer,               intent(in),   optional  :: totalLWidth(:)
@@ -651,19 +705,29 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      value. The elements map each dimension of distgrid to a dimension in
 !      arrayspec. The default is to map all of distgrid|s dimensions against the
 !      lower dimension of arrayspec in sequence.
-! \item[{[computationalLWidth]}] 
+! \item[{[computationalEdgeLWidth]}]
+!      This vector argument must have dimCount elements, where dimCount is
+!      specified in distgrid. It specifies the lower corner of the computational
+!      region with respect to the lower corner of the exclusive region for DEs
+!      that are located on the edge of a patch.
+! \item[{[computationalEdgeUWidth]}]
+!      This vector argument must have dimCount elements, where dimCount is
+!      specified in distgrid. It specifies the upper corner of the computational
+!      region with respect to the upper corner of the exclusive region for DEs
+!      that are located on the edge of a patch.
+! \item[{[computationalLWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the lower corner of the computational
 !      region with respect to the lower corner of the exclusive region.
-! \item[{[computationalUWidth]}] 
+! \item[{[computationalUWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the upper corner of the computational
 !      region with respect to the upper corner of the exclusive region.
-! \item[{[totalMemoryLWidth]}] 
+! \item[{[totalMemoryLWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the lower corner of the total memory
 !      region with respect to the lower corner of the exclusive region.
-! \item[{[totalMemoryUWidth]}] 
+! \item[{[totalMemoryUWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the upper corner of the total memory
 !      region with respect to the upper corner of the exclusive region.
@@ -700,6 +764,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     integer                 :: status     ! local error status
     type(ESMF_Array)        :: array      ! opaque pointer to new C++ Array
     type(ESMF_InterfaceInt) :: dimmapArg              ! helper variable
+    type(ESMF_InterfaceInt) :: computationalEdgeLWidthArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalEdgeUWidthArg ! helper variable
     type(ESMF_InterfaceInt) :: computationalLWidthArg ! helper variable
     type(ESMF_InterfaceInt) :: computationalUWidthArg ! helper variable
     type(ESMF_InterfaceInt) :: totalLWidthArg         ! helper variable
@@ -718,6 +784,14 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 
     ! Deal with (optional) array arguments
     dimmapArg = ESMF_InterfaceIntCreate(dimmap, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalEdgeLWidthArg = &
+      ESMF_InterfaceIntCreate(computationalEdgeLWidth, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalEdgeUWidthArg = &
+      ESMF_InterfaceIntCreate(computationalEdgeUWidth, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLWidthArg = ESMF_InterfaceIntCreate(computationalLWidth, &
@@ -749,21 +823,29 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     if (present(name)) then
       len_name = len(name)
       call c_ESMC_ArrayCreateAllocate(array, arrayspec, distgrid, dimmapArg, &
+        computationalEdgeLWidthArg, computationalEdgeUWidthArg, &
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
-        totalUWidthArg, indexflag, staggerLoc, vectorDim, lboundsArg, &
-        uboundsArg, name, len_name, status)
+        totalUWidthArg, indexflag, staggerLoc, vectorDim, &
+        lboundsArg, uboundsArg, name, len_name, status)
     else
       len_name = 0
       call c_ESMC_ArrayCreateAllocate(array, arrayspec, distgrid, dimmapArg, &
+        computationalEdgeLWidthArg, computationalEdgeUWidthArg, &
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
-        totalUWidthArg, indexflag, staggerLoc, vectorDim, lboundsArg, &
-        uboundsArg, "", len_name, status)
+        totalUWidthArg, indexflag, staggerLoc, vectorDim, &
+        lboundsArg, uboundsArg, "", len_name, status)
     endif
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! Garbage collection
     call ESMF_InterfaceIntDestroy(dimmapArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalEdgeLWidthArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalEdgeUWidthArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLWidthArg, rc=status)

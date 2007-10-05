@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.29 2007/09/20 21:41:28 theurich Exp $
+// $Id: ESMC_DistGrid.h,v 1.30 2007/10/05 21:58:44 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -115,6 +115,9 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
       InterfaceInt *connectionTransformList, 
       DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL);
     static int destroy(DistGrid **distgrid);
+    // is()
+    bool isLocalDeOnEdgeL(int localDe, int dim, int *rc) const;
+    bool isLocalDeOnEdgeU(int localDe, int dim, int *rc) const;
     // get() and set()
     int getDimCount()                   const {return dimCount;}
     int getPatchCount()                 const {return patchCount;}
@@ -137,7 +140,8 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
       const;
     DELayout *getDELayout()         const {return delayout;}
     ESMC_Logical getRegDecompFlag() const {return regDecompFlag;}
-    int getSequenceIndex(int localDe, int *index, int *rc=NULL) const;
+    int getSequenceIndexLocalDe(int localDe, int *index, int *rc=NULL) const;
+    int getSequenceIndexPatch(int patch, int *index, int *rc=NULL) const;
     const int *getArbSeqIndexCountPLocalDe()
       const {return arbSeqIndexCountPLocalDe;}
     const int *getArbSeqIndexListPLocalDe(int localDe, int *rc=NULL) const;

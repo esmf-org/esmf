@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.76 2007/10/02 23:38:38 theurich Exp $
+// $Id: ESMC_Array.h,v 1.77 2007/10/05 21:58:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -125,19 +125,23 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
   public:
     ~Array();
     // create() and destroy()
-    static Array *create(ESMC_ArraySpec *arrayspec, DistGrid *distgrid,
-      InterfaceInt *dimmap, InterfaceInt *computationalLWidthArg,
-      InterfaceInt *computationalUWidthArg,
-      InterfaceInt *totalLWidthArg, InterfaceInt *totalUWidthArg,
-      ESMC_IndexFlag *indexflag, int *staggerLoc, int *vectorDim,
-      InterfaceInt *lboundsArg, InterfaceInt *uboundsArg, int *rc);
     static Array *create(ESMC_LocalArray **larrayList, int larrayCount,
       DistGrid *distgrid, InterfaceInt *dimmap,
+      InterfaceInt *computationalEdgeLWidthArg,
+      InterfaceInt *computationalEdgeUWidthArg,
       InterfaceInt *computationalLWidthArg,
       InterfaceInt *computationalUWidthArg,
       InterfaceInt *totalLWidthArg, InterfaceInt *totalUWidthArg,
       ESMC_IndexFlag *indexflag, int *staggerLoc, int *vectorDim,
       InterfaceInt *lboundsArg, InterfaceInt *uboundsArg, int *rc);
+    static Array *create(ESMC_ArraySpec *arrayspec, DistGrid *distgrid,
+      InterfaceInt *dimmap, InterfaceInt *computationalEdgeLWidthArg,
+      InterfaceInt *computationalEdgeUWidthArg,
+      InterfaceInt *computationalLWidthArg, 
+      InterfaceInt *computationalUWidthArg, InterfaceInt *totalLWidthArg,
+      InterfaceInt *totalUWidthArg, ESMC_IndexFlag *indexflag,
+      int *staggerLoc, int *vectorDim, InterfaceInt *lboundsArg,
+      InterfaceInt *uboundsArg, int *rc);
     static int destroy(Array **array);
     // get() and set()
     ESMC_TypeKind getTypekind()             const {return typekind;}

@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.143 2007/10/04 16:00:59 theurich Exp $
+// $Id: ESMC_Array.C,v 1.144 2007/10/05 21:58:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.143 2007/10/04 16:00:59 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.144 2007/10/05 21:58:43 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -306,6 +306,8 @@ Array *Array::create(
   int larrayCount,                            // (in)
   DistGrid *distgrid,                         // (in)
   InterfaceInt *dimmap,                       // (in)
+  InterfaceInt *computationalEdgeLWidthArg,   // (in)
+  InterfaceInt *computationalEdgeUWidthArg,   // (in)
   InterfaceInt *computationalLWidthArg,       // (in)
   InterfaceInt *computationalUWidthArg,       // (in)
   InterfaceInt *totalLWidthArg,               // (in)
@@ -522,6 +524,45 @@ Array *Array::create(
       } // j
     } // i
   }
+  // deal with computationalEdge widths
+  int *computationalEdgeLWidth = new int[dimCount];
+  int *computationalEdgeUWidth = new int[dimCount];
+  if (computationalEdgeLWidthArg != NULL){
+    if (computationalEdgeLWidthArg->dimCount != 1){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- computationalEdgeLWidth array must be of rank 1", rc);
+      return ESMC_NULL_POINTER;
+    }
+    if (computationalEdgeLWidthArg->extent[0] != dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- computationalEdgeLWidth and distgrid mismatch", rc);
+      return ESMC_NULL_POINTER;
+    }
+    memcpy(computationalEdgeLWidth, computationalEdgeLWidthArg->array,
+      dimCount*sizeof(int));
+  }else{
+    // set default
+    for (int i=0; i<dimCount; i++)
+      computationalEdgeLWidth[i] = 0;
+  }
+  if (computationalEdgeUWidthArg != NULL){
+    if (computationalEdgeUWidthArg->dimCount != 1){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- computationalEdgeUWidth array must be of rank 1", rc);
+      return ESMC_NULL_POINTER;
+    }
+    if (computationalEdgeUWidthArg->extent[0] != dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- computationalEdgeUWidth and distgrid mismatch", rc);
+      return ESMC_NULL_POINTER;
+    }
+    memcpy(computationalEdgeUWidth, computationalEdgeUWidthArg->array,
+      dimCount*sizeof(int));
+  }else{
+    // set default
+    for (int i=0; i<dimCount; i++)
+      computationalEdgeUWidth[i] = 0;
+  }
   // deal with computational widths
   int *computationalLBound = new int[dimCount*localDeCount];
   int *computationalUBound = new int[dimCount*localDeCount];
@@ -567,6 +608,24 @@ Array *Array::create(
     memcpy(computationalUBound, exclusiveUBound,
       localDeCount*dimCount*sizeof(int));
   }
+  // modify computational bounds on patch edges
+  for (int j=0; j<localDeCount; j++){
+    for (int i=0; i<dimCount; i++){
+      bool onEdgeL = distgrid->isLocalDeOnEdgeL(j, i+1, &localrc);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
+        return ESMC_NULL_POINTER;
+      if (onEdgeL)
+        computationalLBound[j*dimCount+i] -= computationalEdgeLWidth[i];
+      bool onEdgeU = distgrid->isLocalDeOnEdgeU(j, i+1, &localrc);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
+        return ESMC_NULL_POINTER;
+      if (onEdgeU)
+        computationalUBound[j*dimCount+i] += computationalEdgeUWidth[i];
+    }
+  }
+  // clean-up
+  delete [] computationalEdgeLWidth;
+  delete [] computationalEdgeUWidth;
   // deal with total widths
   int totalLBoundFlag = 0;  // reset
   int totalUBoundFlag = 0;  // reset
@@ -727,11 +786,15 @@ Array *Array::create(
             temp_lbounds[jj] = totalUBound[i*dimCount+j] - temp_counts[jj] + 1;
           }else{
             // totalLBound and totalUBound not fixed
-            // -> shift computational region into center of total region
-            temp_lbounds[jj] = computationalLBound[i*dimCount+j]
-              - (0.5 * (temp_counts[jj] - 1
-                        + computationalLBound[i*dimCount+j]
-                        - computationalUBound[i*dimCount+j]));
+            // -> shift computational/excl. region into center of total region
+            int lBound = computationalLBound[i*dimCount+j];
+            if (exclusiveLBound[i*dimCount+j]<computationalLBound[i*dimCount+j])
+              lBound = exclusiveLBound[i*dimCount+j];
+            int uBound = computationalUBound[i*dimCount+j];
+            if (exclusiveUBound[i*dimCount+j]>computationalUBound[i*dimCount+j])
+              uBound = exclusiveUBound[i*dimCount+j];
+            temp_lbounds[jj] = lBound
+               - (0.5 * (temp_counts[jj] - 1 + lBound - uBound));
             temp_ubounds[jj] = temp_counts[jj] + temp_lbounds[jj] - 1;
           }
         }
@@ -817,6 +880,8 @@ Array *Array::create(
   ESMC_ArraySpec *arrayspec,                  // (in)
   DistGrid *distgrid,                         // (in)
   InterfaceInt *dimmap,                       // (in)
+  InterfaceInt *computationalEdgeLWidthArg,   // (in)
+  InterfaceInt *computationalEdgeUWidthArg,   // (in)
   InterfaceInt *computationalLWidthArg,       // (in)
   InterfaceInt *computationalUWidthArg,       // (in)
   InterfaceInt *totalLWidthArg,               // (in)
@@ -987,6 +1052,45 @@ Array *Array::create(
       } // j
     } // i
   }
+  // deal with computationalEdge widths
+  int *computationalEdgeLWidth = new int[dimCount];
+  int *computationalEdgeUWidth = new int[dimCount];
+  if (computationalEdgeLWidthArg != NULL){
+    if (computationalEdgeLWidthArg->dimCount != 1){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- computationalEdgeLWidth array must be of rank 1", rc);
+      return ESMC_NULL_POINTER;
+    }
+    if (computationalEdgeLWidthArg->extent[0] != dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- computationalEdgeLWidth and distgrid mismatch", rc);
+      return ESMC_NULL_POINTER;
+    }
+    memcpy(computationalEdgeLWidth, computationalEdgeLWidthArg->array,
+      dimCount*sizeof(int));
+  }else{
+    // set default
+    for (int i=0; i<dimCount; i++)
+      computationalEdgeLWidth[i] = 0;
+  }
+  if (computationalEdgeUWidthArg != NULL){
+    if (computationalEdgeUWidthArg->dimCount != 1){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- computationalEdgeUWidth array must be of rank 1", rc);
+      return ESMC_NULL_POINTER;
+    }
+    if (computationalEdgeUWidthArg->extent[0] != dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- computationalEdgeUWidth and distgrid mismatch", rc);
+      return ESMC_NULL_POINTER;
+    }
+    memcpy(computationalEdgeUWidth, computationalEdgeUWidthArg->array,
+      dimCount*sizeof(int));
+  }else{
+    // set default
+    for (int i=0; i<dimCount; i++)
+      computationalEdgeUWidth[i] = 0;
+  }
   // deal with computational widths
   int *computationalLBound = new int[dimCount*localDeCount];
   int *computationalUBound = new int[dimCount*localDeCount];
@@ -1001,8 +1105,8 @@ Array *Array::create(
         "- computationalLWidth and distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
-    for (int i=0; i<dimCount; i++){
-      for (int j=0; j<localDeCount; j++)
+    for (int j=0; j<localDeCount; j++)
+      for (int i=0; i<dimCount; i++){
         computationalLBound[j*dimCount+i] = exclusiveLBound[j*dimCount+i]
           - computationalLWidthArg->array[i];
     }
@@ -1022,8 +1126,8 @@ Array *Array::create(
         "- computationalUWidth and distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
-    for (int i=0; i<dimCount; i++){
-      for (int j=0; j<localDeCount; j++)
+    for (int j=0; j<localDeCount; j++)
+      for (int i=0; i<dimCount; i++){
         computationalUBound[j*dimCount+i] = exclusiveUBound[j*dimCount+i]
           + computationalUWidthArg->array[i];
     }
@@ -1032,6 +1136,24 @@ Array *Array::create(
     memcpy(computationalUBound, exclusiveUBound,
       localDeCount*dimCount*sizeof(int));
   }
+  // modify computational bounds on patch edges
+  for (int j=0; j<localDeCount; j++){
+    for (int i=0; i<dimCount; i++){
+      bool onEdgeL = distgrid->isLocalDeOnEdgeL(j, i+1, &localrc);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
+        return ESMC_NULL_POINTER;
+      if (onEdgeL)
+        computationalLBound[j*dimCount+i] -= computationalEdgeLWidth[i];
+      bool onEdgeU = distgrid->isLocalDeOnEdgeU(j, i+1, &localrc);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
+        return ESMC_NULL_POINTER;
+      if (onEdgeU)
+        computationalUBound[j*dimCount+i] += computationalEdgeUWidth[i];
+    }
+  }
+  // clean-up
+  delete [] computationalEdgeLWidth;
+  delete [] computationalEdgeUWidth;
   // deal with total widths
   int *totalLBound = new int[dimCount*localDeCount];
   int *totalUBound = new int[dimCount*localDeCount];
@@ -1283,7 +1405,7 @@ int Array::getLinearIndexExclusive(
 // !ARGUMENTS:
 //
   int localDe,                      // in - local DE
-  int *index,                       // in - DE-local index tupple in exclusive
+  int *index,                       // in - DE-local index tuple in exclusive
                                     //      region basis 0
   int *rc                           // out - return code
   )const{
@@ -1340,7 +1462,7 @@ SeqIndex Array::getSequenceIndexExclusive(
 // !ARGUMENTS:
 //
   int localDe,                      // in - local DE
-  int *index,                       // in - DE-local index tupple in exclusive
+  int *index,                       // in - DE-local index tuple in exclusive
                                     //      region basis 0
   int *rc                           // out - return code
   )const{
@@ -1372,7 +1494,8 @@ SeqIndex Array::getSequenceIndexExclusive(
   }
   // determine the sequentialized index for decomposed dimensions
   int decompSeqIndex;
-  decompSeqIndex = distgrid->getSequenceIndex(localDe, decompIndex, &localrc);  
+  decompSeqIndex = distgrid->getSequenceIndexLocalDe(localDe, decompIndex,
+    &localrc);  
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
     return seqIndex;
   seqIndex.decompSeqIndex = decompSeqIndex;

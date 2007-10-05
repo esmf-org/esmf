@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.66 2007/10/02 23:38:39 theurich Exp $
+// $Id: ESMC_Array_F.C,v 1.67 2007/10/05 21:58:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -47,7 +47,10 @@ extern "C" {
         
   void FTN(c_esmc_arraycreatelocalarray)(ESMCI::Array **ptr, 
     ESMC_LocalArray **larrayList, int *larrayCount, ESMCI::DistGrid **distgrid,
-    ESMCI::InterfaceInt **dimmap, ESMCI::InterfaceInt **computationalLWidthArg,
+    ESMCI::InterfaceInt **dimmap,
+    ESMCI::InterfaceInt **computationalEdgeLWidthArg,
+    ESMCI::InterfaceInt **computationalEdgeUWidthArg,
+    ESMCI::InterfaceInt **computationalLWidthArg,
     ESMCI::InterfaceInt **computationalUWidthArg, 
     ESMCI::InterfaceInt **totalLWidthArg, ESMCI::InterfaceInt **totalUWidthArg,
     ESMC_IndexFlag *indexflag, int *staggerLoc, int *vectorDim, 
@@ -60,6 +63,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     // call into C++
     *ptr = ESMCI::Array::create(larrayList, *larrayCount, *distgrid, *dimmap,
+      *computationalEdgeLWidthArg, *computationalEdgeUWidthArg,
       *computationalLWidthArg, *computationalUWidthArg, *totalLWidthArg,
       *totalUWidthArg, ESMC_NOT_PRESENT_FILTER(indexflag),
       ESMC_NOT_PRESENT_FILTER(staggerLoc), ESMC_NOT_PRESENT_FILTER(vectorDim),
@@ -80,7 +84,10 @@ extern "C" {
   
   void FTN(c_esmc_arraycreateallocate)(ESMCI::Array **ptr, 
     ESMC_ArraySpec *arrayspec, ESMCI::DistGrid **distgrid,
-    ESMCI::InterfaceInt **dimmap, ESMCI::InterfaceInt **computationalLWidthArg,
+    ESMCI::InterfaceInt **dimmap,
+    ESMCI::InterfaceInt **computationalEdgeLWidthArg,
+    ESMCI::InterfaceInt **computationalEdgeUWidthArg,
+    ESMCI::InterfaceInt **computationalLWidthArg,
     ESMCI::InterfaceInt **computationalUWidthArg, 
     ESMCI::InterfaceInt **totalLWidthArg, ESMCI::InterfaceInt **totalUWidthArg,
     ESMC_IndexFlag *indexflag, int *staggerLoc, int *vectorDim, 
@@ -93,6 +100,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     // call into C++
     *ptr = ESMCI::Array::create(arrayspec, *distgrid, *dimmap,
+      *computationalEdgeLWidthArg, *computationalEdgeUWidthArg,
       *computationalLWidthArg, *computationalUWidthArg, *totalLWidthArg,
       *totalUWidthArg, ESMC_NOT_PRESENT_FILTER(indexflag),
       ESMC_NOT_PRESENT_FILTER(staggerLoc), ESMC_NOT_PRESENT_FILTER(vectorDim),

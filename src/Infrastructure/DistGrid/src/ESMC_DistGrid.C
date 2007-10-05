@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.36 2007/09/26 18:46:52 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.37 2007/10/05 21:58:45 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.36 2007/09/26 18:46:52 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistGrid.C,v 1.37 2007/10/05 21:58:45 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1665,6 +1665,164 @@ int DistGrid::validate()const{
 
 //-----------------------------------------------------------------------------
 //
+// is()
+//
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DistGrid::isLocalDeOnEdgeL()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::isLocalDeOnEdgeL
+//
+// !INTERFACE:
+bool DistGrid::isLocalDeOnEdgeL(
+//
+// !RETURN VALUE:
+//    bool, true if local DE is on indicated edge, false otherwise
+//
+// !ARGUMENTS:
+//
+  int localDe,                      // in  - local DE = {0, ..., localDeCount-1}
+  int dim,                          // in  - dim  = {1, ..., dimCount}
+  int *rc                           // out - return code
+  )const{
+//
+// !DESCRIPTION:
+//    Determine if local DE is on lower edge along dimension dim.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  // check input
+  int localDeCount = delayout->getLocalDeCount();
+  if (localDe < 0 || localDe > localDeCount-1){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "- Specified local DE out of bounds", rc);
+    return false;
+  }
+  if (dim < 1 || dim > dimCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "- Specified dim out of bounds", rc);
+    return false;
+  }
+  
+  // determine which patch localDe is located on
+  const int *localDeList = delayout->getLocalDeList();
+  int de = localDeList[localDe];
+  int patch = patchListPDe[de];   // patches are basis 1 !!!!
+  bool onEdge = false;            // assume local De is _not_ on edge
+  if (cellCountPDe[de]){
+    // local De is associated with cells
+    // prepare patch relative index tuple of neighbor index to check
+    int *patchIndexTuple = new int[dimCount];
+    for (int i=0; i<dimCount; i++){
+      if (i==(dim-1))
+        patchIndexTuple[i] = indexListPDimPLocalDe[localDe*dimCount+i][0] - 1;
+      else
+        patchIndexTuple[i] = indexListPDimPLocalDe[localDe*dimCount+i][0];
+    }
+    // get sequence index providing patch relative index tuple
+    int seqindex = getSequenceIndexPatch(patch, patchIndexTuple, &localrc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      return false;
+    delete [] patchIndexTuple;
+    // determine if seqindex indicates edge or not
+    if (seqindex == -1){
+      // invalid seqindex indicates edge was crossed
+      onEdge = true;
+    }
+  }
+    
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return onEdge;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DistGrid::isLocalDeOnEdgeU()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::isLocalDeOnEdgeU
+//
+// !INTERFACE:
+bool DistGrid::isLocalDeOnEdgeU(
+//
+// !RETURN VALUE:
+//    bool, true if local DE is on indicated edge, false otherwise
+//
+// !ARGUMENTS:
+//
+  int localDe,                      // in  - local DE = {0, ..., localDeCount-1}
+  int dim,                          // in  - dim  = {1, ..., dimCount}
+  int *rc                           // out - return code
+  )const{
+//
+// !DESCRIPTION:
+//    Determine if local DE is on upper edge along dimension dim.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  // check input
+  int localDeCount = delayout->getLocalDeCount();
+  if (localDe < 0 || localDe > localDeCount-1){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "- Specified local DE out of bounds", rc);
+    return false;
+  }
+  if (dim < 1 || dim > dimCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "- Specified dim out of bounds", rc);
+    return false;
+  }
+  
+  // determine which patch localDe is located on
+  const int *localDeList = delayout->getLocalDeList();
+  int de = localDeList[localDe];
+  int patch = patchListPDe[de];   // patches are basis 1 !!!!
+  bool onEdge = false;            // assume local De is _not_ on edge
+  if (cellCountPDe[de]){
+    // local De is associated with cells
+    // prepare patch relative index tuple of neighbor index to check
+    int *patchIndexTuple = new int[dimCount];
+    for (int i=0; i<dimCount; i++){
+      int max = indexCountPDimPDe[de*dimCount+i] - 1;
+      if (i==(dim-1))
+        patchIndexTuple[i] = indexListPDimPLocalDe[localDe*dimCount+i][max] + 1;
+      else
+        patchIndexTuple[i] = indexListPDimPLocalDe[localDe*dimCount+i][max];
+    }
+    // get sequence index providing patch relative index tuple
+    int seqindex = getSequenceIndexPatch(patch, patchIndexTuple, &localrc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      return false;
+    delete [] patchIndexTuple;
+    // determine if seqindex indicates edge or not
+    if (seqindex == -1){
+      // invalid seqindex indicates edge was crossed
+      onEdge = true;
+    }
+  }
+    
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return onEdge;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//
 // get() and set()
 //
 //-----------------------------------------------------------------------------
@@ -1760,12 +1918,12 @@ int DistGrid::getCellCountPDe(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid::getSequenceIndex()"
+#define ESMC_METHOD "ESMCI::DistGrid::getSequenceIndexLocalDe()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid::getSequenceIndex
+// !IROUTINE:  ESMCI::DistGrid::getSequenceIndexLocalDe
 //
 // !INTERFACE:
-int DistGrid::getSequenceIndex(
+int DistGrid::getSequenceIndexLocalDe(
 //
 // !RETURN VALUE:
 //    int sequence index
@@ -1773,17 +1931,19 @@ int DistGrid::getSequenceIndex(
 // !ARGUMENTS:
 //
   int localDe,                      // in  - local DE = {0, ..., localDeCount-1}
-  int *index,                       // in  - DE-local index tupple in exclusive
+  int *index,                       // in  - DE-local index tuple in exclusive
                                     //       region basis 0
   int *rc                           // out - return code
   )const{
 //
 // !DESCRIPTION:
-//    Get sequential index
+//    Get sequential index provided the index tuple into the exclusive
+//    region of a local DE.
 //
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   // check input
@@ -1807,21 +1967,85 @@ int DistGrid::getSequenceIndex(
     // determine the sequentialized index by construction of default patch rule
     const int *localDeList = delayout->getLocalDeList();
     int patch = patchListPDe[localDeList[localDe]];  // patches are basis 1 !!!!
-    // add up cells from patch in which DE is located
-    seqindex =
-      indexListPDimPLocalDe[localDe*dimCount+(dimCount-1)][index[dimCount-1]]
-      - minIndexPDimPPatch[(patch-1)*dimCount+(dimCount-1)]; // initialize
-    for (int i=dimCount-2; i>=0; i--){
-      seqindex *= maxIndexPDimPPatch[(patch-1)*dimCount+i] 
-        - minIndexPDimPPatch[(patch-1)*dimCount+i] + 1;
-      seqindex += indexListPDimPLocalDe[localDe*dimCount+i][index[i]] 
-        - minIndexPDimPPatch[(patch-1)*dimCount+i];
+    // prepare patch relative index tuple
+    int *patchIndexTuple = new int[dimCount];
+    for (int i=0; i<dimCount; i++)
+      patchIndexTuple[i] = indexListPDimPLocalDe[localDe*dimCount+i][index[i]];
+    // get sequence index providing patch relative index tuple
+    seqindex = getSequenceIndexPatch(patch, patchIndexTuple, &localrc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      return -1;  //  bail out with invalid seqindex
+    delete [] patchIndexTuple;
+  }
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return seqindex;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DistGrid::getSequenceIndexPatch()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::getSequenceIndexPatch
+//
+// !INTERFACE:
+int DistGrid::getSequenceIndexPatch(
+//
+// !RETURN VALUE:
+//    int sequence index
+//
+// !ARGUMENTS:
+//
+  int patch,                        // in  - patch = {1, ..., patchCount}
+  int *index,                       // in  - patch relative index tuple
+  int *rc                           // out - return code
+  )const{
+//
+// !DESCRIPTION:
+//    Get sequential index provided the patch relative index tuple.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  // check input
+  if (patch < 1 || patch > patchCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "- Specified patch out of bounds", rc);
+    return -1;
+  }
+  
+  bool onPatch = true;  // start assuming that index tuple can be found on patch
+  // add up cells from patch
+  int seqindex = 0; // initialize
+  for (int i=dimCount-1; i>=0; i--){
+    // first time multiply with zero intentionally:
+    seqindex *= maxIndexPDimPPatch[(patch-1)*dimCount+i] 
+      - minIndexPDimPPatch[(patch-1)*dimCount+i] + 1;
+    if ((index[i] < minIndexPDimPPatch[(patch-1)*dimCount+i])
+      || (index[i] > maxIndexPDimPPatch[(patch-1)*dimCount+i])){
+      // index is outside of patch bounds -> break out of onPatch code
+      onPatch = false;
+      seqindex = -1;  // indicate not valid sequence index
+      break;
     }
+    seqindex += index[i]
+      - minIndexPDimPPatch[(patch-1)*dimCount+i];
+  }
+  if (onPatch){
     // add all the cells of previous patches
-    for (int i=0; i<patchListPDe[localDeList[localDe]]-2; i++)
+    for (int i=0; i<patch-2; i++)
       seqindex += cellCountPPatch[i];
     ++seqindex;  // shift sequentialized index to basis 1 !!!!
+  }else{
+    //TODO: more involved and expensive lookup using patch connections to find
+    // if there is a patch connected at the patch relative index[] location and
+    // if so find the sequence index.
   }
+    
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return seqindex;

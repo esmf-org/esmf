@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid_F.C,v 1.25 2007/08/03 21:31:16 theurich Exp $
+// $Id: ESMC_DistGrid_F.C,v 1.26 2007/10/05 21:58:44 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -405,7 +405,8 @@ extern "C" {
 //          for (jjj=0; jjj<dimCount-1; jjj++)
 //            printf("%d, ", ii[jjj]);
 //          printf("%d)\n", ii[jjj]);
-          (*seqIndexList)->array[index] = (*ptr)->getSequenceIndex(localDe, ii);
+          (*seqIndexList)->array[index] =
+            (*ptr)->getSequenceIndexLocalDe(localDe, ii);
           ++index;
           // multi-dim index increment
           ++ii[0];
