@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.46 2007/09/27 16:43:05 oehmke Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.47 2007/10/05 20:36:14 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
     program ESMF_FieldCreateEx
 
 !------------------------------------------------------------------------------
-!EXremoveAMPLE        String used by test script to count examples.
+!EXAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
 ! !PROGRAM: ESMF_FieldCreateEx - Field creation
@@ -31,8 +31,8 @@
     integer :: rc
     integer :: mycell
     integer :: igridCount(2)
+    integer :: lbound_(0:1), ubound_(0:1)
     type(ESMF_Grid) :: grid
-    type(ESMF_IGrid) :: igrid
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_InternArray) :: iarray1, iarray2
     type(ESMF_DELayout) :: layout
@@ -57,16 +57,16 @@
 !   !  10x20 DEs.  This version of create simply
 !   !  associates the data with the Grid.  The data is referenced
 !   !  by default.  The DataMap is created with defaults.
-    grid = ESMF_GridCreateShapeTile(name="atmgrid", maxIndex=(/10,20/)) 
+    grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+                                  regDecomp=(/2,2/), name="atmgrid", rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    igrid = ESMF_IGridCreateHorzXYUni((/ 10, 20 /), origin, &
-                                    deltaPerDim=(/ 1.0d0, 1.0d0 /), &
-                                    name="atmigrid", rc=rc)
-    call ESMF_IGridDistribute(igrid, delayout=layout, rc=rc)
-    ! InternArray size has to match the IGrid (plus any halo width), so query igrid for
-    ! local cell counts to determine allocation
-    call ESMF_IGridGetDELocalInfo(igrid, horzrelloc=ESMF_CELL_CENTER, &
-                                 localCellCountPerDim=igridCount, rc=rc)
+    call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER, staggerLBound=lbound_, &
+        staggerUBound=ubound_, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    igridCount(1) = ubound_(0)-lbound_(0)+1
+    igridCount(2) = ubound_(1)-lbound_(1)+1
 
     allocate(f90ptr1(igridCount(1),igridCount(2)))
 
@@ -77,7 +77,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!\subsubsection{Field Create with IGrid and InternArray}
+!\subsubsection{Field Create with Grid and InternArray}
       
 !  The user has already created an {\tt ESMF\_IGrid} and an
 !  {\tt ESMF\_InternArray} with data.  This create associates the
@@ -85,8 +85,8 @@
 !EOE
       
 !BOC
-    field1 = ESMF_FieldCreate(igrid, iarray1, &
-                         horzRelloc=ESMF_CELL_CENTER, name="pressure", rc=rc)
+    field1 = ESMF_FieldCreate(grid, iarray1, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="pressure", rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -96,11 +96,11 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!\subsubsection{Field Create with IGrid and ArraySpec}
+!\subsubsection{Field Create with Grid and ArraySpec}
       
 !  The user has already created an {\tt ESMF\_IGrid} and an
 !  {\tt ESMF\_ArraySpec} which describes the data.  This version of 
-!  create will create an {\tt ESMF\_Array} based on the igrid size
+!  create will create an {\tt ESMF\_Array} based on the grid size
 !  and the {\tt ESMF\_ArraySpec}. 
 !  An {\tt ESMF\_FieldDataMap} is created with all defaults.
 !EOE
@@ -117,7 +117,7 @@
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-    field2 = ESMF_FieldCreate(igrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+    field2 = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, &
                               name="rh", rc=rc)
 !EOC
     print *, "Field example 2 returned"
@@ -135,7 +135,7 @@
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    ! the size of the data in the array still has to line up with the IGrid
+    ! the size of the data in the array still has to line up with the Grid
     ! and its decomposition
     allocate(f90ptr2(igridCount(1),igridCount(2)))
     iarray2 = ESMF_InternArrayCreate(f90ptr2, ESMF_DATA_REF, rc=rc)  
@@ -159,7 +159,7 @@
 !-------------------------------------------------------------------------
 !   ! Example 4:
 !   !
-!   !  The user creates an empty Field, and adds the IGrid and 
+!   !  The user creates an empty Field, and adds the Grid and 
 !   !  data in later calls.
 
 !BOC
@@ -167,8 +167,8 @@
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !
-!    ! At some later time, associate a IGrid with this Field
-     call ESMF_FieldSetIGrid(field3, igrid, rc)
+!    ! At some later time, associate a Grid with this Field
+     call ESMF_FieldSetGrid(field3, grid, rc)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -181,7 +181,7 @@
 !-------------------------------------------------------------------------
 !   ! Example 5:
 !   !
-!   ! Query a Field for number of local igrid cells.
+!   ! Query a Field for number of local grid cells.
 !   COMMENT THIS TEST OUT FOR NOW BECAUSE THE SUBROUTINE
 !   IS UNIMPLEMENTED CAN TURN BACK ON WHEN INITMACROS ARE ON
 !     call ESMF_FieldGetLocalIGridInfo(field3, ncell=mycell, rc=rc)
