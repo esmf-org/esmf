@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.26 2007/09/26 22:51:20 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.27 2007/10/05 21:57:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.26 2007/09/26 22:51:20 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.27 2007/10/05 21:57:11 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -364,7 +364,10 @@ int Grid::allocCoordArray(
     if (coordUndistRank) { 
       // Pass in lbounds, ubounds if there are undistributed dims...
       array=Array::create(arrayspec, distgrid,
-                          dimmapIntInt, compLWidthIntInt, compUWidthIntInt, 
+                          dimmapIntInt,
+                          (InterfaceInt *)ESMC_NULL_POINTER,
+                          (InterfaceInt *)ESMC_NULL_POINTER,
+                          compLWidthIntInt, compUWidthIntInt, 
                           (InterfaceInt *)ESMC_NULL_POINTER,
                           (InterfaceInt *)ESMC_NULL_POINTER,
                           &indexflag, &staggerloc, ESMC_NULL_POINTER, 
@@ -372,7 +375,10 @@ int Grid::allocCoordArray(
     } else {
       // ...otherwise pass in NUll
       array=Array::create(arrayspec, distgrid,
-                          dimmapIntInt, compLWidthIntInt, compUWidthIntInt, 
+                          dimmapIntInt,
+                          (InterfaceInt *)ESMC_NULL_POINTER,
+                          (InterfaceInt *)ESMC_NULL_POINTER,
+                          compLWidthIntInt, compUWidthIntInt, 
                           (InterfaceInt *)ESMC_NULL_POINTER,
                           (InterfaceInt *)ESMC_NULL_POINTER,
                           &indexflag, &staggerloc, ESMC_NULL_POINTER,
