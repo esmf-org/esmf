@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.82 2007/06/20 01:29:19 theurich Exp $
+// $Id: ESMC_Base.C,v 1.83 2007/10/05 00:42:00 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.82 2007/06/20 01:29:19 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.83 2007/10/05 00:42:00 peggyli Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -655,14 +655,18 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     // Initialize local return code; assume routine not implemented
     localrc = ESMC_RC_NOT_IMPL;
 
-  sprintf(msgbuf,
-       "Base object ID: %d, Ref count: %d, Status=%s, Name=%s, Class=%s\n", 
-           ID, refCount, ESMC_StatusString(baseStatus), baseName, className);
-  printf(msgbuf);
+    // PLI -- 10/4/2007 -- use this function to print attribute lists in various ESMF classes
+    // No need to print the base object ID, Name or Class because these information will be
+    // printed at the derived class
+ 
+    //  sprintf(msgbuf,
+    //   "Base object ID: %d, Ref count: %d, Status=%s, Name=%s, Class=%s\n", 
+    //       ID, refCount, ESMC_StatusString(baseStatus), baseName, className);
+    // printf(msgbuf);
     // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   
 
-  sprintf(msgbuf, "  %d Attributes:\n", attrCount);
+  sprintf(msgbuf, "   Number of Attributes: %d\n", attrCount);
   printf(msgbuf);
     // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   for (i=0; i<attrCount; i++) {
@@ -2650,23 +2654,23 @@ if (count) {
       //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
       for (int i=0; i<items; i++) {
                 if (tk == ESMC_TYPEKIND_I4) {
-                    sprintf(msgbuf, " item %d: %d\n", i, vip[i]); 
+                    sprintf(msgbuf, "\t item %d: %d\n", i, vip[i]); 
                 } else if (tk == ESMC_TYPEKIND_I8) {
-                    sprintf(msgbuf, " item %d: %ld\n", i, vlp[i]); 
+                    sprintf(msgbuf, "\t item %d: %ld\n", i, vlp[i]); 
                 } else if (tk == ESMC_TYPEKIND_R4) {
-                    sprintf(msgbuf, " item %d: %f\n", i, vfp[i]); 
+                    sprintf(msgbuf, "\t item %d: %f\n", i, vfp[i]); 
                 } else if (tk == ESMC_TYPEKIND_R8) {
-                    sprintf(msgbuf, " item %d: %g\n", i, vdp[i]); 
+                    sprintf(msgbuf, "\t item %d: %g\n", i, vdp[i]); 
                 } else if (tk == ESMC_TYPEKIND_LOGICAL) {
-                    sprintf(msgbuf, " item %d: %s\n", i,
+                    sprintf(msgbuf, "\t item %d: %s\n", i,
                       ESMC_LogicalString(vbp[i]));
                 } else{
                     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
-                             "unknown value", &rc);
+                             "\t unknown value", &rc);
                     return rc;
                 }
+		printf(msgbuf);
       }
-      printf(msgbuf);
       //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   }
 
