@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.22 2007/09/26 22:51:20 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.23 2007/10/06 02:57:30 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,12 +34,12 @@ program ESMF_GridCreateEx
       type(ESMF_VM):: vm
       type(ESMF_ArraySpec) ::  arrayspec2D
 
-      real(ESMF_KIND_R8), pointer :: centerX(:,:,:), centerY(:,:,:), centerZ(:,:,:)
-      real(ESMF_KIND_R8), pointer :: cornerX(:,:,:), cornerY(:,:,:)
-      real(ESMF_KIND_R8), pointer :: coordX(:,:), coordY(:,:)
+      real(ESMF_KIND_R8), pointer :: centerX(:), centerY(:), centerZ(:)
+      real(ESMF_KIND_R8), pointer :: cornerX(:), cornerY(:)
+      real(ESMF_KIND_R8), pointer :: coordX2D(:,:), coordY2D(:,:)
+      real(ESMF_KIND_R8), pointer :: coordX(:), coordY(:)
 
       integer :: elbnd(3),eubnd(3)
-      integer :: slbnd(3),subnd(3)
       integer :: clbnd(3),cubnd(3)
       integer :: tlbnd(3),tubnd(3)
       integer :: i,j,k
@@ -105,13 +105,15 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC
-!  grid3D=ESMF_GridCreateShapeTile(maxIndex=(/10,20,30/), &
-!         regDecomp=(/2,4,1/), rc=rc)   
+  grid3D=ESMF_GridCreateShapeTile(maxIndex=(/10,20,30/), &
+         regDecomp=(/2,4,1/), rc=rc)   
 !EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    !-------------------------------------------------------------------
    ! Clean up to prepare for the next example.
    !-------------------------------------------------------------------
-!  call ESMF_GridDestroy(grid3D, rc=rc)
+  call ESMF_GridDestroy(grid3D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOE
 ! Irregular distribution requires the user to specify the
@@ -346,7 +348,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
 
 !BOE
-!\subsubsection{Creating a 2D Irregularly Distributed Grid
+!\subsubsection{Creating a 2D Irregularly Distributed Rectilinear Grid
 !                  With Uniformly Spaced Coordinates}
 ! \label{example:2DIrregUniGrid}
 !
@@ -378,6 +380,9 @@ call ESMF_GridDestroy(grid2D,rc=rc)
             ! Define an irregular distribution
             countsPerDEDim1=(/3,7/),     &
             countsPerDEDim2=(/11,2,7/),   &
+            ! Specify mapping of coords dim to Grid dim
+            coordDep1=(/1/), &
+            coordDep2=(/2/), &
             indexflag=ESMF_INDEX_GLOBAL, & ! Use global indices
             rc=rc)
 
@@ -395,16 +400,13 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    !-------------------------------------------------------------------
    call ESMF_GridGetCoord(grid2D, coordDim=1, &
           staggerloc=ESMF_STAGGERLOC_CENTER, &
-          staggerLBound=lbnd, staggerUBound=ubnd, fptr=coordX, rc=rc)
+          computationalLBound=lbnd, computationalUBound=ubnd, fptr=coordX, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension [10-100].
-   ! Note that the coordX array needs to be 2D because currently
-   ! all coordinate arrays must each have the same rank as the grid, but 
-   ! because the coordinate is rectilinear we only need to store a 1D array.
    !-------------------------------------------------------------------
    do i=lbnd(1),ubnd(1)
-        coordX(i,lbnd(2)) = i*10.0
+        coordX(i) = i*10.0
    enddo
 
    !-------------------------------------------------------------------
@@ -413,16 +415,13 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    !-------------------------------------------------------------------
    call ESMF_GridGetCoord(grid2D, coordDim=2, &
           staggerloc=ESMF_STAGGERLOC_CENTER, &
-          staggerLBound=lbnd, staggerUBound=ubnd, fptr=coordY, rc=rc)
+          computationalLBound=lbnd, computationalUBound=ubnd, fptr=coordY, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the second dimension [10-200]
-   ! Note that the coordY array needs to be 2D because currently
-   ! all coordinate arrays must each have the same rank as the grid, but 
-   ! because the coordinate is rectilinear we only need to store a 1D array.
    !-------------------------------------------------------------------
-   do j=lbnd(2),ubnd(2)
-        coordY(lbnd(1),j) = j*10.0
+   do j=lbnd(1),ubnd(1)
+        coordY(j) = j*10.0
    enddo
 !EOC
    !-------------------------------------------------------------------
@@ -480,14 +479,14 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    !-------------------------------------------------------------------
    call ESMF_GridGetCoord(grid2D, coordDim=1, &
           staggerloc=ESMF_STAGGERLOC_CENTER, &
-          staggerLBound=lbnd, staggerUBound=ubnd, fptr=coordX, rc=rc)
+          computationalLBound=lbnd, computationalUBound=ubnd, fptr=coordX2D, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension [10-100].
    !-------------------------------------------------------------------
    do j=lbnd(2),ubnd(2)
    do i=lbnd(1),ubnd(1)
-        coordX(i,j) = i+j
+        coordX2D(i,j) = i+j
    enddo
    enddo
 
@@ -497,14 +496,14 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    !-------------------------------------------------------------------
    call ESMF_GridGetCoord(grid2D, coordDim=2, &
           staggerloc=ESMF_STAGGERLOC_CENTER, &
-          staggerLBound=lbnd, staggerUBound=ubnd, fptr=coordY, rc=rc)
+          computationalLBound=lbnd, computationalUBound=ubnd, fptr=coordY2D, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the second dimension [10-200]
    !-------------------------------------------------------------------
    do j=lbnd(2),ubnd(2)
    do i=lbnd(1),ubnd(1)
-        coordY(i,j) = j-i/100.0
+        coordY2D(i,j) = j-i/100.0
    enddo
    enddo
 !EOC
@@ -543,6 +542,9 @@ call ESMF_GridDestroy(grid2D,rc=rc)
               countsPerDEDim1=(/45,45,45,45/), &
               countsPerDEDim2=(/30,30,30/),    &
               countsPerDEDim3=(/40/),          &
+              coordDep1=(/1/),                 &
+              coordDep2=(/2/),                 &
+              coordDep3=(/3/),                 &
               indexflag=ESMF_INDEX_GLOBAL,     & ! Use global indices
               rc=rc)
 
@@ -568,18 +570,15 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    !-------------------------------------------------------------------
    call ESMF_GridGetCoord(grid3D, coordDim=1,   &
           staggerLoc=ESMF_STAGGERLOC_CORNER_VCENTER, &
-          staggerLBound=lbnd_corner,                 &
-          staggerUBound=ubnd_corner,                 &
+          computationalLBound=lbnd_corner,                 &
+          computationalUBound=ubnd_corner,                 &
           fptr=cornerX, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension.
-   ! Note that the cornerX array needs to be 3D because currently
-   ! all coordinate arrays must each have the same rank as the grid, but 
-   ! because the coordinate is rectilinear we only need to store a 1D array.
    !-------------------------------------------------------------------
    do i=lbnd_corner(1),ubnd_corner(1)
-        cornerX(i,lbnd_corner(2),lbnd_corner(3)) = (i-1)*(360.0/180.0)
+        cornerX(i) = (i-1)*(360.0/180.0)
    enddo
 
 
@@ -590,18 +589,15 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    !-------------------------------------------------------------------
    call ESMF_GridGetCoord(grid3D, coordDim=2,     &
           staggerLoc=ESMF_STAGGERLOC_CORNER_VCENTER,   &
-          staggerLBound=lbnd_corner,                   &
-          staggerUBound=ubnd_corner,                   &
+          computationalLBound=lbnd_corner,                   &
+          computationalUBound=ubnd_corner,                   &
           fptr=cornerY, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the second dimension.
-   ! Note that the cornerY array needs to be 3D because currently
-   ! all coordinate arrays must each have the same rank as the grid, but 
-   ! because the coordinate is rectilinear we only need to store a 1D array.
    !-------------------------------------------------------------------
-   do j=lbnd_corner(2),ubnd_corner(2)
-        cornerY(lbnd_corner(1),j,lbnd_corner(3)) = (j-1)*(180.0/90.0)
+   do j=lbnd_corner(1),ubnd_corner(1)
+        cornerY(j) = (j-1)*(180.0/90.0)
    enddo
 
 
@@ -615,17 +611,13 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    !-------------------------------------------------------------------
    call ESMF_GridGetCoord(grid3D, coordDim=1,   &
           staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
-          staggerLBound=lbnd, staggerUBound=ubnd, fptr=centerX, rc=rc)
+          computationalLBound=lbnd, computationalUBound=ubnd, fptr=centerX, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension.
-   ! Note that the centerX array needs to be 3D because currently
-   ! all coordinate arrays must each have the same rank as the grid, but 
-   ! because the coordinate is rectilinear we only need to store a 1D array.
    !-------------------------------------------------------------------
    do i=lbnd(1),ubnd(1)
-        centerX(i,lbnd(2),lbnd(3)) = 0.5*(cornerX(i,lbnd(2),lbnd(3)) + &
-                                          cornerX(i+1,lbnd(2),lbnd(3))) 
+        centerX(i) = 0.5*(cornerX(i) + cornerX(i+1)) 
    enddo
 
    !-------------------------------------------------------------------
@@ -634,17 +626,13 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    !-------------------------------------------------------------------
    call ESMF_GridGetCoord(grid3D, coordDim=2,   &
           staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
-          staggerLBound=lbnd, staggerUBound=ubnd, fptr=centerY, rc=rc)
+          computationalLBound=lbnd, computationalUBound=ubnd, fptr=centerY, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the second dimension.
-   ! Note that the centerY array needs to be 3D because currently
-   ! all coordinate arrays must each have the same rank as the grid, but 
-   ! because the coordinate is rectilinear we only need to store a 1D array.
    !-------------------------------------------------------------------
-   do j=lbnd(2),ubnd(2)
-        centerY(lbnd(1),j,lbnd(3)) = 0.5*(cornerY(lbnd(1),j,lbnd(3)) + &
-                                          cornerY(lbnd(1),j+1,lbnd(3))) 
+   do j=lbnd(1),ubnd(1)
+        centerY(j) = 0.5*(cornerY(j) + cornerY(j+1)) 
    enddo
 
 
@@ -654,7 +642,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    !-------------------------------------------------------------------
    call ESMF_GridGetCoord(grid3D, coordDim=3,   &
           staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
-          staggerLBound=lbnd, staggerUBound=ubnd, fptr=centerZ, rc=rc)
+          computationalLBound=lbnd, computationalUBound=ubnd, fptr=centerZ, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set the vertical coordinates
@@ -662,8 +650,8 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    ! all coordinate arrays must each have the same rank as the grid, but 
    ! because the coordinate is rectilinear we only need to store a 1D array.
    !-------------------------------------------------------------------
-   do k=lbnd(3),ubnd(3)
-        centerZ(lbnd(1),lbnd(2),k) = 4000.0*( (1./39.)*(k-1)  )**2
+   do k=lbnd(1),ubnd(1)
+        centerZ(k) = 4000.0*( (1./39.)*(k-1)  )**2
    enddo
 
 !EOC
@@ -671,8 +659,6 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    ! Clean up to prepare for the next example.
    !-------------------------------------------------------------------
    call ESMF_GridDestroy(grid3D, rc=rc)
-
-
 
 !BOE
 !\subsubsection{Creating an Empty Grid in a Parent Component 
@@ -864,60 +850,29 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! then {\tt coordDep1} defaults to {/1,2..,gridrank/}.  This default
 ! thus specifies a curvilinear grid.  
 !
-! Currently in ESMF every coordinate array must have
-! the same rank as the Grid itself. 
-! For example, with a 3D grid you can't have a 2D X and Y coordinate array
-! and a 1D Z coordinate array. However, this limitation
-! is only in the dimension of the coordinate storage provided
-! by the Grid. The user is free to use whatever portion
-! of the storage they chose. Because of this temporary limitation,
-! the {\tt coordDep} argument must have the same number of 
-! elements as the rank of the Grid it is being used to create.
-! In the future the size of the {\tt coordDep} array will
-! determine the rank of the associated coordinate array.  
-!EOE
-
-#ifdef LOCAL_NOT_IMPL
-!BOEI
+!
 ! The following call demonstrates the creation of a
 ! 10x20 2D rectilinear grid where the first coordinate
 ! component is mapped to the second index dimension
 ! (i.e. is of size 20) and the second coordinate component
 ! is mapped to the first index dimension (i.e. is of size
 ! 10).
-!EOEI
-
-!BOCI
-   grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/5,5/), &
-          countsPerDEDim2=(/7,7,6/),                    &
-          coordDep1=(/2/),                              &
-          coordDep2=(/1/), rc=rc)   
-!EOCI
-#endif
-
-!BOE
-! The following call demonstrates the creation of a
-! 10x20 2D curvilinear grid where where both
-! coordinate component arrays are 10x20 also, but
-! the order of their dependency on the Grid dimensions
-! is reversed. 
 !EOE
 
 !BOC
    grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/5,5/), &
-          countsPerDEDim2=(/7,7,6/), coordDep1=(/2,1/), &
-          coordDep2=(/1,2/), rc=rc)   
-!EOC 
+          countsPerDEDim2=(/7,7,6/),                    &
+          coordDep1=(/2/),                              &
+          coordDep2=(/1/), rc=rc)   
+!EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
 
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Cleanup after Example
 !!!!!!!!!!!!!!!!!!!!!!
 call ESMF_GridDestroy(grid2D,rc=rc)
 
-#ifdef LOCAL_NOT_IMPL
-!BOEI
+!BOE
 ! The following call demonstrates the creation of a
 ! 10x20x30 2D plus 1 curvilinear grid where 
 ! coordinate component 1 and 2 are still 10x20, but
@@ -925,22 +880,19 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! undistributed third index dimension.
 !EOE
 
-!BOCI
+!BOC
    grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/5,5/), &
           countsPerDEDim2=(/7,7,6/), countsPerDEDim3=(/30/), &
           coordDep1=(/1,2/), coordDep2=(/1,2/), &
           coordDep3=(/3/), rc=rc)   
-!EOCI 
+!EOC 
 
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Cleanup after Example
 !!!!!!!!!!!!!!!!!!!!!!
 call ESMF_GridDestroy(grid2D,rc=rc)
-#endif
-
 
 !BOE
-!
 ! By default the local piece of the array on each processor starts at 
 ! (1,1,..), however, the indexing for each grid coordinate array  
 ! on each DE may be shifted to the global indices by using the {\tt indexflag}.
@@ -1067,7 +1019,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
 !BOC
    call ESMF_GridGetCoord(grid2D, coordDim=2, &
-          staggerloc=ESMF_STAGGERLOC_CORNER, fptr=coordY, rc=rc)
+          staggerloc=ESMF_STAGGERLOC_CORNER, fptr=coordY2D, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -1139,8 +1091,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    call ESMF_GridGetCoord(grid2D, coordDim=1,                   &
           staggerLoc=ESMF_STAGGERLOC_CORNER,                    &
           exclusiveLBound=elbnd, exclusiveUBound=eubnd,         &
-          staggerLBound=slbnd, staggerUBound=subnd,             &
-          computationalLBound=clbnd, computationalUBound=cubnd, &
+          computationalLBound=clbnd, computationalUBound=cubnd,             &
           totalLBound=tlbnd, totalUBound=tubnd, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)

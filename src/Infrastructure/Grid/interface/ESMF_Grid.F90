@@ -137,7 +137,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.31 2007/09/27 17:18:25 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.32 2007/10/06 02:57:31 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -2489,8 +2489,8 @@ end subroutine ESMF_GridGet
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGet()
       subroutine ESMF_GridGetPLocalDePSloc(grid, localDe, staggerloc, &
-          exclusiveLBound, exclusiveUBound, &
-          staggerLBound, staggerUBound, rc)
+          exclusiveLBound, exclusiveUBound, exclusiveCount,  &
+          computationalLBound, computationalUBound, computationalCount, rc)
 
 !
 ! !ARGUMENTS:
@@ -2499,8 +2499,10 @@ end subroutine ESMF_GridGet
       type (ESMF_StaggerLoc), intent(in)            :: staggerloc
       integer,                intent(out), optional :: exclusiveLBound(:)
       integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: staggerLBound(:)
-      integer,                intent(out), optional :: staggerUBound(:)
+      integer,                intent(out), optional :: exclusiveCount(:)
+      integer,                intent(out), optional :: computationalLBound(:)
+      integer,                intent(out), optional :: computationalUBound(:)
+      integer,                intent(out), optional :: computationalCount(:)
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2537,12 +2539,16 @@ end subroutine ESMF_GridGet
 !\item[{[exclusiveUBound]}]
 !     Upon return this holds the upper bounds of the exclusive region.
 !     {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
-!\item[{[staggerLBound]}]
+!\item[{[exclusiveCount]}]
+!     Upon return this holds the number of items in the exclusive region per dimension.
+!\item[{[computationalLBound]}]
 !     Upon return this holds the lower bounds of the stagger region.
-!     {\tt staggerLBound} must be allocated to be of size equal to the coord rank.
-!\item[{[staggerUBound]}]
+!     {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
+!\item[{[computationalUBound]}]
 !     Upon return this holds the upper bounds of the stagger region.
-!     {\tt staggerUBound} must be allocated to be of size equal to the coord rank.
+!     {\tt computationalUBound} must be allocated to be of size equal to the coord rank.
+!\item[{[computationalCount]}]
+!     Upon return this holds the number of items in the stagger region per dimension.
 !\item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -2552,8 +2558,10 @@ end subroutine ESMF_GridGet
     integer :: localrc ! local error status
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: staggerLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: staggerUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code
@@ -2571,17 +2579,24 @@ end subroutine ESMF_GridGet
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    staggerLBoundArg=ESMF_InterfaceIntCreate(staggerLBound, rc=localrc)
+    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    staggerUBoundArg=ESMF_InterfaceIntCreate(staggerUBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
 
     call c_ESMC_GridGetPLocalDePSloc(grid, localDE, tmp_staggerLoc, &
-      exclusiveLBoundArg, exclusiveUBoundArg, staggerLBoundArg, staggerUBoundArg,&
+      exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
+      computationalLBoundArg, computationalUBoundArg, computationalCountArg, &
       localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2593,10 +2608,16 @@ end subroutine ESMF_GridGet
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(staggerLBoundArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(staggerUBoundArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2612,10 +2633,11 @@ end subroutine ESMF_GridGet
 
 ! !INTERFACE:
 !      subroutine ESMF_GridGetCoord(grid, localDE, coordDim, staggerloc, &
-!         exclusiveLBound, exclusiveUBound, staggerLBound, staggerUBound, &
-!         computationalLBound, computationalUBound, totalLBound, totalUBound, &
+!         exclusiveLBound, exclusiveUBound, exclusiveCount,              &
+!         computationalLBound, computationalUBound, computationalCount,  &
+!         totalLBound, totalUBound, totalCount,                          &
 !         <pointer argument>, doCopy, rc)
-!
+! 
 ! !ARGUMENTS:
 !     type(ESMF_Grid),        intent(in) :: grid
 !     integer,                intent(in), optional :: localDE
@@ -2623,12 +2645,13 @@ end subroutine ESMF_GridGet
 !     type (ESMF_StaggerLoc), intent(in), optional :: staggerloc
 !     integer,                intent(out), optional :: exclusiveLBound(:)
 !     integer,                intent(out), optional :: exclusiveUBound(:)
-!     integer,                intent(out), optional :: staggerLBound(:)
-!     integer,                intent(out), optional :: staggerUBound(:)
+!     integer,                intent(out), optional :: exclusiveCount(:)
 !     integer,                intent(out), optional :: computationalLBound(:)
 !     integer,                intent(out), optional :: computationalUBound(:)
+!     integer,                intent(out), optional :: computationalCount(:)
 !     integer,                intent(out), optional :: totalLBound(:)
 !     integer,                intent(out), optional :: totalUBound(:)
+!     integer,                intent(out), optional :: totalCount(:)
 !     <pointer argument>, see below for supported values
 !     type(ESMF_CopyFlag),    intent(in), optional :: docopy
 !     integer,                intent(out), optional :: rc
@@ -2674,18 +2697,12 @@ end subroutine ESMF_GridGet
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
 !          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
-!     \item[{[staggerLBound]}]
-!          Upon return this holds the lower bounds of the stagger region.
-!          {\tt staggerLBound} must be allocated to be of size equal to the coord rank.
-!     \item[{[staggerUBound]}]
-!          Upon return this holds the upper bounds of the stagger region.
-!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
 !     \item[{[computationalLBound]}]
-!          Upon return this holds the lower bounds of the computational region. 
+!          Upon return this holds the lower bounds of the stagger region.
 !          {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
 !     \item[{[computationalUBound]}]
-!          Upon return this holds the upper bounds of the computational region.
-!          {\tt computationalUBound} must be allocated to be of size equal to the coord rank.
+!          Upon return this holds the upper bounds of the stagger region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
 !     \item[{[totalLBound]}]
 !          Upon return this holds the lower bounds of the total region.
 !          {\tt totalLBound} must be allocated to be of size equal to the coord rank.
@@ -2713,8 +2730,9 @@ end subroutine ESMF_GridGet
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
       subroutine ESMF_GridGetCoord1DR4(grid, localDE, coordDim, staggerloc, & 
-          exclusiveLBound, exclusiveUBound, staggerLBound, staggerUBound, &
-          computationalLBound, computationalUBound, totalLBound, totalUBound, &
+          exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
+          computationalLBound, computationalUBound, computationalCount,     &
+          totalLBound, totalUBound, totalCount,                             &
           fptr, doCopy, rc)
 !
 ! !ARGUMENTS:
@@ -2724,12 +2742,13 @@ end subroutine ESMF_GridGet
       type (ESMF_StaggerLoc), intent(in), optional :: staggerloc
       integer,                intent(out), optional :: exclusiveLBound(:)
       integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: staggerLBound(:)
-      integer,                intent(out), optional :: staggerUBound(:)
+      integer,                intent(out), optional :: exclusiveCount(:)
       integer,                intent(out), optional :: computationalLBound(:)
       integer,                intent(out), optional :: computationalUBound(:)
+      integer,                intent(out), optional :: computationalCount(:)
       integer,                intent(out), optional :: totalLBound(:)
       integer,                intent(out), optional :: totalUBound(:)
+      integer,                intent(out), optional :: totalCount(:)
       real(ESMF_KIND_R4), pointer                   :: fptr(:)
       type(ESMF_CopyFlag),    intent(in), optional :: docopy
       integer,                intent(out), optional :: rc
@@ -2760,18 +2779,12 @@ end subroutine ESMF_GridGet
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
 !          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
-!     \item[{[staggerLBound]}]
-!          Upon return this holds the lower bounds of the stagger region.
-!          {\tt staggerLBound} must be allocated to be of size equal to the coord rank.
-!     \item[{[staggerUBound]}]
-!          Upon return this holds the upper bounds of the stagger region.
-!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
 !     \item[{[computationalLBound]}]
-!          Upon return this holds the lower bounds of the computational region. 
+!          Upon return this holds the lower bounds of the stagger region.
 !          {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
 !     \item[{[computationalUBound]}]
-!          Upon return this holds the upper bounds of the computational region.
-!          {\tt computationalUBound} must be allocated to be of size equal to the coord rank.
+!          Upon return this holds the upper bounds of the stagger region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
 !     \item[{[totalLBound]}]
 !          Upon return this holds the lower bounds of the total region.
 !          {\tt totalLBound} must be allocated to be of size equal to the coord rank.
@@ -2802,12 +2815,13 @@ end subroutine ESMF_GridGet
     integer :: coordRank(ESMF_MAXDIM)
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: staggerLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: staggerUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
     type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
     type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code 
@@ -2920,10 +2934,7 @@ end subroutine ESMF_GridGet
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    staggerLBoundArg=ESMF_InterfaceIntCreate(staggerLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    staggerUBoundArg=ESMF_InterfaceIntCreate(staggerUBound, rc=localrc)
+    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
@@ -2932,18 +2943,24 @@ end subroutine ESMF_GridGet
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_GridGetCoordBounds(grid, localDE, coordDim, tmp_staggerloc, &
-      exclusiveLBoundArg, exclusiveUBoundArg, staggerLBoundArg, staggerUBoundArg,&
-      computationalLBoundArg, computationalUBoundArg, &
-      totalLBoundArg, totalUBoundArg, localrc)
+      exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
+      computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
+      totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2954,10 +2971,7 @@ end subroutine ESMF_GridGet
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(staggerLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(staggerUBoundArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
@@ -2966,10 +2980,16 @@ end subroutine ESMF_GridGet
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2988,8 +3008,9 @@ end subroutine ESMF_GridGet
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
       subroutine ESMF_GridGetCoord2DR4(grid, localDE, coordDim, staggerloc, &
-          exclusiveLBound, exclusiveUBound, staggerLBound, staggerUBound, &
-          computationalLBound, computationalUBound, totalLBound, totalUBound, &
+          exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
+          computationalLBound, computationalUBound, computationalCount,     &
+          totalLBound, totalUBound, totalCount,                             &
           fptr, doCopy, rc)
 !
 ! !ARGUMENTS:
@@ -2999,12 +3020,13 @@ end subroutine ESMF_GridGet
       type (ESMF_StaggerLoc), intent(in),optional :: staggerloc
       integer,                intent(out), optional :: exclusiveLBound(:)
       integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: staggerLBound(:)
-      integer,                intent(out), optional :: staggerUBound(:)
+      integer,                intent(out), optional :: exclusiveCount(:)
       integer,                intent(out), optional :: computationalLBound(:)
       integer,                intent(out), optional :: computationalUBound(:)
+      integer,                intent(out), optional :: computationalCount(:)
       integer,                intent(out), optional :: totalLBound(:)
       integer,                intent(out), optional :: totalUBound(:)
+      integer,                intent(out), optional :: totalCount(:)
       real(ESMF_KIND_R4), pointer :: fptr(:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
@@ -3036,18 +3058,12 @@ end subroutine ESMF_GridGet
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
 !          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
-!     \item[{[staggerLBound]}]
-!          Upon return this holds the lower bounds of the stagger region.
-!          {\tt staggerLBound} must be allocated to be of size equal to the coord rank.
-!     \item[{[staggerUBound]}]
-!          Upon return this holds the upper bounds of the stagger region.
-!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
 !     \item[{[computationalLBound]}]
-!          Upon return this holds the lower bounds of the computational region. 
+!          Upon return this holds the lower bounds of the stagger region.
 !          {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
 !     \item[{[computationalUBound]}]
-!          Upon return this holds the upper bounds of the computational region.
-!          {\tt computationalUBound} must be allocated to be of size equal to the coord rank.
+!          Upon return this holds the upper bounds of the stagger region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
 !     \item[{[totalLBound]}]
 !          Upon return this holds the lower bounds of the total region.
 !          {\tt totalLBound} must be allocated to be of size equal to the coord rank.
@@ -3079,12 +3095,13 @@ end subroutine ESMF_GridGet
     integer :: coordRank(ESMF_MAXDIM)
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: staggerLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: staggerUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
     type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
     type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code 
@@ -3199,10 +3216,7 @@ end subroutine ESMF_GridGet
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    staggerLBoundArg=ESMF_InterfaceIntCreate(staggerLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    staggerUBoundArg=ESMF_InterfaceIntCreate(staggerUBound, rc=localrc)
+    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
@@ -3211,18 +3225,24 @@ end subroutine ESMF_GridGet
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_GridGetCoordBounds(grid, localDE, coordDim, tmp_staggerloc, &
-      exclusiveLBoundArg, exclusiveUBoundArg, staggerLBoundArg, staggerUBoundArg,&
-      computationalLBoundArg, computationalUBoundArg, &
-      totalLBoundArg, totalUBoundArg, localrc)
+      exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
+      computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
+      totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3233,10 +3253,7 @@ end subroutine ESMF_GridGet
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(staggerLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(staggerUBoundArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
@@ -3245,10 +3262,16 @@ end subroutine ESMF_GridGet
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3267,8 +3290,9 @@ end subroutine ESMF_GridGet
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
       subroutine ESMF_GridGetCoord3DR4(grid, localDE, coordDim, staggerloc, &
-          exclusiveLBound, exclusiveUBound, staggerLBound, staggerUBound, &
-          computationalLBound, computationalUBound, totalLBound, totalUBound, &      
+          exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
+          computationalLBound, computationalUBound, computationalCount,     &
+          totalLBound, totalUBound, totalCount,                             &      
           fptr, doCopy, rc)
 !
 ! !ARGUMENTS:
@@ -3278,12 +3302,13 @@ end subroutine ESMF_GridGet
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer,                intent(out), optional :: exclusiveLBound(:)
       integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: staggerLBound(:)
-      integer,                intent(out), optional :: staggerUBound(:)
+      integer,                intent(out), optional :: exclusiveCount(:)
       integer,                intent(out), optional :: computationalLBound(:)
       integer,                intent(out), optional :: computationalUBound(:)
+      integer,                intent(out), optional :: computationalCount(:)
       integer,                intent(out), optional :: totalLBound(:)
       integer,                intent(out), optional :: totalUBound(:)
+      integer,                intent(out), optional :: totalCount(:)
       real(ESMF_KIND_R4), pointer :: fptr(:,:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
@@ -3315,18 +3340,12 @@ end subroutine ESMF_GridGet
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
 !          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
-!     \item[{[staggerLBound]}]
-!          Upon return this holds the lower bounds of the stagger region.
-!          {\tt staggerLBound} must be allocated to be of size equal to the coord rank.
-!     \item[{[staggerUBound]}]
-!          Upon return this holds the upper bounds of the stagger region.
-!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
 !     \item[{[computationalLBound]}]
-!          Upon return this holds the lower bounds of the computational region. 
+!          Upon return this holds the lower bounds of the stagger region.
 !          {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
 !     \item[{[computationalUBound]}]
-!          Upon return this holds the upper bounds of the computational region.
-!          {\tt computationalUBound} must be allocated to be of size equal to the coord rank.
+!          Upon return this holds the upper bounds of the stagger region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
 !     \item[{[totalLBound]}]
 !          Upon return this holds the lower bounds of the total region.
 !          {\tt totalLBound} must be allocated to be of size equal to the coord rank.
@@ -3358,12 +3377,13 @@ end subroutine ESMF_GridGet
  integer :: coordRank(ESMF_MAXDIM)
  type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: staggerLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: staggerUBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
  type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
  type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
  integer :: tmp_staggerloc
 
  ! Initialize return code 
@@ -3481,10 +3501,7 @@ endif
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    staggerLBoundArg=ESMF_InterfaceIntCreate(staggerLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    staggerUBoundArg=ESMF_InterfaceIntCreate(staggerUBound, rc=localrc)
+    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
@@ -3493,18 +3510,24 @@ endif
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_GridGetCoordBounds(grid, localDE, coordDim, tmp_staggerloc, &
-      exclusiveLBoundArg, exclusiveUBoundArg, staggerLBoundArg, staggerUBoundArg,&
-      computationalLBoundArg, computationalUBoundArg, &
-      totalLBoundArg, totalUBoundArg, localrc)
+      exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
+      computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
+      totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3515,10 +3538,7 @@ endif
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(staggerLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(staggerUBoundArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
@@ -3527,10 +3547,16 @@ endif
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3549,8 +3575,9 @@ endif
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
       subroutine ESMF_GridGetCoord1DR8(grid, localDE, coordDim, staggerloc, & 
-          exclusiveLBound, exclusiveUBound, staggerLBound, staggerUBound, &
-          computationalLBound, computationalUBound, totalLBound, totalUBound, &
+          exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
+          computationalLBound, computationalUBound, computationalCount,     &
+          totalLBound, totalUBound, totalCount,                             &
           fptr, doCopy, rc)
 !
 ! !ARGUMENTS:
@@ -3560,12 +3587,13 @@ endif
       type (ESMF_StaggerLoc), intent(in),optional :: staggerloc
       integer,                intent(out), optional :: exclusiveLBound(:)
       integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: staggerLBound(:)
-      integer,                intent(out), optional :: staggerUBound(:)
+      integer,                intent(out), optional :: exclusiveCount(:)
       integer,                intent(out), optional :: computationalLBound(:)
       integer,                intent(out), optional :: computationalUBound(:)
+      integer,                intent(out), optional :: computationalCount(:)
       integer,                intent(out), optional :: totalLBound(:)
       integer,                intent(out), optional :: totalUBound(:)
+      integer,                intent(out), optional :: totalCount(:)
       real(ESMF_KIND_R8), pointer :: fptr(:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
@@ -3597,18 +3625,12 @@ endif
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
 !          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
-!     \item[{[staggerLBound]}]
-!          Upon return this holds the lower bounds of the stagger region.
-!          {\tt staggerLBound} must be allocated to be of size equal to the coord rank.
-!     \item[{[staggerUBound]}]
-!          Upon return this holds the upper bounds of the stagger region.
-!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
 !     \item[{[computationalLBound]}]
-!          Upon return this holds the lower bounds of the computational region. 
+!          Upon return this holds the lower bounds of the stagger region.
 !          {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
 !     \item[{[computationalUBound]}]
-!          Upon return this holds the upper bounds of the computational region.
-!          {\tt computationalUBound} must be allocated to be of size equal to the coord rank.
+!          Upon return this holds the upper bounds of the stagger region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
 !     \item[{[totalLBound]}]
 !          Upon return this holds the lower bounds of the total region.
 !          {\tt totalLBound} must be allocated to be of size equal to the coord rank.
@@ -3640,12 +3662,13 @@ endif
  integer :: coordRank(ESMF_MAXDIM)
  type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: staggerLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: staggerUBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
  type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
  type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
  integer :: tmp_staggerloc
 
  ! Initialize return code 
@@ -3762,10 +3785,7 @@ endif
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    staggerLBoundArg=ESMF_InterfaceIntCreate(staggerLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    staggerUBoundArg=ESMF_InterfaceIntCreate(staggerUBound, rc=localrc)
+    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
@@ -3774,18 +3794,24 @@ endif
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_GridGetCoordBounds(grid, localDE, coordDim, tmp_staggerloc, &
-      exclusiveLBoundArg, exclusiveUBoundArg, staggerLBoundArg, staggerUBoundArg,&
-      computationalLBoundArg, computationalUBoundArg, &
-      totalLBoundArg, totalUBoundArg, localrc)
+      exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
+      computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
+      totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3796,10 +3822,7 @@ endif
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(staggerLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(staggerUBoundArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
@@ -3808,10 +3831,16 @@ endif
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3830,8 +3859,9 @@ endif
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
       subroutine ESMF_GridGetCoord2DR8(grid, localDE, coordDim, staggerloc, & 
-          exclusiveLBound, exclusiveUBound, staggerLBound, staggerUBound, &
-          computationalLBound, computationalUBound, totalLBound, totalUBound, &
+          exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
+          computationalLBound, computationalUBound, computationalCount,     &
+          totalLBound, totalUBound, totalCount,                             &
           fptr, doCopy, rc)
 !
 ! !ARGUMENTS:
@@ -3841,12 +3871,13 @@ endif
       type (ESMF_StaggerLoc), intent(in),optional :: staggerloc
       integer,                intent(out), optional :: exclusiveLBound(:)
       integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: staggerLBound(:)
-      integer,                intent(out), optional :: staggerUBound(:)
+      integer,                intent(out), optional :: exclusiveCount(:)
       integer,                intent(out), optional :: computationalLBound(:)
       integer,                intent(out), optional :: computationalUBound(:)
+      integer,                intent(out), optional :: computationalCount(:)
       integer,                intent(out), optional :: totalLBound(:)
       integer,                intent(out), optional :: totalUBound(:)
+      integer,                intent(out), optional :: totalCount(:)
       real(ESMF_KIND_R8), pointer :: fptr(:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
@@ -3878,18 +3909,12 @@ endif
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
 !          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
-!     \item[{[staggerLBound]}]
-!          Upon return this holds the lower bounds of the stagger region.
-!          {\tt staggerLBound} must be allocated to be of size equal to the coord rank.
-!     \item[{[staggerUBound]}]
-!          Upon return this holds the upper bounds of the stagger region.
-!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
 !     \item[{[computationalLBound]}]
-!          Upon return this holds the lower bounds of the computational region. 
+!          Upon return this holds the lower bounds of the stagger region.
 !          {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
 !     \item[{[computationalUBound]}]
-!          Upon return this holds the upper bounds of the computational region.
-!          {\tt computationalUBound} must be allocated to be of size equal to the coord rank.
+!          Upon return this holds the upper bounds of the stagger region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
 !     \item[{[totalLBound]}]
 !          Upon return this holds the lower bounds of the total region.
 !          {\tt totalLBound} must be allocated to be of size equal to the coord rank.
@@ -3921,12 +3946,13 @@ endif
  integer :: coordRank(ESMF_MAXDIM)
  type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: staggerLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: staggerUBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
  type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
  type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
  integer :: tmp_staggerloc
 
  ! Initialize return code 
@@ -4042,10 +4068,7 @@ endif
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    staggerLBoundArg=ESMF_InterfaceIntCreate(staggerLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    staggerUBoundArg=ESMF_InterfaceIntCreate(staggerUBound, rc=localrc)
+    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
@@ -4054,18 +4077,24 @@ endif
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_GridGetCoordBounds(grid, localDE, coordDim, tmp_staggerloc, &
-      exclusiveLBoundArg, exclusiveUBoundArg, staggerLBoundArg, staggerUBoundArg,&
-      computationalLBoundArg, computationalUBoundArg, &
-      totalLBoundArg, totalUBoundArg, localrc)
+      exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
+      computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
+      totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4076,10 +4105,7 @@ endif
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(staggerLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(staggerUBoundArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
@@ -4088,10 +4114,16 @@ endif
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4110,8 +4142,9 @@ endif
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
       subroutine ESMF_GridGetCoord3DR8(grid, localDE, coordDim, staggerloc, & 
-          exclusiveLBound, exclusiveUBound, staggerLBound, staggerUBound, &
-          computationalLBound, computationalUBound, totalLBound, totalUBound, &
+          exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
+          computationalLBound, computationalUBound, computationalCount,     &
+          totalLBound, totalUBound, totalCount,                             &
           fptr, doCopy, rc)
 !
 ! !ARGUMENTS:
@@ -4121,12 +4154,13 @@ endif
       type (ESMF_StaggerLoc), intent(in),optional :: staggerloc
       integer,                intent(out), optional :: exclusiveLBound(:)
       integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: staggerLBound(:)
-      integer,                intent(out), optional :: staggerUBound(:)
+      integer,                intent(out), optional :: exclusiveCount(:)
       integer,                intent(out), optional :: computationalLBound(:)
       integer,                intent(out), optional :: computationalUBound(:)
+      integer,                intent(out), optional :: computationalCount(:)
       integer,                intent(out), optional :: totalLBound(:)
       integer,                intent(out), optional :: totalUBound(:)
+      integer,                intent(out), optional :: totalCount(:)
       real(ESMF_KIND_R8), pointer :: fptr(:,:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
@@ -4158,18 +4192,12 @@ endif
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
 !          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
-!     \item[{[staggerLBound]}]
-!          Upon return this holds the lower bounds of the stagger region.
-!          {\tt staggerLBound} must be allocated to be of size equal to the coord rank.
-!     \item[{[staggerUBound]}]
-!          Upon return this holds the upper bounds of the stagger region.
-!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
 !     \item[{[computationalLBound]}]
-!          Upon return this holds the lower bounds of the computational region. 
+!          Upon return this holds the lower bounds of the stagger region.
 !          {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
 !     \item[{[computationalUBound]}]
-!          Upon return this holds the upper bounds of the computational region.
-!          {\tt computationalUBound} must be allocated to be of size equal to the coord rank.
+!          Upon return this holds the upper bounds of the stagger region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
 !     \item[{[totalLBound]}]
 !          Upon return this holds the lower bounds of the total region.
 !          {\tt totalLBound} must be allocated to be of size equal to the coord rank.
@@ -4201,12 +4229,13 @@ endif
  integer :: coordRank(ESMF_MAXDIM)
  type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: staggerLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: staggerUBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
  type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
  type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
  integer :: tmp_staggerloc
 
  ! Initialize return code 
@@ -4323,10 +4352,7 @@ endif
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    staggerLBoundArg=ESMF_InterfaceIntCreate(staggerLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    staggerUBoundArg=ESMF_InterfaceIntCreate(staggerUBound, rc=localrc)
+    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
@@ -4335,18 +4361,24 @@ endif
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_GridGetCoordBounds(grid, localDE, coordDim, tmp_staggerloc, &
-      exclusiveLBoundArg, exclusiveUBoundArg, staggerLBoundArg, staggerUBoundArg,&
-      computationalLBoundArg, computationalUBoundArg, &
-      totalLBoundArg, totalUBoundArg, localrc)
+      exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
+      computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
+      totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4357,10 +4389,7 @@ endif
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(staggerLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(staggerUBoundArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
@@ -4369,10 +4398,16 @@ endif
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4390,8 +4425,9 @@ endif
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
       subroutine ESMF_GridGetCoordBounds(grid, localDE, coordDim, staggerloc, &
-          exclusiveLBound, exclusiveUBound, staggerLBound, staggerUBound, &
-          computationalLBound, computationalUBound, totalLBound, totalUBound, rc)
+          exclusiveLBound, exclusiveUBound, exclusiveCount,                   &
+          computationalLBound, computationalUBound, computationalCount,       &
+          totalLBound, totalUBound, totalCount, rc)
 
 !
 ! !ARGUMENTS:
@@ -4401,12 +4437,13 @@ endif
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer,                intent(out), optional :: exclusiveLBound(:)
       integer,                intent(out), optional :: exclusiveUBound(:)
-      integer,                intent(out), optional :: staggerLBound(:)
-      integer,                intent(out), optional :: staggerUBound(:)
+      integer,                intent(out), optional :: exclusiveCount(:)
       integer,                intent(out), optional :: computationalLBound(:)
       integer,                intent(out), optional :: computationalUBound(:)
+      integer,                intent(out), optional :: computationalCount(:)
       integer,                intent(out), optional :: totalLBound(:)
       integer,                intent(out), optional :: totalUBound(:)
+      integer,                intent(out), optional :: totalCount(:)
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -4438,18 +4475,12 @@ endif
 !\item[{[exclusiveUBound]}]
 !     Upon return this holds the upper bounds of the exclusive region.
 !     {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
-!\item[{[staggerLBound]}]
-!     Upon return this holds the lower bounds of the stagger region.
-!     {\tt staggerLBound} must be allocated to be of size equal to the coord rank.
-!\item[{[staggerUBound]}]
-!     Upon return this holds the upper bounds of the stagger region.
-!     {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
 !\item[{[computationalLBound]}]
-!     Upon return this holds the lower bounds of the computational region. 
+!     Upon return this holds the lower bounds of the stagger region.
 !     {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
 !\item[{[computationalUBound]}]
-!     Upon return this holds the upper bounds of the computational region.
-!     {\tt computationalUBound} must be allocated to be of size equal to the coord rank.
+!     Upon return this holds the upper bounds of the stagger region.
+!     {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
 !\item[{[totalLBound]}]
 !     Upon return this holds the lower bounds of the total region.
 !     {\tt totalLBound} must be allocated to be of size equal to the coord rank.
@@ -4465,12 +4496,13 @@ endif
     integer :: localrc ! local error status
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: staggerLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: staggerUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
     type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
     type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code
@@ -4494,10 +4526,7 @@ endif
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    staggerLBoundArg=ESMF_InterfaceIntCreate(staggerLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    staggerUBoundArg=ESMF_InterfaceIntCreate(staggerUBound, rc=localrc)
+    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
@@ -4506,18 +4535,24 @@ endif
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_GridGetCoordBounds(grid, localDE, coordDim, tmp_staggerloc, &
-      exclusiveLBoundArg, exclusiveUBoundArg, staggerLBoundArg, staggerUBoundArg,&
-      computationalLBoundArg, computationalUBoundArg, &
-      totalLBoundArg, totalUBoundArg, localrc)
+      exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
+      computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
+      totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4528,10 +4563,7 @@ endif
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(staggerLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(staggerUBoundArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
@@ -4540,10 +4572,16 @@ endif
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

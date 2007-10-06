@@ -1,11 +1,11 @@
-# $Id: makefile,v 1.20 2007/07/05 19:07:50 oehmke Exp $ 
+# $Id: makefile,v 1.21 2007/10/06 02:57:31 oehmke Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
 run_uni:  run_unit_tests_uni
 
-CFLAGS    =
-FFLAGS    =
+CFLAGS    = 
+FFLAGS    = 
 SOURCEC	  = 
 SOURCEF	  =
 
@@ -56,5 +56,5 @@ RUN_ESMF_GridCoordUTest:
 	$(MAKE) TNAME=GridCoord NP=4 ftest
 
 RUN_ESMF_GridCoordUTestUNI:
-	$(MAKE) TNAME=GridCoord NP=1 ftest
+	$(MAKE) TNAME=GridCoord NP=1 ftest 
 

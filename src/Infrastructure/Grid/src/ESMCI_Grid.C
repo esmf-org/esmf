@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.27 2007/10/05 21:57:11 theurich Exp $
+// $Id: ESMCI_Grid.C,v 1.28 2007/10/06 02:57:31 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.27 2007/10/05 21:57:11 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.28 2007/10/06 02:57:31 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -318,15 +318,18 @@ int Grid::allocCoordArray(
         coordUndistRank++;
       }
     }
+
+    // Make sure there are distributed dimensions
+    //    if (!coordDistRank) {
+    // ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+    //             "- Coordinate must have a distributed portion", &rc);
+    //  return rc;
+    // }
     
-    // set size of dimmap (number of coord distributed dimensions)
-    if (coordDistRank) {
-      dimmapIntInt->extent[0]=coordDistRank;
-    } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-                 "- Coordinate must have a distributed portion", &rc);
-      return rc;
-    }
+    // set size of dimmap 
+    // (needs to be total rank of distGrid even if coord rank < distgrid rank)
+    // (0's indicate unused dimensions)
+    dimmapIntInt->extent[0]=distRank;
     
     // set size of bounds (number of coord undistributed dimensions)
     if (coordUndistRank) {
@@ -338,13 +341,19 @@ int Grid::allocCoordArray(
     for (int i=0; i<coordDistRank; i++) {
       compLWidthIntIntArray[i]=0; // init to 0.
     }
-    compLWidthIntInt->extent[0]=coordDistRank;
+
+    // set size of computational lower bound 
+    // (needs to be total rank of distGrid even if coord rank < distgrid rank)
+    compLWidthIntInt->extent[0]=distRank;
     
     // init ComputationalUWidth to 0
     for (int i=0; i<coordDistRank; i++) {
       compUWidthIntIntArray[i]=0; // init to 0.
     }
-    compUWidthIntInt->extent[0]=coordDistRank;
+
+    // set size of computational upper bound 
+    // (needs to be total rank of distGrid even if coord rank < distgrid rank)
+    compUWidthIntInt->extent[0]=distRank;
     
     //// Expand the boundaries of the computational region of the Array 
     //// (distributed and undistributed) to hold the stagger padding
@@ -1237,7 +1246,7 @@ int Grid::setCoordArray(
   bool ok;  
 
    // initialize return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL; 
   rc = ESMC_RC_NOT_IMPL;
   
   // make sure grid is active
@@ -1319,23 +1328,33 @@ int Grid::setCoordArray(
 
 
   // Check that the passed in Array's dimmap is consistant with this coord's
-  // TODO: make this work with replicated arrays
-  arrayDimMap=arrayArg->getDimmap();
-  ok=true;
+  int tmpDimMap[ESMF_MAXDIM];
+
+  //// Init coordDimMap (loop over entire distGrid dimCount)
+  for (int i=0; i<distRank; i++) {
+    tmpDimMap[i]=0;
+  }
+
+  //// Construct coordinate analog to array dimmap (will be 1-based)
   for (int i=0; i<coordRank[coord]; i++) {
     if (coordIsDist[coord][i]) {
-      if (arrayDimMap[coordMapDim[coord][i]]-1 != i) { // arrayDimMap 1-based
-        ok=false;
-        break;
-      }
+      tmpDimMap[coordMapDim[coord][i]]=i+1; // convert to 1-based
     }
-  } 
+  }
+
+  //// get the Array's dimmap 
+  arrayDimMap=arrayArg->getDimmap();
+
+  //// Check if the Array's dimmap matches what we expect for the coord
+  ok=true;
+  for (int i=0; i<distRank; i++) {
+    if (tmpDimMap[i] != arrayDimMap[i]) ok=false;
+  }
   if (!ok) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- Array and Grid Coord dimmap mismatch ", &rc);
       return rc;
   }
-
   
   // Check and make sure the array's computational bounds are
   // big enough for the stagger padding
