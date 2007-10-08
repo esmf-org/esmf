@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.16 2007/10/08 18:16:19 theurich Exp $
+! $Id: user_model2.F90,v 1.17 2007/10/08 18:18:49 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -133,7 +133,7 @@ module user_model2
     ! Initialize return code
     rc = ESMF_SUCCESS
 
-    print *, "User Comp Run starting"
+    print *, "User Comp2 Run starting"
 
     pi = 3.14159d0
 
@@ -157,7 +157,7 @@ module user_model2
       enddo
     enddo
  
-    print *, "User Comp Run returning"
+    print *, "User Comp2 Run returning"
 
   end subroutine user_run
 
@@ -175,9 +175,9 @@ module user_model2
     ! Initialize return code
     rc = ESMF_SUCCESS
 
-    print *, "User Comp Final starting"
+    print *, "User Comp2 Final starting"
 
-    print *, "User Comp Final returning"
+    print *, "User Comp2 Final returning"
 
   end subroutine user_final
 
