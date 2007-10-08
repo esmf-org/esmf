@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.37 2007/10/05 21:58:45 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.38 2007/10/08 22:49:46 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.37 2007/10/05 21:58:45 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistGrid.C,v 1.38 2007/10/08 22:49:46 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2362,41 +2362,40 @@ int DistGrid::serialize(
   //     *length += 2 * fixedpart;
   //  }
 
-  // first set the base part of the object
+  // Serialize the Base class,
   localrc = this->ESMC_Base::ESMC_Serialize(buffer, length, offset);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
-  // serialize the DELayout
+  // Serialize the DELayout
   localrc = delayout->serialize(buffer, length, offset);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
-  
-  // figure current position in buffer
-  cp = (char *)(buffer + *offset);
-  
-  // serialize scalar members
-  ip = (int *)cp;
+  // Serialize DistGrid meta data
+  ip = (int *)(buffer + *offset);
   *ip++ = dimCount;
   *ip++ = patchCount;
+  for (int i=0; i<dimCount*patchCount; i++){
+    *ip++ = minIndexPDimPPatch[i];
+    *ip++ = maxIndexPDimPPatch[i];
+  }
+  for (int i=0; i<patchCount; i++)
+    *ip++ = cellCountPPatch[i];
+  int deCount = delayout->getDeCount();
+  for (int i=0; i<dimCount*deCount; i++){
+    *ip++ = minIndexPDimPDe[i];
+    *ip++ = maxIndexPDimPDe[i];
+    *ip++ = contigFlagPDimPDe[i];
+    *ip++ = indexCountPDimPDe[i];
+  }
+  for (int i=0; i<deCount; i++){
+    *ip++ = cellCountPDe[i];
+    *ip++ = patchListPDe[i];
+  }
   *ip++ = connectionCount;
   lp = (ESMC_Logical *)ip;
   *lp++ = regDecompFlag;
-  
-  int deCount = delayout->getDeCount();
-  // serialize array members
-  ip = (int *)lp;
-  for (int i=0; i<patchCount; i++)
-    *ip++ = cellCountPPatch[i];
-  for (int i=0; i<deCount; i++)
-    *ip++ = patchListPDe[i];
-  for (int i=0; i<dimCount*patchCount; i++)
-    *ip++ = minIndexPDimPPatch[i];
-  for (int i=0; i<dimCount*patchCount; i++)
-    *ip++ = maxIndexPDimPPatch[i];
-  for (int i=0; i<dimCount*deCount; i++)
-    *ip++ = indexCountPDimPDe[i];
-  
-  cp = (char *)ip;
+
+  cp = (char *)lp;
   *offset = (cp - buffer);
   
   // return successfully
@@ -2442,44 +2441,48 @@ DistGrid *DistGrid::deserialize(
   ESMC_DePinFlag *dp;
   de_type *dep;
 
-  // first get the base part of the object
+  // Deserialize the Base class
   localrc = a->ESMC_Base::ESMC_Deserialize(buffer, offset);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return NULL;
+  // Deserialize the DELayout
   a->delayout = DELayout::deserialize(buffer, offset);
   a->vm = NULL; // VM must be reset
-
-  // now the rest
-  cp = (char *)(buffer + *offset);
-  
-  // deserialize scalar members
-  ip = (int *)cp;
+  // Deserialize DistGrid meta data
+  ip = (int *)(buffer + *offset);
   a->dimCount = *ip++;
   a->patchCount = *ip++;
-  a->connectionCount = *ip++;
-  lp = (ESMC_Logical *)ip;
-  a->regDecompFlag = *lp++;
-      
-  int deCount = a->delayout->getDeCount();
-  // deserialize array members
-  ip = (int *)lp;
+  a->minIndexPDimPPatch = new int[a->dimCount*a->patchCount];
+  a->maxIndexPDimPPatch = new int[a->dimCount*a->patchCount];
+  for (int i=0; i<a->dimCount*a->patchCount; i++){
+    a->minIndexPDimPPatch[i] = *ip++;
+    a->maxIndexPDimPPatch[i] = *ip++;
+  }
   a->cellCountPPatch = new int[a->patchCount];
   for (int i=0; i<a->patchCount; i++)
     a->cellCountPPatch[i] = *ip++;
-  a->patchListPDe = new int[deCount];
-  for (int i=0; i<deCount; i++)
-    a->patchListPDe[i] = *ip++;
-  a->minIndexPDimPPatch = new int[a->dimCount*a->patchCount];
-  for (int i=0; i<a->dimCount*a->patchCount; i++)
-    a->minIndexPDimPPatch[i] = *ip++;
-  a->maxIndexPDimPPatch = new int[a->dimCount*a->patchCount];
-  for (int i=0; i<a->dimCount*a->patchCount; i++)
-    a->maxIndexPDimPPatch[i] = *ip++;
+  int deCount = a->delayout->getDeCount();
+  a->minIndexPDimPDe = new int[a->dimCount*deCount];
+  a->maxIndexPDimPDe = new int[a->dimCount*deCount];
+  a->contigFlagPDimPDe = new int[a->dimCount*deCount];
   a->indexCountPDimPDe = new int[a->dimCount*deCount];
-  for (int i=0; i<a->dimCount*deCount; i++)
+  for (int i=0; i<a->dimCount*deCount; i++){
+    a->minIndexPDimPDe[i] = *ip++;
+    a->maxIndexPDimPDe[i] = *ip++;
+    a->contigFlagPDimPDe[i] = *ip++;
     a->indexCountPDimPDe[i] = *ip++;
-  
-  cp = (char *)ip;
+  }
+  a->cellCountPDe = new int[deCount];
+  a->patchListPDe = new int[deCount];
+  for (int i=0; i<deCount; i++){
+    a->cellCountPDe[i] = *ip++;
+    a->patchListPDe[i] = *ip++;
+  }
+  a->connectionCount = *ip++;
+  lp = (ESMC_Logical *)ip;
+  a->regDecompFlag = *lp++;
+
+  cp = (char *)lp;
   *offset = (cp - buffer);
   
   // return successfully

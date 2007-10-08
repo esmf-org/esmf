@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.144 2007/10/05 21:58:43 theurich Exp $
+// $Id: ESMC_Array.C,v 1.145 2007/10/08 22:49:46 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.144 2007/10/05 21:58:43 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.145 2007/10/08 22:49:46 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1691,7 +1691,7 @@ int Array::serialize(
     return rc;
   }
 
-  // First, serialize the base class,
+  // Serialize the Base class,
   localrc = ESMC_Base::ESMC_Serialize(buffer, length, offset);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
@@ -1699,7 +1699,7 @@ int Array::serialize(
   localrc = distgrid->serialize(buffer, length, offset);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
-  // Then, serialize Array meta data
+  // Serialize Array meta data
   dkp = (ESMC_TypeKind *)(buffer + *offset);
   *dkp++ = typekind;
   ip = (int *)dkp;
@@ -1708,7 +1708,19 @@ int Array::serialize(
   *ifp++ = indexflag;
   ip = (int *)ifp;
   *ip++ = tensorCount;
+  for (int i=0; i<tensorCount; i++){
+    *ip++ = lbounds[i];
+    *ip++ = ubounds[i];
+    *ip++ = staggerLoc[i];
+    *ip++ = vectorDim[i];
+  }
+  for (int i=0; i<distgrid->getDimCount(); i++)
+    *ip++ = dimmap[i];
+  for (int i=0; i<rank; i++)
+    *ip++ = inverseDimmap[i];
   *ip++ = tensorCellCount;
+  for (int i=0; i<delayout->getDeCount(); i++)
+    *ip++ = deCellCount[i];
   
   // fix offset  
   cp = (char *)ip;
@@ -1752,16 +1764,15 @@ int Array::deserialize(
   ESMC_TypeKind *dkp;
   ESMC_IndexFlag *ifp;
 
-  // First, deserialize the base class
+  // Deserialize the Base class
   localrc = ESMC_Base::ESMC_Deserialize(buffer, offset);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
-
   // Deserialize the DistGrid
   distgrid = DistGrid::deserialize(buffer, offset);
   // Pull DELayout out of DistGrid
   delayout = distgrid->getDELayout();
-  // Then, deserialize Array meta data
+  // Deserialize Array meta data
   dkp = (ESMC_TypeKind *)(buffer + *offset);
   typekind = *dkp++;
   ip = (int *)dkp;
@@ -1770,7 +1781,26 @@ int Array::deserialize(
   indexflag = *ifp++;
   ip = (int *)ifp;
   tensorCount = *ip++;
+  lbounds = new int[tensorCount];
+  ubounds = new int[tensorCount];
+  staggerLoc = new int[tensorCount];
+  vectorDim = new int[tensorCount];
+  for (int i=0; i<tensorCount; i++){
+    lbounds[i] = *ip++;
+    ubounds[i] = *ip++;
+    staggerLoc[i] = *ip++;
+    vectorDim[i] = *ip++;
+  }
+  dimmap = new int[distgrid->getDimCount()];
+  for (int i=0; i<distgrid->getDimCount(); i++)
+    dimmap[i] = *ip++;
+  inverseDimmap = new int[rank];
+  for (int i=0; i<rank; i++)
+    inverseDimmap[i] = *ip++;
   tensorCellCount = *ip++;
+  deCellCount = new int[delayout->getDeCount()];
+  for (int i=0; i<delayout->getDeCount(); i++)
+    deCellCount[i] = *ip++;
   
   // fix offset
   cp = (char *)ip;
@@ -2067,7 +2097,7 @@ int Array::gather(
         int tensorIndex=0;  // reset
         int commhListCount = 0;  // reset
         for (int j=0; j<dimCount; j++){
-          if(dimmap!=0 && contigFlagPDimPDe[de*dimCount+j]==0){
+          if(dimmap[j]!=0 && contigFlagPDimPDe[de*dimCount+j]==0){
             // associated and non-contiguous dimension
             // -> obtain indexList for this DE and dim
             indexList[j] = new int[indexCountPDimPDe[de*dimCount+j]];
@@ -2166,7 +2196,7 @@ int Array::gather(
       if (patchListPDe[de] == patch){
         // this DE is located on receiving patch -> must send info to rootPet
         for (int j=0; j<dimCount; j++){
-          if(dimmap!=0 && contigFlagPDimPDe[de*dimCount+j]==0){
+          if(dimmap[j]!=0 && contigFlagPDimPDe[de*dimCount+j]==0){
             // associated and non-contiguous dimension
             // -> send local indexList for this DE and dim to rootPet
             commhList[commhListCount] = NULL; // prime for later test
@@ -2347,7 +2377,7 @@ int Array::scatter(
         int tensorIndex=0;  // reset
         int commhListCount = 0;  // reset
         for (int j=0; j<dimCount; j++){
-          if(dimmap!=0 && contigFlagPDimPDe[de*dimCount+j]==0){
+          if(dimmap[j]!=0 && contigFlagPDimPDe[de*dimCount+j]==0){
             // associated and non-contiguous dimension
             // -> obtain indexList for this DE and dim
             indexList[j] = new int[indexCountPDimPDe[de*dimCount+j]];
@@ -2464,7 +2494,7 @@ int Array::scatter(
       if (patchListPDe[de] == patch){
         // this DE is located on receiving patch -> must send info to rootPet
         for (int j=0; j<dimCount; j++){
-          if(dimmap!=0 && contigFlagPDimPDe[de*dimCount+j]==0){
+          if(dimmap[j]!=0 && contigFlagPDimPDe[de*dimCount+j]==0){
             // associated and non-contiguous dimension
             // -> send local indexList for this DE and dim to rootPet
             commhList[commhListCount] = NULL; // prime for later test
