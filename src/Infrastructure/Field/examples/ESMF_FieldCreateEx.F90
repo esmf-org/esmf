@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.47 2007/10/05 20:36:14 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.48 2007/10/08 12:44:15 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
     ! Local variables
     integer :: rc
     integer :: mycell
-    integer :: igridCount(2)
+    integer :: gridCount(2)
     integer :: lbound_(0:1), ubound_(0:1)
     type(ESMF_Grid) :: grid
     type(ESMF_ArraySpec) :: arrayspec
@@ -65,10 +65,10 @@
         staggerUBound=ubound_, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    igridCount(1) = ubound_(0)-lbound_(0)+1
-    igridCount(2) = ubound_(1)-lbound_(1)+1
+    gridCount(1) = ubound_(0)-lbound_(0)+1
+    gridCount(2) = ubound_(1)-lbound_(1)+1
 
-    allocate(f90ptr1(igridCount(1),igridCount(2)))
+    allocate(f90ptr1(gridCount(1),gridCount(2)))
 
     iarray1 = ESMF_InternArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)  
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -79,7 +79,7 @@
 !BOE
 !\subsubsection{Field Create with Grid and InternArray}
       
-!  The user has already created an {\tt ESMF\_IGrid} and an
+!  The user has already created an {\tt ESMF\_Grid} and an
 !  {\tt ESMF\_InternArray} with data.  This create associates the
 !  two objects.  An {\tt ESMF\_FieldDataMap} is created with all defaults.
 !EOE
@@ -98,7 +98,7 @@
 !BOE
 !\subsubsection{Field Create with Grid and ArraySpec}
       
-!  The user has already created an {\tt ESMF\_IGrid} and an
+!  The user has already created an {\tt ESMF\_Grid} and an
 !  {\tt ESMF\_ArraySpec} which describes the data.  This version of 
 !  create will create an {\tt ESMF\_Array} based on the grid size
 !  and the {\tt ESMF\_ArraySpec}. 
@@ -137,7 +137,7 @@
 
     ! the size of the data in the array still has to line up with the Grid
     ! and its decomposition
-    allocate(f90ptr2(igridCount(1),igridCount(2)))
+    allocate(f90ptr2(gridCount(1),gridCount(2)))
     iarray2 = ESMF_InternArrayCreate(f90ptr2, ESMF_DATA_REF, rc=rc)  
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -152,7 +152,7 @@
 !\subsubsection{Empty Field Create}
 
 !  The user creates an empty {\tt ESMF\_Field} object.
-!  The {\tt ESMF\_IGrid}, {\tt ESMF\_InternArray}, and {\tt ESMF\_FieldDataMap}
+!  The {\tt ESMF\_Grid}, {\tt ESMF\_InternArray}, and {\tt ESMF\_FieldDataMap}
 !  can be added later using the set methods.
 !EOE
 
@@ -184,7 +184,7 @@
 !   ! Query a Field for number of local grid cells.
 !   COMMENT THIS TEST OUT FOR NOW BECAUSE THE SUBROUTINE
 !   IS UNIMPLEMENTED CAN TURN BACK ON WHEN INITMACROS ARE ON
-!     call ESMF_FieldGetLocalIGridInfo(field3, ncell=mycell, rc=rc)
+!     call ESMF_FieldGetLocalGridInfo(field3, ncell=mycell, rc=rc)
 !     print *, "Field example 5 returned"
 !
 !    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -195,7 +195,7 @@
 !  When finished with an {\tt ESMF\_Field}, the destroy method
 !  removes it.  However, the objects inside the {\tt ESMF\_Field}
 !  should be deleted separately, since objects can be added to
-!  more than one {\tt ESMF\_Field}, for example the same {\tt ESMF\_IGrid}
+!  more than one {\tt ESMF\_Field}, for example the same {\tt ESMF\_Grid}
 !  can be used in multiple {\tt ESMF\_Field}s.
 !EOE
 

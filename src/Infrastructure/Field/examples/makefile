@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.24 2007/04/12 20:50:21 theurich Exp $ 
+# $Id: makefile,v 1.25 2007/10/08 12:44:19 feiliu Exp $ 
 
 ALL:  build_examples
 
@@ -17,20 +17,20 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/Field/examples
 
 
-EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_FieldCreateEx \
-                 $(ESMF_EXDIR)/ESMF_FieldFromUserEx \
-                 $(ESMF_EXDIR)/ESMF_FieldGlobalEx \
-                 $(ESMF_EXDIR)/ESMF_FieldWriteEx
+EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_FieldCreateEx 
+#                 $(ESMF_EXDIR)/ESMF_FieldFromUserEx \
+#                 $(ESMF_EXDIR)/ESMF_FieldGlobalEx \
+#                 $(ESMF_EXDIR)/ESMF_FieldWriteEx
 
-EXAMPLES_RUN = run_ESMF_FieldCreateEx \
-               run_ESMF_FieldFromUserEx \
-               run_ESMF_FieldGlobalEx \
-               run_ESMF_FieldWriteEx 
+EXAMPLES_RUN = run_ESMF_FieldCreateEx 
+#               run_ESMF_FieldFromUserEx \
+#               run_ESMF_FieldGlobalEx \
+#               run_ESMF_FieldWriteEx 
 
-EXAMPLES_RUN_UNI = run_ESMF_FieldCreateEx_uni \
-                   run_ESMF_FieldFromUserEx_uni \
-                   run_ESMF_FieldGlobalEx_uni \
-                   run_ESMF_FieldWriteEx_uni
+EXAMPLES_RUN_UNI = run_ESMF_FieldCreateEx_uni 
+#                   run_ESMF_FieldFromUserEx_uni \
+#                   run_ESMF_FieldGlobalEx_uni \
+#                   run_ESMF_FieldWriteEx_uni
 
 include $(ESMF_DIR)/makefile
 
