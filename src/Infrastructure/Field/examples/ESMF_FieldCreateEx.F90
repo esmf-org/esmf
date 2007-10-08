@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.48 2007/10/08 12:44:15 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.49 2007/10/08 16:11:51 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -56,7 +56,10 @@
 !   !  We first create a Grid with a regular distribution that is
 !   !  10x20 DEs.  This version of create simply
 !   !  associates the data with the Grid.  The data is referenced
-!   !  by default.  The DataMap is created with defaults.
+!   !  explicitly on a regular 2x2 uniform grid. The shape of data
+!   !  is retrieved from the grid structure through GridGet API.
+!   !  Although one could use 10,20 directly to intialize f90ptr1
+!   !  as well in this case. 
     grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
                                   regDecomp=(/2,2/), name="atmgrid", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
