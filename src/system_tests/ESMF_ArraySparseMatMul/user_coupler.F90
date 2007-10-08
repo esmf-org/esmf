@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.3 2007/07/13 18:20:03 theurich Exp $
+! $Id: user_coupler.F90,v 1.4 2007/10/08 18:16:19 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -36,15 +36,21 @@ module user_coupler
     type(ESMF_CplComp) :: comp
     integer :: rc
 
-    print *, "in user setservices routine"
+    ! Initialize return code
+    rc = ESMF_SUCCESS
 
+    print *, "User Coupler Register starting"
+    
     ! Register the callback routines.
     call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, user_init, &
       ESMF_SINGLEPHASE, rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, user_run, &
       ESMF_SINGLEPHASE, rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, user_final, &
       ESMF_SINGLEPHASE, rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
     print *, "Registered Initialize, Run, and Finalize routines"
 
@@ -55,9 +61,11 @@ module user_coupler
     ! following call unless you are interested in exploring ESMF's 
     ! threading features.
     call ESMF_CplCompSetVMMinThreads(comp, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 #endif
 
-    rc = ESMF_SUCCESS
+    print *, "User Coupler Register returning"
+
   end subroutine
 
 !-------------------------------------------------------------------------
@@ -77,32 +85,34 @@ module user_coupler
     real(ESMF_KIND_R8):: factorList(10000)
     integer:: i, factorIndexList(2,10000)
 
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+
     print *, "User Coupler Init starting"
 
     call ESMF_StateGet(importState, itemcount=itemcount, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     print *, "Import State contains ", itemcount, " items."
 
     ! Need to reconcile import and export states
     call ESMF_CplCompGet(comp, vm=vm, rc=rc)
-    if (rc/=ESMF_SUCCESS) goto 20
+    if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_StateReconcile(importState, vm, rc=rc)
-    if (rc/=ESMF_SUCCESS) goto 20
+    if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_StateReconcile(exportState, vm, rc=rc)
-    if (rc/=ESMF_SUCCESS) goto 20
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get source Array out of import state
     call ESMF_StateGetArray(importState, "array data", srcArray, rc=rc)
-    ! call ESMF_ArrayPrint(srcArray, rc=rc)
-    if (rc/=ESMF_SUCCESS) goto 20
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get destination Array out of export state
     call ESMF_StateGetArray(exportState, "array data", dstArray, rc=rc)
-    ! call ESMF_ArrayPrint(dstArray, rc=rc)
-    if (rc/=ESMF_SUCCESS) goto 20
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! get localPet
     call ESMF_VMGet(vm, localPet=localPet, rc=rc)
-    if (rc/=ESMF_SUCCESS) goto 20
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Setup identity sparse matrix as a combination of PET 0 and PET 4
     ! there are 15000 elements on the diagonal, defined as two overlapping
@@ -134,21 +144,15 @@ module user_coupler
       call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
         routehandle=routehandle, factorList=factorList, &
         factorIndexList=factorIndexList, rc=rc)
-      if (rc/=ESMF_SUCCESS) goto 20
+      if (rc/=ESMF_SUCCESS) return ! bail out
     else
       call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
         routehandle=routehandle, rc=rc)
-      if (rc/=ESMF_SUCCESS) goto 20
+      if (rc/=ESMF_SUCCESS) return ! bail out
     endif
     
     print *, "User Coupler Init returning"
    
-    rc = ESMF_SUCCESS
-    return
-    
-    ! get here only on error exit
-20  continue
-
   end subroutine user_init
 
 
@@ -165,22 +169,24 @@ module user_coupler
     ! Local variables
     type(ESMF_Array) :: srcArray, dstArray
 
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+
     print *, "User Coupler Run starting"
 
     ! Get source Array out of import state
     call ESMF_StateGetArray(importState, "array data", srcArray, rc=rc)
-!    call ESMF_ArrayPrint(srcArray, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get destination Array out of export state
     call ESMF_StateGetArray(exportState, "array data", dstArray, rc=rc)
-!    call ESMF_ArrayPrint(dstArray, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Use ArraySparseMatMul() to take data from srcArray to dstArray
     call ESMF_ArraySparseMatMul(srcArray=srcArray, dstArray=dstArray, &
       routehandle=routehandle, rc=rc)
- 
-!    call ESMF_ArrayPrint(dstArray, rc=rc)
-    
+    if (rc/=ESMF_SUCCESS) return ! bail out
+  
     print *, "User Coupler Run returning"
 
   end subroutine user_run
@@ -196,21 +202,21 @@ module user_coupler
     type(ESMF_Clock) :: clock
     integer :: rc
 
-    ! Local variables
+    ! Initialize return code
+    rc = ESMF_SUCCESS
 
     print *, "User Coupler Final starting"
   
     ! Release resources stored for the Regridding.
     call ESMF_RouteHandleRelease(routehandle=routehandle, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
     print *, "User Coupler Final returning"
   
-    rc = ESMF_SUCCESS
-
   end subroutine user_final
 
 
 end module user_coupler
     
 !\end{verbatim}
-    
+
