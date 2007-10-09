@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.2 2007/09/26 18:48:25 theurich Exp $
+! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.3 2007/10/09 18:49:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayArbIdxSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.2 2007/09/26 18:48:25 theurich Exp $'
+    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.3 2007/10/09 18:49:12 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -50,13 +50,19 @@ program ESMF_ArrayArbIdxSMMUTest
 
   ! Local variables
   type(ESMF_VM)         :: vm
-  type(ESMF_DistGrid)   :: srcDistgrid, srcDistgrid2, dstDistgrid
-  type(ESMF_Array)      :: srcArray, srcArray2, srcArray3
-  type(ESMF_Array)      :: dstArray, dstArray2, dstArray3
-  type(ESMF_ArraySpec)  :: arrayspec, arrayspec3
-  type(ESMF_RouteHandle):: routehandle, routehandle3
+  type(ESMF_DistGrid)   :: srcDistgrid, dstDistgrid
+  type(ESMF_Array)      :: srcArray, dstArray
+  type(ESMF_ArraySpec)  :: arrayspec
+  type(ESMF_RouteHandle):: routehandle
   integer(ESMF_KIND_I4), pointer :: farrayPtr(:)  ! matching F90 array pointer
+#ifdef ESMF_EXHAUSTIVE
+  type(ESMF_DistGrid)   :: srcDistgrid2
+  type(ESMF_Array)      :: srcArray2, srcArray3
+  type(ESMF_Array)      :: dstArray2, dstArray3
+  type(ESMF_ArraySpec)  :: arrayspec3
+  type(ESMF_RouteHandle):: routehandle3
   integer(ESMF_KIND_I4), pointer :: farrayPtr2D(:,:)! matching F90 array pointer
+#endif
   integer               :: rc, i, j, petCount, localPet
   integer, allocatable  :: srcIndices(:)
   integer(ESMF_KIND_I4) :: factorList(3)
@@ -107,12 +113,14 @@ program ESMF_ArrayArbIdxSMMUTest
   srcDistgrid = ESMF_DistGridCreate(arbSeqIndexList=srcIndices, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
+#ifdef ESMF_EXHAUSTIVE
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !EX_UTest_Multi_Proc_Only
   write(name, *) "srcDistgrid2 Create Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   srcDistgrid2 = ESMF_DistGridCreate(arbSeqIndexList=srcIndices, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   deallocate(srcIndices)
 
@@ -145,8 +153,9 @@ program ESMF_ArrayArbIdxSMMUTest
   srcArray = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=srcDistgrid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
+#ifdef ESMF_EXHAUSTIVE
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !EX_UTest_Multi_Proc_Only
   write(name, *) "srcArray2 Create Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   srcArray2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=srcDistgrid2, &
@@ -154,19 +163,20 @@ program ESMF_ArrayArbIdxSMMUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !EX_UTest_Multi_Proc_Only
   write(name, *) "Array Spec rank=2 Set Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArraySpecSet(arrayspec3, typekind=ESMF_TYPEKIND_I4, rank=2, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !EX_UTest_Multi_Proc_Only
   write(name, *) "srcArray3 Create Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   srcArray3 = ESMF_ArrayCreate(arrayspec=arrayspec3, distgrid=srcDistgrid2, &
     lbounds=(/0/), ubounds=(/1/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#endif
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -190,8 +200,9 @@ program ESMF_ArrayArbIdxSMMUTest
   ! 4     0         4     41, 42, 43, 44, 45, 46, 47, 48, 49, 50
   ! 5     0         5     51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62
   
+#ifdef ESMF_EXHAUSTIVE
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !EX_UTest_Multi_Proc_Only
   write(name, *) "Get srcArray2 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayGet(srcArray2, farrayPtr=farrayPtr, rc=rc)
@@ -213,7 +224,7 @@ program ESMF_ArrayArbIdxSMMUTest
   ! 5     0         5     50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61
   
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !EX_UTest_Multi_Proc_Only
   write(name, *) "Get srcArray3 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayGet(srcArray3, farrayPtr=farrayPtr2D, rc=rc)
@@ -244,6 +255,7 @@ program ESMF_ArrayArbIdxSMMUTest
   ! 4     0         4     140, 141, 142, 143, 144, 145, 146, 147, 148, 149
   ! 5     0         5     150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 
   !                       160, 161
+#endif
     
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -259,15 +271,16 @@ program ESMF_ArrayArbIdxSMMUTest
   dstArray = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=dstDistgrid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
+#ifdef ESMF_EXHAUSTIVE
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !EX_UTest_Multi_Proc_Only
   write(name, *) "dstArray2 Create Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   dstArray2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=dstDistgrid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !EX_UTest_Multi_Proc_Only
   write(name, *) "dstArray3 Create Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   dstArray3 = ESMF_ArrayCreate(arrayspec=arrayspec3, distgrid=dstDistgrid, &
@@ -297,7 +310,7 @@ program ESMF_ArrayArbIdxSMMUTest
   ! 3     0         3     random, random
   ! 4     0         4     random, random
   ! 5     0         5     random, random
-
+#endif
 
 !------------------------------------------------------------------------
 ! Initialize the factorList(:) and factorIndexList(:,:) arrays
@@ -429,8 +442,9 @@ program ESMF_ArrayArbIdxSMMUTest
 		     name, failMsg, result, ESMF_SRCLINE)
   endif
 
+#ifdef ESMF_EXHAUSTIVE
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !EX_UTest_Multi_Proc_Only
   write(name, *) "ArraySparseMatMulMul: srcArray2 -> dstArray2 (RRA) Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArraySparseMatMul(srcArray=srcArray2, dstArray=dstArray2, &
@@ -450,7 +464,7 @@ program ESMF_ArrayArbIdxSMMUTest
   ! 5     0         5     5x50 = 250, -1x0 = 0
   
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !EX_UTest_Multi_Proc_Only
   write(name, *) "dstArray2 Get Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayGet(dstArray2, farrayPtr=farrayPtr, rc=rc)
@@ -459,7 +473,7 @@ program ESMF_ArrayArbIdxSMMUTest
   print *, "localPet: ",localPet," dstArray2: ",farrayPtr
   
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !EX_UTest_Multi_Proc_Only
   write(name, *) "Verify results in dstArray2 (RRA) Test"
   write(failMsg, *) "Wrong results" 
   if (localPet == 0) then
@@ -483,7 +497,7 @@ program ESMF_ArrayArbIdxSMMUTest
   endif
 
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !EX_UTest_Multi_Proc_Only
   write(name, *) "ArraySparseMatMulStore with tensor dims Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArraySparseMatMulStore(srcArray=srcArray3, dstArray=dstArray3, &
@@ -492,7 +506,7 @@ program ESMF_ArrayArbIdxSMMUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !EX_UTest_Multi_Proc_Only
   write(name, *) "ArraySparseMatMulMul: srcArray3 -> dstArray3 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArraySparseMatMul(srcArray=srcArray3, dstArray=dstArray3, &
@@ -520,7 +534,7 @@ program ESMF_ArrayArbIdxSMMUTest
   ! 5     0         5     5x150 = 750, -1x100 = -100
   
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !EX_UTest_Multi_Proc_Only
   write(name, *) "dstArray3 Get Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayGet(dstArray3, farrayPtr=farrayPtr2D, rc=rc)
@@ -529,7 +543,7 @@ program ESMF_ArrayArbIdxSMMUTest
   print *, "localPet: ",localPet," dstArray3: ",farrayPtr2D
   
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !EX_UTest_Multi_Proc_Only
   write(name, *) "Verify results in dstArray3 (tensor dim j=1) Test"
   write(failMsg, *) "Wrong results" 
   if (localPet == 0) then
@@ -553,7 +567,7 @@ program ESMF_ArrayArbIdxSMMUTest
   endif
 
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !EX_UTest_Multi_Proc_Only
   write(name, *) "Verify results in dstArray3 (tensor dim j=2) Test"
   write(failMsg, *) "Wrong results" 
   if (localPet == 0) then
@@ -575,6 +589,7 @@ program ESMF_ArrayArbIdxSMMUTest
     call ESMF_Test(((farrayPtr2D(1,2).eq.750).and.((farrayPtr2D(2,2).eq.-100))), &
 		     name, failMsg, result, ESMF_SRCLINE)
   endif
+#endif
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -590,26 +605,28 @@ program ESMF_ArrayArbIdxSMMUTest
   call ESMF_DistGridDestroy(srcDistGrid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+#ifdef ESMF_EXHAUSTIVE
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !EX_UTest_Multi_Proc_Only
   write(name, *) "srcArray2 Destroy Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayDestroy(srcArray2, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !EX_UTest_Multi_Proc_Only
   write(name, *) "srcArray3 Destroy Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayDestroy(srcArray3, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !EX_UTest_Multi_Proc_Only
   write(name, *) "srcDistgrid2 Destroy Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_DistGridDestroy(srcDistGrid2, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -618,19 +635,21 @@ program ESMF_ArrayArbIdxSMMUTest
   call ESMF_ArrayDestroy(dstArray, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+#ifdef ESMF_EXHAUSTIVE
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !EX_UTest_Multi_Proc_Only
   write(name, *) "dstArray2 Destroy Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayDestroy(dstArray2, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !EX_UTest_Multi_Proc_Only
   write(name, *) "dstArray3 Destroy Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayDestroy(dstArray3, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
