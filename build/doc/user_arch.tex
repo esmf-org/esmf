@@ -1,4 +1,4 @@
-% $Id: user_arch.tex,v 1.16.4.6 2007/06/14 19:11:45 theurich Exp $
+% $Id: user_arch.tex,v 1.16.4.7 2007/10/10 21:05:13 theurich Exp $
 
 % List of architectures supported.  This file is 
 % meant to be included in a user doc.
@@ -19,23 +19,23 @@ included in the build system.
 \begin{tabular}{lcccc}
   &{\bfseries ESMF\_OS} &{\bfseries ESMF\_COMPILER} & {\bfseries ESMF\_COMM} & {\bfseries ESMF\_ABI} \\
 
-IBM SP      &  AIX     &  default      &  mpi         &  32,64  \\
-Mac         &  Darwin  &  absoft       &  lam,mpiuni  &  32  \\
-Mac         &  Darwin  &  nag          &  lam,mpiuni  &  32  \\
-Mac         &  Darwin  &  xlf          &  lam,mpiuni  &  32  \\
-Mac         &  Darwin  &  xlfgcc       &  lam,mpiuni  &  32  \\
-SGI Mips    &  IRIX64  &  default      &  mpi         &  32,64  \\
-PC          &  Linux   &  absoft       &  mpich       &  32  \\
-HP IA64     &  Linux   &  intel        &  lam         &  64  \\
-SGI Altix   &  Linux   &  intel        &  mpi         &  64  \\
-PC          &  Linux   &  intel        &  mpich       &  32  \\
-PC 	    &  Linux   &  lahey        &  mpich,mpiuni&  32  \\
-PC 	    &  Linux   &  nag          &  mpich       &  32  \\
-IBM Opteron &  Linux   &  pathscale    &  mpich       &  64  \\
-IBM Opteron &  Linux   &  pgi          &  mpich       &  64  \\
-PC 	    &  Linux   &  pgi          &  mpich,mpiuni&  32  \\
-HP/Compaq   &  OSF1    &  default      &  mpi         &  64  \\
-Cray X1     &  Unicos  &  default      &  mpi         &  64
+Cray X1         &  Unicos  &  default      &  mpi         &  64 \\
+Cray XT3/4      &  Unicos  &  default      &  mpi         &  64 \\
+IBM Opteron     &  Linux   &  pathscale    &  mpich       &  64  \\
+IBM Opteron     &  Linux   &  pgi          &  mpich       &  64  \\
+IBM SP          &  AIX     &  default      &  mpi         &  32,64  \\
+HP ZX6000       &  Linux   &  intel        &  lam         &  64  \\
+Mac G5          &  Darwin  &  absoft       &  lam,mpiuni  &  32  \\
+Mac G5          &  Darwin  &  nag          &  lam,mpiuni  &  32  \\
+Mac G5          &  Darwin  &  xlf          &  lam,mpiuni  &  32  \\
+Mac G5          &  Darwin  &  xlfgcc       &  lam,mpiuni  &  32  \\
+PC Pentium III  &  Linux   &  lahey        &  mpiuni      &  32  \\
+PC Pentium III  &  Linux   &  pgi          &  mpiuni      &  32  \\
+PC Xeon Cluster &  Linux   &  absoft       &  mpich       &  32  \\
+PC Xeon Cluster &  Linux   &  intel        &  mpich       &  32  \\
+PC Xeon Cluster &  Linux   &  nag          &  mpich       &  32  \\
+SGI Altix       &  Linux   &  intel        &  mpi         &  64  \\
+SGI Origin 3800 &  IRIX64  &  default      &  mpi         &  32,64  \\
 \end{tabular}
 
 \vspace{1ex}
@@ -50,13 +50,16 @@ and the default is independent of {\tt ESMF\_MACHINE} the default value is in bo
   {\bfseries ESMF\_OS} &{\bfseries ESMF\_COMPILER} & {\bfseries ESMF\_COMM} & {\bfseries ESMF\_ABI} \\
 
 AIX     &  default      &  {\bf mpi},mpiuni,user         &  32,{\bf 64}  \\
-Darwin  &  absoft       &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32, 64 \\
+Darwin  &  absoft       &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
 Darwin  &  nag          &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
+Darwin  &  g95          &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
+Darwin  &  gfortran     &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
 Darwin  &  xlf          &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
 Darwin  &  xlfgcc       &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
 IRIX64  &  default      &  {\bf mpi},mpiuni,user         &  32,{\bf 64}  \\
-Linux   &  absoft       &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
+Linux   &  absoft       &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32, 64 \\
 Linux   &  g95          &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
+Linux   &  gfortran     &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
 Linux   &  intel        &  {\bf mpiuni},mpi,mpich,mpich2,intelmpi,lam,openmpi,user  &  32, 64 \\
 Linux   &  intelgcc     &  {\bf mpiuni},mpi,mpich,mpich2,lam,openmpi,user  &  32, 64 \\
 Linux   &  lahey        &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
