@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.146 2007/10/10 19:09:42 theurich Exp $
+// $Id: ESMC_Array.C,v 1.147 2007/10/10 20:10:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.146 2007/10/10 19:09:42 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.147 2007/10/10 20:10:26 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -6184,12 +6184,12 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
   delete [] dstCellCountList;
   delete [] srcSeqIndexMinMaxList;
   delete [] dstSeqIndexMinMaxList;
-  for (int i=0; i<srcSeqIndexInterval[localPet].count; i++)
+  for (int i=0; i<srcSeqIndexInterval[localPet].countEff; i++)
     if (srcSeqIndexFactorLookup[i].factorCount)
       delete [] srcSeqIndexFactorLookup[i].factorList;
   delete [] srcSeqIndexFactorLookup;
   delete [] srcSeqIndexInterval;
-  for (int i=0; i<dstSeqIndexInterval[localPet].count; i++)
+  for (int i=0; i<dstSeqIndexInterval[localPet].countEff; i++)
     if (dstSeqIndexFactorLookup[i].factorCount)
       delete [] dstSeqIndexFactorLookup[i].factorList;
   delete [] dstSeqIndexFactorLookup;
