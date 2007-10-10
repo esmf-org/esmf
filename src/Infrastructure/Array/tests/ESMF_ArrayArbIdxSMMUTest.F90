@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.3 2007/10/09 18:49:12 theurich Exp $
+! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.4 2007/10/10 19:10:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayArbIdxSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.3 2007/10/09 18:49:12 theurich Exp $'
+    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.4 2007/10/10 19:10:21 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -55,6 +55,8 @@ program ESMF_ArrayArbIdxSMMUTest
   type(ESMF_ArraySpec)  :: arrayspec
   type(ESMF_RouteHandle):: routehandle
   integer(ESMF_KIND_I4), pointer :: farrayPtr(:)  ! matching F90 array pointer
+  integer(ESMF_KIND_I4) :: factorList(3)
+  integer               :: factorIndexList(2,3)
 #ifdef ESMF_EXHAUSTIVE
   type(ESMF_DistGrid)   :: srcDistgrid2
   type(ESMF_Array)      :: srcArray2, srcArray3
@@ -62,11 +64,11 @@ program ESMF_ArrayArbIdxSMMUTest
   type(ESMF_ArraySpec)  :: arrayspec3
   type(ESMF_RouteHandle):: routehandle3
   integer(ESMF_KIND_I4), pointer :: farrayPtr2D(:,:)! matching F90 array pointer
+  integer(ESMF_KIND_I4) :: factorList2(1)
+  integer               :: factorIndexList2(4,1)
 #endif
   integer               :: rc, i, j, petCount, localPet
   integer, allocatable  :: srcIndices(:)
-  integer(ESMF_KIND_I4) :: factorList(3)
-  integer               :: factorIndexList(2,3)
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -589,6 +591,252 @@ program ESMF_ArrayArbIdxSMMUTest
     call ESMF_Test(((farrayPtr2D(1,2).eq.750).and.((farrayPtr2D(2,2).eq.-100))), &
 		     name, failMsg, result, ESMF_SRCLINE)
   endif
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "routehandle3 Release Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_RouteHandleRelease(routehandle=routehandle3, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySparseMatMulStore with mismatching input Test"
+  write(failMsg, *) "Did return ESMF_SUCCESS" 
+  call ESMF_ArraySparseMatMulStore(srcArray=srcArray3, dstArray=dstArray2, &
+    routehandle=routehandle3, factorList=factorList, &
+    factorIndexList=factorIndexList, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "routehandle3 Release (delete routehandle) Test"
+  write(failMsg, *) "Did return ESMF_SUCCESS" 
+  call ESMF_RouteHandleRelease(routehandle=routehandle3, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+! Initialize the factorList2(:) and factorIndexList2(:,:) arrays
+  if (localPet == 0) then
+    factorList2(1) = 5
+    factorIndexList2(:,1) = (/77,2,10,1/) ! srcSeq, srcTSeq, dstSeq, dstTSeq
+  else if (localPet == 1) then
+    factorList2(1) = -2
+    factorIndexList2(:,1) = (/120,1,1,1/) ! srcSeq, srcTSeq, dstSeq, dstTSeq
+  else if (localPet == 2) then
+    factorList2(1) = 3
+    factorIndexList2(:,1) = (/120,2,1,1/) ! srcSeq, srcTSeq, dstSeq, dstTSeq
+  else if (localPet == 3) then
+    factorList2(1) = 2
+    factorIndexList2(:,1) = (/99,2,4,1/) ! srcSeq, srcTSeq, dstSeq, dstTSeq
+  else if (localPet == 4) then
+    factorList2(1) = 23
+    factorIndexList2(:,1) = (/37,2,7,1/) ! srcSeq, srcTSeq, dstSeq, dstTSeq
+  else if (localPet == 5) then
+    factorList2(1) = -12
+    factorIndexList2(:,1) = (/110,1,7,1/) ! srcSeq, srcTSeq, dstSeq, dstTSeq
+  endif
+  
+  ! Each of the 6 PETs defines 1 factor of the sparse matrix
+  ! multiplication for a total of 6 x 1 = 6 non-zero entries.
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySparseMatMulStore with tensor mixing factorIndexList Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArraySparseMatMulStore(srcArray=srcArray3, dstArray=dstArray2, &
+    routehandle=routehandle3, factorList=factorList2, &
+    factorIndexList=factorIndexList2, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySparseMatMulMul: srcArray3 -> dstArray2 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArraySparseMatMul(srcArray=srcArray3, dstArray=dstArray2, &
+    routehandle=routehandle3, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  ! The expected result of the sparse matrix multiplication in dstArray2 is:
+  ! (note: by default ArraySparseMatMul() initializes _all_ destination cells
+  ! to zero before adding in sparse matrix terms.)
+  !
+  ! PET   localDE   DE    dstArray2 contents
+  ! 0     0         0     -2 * 50 + 3 * 150 = 350, 0
+  ! 1     0         1     0, 2 * 141 = 282
+  ! 2     0         2     0, 0
+  ! 3     0         3     23 * 113 - 12 * 60 = 1879, 0
+  ! 4     0         4     0, 5 * 133 = 665
+  ! 5     0         5     0, 0
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "dstArray2 Get Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayGet(dstArray2, farrayPtr=farrayPtr, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  print *, "localPet: ",localPet," dstArray2: ",farrayPtr
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Verify results in dstArray2 (tensor mixing) Test"
+  write(failMsg, *) "Wrong results" 
+  if (localPet == 0) then
+    call ESMF_Test(((farrayPtr(1).eq.350).and.((farrayPtr(2).eq.0))), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 1) then
+    call ESMF_Test(((farrayPtr(1).eq.0).and.((farrayPtr(2).eq.282))), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 2) then
+    call ESMF_Test(((farrayPtr(1).eq.0).and.((farrayPtr(2).eq.0))), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 3) then
+    call ESMF_Test(((farrayPtr(1).eq.1879).and.((farrayPtr(2).eq.0))), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 4) then
+    call ESMF_Test(((farrayPtr(1).eq.0).and.((farrayPtr(2).eq.665))), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 5) then
+    call ESMF_Test(((farrayPtr(1).eq.0).and.((farrayPtr(2).eq.0))), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  endif
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "routehandle3 Release Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_RouteHandleRelease(routehandle=routehandle3, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+! Initialize the factorList2(:) and factorIndexList2(:,:) arrays
+  if (localPet == 0) then
+    factorList2(1) = 5
+    factorIndexList2(:,1) = (/77,2,10,2/) ! srcSeq, srcTSeq, dstSeq, dstTSeq
+  else if (localPet == 1) then
+    factorList2(1) = -2
+    factorIndexList2(:,1) = (/120,1,1,1/) ! srcSeq, srcTSeq, dstSeq, dstTSeq
+  else if (localPet == 2) then
+    factorList2(1) = 3
+    factorIndexList2(:,1) = (/120,2,1,1/) ! srcSeq, srcTSeq, dstSeq, dstTSeq
+  else if (localPet == 3) then
+    factorList2(1) = 2
+    factorIndexList2(:,1) = (/99,2,4,1/) ! srcSeq, srcTSeq, dstSeq, dstTSeq
+  else if (localPet == 4) then
+    factorList2(1) = 23
+    factorIndexList2(:,1) = (/37,2,7,2/) ! srcSeq, srcTSeq, dstSeq, dstTSeq
+  else if (localPet == 5) then
+    factorList2(1) = -12
+    factorIndexList2(:,1) = (/110,1,7,2/) ! srcSeq, srcTSeq, dstSeq, dstTSeq
+  endif
+  
+  ! Each of the 6 PETs defines 1 factor of the sparse matrix
+  ! multiplication for a total of 6 x 1 = 6 non-zero entries.
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySparseMatMulStore with tensor mixing factorIndexList Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArraySparseMatMulStore(srcArray=srcArray3, dstArray=dstArray3, &
+    routehandle=routehandle3, factorList=factorList2, &
+    factorIndexList=factorIndexList2, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySparseMatMulMul: srcArray3 -> dstArray3 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArraySparseMatMul(srcArray=srcArray3, dstArray=dstArray3, &
+    routehandle=routehandle3, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+call ESMF_ArrayPrint(dstArray3)
+
+  ! The expected result of the sparse matrix multiplication in dstArray3 is:
+  ! (note: by default ArraySparseMatMul() initializes _all_ destination cells
+  ! to zero before adding in sparse matrix terms.)
+  !
+  ! PET   localDE   DE    dstArray3 contents, tensor dimension j=1
+  ! 0     0         0     -2 * 50 + 3 * 150 = 350, 0
+  ! 1     0         1     0, 2 * 141 = 282
+  ! 2     0         2     0, 0
+  ! 3     0         3     0, 0
+  ! 4     0         4     0, 0
+  ! 5     0         5     0, 0
+  !
+  ! PET   localDE   DE    dstArray3 contents, tensor dimension j=2
+  ! 0     0         0     0, 0
+  ! 1     0         1     0, 0
+  ! 2     0         2     0, 0
+  ! 3     0         3     23 * 113 - 12 * 60 = 1879, 0
+  ! 4     0         4     0, 5 * 133 = 665
+  ! 5     0         5     0, 0
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "dstArray3 Get Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayGet(dstArray3, farrayPtr=farrayPtr2D, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  print *, "localPet: ",localPet," dstArray3: ",farrayPtr2D
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Verify results in dstArray3 (tensor dim j=1) Test"
+  write(failMsg, *) "Wrong results" 
+  if (localPet == 0) then
+    call ESMF_Test(((farrayPtr2D(1,1).eq.350).and.((farrayPtr2D(2,1).eq.0))), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 1) then
+    call ESMF_Test(((farrayPtr2D(1,1).eq.0).and.((farrayPtr2D(2,1).eq.282))), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 2) then
+    call ESMF_Test(((farrayPtr2D(1,1).eq.0).and.((farrayPtr2D(2,1).eq.0))), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 3) then
+    call ESMF_Test(((farrayPtr2D(1,1).eq.0).and.((farrayPtr2D(2,1).eq.0))), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 4) then
+    call ESMF_Test(((farrayPtr2D(1,1).eq.0).and.((farrayPtr2D(2,1).eq.0))), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 5) then
+    call ESMF_Test(((farrayPtr2D(1,1).eq.0).and.((farrayPtr2D(2,1).eq.0))), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  endif
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Verify results in dstArray3 (tensor dim j=2) Test"
+  write(failMsg, *) "Wrong results" 
+  if (localPet == 0) then
+    call ESMF_Test(((farrayPtr2D(1,2).eq.0).and.((farrayPtr2D(2,2).eq.0))), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 1) then
+    call ESMF_Test(((farrayPtr2D(1,2).eq.0).and.((farrayPtr2D(2,2).eq.0))), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 2) then
+    call ESMF_Test(((farrayPtr2D(1,2).eq.0).and.((farrayPtr2D(2,2).eq.0))), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 3) then
+    call ESMF_Test(((farrayPtr2D(1,2).eq.1879).and.((farrayPtr2D(2,2).eq.0))), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 4) then
+    call ESMF_Test(((farrayPtr2D(1,2).eq.0).and.((farrayPtr2D(2,2).eq.665))), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 5) then
+    call ESMF_Test(((farrayPtr2D(1,2).eq.0).and.((farrayPtr2D(2,2).eq.0))), &
+		     name, failMsg, result, ESMF_SRCLINE)
+  endif
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "routehandle3 Release Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_RouteHandleRelease(routehandle=routehandle3, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
 #endif
 
 !------------------------------------------------------------------------
@@ -656,6 +904,13 @@ program ESMF_ArrayArbIdxSMMUTest
   write(name, *) "dstDistgrid Destroy Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_DistGridDestroy(dstDistGrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "routehandle Release Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_RouteHandleRelease(routehandle=routehandle, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
