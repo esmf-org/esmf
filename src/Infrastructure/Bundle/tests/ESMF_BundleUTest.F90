@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.55 2007/10/02 04:22:00 cdeluca Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.56 2007/10/10 18:44:51 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.55 2007/10/02 04:22:00 cdeluca Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.56 2007/10/10 18:44:51 feiliu Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -434,6 +434,12 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !EX_UTest
+      ! Bundle Set Grid Test
+      call ESMF_BundleSetGrid(bundle2, grid, rc=rc)
+      write(failMsg, *) "Did not Return ESMF_SUCCESS"
+      write(name, *) "Bundle Set Grid Test after recreating bundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !EX_UTest
       !  Verify that the Field count query from an empty Bundle is handled properly
