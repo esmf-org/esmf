@@ -198,10 +198,10 @@
   integer :: localrc = ESMF_SUCCESS ! assume success
 
   ! test variables
-  integer :: SrcMemRank, DstMemRank
-  integer, allocatable :: SrcMemLoc(:), DstMemLoc(:)
-  integer :: SrcMemBeg, SrcMemEnd, DstMemBeg, DstMemEnd
-  integer :: SrcDistRank, DstDistRank, SrcGridRank, DstGridRank
+! integer :: SrcMemRank, DstMemRank
+! integer, allocatable :: SrcMemLoc(:), DstMemLoc(:)
+! integer :: SrcMemBeg, SrcMemEnd, DstMemBeg, DstMemEnd
+! integer :: SrcDistRank, DstDistRank, SrcGridRank, DstGridRank
 
 
   !----------------------------------------------------------------------------
@@ -216,100 +216,21 @@
   !----------------------------------------------------------------------------
   ! Determine testing process (REDISTRIBUTION or REMAPPING)
   !----------------------------------------------------------------------------
-  print*,'pds is:',problem_descriptor%string
-! call process_query(problem_descriptor%string,                        &
-!                    problem_descriptor%process%name,                  &
-!                    problem_descriptor%process%tag,                   &
-!                    problem_descriptor%process%location,              &
-!                    localrc)
 
   !----------------------------------------------------------------------------
   ! Determine memory layout (Logically Rectangular or General)
   !----------------------------------------------------------------------------
-  if ( .NOT. memory_topology(problem_descriptor%string, localrc) ) then
-     ! if memory structure is General, i.e. multiple logically rectangular
-     ! chunks of memory.
-
-  else  ! set memory structure to LOGICALLY_RECTANGULAR
-     print*,'set memory structure to LOGICALLY_RECTANGULAR'
-     call memory_rank(problem_descriptor%string,                       &
-                      SrcMemRank, DstMemRank,                          &
-                      SrcMemBeg, SrcMemEnd,                            &
-                      DstMemBeg, DstMemEnd, localrc)
-
-     allocate( SrcMemLoc(SrcMemRank+1), DstMemLoc(DstMemRank+1) )
-
-     call memory_locate(problem_descriptor%string,                     &
-                        SrcMemRank,                                    &
-                        SrcMemBeg, SrcMemEnd,                          &
-                        SrcMemLoc, localrc)
-
-     call memory_locate(problem_descriptor%string,                     &
-                        DstMemRank,                                    &
-                        DstMemBeg, DstMemEnd,                          &
-                        DstMemLoc, localrc)
-
-     if (localrc /= ESMF_SUCCESS) then
-        print*,'Syntax error in problem descriptor string:',    &
-                                                  problem_descriptor%string
-        returnrc = ESMF_FAILURE
-        return
-     endif
-
-     !-------------------------------------------------------------------------
-     ! Determine the problem's source distribution rank, order, and topology 
-     !-------------------------------------------------------------------------
-     SrcDistRank = dist_rank(problem_descriptor%string,                &
-                             SrcMemBeg, SrcMemEnd, localrc)
-
-     allocate( problem_descriptor%src_dist%order(SrcDistRank) )
-     problem_descriptor%src_dist%rank = SrcDistRank
-     call dist_query(problem_descriptor%string,                        &
-                     SrcMemBeg, SrcMemEnd, SrcMemRank,                 &
-                     problem_descriptor%src_dist%topology,             &
-                     problem_descriptor%src_dist%order, localrc)
-      
-     !-------------------------------------------------------------------------
-     ! Determine the problem's destination distribution rank, order, and topology 
-     !-------------------------------------------------------------------------
-     DstDistRank = dist_rank(problem_descriptor%string,                &
-                             DstMemBeg, DstMemEnd, localrc)
-     allocate( problem_descriptor%dst_dist%order(DstDistRank) )
-     problem_descriptor%dst_dist%rank = DstDistRank
-     call dist_query(problem_descriptor%string,                        &
-                     DstMemBeg, DstMemEnd, DstMemRank,                 &
-                     problem_descriptor%dst_dist%topology,             &
-                     problem_descriptor%dst_dist%order, localrc)
+     !-----------------------------------------------------------------------
+     ! Determine the problem's destination distribution rank, order, topology 
+     !------------------------------------------------------------------------
              
      !-------------------------------------------------------------------------
      ! Determine source grid rank and order
      !-------------------------------------------------------------------------
-     SrcGridRank =    &
-            grid_rank(problem_descriptor%string, SrcMemBeg, SrcMemEnd, localrc)
-     allocate( problem_descriptor%src_grid%order(SrcGridRank) )
-     problem_descriptor%src_grid%rank = SrcGridRank
-     call grid_query(problem_descriptor%string,                        &
-                     SrcMemBeg, SrcMemEnd, SrcMemRank,                 &
-                     problem_descriptor%src_grid%topology,             &
-                     problem_descriptor%src_grid%order, localrc)
              
      !-------------------------------------------------------------------------
      ! Determine destination grid rank and order
      !-------------------------------------------------------------------------
-     DstGridRank =    &
-            grid_rank(problem_descriptor%string, DstMemBeg, DstMemEnd, localrc)
-     allocate( problem_descriptor%dst_grid%order(DstGridRank) )
-     problem_descriptor%dst_Grid%rank = DstGridRank
-     call grid_query(problem_descriptor%string,                        &
-                     DstMemBeg, DstMemEnd, DstMemRank,                 &
-                     problem_descriptor%dst_grid%topology,             &
-                     problem_descriptor%dst_grid%order, localrc)
-            !
-     print*,'SrcDistRank ', SrcDistRank,' DstDistRank ', DstDistRank
-     print*,'SrcGridRank ', SrcGridRank,' DstGridRank ', DstGridRank
-
-     deallocate( SrcMemLoc, DstMemLoc )
-  endif       ! memory topology
 
   !----------------------------------------------------------------------------
   end subroutine interpret_descriptor_string
@@ -331,7 +252,7 @@
 
   type(ESMF_Config)   :: localcf
 
-  integer :: count,totalcount
+  integer :: ncount
   integer :: src_dist_rank,dst_dist_rank
   integer, allocatable :: partialcount(:)
   character(ESMF_MAXSTR) :: lfile, ltag
@@ -355,8 +276,8 @@
   !----------------------------------------------------------------------------
   ! loop over the number of DistGrid descriptor files, and count the total entries.
   !----------------------------------------------------------------------------
-  do count=1, descriptor%distfiles%size
-     lfile = descriptor%distfiles%string(count)%name
+  do ncount=1, descriptor%distfiles%size
+     lfile = descriptor%distfiles%string(ncount)%name
      call ESMF_ConfigLoadFile( localcf, trim( lfile ), rc=localrc )
      if (localrc /= ESMF_SUCCESS) then
         print*,'error, could not open DistGrid specifier file:',trim( lfile )
@@ -378,12 +299,12 @@
         return
      endif
      ! obtain the number of config entries
-     call ESMF_ConfigGetDim(localcf,partialcount(count),ncol,trim(ltag),   &
+     call ESMF_ConfigGetDim(localcf,partialcount(ncount),ncol,trim(ltag),   &
                             rc=localrc)
 
      ! close config file before opening another
      call ESMF_ConfigDestroy(localcf, localrc)
-  enddo    ! count
+  enddo    ! ncount
 
 ! bunch of stuff here deleted 
 
@@ -751,33 +672,30 @@
  !-----------------------------------------------------------------------------
 
     !--------------------------------------------------------------------------
-    subroutine memory_rank(lstring, SrcRank, DstRank, SrcBeg, SrcEnd,         &
-                           DstBeg, DstEnd, returnrc)
+    subroutine memory_rank(lstring, iRank, iBeg, iEnd, localrc)
     !--------------------------------------------------------------------------
-    ! If the memory topology is structured, this routine returns the memory
-    ! rank as specified by the descriptor string. 
+    ! For a structured block of memory, return the memory rank as specified
+    ! by the descriptor string. 
     ! 
     !------------------------------------------------------------------------
 
     ! arguments
-    character(len=ESMF_MAXSTR), intent(in   ) :: lstring
-    integer,          intent(  out) :: SrcRank,DstRank
-    integer,          intent(  out) :: SrcBeg, SrcEnd, DstBeg, DstEnd
-    integer,          intent(  out) :: returnrc
+    character(ESMF_MAXSTR), intent(in   ) :: lstring
+    integer,                intent(  out) :: iRank
+    integer,                intent(  out) :: iBeg, iEnd
+    integer,                intent(  out) :: localrc
 
     ! local variables
     character(len=1) :: pattern
     character(len=2) :: pattern2
     integer :: nMemory
-    integer :: MemPos(4)
-
-    logical :: flag
+    integer :: MemPos(2)
 
     ! initialize variables
-    returnrc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
 
     ! initialize variables
-    flag = .false.
+    iRank = 0 
 
     !------------------------------------------------------------------------
     ! The structured memory is delineated by square brackets. To determine
@@ -787,51 +705,24 @@
     pattern2 = '[]'
     nMemory = set_query(lstring, pattern2)
 
-    if (nMemory ==0) then
-       ! syntax error, no brackets
-       print*,'Syntax error, no brackets'
-       returnrc = ESMF_FAILURE
-       return
-    elseif (nMemory == 4) then
-       !---------------------------------------------------------------------
+    if ( (nMemory == 0).and.(nMemory >= 4) ) then
+       ! sanity check - syntax error, no brackets or more than one set
+       call ESMF_LogMsgSetError(ESMF_FAILURE,"symbols not properly paired",    &
+                rcToReturn=localrc)
+    elseif (nMemory == 2) then
+       !-----------------------------------------------------------------------
        ! there must be two pairs of matching brackets
-       !---------------------------------------------------------------------
+       !-----------------------------------------------------------------------
        call set_locate(lstring,pattern2, nMemory, MemPos)
-       SrcBeg = MemPos(1)
-       SrcEnd = MemPos(2)
-       DstBeg = MemPos(3)
-       DstEnd = MemPos(4)
-       if( lstring(SrcBeg:SrcBeg)=='[' .and. lstring(SrcEnd:SrcEnd)==']'  &
-           .and. lstring(DstBeg:DstBeg)=='[' .and. lstring(SrcEnd:SrcEnd)==']' ) then
-           print*,'two pairs of brackets found'
-           flag = .true.
-       endif
+       iBeg = MemPos(1)
+       iEnd = MemPos(2)
+       pattern = ';'
+       iRank = pattern_query(lstring(iBeg:iEnd),pattern) + 1
     else 
        ! brackets are mismatched
-       print*,'Syntax error, missing or extra brackets'
-       returnrc = ESMF_FAILURE
-       return
+        call ESMF_LogMsgSetError(ESMF_FAILURE,"symbols not properly paired",   &
+                 rcToReturn=localrc)
     endif
-    !------------------------------------------------------------------------
-    ! if the brackets exist and match, continue to extract memory information
-    !------------------------------------------------------------------------
-    if (flag) then
-       !---------------------------------------------------------------------
-       ! Extract Memory Rank
-       !---------------------------------------------------------------------
-       pattern = ';'
-       SrcRank = pattern_query(lstring(SrcBeg:SrcEnd),pattern) + 1
-       DstRank = pattern_query(lstring(DstBeg:DstEnd),pattern) + 1
-       
-       !------------------------------------------------------------------------
-       ! Extract Memory Rank
-       !------------------------------------------------------------------------
-    else ! not flag
-       ! Syntax error, brackets not consistent
-       print*,'Syntax error, brackets not consistent'
-       returnrc = ESMF_FAILURE
-       return
-    endif       ! if memory chunks
      
     !---------------------------------------------------------------------------
     end subroutine memory_rank
@@ -840,67 +731,88 @@
  !------------------------------------------------------------------------------
 
     !---------------------------------------------------------------------------
-    integer function memory_topology(lstring, localrc)
+    subroutine memory_topology(lstring, location, srcMulti, srcBlock,          &
+                               dstMulti,dstBlock, localrc)
     !---------------------------------------------------------------------------
-    ! function checks the input test string to determine if the memory topology
+    ! routine checks the whole input string to determine if the memory topology
     ! consists of a single structured Logically Rectangular block of memory, or 
-    ! multiple structured blocks. Returns the number of single memory blocks. 
+    ! multiple structured blocks. It also conducts syntax checking on the
+    ! string. Output is through two variables; nBlock the number of single
+    ! contigous blocks of memory, and nMult the number of multiple memory
+    ! blocks.
     !---------------------------------------------------------------------------
 
     ! arguments
     character(ESMF_MAXSTR), intent(in   ) :: lstring
-    integer,          intent(  out) :: localrc
+    integer,                intent(in   ) :: location(2)
+    integer,                intent(  out) :: srcMulti, dstMulti
+    integer,                intent(  out) :: srcBlock,dstBlock
+    integer,                intent(  out) :: localrc
 
     ! local variables
-    integer :: nsingle, nmult
+    integer :: nsingle, nmult, strlen
 
     ! initialize variables
     localrc = ESMF_RC_NOT_IMPL
+    strlen = len(lstring)
+    srcBlock = 0
+    srcMulti = 0
+    dstBlock = 0
+    dstMulti = 0
 
     !---------------------------------------------------------------------------
     ! Memory Layout
     !---------------------------------------------------------------------------
     nmult = set_query(lstring,'()' )
     nsingle = set_query(lstring,'[]' )
-    if( nsingle > 0 ) then
+
+    !---------------------------------------------------------------------------
+    ! check if memory is multiple block
+    !---------------------------------------------------------------------------
+    if( (nmult >= 4).and.(nsingle >= 4) ) then
        !------------------------------------------------------------------------
-       ! are there multiple memory blocks or a single memory block defined
+       ! check to see if symbols are properly paired on each half of the string
        !------------------------------------------------------------------------
-       if( nmult > 0 ) then
-          !---------------------------------------------------------------------
-          ! multiple block memory topology
-          !---------------------------------------------------------------------
-          if( pattern_match(lstring, '(', ')') .and.                           &
-                                      pattern_match(lstring, '[', ']') ) then
-             ! symbols are paired properly
-             memory_topology = nmult/2
-          else
-             ! error - symbols not paired properly
-             print*,' error - symbols not paired properly'
-          endif    ! pattern match
+       if( pattern_match(lstring(1:location(1)), '(', ')') .and.               &
+           pattern_match(lstring(location(2):strlen), '(', ')') .and.          &
+           pattern_match(lstring(1:location(1)), '[', ']') .and.               &
+           pattern_match(lstring(location(2):strlen), '[', ']')  ) then
+
+           srcBlock = set_query(lstring(1:location(1)),'[' )
+           srcMulti = set_query(lstring(1:location(1)),'(' )
+           dstBlock = set_query(lstring(location(2):strlen),'[' )
+           dstMulti = set_query(lstring(location(2):strlen),'(' )
+       else
+          call ESMF_LogMsgSetError(ESMF_FAILURE,"symbols not properly paired", &
+                   rcToReturn=localrc)
+       endif
+
+    !---------------------------------------------------------------------------
+    ! if memory is single block
+    !---------------------------------------------------------------------------
+    elseif( (nmult == 0).and.(nsingle == 4) ) then
+       !------------------------------------------------------------------------
+       ! check to see if symbols are properly paired on each half of the string
+       !------------------------------------------------------------------------
+       if( pattern_match(lstring(1:location(1)), '[', ']') .and.               &
+           pattern_match(lstring(location(1):strlen), '[', ']')  ) then            
+
+           srcBlock = set_query(lstring(1:location(1)),'[' )
+           dstBlock = set_query(lstring(location(2):strlen),'[' )
 
        else
-          !---------------------------------------------------------------------
-          ! single block memory topology
-          !---------------------------------------------------------------------
-          
-          if( pattern_match(lstring, '[', ']') ) then
-             if( nsingle /= 2 ) print*,'error'    ! error
-             ! symbols are paired properly
-             memory_topology = 1
-          else
-             ! error - symbols not paired properly
-             print*,' error - symbols not paired properly'
-             memory_topology = 0
-          endif    ! pattern match
-       endif  
-    else
-      ! error
-      print*,'error'
+          call ESMF_LogMsgSetError(ESMF_FAILURE,"symbols not properly paired", &
+                   rcToReturn=localrc)
+       endif
+
+    else   ! syntax error
+       call ESMF_LogMsgSetError( ESMF_FAILURE,                                 &
+               "symbols not paired properly",                                  &
+               rcToReturn=localrc)
     endif
 
     !---------------------------------------------------------------------------
-    end function memory_topology
+    end subroutine memory_topology
     !---------------------------------------------------------------------------
 
 !2345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -998,6 +910,9 @@
 
           case default
              ! syntax error - no recognized method specified
+             call ESMF_LogMsgSetError( ESMF_FAILURE,                           &
+                      "process symbol not recognized",                         &
+                      rcToReturn=localrc)
              lname = 'ERROR'
              tag  = Harness_Error
              symbol_loc(1) = 0
@@ -1006,10 +921,16 @@
           end select  ! remap type
       elseif( (iredist == 0).and.(iregrid == 0) ) then
          ! syntax error - no action
+         call ESMF_LogMsgSetError( ESMF_FAILURE,                               &
+               "no process symbol found",                                      &
+               rcToReturn=localrc)
          lname = 'ERROR'
          tag = Harness_Error
       elseif( (iredist /= 0).and.(iregrid /= 0) ) then
          ! syntax error - multiple actions
+         call ESMF_LogMsgSetError( ESMF_FAILURE,                               &
+                  "more than one process symbol found",                        &
+                  rcToReturn=localrc)
          lname = 'ERROR'
          tag = Harness_Error
       endif    ! process test

@@ -54,7 +54,7 @@
   integer :: localPet, petCount
   integer :: test_report_flag
   integer :: problem_descriptor_count
-  integer :: count
+  integer :: ncount
   ! top level test harness config file
   character(ESMF_MAXSTR) :: test_harness_name = "test_harness.rc"
 
@@ -296,15 +296,16 @@ contains
 
 !
 ! !DESCRIPTION:
-! This routine takes the problem descriptor file names specified in the top level
-! config file "test_harness.rc" and extracts from a config table the "problem
-! descriptor string" and all the "problem specifier helper files." The helper files 
-! are divided into groups by flags preceeded by a dash. The "-c" flag indicates the 
-! file containing the CLASS specific settings. The "-d" flag indicates the file(s) 
-! containing the ensemble of distribution configurations to be run with the specific
-! "problem descriptor string." Likewise the "-g"  flag indicates the file(s) containing 
-! the ensemble of grid configurations to be run with the specific "problem descriptor 
-! string." This routine only extracts the information from the configuration file. 
+! This routine takes the problem descriptor file names specified in the top 
+! level config file "test_harness.rc" and extracts from a config table the
+! "problem descriptor string" and all the "problem specifier helper files."
+! The helper files are divided into groups by flags preceeded by a dash. The
+! "-c" flag indicates the file containing the CLASS specific settings. The
+! "-d" flag indicates the file(s) containing the ensemble of distribution 
+! configurations to be run with the specific "problem descriptor string."
+! Likewise the "-g" flag indicates the file(s) containing the ensemble of
+! grid configurations to be run with the specific "problem descriptor string."
+! This routine only extracts the information from the configuration file. 
 ! additional processing occurs in a later routine.
 
   ! local ESMF types
@@ -819,6 +820,8 @@ contains
   integer, allocatable :: nstrings(:)
   integer :: tag, location(2)
   integer :: dst_beg, dst_end, src_beg, src_end
+  integer :: srcMulti, dstMulti
+  integer :: srcBlock,dstBlock
 
 
   ! local logical variable
@@ -827,38 +830,54 @@ contains
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
 
-  !--------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
   ! parse each problem descriptor string
-  !--------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
   nfiles = harness%numRecords
   allocate( nstrings(nfiles) )
 
-  !--------------------------------------------------------------------------
-  !--------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
   do file=1,nfiles
      do string=1,nstrings(file)
         lstring = trim( harness%Record(file)%string(string)%pds )
-  !--------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
   ! find the test operation (address of strings)
   ! 1. search for "->" or "=>" - tip of symbol provides ending address
   ! 2. back up until reach white space - provides begining address
   ! 3. src_beg = 1, src_end = operation_beg-1
   !    dst_beg = operation_end+1, dst_end = length(trim(string)
-  !--------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
         call process_query(lstring, lname, tag, location, localrc)  
         harness%Record(file)%string(string)%process%name = lname
         harness%Record(file)%string(string)%process%tag = tag
+
+        call memory_topology(lstring, location, srcMulti, srcBlock,            &
+                             dstMulti, dstBlock, localrc)
+        if( (srcMulti >= 1).or.(dstMulti >= 1) ) then
+           ! multiple block memory structure
+           ! TODO break into multiple single block strings
+
+
+        elseif( (srcMulti == 0).and.(srcBlock == 1) ) then
+           ! single block memory structure
+
+        else
+        endif
+
+
+
         src_beg = 1
         src_end = location(1)
         dst_beg = location(2)
         dst_end = len( trim(lstring) )
-        !--------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! separate string into source and destination strings
-        !--------------------------------------------------------------------
+        !----------------------------------------------------------------------
         src_string = adjustL( lstring(src_beg:src_end) )
         dst_string = adjustL( lstring(dst_beg:dst_end) )
-        !--------------------------------------------------------------------
-        !--------------------------------------------------------------------
+        !----------------------------------------------------------------------
+        !----------------------------------------------------------------------
       print*,' TEST '
       print*,src_beg, src_end, dst_beg,dst_end 
       print*,'123456789012345678901234567890'
