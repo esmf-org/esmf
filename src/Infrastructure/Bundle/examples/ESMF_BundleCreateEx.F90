@@ -1,9 +1,9 @@
-! $Id: ESMF_BundleCreateEx.F90,v 1.28 2007/08/30 05:06:27 cdeluca Exp $
+! $Id: ESMF_BundleCreateEx.F90,v 1.29 2007/10/10 18:20:14 feiliu Exp $
 !
 ! Example/test code which creates a new bundle.
 
 !-------------------------------------------------------------------------
-!EXremoveAMPLE        String used by test script to count examples.
+!EXAMPLE        String used by test script to count examples.
 !-------------------------------------------------------------------------
 
 !BOP
@@ -24,7 +24,7 @@
     
 !   ! Local variables
     integer :: i, rc, fieldcount
-    type(ESMF_IGrid) :: igrid
+    type(ESMF_Grid) :: grid
     type(ESMF_ArraySpec) :: arrayspec
     !type(ESMF_FieldDataMap) :: datamap
     type(ESMF_DELayout) :: delayout
@@ -53,38 +53,46 @@
 
 !   !  Create several Fields and add them to a new Bundle.
  
-    counts = (/ 100, 200 /)
-    min_coord = (/  0.0,  0.0 /)
-    max_coord = (/ 50.0, 60.0 /)
+!    counts = (/ 100, 200 /)
+!    min_coord = (/  0.0,  0.0 /)
+!    max_coord = (/ 50.0, 60.0 /)
     delayout = ESMF_DELayoutCreate(vm, rc=rc)
-    igrid = ESMF_IGridCreateHorzXYUni(counts, min_coord, max_coord, &
-                horzStagger=ESMF_IGRID_HORZ_STAGGER_A, rc=rc)
-    call ESMF_IGridDistribute(igrid, delayout=delayout, rc=rc)
+    grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/100,200/), &
+                                  regDecomp=(/2,2/), name="atmgrid", rc=rc)
 !EOC
-    
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!    distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/100,200/), &
+!                                  regDecomp=(/2,2/), rc=rc)
+!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!
+!    coordX = ESMF_ArrayCreate(farray=fa_x, distgrid=distgrid, rc=rc)
+!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!    call ESMF_ArrayPrint(coordX, rc=rc)
+!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
 
-    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc)
-    field(1) = ESMF_FieldCreate(igrid, arrayspec, &
-                                horzRelloc=ESMF_CELL_CENTER, &
+    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    field(1) = ESMF_FieldCreate(grid, arrayspec, &
+                                staggerloc=ESMF_STAGGERLOC_CENTER, &
                                 name="pressure", rc=rc)
 !EOC
     
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    field(2) = ESMF_FieldCreate(igrid, arrayspec, &
-                                horzRelloc=ESMF_CELL_CENTER, &
+    field(2) = ESMF_FieldCreate(grid, arrayspec, &
+                                staggerloc=ESMF_STAGGERLOC_CENTER, &
                                 name="temperature", rc=rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    field(3) = ESMF_FieldCreate(igrid, arrayspec, &
-                                horzRelloc=ESMF_CELL_CENTER, &
+    field(3) = ESMF_FieldCreate(grid, arrayspec, &
+                                staggerloc=ESMF_STAGGERLOC_CENTER, &
                                 name="heat flux", rc=rc)
 !EOC
 
@@ -103,8 +111,8 @@
 !   !  Create an empty Bundle and then add a single field to it.
 
 
-    simplefield = ESMF_FieldCreate(igrid, arrayspec, &
-                                horzRelloc=ESMF_CELL_CENTER, name="rh", rc=rc)
+    simplefield = ESMF_FieldCreate(grid, arrayspec, &
+                                staggerloc=ESMF_STAGGERLOC_CENTER, name="rh", rc=rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
