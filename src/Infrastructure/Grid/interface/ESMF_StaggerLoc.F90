@@ -1,4 +1,4 @@
-! $Id: ESMF_StaggerLoc.F90,v 1.9 2007/09/25 15:53:52 oehmke Exp $
+! $Id: ESMF_StaggerLoc.F90,v 1.10 2007/10/11 22:23:49 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -97,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StaggerLoc.F90,v 1.9 2007/09/25 15:53:52 oehmke Exp $'
+      '$Id: ESMF_StaggerLoc.F90,v 1.10 2007/10/11 22:23:49 oehmke Exp $'
 
 
 !==============================================================================
@@ -228,12 +228,13 @@ end interface
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StaggerLocSet"
+#define ESMF_METHOD "ESMF_StaggerLocSetAllDim"
 !BOP
 ! !IROUTINE: ESMF_StaggerLocSet - Set a StaggerLoc to a particular position in the cell
 
 ! !INTERFACE:
-      subroutine ESMF_StaggerLocSetAllDim(staggerloc,loc,rc)
+  ! Private name; call using ESMF_StaggerLocSet() 
+     subroutine ESMF_StaggerLocSetAllDim(staggerloc,loc,rc)
 !
 ! !ARGUMENTS:
       type (ESMF_StaggerLoc), intent(inout) :: staggerloc
@@ -288,9 +289,10 @@ end interface
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StaggerLocSetDim"
 !BOP
-! !IROUTINE: ESMF_StaggerLocSetDim - Set one dimension of a StaggerLoc to a particular position
+! !IROUTINE: ESMF_StaggerLocSet - Set one dimension of a StaggerLoc to a particular position
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_StaggerLocSet() 
       subroutine ESMF_StaggerLocSetDim(staggerloc,dim,loc,rc)
 !
 ! !ARGUMENTS:

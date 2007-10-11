@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.28 2007/10/06 02:57:31 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.29 2007/10/11 22:23:49 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.28 2007/10/06 02:57:31 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.29 2007/10/11 22:23:49 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -938,12 +938,12 @@ int Grid::getDistExclusiveUBound(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Grid::getStaggerLWidth()"
+#define ESMC_METHOD "ESMCI::Grid::getLDEStaggerLWidth()"
 //BOPI
-// !IROUTINE:  Grid::getStaggerLWidth()"
+// !IROUTINE:  Grid::getLDEStaggerLWidth()"
 //
 // !INTERFACE:
-int Grid::getStaggerLWidth(
+int Grid::getLDEStaggerLWidth(
 //
 // !RETURN VALUE:
 //   return code
@@ -956,7 +956,7 @@ int Grid::getStaggerLWidth(
   ){
 //
 // !DESCRIPTION:
-//   Returns the amount the Lower end of this DE should be shifted
+//   Returns the amount the Lower end of this local DE should be shifted
 //   to add the stagger padding specified by the staggerLWidth in the Grid
 //   for this stagger location.
 //
@@ -1005,12 +1005,12 @@ int Grid::getStaggerLWidth(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Grid::getStaggerUWidth()"
+#define ESMC_METHOD "ESMCI::Grid::getLDEStaggerUWidth()"
 //BOPI
-// !IROUTINE:  Grid::getStaggerUWidth()"
+// !IROUTINE:  Grid::getLDEStaggerUWidth()"
 //
 // !INTERFACE:
-int Grid::getStaggerUWidth(
+int Grid::getLDEStaggerUWidth(
 //
 // !RETURN VALUE:
 //   return code
@@ -1023,7 +1023,7 @@ int Grid::getStaggerUWidth(
   ){
 //
 // !DESCRIPTION:
-//   Returns the amount the Lower end of this DE should be shifted
+//   Returns the amount the Lower end of this local DE should be shifted
 //   to add the stagger padding specified by the staggerUWidth set in the 
 //   Grid for this stagger location.
 //
@@ -1376,7 +1376,7 @@ int Grid::setCoordArray(
    const int *exLBnd=arrayArg->getExclusiveLBound()+lDE*distRank;
 
     ////// Get stagger Lbnd offset
-    localrc=this->getStaggerLWidth(staggerloc, lDE, offset);
+    localrc=this->getLDEStaggerLWidth(staggerloc, lDE, offset);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
                                               &rc)) return rc; 
     ////// Fill in the staggerLBnd array
@@ -1421,7 +1421,7 @@ int Grid::setCoordArray(
    const int *exUBnd=arrayArg->getExclusiveUBound()+lDE*distRank;
 
     ////// Get stagger Ubnd offset
-    localrc=this->getStaggerUWidth(staggerloc, lDE, offset);
+    localrc=this->getLDEStaggerUWidth(staggerloc, lDE, offset);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
                                               &rc)) return rc; 
     ////// Fill in the staggerLBnd array

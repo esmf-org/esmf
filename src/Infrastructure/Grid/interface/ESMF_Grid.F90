@@ -137,7 +137,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.32 2007/10/06 02:57:31 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.33 2007/10/11 22:23:49 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -217,6 +217,7 @@ end interface
 !
       module procedure ESMF_GridGet
       module procedure ESMF_GridGetPLocalDePSloc
+      module procedure ESMF_GridGetPSloc
       
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -2495,7 +2496,7 @@ end subroutine ESMF_GridGet
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
-      integer,                intent(in),  optional :: localDe
+      integer,                intent(in)            :: localDe
       type (ESMF_StaggerLoc), intent(in)            :: staggerloc
       integer,                intent(out), optional :: exclusiveLBound(:)
       integer,                intent(out), optional :: exclusiveUBound(:)
@@ -2512,7 +2513,7 @@ end subroutine ESMF_GridGet
 !  array may only occupy a subset of the Grid's dimensions, and
 !  so these calls may not give all the bounds of the stagger location. 
 !  The bounds from this call are the full bounds, and so
-!  for example, give the appropriate bounds for creating an array to hold 
+!  for example, give the appropriate bounds for allocating a F90 array to hold 
 !  data residing on the stagger location.
 !  Note that unlike the output from the Array, these values also include the 
 !  undistributed dimensions and are
@@ -2625,6 +2626,127 @@ end subroutine ESMF_GridGet
     if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGetPLocalDePSloc
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD  
+#define ESMF_METHOD "ESMF_GridGetPSloc"
+!BOP
+! !IROUTINE: ESMF_GridGet - Get Grid information for a specific stagger location
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridGet()
+      subroutine ESMF_GridGetPSloc(grid, staggerloc, &
+          computationalEdgeLWidth, computationalEdgeUWidth, &
+          lbounds,ubounds, rc)
+
+!
+! !ARGUMENTS:
+      type(ESMF_Grid),        intent(in)            :: grid
+      type (ESMF_StaggerLoc), intent(in)            :: staggerloc
+      integer,                intent(out), optional :: computationalEdgeLWidth(:)
+      integer,                intent(out), optional :: computationalEdgeUWidth(:)
+      integer,                intent(out), optional :: lbounds(:)
+      integer,                intent(out), optional :: ubounds(:)
+      integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!  This method gets information about a particular stagger location. 
+!  This information is useful for creating an ESMF Array to hold
+!  the data at the stagger location. 
+!
+!The arguments are:
+!\begin{description}
+!\item[{grid}]
+!    Grid to get the information from.
+!\item[{staggerloc}]
+!     The stagger location to get the information for. 
+!     Please see Section~\ref{sec:opt:staggerloc} for a list 
+!     of predefined stagger locations. 
+!\item[{[computationalEdgeLWidth]}]
+!     Upon return this holds the global lower width of the stagger region.
+!     The width returned is only for the distGrid dimensions and is
+!     mapped to correspond to those dimensions. 
+!     {\tt computationalEdgeLWidth} must be allocated to be of size equal to the grid distRank
+!     (i.e. the grid's distgrid's dimCount).
+!\item[{[computationalEdgeUWidth]}]
+!     Upon return this holds the global upper width of the stagger region.
+!     The width returned is only for the distGrid dimensions and is
+!     mapped to correspond to those dimensions. 
+!     {\tt computationalEdgeUWidth} must be allocated to be of size equal to the grid distRank
+!     (i.e. the grid's distgrid's dimCount).
+!\item[{[lbounds]}]
+!     Upon return this holds the lower bound of the stagger region.
+!     This bound is the lower bound used to create the grid modified by
+!     the appropriate staggerLWidths.  
+!     {\tt lbounds} must be allocated to be of size equal to the grid undistRank.
+!\item[{[ubounds]}]
+!     Upon return this holds the upper bound of the stagger region.
+!     This bound is the upper bound used to create the grid modified by
+!     the appropriate staggerUWidths.  
+!     {\tt ubounds} must be allocated to be of size equal to the grid undistRank.
+!\item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!\end{description}
+!
+!EOP
+
+    integer :: localrc ! local error status
+    type(ESMF_InterfaceInt) :: computationalEdgeLWidthArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalEdgeUWidthArg ! helper variable
+    type(ESMF_InterfaceInt) :: lboundsArg ! helper variable
+    type(ESMF_InterfaceInt) :: uboundsArg ! helper variable
+    integer :: tmp_staggerloc
+
+    ! Initialize return code
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
+    tmp_staggerloc=staggerloc%staggerloc
+
+    ! process optional arguments
+    computationalEdgeLWidthArg=ESMF_InterfaceIntCreate(computationalEdgeLWidth, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalEdgeUWidthArg=ESMF_InterfaceIntCreate(computationalEdgeUWidth, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    lboundsArg=ESMF_InterfaceIntCreate(lbounds, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    uboundsArg=ESMF_InterfaceIntCreate(ubounds, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+
+    call c_ESMC_GridGetPSloc(grid, tmp_staggerLoc, &
+      computationalEdgeLWidthArg, computationalEdgeUWidthArg, &
+      lboundsArg,uboundsArg,localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Deallocate interface ints
+    call ESMF_InterfaceIntDestroy(computationalEdgeLWidthArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalEdgeUWidthArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(lboundsArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(uboundsArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetPSloc
+
 
 
 !------------------------------------------------------------------------------

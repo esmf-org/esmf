@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.16 2007/09/25 15:53:51 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.17 2007/10/11 22:23:49 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 
   int staggerLocCount;
   Array ***coordArrayList; // size of coordArrayList = staggerLocCountxrank [staggerLoc][coord]
-  int   **staggerAlignList;     // hold alignment info [staggerloc][coord][dim]
+  int   **staggerAlignList;     // hold alignment info [staggerloc][dim]
   int   **staggerLWidthList;     // hold LWidth info [staggerloc][dim]
   int   **staggerUWidthList;     // hold UWidth info [staggerloc][dim]
   bool  **didIAllocList;        // if true, I allocated this Array [staggerloc][coord]
@@ -152,6 +152,8 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
  public:
 
   // accessor methods
+  // NOTE: For efficiencies sake the following functions don't error check
+  //       so be sure to error check the grid or any input before using.  
   const ESMC_GridStatus getStatus(void) const {return status;}
   const int getRank(void) const {return rank;}
   const int getDistRank(void) const {return distRank;}
@@ -171,6 +173,8 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
         int  *getGridMapDim(void) const {return gridMapDim;} 
         bool **getCoordIsDist(void) const {return coordIsDist;} 
         int  **getCoordMapDim(void) const {return coordMapDim;} 
+  const int   *getStaggerLWidth(int staggerloc) const {return staggerLWidthList[staggerloc];}
+  const int   *getStaggerUWidth(int staggerloc) const {return staggerUWidthList[staggerloc];}
 
   // Set data in an empty grid before commit
   int set(
@@ -215,14 +219,14 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   ~Grid();
 
   // get upper stagger padding for a particular localDe and staggerloc
-  int getStaggerUWidth(
+  int getLDEStaggerUWidth(
 		       int _staggerloc,
 		       int _localDE, 
 		       int *_UWidth // should be size>=grid rank
 		       );
 
   // get upper stagger padding for a particular localDe and staggerloc
-  int getStaggerLWidth(
+  int getLDEStaggerLWidth(
 		     int _staggerloc,
 		     int _localDE, 
 		     int *_LWidth // should be size>=grid rank
