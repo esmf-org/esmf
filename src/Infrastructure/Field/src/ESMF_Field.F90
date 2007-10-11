@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.252 2007/10/05 00:40:29 peggyli Exp $
+! $Id: ESMF_Field.F90,v 1.253 2007/10/11 22:22:57 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -226,7 +226,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.252 2007/10/05 00:40:29 peggyli Exp $'
+      '$Id: ESMF_Field.F90,v 1.253 2007/10/11 22:22:57 oehmke Exp $'
 
 !==============================================================================
 !
@@ -3383,7 +3383,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 ! TODO:FIELDINTEGRATION Replace bound calculation with cellCount from GridGet()
-            call ESMF_GridGet(ftypep%grid, staggerloc=staggerloc, &
+            call ESMF_GridGet(ftypep%grid, localDE=0, staggerloc=staggerloc, &
                               exclusiveLBound=exclLBounds, &
                               exclusiveUBound=exclUBounds, &
                               rc=localrc)
@@ -3955,7 +3955,7 @@
           endif
       endif
 ! TODO:FIELDINTEGRATION Replace bound calculation with cellCount from GridGet()
-      call ESMF_GridGet(ftype%grid, staggerloc=localStaggerloc, &
+      call ESMF_GridGet(ftype%grid, localDE=0, staggerloc=localStaggerloc, &
                         exclusiveLBound=exclLBounds(1:gridRank), &
                         exclusiveUBound=exclUBounds(1:gridRank), &
                         rc=localrc)
