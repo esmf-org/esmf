@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.147 2007/10/10 20:10:26 theurich Exp $
+// $Id: ESMC_Array.C,v 1.148 2007/10/12 19:03:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.147 2007/10/10 20:10:26 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.148 2007/10/12 19:03:25 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2957,6 +2957,7 @@ int Array::sparseMatMulStore(
   struct FactorElement{
     SeqIndex partnerSeqIndex;
     int partnerDe;
+    int padding;    // padding for 8-byte alignment
     char factor[8]; // large enough for R8 and I8
   };
   
@@ -3557,7 +3558,7 @@ printf("srcArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
   
           // prepare to send remaining information to Pet "i" in one long stream
           int thisPetTotalFactorCount = thisPetFactorCountList[totalCountIndex];
-          int byteCount = thisPetTotalFactorCount * (3*sizeof(int) + dataSize);
+          int byteCount = thisPetTotalFactorCount * (4*sizeof(int) + dataSize);
           char *stream = new char[byteCount];
           int *intStream;
           if (typekindArg == ESMC_TYPEKIND_R4){
@@ -3585,6 +3586,7 @@ printf("srcArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
                 *intStream++ = factorIndexList->array[j*2+1]; // dstSeqIndex
                 *intStream++ = -1; // dummy dstTensorSeqIndex
               }
+              *intStream++ = 0; // padding for 8-byte alignment
               factorStream = (ESMC_R4 *)intStream;
               *factorStream++ = ((ESMC_R4 *)factorList)[j];
             }
@@ -3613,6 +3615,7 @@ printf("srcArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
                 *intStream++ = factorIndexList->array[j*2+1]; // dstSeqIndex
                 *intStream++ = -1; // dummy dstTensorSeqIndex
               }
+              *intStream++ = 0; // padding for 8-byte alignment
               factorStream = (ESMC_R8 *)intStream;
               *factorStream++ = ((ESMC_R8 *)factorList)[j];
 #ifdef ASMMSTOREPRINT
@@ -3644,6 +3647,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
                 *intStream++ = factorIndexList->array[j*2+1]; // dstSeqIndex
                 *intStream++ = -1; // dummy dstTensorSeqIndex
               }
+              *intStream++ = 0; // padding for 8-byte alignment
               factorStream = (ESMC_I4 *)intStream;
               *factorStream++ = ((ESMC_I4 *)factorList)[j];
             }
@@ -3672,6 +3676,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
                 *intStream++ = factorIndexList->array[j*2+1]; // dstSeqIndex
                 *intStream++ = -1; // dummy dstTensorSeqIndex
               }
+              *intStream++ = 0; // padding for 8-byte alignment
               factorStream = (ESMC_I8 *)intStream;
                *factorStream++ = ((ESMC_I8 *)factorList)[j];
             }
@@ -3734,7 +3739,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
       }
       delete [] localPetFactorCountList;
       // receive remaining information from rootPet in one long stream
-      int byteCount = localPetTotalFactorCount * (3 * sizeof(int) + dataSize);
+      int byteCount = localPetTotalFactorCount * (4*sizeof(int) + dataSize);
       char *stream = new char[byteCount];
       vm->vmk_recv(stream, byteCount, rootPet);
       // process stream and set srcSeqIndexFactorLookup[] content
@@ -3749,6 +3754,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
             .partnerSeqIndex.decompSeqIndex = *intStream++; // dstSeqIndex
           srcSeqIndexFactorLookup[j].factorList[k]
             .partnerSeqIndex.tensorSeqIndex = *intStream++; // dstTensorSeqIndex
+          intStream++;  // skip padding
           factorStream = (ESMC_R4 *)intStream;
           *((ESMC_R4 *)srcSeqIndexFactorLookup[j].factorList[k].factor) =
             *factorStream++;
@@ -3763,6 +3769,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
             .partnerSeqIndex.decompSeqIndex = *intStream++; // dstSeqIndex
           srcSeqIndexFactorLookup[j].factorList[k]
             .partnerSeqIndex.tensorSeqIndex = *intStream++; // dstTensorSeqIndex
+          intStream++;  // skip padding
           factorStream = (ESMC_R8 *)intStream;
           *((ESMC_R8 *)srcSeqIndexFactorLookup[j].factorList[k].factor) =
             *factorStream++;
@@ -3777,6 +3784,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
             .partnerSeqIndex.decompSeqIndex = *intStream++; // dstSeqIndex
           srcSeqIndexFactorLookup[j].factorList[k]
             .partnerSeqIndex.tensorSeqIndex = *intStream++; // dstTensorSeqIndex
+          intStream++;  // skip padding
           factorStream = (ESMC_I4 *)intStream;
           *((ESMC_I4 *)srcSeqIndexFactorLookup[j].factorList[k].factor) =
             *factorStream++;
@@ -3791,6 +3799,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
             .partnerSeqIndex.decompSeqIndex = *intStream++; // dstSeqIndex
           srcSeqIndexFactorLookup[j].factorList[k]
             .partnerSeqIndex.tensorSeqIndex = *intStream++; // dstTensorSeqIndex
+          intStream++;  // skip padding
           factorStream = (ESMC_I8 *)intStream;
           *((ESMC_I8 *)srcSeqIndexFactorLookup[j].factorList[k].factor) =
             *factorStream++;
@@ -4256,7 +4265,7 @@ printf("dstArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
             (dstSeqIndexInterval[i].countEff + 1) * sizeof(int), i);
           // prepare to send remaining information to Pet "i" in one long stream
           int thisPetTotalFactorCount = thisPetFactorCountList[totalCountIndex];
-          int byteCount = thisPetTotalFactorCount * (3*sizeof(int) + dataSize);
+          int byteCount = thisPetTotalFactorCount * (4*sizeof(int) + dataSize);
           char *stream = new char[byteCount];
           int *intStream;
           if (typekindArg == ESMC_TYPEKIND_R4){
@@ -4284,6 +4293,7 @@ printf("dstArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
                 *intStream++ = factorIndexList->array[j*2];   // srcSeqIndex
                 *intStream++ = -1; // dummy srcTensorSeqIndex
               }
+              *intStream++ = 0; // padding for 8-byte alignment
               factorStream = (ESMC_R4 *)intStream;
               *factorStream++ = ((ESMC_R4 *)factorList)[j];
             }
@@ -4312,6 +4322,7 @@ printf("dstArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
                 *intStream++ = factorIndexList->array[j*2];   // srcSeqIndex
                 *intStream++ = -1; // dummy srcTensorSeqIndex
               }
+              *intStream++ = 0; // padding for 8-byte alignment
               factorStream = (ESMC_R8 *)intStream;
               *factorStream++ = ((ESMC_R8 *)factorList)[j];
 #ifdef ASMMSTOREPRINT
@@ -4343,6 +4354,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
                 *intStream++ = factorIndexList->array[j*2];   // srcSeqIndex
                 *intStream++ = -1; // dummy srcTensorSeqIndex
               }
+              *intStream++ = 0; // padding for 8-byte alignment
               factorStream = (ESMC_I4 *)intStream;
               *factorStream++ = ((ESMC_I4 *)factorList)[j];
             }
@@ -4371,6 +4383,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
                 *intStream++ = factorIndexList->array[j*2];   // srcSeqIndex
                 *intStream++ = -1; // dummy srcTensorSeqIndex
               }
+              *intStream++ = 0; // padding for 8-byte alignment
               factorStream = (ESMC_I8 *)intStream;
               *factorStream++ = ((ESMC_I8 *)factorList)[j];
             }
@@ -4415,7 +4428,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
       }
       delete [] localPetFactorCountList;
       // receive remaining information from rootPet in one long stream
-      int byteCount = localPetTotalFactorCount * (3 * sizeof(int) + dataSize);
+      int byteCount = localPetTotalFactorCount * (4*sizeof(int) + dataSize);
       char *stream = new char[byteCount];
       vm->vmk_recv(stream, byteCount, rootPet);
       // process stream and set dstSeqIndexFactorLookup[] content
@@ -4430,6 +4443,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
             .partnerSeqIndex.decompSeqIndex = *intStream++; // srcSeqIndex
           dstSeqIndexFactorLookup[j].factorList[k]
             .partnerSeqIndex.tensorSeqIndex = *intStream++; // srcTensorSeqIndex
+          intStream++;  // skip padding
           factorStream = (ESMC_R4 *)intStream;
           *((ESMC_R4 *)dstSeqIndexFactorLookup[j].factorList[k].factor) =
             *factorStream++;
@@ -4444,6 +4458,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
             .partnerSeqIndex.decompSeqIndex = *intStream++; // srcSeqIndex
           dstSeqIndexFactorLookup[j].factorList[k]
             .partnerSeqIndex.tensorSeqIndex = *intStream++; // srcTensorSeqIndex
+          intStream++;  // skip padding
           factorStream = (ESMC_R8 *)intStream;
           *((ESMC_R8 *)dstSeqIndexFactorLookup[j].factorList[k].factor) =
             *factorStream++;
@@ -4458,6 +4473,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
             .partnerSeqIndex.decompSeqIndex = *intStream++; // srcSeqIndex
           dstSeqIndexFactorLookup[j].factorList[k]
             .partnerSeqIndex.tensorSeqIndex = *intStream++; // srcTensorSeqIndex
+          intStream++;  // skip padding
           factorStream = (ESMC_I4 *)intStream;
           *((ESMC_I4 *)dstSeqIndexFactorLookup[j].factorList[k].factor) =
             *factorStream++;
@@ -4472,6 +4488,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
             .partnerSeqIndex.decompSeqIndex = *intStream++; // srcSeqIndex
           dstSeqIndexFactorLookup[j].factorList[k]
             .partnerSeqIndex.tensorSeqIndex = *intStream++; // srcTensorSeqIndex
+          intStream++;  // skip padding
           factorStream = (ESMC_I8 *)intStream;
           *((ESMC_I8 *)dstSeqIndexFactorLookup[j].factorList[k].factor) =
             *factorStream++;
@@ -4845,6 +4862,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
           int j = *responseStreamInt++;
           int k = *responseStreamInt++;
           int factorCount = *responseStreamInt++;
+          responseStreamInt++;  // skip padding
           srcLinSeqList[j][k].factorCount = factorCount;
           srcLinSeqList[j][k].factorList = new FactorElement[factorCount];
           responseStreamFactorElement = (FactorElement *)responseStreamInt;
@@ -4903,7 +4921,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
               factorElementCounter += factorCount;
             }
           }
-          int responseStreamSize = 3*indexCounter*sizeof(int)
+          int responseStreamSize = 4*indexCounter*sizeof(int)
             + factorElementCounter*sizeof(FactorElement);
           char *responseStream = new char[responseStreamSize];
           int *responseStreamInt;
@@ -4917,6 +4935,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
               *responseStreamInt++ = seqIndexIndexInfoList[j].listIndex1;
               *responseStreamInt++ = seqIndexIndexInfoList[j].listIndex2;
               *responseStreamInt++ = factorCount;
+              *responseStreamInt++ = 0; // padding for 8-byte alignment
               responseStreamFactorElement = (FactorElement *)responseStreamInt;
               memcpy(responseStreamFactorElement,
                 srcSeqIndexFactorLookup[k].factorList,
@@ -4985,6 +5004,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
           int j = *responseStreamInt++;
           int k = *responseStreamInt++;
           int factorCount = *responseStreamInt++;
+          responseStreamInt++;  // skip padding
           dstLinSeqList[j][k].factorCount = factorCount;
           dstLinSeqList[j][k].factorList = new FactorElement[factorCount];
           responseStreamFactorElement = (FactorElement *)responseStreamInt;
@@ -5043,7 +5063,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
               factorElementCounter += factorCount;
             }
           }
-          int responseStreamSize = 3*indexCounter*sizeof(int)
+          int responseStreamSize = 4*indexCounter*sizeof(int)
             + factorElementCounter*sizeof(FactorElement);
           char *responseStream = new char[responseStreamSize];
           int *responseStreamInt;
@@ -5057,6 +5077,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
               *responseStreamInt++ = seqIndexIndexInfoList[j].listIndex1;
               *responseStreamInt++ = seqIndexIndexInfoList[j].listIndex2;
               *responseStreamInt++ = factorCount;
+              *responseStreamInt++ = 0; // padding for 8-byte alignment
               responseStreamFactorElement = (FactorElement *)responseStreamInt;
               memcpy(responseStreamFactorElement,
                 dstSeqIndexFactorLookup[k].factorList,
