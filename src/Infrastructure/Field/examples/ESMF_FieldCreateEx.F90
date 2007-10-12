@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.50 2007/10/08 18:39:07 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.51 2007/10/12 15:46:56 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -64,7 +64,7 @@
                                   regDecomp=(/2,2/), name="atmgrid", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER, computationalLBound=lbound_, &
+    call ESMF_GridGet(grid, localDE=0, staggerloc=ESMF_STAGGERLOC_CENTER, computationalLBound=lbound_, &
         computationalUBound=ubound_, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
