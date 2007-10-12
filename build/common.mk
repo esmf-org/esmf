@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.199 2007/09/28 21:49:31 theurich Exp $
+#  $Id: common.mk,v 1.200 2007/10/12 20:49:44 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -355,7 +355,7 @@ ESMF_EXDIR      = $(ESMF_BUILD)/examples/examples$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_
 ESMF_INCDIR     = $(ESMF_BUILD)/src/include
 
 # Infrastructure/Superstructure incs
-ESMF_OTHERINCS  = -I$(ESMF_BUILD)/src/Infrastructure -I$(ESMF_BUILD)/src/Superstructure
+ESMF_INTERNALINCDIRS  = -I$(ESMF_BUILD)/src/Infrastructure -I$(ESMF_BUILD)/src/Superstructure
 
 # documentation directory
 ESMF_DOCDIR	= $(ESMF_DIR)/doc
@@ -499,8 +499,8 @@ ESMF_F90COMPILEPATHSLOCAL =
 ifneq ($(ESMF_SITE),default)
 ESMF_F90COMPILEPATHSLOCAL += -I$(ESMF_SITEDIR)
 endif
-ESMF_F90COMPILEPATHSLOCAL += -I$(ESMF_CONFDIR)
-ESMF_F90COMPILEPATHS += -I$(ESMF_INCDIR) $(ESMF_OTHERINCS)
+ESMF_F90COMPILEPATHSLOCAL += -I$(ESMF_CONFDIR) $(ESMF_INTERNALINCDIRS)
+ESMF_F90COMPILEPATHS += -I$(ESMF_INCDIR)
 ESMF_F90COMPILEFREECPP +=
 ESMF_F90COMPILEFREENOCPP +=
 ESMF_F90COMPILEFIXCPP +=
@@ -531,8 +531,8 @@ ESMF_CXXCOMPILEPATHSLOCAL += -I$(ESMF_DIR)/$(LOCDIR)/../include
 ifneq ($(ESMF_SITE),default)
 ESMF_CXXCOMPILEPATHSLOCAL += -I$(ESMF_SITEDIR)
 endif
-ESMF_CXXCOMPILEPATHSLOCAL += -I$(ESMF_CONFDIR)
-ESMF_CXXCOMPILEPATHS += -I$(ESMF_INCDIR) $(ESMF_OTHERINCS)
+ESMF_CXXCOMPILEPATHSLOCAL += -I$(ESMF_CONFDIR) $(ESMF_INTERNALINCDIRS)
+ESMF_CXXCOMPILEPATHS += -I$(ESMF_INCDIR)
 ESMF_CXXCOMPILECPPFLAGS += $(CPPFLAGS) -D__SDIR__='"$(LOCDIR)"'
 
 # - F90LINKER
