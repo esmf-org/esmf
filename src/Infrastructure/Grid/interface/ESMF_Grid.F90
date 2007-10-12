@@ -45,6 +45,7 @@
       use ESMF_StaggerLocMod
       use ESMF_DistGridMod
       use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
+      use ESMF_ArraySpecMod
 
 !     NEED TO ADD MORE HERE
       implicit none
@@ -116,6 +117,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
   public ESMF_GridCreate
   public ESMF_GridCreateEmpty
   public ESMF_GridCreateShapeTile
+  public ESMF_GridCreateArray
 
   public ESMF_GridDestroy
 
@@ -137,7 +139,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.34 2007/10/11 23:23:34 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.35 2007/10/12 22:04:09 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -589,7 +591,6 @@ end interface
 
       end subroutine ESMF_GridCommit
 
-#ifdef NOT_YET
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateArray"
@@ -605,11 +606,11 @@ end interface
 !
 ! !ARGUMENTS:
        type(ESMF_Grid),       intent(in)            :: grid
-       type(ESMF_StaggerLoc), intent(in)            :: staggerloc
+       type(ESMF_StaggerLoc), intent(in),  optional :: staggerloc
        character (len=*),     intent(in),  optional :: name
        type(ESMF_TypeKind),   intent(in),  optional :: typeKind
-       integer,               intent(in),  optional :: totalLWidth
-       integer,               intent(in),  optional :: totalUWidth
+       integer,               intent(in),  optional :: totalLWidth(:)
+       integer,               intent(in),  optional :: totalUWidth(:)
        integer,               intent(out), optional :: rc
 
 !
@@ -627,16 +628,21 @@ end interface
 !\item[{staggerloc}]
 !     The stagger location to build the Array for. 
 !     Please see Section~\ref{sec:opt:staggerloc} for a list 
-!     of predefined stagger locations. 
+!     of predefined stagger locations. If not present, defaults to
+!      ESMF\_STAGGERLOC\_CENTER.
 ! \item[{[name]}]
 !     {\tt ESMF\_Grid} name.
 ! \item[{[typeKind]}] 
 !     The type/kind of the newly created array data. 
 !     If not specified then the type/kind will be 8 byte reals.  
 !\item[{[totalLWidth]}]
-
+!     Extra padding to be added to the Array. {\tt totalLWidth} is the amount
+!     that the lower boundary of the Array should be dropped relative
+!     to the lower bound of the exclusive region.
 !\item[{[totalUWidth]}]
-
+!     Extra padding to be added to the Array. {\tt totalUWidth} is the amount
+!     that the upper boundary of the Array should be raised relative
+!     to the upper bound of the exclusive region.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -647,9 +653,11 @@ end interface
     type(ESMF_ArraySpec) :: arrayspec         
     type(ESMF_DistGrid) :: distgrid
     type(ESMF_IndexFlag) :: indexflag    
-    integer :: compEUWidth(ESMF_MAXDIM),compELWidth(ESMF_MAXDIM)
-    integer :: lbounds(ESMF_MAXDIM),ubounds(ESMF_MAXDIM)
-    integer :: dimmap(ESMF_MAXDIM)
+    type(ESMF_TypeKind) :: localTypeKind
+    type(ESMF_StaggerLoc) :: localStaggerLoc
+    integer, pointer :: compEUWidth(:),compELWidth(:)
+    integer, pointer :: lbounds(:),ubounds(:)
+    integer, pointer :: dimmap(:)
     integer :: rank,distRank,undistRank
 
     ! Initialize return code; assume failure until success is certain
@@ -659,15 +667,47 @@ end interface
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
 
+    ! Set Default TypeKind if neccessary
+    if (present(typekind)) then
+       localTypeKind=typekind
+    else
+       localTypeKind=ESMF_TYPEKIND_R8
+    endif
+
+    ! Set Default StaggerLoc if neccessary
+    if (present(staggerloc)) then
+       localStaggerLoc=staggerloc
+    else
+       localStaggerLoc=ESMF_STAGGERLOC_CENTER
+    endif
+
     ! Get info from Grid
     call ESMF_GridGet(grid, distgrid=distgrid, rank=rank, distRank=distRank, &
-                      undistRank=undistRank, dimmap=dimmap, indexflag=indexflag, rc=localrc)
+                      undistRank=undistRank, indexflag=indexflag, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! allocated dimmap
+    allocate(dimmap(distRank) , stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating dimmap", &
+                                     ESMF_CONTEXT, rc)) return   
+
+    ! allocated computationalEdgeWidths
+    allocate(compELWidth(distRank) , stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating compELWidth", &
+                                     ESMF_CONTEXT, rc)) return   
+    allocate(compEUWidth(distRank) , stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating compEUWidth", &
+                                     ESMF_CONTEXT, rc)) return   
+
+    ! Get info from Grid
+    call ESMF_GridGet(grid, dimmap=dimmap, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
    ! construct ArraySpec
-   call ESMF_ArraySpecSet(arrayspec,rank=rank,typekind=typeKind, rc=localrc)
+   call ESMF_ArraySpecSet(arrayspec,rank=rank,typekind=localTypeKind, rc=localrc)
    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -676,35 +716,48 @@ end interface
    ! if there are undistributed dimensions ...
    if (undistRank .gt. 0) then 
 
+      !! allocate tensor bounds
+      allocate(lbounds(undistRank) , stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating lbounds", &
+                                     ESMF_CONTEXT, rc)) return   
+      allocate(ubounds(undistRank) , stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating ubounds", &
+                                     ESMF_CONTEXT, rc)) return   
+
+
       !! Get info about staggerloc
-      call ESMF_GridGetPSloc(grid, staggerloc, &
+      call ESMF_GridGetPSloc(grid, localStaggerLoc, &
              computationalEdgeLWidth=compELWidth, computationalEdgeUWidth=compEUWidth, &
              lbounds=lbounds,ubounds=ubounds, rc=localrc)
 
       !! create Array
-      array=ESMF_ArrayCreateAllocate(arrayspec=arrayspec, &
+      array=ESMF_ArrayCreate(arrayspec=arrayspec, &
               distgrid=distgrid, dimmap=dimmap, &
               computationalEdgeLWidth=compELWidth, computationalEdgeUWidth=compEUWidth, &
-              totalLWidth, totalUWidth, &
-              indexflag=indexflag, staggerLoc=staggerloc%staggerloc, &
+              totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
+              indexflag=indexflag, staggerLoc=localStaggerLoc%staggerloc, &
               lbounds=lbounds, ubounds=ubounds, name=name, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+
+      !! cleanup
+      deallocate(lbounds)
+      deallocate(ubounds)
     else
 
       !! Get info about staggerloc
-      call ESMF_GridGetPSloc(grid, staggerloc, &
+      call ESMF_GridGetPSloc(grid, localStaggerLoc, &
              computationalEdgeLWidth=compELWidth, computationalEdgeUWidth=compEUWidth, &
              rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
       !! create Array
-      array=ESMF_ArrayCreateAllocate(arrayspec=arrayspec, &
+      array=ESMF_ArrayCreate(arrayspec=arrayspec, &
              distgrid=distgrid, dimmap=dimmap, &
             computationalEdgeLWidth=compELWidth, computationalEdgeUWidth=compEUWidth, &
-            totalLWidth, totalUWidth, &
-            indexflag=indexflag, staggerLoc=staggerloc%staggerloc, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
+            indexflag=indexflag, staggerLoc=localStaggerLoc%staggerloc, &
             name=name, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -713,11 +766,17 @@ end interface
     ! Set return value
     ESMF_GridCreateArray = array
 
+    ! cleanup
+    deallocate(dimmap)
+    deallocate(compELWidth)
+    deallocate(compEUWidth)
+ 
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
     end function ESMF_GridCreateArray
-#endif
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

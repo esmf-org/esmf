@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.13 2007/10/11 22:23:49 oehmke Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.14 2007/10/12 22:04:10 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.13 2007/10/11 22:23:49 oehmke Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.14 2007/10/12 22:04:10 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -52,7 +52,7 @@ program ESMF_GridCoordUTest
   type(ESMF_VM) :: vm
   type(ESMF_DistGrid) :: distgrid2D, distgrid3D,tmpDistgrid
   integer :: rank
-  type(ESMF_Array) :: array2D, array2, array1D
+  type(ESMF_Array) :: array, array2D, array2, array1D
   type(ESMF_ArraySpec) :: arrayspec2D,arrayspec1D
   type(ESMF_StaggerLoc) :: customStagger
   real(ESMF_KIND_R8), pointer :: fptr(:,:), fptr3D(:,:,:)
@@ -2457,6 +2457,75 @@ program ESMF_GridCoordUTest
 
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
+
+
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!! Test 2D Plus 1 Creating an Array at a stagger loc !!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test 2D plus 1 GridCreateArray"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+  correct=.true.
+
+  ! if petCount >1, setup petMap
+  if (petCount .gt. 1) then
+     petMap2D(:,1,1)=(/0,1/)
+     petMap2D(:,2,1)=(/2,3/)
+
+     grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+                              countsPerDeDim2=(/3,4/),  &
+                              countsPerDeDim3=(/5/),  &
+                              indexflag=ESMF_INDEX_GLOBAL, &
+                              petMap=petMap2D, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  else
+     grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+                              countsPerDeDim2=(/3,4/),  &
+                              countsPerDeDim3=(/5/),  & 
+                              indexflag=ESMF_INDEX_GLOBAL, &
+                              rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  endif
+
+  ! Allocate Staggers
+  call ESMF_GridAllocCoord(grid2D, staggerLWidth=(/1,2,3/), staggerUWidth=(/4,5,6/), &
+               staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Create an array on an unallocated stagger location
+  array=ESMF_GridCreateArray(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER, &
+                             rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! make sure array is valid
+  call ESMF_ArrayValidate(array,rc=localrc)  
+  if (localrc .ne. ESMF_SUCCESS) correct=.false.
+
+  ! Create an array on an allocated stagger location
+  array=ESMF_GridCreateArray(grid2D, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
+                             rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! TODO: make sure Array bounds are correct
+
+  ! make sure array is valid
+  call ESMF_ArrayValidate(array,rc=localrc)  
+  if (localrc .ne. ESMF_SUCCESS) correct=.false.
+
+  ! TODO: make sure Array bounds are correct
+
+
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
 
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
