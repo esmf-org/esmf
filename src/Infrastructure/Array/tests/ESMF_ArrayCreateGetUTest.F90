@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.11 2007/10/05 21:58:44 theurich Exp $
+! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.12 2007/10/15 18:49:14 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ArrayCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.11 2007/10/05 21:58:44 theurich Exp $'
+    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.12 2007/10/15 18:49:14 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -65,6 +65,8 @@ program ESMF_ArrayCreateGetUTest
   real(ESMF_KIND_R4), pointer     :: farrayPtr3D(:,:,:)
   integer(ESMF_KIND_I4), pointer  :: farrayPtr4D(:,:,:,:)
   character (len=80)      :: arrayName
+  integer, allocatable:: totalLWidth(:,:), totalUWidth(:,:)
+  integer, allocatable:: totalLBound(:,:), totalUBound(:,:)
   
 
 !-------------------------------------------------------------------------------
@@ -147,7 +149,7 @@ program ESMF_ArrayCreateGetUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayPrint 2D ESMF_TYPEKIND_R8 w/ negative computational widths Test"
+  write(name, *) "ArrayPrint 2D ESMF_TYPEKIND_R8 w/ computational widths Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayPrint(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -170,10 +172,78 @@ program ESMF_ArrayCreateGetUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayPrint 2D ESMF_TYPEKIND_R8 w/ negative computationalEdge widths Test"
+  write(name, *) "ArrayPrint 2D ESMF_TYPEKIND_R8 w/ computationalEdge widths Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayPrint(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayDestroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayCreate Allocate 2D ESMF_TYPEKIND_R8 w/ computationalEdge and total widths Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_GLOBAL, computationalEdgeLWidth=(/0,-1/), &
+    computationalEdgeUWidth=(/-2,+1/), totalLWidth=(/1,2/), totalUWidth=(/3,4/),&
+    name="MyArray Negative Edge", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayPrint 2D ESMF_TYPEKIND_R8 w/ computationalEdge and total widths Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayPrint(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet 2D ESMF_TYPEKIND_R8 w/ computationalEdge and total widths Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(totalLWidth(2,1))
+  allocate(totalUWidth(2,1))
+  allocate(totalLBound(2,1))
+  allocate(totalUBound(2,1))
+  call ESMF_ArrayGet(array, totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
+    totalLBound=totalLBound, totalUBound=totalUBound, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Check total widths for 2D ESMF_TYPEKIND_R8 w/ computationalEdge and total widths Test"
+  write(failMsg, *) "Total widths are wrong"
+  call ESMF_Test((totalLWidth(1,1)==1.and.totalLWidth(2,1)==2.and.&
+    totalUWidth(1,1)==3.and.totalUWidth(2,1)==4), &
+    name, failMsg, result, ESMF_SRCLINE)
+  deallocate(totalLWidth, totalUWidth)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Check total bounds for 2D ESMF_TYPEKIND_R8 w/ computationalEdge and total widths Test"
+  write(failMsg, *) "Total bounds are wrong"
+  if (localPet==0) then
+    call ESMF_Test((totalLBound(1,1)==0.and.totalLBound(2,1)==0.and.&
+    totalUBound(1,1)==11.and.totalUBound(2,1)==16), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet==1) then
+    call ESMF_Test((totalLBound(1,1)==8.and.totalLBound(2,1)==0.and.&
+    totalUBound(1,1)==16.and.totalUBound(2,1)==16), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet==2) then
+    call ESMF_Test((totalLBound(1,1)==0.and.totalLBound(2,1)==11.and.&
+    totalUBound(1,1)==11.and.totalUBound(2,1)==28), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet==3) then
+    call ESMF_Test((totalLBound(1,1)==8.and.totalLBound(2,1)==11.and.&
+    totalUBound(1,1)==16.and.totalUBound(2,1)==28), &
+      name, failMsg, result, ESMF_SRCLINE)
+  endif  
+  deallocate(totalLBound, totalUBound)
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -265,7 +335,7 @@ program ESMF_ArrayCreateGetUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayCreate AssmdShape 1D ESMF_TYPEKIND_R8 w/ computationalEdge widths Test"
+  write(name, *) "ArrayCreate AssmdShape 1D ESMF_TYPEKIND_R8 w/ negative computationalEdge widths Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   array = ESMF_ArrayCreate(farray=farray1D, distgrid=distgrid, &
     computationalEdgeLWidth=(/-1/), computationalEdgeUWidth=(/-1/), rc=rc)
@@ -273,7 +343,7 @@ program ESMF_ArrayCreateGetUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayPrint AssmdShape 1D ESMF_TYPEKIND_R8 w/ computationalEdge widths Test"
+  write(name, *) "ArrayPrint AssmdShape 1D ESMF_TYPEKIND_R8 w/ negative computationalEdge widths Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayPrint(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
