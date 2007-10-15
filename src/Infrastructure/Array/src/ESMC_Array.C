@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.148 2007/10/12 19:03:25 theurich Exp $
+// $Id: ESMC_Array.C,v 1.149 2007/10/15 18:49:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.148 2007/10/12 19:03:25 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.149 2007/10/15 18:49:41 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -650,23 +650,14 @@ Array *Array::create(
         return ESMC_NULL_POINTER;
       }
       for (int j=0; j<localDeCount; j++){
-        totalLBound[j*dimCount+i] = exclusiveLBound[j*dimCount+i]
+        totalLBound[j*dimCount+i] = computationalLBound[j*dimCount+i]
           - totalLWidthArg->array[i];
-        if (totalLBound[j*dimCount+i] > computationalLBound[j*dimCount+i]){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-            "- totalLWidth / computationaLWidth mismatch", rc);
-          return ESMC_NULL_POINTER;
-        }
       }
     }
   }else{
     // set default
-    for (int i=0; i<localDeCount*dimCount; i++){
-      if (computationalLBound[i] < exclusiveLBound[i])
-        totalLBound[i] = computationalLBound[i];
-      else
-        totalLBound[i] = exclusiveLBound[i];
-    }
+    for (int i=0; i<localDeCount*dimCount; i++)
+      totalLBound[i] = computationalLBound[i];
   }
   if (totalUWidthArg != NULL){
     totalUBoundFlag = 1;  // set
@@ -687,24 +678,23 @@ Array *Array::create(
         return ESMC_NULL_POINTER;
       }
       for (int j=0; j<localDeCount; j++){
-        totalUBound[j*dimCount+i] = exclusiveUBound[j*dimCount+i]
+        totalUBound[j*dimCount+i] = computationalUBound[j*dimCount+i]
           + totalUWidthArg->array[i];
-        if (totalUBound[j*dimCount+i] < computationalUBound[j*dimCount+i]){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-            "- totalUWidth / computationaUWidth mismatch", rc);
-          return ESMC_NULL_POINTER;
-        }
       }
     }
   }else{
     // set default
-    for (int i=0; i<localDeCount*dimCount; i++){
-      if (computationalUBound[i] > exclusiveUBound[i])
-        totalUBound[i] = computationalUBound[i];
-      else
-        totalUBound[i] = exclusiveUBound[i];
-    }
+    for (int i=0; i<localDeCount*dimCount; i++)
+      totalUBound[i] = computationalUBound[i];
   }
+  // total region _must_ cover exclusive region -> adjust total region if not so
+  for (int i=0; i<localDeCount*dimCount; i++){
+    if (exclusiveLBound[i] < totalLBound[i])
+      totalLBound[i] = exclusiveLBound[i];
+    if (exclusiveUBound[i] > totalUBound[i])
+      totalUBound[i] = exclusiveUBound[i];
+  }
+  
   // check computational bounds against total bounds
   for (int i=0; i<localDeCount*dimCount; i++){
     if (totalLBound[i] <= totalUBound[i]){
@@ -1175,23 +1165,14 @@ Array *Array::create(
         return ESMC_NULL_POINTER;
       }
       for (int j=0; j<localDeCount; j++){
-        totalLBound[j*dimCount+i] = exclusiveLBound[j*dimCount+i]
+        totalLBound[j*dimCount+i] = computationalLBound[j*dimCount+i]
           - totalLWidthArg->array[i];
-        if (totalLBound[j*dimCount+i] > computationalLBound[j*dimCount+i]){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-            "- totalLWidth / computationaLWidth mismatch", rc);
-          return ESMC_NULL_POINTER;
-        }
       }
     }
   }else{
     // set default
-    for (int i=0; i<localDeCount*dimCount; i++){
-      if (computationalLBound[i] < exclusiveLBound[i])
-        totalLBound[i] = computationalLBound[i];
-      else
-        totalLBound[i] = exclusiveLBound[i];
-    }
+    for (int i=0; i<localDeCount*dimCount; i++)
+      totalLBound[i] = computationalLBound[i];
   }
   if (totalUWidthArg != NULL){
     if (totalUWidthArg->dimCount != 1){
@@ -1211,24 +1192,23 @@ Array *Array::create(
         return ESMC_NULL_POINTER;
       }
       for (int j=0; j<localDeCount; j++){
-        totalUBound[j*dimCount+i] = exclusiveUBound[j*dimCount+i]
+        totalUBound[j*dimCount+i] = computationalUBound[j*dimCount+i]
           + totalUWidthArg->array[i];
-        if (totalUBound[j*dimCount+i] < computationalUBound[j*dimCount+i]){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-            "- totalUWidth / computationaUWidth mismatch", rc);
-          return ESMC_NULL_POINTER;
-        }
       }
     }
   }else{
     // set default
-    for (int i=0; i<localDeCount*dimCount; i++){
-      if (computationalUBound[i] > exclusiveUBound[i])
-        totalUBound[i] = computationalUBound[i];
-      else
-        totalUBound[i] = exclusiveUBound[i];
-    }
+    for (int i=0; i<localDeCount*dimCount; i++)
+      totalUBound[i] = computationalUBound[i];
   }
+  // total region _must_ cover exclusive region -> adjust total region if not so
+  for (int i=0; i<localDeCount*dimCount; i++){
+    if (exclusiveLBound[i] < totalLBound[i])
+      totalLBound[i] = exclusiveLBound[i];
+    if (exclusiveUBound[i] > totalUBound[i])
+      totalUBound[i] = exclusiveUBound[i];
+  }
+
   // check computational bounds against total bounds
   for (int i=0; i<localDeCount*dimCount; i++){
     if (totalLBound[i] <= totalUBound[i]){

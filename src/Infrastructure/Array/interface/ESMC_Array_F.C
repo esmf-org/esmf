@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.67 2007/10/05 21:58:43 theurich Exp $
+// $Id: ESMC_Array_F.C,v 1.68 2007/10/15 18:49:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -454,7 +454,7 @@ extern "C" {
       for (int i=0; i<localDeCount; i++)
         for (int j=0; j<dimCount; j++)
           (*totalLWidth)->array[i*(*totalLWidth)->extent[0]+j] =
-            ((*ptr)->getExclusiveLBound())[i*dimCount+j] -
+            ((*ptr)->getComputationalLBound())[i*dimCount+j] -
             ((*ptr)->getTotalLBound())[i*dimCount+j];
     }
     // fill totalUWidth
@@ -482,7 +482,7 @@ extern "C" {
         for (int j=0; j<dimCount; j++)
           (*totalUWidth)->array[i*(*totalUWidth)->extent[0]+j] =
             ((*ptr)->getTotalUBound())[i*dimCount+j] -
-            ((*ptr)->getExclusiveUBound())[i*dimCount+j];
+            ((*ptr)->getComputationalUBound())[i*dimCount+j];
     }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
