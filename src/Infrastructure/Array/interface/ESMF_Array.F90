@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.68 2007/10/02 23:38:39 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.69 2007/10/16 21:34:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -94,9 +94,8 @@ module ESMF_ArrayMod
   public ESMF_ArrayHalo
   public ESMF_ArrayHaloStore
   public ESMF_ArrayHaloRun
-  public ESMF_ArrayRedist
   public ESMF_ArrayRedistStore
-  public ESMF_ArrayRedistRun
+  public ESMF_ArrayRedist
   public ESMF_ArraySparseMatMulStore
   public ESMF_ArraySparseMatMul
 #ifdef FIRSTNEWARRAYPROTOTYPE
@@ -111,9 +110,8 @@ module ESMF_ArrayMod
   public ESMF_ArrayBundleHalo
   public ESMF_ArrayBundleHaloStore
   public ESMF_ArrayBundleHaloRun
-  public ESMF_ArrayBundleRedist
   public ESMF_ArrayBundleRedistStore
-  public ESMF_ArrayBundleRedistRun
+  public ESMF_ArrayBundleRedist
   public ESMF_ArrayBundleSparseMatMulStr
   public ESMF_ArrayBundleSparseMatMul
   public ESMF_ArrayBundleValidate
@@ -130,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.68 2007/10/02 23:38:39 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.69 2007/10/16 21:34:15 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -601,6 +599,167 @@ contains
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
   end subroutine ESMF_ArrayHaloRun
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayRedistStore()"
+!BOP
+! !IROUTINE: ESMF_ArrayRedistStore - Precompute Array redistribution
+!
+! !INTERFACE:
+  subroutine ESMF_ArrayRedistStore(srcArray, dstArray, routehandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),           intent(in)              :: srcArray
+    type(ESMF_Array),           intent(inout)           :: dstArray
+    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+    integer,                    intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!   Store an Array redistribution operation from {\tt srcArray} to
+!   {\tt dstArray}.
+!
+!   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
+!   vectors. The sequence is defined by the order of DistGrid dimensions and 
+!   the order of patches within the DistGrid or by user-supplied arbitrary
+!   sequence indices. See section \ref{Array:SparseMatMul} for details on the
+!   definition of {\em sequence indices}. Redistribution corresponds to an
+!   identity mapping of the source Array vector to the destination Array vector.
+!
+!   Source and destination Arrays must be of identical <type> and <kind>.
+!   Further the number of cells must match for source and destination Arrays,
+!   but the shape may differ.
+!
+!   It is erroneous to specify the identical Array object for {\tt srcArray} and
+!   {\tt dstArray} arguments.
+!
+!   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
+!   {\tt ESMF\_ArrayRedist()} on any pair of Arrays that are congruent
+!   and typekind conform with the {\tt srcArray}, {\tt dstArray} pair. 
+!   Congruent Arrays possess matching DistGrids and the shape of the local
+!   array tiles matches between the Arrays for every DE.\newline
+!
+!   This call is {\em collective} across the current VM.
+!
+!   \begin{description}
+!   \item [srcArray]
+!     {\tt ESMF\_Array} with source data.
+!   \item [dstArray]
+!     {\tt ESMF\_Array} with destination data.
+!   \item [routehandle]
+!     Handle to the precomputed Route.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
+    
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayRedistStore(srcArray, dstArray, routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Mark routehandle object as being created
+    call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayRedistStore
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayRedist()"
+!BOP
+! !IROUTINE: ESMF_ArrayRedist - Execute an Array redistribution
+!
+! !INTERFACE:
+  subroutine ESMF_ArrayRedist(srcArray, dstArray, routehandle, checkflag, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),       intent(in)              :: srcArray
+    type(ESMF_Array),       intent(inout)           :: dstArray
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_Logical),     intent(in),   optional  :: checkflag
+    integer,                intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!   Execute a precomputed Array redistribution from {\tt srcArray} to
+!   {\tt dstArray}. Both {\tt srcArray} and {\tt dstArray} must be
+!   congruent and typekind conform with the respective Arrays used during 
+!   {\tt ESMF\_ArrayRedistStore()}. Congruent Arrays possess
+!   matching DistGrids and the shape of the local array tiles matches between
+!   the Arrays for every DE.
+!
+!   It is erroneous to specify the identical Array object for {\tt srcArray} and
+!   {\tt dstArray} arguments.
+!
+!   See {\tt ESMF\_ArrayRedistStore()} on how to precompute 
+!   {\tt routehandle}.
+!
+!   This call is {\em collective} across the current VM.
+!
+!   \begin{description}
+!   \item [srcArray]
+!     {\tt ESMF\_Array} with source data.
+!   \item [dstArray]
+!     {\tt ESMF\_Array} with destination data.
+!   \item [routehandle]
+!     Handle to the precomputed Route.
+!   \item [{[checkflag]}]
+!     If set to {\tt ESMF\_TRUE} the input Array pair will be checked for
+!     consistency with the precomputed operation provided by {\tt routehandle}.
+!     If set to {\tt ESMF\_FALSE} {\em (default)} only a very basic input check
+!     will be performed, leaving many inconsistencies undetected. Set
+!     {\tt checkflag} to {\tt ESMF\_FALSE} to achieve highest performance.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_Logical)      :: opt_checkflag! helper variable
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+    
+    ! Set default flags
+    opt_checkflag = ESMF_FALSE
+    if (present(checkflag)) opt_checkflag = checkflag
+        
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayRedist(srcArray, dstArray, routehandle, opt_checkflag, &
+      localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayRedist
 !------------------------------------------------------------------------------
 
 
@@ -1135,160 +1294,6 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySparseMatMul
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayRedist()"
-!BOPI
-! !IROUTINE: ESMF_ArrayRedist - Redistribute data from srcArray to dstArray
-!
-! !INTERFACE:
-    subroutine ESMF_ArrayRedist(srcArray, dstArray, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Array), intent(in)            :: srcArray
-    type(ESMF_Array), intent(out)           :: dstArray
-    integer,          intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Redistribute data from {\tt srcArray} to {\tt dstArray}. Redist requires
-!   that the rank of {\tt srcArray} and {\tt dstArray} be the same. Furthermore
-!   the number of distributed dimensions in the associated DistGrids must match
-!   and the {\tt indexflag} must be the same.
-!
-!   There are two variants of the {\tt ArrayRedist()} operation. In the first
-!   case the associated DistGrids are defined with indexflag {\tt ESMF\_GLOBAL}
-!   and data is mapped from {\tt srcArray} to {\tt dstArray} according to the
-!   global index space. In the second case, for indexflag {\tt ESMF\_DELOCAL},
-!   the data mapping is done in patch-local index space patch for patch.
-!   
-!   In either case ArrayRedist() does not require that source and destination
-!   Arrays have the same number of cells. Only destination cells that also
-!   appear in the source Array will be overwritten.
-!
-!     This version of the interface 
-!     implements the PET-based blocking paradigm: Each PET of the VM must issue
-!     this call exactly once for {\em all} of its DEs. The
-!     call will block until all PET-local data objects are accessible.
-!
-!   \begin{description}
-!   \item [srcArray]
-!         {\tt ESMF\_Array} with source data.
-!   \item [dstArray]
-!         {\tt ESMF\_Array} with destination data.
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
-  end subroutine ESMF_ArrayRedist
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayRedistStore()"
-!BOPI
-! !IROUTINE: ESMF_ArrayRedistStore - Store an ArrayRedist() operation
-!
-! !INTERFACE:
-    subroutine ESMF_ArrayRedistStore(srcArray, dstArray, routehandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Array),       intent(in)              :: srcArray
-    type(ESMF_Array),       intent(out)             :: dstArray
-    type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    integer,                intent(out),  optional  :: rc
-!
-! !DESCRIPTION:
-!   Store an ArrayRedist() operation for {\tt srcArray} and {\tt dstArray}. See
-!   ArrayRedist() for details.
-!
-!   The returned {\tt routehandle} can be used with {\tt srcArray} and
-!   {\tt dstArray} arguments that are DistGrid-conform to those for which 
-!   the operation was precomputed and stored. 
-!
-!     This version of the interface 
-!     implements the PET-based blocking paradigm: Each PET of the VM must issue
-!     this call exactly once for {\em all} of its DEs. The
-!     call will block until all PET-local data objects are accessible.
-!
-!   \begin{description}
-!   \item [srcArray]
-!         {\tt ESMF\_Array} with source data.
-!   \item [dstArray]
-!         {\tt ESMF\_Array} with destination data.
-!   \item [routehandle]
-!         Handle to the Route that stores the operation.
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
-  end subroutine ESMF_ArrayRedistStore
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayRedistRun()"
-!BOPI
-! !IROUTINE: ESMF_ArrayRedistRun - Execute a stored ArrayRedist() operation
-!
-! !INTERFACE:
-    subroutine ESMF_ArrayRedistRun(srcArray, dstArray, routehandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Array),       intent(in)              :: srcArray
-    type(ESMF_Array),       intent(out)             :: dstArray
-    type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    integer,                intent(out),  optional  :: rc
-!
-! !DESCRIPTION:
-!   Execute a stored ArrayRedist() operation for {\tt srcArray} and 
-!   {\tt dstArray}.
-!
-!     This version of the interface 
-!     implements the PET-based blocking paradigm: Each PET of the VM must issue
-!     this call exactly once for {\em all} of its DEs. The
-!     call will block until all PET-local data objects are accessible.
-!
-!   \begin{description}
-!   \item [srcArray]
-!         {\tt ESMF\_Array} with source data.
-!   \item [dstArray]
-!         {\tt ESMF\_Array} with destination data.
-!   \item [routehandle]
-!         Handle to the Route that stores the operation.
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
-  end subroutine ESMF_ArrayRedistRun
 !------------------------------------------------------------------------------
 
 

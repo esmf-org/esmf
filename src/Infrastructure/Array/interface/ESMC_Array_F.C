@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.68 2007/10/15 18:49:41 theurich Exp $
+// $Id: ESMC_Array_F.C,v 1.69 2007/10/16 21:34:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -510,6 +510,32 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
+  void FTN(c_esmc_arrayrediststore)(ESMCI::Array **srcArray,
+    ESMCI::Array **dstArray, ESMC_RouteHandle **routehandle, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arrayrediststore()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Array::redistStore(
+      *srcArray, *dstArray, routehandle),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN(c_esmc_arrayredist)(ESMCI::Array **srcArray, ESMCI::Array **dstArray,
+    ESMC_RouteHandle **routehandle, ESMC_Logical *checkflag, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arrayredist()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Array::redist(
+      *srcArray, *dstArray, routehandle, *checkflag),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
   void FTN(c_esmc_arraysparsematmulstore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMC_RouteHandle **routehandle, 
     ESMC_TypeKind *typekind, void *factorList, int *factorListCount,

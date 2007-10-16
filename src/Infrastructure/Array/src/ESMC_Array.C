@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.149 2007/10/15 18:49:41 theurich Exp $
+// $Id: ESMC_Array.C,v 1.150 2007/10/16 21:34:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.149 2007/10/15 18:49:41 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.150 2007/10/16 21:34:16 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2639,6 +2639,243 @@ int Array::scatter(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::redistStore()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::redistStore
+//
+// !INTERFACE:
+int Array::redistStore(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  Array *srcArray,                      // in    - source Array
+  Array *dstArray,                      // in    - destination Array
+  ESMC_RouteHandle **routehandle        // inout - handle to precomputed comm
+  ){    
+//
+// !DESCRIPTION:
+//  Precompute and store communication pattern for redistribution
+//  from srcArray to dstArray.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // every Pet must provide srcArray and dstArray
+  if (srcArray == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to srcArray", &rc);
+    return rc;
+  }
+  if (dstArray == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to dstArray", &rc);
+    return rc;
+  }
+  // srcArray and dstArray may not point to the identical Array object
+  if (srcArray == dstArray){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "- srcArray and dstArray must not be identical", &rc);
+    return rc;
+  }
+  // source and destination Arrays must have identical number of exclusive cells
+  int srcCellCount = 0; // init
+  const int *srcCellCountPPatch = srcArray->distgrid->getCellCountPPatch();
+  for (int i=0; i<srcArray->distgrid->getPatchCount(); i++)
+    srcCellCount += srcCellCountPPatch[i];
+  int dstCellCount = 0; // init
+  const int *dstCellCountPPatch = dstArray->distgrid->getCellCountPPatch();
+  for (int i=0; i<dstArray->distgrid->getPatchCount(); i++)
+    dstCellCount += dstCellCountPPatch[i];
+  if (srcCellCount != dstCellCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "- srcArray and dstArray must provide identical number of exclusive"
+      " cells", &rc);
+    return rc;
+  }
+  
+  // implemented via sparseMatMul using identity matrix
+  ESMC_TypeKind typekind = srcArray->getTypekind();
+  const int *srcCellCountPDe = srcArray->distgrid->getCellCountPDe();
+  const int *srcArbSeqIndexCountPLocalDe =
+    srcArray->distgrid->getArbSeqIndexCountPLocalDe();
+  const int *srcLocalDeList = srcArray->delayout->getLocalDeList();
+  int srcLocalDeCount = srcArray->delayout->getLocalDeCount();
+  int factorListCount = 0;  // init
+  for (int i=0; i<srcLocalDeCount; i++)
+    factorListCount += srcCellCountPDe[srcLocalDeList[i]];
+  // set up factorIndexList
+  int *factorIndexListAlloc = new int[2*factorListCount*sizeof(int)];
+  int *extent = new int[2];
+  extent[0] = 2;
+  extent[1] = factorListCount;
+  InterfaceInt *factorIndexList =
+    new InterfaceInt(factorIndexListAlloc, 2, extent);
+  delete [] extent;
+  int jj = 0; // reset
+  for (int i=0; i<srcLocalDeCount; i++){
+    int de = srcLocalDeList[i];
+    int arbSeqIndexCount = srcArbSeqIndexCountPLocalDe[i];
+    if (arbSeqIndexCount==srcCellCountPDe[de]){
+      const int *srcArbSeqIndexListPLocalDe =
+        srcArray->distgrid->getArbSeqIndexListPLocalDe(i);
+      for (int j=0; j<arbSeqIndexCount; j++){
+        factorIndexListAlloc[2*jj] = factorIndexListAlloc[2*jj+1] =
+          srcArbSeqIndexListPLocalDe[j];
+        ++jj;
+      }
+    }else{
+      int seqIndexOffset = 1; // reset, seqIndex is basis 1
+      for (int j=0; j<de; j++)
+        seqIndexOffset += srcCellCountPDe[j];
+      for (int j=0; j<srcCellCountPDe[de]; j++){
+        factorIndexListAlloc[2*jj] = factorIndexListAlloc[2*jj+1] =
+          seqIndexOffset + jj;
+        ++jj;
+      }
+    }
+  }  
+  // load type specific factorList with "1"
+  void *factorList;  
+  if (typekind == ESMC_TYPEKIND_R4){
+    ESMC_R4 *factorListT = new ESMC_R4[factorListCount];
+    for (int i=0; i<factorListCount; i++)
+      factorListT[i] = 1.;
+    factorList = (void *)factorListT;
+  }else if (typekind == ESMC_TYPEKIND_R8){
+    ESMC_R8 *factorListT = new ESMC_R8[factorListCount];
+    for (int i=0; i<factorListCount; i++)
+      factorListT[i] = 1.;
+    factorList = (void *)factorListT;
+  }else if (typekind == ESMC_TYPEKIND_I4){
+    ESMC_I4 *factorListT = new ESMC_I4[factorListCount];
+    for (int i=0; i<factorListCount; i++)
+      factorListT[i] = 1;
+    factorList = (void *)factorListT;
+  }else if (typekind == ESMC_TYPEKIND_I8){
+    ESMC_I8 *factorListT = new ESMC_I8[factorListCount];
+    for (int i=0; i<factorListCount; i++)
+      factorListT[i] = 1;
+    factorList = (void *)factorListT;
+  }
+  
+  // precompute sparse matrix multiplication
+  localrc = sparseMatMulStore(srcArray, dstArray, routehandle, typekind,
+    factorList, factorListCount, factorIndexList);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  
+  // garbage collection
+  delete [] factorIndexListAlloc;
+  delete factorIndexList;
+  if (typekind == ESMC_TYPEKIND_R4){
+    ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
+    delete [] factorListT;
+  }else if (typekind == ESMC_TYPEKIND_R8){
+    ESMC_R8 *factorListT = (ESMC_R8 *)factorList;
+    delete [] factorListT;
+  }else if (typekind == ESMC_TYPEKIND_I4){
+    ESMC_I4 *factorListT = (ESMC_I4 *)factorList;
+    delete [] factorListT;
+  }else if (typekind == ESMC_TYPEKIND_I8){
+    ESMC_I8 *factorListT = (ESMC_I8 *)factorList;
+    delete [] factorListT;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+  //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::redist()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::redist
+//
+// !INTERFACE:
+int Array::redist(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  Array *srcArray,                      // in    - source Array
+  Array *dstArray,                      // inout - destination Array
+  ESMC_RouteHandle **routehandle,       // inout - handle to precomputed comm
+  ESMC_Logical checkflag                // in    - ESMF_FALSE: (def.) bas. chcks
+                                        //         ESMF_TRUE: full input check
+  ){    
+//
+// !DESCRIPTION:
+//    Execute an Array redistribution
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // implemented via sparseMatMul
+  localrc = sparseMatMul(srcArray, dstArray, routehandle, ESMF_TRUE,
+    checkflag);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::redistRelease()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::redistRelease
+//
+// !INTERFACE:
+int Array::redistRelease(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  ESMC_RouteHandle *routehandle        // inout -
+  ){    
+//
+// !DESCRIPTION:
+//    Release information for an Array redistribution
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // implemented via sparseMatMul
+  localrc = sparseMatMulRelease(routehandle);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::sparseMatMulStore()"
 //BOPI
 // !IROUTINE:  ESMCI::Array::sparseMatMulStore
@@ -3800,10 +4037,11 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     int seqIndexMin = srcSeqIndexInterval[i].min;
     int seqIndexMax = srcSeqIndexInterval[i].max;
     int seqIndexCount = srcSeqIndexInterval[i].count;
-    int seqIndexCountEff = srcSeqIndexInterval[i].countEff;
+    int seqIndexCountTotal = seqIndexCount * srcArray->tensorCellCount;
     if (localPet!=i){
       // localPet is a client for the active srcSeqIndex interval
-      SeqIndexDeInfo *seqIndexDeInfoList = new SeqIndexDeInfo[seqIndexCountEff];
+      SeqIndexDeInfo *seqIndexDeInfoList =
+        new SeqIndexDeInfo[seqIndexCountTotal];
       int count = 0; // reset
       for (int j=0; j<srcLocalDeCount; j++){
         int de = srcLocalDeList[j];  // global DE number
@@ -4489,10 +4727,11 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     int seqIndexMin = dstSeqIndexInterval[i].min;
     int seqIndexMax = dstSeqIndexInterval[i].max;
     int seqIndexCount = dstSeqIndexInterval[i].count;
-    int seqIndexCountEff = dstSeqIndexInterval[i].countEff;
+    int seqIndexCountTotal = seqIndexCount * dstArray->tensorCellCount;
     if (localPet!=i){
       // localPet is a client for the active dstSeqIndex interval
-      SeqIndexDeInfo *seqIndexDeInfoList = new SeqIndexDeInfo[seqIndexCountEff];
+      SeqIndexDeInfo *seqIndexDeInfoList =
+        new SeqIndexDeInfo[seqIndexCountTotal];
       int count = 0; // reset
       for (int j=0; j<dstLocalDeCount; j++){
         int de = dstLocalDeList[j];  // global DE number
@@ -4798,11 +5037,11 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     int seqIndexMin = srcSeqIndexInterval[i].min;
     int seqIndexMax = srcSeqIndexInterval[i].max;
     int seqIndexCount = srcSeqIndexInterval[i].count;
-    int seqIndexCountEff = srcSeqIndexInterval[i].countEff;
+    int seqIndexCountTotal = seqIndexCount * srcArray->tensorCellCount;
     if (localPet!=i){
       // localPet is a client for the active srcSeqIndex interval
       SeqIndexIndexInfo *seqIndexIndexInfoList =
-        new SeqIndexIndexInfo[seqIndexCountEff];
+        new SeqIndexIndexInfo[seqIndexCountTotal];
       int count = 0; // reset
       for (int j=0; j<srcLocalDeCount; j++){
         for (int k=0; k<srcLocalDeCellCount[j]; k++){
@@ -4940,11 +5179,11 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     int seqIndexMin = dstSeqIndexInterval[i].min;
     int seqIndexMax = dstSeqIndexInterval[i].max;
     int seqIndexCount = dstSeqIndexInterval[i].count;
-    int seqIndexCountEff = dstSeqIndexInterval[i].countEff;
+    int seqIndexCountTotal = seqIndexCount * dstArray->tensorCellCount;
     if (localPet!=i){
       // localPet is a client for the active dstSeqIndex interval
       SeqIndexIndexInfo *seqIndexIndexInfoList =
-        new SeqIndexIndexInfo[seqIndexCountEff];
+        new SeqIndexIndexInfo[seqIndexCountTotal];
       int count = 0; // reset
       for (int j=0; j<dstLocalDeCount; j++){
         for (int k=0; k<dstLocalDeCellCount[j]; k++){
