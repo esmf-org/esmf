@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.4 2007/10/10 19:10:21 theurich Exp $
+! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.5 2007/10/16 20:46:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayArbIdxSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.4 2007/10/10 19:10:21 theurich Exp $'
+    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.5 2007/10/16 20:46:19 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -102,6 +102,8 @@ program ESMF_ArrayArbIdxSMMUTest
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
 
+!------------------------------------------------------------------------
+  ! Prepare for arbitrary sequence indices
   allocate(srcIndices((localPet+1)*2))   ! sizes: 2, 4, 6, 8, 10, 12
   
   do i=1,(localPet+1)*2
@@ -115,17 +117,6 @@ program ESMF_ArrayArbIdxSMMUTest
   srcDistgrid = ESMF_DistGridCreate(arbSeqIndexList=srcIndices, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-#ifdef ESMF_EXHAUSTIVE
-!------------------------------------------------------------------------
-  !EX_UTest_Multi_Proc_Only
-  write(name, *) "srcDistgrid2 Create Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  srcDistgrid2 = ESMF_DistGridCreate(arbSeqIndexList=srcIndices, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#endif
-
-  deallocate(srcIndices)
-
 !  call ESMF_DistGridPrint(srcDistgrid, rc=rc)
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -140,6 +131,17 @@ program ESMF_ArrayArbIdxSMMUTest
   ! 3     0         3     80, 79, 78, 77, 76, 75, 74, 73
   ! 4     0         4     100, 99, 98, 97, 96, 95, 94, 93, 92, 91
   ! 5     0         5     120, 119, 118, 117, 116, 115, 114, 113, 112, 111, 110, 109
+
+#ifdef ESMF_EXHAUSTIVE
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "srcDistgrid2 Create Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  srcDistgrid2 = ESMF_DistGridCreate(arbSeqIndexList=srcIndices, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#endif
+
+  deallocate(srcIndices)
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -273,22 +275,6 @@ program ESMF_ArrayArbIdxSMMUTest
   dstArray = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=dstDistgrid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-#ifdef ESMF_EXHAUSTIVE
-!------------------------------------------------------------------------
-  !EX_UTest_Multi_Proc_Only
-  write(name, *) "dstArray2 Create Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  dstArray2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=dstDistgrid, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
-!------------------------------------------------------------------------
-  !EX_UTest_Multi_Proc_Only
-  write(name, *) "dstArray3 Create Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  dstArray3 = ESMF_ArrayCreate(arrayspec=arrayspec3, distgrid=dstDistgrid, &
-    lbounds=(/1/), ubounds=(/2/), rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
   ! The dstDistgrid evenly divides 12 cells across the 6 DEs (becaues default
   ! is 1 DE per PET and there are 6 PETs running this example).
   ! The default sequenceIndex of dstDistGrid is determined by the default rule
@@ -305,13 +291,30 @@ program ESMF_ArrayArbIdxSMMUTest
   ! The dstArray created on the dstDistgrid has the following shape and
   ! initialization:
   !
-  ! PET   localDE   DE    srcArray contents
+  ! PET   localDE   DE    dstArray contents
   ! 0     0         0     random, random
   ! 1     0         1     random, random
   ! 2     0         2     random, random
   ! 3     0         3     random, random
   ! 4     0         4     random, random
   ! 5     0         5     random, random
+
+#ifdef ESMF_EXHAUSTIVE
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "dstArray2 Create Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  dstArray2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=dstDistgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "dstArray3 Create Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  dstArray3 = ESMF_ArrayCreate(arrayspec=arrayspec3, distgrid=dstDistgrid, &
+    lbounds=(/1/), ubounds=(/2/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
 #endif
 
 !------------------------------------------------------------------------
@@ -425,22 +428,22 @@ program ESMF_ArrayArbIdxSMMUTest
   write(name, *) "Verify results in dstArray Test"
   write(failMsg, *) "Wrong results" 
   if (localPet == 0) then
-    call ESMF_Test(((farrayPtr(1).eq.37).and.((farrayPtr(2).eq.0))), &
+    call ESMF_Test(((farrayPtr(1).eq.37).and.(farrayPtr(2).eq.0)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 1) then
-    call ESMF_Test(((farrayPtr(1).eq.0).and.((farrayPtr(2).eq.-136))), &
+    call ESMF_Test(((farrayPtr(1).eq.0).and.(farrayPtr(2).eq.-136)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 2) then
-    call ESMF_Test(((farrayPtr(1).eq.238).and.((farrayPtr(2).eq.-86))), &
+    call ESMF_Test(((farrayPtr(1).eq.238).and.(farrayPtr(2).eq.-86)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 3) then
-    call ESMF_Test(((farrayPtr(1).eq.-151).and.((farrayPtr(2).eq.0))), &
+    call ESMF_Test(((farrayPtr(1).eq.-151).and.(farrayPtr(2).eq.0)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 4) then
-    call ESMF_Test(((farrayPtr(1).eq.4493).and.((farrayPtr(2).eq.-407))), &
+    call ESMF_Test(((farrayPtr(1).eq.4493).and.(farrayPtr(2).eq.-407)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 5) then
-    call ESMF_Test(((farrayPtr(1).eq.255).and.((farrayPtr(2).eq.-1))), &
+    call ESMF_Test(((farrayPtr(1).eq.255).and.(farrayPtr(2).eq.-1)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   endif
 
@@ -479,22 +482,22 @@ program ESMF_ArrayArbIdxSMMUTest
   write(name, *) "Verify results in dstArray2 (RRA) Test"
   write(failMsg, *) "Wrong results" 
   if (localPet == 0) then
-    call ESMF_Test(((farrayPtr(1).eq.38).and.((farrayPtr(2).eq.0))), &
+    call ESMF_Test(((farrayPtr(1).eq.38).and.(farrayPtr(2).eq.0)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 1) then
-    call ESMF_Test(((farrayPtr(1).eq.0).and.((farrayPtr(2).eq.-135))), &
+    call ESMF_Test(((farrayPtr(1).eq.0).and.(farrayPtr(2).eq.-135)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 2) then
-    call ESMF_Test(((farrayPtr(1).eq.231).and.((farrayPtr(2).eq.-84))), &
+    call ESMF_Test(((farrayPtr(1).eq.231).and.(farrayPtr(2).eq.-84)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 3) then
-    call ESMF_Test(((farrayPtr(1).eq.-150).and.((farrayPtr(2).eq.0))), &
+    call ESMF_Test(((farrayPtr(1).eq.-150).and.(farrayPtr(2).eq.0)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 4) then
-    call ESMF_Test(((farrayPtr(1).eq.4378).and.((farrayPtr(2).eq.-396))), &
+    call ESMF_Test(((farrayPtr(1).eq.4378).and.(farrayPtr(2).eq.-396)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 5) then
-    call ESMF_Test(((farrayPtr(1).eq.250).and.((farrayPtr(2).eq.0))), &
+    call ESMF_Test(((farrayPtr(1).eq.250).and.(farrayPtr(2).eq.0)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   endif
 
@@ -549,22 +552,22 @@ program ESMF_ArrayArbIdxSMMUTest
   write(name, *) "Verify results in dstArray3 (tensor dim j=1) Test"
   write(failMsg, *) "Wrong results" 
   if (localPet == 0) then
-    call ESMF_Test(((farrayPtr2D(1,1).eq.38).and.((farrayPtr2D(2,1).eq.0))), &
+    call ESMF_Test(((farrayPtr2D(1,1).eq.38).and.(farrayPtr2D(2,1).eq.0)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 1) then
-    call ESMF_Test(((farrayPtr2D(1,1).eq.0).and.((farrayPtr2D(2,1).eq.-135))), &
+    call ESMF_Test(((farrayPtr2D(1,1).eq.0).and.(farrayPtr2D(2,1).eq.-135)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 2) then
-    call ESMF_Test(((farrayPtr2D(1,1).eq.231).and.((farrayPtr2D(2,1).eq.-84))), &
+    call ESMF_Test(((farrayPtr2D(1,1).eq.231).and.(farrayPtr2D(2,1).eq.-84)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 3) then
-    call ESMF_Test(((farrayPtr2D(1,1).eq.-150).and.((farrayPtr2D(2,1).eq.0))), &
+    call ESMF_Test(((farrayPtr2D(1,1).eq.-150).and.(farrayPtr2D(2,1).eq.0)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 4) then
-    call ESMF_Test(((farrayPtr2D(1,1).eq.4378).and.((farrayPtr2D(2,1).eq.-396))), &
+    call ESMF_Test(((farrayPtr2D(1,1).eq.4378).and.(farrayPtr2D(2,1).eq.-396)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 5) then
-    call ESMF_Test(((farrayPtr2D(1,1).eq.250).and.((farrayPtr2D(2,1).eq.0))), &
+    call ESMF_Test(((farrayPtr2D(1,1).eq.250).and.(farrayPtr2D(2,1).eq.0)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   endif
 
@@ -573,22 +576,22 @@ program ESMF_ArrayArbIdxSMMUTest
   write(name, *) "Verify results in dstArray3 (tensor dim j=2) Test"
   write(failMsg, *) "Wrong results" 
   if (localPet == 0) then
-    call ESMF_Test(((farrayPtr2D(1,2).eq.-62).and.((farrayPtr2D(2,2).eq.0))), &
+    call ESMF_Test(((farrayPtr2D(1,2).eq.-62).and.(farrayPtr2D(2,2).eq.0)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 1) then
-    call ESMF_Test(((farrayPtr2D(1,2).eq.0).and.((farrayPtr2D(2,2).eq.-235))), &
+    call ESMF_Test(((farrayPtr2D(1,2).eq.0).and.(farrayPtr2D(2,2).eq.-235)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 2) then
-    call ESMF_Test(((farrayPtr2D(1,2).eq.931).and.((farrayPtr2D(2,2).eq.-284))), &
+    call ESMF_Test(((farrayPtr2D(1,2).eq.931).and.(farrayPtr2D(2,2).eq.-284)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 3) then
-    call ESMF_Test(((farrayPtr2D(1,2).eq.-250).and.((farrayPtr2D(2,2).eq.0))), &
+    call ESMF_Test(((farrayPtr2D(1,2).eq.-250).and.(farrayPtr2D(2,2).eq.0)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 4) then
-    call ESMF_Test(((farrayPtr2D(1,2).eq.15878).and.((farrayPtr2D(2,2).eq.-1496))), &
+    call ESMF_Test(((farrayPtr2D(1,2).eq.15878).and.(farrayPtr2D(2,2).eq.-1496)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 5) then
-    call ESMF_Test(((farrayPtr2D(1,2).eq.750).and.((farrayPtr2D(2,2).eq.-100))), &
+    call ESMF_Test(((farrayPtr2D(1,2).eq.750).and.(farrayPtr2D(2,2).eq.-100)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   endif
 
@@ -683,22 +686,22 @@ program ESMF_ArrayArbIdxSMMUTest
   write(name, *) "Verify results in dstArray2 (tensor mixing) Test"
   write(failMsg, *) "Wrong results" 
   if (localPet == 0) then
-    call ESMF_Test(((farrayPtr(1).eq.350).and.((farrayPtr(2).eq.0))), &
+    call ESMF_Test(((farrayPtr(1).eq.350).and.(farrayPtr(2).eq.0)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 1) then
-    call ESMF_Test(((farrayPtr(1).eq.0).and.((farrayPtr(2).eq.282))), &
+    call ESMF_Test(((farrayPtr(1).eq.0).and.(farrayPtr(2).eq.282)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 2) then
-    call ESMF_Test(((farrayPtr(1).eq.0).and.((farrayPtr(2).eq.0))), &
+    call ESMF_Test(((farrayPtr(1).eq.0).and.(farrayPtr(2).eq.0)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 3) then
-    call ESMF_Test(((farrayPtr(1).eq.1879).and.((farrayPtr(2).eq.0))), &
+    call ESMF_Test(((farrayPtr(1).eq.1879).and.(farrayPtr(2).eq.0)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 4) then
-    call ESMF_Test(((farrayPtr(1).eq.0).and.((farrayPtr(2).eq.665))), &
+    call ESMF_Test(((farrayPtr(1).eq.0).and.(farrayPtr(2).eq.665)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 5) then
-    call ESMF_Test(((farrayPtr(1).eq.0).and.((farrayPtr(2).eq.0))), &
+    call ESMF_Test(((farrayPtr(1).eq.0).and.(farrayPtr(2).eq.0)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   endif
   
@@ -787,22 +790,22 @@ call ESMF_ArrayPrint(dstArray3)
   write(name, *) "Verify results in dstArray3 (tensor dim j=1) Test"
   write(failMsg, *) "Wrong results" 
   if (localPet == 0) then
-    call ESMF_Test(((farrayPtr2D(1,1).eq.350).and.((farrayPtr2D(2,1).eq.0))), &
+    call ESMF_Test(((farrayPtr2D(1,1).eq.350).and.(farrayPtr2D(2,1).eq.0)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 1) then
-    call ESMF_Test(((farrayPtr2D(1,1).eq.0).and.((farrayPtr2D(2,1).eq.282))), &
+    call ESMF_Test(((farrayPtr2D(1,1).eq.0).and.(farrayPtr2D(2,1).eq.282)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 2) then
-    call ESMF_Test(((farrayPtr2D(1,1).eq.0).and.((farrayPtr2D(2,1).eq.0))), &
+    call ESMF_Test(((farrayPtr2D(1,1).eq.0).and.(farrayPtr2D(2,1).eq.0)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 3) then
-    call ESMF_Test(((farrayPtr2D(1,1).eq.0).and.((farrayPtr2D(2,1).eq.0))), &
+    call ESMF_Test(((farrayPtr2D(1,1).eq.0).and.(farrayPtr2D(2,1).eq.0)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 4) then
-    call ESMF_Test(((farrayPtr2D(1,1).eq.0).and.((farrayPtr2D(2,1).eq.0))), &
+    call ESMF_Test(((farrayPtr2D(1,1).eq.0).and.(farrayPtr2D(2,1).eq.0)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 5) then
-    call ESMF_Test(((farrayPtr2D(1,1).eq.0).and.((farrayPtr2D(2,1).eq.0))), &
+    call ESMF_Test(((farrayPtr2D(1,1).eq.0).and.(farrayPtr2D(2,1).eq.0)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   endif
   
@@ -811,22 +814,22 @@ call ESMF_ArrayPrint(dstArray3)
   write(name, *) "Verify results in dstArray3 (tensor dim j=2) Test"
   write(failMsg, *) "Wrong results" 
   if (localPet == 0) then
-    call ESMF_Test(((farrayPtr2D(1,2).eq.0).and.((farrayPtr2D(2,2).eq.0))), &
+    call ESMF_Test(((farrayPtr2D(1,2).eq.0).and.(farrayPtr2D(2,2).eq.0)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 1) then
-    call ESMF_Test(((farrayPtr2D(1,2).eq.0).and.((farrayPtr2D(2,2).eq.0))), &
+    call ESMF_Test(((farrayPtr2D(1,2).eq.0).and.(farrayPtr2D(2,2).eq.0)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 2) then
-    call ESMF_Test(((farrayPtr2D(1,2).eq.0).and.((farrayPtr2D(2,2).eq.0))), &
+    call ESMF_Test(((farrayPtr2D(1,2).eq.0).and.(farrayPtr2D(2,2).eq.0)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 3) then
-    call ESMF_Test(((farrayPtr2D(1,2).eq.1879).and.((farrayPtr2D(2,2).eq.0))), &
+    call ESMF_Test(((farrayPtr2D(1,2).eq.1879).and.(farrayPtr2D(2,2).eq.0)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 4) then
-    call ESMF_Test(((farrayPtr2D(1,2).eq.0).and.((farrayPtr2D(2,2).eq.665))), &
+    call ESMF_Test(((farrayPtr2D(1,2).eq.0).and.(farrayPtr2D(2,2).eq.665)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 5) then
-    call ESMF_Test(((farrayPtr2D(1,2).eq.0).and.((farrayPtr2D(2,2).eq.0))), &
+    call ESMF_Test(((farrayPtr2D(1,2).eq.0).and.(farrayPtr2D(2,2).eq.0)), &
 		     name, failMsg, result, ESMF_SRCLINE)
   endif
   
