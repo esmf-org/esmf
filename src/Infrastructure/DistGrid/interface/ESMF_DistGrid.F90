@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.30 2007/09/25 06:05:56 cdeluca Exp $
+! $Id: ESMF_DistGrid.F90,v 1.31 2007/10/16 17:27:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -110,7 +110,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.30 2007/09/25 06:05:56 cdeluca Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.31 2007/10/16 17:27:17 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1717,11 +1717,10 @@ contains
     type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
     type(ESMF_VM)           :: vm           ! opaque pointer to VM object
     type(ESMF_InterfaceInt) :: indicesArg   ! index helper
-    integer                 :: localSize(2) ! number of local indices
+    integer                 :: localSize(1) ! number of local indices
     integer, allocatable    :: globalSizes(:)  ! array of all sizes
     integer                 :: petCount        ! num pets
     integer, allocatable    :: deblock(:,:,:)  ! Array of sizes
-    integer                 :: imin, imax      ! min and max indicies,this pet
     integer                 :: i, csum         ! loop variable
     integer                 :: minC(1), maxC(1)! min/max corner
 
@@ -1737,25 +1736,17 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! min/max of local indices
+    ! number of local indices
     localSize(1) = size(arbSeqIndexList)
-    imax = -huge(imax)
-    imin = huge(imin)
-    do i=1,localSize(1)
-      if (arbSeqIndexList(i) .le. imin) imin = arbSeqIndexList(i)
-      if (arbSeqIndexList(i) .ge. imax) imax = arbSeqIndexList(i)
-    enddo
 
-    allocate(globalSizes(2*petCount))
-
-    ! Gather the sizes locally
+    ! gather all sizes locally
+    allocate(globalSizes(petCount))
     call ESMF_VMAllGather(vm, localSize, globalSizes, 1, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Now set up the deblocks
+    ! set up the deblocks
     allocate(deblock(1,2,petCount))
-
     csum = 0
     do i=1,petCount
       deblock(1,1,i) = csum + 1
@@ -1763,31 +1754,26 @@ contains
       deblock(1,2,i) = csum
     enddo
 
-    ! And now a global reduction to find min/max corners over all pets
-    localSize(1) = imin
-    call ESMF_VMAllReduce(vm, localSize, globalSizes, 1, ESMF_MIN, rc=localrc)
-    imin = globalSizes(1)
-    localSize(1) = imax
-    call ESMF_VMAllReduce(vm, localSize, globalSizes, 1, ESMF_MAX, rc=localrc)
-    imax = globalSizes(1)
-
-    minC(1) = imin
-    maxC(1) = imax
-    distgrid = ESMF_DistGridCreateDB(minC, maxC, deBlockList=deblock, &
-      rc=localrc)
+    ! create fitting DistGrid
+    minC(1) = deblock(1,1,1)
+    maxC(1) = deblock(1,2,petCount)
+    distgrid = ESMF_DistGridCreate(minC, maxC, deBlockList=deblock, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! garbage collection
     deallocate(deblock)
     deallocate(globalSizes)
     
-    ! Set return value
+    ! set return value
     ESMF_DistGridCreateDBAI = distgrid 
 
+    ! prepare to set local arbitrary sequence indices
     indicesArg = ESMF_InterfaceIntCreate(farray1D=arbSeqIndexList, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! set local arbitrary sequence indices in DistGrid object
     call c_ESMC_DistGridSetArbSeqIndex(distgrid, indicesArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
