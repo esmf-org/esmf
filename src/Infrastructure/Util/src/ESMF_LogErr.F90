@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.42 2007/08/28 19:23:56 svasquez Exp $
+! $Id: ESMF_LogErr.F90,v 1.43 2007/10/17 16:07:35 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -1495,12 +1495,14 @@ end subroutine ESMF_LogMsgSetError
 	    write(fnum,11) alog%petNumber 
         else if (alog%petNumber .le. 99) then
             write(fnum,21) alog%petNumber
-        else if (alog%petNumber .le. 9999) then
+        else if (alog%petNumber .le. 999) then
             write(fnum,31) alog%petNumber
-        else if (alog%petNumber .le. 99999) then
+        else if (alog%petNumber .le. 9999) then
             write(fnum,41) alog%petNumber
-        else if (alog%petNumber .le. 999999) then
+        else if (alog%petNumber .le. 99999) then
             write(fnum,51) alog%petNumber
+        else if (alog%petNumber .le. 999999) then
+            write(fnum,61) alog%petNumber
         else 
             write(fnum,*) alog%petNumber
         endif
@@ -1512,6 +1514,7 @@ end subroutine ESMF_LogMsgSetError
  31     format(I3.3)
  41     format(I4.4)
  51     format(I5.5)
+ 61     format(I6.6)
     if (len(alog%nameLogErrFile) .gt. 32) then
         print *, "Filename exceeded 32 characters."
         if (present(rc)) then
