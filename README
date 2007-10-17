@@ -1,6 +1,6 @@
 ================================================================================
 
-                        README - ESMF v2.2.2rp2 beta snapshot
+                        README - ESMF v2.2.2rp2
 
                     Earth System Modeling Framework (ESMF)
 
@@ -562,4 +562,4 @@ Please contact esmf_support@ucar.edu with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.69.2.21 2007/06/13 17:57:33 theurich Exp $
+ $Id: README,v 1.69.2.22 2007/10/17 21:18:09 theurich Exp $
