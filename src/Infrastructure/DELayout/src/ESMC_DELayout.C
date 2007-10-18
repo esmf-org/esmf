@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.82 2007/09/14 22:57:15 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.83 2007/10/18 21:59:18 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.82 2007/09/14 22:57:15 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.83 2007/10/18 21:59:18 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2437,9 +2437,9 @@ int XXE::exec(
   
   // set index range
   int indexRangeStart = 0;        // default
-  if (indexStart >= 0) indexRangeStart = indexStart;
-  int indexRangeStop = count-1;   // default
-  if (indexStop >= 0) indexRangeStop = indexStop;
+  if (indexStart > 0) indexRangeStart = indexStart;
+  int indexRangeStop = (count-1 > 0) ? count-1 : 0;   // default
+  if (indexStop > 0) indexRangeStop = indexStop;
   
   // check index range
   if (indexRangeStart > count-1){
