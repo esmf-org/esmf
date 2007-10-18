@@ -1,4 +1,4 @@
-% $Id: user_arch.tex,v 1.16.4.7 2007/10/10 21:05:13 theurich Exp $
+% $Id: user_arch.tex,v 1.16.4.8 2007/10/18 04:52:59 theurich Exp $
 
 % List of architectures supported.  This file is 
 % meant to be included in a user doc.
@@ -13,35 +13,46 @@ fully supported. The second table lists all possible combinations which are
 included in the build system.
 
 \vspace{1ex}
-{\bf Fully tested combinations}:
+{\bf Fully tested combinations}: (See \htmladdnormallink{http://www.esmf.ucar.edu/download/platforms/}{http://www.esmf.ucar.edu/download/platforms/} for the most up-to-date table of supported combinations.)
 \vspace{1ex}
 
-\begin{tabular}{lcccc}
-  &{\bfseries ESMF\_OS} &{\bfseries ESMF\_COMPILER} & {\bfseries ESMF\_COMM} & {\bfseries ESMF\_ABI} \\
+\begin{tabular}{lllllll}
+  &{\bfseries\footnotesize ESMF\_OS} &{\bfseries\footnotesize ESMF\_COMPILER} & {\bfseries\footnotesize\it F90 compiler} & {\bfseries\footnotesize\it C++ compiler} & {\bfseries\footnotesize ESMF\_COMM} & {\bfseries\footnotesize ESMF\_ABI} \\
 
-Cray X1         &  Unicos  &  default      &  mpi         &  64 \\
-Cray XT3/4      &  Unicos  &  default      &  mpi         &  64 \\
-IBM Opteron     &  Linux   &  pathscale    &  mpich       &  64  \\
-IBM Opteron     &  Linux   &  pgi          &  mpich       &  64  \\
-IBM SP          &  AIX     &  default      &  mpi         &  32,64  \\
-HP ZX6000       &  Linux   &  intel        &  lam         &  64  \\
-Mac G5          &  Darwin  &  absoft       &  lam,mpiuni  &  32  \\
-Mac G5          &  Darwin  &  nag          &  lam,mpiuni  &  32  \\
-Mac G5          &  Darwin  &  xlf          &  lam,mpiuni  &  32  \\
-Mac G5          &  Darwin  &  xlfgcc       &  lam,mpiuni  &  32  \\
-PC Pentium III  &  Linux   &  lahey        &  mpiuni      &  32  \\
-PC Pentium III  &  Linux   &  pgi          &  mpiuni      &  32  \\
-PC Xeon Cluster &  Linux   &  absoft       &  mpich       &  32  \\
-PC Xeon Cluster &  Linux   &  intel        &  mpich       &  32  \\
-PC Xeon Cluster &  Linux   &  nag          &  mpich       &  32  \\
-SGI Altix       &  Linux   &  intel        &  mpi         &  64  \\
-SGI Origin 3800 &  IRIX64  &  default      &  mpi         &  32,64  \\
+Cray X1         &\tt Unicos &\tt default & ftn \footnotesize 5.6.0.3 & CC \footnotesize 5.6.0.3 &\tt mpi &\tt 64 \\
+Cray X1         &\tt Unicos &\tt default & ftn \footnotesize 5.5.0.9 & CC \footnotesize 5.5.0.9 &\tt mpi &\tt 64 \\
+HP ZX6000       &\tt Linux  &\tt intel   & ifort \footnotesize 8.1.021 & icpc \footnotesize 8.1.024 &\tt lam &\tt 64 \\
+IBM Bluegene    &\tt Linux  &\tt xlf     & mpxlf90 \footnotesize 10.1.0.4 & mpxlC \footnotesize 8.0.0.4 &\tt mpi &\tt 32 \\
+IBM Opteron     &\tt Linux  &\tt pathscale & pathf90 \footnotesize 2.4 & pathCC \footnotesize 2.4 &\tt mpich &\tt x86\_64\_small, \\
+                &           &              &                           &                          &          &\tt x86\_64\_medium \\
+IBM Opteron     &\tt Linux  &\tt pgi     & pgf90 \footnotesize 5.2-4 & pgCC \footnotesize 5.2-4 &\tt mpich   &\tt x86\_64\_small, \\
+                &           &            &                           &                          &            &\tt x86\_64\_medium \\
+IBM Opteron     &\tt Linux  &\tt pgi     & pgf90 \footnotesize 6.2-3 & pgCC \footnotesize 6.2-3 &\tt mpich   &\tt x86\_64\_small, \\
+                &           &            &                           &                          &            &\tt x86\_64\_medium \\
+IBM SP          &\tt AIX    &\tt default & mpxlf90\_r \footnotesize 10.1.0.4 & mpCC\_r \footnotesize 8.0.0.0 &\tt mpi &\tt 32,64 \\
+IBM SP          &\tt AIX    &\tt default & mpxlf90\_r \footnotesize 10.1.0.4 & mpCC\_r \footnotesize 8.0.0.5 &\tt mpi &\tt 32,64 \\
+Mac G5          &\tt Darwin &\tt absoft  & f90 \footnotesize 9.0     & g++ \footnotesize 3.3    &\tt lam,mpiuni &\tt 32 \\
+Mac G5          &\tt Darwin &\tt absoft  & f90 \footnotesize 8.2     & g++ \footnotesize 3.3    &\tt lam,mpiuni &\tt 32 \\
+Mac G5          &\tt Darwin &\tt nag     & f95 \footnotesize 5.0(272)& g++ \footnotesize 3.3    &\tt lam,mpiuni &\tt 32 \\
+Mac G5          &\tt Darwin &\tt xlf     & xlf90\_r \footnotesize 8.1& xlC\_r \footnotesize 6.0 &\tt lam,mpiuni &\tt 32 \\
+Mac G5          &\tt Darwin &\tt xlfgcc  & xlf90\_r \footnotesize 8.1& g++ \footnotesize 3.3    &\tt lam,mpiuni &\tt 32 \\
+PC Pentium III  &\tt Linux  &\tt lahey   & lf95 \footnotesize L6.20d & g++ \footnotesize 3.2.3  &\tt mpiuni     &\tt 32 \\
+PC Pentium III  &\tt Linux  &\tt pgi     & pgf90 \footnotesize 5.0-2 & pgCC \footnotesize 5.0-2 &\tt mpiuni     &\tt 32 \\
+PC Pentium III  &\tt Linux  &\tt pgi     & pgf90 \footnotesize 7.0-6 & pgCC \footnotesize 7.0-6 &\tt mpiuni     &\tt 32 \\
+PC Pentium III  &\tt Linux  &\tt pgigcc  & pgf90 \footnotesize 5.0-2 & g++ \footnotesize 3.2.3  &\tt mpiuni     &\tt 32 \\
+PC Pentium III  &\tt Linux  &\tt pgigcc  & pgf90 \footnotesize 7.0-6 & g++ \footnotesize 3.2.3  &\tt mpiuni     &\tt 32 \\
+PC Xeon Cluster &\tt Linux  &\tt absoft  & f90 \footnotesize 9.0 r2  & g++ \footnotesize 3.2.3  &\tt mpich      &\tt 32 \\
+PC Xeon Cluster &\tt Linux  &\tt intel   & ifort \footnotesize 8.1   & icpc \footnotesize 8.1   &\tt mpich      &\tt 32 \\
+PC Xeon Cluster &\tt Linux  &\tt nag     & f95 \footnotesize 5.0(361)& icpc \footnotesize 8.1   &\tt mpich      &\tt 32 \\
+PC Xeon Cluster &\tt Linux  &\tt pgi     & pgf90 \footnotesize 5.2-4 & pgCC \footnotesize 5.2-4 &\tt mpich      &\tt 32 \\
+SGI Altix       &\tt Linux  &\tt intel   & ifort \footnotesize 9.1.045 & icpc \footnotesize 9.1.049 &\tt mpi    &\tt 64 \\
+SGI Origin 3800 &\tt IRIX64 &\tt default & f90 \footnotesize 7.4.3m  & CC \footnotesize 7.4.3m  &\tt mpi        &\tt 32,64
 \end{tabular}
 
 \vspace{1ex}
 
 {\bf All possible options}. Where multiple options exist 
-and the default is independent of {\tt ESMF\_MACHINE} the default value is in bold:
+and the default is independent of {\tt ESMF\_MACHINE} the default value is in {\bf bold}:
 
 \vspace{1ex}
 
