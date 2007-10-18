@@ -1,7 +1,7 @@
-! $Id: ESMF_ArrayCreate.cpp,v 1.10.2.2 2006/11/16 06:14:23 cdeluca Exp $
+! $Id: ESMF_ArrayCreate.cpp,v 1.10.2.3 2007/10/18 02:41:57 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2006, University Corporation for Atmospheric Research, 
+! Copyright 2002-2007, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -83,7 +83,7 @@ AllTypesMacro(ArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayCreate.cpp,v 1.10.2.2 2006/11/16 06:14:23 cdeluca Exp $'
+      '$Id: ESMF_ArrayCreate.cpp,v 1.10.2.3 2007/10/18 02:41:57 cdeluca Exp $'
 
 !==============================================================================
 ! 

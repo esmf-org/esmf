@@ -1,8 +1,8 @@
 #if 0
-$Id: ESMF_ErrReturnCodes.inc,v 1.3.2.2 2006/11/16 06:15:39 cdeluca Exp $
+$Id: ESMF_ErrReturnCodes.inc,v 1.3.2.3 2007/10/18 02:43:24 cdeluca Exp $
 
 Earth System Modeling Framework
-Copyright 2002-2006, University Corporation for Atmospheric Research,
+Copyright 2002-2007, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 Laboratory, University of Michigan, National Centers for Environmental
 Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
