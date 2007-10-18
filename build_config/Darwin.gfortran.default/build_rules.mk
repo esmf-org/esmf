@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.2.2.4 2007/10/03 17:44:34 theurich Exp $
+# $Id: build_rules.mk,v 1.2.2.5 2007/10/18 23:06:41 theurich Exp $
 #
 # Darwin.gfortran.default
 #
@@ -97,28 +97,36 @@ ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
 ############################################################
 # Determine where gcc's libraries are located
 #
-ESMF_F90LINKPATHS += \
-  -L$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.so))
-ESMF_F90LINKRPATHS += \
-  -Wl,-rpath,$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.so))
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.dylib)
+ifeq ($(ESMF_LIBSTDCXX),libstdc++.dylib)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
+endif
+ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
 
 ############################################################
 # Determine where gfortran's libraries are located
 #
-ESMF_CXXLINKPATHS += \
-  -L$(dir $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.so))
-ESMF_CXXLINKRPATHS += \
-  -Wl,-rpath,$(dir $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.so))
+ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.dylib)
+ifeq ($(ESMF_LIBSTDCXX),libgfortran.dylib)
+ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.a)
+endif
+ESMF_CXXLINKPATHS += -L$(dir $(ESMF_LIBGFORTRAN))
+
+############################################################
+# Blank out variables to prevent rpath encoding
+#
+ESMF_F90LINKRPATHS      =
+ESMF_CXXLINKRPATHS      =
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lrt -lstdc++
+ESMF_F90LINKLIBS += -lstdc++
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lrt -lgfortran
+ESMF_CXXLINKLIBS += -lgfortran
 
 ############################################################
 # Blank out shared library options

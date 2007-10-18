@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.5.2.8 2006/09/19 06:01:26 theurich Exp $
+# $Id: build_rules.mk,v 1.5.2.9 2007/10/18 23:06:41 theurich Exp $
 #
 # Linux.g95.default
 #
@@ -98,10 +98,12 @@ ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
 ############################################################
 # Determine where gcc's libraries are located
 #
-ESMF_F90LINKPATHS += \
-  -L$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.so))
-ESMF_F90LINKRPATHS += \
-  -Wl,-rpath,$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.so))
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.so)
+ifeq ($(ESMF_LIBSTDCXX),libstdc++.so)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
+endif
+ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
+ESMF_F90LINKRPATHS += -Wl,-rpath,$(dir $(ESMF_LIBSTDCXX))
 
 ############################################################
 # Determine where g95's libraries are located

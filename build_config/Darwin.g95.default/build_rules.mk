@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.1.2.5 2007/10/04 16:43:38 theurich Exp $
+# $Id: build_rules.mk,v 1.1.2.6 2007/10/18 23:06:41 theurich Exp $
 #
 # Dawin.g95.default
 #
@@ -104,8 +104,11 @@ ESMF_CXXLINKRPATHS      =
 ############################################################
 # Determine where gcc's libraries are located
 #
-ESMF_F90LINKPATHS += \
-  -L$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a))
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.dylib)
+ifeq ($(ESMF_LIBSTDCXX),libstdc++.dylib)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
+endif
+ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
