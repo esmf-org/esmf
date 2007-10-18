@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.8 2007/10/18 20:52:56 theurich Exp $
+# $Id: build_rules.mk,v 1.9 2007/10/18 21:02:37 theurich Exp $
 #
 # Darwin.gfortran.default
 #
@@ -124,7 +124,7 @@ ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
 # Determine where gfortran's libraries are located
 #
 ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.dylib)
-ifeq ($(ESMF_LIBSTDCXX),libstdc++.dylib)
+ifeq ($(ESMF_LIBSTDCXX),libgfortran.dylib)
 ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.a)
 endif
 ESMF_CXXLINKPATHS += -L$(dir $(ESMF_LIBGFORTRAN))
