@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.43 2007/10/17 16:07:35 peggyli Exp $
+! $Id: ESMF_LogErr.F90,v 1.44 2007/10/19 20:05:22 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -1403,8 +1403,8 @@ end subroutine ESMF_LogMsgSetError
 !            the PET number to be added and keep the total file name
 !            length under 32 characters.
 !      \item [{[logtype]}]
-!            Set the logtype. Valid options are {\tt ESMF\_LOG\_SINGLE}
-!            and {\tt ESMF\_LOG\_MULTI}.
+!            Set the logtype. See section \ref{opt:logtype} for a list of
+!            valid options.
 !            If not specified, defaults to {\tt ESMF\_LOG\_MULTI}.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1443,16 +1443,6 @@ end subroutine ESMF_LogMsgSetError
     endif
         
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
-
-    if (present(logtype)) then
-	if (logtype .eq. ESMF_LOG_NONE) then
-	    print *, "ESMF_LOG_NONE is not a valid option of logtype."
-	    if (present(rc)) then
-               rc=ESMF_RC_NOT_VALID
-	       return
-	    endif
-	 endif
-    endif
 
     ! Test if it is open or closed
     if (alog%FileIsOpen .eq. ESMF_TRUE) then
