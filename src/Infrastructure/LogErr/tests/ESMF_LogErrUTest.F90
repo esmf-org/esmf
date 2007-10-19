@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.43 2007/09/05 21:42:15 svasquez Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.44 2007/10/19 19:56:50 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.43 2007/09/05 21:42:15 svasquez Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.44 2007/10/19 19:56:50 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -120,10 +120,10 @@
       !NEX_UTest
       ! Test Log Open
       logtype = ESMF_LOG_NONE
-      write(failMsg, *) "Did not return ESMF_RC_NOT_VALID"
+      write(failMsg, *) "Did not return ESMF_FAILURE"
       call ESMF_LogOpen(log5, "None_Log_File", logtype=logtype,  rc=rc)
-      write(name, *) "Open ESMF_LOG_NONE Log Test"
-      call ESMF_Test((rc.eq.ESMF_RC_NOT_VALID), name, failMsg, result, ESMF_SRCLINE)
+      write(name, *) "Open ESMF_LOG_NONE Log of opened file Test"
+      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
 
 
