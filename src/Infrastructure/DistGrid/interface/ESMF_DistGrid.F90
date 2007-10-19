@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.31 2007/10/16 17:27:17 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.32 2007/10/19 21:15:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -110,7 +110,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.31 2007/10/16 17:27:17 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.32 2007/10/19 21:15:26 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -228,8 +228,8 @@ contains
 !     \item[{[decompflag]}]
 !          List of decomposition flags indicating how each dimension of the
 !          patch is to be divided between the DEs. The default setting
-!          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. See section ?? for a 
-!          list of valid decomposition flag options.
+!          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. See section
+!          \ref{opt:decompflag} for a list of valid decomposition flag options.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
 !          sequence is given by the column major order of the {\tt regDecomp}
@@ -651,8 +651,8 @@ contains
 !     \item[{[decompflag]}]
 !          List of decomposition flags indicating how each dimension of the
 !          patch is to be divided between the DEs. The default setting
-!          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. See section ?? for a 
-!          list of valid decomposition flag options.
+!          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. See section
+!          \ref{opt:decompflag} for a list of valid decomposition flag options.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
 !          sequence is given by the column major order of the {\tt regDecomp}
@@ -1025,8 +1025,8 @@ contains
 !          List of decomposition flags indicating how each dimension of each
 !          patch is to be divided between the DEs. The default setting
 !          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions for all patches. 
-!          See section ?? for a list of valid decomposition flag options. The 
-!          second index indicates the patch number.
+!          See section \ref{opt:decompflag} for a list of valid decomposition
+!          flag options. The second index indicates the patch number.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
 !          sequence is given by the column major order of the {\tt regDecomp}
@@ -1417,8 +1417,8 @@ contains
 !          List of decomposition flags indicating how each dimension of each
 !          patch is to be divided between the DEs. The default setting
 !          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions for all patches. 
-!          See section ?? for a list of valid decomposition flag options. The 
-!          second index indicates the patch number.
+!          See section \ref{opt:decompflag} for a list of valid decomposition
+!          flag options. The second index indicates the patch number.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
 !          sequence is given by the column major order of the {\tt regDecomp}

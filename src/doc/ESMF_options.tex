@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.26 2007/07/12 19:05:23 cdeluca Exp $
+% $Id: ESMF_options.tex,v 1.27 2007/10/19 21:15:26 theurich Exp $
 
 \section{Global Options and Parameters}
 
@@ -110,7 +110,7 @@ Valid values are:
 \subsubsection{ESMF\_DefaultFlag}
 \label{opt:defaultflag}
 {\sf DESCRIPTION:\\}
-Indicates whether to reference a data item or make a copy of it.
+Indicates whether to use defaults or not.
 
 Valid values are:
 \begin{description}
@@ -118,6 +118,29 @@ Valid values are:
       Use default values where possible.
 \item [ESMF\_NO\_DEFAULTS]
       Don't use any default values.
+\end{description}
+
+\subsubsection{ESMF\_DecompFlag}
+\label{opt:decompflag}
+{\sf DESCRIPTION:\\}
+Indicates how DistGrid elements are decomposed over DEs.
+
+Valid values are:
+\begin{description}
+\item [ESMF\_DECOMP\_CYCLIC]
+      Decompose elements cyclically across DEs.
+\item [ESMF\_DECOMP\_DEFAULT]
+      Use default decomposition behavior. Currently equal to 
+      {\tt ESMF\_DECOMP\_HOMOGEN}.
+\item [ESMF\_DECOMP\_HOMOGEN]
+      Decompose elements as homogenously as possible across DEs. The maximum 
+      difference in number of elements per DE is 1, with the extra elements on
+      the lower DEs.
+\item [ESMF\_DECOMP\_RESTFIRST]
+      Divide elements over DEs. Assign the rest of this division to the first
+      DE.
+\item [ESMF\_DECOMP\_RESTLAST]
+      Divide elements over DEs. Assign the rest of this division to the last DE.
 \end{description}
 
 \subsubsection{ESMF\_IndexFlag}
