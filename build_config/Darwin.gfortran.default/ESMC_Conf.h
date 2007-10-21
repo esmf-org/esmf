@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.1.2.3 2007/10/03 17:44:34 theurich Exp $"
+"$Id: ESMC_Conf.h,v 1.1.2.4 2007/10/21 04:47:11 theurich Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -24,7 +24,7 @@ Licensed under the University of Illinois-NCSA License.
 
 #if S32
 #define ESMF_IS_32BIT_MACHINE 1
-#define ESMF_F90_PTR_BASE_SIZE 28
+#define ESMF_F90_PTR_BASE_SIZE 24
 #define ESMF_F90_PTR_PLUS_RANK 12
 #define ESMC_POINTER_SIZE 4
 #endif
