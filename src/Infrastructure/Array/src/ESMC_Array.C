@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.150 2007/10/16 21:34:16 theurich Exp $
+// $Id: ESMC_Array.C,v 1.151 2007/10/23 19:06:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.150 2007/10/16 21:34:16 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.151 2007/10/23 19:06:32 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -105,7 +105,9 @@ Array::Array(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-  
+
+  try{  
+
   // fill in the Array object
   typekind = typekindArg;
   rank = rankArg;
@@ -222,6 +224,12 @@ Array::Array(
   // invalidate the name for this Array object in the Base class
   ESMC_BaseSetName(NULL, "Array");
    
+  }catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught exception", rc);
+    return;
+  }
+  
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
@@ -327,6 +335,9 @@ Array *Array::create(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  
+  Array *array;
+  try{
   
   // check the input and get the information together to call construct()
   // larrayListArg -> typekind/rank
@@ -816,7 +827,6 @@ Array *Array::create(
   delete [] temp_ubounds;
   
   // call class constructor
-  Array *array;
   try{
     array = new Array(typekind, rank, larrayList, distgrid, exclusiveLBound,
       exclusiveUBound, computationalLBound, computationalUBound,
@@ -845,6 +855,12 @@ Array *Array::create(
   delete [] vectorDim;
   if (lboundsArrayAllocFlag) delete [] lboundsArray;
   if (uboundsArrayAllocFlag) delete [] uboundsArray;
+  
+  }catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught exception", rc);
+    return ESMC_NULL_POINTER;
+  }
   
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -891,6 +907,9 @@ Array *Array::create(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  
+  Array *array;
+  try{
   
   // check the input and get the information together to call construct()
   // arrayspec -> typekind/rank
@@ -1287,7 +1306,6 @@ Array *Array::create(
   delete [] temp_ubounds;
   
   // call class constructor
-  Array *array;
   try{
     array = new Array(typekind, rank, larrayList, distgrid, exclusiveLBound,
       exclusiveUBound, computationalLBound, computationalUBound,
@@ -1314,6 +1332,12 @@ Array *Array::create(
   delete [] inverseDimmapArray;
   delete [] staggerLoc;
   delete [] vectorDim;
+  
+  }catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught exception", rc);
+    return ESMC_NULL_POINTER;
+  }
   
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1345,6 +1369,8 @@ int Array::destroy(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  try{
 
   // return with errors for NULL pointer
   if (array == ESMC_NULL_POINTER || *array == ESMC_NULL_POINTER){
@@ -1356,6 +1382,12 @@ int Array::destroy(
   // delete Array object
   delete *array;
   *array = ESMC_NULL_POINTER;
+  
+  }catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught exception", &rc);
+    return rc;
+  }
   
   // return successfully
   rc = ESMF_SUCCESS;
@@ -2920,6 +2952,8 @@ int Array::sparseMatMulStore(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
+  try{
+  
   //---------------------------------------------------------------------------
   // Phase I
   //---------------------------------------------------------------------------
@@ -6454,6 +6488,12 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
     t5-t0, t6-t0, t7-t0, t8-t0, t10X-t0, t9-t0, t10Y-t0, t11-t0);
 #endif
   
+  }catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught exception", &rc);
+    return rc;
+  }
+  
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -6492,6 +6532,8 @@ int Array::sparseMatMul(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  try{
 
 #define ASMMTIMING___disable
 #ifdef ASMMTIMING
@@ -6600,6 +6642,12 @@ int Array::sparseMatMul(
     localPet, t1-t0, t2-t0, t3-t0, t4-t0, t5-t0, t6-t0);
 #endif
   
+  }catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught exception", &rc);
+    return rc;
+  }
+  
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -6633,6 +6681,8 @@ int Array::sparseMatMulRelease(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
+  try{
+  
   // get XXE from routehandle
   XXE *xxe = (XXE *)routehandle->ESMC_RouteHandleGetStorage();
   
@@ -6660,6 +6710,12 @@ int Array::sparseMatMulRelease(
 
   // mark storage pointer in RouteHandle as invalid  
   routehandle->ESMC_RouteHandleSetStorage(NULL);
+  
+  }catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught exception", &rc);
+    return rc;
+  }
   
   // return successfully
   rc = ESMF_SUCCESS;
