@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.19 2007/07/19 20:59:04 theurich Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.20 2007/10/23 18:47:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -69,7 +69,7 @@ program ESMF_DistGridEx
 !BOE
 ! A default DELayout with 1 DE per PET will be created during 
 ! {\tt ESMF\_DistGridCreate()}. The 1000 cells of the specified 1D patch will
-! then be block decomposed across the availbale DEs, i.e. across all PETs. 
+! then be block decomposed across the available DEs, i.e. across all PETs. 
 ! Hence, for 4 PETs the (min) $\sim$ (max) corners of the DE-local LR regions
 ! will be:
 ! \begin{verbatim}
@@ -593,25 +593,27 @@ program ESMF_DistGridEx
 ! along the first dimension are imposed by adding a
 ! {\tt connectionList} argument with only one element to the create call.
 !
-! Each {\tt connectionList} element is a vector of {\tt (2 * dimCount + 2)}
+! Each {\tt connectionList} element is a vector of {\tt (3 * dimCount + 2)}
 ! integer numbers:
 !EOE
 !BOC
-  allocate(connectionList(2*2+2, 1))  ! (2*dimCount+2, number of connections)
+  allocate(connectionList(3*2+2, 1))  ! (3*dimCount+2, number of connections)
 !EOC
 !BOE
 ! and has the following format:
 !
-! {\tt (/patchIndex\_A, patchIndex\_B, positionVector, orientationVector/)}.
+! {\tt (/patchIndex\_A, patchIndex\_B, positionVector, orientationVector,
+! repetitionVector/)}.
 !
 ! The following constructor call can be used to construct a suitable connectionList
 ! element.
 !EOE
 !BOC
-  call ESMF_Connection(connection=connectionList(:,1), &
+  call ESMF_DistGridConnection(connection=connectionList(:,1), &
      patchIndexA=1, patchIndexB=1, &
      positionVector=(/5, 0/), &
-     orientationVector=(/1, 2/), rc=rc)
+     orientationVector=(/1, 2/), &
+     repetitionVector=(/1, 0/), rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
@@ -622,13 +624,18 @@ program ESMF_DistGridEx
 !BOE
 ! The {\tt patchIndexA} and {\tt patchIndexB} arguments specify that this is a
 ! connection within patch 1. The {\tt positionVector} indicates that there is no
-! offset between patch B and patch A along the second dimension, but there is
+! offset between patchB and patchA along the second dimension, but there is
 ! an offset of 5 along the first dimension (which in this case is the length of
-! dimension 1). Finally, the {\tt orientationVector} fixes the orientation of 
-! the patch B index space to be the same as the orientation of patch A (it maps
-! index 1 of patch A to index 1 of patch B and the same for index 2). Note that
-! the {\tt orientationVector} could have been omitted in this case which 
-! corresponds to the default orientation.
+! dimension 1). This aligns patchB (which is patch 1) right next to patchA
+! (which is also patch 1).
+!
+! The {\tt orientationVector} fixes the orientation of the patchB index space to
+! be the same as the orientation of patchA (it maps index 1 of patchA to index 1
+! of patchB and the same for index 2). The {\tt orientationVector} could have
+! been omitted in this case which corresponds to the default orientation.
+!
+! Finally, the {\tt repetitionVector} idicates that this connetion element will
+! be periodically repeated along dimension 1.
 !
 ! The {\tt connectionList} can now be used to create a {\tt DistGrid} object with the
 ! desired boundary conditions.
@@ -811,15 +818,15 @@ program ESMF_DistGridEx
 ! patch 1 and 2 and between 2 and 3) and one outer edge between patch 1 and 3.
 !EOEI
 !BOCI
-  allocate(connectionList(2*2+2,3))  ! (2*dimCount+2, number of connections)
+  allocate(connectionList(3*2+2,3))  ! (3*dimCount+2, number of connections)
 !EOCI
 !BOEI
 ! Setup of the first two connectionList elements is straight forward:
 !EOEI
 !BOCI
-  call ESMF_Connection(connection=connectionList(:,1), &
+  call ESMF_DistGridConnection(connection=connectionList(:,1), &
      patchIndexA=1, patchIndexB=2, positionVector=(/0, 10/), rc=rc)   ! 1 <-> 2
-  call ESMF_Connection(connection=connectionList(:,2), &
+  call DistGridConnection(connection=connectionList(:,2), &
      patchIndexA=2, patchIndexB=3, positionVector=(/-10, 0/), rc=rc)  ! 2 <-> 3
 !EOCI
 !BOEI
@@ -827,7 +834,7 @@ program ESMF_DistGridEx
 ! characteristics of the cubed sphere topology:
 !EOEI
 !BOCI
-  call ESMF_Connection(connection=connectionList(:,3), &
+  call DistGridConnection(connection=connectionList(:,3), &
      patchIndexA=1, patchIndexB=3, positionVector=(/-1, 0/), &
      orientationVector=(/-2, 1/), rc=rc)
 !EOCI
@@ -848,10 +855,10 @@ program ESMF_DistGridEx
 ! the connectionTransformList elements for this example are:
 !BOCI
   allocate(connectionTransformList(5+2,2))  ! (4+2*dimCount, number of transforms)
-  call ESMF_ConnectionTransform(connectionTransformList(:,1), &
+  call DistGridConnectionTrans(connectionTransformList(:,1), &
     connectionIndex=3, direction=0, staggerSrc=1, staggerDst=2, &
     indexOffsetVector=(/0,0/), signChangeVector=(/-1,+1/))   ! N face -> E face
-  call ESMF_ConnectionTransform(connectionTransformList(:,2), &
+  call DistGridConnectionTrans(connectionTransformList(:,2), &
     connectionIndex=3, direction=0, staggerSrc=2, staggerDst=1, &
     indexOffsetVector=(/+1,0/), signChangeVector=(/-1,+1/))  ! E face -> N face
 !EOCI
@@ -1011,8 +1018,8 @@ program ESMF_DistGridEx
 ! of patch 1 for the otherwise unchanged previous example:
 !EOEI
 !BOCI
-  allocate(connectionList(2*2+2, 1))  ! (2*dimCount+2, number of connections)
-  call ESMF_Connection(connection=connectionList(:,1), &
+  allocate(connectionList(3*2+2, 1))  ! (3*dimCount+2, number of connections)
+  call DistGridConnection(connection=connectionList(:,1), &
      patchIndexA=1, patchIndexB=1, positionVector=(/10, 0/), rc=rc)
 !EOCI
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)

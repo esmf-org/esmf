@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.32 2007/10/19 21:15:26 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.33 2007/10/23 18:47:34 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -96,8 +96,8 @@ module ESMF_DistGridMod
   public ESMF_DistGridPrint
   public ESMF_DistGridValidate
   
-  public ESMF_Connection
-  public ESMF_ConnectionTransform
+  public ESMF_DistGridConnection
+  public ESMF_DistGridConnectionTrans
 
 ! - ESMF-internal methods:
   public ESMF_DistGridGetInit
@@ -110,7 +110,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.32 2007/10/19 21:15:26 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.33 2007/10/23 18:47:34 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -187,7 +187,7 @@ contains
   ! Private name; call using ESMF_DistGridCreate()
   
   function ESMF_DistGridCreateRD(minIndex, maxIndex, regDecomp, &
-    decompflag, deLabelList, indexflag, connectionList, connectionTransformList, &
+    decompflag, deLabelList, indexflag, connectionList, connectionTransList, &
     delayout, vm, rc)
 !
 ! !ARGUMENTS:
@@ -198,7 +198,7 @@ contains
     integer, target,              intent(in), optional  :: deLabelList(:)
     type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
     integer, target,              intent(in), optional  :: connectionList(:,:)
-    integer, target,              intent(in), optional  :: connectionTransformList(:,:)
+    integer, target,              intent(in), optional  :: connectionTransList(:,:)
     type(ESMF_DELayout),          intent(in), optional  :: delayout
     type(ESMF_VM),                intent(in), optional  :: vm
     integer,                      intent(out),optional  :: rc
@@ -258,13 +258,13 @@ contains
 !                with a dimension in patch B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
 !          \end{itemize}
-!     \item[{[connectionTransformList]}]
+!     \item[{[connectionTransList]}]
 !          List of transforms associated with patch connections defined in 
-!          {\tt connectionList}. The second dimension of {\tt connectionTransformList}
+!          {\tt connectionList}. The second dimension of {\tt connectionTransList}
 !          steps through the connection transforms, defined by the first index. The
 !          first index must be of size {\tt 5 + dimCount}, where {\tt dimCount}
 !          is the rank of the decomposed index space. Each 
-!          {\tt connectionTransformList} element specifies a connection transform 
+!          {\tt connectionTransList} element specifies a connection transform 
 !          by a list of integer values in the format {\tt (/connectionIndex,
 !          direction, staggerSrc, staggerDst, offsetDst, signVector/)}, where
 !          \begin{itemize}
@@ -310,7 +310,7 @@ contains
     integer                 :: len_decompflag ! helper variable
     type(ESMF_InterfaceInt) :: deLabelListArg ! helper variable
     type(ESMF_InterfaceInt) :: connectionListArg ! helper variable
-    type(ESMF_InterfaceInt) :: connectionTransformListArg ! helper variable
+    type(ESMF_InterfaceInt) :: connectionTransListArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -344,8 +344,8 @@ contains
       ESMF_InterfaceIntCreate(farray2D=connectionList, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    connectionTransformListArg = &
-      ESMF_InterfaceIntCreate(farray2D=connectionTransformList, rc=localrc)
+    connectionTransListArg = &
+      ESMF_InterfaceIntCreate(farray2D=connectionTransList, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -355,7 +355,7 @@ contains
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridCreateRD(distgrid, minIndexArg, maxIndexArg, &
       regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
-      connectionListArg, connectionTransformListArg, delayout, vm, localrc)
+      connectionListArg, connectionTransListArg, delayout, vm, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -375,7 +375,7 @@ contains
     call ESMF_InterfaceIntDestroy(connectionListArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(connectionTransformListArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(connectionTransListArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -402,7 +402,7 @@ contains
   ! Private name; call using ESMF_DistGridCreate()
   
   function ESMF_DistGridCreateDB(minIndex, maxIndex, deBlockList, &
-    deLabelList, indexflag, connectionList, connectionTransformList, delayout, &
+    deLabelList, indexflag, connectionList, connectionTransList, delayout, &
     vm, rc)
 !
 ! !ARGUMENTS:
@@ -412,7 +412,7 @@ contains
     integer,                      intent(in), optional  :: deLabelList(:)
     type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
     integer,                      intent(in), optional  :: connectionList(:,:)
-    integer,                      intent(in), optional  :: connectionTransformList(:,:)
+    integer,                      intent(in), optional  :: connectionTransList(:,:)
     type(ESMF_DELayout),          intent(in), optional  :: delayout
     type(ESMF_VM),                intent(in), optional  :: vm
     integer,                      intent(out),optional  :: rc
@@ -476,13 +476,13 @@ contains
 !                with a dimension in patch B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
 !          \end{itemize}
-!     \item[{[connectionTransformList]}]
+!     \item[{[connectionTransList]}]
 !          List of transforms associated with patch connections defined in 
-!          {\tt connectionList}. The second dimension of {\tt connectionTransformList}
+!          {\tt connectionList}. The second dimension of {\tt connectionTransList}
 !          steps through the connection transforms, defined by the first index. The
 !          first index must be of size {\tt 5 + dimCount}, where {\tt dimCount}
 !          is the rank of the decomposed index space. Each 
-!          {\tt connectionTransformList} element specifies a connection transform 
+!          {\tt connectionTransList} element specifies a connection transform 
 !          by a list of integer values in the format {\tt (/connectionIndex,
 !          direction, staggerSrc, staggerDst, offsetDst, signVector/)}, where
 !          \begin{itemize}
@@ -525,7 +525,7 @@ contains
     type(ESMF_InterfaceInt) :: deBlockListArg ! helper variable
     type(ESMF_InterfaceInt) :: deLabelListArg ! helper variable
     type(ESMF_InterfaceInt) :: connectionListArg ! helper variable
-    type(ESMF_InterfaceInt) :: connectionTransformListArg ! helper variable
+    type(ESMF_InterfaceInt) :: connectionTransListArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -552,8 +552,8 @@ contains
       ESMF_InterfaceIntCreate(farray2D=connectionList, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    connectionTransformListArg = &
-      ESMF_InterfaceIntCreate(farray2D=connectionTransformList, rc=localrc)
+    connectionTransListArg = &
+      ESMF_InterfaceIntCreate(farray2D=connectionTransList, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -563,7 +563,7 @@ contains
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridCreateDB(distgrid, minIndexArg, maxIndexArg, &
       deBlockListArg, deLabelListArg, indexflag, &
-      connectionListArg, connectionTransformListArg, delayout, vm, localrc)
+      connectionListArg, connectionTransListArg, delayout, vm, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -583,7 +583,7 @@ contains
     call ESMF_InterfaceIntDestroy(connectionListArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(connectionTransformListArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(connectionTransListArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -610,7 +610,7 @@ contains
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateRDFA(minIndex, maxIndex, &
     regDecomp, decompflag, deLabelList, indexflag, connectionList, &
-    connectionTransformList, fastAxis, vm, rc)
+    connectionTransList, fastAxis, vm, rc)
 !
 ! !ARGUMENTS:
     integer,                      intent(in)            :: minIndex(:)
@@ -620,7 +620,7 @@ contains
     integer,                      intent(in), optional  :: deLabelList(:)
     type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
     integer,                      intent(in), optional  :: connectionList(:,:)
-    integer,                      intent(in), optional  :: connectionTransformList(:,:)
+    integer,                      intent(in), optional  :: connectionTransList(:,:)
     integer,                      intent(in)            :: fastAxis
     type(ESMF_VM),                intent(in), optional  :: vm
     integer,                      intent(out),optional  :: rc
@@ -681,13 +681,13 @@ contains
 !                with a dimension in patch B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
 !          \end{itemize}
-!     \item[{[connectionTransformList]}]
+!     \item[{[connectionTransList]}]
 !          List of transforms associated with patch connections defined in 
-!          {\tt connectionList}. The second dimension of {\tt connectionTransformList}
+!          {\tt connectionList}. The second dimension of {\tt connectionTransList}
 !          steps through the connection transforms, defined by the first index. The
 !          first index must be of size {\tt 5 + dimCount}, where {\tt dimCount}
 !          is the rank of the decomposed index space. Each 
-!          {\tt connectionTransformList} element specifies a connection transform 
+!          {\tt connectionTransList} element specifies a connection transform 
 !          by a list of integer values in the format {\tt (/connectionIndex,
 !          direction, staggerSrc, staggerDst, offsetDst, signVector/)}, where
 !          \begin{itemize}
@@ -731,7 +731,7 @@ contains
     integer                 :: len_decompflag ! helper variable
     type(ESMF_InterfaceInt) :: deLabelListArg ! helper variable
     type(ESMF_InterfaceInt) :: connectionListArg ! helper variable
-    type(ESMF_InterfaceInt) :: connectionTransformListArg ! helper variable
+    type(ESMF_InterfaceInt) :: connectionTransListArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -764,8 +764,8 @@ contains
       ESMF_InterfaceIntCreate(farray2D=connectionList, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    connectionTransformListArg = &
-      ESMF_InterfaceIntCreate(farray2D=connectionTransformList, rc=localrc)
+    connectionTransListArg = &
+      ESMF_InterfaceIntCreate(farray2D=connectionTransList, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -775,7 +775,7 @@ contains
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridCreateRDFA(distgrid, minIndexArg, maxIndexArg, &
       regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
-      connectionListArg, connectionTransformListArg, fastAxis, vm, localrc)
+      connectionListArg, connectionTransListArg, fastAxis, vm, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -795,7 +795,7 @@ contains
     call ESMF_InterfaceIntDestroy(connectionListArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(connectionTransformListArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(connectionTransListArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -822,7 +822,7 @@ contains
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateDBFA(minIndex, maxIndex, &
     deBlockList, deLabelList, indexflag, connectionList, &
-    connectionTransformList, fastAxis, vm, rc)
+    connectionTransList, fastAxis, vm, rc)
 !
 ! !ARGUMENTS:
     integer,                      intent(in)            :: minIndex(:)
@@ -831,7 +831,7 @@ contains
     integer,                      intent(in), optional  :: deLabelList(:)
     type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
     integer,                      intent(in), optional  :: connectionList(:,:)
-    integer,                      intent(in), optional  :: connectionTransformList(:,:)
+    integer,                      intent(in), optional  :: connectionTransList(:,:)
     integer,                      intent(in)            :: fastAxis
     type(ESMF_VM),                intent(in), optional  :: vm
     integer,                      intent(out),optional  :: rc
@@ -895,13 +895,13 @@ contains
 !                with a dimension in patch B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
 !          \end{itemize}
-!     \item[{[connectionTransformList]}]
+!     \item[{[connectionTransList]}]
 !          List of transforms associated with patch connections defined in 
-!          {\tt connectionList}. The second dimension of {\tt connectionTransformList}
+!          {\tt connectionList}. The second dimension of {\tt connectionTransList}
 !          steps through the connection transforms, defined by the first index. The
 !          first index must be of size {\tt 5 + dimCount}, where {\tt dimCount}
 !          is the rank of the decomposed index space. Each 
-!          {\tt connectionTransformList} element specifies a connection transform 
+!          {\tt connectionTransList} element specifies a connection transform 
 !          by a list of integer values in the format {\tt (/connectionIndex,
 !          direction, staggerSrc, staggerDst, offsetDst, signVector/)}, where
 !          \begin{itemize}
@@ -951,7 +951,7 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments.
 !    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexArg, maxIndexArg, &
 !      regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
-!      connectionListArg, connectionTransformListArg, fastAxis, vm, localrc)
+!      connectionListArg, connectionTransListArg, fastAxis, vm, localrc)
 !    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !      ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -977,7 +977,7 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateRDP(minIndex, maxIndex, regDecomp,&
-    decompflag, deLabelList, indexflag, connectionList, connectionTransformList,&
+    decompflag, deLabelList, indexflag, connectionList, connectionTransList,&
     delayout, vm, rc)
 !
 ! !ARGUMENTS:
@@ -988,7 +988,7 @@ contains
     integer,                      intent(in), optional  :: deLabelList(:)
     type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
     integer,                      intent(in), optional  :: connectionList(:,:)
-    integer,                      intent(in), optional  :: connectionTransformList(:,:)
+    integer,                      intent(in), optional  :: connectionTransList(:,:)
     type(ESMF_DELayout),          intent(in), optional  :: delayout
     type(ESMF_VM),                intent(in), optional  :: vm
     integer,                      intent(out),optional  :: rc
@@ -1055,13 +1055,13 @@ contains
 !                with a dimension in patch B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
 !          \end{itemize}
-!     \item[{[connectionTransformList]}]
+!     \item[{[connectionTransList]}]
 !          List of transforms associated with patch connections defined in 
-!          {\tt connectionList}. The second dimension of {\tt connectionTransformList}
+!          {\tt connectionList}. The second dimension of {\tt connectionTransList}
 !          steps through the connection transforms, defined by the first index. The
 !          first index must be of size {\tt 5 + dimCount}, where {\tt dimCount}
 !          is the rank of the decomposed index space. Each 
-!          {\tt connectionTransformList} element specifies a connection transform 
+!          {\tt connectionTransList} element specifies a connection transform 
 !          by a list of integer values in the format {\tt (/connectionIndex,
 !          direction, staggerSrc, staggerDst, offsetDst, signVector/)}, where
 !          \begin{itemize}
@@ -1108,7 +1108,7 @@ contains
     integer                 :: len2_decompflag ! helper variable
     type(ESMF_InterfaceInt) :: deLabelListArg ! helper variable
     type(ESMF_InterfaceInt) :: connectionListArg ! helper variable
-    type(ESMF_InterfaceInt) :: connectionTransformListArg ! helper variable
+    type(ESMF_InterfaceInt) :: connectionTransListArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1144,8 +1144,8 @@ contains
       ESMF_InterfaceIntCreate(farray2D=connectionList, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    connectionTransformListArg = &
-      ESMF_InterfaceIntCreate(farray2D=connectionTransformList, rc=localrc)
+    connectionTransListArg = &
+      ESMF_InterfaceIntCreate(farray2D=connectionTransList, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1156,7 +1156,7 @@ contains
     call c_ESMC_DistGridCreateRDP(distgrid, minIndexArg, &
       maxIndexArg, regDecompArg, opt_decompflag, len1_decompflag, &
       len2_decompflag, deLabelListArg, indexflag, &
-      connectionListArg, connectionTransformListArg, delayout, vm, localrc)
+      connectionListArg, connectionTransListArg, delayout, vm, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -1176,7 +1176,7 @@ contains
     call ESMF_InterfaceIntDestroy(connectionListArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(connectionTransformListArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(connectionTransListArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1203,7 +1203,7 @@ contains
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateDBP(minIndex, maxIndex, &
     deBlockList, deLabelList, indexflag, connectionList, &
-    connectionTransformList, delayout, vm, rc)
+    connectionTransList, delayout, vm, rc)
 !
 ! !ARGUMENTS:
     integer,                      intent(in)            :: minIndex(:,:)
@@ -1212,7 +1212,7 @@ contains
     integer,                      intent(in), optional  :: deLabelList(:)
     type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
     integer,                      intent(in), optional  :: connectionList(:,:)
-    integer,                      intent(in), optional  :: connectionTransformList(:,:)
+    integer,                      intent(in), optional  :: connectionTransList(:,:)
     type(ESMF_DELayout),          intent(in), optional  :: delayout
     type(ESMF_VM),                intent(in), optional  :: vm
     integer,                      intent(out),optional  :: rc
@@ -1284,13 +1284,13 @@ contains
 !                with a dimension in patch B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
 !          \end{itemize}
-!     \item[{[connectionTransformList]}]
+!     \item[{[connectionTransList]}]
 !          List of transforms associated with patch connections defined in 
-!          {\tt connectionList}. The second dimension of {\tt connectionTransformList}
+!          {\tt connectionList}. The second dimension of {\tt connectionTransList}
 !          steps through the connection transforms, defined by the first index. The
 !          first index must be of size {\tt 5 + dimCount}, where {\tt dimCount}
 !          is the rank of the decomposed index space. Each 
-!          {\tt connectionTransformList} element specifies a connection transform 
+!          {\tt connectionTransList} element specifies a connection transform 
 !          by a list of integer values in the format {\tt (/connectionIndex,
 !          direction, staggerSrc, staggerDst, offsetDst, signVector/)}, where
 !          \begin{itemize}
@@ -1343,7 +1343,7 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments.
 !    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexArg, maxIndexArg, &
 !      regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
-!      connectionListArg, connectionTransformListArg, fastAxis, vm, localrc)
+!      connectionListArg, connectionTransListArg, fastAxis, vm, localrc)
 !    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !      ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1370,7 +1370,7 @@ contains
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateRDPFA(minIndex, maxIndex, &
     regDecomp, decompflag, deLabelList, indexflag, connectionList, &
-    connectionTransformList, fastAxis, vm, rc)
+    connectionTransList, fastAxis, vm, rc)
 !
 ! !ARGUMENTS:
     integer,                      intent(in)            :: minIndex(:,:)
@@ -1380,7 +1380,7 @@ contains
     integer,                      intent(in), optional  :: deLabelList(:)
     type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
     integer,                      intent(in), optional  :: connectionList(:,:)
-    integer,                      intent(in), optional  :: connectionTransformList(:,:)
+    integer,                      intent(in), optional  :: connectionTransList(:,:)
     integer,                      intent(in)            :: fastAxis
     type(ESMF_VM),                intent(in), optional  :: vm
     integer,                      intent(out),optional  :: rc
@@ -1447,13 +1447,13 @@ contains
 !                with a dimension in patch B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
 !          \end{itemize}
-!     \item[{[connectionTransformList]}]
+!     \item[{[connectionTransList]}]
 !          List of transforms associated with patch connections defined in 
-!          {\tt connectionList}. The second dimension of {\tt connectionTransformList}
+!          {\tt connectionList}. The second dimension of {\tt connectionTransList}
 !          steps through the connection transforms, defined by the first index. The
 !          first index must be of size {\tt 5 + dimCount}, where {\tt dimCount}
 !          is the rank of the decomposed index space. Each 
-!          {\tt connectionTransformList} element specifies a connection transform 
+!          {\tt connectionTransList} element specifies a connection transform 
 !          by a list of integer values in the format {\tt (/connectionIndex,
 !          direction, staggerSrc, staggerDst, offsetDst, signVector/)}, where
 !          \begin{itemize}
@@ -1503,7 +1503,7 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments.
 !    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexArg, maxIndexArg, &
 !      regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
-!      connectionListArg, connectionTransformListArg, fastAxis, vm, localrc)
+!      connectionListArg, connectionTransListArg, fastAxis, vm, localrc)
 !    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !      ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1530,7 +1530,7 @@ contains
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateDBPFA(minIndex, maxIndex, &
     deBlockList, deLabelList, indexflag, connectionList, &
-    connectionTransformList, fastAxis, vm, rc)
+    connectionTransList, fastAxis, vm, rc)
 !
 ! !ARGUMENTS:
     integer,                      intent(in)            :: minIndex(:,:)
@@ -1539,7 +1539,7 @@ contains
     integer,                      intent(in), optional  :: deLabelList(:)
     type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
     integer,                      intent(in), optional  :: connectionList(:,:)
-    integer,                      intent(in), optional  :: connectionTransformList(:,:)
+    integer,                      intent(in), optional  :: connectionTransList(:,:)
     integer,                      intent(in)            :: fastAxis
     type(ESMF_VM),                intent(in), optional  :: vm
     integer,                      intent(out),optional  :: rc
@@ -1605,13 +1605,13 @@ contains
 !                with a dimension in patch B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
 !          \end{itemize}
-!     \item[{[connectionTransformList]}]
+!     \item[{[connectionTransList]}]
 !          List of transforms associated with patch connections defined in 
-!          {\tt connectionList}. The second dimension of {\tt connectionTransformList}
+!          {\tt connectionList}. The second dimension of {\tt connectionTransList}
 !          steps through the connection transforms, defined by the first index. The
 !          first index must be of size {\tt 5 + dimCount}, where {\tt dimCount}
 !          is the rank of the decomposed index space. Each 
-!          {\tt connectionTransformList} element specifies a connection transform 
+!          {\tt connectionTransList} element specifies a connection transform 
 !          by a list of integer values in the format {\tt (/connectionIndex,
 !          direction, staggerSrc, staggerDst, offsetDst, signVector/)}, where
 !          \begin{itemize}
@@ -1661,7 +1661,7 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments.
 !    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexArg, maxIndexArg, &
 !      regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
-!      connectionListArg, connectionTransformListArg, fastAxis, vm, localrc)
+!      connectionListArg, connectionTransListArg, fastAxis, vm, localrc)
 !    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !      ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -2440,12 +2440,12 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_Connection()"
+#define ESMF_METHOD "ESMF_DistGridConnection()"
 !BOP
-! !IROUTINE: ESMF_Connection - Construct a connection element
+! !IROUTINE: ESMF_DistGridConnection - Construct a DistGrid connection element
 ! !INTERFACE:
-  subroutine ESMF_Connection(connection, patchIndexA, patchIndexB, &
-    positionVector, orientationVector, rc)
+  subroutine ESMF_DistGridConnection(connection, patchIndexA, patchIndexB, &
+    positionVector, orientationVector, repetitionVector, rc)
 !
 ! !ARGUMENTS:
     integer,                intent(out)           :: connection(:)
@@ -2453,11 +2453,12 @@ contains
     integer,                intent(in)            :: patchIndexB
     integer,                intent(in)            :: positionVector(:)
     integer,                intent(in),  optional :: orientationVector(:)
+    integer,                intent(in),  optional :: repetitionVector(:)
     integer,                intent(out), optional :: rc
 !         
 !
 ! !DESCRIPTION:
-!     This call helps to construct a {\tt connection},
+!     This call helps to construct a DistGrid connection,
 !     which is a simple vector of integers, out of its components.
 !
 !     The arguments are:
@@ -2476,7 +2477,15 @@ contains
 !        Associates each dimension of patch A with a dimension in patch B's 
 !        index space. Negative index values may be used to indicate a 
 !        reversal in index orientation. It is erroneous to associate multiple
-!        dimensions of patch A with the same index in patch B.
+!        dimensions of patch A with the same index in patch B. By default
+!        {\tt orientationVector = (/1,2,3,.../)}, i.e. same orientation as
+!        patch A.
+!     \item[{[repetitionVector]}]
+!        The allowed values for each direction are 0 and 1. An entry of 1
+!        indicates that this connection element will be repeated along the
+!        respective dimension. A value of 0 indicates no repetition along this
+!        dimension. By default {\tt repetitionVector = (/0,0,0,.../)}, i.e. no
+!        repetition along any direction.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2484,9 +2493,10 @@ contains
 !EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    type(ESMF_InterfaceInt) :: connectionArg ! helper variable
-    type(ESMF_InterfaceInt) :: positionVectorArg ! helper variable
+    type(ESMF_InterfaceInt) :: connectionArg        ! helper variable
+    type(ESMF_InterfaceInt) :: positionVectorArg    ! helper variable
     type(ESMF_InterfaceInt) :: orientationVectorArg ! helper variable
+    type(ESMF_InterfaceInt) :: repetitionVectorArg  ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2503,10 +2513,15 @@ contains
       rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    repetitionVectorArg = ESMF_InterfaceIntCreate(repetitionVector, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_Connection(connectionArg, &
-      patchIndexA, patchIndexB, positionVectorArg, orientationVectorArg, localrc)
+    call c_ESMC_DistGridConnection(connectionArg, &
+      patchIndexA, patchIndexB, positionVectorArg, orientationVectorArg, &
+      repetitionVectorArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -2520,26 +2535,29 @@ contains
     call ESMF_InterfaceIntDestroy(orientationVectorArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(repetitionVectorArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_Connection
+  end subroutine ESMF_DistGridConnection
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ConnectionTransform()"
+#define ESMF_METHOD "ESMF_DistGridConnectionTrans()"
 !BOPI
-! !IROUTINE: ESMF_ConnectionTransform - Construct a connection transform element
+! !IROUTINE: ESMF_DistGridConnectionTrans - Construct a DistGrid connection transform element
 ! !INTERFACE:
-  subroutine ESMF_ConnectionTransform(connectionTransform,&
+  subroutine ESMF_DistGridConnectionTrans(connectionTrans,&
     connectionIndex, direction, staggerSrc, staggerDst, indexOffsetVector, &
     signChangeVector, rc)
 !
 ! !ARGUMENTS:
-    integer,                intent(out)           :: connectionTransform(:)
+    integer,                intent(out)           :: connectionTrans(:)
     integer,                intent(in)            :: connectionIndex
     integer,                intent(in)            :: direction
     integer,                intent(in)            :: staggerSrc
@@ -2550,7 +2568,7 @@ contains
 !         
 !
 ! !DESCRIPTION:
-!     This call helps to construct a {\tt connectionTransform},
+!     This call helps to construct a DistGrid connection transform,
 !     which is a simple vector of integers, out of its components.
 !
 !     The arguments are:
@@ -2601,7 +2619,7 @@ contains
     ! return successfully
     !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
     
-  end subroutine ESMF_ConnectionTransform
+  end subroutine ESMF_DistGridConnectionTrans
 !------------------------------------------------------------------------------
 
 end module ESMF_DistGridMod

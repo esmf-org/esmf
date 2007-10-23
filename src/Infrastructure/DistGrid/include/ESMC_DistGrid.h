@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.30 2007/10/05 21:58:44 theurich Exp $
+// $Id: ESMC_DistGrid.h,v 1.31 2007/10/23 18:47:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -92,27 +92,27 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
       DecompFlag *decompflag, int decompflagCount,
       InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
       InterfaceInt *connectionList,
-      InterfaceInt *connectionTransformList, 
+      InterfaceInt *connectionTransList, 
       DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL);
     static DistGrid *create(InterfaceInt *minIndex,
       InterfaceInt *maxIndex, InterfaceInt *deBlockList, 
       InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
       InterfaceInt *connectionList,
-      InterfaceInt *connectionTransformList, 
+      InterfaceInt *connectionTransList, 
       DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL);
     static DistGrid *create(InterfaceInt *minIndex,
       InterfaceInt *maxIndex, InterfaceInt *regDecomp, 
       DecompFlag *decompflag, int decompflagCount,
       InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
       InterfaceInt *connectionList,
-      InterfaceInt *connectionTransformList, 
+      InterfaceInt *connectionTransList, 
       int fastAxis, VM *vm=NULL, int *rc=NULL);
     static DistGrid *create(InterfaceInt *minIndex,
       InterfaceInt *maxIndex, InterfaceInt *regDecomp, 
       DecompFlag *decompflag, int decompflagCount1, int decompflagCount2,
       InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
       InterfaceInt *connectionList,
-      InterfaceInt *connectionTransformList, 
+      InterfaceInt *connectionTransList, 
       DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL);
     static int destroy(DistGrid **distgrid);
     // is()
@@ -158,7 +158,7 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     // connections
     static int connection(InterfaceInt *connection, int patchIndexA, 
       int patchIndexB, InterfaceInt *positionVector,
-      InterfaceInt *orientationVector);
+      InterfaceInt *orientationVector, InterfaceInt *repetitionVector);
 };  // class DistGrid
 
 } // namespace ESMCI
