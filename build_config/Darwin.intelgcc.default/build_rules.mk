@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.1 2007/08/08 22:02:28 theurich Exp $
+# $Id: build_rules.mk,v 1.2 2007/10/24 19:26:46 theurich Exp $
 #
 # Darwin.intelgcc.default
 #
@@ -67,6 +67,7 @@ ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+ESMF_F90LINKLIBS       += -lmpi_cxx
 else
 ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------
@@ -98,17 +99,19 @@ endif
 ############################################################
 # Link against GCC's stdc++ library (because g++ is used)
 #
-ESMF_F90LINKPATHS += -L$(dir $(shell gcc -print-file-name=libstdc++.so))
-ESMF_F90LINKLIBS  += -lstdc++
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.dylib)
+ifeq ($(ESMF_LIBSTDCXX),libstdc++.dylib)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
+endif
+ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
+ESMF_F90LINKLIBS  += -lstdc++ -lgcc_eh
 
 ############################################################
 # Conditionally add pthread compiler and linker flags
 #
 ifeq ($(ESMF_PTHREADS),ON)
-ESMF_F90COMPILEOPTS +=  -threads
-ESMF_CXXCOMPILEOPTS +=  -pthread
+ESMF_F90COMPILEOPTS += -threads
 ESMF_F90LINKOPTS    += -threads
-ESMF_CXXLINKOPTS    += -pthread
 endif
 
 ############################################################
@@ -131,7 +134,7 @@ ESMF_CXXLINKRPATHS      =
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -limf -lm -lcxa -lunwind
+ESMF_F90LINKLIBS += -lm 
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
