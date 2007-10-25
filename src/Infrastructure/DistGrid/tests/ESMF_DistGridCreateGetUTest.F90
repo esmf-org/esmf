@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.2 2007/07/19 20:59:05 theurich Exp $
+! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.3 2007/10/25 05:16:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_DistGridCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.2 2007/07/19 20:59:05 theurich Exp $'
+    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.3 2007/10/25 05:16:13 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -57,7 +57,7 @@ program ESMF_DistGridCreateGetUTest
   type(ESMF_DELayout):: delayout
   integer:: dimCount, patchCount, deCount
   type(ESMF_Logical):: regDecompFlag
-  integer, allocatable:: cellCountPPatch(:), patchListPDe(:), cellCountPDe(:)
+  integer, allocatable:: elementCountPPatch(:), patchListPDe(:), elementCountPDe(:)
   integer, allocatable:: minIndexPDimPPatch(:,:), maxIndexPDimPPatch(:,:)
   integer, allocatable:: indexCountPDimPDe(:,:), localDeList(:)
   integer, allocatable:: indexList(:), seqIndexList(:)
@@ -175,36 +175,36 @@ program ESMF_DistGridCreateGetUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "DistGridGet() - cellCountPPatch(:)"
+  write(name, *) "DistGridGet() - elementCountPPatch(:)"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  allocate(cellCountPPatch(patchCount))
-  call ESMF_DistGridGet(distgrid, cellCountPPatch=cellCountPPatch, rc=rc)
+  allocate(elementCountPPatch(patchCount))
+  call ESMF_DistGridGet(distgrid, elementCountPPatch=elementCountPPatch, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Verify cellCountPPatch(:)"
+  write(name, *) "Verify elementCountPPatch(:)"
   write(failMsg, *) "Wrong result"
-  call ESMF_Test((cellCountPPatch(1) == 1000), &
+  call ESMF_Test((elementCountPPatch(1) == 1000), &
     name, failMsg, result, ESMF_SRCLINE)
-  deallocate(cellCountPPatch)
+  deallocate(elementCountPPatch)
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "DistGridGet() - cellCountPDe(:)"
+  write(name, *) "DistGridGet() - elementCountPDe(:)"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  allocate(cellCountPDe(0:deCount-1))
-  call ESMF_DistGridGet(distgrid, cellCountPDe=cellCountPDe, rc=rc)
+  allocate(elementCountPDe(0:deCount-1))
+  call ESMF_DistGridGet(distgrid, elementCountPDe=elementCountPDe, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Verify cellCountPDe(:)"
+  write(name, *) "Verify elementCountPDe(:)"
   write(failMsg, *) "Wrong result"
   loopResult = .true.
   do i=0, deCount-1
-    if ((cellCountPDe(i) < 1000/deCount) .or. &
-      (cellCountPDe(i) > 1000/deCount + 1000 - (1000/deCount)*deCount)) &
+    if ((elementCountPDe(i) < 1000/deCount) .or. &
+      (elementCountPDe(i) > 1000/deCount + 1000 - (1000/deCount)*deCount)) &
       loopResult = .false.
   enddo
   call ESMF_Test(loopResult, &
@@ -280,7 +280,7 @@ program ESMF_DistGridCreateGetUTest
   !NEX_UTest
   write(name, *) "DistGridGet() - seqIndexList(:)"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  allocate(seqIndexList(cellCountPDe(localDeList(0))))
+  allocate(seqIndexList(elementCountPDe(localDeList(0))))
   call ESMF_DistGridGet(distgrid, localDe=0, seqIndexList=seqIndexList, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     
@@ -289,14 +289,14 @@ program ESMF_DistGridCreateGetUTest
   write(name, *) "Verify seqIndexList(:)"
   write(failMsg, *) "Wrong result"
   loopResult = .true.
-  do i=1, cellCountPDe(localDeList(0))
+  do i=1, elementCountPDe(localDeList(0))
     if (seqIndexList(i) /= seqIndexList(1)+(i-1)) &
       loopResult = .false.
   enddo
   call ESMF_Test(loopResult, &
     name, failMsg, result, ESMF_SRCLINE)
   deallocate(seqIndexList)
-  deallocate(cellCountPDe)
+  deallocate(elementCountPDe)
   deallocate(localDeList)
 
   !------------------------------------------------------------------------

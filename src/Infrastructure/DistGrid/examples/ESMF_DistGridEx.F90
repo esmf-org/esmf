@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.20 2007/10/23 18:47:33 theurich Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.21 2007/10/25 05:16:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -54,7 +54,7 @@ program ESMF_DistGridEx
 ! The minimum information required to create an {\tt ESMF\_DistGrid} object
 ! for a single patch with default decomposition are the corners of the patch
 ! in index space. The following call will create a 1D DistGrid for a 
-! 1D index space patch with cells from 1 through 1000.
+! 1D index space patch with elements from 1 through 1000.
 !EOE
 
 !BOC
@@ -68,7 +68,7 @@ program ESMF_DistGridEx
 
 !BOE
 ! A default DELayout with 1 DE per PET will be created during 
-! {\tt ESMF\_DistGridCreate()}. The 1000 cells of the specified 1D patch will
+! {\tt ESMF\_DistGridCreate()}. The 1000 elements of the specified 1D patch will
 ! then be block decomposed across the available DEs, i.e. across all PETs. 
 ! Hence, for 4 PETs the (min) $\sim$ (max) corners of the DE-local LR regions
 ! will be:
@@ -135,8 +135,8 @@ program ESMF_DistGridEx
 ! \end{verbatim}
 !
 ! By default grid points along all dimensions are homogeneously divided between
-! the DEs. The maximum cell count difference between DEs along any dimension is
-! 1. The (min) $\sim$ (max) corners of the DE-local LR domains of the above 
+! the DEs. The maximum element count difference between DEs along any dimension
+! is 1. The (min) $\sim$ (max) corners of the DE-local LR domains of the above
 ! example are as follows:
 ! \begin{verbatim}
 !   DE 0 - (1,1) ~ (3,2)
@@ -151,7 +151,7 @@ program ESMF_DistGridEx
 ! modified by the optional {\tt decompflag} argument. The following line shows
 ! how this argument is used to keep ESMF's default decomposition in the first
 ! dimension but move extra grid points of the second dimension to the last DEs
-! in that direction. Extra cells occur if the number of DEs for a certain
+! in that direction. Extra elements occur if the number of DEs for a certain
 ! dimension does not evenly divide its extent. In this example there are
 ! 2 extra grid points for the second dimension because its extent is 5 but there
 ! are 3 DEs along this index space axis.
@@ -166,7 +166,7 @@ program ESMF_DistGridEx
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOE
-! Now DE 4 and DE 5 will hold the extra cells along the 2nd dimension.
+! Now DE 4 and DE 5 will hold the extra elements along the 2nd dimension.
 ! \begin{verbatim}
 !   DE 0 - (1,1) ~ (3,1)
 !   DE 1 - (4,1) ~ (5,1)
@@ -867,8 +867,8 @@ program ESMF_DistGridEx
 ! location 1 will map to staggering location 2 when going through connection 3,
 ! which corresponds to a patch 1 to patch 3 interface according to 
 ! {\tt connectionList}. The element further contains the information that the
-! correct cell location on the destination patch, i.e. patch 3 in this 
-! case, will be at an offset of (0,0) with respect to the cell mapping 
+! correct element location on the destination patch, i.e. patch 3 in this 
+! case, will be at an offset of (0,0) with respect to the element mapping 
 ! contained in the connection interface. Finally, the {\tt signChangeVector}
 ! (-1,+1) indicates that vector components that are aligned along a certain
 ! dimension will undergo a sign change when going through this connection, 
@@ -885,7 +885,7 @@ program ESMF_DistGridEx
 ! meaning as to identify different staggering locations when transformations 
 ! for actual data objects are computed. It is up to the user or higher classes
 ! to interpret staggering location labels in terms of physical location in a
-! cell.
+! element.
 !
 ! Finally, the {\tt DistGrid} object with the correct index space topology 
 ! can be created using the {\tt connectionList} and {\tt connectionTransformList} 
@@ -922,26 +922,26 @@ program ESMF_DistGridEx
 ! displacement vectors for inner and outer rims around the DE-local region.
 ! The call returns the number of links that connect index blocks in the rim 
 ! region to exclusive DE-local regions. This information can be used to
-! inquire about redundant cells and halo relationships.
+! inquire about redundant elements and halo relationships.
 !
 ! The following example shows how index space topology around DE 2 for stagger
 ! location 1 of the DistGrid defined in the previous section can be 
 ! determined and explains the format of the input and output information.
 !
 ! A first query call is necessary to determine the number of links that
-! connect to cells in the rim defined by the {\tt lVecInner}, {\tt uVecInner},
+! connect to elements in the rim defined by the {\tt lVecInner}, {\tt uVecInner},
 ! {\tt lVecOuter} and {\tt uVecOuter} arguments.
 !EOEI
 !BOCI
   call ESMF_DistGridGet(distgrid, de=2, staggerLoc=1, &
     lVecInner=(/0,0/), uVecInner=(/0,0/), & ! inner rim edge is same as DE LR box
-    lVecOuter=(/-1,-1/), uVecOuter=(/1,1/), & ! outer rim edge is one cell wider than DE LR box
+    lVecOuter=(/-1,-1/), uVecOuter=(/1,1/), & ! outer rim edge is one element wider than DE LR box
     linkCount=linkCount, rc=rc)
 !EOCI
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOEI
 ! The value returned for {\tt linkCount} will be 6 because there are six index
-! space blocks in the 1 cell wide rim around the DE-local region that connect
+! space blocks in the 1 element wide rim around the DE-local region that connect
 ! to exclusive DE-local regions. Now the {\tt linkList} argument can be
 ! allocated and a second query will return the complete information about
 ! the links:
@@ -950,7 +950,7 @@ program ESMF_DistGridEx
   allocate(linkList(5*2+2,6)) ! (5*dimCount+2, linkCount)
   call ESMF_DistGridGet(distgrid, de=2, staggerLoc=1, &
     lVecInner=(/0,0/), uVecInner=(/0,0/), & ! inner rim edge is same as DE LR box
-    lVecOuter=(/-1,-1/), uVecOuter=(/1,1/), & ! outer rim edge is one cell wider than DE LR box
+    lVecOuter=(/-1,-1/), uVecOuter=(/1,1/), & ! outer rim edge is one element wider than DE LR box
     linkCount=linkCount, linkList=linkList, rc=rc)
 !EOCI
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)

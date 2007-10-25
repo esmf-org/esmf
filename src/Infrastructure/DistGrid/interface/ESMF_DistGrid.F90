@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.33 2007/10/23 18:47:34 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.34 2007/10/25 05:16:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -110,7 +110,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.33 2007/10/23 18:47:34 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.34 2007/10/25 05:16:12 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1697,7 +1697,7 @@ contains
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} of {\tt dimCount} 1 from a PET-local list
 !     of sequence indices. The PET-local size of the {\tt arbSeqIndexList}
-!     argument determines the number of local cells in the created DistGrid.
+!     argument determines the number of local elements in the created DistGrid.
 !     The sequence indices must be unique across all PETs and are meant to be
 !     used in combination with {\tt ESMF\_ArraySparseMatMulStore()}. A default
 !     1-D DELayout with 1 DE per PET across all PETs of the current VM is 
@@ -1855,8 +1855,8 @@ contains
 
 ! !INTERFACE:
   subroutine ESMF_DistGridGet(distgrid, delayout, dimCount, patchCount, &
-    minIndexPDimPPatch, maxIndexPDimPPatch, cellCountPPatch, cellCountPDe, &
-    patchListPDe, indexCountPDimPDe, regDecompFlag, rc)
+    minIndexPDimPPatch, maxIndexPDimPPatch, elementCountPPatch, &
+    elementCountPDe, patchListPDe, indexCountPDimPDe, regDecompFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),    intent(in)            :: distgrid
@@ -1865,8 +1865,8 @@ contains
     integer,                intent(out), optional :: patchCount
     integer,                intent(out), optional :: minIndexPDimPPatch(:,:)
     integer,                intent(out), optional :: maxIndexPDimPPatch(:,:)
-    integer,                intent(out), optional :: cellCountPPatch(:)
-    integer,                intent(out), optional :: cellCountPDe(:)
+    integer,                intent(out), optional :: elementCountPPatch(:)
+    integer,                intent(out), optional :: elementCountPDe(:)
     integer,                intent(out), optional :: patchListPDe(:)
     integer,                intent(out), optional :: indexCountPDimPDe(:,:)
     type(ESMF_Logical),     intent(out), optional :: regDecompFlag
@@ -1892,12 +1892,12 @@ contains
 !   \item[{[maxIndexPDimPPatch]}]
 !     Upper index space corner per {\tt dim}, per {\tt patch}, with
 !     {\tt size(minIndexPDimPPatch) == (/dimCount, patchCount/)}.
-!   \item[{[cellCountPPatch]}]
-!     Number of cells in exclusive region per patch, with
-!     {\tt size(cellCountPPatch) == (/patchCount/)}
-!   \item[{[cellCountPDe]}]
-!     Number of cells in exclusive region per DE, with
-!     {\tt size(cellCountPDe) == (/deCount/)}
+!   \item[{[elementCountPPatch]}]
+!     Number of elements in exclusive region per patch, with
+!     {\tt size(elementCountPPatch) == (/patchCount/)}
+!   \item[{[elementCountPDe]}]
+!     Number of elements in exclusive region per DE, with
+!     {\tt size(elementCountPDe) == (/deCount/)}
 !   \item[{[patchListPDe]}]
 !     List of patch id numbers, one for each DE, with
 !     {\tt size(patchListPDe) == (/deCount/)}
@@ -1916,8 +1916,8 @@ contains
     integer                 :: localrc                ! local return code
     type(ESMF_InterfaceInt) :: minIndexPDimPPatchArg  ! helper variable
     type(ESMF_InterfaceInt) :: maxIndexPDimPPatchArg  ! helper variable
-    type(ESMF_InterfaceInt) :: cellCountPPatchArg     ! helper variable
-    type(ESMF_InterfaceInt) :: cellCountPDeArg        ! helper variable
+    type(ESMF_InterfaceInt) :: elementCountPPatchArg  ! helper variable
+    type(ESMF_InterfaceInt) :: elementCountPDeArg     ! helper variable
     type(ESMF_InterfaceInt) :: patchListPDeArg        ! helper variable
     type(ESMF_InterfaceInt) :: indexCountPDimPDeArg   ! helper variable
 
@@ -1937,10 +1937,11 @@ contains
       ESMF_InterfaceIntCreate(farray2D=maxIndexPDimPPatch, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    cellCountPPatchArg = ESMF_InterfaceIntCreate(cellCountPPatch, rc=localrc)
+    elementCountPPatchArg = ESMF_InterfaceIntCreate(elementCountPPatch, &
+      rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    cellCountPDeArg = ESMF_InterfaceIntCreate(cellCountPDe, rc=localrc)
+    elementCountPDeArg = ESMF_InterfaceIntCreate(elementCountPDe, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     patchListPDeArg = ESMF_InterfaceIntCreate(patchListPDe, rc=localrc)
@@ -1953,8 +1954,8 @@ contains
 
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridGet(distgrid, dimCount, patchCount, &
-      minIndexPDimPPatchArg, maxIndexPDimPPatchArg, cellCountPPatchArg, &
-      cellCountPDeArg, patchListPDeArg, indexCountPDimPDeArg, regDecompFlag, &
+      minIndexPDimPPatchArg, maxIndexPDimPPatchArg, elementCountPPatchArg, &
+      elementCountPDeArg, patchListPDeArg, indexCountPDimPDeArg, regDecompFlag,&
       delayout, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1973,10 +1974,10 @@ contains
     call ESMF_InterfaceIntDestroy(maxIndexPDimPPatchArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(cellCountPPatchArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(elementCountPPatchArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(cellCountPDeArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(elementCountPDeArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(patchListPDeArg, rc=localrc)
@@ -2079,7 +2080,7 @@ contains
 !     Local DE for which information is requested. {\tt [0,..,localDeCount-1]}
 !   \item[{[seqIndexList]}]
 !     List of DistGrid patch-local sequence indices for {\tt localDe}, with
-!     {\tt size(seqIndexList) == (/cellCountPDe(localDe)/)}.
+!     {\tt size(seqIndexList) == (/elementCountPDe(localDe)/)}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}

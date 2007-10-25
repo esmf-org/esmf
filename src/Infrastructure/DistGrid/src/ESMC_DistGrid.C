@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.39 2007/10/23 18:47:35 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.40 2007/10/25 05:16:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.39 2007/10/23 18:47:35 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistGrid.C,v 1.40 2007/10/25 05:16:13 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1315,23 +1315,23 @@ int DistGrid::construct(
         sizeof(int)*indexCountPDimPDe[de*dimCount+k]);
     }
   }
-  // determine the cellCountPPatch
-  cellCountPPatch = new int[patchCount];
+  // determine the elementCountPPatch
+  elementCountPPatch = new int[patchCount];
   for (int i=0; i<patchCount; i++){
-    cellCountPPatch[i] = 1;  // reset
+    elementCountPPatch[i] = 1;  // reset
     for (int j=0; j<dimCount; j++)
-      cellCountPPatch[i] *=
+      elementCountPPatch[i] *=
         maxIndexPDimPPatch[i*dimCount+j] - minIndexPDimPPatch[i*dimCount+j] + 1;
   }
   patchListPDe = new int[deCount];
   memcpy(patchListPDe, patchListPDeArg, sizeof(int)*deCount);
-  cellCountPDe = new int[deCount];
+  elementCountPDe = new int[deCount];
   for (int i=0; i<deCount; i++){
-    cellCountPDe[i] = 1;  // reset
+    elementCountPDe[i] = 1;  // reset
     for (int j=0; j<dimCount; j++)
-      cellCountPDe[i] *= indexCountPDimPDe[i*dimCount+j];
-    // mark in patchListPDe DEs that have no cells as not being on any patch
-    if (cellCountPDe[i]==0) patchListPDe[i]=0;
+      elementCountPDe[i] *= indexCountPDimPDe[i*dimCount+j];
+    // mark in patchListPDe DEs that have no elements as not being on any patch
+    if (elementCountPDe[i]==0) patchListPDe[i]=0;
   }
   // no arbitrary sequence indices by default
   arbSeqIndexCountPLocalDe = new int[localDeCount];
@@ -1375,9 +1375,9 @@ int DistGrid::destruct(void){
   delete [] maxIndexPDimPPatch;
   delete [] minIndexPDimPDe;
   delete [] maxIndexPDimPDe;
-  delete [] cellCountPPatch;
+  delete [] elementCountPPatch;
   delete [] patchListPDe;
-  delete [] cellCountPDe;
+  delete [] elementCountPDe;
   delete [] contigFlagPDimPDe;
   int localDeCount = delayout->getLocalDeCount();
   for (int i=0; i<dimCount*localDeCount; i++)
@@ -1554,9 +1554,9 @@ int DistGrid::print()const{
   printf("--- ESMCI::DistGrid::print start ---\n");
   printf("dimCount = %d\n", dimCount);
   printf("patchCount = %d\n", patchCount);
-  printf("cellCountPPatch: ");
+  printf("elementCountPPatch: ");
   for (int i=0; i<patchCount; i++)
-    printf("%d ", cellCountPPatch[i]);
+    printf("%d ", elementCountPPatch[i]);
   printf("\n");
   printf("regDecompFlag = %s\n", ESMC_LogicalString(regDecompFlag));
   printf("patchListPDe: ");
@@ -1564,9 +1564,9 @@ int DistGrid::print()const{
   for (int i=0; i<deCount; i++)
     printf("%d ", patchListPDe[i]);
   printf("\n");
-  printf("cellCountPDe: ");
+  printf("elementCountPDe: ");
   for (int i=0; i<deCount; i++)
-    printf("%d ", cellCountPDe[i]);
+    printf("%d ", elementCountPDe[i]);
   printf("\n");
   printf("contigFlagPDimPDe (dims separated by / ):\n");
   for (int i=0; i<deCount; i++){
@@ -1716,8 +1716,8 @@ bool DistGrid::isLocalDeOnEdgeL(
   int de = localDeList[localDe];
   int patch = patchListPDe[de];   // patches are basis 1 !!!!
   bool onEdge = false;            // assume local De is _not_ on edge
-  if (cellCountPDe[de]){
-    // local De is associated with cells
+  if (elementCountPDe[de]){
+    // local De is associated with elements
     // prepare patch relative index tuple of neighbor index to check
     int *patchIndexTuple = new int[dimCount];
     for (int i=0; i<dimCount; i++){
@@ -1791,8 +1791,8 @@ bool DistGrid::isLocalDeOnEdgeU(
   int de = localDeList[localDe];
   int patch = patchListPDe[de];   // patches are basis 1 !!!!
   bool onEdge = false;            // assume local De is _not_ on edge
-  if (cellCountPDe[de]){
-    // local De is associated with cells
+  if (elementCountPDe[de]){
+    // local De is associated with elements
     // prepare patch relative index tuple of neighbor index to check
     int *patchIndexTuple = new int[dimCount];
     for (int i=0; i<dimCount; i++){
@@ -1877,15 +1877,15 @@ int DistGrid::getContigFlagPDimPDe(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid::getCellCountPDe()"
+#define ESMC_METHOD "ESMCI::DistGrid::getElementCountPDe()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid::getCellCountPDe
+// !IROUTINE:  ESMCI::DistGrid::getElementCountPDe
 //
 // !INTERFACE:
-int DistGrid::getCellCountPDe(
+int DistGrid::getElementCountPDe(
 //
 // !RETURN VALUE:
-//    int cellCount for DE
+//    int elementCount for DE
 //
 // !ARGUMENTS:
 //
@@ -1911,7 +1911,7 @@ int DistGrid::getCellCountPDe(
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
-  return cellCountPDe[de];
+  return elementCountPDe[de];
 }
 //-----------------------------------------------------------------------------
 
@@ -2019,7 +2019,7 @@ int DistGrid::getSequenceIndexPatch(
   }
   
   bool onPatch = true;  // start assuming that index tuple can be found on patch
-  // add up cells from patch
+  // add up elements from patch
   int seqindex = 0; // initialize
   for (int i=dimCount-1; i>=0; i--){
     // first time multiply with zero intentionally:
@@ -2036,9 +2036,9 @@ int DistGrid::getSequenceIndexPatch(
       - minIndexPDimPPatch[(patch-1)*dimCount+i];
   }
   if (onPatch){
-    // add all the cells of previous patches
+    // add all the elements of previous patches
     for (int i=0; i<patch-2; i++)
-      seqindex += cellCountPPatch[i];
+      seqindex += elementCountPPatch[i];
     ++seqindex;  // shift sequentialized index to basis 1 !!!!
   }else{
     //TODO: more involved and expensive lookup using patch connections to find
@@ -2379,7 +2379,7 @@ int DistGrid::serialize(
     *ip++ = maxIndexPDimPPatch[i];
   }
   for (int i=0; i<patchCount; i++)
-    *ip++ = cellCountPPatch[i];
+    *ip++ = elementCountPPatch[i];
   int deCount = delayout->getDeCount();
   for (int i=0; i<dimCount*deCount; i++){
     *ip++ = minIndexPDimPDe[i];
@@ -2388,7 +2388,7 @@ int DistGrid::serialize(
     *ip++ = indexCountPDimPDe[i];
   }
   for (int i=0; i<deCount; i++){
-    *ip++ = cellCountPDe[i];
+    *ip++ = elementCountPDe[i];
     *ip++ = patchListPDe[i];
   }
   *ip++ = connectionCount;
@@ -2458,9 +2458,9 @@ DistGrid *DistGrid::deserialize(
     a->minIndexPDimPPatch[i] = *ip++;
     a->maxIndexPDimPPatch[i] = *ip++;
   }
-  a->cellCountPPatch = new int[a->patchCount];
+  a->elementCountPPatch = new int[a->patchCount];
   for (int i=0; i<a->patchCount; i++)
-    a->cellCountPPatch[i] = *ip++;
+    a->elementCountPPatch[i] = *ip++;
   int deCount = a->delayout->getDeCount();
   a->minIndexPDimPDe = new int[a->dimCount*deCount];
   a->maxIndexPDimPDe = new int[a->dimCount*deCount];
@@ -2472,10 +2472,10 @@ DistGrid *DistGrid::deserialize(
     a->contigFlagPDimPDe[i] = *ip++;
     a->indexCountPDimPDe[i] = *ip++;
   }
-  a->cellCountPDe = new int[deCount];
+  a->elementCountPDe = new int[deCount];
   a->patchListPDe = new int[deCount];
   for (int i=0; i<deCount; i++){
-    a->cellCountPDe[i] = *ip++;
+    a->elementCountPDe[i] = *ip++;
     a->patchListPDe[i] = *ip++;
   }
   a->connectionCount = *ip++;
@@ -2674,9 +2674,9 @@ int DistGrid::setArbSeqIndex(
     return rc;
   }
   const int *localDeList = delayout->getLocalDeList();
-  if (arbSeqIndex->extent[0] != cellCountPDe[localDeList[0]]){
+  if (arbSeqIndex->extent[0] != elementCountPDe[localDeList[0]]){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-      "- arbSeqIndex array must supply one value for each cell in local DE",
+      "- arbSeqIndex array must supply one value for each element in local DE",
       &rc);
     return rc;
   }

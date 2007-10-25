@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.31 2007/10/23 18:47:34 theurich Exp $
+// $Id: ESMC_DistGrid.h,v 1.32 2007/10/25 05:16:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -56,10 +56,10 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     int patchCount;               // number of patches in DistGrid
     int *minIndexPDimPPatch;      // lower corner indices [dimCount*patchCount]
     int *maxIndexPDimPPatch;      // upper corner indices [dimCount*patchCount]
-    int *cellCountPPatch;         // number of cells [patchCount]
+    int *elementCountPPatch;      // number of elements [patchCount]
     int *minIndexPDimPDe;         // lower corner indices [dimCount*deCount]
     int *maxIndexPDimPDe;         // upper corner indices [dimCount*deCount]
-    int *cellCountPDe;            // number of cells [deCount]
+    int *elementCountPDe;         // number of elements [deCount]
     int *patchListPDe;            // patch indices [deCount]
     int *contigFlagPDimPDe;       // flag contiguous indices [dimCount*deCount]
     int *indexCountPDimPDe;       // number of indices [dimCount*deCount]
@@ -69,7 +69,7 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     int **connectionList;         // list of connection elements
     int *arbSeqIndexCountPLocalDe;// number of arb seq. indices [localDeCount]
                                   // ==0: no arb seq indices for localDe
-                                  // ==cellCountPDe(localDe): arb seq indices
+                                  // ==elementCountPDe(localDe): arb seq indices
     int **arbSeqIndexListPLocalDe;// local arb sequence indices [localDeCount]
                                   // [arbSeqIndexCountPLocalDe(localDe)]
     ESMC_Logical regDecompFlag;   // flag indicating regular decomposition
@@ -125,13 +125,13 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     const int *getMinIndexPDimPPatch(int patch, int *rc) const;
     const int *getMaxIndexPDimPPatch()  const {return maxIndexPDimPPatch;}
     const int *getMaxIndexPDimPPatch(int patch, int *rc) const;
-    const int *getCellCountPPatch()     const {return cellCountPPatch;}
+    const int *getElementCountPPatch()  const {return elementCountPPatch;}
     const int *getMinIndexPDimPDe()     const {return minIndexPDimPDe;}
     const int *getMinIndexPDimPDe(int de, int *rc) const;
     const int *getMaxIndexPDimPDe()     const {return maxIndexPDimPDe;}
     const int *getMaxIndexPDimPDe(int de, int *rc) const;
-    const int *getCellCountPDe()        const {return cellCountPDe;}
-    int getCellCountPDe(int de, int *rc) const;
+    const int *getElementCountPDe()      const {return elementCountPDe;}
+    int getElementCountPDe(int de, int *rc) const;
     const int *getPatchListPDe()        const {return patchListPDe;}
     const int *getContigFlagPDimPDe()   const {return contigFlagPDimPDe;}
     int getContigFlagPDimPDe(int de, int dim, int *rc) const;

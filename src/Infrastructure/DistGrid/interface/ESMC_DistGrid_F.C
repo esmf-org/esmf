@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid_F.C,v 1.27 2007/10/23 18:47:34 theurich Exp $
+// $Id: ESMC_DistGrid_F.C,v 1.28 2007/10/25 05:16:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -178,8 +178,8 @@ extern "C" {
     int *dimCount, int *patchCount,
     ESMCI::InterfaceInt **minIndexPDimPPatch,
     ESMCI::InterfaceInt **maxIndexPDimPPatch,
-    ESMCI::InterfaceInt **cellCountPPatch,
-    ESMCI::InterfaceInt **cellCountPDe,
+    ESMCI::InterfaceInt **elementCountPPatch,
+    ESMCI::InterfaceInt **elementCountPDe,
     ESMCI::InterfaceInt **patchListPDe,
     ESMCI::InterfaceInt **indexCountPDimPDe,
     ESMC_Logical *regDecompFlag, ESMCI::DELayout **delayout, int *rc){
@@ -259,40 +259,40 @@ extern "C" {
           &(((*ptr)->getMaxIndexPDimPPatch())[i*(*ptr)->getDimCount()]),
           sizeof(int)*(*ptr)->getDimCount());
     }
-    // fill cellCountPPatch
-    if (*cellCountPPatch != NULL){
-      // cellCountPPatch was provided -> do some error checking
-      if ((*cellCountPPatch)->dimCount != 1){
+    // fill elementCountPPatch
+    if (*elementCountPPatch != NULL){
+      // elementCountPPatch was provided -> do some error checking
+      if ((*elementCountPPatch)->dimCount != 1){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-          "- cellCountPPatch array must be of rank 1", rc);
+          "- elementCountPPatch array must be of rank 1", rc);
         return;
       }
-      if ((*cellCountPPatch)->extent[0] < (*ptr)->getPatchCount()){
+      if ((*elementCountPPatch)->extent[0] < (*ptr)->getPatchCount()){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of cellCountPPatch array must be of size 'patchCount'",
+          "- 1st dim of elementCountPPatch array must be of size 'patchCount'",
           rc);
         return;
       }
       // fill in values
-      memcpy((*cellCountPPatch)->array, (*ptr)->getCellCountPPatch(),
+      memcpy((*elementCountPPatch)->array, (*ptr)->getElementCountPPatch(),
         sizeof(int)*(*ptr)->getPatchCount());
     }
-    // fill cellCountPDe
-    if (*cellCountPDe != NULL){
-      // cellCountPDe was provided -> do some error checking
-      if ((*cellCountPDe)->dimCount != 1){
+    // fill elementCountPDe
+    if (*elementCountPDe != NULL){
+      // elementCountPDe was provided -> do some error checking
+      if ((*elementCountPDe)->dimCount != 1){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-          "- cellCountPDe array must be of rank 1", rc);
+          "- elementCountPDe array must be of rank 1", rc);
         return;
       }
-      if ((*cellCountPDe)->extent[0] < (*ptr)->getDELayout()->getDeCount()){
+      if ((*elementCountPDe)->extent[0] < (*ptr)->getDELayout()->getDeCount()){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of cellCountPDe array must be of size 'deCount'",
+          "- 1st dim of elementCountPDe array must be of size 'deCount'",
           rc);
         return;
       }
       // fill in values
-      memcpy((*cellCountPDe)->array, (*ptr)->getCellCountPDe(),
+      memcpy((*elementCountPDe)->array, (*ptr)->getElementCountPDe(),
         sizeof(int)*(*ptr)->getDELayout()->getDeCount());
     }
     // fill patchListPDe
@@ -372,7 +372,7 @@ extern "C" {
         return;
       }
       if ((*seqIndexList)->extent[0] <
-        ((*ptr)->getCellCountPDe())[(*ptr)->getDELayout()->
+        ((*ptr)->getElementCountPDe())[(*ptr)->getDELayout()->
         getLocalDeList()[localDe]]){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of seqIndexList array size insufficiently", rc);
@@ -399,7 +399,7 @@ extern "C" {
         int index = 0;
         for (int j=0; j<dimCount; j++)
           ii[j] = 0;  // reset
-        // loop over all cells in exclusive region for localDe
+        // loop over all elements in exclusive region for localDe
         while(ii[dimCount-1] < iiEnd[dimCount-1]){
 //          int jjj;
 //          for (jjj=0; jjj<dimCount-1; jjj++)
