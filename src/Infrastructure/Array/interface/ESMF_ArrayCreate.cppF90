@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.16 2007/10/05 21:58:43 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.17 2007/10/25 05:16:56 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -106,7 +106,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.16 2007/10/05 21:58:43 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.17 2007/10/25 05:16:56 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -254,8 +254,8 @@ contains
 !      This vector argument must have dimCount elements, where dimCount is @\
 !      specified in distgrid. It specifies the upper corner of the total memory @\
 !      region with respect to the upper corner of the exclusive region. @\
-!      The default is a vector that contains the remaining number of cells in @\
-!      each direction as to fit the computational region into the memory @\
+!      The default is a vector that contains the remaining number of elements
+!      in each direction as to fit the computational region into the memory @\
 !      region provided by the {\tt farray} argument. @\
 ! \item[{[indexflag]}] @\
 !      Indicate how DE-local indices are defined. By default each DE|s @\
@@ -472,8 +472,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the upper corner of the total memory
 !      region with respect to the upper corner of the exclusive region.
-!      The default is a vector that contains the remaining number of cells in
-!      each direction as to fit the computational region into the memory
+!      The default is a vector that contains the remaining number of elements
+!      in each direction as to fit the computational region into the memory
 !      region provided by the {\tt larrayList} argument.
 ! \item[{[indexflag]}]
 !      Indicate how DE-local indices are defined. By default each DE's

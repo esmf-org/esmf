@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterUTest.F90,v 1.28 2007/07/20 05:47:09 theurich Exp $
+! $Id: ESMF_ArrayScatterUTest.F90,v 1.29 2007/10/25 05:16:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArrayScatterUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayScatterUTest.F90,v 1.28 2007/07/20 05:47:09 theurich Exp $'
+    '$Id: ESMF_ArrayScatterUTest.F90,v 1.29 2007/10/25 05:16:58 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -350,8 +350,9 @@ print *, min_R4, min_R8
 
   !------------------------------------------------------------------------
   ! preparations for same test as above but with a DistGrid that has less
-  ! cells in the first dimension than DEs requested in the regDecomp argument.
-  ! -> there will be DEs not associated with DistGrid cells, namely DE 1 and 3.
+  ! elements in the first dimension than DEs requested in the regDecomp argument.
+  ! -> there will be DEs not associated with DistGrid elements, namely DE 1 and
+  ! DE 3.
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/1,23/), &

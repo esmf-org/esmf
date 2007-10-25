@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.78 2007/10/16 21:34:15 theurich Exp $
+// $Id: ESMC_Array.h,v 1.79 2007/10/25 05:16:54 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -80,12 +80,14 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     int *dimmap;                      // [dimCount]
     int *inverseDimmap;               // [rank]
     int *contiguousFlag;              // [localDeCount]
-    int tensorCellCount;              // number of tensor cells per excl. cell
-    int *deCellCount;                 // [deCount] number of cells in exclusive
-                                      // region only considering DistGrid dims
-                                      // that are associated with the Array dims
-                                      // multiply with tensorCellCount to get
-                                      // tot. number of exclusive cells in Array
+    int tensorElementCount;           // number of tensor elements per excl. ele
+    int *deElementCount;              // [deCount] number of elements in
+                                      // exclusive region only considering
+                                      // DistGrid dims that are associated with
+                                      // the Array dims. 
+                                      // Multiply with tensorElementCount to get
+                                      // total number of exclusive elements in
+                                      // Array.
     // lower level object references
     DistGrid *distgrid;
     DELayout *delayout;
@@ -112,8 +114,8 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
       dimmap = NULL;
       inverseDimmap = NULL;
       contiguousFlag = NULL;
-      tensorCellCount = 0;
-      deCellCount = NULL;
+      tensorElementCount = 0;
+      deElementCount = NULL;
     }
   private:
     Array(ESMC_TypeKind typekind, int rank, ESMC_LocalArray **larrayList,
@@ -159,8 +161,8 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     const int *getUBounds()                 const {return ubounds;}
     const int *getStaggerLoc()              const {return staggerLoc;}
     const int *getVectorDim()               const {return vectorDim;}
-    const int *getDeCellCount()             const {return deCellCount;}
-    int getTensorCellCount()                const {return tensorCellCount;}
+    const int *getDeElementCount()          const {return deElementCount;}
+    int getTensorElementCount()             const {return tensorElementCount;}
     const int *getDimmap()                  const {return dimmap;}
     const int *getInverseDimmap()           const {return inverseDimmap;}
     DistGrid *getDistGrid()                 const {return distgrid;}

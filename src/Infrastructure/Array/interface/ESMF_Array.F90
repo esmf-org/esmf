@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.69 2007/10/16 21:34:15 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.70 2007/10/25 05:16:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -128,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.69 2007/10/16 21:34:15 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.70 2007/10/25 05:16:55 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -629,7 +629,7 @@ contains
 !   identity mapping of the source Array vector to the destination Array vector.
 !
 !   Source and destination Arrays must be of identical <type> and <kind>.
-!   Further the number of cells must match for source and destination Arrays,
+!   Further the number of elements must match for source and destination Arrays,
 !   but the shape may differ.
 !
 !   It is erroneous to specify the identical Array object for {\tt srcArray} and
@@ -798,9 +798,9 @@ contains
 !   definition of {\em sequence indices}.
 !
 !   Source and destination Arrays must be of identical <type> and <kind>, but 
-!   may differ in shape and number of cells. The <type> and <kind> of a supplied
-!   {\tt factorList} argument must also match the <type> and <kind> of the
-!   Array arguments.
+!   may differ in shape and number of elements. The <type> and <kind> of a 
+!   supplied {\tt factorList} argument must also match the <type> and <kind> 
+!   of the Array arguments.
 !
 !   It is erroneous to specify the identical Array object for {\tt srcArray} and
 !   {\tt dstArray} arguments.
@@ -832,10 +832,11 @@ contains
 !     second dimension of {\tt factorIndexList} steps through the list of 
 !     pairs, i.e. {\tt size(factorIndexList,2) == size(factorList)}. The first
 !     dimension of {\tt factorIndexList} is of size 2 where {\tt factorIndexList(1,:)}
-!     specifies the sequence index of the source cell in the {\tt srcArray} while
-!     {\tt factorIndexList(2,:)} specifies the sequence index of the destination
-!     cell in {\tt dstArray}. See section \ref{Array:SparseMatMul} for details
-!     on the definition of Array {\em sequence indices}.
+!     specifies the sequence index of the source element in the {\tt srcArray}
+!     while {\tt factorIndexList(2,:)} specifies the sequence index of the
+!     destination element in {\tt dstArray}. See section
+!     \ref{Array:SparseMatMul} for details on the definition of Array
+!     {\em sequence indices}.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1143,9 +1144,9 @@ contains
 !   definition of {\em sequence indices}.
 !
 !   Source and destination Arrays must be of identical <type> and <kind>, but 
-!   may differ in shape and number of cells. The <type> and <kind> of a supplied
-!   {\tt factorList} argument must also match the <type> and <kind> of the
-!   Array arguments.
+!   may differ in shape and number of elements. The <type> and <kind> of a
+!   supplied {\tt factorList} argument must also match the <type> and <kind>
+!   of the Array arguments.
 !
 !   It is erroneous to specify the identical Array object for {\tt srcArray} and
 !   {\tt dstArray} arguments.
@@ -1249,10 +1250,10 @@ contains
 !   \item [{[zeroflag]}]
 !     If set to {\tt ESMF\_TRUE} {\em (default)} the total regions of all 
 !     DEs in {\tt dstArray} will be initialized to zero before updating the 
-!     cells with the results of the sparse matrix multiplication. If set to
-!     {\tt ESMF\_FALSE} the cells in {\tt dstArray} will not be modified
+!     elements with the results of the sparse matrix multiplication. If set to
+!     {\tt ESMF\_FALSE} the elements in {\tt dstArray} will not be modified
 !     prior to the sparse matrix multiplication and results will be added
-!     to the incoming cell values.
+!     to the incoming element values.
 !   \item [{[checkflag]}]
 !     If set to {\tt ESMF\_TRUE} the input Array pair will be checked for
 !     consistency with the precomputed operation provided by {\tt routehandle}.
@@ -2244,7 +2245,7 @@ contains
 !   the data mapping is done in patch-local index space patch for patch.
 !   
 !   In either case Redist does not require that source and destination
-!   Arrays have the same number of cells. Only destination cells that also
+!   Arrays have the same number of elements. Only destination elements that also
 !   appear in the source Array will be overwritten.
 !
 !     This version of the interface 
@@ -2387,7 +2388,7 @@ contains
 !   interpreted as sequentialized vectors. The 
 !   sequence is defined by the order of DistGrid dimensions and the order of 
 !   patches within the DistGrid. Source and destination Arrys may have different
-!   shape and different number of cells.
+!   shape and different number of elements.
 !
 !   The sparse matrix is constructed from the {\tt factorList} and 
 !   {\tt factorIndexList} arguments which must be provided on rootPET.

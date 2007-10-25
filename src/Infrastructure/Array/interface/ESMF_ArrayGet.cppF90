@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.24 2007/07/20 05:47:09 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.25 2007/10/25 05:16:56 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.24 2007/07/20 05:47:09 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.25 2007/10/25 05:16:56 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -90,9 +90,9 @@ module ESMF_ArrayGetMod
     module procedure ESMF_ArrayGetPLocalDePDim
     TypeKindRankInterfaceMacro(ArrayGetFPtr)
     module procedure ESMF_ArrayGetLarray
-    module procedure ESMF_ArrayGetTotalCellMask1D
-    module procedure ESMF_ArrayGetTotalCellMask2D
-    module procedure ESMF_ArrayGetTotalCellMask3D
+    module procedure ESMF_ArrayGetTotalElementMask1D
+    module procedure ESMF_ArrayGetTotalElementMask2D
+    module procedure ESMF_ArrayGetTotalElementMask3D
     module procedure ESMF_ArrayGetHalo
       
 ! !DESCRIPTION: 
@@ -770,20 +770,20 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 
 ! -------------------------- ESMF-public method -------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_ArrayGetTotalCellMask1D()"
+^define ESMF_METHOD "ESMF_ArrayGetTotalElementMask1D()"
 !BOPI
 ! !IROUTINE: ESMF_ArrayGet - Get Array internals for local DE
 
 ! !INTERFACE:
   ! Private name; call using ESMF_Get()
-  subroutine ESMF_ArrayGetTotalCellMask1D(array, routehandlelist, localDe, &
-    totalCellMask, rc)
+  subroutine ESMF_ArrayGetTotalElementMask1D(array, routehandlelist, localDe, &
+    totalElementMask, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in)            :: array
     type(ESMF_RouteHandle), intent(in), optional  :: routehandlelist(:)
     integer,                intent(in)            :: localDe
-    integer,                intent(out)           :: totalCellMask(:)
+    integer,                intent(out)           :: totalElementMask(:)
     integer,                intent(out), optional :: rc  
 !         
 !
@@ -803,26 +803,26 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
     ! Initialize return code
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
-  end subroutine ESMF_ArrayGetTotalCellMask1D
+  end subroutine ESMF_ArrayGetTotalElementMask1D
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_ArrayGetTotalCellMask2D()"
+^define ESMF_METHOD "ESMF_ArrayGetTotalElementMask2D()"
 !BOPI
 ! !IROUTINE: ESMF_ArrayGet - Get Array internals for local DE
 
 ! !INTERFACE:
   ! Private name; call using ESMF_Get()
-  subroutine ESMF_ArrayGetTotalCellMask2D(array, routehandlelist, localDe, &
-    totalCellMask, rc)
+  subroutine ESMF_ArrayGetTotalElementMask2D(array, routehandlelist, localDe, &
+    totalElementMask, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in)            :: array
     type(ESMF_RouteHandle), intent(in), optional  :: routehandlelist(:)
     integer,                intent(in)            :: localDe
-    integer,                intent(out)           :: totalCellMask(:,:)
+    integer,                intent(out)           :: totalElementMask(:,:)
     integer,                intent(out), optional :: rc  
 !         
 !
@@ -842,26 +842,26 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
     ! Initialize return code
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
-  end subroutine ESMF_ArrayGetTotalCellMask2D
+  end subroutine ESMF_ArrayGetTotalElementMask2D
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_ArrayGetTotalCellMask3D()"
+^define ESMF_METHOD "ESMF_ArrayGetTotalElementMask3D()"
 !BOPI
 ! !IROUTINE: ESMF_ArrayGet - Get Array internals for local DE
 
 ! !INTERFACE:
   ! Private name; call using ESMF_Get()
-  subroutine ESMF_ArrayGetTotalCellMask3D(array, routehandlelist, localDe, &
-    totalCellMask, rc)
+  subroutine ESMF_ArrayGetTotalElementMask3D(array, routehandlelist, localDe, &
+    totalElementMask, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in)            :: array
     type(ESMF_RouteHandle), intent(in), optional  :: routehandlelist(:)
     integer,                intent(in)            :: localDe
-    integer,                intent(out)           :: totalCellMask(:,:,:)
+    integer,                intent(out)           :: totalElementMask(:,:,:)
     integer,                intent(out), optional :: rc  
 !         
 !
@@ -881,7 +881,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
     ! Initialize return code
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
-  end subroutine ESMF_ArrayGetTotalCellMask3D
+  end subroutine ESMF_ArrayGetTotalElementMask3D
 !------------------------------------------------------------------------------
 
 

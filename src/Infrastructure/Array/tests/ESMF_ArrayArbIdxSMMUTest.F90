@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.5 2007/10/16 20:46:19 theurich Exp $
+! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.6 2007/10/25 05:16:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayArbIdxSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.5 2007/10/16 20:46:19 theurich Exp $'
+    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.6 2007/10/25 05:16:57 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -121,7 +121,7 @@ program ESMF_ArrayArbIdxSMMUTest
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   ! The srcDistgrid has 1 DE per PET, i.e. 6 DEs. Each DE has a different
-  ! number of local cells in the DistGrid. The arbitrary sequence indices are
+  ! number of local elements in the DistGrid. The arbitrary sequence indices are
   ! constructed to look like this:
   !
   ! PET   localDE   DE    indices
@@ -275,10 +275,10 @@ program ESMF_ArrayArbIdxSMMUTest
   dstArray = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=dstDistgrid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-  ! The dstDistgrid evenly divides 12 cells across the 6 DEs (becaues default
+  ! The dstDistgrid evenly divides 12 elements across the 6 DEs (becaues default
   ! is 1 DE per PET and there are 6 PETs running this example).
   ! The default sequenceIndex of dstDistGrid is determined by the default rule
-  ! of simply enumerating the cells within the tile, starting at 1:
+  ! of simply enumerating the elements within the tile, starting at 1:
   !
   ! PET   localDE   DE    indices
   ! 0     0         0     1, 2
@@ -403,7 +403,7 @@ program ESMF_ArrayArbIdxSMMUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   ! The expected result of the sparse matrix multiplication in dstArray is:
-  ! (note: by default ArraySparseMatMul() initializes _all_ destination cells
+  ! (note: by default ArraySparseMatMul() initializes _all_ destination elements
   ! to zero before adding in sparse matrix terms.)
   !
   ! PET   localDE   DE    dstArray contents
@@ -457,7 +457,7 @@ program ESMF_ArrayArbIdxSMMUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   ! The expected result of the sparse matrix multiplication in dstArray2 is:
-  ! (note: by default ArraySparseMatMul() initializes _all_ destination cells
+  ! (note: by default ArraySparseMatMul() initializes _all_ destination elements
   ! to zero before adding in sparse matrix terms.)
   !
   ! PET   localDE   DE    dstArray2 contents
@@ -519,7 +519,7 @@ program ESMF_ArrayArbIdxSMMUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   ! The expected result of the sparse matrix multiplication in dstArray3 is:
-  ! (note: by default ArraySparseMatMul() initializes _all_ destination cells
+  ! (note: by default ArraySparseMatMul() initializes _all_ destination elements
   ! to zero before adding in sparse matrix terms.)
   !
   ! PET   localDE   DE    dstArray3 contents, tensor dimension j=1
@@ -661,7 +661,7 @@ program ESMF_ArrayArbIdxSMMUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   ! The expected result of the sparse matrix multiplication in dstArray2 is:
-  ! (note: by default ArraySparseMatMul() initializes _all_ destination cells
+  ! (note: by default ArraySparseMatMul() initializes _all_ destination elements
   ! to zero before adding in sparse matrix terms.)
   !
   ! PET   localDE   DE    dstArray2 contents
@@ -757,7 +757,7 @@ program ESMF_ArrayArbIdxSMMUTest
 call ESMF_ArrayPrint(dstArray3)
 
   ! The expected result of the sparse matrix multiplication in dstArray3 is:
-  ! (note: by default ArraySparseMatMul() initializes _all_ destination cells
+  ! (note: by default ArraySparseMatMul() initializes _all_ destination elements
   ! to zero before adding in sparse matrix terms.)
   !
   ! PET   localDE   DE    dstArray3 contents, tensor dimension j=1

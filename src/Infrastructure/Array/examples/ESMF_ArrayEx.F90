@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.27 2007/09/21 04:12:54 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.28 2007/10/25 05:16:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -53,7 +53,7 @@ program ESMF_ArrayEx
   integer, allocatable:: exclusiveLBound(:,:), exclusiveUBound(:,:)
   integer, allocatable:: totalLWidth(:,:), totalUWidth(:,:)
   integer, allocatable:: totalLBound(:,:), totalUBound(:,:)
-!  integer, allocatable:: totalCellMask(:,:)
+!  integer, allocatable:: totalElementMask(:,:)
   integer, allocatable:: computationalLWidth(:,:), computationalUWidth(:,:)
   integer, allocatable:: computationalLBound(:,:), computationalUBound(:,:)
 !  integer, allocatable:: haloLDepth(:), haloUDepth(:)
@@ -126,9 +126,9 @@ program ESMF_ArrayEx
 ! PETs of the current context.
 !
 ! The index space covered by the Array object and the decomposition into 
-! DE-local exclusive cell regions, as it is described by the DistGrid object,
+! DE-local exclusive regions, as it is described by the DistGrid object,
 ! is illustrated in the following diagram. Each asterix (*) represents a single
-! cell.
+! element.
 !
 ! \begin{verbatim}
 ! 
@@ -227,44 +227,44 @@ program ESMF_ArrayEx
 ! pieces of information:
 ! \begin{itemize}
 ! \item The extent and topology of the global domain covered by the Array object
-!       in terms of indexed cells. The total extent may be a composition or 
+!       in terms of indexed elements. The total extent may be a composition or 
 !       patchwork of smaller logically rectangular (LR) domain pieces or patches.
-! \item The decomposition of the entire domain into "cell exclusive" DE-local LR
-!       chunks. {\em Cell exclusive} means that there is no cell overlap 
+! \item The decomposition of the entire domain into "element exclusive" DE-local
+!       LR chunks. {\em Element exclusive} means that there is no element overlap 
 !       between DE-local chunks. This, however, does not exclude degeneracies 
 !       between staggering locations for certain topologies (e.g. bipolar).
 ! \item The layout of DEs over the available PETs an thus the distribution of
 !       the Array data.
 ! \end{itemize}
 !
-! Each cell of an Array is associated with a {\em single} DE. The union of
-! cells associated with a DE, as defined by the DistGrid above, will correspond
+! Each element of an Array is associated with a {\em single} DE. The union of
+! elements associated with a DE, as defined by the DistGrid above, will correspond
 ! to a LR chunk of index space, called the {\em exclusive region} of the DE.
 !
 ! There is a hierarchy of four regions that can be identified for each DE in an
 ! Array object. Their definition and relationship to each other is as follows:
 ! \begin{itemize}
-! \item {\em Interior Region}: Region that only contains local cells that are
+! \item {\em Interior Region}: Region that only contains local elements that are
 !       {\em not} mapped into the halo of any other DE. The shape and size of 
 !       this region for a particular DE depends non-locally on the halos defined
 !       by other DEs and may change during computations. Knowledge of the 
-!       interior cells may be used to improve performance by overlapping 
+!       interior elements may be used to improve performance by overlapping 
 !       communications with ongoing computation for a DE.
-! \item {\em Exclusive Region}: Cells for which this DE claims exclusive 
+! \item {\em Exclusive Region}: Elements for which this DE claims exclusive 
 !       ownership. Practically this means that the DE will be the source for 
-!       these cells in halo and reduce operations. There are exceptions
+!       these elements in halo and reduce operations. There are exceptions
 !       to this for certain staggering locations in some topologies. These 
 !       cases remain well-defined with the information available through 
-!       DistGrid. This region includes all cells of the interior region.
-! \item {\em Computational Region}: Region of all cells that are kept locally
+!       DistGrid. This region includes all elements of the interior region.
+! \item {\em Computational Region}: Region of all elements that are kept locally
 !       and are updated during computation by the local DE. The additional 
-!       computational cells, beyond the exclusive cells of the DE, are either 
+!       computational elements, beyond the exclusive elements of the DE, are either 
 !       overlapping with the exclusive region of another DE or lie outside the 
 !       global domain as defined by the DistGrid. Extra computational points 
 !       may be chosen differently for different stagger locations.
-! \item {\em Total (Memory) Region}: Total of all DE-locally allocated cells. 
+! \item {\em Total (Memory) Region}: Total of all DE-locally allocated elements. 
 !       The size and shape of the total memory region must accommodate the
-!       computational region but may contain additional cells to be used
+!       computational region but may contain additional elements to be used
 !       in halos and/or as memory padding.
 ! \end{itemize}
 !
@@ -432,7 +432,7 @@ program ESMF_ArrayEx
 ! kind of information. Please see the DistGrid proposal for more details.
 !
 
-! \subsubsection{Computational region and extra cells for halo or padding}
+! \subsubsection{Computational region and extra elements for halo or padding}
 !
 ! In the previous examples the computational region of {\tt array} was chosen 
 ! by default to be identical to the exclusive region defined by the DistGrid
@@ -498,7 +498,7 @@ program ESMF_ArrayEx
 ! kernel to overstep the exclusive region for both read/write access 
 ! (computational region) and potentially read-only access into the total region
 ! outside of the computational region, if a halo operation provides valid 
-! entries for these cells. 
+! entries for these elements. 
 !
 ! The Array object can be queried for absolute {\em bounds}
 !EOE
@@ -588,30 +588,30 @@ program ESMF_ArrayEx
 ! computational and total regions that reach beyond the index space as it is
 ! defined by 
 ! the DistGrid. For example DE 1's computational and total region, as shown 
-! in the diagram above, contain extra cells that are not covered by the
+! in the diagram above, contain extra elements that are not covered by the
 ! index space described by the DistGrid object. 
 !
 ! The situation is different for interior DEs, or when the widths specified
 ! during Array creation are asymmetric. For the current example DE 3, for
 ! instance,
-! only contains cells in its total and computational region that lie within
-! the DistGrid index space. Cells in the total region that are outside of a DE's
-! exclusive region are then redundant with another DE's exclusive cells. 
+! only contains elements in its total and computational region that lie within
+! the DistGrid index space. Elements in the total region that are outside of a 
+! DE's exclusive region are then redundant with another DE's exclusive elements. 
 ! Redundancies in the computational region may be enforced or monitored by
-! special Array communication calls. Total region cells that are outside the 
+! special Array communication calls. Total region elements that are outside the 
 ! computational region may be part of a halo operation and may be updated with 
-! the value of the corresponding exclusive cell in another DE using halo 
+! the value of the corresponding exclusive element in another DE using halo 
 ! communication methods.
 !
-! Computational cells that are outside the DistGrid index space are kept for 
+! Computational elements that are outside the DistGrid index space are kept for 
 ! convenience, simplifying the formulation of the computational kernel. 
-! Naturally, redundancy cannot be checked or enforced for these cells. 
-! Similarly, halo cells that do not correspond to cells within the index space
+! Naturally, redundancy cannot be checked or enforced for these elements. 
+! Similarly, halo elements that do not correspond to elements within the index space
 ! of the DistGrid will not be updated during halo communications. It is up to
-! the application writer to utilize the provided cells as is appropriate for the
+! the application writer to utilize the provided elements as is appropriate for the
 ! computational algorithm. The Array class offers mask type information 
 ! through the {\tt ESMF\_ArrayGet()} method in order to assist the user in 
-! dealing with cells that are not part of the Array index space as it is 
+! dealing with elements that are not part of the Array index space as it is 
 ! defined in the corresponding DistGrid object. Please see section 
 ! \ref{ArrayEx_interiorRegion} for details.
 !
@@ -646,14 +646,14 @@ program ESMF_ArrayEx
 !
 ! The associated DistGrid does not define any extra connections so that the
 ! global domain has open outside boundaries as is the case for regional models.
-! The {\tt array} was created with extra cells around each DE's exclusive 
-! region. The total of all DE-local cells make up each DE's total region. 
-! Within the total region some of the cells are carried as extra computational 
-! cells in the computational region. The exact situation has been illustrated
+! The {\tt array} was created with extra elements around each DE's exclusive 
+! region. The total of all DE-local elements make up each DE's total region. 
+! Within the total region some of the elements are carried as extra computational 
+! elements in the computational region. The exact situation has been illustrated
 ! for this {\tt array} object in the previous sections.
 !
 ! Now a simple halo operation shall be carried out for {\tt array} that updates
-! all the extra cells in the total region for each DE.
+! all the extra elements in the total region for each DE.
 !EOEI
 !BOCI
   call ESMF_ArrayHalo(array, regionflag=ESMF_REGION_EXCLUSIVE, rc=rc)
@@ -661,15 +661,15 @@ program ESMF_ArrayEx
 !BOEI
 ! The {\tt regionflag=ESMF\_REGION\_EXCLUSIVE} indicates that the halo operation 
 ! is to be relative to the exclusive region, i.e. it includes computational 
-! cells as is the case during the spin up phase of some models.
+! elements as is the case during the spin up phase of some models.
 !
 ! The above call to the ArrayHalo() method will have updated all of the extra 
-! cells in the DE-local regions that had source cells in one of the DEs of the
+! elements in the DE-local regions that had source elements in one of the DEs of the
 ! Array object. There are, however, as will be pointed out in the next section,
-! some extra cells that do not correspond to any DE's exclusive region. The
-! ArrayHalo() operation leaves those cells unchanged.
+! some extra elements that do not correspond to any DE's exclusive region. The
+! ArrayHalo() operation leaves those elements unchanged.
 !
-! Next only the cells outside the computational region shall be updated. This
+! Next only the elements outside the computational region shall be updated. This
 ! is the default for ArrayHalo() and the number of arguments that need to be
 ! specified is minimal.
 !EOEI
@@ -682,7 +682,7 @@ program ESMF_ArrayEx
 ! 
 ! The ArrayHalo() method allows the halo depth to be specified for each side
 ! of the DE-local region. In the following example the {\tt haloLDepth} and 
-! {\tt haloUDepth} arguments are used to halo a maximum of 1 cell around the
+! {\tt haloUDepth} arguments are used to halo a maximum of 1 element around the
 ! computational region of each DE.
 !EOEI
 !BOCI
@@ -720,7 +720,7 @@ program ESMF_ArrayEx
 !EOCI
 !BOEI
 ! Multiple halo operations for the same Array object can be stored and are 
-! available to run when needed. For example a halo update for cells in positive
+! available to run when needed. For example a halo update for elements in positive
 ! second dimension of {\tt array} may be stored without loosing the previously
 ! precomputed operation by supplying a separate RouteHandle object.
 !EOEI
@@ -753,10 +753,10 @@ program ESMF_ArrayEx
 ! after the Routes have been released.
 !
 !
-! \subsubsection{Interior region and Array's total cell mask}
+! \subsubsection{Interior region and Array's total element mask}
 ! \label{ArrayEx_interiorRegion}
 !
-! The {\em Array total cell mask} is a native Fortran90 integer array of
+! The {\em Array total element mask} is a native Fortran90 integer array of
 ! the same rank as the ESMF Array object. The array must be allocated and 
 ! deallocated by the user and is filled by the ArrayGet() method with the
 ! mask information. (The Array object does not store the mask information
@@ -768,21 +768,21 @@ program ESMF_ArrayEx
 ! be chosen to match the totalLBound(:) and totalUBound(:) parameters of the
 ! Array.
 !
-! For the {\tt array} object created in the previous section the total cell mask
+! For the {\tt array} object created in the previous section the total element mask
 ! for DE 1 would need to be allocated as
 !EOEI
 !BOCI
-  allocate(totalCellMask(3:8, -3:3))              ! rank=2
+  allocate(totalElementMask(3:8, -3:3))              ! rank=2
 !EOCI
 !BOEI
 ! Then, assuming that DE 1 was localDE 1 on the PET issuing the following
 ! call the mask can be obtained in the following manner.
 !EOEI
 !BOCI
-  call ESMF_ArrayGet(array, localDe=1, totalCellMask=totalCellMask, rc=rc)
+  call ESMF_ArrayGet(array, localDe=1, totalElementMask=totalElementMask, rc=rc)
 !EOCI
 !BOEI
-! Now the {\tt totalCellMask} variable contains the mask for the total
+! Now the {\tt totalElementMask} variable contains the mask for the total
 ! region for DE 1 for {\tt array}. For the example the mask will contain the
 ! following values:
 !
@@ -812,29 +812,29 @@ program ESMF_ArrayEx
 ! \end{verbatim}
 !
 ! The inner most rectangle corresponds to the exclusive region on DE 1. The
-! value of "-2" in an exclusive cell indicates that other DEs of the Array
-! have cells in their total region that correspond to this DE's exclusive cell.
-! A value of "-3" for an exclusive cell indicates that there exists a redundancy
+! value of "-2" in an exclusive element indicates that other DEs of the Array
+! have elements in their total region that correspond to this DE's exclusive element.
+! A value of "-3" for an exclusive element indicates that there exists a redundancy
 ! with another DE's exclusive region and a value of "-4" indicates redundancy 
-! and dependency between DEs. Finally, a cell value of "-1" in the exclusive
+! and dependency between DEs. Finally, a element value of "-1" in the exclusive
 ! region indicates that there are no other DEs in the Array that depend on this
-! exclusive cell. The union of exclusive cells with mask value "-1" define the 
+! exclusive element. The union of exclusive elements with mask value "-1" define the 
 ! {\em absolute interior region} of the DE. In this example DE 1 does not 
-! contain any absolute interior cells.
+! contain any absolute interior elements.
 !
 ! The next larger rectangle in the above diagram corresponds to the 
 ! computational region of DE 1 and the entire array extent is that of this DE's
-! total region. A cell mask value of "-1" in these regions indicates that 
-! there are no cells in any of the DEs' exclusive regions that corresponds to 
-! this cell, i.e. the cell lies outside the index space covered by DistGrid.
+! total region. A element mask value of "-1" in these regions indicates that 
+! there are no elements in any of the DEs' exclusive regions that corresponds to 
+! this element, i.e. the element lies outside the index space covered by DistGrid.
 !
 ! Mask values $>= 0$ in the computational and total regions indicate the DE 
-! which contains the corresponding cell in its exclusive region. Thus a cell 
+! which contains the corresponding element in its exclusive region. Thus a element 
 ! with mask value $>= 0$ lies within the DistGrid index space.
 !
 ! The query call used above was only able to return information based on the
 ! information stored in the Array object and the underlying DistGrid. However,
-! it is often more valuable to obtain the information stored in a total cell
+! it is often more valuable to obtain the information stored in a total element
 ! mask specifically for a particular Array communication pattern or a whole
 ! set thereof. The following lines of code demonstrate this aspect for one of 
 ! the Array halo operations used in the previous section.
@@ -844,18 +844,18 @@ program ESMF_ArrayEx
     routehandle=haloHandle2, rc=rc)
 !EOCI
 !BOEI
-! The same {\tt totalCellMask} variable may be used to obtain the specific total
-! cell mask. Only difference is that the {\tt routehandle} must be provided
-! as an additional input parameter. Since specific total cell masks may be 
+! The same {\tt totalElementMask} variable may be used to obtain the specific total
+! element mask. Only difference is that the {\tt routehandle} must be provided
+! as an additional input parameter. Since specific total element masks may be 
 ! required as an "OR" over a whole set of communication operations the optional
 ! input parameter is defined as a list of RouteHandles.
 !EOEI
 !BOCI
   call ESMF_ArrayGet(array, routehandlelist=(/haloHandle2/), &
-    localDe=1, totalCellMask=totalCellMask, rc=rc)
+    localDe=1, totalElementMask=totalElementMask, rc=rc)
 !EOCI
 !BOEI
-! Now {\tt totalCellMask} holds the total cell mask for {\tt array} specifically
+! Now {\tt totalElementMask} holds the total element mask for {\tt array} specifically
 ! for the Route referenced by {\tt haloHandle2}. For DE1 the output will look
 ! as follows:
 ! \begin{verbatim}
@@ -883,18 +883,18 @@ program ESMF_ArrayEx
 !
 ! \end{verbatim}
 !
-! The meaning of the values stored in the total cell mask for a specific 
+! The meaning of the values stored in the total element mask for a specific 
 ! query call are now related to the specified operations. The "-1" in the 
 ! exclusive region (inner most rectangle) indicates that the operation
-! referenced by {\tt haloHandle2} requires none of the exclusive cells of DE 1.
-! Thus all exclusive cells of DE 1 can be considered interior cells with 
+! referenced by {\tt haloHandle2} requires none of the exclusive elements of DE 1.
+! Thus all exclusive elements of DE 1 can be considered interior elements with 
 ! respect to {\tt haloHandle2}. Consequently, if a non-blocking HaloRun() were
 ! to be executed it would be safe to read from and write to all of DE 1's
-! exclusive cells.
+! exclusive elements.
 !
-! For the next larger rectangle, the computational region, {\tt totalCellMask}
-! indicates that there are only two cells that will be updated with values from 
-! exclusive cells of DE 3 during execution of {\tt haloHandle2}, all other cells
+! For the next larger rectangle, the computational region, {\tt totalElementMask}
+! indicates that there are only two elements that will be updated with values from 
+! exclusive elements of DE 3 during execution of {\tt haloHandle2}, all other elements
 ! are unaffected by this communication pattern.
 !
 ! Finally, none of the points in DE 1's total region outside of the 
@@ -903,7 +903,7 @@ program ESMF_ArrayEx
 ! After usage it is the user's responsibility to clean up.
 !EOEI
 !BOCI
-  deallocate(totalCellMask)
+  deallocate(totalElementMask)
   call ESMF_RouteHandleRelease(routehandle=haloHandle2, rc=rc)
   call ESMF_ArrayDestroy(array, rc=rc) ! destroy array object
 !EOCI  
@@ -932,17 +932,17 @@ program ESMF_ArrayEx
 !EOCI  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOEI
-! This {\tt array} has DE-local total regions that are three cells wider in 
+! This {\tt array} has DE-local total regions that are three elements wider in 
 ! each direction than the corresponding exclusive region. The default
 ! computational region for each DE is equal to the DE's exclusive region. The
-! extra cells between exclusive and total region are available for halos or
+! extra elements between exclusive and total region are available for halos or
 ! can be used to expamd the computational region of the Array.
 !
 ! The following compute loop first executes a halo update which by default
-! will attempt to halo all cells that are outside of the computational region.
+! will attempt to halo all elements that are outside of the computational region.
 ! Then the a three step cycle is entered which sets the computational region to
-! 2, 1 and 0 cells around the exclusive region and each time calls a 
-! compuitational kernel that will access cells from (i-1,j-1) to (i+1,j+1). 
+! 2, 1 and 0 elements around the exclusive region and each time calls a 
+! compuitational kernel that will access elements from (i-1,j-1) to (i+1,j+1). 
 ! After the computational width has reached 0 a new halo updated needs to be
 ! performed.
 !EOEI
@@ -952,7 +952,7 @@ program ESMF_ArrayEx
     do k=2, 0, -1
       call ESMF_ArraySet(array, &
         computationalLWidth=(/k,k/), computationalUWidth=(/k,k/), rc=rc)
-      ! call second_order_kernel(array)  ! will access (i-1) and (i+1) cells
+      ! call second_order_kernel(array)  ! will access (i-1) and (i+1) elements
     enddo
   enddo
 !EOCI
@@ -964,15 +964,15 @@ program ESMF_ArrayEx
 !EOCI
 !BOEI
 ! Sometimes it may be desirable to add extra memory padding around the DE-local
-! data cells, e.g. to prevent false sharing on shared memory architectures. 
+! data elements, e.g. to prevent false sharing on shared memory architectures. 
 ! For this the total region can be chosen larger than is needed by the 
 ! algorithm. The following lines of code recapture the example from above but
-! now the total region is chosen with a 5 cell wide rim around the exclusive
-! region. Still only a 3 cell wide halo is needed for the computational
-! algorithm. By default the ArrayHalo() call will halo all extra cells, to keep
-! the halo to 3 cells in each direction the haloLDepth and haloUDepth arguments
-! must be used. With that a 5 - 3 = 2 cell wide memory padding has been placed
-! around the cells used by each DE.
+! now the total region is chosen with a 5 element wide rim around the exclusive
+! region. Still only a 3 element wide halo is needed for the computational
+! algorithm. By default the ArrayHalo() call will halo all extra elements, to keep
+! the halo to 3 elements in each direction the haloLDepth and haloUDepth arguments
+! must be used. With that a 5 - 3 = 2 element wide memory padding has been placed
+! around the elements used by each DE.
 !
 !EOEI
 !BOCI
@@ -986,7 +986,7 @@ program ESMF_ArrayEx
     do k=2, 0, -1
       call ESMF_ArraySet(array, &
         computationalLWidth=(/k,k/), computationalUWidth=(/k,k/), rc=rc)
-      ! call second_order_kernel(array)  ! will access (i-1) and (i+1) cells
+      ! call second_order_kernel(array)  ! will access (i-1) and (i+1) elements
     enddo
   enddo
 !EOCI
@@ -1015,37 +1015,37 @@ program ESMF_ArrayEx
 ! 
 ! Sparse matrix multiplication is a fundamental Array communication method. One
 ! frequently used application of this method is the interpolation between pairs
-! of Arrays. The principle is this: the value of each cell in the exclusive 
+! of Arrays. The principle is this: the value of each element in the exclusive 
 ! region of the destination Array is expressed as a linear combination of {\em 
-! potentially all} the exclusive cells of the source Array. Naturally most of
+! potentially all} the exclusive elements of the source Array. Naturally most of
 ! the coefficients of these linear combinations will be zero and it is more 
 ! efficient to store explicit information about the non-zero elements than to 
 ! keep track of all the coefficients.
 !
 ! There is a choice to be made with respect to the format in which to store the
 ! information about the non-zero elements. One option is to store the value
-! of each coefficient together with the corresponding destination cell index
-! and source cell index. Destination and source indices could be expressed in
+! of each coefficient together with the corresponding destination element index
+! and source element index. Destination and source indices could be expressed in
 ! terms of the corresponding DistGrid patch index together with the coordinate
 ! tuple within the patch. While this format may be the most natural way to
-! express cells in the source and destination Array, it has two major drawbacks.
+! express elements in the source and destination Array, it has two major drawbacks.
 ! First the coordinate tuple is {\tt dimCount} specific and second the format
 ! is extremly bulky. For 2D source and destination Arrays it would require 6
-! integers to store the source and destination cell information for each
+! integers to store the source and destination element information for each
 ! non-zero coefficient and matters get worse for higher dimensions.
 !
 ! Both problems can be circumvented by {\em interpreting} source and destination
-! Arrays as sequentialized strings or {\em vectors} of cells. This is done
-! by assigning a unique {\em sequence index} to each exclusive cell in both
-! Arrays. With that the operation of updating the cells in the destination Array
-! as linear combinations of source Array cells takes the form of a {\em sparse
+! Arrays as sequentialized strings or {\em vectors} of elements. This is done
+! by assigning a unique {\em sequence index} to each exclusive element in both
+! Arrays. With that the operation of updating the elements in the destination Array
+! as linear combinations of source Array elements takes the form of a {\em sparse
 ! matrix multiplication}.
 !
 ! The default sequence index rule assigns index $1$ to the {\tt minIndex} corner
-! cell of the first patch of the DistGrid on which the Array is defined. It then
-! increments the sequence index by $1$ for each cell running through the
+! element of the first patch of the DistGrid on which the Array is defined. It then
+! increments the sequence index by $1$ for each element running through the
 ! DistGrid dimensions by order. The index space position of the DistGrid patches
-! does not affect the sequence labeling of cells. The default sequence indices
+! does not affect the sequence labeling of elements. The default sequence indices
 ! for
 !EOE
 !BOC
@@ -1053,7 +1053,7 @@ program ESMF_ArrayEx
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
-! for each cell are:
+! for each element are:
 ! \begin{verbatim}
 !   -------------------------------------> 2nd dim
 !   |
@@ -1076,8 +1076,8 @@ program ESMF_ArrayEx
 ! \end{verbatim}
 !
 ! The assigned sequence indices are decomposition and distribution invariant by
-! construction. Furthermore, when an Array is created with extra cells per DE on
-! a DistGrid the sequence indices (which only cover the exclusive cells) remain
+! construction. Furthermore, when an Array is created with extra elements per DE on
+! a DistGrid the sequence indices (which only cover the exclusive elements) remain
 ! unchanged.
 !EOE
 !BOC
@@ -1087,12 +1087,12 @@ program ESMF_ArrayEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
-! The extra padding of 1 cell in each direction around the exclusive cells on
+! The extra padding of 1 element in each direction around the exclusive elements on
 ! each DE are "invisible" to the Array spare matrix multiplication method. These
-! extra cells are either updated by the computational kernel or by Array halo
+! extra elements are either updated by the computational kernel or by Array halo
 ! operations (not yet implemented!).
 !
-! An alternative way to assign sequence indices to all the cells in the patches
+! An alternative way to assign sequence indices to all the elements in the patches
 ! covered by a DistGrid object is to use a special {\tt ESMF\_DistGridCreate()}
 ! call. This call has been specifically designed for 1D cases with arbitrary,
 ! user-supplied sequence indices.
@@ -1122,8 +1122,8 @@ program ESMF_ArrayEx
 ! \end{verbatim}
 !
 ! Again the DistGrid object provides the sequence index labeling for the
-! exclusive cells of an Array created on the DistGrid regardless of extra,
-! non-exclusive cells.
+! exclusive elements of an Array created on the DistGrid regardless of extra,
+! non-exclusive elements.
 !EOE
   call ESMF_ArraySpecSet(arrayspec1D, typekind=ESMF_TYPEKIND_R8, rank=1, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1135,8 +1135,8 @@ program ESMF_ArrayEx
 !BOE
 ! With the definition of sequence indices, either by the default rule or as user
 ! provided arbitrary sequence indices, it is now possible to uniquely identify
-! each exclusive cell in the source and destination Array by a single integer
-! number. Specifying a pair of source and destination cells takes two integer
+! each exclusive element in the source and destination Array by a single integer
+! number. Specifying a pair of source and destination elements takes two integer
 ! number regardless of the number of dimensions.
 !
 ! The information required to carry out a sparse matrix multiplication are the
@@ -1148,9 +1148,9 @@ program ESMF_ArrayEx
 ! kind using factors of identical type and kind. The sequence index pairs
 ! associated with the factors provided by {\tt factorList} are stored in a 2D
 ! Fortran array of default integer kind of the shape {\tt
-! integer::factorIndexList(2,:)}. The sequence indices of the source Array cells
+! integer::factorIndexList(2,:)}. The sequence indices of the source Array elements
 ! are stored in the first row of {\tt 
-! factorIndexList} while the sequence indices of the destination Array cells are
+! factorIndexList} while the sequence indices of the destination Array elements are
 ! stored in the second row.
 !
 ! Each PET in the current VM must call into {\tt ESMF\_ArraySparseMatMulStore()}
@@ -1218,7 +1218,7 @@ program ESMF_ArrayEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
-! will initialize the entire {\tt dstArray} to 0.0 and then update two cells:
+! will initialize the entire {\tt dstArray} to 0.0 and then update two elements:
 !
 ! \begin{verbatim}
 ! on DE 1:
@@ -1242,7 +1242,7 @@ program ESMF_ArrayEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
-! skips the initialization and cells in {\tt dstArray} are updated according to:
+! skips the initialization and elements in {\tt dstArray} are updated according to:
 !
 ! \begin{verbatim}
 !   do n=1, size(combinedFactorList)
@@ -1290,10 +1290,10 @@ program ESMF_ArrayEx
 ! the index space and must be considered within the Array and DistGrid classes.
 ! The
 ! index tuple that are used to identify data elements in index space specify 
-! cells, but do not contain any information as to where {\em within} the 
-! physical cell
+! elements, but do not contain any information as to where {\em within} the 
+! physical element
 ! the data value actually is located. This orientation of the data point with
-! respect to the cell is called its stagger location. In many cases the stagger
+! respect to the element is called its stagger location. In many cases the stagger
 ! location, which is physical information, has no effect on the index space.
 ! However, in some topologies the stagger location does matter for certain 
 ! operations and the index space layer must provide a mechanism to address the
@@ -1301,12 +1301,12 @@ program ESMF_ArrayEx
 !
 ! The ESMF index space layer (DistGrid and Array) provides support for
 ! staggered data by means of a staggering index that is attached to the data.
-! Much like the index space location of a cell the stagger location index does 
+! Much like the index space location of a element the stagger location index does 
 ! not have a direct physical meaning attached and can be chosen arbitrarily.
 ! In fact. the staggering location index is by its nature independent of the 
 ! rank of the data and the decomposition. It is simply an integer number that
 ! distinguishes different stagger locations. The interpretation of the stagger 
-! location in terms of a physical location in the cell is again left to the 
+! location in terms of a physical location in the element is again left to the 
 ! user of the index space layer or higher ESMF classes.
 !
 ! For the Arrays, that have been used throughout the previous sections
@@ -1363,15 +1363,15 @@ program ESMF_ArrayEx
 !EOCI
 !BOEI
 ! Each DE in {\tt array1} will have allocated enough memory to hold the 
-! exclusive region of cells (which is determined by the decomposition) plus
-! a halo of one cell in positive and negative peripheral direction. Furthermore
+! exclusive region of elements (which is determined by the decomposition) plus
+! a halo of one element in positive and negative peripheral direction. Furthermore
 ! the {\tt staggerLoc} argument was used to indicate that the quantity stored
 ! in {\tt array1} is located on stagger location "1", which, at this point, is 
 ! nothing but an arbitrary index whose meaning will become clearer below.
 !
 ! The second quantity will be provided in {\tt array2} using the same DistGrid
 ! object, thus defining it within the same index space and ensuring identical
-! decomposition. However, {\tt array2} will have one more cell along the 
+! decomposition. However, {\tt array2} will have one more element along the 
 ! negative peripheral direction in its computational region and no extra space
 ! for a halo.
 !EOEI
@@ -1386,11 +1386,11 @@ program ESMF_ArrayEx
 ! in mind that the ESMF index space layer makes no such interpretation, all it
 ! knows is that {\tt array1} and {\tt array2} are associated with 
 ! {\em different} stagger locations and that {\tt array2} has one more 
-! computational cell in the negative second dimension. The diagram depicts 
+! computational element in the negative second dimension. The diagram depicts 
 ! the situation for
 ! a single DE. The labels are {\tt a1} for {\tt array1}, {\tt a2} for 
-! {\tt array2}, {\tt a1h} for the halo cells in {\tt array1} and 
-! {\tt a2c} for the extra computational cells in {\tt array2}, 
+! {\tt array2}, {\tt a1h} for the halo elements in {\tt array1} and 
+! {\tt a2c} for the extra computational elements in {\tt array2}, 
 !
 ! \begin{verbatim}
 !   ----------------------------------------> 2nd dim
@@ -1452,7 +1452,7 @@ program ESMF_ArrayEx
     ! use the computational bounds of array1 for the kernel
     do i=computationalLBound(de, 1), computationalUBound(de, 1)
       do j=computationalLBound(de, 2), computationalUBound(de, 2)
-        ! (i,j) references the same cell in both Array objects!
+        ! (i,j) references the same element in both Array objects!
         dummySum = dummySum + &
           (myF90Array2(i,j-1) - myF90Array2(i,j)) * myF90Array1(i,j)
       enddo
@@ -1600,9 +1600,9 @@ program ESMF_ArrayEx
 !EOCI
 !BOEI
 ! In the above case only {\tt array1} will have been haloed because {\tt array2}
-! does not define any cells used by default to halo (the total region is 
+! does not define any elements used by default to halo (the total region is 
 ! identical to the computational region). If, however, {\tt array2} had been
-! defined with cells that would default into halo cells, the above halo call
+! defined with elements that would default into halo elements, the above halo call
 ! would try to update the halo regions of both arrays. The optional argument
 ! {\tt arrayIndex} can then be used to indicate which Array is supposed to be
 ! haloed.
@@ -1641,7 +1641,7 @@ program ESMF_ArrayEx
 !BOE
 ! The index space covered by the Array and the decomposition description is
 ! provided to the Array create method by the {\tt distgrid} argument. The index
-! space in this example has 16 cells and covers the interval $[-10, 5]$. It is 
+! space in this example has 16 elements and covers the interval $[-10, 5]$. It is 
 ! decomposed into as many DEs as there are PETs in the current context.
 !EOE
 !BOC
@@ -2027,7 +2027,7 @@ program ESMF_ArrayEx
 ! replicated along the DEs of the 2nd DistGrid dimension. Replication in the
 ! context of {\tt ESMF\_ArrayCreate()} does not mean that data values are
 ! communicated and replicated between different DEs, but it means that different
-! DEs provide memory allocations for {\em identical} exclusive cells.
+! DEs provide memory allocations for {\em identical} exclusive elements.
 !
 ! Access to the data storage of an Array that has been replicated along 
 ! DistGrid dimensions is not different from Arrays without replication.
@@ -2227,7 +2227,7 @@ program ESMF_ArrayEx
 ! a replicated Array there is an intrinsic ambiguity that needs to be 
 ! considered. ESMF defines the gathering of data of a replicated Array
 ! as the collection of data originating from the numerically larger DEs. This
-! means that data in replicated cells associated with numerically smaller DEs
+! means that data in replicated elements associated with numerically smaller DEs
 ! will be ignored during {\tt ESMF\_ArrayGather()}.
 ! For the current example this means that changing the Array contents on PET 1,
 ! which here corresponds to DE 1,
@@ -2304,10 +2304,10 @@ program ESMF_ArrayEx
 ! used.
 !
 ! The index space of the bipolar region remains logically rectangular (LR) and
-! is assumed to be of size 360 x 50 cells for this example. The index order in
+! is assumed to be of size 360 x 50 elements for this example. The index order in
 ! the example is assumed $i,j$. The line for $j=1$ corresponds to a line of 
 ! constant latitude in the spherical coordinate system and the {\em bipolar
-! fold} is along $j=50$. Two equal sized patches of each 180 x 50 cells need
+! fold} is along $j=50$. Two equal sized patches of each 180 x 50 elements need
 ! to be connected in a way that corresponds to the bipolar topology.
 ! 
 !EOEI
@@ -2371,7 +2371,7 @@ program ESMF_ArrayEx
 ! First a scalar tracer Array will be created. The default stagger location can
 ! be used in this case because "0" (the default) has not been used for any other
 ! stagger location in the definitions of the connection transformations. The 
-! trace Array is created without halo cells.
+! trace Array is created without halo elements.
 !EOEI
 !BOCI
   arrayTracer = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
@@ -2380,7 +2380,7 @@ program ESMF_ArrayEx
 ! Next an Array is created for a scalar living at the north face. The
 ! connection transformation corresponding to the north face was tagged with
 ! stagger location index "1" so the {\tt staggerLoc} for the Array must be set
-! accordingly. Space for a halo width of one cell in each direction will be 
+! accordingly. Space for a halo width of one element in each direction will be 
 ! provided for this quantity. 
 !EOEI
 !BOCI
@@ -2389,9 +2389,9 @@ program ESMF_ArrayEx
 !EOCI
 !BOEI
 ! Finally Arrays for the horizontal velocity components are created at the 
-! NE cell corner. The transformation behavior of this point is defined in 
+! NE element corner. The transformation behavior of this point is defined in 
 ! the DistGrid for stagger location index "2". Again space for a halo of one 
-! cell in each direction is taken into account when creating the Arrays.
+! element in each direction is taken into account when creating the Arrays.
 !EOEI
 !BOCI
   arrayNEu = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
@@ -2410,10 +2410,10 @@ program ESMF_ArrayEx
 !
 ! A consequence of the bipolar topology is that all three Arrays 
 ! {\tt arrayNScalar}, {\tt arrayNEu} and {\tt arrayNEv} contain redundant
-! cells in their DE-local exclusive regions along the bipolar fold. These
+! elements in their DE-local exclusive regions along the bipolar fold. These
 ! redundancies are automatically detected during Array creation. The Array
 ! class will define communication methods to monitor and enforce redundancies.
-! Furthermore redundant cells in exclusive regions will also be taken into 
+! Furthermore redundant elements in exclusive regions will also be taken into 
 ! account in Array reduce operations.
 !
 !EOEI

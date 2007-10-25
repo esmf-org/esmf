@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistUTest.F90,v 1.1 2007/10/16 21:34:48 theurich Exp $
+! $Id: ESMF_ArrayRedistUTest.F90,v 1.2 2007/10/25 05:16:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ArrayRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayRedistUTest.F90,v 1.1 2007/10/16 21:34:48 theurich Exp $'
+    '$Id: ESMF_ArrayRedistUTest.F90,v 1.2 2007/10/25 05:16:57 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -116,10 +116,10 @@ program ESMF_ArrayRedistUTest
   dstArray = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=dstDistgrid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-  ! The dstDistgrid evenly divides 42 cells across the 6 DEs (becaues default
+  ! The dstDistgrid evenly divides 42 elements across the 6 DEs (becaues default
   ! is 1 DE per PET and there are 6 PETs running this test).
   ! The default sequenceIndex of dstDistGrid is determined by the default rule
-  ! of simply enumerating the cells within the tile, starting at 1:
+  ! of simply enumerating the elements within the tile, starting at 1:
   !
   ! PET   localDE   DE    indices
   ! 0     0         0     1, 2, 3, 4, 5, 6, 7
@@ -333,7 +333,7 @@ call ESMF_ArrayPrint(dstArray)
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   ! The srcDistgrid has 1 DE per PET, i.e. 6 DEs. Each DE has a different
-  ! number of local cells in the DistGrid. The arbitrary sequence indices are
+  ! number of local elements in the DistGrid. The arbitrary sequence indices are
   ! constructed to look like this:
   !
   ! PET   localDE   DE    indices

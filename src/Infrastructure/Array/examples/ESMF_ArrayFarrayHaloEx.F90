@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.5 2007/05/30 17:46:19 theurich Exp $
+! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.6 2007/10/25 05:16:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -15,7 +15,7 @@
 !==============================================================================
 
 !BOE
-! \subsubsection{Array from native Fortran90 array with cells for halo}
+! \subsubsection{Array from native Fortran90 array with elements for halo}
 ! 
 ! The example of the previous section showed how easy it is to create an Array
 ! object from existing PET-local Fortran90 arrays. The example did, however, not
@@ -78,7 +78,7 @@ program ESMF_ArrayFarrayHaloEx
 !BOE
 ! This DistGrid describes a 40 x 10 index space that will be decomposed into 
 ! 4 DEs when executed on 4 PETs, associating 1 DE per PET. Each DE-local 
-! exclusive region contains 10 x 10 cells. The DistGrid also stores and provides
+! exclusive region contains 10 x 10 elements. The DistGrid also stores and provides
 ! information about the relationship between DEs in index space, however,
 ! DistGrid does not contain information about halos. Arrays contain halo 
 ! information and it is possible to create multiple Arrays covering the same
@@ -87,7 +87,7 @@ program ESMF_ArrayFarrayHaloEx
 !
 ! The extra memory required to cover the halo in the Array object must be 
 ! taken into account when allocating the PET-local {\tt farrayA} arrays. For
-! a halo of 2 cells in each direction the following allocation will suffice.
+! a halo of 2 elements in each direction the following allocation will suffice.
 !EOE
 !BOC
   allocate(farrayA(14,14))    ! Fortran90 array with halo: 14 = 10 + 2 * 2
@@ -95,12 +95,12 @@ program ESMF_ArrayFarrayHaloEx
   farrayA = 36.71d0 ! initialize
 !BOE
 ! The {\tt farrayA} can now be used to create an Array object with enough space
-! for a two cell halo in each direction. The Array creation method checks for 
+! for a two element halo in each direction. The Array creation method checks for 
 ! each PET that the local Fortran90 array can accomodate the requested regions.
 !
 ! The default behavior of ArrayCreate() is to center the exclusive region within
 ! the total region. Consequently the following call will provide the 2 extra 
-! cells on each side of the exclusive 10 x 10 region without having to specify
+! elements on each side of the exclusive 10 x 10 region without having to specify
 ! any additional arguments.
 !EOE
 !BOC
@@ -133,7 +133,7 @@ call ESMF_ArrayPrint(array)
 !EOC
 print *, "localSum=", localSum
 !BOE
-! Cells with $i$ or $j$ in the [-1,0] or [11,12] ranges are located outside the
+! Elements with $i$ or $j$ in the [-1,0] or [11,12] ranges are located outside the
 ! exclusive region and may be used to define extra computational points or 
 ! halo operations.
 !

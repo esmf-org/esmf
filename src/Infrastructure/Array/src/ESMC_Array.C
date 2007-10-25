@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.151 2007/10/23 19:06:32 theurich Exp $
+// $Id: ESMC_Array.C,v 1.152 2007/10/25 05:16:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.151 2007/10/23 19:06:32 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.152 2007/10/25 05:16:56 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -161,32 +161,32 @@ Array::Array(
   indexflag = indexflagArg;
   // contiguous flag
   contiguousFlag = new int[localDeCount];
-  // deCellCount
+  // deElementCount
   int deCount = delayout->getDeCount();
-  deCellCount = new int[deCount];
+  deElementCount = new int[deCount];
   
   const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
   
   for (int i=0; i<deCount; i++){
-    deCellCount[i] = 1;   // prime deCellCount element
+    deElementCount[i] = 1;   // prime deElementCount element
     for (int jj=0; jj<rank; jj++){
       int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor dims
       if (j){
         // decomposed dimension 
         --j;  // shift to basis 0
-        deCellCount[i] *= indexCountPDimPDe[i*dimCount+j];
+        deElementCount[i] *= indexCountPDimPDe[i*dimCount+j];
       }
     }
   }
   
-  // tensorCellCount
-  tensorCellCount = 1;  // prime tensorCellCount
+  // tensorElementCount
+  tensorElementCount = 1;  // prime tensorElementCount
   int tensorIndex = 0;  // reset
   for (int jj=0; jj<rank; jj++){
     int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor dims
     if (j==0){
       // tensor dimension
-      tensorCellCount *= (ubounds[tensorIndex] - lbounds[tensorIndex] + 1);
+      tensorElementCount *= (ubounds[tensorIndex] - lbounds[tensorIndex] + 1);
       ++tensorIndex;
     }
   }
@@ -284,8 +284,8 @@ Array::~Array(){
     delete [] inverseDimmap;
   if (contiguousFlag != NULL)
     delete [] contiguousFlag;
-  if (deCellCount != NULL)
-    delete [] deCellCount;
+  if (deElementCount != NULL)
+    delete [] deElementCount;
 }
 //-----------------------------------------------------------------------------
 
@@ -709,7 +709,7 @@ Array *Array::create(
   // check computational bounds against total bounds
   for (int i=0; i<localDeCount*dimCount; i++){
     if (totalLBound[i] <= totalUBound[i]){
-      // DE/dim is associated with DistGrid cells
+      // DE/dim is associated with DistGrid elements
       if (computationalLBound[i] < totalLBound[i]){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
           "- computationaLBound / totalLBound mismatch", rc);
@@ -764,7 +764,7 @@ Array *Array::create(
         if (temp_counts[jj] < 
           totalUBound[i*dimCount+j] - totalLBound[i*dimCount+j] + 1){
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-            "- LocalArray does not accommodate requested cell count", rc);
+            "- LocalArray does not accommodate requested element count", rc);
           return ESMC_NULL_POINTER;
         }
         // move the total bounds according to input info
@@ -806,7 +806,7 @@ Array *Array::create(
         if (temp_counts[jj] < 
           uboundsArray[jjj] - lboundsArray[jjj] + 1){
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-            "- LocalArray does not accommodate requested cell count", rc);
+            "- LocalArray does not accommodate requested element count", rc);
           return ESMC_NULL_POINTER;
         }
         temp_lbounds[jj] = lboundsArray[jjj];
@@ -1231,7 +1231,7 @@ Array *Array::create(
   // check computational bounds against total bounds
   for (int i=0; i<localDeCount*dimCount; i++){
     if (totalLBound[i] <= totalUBound[i]){
-      // DE/dim is associated with DistGrid cells
+      // DE/dim is associated with DistGrid elements
       if (computationalLBound[i] < totalLBound[i]){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
           "- computationaLBound / totalLBound mismatch", rc);
@@ -1590,7 +1590,7 @@ int Array::print()const{
     int de = localDeList[i];
     printf("~ local data in LocalArray for DE %d ~\n", de);
     larrayList[i]->ESMC_LocalArrayPrint();
-    if (deCellCount[de]){
+    if (deElementCount[de]){
       // associated DE
       int jjj=0;  // reset
       for (int jj=0; jj<rank; jj++){
@@ -1731,9 +1731,9 @@ int Array::serialize(
     *ip++ = dimmap[i];
   for (int i=0; i<rank; i++)
     *ip++ = inverseDimmap[i];
-  *ip++ = tensorCellCount;
+  *ip++ = tensorElementCount;
   for (int i=0; i<delayout->getDeCount(); i++)
-    *ip++ = deCellCount[i];
+    *ip++ = deElementCount[i];
   
   // fix offset  
   cp = (char *)ip;
@@ -1810,10 +1810,10 @@ int Array::deserialize(
   inverseDimmap = new int[rank];
   for (int i=0; i<rank; i++)
     inverseDimmap[i] = *ip++;
-  tensorCellCount = *ip++;
-  deCellCount = new int[delayout->getDeCount()];
+  tensorElementCount = *ip++;
+  deElementCount = new int[delayout->getDeCount()];
   for (int i=0; i<delayout->getDeCount(); i++)
-    deCellCount[i] = *ip++;
+    deElementCount[i] = *ip++;
   
   // fix offset
   cp = (char *)ip;
@@ -1971,7 +1971,7 @@ int Array::gather(
       if (patchListPDe[de] == patch){
         // this DE is located on sending patch
         // prepare contiguous recvBuffer for this DE and issue non-blocking recv
-        int recvSize = deCellCount[de]*tensorCellCount*dataSize;  // bytes
+        int recvSize = deElementCount[de]*tensorElementCount*dataSize;  // bytes
         recvBuffer[de] = new char[recvSize];
         int srcPet;
         delayout->getDEMatchPET(de, *vm, NULL, &srcPet, 1);
@@ -1995,7 +1995,7 @@ int Array::gather(
     int de = localDeList[i];
     if (patchListPDe[de] != patch) continue; // skip to next local DE
     sendBuffer[i] = (char *)larrayBaseAddrList[i]; // default: contiguous
-    int sendSize = deCellCount[de]*tensorCellCount*dataSize;  // bytes
+    int sendSize = deElementCount[de]*tensorElementCount*dataSize;  // bytes
     if (!contiguousFlag[i]){
       // only if this DE has a non-contiguous decomposition the contiguous
       // send buffer must be compiled from DE-local array segment piece by p.
@@ -2032,10 +2032,10 @@ int Array::gather(
         }
         ii[jj] = iiSrt[jj];
       }
-      // loop over all cells in exclusive region for this DE and memcpy data
+      // loop over all elements in exclusive region for this DE and memcpy data
       // via multi-dim while-loop
       int sendBufferIndex = 0;  // reset
-      // determine start linear index for this cell into larrayBaseAddrList[i]
+      // determine start lin. index for this element into larrayBaseAddrList[i]
       int linearIndex = ii[rank-1];  // init
       for (int jj=rank-2; jj>=0; jj--){
         int j = inverseDimmap[jj];
@@ -2146,11 +2146,11 @@ int Array::gather(
           delete commhList[j];
         }
         
-        // loop over all cells in exclusive region for this DE 
+        // loop over all elements in exclusive region for this DE 
         // via multi-dim while-loop
         int recvBufferIndex = 0;  // reset
         while(ii[rank-1] < iiEnd[rank-1]){        
-          // determine linear index for this cell into array
+          // determine linear index for this element into array
           int linearIndex = 0;  // reset
           for (int jj=rank-1; jj>=0; jj--){
             linearIndex *= counts[jj];  // first time zero o.k.
@@ -2405,7 +2405,7 @@ int Array::scatter(
         } // j
 
         // prepare contiguous sendBuffer for this DE
-        int sendSize = deCellCount[de]*tensorCellCount*dataSize;  // bytes
+        int sendSize = deElementCount[de]*tensorElementCount*dataSize;  // bytes
         sendBuffer[de] = new char[sendSize];
         // reset counters for multi-dim while-loop
         tensorIndex=0;  // reset
@@ -2429,11 +2429,11 @@ int Array::scatter(
           delete commhList[j];
         }
         
-        // loop over all cells in exclusive region for this DE 
+        // loop over all elements in exclusive region for this DE 
         // via multi-dim while-loop
         int sendBufferIndex = 0;  // reset
         while(ii[rank-1] < iiEnd[rank-1]){        
-          // determine linear index for this cell into array
+          // determine linear index for this element into array
           int linearIndex = 0;  // reset
           for (int jj=rank-1; jj>=0; jj--){
             linearIndex *= counts[jj];  // first time zero o.k.
@@ -2536,7 +2536,7 @@ int Array::scatter(
     int de = localDeList[i];
     if (patchListPDe[de] != patch) continue; // skip to next local DE
     recvBuffer[i] = (char *)larrayBaseAddrList[i]; // default: contiguous
-    int recvSize = deCellCount[de]*tensorCellCount*dataSize; // bytes
+    int recvSize = deElementCount[de]*tensorElementCount*dataSize; // bytes
     if (!contiguousFlag[i])
       recvBuffer[i] = new char[recvSize];
     *commh = NULL; // invalidate
@@ -2601,10 +2601,10 @@ int Array::scatter(
         }
         ii[jj] = iiSrt[jj];
       }
-      // loop over all cells in exclusive region for this DE and memcpy data
+      // loop over all elements in exclusive region for this DE and memcpy data
       // via multi-dim while-loop
       int recvBufferIndex = 0;  // reset
-      // determine start linear index for this cell into larrayBaseAddrList[i]
+      // determine start lin. index for this element into larrayBaseAddrList[i]
       int linearIndex = ii[rank-1];  // init
       for (int jj=rank-2; jj>=0; jj--){
         int j = inverseDimmap[jj];
@@ -2715,32 +2715,34 @@ int Array::redistStore(
       "- srcArray and dstArray must not be identical", &rc);
     return rc;
   }
-  // source and destination Arrays must have identical number of exclusive cells
-  int srcCellCount = 0; // init
-  const int *srcCellCountPPatch = srcArray->distgrid->getCellCountPPatch();
+  // src and dst Arrays must have identical number of exclusive elements
+  int srcElementCount = 0; // init
+  const int *srcElementCountPPatch =
+    srcArray->distgrid->getElementCountPPatch();
   for (int i=0; i<srcArray->distgrid->getPatchCount(); i++)
-    srcCellCount += srcCellCountPPatch[i];
-  int dstCellCount = 0; // init
-  const int *dstCellCountPPatch = dstArray->distgrid->getCellCountPPatch();
+    srcElementCount += srcElementCountPPatch[i];
+  int dstElementCount = 0; // init
+  const int *dstElementCountPPatch =
+    dstArray->distgrid->getElementCountPPatch();
   for (int i=0; i<dstArray->distgrid->getPatchCount(); i++)
-    dstCellCount += dstCellCountPPatch[i];
-  if (srcCellCount != dstCellCount){
+    dstElementCount += dstElementCountPPatch[i];
+  if (srcElementCount != dstElementCount){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "- srcArray and dstArray must provide identical number of exclusive"
-      " cells", &rc);
+      " elements", &rc);
     return rc;
   }
   
   // implemented via sparseMatMul using identity matrix
   ESMC_TypeKind typekind = srcArray->getTypekind();
-  const int *srcCellCountPDe = srcArray->distgrid->getCellCountPDe();
+  const int *srcElementCountPDe = srcArray->distgrid->getElementCountPDe();
   const int *srcArbSeqIndexCountPLocalDe =
     srcArray->distgrid->getArbSeqIndexCountPLocalDe();
   const int *srcLocalDeList = srcArray->delayout->getLocalDeList();
   int srcLocalDeCount = srcArray->delayout->getLocalDeCount();
   int factorListCount = 0;  // init
   for (int i=0; i<srcLocalDeCount; i++)
-    factorListCount += srcCellCountPDe[srcLocalDeList[i]];
+    factorListCount += srcElementCountPDe[srcLocalDeList[i]];
   // set up factorIndexList
   int *factorIndexListAlloc = new int[2*factorListCount*sizeof(int)];
   int *extent = new int[2];
@@ -2753,7 +2755,7 @@ int Array::redistStore(
   for (int i=0; i<srcLocalDeCount; i++){
     int de = srcLocalDeList[i];
     int arbSeqIndexCount = srcArbSeqIndexCountPLocalDe[i];
-    if (arbSeqIndexCount==srcCellCountPDe[de]){
+    if (arbSeqIndexCount==srcElementCountPDe[de]){
       const int *srcArbSeqIndexListPLocalDe =
         srcArray->distgrid->getArbSeqIndexListPLocalDe(i);
       for (int j=0; j<arbSeqIndexCount; j++){
@@ -2764,8 +2766,8 @@ int Array::redistStore(
     }else{
       int seqIndexOffset = 1; // reset, seqIndex is basis 1
       for (int j=0; j<de; j++)
-        seqIndexOffset += srcCellCountPDe[j];
-      for (int j=0; j<srcCellCountPDe[de]; j++){
+        seqIndexOffset += srcElementCountPDe[j];
+      for (int j=0; j<srcElementCountPDe[de]; j++){
         factorIndexListAlloc[2*jj] = factorIndexListAlloc[2*jj+1] =
           seqIndexOffset + jj;
         ++jj;
@@ -3109,12 +3111,12 @@ int Array::sparseMatMulStore(
   // size in bytes of each piece of data
   int dataSize = ESMC_TypeKindSize(typekindArg);
   
-  // check that if tensorMixFlag is not set that the tensorCellCount matches
+  // check that if tensorMixFlag is not set that the tensorElementCount matches
   if (!tensorMixFlag){
-    if (srcArray->getTensorCellCount() != dstArray->getTensorCellCount()){
+    if (srcArray->getTensorElementCount() != dstArray->getTensorElementCount()){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- factorIndexList without tensor mixing requires matching srcArray and"
-        " dstArray tensorCellCount", &rc);
+        " dstArray tensorElementCount", &rc);
       return rc;
     }
   }
@@ -3152,44 +3154,44 @@ int Array::sparseMatMulStore(
   // Phase II
   //---------------------------------------------------------------------------
 
-  // determine local srcCellCount
+  // determine local srcElementCount
   int srcLocalDeCount = srcArray->delayout->getLocalDeCount();
   const int *srcLocalDeList = srcArray->delayout->getLocalDeList();
-  int *srcLocalDeCellCount = new int[srcLocalDeCount];
-  int srcCellCount = 0;   // initialize
+  int *srcLocalDeElementCount = new int[srcLocalDeCount];
+  int srcElementCount = 0;   // initialize
   for (int i=0; i<srcLocalDeCount; i++){
     int de = srcLocalDeList[i];  // global DE index
-    srcLocalDeCellCount[i] = srcArray->deCellCount[de]
-      * srcArray->tensorCellCount;
-    srcCellCount += srcLocalDeCellCount[i];
+    srcLocalDeElementCount[i] = srcArray->deElementCount[de]
+      * srcArray->tensorElementCount;
+    srcElementCount += srcLocalDeElementCount[i];
   }
-  // communicate srcCellCount across all Pets
+  // communicate srcElementCount across all Pets
   // todo: use nb-allgather and wait right before needed below
-  int *srcCellCountList = new int[petCount];
-  vm->vmk_allgather(&srcCellCount, srcCellCountList, sizeof(int));
-  // determine local dstCellCount
+  int *srcElementCountList = new int[petCount];
+  vm->vmk_allgather(&srcElementCount, srcElementCountList, sizeof(int));
+  // determine local dstElementCount
   int dstLocalDeCount = dstArray->delayout->getLocalDeCount();
   const int *dstLocalDeList = dstArray->delayout->getLocalDeList();
-  int *dstLocalDeCellCount = new int[dstLocalDeCount];
-  int dstCellCount = 0;   // initialize
+  int *dstLocalDeElementCount = new int[dstLocalDeCount];
+  int dstElementCount = 0;   // initialize
   for (int i=0; i<dstLocalDeCount; i++){
     int de = dstLocalDeList[i];  // global DE index
-    dstLocalDeCellCount[i] = dstArray->deCellCount[de]
-      * dstArray->tensorCellCount;
-    dstCellCount += dstLocalDeCellCount[i];
+    dstLocalDeElementCount[i] = dstArray->deElementCount[de]
+      * dstArray->tensorElementCount;
+    dstElementCount += dstLocalDeElementCount[i];
   }
-  // communicate dstCellCount across all Pets
+  // communicate dstElementCount across all Pets
   // todo: use nb-allgather and wait right before needed below
-  int *dstCellCountList = new int[petCount];
-  vm->vmk_allgather(&dstCellCount, dstCellCountList, sizeof(int));
+  int *dstElementCountList = new int[petCount];
+  vm->vmk_allgather(&dstElementCount, dstElementCountList, sizeof(int));
   
-  // set the effective tensorCellCount for src and dst Arrays
-  int srcTensorCellCountEff = srcArray->tensorCellCount;  // default
-  int dstTensorCellCountEff = dstArray->tensorCellCount;  // default
+  // set the effective tensorElementCount for src and dst Arrays
+  int srcTensorElementCountEff = srcArray->tensorElementCount;  // default
+  int dstTensorElementCountEff = dstArray->tensorElementCount;  // default
   if (!tensorMixFlag){
     // if there is not tensor mixing then default into tensor for tensor mode
-    srcTensorCellCountEff = 1;
-    dstTensorCellCountEff = 1;
+    srcTensorElementCountEff = 1;
+    dstTensorElementCountEff = 1;
   }    
 
 #ifdef ASMMSTORETIMING
@@ -3230,7 +3232,7 @@ int Array::sparseMatMulStore(
     FactorElement *factorList;
   };
   
-  // determine linIndex <-> seqIndex association for all cells in exclusive 
+  // determine linIndex <-> seqIndex association for all elements in exclusive 
   // region on all localDEs on srcArray
   int srcRank = srcArray->rank;
   int *ii = new int[srcRank];     // index tuple basis 0
@@ -3241,9 +3243,9 @@ int Array::sparseMatMulStore(
   for (int i=0; i<srcLocalDeCount; i++){
     int de = srcLocalDeList[i];  // global DE index
     // allocate memory in srcLinSeqList for this DE
-    srcLinSeqList[i] = new AssociationElement[srcLocalDeCellCount[i]];
-    // only go into the multi-dim loop if there are cells for the local DE
-    if (srcLocalDeCellCount[i]){
+    srcLinSeqList[i] = new AssociationElement[srcLocalDeElementCount[i]];
+    // only go into the multi-dim loop if there are elements for the local DE
+    if (srcLocalDeElementCount[i]){
       // reset counters
       int joff = i*srcArray->distgrid->getDimCount();  // offset into bounds
       int tensorIndex = 0;    // reset
@@ -3263,26 +3265,26 @@ int Array::sparseMatMulStore(
           ++tensorIndex;
         }
       }
-      // loop over all cells in exclusive region for this DE
-      int cellIndex = 0;  // reset
+      // loop over all elements in exclusive region for this DE
+      int elementIndex = 0;  // reset
       while(ii[srcRank-1] < iiEnd[srcRank-1]){
         //printf("src: DE = %d  - (", de);
         //int jjj;
         //for (jjj=0; jjj<srcRank-1; jjj++)
         //  printf("%d, ", ii[jjj]);
         //printf("%d)\n", ii[jjj]);
-        // determine the lin. index for cell ii[] in localArray for this DE
+        // determine the lin. index for element ii[] in localArray for this DE
         int linIndex = srcArray->getLinearIndexExclusive(i, ii);
-        // determine the sequentialized index for cell ii[] in this DE
+        // determine the sequentialized index for element ii[] in this DE
         // getSequenceIndexExclusive() expects basis 0 ii[] in excl. region
         SeqIndex seqIndex = srcArray->getSequenceIndexExclusive(i, ii);
         // store linIndex and seqIndex in srcLinSeqList for this DE
-        srcLinSeqList[i][cellIndex].linIndex = linIndex;
-        srcLinSeqList[i][cellIndex].seqIndex = seqIndex;
+        srcLinSeqList[i][elementIndex].linIndex = linIndex;
+        srcLinSeqList[i][elementIndex].seqIndex = seqIndex;
         // reset factorCount
-        srcLinSeqList[i][cellIndex].factorCount = 0;
+        srcLinSeqList[i][elementIndex].factorCount = 0;
         // record seqIndex min and max
-        if (i==0 && cellIndex==0)
+        if (i==0 && elementIndex==0)
           srcSeqIndexMinMax[0] = srcSeqIndexMinMax[1]
             = seqIndex.decompSeqIndex; // initialize
         else{
@@ -3292,7 +3294,7 @@ int Array::sparseMatMulStore(
             srcSeqIndexMinMax[1] = seqIndex.decompSeqIndex;
         }
         // increment
-        ++cellIndex;
+        ++elementIndex;
         // multi-dim index increment
         ++ii[0];
         for (int j=0; j<srcRank-1; j++){
@@ -3301,8 +3303,8 @@ int Array::sparseMatMulStore(
             ++ii[j+1];
           }
         }
-      } // end while over all exclusive cells
-    } // if there are cells in localArray associated with this local DE
+      } // end while over all exclusive elements
+    } // if there are elements in localArray associated with this local DE
   } // end for over local DEs
   delete [] ii;
   delete [] iiEnd;
@@ -3314,13 +3316,13 @@ int Array::sparseMatMulStore(
 
 #ifdef ASMMSTOREPRINT
   for (int i=0; i<srcLocalDeCount; i++)
-    for (int j=0; j<srcLocalDeCellCount[i]; j++)
+    for (int j=0; j<srcLocalDeElementCount[i]; j++)
       printf("gjt: localPet %d, srcLinSeqList[%d][%d] = %d, %d\n", 
         localPet, i, j, srcLinSeqList[i][j].linIndex,
         srcLinSeqList[i][j].seqIndex);
 #endif
 
-  // determine linIndex <-> seqIndex association for all cells in exclusive 
+  // determine linIndex <-> seqIndex association for all elements in exclusive 
   // region on all localDEs on dstArray
   int dstRank = dstArray->rank;
   ii = new int[dstRank];     // index tuple basis 0
@@ -3331,9 +3333,9 @@ int Array::sparseMatMulStore(
   for (int i=0; i<dstLocalDeCount; i++){
     int de = dstLocalDeList[i];  // global DE index
     // allocate memory in dstLinSeqList for this DE
-    dstLinSeqList[i] = new AssociationElement[dstLocalDeCellCount[i]];
-    // only go into the multi-dim loop if there are cells for the local DE
-    if (dstLocalDeCellCount[i]){
+    dstLinSeqList[i] = new AssociationElement[dstLocalDeElementCount[i]];
+    // only go into the multi-dim loop if there are elements for the local DE
+    if (dstLocalDeElementCount[i]){
       // reset counters
       int joff = i*dstArray->distgrid->getDimCount();  // offset into bounds
       int tensorIndex = 0;    // reset
@@ -3353,26 +3355,26 @@ int Array::sparseMatMulStore(
           ++tensorIndex;
         }
       }
-      // loop over all cells in exclusive region for this DE
-      int cellIndex = 0;  // reset
+      // loop over all elements in exclusive region for this DE
+      int elementIndex = 0;  // reset
       while(ii[dstRank-1] < iiEnd[dstRank-1]){
         //printf("dst: DE = %d  - (", de);
         //int jjj;
         //for (jjj=0; jjj<dstRank-1; jjj++)
         //  printf("%d, ", ii[jjj]);
         //printf("%d)\n", ii[jjj]);
-        // determine the lin. index for cell ii[] in localArray for this DE
+        // determine the lin. index for element ii[] in localArray for this DE
         int linIndex = dstArray->getLinearIndexExclusive(i, ii);
-        // determine the sequentialized index for cell ii[] in this DE
+        // determine the sequentialized index for element ii[] in this DE
         // getSequenceIndexExclusive() expects basis 0 ii[] in excl. region
         SeqIndex seqIndex = dstArray->getSequenceIndexExclusive(i, ii);
         // store linIndex and seqIndex in dstLinSeqList for this DE
-        dstLinSeqList[i][cellIndex].linIndex = linIndex;
-        dstLinSeqList[i][cellIndex].seqIndex = seqIndex;
+        dstLinSeqList[i][elementIndex].linIndex = linIndex;
+        dstLinSeqList[i][elementIndex].seqIndex = seqIndex;
         // reset factorCount
-        dstLinSeqList[i][cellIndex].factorCount = 0;
+        dstLinSeqList[i][elementIndex].factorCount = 0;
         // record seqIndex min and max
-        if (i==0 && cellIndex==0)
+        if (i==0 && elementIndex==0)
           dstSeqIndexMinMax[0] = dstSeqIndexMinMax[1]
             = seqIndex.decompSeqIndex; // initialize
         else{
@@ -3382,7 +3384,7 @@ int Array::sparseMatMulStore(
             dstSeqIndexMinMax[1] = seqIndex.decompSeqIndex;
         }
         // increment
-        ++cellIndex;
+        ++elementIndex;
         // multi-dim index increment
         ++ii[0];
         for (int j=0; j<dstRank-1; j++){
@@ -3391,8 +3393,8 @@ int Array::sparseMatMulStore(
             ++ii[j+1];
           }
         }
-      } // end while over all exclusive cells
-    } // if there are cells in localArray associated with this local DE
+      } // end while over all exclusive elements
+    } // if there are elements in localArray associated with this local DE
   } // end for over local DEs
   delete [] ii;
   delete [] iiEnd;
@@ -3408,7 +3410,7 @@ int Array::sparseMatMulStore(
 
 #ifdef ASMMSTOREPRINT
   for (int i=0; i<dstLocalDeCount; i++)
-    for (int j=0; j<dstLocalDeCellCount[i]; j++)
+    for (int j=0; j<dstLocalDeElementCount[i]; j++)
       printf("gjt: localPet %d, dstLinSeqList[%d][%d] = %d, %d\n", 
         localPet, i, j, dstLinSeqList[i][j].linIndex,
         dstLinSeqList[i][j].seqIndex);
@@ -3419,8 +3421,8 @@ int Array::sparseMatMulStore(
   int srcSeqIndexMinGlobal, srcSeqIndexMaxGlobal;
   int pastInitFlag = 0; // reset
   for (int i=0; i<petCount; i++){
-    if (srcCellCountList[i]){
-      // this Pet does hold cells in srcArray
+    if (srcElementCountList[i]){
+      // this Pet does hold elements in srcArray
       if (pastInitFlag){
         if (srcSeqIndexMinMaxList[2*i] < srcSeqIndexMinGlobal)
           srcSeqIndexMinGlobal = srcSeqIndexMinMaxList[2*i];
@@ -3453,7 +3455,7 @@ int Array::sparseMatMulStore(
     srcSeqIndexInterval[i].count = 
       srcSeqIndexInterval[i].max - srcSeqIndexInterval[i].min + 1;
     srcSeqIndexInterval[i].countEff =
-      srcSeqIndexInterval[i].count * srcTensorCellCountEff;
+      srcSeqIndexInterval[i].count * srcTensorElementCountEff;
     srcSeqIndexInterval[i+1].min = srcSeqIndexInterval[i].max + 1;
   }
   srcSeqIndexInterval[petCount-1].max = srcSeqIndexMaxGlobal;  // finish
@@ -3461,13 +3463,13 @@ int Array::sparseMatMulStore(
     srcSeqIndexInterval[petCount-1].max - srcSeqIndexInterval[petCount-1].min
     + 1;
   srcSeqIndexInterval[petCount-1].countEff =
-    srcSeqIndexInterval[petCount-1].count * srcTensorCellCountEff;
+    srcSeqIndexInterval[petCount-1].count * srcTensorElementCountEff;
   
 #ifdef ASMMSTOREPRINT
-  printf("gjt: localPet %d, srcCellCountList[localPet] = %d, "
+  printf("gjt: localPet %d, srcElementCountList[localPet] = %d, "
     "srcSeqIndexMinMax = %d / %d, srcSeqIndexMinGlobal/MaxGlobal = %d, %d, "
     "srcSeqIndexInterval[localPet].min/.max = %d, %d\n",
-    localPet, srcCellCountList[localPet], srcSeqIndexMinMax[0],
+    localPet, srcElementCountList[localPet], srcSeqIndexMinMax[0],
     srcSeqIndexMinMax[1], srcSeqIndexMinGlobal, srcSeqIndexMaxGlobal,
     srcSeqIndexInterval[localPet].min, srcSeqIndexInterval[localPet].max);
 #endif
@@ -3512,7 +3514,8 @@ int Array::sparseMatMulStore(
         continue; 
       }
       // found interval -> check if srcTensorSeqIndex is within bounds
-      if (srcTensorSeqIndex < 1 || srcTensorSeqIndex > srcTensorCellCountEff){
+      if (srcTensorSeqIndex < 1 || srcTensorSeqIndex >
+        srcTensorElementCountEff){
         // srcTensorSeqIndex outside srcArray bounds
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
           "- factorIndexList contains srcTensorSeqIndex outside srcArray"
@@ -4071,7 +4074,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     int seqIndexMin = srcSeqIndexInterval[i].min;
     int seqIndexMax = srcSeqIndexInterval[i].max;
     int seqIndexCount = srcSeqIndexInterval[i].count;
-    int seqIndexCountTotal = seqIndexCount * srcArray->tensorCellCount;
+    int seqIndexCountTotal = seqIndexCount * srcArray->tensorElementCount;
     if (localPet!=i){
       // localPet is a client for the active srcSeqIndex interval
       SeqIndexDeInfo *seqIndexDeInfoList =
@@ -4079,7 +4082,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
       int count = 0; // reset
       for (int j=0; j<srcLocalDeCount; j++){
         int de = srcLocalDeList[j];  // global DE number
-        for (int k=0; k<srcLocalDeCellCount[j]; k++){
+        for (int k=0; k<srcLocalDeElementCount[j]; k++){
           int srcSeqIndex = srcLinSeqList[j][k].seqIndex.decompSeqIndex;
           if (srcSeqIndex >= seqIndexMin && srcSeqIndex <= seqIndexMax){
             int lookupIndex = srcSeqIndex - seqIndexMin;
@@ -4108,7 +4111,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
           // server Pet itself
           for (int j=0; j<srcLocalDeCount; j++){
             int de = srcLocalDeList[j];  // global DE number
-            for (int k=0; k<srcLocalDeCellCount[j]; k++){
+            for (int k=0; k<srcLocalDeElementCount[j]; k++){
               int srcSeqIndex = srcLinSeqList[j][k].seqIndex.decompSeqIndex;
               if (srcSeqIndex >= seqIndexMin && srcSeqIndex <= seqIndexMax){
                 int kk = srcSeqIndex - seqIndexMin;
@@ -4154,8 +4157,8 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   int dstSeqIndexMinGlobal, dstSeqIndexMaxGlobal;
   pastInitFlag = 0; // reset
   for (int i=0; i<petCount; i++){
-    if (dstCellCountList[i]){
-      // this Pet does hold cells in dstArray
+    if (dstElementCountList[i]){
+      // this Pet does hold elements in dstArray
       if (pastInitFlag){
         if (dstSeqIndexMinMaxList[2*i] < dstSeqIndexMinGlobal)
           dstSeqIndexMinGlobal = dstSeqIndexMinMaxList[2*i];
@@ -4186,7 +4189,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     dstSeqIndexInterval[i].count = 
       dstSeqIndexInterval[i].max - dstSeqIndexInterval[i].min + 1;
     dstSeqIndexInterval[i].countEff =
-      dstSeqIndexInterval[i].count * dstTensorCellCountEff;
+      dstSeqIndexInterval[i].count * dstTensorElementCountEff;
     dstSeqIndexInterval[i+1].min = dstSeqIndexInterval[i].max + 1;
   }
   dstSeqIndexInterval[petCount-1].max = dstSeqIndexMaxGlobal;  // finish
@@ -4194,13 +4197,13 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     dstSeqIndexInterval[petCount-1].max - dstSeqIndexInterval[petCount-1].min
     + 1;
   dstSeqIndexInterval[petCount-1].countEff =
-    dstSeqIndexInterval[petCount-1].count * dstTensorCellCountEff;
+    dstSeqIndexInterval[petCount-1].count * dstTensorElementCountEff;
   
 #ifdef ASMMSTOREPRINT
-    printf("gjt: localPet %d, dstCellCountList[localPet] = %d, "
+    printf("gjt: localPet %d, dstElementCountList[localPet] = %d, "
     "dstSeqIndexMinMax = %d / %d, dstSeqIndexMinGlobal/MaxGlobal = %d, %d, "
     "dstSeqIndexInterval[localPet].min/.max = %d, %d\n",
-    localPet, dstCellCountList[localPet], dstSeqIndexMinMax[0],
+    localPet, dstElementCountList[localPet], dstSeqIndexMinMax[0],
     dstSeqIndexMinMax[1], dstSeqIndexMinGlobal, dstSeqIndexMaxGlobal,
     dstSeqIndexInterval[localPet].min, dstSeqIndexInterval[localPet].max);
 #endif
@@ -4245,7 +4248,8 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
         continue; 
       }
       // found interval -> check if dstTensorSeqIndex is within bounds
-      if (dstTensorSeqIndex < 1 || dstTensorSeqIndex > dstTensorCellCountEff){
+      if (dstTensorSeqIndex < 1 || dstTensorSeqIndex >
+        dstTensorElementCountEff){
         // dstTensorSeqIndex outside dstArray bounds
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
           "- factorIndexList contains dstTensorSeqIndex outside dstArray"
@@ -4761,7 +4765,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     int seqIndexMin = dstSeqIndexInterval[i].min;
     int seqIndexMax = dstSeqIndexInterval[i].max;
     int seqIndexCount = dstSeqIndexInterval[i].count;
-    int seqIndexCountTotal = seqIndexCount * dstArray->tensorCellCount;
+    int seqIndexCountTotal = seqIndexCount * dstArray->tensorElementCount;
     if (localPet!=i){
       // localPet is a client for the active dstSeqIndex interval
       SeqIndexDeInfo *seqIndexDeInfoList =
@@ -4769,7 +4773,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
       int count = 0; // reset
       for (int j=0; j<dstLocalDeCount; j++){
         int de = dstLocalDeList[j];  // global DE number
-        for (int k=0; k<dstLocalDeCellCount[j]; k++){
+        for (int k=0; k<dstLocalDeElementCount[j]; k++){
           int dstSeqIndex = dstLinSeqList[j][k].seqIndex.decompSeqIndex;
           if (dstSeqIndex >= seqIndexMin && dstSeqIndex <= seqIndexMax){
             int lookupIndex = dstSeqIndex - seqIndexMin;
@@ -4798,7 +4802,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
           // server Pet itself
           for (int j=0; j<dstLocalDeCount; j++){
             int de = dstLocalDeList[j];  // global DE number
-            for (int k=0; k<dstLocalDeCellCount[j]; k++){
+            for (int k=0; k<dstLocalDeElementCount[j]; k++){
               int dstSeqIndex = dstLinSeqList[j][k].seqIndex.decompSeqIndex;
               if (dstSeqIndex >= seqIndexMin && dstSeqIndex <= seqIndexMax){
                 int kk = dstSeqIndex - seqIndexMin;
@@ -5071,14 +5075,14 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     int seqIndexMin = srcSeqIndexInterval[i].min;
     int seqIndexMax = srcSeqIndexInterval[i].max;
     int seqIndexCount = srcSeqIndexInterval[i].count;
-    int seqIndexCountTotal = seqIndexCount * srcArray->tensorCellCount;
+    int seqIndexCountTotal = seqIndexCount * srcArray->tensorElementCount;
     if (localPet!=i){
       // localPet is a client for the active srcSeqIndex interval
       SeqIndexIndexInfo *seqIndexIndexInfoList =
         new SeqIndexIndexInfo[seqIndexCountTotal];
       int count = 0; // reset
       for (int j=0; j<srcLocalDeCount; j++){
-        for (int k=0; k<srcLocalDeCellCount[j]; k++){
+        for (int k=0; k<srcLocalDeElementCount[j]; k++){
           int srcSeqIndex = srcLinSeqList[j][k].seqIndex.decompSeqIndex;
           if (srcSeqIndex >= seqIndexMin && srcSeqIndex <= seqIndexMax){
             int lookupIndex = srcSeqIndex - seqIndexMin;
@@ -5134,7 +5138,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
         if (ii==i){
           // server Pet itself
           for (int j=0; j<srcLocalDeCount; j++){
-            for (int k=0; k<srcLocalDeCellCount[j]; k++){
+            for (int k=0; k<srcLocalDeElementCount[j]; k++){
               int srcSeqIndex = srcLinSeqList[j][k].seqIndex.decompSeqIndex;
               if (srcSeqIndex >= seqIndexMin && srcSeqIndex <= seqIndexMax){
                 int kk = srcSeqIndex - seqIndexMin;
@@ -5213,14 +5217,14 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     int seqIndexMin = dstSeqIndexInterval[i].min;
     int seqIndexMax = dstSeqIndexInterval[i].max;
     int seqIndexCount = dstSeqIndexInterval[i].count;
-    int seqIndexCountTotal = seqIndexCount * dstArray->tensorCellCount;
+    int seqIndexCountTotal = seqIndexCount * dstArray->tensorElementCount;
     if (localPet!=i){
       // localPet is a client for the active dstSeqIndex interval
       SeqIndexIndexInfo *seqIndexIndexInfoList =
         new SeqIndexIndexInfo[seqIndexCountTotal];
       int count = 0; // reset
       for (int j=0; j<dstLocalDeCount; j++){
-        for (int k=0; k<dstLocalDeCellCount[j]; k++){
+        for (int k=0; k<dstLocalDeElementCount[j]; k++){
           int dstSeqIndex = dstLinSeqList[j][k].seqIndex.decompSeqIndex;
           if (dstSeqIndex >= seqIndexMin && dstSeqIndex <= seqIndexMax){
             int lookupIndex = dstSeqIndex - seqIndexMin;
@@ -5276,7 +5280,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
         if (ii==i){
           // server Pet itself
           for (int j=0; j<dstLocalDeCount; j++){
-            for (int k=0; k<dstLocalDeCellCount[j]; k++){
+            for (int k=0; k<dstLocalDeElementCount[j]; k++){
               int dstSeqIndex = dstLinSeqList[j][k].seqIndex.decompSeqIndex;
               if (dstSeqIndex >= seqIndexMin && dstSeqIndex <= seqIndexMax){
                 int kk = dstSeqIndex - seqIndexMin;
@@ -5353,7 +5357,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
 #ifdef ASMMSTOREPRINT
   // more serious printing
   for (int j=0; j<srcLocalDeCount; j++){
-    for (int k=0; k<srcLocalDeCellCount[j]; k++){
+    for (int k=0; k<srcLocalDeElementCount[j]; k++){
       printf("localPet: %d, srcLinSeqList[%d][%d].linIndex = %d, "
         ".seqIndex = %d, .factorCount = %d\n",
         localPet, j, k, srcLinSeqList[j][k].linIndex,
@@ -5369,7 +5373,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     
   // more serious printing
   for (int j=0; j<dstLocalDeCount; j++){
-    for (int k=0; k<dstLocalDeCellCount[j]; k++){
+    for (int k=0; k<dstLocalDeElementCount[j]; k++){
       printf("localPet: %d, dstLinSeqList[%d][%d].linIndex = %d, "
         ".seqIndex = %d, .factorCount = %d\n",
         localPet, j, k, dstLinSeqList[j][k].linIndex,
@@ -5503,10 +5507,10 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
       
   // determine recv pattern for all localDEs in dstArray and issue XXE::recvnb
   for (int j=0; j<dstLocalDeCount; j++){
-    int *index2Ref = new int[dstLocalDeCellCount[j]];  // large enough
+    int *index2Ref = new int[dstLocalDeElementCount[j]];  // large enough
     int localDeFactorCount = 0; // reset
     int iCount = 0; // reset
-    for (int k=0; k<dstLocalDeCellCount[j]; k++){
+    for (int k=0; k<dstLocalDeElementCount[j]; k++){
       int factorCount = dstLinSeqList[j][k].factorCount;
       if (factorCount){
         index2Ref[iCount] = k;   // store index2
@@ -5717,10 +5721,10 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   
   // determine send pattern for all localDEs in srcArray and fill in XXE
   for (int j=0; j<srcLocalDeCount; j++){
-    int *index2Ref = new int[srcLocalDeCellCount[j]];  // large enough
+    int *index2Ref = new int[srcLocalDeElementCount[j]];  // large enough
     int localDeFactorCount = 0; // reset
     int iCount = 0; // reset
-    for (int k=0; k<srcLocalDeCellCount[j]; k++){
+    for (int k=0; k<srcLocalDeElementCount[j]; k++){
       int factorCount = srcLinSeqList[j][k].factorCount;
       if (factorCount){
         index2Ref[iCount] = k;   // store index2
@@ -6439,23 +6443,23 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
   
   // garbage collection
   for (int i=0; i<srcLocalDeCount; i++){
-    for (int j=0; j<srcLocalDeCellCount[i]; j++)
+    for (int j=0; j<srcLocalDeElementCount[i]; j++)
       if (srcLinSeqList[i][j].factorCount)
         delete [] srcLinSeqList[i][j].factorList;
     delete [] srcLinSeqList[i];
   }
   delete [] srcLinSeqList;
-  delete [] srcLocalDeCellCount;
+  delete [] srcLocalDeElementCount;
   for (int i=0; i<dstLocalDeCount; i++){
-    for (int j=0; j<dstLocalDeCellCount[i]; j++)
+    for (int j=0; j<dstLocalDeElementCount[i]; j++)
       if (dstLinSeqList[i][j].factorCount)
         delete [] dstLinSeqList[i][j].factorList;
     delete [] dstLinSeqList[i];
   }
   delete [] dstLinSeqList;
-  delete [] dstLocalDeCellCount;
-  delete [] srcCellCountList;
-  delete [] dstCellCountList;
+  delete [] dstLocalDeElementCount;
+  delete [] srcElementCountList;
+  delete [] dstElementCountList;
   delete [] srcSeqIndexMinMaxList;
   delete [] dstSeqIndexMinMaxList;
   for (int i=0; i<srcSeqIndexInterval[localPet].countEff; i++)
@@ -6596,10 +6600,10 @@ int Array::sparseMatMul(
     for (int i=0; i<dstArray->delayout->getLocalDeCount(); i++){
       char *start = (char *)(dstArray->larrayBaseAddrList[i]);
       int dataSize = ESMC_TypeKindSize(dstArray->typekind);
-      int cellCount =
-        dstArray->deCellCount[dstArray->delayout->getLocalDeList()[i]]
-        * dstArray->tensorCellCount;
-      memset(start, 0, dataSize * cellCount);
+      int elementCount =
+        dstArray->deElementCount[dstArray->delayout->getLocalDeList()[i]]
+        * dstArray->tensorElementCount;
+      memset(start, 0, dataSize * elementCount);
     }
   }
   
