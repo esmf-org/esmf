@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.84 2007/10/19 19:49:14 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.85 2007/10/25 16:02:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.84 2007/10/19 19:49:14 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.85 2007/10/25 16:02:58 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2473,13 +2473,13 @@ int XXE::exec(
   XxeSubInfo *xxeSubInfo;
   XxeSubMultiInfo *xxeSubMultiInfo;
   WtimerInfo *xxeWtimerInfo, *xxeWtimerInfoActual, *xxeWtimerInfoRelative;
-  PrintInfo *xxePrintInfo;
+  MessageInfo *xxeMessageInfo;
   
   double t0, t1;
   
   if (dTime != NULL)
     VMK::wtime(&t0);
-      
+  
   for (int i=indexRangeStart; i<=indexRangeStop; i++){
     xxeElement = &(stream[i]);
 //    printf("gjt: %d, opId=%d\n", i, stream[i].opId);
@@ -2491,9 +2491,6 @@ int XXE::exec(
     case sendnb:
       {
         xxeSendnbInfo = (SendnbInfo *)xxeElement;
-//        printf("case: sendnb: %p, %d, %d, %p\n", xxeSendnbInfo->buffer,
-//          xxeSendnbInfo->size, xxeSendnbInfo->dstPet,
-//          xxeSendnbInfo->commhandle);
         vm->vmk_send(xxeSendnbInfo->buffer, xxeSendnbInfo->size,
           xxeSendnbInfo->dstPet, xxeSendnbInfo->commhandle);
       }
@@ -2501,9 +2498,6 @@ int XXE::exec(
     case recvnb:
       {
         xxeRecvnbInfo = (RecvnbInfo *)xxeElement;
-//        printf("case: recvnb: %p, %d, %d, %p\n", xxeRecvnbInfo->buffer,
-//          xxeRecvnbInfo->size, xxeRecvnbInfo->srcPet,
-//          xxeRecvnbInfo->commhandle);
         vm->vmk_recv(xxeRecvnbInfo->buffer, xxeRecvnbInfo->size,
           xxeRecvnbInfo->srcPet, xxeRecvnbInfo->commhandle);
       }
@@ -2511,9 +2505,6 @@ int XXE::exec(
     case sendnbRRA:
       {
         xxeSendnbRRAInfo = (SendnbRRAInfo *)xxeElement;
-//        printf("case: sendnbRRA: %p, %d, %d, %p\n", xxeSendnbInfo->buffer,
-//          xxeSendnbInfo->size, xxeSendnbInfo->dstPet,
-//          xxeSendnbInfo->commhandle);
         vm->vmk_send(rraList[xxeSendnbRRAInfo->rraIndex]    
           + xxeSendnbRRAInfo->rraOffset,
           xxeSendnbRRAInfo->size, xxeSendnbRRAInfo->dstPet,
@@ -2523,9 +2514,6 @@ int XXE::exec(
     case recvnbRRA:
       {
         xxeRecvnbRRAInfo = (RecvnbRRAInfo *)xxeElement;
-//        printf("case: recvnbRRA: %p, %d, %d, %p\n", xxeRecvnbInfo->buffer,
-//          xxeRecvnbInfo->size, xxeRecvnbInfo->srcPet,
-//          xxeRecvnbInfo->commhandle);
         vm->vmk_recv(rraList[xxeRecvnbRRAInfo->rraIndex]
           + xxeRecvnbRRAInfo->rraOffset,
           xxeRecvnbRRAInfo->size, xxeRecvnbRRAInfo->srcPet,
@@ -2537,8 +2525,6 @@ int XXE::exec(
         xxeWaitOnIndexInfo = (WaitOnIndexInfo *)xxeElement;
         xxeIndexElement = &(stream[xxeWaitOnIndexInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
-//        printf("case: waitOnIndex: %d, %p\n", xxeWaitOnIndexInfo->index,
-//          xxeCommhandleInfo->commhandle);
         vm->commwait(xxeCommhandleInfo->commhandle);
       }
       break;
@@ -2955,10 +2941,10 @@ int XXE::exec(
         *wtimeActual = *wtime;
       }
       break;
-    case print:
+    case message:
       {
-        xxePrintInfo = (PrintInfo *)xxeElement;
-        printf("%s", xxePrintInfo->printString);
+        xxeMessageInfo = (MessageInfo *)xxeElement;
+        printf("%s", xxeMessageInfo->messageString);
       }
       break;
     default:
@@ -2969,6 +2955,459 @@ int XXE::exec(
   if (dTime != NULL){
     VMK::wtime(&t1);
     *dTime = t1 - t0;
+  }
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::print()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::print
+//
+// !INTERFACE:
+int XXE::print(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int rraCount,       // in  - number of relative run-time address in rraList
+  char **rraList,     // in  - relative run-time addresses
+  int indexStart,     // in  - start index, < 0 for default (full stream)
+  int indexStop       // in  - stop index, < 0 for default (full stream)
+  ){
+//
+// !DESCRIPTION:
+//  Print XXE stream content.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // get the current VM
+  VM *vm = VM::getCurrent(&localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  
+  // set index range
+  int indexRangeStart = 0;        // default
+  if (indexStart > 0) indexRangeStart = indexStart;
+  int indexRangeStop = count-1;   // default
+  if (indexStop > 0) indexRangeStop = indexStop;
+  
+  // check index range
+  if (count > 0 && indexRangeStart > count-1){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "- indexStart out of range", &rc);
+    return rc;
+  }
+  if (indexRangeStop > count-1){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "- indexStop out of range", &rc);
+    return rc;
+  }
+  
+  void *xxeElement, *xxeIndexElement;
+  SendnbInfo *xxeSendnbInfo;
+  RecvnbInfo *xxeRecvnbInfo;
+  SendnbRRAInfo *xxeSendnbRRAInfo;
+  RecvnbRRAInfo *xxeRecvnbRRAInfo;
+  WaitOnIndexInfo *xxeWaitOnIndexInfo;
+  WaitOnAnyIndexSubInfo *xxeWaitOnAnyIndexSubInfo;
+  WaitOnIndexRangeInfo *xxeWaitOnIndexRangeInfo;
+  CommhandleInfo *xxeCommhandleInfo;
+  ProductSumVectorInfo *xxeProductSumVectorInfo;
+  ProductSumScalarInfo *xxeProductSumScalarInfo;
+  ProductSumScalarRRAInfo *xxeProductSumScalarRRAInfo;
+  ProductSumSuperScalarRRAInfo *xxeProductSumSuperScalarRRAInfo;
+  ProductSumSuperScalarContigRRAInfo *xxeProductSumSuperScalarContigRRAInfo;
+  MemCpyInfo *xxeMemCpyInfo;
+  MemCpySrcRRAInfo *xxeMemCpySrcRRAInfo;
+  MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo;
+  XxeSubInfo *xxeSubInfo;
+  XxeSubMultiInfo *xxeSubMultiInfo;
+  WtimerInfo *xxeWtimerInfo, *xxeWtimerInfoActual, *xxeWtimerInfoRelative;
+  MessageInfo *xxeMessageInfo;
+  
+  for (int i=indexRangeStart; i<=indexRangeStop; i++){
+    xxeElement = &(stream[i]);
+    printf("XXE::print(): <localPet=%d> i=%d, xxeElement=%p, opId=%d\n", 
+      vm->getLocalPet(), i, xxeElement, stream[i].opId);
+    switch(stream[i].opId){
+    case send:
+      break;
+    case recv:
+      break;
+    case sendnb:
+      {
+        xxeSendnbInfo = (SendnbInfo *)xxeElement;
+        printf("XXE::sendnb: <localPet=%d> buffer=%p, size=%d, dst=%d, "
+          "commhandle=%p\n", vm->getLocalPet(),
+          xxeSendnbInfo->buffer, xxeSendnbInfo->size, xxeSendnbInfo->dstPet,
+          xxeSendnbInfo->commhandle);
+      }
+      break;
+    case recvnb:
+      {
+        xxeRecvnbInfo = (RecvnbInfo *)xxeElement;
+        printf("XXE::recvnb: <localPet=%d> buffer=%p, size=%d, src=%d, "
+          "commhandle=%p\n", vm->getLocalPet(),
+          xxeRecvnbInfo->buffer, xxeRecvnbInfo->size, xxeRecvnbInfo->srcPet,
+          xxeRecvnbInfo->commhandle);
+      }
+      break;
+    case sendnbRRA:
+      {
+        xxeSendnbRRAInfo = (SendnbRRAInfo *)xxeElement;
+        printf("XXE::sendnbRRA: <localPet=%d> rraOffset=%d, size=%d, dst=%d, "
+          " rraIndex=%d, commhandle=%p\n", vm->getLocalPet(),
+          xxeSendnbRRAInfo->rraOffset, xxeSendnbRRAInfo->size,
+          xxeSendnbRRAInfo->dstPet, xxeSendnbRRAInfo->rraIndex,
+          xxeSendnbRRAInfo->commhandle);
+      }
+      break;
+    case recvnbRRA:
+      {
+        xxeRecvnbRRAInfo = (RecvnbRRAInfo *)xxeElement;
+        printf("XXE::recvnbRRA: <localPet=%d> rraOffset=%d, size=%d, src=%d, "
+          "rraIndex=%d, commhandle=%p\n", vm->getLocalPet(),
+          xxeRecvnbRRAInfo->rraOffset, xxeRecvnbRRAInfo->size,
+          xxeRecvnbRRAInfo->srcPet, xxeRecvnbRRAInfo->rraIndex,
+          xxeRecvnbRRAInfo->commhandle);
+      }
+      break;
+    case waitOnIndex:
+      {
+        xxeWaitOnIndexInfo = (WaitOnIndexInfo *)xxeElement;
+        xxeIndexElement = &(stream[xxeWaitOnIndexInfo->index]);
+        xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
+        printf("XXE::waitOnIndex: <localPet=%d> index=%d, commhandle=%p\n",
+          vm->getLocalPet(), xxeWaitOnIndexInfo->index,
+          xxeCommhandleInfo->commhandle);
+      }
+      break;
+    case waitOnIndexRange:
+      {
+        xxeWaitOnIndexRangeInfo = (WaitOnIndexRangeInfo *)xxeElement;
+        printf("XXE::waitOnIndexRange <localPet=%d>\n", vm->getLocalPet());
+      }
+      break;
+    case productSumVector:
+      {
+        xxeProductSumVectorInfo = (ProductSumVectorInfo *)xxeElement;
+        printf("XXE::productSumVector <localPet=%d>\n", vm->getLocalPet());
+        switch (xxeProductSumVectorInfo->opSubId){
+        case I4:
+          {
+            ESMC_I4 *element = (ESMC_I4 *)xxeProductSumVectorInfo->element;
+            ESMC_I4 *factorList =
+              (ESMC_I4 *)xxeProductSumVectorInfo->factorList;
+            ESMC_I4 *valueList = (ESMC_I4 *)xxeProductSumVectorInfo->valueList;
+          }
+          break;
+        case I8:
+          {
+            ESMC_I8 *element = (ESMC_I8 *)xxeProductSumVectorInfo->element;
+            ESMC_I8 *factorList =
+              (ESMC_I8 *)xxeProductSumVectorInfo->factorList;
+            ESMC_I8 *valueList = (ESMC_I8 *)xxeProductSumVectorInfo->valueList;
+          }
+          break;
+        case R4:
+          {
+            ESMC_R4 *element = (ESMC_R4 *)xxeProductSumVectorInfo->element;
+            ESMC_R4 *factorList =
+              (ESMC_R4 *)xxeProductSumVectorInfo->factorList;
+            ESMC_R4 *valueList = (ESMC_R4 *)xxeProductSumVectorInfo->valueList;
+          }
+          break;
+        case R8:
+          {
+            ESMC_R8 *element = (ESMC_R8 *)xxeProductSumVectorInfo->element;
+            ESMC_R8 *factorList =
+              (ESMC_R8 *)xxeProductSumVectorInfo->factorList;
+            ESMC_R8 *valueList = (ESMC_R8 *)xxeProductSumVectorInfo->valueList;
+          }
+          break;
+        default:
+          break;
+        }
+      }
+      break;
+    case productSumScalar:
+      {
+        xxeProductSumScalarInfo = (ProductSumScalarInfo *)xxeElement;
+        printf("XXE::productSumScalar <localPet=%d>\n", vm->getLocalPet());
+        switch (xxeProductSumScalarInfo->opSubId){
+        case I4:
+          {
+            ESMC_I4 *element = (ESMC_I4 *)xxeProductSumScalarInfo->element;
+            ESMC_I4 *factor = (ESMC_I4 *)xxeProductSumScalarInfo->factor;
+            ESMC_I4 *value = (ESMC_I4 *)xxeProductSumScalarInfo->value;
+          }
+          break;
+        case I8:
+          {
+            ESMC_I8 *element = (ESMC_I8 *)xxeProductSumScalarInfo->element;
+            ESMC_I8 *factor = (ESMC_I8 *)xxeProductSumScalarInfo->factor;
+            ESMC_I8 *value = (ESMC_I8 *)xxeProductSumScalarInfo->value;
+          }
+          break;
+        case R4:
+          {
+            ESMC_R4 *element = (ESMC_R4 *)xxeProductSumScalarInfo->element;
+            ESMC_R4 *factor = (ESMC_R4 *)xxeProductSumScalarInfo->factor;
+            ESMC_R4 *value = (ESMC_R4 *)xxeProductSumScalarInfo->value;
+          }
+          break;
+        case R8:
+          {
+            ESMC_R8 *element = (ESMC_R8 *)xxeProductSumScalarInfo->element;
+            ESMC_R8 *factor = (ESMC_R8 *)xxeProductSumScalarInfo->factor;
+            ESMC_R8 *value = (ESMC_R8 *)xxeProductSumScalarInfo->value;
+          }
+          break;
+        default:
+          break;
+        }
+      }
+      break;
+    case productSumScalarRRA:
+      {
+        xxeProductSumScalarRRAInfo = (ProductSumScalarRRAInfo *)xxeElement;
+        printf("XXE::productSumScalarRRA <localPet=%d>\n", vm->getLocalPet());
+        char *rraBase = rraList[xxeProductSumScalarRRAInfo->rraIndex];
+        switch (xxeProductSumScalarRRAInfo->opSubId){
+        case I4:
+          {
+            ESMC_I4 *element = (ESMC_I4 *)
+              (rraBase + xxeProductSumScalarRRAInfo->rraOffset);
+            ESMC_I4 *factor = (ESMC_I4 *)xxeProductSumScalarRRAInfo->factor;
+            ESMC_I4 *value = (ESMC_I4 *)xxeProductSumScalarRRAInfo->value;
+          }
+          break;
+        case I8:
+          {
+            ESMC_I8 *element = (ESMC_I8 *)
+              (rraBase + xxeProductSumScalarRRAInfo->rraOffset);
+            ESMC_I8 *factor = (ESMC_I8 *)xxeProductSumScalarRRAInfo->factor;
+            ESMC_I8 *value = (ESMC_I8 *)xxeProductSumScalarRRAInfo->value;
+          }
+          break;
+        case R4:
+          {
+            ESMC_R4 *element = (ESMC_R4 *)
+              (rraBase + xxeProductSumScalarRRAInfo->rraOffset);
+            ESMC_R4 *factor = (ESMC_R4 *)xxeProductSumScalarRRAInfo->factor;
+            ESMC_R4 *value = (ESMC_R4 *)xxeProductSumScalarRRAInfo->value;
+          }
+          break;
+        case R8:
+          {
+            ESMC_R8 *element = (ESMC_R8 *)
+              (rraBase + xxeProductSumScalarRRAInfo->rraOffset);
+            ESMC_R8 *factor = (ESMC_R8 *)xxeProductSumScalarRRAInfo->factor;
+            ESMC_R8 *value = (ESMC_R8 *)xxeProductSumScalarRRAInfo->value;
+          }
+          break;
+        default:
+          break;
+        }
+      }
+      break;
+    case productSumSuperScalarRRA:
+      {
+        xxeProductSumSuperScalarRRAInfo =
+          (ProductSumSuperScalarRRAInfo *)xxeElement;
+        printf("XXE::productSumSuperScalarRRA <localPet=%d>\n",
+          vm->getLocalPet());
+        char *rraBase = rraList[xxeProductSumSuperScalarRRAInfo->rraIndex];
+        int *rraOffsetList = xxeProductSumSuperScalarRRAInfo->rraOffsetList;
+        void **factorList = xxeProductSumSuperScalarRRAInfo->factorList;
+        void **valueList = xxeProductSumSuperScalarRRAInfo->valueList;
+        int termCount = xxeProductSumSuperScalarRRAInfo->termCount;
+        switch (xxeProductSumSuperScalarRRAInfo->opSubId){
+        case I4:
+          {
+            ESMC_I4 *element, *factor, *value;
+          }
+          break;
+        case I8:
+          {
+            ESMC_I8 *element, *factor, *value;
+          }
+          break;
+        case R4:
+          {
+            ESMC_R4 *element, *factor, *value;
+          }
+          break;
+        case R8:
+          {
+            ESMC_R8 *element, *factor, *value;
+          }
+          break;
+        default:
+          break;
+        }
+      }
+      break;
+    case productSumSuperScalarContigRRA:
+      {
+        xxeProductSumSuperScalarContigRRAInfo =
+          (ProductSumSuperScalarContigRRAInfo *)xxeElement;
+        printf("XXE::productSumSuperScalarContigRRA <localPet=%d>\n",
+          vm->getLocalPet());
+        char *rraBase =
+          rraList[xxeProductSumSuperScalarContigRRAInfo->rraIndex];
+        int *rraOffsetList =
+          xxeProductSumSuperScalarContigRRAInfo->rraOffsetList;
+        void **factorList = xxeProductSumSuperScalarContigRRAInfo->factorList;
+        void *valueList = xxeProductSumSuperScalarContigRRAInfo->valueList;
+        int termCount = xxeProductSumSuperScalarContigRRAInfo->termCount;
+        switch (xxeProductSumSuperScalarContigRRAInfo->opSubId){
+        case I4:
+          {
+            ESMC_I4 *element, factor;
+            ESMC_I4 *value = (ESMC_I4 *)valueList;
+          }
+          break;
+        case I8:
+          {
+            ESMC_I8 *element, factor;
+            ESMC_I8 *value = (ESMC_I8 *)valueList;
+          }
+          break;
+        case R4:
+          {
+            ESMC_R4 *element, factor;
+            ESMC_R4 *value = (ESMC_R4 *)valueList;
+          }
+          break;
+        case R8:
+          {
+            ESMC_R8 *element, factor;
+            ESMC_R8 *value = (ESMC_R8 *)valueList;
+          }
+          break;
+        default:
+          break;
+        }
+      }
+      break;
+    case memCpy:
+      {
+        xxeMemCpyInfo = (MemCpyInfo *)xxeElement;
+        printf("XXE::memCpy <localPet=%d>\n", vm->getLocalPet());
+      }
+      break;
+    case memCpySrcRRA:
+      {
+        xxeMemCpySrcRRAInfo = (MemCpySrcRRAInfo *)xxeElement;
+        printf("XXE::memCpySrcRRA <localPet=%d>\n", vm->getLocalPet());
+      }
+      break;
+    case memGatherSrcRRA:
+      {
+        xxeMemGatherSrcRRAInfo = (MemGatherSrcRRAInfo *)xxeElement;
+        printf("XXE::memGatherSrcRRA <localPet=%d>\n", vm->getLocalPet());
+        char *dstBase = (char *)xxeMemGatherSrcRRAInfo->dstBase;
+        char *rraBase = rraList[xxeMemGatherSrcRRAInfo->rraIndex];
+        int *rraOffsetList = xxeMemGatherSrcRRAInfo->rraOffsetList;
+        int *countList = xxeMemGatherSrcRRAInfo->countList;
+        switch (xxeMemGatherSrcRRAInfo->opSubId){
+        case BYTE:
+          {
+            char *dstPointer = dstBase;
+          }
+          break;
+        case I4:
+          {
+            ESMC_I4 *dstPointer = (ESMC_I4*)dstBase;
+            ESMC_I4 *srcPointer;
+          }
+          break;
+        case I8:
+          {
+            ESMC_I8 *dstPointer = (ESMC_I8*)dstBase;
+            ESMC_I8 *srcPointer;
+          }
+          break;
+        case R4:
+          {
+            ESMC_R4 *dstPointer = (ESMC_R4*)dstBase;
+            ESMC_R4 *srcPointer;
+          }
+          break;
+        case R8:
+          {
+            ESMC_R8 *dstPointer = (ESMC_R8*)dstBase;
+            ESMC_R8 *srcPointer;
+          }
+          break;
+        }
+      }
+      break;
+    case xxeSub:
+      {
+        xxeSubInfo = (XxeSubInfo *)xxeElement;
+        printf("XXE::xxeSub <localPet=%d>\n", vm->getLocalPet());
+        xxeSubInfo->xxe->exec(rraCount, rraList); // recursive call
+      }
+      break;
+    case xxeSubMulti:
+      {
+        xxeSubMultiInfo = (XxeSubMultiInfo *)xxeElement;
+        printf("XXE::xxeSubMulti <localPet=%d>\n", vm->getLocalPet());
+        for (int k=0; k<xxeSubMultiInfo->count; k++)
+          xxeSubMultiInfo->xxe[k]->print(rraCount, rraList); // recursive call
+      }
+      break;
+    case waitOnAnyIndexSub:
+      {
+        xxeWaitOnAnyIndexSubInfo = (WaitOnAnyIndexSubInfo *)xxeElement;
+        printf("XXE::waitOnAnyIndexSub <localPet=%d>\n", vm->getLocalPet());
+        int *completeFlag = xxeWaitOnAnyIndexSubInfo->completeFlag;
+        int count = xxeWaitOnAnyIndexSubInfo->count;
+        int completeTotal = 0;  // reset
+        for (int k=0; k<count; k++)
+          xxeWaitOnAnyIndexSubInfo->xxe[k]->print(rraCount, rraList);
+          // recursive call
+      }
+      break;
+    case wtimer:
+      {
+        xxeWtimerInfo = (WtimerInfo *)xxeElement;
+        printf("XXE::wtimer <localPet=%d>\n", vm->getLocalPet());
+        int index = xxeWtimerInfo->actualWtimerIndex;
+        double *wtime = &(xxeWtimerInfo->wtime);
+        *wtime = 0.;                      // initialize
+        xxeWtimerInfo->wtimeSum = 0.;     // initialize
+        xxeWtimerInfo->sumTermCount = -1;  // initialize
+        xxeWtimerInfoActual = (WtimerInfo *)(&(stream[index]));
+        double *wtimeActual = &(xxeWtimerInfoActual->wtime);
+        double *wtimeSumActual = &(xxeWtimerInfoActual->wtimeSum);
+        int *sumTermCountActual = &(xxeWtimerInfoActual->sumTermCount);
+        double wtimeRelative = *(xxeWtimerInfo->relativeWtime);
+      }
+      break;
+    case message:
+      {
+        xxeMessageInfo = (MessageInfo *)xxeElement;
+        printf("XXE::message <localPet=%d>\n", vm->getLocalPet());
+      }
+      break;
+    default:
+      break;
+    }
   }
   
   // return successfully
@@ -3219,8 +3658,6 @@ int XXE::execReady(
   int recvnbLowerIndex = -1;  // prime lower index indicator blow 0
   
   void *xxeElement, *xxeIndexElement, *xxeElement2;
-  SendnbInfo *xxeSendnbInfo;
-  RecvnbInfo *xxeRecvnbInfo;
   WaitOnIndexInfo *xxeWaitOnIndexInfo;
   WaitOnAnyIndexSubInfo *xxeWaitOnAnyIndexSubInfo;
   WaitOnIndexRangeInfo *xxeWaitOnIndexRangeInfo;
@@ -3270,7 +3707,6 @@ int XXE::execReady(
         break;
       case sendnb:
         if (i>sendnbLowerIndex){
-          xxeSendnbInfo = (SendnbInfo *)xxeElement;
           sendnbIndexList[sendnbCount] = i;
           ++sendnbCount;
           if (sendnbCount >= sendnbMax){
@@ -3282,7 +3718,28 @@ int XXE::execReady(
         break;
       case recvnb:
         if (i>recvnbLowerIndex){
-          xxeRecvnbInfo = (RecvnbInfo *)xxeElement;
+          recvnbIndexList[recvnbCount] = i;
+          ++recvnbCount;
+          if (recvnbCount >= recvnbMax){
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+              "- recvnbCount out of range", &rc);
+            return rc;
+          }
+        }
+        break;
+      case sendnbRRA:
+        if (i>sendnbLowerIndex){
+          sendnbIndexList[sendnbCount] = i;
+          ++sendnbCount;
+          if (sendnbCount >= sendnbMax){
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+              "- sendnbCount out of range", &rc);
+            return rc;
+          }
+        }
+        break;
+      case recvnbRRA:
+        if (i>recvnbLowerIndex){
           recvnbIndexList[recvnbCount] = i;
           ++recvnbCount;
           if (recvnbCount >= recvnbMax){

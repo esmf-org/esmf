@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.152 2007/10/25 05:16:56 theurich Exp $
+// $Id: ESMC_Array.C,v 1.153 2007/10/25 16:02:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.152 2007/10/25 05:16:56 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.153 2007/10/25 16:02:58 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -5438,22 +5438,14 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   XXE::SendnbInfo *xxeSendnbInfo;
   XXE::RecvnbInfo *xxeRecvnbInfo;
   XXE::SendnbRRAInfo *xxeSendnbRRAInfo;
-  XXE::RecvnbRRAInfo *xxeRecvnbRRAInfo;
   XXE::CommhandleInfo *xxeCommhandleInfo;
-  XXE::ProductSumVectorInfo *xxeProductSumVectorInfo;
-  XXE::ProductSumScalarInfo *xxeProductSumScalarInfo;
   XXE::ProductSumScalarRRAInfo *xxeProductSumScalarRRAInfo;
   XXE::ProductSumSuperScalarRRAInfo *xxeProductSumSuperScalarRRAInfo;
   XXE::ProductSumSuperScalarContigRRAInfo
     *xxeProductSumSuperScalarContigRRAInfo;
-  XXE::MemCpyInfo *xxeMemCpyInfo;
   XXE::MemCpySrcRRAInfo *xxeMemCpySrcRRAInfo;
   XXE::MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo;
-  XXE::XxeSubInfo *xxeSubInfo;
-  XXE::XxeSubMultiInfo *xxeSubMultiInfo;
   XXE::WtimerInfo *xxeWtimerInfo;
-  XXE::PrintInfo *xxePrintInfo;
-  XXE::WaitOnIndexInfo *xxeWaitOnIndexInfo;
   XXE::WaitOnAnyIndexSubInfo *xxeWaitOnAnyIndexSubInfo;
     
 #ifdef ASMMSTORETIMING
@@ -5877,9 +5869,6 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         xxeSendnbRRAInfo->size = partnerDeCount[i] * dataSize;
         xxeSendnbRRAInfo->dstPet = dstPet;
         xxeSendnbRRAInfo->rraIndex = j; // localDe index into srcArray
-        localrc = xxe->incCount();
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
       }else{
 #ifdef ASMMSTOREPRINT
         printf("gjt: non-contiguous linIndex in srcArray -> need buffer \n");
@@ -5996,9 +5985,6 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
         xxeSendnbInfo->buffer = buffer;
         xxeSendnbInfo->size = partnerDeCount[i] * dataSize;
         xxeSendnbInfo->dstPet = dstPet;
-        localrc = xxe->incCount();
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
       }
       // add commhandle to last xxe element (sendnbRRA or sendnb) and keep track
       // of commhandle for xxe garbage collection
@@ -6007,6 +5993,9 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       *(xxeCommhandleInfo->commhandle) = new vmk_commhandle;
       xxe->commhandle[xxe->commhandleCount] = xxeCommhandleInfo->commhandle;
       localrc = xxe->incCommhandleCount();
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
+      localrc = xxe->incCount();
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       delete [] linIndexContigBlockList;

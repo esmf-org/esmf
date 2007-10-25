@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.47 2007/09/14 22:48:43 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.48 2007/10/25 16:02:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -222,7 +222,7 @@ class XXE{
       // --- profiling
       wtimer,
       // --- misc
-      print,
+      message,
       // --- nop
       nop,
       // --- ids below are not suitable for direct execution
@@ -284,6 +284,8 @@ class XXE{
       delete [] xxeSubList;
     }
     int exec(int rraCount=0, char **rraList=NULL, double *dTime=NULL,
+      int indexStart=-1, int indexStop=-1);
+    int print(int rraCount=0, char **rraList=NULL,
       int indexStart=-1, int indexStop=-1);
     int printProfile();
     int execReady();
@@ -474,8 +476,8 @@ class XXE{
     typedef struct{
       OpId opId;
       OpSubId opSubId;
-      char *printString;
-    }PrintInfo;
+      char *messageString;
+    }MessageInfo;
     
     // --- meta Info structs (i.e. don't correspond to OpIds)
 
