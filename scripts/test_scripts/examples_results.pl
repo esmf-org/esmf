@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: examples_results.pl,v 1.2 2006/03/07 20:48:00 svasquez Exp $
+# $Id: examples_results.pl,v 1.3 2007/10/26 19:26:39 svasquez Exp $
 # This subroutine is called at the end of the examples, "check_examples" and "check_results" targets.
 # The purpose is to give the user the results of running the examples.
 # The results are either complete results or a summary.
@@ -212,9 +212,13 @@ use File::Find;
                 else { # Print only if full output requested
                         print "\n\nEXAMPLES SUMMARY\n";
                 }
-		print "Found $example_count examples, $pass_count passed and $fail_count failed.\n\n";
-
-
+		if ($ex_count == 1) {
+			print "Found $example_count example, $pass_count passed and $fail_count failed.\n\n";
+		}
+		else {
+			print "Found $example_count examples, $pass_count passed and $fail_count failed.\n\n";
+		}
+		
 			
 	}
 }
