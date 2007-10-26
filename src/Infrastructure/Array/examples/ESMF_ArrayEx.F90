@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.28 2007/10/25 05:16:54 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.29 2007/10/26 21:56:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -80,16 +80,16 @@ program ESMF_ArrayEx
 !
 ! The examples of the previous sections made the user responsible for 
 ! providing memory allocations for the PET-local regions of the Array object.
-! The user was able to use any of the Fortran90 methods to obtain allocated
-! arrays and pass them into ArrayCreate(). Alternatively, users may wish for
-! ESMF to control memory management of an Array object. The following example
+! The user was able to use any of the Fortran90 array methods or go through the
+! {\tt ESMF\_LocalArray} interfaces to obtain memory allocations before
+! passing them into ArrayCreate(). Alternatively, users may wish for ESMF to
+! handle memory allocation of an Array object directly. The following example
 ! shows the interfaces that are available to the user to do just this.
 ! 
 ! To create an {\tt ESMF\_Array} object without providing an existing
-! Fortran90 array at least two pieces of information 
-! are required. First the {\em type, kind and rank} (tkr) of the
-! array must be specified in form of an {\tt ESMF\_ArraySpec} argument. Here
-! a 2D Array of double precision real numbers is to be created:
+! Fortran90 array or {\tt ESMF\_LocalArray} the {\em type, kind and rank}
+! (tkr) of the Array must be specified in form of an {\tt ESMF\_ArraySpec}
+! argument. Here a 2D Array of double precision real numbers is to be created:
 !EOE
 !BOC
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
@@ -166,16 +166,13 @@ program ESMF_ArrayEx
 ! {\tt ESMF\_DistGridCreate()} call (see the refDoc / proposal for 
 ! {\tt ESMF\_DELayout} and {\tt ESMF\_DistGrid} for details).
 !
-! In order to use the {\tt array} object it is necessary to know how many DEs
-! are located on each calling PET. To this end the corresponding DELayout object
-! needs to be extracted from {\tt distgrid} first and then can be queried for 
-! the PET-local deCount.
+! In order to use the {\tt array} object it is necessary to know the local DEs
+! located on each calling PET.
 !EOE
 !BOC
-  call ESMF_DistGridGet(distgrid, delayout=delayout, rc=rc)
-  call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=rc)
+  call ESMF_ArrayGet(array, localDeCount=localDeCount, rc=rc)
   allocate(localDeList(localDeCount))
-  call ESMF_DELayoutGet(delayout, localDeList=localDeList, rc=rc)
+  call ESMF_ArrayGet(array, localDeList=localDeList, rc=rc)
 !EOC  
 !BOE
 ! In general it must be assumed that there may be multiple DEs associated with
@@ -216,9 +213,9 @@ program ESMF_ArrayEx
 ! \subsubsection{Regions and default bounds}
 ! \label{Array_regions_and_default_bounds}
 !
-! Each {\tt Array} object is decomposed into DEs as specified by the 
-! associated {\tt DistGrid} object. Each piece of this decomposition, i.e. each
-! DE, holds a chunk of the {\tt array} data in its own private piece of memory.
+! Each {\tt ESMF\_Array} object is decomposed into DEs as specified by the
+! associated {\tt ESMF\_DistGrid} object. Each piece of this decomposition, i.e.
+! each DE, holds a chunk of the Array data in its own local piece of memory.
 ! The details of the Array decomposition are described in the following 
 ! paragraphs.
 !
@@ -230,7 +227,7 @@ program ESMF_ArrayEx
 !       in terms of indexed elements. The total extent may be a composition or 
 !       patchwork of smaller logically rectangular (LR) domain pieces or patches.
 ! \item The decomposition of the entire domain into "element exclusive" DE-local
-!       LR chunks. {\em Element exclusive} means that there is no element overlap 
+!       LR chunks. {\em Element exclusive} means that there is no element overlap
 !       between DE-local chunks. This, however, does not exclude degeneracies 
 !       between staggering locations for certain topologies (e.g. bipolar).
 ! \item The layout of DEs over the available PETs an thus the distribution of
@@ -238,7 +235,7 @@ program ESMF_ArrayEx
 ! \end{itemize}
 !
 ! Each element of an Array is associated with a {\em single} DE. The union of
-! elements associated with a DE, as defined by the DistGrid above, will correspond
+! elements associated with a DE, as defined by the DistGrid above, corresponds
 ! to a LR chunk of index space, called the {\em exclusive region} of the DE.
 !
 ! There is a hierarchy of four regions that can be identified for each DE in an
@@ -247,25 +244,31 @@ program ESMF_ArrayEx
 ! \item {\em Interior Region}: Region that only contains local elements that are
 !       {\em not} mapped into the halo of any other DE. The shape and size of 
 !       this region for a particular DE depends non-locally on the halos defined
-!       by other DEs and may change during computations. Knowledge of the 
-!       interior elements may be used to improve performance by overlapping 
-!       communications with ongoing computation for a DE.
-! \item {\em Exclusive Region}: Elements for which this DE claims exclusive 
-!       ownership. Practically this means that the DE will be the source for 
-!       these elements in halo and reduce operations. There are exceptions
+!       by other DEs and may change during computation as halo operations are
+!       precomputed and released. Knowledge of the interior elements may be used
+!       to improve performance by overlapping communications with ongoing 
+!       computation for a DE.
+! \item {\em Exclusive Region}: Elements for which a DE claims exclusive
+!       ownership. Practically this means that the DE will be the sole source
+!       for these elements in halo and reduce operations. There are exceptions
 !       to this for certain staggering locations in some topologies. These 
-!       cases remain well-defined with the information available through 
-!       DistGrid. This region includes all elements of the interior region.
-! \item {\em Computational Region}: Region of all elements that are kept locally
-!       and are updated during computation by the local DE. The additional 
-!       computational elements, beyond the exclusive elements of the DE, are either 
-!       overlapping with the exclusive region of another DE or lie outside the 
-!       global domain as defined by the DistGrid. Extra computational points 
-!       may be chosen differently for different stagger locations.
-! \item {\em Total (Memory) Region}: Total of all DE-locally allocated elements. 
+!       cases remain well-defined with the information available through the
+!       associated DistGrid. The exclusive region includes all elements of the
+!       interior region.
+! \item {\em Computational Region}: Region that can be set arbitrarily within
+!       the bounds of the total region (defined next). The typical use of the
+!       computation region is to define bounds that only include elements that
+!       are updated by a DE-local computation kernel. The compuational region
+!       does not need to include all exclusive elements and it may also contain
+!       elements that lie outside the exclusive region.
+! \item {\em Total (Memory) Region}: Total of all DE-locally allocated elements.
 !       The size and shape of the total memory region must accommodate the
-!       computational region but may contain additional elements to be used
-!       in halos and/or as memory padding.
+!       union of exclusive and computational region but may contain 
+!       additional elements. Elements outside the exclusive region may overlap
+!       with the exclusive region of another DE which makes them potential 
+!       receivers for Array halo operations. Elements outside the exclusive
+!       region that do not overlap with the exclusive region of another DE
+!       can be used to set boundary conditions and/or serve as memory padding.
 ! \end{itemize}
 !
 ! \begin{verbatim}
@@ -280,13 +283,13 @@ program ESMF_ArrayEx
 !   |   |  \                                      |   |
 !   |   |   +-exclusiveLBound(:)-------------+    |   |
 !   |   |   |                                |    |   |
-!   |   |   |     +-------------------+      |    |   |
-!   |   |   |     |                   |      |    |   |
-!   |   |   |     |                   |      |    |   |
+!   |   |   |     +------+      +-----+      |    |   |
+!   |   |   |     |      |      |     |      |    |   |
+!   |   |   |     |      +------+     |      |    |   |
 !   |   |   |     | "Interior Region" |      |    |   |
-!   |   |   |     |                   |      |    |   |
-!   |   |   |     |                   |      |    |   |
-!   |   |   |     +-------------------+      |    |   |
+!   |   |   |     +-----+             |      |    |   |
+!   |   |   |           |             |      |    |   |
+!   |   |   |           +-------------+      |    |   |
 !   |   |   |                                |    |   |
 !   |   |   | "Exclusive Region"             |    |   |
 !   |   |   +-------------exclusiveUBound(:)-+    |   |
@@ -305,15 +308,15 @@ program ESMF_ArrayEx
 ! With the following definitions:
 ! \begin{verbatim}
 !
-! totalLWidth(:) = exclusiveLBound(:) - totalLBound(:)
-! totalUWidth(:) = totalUBound(:) - exclusiveLBound(:)
+! computationalLWidth(:) = exclusiveLBound(:) - computationalLBound(:)
+! computationalUWidth(:) = computationalUBound(:) - exclusiveLBound(:)
 !
 ! \end{verbatim}
 ! and
 ! \begin{verbatim}
 !
-! computationalLWidth(:) = exclusiveLBound(:) - computationalLBound(:)
-! computationalUWidth(:) = computationalUBound(:) - exclusiveLBound(:)
+! totalLWidth(:) = computationalLBound(:) - totalLBound(:)
+! totalUWidth(:) = totalUBound(:) - computationalUBound(:)
 !
 ! \end{verbatim}
 !
@@ -325,29 +328,33 @@ program ESMF_ArrayEx
 ! memory allocation for each DE, is also determined during Array creation. When
 ! creating the Array object from existing Fortran90 arrays the total region is
 ! set equal to the memory provided by the Fortran90 arrays. Otherwise the 
-! default is to allocate as much memory as is needed to accomodate the 
-! computational region. Finally it is also possible to use optional arguments to
-! the ArrayCreate() call to specify the total region of the object.
+! default is to allocate as much memory as is needed to accomodate the union
+! of the DE-local exclusive and computational region. Finally it is also
+! possible to use optional arguments to the ArrayCreate() call to specify the
+! total region of the object explicitly.
 !
-! Once an Array object has been created its total region cannot be changed. 
-! The computational region, however, may be adjusted within the limits of the 
-! total region using the {\tt ArraySet()} call.
+! The {\tt ESMF\_ArrayCreate()} call checks that the input parameters are
+! consistent and will result in an Array that fulfills all of the above 
+! mentioned requirements for its DE-local regions.
+!
+! Once an Array object has been created the exclusive and total regions are
+! fixed. The computational region, however, may be adjusted within the limits
+! of the total region using the {\tt ArraySet()} call.
 !
 ! The {\em interior region} is very different from the other regions in that
 ! it cannot be specified. The {\em interior region} for each DE is a {\em
-! consequence} 
-! of the choices made for the other regions collectively across all DEs into
-! which an Array object is decomposed. An Array object can be queried for
-! its DE-local {\em interior regions} as to offer additional information to 
-! the user necessary to write more efficient code. See section 
-! \ref{ArrayEx_interiorRegion} for more details.
+! consequence} of the choices made for the other regions collectively across
+! all DEs into which an Array object is decomposed. An Array object can be
+! queried for its DE-local {\em interior regions} as to offer additional
+! information to the user necessary to write more efficient code. See section 
+! \ref{ArrayEx_interiorRegion}(not yet implemented) for more details.
 !
-! By default the bounds of 
-! each DE-local {\em total region} are defined as to put the start of the
-! DE-local {\em exclusive region} at the "origin" of the local index space, i.e.
-! at {\tt (1, 1, ..., 1)}. With that the following loop will access each
-! element of the DE-local memory segment for each PET-local DE of the Array 
-! object created in the previous sections and print its content.
+! By default the bounds of each DE-local {\em total region} are defined as
+! to put the start of the DE-local {\em exclusive region} at the "origin" of 
+! the local index space, i.e. at {\tt (1, 1, ..., 1)}. With that definition the
+! following loop will access each element of the DE-local memory segment for
+! each PET-local DE of the Array object used in the previous sections and
+! print its content.
 !EOE
 !
 !BOC
@@ -355,7 +362,7 @@ program ESMF_ArrayEx
     call ESMF_LocalArrayGetData(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
     do i=1, size(myF90Array, 1)
       do j=1, size(myF90Array, 2)
-!        print *, "PET-local DE=", de, ": array(",i,",",j,")=", myF90Array(i,j)
+        print *, "PET-local DE=", de, ": array(",i,",",j,")=", myF90Array(i,j)
       enddo
     enddo
   enddo
@@ -396,6 +403,7 @@ program ESMF_ArrayEx
   call ESMF_ArrayGet(array, indexflag=indexflag, &
     exclusiveLBound=exclusiveLBound, exclusiveUBound=exclusiveUBound, rc=rc)
   if (indexflag == ESMF_INDEX_DELOCAL) then
+    ! this is the default
 !    print *, "DE-local exclusive regions start at (1,1)"
     do de=1, localDeCount
       call ESMF_LocalArrayGetData(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
@@ -406,7 +414,8 @@ program ESMF_ArrayEx
         enddo
       enddo
     enddo
-  else
+  else if (indexflag == ESMF_INDEX_GLOBAL) then
+    ! only if set during ESMF_ArrayCreate()
 !    print *, "DE-local exclusive regions of this Array have global bounds"
     do de=1, localDeCount
       call ESMF_LocalArrayGetData(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
@@ -418,7 +427,9 @@ program ESMF_ArrayEx
       enddo
     enddo
   endif
-!EOC
+  call ESMF_ArrayDestroy(array, rc=rc) ! destroy the array object
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOE
 ! Obviously the second branch of this simple code will work for either case, 
@@ -426,11 +437,13 @@ program ESMF_ArrayEx
 ! {\tt ESMF\_INDEX\_DELOCAL} type bounds the second branch would simply be 
 ! used to indicate the problem and bail out.
 !
-! If the Array uses {\tt ESMF\_INDEX\_DELOCAL} type bounds and the 
-! code accessing the Array data requires knowledge of global index space 
-! information then the corresponding DistGrid object can be queried for this
-! kind of information. Please see the DistGrid proposal for more details.
-!
+! The advantage of the {\tt ESMF\_INDEX\_GLOBAL} index option is that
+! the Array bounds directly contain information on where the DE-local
+! Array piece is located in a global index space sense. When the
+! {\tt ESMF\_INDEX\_DELOCAL} option is used the correspondence between local
+! and global index space must be made by querying the associated DistGrid for
+! the DE-local {\tt indexList} arguments.
+
 
 ! \subsubsection{Computational region and extra elements for halo or padding}
 !
@@ -446,12 +459,7 @@ program ESMF_ArrayEx
 ! {\tt ESMF\_INDEX\_GLOBAL} indicating that the bounds of the exclusive region
 ! correspond to the index space coordinates as they are defined by the DistGrid
 ! object.
-!EOE
-!BOC
-  call ESMF_ArrayDestroy(array, rc=rc) ! first destroy the old array object
-!EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOE
+!
 ! The same {\tt arrayspec} and {\tt distgrid} objects as before are used
 ! which also allows the reuse of the already allocated {\tt larrayList}
 ! variable.
@@ -465,6 +473,9 @@ program ESMF_ArrayEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !  call ESMF_ArrayPrint(array, rc=rc)
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOE
+! Obtain the {\tt larrayList} on every PET.
+!EOE
 !BOC
   call ESMF_ArrayGet(array, larrayList=larrayList, rc=rc)
 !EOC  
@@ -537,18 +548,18 @@ program ESMF_ArrayEx
     ! first time through the total region of array    
 !    print *, "myF90Array bounds for DE=", localDeList(de), lbound(myF90Array), &
 !      ubound(myF90Array)
-!    do j=exclusiveLBound(2, de), exclusiveUBound(2, de)
-!      do i=exclusiveLBound(1, de), exclusiveUBound(1, de)
+    do j=exclusiveLBound(2, de), exclusiveUBound(2, de)
+      do i=exclusiveLBound(1, de), exclusiveUBound(1, de)
 !        print *, "Excl region DE=", localDeList(de), ": array(",i,",",j,")=", &
 !          myF90Array(i,j)
-!      enddo
-!    enddo
-!    do j=computationalLBound(2, de), computationalUBound(2, de)
-!      do i=computationalLBound(1, de), computationalUBound(1, de)
+      enddo
+    enddo
+    do j=computationalLBound(2, de), computationalUBound(2, de)
+      do i=computationalLBound(1, de), computationalUBound(1, de)
 !        print *, "Excl region DE=", localDeList(de), ": array(",i,",",j,")=", &
 !          myF90Array(i,j)
-!      enddo
-!    enddo
+      enddo
+    enddo
     do j=totalLBound(2, de), totalUBound(2, de)
       do i=totalLBound(1, de), totalUBound(1, de)
 !        print *, "Total region DE=", localDeList(de), ": array(",i,",",j,")=", &
@@ -1628,7 +1639,7 @@ program ESMF_ArrayEx
 !
 ! All previous examples were written for the 2D case. There is, however, no
 ! restriction within the Array or DistGrid class that limits the dimensionality
-! of Array objects beyond the language specific limitations. 
+! of Array objects beyond the language specific limitations (7D for Fortran). 
 !
 ! In order to create an {\tt n}-dimensional Array the rank indicated by both
 ! the {\tt arrayspec} and the {\tt distgrid} arguments specified during Array
@@ -1707,9 +1718,9 @@ program ESMF_ArrayEx
 ! \ref{ArrayEx_staggeredArrays} for the 2D case applies without change to 
 ! 1D, 3D or any other dimensionality. Connections defined in the DistGrid object
 ! may utilize the stagger location index in order to express characteristics of
-! the index space topology, The concept is completely rank independent.
-!
-!
+! the index space topology. The concept is completely rank independent.
+
+
 ! \subsubsection{Working with Arrays of different rank}
 ! Assume a computational kernel that involves the {\tt array3D} object as it was
 ! created at the end of the previous section. Assume further that the kernel 
@@ -1764,33 +1775,45 @@ program ESMF_ArrayEx
 !
 ! All of the Array create interfaces require the specification of at least the 
 ! {\tt arrayspec} and the {\tt distgrid} arguments. Both arguments contain a
-! sense of dimensionality. The interaction between these two arguments deserves
+! sense of dimensionality. The relationship between these two arguments deserves
 ! extra attention.
 !
 ! The {\tt arrayspec} argument is of type {\tt ESMF\_ArraySpec} and determines,
-! among other things, the rank of the Array (data storage). This means, for 
-! example, that the rank
-! of a native language array extracted from an Array object is equal to that
-! specified in the {\tt arrayspec} argument, which is also what is returned as
-! {\tt rank} by the {\tt ESMF\_ArrayGet()} call. The {\tt arrayspec} argument 
-! does not determine, however, how the Array dimensions are decomposed and 
+! among other things, the rank of the Array, i.e. the dimensionality of the
+! actual data storage. This means, for example, that the rank of a native 
+! language array extracted from an Array object is equal to the rank specified
+! by the {\tt arrayspec} argument. It is also equal to the {\tt rank} that is
+! returned as by the {\tt ESMF\_ArrayGet()} call. The {\tt arrayspec} argument
+! does not determine, however, how the Array dimensions are decomposed and
 ! distributed.
 !
 ! The rank specification contained in the {\tt distgrid} argument, which is of 
 ! type {\tt ESMF\_DistGrid}, on the other hand has no affect on the 
-! dimensionality of the Array. The DistGrid rank specifies the dimensionality 
-! of the {\em decomposition}, i.e. the number of Array dimensions that are
-! decomposed. Consequently, the DistGrid rank must be smaller or equal to the
-! Array rank.
+! rank of the Array. The {\tt dimCount} specified by the DistGrid object,
+! which may be equal, greater or less than the Array rank, determines the 
+! dimensionality of the {\em decomposition}.
 !
-! The DistGrid rank, furthermore, determines the dimensionality of the index 
-! space of the Array. Array dimensions that do not correspond to DistGrid
-! dimensions are considered extra or {\em tensor} dimensions of the Array. They
-! are not part of the index space. Tensor dimensions are used to address
-! multiple data storage arrays in the same Array object. It is, for example,
+! While there is no constraint between DistGrid {\tt dimCount} and Array
+! {\tt rank}, there is an important relationship between the two, resulting in
+! the concept of index space dimensionality. Array dimensions can be
+! arbitrarily mapped against DistGrid dimension, rendering them {\em decomposed}
+! dimensions. The index space dimensionality is equal to the number of 
+! decomposed Array dimensions.
+!
+! Array dimensions that are not mapped to DistGrid dimensions are
+! considered extra or {\em tensor} dimensions of the Array. They are not part
+! of the index space. The mapping is specified during {\tt ESMF\_ArrayCreate()}
+! via the the {\tt dimmap} argument. DistGrid dimensions that have not been
+! associated with Array dimensions are {\tt replicating} dimensions. The Array
+! will be replicated across the DEs that lie along replication DistGrid
+! dimensions.
+!
+! Array tensor dimensions can be used to store multi-dimensional data for each
+! Array index space element. A special purpose of tensor dimensions is to store
+! multiple data arrays in the same Array object. It is, for example,
 ! possible to store {\tt array1} and {\tt array2} of section
 ! \ref{ArrayEx_staggeredArrays} in a single Array object using one 
-! additional tensor dimension of size 2. The same {\tt distgrid} object as 
+! tensor dimension of size 2. The same {\tt distgrid} object as 
 ! before can be used to create the Array. 
 !EOE
 !BOC
@@ -1798,9 +1821,8 @@ program ESMF_ArrayEx
     regDecomp=(/2,3/), rc=rc)
 !EOC
 !BOE
-! The rank in the {\tt arrayspec} 
-! argument, however, must be changed from 2 to 3 in order to provide for the 
-! extra Array dimension. 
+! The rank in the {\tt arrayspec} argument, however, must change from 2 to 3 in
+! order to provide for the extra Array dimension.
 !EOE
 !BOC
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=3, rc=rc)
@@ -1809,8 +1831,8 @@ program ESMF_ArrayEx
 ! During Array creation with extra dimension(s) it is necessary to specify the
 ! bounds of these tensor dimension(s). This requires two additional arguments,
 ! {\tt lbounds} and {\tt ubounds}, which are vectors in order to accommodate
-! multiple tensor dimensions. The other arguments remain unchanged and apply
-! across all tensor components. 
+! higher order tensor dimensions. The other arguments remain unchanged and
+! apply across all tensor components. 
 !
 ! The optional arguments used in the following call are identical to those
 ! used to create {\tt array1} of section \ref{ArrayEx_staggeredArrays}. This
@@ -1828,14 +1850,15 @@ program ESMF_ArrayEx
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     
 !BOE
-! This will create {\tt array} with 2+1 dimensions, i.e. a 2D DistGrid is used
-! to describe the index space and decomposition into DEs and an extra Array 
-! dimension captures the fact that multiple 2D user data arrays are kept in a 
-! single data storage object (Array). By default the {\tt distgrid} dimensions 
-! are associated with the first Array dimensions in sequence. For the example
-! above this means that the first 2 Array dimensions are decomposed according to
-! the provided 2D DistGrid. The 3rd Array dimension does not have an associated
-! DistGrid dimension, rendering it a tensor dimension.
+! This will create {\tt array} with 2+1 dimensions. The 2D DistGrid is used
+! to describe decomposition into DEs with 2 Array dimensions mapped to the 
+! DistGrid dimensions resulting in a 2D index space. The extra Array dimension
+! provides storeage for multiple 2D user data arrays that are kept in a 
+! single Array object. By default the {\tt distgrid} dimensions are associated
+! with the first Array dimensions in sequence. For the example above this means
+! that the first 2 Array dimensions are decomposed according to the provided 2D
+! DistGrid. The 3rd Array dimension does not have an associated DistGrid
+! dimension, rendering it a tensor dimension.
 !
 ! The optional arguments that were used to create {\tt array} ensure that
 ! the {\em total region} is large enough to accommodate the 
@@ -1844,23 +1867,27 @@ program ESMF_ArrayEx
 ! be adjusted to correctly reflect the {\tt array2} settings as in section
 ! \ref{ArrayEx_staggeredArrays}. The stagger location, too, must be changed 
 ! from "1" to "2" to match correctly. The Array class provides a special
-! method that allows to individually address tensor elements in an Array and set
-! stagger location, computational and halo widths.
+! {\tt Set()} method that allows to individually address tensor elements
+! in an Array and set stagger location, computational and halo widths.
 !EOE
 !BOC
   call ESMF_ArraySet(array, tensorIndex=(/2/), computationalLWidth=(/0,1/), &
     staggerLoc=2, rc=rc)
 !EOC
-!BOE
+
+#ifdef NOSKIP   
+!BOEI
 !
 ! The {\tt array} object is now completely self-contained with respect to the
 ! connection transformation stored in the DistGrid which mixes stagger location
 ! "1" and "2" when crossing the interface. Consequently, {\tt array} can be 
 ! haloed without the need to specify a list of Array objects.
-!EOE
-!BOC
+!EOEI
+!BOCI
   call ESMF_ArrayHalo(array, rc=rc)
-!EOC
+!EOCI
+#endif
+
 !BOE
 ! Native language access to an Array with tensor dimensions is in principle
 ! the same as without extra dimensions.
@@ -1870,12 +1897,12 @@ program ESMF_ArrayEx
   allocate(larrayList(localDeCount))
   call ESMF_ArrayGet(array, larrayList=larrayList, rc=rc)
 !BOE
-! The following loop shows how a Fortran90
-! pointer to the DE-local data chunks can be obtained and used to set data 
-! values in the exclusive regions. The {\tt myF90Array3D} variable must be of 
-! rank 3 to match the Array rank of {\tt array}.
-! However, variables such as {\tt exclusiveUBound} that store the information
-! about the decomposition, remain to be allocated for a 2D decomposition.
+! The following loop shows how a Fortran pointer to the DE-local data chunks
+! can be obtained and used to set data values in the exclusive regions. The
+! {\tt myF90Array3D} variable must be of rank 3 to match the Array rank of
+! {\tt array}. However, variables such as {\tt exclusiveUBound} that store the
+! information about the decomposition, remain to be allocated for a 2D 
+! decomposition.
 !EOE
 !BOC
   call ESMF_ArrayGet(array, exclusiveLBound=exclusiveLBound, &
@@ -1899,11 +1926,11 @@ program ESMF_ArrayEx
 ! between Array and DistGrid dimensions. To demonstrate this the
 ! following lines of code reproduce the above example but with rearranged
 ! dimensions. Here the {\tt dimmap} argument is a list with two elements 
-! corresponding to the DistGrid rank of 2. The first element indicates against 
-! which Array dimension the first DistGrid dimension is mapped. Here the 1st
-! DistGrid dimension maps against the 3rd Array and the 2nd DistGrid dimension
-! maps against the 1st Array dimension. This leaves the 2nd Array dimension
-! to be the extra or tensor dimension of the created Array object.
+! corresponding to the DistGrid {\tt dimCount} of 2. The first element indicates
+! which Array dimension the first DistGrid dimension is mapped against. Here the
+! 1st DistGrid dimension maps against the 3rd Array and the 2nd DistGrid
+! dimension maps against the 1st Array dimension. This leaves the 2nd Array
+! dimension to be the extra or tensor dimension of the created Array object.
 !EOE
 !BOC
   call ESMF_ArrayDestroy(array, rc=rc)
@@ -1918,19 +1945,23 @@ program ESMF_ArrayEx
 ! Operations on the Array object as a whole are unchanged by the different
 ! mapping of dimensions.
 !EOE
-!BOC
+
+#ifdef NOSKIP   
+!BOCI
   call ESMF_ArrayHalo(array, rc=rc)
-!EOC
+!EOCI
+#endif
+
 !BOE
 ! When working with Arrays that contain explicitly mapped Array and DistGrid 
 ! dimensions it is critical to understand that {\em width} and {\em bound}
 ! arguments are always defined in terms of the DistGrid dimension order. The
 ! Array dimensions indicate how the data is actually stored in the Array
 ! object, and that can be different for each Array, even if the same DistGrid
-! is used. The index space defined in DistGrid, however, does not change 
+! is used. The decomposition defined by the DistGrid, however, does not change 
 ! and is the same for each Array that uses it, regardless of the dimension order
-! in the Array. The DistGrid dimension order thus becomes a common
-! reference order for all Arrays that use the same DistGrid.
+! in the Array. The DistGrid dimension order thus becomes a common reference
+! frame for all Arrays that use the same DistGrid.
 !
 ! The {\tt dimmap} argument optionally provided during Array create indicates
 ! the DistGrid to Array dimension mapping. Depending on the formulation of the
@@ -1944,10 +1975,9 @@ program ESMF_ArrayEx
 !
 ! The association between Array and DistGrid dimensions becomes critical for
 ! correct native language access to the Array. In the following example the
-! inverse mapping information is used
-! to determine the correct bounds or the Array dimensions and to verify that
-! the kernel's assumption about which Array dimension is of tensor character is
-! correct. 
+! inverse mapping information is used to determine the correct bounds of the
+! Array dimensions and to verify that the kernel's assumption about which Array
+! dimension is a tensor dimension is correct. 
 !EOE
 !BOC
   allocate(inverseDimmap(3))  ! arrayRank = 3
@@ -2226,8 +2256,8 @@ program ESMF_ArrayEx
 ! When the inverse operation, i.e. {\tt ESMF\_ArrayGather()}, is applied to
 ! a replicated Array there is an intrinsic ambiguity that needs to be 
 ! considered. ESMF defines the gathering of data of a replicated Array
-! as the collection of data originating from the numerically larger DEs. This
-! means that data in replicated elements associated with numerically smaller DEs
+! as the collection of data originating from the numerically higher DEs. This
+! means that data in replicated elements associated with numerically lower DEs
 ! will be ignored during {\tt ESMF\_ArrayGather()}.
 ! For the current example this means that changing the Array contents on PET 1,
 ! which here corresponds to DE 1,
@@ -2252,7 +2282,7 @@ program ESMF_ArrayEx
   
 !BOE
 ! The result remains completely defined by the unmodified values of Array in 
-! DE 3, the numerically largest DE. However, overriding the DE-local Array
+! DE 3, the numerically highest DE. However, overriding the DE-local Array
 ! piece on DE 3
 !EOE
 !BOC

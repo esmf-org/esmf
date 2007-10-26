@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatter.cppF90,v 1.9 2007/09/20 23:08:25 theurich Exp $
+! $Id: ESMF_ArrayScatter.cppF90,v 1.10 2007/10/26 21:57:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_ArrayScatterMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayScatter.cppF90,v 1.9 2007/09/20 23:08:25 theurich Exp $'
+    '$Id: ESMF_ArrayScatter.cppF90,v 1.10 2007/10/26 21:57:00 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -141,6 +141,9 @@ contains
 !   argument allows selection of the patch. For Arrays defined on a single @\
 !   patch DistGrid the default selection (patch 1) will be correct. The @\
 !   shape of {\tt farray} must match the shape of the patch in Array. @\
+! @\
+!   If the Array contains replicating DistGrid dimensions data will be @\
+!   scattered across all of the replicated pieces. @\
 ! @\
 !   This version of the interface implements the PET-based blocking paradigm: @\
 !   Each PET of the VM must issue this call exactly once for {\em all} of its @\

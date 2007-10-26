@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayLarrayEx.F90,v 1.5 2007/05/30 17:46:19 theurich Exp $
+! $Id: ESMF_ArrayLarrayEx.F90,v 1.6 2007/10/26 21:56:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -261,10 +261,10 @@ program ESMF_ArrayLarrayEx
 !EOC  
 !BOE
 ! Note: If the VM associates multiple PEs with a PET the application writter 
-! may for decide to use OpenMP loop parallelization on the {\tt de} loop.
+! may decide to use OpenMP loop parallelization on the {\tt de} loop.
 !
 ! Cleanup requires that the PET-local deallocations are done before the 
-! pointers to the actual Fortran90 arrays get lost. Notice that {\tt larrayList}
+! pointers to the actual Fortran90 arrays are lost. Notice that {\tt larrayList}
 ! is used to obtain the pointers used in the deallocate statement. Pointers
 ! obtained from the {\tt larrayRefList}, while pointing to the same data, 
 ! {\em cannot} be used to deallocated the array allocations!

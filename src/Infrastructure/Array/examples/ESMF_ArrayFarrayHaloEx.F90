@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.6 2007/10/25 05:16:54 theurich Exp $
+! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.7 2007/10/26 21:56:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,9 +37,9 @@ program ESMF_ArrayFarrayHaloEx
 !BOC
   ! local variables
   real(ESMF_KIND_R8), allocatable :: farrayA(:,:)   ! allocatable F90 array
-  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)     ! matching F90 array pointer 
-  type(ESMF_DistGrid)      :: distgrid           ! DistGrid object
-  type(ESMF_Array)         :: array              ! Array object
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)     ! matching F90 array pointer
+  type(ESMF_DistGrid)         :: distgrid           ! DistGrid object
+  type(ESMF_Array)            :: array              ! Array object
   integer                     :: rc, i, j
   real                        :: localSum
   

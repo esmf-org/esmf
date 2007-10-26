@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.25 2007/10/25 05:16:56 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.26 2007/10/26 21:56:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.25 2007/10/25 05:16:56 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.26 2007/10/26 21:56:59 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -180,7 +180,7 @@ contains
 !     Rank of the Array object.
 !   \item[{[larrayList]}]
 !     Upon return this holds a list of the associated {\tt ESMC\_LocalArray}
-!     objects. {\tt larrayList} must be allocated to be at least of size
+!     objects. {\tt larrayList} must be allocated to be of size
 !     {\tt localDeCount}, i.e. the number of DEs associated with the calling
 !     PET.
 !   \item[{[indexflag]}]
@@ -189,11 +189,14 @@ contains
 !   \item[{[dimmap]}]
 !     Upon return this list holds the Array dimensions against which the
 !     DistGrid dimensions are mapped. {\tt dimmap} must be allocated to be
-!     at least of size {\tt dimCount}.
+!     of size {\tt dimCount}. An entry of zero indicates that the respective
+!     DistGrid dimension is replicating the Array across the DEs along this
+!     direction.
 !   \item[{[inverseDimmap]}]
 !     Upon return this list holds the DistGrid dimensions against which the
 !     Array dimensions are mapped. {\tt inverseDimmap} must be allocated to
-!     be at least of size {\tt rank}.
+!     of size {\tt rank}. An entry of zero indicates that the respective
+!     Array dimension is not decomposed, rendering it a tensor dimension.
 !   \item[{[exclusiveLBound]}]
 !     Upon return this holds the lower bounds of the exclusive regions for
 !     all PET-local DEs. {\tt exclusiveLBound} must be allocated to be
@@ -265,7 +268,7 @@ contains
 !   \item[{[localDeList]}]
 !     Upon return this holds the list of DE ids for the PET-local
 !     DEs defined in the DELayout associated with the Array object.
-!     The provided argument must at least be of size {\tt localDeCount}.
+!     The provided argument must be of size {\tt localDeCount}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}

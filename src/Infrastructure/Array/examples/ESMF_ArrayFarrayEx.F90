@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayEx.F90,v 1.5 2007/05/30 17:46:19 theurich Exp $
+! $Id: ESMF_ArrayFarrayEx.F90,v 1.6 2007/10/26 21:56:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -43,7 +43,8 @@ program ESMF_ArrayFarrayEx
 ! or allocatable attribute and it is the user's responsibility to allocate 
 ! memory. While it is also the user's responsibility to deallocate memory for
 ! arrays with pointer attribute the compiler will automatically deallocate
-! allocatable arrays under certain circumstances defined by the standard.
+! allocatable arrays under certain circumstances defined by the Fortran
+! standard.
 !
 ! The {\tt ESMF\_ArrayCreate()} interface has been written to accept native
 ! Fortran90 arrays of any flavor as a means to allow user-contolled memory
@@ -96,8 +97,8 @@ program ESMF_ArrayFarrayEx
 !EOE
 !BOC
   real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)     ! matching F90 array pointer 
-  type(ESMF_DistGrid)      :: distgrid           ! DistGrid object
-  type(ESMF_Array)         :: array              ! Array object
+  type(ESMF_DistGrid)         :: distgrid           ! DistGrid object
+  type(ESMF_Array)            :: array              ! Array object
   integer                     :: rc
   
 !EOC

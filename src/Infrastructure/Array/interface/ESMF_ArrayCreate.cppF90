@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.18 2007/10/25 18:41:11 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.19 2007/10/26 21:56:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -106,7 +106,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.18 2007/10/25 18:41:11 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.19 2007/10/26 21:56:59 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -190,16 +190,16 @@ contains
 ! The local arrays provided must be dimensioned according to the DE-local @\
 ! total region. Bounds of the exclusive regions are set as specified in the @\
 ! distgrid argument. Bounds for array dimensions that are not distributed can @\
-! be chosen freely. @\
+! be chosen freely using the {\tt lbounds} and {\tt ubounds} arguments. @\
 ! @\
 ! This interface requires a 1 DE per PET decomposition. The Array object will @\
 ! not be created and an error will be returned if this condition is not met. @\
 ! @\
-! The not distributed array dimensions form a tensor of rank = array.rank - @\
+! The not distributed Array dimensions form a tensor of rank = array.rank - @\
 ! distgrid.dimCount. By default all tensor elements are associated with @\
 ! stagger location 0. The widths of the computational region are set to @\
 ! the provided value, or zero by default, for all tensor elements. Use @\
-! {\tt ESMF\_ArraySetTensor()} to change these default settings after the @\
+! {\tt ESMF\_ArraySet()} to change these default settings after the @\
 ! Array object has been created. @\
 ! @\
 ! The return value is the newly created {\tt ESMF\_Array} object. @\
@@ -217,12 +217,22 @@ contains
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal @\
 !      to the rank of farray. @\
 ! \item[{[dimmap]}] @\
-!      List that contains as many elements as is indicated by distgrids|s @\
-!      dimCount. The elements map each dimension of distgrid to a dimension in @\
-!      {\tt farray}. The default is to map all of distgrid|s dimensions against the @\
-!      lower dimension of {\tt farray} in sequence. Unmapped {\tt farray} @\
-!      dimensions are considered to be not distributed dimensions and form a @\
-!      tensor of rank = farray.rank - distgrid.dimCount. @\
+!      List that contains as many elements as is indicated by @\
+!      {\tt distgrids}|s dimCount. The list elements map each dimension of @\
+!      the DistGrid object to a dimension in {\tt farray} by specifying the @\
+!      appropriate Array dimension index. The default is to map all of @\
+!      {\tt distgrid}|s dimensions against the lower dimensions of the @\
+!      {\tt farray} argument in sequence, i.e. {\tt dimmap = (/1, 2, .../)}. @\
+!      Unmapped {\tt farray} dimensions are not decomposed dimensions and @\
+!      form a tensor of rank = farray.rank - distgrid.dimCount. @\
+!      All {\tt dimmap} entries must be greater than or equal to one and @\
+!      smaller than or equal to the Array rank. It is erroneous to specify @\
+!      the same entry multiple times unless it is zero. @\
+!      If the Array rank is less than the DistGrid dimCount then the default @\
+!      dimmap will contain zeros for the dimCount - rank right most entries. @\
+!      A zero entry in the {\tt dimmap} indicates that the particular @\
+!      DistGrid dimension will be replicating the Array across the DEs @\
+!      along this direction. @\
 ! \item[{[computationalEdgeLWidth]}] @\
 !      This vector argument must have dimCount elements, where dimCount is @\
 !      specified in distgrid. It specifies the lower corner of the computational @\
@@ -248,15 +258,16 @@ contains
 ! \item[{[totalLWidth]}] @\
 !      This vector argument must have dimCount elements, where dimCount is @\
 !      specified in distgrid. It specifies the lower corner of the total memory @\
-!      region with respect to the lower corner of the exclusive region. @\
-!      The default is a zero vector. @\
+!      region with respect to the lower corner of the computational region. @\
+!      The default is to accommodate the union of exclusive and computational @\
+!      region exactly. @\
 ! \item[{[totalUWidth]}] @\
 !      This vector argument must have dimCount elements, where dimCount is @\
 !      specified in distgrid. It specifies the upper corner of the total memory @\
-!      region with respect to the upper corner of the exclusive region. @\
+!      region with respect to the upper corner of the computational region. @\
 !      The default is a vector that contains the remaining number of elements @\
-!      in each direction as to fit the computational region into the memory @\
-!      region provided by the {\tt farray} argument. @\
+!      in each direction as to fit the union of exclusive and computational @\
+!      region into the memory region provided by the {\tt farray} argument. @\
 ! \item[{[indexflag]}] @\
 !      Indicate how DE-local indices are defined. By default each DE|s @\
 !      exclusive region is placed to start at the local index space origin, @\
@@ -411,15 +422,15 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! object. The local arrays provided must be dimensioned according to the 
 ! DE-local total region. Bounds of the exclusive regions are set as specified 
 ! in the distgrid argument. Bounds for array dimensions that are not distributed
-! can be chosen freely.
+! can be chosen freely using the {\tt lbounds} and {\tt ubounds} arguments. @\
 !
 ! This interface is able to handle multiple DEs per PET.
 !
-! The not distributed array dimensions form a tensor of rank = array.rank - 
+! The not distributed Array dimensions form a tensor of rank = array.rank - 
 ! distgrid.dimCount. By default all tensor elements are associated with 
 ! stagger location 0. The widths of the computational region are set to 
 ! the provided value, or zero by default, for all tensor elements. Use 
-! {\tt ESMF\_ArraySetTensor()} to change these default settings after the 
+! {\tt ESMF\_ArraySet()} to change these default settings after the 
 ! Array object has been created.
 !
 ! The return value is the newly created {\tt ESMF\_Array} object.
@@ -439,10 +450,22 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      to the rank specified in arrayspec, otherwise a runtime ESMF error will be
 !      raised.
 ! \item[{[dimmap]}]
-!      List that has as many elements as is indicated by distgrids|s dimCount
-!      value. The elements map each dimension of distgrid to a dimension in
-!      arrayspec. The default is to map all of distgrid|s dimensions against the
-!      lower dimension of arrayspec in sequence.
+!      List that contains as many elements as is indicated by
+!      {\tt distgrids}|s dimCount. The list elements map each dimension of
+!      the DistGrid object to a dimension in {\tt farray} by specifying the
+!      appropriate Array dimension index. The default is to map all of
+!      {\tt distgrid}|s dimensions against the lower dimensions of the
+!      {\tt farray} argument in sequence, i.e. {\tt dimmap = (/1, 2, .../)}.
+!      Unmapped {\tt farray} dimensions are not decomposed dimensions and
+!      form a tensor of rank = farray.rank - distgrid.dimCount.
+!      All {\tt dimmap} entries must be greater than or equal to one and
+!      smaller than or equal to the Array rank. It is erroneous to specify
+!      the same entry multiple times unless it is zero.
+!      If the Array rank is less than the DistGrid dimCount then the default
+!      dimmap will contain zeros for the dimCount - rank right most entries.
+!      A zero entry in the {\tt dimmap} indicates that the particular
+!      DistGrid dimension will be replicating the Array across the DEs
+!      along this direction.
 ! \item[{[computationalEdgeLWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the lower corner of the computational
@@ -466,15 +489,16 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! \item[{[totalLWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the lower corner of the total memory
-!      region with respect to the lower corner of the exclusive region.
-!      The default is a zero vector.
+!      region with respect to the lower corner of the computational region.
+!      The default is to accommodate the union of exclusive and computational
+!      region exactly.
 ! \item[{[totalUWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the upper corner of the total memory
 !      region with respect to the upper corner of the exclusive region.
 !      The default is a vector that contains the remaining number of elements
-!      in each direction as to fit the computational region into the memory
-!      region provided by the {\tt larrayList} argument.
+!      in each direction as to fit the union of exclusive and computational
+!      region into the memory region provided by the {\tt larrayList} argument.
 ! \item[{[indexflag]}]
 !      Indicate how DE-local indices are defined. By default each DE's
 !      exclusive region is placed to start at the local index space origin,
@@ -701,10 +725,22 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      to the rank specified in arrayspec, otherwise a runtime ESMF error will be
 !      raised.
 ! \item[{[dimmap]}]
-!      List that has as many elements as is indicated by distgrids|s dimCount
-!      value. The elements map each dimension of distgrid to a dimension in
-!      arrayspec. The default is to map all of distgrid|s dimensions against the
-!      lower dimension of arrayspec in sequence.
+!      List that contains as many elements as is indicated by
+!      {\tt distgrids}|s dimCount. The list elements map each dimension of
+!      the DistGrid object to a dimension in {\tt farray} by specifying the
+!      appropriate Array dimension index. The default is to map all of
+!      {\tt distgrid}|s dimensions against the lower dimensions of the
+!      {\tt farray} argument in sequence, i.e. {\tt dimmap = (/1, 2, .../)}.
+!      Unmapped {\tt farray} dimensions are not decomposed dimensions and
+!      form a tensor of rank = farray.rank - distgrid.dimCount.
+!      All {\tt dimmap} entries must be greater than or equal to one and
+!      smaller than or equal to the Array rank. It is erroneous to specify
+!      the same entry multiple times unless it is zero.
+!      If the Array rank is less than the DistGrid dimCount then the default
+!      dimmap will contain zeros for the dimCount - rank right most entries.
+!      A zero entry in the {\tt dimmap} indicates that the particular
+!      DistGrid dimension will be replicating the Array across the DEs
+!      along this direction.
 ! \item[{[computationalEdgeLWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the lower corner of the computational
@@ -719,18 +755,24 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the lower corner of the computational
 !      region with respect to the lower corner of the exclusive region.
+!      The default is a zero vector.
 ! \item[{[computationalUWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the upper corner of the computational
 !      region with respect to the upper corner of the exclusive region.
+!      The default is a zero vector.
 ! \item[{[totalMemoryLWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the lower corner of the total memory
-!      region with respect to the lower corner of the exclusive region.
+!      region with respect to the lower corner of the computational region.
+!      The default is to accommodate the union of exclusive and computational
+!      region.
 ! \item[{[totalMemoryUWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the upper corner of the total memory
-!      region with respect to the upper corner of the exclusive region.
+!      region with respect to the upper corner of the computational region.
+!      The default is to accommodate the union of exclusive and computational
+!      region.
 ! \item[{[indexflag]}]
 !      Indicate how DE-local indices are defined. By default each DE's
 !      exclusive region is placed to start at the local index space origin,
