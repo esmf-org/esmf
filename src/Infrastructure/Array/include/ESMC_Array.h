@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.79 2007/10/25 05:16:54 theurich Exp $
+// $Id: ESMC_Array.h,v 1.80 2007/10/27 00:00:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -170,6 +170,14 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     int getLinearIndexExclusive(int localDe, int *index, int *rc=NULL) const;
     SeqIndex getSequenceIndexExclusive(int localDe, int *index,
       int *rc=NULL) const;
+    void setStaggerLoc(int staggerLocArg){
+      for (int i=0; i<tensorCount; i++) staggerLoc[i] = staggerLocArg;
+    }
+    void setVectorDim(int vectorDimArg){
+      for (int i=0; i<tensorCount; i++) vectorDim[i] = vectorDimArg;
+    }
+    int setComputationalLWidth(InterfaceInt *computationalLWidthArg);
+    int setComputationalUWidth(InterfaceInt *computationalUWidthArg);
     const char *getName()               const {return ESMC_BaseGetName();}
     int setName(char *name){return ESMC_BaseSetName(name, "Array");}
     // misc.

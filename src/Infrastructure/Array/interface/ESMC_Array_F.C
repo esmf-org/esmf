@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.69 2007/10/16 21:34:15 theurich Exp $
+// $Id: ESMC_Array_F.C,v 1.70 2007/10/27 00:00:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -649,6 +649,31 @@ extern "C" {
     ESMC_LogDefault.ESMC_LogMsgFoundError((*array)->scatter(
       NULL, ESMF_NOKIND, 0, NULL, ESMC_NOT_PRESENT_FILTER(patch),
       *rootPet, opt_vm),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
+  void FTN(c_esmc_arrayset)(ESMCI::Array **array, int *staggerLoc, 
+    int *vectorDim, ESMCI::InterfaceInt **computationalLWidthArg,
+    ESMCI::InterfaceInt **computationalUWidthArg, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arrayset()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // set staggerLoc
+    if (ESMC_NOT_PRESENT_FILTER(staggerLoc)!=ESMC_NULL_POINTER)
+      (*array)->setStaggerLoc(*staggerLoc);
+    // set vectorDim
+    if (ESMC_NOT_PRESENT_FILTER(vectorDim)!=ESMC_NULL_POINTER)
+      (*array)->setVectorDim(*vectorDim);
+    // Call into the C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*array)->setComputationalLWidth(
+      *computationalLWidthArg),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+    // Call into the C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*array)->setComputationalUWidth(
+      *computationalUWidthArg),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

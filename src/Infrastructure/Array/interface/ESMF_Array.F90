@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.70 2007/10/25 05:16:55 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.71 2007/10/27 00:00:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -128,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.70 2007/10/25 05:16:55 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.71 2007/10/27 00:00:24 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -146,8 +146,7 @@ module ESMF_ArrayMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
     module procedure ESMF_ArraySet
-    module procedure ESMF_ArraySetAllDecompAllDe
-    module procedure ESMF_ArraySetTensorAllDe
+    module procedure ESMF_ArraySetTensor
       
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -250,120 +249,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArraySetAllDecompAllDe()"
-!BOPI
-! !IROUTINE: ESMF_ArraySetAllDecompAllDe - Set Array internals
-
-! !INTERFACE:
-  ! Private name; call using ESMF_ArraySet()
-  subroutine ESMF_ArraySetAllDecompAllDe(array, staggerLoc, vectorDim, &
-    computationalLWidth, computationalUWidth, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Array), intent(in)              :: array
-    integer,          intent(in),   optional  :: staggerLoc
-    integer,          intent(in),   optional  :: vectorDim
-    integer,          intent(in),   optional  :: computationalLWidth(:)
-    integer,          intent(in),   optional  :: computationalUWidth(:)
-    integer,          intent(out),  optional  :: rc  
-!         
-!
-! !DESCRIPTION:
-!     Set internal information.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[array] 
-!        {\tt ESMF\_Array} object for which to set properties.
-!     \item[staggerLoc]
-!       Stagger location of this Array.
-!     \item[vectorDim]
-!       Dimension along this vector component is aligned.
-!     \item[{[computationalLWidth]}] 
-!      This vector argument must have dimCount elements, where dimCount is
-!      specified in distgrid. It specifies the lower corner of the computational
-!      region with respect to the lower corner of the exclusive region.
-!     \item[{[computationalUWidth]}] 
-!      This vector argument must have dimCount elements, where dimCount is
-!      specified in distgrid. It specifies the upper corner of the computational
-!      region with respect to the upper corner of the exclusive region.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-  end subroutine ESMF_ArraySetAllDecompAllDe
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArraySetTensorAllDe()"
-!BOPI
-! !IROUTINE: ESMF_ArraySetTensorAllDe - Set Array internals
-
-! !INTERFACE:
-  ! Private name; call using ESMF_ArraySet()
-  subroutine ESMF_ArraySetTensorAllDe(array, tensorIndex, staggerLoc, &
-    vectorDim, computationalLWidth, computationalUWidth, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Array), intent(in)              :: array
-    integer,          intent(in)              :: tensorIndex(:)
-    integer,          intent(in),   optional  :: staggerLoc
-    integer,          intent(in),   optional  :: vectorDim
-    integer,          intent(in),   optional  :: computationalLWidth(:)
-    integer,          intent(in),   optional  :: computationalUWidth(:)
-    integer,          intent(out),  optional  :: rc  
-!         
-!
-! !DESCRIPTION:
-!     Set internal information.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[array] 
-!        {\tt ESMF\_Array} object for which to set properties.
-!     \item[{[tensorIndex]}]
-!       Specifies the element within the not distributed array dimensions for which
-!       properties are to be set. Default is to set it for all elements.
-!     \item[staggerLoc]
-!       Stagger location of this tensor element.
-!     \item[vectorDim]
-!       Dimension along this vector component of this tensor element is aligned.
-!     \item[{[computationalLWidth]}] 
-!      This vector argument must have dimCount elements, where dimCount is
-!      specified in distgrid. It specifies the lower corner of the computational
-!      region with respect to the lower corner of the exclusive region.
-!     \item[{[computationalUWidth]}] 
-!      This vector argument must have dimCount elements, where dimCount is
-!      specified in distgrid. It specifies the upper corner of the computational
-!      region with respect to the upper corner of the exclusive region.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-  end subroutine ESMF_ArraySetTensorAllDe
-!------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
@@ -1442,33 +1327,53 @@ contains
 ! !IROUTINE: ESMF_ArraySet - Set Array properties
 !
 ! !INTERFACE:
-  subroutine ESMF_ArraySet(array, name, rc)
+  subroutine ESMF_ArraySet(array, name, staggerLoc, vectorDim, &
+    computationalLWidth, computationalUWidth, rc)
 
 !
 ! !ARGUMENTS:
-  type(ESMF_Array),    intent(inout)         :: array
-  character (len = *), intent(in)            :: name
-  integer,             intent(out), optional :: rc
+    type(ESMF_Array),   intent(inout)           :: array
+    character(len = *), intent(in),   optional  :: name
+    integer,            intent(in),   optional  :: staggerLoc
+    integer,            intent(in),   optional  :: vectorDim
+    integer,            intent(in),   optional  :: computationalLWidth(:,:)
+    integer,            intent(in),   optional  :: computationalUWidth(:,:)
+    integer,            intent(out),  optional  :: rc
 
 !
 ! !DESCRIPTION:
-!     Sets the name of the {\tt ESMF\_Array} object.
-!     Note: Unlike most other ESMF objects there are very few items which can 
-!     be changed once an {\tt ESMF\_Array} object has been created.
+!     Sets adjustable settings in an {\tt ESMF\_Array} object. Arrays with
+!     tensor dimensions will set values for {\em all} tensor components.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
-!           An {\tt ESMF\_Array}.
-!     \item [name]
-!           The Array name.
+!       {\tt ESMF\_Array} object for which to set properties.
+!     \item [{[name]}]
+!       The Array name.
+!     \item[{[staggerLoc]}]
+!       User-defined stagger location.
+!     \item[{[vectorDim]}]
+!       User-defined vector dimension.
+!     \item[{[computationalLWidth]}] 
+!       This argument must have of size {\tt (dimCount, localDeCount)}.
+!       {\tt computationalLWidth} specifies the lower corner of the
+!       computational region with respect to the lower corner of the exclusive
+!       region for all DEs.
+!     \item[{[computationalUWidth]}] 
+!       This argument must have of size {\tt (dimCount, localDeCount)}.
+!       {\tt computationalUWidth} specifies the upper corner of the
+!       computational region with respect to the upper corner of the exclusive
+!       region for all DEs.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_InterfaceInt)       :: computationalLWidthArg ! helper variable
+    type(ESMF_InterfaceInt)       :: computationalUWidthArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1478,7 +1383,33 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
     
     ! Set the name in Base object
-    call c_ESMC_SetName(array, "Array", name, localrc)
+    if (present(name)) then
+      call c_ESMC_SetName(array, "Array", name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! Deal with (optional) array arguments
+    computationalLWidthArg = &
+      ESMF_InterfaceIntCreate(farray2D=computationalLWidth, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalUWidthArg = &
+      ESMF_InterfaceIntCreate(farray2D=computationalUWidth, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArraySet(array, staggerLoc, vectorDim, computationalLWidthArg, &
+      computationalUWidthArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Garbage collection
+    call ESMF_InterfaceIntDestroy(computationalLWidthArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalUWidthArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1486,6 +1417,55 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySet
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySetTensor()"
+!BOP
+! !IROUTINE: ESMF_ArraySet - Set Array internals for specific tensor component
+
+! !INTERFACE:
+  ! Private name; call using ESMF_ArraySet()
+  subroutine ESMF_ArraySetTensor(array, tensorIndex, staggerLoc, vectorDim, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array), intent(in)              :: array
+    integer,          intent(in)              :: tensorIndex(:)
+    integer,          intent(in),   optional  :: staggerLoc
+    integer,          intent(in),   optional  :: vectorDim
+    integer,          intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Sets adjustable settings in an {\tt ESMF\_Array} object for a specific
+!     tensor component.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[array] 
+!       {\tt ESMF\_Array} object for which to set properties.
+!     \item[tensorIndex]
+!       Specifies the tensor component within the not distributed array
+!       dimensions for which properties are to be set.
+!     \item[{[staggerLoc]}]
+!       Stagger location of this tensor element.
+!     \item[{[vectorDim]}]
+!       Dimension along this vector component of this tensor element is aligned.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+  end subroutine ESMF_ArraySetTensor
 !------------------------------------------------------------------------------
 
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.154 2007/10/25 17:56:15 theurich Exp $
+// $Id: ESMC_Array.C,v 1.155 2007/10/27 00:00:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.154 2007/10/25 17:56:15 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.155 2007/10/27 00:00:25 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1534,6 +1534,72 @@ SeqIndex Array::getSequenceIndexExclusive(
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return seqIndex;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::setComputationalLWidth()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::setComputationalLWidth
+//
+// !INTERFACE:
+int Array::setComputationalLWidth(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  InterfaceInt *computationalLWidthArg        // (in)
+  ){
+//
+// !DESCRIPTION:
+//    Set computationalLWidth.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::setComputationalUWidth()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::setComputationalUWidth
+//
+// !INTERFACE:
+int Array::setComputationalUWidth(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  InterfaceInt *computationalUWidthArg        // (in)
+  ){
+//
+// !DESCRIPTION:
+//    Set computationalUWidth.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
 }
 //-----------------------------------------------------------------------------
 

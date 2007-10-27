@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.29 2007/10/26 21:56:58 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.30 2007/10/27 00:00:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -1871,8 +1871,7 @@ program ESMF_ArrayEx
 ! in an Array and set stagger location, computational and halo widths.
 !EOE
 !BOC
-  call ESMF_ArraySet(array, tensorIndex=(/2/), computationalLWidth=(/0,1/), &
-    staggerLoc=2, rc=rc)
+  call ESMF_ArraySet(array, tensorIndex=(/2/), staggerLoc=2, rc=rc)
 !EOC
 
 #ifdef NOSKIP   
@@ -1938,8 +1937,7 @@ program ESMF_ArrayEx
     dimmap=(/3, 1/), totalLWidth=(/0,1/), totalUWidth=(/0,1/), &
     lbounds=(/1/), ubounds=(/2/), rc=rc)
   call ESMF_ArraySet(array, tensorIndex=(/1/), staggerLoc=1, rc=rc)
-  call ESMF_ArraySet(array, tensorIndex=(/2/), computationalLWidth=(/0,1/), &
-    staggerLoc=2, rc=rc)
+  call ESMF_ArraySet(array, tensorIndex=(/2/), staggerLoc=2, rc=rc)
 !EOC
 !BOE
 ! Operations on the Array object as a whole are unchanged by the different
