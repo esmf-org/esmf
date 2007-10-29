@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.200 2007/10/12 20:49:44 theurich Exp $
+#  $Id: common.mk,v 1.201 2007/10/29 18:01:39 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1885,21 +1885,23 @@ tree_run_examples_uni: $(EXAMPLES_RUN_UNI)
 # relying on the mpirun script to redirect stdout from inside the batch script.
 #
 exfrun:
-	-@if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
-	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex ; \
-	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex ; \
+	-@cd $(ESMF_EXDIR) ; \
+	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
+	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(EXNAME)Ex ; \
+	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(EXNAME)Ex ; \
 	else \
-	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex \> $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex.stdout 2\>\&1 ; \
-	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex > $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex.stdout 2>&1 ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(EXNAME)Ex \> ./ESMF_$(EXNAME)Ex.stdout 2\>\&1 ; \
+	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(EXNAME)Ex > ./ESMF_$(EXNAME)Ex.stdout 2>&1 ; \
 	fi 
 
 excrun:
-	-@if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
-	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex ; \
-	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex ; \
+	-@cd $(ESMF_EXDIR) ; \
+	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
+	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(EXNAME)Ex ; \
+	  $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(EXNAME)Ex ; \
 	else \
-	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex \> $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex.stdout 2\>\&1 ; \
-	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex > $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex.stdout 2>&1 ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(EXNAME)Ex \> ./ESMC_$(EXNAME)Ex.stdout 2\>\&1 ; \
+	  $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(EXNAME)Ex > ./ESMC_$(EXNAME)Ex.stdout 2>&1 ; \
 	fi 
 
 #
