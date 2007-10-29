@@ -1,4 +1,4 @@
-! $Id: ESMF_NewField.F90,v 1.3 2007/10/29 17:52:51 cdeluca Exp $
+! $Id: ESMF_NewField.F90,v 1.4 2007/10/29 18:22:03 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -206,7 +206,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_NewField.F90,v 1.3 2007/10/29 17:52:51 cdeluca Exp $'
+      '$Id: ESMF_NewField.F90,v 1.4 2007/10/29 18:22:03 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -3907,7 +3907,8 @@
       endif
 
 ! TODO:FIELDINTEGRATION Adjust array size in field create for halo widths 
-      array = ESMF_ArrayCreateFromGrid(grid, staggerloc, typekind, rc=localrc) 
+      array = ESMF_ArrayCreateFromGrid(grid, staggerloc=staggerloc, typekind=typekind, &
+                                       rc=localrc) 
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
