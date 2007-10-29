@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.155 2007/10/27 00:00:25 theurich Exp $
+// $Id: ESMC_Array.C,v 1.156 2007/10/29 19:10:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.155 2007/10/27 00:00:25 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.156 2007/10/29 19:10:38 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -84,6 +84,7 @@ Array::Array(
   int *totalLBoundArg,                    // (in)
   int *totalUBoundArg,                    // (in)
   int tensorCountArg,                     // (in)
+  int tensorElementCountArg,              // (in)
   int *lboundsArray,                      // (in)
   int *uboundsArray,                      // (in)
   int *staggerLocArray,                   // (in)
@@ -143,15 +144,16 @@ Array::Array(
     dimCount*localDeCount*sizeof(int));
   // tensor dimensions
   tensorCount = tensorCountArg;
+  tensorElementCount = tensorElementCountArg;
   lbounds = new int[tensorCountArg];
   memcpy(lbounds, lboundsArray, tensorCountArg * sizeof(int));
   ubounds = new int[tensorCountArg];
   memcpy(ubounds, uboundsArray, tensorCountArg * sizeof(int));
   // staggerLoc and vectorDim
-  staggerLoc = new int[tensorCountArg];
-  memcpy(staggerLoc, staggerLocArray, tensorCountArg * sizeof(int));
-  vectorDim = new int[tensorCountArg];
-  memcpy(vectorDim, vectorDimArray, tensorCountArg * sizeof(int));
+  staggerLoc = new int[tensorElementCount];
+  memcpy(staggerLoc, staggerLocArray, tensorElementCount * sizeof(int));
+  vectorDim = new int[tensorElementCount];
+  memcpy(vectorDim, vectorDimArray, tensorElementCount * sizeof(int));
   // dimmap and inverseDimmap
   dimmap = new int[dimCount];
   memcpy(dimmap, dimmapArray, dimCount * sizeof(int));
@@ -176,18 +178,6 @@ Array::Array(
         --j;  // shift to basis 0
         deElementCount[i] *= indexCountPDimPDe[i*dimCount+j];
       }
-    }
-  }
-  
-  // tensorElementCount
-  tensorElementCount = 1;  // prime tensorElementCount
-  int tensorIndex = 0;  // reset
-  for (int jj=0; jj<rank; jj++){
-    int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor dims
-    if (j==0){
-      // tensor dimension
-      tensorElementCount *= (ubounds[tensorIndex] - lbounds[tensorIndex] + 1);
-      ++tensorIndex;
     }
   }
   
@@ -478,6 +468,26 @@ Array *Array::create(
       }
     delete [] ubounds;
   }
+  // tensorElementCount
+  int tensorElementCount = 1;  // prime tensorElementCount
+  for (int i=0; i<tensorCount; i++)
+    tensorElementCount *= (uboundsArray[i] - lboundsArray[i] + 1);
+  // prepare temporary staggerLoc and vectorDim arrays
+  int *staggerLoc = new int[tensorElementCount];
+  if (staggerLocArg)
+    for (int i=0; i<tensorElementCount; i++)
+      staggerLoc[i] = *staggerLocArg;
+  else
+    for (int i=0; i<tensorElementCount; i++)
+      staggerLoc[i] = 0;
+  int *vectorDim = new int[tensorElementCount];
+  if (vectorDimArg)
+    for (int i=0; i<tensorElementCount; i++)
+      vectorDim[i] = *vectorDimArg;
+  else
+    for (int i=0; i<tensorElementCount; i++)
+      vectorDim[i] = 1;
+  
   // delayout -> deCount, localDeCount, localDeList
   int deCount = delayout->getDeCount();
   int localDeCount = delayout->getLocalDeCount();
@@ -733,22 +743,6 @@ Array *Array::create(
     }
   }
 
-  // prepare temporary staggerLoc and vectorDim arrays
-  int *staggerLoc = new int[tensorCount];
-  if (staggerLocArg)
-    for (int i=0; i<tensorCount; i++)
-      staggerLoc[i] = *staggerLocArg;
-  else
-    for (int i=0; i<tensorCount; i++)
-      staggerLoc[i] = 0;
-  int *vectorDim = new int[tensorCount];
-  if (vectorDimArg)
-    for (int i=0; i<tensorCount; i++)
-      vectorDim[i] = *vectorDimArg;
-  else
-    for (int i=0; i<tensorCount; i++)
-      vectorDim[i] = 1;
-    
   // allocate LocalArray list that holds all PET-local DEs and adjust elements
   ESMC_LocalArray **larrayList = new ESMC_LocalArray*[localDeCount];
   int *temp_counts = new int[rank];
@@ -830,9 +824,9 @@ Array *Array::create(
   try{
     array = new Array(typekind, rank, larrayList, distgrid, exclusiveLBound,
       exclusiveUBound, computationalLBound, computationalUBound,
-      totalLBound, totalUBound, tensorCount, lboundsArray, uboundsArray,
-      staggerLoc, vectorDim, dimmapArray, inverseDimmapArray, indexflag,
-      &localrc);
+      totalLBound, totalUBound, tensorCount, tensorElementCount, lboundsArray,
+      uboundsArray, staggerLoc, vectorDim, dimmapArray, inverseDimmapArray,
+      indexflag, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }catch(...){
@@ -1010,6 +1004,26 @@ Array *Array::create(
     }
     uboundsArray = uboundsArg->array;
   }
+  // tensorElementCount
+  int tensorElementCount = 1;  // prime tensorElementCount
+  for (int i=0; i<tensorCount; i++)
+    tensorElementCount *= (uboundsArray[i] - lboundsArray[i] + 1);
+  // prepare temporary staggerLoc and vectorDim arrays
+  int *staggerLoc = new int[tensorElementCount];
+  if (staggerLocArg)
+    for (int i=0; i<tensorElementCount; i++)
+      staggerLoc[i] = *staggerLocArg;
+  else
+    for (int i=0; i<tensorElementCount; i++)
+      staggerLoc[i] = 0;
+  int *vectorDim = new int[tensorElementCount];
+  if (vectorDimArg)
+    for (int i=0; i<tensorElementCount; i++)
+      vectorDim[i] = *vectorDimArg;
+  else
+    for (int i=0; i<tensorElementCount; i++)
+      vectorDim[i] = 1;
+  
   // delayout -> deCount, localDeCount, localDeList
   int deCount = delayout->getDeCount();
   int localDeCount = delayout->getLocalDeCount();
@@ -1255,22 +1269,6 @@ Array *Array::create(
     }
   }
   
-  // prepare temporary staggerLoc and vectorDim arrays
-  int *staggerLoc = new int[tensorCount];
-  if (staggerLocArg)
-    for (int i=0; i<tensorCount; i++)
-      staggerLoc[i] = *staggerLocArg;
-  else
-    for (int i=0; i<tensorCount; i++)
-      staggerLoc[i] = 0;
-  int *vectorDim = new int[tensorCount];
-  if (vectorDimArg)
-    for (int i=0; i<tensorCount; i++)
-      vectorDim[i] = *vectorDimArg;
-  else
-    for (int i=0; i<tensorCount; i++)
-      vectorDim[i] = 1;
-  
   // allocate LocalArray list that holds all PET-local DEs
   ESMC_LocalArray **larrayList = new ESMC_LocalArray*[localDeCount];
   int *temp_counts = new int[rank];
@@ -1309,9 +1307,9 @@ Array *Array::create(
   try{
     array = new Array(typekind, rank, larrayList, distgrid, exclusiveLBound,
       exclusiveUBound, computationalLBound, computationalUBound,
-      totalLBound, totalUBound, tensorCount, lboundsArray, uboundsArray,
-      staggerLoc, vectorDim, dimmapArray, inverseDimmapArray, indexflag,
-      &localrc);
+      totalLBound, totalUBound, tensorCount, tensorElementCount, lboundsArray,
+      uboundsArray, staggerLoc, vectorDim, dimmapArray, inverseDimmapArray,
+      indexflag, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }catch(...){
@@ -1556,13 +1554,55 @@ int Array::setComputationalLWidth(
   ){
 //
 // !DESCRIPTION:
-//    Set computationalLWidth.
+//    Set computationalLWidth for all local DEs.
 //
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // check computationalLWidthArg input and process
+  if (computationalLWidthArg != NULL){
+    if (computationalLWidthArg->dimCount != 2){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- computationalLWidth array must be of rank 2", &rc);
+      return rc;
+    }
+    int dimCount = distgrid->getDimCount();
+    if (computationalLWidthArg->extent[0] != dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- first dim of computationalLWidth argument must be of size dimCount",
+        &rc);
+      return rc;
+    }
+    int localDeCount = delayout->getLocalDeCount();
+    if (computationalLWidthArg->extent[1] != localDeCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- second dim of computationalLWidth argument must be of size "
+        "localDeCount", &rc);
+      return rc;
+    }
+    int *computationalLBoundNew = new int[dimCount*localDeCount];
+    for (int i=0; i<localDeCount*dimCount; i++){
+      computationalLBoundNew[i] = exclusiveLBound[i]
+        - computationalLWidthArg->array[i];
+      if (computationalLBoundNew[i] < totalLBound[i]){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          "- computationaLWidth below totalLBound -> not updated", &rc);
+        return rc;
+      }
+      if (computationalLBoundNew[i] > totalUBound[i]){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          "- computationaLWidth above totalUBound -> not updated", &rc);
+        return rc;
+      }
+    }
+    // update computationalLBound
+    memcpy(computationalLBound, computationalLBoundNew,
+      dimCount*localDeCount*sizeof(int));
+    delete [] computationalLBoundNew;
+  }
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -1589,13 +1629,55 @@ int Array::setComputationalUWidth(
   ){
 //
 // !DESCRIPTION:
-//    Set computationalUWidth.
+//    Set computationalUWidth for all local DEs.
 //
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // check computationalUWidthArg input and process
+  if (computationalUWidthArg != NULL){
+    if (computationalUWidthArg->dimCount != 2){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- computationalUWidth array must be of rank 2", &rc);
+      return rc;
+    }
+    int dimCount = distgrid->getDimCount();
+    if (computationalUWidthArg->extent[0] != dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- first dim of computationalUWidth argument must be of size dimCount",
+        &rc);
+      return rc;
+    }
+    int localDeCount = delayout->getLocalDeCount();
+    if (computationalUWidthArg->extent[1] != localDeCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- second dim of computationalUWidth argument must be of size "
+        "localDeCount", &rc);
+      return rc;
+    }
+    int *computationalLBoundNew = new int[dimCount*localDeCount];
+    for (int i=0; i<localDeCount*dimCount; i++){
+      computationalLBoundNew[i] = exclusiveLBound[i]
+        - computationalUWidthArg->array[i];
+      if (computationalLBoundNew[i] < totalLBound[i]){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          "- computationaUWidth below totalLBound -> not updated", &rc);
+        return rc;
+      }
+      if (computationalLBoundNew[i] > totalUBound[i]){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          "- computationaUWidth above totalUBound -> not updated", &rc);
+        return rc;
+      }
+    }
+    // update computationalLBound
+    memcpy(computationalLBound, computationalLBoundNew,
+      dimCount*localDeCount*sizeof(int));
+    delete [] computationalLBoundNew;
+  }
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -3033,7 +3115,7 @@ int Array::sparseMatMulStore(
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
   
-#define ASMMSTORETIMING
+#define ASMMSTORETIMING___disable
 #ifdef ASMMSTORETIMING
   double t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10X, t10Y, t11;//gjt - profile
   double t4a, t4b, t4c, t5a, t5b, t5c;  //gjt - profile
@@ -5518,7 +5600,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   VMK::wtime(&t8);   //gjt - profile
 #endif
     
-#define ASMMPROFILE
+#define ASMMPROFILE___disable
 #ifdef ASMMPROFILE
   // <XXE profiling element>
   xxe->stream[xxe->count].opId = XXE::wtimer;

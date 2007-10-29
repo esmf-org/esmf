@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.30 2007/10/27 00:00:23 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.31 2007/10/29 19:10:36 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -1861,14 +1861,10 @@ program ESMF_ArrayEx
 ! dimension, rendering it a tensor dimension.
 !
 ! The optional arguments that were used to create {\tt array} ensure that
-! the {\em total region} is large enough to accommodate the 
-! {\em halo} for tensor component 1 and the {\em computational region}
-! for tensor component 2. However, the regions for tensor component 2 must still
-! be adjusted to correctly reflect the {\tt array2} settings as in section
-! \ref{ArrayEx_staggeredArrays}. The stagger location, too, must be changed 
-! from "1" to "2" to match correctly. The Array class provides a special
+! the {\em total region} is large enough to accommodate the arrays for
+! tensor component 1 and 2. The Array class provides a special
 ! {\tt Set()} method that allows to individually address tensor elements
-! in an Array and set stagger location, computational and halo widths.
+! in an Array and set {\tt staggerLoc} and {\tt vectorDim} arguments.
 !EOE
 !BOC
   call ESMF_ArraySet(array, tensorIndex=(/2/), staggerLoc=2, rc=rc)

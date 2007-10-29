@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.71 2007/10/27 00:00:24 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.72 2007/10/29 19:10:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -128,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.71 2007/10/27 00:00:24 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.72 2007/10/29 19:10:37 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1359,12 +1359,12 @@ contains
 !       This argument must have of size {\tt (dimCount, localDeCount)}.
 !       {\tt computationalLWidth} specifies the lower corner of the
 !       computational region with respect to the lower corner of the exclusive
-!       region for all DEs.
+!       region for all local DEs.
 !     \item[{[computationalUWidth]}] 
 !       This argument must have of size {\tt (dimCount, localDeCount)}.
 !       {\tt computationalUWidth} specifies the upper corner of the
 !       computational region with respect to the upper corner of the exclusive
-!       region for all DEs.
+!       region for all local DEs.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1460,10 +1460,30 @@ contains
 !EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_InterfaceInt) :: tensorIndexArg  ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Deal with (optional) array arguments
+    tensorIndexArg = ESMF_InterfaceIntCreate(tensorIndex, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArraySetTensor(array, tensorIndexArg, staggerLoc, vectorDim, &
+      localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! garbage collection
+    call ESMF_InterfaceIntDestroy(tensorIndexArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySetTensor
 !------------------------------------------------------------------------------
