@@ -1,4 +1,4 @@
-! $Id: ESMF_NewField.F90,v 1.2 2007/10/29 05:17:00 cdeluca Exp $
+! $Id: ESMF_NewField.F90,v 1.3 2007/10/29 17:52:51 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -206,7 +206,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_NewField.F90,v 1.2 2007/10/29 05:17:00 cdeluca Exp $'
+      '$Id: ESMF_NewField.F90,v 1.3 2007/10/29 17:52:51 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -3840,9 +3840,9 @@
 
       integer :: localrc
       type(ESMF_Array) :: array                  
-      type(ESMF_DistGrid) :: distgrid
       type(ESMF_StaggerLoc) :: localStaggerloc
       type(ESMF_FieldDataMap) :: dmap
+      type(ESMF_TypeKind) :: typekind
       integer, dimension(ESMF_MAXDIM) :: gridcounts, arraycounts
       integer, dimension(ESMF_MAXDIM) :: exclLBounds, exclUBounds
       integer, dimension(ESMF_MAXDIM) :: dimorder, counts
@@ -3864,7 +3864,7 @@
 !      endif
 
       ! construct a reasonable datamap first before calling field construct
-      call ESMF_ArraySpecGet(arrayspec, rank=arrayRank, rc=localrc)
+      call ESMF_ArraySpecGet(arrayspec, rank=arrayRank, typekind=typekind, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -3893,7 +3893,7 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      ! make sure localStaggerloc has a value before GridGet call
+      ! make sure localStaggerloc has a value before Array create call
       if (present(staggerloc)) then
           localStaggerloc = staggerloc
       else
@@ -3907,12 +3907,7 @@
       endif
 
 ! TODO:FIELDINTEGRATION Adjust array size in field create for halo widths 
-      call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      array = ESMF_ArrayCreate(arrayspec, distgrid, rc=localrc) 
+      array = ESMF_ArrayCreateFromGrid(grid, staggerloc, typekind, rc=localrc) 
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return

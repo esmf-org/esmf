@@ -117,7 +117,6 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
   public ESMF_GridCreate
   public ESMF_GridCreateEmpty
   public ESMF_GridCreateShapeTile
-  public ESMF_GridCreateArray
 
   public ESMF_GridDestroy
 
@@ -130,6 +129,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
   public ESMF_GridSetShape
   public ESMF_GridValidate
 
+  public ESMF_ArrayCreateFromGrid
 
 ! - ESMF-internal methods:
   public ESMF_GridGetInit  
@@ -139,7 +139,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.35 2007/10/12 22:04:09 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.36 2007/10/29 17:52:51 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -593,22 +593,22 @@ end interface
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCreateArray"
-!BOP
-! !IROUTINE: ESMF_GridCreateArray - Create an Array to hold data for a stagger location
+#define ESMF_METHOD "ArrayCreateFromGrid"
+!BOPI
+! !IROUTINE: ESMF_ArrayCreateFromGrid - Create an Array to hold data for a stagger location
 
 ! !INTERFACE:
-      function ESMF_GridCreateArray(grid,staggerloc,name,typeKind, &
+      function ESMF_ArrayCreateFromGrid(grid,staggerloc,name,typekind, &
                                        totalLWidth, totalUWidth, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Array) :: ESMF_GridCreateArray
+      type(ESMF_Array) :: ESMF_ArrayCreateFromGrid
 !
 ! !ARGUMENTS:
        type(ESMF_Grid),       intent(in)            :: grid
        type(ESMF_StaggerLoc), intent(in),  optional :: staggerloc
        character (len=*),     intent(in),  optional :: name
-       type(ESMF_TypeKind),   intent(in),  optional :: typeKind
+       type(ESMF_TypeKind),   intent(in),  optional :: typekind
        integer,               intent(in),  optional :: totalLWidth(:)
        integer,               intent(in),  optional :: totalUWidth(:)
        integer,               intent(out), optional :: rc
@@ -632,7 +632,7 @@ end interface
 !      ESMF\_STAGGERLOC\_CENTER.
 ! \item[{[name]}]
 !     {\tt ESMF\_Grid} name.
-! \item[{[typeKind]}] 
+! \item[{[typekind]}] 
 !     The type/kind of the newly created array data. 
 !     If not specified then the type/kind will be 8 byte reals.  
 !\item[{[totalLWidth]}]
@@ -647,7 +647,7 @@ end interface
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOP
+!EOPI
     integer :: localrc ! local error status
     type(ESMF_Array) :: array             
     type(ESMF_ArraySpec) :: arrayspec         
@@ -764,7 +764,7 @@ end interface
     endif
 
     ! Set return value
-    ESMF_GridCreateArray = array
+    ESMF_ArrayCreateFromGrid = array
 
     ! cleanup
     deallocate(dimmap)
@@ -775,7 +775,7 @@ end interface
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-    end function ESMF_GridCreateArray
+    end function ESMF_ArrayCreateFromGrid
 
 
 !------------------------------------------------------------------------------
