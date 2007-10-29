@@ -1,4 +1,4 @@
-! $Id: ESMF_NewField.F90,v 1.1 2007/10/26 05:27:44 cdeluca Exp $
+! $Id: ESMF_NewField.F90,v 1.2 2007/10/29 05:17:00 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -50,16 +50,15 @@
       use ESMF_LogErrMod
       use ESMF_IOSpecMod
       use ESMF_ArraySpecMod
-      use ESMF_Array
       use ESMF_LocalArrayMod
-      use ESMF_InternArrayDataMapMod
       use ESMF_DELayoutMod
       use ESMF_StaggerLocMod
       use ESMF_DistGridMod
       use ESMF_GridMod
-      use ESMF_InternArrayMod
-      use ESMF_InternArrayCreateMod
-      use ESMF_InternArrayGetMod
+      use ESMF_ArrayMod
+      use ESMF_ArrayCreateMod
+      use ESMF_ArrayGetMod
+      use ESMF_InternArrayDataMapMod
       use ESMF_TimeMod
       use ESMF_FieldDataMapMod
       use ESMF_InitMacrosMod
@@ -118,7 +117,7 @@
         type (ESMF_FieldDataMap)      :: mapping  ! mapping of Array indices to Grid
         type (ESMF_IOSpec)            :: iospec           ! iospec values
         type (ESMF_Status)            :: iostatus         ! if unset, inherit from gcomp
-! TODO:ARRAYINTEGRATION Reconcile the additions of arrayspec, array and localFlag with methods
+! TODO:FIELDINTEGRATION Reconcile the additions of arrayspec, array and localFlag with methods
         type (ESMF_ArraySpec)         :: arrayspec
         type (ESMF_Array)             :: array
         logical                       :: localFlag        ! .true. if local data present
@@ -207,7 +206,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_NewField.F90,v 1.1 2007/10/26 05:27:44 cdeluca Exp $'
+      '$Id: ESMF_NewField.F90,v 1.2 2007/10/29 05:17:00 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -450,7 +449,7 @@
 !     \item [{[staggerloc]}]
 !           Stagger location of data in grid cells.  For valid 
 !           predefined values see Section \ref{sec:opt:staggerloc}.
-!           To create a custome stagger location see Section
+!           To create a custom stagger location see Section
 !           \ref{sec:usage:staggerloc:adv}.
 !           If a stagger location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
@@ -537,7 +536,7 @@
 !     \item [{[staggerloc]}]
 !           Stagger location of data in grid cells.  For valid 
 !           predefined values see Section \ref{sec:opt:staggerloc}.
-!           To create a custome stagger location see Section
+!           To create a custom stagger location see Section
 !           \ref{sec:usage:staggerloc:adv}.
 !           If a stagger location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
@@ -2240,6 +2239,8 @@
       localrc = ESMF_RC_NOT_IMPL   
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+! TODO:FIELDINTEGRATION Restore FieldSetLocalArray if it makes sense
+#if 0
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
@@ -2278,6 +2279,7 @@
                                 ESMF_CONTEXT, rc)) return
  
       if (present(rc)) rc = ESMF_SUCCESS
+#endif
 
       end subroutine ESMF_FieldSetLocalArray
 
@@ -3348,7 +3350,7 @@
           enddo
       endif
 
-! TODO:ARRAYINTEGRATION Restore this section with new Array calls
+! TODO:FIELDINTEGRATION Restore this section with new Array calls
 #if 0
       ! make sure there is data before asking it questions.
       if (ftypep%datastatus .eq. ESMF_STATUS_READY) then
@@ -3776,9 +3778,9 @@
 ! !IROUTINE: ESMF_FieldConstructIANew - Construct the internals of a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldConstructIANew(ftype, grid, arrayspec, allocflag, &
-                                        staggerloc, &
-                                        datamap, name, iospec, rc)
+      subroutine ESMF_FieldConstructIANew(ftype, grid, arrayspec, &
+                                        allocflag, staggerloc, &
+                                        indexflag, datamap, name, iospec, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldType), pointer :: ftype 
@@ -3786,6 +3788,7 @@
       type(ESMF_ArraySpec), intent(inout) :: arrayspec     
       type(ESMF_AllocFlag), intent(in), optional :: allocflag
       type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
+      type(ESMF_IndexFlag), intent(in), optional :: indexflag
       type(ESMF_FieldDataMap), intent(inout), optional :: datamap           
       character (len=*), intent(in), optional :: name
       type(ESMF_IOSpec), intent(in), optional :: iospec 
@@ -3813,10 +3816,13 @@
 !     \item [{[staggerloc]}]
 !           Stagger location of data in grid cells.  For valid 
 !           predefined values see Section \ref{sec:opt:staggerloc}.
-!           To create a custome stagger location see Section
+!           To create a custom stagger location see Section
 !           \ref{sec:usage:staggerloc:adv}.
 !           If a stagger location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
+!     \item [{[indexflag]}]
+!           Local or global indices.  See section \ref{opt:indexflag} for a 
+!           list of valid indexflag options.  The default is {ESMF\_INDEX\_DELOCAL}.
 !     \item [{[datamap]}]
 !           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
 !           data to the {\tt ESMF\_Grid}.
@@ -3833,7 +3839,8 @@
 
 
       integer :: localrc
-      type(ESMF_InternArray) :: array                   ! New array
+      type(ESMF_Array) :: array                  
+      type(ESMF_DistGrid) :: distgrid
       type(ESMF_StaggerLoc) :: localStaggerloc
       type(ESMF_FieldDataMap) :: dmap
       integer, dimension(ESMF_MAXDIM) :: gridcounts, arraycounts
@@ -3898,39 +3905,14 @@
                                  ESMF_CONTEXT, rc)) return
           endif
       endif
-! TODO:FIELDINTEGRATION Replace bound calculation with cellCount from GridGet()
-      call ESMF_GridGet(ftype%grid, localDE=0, staggerloc=localStaggerloc, &
-                        exclusiveLBound=exclLBounds(1:gridRank), &
-                        exclusiveUBound=exclUBounds(1:gridRank), &
-                        rc=localrc)
+
+! TODO:FIELDINTEGRATION Adjust array size in field create for halo widths 
+      call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      do i = 1, gridRank
-        gridcounts(i) = (exclUBounds(i) - exclLBounds(i)) + 1
-      enddo
-
-      ! get information back from datamap
-      call ESMF_FieldDataMapGet(ftype%mapping, dataIndexList=dimorder, &
-                                counts=counts, rc=localrc)
-
-      arraycounts(:) = 1
-      j = 1
-      do i=1, arrayRank
-         if (dimorder(i) .eq. 0) then
-            arraycounts(i) = counts(j) 
-            j = j + 1
-         else
-            !! TODO: decide if the counts going into ArrayCreate do or do not
-            !! include either halo widths or allocation widths.  If so, this
-            !! is the right count.  If not, then add hwidths plus awidths.
-            !!arraycounts(i) = gridcounts(dimorder(i))
-            arraycounts(i) = gridcounts(dimorder(i)) + (2 * hwidth)
-         endif
-      enddo
-
-      array = ESMF_InternArrayCreate(arrayspec, arraycounts, hwidth, rc=localrc) 
+      array = ESMF_ArrayCreate(arrayspec, distgrid, rc=localrc) 
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -3951,14 +3933,14 @@
 
 ! !INTERFACE:
       subroutine ESMF_FieldConstructIANewArray(ftype, grid, array, staggerloc, &
-                                             datamap, name, iospec, rc)
+                                               datamap, name, iospec, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldType), pointer :: ftype 
       type(ESMF_Grid) :: grid               
-      type(ESMF_InternArray), intent(in) :: array     
+      type(ESMF_Array), intent(in) :: array     
       type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
-      type(ESMF_FieldDataMap), intent(inout), optional :: datamap           
+      type(ESMF_FieldDataMap), intent(inout), optional :: datamap
       character (len=*), intent(in), optional :: name
       type(ESMF_IOSpec), intent(in), optional :: iospec 
       integer, intent(out), optional :: rc              
@@ -3979,7 +3961,7 @@
 !     \item [{[staggerloc]}] 
 !           Stagger location of data in grid cells.  For valid 
 !           predefined values see Section \ref{sec:opt:staggerloc}.
-!           To create a custome stagger location see Section
+!           To create a custom stagger location see Section
 !           \ref{sec:usage:staggerloc:adv}.
 !           If a stagger location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
@@ -4016,7 +3998,7 @@
                                   ESMF_CONTEXT, rc)) return
 
       ! make sure the array is a valid object first.
-      call ESMF_InternArrayValidate(array, "", localrc)
+      call ESMF_ArrayValidate(array, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -4084,7 +4066,7 @@
 !     \item [{[staggerloc]}] 
 !           Stagger location of data in grid cells.  For valid 
 !           predefined values see Section \ref{sec:opt:staggerloc}.
-!           To create a custome stagger location see Section
+!           To create a custom stagger location see Section
 !           \ref{sec:usage:staggerloc:adv}.
 !           If a stagger location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
@@ -4206,7 +4188,7 @@
 !     \item [{[staggerloc]}] 
 !           Stagger location of data in grid cells.  For valid 
 !           predefined values see Section \ref{sec:opt:staggerloc}.
-!           To create a custome stagger location see Section
+!           To create a custom stagger location see Section
 !           \ref{sec:usage:staggerloc:adv}.
 !           If a stagger location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
