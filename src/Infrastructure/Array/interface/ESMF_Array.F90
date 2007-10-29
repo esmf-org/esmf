@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.72 2007/10/29 19:10:37 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.73 2007/10/29 19:15:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -128,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.72 2007/10/29 19:10:37 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.73 2007/10/29 19:15:37 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -645,6 +645,311 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArrayRedist
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayReduce()"
+!BOPI
+! !IROUTINE: ESMF_ArrayReduce
+
+! !INTERFACE:
+  subroutine ESMF_ArrayReduce(array, result, reduceflag, rootPET, vm, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),           intent(inout)           :: array
+    real(ESMF_KIND_R8),         intent(out),  optional  :: result
+    type(ESMF_ReduceFlag),      intent(in)              :: reduceflag
+    integer,                    intent(in)              :: rootPET
+    type(ESMF_VM),              intent(in),   optional  :: vm
+    integer,                    intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Fully reduce the entire Array into a single {\tt result} on {\tt rootPET}
+!     according to the operation specified in {\tt reduceflag}. Only root must
+!     specify a valid result argument.
+!
+!     This version of the interface 
+!     implements the PET-based blocking paradigm: Each PET of the VM must issue
+!     this call exactly once for {\em all} of its DEs. The
+!     call will block until all PET-local data objects are accessible.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[array] 
+!        The {\tt ESMF\_Array} object across which data will be scattered.
+!     \item[{[result ]}]
+!        Argument into which to reduce the Array. Only root
+!        must provide a valid {\tt result} argument.
+!     \item[reduceflag] 
+!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
+!        valid reduce operations. There will be options that determine the 
+!        sequence of operations to ensure bit-wise reproducibility.
+!     \item[rootPET]
+!          root.
+!     \item[{[vm]}]
+!        Optional {\tt ESMF\_VM} object of the current context. Providing the
+!        VM of the current context will lower the method's overhead.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+  end subroutine ESMF_ArrayReduce
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayReduce()"
+!BOPI
+! !IROUTINE: ESMF_ArrayReduce
+
+! !INTERFACE:
+  ! Private name; call using ESMF_ArrayReduce()
+  subroutine ESMF_ArrayReduceFarray(array, farray, reduceflag, rootPET, &
+    dimList, patch, vm, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),           intent(inout)           :: array
+    real(ESMF_KIND_R8), target, intent(out),  optional  :: farray(:,:)
+    type(ESMF_ReduceFlag),      intent(in)              :: reduceflag
+    integer,                    intent(in)              :: rootPET
+    integer,                    intent(in)              :: dimList(:)
+    integer,                    intent(in),   optional  :: patch
+    type(ESMF_VM),              intent(in),   optional  :: vm
+    integer,                    intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Reduce the dimensions specified in {\tt dimList} of the Array object 
+!     into {\tt farray} on {\tt rootPET} according to the operation specified 
+!     in {\tt reduceflag}. Only root must provide a valid {\tt farray} argument.
+!     
+!     This partial reduction operation is patch specific, i.e. only a single
+!     DistGrid patch of the Array will be reduced. The patch can be selected
+!     by the optional {\tt patch} argument. The shape of the provided 
+!     {\tt farray} argument must match that of the Array patch reduced by the
+!     dimensions specified in {\tt dimList}.
+!      
+!
+!     This version of the interface 
+!     implements the PET-based blocking paradigm: Each PET of the VM must issue
+!     this call exactly once for {\em all} of its DEs. The
+!     call will block until all PET-local data objects are accessible.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[array] 
+!        The {\tt ESMF\_Array} object across which data will be scattered.
+!     \item[{[farray]}]
+!        Fortran90 array into which to reduce the Array. Only root
+!        must provide a valid {\tt farray} argument.
+!     \item[reduceflag] 
+!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
+!        valid reduce operations. There will be options that determine the 
+!        sequence of operations to ensure bit-wise reproducibility.
+!     \item[rootPET]
+!          root.
+!     \item[dimList]
+!        List of Array dimensions to be reduced.
+!     \item[{[patch]}]
+!        The DistGrid patch in {\tt array} to reduce into {\tt farray}.
+!        By default patch 1 of {\tt farray} will be reduced.
+!     \item[{[vm]}]
+!        Optional {\tt ESMF\_VM} object of the current context. Providing the
+!        VM of the current context will lower the method's overhead.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+  end subroutine ESMF_ArrayReduceFarray
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySet()"
+!BOP
+! !IROUTINE: ESMF_ArraySet - Set Array properties
+!
+! !INTERFACE:
+  subroutine ESMF_ArraySet(array, name, staggerLoc, vectorDim, &
+    computationalLWidth, computationalUWidth, rc)
+
+!
+! !ARGUMENTS:
+    type(ESMF_Array),   intent(inout)           :: array
+    character(len = *), intent(in),   optional  :: name
+    integer,            intent(in),   optional  :: staggerLoc
+    integer,            intent(in),   optional  :: vectorDim
+    integer,            intent(in),   optional  :: computationalLWidth(:,:)
+    integer,            intent(in),   optional  :: computationalUWidth(:,:)
+    integer,            intent(out),  optional  :: rc
+
+!
+! !DESCRIPTION:
+!     Sets adjustable settings in an {\tt ESMF\_Array} object. Arrays with
+!     tensor dimensions will set values for {\em all} tensor components.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!       {\tt ESMF\_Array} object for which to set properties.
+!     \item [{[name]}]
+!       The Array name.
+!     \item[{[staggerLoc]}]
+!       User-defined stagger location.
+!     \item[{[vectorDim]}]
+!       User-defined vector dimension.
+!     \item[{[computationalLWidth]}] 
+!       This argument must have of size {\tt (dimCount, localDeCount)}.
+!       {\tt computationalLWidth} specifies the lower corner of the
+!       computational region with respect to the lower corner of the exclusive
+!       region for all local DEs.
+!     \item[{[computationalUWidth]}] 
+!       This argument must have of size {\tt (dimCount, localDeCount)}.
+!       {\tt computationalUWidth} specifies the upper corner of the
+!       computational region with respect to the upper corner of the exclusive
+!       region for all local DEs.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_InterfaceInt)       :: computationalLWidthArg ! helper variable
+    type(ESMF_InterfaceInt)       :: computationalUWidthArg ! helper variable
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
+    
+    ! Set the name in Base object
+    if (present(name)) then
+      call c_ESMC_SetName(array, "Array", name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! Deal with (optional) array arguments
+    computationalLWidthArg = &
+      ESMF_InterfaceIntCreate(farray2D=computationalLWidth, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalUWidthArg = &
+      ESMF_InterfaceIntCreate(farray2D=computationalUWidth, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArraySet(array, staggerLoc, vectorDim, computationalLWidthArg, &
+      computationalUWidthArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Garbage collection
+    call ESMF_InterfaceIntDestroy(computationalLWidthArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalUWidthArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArraySet
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySetTensor()"
+!BOP
+! !IROUTINE: ESMF_ArraySet - Set Array internals for specific tensor component
+
+! !INTERFACE:
+  ! Private name; call using ESMF_ArraySet()
+  subroutine ESMF_ArraySetTensor(array, tensorIndex, staggerLoc, vectorDim, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array), intent(in)              :: array
+    integer,          intent(in)              :: tensorIndex(:)
+    integer,          intent(in),   optional  :: staggerLoc
+    integer,          intent(in),   optional  :: vectorDim
+    integer,          intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Sets adjustable settings in an {\tt ESMF\_Array} object for a specific
+!     tensor component.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[array] 
+!       {\tt ESMF\_Array} object for which to set properties.
+!     \item[tensorIndex]
+!       Specifies the tensor component within the not distributed array
+!       dimensions for which properties are to be set.
+!     \item[{[staggerLoc]}]
+!       Stagger location of this tensor element.
+!     \item[{[vectorDim]}]
+!       Dimension along this vector component of this tensor element is aligned.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_InterfaceInt) :: tensorIndexArg  ! helper variable
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Deal with (optional) array arguments
+    tensorIndexArg = ESMF_InterfaceIntCreate(tensorIndex, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArraySetTensor(array, tensorIndexArg, staggerLoc, vectorDim, &
+      localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! garbage collection
+    call ESMF_InterfaceIntDestroy(tensorIndexArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArraySetTensor
 !------------------------------------------------------------------------------
 
 
@@ -1180,312 +1485,6 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySparseMatMul
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayReduce()"
-!BOPI
-! !IROUTINE: ESMF_ArrayReduce
-
-! !INTERFACE:
-  subroutine ESMF_ArrayReduce(array, result, reduceflag, rootPET, vm, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Array),           intent(inout)           :: array
-    real(ESMF_KIND_R8),         intent(out),  optional  :: result
-    type(ESMF_ReduceFlag),      intent(in)              :: reduceflag
-    integer,                    intent(in)              :: rootPET
-    type(ESMF_VM),              intent(in),   optional  :: vm
-    integer,                    intent(out),  optional  :: rc  
-!         
-!
-! !DESCRIPTION:
-!     Fully reduce the entire Array into a single {\tt result} on {\tt rootPET}
-!     according to the operation specified in {\tt reduceflag}. Only root must
-!     specify a valid result argument.
-!
-!     This version of the interface 
-!     implements the PET-based blocking paradigm: Each PET of the VM must issue
-!     this call exactly once for {\em all} of its DEs. The
-!     call will block until all PET-local data objects are accessible.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[array] 
-!        The {\tt ESMF\_Array} object across which data will be scattered.
-!     \item[{[result ]}]
-!        Argument into which to reduce the Array. Only root
-!        must provide a valid {\tt result} argument.
-!     \item[reduceflag] 
-!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
-!        valid reduce operations. There will be options that determine the 
-!        sequence of operations to ensure bit-wise reproducibility.
-!     \item[rootPET]
-!          root.
-!     \item[{[vm]}]
-!        Optional {\tt ESMF\_VM} object of the current context. Providing the
-!        VM of the current context will lower the method's overhead.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
-  end subroutine ESMF_ArrayReduce
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayReduce()"
-!BOPI
-! !IROUTINE: ESMF_ArrayReduce
-
-! !INTERFACE:
-  ! Private name; call using ESMF_ArrayReduce()
-  subroutine ESMF_ArrayReduceFarray(array, farray, reduceflag, rootPET, &
-    dimList, patch, vm, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Array),           intent(inout)           :: array
-    real(ESMF_KIND_R8), target, intent(out),  optional  :: farray(:,:)
-    type(ESMF_ReduceFlag),      intent(in)              :: reduceflag
-    integer,                    intent(in)              :: rootPET
-    integer,                    intent(in)              :: dimList(:)
-    integer,                    intent(in),   optional  :: patch
-    type(ESMF_VM),              intent(in),   optional  :: vm
-    integer,                    intent(out),  optional  :: rc  
-!         
-!
-! !DESCRIPTION:
-!     Reduce the dimensions specified in {\tt dimList} of the Array object 
-!     into {\tt farray} on {\tt rootPET} according to the operation specified 
-!     in {\tt reduceflag}. Only root must provide a valid {\tt farray} argument.
-!     
-!     This partial reduction operation is patch specific, i.e. only a single
-!     DistGrid patch of the Array will be reduced. The patch can be selected
-!     by the optional {\tt patch} argument. The shape of the provided 
-!     {\tt farray} argument must match that of the Array patch reduced by the
-!     dimensions specified in {\tt dimList}.
-!      
-!
-!     This version of the interface 
-!     implements the PET-based blocking paradigm: Each PET of the VM must issue
-!     this call exactly once for {\em all} of its DEs. The
-!     call will block until all PET-local data objects are accessible.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[array] 
-!        The {\tt ESMF\_Array} object across which data will be scattered.
-!     \item[{[farray]}]
-!        Fortran90 array into which to reduce the Array. Only root
-!        must provide a valid {\tt farray} argument.
-!     \item[reduceflag] 
-!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
-!        valid reduce operations. There will be options that determine the 
-!        sequence of operations to ensure bit-wise reproducibility.
-!     \item[rootPET]
-!          root.
-!     \item[dimList]
-!        List of Array dimensions to be reduced.
-!     \item[{[patch]}]
-!        The DistGrid patch in {\tt array} to reduce into {\tt farray}.
-!        By default patch 1 of {\tt farray} will be reduced.
-!     \item[{[vm]}]
-!        Optional {\tt ESMF\_VM} object of the current context. Providing the
-!        VM of the current context will lower the method's overhead.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
-  end subroutine ESMF_ArrayReduceFarray
-!------------------------------------------------------------------------------
-
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArraySet()"
-!BOP
-! !IROUTINE: ESMF_ArraySet - Set Array properties
-!
-! !INTERFACE:
-  subroutine ESMF_ArraySet(array, name, staggerLoc, vectorDim, &
-    computationalLWidth, computationalUWidth, rc)
-
-!
-! !ARGUMENTS:
-    type(ESMF_Array),   intent(inout)           :: array
-    character(len = *), intent(in),   optional  :: name
-    integer,            intent(in),   optional  :: staggerLoc
-    integer,            intent(in),   optional  :: vectorDim
-    integer,            intent(in),   optional  :: computationalLWidth(:,:)
-    integer,            intent(in),   optional  :: computationalUWidth(:,:)
-    integer,            intent(out),  optional  :: rc
-
-!
-! !DESCRIPTION:
-!     Sets adjustable settings in an {\tt ESMF\_Array} object. Arrays with
-!     tensor dimensions will set values for {\em all} tensor components.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [array]
-!       {\tt ESMF\_Array} object for which to set properties.
-!     \item [{[name]}]
-!       The Array name.
-!     \item[{[staggerLoc]}]
-!       User-defined stagger location.
-!     \item[{[vectorDim]}]
-!       User-defined vector dimension.
-!     \item[{[computationalLWidth]}] 
-!       This argument must have of size {\tt (dimCount, localDeCount)}.
-!       {\tt computationalLWidth} specifies the lower corner of the
-!       computational region with respect to the lower corner of the exclusive
-!       region for all local DEs.
-!     \item[{[computationalUWidth]}] 
-!       This argument must have of size {\tt (dimCount, localDeCount)}.
-!       {\tt computationalUWidth} specifies the upper corner of the
-!       computational region with respect to the upper corner of the exclusive
-!       region for all local DEs.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_InterfaceInt)       :: computationalLWidthArg ! helper variable
-    type(ESMF_InterfaceInt)       :: computationalUWidthArg ! helper variable
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
-    
-    ! Set the name in Base object
-    if (present(name)) then
-      call c_ESMC_SetName(array, "Array", name, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! Deal with (optional) array arguments
-    computationalLWidthArg = &
-      ESMF_InterfaceIntCreate(farray2D=computationalLWidth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUWidthArg = &
-      ESMF_InterfaceIntCreate(farray2D=computationalUWidth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArraySet(array, staggerLoc, vectorDim, computationalLWidthArg, &
-      computationalUWidthArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    ! Garbage collection
-    call ESMF_InterfaceIntDestroy(computationalLWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_ArraySet
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArraySetTensor()"
-!BOP
-! !IROUTINE: ESMF_ArraySet - Set Array internals for specific tensor component
-
-! !INTERFACE:
-  ! Private name; call using ESMF_ArraySet()
-  subroutine ESMF_ArraySetTensor(array, tensorIndex, staggerLoc, vectorDim, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Array), intent(in)              :: array
-    integer,          intent(in)              :: tensorIndex(:)
-    integer,          intent(in),   optional  :: staggerLoc
-    integer,          intent(in),   optional  :: vectorDim
-    integer,          intent(out),  optional  :: rc  
-!         
-!
-! !DESCRIPTION:
-!     Sets adjustable settings in an {\tt ESMF\_Array} object for a specific
-!     tensor component.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[array] 
-!       {\tt ESMF\_Array} object for which to set properties.
-!     \item[tensorIndex]
-!       Specifies the tensor component within the not distributed array
-!       dimensions for which properties are to be set.
-!     \item[{[staggerLoc]}]
-!       Stagger location of this tensor element.
-!     \item[{[vectorDim]}]
-!       Dimension along this vector component of this tensor element is aligned.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_InterfaceInt) :: tensorIndexArg  ! helper variable
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
-    ! Deal with (optional) array arguments
-    tensorIndexArg = ESMF_InterfaceIntCreate(tensorIndex, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArraySetTensor(array, tensorIndexArg, staggerLoc, vectorDim, &
-      localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    ! garbage collection
-    call ESMF_InterfaceIntDestroy(tensorIndexArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_ArraySetTensor
 !------------------------------------------------------------------------------
 
 
