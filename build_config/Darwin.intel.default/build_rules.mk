@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.4 2007/08/08 21:52:57 theurich Exp $
+# $Id: build_rules.mk,v 1.5 2007/10/29 20:11:20 theurich Exp $
 #
 # Darwin.intel.default
 #
@@ -60,6 +60,7 @@ ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+ESMF_F90LINKLIBS       += -lmpi_cxx
 else
 ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------

@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.21 2007/06/19 06:33:47 theurich Exp $
+# $Id: build_rules.mk,v 1.22 2007/10/29 20:11:19 theurich Exp $
 #
 # Darwin.absoft.default
 #
@@ -54,6 +54,7 @@ ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+ESMF_F90LINKLIBS       += -lmpi_cxx
 else
 ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------

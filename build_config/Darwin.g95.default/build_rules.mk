@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.9 2007/10/18 20:23:25 theurich Exp $
+# $Id: build_rules.mk,v 1.10 2007/10/29 20:11:19 theurich Exp $
 #
 # Dawin.g95.default
 #
@@ -51,10 +51,10 @@ else
 ifeq ($(ESMF_COMM),openmpi)
 # OpenMPI --------------------------------------------------
 ESMF_F90DEFAULT         = mpif90
-ESMF_F90LINKLIBS       += -lmpi_cxx
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+ESMF_F90LINKLIBS       += -lmpi_cxx
 else
 ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------
