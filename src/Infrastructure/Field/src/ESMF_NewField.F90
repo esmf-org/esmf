@@ -1,4 +1,4 @@
-! $Id: ESMF_NewField.F90,v 1.4 2007/10/29 18:22:03 cdeluca Exp $
+! $Id: ESMF_NewField.F90,v 1.5 2007/10/30 20:10:58 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -206,7 +206,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_NewField.F90,v 1.4 2007/10/29 18:22:03 cdeluca Exp $'
+      '$Id: ESMF_NewField.F90,v 1.5 2007/10/30 20:10:58 feiliu Exp $'
 
 !==============================================================================
 !
@@ -3238,9 +3238,7 @@
 !      Validates that the {\tt field} is internally consistent.
 !      Currently this method determines if the {\tt field} is uninitialized 
 !      or already destroyed.  The code also checks if the data and Grid sizes agree.
-!      Currently we allow for 1 point mismatch to accommodate different staggerings.
-!      The method returns an error code if problems 
-!      are found.  
+!      The method returns an error code if problems are found.  
 !
 !     The arguments are:
 !     \begin{description}
@@ -3260,16 +3258,18 @@
       type(ESMF_FieldType), pointer :: ftypep
       type(ESMF_StaggerLoc) :: staggerloc
       character(len=ESMF_MAXSTR) :: msgbuf
-      integer :: gridcounts(ESMF_MAXGRIDDIM)   ! how big the local grid is
       integer :: exclLBounds(ESMF_MAXGRIDDIM)  ! exclusive grid lower bounds
       integer :: exclUBounds(ESMF_MAXGRIDDIM)  ! exclusive grid upper bounds
-      integer :: arraycounts(ESMF_MAXDIM)      ! how big the local array is
       integer :: maplist(ESMF_MAXDIM)          ! mapping between them
       integer :: otheraxes(ESMF_MAXDIM)        ! counts for non-grid dims
-      integer :: gridrank, maprank, arrayrank, halo
-      integer :: gridcellcount, arraycellcount
+      integer :: gridrank, maprank
       logical :: hasgrid, hasarray, hasmap     ! decide what we can validate
-      integer :: i, j
+      integer :: i, lDE                        ! helper variables to verify bounds
+      integer :: localDECount, dimCount        ! and distgrid
+      integer, allocatable :: dimmap(:)
+      integer, allocatable :: arrayCompUBnd(:, :), arrayCompLBnd(:, :)
+      integer, allocatable :: gridCompUBnd(:), gridCompLBnd(:)
+      type(ESMF_DistGrid)  :: arrayDistGrid, gridDistGrid
     
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -3325,119 +3325,78 @@
       if (ftypep%gridstatus .eq. ESMF_STATUS_READY) then
 
           ! get grid dim and extents for the local piece
-          call ESMF_GridGet(ftypep%grid, distRank=gridrank, rc=localrc)
+          call ESMF_GridGet(ftypep%grid, distRank=gridrank, &
+                            distgrid=gridDistGrid, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 ! TODO:FIELDINTEGRATION Replace bound calculation with cellCount from GridGet()
-            call ESMF_GridGet(ftypep%grid, localDE=0, staggerloc=staggerloc, &
-                              exclusiveLBound=exclLBounds, &
-                              exclusiveUBound=exclUBounds, &
-                              rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
-                              ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rc)) return
+          call ESMF_GridGet(ftypep%grid, localDE=0, staggerloc=staggerloc, &
+                            exclusiveLBound=exclLBounds, &
+                            exclusiveUBound=exclUBounds, &
+                            rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                            ESMF_ERR_PASSTHRU, &
+                            ESMF_CONTEXT, rc)) return
           hasgrid = .TRUE.
-
-          do i = 1, gridrank
-            gridcounts(i) = (exclUBounds(i) - exclLBounds(i)) + 1
-          enddo
-
-          ! compute total number of grid items for later
-          gridcellcount = 1
-          do i = 1, gridrank
-              gridcellcount = gridcellcount * gridcounts(i)
-          enddo
       endif
 
-! TODO:FIELDINTEGRATION Restore this section with new Array calls
-#if 0
       ! make sure there is data before asking it questions.
       if (ftypep%datastatus .eq. ESMF_STATUS_READY) then
-
-        if (ftypep%localFlag) then
-        
-          ! get array counts and other info
-          call ESMF_InternArrayGet(ftypep%array, counts=arraycounts, &
-                             haloWidth=halo, rank=arrayrank, rc=localrc)
-
+          call ESMF_ArrayGet(ftypep%array, dimCount=dimCount, localDECount=localDECount, &
+              distgrid=arrayDistGrid, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
+          
+          ! Verify the distgrids in array and grid match.
+!          if(gridDistGrid.this .ne. arrayDistGrid.this) then
+!              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+!                 "grid DistGrid does not match array DistGrid", &
+!                  ESMF_CONTEXT, rc)
+!              return
+!          endif
+
+          ! Verify that the computational bounds of array and grid contained
+          ! in the field match.
+          allocate(dimmap(dimCount))
+          allocate(arrayCompLBnd(dimCount, localDECount))
+          allocate(arrayCompUBnd(dimCount, localDECount))
+
+          call ESMF_ArrayGet(ftypep%array, dimmap=dimmap, computationalLBound=arrayCompLBnd, &
+              computationalUBound=arrayCompUBnd, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           hasarray = .TRUE.
-
-          ! compute total number of array items for later
-          arraycellcount = 1
-          do i = 1, arrayrank
-              arraycellcount = arraycellcount * arraycounts(i)
-          enddo
-        endif
-      endif
-
-      ! and now see if it is at all consistent.
-      if (hasarray .and. hasmap) then
-          if (arrayrank .ne. maprank) then
-              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                             "rank in fielddatamap must match rank in array", &
-                                       ESMF_CONTEXT, rc)
-              return
-          endif
-      endif
-
-      ! if array and datamap and grid, check exact counts now
-      if (hasarray .and. hasmap .and. hasgrid) then
-
-          ! if the array and grid cell counts are 0, there is no local
-          ! data on the PET and we should look no further.
-          if ((arraycellcount .eq. 0) .and. (gridcellcount .eq. 0)) then
-             continue ! ok, no data on this local PET.  
-          else
-            j = 1
-            do i = 1, arrayrank
-              if (maplist(i) .eq. 0) then
-                  ! maplist is 0 if the axes does not correspond to the grid.
-                  ! in that case, it must correspond to the counts in the map.
-                  ! TODO: for now the halo is added to all axes in the array,
-                  ! not just those which correspond to the grid.  when we fix
-                  ! this, then change this test to ignore halo widths.
-                  if ((abs(arraycounts(i)) - (otheraxes(j) + (2*halo))) > 1 ) then
-                      if (arraycounts(i) .eq. otheraxes(j)) then
-                       write(msgbuf,*) "array index", i, "(", arraycounts(i), &
-                                       ") != datamap index", j, &
-                                       "(", otheraxes(j) + (2*halo), &
-                                       ") including halo width"
-                          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, msgbuf, &
-                                                   ESMF_CONTEXT, rc)
-                          return
-                      else 
-                       write(msgbuf,*) "array index", i, "(", arraycounts(i), &
-                                       ") != datamap index", j, &
-                                       "(", otheraxes(j) + (2*halo), ")"
-                          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, msgbuf, &
-                                                   ESMF_CONTEXT, rc)
-                  
-                          return
-                      endif
-                  endif
-                  j = j + 1
-              else
-                  ! maplist is not 0, so this axes does correspond to the grid.
-                  ! the sizes must match, taking into account the halo widths
-                  ! and the index reordering.
-                  if (abs(arraycounts(i) - (gridcounts(maplist(i)) + (2*halo))) > 1 ) then
-                      write(msgbuf,*) "array index", i, "(", arraycounts(i), &
-                                      ") != grid index", maplist(i), "(", &
-                                      gridcounts(maplist(i)) + (2*halo), ")"
-                      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, msgbuf, &
-                                                ESMF_CONTEXT, rc)
+          ! verify array computational bounds match grid computational bounds per localDE
+          do lDE=0, localDECount
+              allocate(gridCompUBnd(dimCount), gridCompLBnd(dimCount))
+              call ESMF_GridGet(ftypep%grid, staggerloc=staggerloc, localDE=lDE, &
+                  computationalUBound=gridCompUBnd, computationalLBound=gridCompLBnd, &
+                  rc=localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
+                                        ESMF_ERR_PASSTHRU, &
+                                        ESMF_CONTEXT, rc)) return
+              do i=1, dimCount
+                  if(gridCompLBnd(dimmap(i)) .ne. arrayCompLBnd(i, lDE)) then
+                      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                         "grid computationalLBound does not match array computationalLBound", &
+                          ESMF_CONTEXT, rc)
                       return
                   endif
-    
-              endif
-            enddo
-          endif
+                  if(gridCompUBnd(dimmap(i)) .ne. arrayCompUBnd(i, lDE)) then
+                      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                         "grid computationalUBound does not match array computationalUBound", &
+                          ESMF_CONTEXT, rc)
+                      return
+                  endif
+              enddo
+              deallocate(gridCompUBnd, gridCompLBnd)
+          enddo
+          deallocate(dimmap, arrayCompUBnd, arrayCompLBnd)
       endif
-#endif
       
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3711,8 +3670,8 @@
                                       ESMF_CONTEXT, rc)) return
         endif
 
-      if (present(rc)) rc = ESMF_SUCCESS
 #endif
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldWriteFileASCII
         
