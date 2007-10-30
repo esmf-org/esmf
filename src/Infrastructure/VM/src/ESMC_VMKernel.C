@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.98 2007/09/20 21:25:05 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.99 2007/10/30 20:49:52 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -4188,6 +4188,70 @@ int VMK::vmk_allgatherv(void *in, int inCount, void *out,
     for (int i=0; i<npets; i++)
       len += outCounts[i] * size;
     localrc = vmk_broadcast(out, len, root);
+  }
+  return localrc;
+}
+
+
+int VMK::vmk_alltoall(void *in, int inCount, void *out, int outCount,
+  vmType type){
+  int localrc=0;
+  if (mpionly){
+    // Find corresponding MPI data type
+    MPI_Datatype mpitype;
+    switch (type){
+    case vmBYTE:
+      mpitype = MPI_BYTE;
+      break;
+    case vmI4:
+      mpitype = MPI_INT;
+      break;
+    case vmR4:
+      mpitype = MPI_FLOAT;
+      break;
+    case vmR8:
+      mpitype = MPI_DOUBLE;
+      break;
+    }
+    localrc = MPI_Alltoall(in, inCount, mpitype, out, outCount, mpitype, mpi_c);
+  }else{
+    // This is a very simplistic, probably very bad peformance implementation.
+    int size=0;
+    switch (type){
+    case vmI4:
+      size=4;
+      break;
+    case vmR4:
+      size=4;
+      break;
+    case vmR8:
+      size=8;
+      break;
+    }
+    char *inC = (char *)in;
+    char *outC = (char *)out;
+    // send to all PETs with id smaller than mypet
+    for (int i=0; i<mypet; i++){
+      localrc = vmk_send(inC+inCount*i*size, inCount*size, i);
+      if (localrc) return localrc;
+    }
+    // memcpy the local chunk
+    memcpy(outC+outCount*mypet*size, inC+inCount*mypet*size, inCount*size);
+    // receive the data from all Pets with id larger than mypet
+    for (int i=mypet+1; i<npets; i++){
+      localrc = vmk_recv(outC+outCount*i*size, outCount*size, i);
+      if (localrc) return localrc;
+    }
+    // send to all PETs with larger than mypet
+    for (int i=mypet+1; i<npets; i++){
+      localrc = vmk_send(inC+inCount*i*size, inCount*size, i);
+      if (localrc) return localrc;
+    }
+    // receive the data from all Pets with id smaller than mypet
+    for (int i=0; i<mypet; i++){
+      localrc = vmk_recv(outC+outCount*i*size, outCount*size, i);
+      if (localrc) return localrc;
+    }
   }
   return localrc;
 }
