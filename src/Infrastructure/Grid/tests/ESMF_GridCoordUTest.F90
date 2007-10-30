@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.15 2007/10/30 19:31:57 oehmke Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.16 2007/10/30 23:31:30 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.15 2007/10/30 19:31:57 oehmke Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.16 2007/10/30 23:31:30 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -146,9 +146,10 @@ program ESMF_GridCoordUTest
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
-
+#if 0 
+  ! BETTER IMPLEMENTATION OF THIS AWAITS ARRAY RETURNING compEdgeWidths
   !-----------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_U_Test
   write(name, *) "Set Coordinates from Array, check bounds checking"
   write(failMsg, *) "Did not catch too small Array"
 
@@ -181,7 +182,7 @@ program ESMF_GridCoordUTest
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-
+#endif
 
   !-----------------------------------------------------------------------------
   !NEX_UTest

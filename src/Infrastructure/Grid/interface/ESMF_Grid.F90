@@ -149,7 +149,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.37 2007/10/30 20:05:18 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.38 2007/10/30 23:31:30 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -1307,6 +1307,7 @@ end interface
     type(ESMF_GridConn)  :: connDim3Local(2)
     integer              :: connCount, petListCount 
     integer              :: top
+    logical              :: isDimDist(ESMF_MAXDIM)
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1320,19 +1321,42 @@ end interface
 	rank=2
     endif
 
-    ! rank of distributed part
-    distRank=0 
+    ! initialize isDimDist
+    isDimDist(:)=.false.
 
+    ! check for distributed dimensions
     if (size(countsPerDEDim1) .gt. 1) then
-       distRank=distRank+1
+       isDimDist(1)=.true.
     endif
 
     if (size(countsPerDEDim2) .gt. 1) then
-       distRank=distRank+1
+       isDimDist(2)=.true.
     endif
 
     if (rank .gt. 2) then
        if (size(countsPerDEDim3) .gt. 1) then
+          isDimDist(3)=.true.
+       endif
+    endif
+
+    ! if nothing is distributed then make everything distributed
+    if (.not. (isDimDist(1) .or. isDimDist(2) .or. isDimDist(3))) then
+       isDimDist(:)=.true.
+    endif 
+
+    ! rank of distributed part
+    distRank=0 
+
+    if (isDimDist(1)) then
+       distRank=distRank+1
+    endif
+
+    if (isDimDist(2)) then
+       distRank=distRank+1
+    endif
+
+    if (rank .gt. 2) then
+       if (isDimDist(3)) then
            distRank=distRank+1
         endif
     endif
@@ -1767,14 +1791,14 @@ end interface
 
    ! Fill in minIndex, maxIndex, dimMap
    d=1
-   if (size(countsPerDEDim1) .gt. 1) then
+   if (isDimDist(1)) then
       minIndexDG(d)=minIndexLocal(1)
       maxIndexDG(d)=sum(countsPerDEDim1Local)+minIndexDG(d)-1
       dimMap(d)=1      
       d=d+1
    endif
 
-   if (size(countsPerDEDim2Local) .gt. 1) then
+   if (isDimDist(2)) then
       minIndexDG(d)=minIndexLocal(2)
       maxIndexDG(d)=sum(countsPerDEDim2Local)+minIndexDG(d)-1
       dimMap(d)=2      
@@ -1782,7 +1806,7 @@ end interface
    endif
 
    if (rank .gt. 2) then
-      if (size(countsPerDEDim3Local) .gt. 1) then
+      if (isDimDist(3)) then
          minIndexDG(d)=minIndexLocal(3)
          maxIndexDG(d)=sum(countsPerDEDim2Local)+minIndexDG(d)-1
          dimMap(d)=3      
@@ -1829,7 +1853,7 @@ end interface
 
   ! Calc the maximum end of each DE in a Dim, and the size of each DEDim
   d=1
-  if (size(countsPerDEDim1Local) .gt. 1) then
+  if (isDimDist(1)) then
       deDimCount(d)=size(countsPerDEDim1Local)
       minPerDeDim(d,1)=minIndexLocal(1)
       maxPerDeDim(d,1)=minIndexLocal(1)+countsPerDEDim1Local(1)-1
@@ -1840,7 +1864,7 @@ end interface
       d=d+1  ! advance to next distgrid dimension
   endif
 
-  if (size(countsPerDEDim2Local) .gt. 1) then
+  if (isDimDist(2)) then
       deDimCount(d)=size(countsPerDEDim2Local)
       minPerDeDim(d,1)=minIndexLocal(2)
       maxPerDeDim(d,1)=minIndexLocal(2)+countsPerDEDim2Local(1)-1
@@ -1852,7 +1876,7 @@ end interface
   endif
 
   if (rank .gt. 2) then
-  if (size(countsPerDEDim3Local) .gt. 1) then
+  if (isDimDist(3)) then
       deDimCount(d)=size(countsPerDEDim3Local)
       minPerDeDim(d,1)=minIndexLocal(3)
       maxPerDeDim(d,1)=minIndexLocal(3)+countsPerDEDim3Local(1)-1
@@ -1984,20 +2008,20 @@ end interface
 
       ! Fill in minIndex, maxIndex, dimMap
        d=1
-      if (size(countsPerDEDim1Local) .eq. 1) then
+      if (.not. isDimDist(1)) then
          lbounds(d)=minIndexLocal(1)
          ubounds(d)=countsPerDEDim1Local(1)+lbounds(d)-1
          d=d+1
       endif
 
-      if (size(countsPerDEDim2Local) .eq. 1) then
+      if (.not. isDimDist(2)) then
          lbounds(d)=minIndexLocal(2)
          ubounds(d)=countsPerDEDim2Local(1)+lbounds(d)-1
          d=d+1
       endif
 
       if (rank .gt. 2) then
-         if (size(countsPerDEDim3Local) .eq. 1) then
+         if (.not. isDimDist(3)) then
             lbounds(d)=minIndexLocal(3)
             ubounds(d)=countsPerDEDim3Local(1)+lbounds(d)-1
             d=d+1
@@ -6336,7 +6360,14 @@ endif
     integer              :: localrc
     integer              :: rank,i,distRank,undistRank,maxSizeDEDim
     integer, pointer     :: minIndexDG(:),maxIndexDG(:)
-    integer, pointer     :: dimMap(:),minIndexLocal(:), deDimCount(:)
+    integer, pointer     :: dimMap(:), deDimCount(:)
+    integer, pointer     :: minIndexLocal(:)
+    integer, pointer     :: gridEdgeLWidthLocal(:)
+    integer, pointer     :: gridEdgeUWidthLocal(:)
+    integer, pointer     :: gridAlignLocal(:)
+    integer, pointer     :: countsPerDEDim1Local(:)
+    integer, pointer     :: countsPerDEDim2Local(:)
+    integer, pointer     :: countsPerDEDim3Local(:)
     integer, pointer     :: deBlockList(:,:,:),minPerDEDim(:,:),maxPerDEDim(:,:)
     integer              :: deCount
     integer              :: d,i1,i2,i3,k
@@ -6344,6 +6375,8 @@ endif
     type(ESMF_GridConn)  :: connDim2Local(2)
     type(ESMF_GridConn)  :: connDim3Local(2)
     integer              :: connCount, petListCount 
+    integer              :: top
+    logical              :: isDimDist(ESMF_MAXDIM)
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -6357,19 +6390,42 @@ endif
 	rank=2
     endif
 
-    ! rank of distributed part
-    distRank=0 
+    ! initialize isDimDist
+    isDimDist(:)=.false.
 
+    ! check for distributed dimensions
     if (size(countsPerDEDim1) .gt. 1) then
-       distRank=distRank+1
+       isDimDist(1)=.true.
     endif
 
     if (size(countsPerDEDim2) .gt. 1) then
-       distRank=distRank+1
+       isDimDist(2)=.true.
     endif
 
     if (rank .gt. 2) then
        if (size(countsPerDEDim3) .gt. 1) then
+          isDimDist(3)=.true.
+       endif
+    endif
+
+    ! if nothing is distributed then make everything distributed
+    if (.not. (isDimDist(1) .or. isDimDist(2) .or. isDimDist(3))) then
+       isDimDist(:)=.true.
+    endif 
+
+    ! rank of distributed part
+    distRank=0 
+
+    if (isDimDist(1)) then
+       distRank=distRank+1
+    endif
+
+    if (isDimDist(2)) then
+       distRank=distRank+1
+    endif
+
+    if (rank .gt. 2) then
+       if (isDimDist(3)) then
            distRank=distRank+1
         endif
     endif
@@ -6490,9 +6546,34 @@ endif
     endif
 
 
-   ! Check for non-valid connection types here
 
+    ! Check Rank of gridWidths and Aligns
+    if (present(gridEdgeLWidth)) then
+        if (size(gridEdgeLWidth) .ne. rank) then
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+                     "- gridEdgeLWidth must be of size equal to Grid rank", & 
+                     ESMF_CONTEXT, rc) 
+              return
+        endif 
+    endif
 
+    if (present(gridEdgeUWidth)) then
+        if (size(gridEdgeUWidth) .ne. rank) then
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+                     "- gridEdgeUWidth must be of size equal to Grid rank", & 
+                     ESMF_CONTEXT, rc) 
+              return
+        endif 
+    endif
+
+    if (present(gridAlign)) then
+        if (size(gridAlign) .ne. rank) then
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+                     "- gridAlign must be of size equal to Grid rank", & 
+                     ESMF_CONTEXT, rc) 
+              return
+        endif 
+    endif
 
    ! make sure connected dimensions don't have an edge width
    if (present(connDim1)) then
@@ -6621,6 +6702,10 @@ endif
 
 
 
+   ! Check for non-valid connection types here
+
+
+
    ! TODO: can you create an array without a distgrid??? What if everything they specify is undistributed?
    !       for now make a totally undistributed grid an error. Work on handling it later.
    !       Perhaps don't use lbounds, ubounds
@@ -6636,7 +6721,26 @@ endif
    !      have 3 of these ShapeCreate subroutines with only minor changes
 
 
-    ! Set Defaults ------------------------------------------------------------------
+    ! Copy vales for countsPerDEDim --------------------------------------------
+    allocate(countsPerDEDim1Local(size(countsPerDEDim1)), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
+                                     ESMF_CONTEXT, rc)) return
+    countsPerDEDim1Local=countsPerDEDim1
+
+    allocate(countsPerDEDim2Local(size(countsPerDEDim2)), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
+                                     ESMF_CONTEXT, rc)) return
+    countsPerDEDim2Local=countsPerDEDim2
+
+    if (rank .gt. 2) then
+       allocate(countsPerDEDim3Local(size(countsPerDEDim3)), stat=localrc)
+       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
+                                      ESMF_CONTEXT, rc)) return
+       countsPerDEDim3Local=countsPerDEDim3
+    endif
+
+
+    ! Set Defaults -------------------------------------------------------------
 
     ! Set default for minIndex 
     allocate(minIndexLocal(rank), stat=localrc)
@@ -6651,6 +6755,9 @@ endif
        enddo
     endif
 
+
+
+
     ! Set Default for connections (although they don't work yet in distgrid/array, so they aren't really used anywhere yet.)
     if (present(connDim1)) then
        if (size(connDim1) .eq. 1) then
@@ -6661,8 +6768,8 @@ endif
           connDim1Local(2)=connDim1(2)
        endif
     else
-!       connDim1Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-!       connDim1Local(2)=ESMF_GRIDCONN_NONE
+       connDim1Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connDim1Local(2)=ESMF_GRIDCONN_NONE
     endif
 
     if (present(connDim2)) then
@@ -6674,8 +6781,8 @@ endif
           connDim2Local(2)=connDim2(2)
        endif
     else
-!       connDim2Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-!       connDim2Local(2)=ESMF_GRIDCONN_NONE
+       connDim2Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connDim2Local(2)=ESMF_GRIDCONN_NONE
     endif
 
     if (present(connDim3)) then
@@ -6687,8 +6794,55 @@ endif
           connDim3Local(2)=connDim3(2)
        endif
     else
-!       connDim3Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-!       connDim3Local(2)=ESMF_GRIDCONN_NONE
+       connDim3Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connDim3Local(2)=ESMF_GRIDCONN_NONE
+    endif
+
+
+   ! Make alterations to size due to GridEdgeWidths ----------------------------
+    allocate(gridEdgeLWidthLocal(rank), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeLWidthLocal", &
+                                     ESMF_CONTEXT, rc)) return
+    allocate(gridEdgeUWidthLocal(rank), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeUWidthLocal", &
+                                     ESMF_CONTEXT, rc)) return
+    allocate(gridAlignLocal(rank), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridAlignLocal", &
+                                     ESMF_CONTEXT, rc)) return
+
+    call ESMF_GridLUADefault(rank, &
+                             gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
+                             gridEdgeLWidthLocal, gridEdgeUWidthLocal, gridAlignLocal, &
+                             rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Modify lower bound
+    do i=1,rank
+       minIndexLocal(i)=minIndexLocal(i)-gridEdgeLWidthLocal(i)
+    enddo
+
+
+    ! Modify lower size
+    countsPerDEDim1Local(1)=countsPerDEDim1Local(1)+gridEdgeLWidthLocal(1)
+
+    countsPerDEDim2Local(1)=countsPerDEDim2Local(1)+gridEdgeLWidthLocal(2)
+  
+    if (rank .gt. 2) then
+       countsPerDEDim3Local(1)=countsPerDEDim3Local(1)+gridEdgeLWidthLocal(3)
+    endif
+
+
+    ! Modify upper size
+    top=size(countsPerDEDim1Local)
+    countsPerDEDim1Local(top)=countsPerDEDim1Local(top)+gridEdgeUWidthLocal(1)
+
+    top=size(countsPerDEDim2Local)
+    countsPerDEDim2Local(top)=countsPerDEDim2Local(top)+gridEdgeUWidthLocal(2)
+  
+    if (rank .gt. 2) then
+       top=size(countsPerDEDim3Local)
+       countsPerDEDim3Local(top)=countsPerDEDim3Local(top)+gridEdgeUWidthLocal(3)
     endif
 
 
@@ -6706,24 +6860,24 @@ endif
 
    ! Fill in minIndex, maxIndex, dimMap
    d=1
-   if (size(countsPerDEDim1) .gt. 1) then
+   if (isDimDist(1)) then
       minIndexDG(d)=minIndexLocal(1)
-      maxIndexDG(d)=sum(countsPerDEDim1)+minIndexDG(d)-1
+      maxIndexDG(d)=sum(countsPerDEDim1Local)+minIndexDG(d)-1
       dimMap(d)=1      
       d=d+1
    endif
 
-   if (size(countsPerDEDim2) .gt. 1) then
+   if (isDimDist(2)) then
       minIndexDG(d)=minIndexLocal(2)
-      maxIndexDG(d)=sum(countsPerDeDim2)+minIndexDG(d)-1
+      maxIndexDG(d)=sum(countsPerDEDim2Local)+minIndexDG(d)-1
       dimMap(d)=2      
       d=d+1
    endif
 
    if (rank .gt. 2) then
-      if (size(countsPerDEDim3) .gt. 1) then
+      if (isDimDist(3)) then
          minIndexDG(d)=minIndexLocal(3)
-         maxIndexDG(d)=sum(countsPerDeDim2)+minIndexDG(d)-1
+         maxIndexDG(d)=sum(countsPerDEDim2Local)+minIndexDG(d)-1
          dimMap(d)=3      
          d=d+1
       endif
@@ -6733,23 +6887,23 @@ endif
   ! Setup deBlockList for DistGrid ------------------------------------------------
   ! count de blocks
   deCount=1
-  deCount=deCount*size(countsPerDEDim1) 
-  deCount=deCount*size(countsPerDEDim2)
+  deCount=deCount*size(countsPerDEDim1Local) 
+  deCount=deCount*size(countsPerDEDim2Local)
   if (rank .gt. 2) then
-     deCount=deCount*size(countsPerDEDim3)
+     deCount=deCount*size(countsPerDEDim3Local)
   endif 
  
   ! Calc the max size of a DEDim
   maxSizeDEDim=1
-  if (size(countsPerDEDim1) .gt. maxSizeDEDim) then
-      maxSizeDEDim=size(countsPerDEDim1)
+  if (size(countsPerDEDim1Local) .gt. maxSizeDEDim) then
+      maxSizeDEDim=size(countsPerDEDim1Local)
   endif
-  if (size(countsPerDEDim2) .gt. maxSizeDEDim) then
-      maxSizeDEDim=size(countsPerDEDim2)
+  if (size(countsPerDEDim2Local) .gt. maxSizeDEDim) then
+      maxSizeDEDim=size(countsPerDEDim2Local)
   endif
   if (rank .gt. 2) then
-      if (size(countsPerDEDim3) .gt. maxSizeDEDim) then
-         maxSizeDEDim=size(countsPerDEDim3)
+      if (size(countsPerDEDim3Local) .gt. maxSizeDEDim) then
+         maxSizeDEDim=size(countsPerDEDim3Local)
       endif
   endif
   
@@ -6768,36 +6922,36 @@ endif
 
   ! Calc the maximum end of each DE in a Dim, and the size of each DEDim
   d=1
-  if (size(countsPerDEDim1) .gt. 1) then
-      deDimCount(d)=size(countsPerDEDim1)
+  if (isDimDist(1)) then
+      deDimCount(d)=size(countsPerDEDim1Local)
       minPerDeDim(d,1)=minIndexLocal(1)
-      maxPerDeDim(d,1)=minIndexLocal(1)+countsPerDEDim1(1)-1
+      maxPerDeDim(d,1)=minIndexLocal(1)+countsPerDEDim1Local(1)-1
       do i=2,deDimCount(d) 
          minPerDEDim(d,i)=maxPerDEDim(d,i-1)+1
-         maxPerDEDim(d,i)=minPerDEDim(d,i)+countsPerDEDim1(i)-1
+         maxPerDEDim(d,i)=minPerDEDim(d,i)+countsPerDEDim1Local(i)-1
       enddo
       d=d+1  ! advance to next distgrid dimension
   endif
 
-  if (size(countsPerDEDim2) .gt. 1) then
-      deDimCount(d)=size(countsPerDEDim2)
+  if (isDimDist(2)) then
+      deDimCount(d)=size(countsPerDEDim2Local)
       minPerDeDim(d,1)=minIndexLocal(2)
-      maxPerDeDim(d,1)=minIndexLocal(2)+countsPerDEDim2(1)-1
+      maxPerDeDim(d,1)=minIndexLocal(2)+countsPerDEDim2Local(1)-1
       do i=2,deDimCount(d) 
          minPerDEDim(d,i)=maxPerDEDim(d,i-1)+1
-         maxPerDEDim(d,i)=minPerDEDim(d,i)+countsPerDEDim2(i)-1
+         maxPerDEDim(d,i)=minPerDEDim(d,i)+countsPerDEDim2Local(i)-1
       enddo
       d=d+1  ! advance to next distgrid dimension
   endif
 
   if (rank .gt. 2) then
-  if (size(countsPerDEDim3) .gt. 1) then
-      deDimCount(d)=size(countsPerDEDim3)
+  if (isDimDist(3)) then
+      deDimCount(d)=size(countsPerDEDim3Local)
       minPerDeDim(d,1)=minIndexLocal(3)
-      maxPerDeDim(d,1)=minIndexLocal(3)+countsPerDEDim3(1)-1
+      maxPerDeDim(d,1)=minIndexLocal(3)+countsPerDEDim3Local(1)-1
       do i=2,deDimCount(d) 
          minPerDEDim(d,i)=maxPerDEDim(d,i-1)+1
-         maxPerDEDim(d,i)=minPerDEDim(d,i)+countsPerDEDim3(i)-1
+         maxPerDEDim(d,i)=minPerDEDim(d,i)+countsPerDEDim3Local(i)-1
       enddo
       d=d+1  ! advance to next distgrid dimension
   endif
@@ -6855,6 +7009,7 @@ endif
 
    ! CONNECTIONS DON'T WORK YET SO NOT IMPLEMENTED
 
+
    ! Process PetMap --------------------------------------------------------------
    if (present(petMap)) then
 
@@ -6867,9 +7022,9 @@ endif
       !! copy petMap to petList
       if (rank .gt. 2) then
 	 k=1
-     	 do i3=1,size(countsPerDEDim3)
-         do i2=1,size(countsPerDEDim2)
-         do i1=1,size(countsPerDEDim1)
+     	 do i3=1,size(countsPerDEDim3Local)
+         do i2=1,size(countsPerDEDim2Local)
+         do i1=1,size(countsPerDEDim1Local)
             petList(k)=petMap(i1,i2,i3)
             k=k+1
          enddo
@@ -6878,8 +7033,8 @@ endif
       else 
 	 k=1
      	 do i3=1,1
-         do i2=1,size(countsPerDEDim2)
-         do i1=1,size(countsPerDEDim1)
+         do i2=1,size(countsPerDEDim2Local)
+         do i1=1,size(countsPerDEDim1Local)
             petList(k)=petMap(i1,i2,i3)
             k=k+1
          enddo
@@ -6902,8 +7057,9 @@ endif
    endif
 
 
-   ! Create DistGrid --------------------------------------------------------------
+   
 
+   ! Create DistGrid --------------------------------------------------------------
     distgrid=ESMF_DistGridCreate(minIndex=minIndexDG, maxIndex=maxIndexDG, &
                deBlockList=deBlockList, delayout=delayout, indexflag=indexflag, rc=localrc)   
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6921,22 +7077,22 @@ endif
 
       ! Fill in minIndex, maxIndex, dimMap
        d=1
-      if (size(countsPerDEDim1) .eq. 1) then
+      if (.not. isDimDist(1)) then
          lbounds(d)=minIndexLocal(1)
-         ubounds(d)=countsPerDEDim1(1)+lbounds(d)-1
+         ubounds(d)=countsPerDEDim1Local(1)+lbounds(d)-1
          d=d+1
       endif
 
-      if (size(countsPerDEDim2) .eq. 1) then
+      if (.not. isDimDist(2)) then
          lbounds(d)=minIndexLocal(2)
-         ubounds(d)=countsPerDEDim2(1)+lbounds(d)-1
+         ubounds(d)=countsPerDEDim2Local(1)+lbounds(d)-1
          d=d+1
       endif
 
       if (rank .gt. 2) then
-         if (size(countsPerDEDim3) .eq. 1) then
+         if (.not. isDimDist(3)) then
             lbounds(d)=minIndexLocal(3)
-            ubounds(d)=countsPerDEDim3(1)+lbounds(d)-1
+            ubounds(d)=countsPerDEDim3Local(1)+lbounds(d)-1
             d=d+1
          endif
       endif
@@ -6996,20 +7152,20 @@ endif
    ! Create Grid from specification -----------------------------------------------
    if (undistRank .gt. 0) then
        call ESMF_GridSetFromDistGrid(grid, name, coordTypeKind, &
-                                    distgrid, dimmap=dimmap, lbounds=lbounds, ubounds=ubounds, &
+                                    distgrid, dimmap=dimmap, &
+                                    lbounds=lbounds, ubounds=ubounds, &
                                     coordRank=coordRank, coordDimMap=coordDimMap, &
-                                    gridEdgeLWidth=gridEdgeLWidth, &
-                                    gridEdgeUWidth=gridEdgeUWidth, &
-                                    gridAlign=gridAlign, &
-                                    indexflag=indexflag, &
-                                    rc=localrc)
+                                    gridEdgeLWidth=gridEdgeLWidthLocal, &
+                                    gridEdgeUWidth=gridEdgeUWidthLocal, &
+                                    gridAlign=gridAlignLocal, &
+                                    indexflag=indexflag, rc=localrc)
     else
        call ESMF_GridSetFromDistGrid(grid, name, coordTypeKind, &
                                     distgrid=distgrid, dimmap=dimmap, &
                                     coordRank=coordRank, coordDimMap=coordDimMap, &
-                                    gridEdgeLWidth=gridEdgeLWidth, &
-                                    gridEdgeUWidth=gridEdgeUWidth, &
-                                    gridAlign=gridAlign, &
+                                    gridEdgeLWidth=gridEdgeLWidthLocal, &
+                                    gridEdgeUWidth=gridEdgeUWidthLocal, &
+                                    gridAlign=gridAlignLocal, &
                                     indexflag=indexflag, &
                                     rc=localrc)
     endif
@@ -7032,6 +7188,15 @@ endif
        deallocate(lbounds)
        deallocate(ubounds)
     endif
+    deallocate(gridEdgeLWidthLocal)
+    deallocate(gridEdgeUWidthLocal)
+    deallocate(gridAlignLocal)
+    deallocate(countsPerDEDim1Local) 
+    deallocate(countsPerDEDim2Local) 
+    if (rank .gt. 2) then
+       deallocate(countsPerDEDim3Local) 
+    endif
+
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
