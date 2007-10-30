@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.17 2007/10/11 22:23:49 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.18 2007/10/30 19:31:54 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -64,6 +64,11 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   ESMC_TypeKind typekind;
   
   int distRank;
+
+  int *gridEdgeLWidth; // size of grid rank
+  int *gridEdgeUWidth; // size of grid rank
+  int *gridAlign; // size of grid rank
+
   int *dimmap;    // size of dimmap = distRank, entries are 0-based
 
   int undistRank;
@@ -133,6 +138,9 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
        int *lboundsArg,                        // (in)
        int *uboundsArg,                        // (in)
        int rankArg,                            // (in)
+       int *gridEdgeLWidth,
+       int *gridEdgeUWidth,
+       int *gridAlign,
        int *coordRankArg,                     // (in)
        int **coordDimMapArg,                   // (in)
        ESMC_IndexFlag indexflagArg             // (in)
@@ -167,6 +175,10 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   const int *getLbounds(void) const {return lbounds;}
   const int *getUbounds(void) const {return ubounds;}
   const int *getCoordRank(void) const {return coordRank;}
+  const int *getGridEdgeLWidth(void) const {return gridEdgeLWidth;}
+  const int *getGridEdgeUWidth(void)  const {return gridEdgeUWidth;}
+  const int *getGridAlign(void) const {return gridAlign;}
+
         int **getCoordDimMap(void) const {return coordDimMap;}
   const char *getName(void)  const {return ESMC_BaseGetName();}
         bool *getGridIsDist(void) const {return gridIsDist;} 
@@ -182,6 +194,9 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 	  char *_name,                                 // (in)
 	  ESMC_TypeKind *_typekind,                    // (in)
 	  DistGrid *_distgrid,                    // (in)
+	  InterfaceInt *gridEdgeLWidth,          // (in)
+	  InterfaceInt *gridEdgeUWidth,          // (in)
+	  InterfaceInt *gridAlign,          // (in)
 	  InterfaceInt *_dimmap,                  // (in)
 	  InterfaceInt *_lbounds,                 // (in)
 	  InterfaceInt *_ubounds,                 // (in)
@@ -195,6 +210,9 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 	       char *name,                                 // (in)
 	       ESMC_TypeKind *typekind,                    // (in)
 	       DistGrid *distgrid,                  // (in)
+	       InterfaceInt *gridEdgeLWidth,          // (in)
+	       InterfaceInt *gridEdgeUWidth,          // (in)
+	       InterfaceInt *gridAlign,          // (in)
 	       InterfaceInt *dimmap,                  // (in)
 	       InterfaceInt *lbounds,                 // (in)
 	       InterfaceInt *ubounds,                 // (in)
@@ -218,15 +236,15 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   // Grid Destruct
   ~Grid();
 
-  // get upper stagger padding for a particular localDe and staggerloc
-  int getLDEStaggerUWidth(
+  // get lower stagger offset for a particular localDe and staggerloc
+  int getLDEStaggerUOffset(
 		       int _staggerloc,
 		       int _localDE, 
 		       int *_UWidth // should be size>=grid rank
 		       );
 
-  // get upper stagger padding for a particular localDe and staggerloc
-  int getLDEStaggerLWidth(
+  // get upper stagger offset for a particular localDe and staggerloc
+  int getLDEStaggerLOffset(
 		     int _staggerloc,
 		     int _localDE, 
 		     int *_LWidth // should be size>=grid rank
@@ -275,6 +293,9 @@ int getDistExclusiveUBound(
 		      char *_name, 
 		      ESMC_TypeKind *_typekind,
 		      DistGrid *_distgrid,     
+                      InterfaceInt *gridEdgeLWidthArg,
+                      InterfaceInt *gridEdgeUWidthArg,
+                      InterfaceInt *gridAlignArg,
 		      InterfaceInt *_dimmap,   
 		      InterfaceInt *_lbounds,  
 		      InterfaceInt *_ubounds,  
@@ -285,7 +306,16 @@ int getDistExclusiveUBound(
   
 };  // end class ESMC_Grid
 
-
+  // set defaults for LWidth, UWidth, and Align based on user input
+  int setGridDefaultsLUA(
+                       int rank,                // Size of the input arrays
+                       InterfaceInt *gridEdgeLWidthIn,  // (in) optional
+                       InterfaceInt *gridEdgeUWidthIn,  // (in) optional
+                       InterfaceInt *gridAlignIn,   // (in) optional
+                       int *gridEdgeLWidthOut,          // (out)
+                       int *gridEdgeUWidthOut,          // (out)
+                       int *gridAlignOut            // (out)
+                       );
 
 
  // Class for holding data set after grid empty creation, but before grid is finally created.
@@ -295,6 +325,9 @@ class ProtoGrid {
   char *name;  
   ESMC_TypeKind *typekind;
   DistGrid *distgrid;     
+  InterfaceInt *gridEdgeLWidth;
+  InterfaceInt *gridEdgeUWidth;
+  InterfaceInt *gridAlign;   
   InterfaceInt *dimmap;   
   InterfaceInt *lbounds;  
   InterfaceInt *ubounds;  

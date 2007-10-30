@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.56 2007/09/26 22:51:21 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.57 2007/10/30 19:31:58 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.56 2007/09/26 22:51:21 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.57 2007/10/30 19:31:58 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -56,6 +56,7 @@ program ESMF_GridCreateUTest
   type(ESMF_IndexFlag) :: indexflag
   integer :: dimmap(2), coordRank(2), dimcount
   integer :: coordRank2(3),coordDimMap2(3,3)
+  integer :: gridEdgeLWidth(3),gridEdgeUWidth(3),gridAlign(3)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -114,7 +115,9 @@ program ESMF_GridCreateUTest
   ! get info from Grid
   call ESMF_GridGet(grid, rank=rank, coordTypeKind=typekind, &
          dimmap=dimmap, coordRank=coordRank, coordDimMap=coordDimMap, &
-         indexflag=indexflag, rc=localrc)
+         indexflag=indexflag, &
+         gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
+         gridAlign=gridAlign, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! check that defaults are as expected
@@ -127,6 +130,9 @@ program ESMF_GridCreateUTest
   if ((coordDimMap(1,1) .ne. 1) .or. (coordDimMap(1,2) .ne. 2) .or. & 
       (coordDimMap(2,1) .ne. 1) .or. (coordDimMap(2,2) .ne. 2)) correct=.false.
 !  if (indexflag .ne. ESMF_INDEX_DELOCAL) correct=.false.
+  if ((gridEdgeLWidth(1) .ne. 0) .or. (gridEdgeLWidth(2) .ne. 0)) correct=.false. 
+  if ((gridEdgeUWidth(1) .ne. 1) .or. (gridEdgeUWidth(2) .ne. 1)) correct=.false. 
+  if ((gridAlign(1) .ne. -1) .or. (gridAlign(2) .ne. -1)) correct=.false. 
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
@@ -348,6 +354,37 @@ program ESMF_GridCreateUTest
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Creating a Grid with non-default EdgeWidths and Aligns"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! create grid with nondefault parameter
+  rc=ESMF_SUCCESS
+  grid=ESMF_GridCreate(distgrid=distgrid, gridEdgeLWidth=(/1,0/), &
+         gridEdgeUWidth=(/0,0/), gridAlign=(/1,-1/), rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! get info back from grid
+  call ESMF_GridGet(grid, gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
+         gridAlign=gridAlign, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! check that output is as expected
+  correct=.true.
+  if ((gridEdgeLWidth(1) .ne. 1) .or. (gridEdgeLWidth(2) .ne. 0)) correct=.false. 
+  if ((gridEdgeUWidth(1) .ne. 0) .or. (gridEdgeUWidth(2) .ne. 0)) correct=.false. 
+  if ((gridAlign(1) .ne. 1) .or. (gridAlign(2) .ne. -1)) correct=.false. 
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
@@ -432,7 +469,7 @@ program ESMF_GridCreateUTest
   correct=.true.
   if (dimcount .ne. 2) correct=.false.
   if (lbounds(1) .ne. 1) correct=.false.
-  if (ubounds(1) .ne. 6) correct=.false.
+  if (ubounds(1) .ne. 7) correct=.false.
 
   ! destroy grid
   call ESMF_GridDestroy(grid,rc=localrc)
@@ -465,7 +502,7 @@ program ESMF_GridCreateUTest
   correct=.true.
   if (dimcount .ne. 2) correct=.false.
   if (lbounds(1) .ne. 2) correct=.false.
-  if (ubounds(1) .ne. 6) correct=.false.
+  if (ubounds(1) .ne. 7) correct=.false.
 
   ! destroy grid
   call ESMF_GridDestroy(grid,rc=localrc)
@@ -512,6 +549,42 @@ program ESMF_GridCreateUTest
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Creating a 2D distributed Grid with 1 undistributed dim. with CreateShapeTileIrreg and no-default gridEdgeWidths"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! create grid with nondefault parameter
+  rc=ESMF_SUCCESS
+  grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2,3,4/), &
+                                    countsPerDeDim2=(/3,4,5/), &
+                                    countsPerDeDim3=(/6/), &
+                                    gridEdgeLWidth=(/0,1,0/), &
+                                    gridEdgeUWidth=(/1,0,0/), &
+                                    gridAlign=(/-1,1,1/), &
+                                    rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! get info back from grid
+  call ESMF_GridGet(grid, gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
+         gridAlign=gridAlign, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! check that output is as expected
+  correct=.true.
+  if ((gridEdgeLWidth(1) .ne. 0) .or. (gridEdgeLWidth(2) .ne. 1) .or. &
+      (gridEdgeLWidth(3) .ne. 0)) correct=.false. 
+  if ((gridEdgeUWidth(1) .ne. 1) .or. (gridEdgeUWidth(2) .ne. 0) .or. & 
+      (gridEdgeUWidth(3) .ne. 0)) correct=.false. 
+  if ((gridAlign(1) .ne. -1) .or. (gridAlign(2) .ne. 1) .or. &
+      (gridAlign(3) .ne. 1)) correct=.false. 
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
 
 
   !-----------------------------------------------------------------------------
@@ -590,7 +663,7 @@ program ESMF_GridCreateUTest
   correct=.true.
   if (dimcount .ne. 1) correct=.false.
   if (lbounds(1) .ne. 1) correct=.false.
-  if (ubounds(1) .ne. 2) correct=.false.
+  if (ubounds(1) .ne. 3) correct=.false.
 
   ! destroy grid
   call ESMF_GridDestroy(grid,rc=localrc)
@@ -620,7 +693,7 @@ program ESMF_GridCreateUTest
   correct=.true.
   if (dimcount .ne. 1) correct=.false.
   if (lbounds(1) .ne. 1) correct=.false.
-  if (ubounds(1) .ne. 4) correct=.false.
+  if (ubounds(1) .ne. 5) correct=.false.
 
   ! destroy grid
   call ESMF_GridDestroy(grid,rc=localrc)
@@ -658,6 +731,42 @@ program ESMF_GridCreateUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "Creating a Grid with CreateShapeTileReg and non-default gridEdgeWidths"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! create grid with nondefault parameter
+  rc=ESMF_SUCCESS
+  grid=ESMF_GridCreateShapeTile(minIndex=(/1,2,3/), &
+                                maxIndex=(/3,4,5/), &
+                                gridEdgeLWidth=(/0,1,0/), &
+                                gridEdgeUWidth=(/1,0,0/), &
+                                gridAlign=(/-1,1,1/), &
+                                rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! get info back from grid
+  call ESMF_GridGet(grid, gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
+         gridAlign=gridAlign, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! check that output is as expected
+  correct=.true.
+  if ((gridEdgeLWidth(1) .ne. 0) .or. (gridEdgeLWidth(2) .ne. 1) .or. &
+      (gridEdgeLWidth(3) .ne. 0)) correct=.false. 
+  if ((gridEdgeUWidth(1) .ne. 1) .or. (gridEdgeUWidth(2) .ne. 0) .or. & 
+      (gridEdgeUWidth(3) .ne. 0)) correct=.false. 
+  if ((gridAlign(1) .ne. -1) .or. (gridAlign(2) .ne. 1) .or. &
+      (gridAlign(3) .ne. 1)) correct=.false. 
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "Creating a 3D  Grid with non-default minIndex and non-default 2D regDecomp with CreateShapeTileReg"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
@@ -676,7 +785,7 @@ program ESMF_GridCreateUTest
   correct=.true.
   if (dimcount .ne. 2) correct=.false.
   if (lbounds(1) .ne. 2) correct=.false.
-  if (ubounds(1) .ne. 5) correct=.false.
+  if (ubounds(1) .ne. 6) correct=.false.
 
   ! destroy grid
   call ESMF_GridDestroy(grid,rc=localrc)

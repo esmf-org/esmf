@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.23 2007/10/06 02:57:30 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.24 2007/10/30 19:31:53 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@ program ESMF_GridCreateEx
       ! Local variables  
       integer:: rc, finalrc
       type(ESMF_VM):: vm
-      type(ESMF_ArraySpec) ::  arrayspec2D
+      type(ESMF_ArraySpec) ::  arrayspec2D,arrayspec
 
       real(ESMF_KIND_R8), pointer :: centerX(:), centerY(:), centerZ(:)
       real(ESMF_KIND_R8), pointer :: cornerX(:), cornerY(:)
@@ -41,15 +41,18 @@ program ESMF_GridCreateEx
 
       integer :: elbnd(3),eubnd(3)
       integer :: clbnd(3),cubnd(3)
+      integer :: celwdth(2),ceuwdth(2)
       integer :: tlbnd(3),tubnd(3)
       integer :: i,j,k
       integer :: lbnd(3), ubnd(3), lbnd_corner(3), ubnd_corner(3)
       integer, allocatable :: petMap(:,:,:), localIndices(:,:)
+      integer :: dimmap(2)
+      integer :: lbnd1D(1), ubnd1D(1)
 
       type(ESMF_Grid) :: grid2D, grid3D, grid4D
-      type(ESMF_Array) :: arrayCoordX, arrayCoordY
+      type(ESMF_Array) :: arrayCoordX, arrayCoordY,array
 
-      type(ESMF_distGrid) :: distgrid2D,distgrid4D
+      type(ESMF_distGrid) :: distgrid2D,distgrid4D,distgrid
       type(ESMF_StaggerLoc) :: staggerloc
       integer :: localPet, petCount
 
@@ -190,13 +193,25 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 
 !BOE
 !
-! For the regular and irregular types of distributions, the 
-! {\tt petMap} parameter may be used to specify which specific PETs 
-! the DEs in the Grid are assigned to. The {\tt petMap} 
-! array is the same size in each dimension as the number of DEs in
-! that dimension.
+! The {\tt petMap} parameter may be used to specify on to which specific PETs 
+! the DEs in the Grid are assigned. Note that this parameter is only available for the 
+! regular and irregular distribution types. The {\tt petMap} 
+! array is a 3D array, for a 3D Grid each of its dimensions correspond to a
+! Grid dimension. If the Grid is 2D, then the first two dimensions correspond
+! to Grid dimensions and the last dimension should be of size 1. 
+! The size of each {\tt petMap} dimension is
+! the number of DE's along that dimension in the Grid. For a 
+! regular Grid, the size is equal to the number in regDecomp 
+! (i.e. {\tt size(petMap,d)=regDecomp(d)} for all dimensions {\tt d} in the Grid). For
+! an irregular Grid the size is equal to the number of items in
+! the corresponding {\tt countsPerDEDim} variable (i.e. 
+! {\tt size(petMap,d)=size(countsPerDEDimd)} for all dimensions {\tt d} in the Grid).
+! 
+! Each entry in {\tt petMap} specifies to which PET the corresponding
+! DE should be assigned. For example, {\tt petMap(3,2)=4} tells the Grid
+! create call to put the DE located at column 3 row 2 on PET 4.
 !
-! The next example demonstrates how to specify the PET to DE association 
+! The following example demonstrates how to specify the PET to DE association 
 ! for an {\tt ESMF\_GridCreateShapeTile()} call.
 !EOE
 
@@ -207,8 +222,8 @@ if (petcount .eq. 4) then
    allocate( petMap(2,2,1) )
 
    ! Set petMap
-   petMap(:,1,1) = (/3,2/)
-   petMap(:,2,1) = (/1,0/)
+   petMap(:,1,1) = (/3,2/) ! DE (1,1,1) on PET 3 and DE (2,1,1) on PET 2
+   petMap(:,2,1) = (/1,0/) ! DE (1,2,1) on PET 1 and DE (2,2,1) on PET 0
 
 
    ! Let the 3D grid be be distributed only in the first two dimensions.
@@ -602,8 +617,8 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
 
 !----------------------------------------------------------------------
-! Now fill the coordinates for the center stagger location by averaging 
-! the corner locations.
+! Now fill the coordinates for the center stagger location with
+! the average of the corner coordinate location values.
 !----------------------------------------------------------------------
    !-------------------------------------------------------------------
    ! Get the local bounds of the global indexing for the first 
@@ -617,7 +632,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    ! Calculate and set coordinates in the first dimension.
    !-------------------------------------------------------------------
    do i=lbnd(1),ubnd(1)
-        centerX(i) = 0.5*(cornerX(i) + cornerX(i+1)) 
+        centerX(i) = 0.5*(i-1 + i)*(360.0/180.0) 
    enddo
 
    !-------------------------------------------------------------------
@@ -632,7 +647,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    ! Calculate and set coordinates in the second dimension.
    !-------------------------------------------------------------------
    do j=lbnd(1),ubnd(1)
-        centerY(j) = 0.5*(cornerY(j) + cornerY(j+1)) 
+        centerY(j) = 0.5*(j-1 + j)*(180.0/90.0) 
    enddo
 
 
@@ -667,7 +682,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! ESMF Grids can be created using an incremental paradigm. To do this,
 ! the user first calls ESMF\_GridCreateEmpty to allocate the shell of
 ! a Grid. Next, a series of {\tt ESMF\_GridSet()} calls are used to fill
-! in the details of the grid. Here we use a convenient {\tt ESMF\_GridSetShape()}
+! in the details of the grid. Here we use a convenient {\tt ESMF\_GridSetShapeTile()}
 ! call that fills in the Grid via an interface much like the
 ! {\tt ESMF\_GridCreateShapeTile()} call. Finally, after the set calls,
 ! any other grid call will internally validate and create the final, 
@@ -694,7 +709,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! rectangular Grid.
 !---------------------------------------------------------------------------
 
-   call ESMF_GridSetShape(grid2D,                    &
+   call ESMF_GridSetShapeTile(grid2D,                    &
                           countsPerDEDim1=(/5,5/),   &
                           countsPerDEDim2=(/7,7,6/), rc=rc)
 
@@ -941,11 +956,10 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
 !BOC
    call ESMF_GridSetCoord(grid2D, &
-          staggerLoc=ESMF_STAGGERLOC_CENTER, &
+          staggerLoc=ESMF_STAGGERLOC_CORNER, &
           coordDim=1, array=arrayCoordX, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
 
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Cleanup after Example
@@ -986,7 +1000,6 @@ call ESMF_GridDestroy(grid2D,rc=rc)
           array=arrayCoordY, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
 
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Cleanup after Example
@@ -1032,19 +1045,65 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 
+
 !BOE
-!\subsubsection{Getting Grid Coordinate Array Bounds}
+!\subsubsection{Grid Regions and Bounds}
+!\label{sec:grid:usage:bounds}
 !
-! Once coordinates have been allocated the user may wish to 
-! retrieve the bounds of the piece of that array on
-! the local DE. This is useful for iterating through the
-! array to set coordinates, retrieve coordinates, or do calculations. 
-! The method {\tt ESMF\_GridGetCoord} allows the user
-! to retrieve bound information for a particular coordinate
-! array. 
+! The index space of the Grid contains three regions
+! with associated bounds. This section describes these
+! regions and bounds in general. The next couple of 
+! sections describe getting the bound information
+! for specific types of Grid information. 
 !
-! There are actually four types of bounds the user can 
-! get: exclusive bounds, stagger bounds, computational bounds, 
+! The exclusive region is the index space defined by the 
+! distgrid, lbounds, and ubounds of the Grid. These correspond to the
+! maximum index space usable by any stagger location in the Grid.
+! The size of the exclusive region is the index space for the 
+! Grid cells, plus the stagger padding. 
+!
+! The default stagger padding depends on the topology of the Grid. 
+! For an unconnected dimension the stagger padding is a width
+! of 1 on the upper side (i.e. {\tt staggerUWidth=(1,1,1,1...)}).
+! For a periodic dimension there is no stagger padding.
+! By adjusting {\tt staggerLWidth} and {\tt staggerUWidth}, the 
+! user can set the stagger padding arbitrarily and
+! thus the exclusive region can be adjusted at will around the 
+! index space corresponding to the cells. 
+!
+! The cell counts are what are specified in the create calls, so
+! for example, if the user does the folowing call
+! with the default stagger padding the resulting excusive region will
+! look like the following image.
+!
+! 
+! The Grid computational region is a subset of the the Grid exclusive
+! region.  The computational region indicates which index locations in 
+! the Grid are active for a particular stagger. The computational region
+! is typically the region that a user would compute over (e.g.
+! would iterate over setting values for).
+! 
+! Given the previous Grid create and default stagger padding, the
+! following is what the corner stagger location computational region
+! would look like. 
+!
+!
+! The total region is the outermost boundary of the memory allocated 
+! on each DE to hold the data for the Grid on that DE. This region 
+! can be as small as the computational region, but may be larger to 
+! include space for halos, memory padding, etc. The total region is
+! what is enlarged to include space for halos, and the total region 
+! must be large enough to contain the maximum halo operation on the
+! Grid. The total region is a property of an underlying Array and
+! so information about it is only retrievable when an Array has
+! been set or allocated. 
+!
+! The following shows the previous Grid with a coordinate halo width
+! of 1. 
+!
+! 
+! There are actually three types of bounds the user can 
+! get: exclusive bounds, computational bounds, 
 ! and total bounds. Note that although some of these are similar
 ! to bounds provided by ESMF\_Array subroutines 
 ! (see Section~\ref{Array_regions_and_default_bounds}) 
@@ -1052,26 +1111,58 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! distributed dimensions and are ordered to correspond 
 ! to the dimension order in the associated DistGrid. The bounds
 ! provided by the Grid are for both distributed and undistributed dimensions
-! and are ordered accoording to the order of dimensions in the 
-! coordinate. This means that the bounds provided should be usable
-! "as is" to access data in the coordinate array.  
+! and are ordered according to the order of dimensions of the data
+! in question. This means that the bounds provided should be usable
+! "as is" to access the data. 
 !
-! The exclusive bounds are the bounds of the index space defined by the 
-! distgrid and lbound and ubounds of the Grid. These correspond to the
-! index space region of the center stagger location. 
+! Each of the three types of bounds refers to the maximum and minimum
+! per dimension of the index ranges of a particular region. The paramters
+! referring to the maximums contain a 'U' for upper. The parameters referring 
+! to the minimums contain an 'L' for lower. The bounds and associated
+! quantities are almost always given on a per DE basis. The three types of
+! bounds exclusiveBounds, computationalBounds, and totalBounds refer
+! to the ranges of the exlusive region, the computational region, and the
+! total region. Each of these bounds also has a corresponding count parameter
+! which gives the number of items across that region (on a DE) in each dimension.
+! (e.g. totalCount(d)=totallUBound(i)-totalLBound(i)+1). Width parameters
+! give the spacing between two different types of region. The
+! {\tt computationalWidth} argument gives the spacing between the exclusive
+! region and the computational region. The {\tt totalWidth} argument gives the 
+! spacing between the total region and the computational region. Like the 
+! other bound information these are typically on a per DE basis, for example
+! specifying {\tt totalLWidth=(1,1)} makes the bottom of the total
+! region one lower in each dimension than the computational region on
+! each DE. The exception to the per DE rule is {\tt computationalEdgeWidth},
+! which gives the spacing only on the DEs along the boundaries of the Grid.
 !
-! The stagger bounds are the exclusive bounds plus the extra
-! padding added for the stagger. Note that this padding will
-! change from DE to DE because the padding is only applied to 
-! the edge of the tile. The stagger bounds are the bounds the 
-! user will typically use for their computations. 
+!EOE
+
+!BOE
+!\subsubsection{Getting Grid Coordinate Bounds}
 !
-! The computational bounds are the exclusive bounds plus the stagger padding, 
-! plus any extra halo space. 
+! When operating on coordiantes the user may often wish to 
+! retrieve the bounds of the piece of coordinate data on
+! a particular local DE. This is useful for iterating through the
+! data to set coordinates, retrieve coordinates, or do calculations. 
+! The method {\tt ESMF\_GridGetCoord} allows the user
+! to retrieve bound information for a particular coordinate
+! array. 
 !
-! The total bounds are the outermost bounds of the coordinate array. The
-! total bounds should always match the bounds of the Fortran array 
-! retrieved by {\tt ESMF\_GetCoord()}. 
+! As described in the previous section there are three types of bounds the user can 
+! get: exclusive bounds, computational bounds, 
+! and total bounds. The exclusive and computational bounds may 
+! be retrieved from an unallocated stagger location, but
+! the total bounds may only be retrieved from a stagger location 
+! which contains a valid coordinate Array. The bounds
+! provided by {\tt ESMF\_GridGetCoord} are for both distributed
+! and undistributed dimensions and are ordered according to the
+! order of dimensions in the  coordinate. This means that the bounds
+!  provided should be usable
+! "as is" to access data in the coordinate array. In the case
+! of factorized coordinate Arrays where a coordinate may
+! have a smaller dimension than its associated Grid, then
+! the dimension of the coordinate's bounds are the dimension of
+! the coordinate, not the Grid. 
 !
 ! The following is an example of retrieving the bounds for the first
 ! coordinate array from the corner stagger location. 
@@ -1088,10 +1179,10 @@ call ESMF_GridDestroy(grid2D,rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
  
 !BOC
-   call ESMF_GridGetCoord(grid2D, coordDim=1,                   &
+   call ESMF_GridGetCoord(grid2D, localDE=0, coordDim=1,        &
           staggerLoc=ESMF_STAGGERLOC_CORNER,                    &
           exclusiveLBound=elbnd, exclusiveUBound=eubnd,         &
-          computationalLBound=clbnd, computationalUBound=cubnd,             &
+          computationalLBound=clbnd, computationalUBound=cubnd, &
           totalLBound=tlbnd, totalUBound=tubnd, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1105,6 +1196,192 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    call ESMF_DistGridDestroy(distgrid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
+
+
+!BOE
+!\subsubsection{Getting Grid Stagger Location Bounds}
+!
+! When operating on data stored at a particular stagger
+! in a Grid the user may find it useful to be able
+! to retrieve the bounds of the data on a particular local DE. 
+! This is useful for iterating through the
+! data for computations or allocating arrays to hold the data. 
+! The method {\tt ESMF\_GridGet} allows the user
+! to retrieve bound information for a particular stagger location. 
+!
+! As described in Section~\ref{sec:grid:usage:bounds} there are three types of bounds 
+! the user can typically get, however, the Grid doesn't hold data at
+! a stagger location (that is the job of the Field), and so 
+! no Array is contained there and so no total region exists, so the 
+! user may only retrieve exclusive and computational bounds from
+! a stagger location.  The bounds
+! provided by {\tt ESMF\_GridGet} are for both distributed
+! and undistributed dimensions and are ordered according to the
+! order of dimensions in the Grid. 
+!
+! The following is an example of retrieving the bounds for localDE 0
+! from the corner stagger location. 
+!EOE
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Setup For Example
+!!!!!!!!!!!!!!!!!!!!!!
+   distgrid2D=ESMF_DistGridCreate(minIndex=(/1,1/),maxIndex=(/10,10/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CORNER, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+ 
+!BOC
+   call ESMF_GridGet(grid2D, localDE=0,                         &
+          staggerLoc=ESMF_STAGGERLOC_CORNER,                    &
+          exclusiveLBound=elbnd, exclusiveUBound=eubnd,         &
+          computationalLBound=clbnd, computationalUBound=cubnd, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Cleanup after Example
+!!!!!!!!!!!!!!!!!!!!!!
+   call ESMF_GridDestroy(grid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   call ESMF_DistGridDestroy(distgrid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+
+
+!BOE
+!\subsubsection{Getting Grid Stagger Location Information}
+!
+! In addition to the per DE information that can be accessed about
+! a stagger location there is a set of global information that can
+! accessed by using {\tt ESMF\_GridGet} without specifying a
+! localDE. One of the main uses of this information is to create
+! an ESMF Array to hold data for a stagger location. 
+!
+! There are several types of information currently available from a stagger
+! location. The first set is {\tt computationalEdgeLWidth}  and
+! {\tt computationalEdgeUWidth} these give the difference between
+! the lower and upper boundary of the exclusive region and the computational 
+! region. This information is just for the distributed dimensions and
+! so is the same size as the distgrid dimension and is arranged to 
+! correspond to the distgrid dimensions. 
+!
+! The second set is {\tt lbounds} and {\tt ubounds} these are the bounds
+! of the undistributed dimensions of the stagger locations. These
+! will be of the same size as the undistributed dimensions of the Grid. 
+! The values of these bounds are the undistributed bounds of the 
+! Grid modified by the padding for this stagger location.  
+!
+! The following is an example of retrieving information 
+! from the corner stagger location. 
+!EOE
+
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Setup For Example
+!!!!!!!!!!!!!!!!!!!!!!
+   distgrid2D=ESMF_DistGridCreate(minIndex=(/1,1/),maxIndex=(/10,10/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   grid3D=ESMF_GridCreate(distgrid=distgrid2D, lbounds=(/1/), ubounds=(/10/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_GridAllocCoord(grid3D, staggerloc=ESMF_STAGGERLOC_CORNER, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+ 
+!BOC
+
+    ! Get info about staggerloc
+    call ESMF_GridGet(grid3D, staggerLoc=ESMF_STAGGERLOC_CORNER, &
+           computationalEdgeLWidth=celwdth, computationalEdgeUWidth=ceuwdth, &
+           lbounds=lbnd, ubounds=ubnd, rc=rc)
+
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Cleanup after Example
+!!!!!!!!!!!!!!!!!!!!!!
+   call ESMF_GridDestroy(grid3D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   call ESMF_DistGridDestroy(distgrid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+
+
+!BOE
+!\subsubsection{Creating an Array at a Stagger Location}
+!
+! In order to create an Array to correspond to a Grid stagger location
+! several pieces of information need to be obtained from both the 
+! Grid and the stagger location in the Grid. 
+!
+! The information that needs to be obtained from the Grid
+! is the distgrid and dimmap to ensure that the new Array
+! has the correct size and distribution and that its 
+! dimensions are mapped correctly to the Grid. These
+! are obtained using the {\tt ESMF\_GridGet} method. 
+!
+! The information that needs to be obtained from the stagger
+! location are the distributed and undistributed sizes. 
+! The distributed sizes are give as offsets from the edges of the 
+! exclusive region of the distgrid. These may be obtained
+! from {\tt ESMF\_GridGet} by passing in the 
+! stagger location and the arguments {\tt computationalEdgeLWidth}  and
+! {\tt computationalEdgeUWidth}. The undistributed sizes may
+! may be obtained from the same call using the {\tt lbounds} and 
+! {\tt ubounds} arguments. Note that if the Grid doesn't contain 
+! undistributed dimensions, then this second set of 
+! bounds doesn't need to be used. 
+!
+! The following is an example of using information from the Grid
+! to create an Array corresponding to a stagger location.
+! The Grid is 3D and contains both distributed and undistributed
+! dimensions.
+!
+!EOE
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Setup For Example
+!!!!!!!!!!!!!!!!!!!!!!
+   distgrid2D=ESMF_DistGridCreate(minIndex=(/1,1/),maxIndex=(/10,10/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   grid3D=ESMF_GridCreate(distgrid=distgrid2D, lbounds=(/1/), ubounds=(/10/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_GridAllocCoord(grid3D, staggerloc=ESMF_STAGGERLOC_CORNER, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+ 
+!BOC
+
+    ! Get info from Grid
+    call ESMF_GridGet(grid3D, distgrid=distgrid, dimmap=dimmap, rc=rc)
+
+    ! Get info about staggerloc
+    call ESMF_GridGet(grid3D, staggerLoc=ESMF_STAGGERLOC_CORNER, &
+           computationalEdgeLWidth=celwdth, computationalEdgeUWidth=ceuwdth, &
+           lbounds=lbnd1D, ubounds=ubnd1D, rc=rc)
+
+    ! construct ArraySpec
+    call ESMF_ArraySpecSet(arrayspec, rank=3, typekind=ESMF_TYPEKIND_R8, rc=rc)
+
+    ! Create an Array based on the presence of distributed dimensions
+    array=ESMF_ArrayCreate(arrayspec=arrayspec, &
+            distgrid=distgrid, dimmap=dimmap, &
+            computationalEdgeLWidth=celwdth, &
+            computationalEdgeUWidth=ceuwdth, &
+            lbounds=lbnd1D, ubounds=ubnd1D, rc=rc)
+
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Cleanup after Example
+!!!!!!!!!!!!!!!!!!!!!!
+   call ESMF_GridDestroy(grid3D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   call ESMF_DistGridDestroy(distgrid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 
 #ifdef LOCAL_NOT_IMPL
@@ -1495,7 +1772,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
 
    ! Set the Grid type and kind
-   grid=ESMF_GridSetShape(coordTypeKind=ESMF_TYPEKIND_R4, rc=rc)
+   grid=ESMF_GridSetShapeTile(coordTypeKind=ESMF_TYPEKIND_R4, rc=rc)
 
 
    ! Set the grid size and distribution
@@ -1504,11 +1781,11 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    petMap(:,1,1) = (/1,2/)
 
    ! Set Grid 
-   grid=ESMF_GridSetShape(countsPerDEDim1=(/10,10/), &
+   grid=ESMF_GridSetShapeTile(countsPerDEDim1=(/10,10/), &
           countsPerDEDim2=(/10,10/), petMap=petMap, rc=rc)   
 
    ! Set the grid coordinate array index dependency
-   grid=ESMF_GridSetShape(coordDep1=(/1,2/), coordDep2=(/1,2/), &
+   grid=ESMF_GridSetShapeTile(coordDep1=(/1,2/), coordDep2=(/1,2/), &
           rc=rc)   
 
   ! Create the grid and add a center stagger location and at the same time set {\tt grid} to 
@@ -1781,7 +2058,6 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Cleanup after Example
 !!!!!!!!!!!!!!!!!!!!!!!
@@ -1859,7 +2135,8 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !!!!!!!!!!!!!!!!!!!!!!
    distgrid2D=ESMF_DistGridCreate(minIndex=(/1,1/), &
                                   maxIndex=(/10,10/), rc=rc)
-   grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
+   grid2D=ESMF_GridCreate(distgrid=distgrid2D, &
+            gridEdgeLWidth=(/1,1/), gridEdgeUWidth=(/1,1/), rc=rc)
 
 
 !BOC 
@@ -1902,7 +2179,6 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! The following code illustrates aligning the positive (northeast in 2D) 
 ! corner with the center. 
 !EOE
-
 
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Setup For Example
