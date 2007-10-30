@@ -87,6 +87,12 @@
      integer :: gridconn
   end type
 
+  type(ESMF_GridConn), parameter :: &
+    ESMF_GRIDCONN_NONE = ESMF_GridConn(0), &
+    ESMF_GRIDCONN_PERIODIC = ESMF_GridConn(1), &
+    ESMF_GRIDCONN_POLE = ESMF_GridConn(2), &
+    ESMF_GRIDCONN_BIPOLE = ESMF_GridConn(3)
+
 !------------------------------------------------------------------------------
 ! ! ESMF_DefaultFlag
 !
@@ -102,8 +108,11 @@
 !
 ! !PUBLIC TYPES:
 !
-public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
-
+public ESMF_Grid
+public  ESMF_GridConn,  ESMF_GRIDCONN_NONE, ESMF_GRIDCONN_PERIODIC, &
+                        ESMF_GRIDCONN_POLE, ESMF_GRIDCONN_BIPOLE
+public  ESMF_GridStatus
+public  ESMF_DefaultFlag
 
 !------------------------------------------------------------------------------
 !
@@ -126,9 +135,10 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
   public ESMF_GridSet
   public ESMF_GridSetCoord
 
-  public ESMF_GridSetShape
+  public ESMF_GridSetShapeTile
   public ESMF_GridValidate
 
+  public operator(.eq.), operator(.ne.) 
   public ESMF_ArrayCreateFromGrid
 
 ! - ESMF-internal methods:
@@ -139,7 +149,7 @@ public ESMF_Grid, ESMF_GridStatus, ESMF_DefaultFlag, ESMF_GridConn
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.36 2007/10/29 17:52:51 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.37 2007/10/30 20:05:18 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -289,23 +299,52 @@ end interface
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
-! !IROUTINE: ESMF_GridSetShape -- Generic interface
+! !IROUTINE: ESMF_GridSetShapeTile -- Generic interface
 
 ! !INTERFACE:
-interface ESMF_GridSetShape
+interface ESMF_GridSetShapeTile
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-      module procedure ESMF_GridSetShapeIrreg
+      module procedure ESMF_GridSetShapeTileIrreg
 
       
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_GridSetShape} functions.   
+!  types of {\tt ESMF\_GridSetShapeTile} functions.   
 !EOPI 
 end interface
+!==============================================================================
+!BOPI
+! !INTERFACE:
+      interface operator (.eq.)
 
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridConnEqual
 
+! !DESCRIPTION:
+!     This interface overloads the equality operator for the specific
+!     ESMF GridConn.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (.ne.)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridConnNotEqual
+
+! !DESCRIPTION:
+!     This interface overloads the inequality operator for the specific
+!     ESMF GridConn.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
 
 !==============================================================================
 
@@ -325,7 +364,6 @@ end interface
   ! Private name; call using ESMF_GridAllocCoord()
      subroutine ESMF_GridAllocCoordNoValues(grid, staggerloc,  &
                 staggerLWidth, staggerUWidth, staggerAlign, &
-                computationalLWidth, computationalUWidth, &
                 totalLWidth, totalUWidth,rc)
 
 !
@@ -335,8 +373,6 @@ end interface
       integer,                intent(in),optional     :: staggerLWidth(:)
       integer,                intent(in),optional     :: staggerUWidth(:)
       integer,                intent(in),optional     :: staggerAlign(:)
-      integer,                intent(out), optional   :: computationalLWidth(:) ! N. IMP
-      integer,                intent(out), optional   :: computationalUWidth(:) ! N. IMP
       integer,                intent(out), optional   :: totalLWidth(:)         ! N. IMP
       integer,                intent(out), optional   :: totalUWidth(:)         ! N. IMP
       integer,                intent(out),optional    :: rc
@@ -375,16 +411,6 @@ end interface
 !      If not set, then this defaults to all negative. (e.g. 
 !      The most negative part of the stagger in a cell is aligned with the 
 !      center and the padding is all on the postive side.) 
-!\item[{[computationalLWidth]}]
-!     The lower boundary of the computatational region in reference to the exclusive region. 
-!     If {\tt staggerLWidth} is present then the actual computational width
-!     is the max on a dimension by dimension basis between {\tt staggerLWidth} and
-!      {\tt computationalLWidth}. [CURRENTLY NOT IMPLEMENTED]
-!\item[{[computationalUWidth]}]
-!     The lower boundary of the computatational region in reference to the exclusive region. 
-!     If {\tt staggerUWidth} is present then the actual computational width
-!     is the max on a dimension by dimension basis between {\tt staggerUWidth} and
-!      {\tt computationalUWidth}. [CURRENTLY NOT IMPLEMENTED]
 !\item[{[totalLWidth]}]
 !     The lower boundary of the computatational region in reference to the computational region. 
 !     Note, the computational region includes the extra padding specified by {\tt ccordLWidth}.
@@ -413,21 +439,7 @@ end interface
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
 
 
-    ! Check for Not Implemented inputs
-    if (present(computationalLWidth)) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
-                 "- computationalLWidth specification not yet implemented", & 
-                 ESMF_CONTEXT, rc) 
-       return 
-    endif
-
-    if (present(computationalUWidth)) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
-                 "- computationalUWidth specification not yet implemented", & 
-                 ESMF_CONTEXT, rc) 
-       return 
-    endif
-
+    ! check for not implemented parameters
     if (present(totalLWidth)) then
        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
                  "- totalLWidth specification not yet implemented", & 
@@ -594,6 +606,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ArrayCreateFromGrid"
+
 !BOPI
 ! !IROUTINE: ESMF_ArrayCreateFromGrid - Create an Array to hold data for a stagger location
 
@@ -659,6 +672,11 @@ end interface
     integer, pointer :: lbounds(:),ubounds(:)
     integer, pointer :: dimmap(:)
     integer :: rank,distRank,undistRank
+
+    !
+    ! TODO: Should totalwidth be the full Grid rank or just distGrid rank?? 
+    !
+
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -786,8 +804,9 @@ end interface
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
-      function ESMF_GridCreateFromDistGrid(name,coordTypeKind,distgrid, dimmap, &
-                        lbounds, ubounds, coordRank, coordDimMap, indexflag, rc)
+      function ESMF_GridCreateFromDistGrid(name,coordTypeKind,distgrid, &
+                         dimmap, lbounds, ubounds, coordRank, coordDimMap, &
+                         gridEdgeLWidth, gridEdgeUWidth, gridAlign, indexflag, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFromDistGrid
@@ -801,6 +820,9 @@ end interface
        integer,               intent(in),   optional  :: ubounds(:)
        integer,               intent(in),   optional  :: coordRank(:)
        integer,               intent(in),   optional  :: coordDimMap(:,:)
+       integer,               intent(in),   optional  :: gridEdgeLWidth(:)
+       integer,               intent(in),   optional  :: gridEdgeUWidth(:)
+       integer,               intent(in),   optional  :: gridAlign(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(out),  optional  :: rc
 !
@@ -851,6 +873,23 @@ end interface
 !      dimensions. Each entry {\tt coordDimMap(i,j)} tells which
 !      grid dimension component i's, jth dimension maps to. 
 !      Note that if j is bigger than {\tt coordRank(i)} than its ignored.        
+! \item[{[gridEdgeLWidth]}] 
+!      The padding around the lower edges of the grid. This padding is between
+!      the index space corresponding to the cells and the boundary of the 
+!      the exclusive region. This extra space is to contain the extra
+!      padding for non-center stagger locations, and should be big enough
+!      to hold any stagger in the grid. 
+! \item[{[gridEdgeUWidth]}] 
+!      The padding around the upper edges of the grid. This padding is between
+!      the index space corresponding to the cells and the boundary of the 
+!      the exclusive region. This extra space is to contain the extra
+!      padding for non-center stagger locations, and should be big enough
+!      to hold any stagger in the grid. 
+! \item[{[gridAlign]}] 
+!     Specification of how the stagger locations should align with the cell
+!     index space (can be overridden by the individual staggerAligns). If
+!     the {\tt gridEdgeWidths} are not specified than this parameter
+!     implies the EdgeWidths.
 ! \item[{[indexflag]}]
 !      Indicates whether the indices in the grid are to be interpreted to form
 !      a flat pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}), or are to 
@@ -863,6 +902,9 @@ end interface
     integer :: localrc ! local error status
     type(ESMF_Grid) :: grid              
     integer :: nameLen 
+    type(ESMF_InterfaceInt) :: gridEdgeLWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: gridEdgeUWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: gridAlignArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: dimmapArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: lboundsArg ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: uboundsArg ! Language Interface Helper Var
@@ -885,6 +927,17 @@ end interface
 
     !! coordTypeKind
     ! It doesn't look like it needs to be translated, but test to make sure
+
+    !! staggerWidths
+    gridEdgeLWidthArg = ESMF_InterfaceIntCreate(gridEdgeLWidth, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    gridEdgeUWidthArg = ESMF_InterfaceIntCreate(gridEdgeUWidth, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    gridAlignArg = ESMF_InterfaceIntCreate(gridAlign, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! dimmap
     dimmapArg = ESMF_InterfaceIntCreate(dimmap, rc=localrc)
@@ -912,12 +965,23 @@ end interface
 
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridcreatefromdistgrid(grid%this, nameLen, name, &
-      coordTypeKind, distgrid, dimmapArg, lboundsArg, uboundsArg, coordRankArg, coordDimMapArg, &
+      coordTypeKind, distgrid, dimmapArg, &
+      lboundsArg, uboundsArg, coordRankArg, coordDimMapArg, &
+      gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, &
       indexflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate helper variables
+    call ESMF_InterfaceIntDestroy(gridEdgeLWidthArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(gridEdgeUWidthArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(gridAlignArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(dimmapArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1015,6 +1079,7 @@ end interface
                         poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
                         bipolePos1, bipolePos2, bipolePos3, &
                         coordDep1, coordDep2, coordDep3, &
+                        gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
                         indexflag, petMap, rc)
 !
 ! !RETURN VALUE:
@@ -1039,6 +1104,9 @@ end interface
        integer,               intent(in),   optional  :: coordDep1(:)
        integer,               intent(in),   optional  :: coordDep2(:)
        integer,               intent(in),   optional  :: coordDep3(:)
+       integer,               intent(in),   optional  :: gridEdgeLWidth(:)
+       integer,               intent(in),   optional  :: gridEdgeUWidth(:)
+       integer,               intent(in),   optional  :: gridAlign(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: petMap(:,:,:)
        integer,               intent(out),  optional  :: rc
@@ -1184,6 +1252,23 @@ end interface
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
 !     arrays map to. If not present the default is /1,2,3/. 
+! \item[{[gridEdgeLWidth]}] 
+!      The padding around the lower edges of the grid. This padding is between
+!      the index space corresponding to the cells and the boundary of the 
+!      the exclusive region. This extra space is to contain the extra
+!      padding for non-center stagger locations, and should be big enough
+!      to hold any stagger in the grid. 
+! \item[{[gridEdgeUWidth]}] 
+!      The padding around the upper edges of the grid. This padding is between
+!      the index space corresponding to the cells and the boundary of the 
+!      the exclusive region. This extra space is to contain the extra
+!      padding for non-center stagger locations, and should be big enough
+!      to hold any stagger in the grid. 
+! \item[{[gridAlign]}] 
+!     Specification of how the stagger locations should align with the cell
+!     index space (can be overridden by the individual staggerAligns). If
+!     the {\tt gridEdgeWidths} are not specified than this parameter
+!     implies the EdgeWidths.
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
 ! \item[{[petMap]}]
@@ -1206,7 +1291,14 @@ end interface
     integer              :: localrc
     integer              :: rank,i,distRank,undistRank,maxSizeDEDim
     integer, pointer     :: minIndexDG(:),maxIndexDG(:)
-    integer, pointer     :: dimMap(:),minIndexLocal(:), deDimCount(:)
+    integer, pointer     :: dimMap(:), deDimCount(:)
+    integer, pointer     :: minIndexLocal(:)
+    integer, pointer     :: gridEdgeLWidthLocal(:)
+    integer, pointer     :: gridEdgeUWidthLocal(:)
+    integer, pointer     :: gridAlignLocal(:)
+    integer, pointer     :: countsPerDEDim1Local(:)
+    integer, pointer     :: countsPerDEDim2Local(:)
+    integer, pointer     :: countsPerDEDim3Local(:)
     integer, pointer     :: deBlockList(:,:,:),minPerDEDim(:,:),maxPerDEDim(:,:)
     integer              :: deCount
     integer              :: d,i1,i2,i3,k
@@ -1214,6 +1306,7 @@ end interface
     type(ESMF_GridConn)  :: connDim2Local(2)
     type(ESMF_GridConn)  :: connDim3Local(2)
     integer              :: connCount, petListCount 
+    integer              :: top
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1360,6 +1453,162 @@ end interface
     endif
 
 
+
+    ! Check Rank of gridWidths and Aligns
+    if (present(gridEdgeLWidth)) then
+        if (size(gridEdgeLWidth) .ne. rank) then
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+                     "- gridEdgeLWidth must be of size equal to Grid rank", & 
+                     ESMF_CONTEXT, rc) 
+              return
+        endif 
+    endif
+
+    if (present(gridEdgeUWidth)) then
+        if (size(gridEdgeUWidth) .ne. rank) then
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+                     "- gridEdgeUWidth must be of size equal to Grid rank", & 
+                     ESMF_CONTEXT, rc) 
+              return
+        endif 
+    endif
+
+    if (present(gridAlign)) then
+        if (size(gridAlign) .ne. rank) then
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+                     "- gridAlign must be of size equal to Grid rank", & 
+                     ESMF_CONTEXT, rc) 
+              return
+        endif 
+    endif
+
+   ! make sure connected dimensions don't have an edge width
+   if (present(connDim1)) then
+      if (size(connDim1) .eq. 1) then
+         if (connDim1(1) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeLWidth)) then
+               if (gridEdgeLWidth(1) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+            if (present(gridEdgeUWidth)) then
+               if (gridEdgeUWidth(1) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+      else if (size(connDim1) .eq. 2) then
+         if (connDim1(1) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeLWidth)) then
+               if (gridEdgeLWidth(1) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+         if (connDim1(2) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeUWidth)) then
+               if (gridEdgeUWidth(1) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+      endif
+   endif
+
+   ! make sure connected dimensions don't have an edge width
+   if (present(connDim2)) then
+      if (size(connDim2) .eq. 1) then
+         if (connDim2(1) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeLWidth)) then
+               if (gridEdgeLWidth(2) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+            if (present(gridEdgeUWidth)) then
+               if (gridEdgeUWidth(2) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+      else if (size(connDim2) .eq. 2) then
+         if (connDim2(1) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeLWidth)) then
+               if (gridEdgeLWidth(2) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+         if (connDim2(2) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeUWidth)) then
+               if (gridEdgeUWidth(2) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+      endif
+   endif
+
+
+   ! make sure connected dimensions don't have an edge width
+   if (present(connDim3)) then
+      if (size(connDim3) .eq. 1) then
+         if (connDim3(1) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeLWidth)) then
+               if (gridEdgeLWidth(3) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+            if (present(gridEdgeUWidth)) then
+               if (gridEdgeUWidth(3) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+      else if (size(connDim3) .eq. 2) then
+         if (connDim3(1) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeLWidth)) then
+               if (gridEdgeLWidth(3) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+         if (connDim3(2) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeUWidth)) then
+               if (gridEdgeUWidth(3) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+      endif
+   endif
+
+
+
+
    ! Check for non-valid connection types here
 
 
@@ -1379,7 +1628,26 @@ end interface
    !      have 3 of these ShapeCreate subroutines with only minor changes
 
 
-    ! Set Defaults ------------------------------------------------------------------
+    ! Copy vales for countsPerDEDim --------------------------------------------
+    allocate(countsPerDEDim1Local(size(countsPerDEDim1)), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
+                                     ESMF_CONTEXT, rc)) return
+    countsPerDEDim1Local=countsPerDEDim1
+
+    allocate(countsPerDEDim2Local(size(countsPerDEDim2)), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
+                                     ESMF_CONTEXT, rc)) return
+    countsPerDEDim2Local=countsPerDEDim2
+
+    if (rank .gt. 2) then
+       allocate(countsPerDEDim3Local(size(countsPerDEDim3)), stat=localrc)
+       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
+                                      ESMF_CONTEXT, rc)) return
+       countsPerDEDim3Local=countsPerDEDim3
+    endif
+
+
+    ! Set Defaults -------------------------------------------------------------
 
     ! Set default for minIndex 
     allocate(minIndexLocal(rank), stat=localrc)
@@ -1394,6 +1662,9 @@ end interface
        enddo
     endif
 
+
+
+
     ! Set Default for connections (although they don't work yet in distgrid/array, so they aren't really used anywhere yet.)
     if (present(connDim1)) then
        if (size(connDim1) .eq. 1) then
@@ -1404,8 +1675,8 @@ end interface
           connDim1Local(2)=connDim1(2)
        endif
     else
-!       connDim1Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-!       connDim1Local(2)=ESMF_GRIDCONN_NONE
+       connDim1Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connDim1Local(2)=ESMF_GRIDCONN_NONE
     endif
 
     if (present(connDim2)) then
@@ -1417,8 +1688,8 @@ end interface
           connDim2Local(2)=connDim2(2)
        endif
     else
-!       connDim2Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-!       connDim2Local(2)=ESMF_GRIDCONN_NONE
+       connDim2Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connDim2Local(2)=ESMF_GRIDCONN_NONE
     endif
 
     if (present(connDim3)) then
@@ -1430,8 +1701,55 @@ end interface
           connDim3Local(2)=connDim3(2)
        endif
     else
-!       connDim3Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-!       connDim3Local(2)=ESMF_GRIDCONN_NONE
+       connDim3Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connDim3Local(2)=ESMF_GRIDCONN_NONE
+    endif
+
+
+   ! Make alterations to size due to GridEdgeWidths ----------------------------
+    allocate(gridEdgeLWidthLocal(rank), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeLWidthLocal", &
+                                     ESMF_CONTEXT, rc)) return
+    allocate(gridEdgeUWidthLocal(rank), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeUWidthLocal", &
+                                     ESMF_CONTEXT, rc)) return
+    allocate(gridAlignLocal(rank), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridAlignLocal", &
+                                     ESMF_CONTEXT, rc)) return
+
+    call ESMF_GridLUADefault(rank, &
+                             gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
+                             gridEdgeLWidthLocal, gridEdgeUWidthLocal, gridAlignLocal, &
+                             rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Modify lower bound
+    do i=1,rank
+       minIndexLocal(i)=minIndexLocal(i)-gridEdgeLWidthLocal(i)
+    enddo
+
+
+    ! Modify lower size
+    countsPerDEDim1Local(1)=countsPerDEDim1Local(1)+gridEdgeLWidthLocal(1)
+
+    countsPerDEDim2Local(1)=countsPerDEDim2Local(1)+gridEdgeLWidthLocal(2)
+  
+    if (rank .gt. 2) then
+       countsPerDEDim3Local(1)=countsPerDEDim3Local(1)+gridEdgeLWidthLocal(3)
+    endif
+
+
+    ! Modify upper size
+    top=size(countsPerDEDim1Local)
+    countsPerDEDim1Local(top)=countsPerDEDim1Local(top)+gridEdgeUWidthLocal(1)
+
+    top=size(countsPerDEDim2Local)
+    countsPerDEDim2Local(top)=countsPerDEDim2Local(top)+gridEdgeUWidthLocal(2)
+  
+    if (rank .gt. 2) then
+       top=size(countsPerDEDim3Local)
+       countsPerDEDim3Local(top)=countsPerDEDim3Local(top)+gridEdgeUWidthLocal(3)
     endif
 
 
@@ -1451,22 +1769,22 @@ end interface
    d=1
    if (size(countsPerDEDim1) .gt. 1) then
       minIndexDG(d)=minIndexLocal(1)
-      maxIndexDG(d)=sum(countsPerDeDim1)+minIndexDG(d)-1
+      maxIndexDG(d)=sum(countsPerDEDim1Local)+minIndexDG(d)-1
       dimMap(d)=1      
       d=d+1
    endif
 
-   if (size(countsPerDEDim2) .gt. 1) then
+   if (size(countsPerDEDim2Local) .gt. 1) then
       minIndexDG(d)=minIndexLocal(2)
-      maxIndexDG(d)=sum(countsPerDeDim2)+minIndexDG(d)-1
+      maxIndexDG(d)=sum(countsPerDEDim2Local)+minIndexDG(d)-1
       dimMap(d)=2      
       d=d+1
    endif
 
    if (rank .gt. 2) then
-      if (size(countsPerDEDim3) .gt. 1) then
+      if (size(countsPerDEDim3Local) .gt. 1) then
          minIndexDG(d)=minIndexLocal(3)
-         maxIndexDG(d)=sum(countsPerDeDim2)+minIndexDG(d)-1
+         maxIndexDG(d)=sum(countsPerDEDim2Local)+minIndexDG(d)-1
          dimMap(d)=3      
          d=d+1
       endif
@@ -1476,23 +1794,23 @@ end interface
   ! Setup deBlockList for DistGrid ------------------------------------------------
   ! count de blocks
   deCount=1
-  deCount=deCount*size(countsPerDEDim1) 
-  deCount=deCount*size(countsPerDEDim2)
+  deCount=deCount*size(countsPerDEDim1Local) 
+  deCount=deCount*size(countsPerDEDim2Local)
   if (rank .gt. 2) then
-     deCount=deCount*size(countsPerDEDim3)
+     deCount=deCount*size(countsPerDEDim3Local)
   endif 
  
   ! Calc the max size of a DEDim
   maxSizeDEDim=1
-  if (size(countsPerDEDim1) .gt. maxSizeDEDim) then
-      maxSizeDEDim=size(countsPerDEDim1)
+  if (size(countsPerDEDim1Local) .gt. maxSizeDEDim) then
+      maxSizeDEDim=size(countsPerDEDim1Local)
   endif
-  if (size(countsPerDEDim2) .gt. maxSizeDEDim) then
-      maxSizeDEDim=size(countsPerDEDim2)
+  if (size(countsPerDEDim2Local) .gt. maxSizeDEDim) then
+      maxSizeDEDim=size(countsPerDEDim2Local)
   endif
   if (rank .gt. 2) then
-      if (size(countsPerDEDim3) .gt. maxSizeDEDim) then
-         maxSizeDEDim=size(countsPerDEDim3)
+      if (size(countsPerDEDim3Local) .gt. maxSizeDEDim) then
+         maxSizeDEDim=size(countsPerDEDim3Local)
       endif
   endif
   
@@ -1511,36 +1829,36 @@ end interface
 
   ! Calc the maximum end of each DE in a Dim, and the size of each DEDim
   d=1
-  if (size(countsPerDEDim1) .gt. 1) then
-      deDimCount(d)=size(countsPerDEDim1)
+  if (size(countsPerDEDim1Local) .gt. 1) then
+      deDimCount(d)=size(countsPerDEDim1Local)
       minPerDeDim(d,1)=minIndexLocal(1)
-      maxPerDeDim(d,1)=minIndexLocal(1)+countsPerDEDim1(1)-1
+      maxPerDeDim(d,1)=minIndexLocal(1)+countsPerDEDim1Local(1)-1
       do i=2,deDimCount(d) 
          minPerDEDim(d,i)=maxPerDEDim(d,i-1)+1
-         maxPerDEDim(d,i)=minPerDEDim(d,i)+countsPerDEDim1(i)-1
+         maxPerDEDim(d,i)=minPerDEDim(d,i)+countsPerDEDim1Local(i)-1
       enddo
       d=d+1  ! advance to next distgrid dimension
   endif
 
-  if (size(countsPerDEDim2) .gt. 1) then
-      deDimCount(d)=size(countsPerDEDim2)
+  if (size(countsPerDEDim2Local) .gt. 1) then
+      deDimCount(d)=size(countsPerDEDim2Local)
       minPerDeDim(d,1)=minIndexLocal(2)
-      maxPerDeDim(d,1)=minIndexLocal(2)+countsPerDEDim2(1)-1
+      maxPerDeDim(d,1)=minIndexLocal(2)+countsPerDEDim2Local(1)-1
       do i=2,deDimCount(d) 
          minPerDEDim(d,i)=maxPerDEDim(d,i-1)+1
-         maxPerDEDim(d,i)=minPerDEDim(d,i)+countsPerDEDim2(i)-1
+         maxPerDEDim(d,i)=minPerDEDim(d,i)+countsPerDEDim2Local(i)-1
       enddo
       d=d+1  ! advance to next distgrid dimension
   endif
 
   if (rank .gt. 2) then
-  if (size(countsPerDEDim3) .gt. 1) then
-      deDimCount(d)=size(countsPerDEDim3)
+  if (size(countsPerDEDim3Local) .gt. 1) then
+      deDimCount(d)=size(countsPerDEDim3Local)
       minPerDeDim(d,1)=minIndexLocal(3)
-      maxPerDeDim(d,1)=minIndexLocal(3)+countsPerDEDim3(1)-1
+      maxPerDeDim(d,1)=minIndexLocal(3)+countsPerDEDim3Local(1)-1
       do i=2,deDimCount(d) 
          minPerDEDim(d,i)=maxPerDEDim(d,i-1)+1
-         maxPerDEDim(d,i)=minPerDEDim(d,i)+countsPerDEDim3(i)-1
+         maxPerDEDim(d,i)=minPerDEDim(d,i)+countsPerDEDim3Local(i)-1
       enddo
       d=d+1  ! advance to next distgrid dimension
   endif
@@ -1611,9 +1929,9 @@ end interface
       !! copy petMap to petList
       if (rank .gt. 2) then
 	 k=1
-     	 do i3=1,size(countsPerDEDim3)
-         do i2=1,size(countsPerDEDim2)
-         do i1=1,size(countsPerDEDim1)
+     	 do i3=1,size(countsPerDEDim3Local)
+         do i2=1,size(countsPerDEDim2Local)
+         do i1=1,size(countsPerDEDim1Local)
             petList(k)=petMap(i1,i2,i3)
             k=k+1
          enddo
@@ -1622,8 +1940,8 @@ end interface
       else 
 	 k=1
      	 do i3=1,1
-         do i2=1,size(countsPerDEDim2)
-         do i1=1,size(countsPerDEDim1)
+         do i2=1,size(countsPerDEDim2Local)
+         do i1=1,size(countsPerDEDim1Local)
             petList(k)=petMap(i1,i2,i3)
             k=k+1
          enddo
@@ -1649,7 +1967,6 @@ end interface
    
 
    ! Create DistGrid --------------------------------------------------------------
-
     distgrid=ESMF_DistGridCreate(minIndex=minIndexDG, maxIndex=maxIndexDG, &
                deBlockList=deBlockList, delayout=delayout, indexflag=indexflag, rc=localrc)   
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1667,22 +1984,22 @@ end interface
 
       ! Fill in minIndex, maxIndex, dimMap
        d=1
-      if (size(countsPerDEDim1) .eq. 1) then
+      if (size(countsPerDEDim1Local) .eq. 1) then
          lbounds(d)=minIndexLocal(1)
-         ubounds(d)=countsPerDEDim1(1)+lbounds(d)-1
+         ubounds(d)=countsPerDEDim1Local(1)+lbounds(d)-1
          d=d+1
       endif
 
-      if (size(countsPerDEDim2) .eq. 1) then
+      if (size(countsPerDEDim2Local) .eq. 1) then
          lbounds(d)=minIndexLocal(2)
-         ubounds(d)=countsPerDEDim2(1)+lbounds(d)-1
+         ubounds(d)=countsPerDEDim2Local(1)+lbounds(d)-1
          d=d+1
       endif
 
       if (rank .gt. 2) then
-         if (size(countsPerDEDim3) .eq. 1) then
+         if (size(countsPerDEDim3Local) .eq. 1) then
             lbounds(d)=minIndexLocal(3)
-            ubounds(d)=countsPerDEDim3(1)+lbounds(d)-1
+            ubounds(d)=countsPerDEDim3Local(1)+lbounds(d)-1
             d=d+1
          endif
       endif
@@ -1742,13 +2059,20 @@ end interface
    ! Create Grid from specification -----------------------------------------------
    if (undistRank .gt. 0) then
        ESMF_GridCreateShapeTileIrreg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
-                                    distgrid, dimmap, lbounds, ubounds, &
-                                    coordRank, coordDimMap, indexflag, &
-                                    localrc)
+                                    distgrid, dimmap=dimmap, &
+                                    lbounds=lbounds, ubounds=ubounds, &
+                                    coordRank=coordRank, coordDimMap=coordDimMap, &
+                                    gridEdgeLWidth=gridEdgeLWidthLocal, &
+                                    gridEdgeUWidth=gridEdgeUWidthLocal, &
+                                    gridAlign=gridAlignLocal, &
+                                    indexflag=indexflag, rc=localrc)
     else
        ESMF_GridCreateShapeTileIrreg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
                                     distgrid=distgrid, dimmap=dimmap, &
                                     coordRank=coordRank, coordDimMap=coordDimMap, &
+                                    gridEdgeLWidth=gridEdgeLWidthLocal, &
+                                    gridEdgeUWidth=gridEdgeUWidthLocal, &
+                                    gridAlign=gridAlignLocal, &
                                     indexflag=indexflag, &
                                     rc=localrc)
     endif
@@ -1771,6 +2095,15 @@ end interface
        deallocate(lbounds)
        deallocate(ubounds)
     endif
+    deallocate(gridEdgeLWidthLocal)
+    deallocate(gridEdgeUWidthLocal)
+    deallocate(gridAlignLocal)
+    deallocate(countsPerDEDim1Local) 
+    deallocate(countsPerDEDim2Local) 
+    if (rank .gt. 2) then
+       deallocate(countsPerDEDim3Local) 
+    endif
+
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1791,6 +2124,7 @@ end interface
                         poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
                         bipolePos1, bipolePos2, bipolePos3, &
                         coordDep1, coordDep2, coordDep3, &
+                        gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
                         indexflag, petMap, rc)
 
 
@@ -1817,6 +2151,9 @@ end interface
        integer,               intent(in),   optional  :: coordDep1(:)
        integer,               intent(in),   optional  :: coordDep2(:)
        integer,               intent(in),   optional  :: coordDep3(:)
+       integer,               intent(in),   optional  :: gridEdgeLWidth(:)
+       integer,               intent(in),   optional  :: gridEdgeUWidth(:)
+       integer,               intent(in),   optional  :: gridAlign(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: petMap(:,:,:)
        integer,               intent(out),  optional  :: rc
@@ -1848,7 +2185,9 @@ end interface
 ! \item[{[decompflag]}]
 !      List of decomposition flags indicating how each dimension of the
 !      patch is to be divided between the DEs. The default setting
-!      is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. 
+!      is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. Please see
+!      Section~\ref{opt:decompflag} for a full description of the 
+!      possible options. 
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
 !      to /1,1,1,.../.
@@ -1950,6 +2289,23 @@ end interface
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
 !     arrays map to. If not present the default is /1,2,3/. 
+! \item[{[gridEdgeLWidth]}] 
+!      The padding around the lower edges of the grid. This padding is between
+!      the index space corresponding to the cells and the boundary of the 
+!      the exclusive region. This extra space is to contain the extra
+!      padding for non-center stagger locations, and should be big enough
+!      to hold any stagger in the grid. 
+! \item[{[gridEdgeUWidth]}] 
+!      The padding around the upper edges of the grid. This padding is between
+!      the index space corresponding to the cells and the boundary of the 
+!      the exclusive region. This extra space is to contain the extra
+!      padding for non-center stagger locations, and should be big enough
+!      to hold any stagger in the grid. 
+! \item[{[gridAlign]}] 
+!     Specification of how the stagger locations should align with the cell
+!     index space (can be overridden by the individual staggerAligns). If
+!     the {\tt gridEdgeWidths} are not specified than this parameter
+!     implies the EdgeWidths.
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
 ! \item[{[petMap]}]
@@ -1978,7 +2334,11 @@ end interface
     type(ESMF_DecompFlag), pointer :: decompflagDG(:)
     integer, pointer     :: regDecompLocal(:)
     type(ESMF_DecompFlag), pointer :: decompflagLocal(:)
-    integer, pointer     :: dimMap(:),minIndexLocal(:), deDimCount(:)
+    integer, pointer     :: dimMap(:), deDimCount(:)
+    integer, pointer     :: minIndexLocal(:), maxIndexLocal(:)
+    integer, pointer     :: gridEdgeLWidthLocal(:)
+    integer, pointer     :: gridEdgeUWidthLocal(:)
+    integer, pointer     :: gridAlignLocal(:)
     integer              :: deCount
     integer              :: d,ud,i1,i2,i3,k
     type(ESMF_GridConn)  :: connDim1Local(2)
@@ -2099,6 +2459,161 @@ end interface
 
 
 
+    ! Check Rank of gridWidths and Aligns
+    if (present(gridEdgeLWidth)) then
+        if (size(gridEdgeLWidth) .ne. rank) then
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+                     "- gridEdgeLWidth must be of size equal to Grid rank", & 
+                     ESMF_CONTEXT, rc) 
+              return
+        endif 
+    endif
+
+    if (present(gridEdgeUWidth)) then
+        if (size(gridEdgeUWidth) .ne. rank) then
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+                     "- gridEdgeUWidth must be of size equal to Grid rank", & 
+                     ESMF_CONTEXT, rc) 
+              return
+        endif 
+    endif
+
+    if (present(gridAlign)) then
+        if (size(gridAlign) .ne. rank) then
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+                     "- gridAlign must be of size equal to Grid rank", & 
+                     ESMF_CONTEXT, rc) 
+              return
+        endif 
+    endif
+
+
+   ! make sure connected dimensions don't have an edge width
+   if (present(connDim1)) then
+      if (size(connDim1) .eq. 1) then
+         if (connDim1(1) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeLWidth)) then
+               if (gridEdgeLWidth(1) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+            if (present(gridEdgeUWidth)) then
+               if (gridEdgeUWidth(1) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+      else if (size(connDim1) .eq. 2) then
+         if (connDim1(1) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeLWidth)) then
+               if (gridEdgeLWidth(1) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+         if (connDim1(2) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeUWidth)) then
+               if (gridEdgeUWidth(1) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+      endif
+   endif
+
+   ! make sure connected dimensions don't have an edge width
+   if (present(connDim2)) then
+      if (size(connDim2) .eq. 1) then
+         if (connDim2(1) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeLWidth)) then
+               if (gridEdgeLWidth(2) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+            if (present(gridEdgeUWidth)) then
+               if (gridEdgeUWidth(2) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+      else if (size(connDim2) .eq. 2) then
+         if (connDim2(1) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeLWidth)) then
+               if (gridEdgeLWidth(2) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+         if (connDim2(2) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeUWidth)) then
+               if (gridEdgeUWidth(2) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+      endif
+   endif
+
+
+   ! make sure connected dimensions don't have an edge width
+   if (present(connDim3)) then
+      if (size(connDim3) .eq. 1) then
+         if (connDim3(1) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeLWidth)) then
+               if (gridEdgeLWidth(3) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+            if (present(gridEdgeUWidth)) then
+               if (gridEdgeUWidth(3) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+      else if (size(connDim3) .eq. 2) then
+         if (connDim3(1) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeLWidth)) then
+               if (gridEdgeLWidth(3) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+         if (connDim3(2) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeUWidth)) then
+               if (gridEdgeUWidth(3) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+      endif
+   endif
+
+
+
    ! Check for non-valid connection types here
 
 
@@ -2120,7 +2635,7 @@ end interface
 
     ! Set Defaults ------------------------------------------------------------------
 
-    ! Set default for minIndex 
+    ! Set default for minIndex
     allocate(minIndexLocal(rank), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
                                      ESMF_CONTEXT, rc)) return
@@ -2132,6 +2647,14 @@ end interface
           minIndexLocal(i)=1
        enddo
     endif
+
+
+    ! Set default for minIndex
+    allocate(maxIndexLocal(rank), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating maxIndexLocal", &
+                                     ESMF_CONTEXT, rc)) return
+    maxIndexLocal(:)=maxIndex(:)
+
 
     ! Set default for regDecomp 
     allocate(regDecompLocal(rank), stat=localrc)
@@ -2206,6 +2729,7 @@ end interface
 !       connDim3Local(2)=ESMF_GRIDCONN_NONE
     endif
 
+
   ! Further Error Checking which is easier after setting defaults ----------------------
   if (present(petMap)) then
      if (rank .gt. 2) then
@@ -2228,6 +2752,38 @@ end interface
           endif
       endif
     endif
+
+   ! Modify Bounds by GridEdgeUWidth and GridEdgeLWidth  -------------------------
+   ! setup maxIndexLocal to hold modified bounds
+    allocate(gridEdgeLWidthLocal(rank), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeLWidthLocal", &
+                                     ESMF_CONTEXT, rc)) return
+    allocate(gridEdgeUWidthLocal(rank), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeUWidthLocal", &
+                                     ESMF_CONTEXT, rc)) return
+    allocate(gridAlignLocal(rank), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridAlignLocal", &
+                                     ESMF_CONTEXT, rc)) return
+
+    call ESMF_GridLUADefault(rank, &
+                             gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
+                             gridEdgeLWidthLocal, gridEdgeUWidthLocal, gridAlignLocal, &
+                             rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Modify lower bound
+    do i=1,rank
+       minIndexLocal(i)=minIndexLocal(i)-gridEdgeLWidthLocal(i)
+    enddo
+
+    ! Modify upper bound
+    do i=1,rank
+       maxIndexLocal(i)=maxIndexLocal(i)+gridEdgeUWidthLocal(i)
+    enddo
+
+
+
 
 
    ! Calc minIndex,maxIndex,dimMap for DistGrid -----------------------------------
@@ -2258,46 +2814,48 @@ end interface
    ud=1
    if ((regDecompLocal(1) .gt. 1) .or. all(regDecompLocal .eq. 1)) then
       minIndexDG(d)=minIndexLocal(1)
-      maxIndexDG(d)=maxIndex(1)
+      maxIndexDG(d)=maxIndexLocal(1)
       dimMap(d)=1      
       regDecompDG(d)=regDecompLocal(1)
       decompFlagDG(d)=decompFlagLocal(1)
       d=d+1
    else
      lbounds(ud)=minIndexLocal(1)
-     ubounds(ud)=maxIndex(1)
+     ubounds(ud)=maxIndexLocal(1)
      ud=ud+1
    endif
 
    if (regDecompLocal(2) .gt. 1) then
       minIndexDG(d)=minIndexLocal(2)
-      maxIndexDG(d)=maxIndex(2)
+      maxIndexDG(d)=maxIndexLocal(2)
       dimMap(d)=2      
       regDecompDG(d)=regDecompLocal(2)
       decompFlagDG(d)=decompFlagLocal(2)
       d=d+1
    else
      lbounds(ud)=minIndexLocal(2)
-     ubounds(ud)=maxIndex(2)
+     ubounds(ud)=maxIndexLocal(2)
      ud=ud+1
    endif
 
    if (rank .gt. 2) then
       if (regDecompLocal(3) .gt. 1) then
          minIndexDG(d)=minIndexLocal(3)
-         maxIndexDG(d)=maxIndex(3)
+         maxIndexDG(d)=maxIndexLocal(3)
          dimMap(d)=3      
          regDecompDG(d)=regDecompLocal(3)
          decompFlagDG(d)=decompFlagLocal(3)
          d=d+1
        else
          lbounds(ud)=minIndexLocal(3)
-         ubounds(ud)=maxIndex(3)
+         ubounds(ud)=maxIndexLocal(3)
          ud=ud+1
        endif
    endif
 
    
+
+
    ! Setup Connections between patch sides ----------------------------------------
 
    ! CONNECTIONS DON'T WORK YET SO NOT IMPLEMENTED
@@ -2418,19 +2976,25 @@ end interface
    ! Create Grid from specification -----------------------------------------------
    if (undistRank .gt. 0) then
        ESMF_GridCreateShapeTileReg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
-                                    distgrid, dimmap, lbounds, ubounds, &
-                                    coordRank, coordDimMap, indexflag, &
-                                    localrc)
+                                    distgrid=distgrid, dimmap=dimmap, &
+                                    lbounds=lbounds, ubounds=ubounds, &
+                                    coordRank=coordRank, coordDimMap=coordDimMap, &
+                                    gridEdgeLWidth=gridEdgeLWidthLocal, &
+                                    gridEdgeUWidth=gridEdgeUWidthLocal, &
+                                    gridAlign=gridAlignLocal, &
+                                    indexflag=indexflag, rc=localrc)
     else
        ESMF_GridCreateShapeTileReg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
                                     distgrid=distgrid, dimmap=dimmap, &
                                     coordRank=coordRank, coordDimMap=coordDimMap, &
+                                    gridEdgeLWidth=gridEdgeLWidthLocal, &
+                                    gridEdgeUWidth=gridEdgeUWidthLocal, &
+                                    gridAlign=gridAlignLocal, &
                                     indexflag=indexflag, &
                                     rc=localrc)
     endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
 
 
     ! Clean up memory
@@ -2442,9 +3006,15 @@ end interface
     deallocate(coordDimMap)
     deallocate(minIndexDG)
     deallocate(maxIndexDG)
+    deallocate(minIndexLocal)
+    deallocate(maxIndexLocal)
     deallocate(dimMap)
     deallocate(lbounds)
     deallocate(ubounds)
+    deallocate(gridEdgeLWidthLocal)
+    deallocate(gridEdgeUWidthLocal)
+    deallocate(gridAlignLocal)
+
  
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2514,7 +3084,7 @@ end interface
           rank, distRank, undistRank,  &
           tileCount, staggerlocsCount, localDECount, distgrid, &
           dimmap, lbounds, ubounds, coordRank, coordDimMap, &
-          indexFlag, rc)
+          gridEdgeLWidth, gridEdgeUWidth, gridAlign, indexFlag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),       intent(in)            :: grid
@@ -2532,6 +3102,9 @@ end interface
       integer,               intent(out), optional :: ubounds(:)
       integer,               intent(out), optional :: coordRank(:)
       integer,               intent(out), optional :: coordDimMap(:,:)
+      integer,               intent(out), optional :: gridEdgeLWidth(:)
+      integer,               intent(out), optional :: gridEdgeUWidth(:)
+      integer,               intent(out), optional :: gridAlign(:)
       type(ESMF_IndexFlag),  intent(out), optional :: indexflag
       integer,               intent(out), optional :: rc
 !
@@ -2578,6 +3151,15 @@ end interface
 !   2D list of size grid rank x grid rank. This array describes the
 !   map of each component array's dimensions onto the grids
 !   dimensions. 
+! \item[{[gridEdgeLWidth]}] 
+!   The padding around the lower edges of the grid. The array should
+!   be of size greater or equal to the Grid rank.
+! \item[{[gridEdgeUWidth]}] 
+!      The padding around the upper edges of the grid. The array should
+!   be of size greater or equal to the Grid rank. 
+! \item[{[gridAlign]}] 
+!     Specification of how the stagger locations should align with the cell
+!     index space. The array should be of size greater or equal to the Grid rank. 
 ! \item[{[indexflag]}]
 !    Flag that indicates how the DE-local indices are to be defined.
 !\item[{[rc]}]
@@ -2591,7 +3173,9 @@ end interface
     type(ESMF_InterfaceInt) :: uboundsArg ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordRankArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
-
+    type(ESMF_InterfaceInt) :: gridEdgeLWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: gridEdgeUWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: gridAlignArg  ! Language Interface Helper Var
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -2631,10 +3215,24 @@ end interface
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    !! Grid Boundary Info
+    gridEdgeLWidthArg = ESMF_InterfaceIntCreate(gridEdgeLWidth, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    gridEdgeUWidthArg = ESMF_InterfaceIntCreate(gridEdgeUWidth, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    gridAlignArg = ESMF_InterfaceIntCreate(gridAlign, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+
     ! Call C++ Subroutine to do the get
     call c_ESMC_gridget(grid%this, &
       coordTypeKind, rank, tileCount, distgrid,  staggerlocsCount, &
       dimmapArg, lboundsArg, uboundsArg, coordRankArg, coordDimMapArg, &
+      gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, &
       indexflag, localDECount, distRank, undistRank, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2653,6 +3251,15 @@ end interface
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(gridEdgeLWidthArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(gridEdgeUWidthArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(gridAlignArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2674,7 +3281,7 @@ end subroutine ESMF_GridGet
 #undef  ESMF_METHOD  
 #define ESMF_METHOD "ESMF_GridGetPLocalDePSloc"
 !BOP
-! !IROUTINE: ESMF_GridGet - Get Grid information for a specific stagger location
+! !IROUTINE: ESMF_GridGet - Get information about a particular DE in a stagger location in a Grid
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGet()
@@ -2716,29 +3323,43 @@ end subroutine ESMF_GridGet
 !\item[{grid}]
 !    Grid to get the information from.
 !\item[{[localDe]}]
-!     The local DE from which to get the information.  If not set, defaults to 
-!     the first DE on this processor. (localDE starts at 0)
+!     The local DE from which to get the information.  
 !\item[{staggerloc}]
 !     The stagger location to get the information for. 
 !     Please see Section~\ref{sec:opt:staggerloc} for a list 
-!     of predefined stagger locations. If not present, defaults to
-!     ESMF\_STAGGERLOC\_CENTER.
+!     of predefined stagger locations.
 !\item[{[exclusiveLBound]}]
 !     Upon return this holds the lower bounds of the exclusive region.
-!     {\tt exclusiveLBound} must be allocated to be of size equal to the coord rank.
+!     {\tt exclusiveLBound} must be allocated to be of size equal to the Grid rank.
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
 !\item[{[exclusiveUBound]}]
 !     Upon return this holds the upper bounds of the exclusive region.
-!     {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!     {\tt exclusiveUBound} must be allocated to be of size equal to the Grid rank.
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
 !\item[{[exclusiveCount]}]
-!     Upon return this holds the number of items in the exclusive region per dimension.
+!     Upon return this holds the number of items in the exclusive region per dimension
+!     (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
+!      be allocated to be of size equal to the Grid rank.
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
 !\item[{[computationalLBound]}]
-!     Upon return this holds the lower bounds of the stagger region.
-!     {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
+!     Upon return this holds the lower bounds of the computational region.
+!     {\tt computationalLBound} must be allocated to be of size equal to the Grid rank.
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
 !\item[{[computationalUBound]}]
-!     Upon return this holds the upper bounds of the stagger region.
-!     {\tt computationalUBound} must be allocated to be of size equal to the coord rank.
+!     Upon return this holds the upper bounds of the computational region.
+!     {\tt computationalUBound} must be allocated to be of size equal to the Grid rank.
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
 !\item[{[computationalCount]}]
-!     Upon return this holds the number of items in the stagger region per dimension.
+!     Upon return this holds the number of items in the computational region per dimension.
+!     (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount} must
+!      be allocated to be of size equal to the Grid rank.
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
 !\item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -2821,7 +3442,7 @@ end subroutine ESMF_GridGet
 #undef  ESMF_METHOD  
 #define ESMF_METHOD "ESMF_GridGetPSloc"
 !BOP
-! !IROUTINE: ESMF_GridGet - Get Grid information for a specific stagger location
+! !IROUTINE: ESMF_GridGet - Get information about a particular stagger location in a Grid
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGet()
@@ -2940,7 +3561,7 @@ end subroutine ESMF_GridGet
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridGetCoord - Get coordinates and put in a native Fortran array
+! !IROUTINE: ESMF_GridGetCoord - Get Grid coordinate bounds and an F90 pointer to coordinate data
 
 ! !INTERFACE:
 !      subroutine ESMF_GridGetCoord(grid, localDE, coordDim, staggerloc, &
@@ -3008,18 +3629,44 @@ end subroutine ESMF_GridGet
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
 !          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!     \item[{[exclusiveCount]}]
+!          Upon return this holds the number of items in the exclusive region per dimension
+!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
+!          be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[computationalLBound]}]
 !          Upon return this holds the lower bounds of the stagger region.
 !          {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[computationalUBound]}]
 !          Upon return this holds the upper bounds of the stagger region.
 !          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalCount]}]
+!          Upon return this holds the number of items in the computational region per dimension
+!          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
+!          must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[totalLBound]}]
 !          Upon return this holds the lower bounds of the total region.
 !          {\tt totalLBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[totalUBound]}]
 !          Upon return this holds the upper bounds of the total region.
 !          {\tt totalUBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalCount]}]
+!          Upon return this holds the number of items in the total region per dimension
+!          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
+!          be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{fptr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
@@ -3087,21 +3734,51 @@ end subroutine ESMF_GridGet
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
 !          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[exclusiveCount]}]
+!          Upon return this holds the number of items in the exclusive region per dimension
+!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
+!          be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[computationalLBound]}]
 !          Upon return this holds the lower bounds of the stagger region.
 !          {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[computationalUBound]}]
 !          Upon return this holds the upper bounds of the stagger region.
 !          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalCount]}]
+!          Upon return this holds the number of items in the computational region per dimension
+!          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
+!          must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[totalLBound]}]
 !          Upon return this holds the lower bounds of the total region.
 !          {\tt totalLBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[totalUBound]}]
 !          Upon return this holds the upper bounds of the total region.
 !          {\tt totalUBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalCount]}]
+!          Upon return this holds the number of items in the total region per dimension
+!          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
+!          be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{fptr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
@@ -3366,21 +4043,51 @@ end subroutine ESMF_GridGet
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
 !          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[exclusiveCount]}]
+!          Upon return this holds the number of items in the exclusive region per dimension
+!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
+!          be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[computationalLBound]}]
 !          Upon return this holds the lower bounds of the stagger region.
 !          {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[computationalUBound]}]
 !          Upon return this holds the upper bounds of the stagger region.
 !          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalCount]}]
+!          Upon return this holds the number of items in the computational region per dimension
+!          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
+!          must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[totalLBound]}]
 !          Upon return this holds the lower bounds of the total region.
 !          {\tt totalLBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[totalUBound]}]
 !          Upon return this holds the upper bounds of the total region.
 !          {\tt totalUBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalCount]}]
+!          Upon return this holds the number of items in the total region per dimension
+!          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
+!          be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{fptr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
@@ -3648,21 +4355,51 @@ end subroutine ESMF_GridGet
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
 !          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[exclusiveCount]}]
+!          Upon return this holds the number of items in the exclusive region per dimension
+!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
+!          be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[computationalLBound]}]
 !          Upon return this holds the lower bounds of the stagger region.
 !          {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[computationalUBound]}]
 !          Upon return this holds the upper bounds of the stagger region.
 !          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalCount]}]
+!          Upon return this holds the number of items in the computational region per dimension
+!          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
+!          must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[totalLBound]}]
 !          Upon return this holds the lower bounds of the total region.
 !          {\tt totalLBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[totalUBound]}]
 !          Upon return this holds the upper bounds of the total region.
 !          {\tt totalUBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalCount]}]
+!          Upon return this holds the number of items in the total region per dimension
+!          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
+!          be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{fptr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
@@ -3933,21 +4670,51 @@ endif
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
 !          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[exclusiveCount]}]
+!          Upon return this holds the number of items in the exclusive region per dimension
+!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
+!          be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[computationalLBound]}]
 !          Upon return this holds the lower bounds of the stagger region.
 !          {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[computationalUBound]}]
 !          Upon return this holds the upper bounds of the stagger region.
 !          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalCount]}]
+!          Upon return this holds the number of items in the computational region per dimension
+!          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
+!          must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[totalLBound]}]
 !          Upon return this holds the lower bounds of the total region.
 !          {\tt totalLBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[totalUBound]}]
 !          Upon return this holds the upper bounds of the total region.
 !          {\tt totalUBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalCount]}]
+!          Upon return this holds the number of items in the total region per dimension
+!          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
+!          be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{fptr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
@@ -4217,21 +4984,51 @@ endif
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
 !          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[exclusiveCount]}]
+!          Upon return this holds the number of items in the exclusive region per dimension
+!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
+!          be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[computationalLBound]}]
 !          Upon return this holds the lower bounds of the stagger region.
 !          {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[computationalUBound]}]
 !          Upon return this holds the upper bounds of the stagger region.
 !          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalCount]}]
+!          Upon return this holds the number of items in the computational region per dimension
+!          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
+!          must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[totalLBound]}]
 !          Upon return this holds the lower bounds of the total region.
 !          {\tt totalLBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[totalUBound]}]
 !          Upon return this holds the upper bounds of the total region.
 !          {\tt totalUBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalCount]}]
+!          Upon return this holds the number of items in the total region per dimension
+!          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
+!          be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{fptr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
@@ -4500,21 +5297,51 @@ endif
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
 !          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[exclusiveCount]}]
+!          Upon return this holds the number of items in the exclusive region per dimension
+!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
+!          be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[computationalLBound]}]
 !          Upon return this holds the lower bounds of the stagger region.
 !          {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[computationalUBound]}]
 !          Upon return this holds the upper bounds of the stagger region.
 !          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalCount]}]
+!          Upon return this holds the number of items in the computational region per dimension
+!          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
+!          must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[totalLBound]}]
 !          Upon return this holds the lower bounds of the total region.
 !          {\tt totalLBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{[totalUBound]}]
 !          Upon return this holds the upper bounds of the total region.
 !          {\tt totalUBound} must be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalCount]}]
+!          Upon return this holds the number of items in the total region per dimension
+!          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
+!          be allocated to be of size equal to the coord rank.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
 !     \item[{fptr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
@@ -4731,7 +5558,7 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetCoordBounds"
 !BOP
-! !IROUTINE: ESMF_GridGetCoord - Get coordinate bounds
+! !IROUTINE: ESMF_GridGetCoord -  Get Grid coordinate bounds
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
@@ -4783,21 +5610,51 @@ endif
 !\item[{[exclusiveLBound]}]
 !     Upon return this holds the lower bounds of the exclusive region.
 !     {\tt exclusiveLBound} must be allocated to be of size equal to the coord rank.
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
 !\item[{[exclusiveUBound]}]
 !     Upon return this holds the upper bounds of the exclusive region.
 !     {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
+!\item[{[exclusiveCount]}]
+!     Upon return this holds the number of items in the exclusive region per dimension
+!     (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
+!     be allocated to be of size equal to the coord rank.
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
 !\item[{[computationalLBound]}]
 !     Upon return this holds the lower bounds of the stagger region.
 !     {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
 !\item[{[computationalUBound]}]
 !     Upon return this holds the upper bounds of the stagger region.
-!     {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!     {\tt computationalUBound} must be allocated to be of size equal to the coord rank.
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
+!\item[{[computationalCount]}]
+!     Upon return this holds the number of items in the computational region per dimension
+!     (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
+!      must be allocated to be of size equal to the coord rank.
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
 !\item[{[totalLBound]}]
 !     Upon return this holds the lower bounds of the total region.
 !     {\tt totalLBound} must be allocated to be of size equal to the coord rank.
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
 !\item[{[totalUBound]}]
 !     Upon return this holds the upper bounds of the total region.
 !     {\tt totalUBound} must be allocated to be of size equal to the coord rank.
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
+!\item[{[totalCount]}]
+!     Upon return this holds the number of items in the total region per dimension
+!     (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
+!      be allocated to be of size equal to the coord rank.
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
 !\item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -4991,8 +5848,9 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridSet()
-    subroutine ESMF_GridSetFromDistGrid(grid,name,coordTypeKind,distgrid, &
-                 dimmap, lbounds, ubounds, coordRank, coordDimMap, &
+    subroutine ESMF_GridSetFromDistGrid(grid, name, coordTypeKind, distgrid, & 
+                 dimmap, lbounds, ubounds, coordRank, coordDimMap,           &
+                 gridEdgeLWidth, gridEdgeUWidth, gridAlign,                  &
                  indexflag, rc)
 !
 ! !RETURN VALUE:
@@ -5008,6 +5866,9 @@ endif
        integer,               intent(in),   optional  :: ubounds(:)
        integer,               intent(in),   optional  :: coordRank(:)
        integer,               intent(in),   optional  :: coordDimMap(:,:)
+       integer,               intent(in),   optional  :: gridEdgeLWidth(:)
+       integer,               intent(in),   optional  :: gridEdgeUWidth(:)
+       integer,               intent(in),   optional  :: gridAlign(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(out),  optional  :: rc
 !
@@ -5041,6 +5902,23 @@ endif
 !      Lower bounds for undistributed array dimensions.
 ! \item[{[ubounds]}] 
 !      Upper bounds for undistributed array dimensions.
+! \item[{[gridEdgeLWidth]}] 
+!      The padding around the lower edges of the grid. This padding is between
+!      the index space corresponding to the cells and the boundary of the 
+!      the exclusive region. This extra space is to contain the extra
+!      padding for non-center stagger locations, and should be big enough
+!      to hold any stagger in the grid. 
+! \item[{[gridEdgeUWidth]}] 
+!      The padding around the upper edges of the grid. This padding is between
+!      the index space corresponding to the cells and the boundary of the 
+!      the exclusive region. This extra space is to contain the extra
+!      padding for non-center stagger locations, and should be big enough
+!      to hold any stagger in the grid. 
+! \item[{[gridAlign]}] 
+!     Specification of how the stagger locations should align with the cell
+!     index space (can be overridden by the individual staggerAligns). If
+!     the {\tt gridEdgeWidths} are not specified than this parameter
+!     implies the EdgeWidths.
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
 ! \item[{[rc]}]
@@ -5050,6 +5928,9 @@ endif
 !EOP
     integer :: localrc ! local error status
     integer :: nameLen 
+    type(ESMF_InterfaceInt) :: gridEdgeLWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: gridEdgeUWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: gridAlignArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: dimmapArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: lboundsArg ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: uboundsArg ! Language Interface Helper Var
@@ -5075,6 +5956,17 @@ endif
     !! coordTypeKind
     ! It doesn't look like it needs to be translated, but test to make sure
 
+    !! gridEdgeLWidth and gridEdgeUWidth
+    gridEdgeLWidthArg = ESMF_InterfaceIntCreate(gridEdgeLWidth, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    gridEdgeUWidthArg = ESMF_InterfaceIntCreate(gridEdgeUWidth, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    gridAlignArg = ESMF_InterfaceIntCreate(gridAlign, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     !! dimmap
     dimmapArg = ESMF_InterfaceIntCreate(dimmap, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5098,12 +5990,23 @@ endif
 
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridsetfromdistgrid(grid%this, nameLen, name, &
-      coordTypeKind, distgrid, dimmapArg, lboundsArg, uboundsArg, coordRankArg, coordDimMapArg, &
+      coordTypeKind, distgrid, &
+      dimmapArg, lboundsArg, uboundsArg, coordRankArg, coordDimMapArg, &
+      gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, &
       indexflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate helper variables
+    call ESMF_InterfaceIntDestroy(gridEdgeUWidthArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(gridEdgeLWidthArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(gridAlignArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(dimmapArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -5201,18 +6104,19 @@ endif
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridSetShapeIrreg"
+#define ESMF_METHOD "ESMF_GridSetShapeTileIrreg"
 !BOP
-! !IROUTINE: ESMF_GridSetShape - Create a Grid with an irregular distribution
+! !IROUTINE: ESMF_GridSetShapeTile - Create a Grid with an irregular distribution
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_GridSetShape()
-     subroutine ESMF_GridSetShapeIrreg(grid, name,coordTypeKind, minIndex,  &
+  ! Private name; call using ESMF_GridSetShapeTile()
+     subroutine ESMF_GridSetShapeTileIrreg(grid, name,coordTypeKind, minIndex,  &
                         countsPerDEDim1,countsPerDeDim2, countsPerDEDim3, &
                         connDim1, connDim2, connDim3, &
                         poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
                         bipolePos1, bipolePos2, bipolePos3, &
                         coordDep1, coordDep2, coordDep3, &
+                        gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
                         indexflag, petMap, rc)
 
 !
@@ -5236,6 +6140,9 @@ endif
        integer,               intent(in),   optional  :: coordDep1(:)
        integer,               intent(in),   optional  :: coordDep2(:)
        integer,               intent(in),   optional  :: coordDep3(:)
+       integer,               intent(in),   optional  :: gridEdgeLWidth(:)
+       integer,               intent(in),   optional  :: gridEdgeUWidth(:)
+       integer,               intent(in),   optional  :: gridAlign(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: petMap(:,:,:)
        integer,               intent(out),  optional  :: rc
@@ -5390,6 +6297,23 @@ endif
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
 !     arrays map to. If not present the default is /1,2,3/. 
+! \item[{[gridEdgeLWidth]}] 
+!      The padding around the lower edges of the grid. This padding is between
+!      the index space corresponding to the cells and the boundary of the 
+!      the exclusive region. This extra space is to contain the extra
+!      padding for non-center stagger locations, and should be big enough
+!      to hold any stagger in the grid. 
+! \item[{[gridEdgeUWidth]}] 
+!      The padding around the upper edges of the grid. This padding is between
+!      the index space corresponding to the cells and the boundary of the 
+!      the exclusive region. This extra space is to contain the extra
+!      padding for non-center stagger locations, and should be big enough
+!      to hold any stagger in the grid. 
+! \item[{[gridAlign]}] 
+!     Specification of how the stagger locations should align with the cell
+!     index space (can be overridden by the individual staggerAligns). If
+!     the {\tt gridEdgeWidths} are not specified than this parameter
+!     implies the EdgeWidths.
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
 ! \item[{[petMap]}]
@@ -5570,6 +6494,133 @@ endif
 
 
 
+   ! make sure connected dimensions don't have an edge width
+   if (present(connDim1)) then
+      if (size(connDim1) .eq. 1) then
+         if (connDim1(1) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeLWidth)) then
+               if (gridEdgeLWidth(1) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+            if (present(gridEdgeUWidth)) then
+               if (gridEdgeUWidth(1) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+      else if (size(connDim1) .eq. 2) then
+         if (connDim1(1) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeLWidth)) then
+               if (gridEdgeLWidth(1) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+         if (connDim1(2) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeUWidth)) then
+               if (gridEdgeUWidth(1) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+      endif
+   endif
+
+   ! make sure connected dimensions don't have an edge width
+   if (present(connDim2)) then
+      if (size(connDim2) .eq. 1) then
+         if (connDim2(1) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeLWidth)) then
+               if (gridEdgeLWidth(2) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+            if (present(gridEdgeUWidth)) then
+               if (gridEdgeUWidth(2) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+      else if (size(connDim2) .eq. 2) then
+         if (connDim2(1) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeLWidth)) then
+               if (gridEdgeLWidth(2) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+         if (connDim2(2) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeUWidth)) then
+               if (gridEdgeUWidth(2) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+      endif
+   endif
+
+
+   ! make sure connected dimensions don't have an edge width
+   if (present(connDim3)) then
+      if (size(connDim3) .eq. 1) then
+         if (connDim3(1) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeLWidth)) then
+               if (gridEdgeLWidth(3) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+            if (present(gridEdgeUWidth)) then
+               if (gridEdgeUWidth(3) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+      else if (size(connDim3) .eq. 2) then
+         if (connDim3(1) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeLWidth)) then
+               if (gridEdgeLWidth(3) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+         if (connDim3(2) .ne. ESMF_GRIDCONN_NONE) then
+            if (present(gridEdgeUWidth)) then
+               if (gridEdgeUWidth(3) .gt. 0) then
+                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                     "- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rc) 
+               endif
+            endif
+         endif
+      endif
+   endif
+
+
+
+
    ! TODO: can you create an array without a distgrid??? What if everything they specify is undistributed?
    !       for now make a totally undistributed grid an error. Work on handling it later.
    !       Perhaps don't use lbounds, ubounds
@@ -5657,7 +6708,7 @@ endif
    d=1
    if (size(countsPerDEDim1) .gt. 1) then
       minIndexDG(d)=minIndexLocal(1)
-      maxIndexDG(d)=sum(countsPerDeDim1)+minIndexDG(d)-1
+      maxIndexDG(d)=sum(countsPerDEDim1)+minIndexDG(d)-1
       dimMap(d)=1      
       d=d+1
    endif
@@ -5945,13 +6996,20 @@ endif
    ! Create Grid from specification -----------------------------------------------
    if (undistRank .gt. 0) then
        call ESMF_GridSetFromDistGrid(grid, name, coordTypeKind, &
-                                    distgrid, dimmap, lbounds, ubounds, &
-                                    coordRank, coordDimMap, indexflag, &
-                                    localrc)
+                                    distgrid, dimmap=dimmap, lbounds=lbounds, ubounds=ubounds, &
+                                    coordRank=coordRank, coordDimMap=coordDimMap, &
+                                    gridEdgeLWidth=gridEdgeLWidth, &
+                                    gridEdgeUWidth=gridEdgeUWidth, &
+                                    gridAlign=gridAlign, &
+                                    indexflag=indexflag, &
+                                    rc=localrc)
     else
        call ESMF_GridSetFromDistGrid(grid, name, coordTypeKind, &
                                     distgrid=distgrid, dimmap=dimmap, &
                                     coordRank=coordRank, coordDimMap=coordDimMap, &
+                                    gridEdgeLWidth=gridEdgeLWidth, &
+                                    gridEdgeUWidth=gridEdgeUWidth, &
+                                    gridAlign=gridAlign, &
                                     indexflag=indexflag, &
                                     rc=localrc)
     endif
@@ -5977,7 +7035,7 @@ endif
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
-    end subroutine ESMF_GridSetShapeIrreg
+    end subroutine ESMF_GridSetShapeTileIrreg
 
 
 ! -------------------------- ESMF-public method -------------------------------
@@ -6074,6 +7132,188 @@ endif
     end function ESMF_GridGetInit
 
 !------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridConnEqual"
+!BOPI
+! !IROUTINE: ESMF_GridConnEqual - Equality of GridConns
+!
+! !INTERFACE:
+      function ESMF_GridConnEqual(GridConn1, GridConn2)
+
+! !RETURN VALUE:
+      logical :: ESMF_GridConnEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_GridConn), intent(in) :: &
+         GridConn1,      &! Two igrid statuses to compare for
+         GridConn2        ! equality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF GridConn statuses to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[GridConn1, GridConn2]
+!          Two igrid statuses to compare for equality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_GridConnEqual = (GridConn1%gridconn == &
+                              GridConn2%gridconn)
+
+      end function ESMF_GridConnEqual
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridConnNotEqual"
+!BOPI
+! !IROUTINE: ESMF_GridConnNotEqual - Non-equality of GridConns
+!
+! !INTERFACE:
+      function ESMF_GridConnNotEqual(GridConn1, GridConn2)
+
+! !RETURN VALUE:
+      logical :: ESMF_GridConnNotEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_GridConn), intent(in) :: &
+         GridConn1,      &! Two GridConn Statuses to compare for
+         GridConn2        ! inequality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF GridConn statuses to see if
+!     they are unequal.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[GridConn1, GridConn2]
+!          Two statuses of GridConns to compare for inequality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_GridConnNotEqual = (GridConn1%gridconn /= &
+                                 GridConn2%gridconn)
+
+      end function ESMF_GridConnNotEqual
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridLUADefault"
+!BOPI
+! !IROUTINE: ESMF_GridLUADefault
+
+! !INTERFACE:
+      subroutine ESMF_GridLUADefault(rank, &
+                                     lWidthIn, uWidthIn, alignIn, &
+                                     lWidthOut, uWidthOut, alignOut, &
+                                     rc)
+!
+! !ARGUMENTS:
+       integer,               intent(in)              :: rank
+       integer,               intent(in),   optional  :: lWidthIn(:)
+       integer,               intent(in),   optional  :: uWidthIn(:)
+       integer,               intent(in),   optional  :: alignIn(:)
+       integer,               intent(out)             :: lWidthOut(:)
+       integer,               intent(out)             :: uWidthOut(:)
+       integer,               intent(out)             :: alignOut(:)
+       integer,               intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+! This routine sets the default values of the lwidth, uwidth, and align
+! based on the user's passed in values for these. 
+!
+! The arguments are:
+! \begin{description}
+! \item[{[lWidthIn]}]
+!     The lower width from the user.
+! \item[{[uWidthIn]}]
+!     The upper width from the user.
+! \item[{[alignIn]}]
+!     The lower width from the user.
+! \item[{[lWidthOut]}]
+!     The lower width based on user input.
+! \item[{[uWidthIn]}]
+!     The upper width based on user input.
+! \item[{[alignIn]}]
+!     The lower width based on user input.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+    integer :: localrc ! local error status
+    type(ESMF_InterfaceInt) :: lWidthInArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: uWidthInArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: alignInArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: lWidthOutArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: uWidthOutArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: alignOutArg  ! Language Interface Helper Var
+
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! turn to interfaceint
+    lWidthInArg = ESMF_InterfaceIntCreate(lWidthIn, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    uWidthInArg = ESMF_InterfaceIntCreate(uWidthIn, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    alignInArg = ESMF_InterfaceIntCreate(alignIn, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    lWidthOutArg = ESMF_InterfaceIntCreate(lWidthOut, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    uWidthOutArg = ESMF_InterfaceIntCreate(uWidthOut, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    alignOutArg = ESMF_InterfaceIntCreate(alignOut, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call C++ Subroutine for the default
+    call c_ESMC_gridluadefault(rank, &
+                               lWidthInArg, uWidthInArg, alignInArg, &
+                               lWidthOutArg, uWidthOutArg, alignOutArg, &
+                               localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Deallocate helper variables
+    call ESMF_InterfaceIntDestroy(lWidthInArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(uWidthInArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(alignInArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(lWidthOutArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(uWidthOutArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(alignOutArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    end subroutine ESMF_GridLUADefault
 
       end module ESMF_GridMod
 
