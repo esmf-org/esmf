@@ -4,4 +4,8 @@
 PGF90EXE=`$1 -dryrun 2>&1 | grep "\/\.pg" | head -1 | awk '{ print $3} '`
 PGF90EXE=$PGF90EXE"TermX"
 PGF90EXE=`echo $PGF90EXE | sed 's/\.pg.*TermX/pgf90/g'`
+if [ $1 = "ftn" ]; then
+$PGF90EXE -show 2>&1 | grep DEFSTDLIBS | sed 's/DEFSTDLIBS//g' | sed 's/=//g' | sed 's/-lpthread//g' | sed 's/-lgcc//g' | sed 's/-lc//g'
+else
 $PGF90EXE -show 2>&1 | grep DEFSTDLIBS | sed 's/DEFSTDLIBS//g' | sed 's/=//g'
+fi
