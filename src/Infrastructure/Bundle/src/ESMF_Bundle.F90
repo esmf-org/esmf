@@ -1,5 +1,5 @@
 
-! $Id: ESMF_Bundle.F90,v 1.117 2007/10/31 03:39:57 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.118 2007/10/31 16:58:50 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -46,7 +46,6 @@
       use ESMF_StaggerLocMod
       use ESMF_GridMod
       use ESMF_InternArrayMod
-      use ESMF_FieldDataMapMod
       use ESMF_FieldMod
       use ESMF_InitMacrosMod
       implicit none
@@ -96,7 +95,6 @@
         sequence
         private
           integer :: field_order                      ! index of this field
-          type(ESMF_FieldDataMap) :: field_dm         ! copy of this field's dm
           type(ESMF_BundleFieldAccess) :: field_bfa   ! access info if packed
           ESMF_INIT_DECLARE
         end type
@@ -2047,7 +2045,7 @@ end function
       type(ESMF_BundleCongrntData) :: candidate  ! values being compared
       type(ESMF_Field), pointer :: fieldp
       type(ESMF_InternArray) :: array
-      type(ESMF_FieldDataMap) :: datamap
+!      type(ESMF_FieldDataMap) :: datamap
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2056,6 +2054,9 @@ end function
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
+
+! TODO:FIELDINTEGRATION Restore BundleIsCongruent
+#if 0
       ESMF_BundleIsCongruent = .FALSE.
       bundle%btypep%isCongruent = .FALSE.
 
@@ -2145,6 +2146,7 @@ end function
       ! if you get here, all fields matched
       ESMF_BundleIsCongruent = .TRUE.
       btype%isCongruent = .TRUE.
+#endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2471,7 +2473,7 @@ end function
       do i = 1, btype%field_count
 
        write (*, *)  "    Field", i, ": "
-       call ESMF_FieldPrint(btype%flist(i),rc=status)  
+       !call ESMF_FieldPrint(btype%flist(i),rc=status)  
        !call ESMF_FieldGet(btype%flist(i), name=fname, rc=status)
        if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.2 2007/09/26 13:37:27 cdeluca Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.3 2007/10/31 16:58:53 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -40,12 +40,10 @@
       use ESMF_DELayoutMod
       use ESMF_StaggerLocMod
       use ESMF_GridMod
-      use ESMF_InternArrayMod
-      use ESMF_InternArrayGetMod
-      use ESMF_InternArrayCreateMod
-      use ESMF_FieldDataMapMod
+      use ESMF_ArrayMod
+      use ESMF_ArrayGetMod
+      use ESMF_ArrayCreateMod
       use ESMF_FieldMod
-      use ESMF_FieldGetMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -60,7 +58,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cppF90,v 1.2 2007/09/26 13:37:27 cdeluca Exp $'
+      '$Id: ESMF_FieldCreate.cppF90,v 1.3 2007/10/31 16:58:53 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -79,13 +77,15 @@
 ! !PRIVATE MEMBER FUNCTIONS:
 !
         module procedure ESMF_FieldCreateNew
-        module procedure ESMF_FieldCreateFromArray
-        module procedure ESMF_FieldCreateRemap
+!        module procedure ESMF_FieldCreateFromArray
+!        module procedure ESMF_FieldCreateRemap
 
+^if 0
       ! < declarations of interfaces for each T/K/R >
 TypeKindRankInterfaceMacro(FieldCreateDPtr)
 
 TypeKindRankInterfaceMacro(FieldCreateEPtr)
+^endif
 
 ! !DESCRIPTION:
 !   This interface provides an entry point for methods that create a complete
@@ -112,8 +112,9 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreate()
       function ESMF_FieldCreateNew(grid, arrayspec, allocflag, staggerloc, &
-                                   haloWidth, datamap, name, &
-                                   iospec, rc)
+                                   gridDimMap, ungriddedLBound, &
+                                   ungriddedUBound, haloLWidth, &
+                                   haloUWidth, indexflag, name, iospec, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Field) :: ESMF_FieldCreateNew
@@ -123,8 +124,12 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
       type(ESMF_ArraySpec), intent(inout) :: arrayspec     
       type(ESMF_AllocFlag), intent(in), optional :: allocflag
       type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
-      integer, intent(in), optional :: haloWidth
-      type(ESMF_FieldDataMap), intent(inout), optional :: datamap          
+      integer, intent(in), optional :: gridDimMap(:)    
+      integer, intent(in), optional :: ungriddedLBound(:)
+      integer, intent(in), optional :: ungriddedUBound(:)
+      integer, intent(in), optional :: haloLWidth(:)
+      integer, intent(in), optional :: haloUWidth(:)
+      type(ESMF_IndexFlag), intent(in), optional ::indexflag
       character (len=*), intent(in), optional :: name 
       type(ESMF_IOSpec), intent(in), optional :: iospec 
       integer, intent(out), optional :: rc              
@@ -148,11 +153,31 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 !           Relative location of data per grid cell/vertex in the grid.  
 !           If specified here, takes precedence over the same setting
 !           in the {\tt datamap} argument.
-!     \item [{[haloWidth]}] 
-!           Maximum halo depth along all edges.  Default is 0.
-!     \item [{[datamap]}]
-!           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
-!           data to the {\tt ESMF\_Grid}.
+!     \item [{[gridDimMap]}]
+!           List that contains as many elements as is indicated by the {\tt grid}'s rank. 
+!           The list elements map each dimension of the Grid object to a dimension in the
+!           Field's Array by specifying the appropriate Array dimension index. The default is to
+!           map all of the grid's dimensions against the lower dimensions of the Field's
+!           Array in sequence, i.e. gridDimmap = (/1, 2, .../). Unmapped dimensions are
+!           undistributed dimensions.  The total undistributed dimensions are the total 
+!           Array dimensions - the distributed dimensions in the Grid (distRank).  All
+!           gridDimMap entries must be greater than or equal to one and smaller than or equal
+!           to the Array rank. It is erroneous to specify the same entry multiple times
+!           unless it is zero.  If the Array rank is less than the Grid dimCount then
+!           the default gridDimMap will contain zeros for the dimCount.
+!           A zero entry in the dimmap indicates that the particular Grid dimension will
+!           be replicating the Array across the DEs along this direction.
+!     \item [{[ungriddedLBound]}]
+!           Lower bounds of the ungridded dimensions of the Field.
+!     \item [{[ungriddedUBound]}]
+!           Upper bounds of the ungridded dimensions of the Field.
+!     \item [{[haloLWidth]}]
+!           Lower bound of halo region.  Defaults to 0.
+!     \item [{[haloUWidth]}]
+!           Upper bound of halo region.  Defaults to 0.
+!     \item [{[indexflag]}]
+!           Local or global indices.  See section \ref{opt:indexflag} for a 
+!           list of valid indexflag options.  The default is {ESMF\_INDEX\_DELOCAL}.
 !     \item [{[name]}] 
 !           {\tt Field} name. 
 !     \item [{[iospec]}] 
@@ -162,11 +187,9 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: FLD1.1.1, FLD1.5.1
-
 
       type(ESMF_FieldType), pointer :: ftype      ! Pointer to new field
-      integer :: localrc                           !  Local error code
+      integer :: localrc                          !  Local error code
       logical :: rcpresent                        ! Return code present
 
       ! Initialize pointers
@@ -181,9 +204,6 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
         rc = ESMF_RC_NOT_IMPL
       endif
 
-      ! check variables
-      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
-
       allocate(ftype, stat=localrc)
       ! If error write message and return.
       ! Formal error handling will be added asap.
@@ -193,8 +213,9 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 
       ! Call construction method to allocate and initialize field internals.
       call ESMF_FieldConstructIA(ftype, grid, arrayspec, allocflag, &
-                                  staggerloc, haloWidth, &
-                                  datamap, name, iospec, localrc)
+                                  staggerloc, gridDimMap, ungriddedLBound, &
+                                  ungriddedUBound, haloLWidth, &
+                                  haloUWidth, indexflag, name, iospec, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -207,6 +228,7 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 
       end function ESMF_FieldCreateNew
 
+^if 0
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldCreateFromArray"
@@ -224,7 +246,7 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid                
-      type(ESMF_InternArray), intent(in) :: array              
+      type(ESMF_Array), intent(in) :: array              
       type(ESMF_CopyFlag), intent(in), optional :: copyflag       
       type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
       integer, intent(in), optional :: haloWidth
@@ -306,7 +328,9 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
       if(rcpresent) rc = ESMF_SUCCESS
 
       end function ESMF_FieldCreateFromArray
+^endif
 
+^if 0
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldCreateRemap"
@@ -395,13 +419,15 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
       if(rcpresent) rc = ESMF_SUCCESS
 
       end function ESMF_FieldCreateRemap
-
+^endif
 !------------------------------------------------------------------------------
 
       ! < declarations of subroutines for each T/K/R >
+^if 0
 TypeKindRankDeclarationMacro(FieldCreateDPtr)
 
 TypeKindRankDeclarationMacro(FieldCreateEPtr)
+^endif
 
 !------------------------------------------------------------------------------
 

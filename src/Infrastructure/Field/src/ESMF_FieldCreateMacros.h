@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.22 2007/09/26 13:37:27 cdeluca Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.23 2007/10/31 16:58:53 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -107,17 +107,19 @@
       character (len=*), intent(in), optional :: name  @\
       type(ESMF_IOSpec), intent(in), optional :: iospec @\
       integer, intent(out), optional :: rc @\
-@\
+ @\
         ! Local variables @\
         type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field @\
-        type(ESMF_InternArray) :: array          ! array object @\
-        integer :: localrc                   ! local error status @\
-        logical :: rcpresent                ! did user specify rc? @\
+        type(ESMF_DistGrid) :: distgrid         ! distgrid object @\
+        type(ESMF_Array) :: array               ! array object @\
+        integer :: localrc                      ! local error status @\
+        logical :: rcpresent                    ! did user specify rc? @\
  @\
         ! Initialize return code; assume routine not implemented @\
         localrc = ESMF_RC_NOT_IMPL @\
         rcpresent = .FALSE. @\
-        array%this = ESMF_NULL_POINTER @\
+        ! TODO:FIELDINTEGRATION Initialize array pointer correctly in field create @\
+        ! array%this = ESMF_NULL_POINTER @\
  @\
         if (present(rc)) then @\
           rcpresent = .TRUE. @\
@@ -134,7 +136,12 @@
                                 ESMF_CONTEXT, rc)) return @\
         endif @\
  @\
-        array = ESMF_InternArrayCreate(fptr, copyflag, haloWidth, rc=localrc) @\
+        call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
+ @\
+        array = ESMF_ArrayCreate(fptr, distgrid=distgrid, rc=localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
@@ -182,7 +189,7 @@
 !   ! Private name; call using ESMF_FieldCreate() @\
 !   function ESMF_FieldCreateEPtr<rank><type><kind>(grid, fptr, allocflag, & @\
 !             staggerloc, haloWidth, lbounds, ubounds, & @\
-!             datamap, name, iospec, rc) @\
+!             indexflag, datamap, name, iospec, rc) @\
 ! @\
 ! !RETURN VALUE: @\
 !      type(ESMF_Field) :: ESMF_FieldCreateEPtr<rank><type><kind> @\
@@ -195,6 +202,7 @@
 !     integer, intent(in), optional :: haloWidth @\
 !     integer, dimension(:), intent(in), optional :: lbounds @\
 !     integer, dimension(:), intent(in), optional :: ubounds @\
+!     type(ESMF_IndexFlag), intent(in), optional :: indexflag @\
 !     type(ESMF_FieldDataMap), intent(in), optional :: datamap @\
 !     character (len=*), intent(in), optional :: name  @\
 !     type(ESMF_IOSpec), intent(in), optional :: iospec @\
@@ -230,6 +238,9 @@
 !  \item[{[ubounds]}]  @\
 !    An integer array of upper index values.  Must be the same length @\
 !    as the rank. @\
+!  \item [{[indexflag]}] @\
+!    Local or global indices.  See section \ref{opt:indexflag} for a @\
+!    list of valid indexflag options.  The default is {ESMF\_INDEX\_DELOCAL}. @\
 !  \item [{[datamap]}] @\
 !    Describes the mapping of data to the {\tt ESMF\_Grid}. @\
 !  \item [{[name]}] @\
@@ -254,7 +265,7 @@
 ! <Created by macro - do not edit directly > @\
       function ESMF_FieldCreateEPtr##mrank##D##mtypekind(grid, fptr, allocflag, & @\
                 staggerloc, haloWidth, lbounds, ubounds, & @\
-                datamap, name, iospec, rc) @\
+                indexflag, datamap, name, iospec, rc) @\
  @\
       type(ESMF_Field) :: ESMF_FieldCreateEPtr##mrank##D##mtypekind @\
  @\
@@ -266,6 +277,7 @@
       integer, intent(in), optional :: haloWidth @\
       integer, dimension(:), intent(in), optional :: lbounds @\
       integer, dimension(:), intent(in), optional :: ubounds @\
+      type(ESMF_IndexFlag), intent(in), optional :: indexflag @\
       type(ESMF_FieldDataMap), intent(inout), optional :: datamap @\
       character (len=*), intent(in), optional :: name  @\
       type(ESMF_IOSpec), intent(in), optional :: iospec @\
@@ -306,8 +318,8 @@
  @\
         ! Construction method allocates and initializes field internals. @\
         call ESMF_FieldConstructIA(ftype, grid, arrayspec, allocflag, & @\
-                                    staggerloc, haloWidth, & @\
-                                    datamap, name, iospec, localrc) @\
+                                    staggerloc, indexflag, datamap, & @\
+                                    name, iospec, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\

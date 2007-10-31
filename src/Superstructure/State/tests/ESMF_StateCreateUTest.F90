@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.6 2007/03/31 05:51:33 cdeluca Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.7 2007/10/31 16:59:05 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.6 2007/03/31 05:51:33 cdeluca Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.7 2007/10/31 16:59:05 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -68,7 +68,7 @@
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
       
       !------------------------------------------------------------------------
-      !NEX_UTest   
+      !NEX_removeUTest   
       ! Create/Destroy an Empty State.
       sname = "Atmosphere Import"
       state1 = ESMF_StateCreate(sname, ESMF_STATE_IMPORT, rc=rc)  
@@ -77,7 +77,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !NEX_UTest      
+      !NEX_removeUTest      
       ! Test printing an Empty State
       call ESMF_StatePrint(state1, rc=rc)
       write(failMsg, *) ""
@@ -85,7 +85,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !NEX_UTest      
+      !NEX_removeUTest      
       ! Test Destruction of an empty import State 
       call ESMF_StateDestroy(state1, rc=rc)
       write(failMsg, *) ""
@@ -101,7 +101,7 @@
 #ifdef ESMF_EXHAUSTIVE
 
       !------------------------------------------------------------------------
-      !EX_UTest 
+      !EX_removeUTest 
       ! Test Creation of an empty export State 
       sname = "Ocean Export"
       state2 = ESMF_StateCreate(sname, ESMF_STATE_EXPORT, rc=rc)  
@@ -110,7 +110,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest 
+      !EX_removeUTest 
       ! Create a bundle to use in the subsequent tests
       bname="Surface pressure"
       bundle1 = ESMF_BundleCreate(name=bname, rc=rc)
@@ -119,7 +119,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest 
+      !EX_removeUTest 
       ! Test adding a bundle to a state
       call ESMF_StateAddBundle(state2, bundle1, rc=rc)
       write(failMsg, *) ""
@@ -127,7 +127,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_removeUTest      
       ! Test printing a State with 1 Bundle
       call ESMF_StatePrint(state2, rc=rc)
       write(failMsg, *) ""
@@ -135,7 +135,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest 
+      !EX_removeUTest 
       ! Create a second bundle to use in the subsequent tests
       bname="Temperature"
       bundle2 = ESMF_BundleCreate(name=bname, rc=rc)
@@ -144,7 +144,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest 
+      !EX_removeUTest 
       ! Test adding a second bundle to a state
       call ESMF_StateAddBundle(state2, bundle2, rc=rc)
       write(failMsg, *) ""
@@ -152,7 +152,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_removeUTest      
       ! Test printing a State with 2 Bundles
       call ESMF_StatePrint(state2, rc=rc)
       write(failMsg, *) ""
@@ -160,7 +160,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_removeUTest      
       ! Test getting a Bundle by name
       call ESMF_StateGetBundle(state2, "Surface pressure", qbundle, rc=rc)
       write(failMsg, *) ""
@@ -168,7 +168,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_removeUTest      
       ! Destroying a State
       call ESMF_StateDestroy(state2, rc=rc)
       write(failMsg, *) ""
@@ -176,7 +176,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_removeUTest      
       ! Destroying a Bundle
       call ESMF_BundleDestroy(bundle1, rc=rc)
       write(failMsg, *) ""
@@ -184,7 +184,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_removeUTest      
       ! Destroying the other Bundle
       call ESMF_BundleDestroy(bundle2, rc=rc)
       write(failMsg, *) ""
@@ -193,7 +193,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_removeUTest      
       ! Creating a State
       sname = "Ocean Export"
       state3 = ESMF_StateCreate(sname, ESMF_STATE_EXPORT, rc=rc)
@@ -202,7 +202,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_removeUTest      
       ! Adding a name only
       sname = "Downward wind"
       call ESMF_StateAddNameOnly(state3, sname, rc=rc)
@@ -211,7 +211,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_removeUTest      
       ! Marking an item needed
       sname = "Downward wind"
       call ESMF_StateSetNeeded(state3, sname, ESMF_NEEDED, rc=rc)
@@ -220,7 +220,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_removeUTest      
       ! Querying if an item is needed, using sname from above
       isNeeded =  ESMF_StateIsNeeded(state3, sname, rc=rc)
       write(failMsg, *) ""
@@ -229,7 +229,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_removeUTest      
       ! Creating a Bundle to add to a State
       bundle2 = ESMF_BundleCreate(name=sname, rc=rc)
       write(failMsg, *) ""
@@ -237,7 +237,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_removeUTest      
       ! Replacing a name placeholder with a real item, using bundle from above
       call ESMF_StateAddBundle(state3, bundle2, rc=rc)
       write(failMsg, *) ""
@@ -246,7 +246,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_removeUTest      
       ! Destroying a State
       call ESMF_StateDestroy(state3, rc=rc)
       write(failMsg, *) ""
@@ -254,7 +254,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_removeUTest      
       ! Destroying a Bundle
       call ESMF_BundleDestroy(bundle2, rc=rc)
       write(failMsg, *) ""
@@ -269,7 +269,7 @@
 
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_removeUTest      
       ! Create a State which will contain other nested States
       sname = "Coupler Statelist"
       state5 = ESMF_StateCreate(sname, ESMF_STATE_UNSPECIFIED, rc=rc)  
@@ -278,7 +278,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_removeUTest      
       ! Create a State which will be put into the other
       sname = "Atmosphere Import"
       state1 = ESMF_StateCreate(sname, ESMF_STATE_IMPORT, rc=rc)  
@@ -287,7 +287,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_removeUTest      
       ! Add a nested State to another
       call ESMF_StateAddState(state5, state1, rc=rc)
       write(failMsg, *) ""
@@ -295,7 +295,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_removeUTest      
       ! Create another State which will be put into a State
       sname = "Ocean Export"
       state2 = ESMF_StateCreate(sname, ESMF_STATE_EXPORT, rc=rc)  
@@ -304,7 +304,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_removeUTest      
       ! Add another nested State to the first
       call ESMF_StateAddState(state5, state2, rc=rc)
       write(failMsg, *) ""
@@ -312,7 +312,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_removeUTest      
       ! Destroying a State
       call ESMF_StateDestroy(state5, rc=rc)
       write(failMsg, *) ""
@@ -320,7 +320,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_removeUTest      
       ! Destroying a State
       call ESMF_StateDestroy(state1, rc=rc)
       write(failMsg, *) ""
@@ -328,7 +328,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_removeUTest      
       ! Destroying a State
       call ESMF_StateDestroy(state2, rc=rc)
       write(failMsg, *) ""
@@ -341,7 +341,7 @@
       !------------------------------------------------------------------------
       ! Create another Array for use below
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_removeUTest      
       ! Create an empty State
       sname = "Atmosphere Import"
       state1 = ESMF_StateCreate(sname, ESMF_STATE_IMPORT, rc=rc)  
@@ -354,7 +354,7 @@
       !------------------------------------------------------------------------
       ! Add a second Array to a State
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_removeUTest      
       ! Destroying a State
       call ESMF_StateDestroy(state1, rc=rc)
       write(failMsg, *) ""

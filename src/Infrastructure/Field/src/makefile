@@ -1,9 +1,11 @@
-# $Id: makefile,v 1.22 2007/09/26 13:37:27 cdeluca Exp $ 
+# $Id: makefile,v 1.23 2007/10/31 16:58:53 cdeluca Exp $ 
 
 #
 ALL: build_here 
 
-AUTOGEN   = ESMF_FieldSet.F90 ESMF_FieldGet.F90 ESMF_FieldCreate.F90
+AUTOGEN   = ESMF_FieldCreate.F90
+# TODO:FIELDINTEGRATION Restore FieldGet and FieldSet
+# ESMF_FieldGet.F90 ESMF_FieldSet.F90
 CFLAGS    =
 FFLAGS    =
 SOURCEC	  = 

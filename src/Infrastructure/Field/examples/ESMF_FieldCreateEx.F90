@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.51 2007/10/12 15:46:56 oehmke Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.52 2007/10/31 16:58:52 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
     program ESMF_FieldCreateEx
 
 !------------------------------------------------------------------------------
-!EXAMPLE        String used by test script to count examples.
+!EXremoveAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
 ! !PROGRAM: ESMF_FieldCreateEx - Field creation

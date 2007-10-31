@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrHaltUTest.F90,v 1.5 2007/03/31 05:51:17 cdeluca Exp $
+! $Id: ESMF_LogErrHaltUTest.F90,v 1.6 2007/10/31 16:59:03 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrHaltUTest.F90,v 1.5 2007/03/31 05:51:17 cdeluca Exp $'
+      '$Id: ESMF_LogErrHaltUTest.F90,v 1.6 2007/10/31 16:59:03 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -70,7 +70,7 @@
 #ifdef ESMF_EXHAUSTIVE
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Set Log HaltOnError
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       call ESMF_LogSet(halt=ESMF_LOG_HALTERROR, rc=rc)
@@ -79,7 +79,7 @@
       print *, " rc = ", rc
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Query a deleted Field to intentionally create an error to test the
       ! halt on error feature. Execution should halt inside ESMF_FieldGet().
       ! Print a pass first assuming that execution will stop.

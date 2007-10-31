@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2007/02/10 00:01:11 svasquez Exp $ 
+# $Id: makefile,v 1.16 2007/10/31 16:59:03 cdeluca Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -16,14 +16,17 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/LogErr/tests
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_LogErrUTest \
-		$(ESMF_TESTDIR)/ESMF_LogErrHaltUTest
+# TODO:FIELDINTEGRATION Restore LogErrHaltUTest
 
-TESTS_RUN     = RUN_ESMF_LogErrUTest \
-                RUN_ESMF_LogErrHaltUTest
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_LogErrUTest
+#		$(ESMF_TESTDIR)/ESMF_LogErrHaltUTest
 
-TESTS_RUN_UNI = RUN_ESMF_LogErrUTestUNI \
-                RUN_ESMF_LogErrHaltUTestUNI
+TESTS_RUN     = RUN_ESMF_LogErrUTest
+#                RUN_ESMF_LogErrHaltUTest
+
+TESTS_RUN_UNI = RUN_ESMF_LogErrUTestUNI
+#                RUN_ESMF_LogErrHaltUTestUNI
+
 
 
 include ${ESMF_DIR}/makefile

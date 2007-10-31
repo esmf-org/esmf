@@ -1,9 +1,11 @@
-# $Id: makefile,v 1.13 2007/09/26 13:38:13 cdeluca Exp $ 
+# $Id: makefile,v 1.14 2007/10/31 16:58:51 cdeluca Exp $ 
 
 
 ALL: build_here 
 
-AUTOGEN   = ESMF_BundleGet.F90 
+AUTOGEN   = 
+# TODO:FIELDINTEGRATION Restore BundleGet
+# ESMF_BundleGet.F90 
 
 SOURCEC	  = 
 SOURCEF	  = ESMF_Bundle.F90 $(AUTOGEN)

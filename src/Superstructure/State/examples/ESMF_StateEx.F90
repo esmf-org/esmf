@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.22 2007/03/31 05:51:33 cdeluca Exp $
+! $Id: ESMF_StateEx.F90,v 1.23 2007/10/31 16:59:04 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
     program ESMF_StateEx
 
 !------------------------------------------------------------------------------
-!EXAMPLE        String used by test script to count examples.
+!EXremoveAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
 ! !PROGRAM: ESMF_StateEx - State creation and operation
