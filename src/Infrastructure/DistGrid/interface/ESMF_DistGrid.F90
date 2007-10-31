@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.34 2007/10/25 05:16:12 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.35 2007/10/31 04:53:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -93,6 +93,7 @@ module ESMF_DistGridMod
   public ESMF_DistGridDestroy
   
   public ESMF_DistGridGet
+  public ESMF_DistGridMatch
   public ESMF_DistGridPrint
   public ESMF_DistGridValidate
   
@@ -110,7 +111,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.34 2007/10/25 05:16:12 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.35 2007/10/31 04:53:41 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2310,6 +2311,64 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_DistGridPrint
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridMatch()"
+!BOP
+! !IROUTINE: ESMF_DistGridMatch - Check if two DistGrid objects match
+
+! !INTERFACE:
+  function ESMF_DistGridMatch(distgrid1, distgrid2, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_Logical) :: ESMF_DistGridMatch
+      
+! !ARGUMENTS:
+    type(ESMF_DistGrid),  intent(in)              :: distgrid1
+    type(ESMF_DistGrid),  intent(in)              :: distgrid2
+    integer,              intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Check if {\tt distgrid1} and {\tt distgrid2} match. Returns
+!      {\tt ESMF\_TRUE} if DistGrid objects match, {\tt ESMF\_FALSE} otherwise.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid1] 
+!          {\tt ESMF\_DistGrid} object.
+!     \item[distgrid2] 
+!          {\tt ESMF\_DistGrid} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_Logical)      :: matchResult
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid1, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid2, rc)
+    
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_DistGridMatch(distgrid1, distgrid2, matchResult, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    ESMF_DistGridMatch = matchResult
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end function ESMF_DistGridMatch
 !------------------------------------------------------------------------------
 
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.3 2007/10/25 05:16:13 theurich Exp $
+! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.4 2007/10/31 04:53:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_DistGridCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.3 2007/10/25 05:16:13 theurich Exp $'
+    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.4 2007/10/31 04:53:43 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -53,7 +53,7 @@ program ESMF_DistGridCreateGetUTest
   !LOCAL VARIABLES:
   type(ESMF_VM):: vm
   integer:: petCount, localPet, i, localDeCount
-  type(ESMF_DistGrid):: distgrid
+  type(ESMF_DistGrid):: distgrid, distgrid2
   type(ESMF_DELayout):: delayout
   integer:: dimCount, patchCount, deCount
   type(ESMF_Logical):: regDecompFlag
@@ -62,6 +62,7 @@ program ESMF_DistGridCreateGetUTest
   integer, allocatable:: indexCountPDimPDe(:,:), localDeList(:)
   integer, allocatable:: indexList(:), seqIndexList(:)
   logical:: loopResult
+  type(ESMF_Logical):: matchResult
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -301,9 +302,97 @@ program ESMF_DistGridCreateGetUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "DistGridMatch() - identical DistGrids"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  matchResult = ESMF_DistGridMatch(distgrid, distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridMatch() - identical DistGrids - matchResult"
+  write(failMsg, *) "matchResult not ESMF_TRUE"
+  call ESMF_Test((matchResult.eq.ESMF_TRUE), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridMatch() - invalid DistGrid object"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  matchResult = ESMF_DistGridMatch(distgrid, distgrid2, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridMatch() - identical DistGrids"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgrid2 = distgrid
+  matchResult = ESMF_DistGridMatch(distgrid, distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridMatch() - identical DistGrids - matchResult"
+  write(failMsg, *) "matchResult not ESMF_TRUE"
+  call ESMF_Test((matchResult.eq.ESMF_TRUE), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridCreate() - 1D Single Patch Default"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgrid2 = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/1000/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridMatch() - different DistGrids that are the same"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  matchResult = ESMF_DistGridMatch(distgrid, distgrid2, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridMatch() - different DistGrids that are the same - matchResult"
+  write(failMsg, *) "matchResult not ESMF_TRUE"
+  call ESMF_Test((matchResult.eq.ESMF_TRUE), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridDestroy()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid2, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridCreate() - 1D Single Patch Default"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgrid2 = ESMF_DistGridCreate(minIndex=(/0/), maxIndex=(/999/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridMatch() - different DistGrids"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  matchResult = ESMF_DistGridMatch(distgrid, distgrid2, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridMatch() - different DistGrids - matchResult"
+  write(failMsg, *) "matchResult not ESMF_FALSE"
+  call ESMF_Test((matchResult.ne.ESMF_TRUE), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "DistGridDestroy()"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_DistGridDestroy(distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridDestroy()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid2, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------

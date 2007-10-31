@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.40 2007/10/25 05:16:13 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.41 2007/10/31 04:53:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.40 2007/10/25 05:16:13 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistGrid.C,v 1.41 2007/10/31 04:53:41 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1516,8 +1516,162 @@ int DistGrid::fillIndexListPDimPDe(
 
 //-----------------------------------------------------------------------------
 //
-// print and validation class methods
+// match, print and validation class methods
 //
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DistGrid::match()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::match
+//
+// !INTERFACE:
+ESMC_Logical DistGrid::match(
+//
+// !RETURN VALUE:
+//    ESMC\_Logical according to match
+//
+// !ARGUMENTS:
+//
+  DistGrid *distgrid1,                    // in
+  DistGrid *distgrid2,                    // in
+  int *rc                                 // (out) return code
+  ){
+//
+// !DESCRIPTION:
+//    Determine if distgrid1 and distgrid2 match.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  // initialize return value
+  ESMC_Logical matchResult = ESMF_FALSE;
+  
+  // return with errors for NULL pointer
+  if (distgrid1 == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to DistGrid", rc);
+    return matchResult;
+  }
+  if (distgrid2 == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to DistGrid", rc);
+    return matchResult;
+  }
+  
+  // check if DistGrid pointers are identical
+  if (distgrid1 == distgrid2){
+    // pointers are identical -> nothing more to check
+    matchResult = ESMF_TRUE;
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
+  }
+  
+  // go through all members of DistGrid and compare
+  int dimCount1 = distgrid1->dimCount;
+  int dimCount2 = distgrid2->dimCount;
+  if (dimCount1 != dimCount2){
+    matchResult = ESMF_FALSE;
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
+  }
+  int patchCount1 = distgrid1->patchCount;
+  int patchCount2 = distgrid2->patchCount;
+  if (patchCount1 != patchCount2){
+    matchResult = ESMF_FALSE;
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
+  }
+  int deCount1 = distgrid1->delayout->getDeCount();
+  int deCount2 = distgrid2->delayout->getDeCount();
+  if (deCount1 != deCount2){
+    matchResult = ESMF_FALSE;
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
+  }
+  int *int1 = distgrid1->minIndexPDimPPatch;
+  int *int2 = distgrid2->minIndexPDimPPatch;
+  for (int i=0; i<dimCount1*patchCount1; i++){
+    if (int1[i] != int2[i]){
+      matchResult = ESMF_FALSE;
+      if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+      return matchResult;
+    }
+  }
+  int1 = distgrid1->maxIndexPDimPPatch;
+  int2 = distgrid2->maxIndexPDimPPatch;
+  for (int i=0; i<dimCount1*patchCount1; i++){
+    if (int1[i] != int2[i]){
+      matchResult = ESMF_FALSE;
+      if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+      return matchResult;
+    }
+  }
+  int1 = distgrid1->elementCountPPatch;
+  int2 = distgrid2->elementCountPPatch;
+  for (int i=0; i<patchCount1; i++){
+    if (int1[i] != int2[i]){
+      matchResult = ESMF_FALSE;
+      if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+      return matchResult;
+    }
+  }
+  int1 = distgrid1->minIndexPDimPDe;
+  int2 = distgrid2->minIndexPDimPDe;
+  for (int i=0; i<dimCount1*deCount1; i++){
+    if (int1[i] != int2[i]){
+      matchResult = ESMF_FALSE;
+      if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+      return matchResult;
+    }
+  }
+  int1 = distgrid1->maxIndexPDimPDe;
+  int2 = distgrid2->maxIndexPDimPDe;
+  for (int i=0; i<dimCount1*deCount1; i++){
+    if (int1[i] != int2[i]){
+      matchResult = ESMF_FALSE;
+      if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+      return matchResult;
+    }
+  }
+  int1 = distgrid1->elementCountPDe;
+  int2 = distgrid2->elementCountPDe;
+  for (int i=0; i<deCount1; i++){
+    if (int1[i] != int2[i]){
+      matchResult = ESMF_FALSE;
+      if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+      return matchResult;
+    }
+  }
+  int1 = distgrid1->patchListPDe;
+  int2 = distgrid2->patchListPDe;
+  for (int i=0; i<deCount1; i++){
+    if (int1[i] != int2[i]){
+      matchResult = ESMF_FALSE;
+      if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+      return matchResult;
+    }
+  }
+  int1 = distgrid1->contigFlagPDimPDe;
+  int2 = distgrid2->contigFlagPDimPDe;
+  for (int i=0; i<dimCount1*deCount1; i++){
+    if (int1[i] != int2[i]){
+      matchResult = ESMF_FALSE;
+      if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+      return matchResult;
+    }
+  }
+  
+  // return successfully indicating match
+  matchResult = ESMF_TRUE;
+  if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+  return matchResult;
+}
 //-----------------------------------------------------------------------------
 
 
