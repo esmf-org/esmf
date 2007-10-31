@@ -1,5 +1,5 @@
 
-! $Id: ESMF_Bundle.F90,v 1.115 2007/10/05 00:39:55 peggyli Exp $
+! $Id: ESMF_Bundle.F90,v 1.116 2007/10/31 02:04:31 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -48,7 +48,6 @@
       use ESMF_InternArrayMod
       use ESMF_FieldDataMapMod
       use ESMF_FieldMod
-      use ESMF_BundleDataMapMod
       use ESMF_InitMacrosMod
       implicit none
 !
@@ -157,7 +156,6 @@
         type(ESMF_LocalBundle) :: localbundle    ! this differs per DE
         type(ESMF_Packflag) :: pack_flag         ! is packed data present?
         type(ESMF_BundleFieldIntrlv) :: fil  ! ordering in buffer
-        type(ESMF_BundleDataMap) :: mapping      ! map info
         type(ESMF_IOSpec) :: iospec              ! iospec values
         type(ESMF_Status) :: iostatus            ! if unset, inherit from gcomp
         logical :: isCongruent                   ! are all fields identical?
@@ -231,9 +229,6 @@
        public ESMF_BundleAddField      ! Add one or more Fields 
 !      public ESMF_BundleRemoveField   ! Delete one or more Fields by name or number
 
-       public ESMF_BundlePackData     ! Pack bundle data into a single 
-!                                     !   buffer
-
       public ESMF_BundleSetGrid           ! In empty Bundle, set Grid
 
       public ESMF_BundleIsCongruent        ! private to framework
@@ -263,8 +258,6 @@
 
     public operator(.eq.), operator(.ne.)
 
-!  !subroutine ESMF_BundleGetDataMap
-!
 !  !subroutine ESMF_BundleWriteRestart(bundle, iospec, rc)
 !  !function ESMF_BundleReadRestart(name, iospec, rc)
 !  !subroutine ESMF_BundleWrite(bundle, subarray, iospec, rc)
@@ -2161,69 +2154,6 @@ end function
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGetDataMap"
-!BOPI
-! !IROUTINE: ESMF_BundleGetDataMap - Get data ordering
-!
-! !INTERFACE:
-      subroutine ESMF_BundleGetDataMap(bundle, bundledatamap, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle
-      type(ESMF_BundleDataMap) :: bundledatamap
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Query the memory ordering of packed data associated 
-!   with a {\tt bundle}, where packed data refers to 
-!   constituent {\tt ESMF\_Field} data that has been
-!   copied into a contiguous array.  Note that packing is not yet 
-!   implemented, so this method is merely a placeholder.  
-!   The method will return a {\tt bundledatamap} which can be 
-!   queried by {\tt ESMF\_BundleDataMap} methods.  
-!   However, those queries will not yield meaningful information.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           The {\tt ESMF\_Bundle} object to query.
-!     \item [bundledatamap]
-!           The current order/interleaving.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-    integer :: status                           ! Error status
-    type(ESMF_BundleType), pointer :: btype
-
-    ! Initialize return code.  Assume routine not implemented.
-    status = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! check variables
-    ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-    ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit,ESMF_BundleDataMapInit,bundledatamap)
-
-    ! Validate bundle before going further
-    call ESMF_BundleValidate(bundle, rc=status)
-    if (ESMF_LogMsgFoundError(status, &
-                              ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rc)) return
-
-    btype => bundle%btypep
-
-    bundledatamap = btype%mapping
-
-    if (present(rc)) rc = ESMF_SUCCESS
-
-    end subroutine ESMF_BundleGetDataMap
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetFieldByName"
 !BOP
 ! !IROUTINE: ESMF_BundleGetField - Retrieve a Field by name
@@ -2466,77 +2396,6 @@ end function
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundlePackData"
-!BOPI
-! !IROUTINE: ESMF_BundlePackData - Pack Field data into a single Array
-!
-! !INTERFACE:
-      subroutine ESMF_BundlePackData(bundle, bundledatamap, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle
-      type(ESMF_BundleDataMap), intent(in), optional :: bundledatamap 
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!    Packs the {\tt ESMF\_Field} data into a single {\tt ESMF\_Array}.  
-!    If new {\tt ESMF\_Field}s are added to an {\tt ESMF\_Bundle} which 
-!    already has Packed data, the data will be copied.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           Existing {\tt ESMF\_Bundle}.
-!     \item [{[datamap]}]
-!           Ordering and interleaving information.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-
-      integer :: status                           ! Error status
-      !integer :: i                               ! temp var
-      !type(ESMF_InternArray) :: pkarray                ! Array for packed data
-      type(ESMF_BundleType), pointer :: btype     ! internal data
-
-      ! Initialize return code.  Assume routine not implemented.
-      status = ESMF_RC_NOT_IMPL
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit,ESMF_BundleDataMapInit,bundledatamap)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      btype => bundle%btypep
-
-      ! TODO: remove this when implemented.
-      if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "ESMF_BundlePackData", &
-                                 ESMF_CONTEXT, rc)) return
-
-      !pkarray = ESMF_ArrayCreate(arrayspec, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      btype%pack_flag = ESMF_PACKED_DATA
-      !btype%localbundle%packed_data = pkarray
-
-      if(present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundlePackData
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundlePrint"
 !BOP
 ! !IROUTINE: ESMF_BundlePrint - Print information about a Bundle
@@ -2773,54 +2632,6 @@ end function
 
       end subroutine ESMF_BundleRemoveField
 
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleReorder"
-!BOPI
-! !IROUTINE: ESMF_BundleReorder - Alter memory interleave in packed data
-!
-! !INTERFACE:
-      subroutine ESMF_BundleReorder(bundle, bundledatamap, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle
-      type(ESMF_BundleDataMap), intent(in) :: bundledatamap
-      integer, intent(out), optional :: rc
-
-!
-! !DESCRIPTION:
-!   Used to alter memory ordering of packed {\tt ESMF\_Array} data.  
-!   Implemented by setting the desired options in an 
-!   {\tt ESMF\_BundleDataMap} type and then passing it in
-!   as a parameter to this routine.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item [bundle]
-!       The {\tt ESMF\_Bundle} to operate on.
-!   \item [datamap]
-!       The new interleave/order.
-!   \item [{[rc]}]
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!
-!EOPI
-      integer :: localrc                        ! local return code
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      localrc = ESMF_RC_NOT_IMPL
-
-!
-!  TODO: code goes here
-!
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-      end subroutine ESMF_BundleReorder
 
 !------------------------------------------------------------------------------
 !BOP
@@ -4059,13 +3870,13 @@ end function
       endif
 
       ! If packed data buffer requested, create or update it here.
-      if (btype%pack_flag .eq. ESMF_PACKED_DATA) then
+      ! if (btype%pack_flag .eq. ESMF_PACKED_DATA) then
 
-         call ESMF_BundleTypeRepackData(btype, rc=status)
-         if (ESMF_LogMsgFoundAllocError(status, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
+      !   call ESMF_BundleTypeRepackData(btype, rc=status)
+      !   if (ESMF_LogMsgFoundAllocError(status, ESMF_ERR_PASSTHRU, &
+      !   ESMF_CONTEXT, rcToReturn=rc)) return
 
-      endif
+      ! endif
 
       ! TODO: outstanding architectural issue:
       ! unless all the fields are required to contain data before they are
@@ -4118,67 +3929,6 @@ end function
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleTypeAddFieldList
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleTypeRepackData"
-!BOPI
-! !IROUTINE: ESMF_BundleTypeRepackData - Pack Field data into a single Array
-!
-! !INTERFACE:
-      subroutine ESMF_BundleTypeRepackData(btype, bundledatamap, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_BundleType), pointer :: btype
-      type(ESMF_BundleDataMap), intent(in), optional :: bundledatamap 
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!      Packs the {\tt ESMF\_Field} data into a single {\tt ESMF\_Array}.  If new {\tt ESMF\_Field}s
-!      are added to an {\tt ESMF\_Bundle} which already has Packed data, the data will
-!      have to be copied into a new {\tt ESMF\_Array}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [btype]
-!           {\tt ESMF\_BundleType} pointer.
-!     \item [{[datamap]}]
-!           Ordering and Interleaving information.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-
-
-      integer :: status                           ! Error status
-      !type(ESMF_InternArray) :: pkarray                 ! Array for packed data
-
-      ! Initialize return code.  Assume routine not implemented.
-      status = ESMF_RC_NOT_IMPL
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleTypeGetInit,btype,rc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_BundleDataMapGetInit,ESMF_BundleDataMapInit,bundledatamap)
-
-      ! TODO: take this out when implemented
-      if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Packed Data not supported yet in Bundles", &
-                                ESMF_CONTEXT, rc)) return
-
-      !pkarray = ESMF_ArrayCreate(arrayspec, status)
-      !if (ESMF_LogMsgFoundError(status, &
-      !                            ESMF_ERR_PASSTHRU, &
-      !                            ESMF_CONTEXT, rc)) return
-
-      btype%pack_flag = ESMF_PACKED_DATA
-      !btype%localbundle%packed_data = pkarray
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleTypeRepackData
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -4467,7 +4217,6 @@ end function
         type(ESMF_LocalBundle) :: localbundle    ! this differs per DE
         type(ESMF_Packflag) :: pack_flag         ! is packed data present?
         type(ESMF_BundleFieldIntrlv) :: fil  ! ordering in buffer
-        type(ESMF_BundleDataMap) :: mapping      ! map info
         type(ESMF_IOSpec) :: iospec              ! iospec values
         type(ESMF_Status) :: iostatus            ! if unset, inherit from gcomp
 
@@ -4505,13 +4254,6 @@ end function
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
       enddo
-
-    ! TODO: if shallow, call C directly?
-      !call ESMF_BundleDataMapSerialize(bp%mapping, buffer, length, &
-      !                                offset, localrc)
-      !if (ESMF_LogMsgFoundError(localrc, &
-      !                           ESMF_ERR_PASSTHRU, &
-      !                           ESMF_CONTEXT, rc)) return
 
     ! TODO: if shallow, call C directly?
       !call ESMF_IOSpecSerialize(bp%iospec, buffer, length, offset, localrc)
@@ -4635,12 +4377,6 @@ end function
                                     ESMF_CONTEXT, rc)) return
       enddo
 
-    ! TODO: if shallow, call C directly?
-      !call ESMF_BundleDataMapDeserialize(bp%mapping, buffer, &
-      !                                offset, localrc)
-      !if (ESMF_LogMsgFoundError(localrc, &
-      !                           ESMF_ERR_PASSTHRU, &
-      !                           ESMF_CONTEXT, rc)) return
 
     ! TODO: if shallow, call C directly?
       !call ESMF_IOSpecDeserialize(bp%iospec, buffer, offset, localrc)

@@ -1,4 +1,4 @@
-! $Id: ESMF.F90,v 1.46 2007/09/26 13:39:42 cdeluca Exp $
+! $Id: ESMF.F90,v 1.47 2007/10/31 02:04:46 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -49,11 +49,6 @@ module ESMF_Mod
     use ESMF_InternArrayGetMod
 
     use ESMF_InternDGMod
-!    use ESMF_PhysCoordMod
-!    use ESMF_PhysGridMod
-!    use ESMF_IGridTypesMod
-!    use ESMF_LogRectIGridMod
-!    use ESMF_IGridMod
     use ESMF_GridMod
     use ESMF_StaggerLocMod
 
@@ -70,7 +65,6 @@ module ESMF_Mod
     use ESMF_FieldGetMod
     use ESMF_FieldSetMod
     use ESMF_FieldCreateMod
-    use ESMF_BundleDataMapMod
     use ESMF_BundleMod
     use ESMF_BundleGetMod
 

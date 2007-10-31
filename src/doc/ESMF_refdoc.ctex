@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.75 2007/09/27 06:07:09 theurich Exp $
+% $Id: ESMF_refdoc.ctex,v 1.76 2007/10/31 02:04:47 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -133,8 +133,6 @@
 \newpage
 
 #include "../Infrastructure/Bundle/doc/Bundle_refdoc.ctex"
-
-#include "../Infrastructure/BundleDataMap/doc/BundleDataMap_refdoc.ctex"
 
 #include "../Infrastructure/Field/doc/Field_refdoc.ctex"
 
