@@ -1,5 +1,5 @@
 
-! $Id: ESMF_Bundle.F90,v 1.116 2007/10/31 02:04:31 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.117 2007/10/31 03:39:57 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -604,7 +604,7 @@ end function
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleCreate()
       function ESMF_BundleCreateNew(fieldCount, fieldList, &
-                                  packflag, bundleinterleave, name, iospec, rc)
+                                    packflag, bundleinterleave, name, iospec, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Bundle) :: ESMF_BundleCreateNew
@@ -703,7 +703,7 @@ end function
 
 
       ! do this before ESMF_BundleIsConguent so it doesn't complain
-      ! about uniniitalize bundles
+      ! about uninitialized bundles
       ESMF_INIT_SET_CREATED(ESMF_BundleCreateNew)
 
 
@@ -4010,7 +4010,17 @@ end function
                                   ESMF_CONTEXT, rc)) return
 
       ! If specified, set packflag and interleave
-      if(present(packflag)) btype%pack_flag = packflag
+      if(present(packflag)) then
+        if(packflag.eq.ESMF_PACKED_DATA) then
+          call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+                                 "Packed data option not implemented", &
+                                 ESMF_CONTEXT, rc) 
+          return
+        else
+          btype%pack_flag = packflag
+        endif
+      endif  
+ 
       if(present(bundleinterleave)) btype%fil%field_bfa%bfa_type = bundleinterleave
 
       ! Add the fields in the list, checking for consistency.

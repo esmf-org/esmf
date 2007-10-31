@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.56 2007/10/10 18:44:51 feiliu Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.57 2007/10/31 03:39:58 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.56 2007/10/10 18:44:51 feiliu Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.57 2007/10/31 03:39:58 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -235,7 +235,7 @@
       !print *, "Field count of uninitialized Bundle = ", fieldcount
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test Requirement FLD2.1.1 Creation using Field list
+      ! Test Requirement Creation using Field list
       ! It shall be possible to create a bundle with a field list, an optional 
       ! I/O specification, and an identifier that specifies whether the bundle 
       ! is to be packed (contiguous data) or loose (noncontiguous data). 
@@ -250,16 +250,14 @@
       !------------------------------------------------------------------------
 
       !EX_UTest
-! TODO:FIELDINTEGRATION This test returns the incorrect code:  it should be ESMF_RC_NOT_IMPL.
-      ! Test Requirement FLD2.1.1 Creating a Bundle with ESMF_PACKED_DATA option
-      ! The ESMF_PACKED_DATA is not implemented, this test will return ESMF_RC_MEM
-      ! until it is implemented, at that point it should return success and the
-      ! test will need to be changed.
-      write(failMsg, *) "Did not return ESMF_RC_MEM"
+      ! Test Requirement Creating a Bundle with ESMF_PACKED_DATA option
+      ! The ESMF_PACKED_DATA option is not implemented and until it is, it
+      ! is correct for the method to return ESMF_RC_NOT_IMPL when it is used.
+      write(failMsg, *) "Did not return ESMF_RC_NOT_IMPL"
       bundle4 = ESMF_BundleCreate(3, fields, ESMF_PACKED_DATA, &
       			name="atmosphere data", rc=rc)
-      write(name, *) "Creating Bundle with ESMF_PACKED_DATA Req. FLD2.1.1"
-      call ESMF_Test((rc.eq.ESMF_RC_MEM), name, failMsg, result, ESMF_SRCLINE)
+      write(name, *) "Creating Bundle with ESMF_PACKED_DATA"
+      call ESMF_Test((rc.eq.ESMF_RC_NOT_IMPL), name, failMsg, result, ESMF_SRCLINE)
       print *, "rc = ", rc
       !------------------------------------------------------------------------
 
@@ -471,7 +469,7 @@
 
 
       !EX_UTest
-      !  Test Requirement FLD2.5.7 Return Grid
+      !  Test Requirement Return Grid
       call ESMF_BundleGet(bundle2, grid=grid2, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting a Grid from a Bundle Test"
@@ -675,7 +673,7 @@
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Test Requirement FLD2.4 Deletion
+      ! Test Requirement Deletion
       ! Bundles may be deleted. Data allocated by and included in packed bundles 
       ! is deleted along with the bundle. Pointers to field data in unpacked 
       ! bundles are returned at deletion. 
@@ -744,7 +742,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      ! Requirement 2.5.2 Insert and remove Field
+      ! Requirement Insert and remove Field
       ! A Field can be inserted into or removed from a Bundle
       ! The remove portion of this requirement cannot be tested until Bug 705849
       ! ESMF_BundleDeleteField not implemented" is fixed.
