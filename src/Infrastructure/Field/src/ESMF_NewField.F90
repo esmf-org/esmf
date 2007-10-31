@@ -1,4 +1,4 @@
-! $Id: ESMF_NewField.F90,v 1.5 2007/10/30 20:10:58 feiliu Exp $
+! $Id: ESMF_NewField.F90,v 1.6 2007/10/31 01:04:00 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -206,7 +206,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_NewField.F90,v 1.5 2007/10/30 20:10:58 feiliu Exp $'
+      '$Id: ESMF_NewField.F90,v 1.6 2007/10/31 01:04:00 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -3739,16 +3739,19 @@
 ! !INTERFACE:
       subroutine ESMF_FieldConstructIANew(ftype, grid, arrayspec, &
                                         allocflag, staggerloc, &
-                                        indexflag, datamap, name, iospec, rc)
+                                        indexflag, gridDimMap, ungriddedLBounds, &
+                                        ungriddedUBounds, name, iospec, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldType), pointer :: ftype 
       type(ESMF_Grid) :: grid               
-      type(ESMF_ArraySpec), intent(inout) :: arrayspec     
+      type(ESMF_ArraySpec), intent(inout) :: arrayspec
       type(ESMF_AllocFlag), intent(in), optional :: allocflag
       type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
       type(ESMF_IndexFlag), intent(in), optional :: indexflag
-      type(ESMF_FieldDataMap), intent(inout), optional :: datamap           
+      integer, intent(in), optional :: gridDimMap
+      integer, intent(in), ungriddedLBounds
+      integer, intent(in), ungriddedUBounds     
       character (len=*), intent(in), optional :: name
       type(ESMF_IOSpec), intent(in), optional :: iospec 
       integer, intent(out), optional :: rc              
@@ -3768,7 +3771,25 @@
 !     \item [grid] 
 !           Pointer to an {\tt ESMF\_Grid} object. 
 !     \item [arrayspec]
-!           Data specification. 
+!           Data specification.
+!     \item [gridDimMap] 
+!           List that contains as many elements as is indicated by the {\tt grid}'s rank. 
+!           The list elements map each dimension of the Grid object to a dimension in the
+!           Field's Array by specifying the appropriate Array dimension index. The default is to
+!           map all of the grid's dimensions against the lower dimensions of the Field's
+!           Array in sequence, i.e. gridDimmap = (/1, 2, .../). Unmapped dimensions are
+!           undistributed dimensions.  The total undistributed dimensions are the total 
+!           Field dimensions - the distributed dimenstions in the Grid (distRank).  All
+!           gridDimmap entries must be greater than or equal to one and smaller than or equal
+!           to the Field rank. It is erroneous to specify the same entry multiple times
+!           unless it is zero.  If the Array rank is less than the DistGrid dimCount then
+!           the default dimmap will contain zeros for the dimCount - rank right most entries.
+!           A zero entry in the dimmap indicates that the particular DistGrid dimension will
+!           be replicating the Array across the DEs along this direction.
+!     \item [ungriddedLBounds]
+!           Lower bounds of the ungridded dimensions of the Field.
+!     \item [ungriddedUBounds]
+!           Upper bounds of the ungridded dimensions of the Field.
 !     \item [{[allocflag]}]
 !           Allocate space for data array or not.  For possible values
 !           see Section~\ref{opt:allocflag}.
@@ -3828,11 +3849,18 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_GridGet(grid, distRank=gridRank, &
+      call ESMF_GridGet(grid, rank=gridRank, &
                         rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+
+      if (arrayRank.lt.gridRank) then
+         call ESMF_LogMsgSetError(ESMF_RC_ARG_RANK, &
+                                 "Array rank must be equal to or greater than Grid rank", &
+                                  ESMF_CONTEXT, rc)
+      
+     
 
       minRank = min(arrayRank, gridRank)
       if (present(datamap)) then

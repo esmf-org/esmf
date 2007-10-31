@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.41 2007/09/06 16:40:56 theurich Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.42 2007/10/31 01:04:02 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,10 +43,7 @@
       use ESMF_LogErrMod
       use ESMF_BaseMod
       use ESMF_VMMod
-      use ESMF_InternArrayMod
-      use ESMF_InternArrayGetMod
-      use ESMF_InternArrayCreateMod
-!      use ESMF_LogRectIGridMod
+      use ESMF_ArrayMod
       use ESMF_FieldMod
       use ESMF_BundleMod
       use ESMF_StateTypesMod
@@ -115,7 +112,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.41 2007/09/06 16:40:56 theurich Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.42 2007/10/31 01:04:02 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -344,15 +341,6 @@
                                        bufsize, offset, localrc)
 !!DEBUG "serialized field, obj=", si%objsend(i), " id=", si%idsend(i)
 
-           case (ESMF_STATEITEM_INTERNARRAY%ot)
-             call c_ESMC_GetID(stateitem%datap%iap, si%idsend(i), localrc)
-             call c_ESMC_GetVMId(stateitem%datap%iap, si%vmidsend(i), localrc)
-             si%objsend(i) = ESMF_ID_INTERNARRAY%objectID
-             bptr => si%blindsend(:,i)
-             call c_ESMC_IArraySerializeNoData(stateitem%datap%iap, bptr(1), &
-                                       bufsize, offset, localrc)
-!!DEBUG "serialized internarray, obj=", si%objsend(i), " id=", si%idsend(i)
-
            case (ESMF_STATEITEM_ARRAY%ot)
              call c_ESMC_GetID(stateitem%datap%ap, si%idsend(i), localrc)
              call c_ESMC_GetVMId(stateitem%datap%ap, si%vmidsend(i), localrc)
@@ -550,7 +538,6 @@
     type(ESMF_State) :: substate
     type(ESMF_Bundle) :: bundle
     type(ESMF_Field) :: field
-    type(ESMF_InternArray) :: iarray
     type(ESMF_Array) :: array
     character(len=ESMF_MAXSTR) :: thisname
     integer(ESMF_KIND_I4), pointer, dimension(:) :: bptr
@@ -778,17 +765,6 @@
                     call c_ESMC_SetVMId(field%ftypep, si%vmidrecv(k), localrc)
                     call ESMF_StateAddField(state, field, rc=localrc)
 !!DEBUG "field added to state"
-
-                   case (ESMF_ID_INTERNARRAY%objectID)
-!!DEBUG "need to create proxy internarray, remote id=", si%idrecv(k)
-                    bptr => si%blindrecv(:,k)
-                    call c_ESMC_IArrayDeserializeNoData(iarray, bptr, offset, localrc)
-                    ! Set init code
-                    call ESMF_InternArraySetInitCreated(iarray, rc=localrc)
-!!DEBUG "created array, ready to set id and add to local state"
-                    call c_ESMC_SetVMId(iarray, si%vmidrecv(k), localrc)
-                    call ESMF_StateAddInternArray(state, iarray, rc=localrc)
-!!DEBUG "array added to state"
 
                    case (ESMF_ID_ARRAY%objectID)
 !!DEBUG "need to create proxy array, remote id=", si%idrecv(k)

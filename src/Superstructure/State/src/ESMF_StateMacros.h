@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_StateMacros.h,v 1.17 2007/09/24 21:35:32 svasquez Exp $
+! $Id: ESMF_StateMacros.h,v 1.18 2007/10/31 01:04:02 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -99,9 +99,9 @@
       integer, intent(out), optional :: rc   @\
  @\
         ! Local variables @\
-        !!type (ESMF_Bundle) :: bundle        ! bundle object @\
+        !!type (ESMF_Bundle) :: bundle      ! bundle object @\
         type (ESMF_Field) :: field          ! field object @\
-        type(ESMF_InternArray) :: array          ! array object @\
+        type(ESMF_Array) :: array           ! array object @\
         type(ESMF_State) :: top     @\
         integer :: status                   ! local error status @\
         logical :: rcpresent                ! did user specify rc? @\
@@ -113,7 +113,8 @@
         ! Initialize return code; assume failure until success is certain @\
         status = ESMF_RC_NOT_IMPL @\
         rcpresent = .FALSE. @\
-        array%this = ESMF_NULL_POINTER @\
+        ! TODO:FIELDINTEGRATION Resolve problem with array%this init to NULL @\
+        ! array%this = ESMF_NULL_POINTER @\
  @\
         if (present(rc)) then @\
           rcpresent = .TRUE. @\
@@ -209,11 +210,6 @@
                             @\
           ! get pointer     @\
           call ESMF_ArrayGet(dataitem%datap%ap, dataPointer, rc=status) @\
-          if (ESMF_LogMsgFoundError(status, & @\
-                                  ESMF_ERR_PASSTHRU, & @\
-                                  ESMF_CONTEXT, rc)) return @\
-        else if (dataitem%otype .eq. ESMF_STATEITEM_INTERNARRAY) then @\
-          call ESMF_InternArrayGetData(dataitem%datap%iap, dataPointer, copyflag, rc=status) @\
           if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.53 2007/09/24 16:44:51 theurich Exp $
+! $Id: ESMF_StateUTest.F90,v 1.54 2007/10/31 01:04:03 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.53 2007/09/24 16:44:51 theurich Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.54 2007/10/31 01:04:03 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -52,8 +52,7 @@
       
       type(ESMF_ArraySpec)  :: arrayspec
       type(ESMF_DistGrid)   :: distgrid
-      type(ESMF_Array)      :: array, array2,arrayGDP
-      type(ESMF_InternArray) :: iarray
+      type(ESMF_Array)      :: array, array2, arrayGDP, testarray
 
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -103,27 +102,27 @@
 
       !------------------------------------------------------------------------
       !EX_UTest 
-      ! Add  uncreated internal array to uncreated  State 
+      ! Add  uncreated array to uncreated  State 
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
-      write(name, *) "Add uncreated internal array to uncreated State Test"
-      call ESMF_StateAddInternArray(state4, iarray, rc=rc)
+      write(name, *) "Add uncreated array to uncreated State Test"
+      call ESMF_StateAddArray(state4, testarray, rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest 
-      ! Get  uncreated internal array from uncreated  State 
-      arrayname = "Internal Array"
+      ! Get  uncreated array from uncreated  State 
+      arrayname = "Test Array"
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
-      write(name, *) "Get uncreated internal array from uncreated State Test"
-      call ESMF_StateGetInternArray(state4, arrayname, iarray, rc=rc)
+      write(name, *) "Get uncreated array from uncreated State Test"
+      call ESMF_StateGetArray(state4, arrayname, testarray, rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest 
       ! Test Creation of an empty import State 
-      statename = "Internal Array State"
+      statename = "Test Array State"
       state4 = ESMF_StateCreate(statename, ESMF_STATE_IMPORT, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an empty import State Test"
@@ -132,86 +131,39 @@
 
       !------------------------------------------------------------------------
       !EX_UTest 
-      ! Add  uncreated internal array to a  State 
+      ! Add  uncreated array to a  State 
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
-      write(name, *) "Add uncreated internal array to a State Test"
-      call ESMF_StateAddInternArray(state4, iarray, rc=rc)
+      write(name, *) "Add uncreated array to a State Test"
+      call ESMF_StateAddArray(state4, testarray, rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
 
 
       !------------------------------------------------------------------------
       !EX_UTest 
-      ! Get  uncreated internal array from State 
-      arrayname = "Internal Array"
+      ! Get  uncreated array from State 
+      arrayname = "Test Array"
       write(failMsg, *) "Did not return ESMF_RC_ARG_INCOMP"
-      write(name, *) "Get uncreated internal array from a State Test"
-      call ESMF_StateGetInternArray(state4, arrayname, iarray, rc=rc)
+      write(name, *) "Get uncreated array from a State Test"
+      call ESMF_StateGetArray(state4, arrayname, testarray, rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_ARG_INCOMP), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      !-------------------------------------------------------------------------------
-      !EX_UTest
-      ! Create an Internal Array Test
-      allocate(f90ptr1(10,20))
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Create internal Array Test"
-      iarray =  ESMF_InternArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !-------------------------------------------------------------------------------
-      !EX_UTest
-      !  Set Array Name Test
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Set Array Name Test"
-      call ESMF_InternArraySet(iarray, name="Internal Array", rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest 
-      ! Add  an internal array to a  State 
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Add an internal array to a State Test"
-      call ESMF_StateAddInternArray(state4, iarray, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest 
-      ! Get an internal array from State 
-      arrayname = "Internal Array"
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Get an internal array from a State Test"
-      call ESMF_StateGetInternArray(state4, arrayname, iarray, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      !-------------------------------------------------------------------------------
-      !EX_UTest
-      ! Destroy an Internal Array Test
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Destroy Array Test"
-      call ESMF_InternArrayDestroy(iarray, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest 
-      ! Add a destroyed internal array to a  State 
-      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
-      write(name, *) "Add a destroyed internal array to a State Test"
-      call ESMF_StateAddInternArray(state4, iarray, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX______UTest 
       ! This test is commented out until bug 1707501 
-      ! is resolved
-      ! Get a destroyed internal array from State 
-      !arrayname = "Internal Array"
+      ! is resolved.  The failure was on an InternArray object,
+      ! which was switched over to new Array in 10/07.   
+      ! The code to create and destroy the InternArray prior to 
+      ! this test was deleted.  To reinstate this test the code
+      ! to create and destroy an Array before this test needs to
+      ! be restored.
+      ! 
+      ! Get a destroyed array from State 
+      !arrayname = "Test Array"
       !write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
-      !write(name, *) "Get a destroyed internal array from a State Test"
-      !call ESMF_StateGetInternArray(state4, arrayname, iarray, rc=rc)
+      !write(name, *) "Get a destroyed array from a State Test"
+      !call ESMF_StateGetArray(state4, arrayname, testarray, rc=rc)
       !call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
       !                name, failMsg, result, ESMF_SRCLINE)
 
@@ -222,16 +174,6 @@
       write(name, *) "Destroy State Test"
       call ESMF_StateDestroy(state4, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest 
-      ! Get a destroyed internal array from State 
-      arrayname = "Internal Array"
-      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
-      write(name, *) "Get a destroyed internal array from a State Test"
-      call ESMF_StateGetInternArray(state4, arrayname, iarray, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
-                      name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest 
