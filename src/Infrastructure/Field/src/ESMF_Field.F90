@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.254 2007/10/31 16:58:53 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.255 2007/10/31 20:24:34 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -206,7 +206,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.254 2007/10/31 16:58:53 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.255 2007/10/31 20:24:34 feiliu Exp $'
 
 !==============================================================================
 !
@@ -3145,7 +3145,7 @@
       integer :: maplist(ESMF_MAXDIM)          ! mapping between them
       integer :: otheraxes(ESMF_MAXDIM)        ! counts for non-grid dims
       integer :: gridrank, maprank
-      logical :: hasgrid, hasarray, hasmap     ! decide what we can validate
+      logical :: hasgrid, hasarray             ! decide what we can validate
       integer :: i, lDE                        ! helper variables to verify bounds
       integer :: localDECount, dimCount        ! and distgrid
       integer, allocatable :: dimmap(:)
@@ -3182,29 +3182,8 @@
       ! before doing tests to be sure they are consistent.
       hasgrid = .FALSE.
       hasarray = .FALSE.
-      hasmap = .FALSE.
 
-
-! TODO:FIELDINTEGRATION Restore internals of Field validate
-#if 0      
-      ! make sure there is data before asking the datamap questions.
-      if (ftypep%datamapstatus .eq. ESMF_STATUS_READY) then
-
-          ! get needed info from datamap. 
-          call ESMF_FieldDataMapGet(ftypep%mapping, staggerloc=staggerloc, &
-                                    dataRank=maprank, dataIndexList=maplist, &
-                                    counts=otheraxes, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
-          hasmap = .TRUE.
-      endif
-
-      ! if there is no datamap yet, then default staggerloc to cell center
-      ! before asking the grid for count information
-      if (.not. hasmap) then
-          staggerloc = ESMF_STAGGERLOC_CENTER
-      endif
+      staggerloc = ESMF_STAGGERLOC_CENTER
 
       ! make sure there is a grid before asking it questions.
       if (ftypep%gridstatus .eq. ESMF_STATUS_READY) then
@@ -3282,7 +3261,6 @@
           enddo
           deallocate(dimmap, arrayCompUBnd, arrayCompLBnd)
       endif
-#endif      
 
       if (present(rc)) rc = ESMF_SUCCESS
 
