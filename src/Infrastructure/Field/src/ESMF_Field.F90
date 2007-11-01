@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.255 2007/10/31 20:24:34 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.256 2007/11/01 14:44:36 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -31,12 +31,11 @@
 !
 ! !DESCRIPTION:
 ! The code in this file implements the {\tt ESMF\_Field} class, which 
-! represents a
-! single scalar or vector field.  {\tt ESMF\_Field}s associate a metadata 
-! description 
-! expressed as a set of {\tt ESMF\_Attributes} with a data {\tt ESMF\_Array}, 
-! {\tt ESMF\_Grid}, and I/O specification, or {\tt ESMF\_IOSpec} (NOT IMPLEMENTED).  
-! A GridDimMap describes the relationship of the {\tt ESMF\_Array} to
+! represents a single scalar or vector field.  {\tt ESMF\_Field}s associate
+! a metadata description expressed as a set of {\tt ESMF\_Attributes} with
+! a data {\tt ESMF\_Array}, {\tt ESMF\_Grid}, and I/O specification, or
+! {\tt ESMF\_IOSpec} (NOT IMPLEMENTED).  
+! A gridToFieldMap describes the relationship of the {\tt ESMF\_Array} to
 ! the {\tt ESMF\_Grid}.  
 !
 ! This type is implemented in Fortran 90.
@@ -119,11 +118,11 @@
         type (ESMF_Array)             :: array
         type (ESMF_StaggerLoc)        :: staggerloc
         logical                       :: localFlag        ! .true. if local data present
-        integer                       :: gridDimMap(ESMF_MAXDIM)
+        integer                       :: gridToFieldMap(ESMF_MAXDIM)
         integer                       :: ungriddedLBound(ESMF_MAXDIM)
         integer                       :: ungriddedUBound(ESMF_MAXDIM)
-        integer                       :: haloLWidth(ESMF_MAXDIM)
-        integer                       :: haloUWidth(ESMF_MAXDIM)
+        integer                       :: maxHaloLWidth(ESMF_MAXDIM)
+        integer                       :: maxHaloUWidth(ESMF_MAXDIM)
         ESMF_INIT_DECLARE
 
       end type
@@ -159,17 +158,14 @@
 
    public ESMF_FieldGetInit            ! For Standardized Initialization
 
-
    public ESMF_FieldCreateNoData       ! Create a new Field without data
    public ESMF_FieldDestroy            ! Destroy a Field
 
    public ESMF_FieldGet                ! Generic Get() routine
 
    public ESMF_FieldGetArray           ! Return the data Array
-!   public ESMF_FieldGetLocalArray      ! Return the Local Array
 
 !   public ESMF_FieldSetArray           ! Set a data Array in a Field
-!   public ESMF_FieldSetLocalArray      ! Set a data Array in a Field
 !   public ESMF_FieldSetDataValues      ! Set Field data values 
 !   public ESMF_FieldSetGrid
 
@@ -181,7 +177,6 @@
 
    public ESMF_FieldValidate           ! Check internal consistency
 !   public ESMF_FieldPrint              ! Print contents of a Field
-!   public ESMF_FieldBoxIntersect       ! Intersect bounding boxes
 
    public ESMF_FieldWrite              ! Write data and Grid from a Field
 
@@ -206,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.255 2007/10/31 20:24:34 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.256 2007/11/01 14:44:36 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -420,9 +415,9 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreateNoData()
       function ESMF_FieldCreateNoDataPtr(grid, arrayspec, staggerloc, &
-                                         gridDimMap, ungriddedLBound, &
-                                         ungriddedUBound, haloLWidth, &
-                                         haloUWidth, indexflag, name, iospec, rc)
+                                         gridToFieldMap, ungriddedLBound, &
+                                         ungriddedUBound, maxHaloLWidth, &
+                                         maxHaloUWidth, indexflag, name, iospec, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Field) :: ESMF_FieldCreateNoDataPtr   
@@ -431,11 +426,11 @@
       type(ESMF_Grid) :: grid                 
       type(ESMF_ArraySpec), intent(inout) :: arrayspec    
       type(ESMF_StaggerLoc), intent(in), optional ::staggerloc 
-      integer, intent(in), optional :: gridDimMap(:)    
+      integer, intent(in), optional :: gridToFieldMap(:)    
       integer, intent(in), optional :: ungriddedLBound(:)
       integer, intent(in), optional :: ungriddedUBound(:)
-      integer, intent(in), optional :: haloLWidth(:)
-      integer, intent(in), optional :: haloUWidth(:)
+      integer, intent(in), optional :: maxHaloLWidth(:)
+      integer, intent(in), optional :: maxHaloUWidth(:)
       type(ESMF_IndexFlag), intent(in), optional ::indexflag
       character (len=*), intent(in), optional :: name    
       type(ESMF_IOSpec), intent(in), optional :: iospec  
@@ -457,7 +452,7 @@
 !           predefined values see Section \ref{sec:opt:staggerloc}.
 !           To create a custom stagger location see Section
 !           \ref{sec:usage:staggerloc:adv}.
-!     \item [{[gridDimMap]}]
+!     \item [{[gridToFieldMap]}]
 !           List that contains as many elements as is indicated by the {\tt grid}'s rank. 
 !           The list elements map each dimension of the Grid object to a dimension in the
 !           Field's Array by specifying the appropriate Array dimension index. The default is to
@@ -465,19 +460,19 @@
 !           Array in sequence, i.e. gridDimmap = (/1, 2, .../). Unmapped dimensions are
 !           undistributed dimensions.  The total undistributed dimensions are the total 
 !           Array dimensions - the distributed dimensions in the Grid (distRank).  All
-!           gridDimMap entries must be greater than or equal to one and smaller than or equal
+!           gridToFieldMap entries must be greater than or equal to one and smaller than or equal
 !           to the Array rank. It is erroneous to specify the same entry multiple times
 !           unless it is zero.  If the Array rank is less than the Grid dimCount then
-!           the default gridDimMap will contain zeros for the dimCount.
+!           the default gridToFieldMap will contain zeros for the dimCount.
 !           A zero entry in the dimmap indicates that the particular Grid dimension will
 !           be replicating the Array across the DEs along this direction.
 !     \item [{[ungriddedLBound]}]
 !           Lower bounds of the ungridded dimensions of the Field.
 !     \item [{[ungriddedUBound]}]
 !           Upper bounds of the ungridded dimensions of the Field.
-!     \item [{[haloLWidth]}]
+!     \item [{[maxHaloLWidth]}]
 !           Lower bound of halo region.  Defaults to 0.
-!     \item [{[haloUWidth]}]
+!     \item [{[maxHaloUWidth]}]
 !           Upper bound of halo region.  Defaults to 0.
 !     \item [{[indexflag]}]
 !           Local or global indices.  See section \ref{opt:indexflag} for a 
@@ -507,9 +502,9 @@
 
       ! Call construction method to build field internals.
       call ESMF_FieldConstructNoDataPtr(ftype, grid, arrayspec, staggerloc, &
-                                       gridDimMap, ungriddedLBound, &
-                                       ungriddedUBound, haloLWidth, &
-                                       haloUWidth, indexflag, name, iospec, localrc)
+                                       gridToFieldMap, ungriddedLBound, &
+                                       ungriddedUBound, maxHaloLWidth, &
+                                       maxHaloUWidth, indexflag, name, iospec, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -749,9 +744,9 @@
 ! !INTERFACE:
       subroutine ESMF_FieldGet(field, grid, array, &
                                typekind, rank, staggerloc, &
-                               gridDimMap, ungriddedLBound, &
-                               ungriddedUBound, haloLWidth, &
-                               haloUWidth, name, iospec, rc) 
+                               gridToFieldMap, ungriddedLBound, &
+                               ungriddedUBound, maxHaloLWidth, &
+                               maxHaloUWidth, name, iospec, rc) 
 
 !
 ! !ARGUMENTS:
@@ -761,11 +756,11 @@
       type(ESMF_TypeKind), intent(out), optional :: typekind
       integer, intent(out), optional :: rank
       type(ESMF_StaggerLoc), intent(out), optional :: staggerloc 
-      integer, intent(out), optional :: gridDimMap(:)    
+      integer, intent(out), optional :: gridToFieldMap(:)    
       integer, intent(out), optional :: ungriddedLBound(:)
       integer, intent(out), optional :: ungriddedUBound(:)
-      integer, intent(out), optional :: haloLWidth(:)
-      integer, intent(out), optional :: haloUWidth(:)
+      integer, intent(out), optional :: maxHaloLWidth(:)
+      integer, intent(out), optional :: maxHaloUWidth(:)
       character(len=*), intent(out), optional :: name
       type(ESMF_IOSpec), intent(out), optional :: iospec ! NOT IMPLEMENTED
       integer, intent(out), optional :: rc     
@@ -792,7 +787,7 @@
 !           Stagger location of data in grid cells.  For valid values 
 !           and interpretation
 !           of results see Section \ref{sec:opt:staggerloc}.
-!     \item [{[gridDimMap]}]
+!     \item [{[gridToFieldMap]}]
 !           List that contains as many elements as is indicated by the {\tt grid}'s rank. 
 !           The list elements map each dimension of the Grid object to a dimension in the
 !           Field's Array by specifying the appropriate Array dimension index. The default is to
@@ -800,19 +795,19 @@
 !           Array in sequence, i.e. gridDimmap = (/1, 2, .../). Unmapped dimensions are
 !           undistributed dimensions.  The total undistributed dimensions are the total 
 !           Array dimensions - the distributed dimensions in the Grid (distRank).  All
-!           gridDimMap entries must be greater than or equal to one and smaller than or equal
+!           gridToFieldMap entries must be greater than or equal to one and smaller than or equal
 !           to the Array rank. It is erroneous to specify the same entry multiple times
 !           unless it is zero.  If the Array rank is less than the Grid dimCount then
-!           the default gridDimMap will contain zeros for the dimCount.
+!           the default gridToFieldMap will contain zeros for the dimCount.
 !           A zero entry in the dimmap indicates that the particular Grid dimension will
 !           be replicating the Array across the DEs along this direction.
 !     \item [{[ungriddedLBound]}]
 !           Lower bounds of the ungridded dimensions of the Field.
 !     \item [{[ungriddedUBound]}]
 !           Upper bounds of the ungridded dimensions of the Field.
-!     \item [{[haloLWidth]}]
+!     \item [{[maxHaloLWidth]}]
 !           Lower bound of halo region.  Defaults to 0.
-!     \item [{[haloUWidth]}]
+!     \item [{[maxHaloUWidth]}]
 !           Upper bound of halo region.  Defaults to 0.
 !     \item [{[name]}]
 !           Name of queried item.
@@ -860,8 +855,8 @@
             array = ftype%array
         endif
 
-        if (present(gridDimMap)) then
-            gridDimMap = ftype%gridDimMap
+        if (present(gridToFieldMap)) then
+            gridToFieldMap = ftype%gridToFieldMap
         endif
 
         if (present(ungriddedLBound)) then
@@ -872,12 +867,12 @@
             ungriddedUBound = ftype%ungriddedUBound
         endif
 
-        if (present(haloLWidth)) then
-            haloLWidth = ftype%haloLWidth
+        if (present(maxHaloLWidth)) then
+            maxHaloLWidth = ftype%maxHaloLWidth
         endif
 
         if (present(ungriddedUBound)) then
-            haloUWidth = ftype%haloUWidth
+            maxHaloUWidth = ftype%maxHaloUWidth
         endif
 
         if (present(staggerloc)) then
@@ -2059,7 +2054,7 @@
            call ESMF_ArrayPrint(fp%array, "", localrc)
         endif
 
-! TODO:FIELDINTEGRATION Finish implementation of FieldPrint - gridDimMap etc.
+! TODO:FIELDINTEGRATION Finish implementation of FieldPrint - gridToFieldMap etc.
 
 
         ! global field contents
@@ -3603,9 +3598,9 @@
 ! !INTERFACE:
       subroutine ESMF_FieldConstructIANew(ftype, grid, arrayspec, &
                                         allocflag, staggerloc, &
-                                        gridDimMap, ungriddedLBound, &
-                                        ungriddedUBound, haloLWidth, &
-                                        haloUWidth, indexflag, name, iospec, rc)
+                                        gridToFieldMap, ungriddedLBound, &
+                                        ungriddedUBound, maxHaloLWidth, &
+                                        maxHaloUWidth, indexflag, name, iospec, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldType), pointer :: ftype 
@@ -3613,11 +3608,11 @@
       type(ESMF_ArraySpec), intent(inout) :: arrayspec
       type(ESMF_AllocFlag), intent(in), optional :: allocflag
       type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
-      integer, intent(in), optional :: gridDimMap(:)
+      integer, intent(in), optional :: gridToFieldMap(:)
       integer, intent(in), optional :: ungriddedLBound(:)
       integer, intent(in), optional :: ungriddedUBound(:)      
-      integer, intent(in), optional :: haloLWidth(:)
-      integer, intent(in), optional :: haloUWidth(:)
+      integer, intent(in), optional :: maxHaloLWidth(:)
+      integer, intent(in), optional :: maxHaloUWidth(:)
       type(ESMF_IndexFlag), intent(in), optional :: indexflag
       character (len=*), intent(in), optional :: name
       type(ESMF_IOSpec), intent(in), optional :: iospec 
@@ -3626,7 +3621,7 @@
 ! !DESCRIPTION:
 ! 
 !     Constructs all {\tt ESMF\_Field} internals, including the allocation
-!     of a data {\tt ESMF\_Array}.   TODO: this is missing a counts argument,
+!     of a data {\tt ESMF\_Array}.  TODO: this is missing a counts argument,
 !     which is required if the arrayspec rank is greater than the {\tt grid} rank.
 !     Either that, or we must enforce that a datamap comes in, and it
 !     contains the counts for non-grid dims.
@@ -3649,7 +3644,7 @@
 !           \ref{sec:usage:staggerloc:adv}.
 !           If a stagger location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
-!     \item [{[gridDimMap]}]
+!     \item [{[gridToFieldMap]}]
 !           List that contains as many elements as is indicated by the {\tt grid}'s rank. 
 !           The list elements map each dimension of the Grid object to a dimension in the
 !           Field's Array by specifying the appropriate Array dimension index. The default is to
@@ -3657,22 +3652,23 @@
 !           Array in sequence, i.e. gridDimmap = (/1, 2, .../). Unmapped dimensions are
 !           undistributed dimensions.  The total undistributed dimensions are the total 
 !           Array dimensions - the distributed dimensions in the Grid (distRank).  All
-!           gridDimMap entries must be greater than or equal to one and smaller than or equal
+!           gridToFieldMap entries must be greater than or equal to one and smaller than or equal
 !           to the Array rank. It is erroneous to specify the same entry multiple times
 !           unless it is zero.  If the Array rank is less than the Grid dimCount then
-!           the default gridDimMap will contain zeros for the dimCount.
+!           the default gridToFieldMap will contain zeros for the dimCount.
 !           A zero entry in the dimmap indicates that the particular Grid dimension will
 !           be replicating the Array across the DEs along this direction.
 !     \item [{[ungriddedLBound]}]
 !           Lower bounds of the ungridded dimensions of the Field.
 !     \item [{[ungriddedUBound]}]
 !           Upper bounds of the ungridded dimensions of the Field.
+!     \item [{[maxHaloLWidth]}]
+!           Lower bound of halo region.  Defaults to 0.
+!     \item [{[maxHaloUWidth]}]
+!           Upper bound of halo region.  Defaults to 0.
 !     \item [{[indexflag]}]
 !           Local or global indices.  See section \ref{opt:indexflag} for a 
 !           list of valid indexflag options.  The default is {ESMF\_INDEX\_DELOCAL}.
-!     \item [{[datamap]}]
-!           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
-!           data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
 !           {\tt ESMF\_Field} name. 
 !     \item [{[iospec]}] 
@@ -3683,7 +3679,6 @@
 !     \end{description}
 !
 !EOPI
-
 
       integer :: localrc
       type(ESMF_Array) :: array                  
@@ -3745,11 +3740,23 @@
       endif
 
 ! TODO:FIELDINTEGRATION Adjust array size in field create for halo widths 
-      array = ESMF_ArrayCreateFromGrid(grid, staggerloc=staggerloc, typekind=typekind, &
-                                       rc=localrc) 
+
+!      Field halo needs to be same rank as distgrid dim count - this 
+!      should be checked.
+      
+!      Array assumes the halo arguments are in the same order as the
+!      distgrid dimensions.
+      
+!      The ArrayCreateFromGrid call needs to be updated so you can
+!      pass in the ungriddedLBound and ungriddedUBound, and 
+!      the gridToFieldMap.  The halo widths should go in as the total
+!      width argument.           
+
+      array = ESMF_ArrayCreateFromGrid(grid, staggerloc=staggerloc, &
+                                       typekind=typekind, rc=localrc) 
       if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ftype%array = array
       ftype%datastatus = ESMF_STATUS_READY
@@ -3875,9 +3882,9 @@
 
 ! !INTERFACE:
       subroutine ESMF_FieldConstructNoDataPtr(ftype, grid, arrayspec, staggerloc, &
-                                       gridDimMap, ungriddedLBound, &
-                                       ungriddedUBound, haloLWidth, &
-                                       haloUWidth, indexflag, name, iospec, rc)
+                                       gridToFieldMap, ungriddedLBound, &
+                                       ungriddedUBound, maxHaloLWidth, &
+                                       maxHaloUWidth, indexflag, name, iospec, rc)
 
 !
 ! !ARGUMENTS:     
@@ -3885,11 +3892,11 @@
       type(ESMF_Grid), intent(inout) :: grid               
       type(ESMF_ArraySpec), intent(inout) :: arrayspec     
       type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
-      integer, intent(in), optional :: gridDimMap(:)    
+      integer, intent(in), optional :: gridToFieldMap(:)    
       integer, intent(in), optional :: ungriddedLBound(:)
       integer, intent(in), optional :: ungriddedUBound(:)
-      integer, intent(in), optional :: haloLWidth(:)
-      integer, intent(in), optional :: haloUWidth(:)
+      integer, intent(in), optional :: maxHaloLWidth(:)
+      integer, intent(in), optional :: maxHaloUWidth(:)
       type(ESMF_IndexFlag), intent(in), optional ::indexflag
       character (len=*), intent(in), optional :: name
       type(ESMF_IOSpec), intent(in), optional :: iospec 
@@ -3915,7 +3922,7 @@
 !           \ref{sec:usage:staggerloc:adv}.
 !           If a stagger location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
-!     \item [{[gridDimMap]}]
+!     \item [{[gridToFieldMap]}]
 !           List that contains as many elements as is indicated by the {\tt grid}'s rank. 
 !           The list elements map each dimension of the Grid object to a dimension in the
 !           Field's Array by specifying the appropriate Array dimension index. The default is to
@@ -3923,19 +3930,19 @@
 !           Array in sequence, i.e. gridDimmap = (/1, 2, .../). Unmapped dimensions are
 !           undistributed dimensions.  The total undistributed dimensions are the total 
 !           Array dimensions - the distributed dimensions in the Grid (distRank).  All
-!           gridDimMap entries must be greater than or equal to one and smaller than or equal
+!           gridToFieldMap entries must be greater than or equal to one and smaller than or equal
 !           to the Array rank. It is erroneous to specify the same entry multiple times
 !           unless it is zero.  If the Array rank is less than the Grid dimCount then
-!           the default gridDimMap will contain zeros for the dimCount.
+!           the default gridToFieldMap will contain zeros for the dimCount.
 !           A zero entry in the dimmap indicates that the particular Grid dimension will
 !           be replicating the Array across the DEs along this direction.
 !     \item [{[ungriddedLBound]}]
 !           Lower bounds of the ungridded dimensions of the Field.
 !     \item [{[ungriddedUBound]}]
 !           Upper bounds of the ungridded dimensions of the Field.
-!     \item [{[haloLWidth]}]
+!     \item [{[maxHaloLWidth]}]
 !           Lower bound of halo region.  Defaults to 0.
-!     \item [{[haloUWidth]}]
+!     \item [{[maxHaloUWidth]}]
 !           Upper bound of halo region.  Defaults to 0.
 !     \item [{[indexflag]}]
 !           Local or global indices.  See section \ref{opt:indexflag} for a 

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.3 2007/10/31 16:58:53 cdeluca Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.4 2007/11/01 14:44:37 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cppF90,v 1.3 2007/10/31 16:58:53 cdeluca Exp $'
+      '$Id: ESMF_FieldCreate.cppF90,v 1.4 2007/11/01 14:44:37 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -113,8 +113,8 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
       ! Private name; call using ESMF_FieldCreate()
       function ESMF_FieldCreateNew(grid, arrayspec, allocflag, staggerloc, &
                                    gridDimMap, ungriddedLBound, &
-                                   ungriddedUBound, haloLWidth, &
-                                   haloUWidth, indexflag, name, iospec, rc)
+                                   ungriddedUBound, maxHaloLWidth, &
+                                   maxHaloUWidth, indexflag, name, iospec, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Field) :: ESMF_FieldCreateNew
@@ -127,8 +127,8 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
       integer, intent(in), optional :: gridDimMap(:)    
       integer, intent(in), optional :: ungriddedLBound(:)
       integer, intent(in), optional :: ungriddedUBound(:)
-      integer, intent(in), optional :: haloLWidth(:)
-      integer, intent(in), optional :: haloUWidth(:)
+      integer, intent(in), optional :: maxHaloLWidth(:)
+      integer, intent(in), optional :: maxHaloUWidth(:)
       type(ESMF_IndexFlag), intent(in), optional ::indexflag
       character (len=*), intent(in), optional :: name 
       type(ESMF_IOSpec), intent(in), optional :: iospec 
@@ -171,9 +171,9 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 !           Lower bounds of the ungridded dimensions of the Field.
 !     \item [{[ungriddedUBound]}]
 !           Upper bounds of the ungridded dimensions of the Field.
-!     \item [{[haloLWidth]}]
+!     \item [{[maxHaloLWidth]}]
 !           Lower bound of halo region.  Defaults to 0.
-!     \item [{[haloUWidth]}]
+!     \item [{[maxHaloUWidth]}]
 !           Upper bound of halo region.  Defaults to 0.
 !     \item [{[indexflag]}]
 !           Local or global indices.  See section \ref{opt:indexflag} for a 
@@ -214,8 +214,8 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
       ! Call construction method to allocate and initialize field internals.
       call ESMF_FieldConstructIA(ftype, grid, arrayspec, allocflag, &
                                   staggerloc, gridDimMap, ungriddedLBound, &
-                                  ungriddedUBound, haloLWidth, &
-                                  haloUWidth, indexflag, name, iospec, localrc)
+                                  ungriddedUBound, maxHaloLWidth, &
+                                  maxHaloUWidth, indexflag, name, iospec, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
