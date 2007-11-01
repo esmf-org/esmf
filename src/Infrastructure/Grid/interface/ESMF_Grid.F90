@@ -149,7 +149,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.38 2007/10/30 23:31:30 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.39 2007/11/01 23:47:03 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -612,7 +612,8 @@ end interface
 
 ! !INTERFACE:
       function ESMF_ArrayCreateFromGrid(grid,staggerloc,name,typekind, &
-                                       totalLWidth, totalUWidth, rc)
+                           gridToArrayMap, ungriddedLBound, ungriddedUBound, &
+                           totalLWidth, totalUWidth, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Array) :: ESMF_ArrayCreateFromGrid
@@ -622,6 +623,9 @@ end interface
        type(ESMF_StaggerLoc), intent(in),  optional :: staggerloc
        character (len=*),     intent(in),  optional :: name
        type(ESMF_TypeKind),   intent(in),  optional :: typekind
+       integer,               intent(in),  optional :: gridToArrayMap(:)
+       integer,               intent(in),  optional :: ungriddedLBound(:)
+       integer,               intent(in),  optional :: ungriddedUBound(:)
        integer,               intent(in),  optional :: totalLWidth(:)
        integer,               intent(in),  optional :: totalUWidth(:)
        integer,               intent(out), optional :: rc
@@ -648,6 +652,14 @@ end interface
 ! \item[{[typekind]}] 
 !     The type/kind of the newly created array data. 
 !     If not specified then the type/kind will be 8 byte reals.  
+!\item[{[gridToArrayMap]}]
+!     Indicates where each grid dimension goes in the newly created Array.
+!     {\tt The array gridToArrayMap} should be at least of size equal to the grid's rank.
+!     If not set defaults to (1,2,3,....).
+!\item[{[ungriddedLBound]}]
+!     The lower bounds of the non-grid Array dimensions.
+!\item[{[ungriddedUBound]}]
+!     The upper bounds of the non-grid array dimensions.  
 !\item[{[totalLWidth]}]
 !     Extra padding to be added to the Array. {\tt totalLWidth} is the amount
 !     that the lower boundary of the Array should be dropped relative
@@ -669,15 +681,15 @@ end interface
     type(ESMF_TypeKind) :: localTypeKind
     type(ESMF_StaggerLoc) :: localStaggerLoc
     integer, pointer :: compEUWidth(:),compELWidth(:)
-    integer, pointer :: lbounds(:),ubounds(:)
-    integer, pointer :: dimmap(:)
+    integer, pointer :: gridLBound(:),gridUBound(:)
+    integer, pointer :: arrayLBound(:),arrayUBound(:)
+    integer, pointer :: arrayDimType(:),gridDimType(:)
+    integer, pointer :: arrayDimInd(:)
+    integer, pointer :: distgridToGridMap(:)
+    integer, pointer :: distgridToArrayMap(:)
     integer :: rank,distRank,undistRank
-
-    !
-    ! TODO: Should totalwidth be the full Grid rank or just distGrid rank?? 
-    !
-
-
+    integer :: i,ungriddedRank, arrayRank, undistArrayRank, bndpos
+   
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -699,15 +711,75 @@ end interface
        localStaggerLoc=ESMF_STAGGERLOC_CENTER
     endif
 
+
+    ! Both the bounds need to be present if either is.
+    if ((present(ungriddedLBound) .or. present(ungriddedUBound)) .and. &
+        .not. (present(ungriddedLBound) .and. present(ungriddedUBound))) then
+       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+               "- if either ungriddedBound is present both need to be", & 
+                      ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    ! The bounds need to be the same size
+    if (present(ungriddedLBound) .and. present(ungriddedUBound)) then
+       if (size(ungriddedLBound) .ne. size(ungriddedUBound)) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+                "- ungriddedLBound and ungriddedUBound must be the same size ", & 
+                  ESMF_CONTEXT, rc) 
+          return 
+       endif
+    endif
+
+   ! Get the ungridded rank
+   ungriddedRank=0
+   if (present(ungriddedUBound)) then
+      ungriddedRank=size(ungriddedUBound)
+   endif
+
     ! Get info from Grid
     call ESMF_GridGet(grid, distgrid=distgrid, rank=rank, distRank=distRank, &
                       undistRank=undistRank, indexflag=indexflag, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! allocated dimmap
-    allocate(dimmap(distRank) , stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating dimmap", &
+    ! calc full Array Rank
+    arrayRank=ungriddedRank+rank
+
+    ! calc undist Array Rank
+    undistArrayRank=ungriddedRank+undistRank
+
+    ! Make sure gridToArrayMap is correct size
+    if (present(gridToArrayMap)) then
+       if (size(gridToArrayMap) < rank) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+               "- gridToArrayMap needs to at least be of the Grid's rank", & 
+                      ESMF_CONTEXT, rc) 
+          return 
+       endif
+    endif
+
+    ! Make sure gridToArrayMap is correct size
+    if (present(gridToArrayMap)) then
+       do i=1,distRank
+          if ((gridToArrayMap(i) <1) .or. (gridToArrayMap(i) > arrayRank)) then
+              call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   "- gridToArrayMap value is outside range", & 
+                          ESMF_CONTEXT, rc) 
+              return 
+          endif
+       enddo
+    endif
+
+
+    ! allocate distgridToGridMap
+    allocate(distgridToGridMap(distRank) , stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToGridMap", &
+                                     ESMF_CONTEXT, rc)) return   
+
+    ! allocate distgridToArrayMap
+    allocate(distgridToArrayMap(distRank) , stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToArrayMap", &
                                      ESMF_CONTEXT, rc)) return   
 
     ! allocated computationalEdgeWidths
@@ -718,61 +790,177 @@ end interface
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating compEUWidth", &
                                      ESMF_CONTEXT, rc)) return   
 
+
+
     ! Get info from Grid
-    call ESMF_GridGet(grid, dimmap=dimmap, rc=localrc)
+    call ESMF_GridGet(grid, dimmap=distgridToGridMap, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-
    ! construct ArraySpec
-   call ESMF_ArraySpecSet(arrayspec,rank=rank,typekind=localTypeKind, rc=localrc)
+   call ESMF_ArraySpecSet(arrayspec,rank=arrayRank,typekind=localTypeKind, rc=localrc)
    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
+   ! Get info about computational Bounds
+   call ESMF_GridGetPSloc(grid, localStaggerLoc, &
+          computationalEdgeLWidth=compELWidth, computationalEdgeUWidth=compEUWidth, &
+          rc=localrc)
+   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+   ! construct distgridToArrayMap
+   if (present(gridToArrayMap)) then
+      do i=1,distRank
+        distgridToArrayMap(i)=gridToArrayMap(distgridToGridMap(i))
+      enddo
+   else
+     distgridToArrayMap(:)=distgridToGridMap(:)
+   endif
 
    ! construct array based on the presence of distributed dimensions
    ! if there are undistributed dimensions ...
-   if (undistRank .gt. 0) then 
-
+   if (undistArrayRank .gt. 0) then      
       !! allocate tensor bounds
-      allocate(lbounds(undistRank) , stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating lbounds", &
+      allocate(arrayLBound(undistArrayRank) , stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridLBound", &
                                      ESMF_CONTEXT, rc)) return   
-      allocate(ubounds(undistRank) , stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating ubounds", &
+      allocate(arrayUBound(undistArrayRank) , stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridUBound", &
                                      ESMF_CONTEXT, rc)) return   
 
+      !! allocate array dim. info arrays
+      allocate(arrayDimType(arrayRank) , stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridUBound", &
+                                     ESMF_CONTEXT, rc)) return   
+      allocate(arrayDimInd(arrayRank) , stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridUBound", &
+                                     ESMF_CONTEXT, rc)) return   
 
-      !! Get info about staggerloc
-      call ESMF_GridGetPSloc(grid, localStaggerLoc, &
-             computationalEdgeLWidth=compELWidth, computationalEdgeUWidth=compEUWidth, &
-             lbounds=lbounds,ubounds=ubounds, rc=localrc)
+      !! set which dimensions are used by the distgrid
+      arrayDimType(:)=0 ! initialize to no type
+      do i=1,distRank
+         arrayDimType(distGridToArrayMap(i))=1 ! set to distributed
+      enddo
+
+      !! add in grid undistributed dimensions
+      if (undistRank .gt. 0) then
+         !!! Allocate Grid Dimension Type array
+         allocate(gridDimType(rank) , stat=localrc)
+         if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridUBound", &
+                                        ESMF_CONTEXT, rc)) return   
+
+         !!! set which dimensions are used by the distgrid
+         gridDimType(:)=0
+         do i=1,distRank
+            gridDimType(distGridToGridMap(i))=1 ! Set to distributed
+         enddo
+
+        !!! put record Grid bound info depending if gridToArrayMap exists
+        if (present(gridToArrayMap)) then
+           bndpos=1
+           do i=1,rank
+              if (gridDimType(i) .eq. 0) then
+                 arrayDimInd(gridToArrayMap(i))=bndpos
+                 arrayDimType(gridToArrayMap(i))=2 ! set to undistributed Grid
+                 bndpos=bndpos+1
+              endif
+           enddo
+        else
+           bndpos=1
+           do i=1,rank
+              if (gridDimType(i) .eq. 0) then
+                 arrayDimInd(i)=bndpos
+                 arrayDimType(i)=2 ! set to undistributed Grid
+                 bndpos=bndpos+1
+              endif
+           enddo
+        endif
+
+         !!! cleanup
+         deallocate(gridDimType)
+      endif
+
+
+      !! Fill in ungridded bound info
+      bndpos=1
+      do i=1,arrayRank
+         if (arrayDimType(i) .eq. 0) then
+            arrayDimInd(i)=bndpos
+            arrayDimType(i)=3 ! set to undistributed Grid
+            bndpos=bndpos+1
+         endif
+      enddo
+
+      !! Finally setup new Array bounds based on info in arrayDimType and arrayDimInd
+      !! Do this depending if there are grid undistributed bounds or not
+      if (undistRank .gt. 0) then
+         !!! allocate tensor bounds
+         allocate(gridLBound(undistRank) , stat=localrc)
+         if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridLBound", &
+                                        ESMF_CONTEXT, rc)) return   
+         allocate(gridUBound(undistRank) , stat=localrc)
+         if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridUBound", &
+                                        ESMF_CONTEXT, rc)) return   
+
+         !!! Get staggerloc grid bounds
+         call ESMF_GridGetPSloc(grid, localStaggerLoc, &
+              lbounds=gridLBound,ubounds=gridUBound, rc=localrc)
+
+         !!! Fill new array undistributed bounds
+         bndpos=1
+         do i=1,arrayRank
+            if (arrayDimType(i) .eq. 2) then
+               arrayLBound(bndpos)=gridLBound(arrayDimInd(i))
+               arrayUBound(bndpos)=gridUBound(arrayDimInd(i))
+               bndpos=bndpos+1
+            else if (arrayDimType(i) .eq. 3) then
+               arrayLBound(bndpos)=ungriddedLBound(arrayDimInd(i))
+               arrayUBound(bndpos)=ungriddedUBound(arrayDimInd(i))
+               bndpos=bndpos+1
+            endif
+         enddo
+
+         !!! cleanup
+         deallocate(gridLBound)
+         deallocate(gridUBound)
+      else
+         !!! Fill new array undistributed bounds
+         bndpos=1
+         do i=1,arrayRank
+            if (arrayDimType(i) .eq. 3) then
+               arrayLBound(bndpos)=ungriddedLBound(arrayDimInd(i))
+               arrayUBound(bndpos)=ungriddedUBound(arrayDimInd(i))
+               bndpos=bndpos+1
+            endif
+         enddo
+      endif
+
+
+!      write(*,*) "d2amap=",distgridToArrayMap
+!      write(*,*) "cel=",compELWidth," ceu=",compEUWidth
+!     write(*,*)  " au=",arrayUBound, " al=",arrayLBound
 
       !! create Array
       array=ESMF_ArrayCreate(arrayspec=arrayspec, &
-              distgrid=distgrid, dimmap=dimmap, &
+              distgrid=distgrid, dimmap=distgridToArrayMap, &
               computationalEdgeLWidth=compELWidth, computationalEdgeUWidth=compEUWidth, &
               totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
               indexflag=indexflag, staggerLoc=localStaggerLoc%staggerloc, &
-              lbounds=lbounds, ubounds=ubounds, name=name, rc=localrc)
+              lbounds=arrayLBound, ubounds=arrayUBound, name=name, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
       !! cleanup
-      deallocate(lbounds)
-      deallocate(ubounds)
+      deallocate(arrayLBound)
+      deallocate(arrayUBound)
+      deallocate(arrayDimType)
+      deallocate(arrayDimInd)
     else
-
-      !! Get info about staggerloc
-      call ESMF_GridGetPSloc(grid, localStaggerLoc, &
-             computationalEdgeLWidth=compELWidth, computationalEdgeUWidth=compEUWidth, &
-             rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
 
       !! create Array
       array=ESMF_ArrayCreate(arrayspec=arrayspec, &
-             distgrid=distgrid, dimmap=dimmap, &
+             distgrid=distgrid, dimmap=distgridToArrayMap, &
             computationalEdgeLWidth=compELWidth, computationalEdgeUWidth=compEUWidth, &
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             indexflag=indexflag, staggerLoc=localStaggerLoc%staggerloc, &
@@ -785,7 +973,8 @@ end interface
     ESMF_ArrayCreateFromGrid = array
 
     ! cleanup
-    deallocate(dimmap)
+    deallocate(distgridToGridMap)
+    deallocate(distgridToArrayMap)
     deallocate(compELWidth)
     deallocate(compEUWidth)
  
@@ -3108,7 +3297,8 @@ end interface
           rank, distRank, undistRank,  &
           tileCount, staggerlocsCount, localDECount, distgrid, &
           dimmap, lbounds, ubounds, coordRank, coordDimMap, &
-          gridEdgeLWidth, gridEdgeUWidth, gridAlign, indexFlag, rc)
+          gridEdgeLWidth, gridEdgeUWidth, gridAlign,  &
+          indexFlag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),       intent(in)            :: grid

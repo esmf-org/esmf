@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.58 2007/10/30 23:31:30 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.59 2007/11/01 23:49:41 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.58 2007/10/30 23:31:30 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.59 2007/11/01 23:49:41 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -52,11 +52,13 @@ program ESMF_GridCreateUTest
   type(ESMF_Grid) :: grid
   type(ESMF_VM) :: vm
   type(ESMF_DistGrid) :: distgrid,distgrid2
-  integer :: coordDimMap(2,2), rank, lbounds(2), ubounds(2)
+  type(ESMF_Array) :: array
+  integer :: coordDimMap(2,2), rank, lbounds(3), ubounds(3)
   type(ESMF_IndexFlag) :: indexflag
   integer :: dimmap(2), coordRank(2), dimcount
   integer :: coordRank2(3),coordDimMap2(3,3)
   integer :: gridEdgeLWidth(3),gridEdgeUWidth(3),gridAlign(3)
+ 
 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -935,6 +937,54 @@ program ESMF_GridCreateUTest
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test ArrayCreateFromGrid with non-default ungriddedBounds"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+  correct=.true.
+
+  ! create grid
+  grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/2,2/), &
+                              countsPerDeDim2=(/5/),  & 
+                              countsPerDeDim3=(/3,4/),  &
+                              indexflag=ESMF_INDEX_GLOBAL, &
+                              rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Create an array on an unallocated stagger location
+  array=ESMF_ArrayCreateFromGrid(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+          gridToArrayMap=(/1,4,3/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
+          rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! make sure array is valid
+  call ESMF_ArrayValidate(array,rc=localrc)  
+  if (localrc .ne. ESMF_SUCCESS) correct=.false.
+
+  ! Get array info and make sure its correct
+  call ESMF_ArrayGet(array,dimmap=dimmap,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Make sure info is as expected
+  if ((dimmap(1) .ne. 1) .or. (dimmap(2) .ne. 3)) correct=.false.
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! destroy grid
+  call ESMF_ArrayDestroy(array, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
 
 
 
