@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.19 2007/10/30 19:31:55 oehmke Exp $
+// $Id: ESMCI_Grid_F.C,v 1.20 2007/11/02 19:22:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -580,8 +580,8 @@ extern "C" {
      }
 
     // Array undistributed bounds
-    arrayLbounds=array->getLBounds();
-    arrayUbounds=array->getUBounds();
+    arrayLbounds=array->getUndistLBound();
+    arrayUbounds=array->getUndistUBound();
    }
 
    // get grid exclusive bounds

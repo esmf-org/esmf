@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.156 2007/10/29 19:10:38 theurich Exp $
+// $Id: ESMC_Array.C,v 1.157 2007/11/02 19:22:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.156 2007/10/29 19:10:38 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.157 2007/11/02 19:22:04 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -85,8 +85,8 @@ Array::Array(
   int *totalUBoundArg,                    // (in)
   int tensorCountArg,                     // (in)
   int tensorElementCountArg,              // (in)
-  int *lboundsArray,                      // (in)
-  int *uboundsArray,                      // (in)
+  int *undistLBoundArray,                 // (in)
+  int *undistUBoundArray,                 // (in)
   int *staggerLocArray,                   // (in)
   int *vectorDimArray,                    // (in)
   int *dimmapArray,                       // (in)
@@ -145,10 +145,10 @@ Array::Array(
   // tensor dimensions
   tensorCount = tensorCountArg;
   tensorElementCount = tensorElementCountArg;
-  lbounds = new int[tensorCountArg];
-  memcpy(lbounds, lboundsArray, tensorCountArg * sizeof(int));
-  ubounds = new int[tensorCountArg];
-  memcpy(ubounds, uboundsArray, tensorCountArg * sizeof(int));
+  undistLBound = new int[tensorCountArg];
+  memcpy(undistLBound, undistLBoundArray, tensorCountArg * sizeof(int));
+  undistUBound = new int[tensorCountArg];
+  memcpy(undistUBound, undistUBoundArray, tensorCountArg * sizeof(int));
   // staggerLoc and vectorDim
   staggerLoc = new int[tensorElementCount];
   memcpy(staggerLoc, staggerLocArray, tensorElementCount * sizeof(int));
@@ -260,10 +260,10 @@ Array::~Array(){
     delete [] totalLBound;
   if (totalUBound != NULL)
     delete [] totalUBound;
-  if (lbounds != NULL)
-    delete [] lbounds;
-  if (ubounds != NULL)
-    delete [] ubounds;
+  if (undistLBound != NULL)
+    delete [] undistLBound;
+  if (undistUBound != NULL)
+    delete [] undistUBound;
   if (staggerLoc != NULL)
     delete [] staggerLoc;
   if (vectorDim != NULL)
@@ -313,8 +313,8 @@ Array *Array::create(
   ESMC_IndexFlag *indexflagArg,               // (in)
   int *staggerLocArg,                         // (in)
   int *vectorDimArg,                          // (in)
-  InterfaceInt *lboundsArg,                   // (in)
-  InterfaceInt *uboundsArg,                   // (in)
+  InterfaceInt *undistLBoundArg,              // (in)
+  InterfaceInt *undistUBoundArg,              // (in)
   int *rc                                     // (out) return code
   ){
 //
@@ -407,71 +407,71 @@ Array *Array::create(
     if (dimmapArray[i] > 0)
       inverseDimmapArray[dimmapArray[i]-1] = i+1;
   }
-  // check for lbounds and ubounds arguments and that they match dimCount, rank
-  // by default use lbounds and ubounds of LocalArray for localDe 0 for tensor
-  // dims.
-  int lboundsArrayAllocFlag = 0;  // reset
-  int *lboundsArray = NULL; // reset
-  if (lboundsArg != NULL){
-    if (lboundsArg->dimCount != 1){
+  // check for undistLBound and undistUBound arguments and that they match
+  // dimCount, rank. By default use undistLBound and undistUBound of LocalArray
+  // for localDe 0 for tensor dims.
+  int undistLBoundArrayAllocFlag = 0;  // reset
+  int *undistLBoundArray = NULL; // reset
+  if (undistLBoundArg != NULL){
+    if (undistLBoundArg->dimCount != 1){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-        "- lbounds array must be of rank 1", rc);
+        "- undistLBound array must be of rank 1", rc);
       return ESMC_NULL_POINTER;
     }
-    if (lboundsArg->extent[0] != tensorCount){
+    if (undistLBoundArg->extent[0] != tensorCount){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-        "- lbounds, arrayspec, distgrid mismatch", rc);
+        "- undistLBound, arrayspec, distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
-    lboundsArray = lboundsArg->array;
+    undistLBoundArray = undistLBoundArg->array;
   }else if (tensorCount > 0){
-    int *lbounds = new int[rank];
-    localrc = larrayListArg[0]->ESMC_LocalArrayGetLbounds(rank, lbounds);
+    int *undistLBound = new int[rank];
+    localrc = larrayListArg[0]->ESMC_LocalArrayGetLbounds(rank, undistLBound);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
       return ESMC_NULL_POINTER;
-    lboundsArrayAllocFlag = 1;  // set
-    lboundsArray = new int[tensorCount];
+    undistLBoundArrayAllocFlag = 1;  // set
+    undistLBoundArray = new int[tensorCount];
     int tensorIndex = 0;  // reset
     for (int i=0; i<rank; i++)
       if (inverseDimmapArray[i] == 0){
-        lboundsArray[tensorIndex] = lbounds[i];
+        undistLBoundArray[tensorIndex] = undistLBound[i];
         ++tensorIndex;
       }
-    delete [] lbounds;
+    delete [] undistLBound;
   }
-  int uboundsArrayAllocFlag = 0;  // reset
-  int *uboundsArray = NULL; // reset
-  if (uboundsArg != NULL){
-    if (uboundsArg->dimCount != 1){
+  int undistUBoundArrayAllocFlag = 0;  // reset
+  int *undistUBoundArray = NULL; // reset
+  if (undistUBoundArg != NULL){
+    if (undistUBoundArg->dimCount != 1){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-        "- ubounds array must be of rank 1", rc);
+        "- undistUBound array must be of rank 1", rc);
       return ESMC_NULL_POINTER;
     }
-    if (uboundsArg->extent[0] != tensorCount){
+    if (undistUBoundArg->extent[0] != tensorCount){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-        "- ubounds, arrayspec, distgrid mismatch", rc);
+        "- undistUBound, arrayspec, distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
-    uboundsArray = uboundsArg->array;
+    undistUBoundArray = undistUBoundArg->array;
   }else if (tensorCount > 0){
-    int *ubounds = new int[rank];
-    localrc = larrayListArg[0]->ESMC_LocalArrayGetUbounds(rank, ubounds);
+    int *undistUBound = new int[rank];
+    localrc = larrayListArg[0]->ESMC_LocalArrayGetUbounds(rank, undistUBound);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
       return ESMC_NULL_POINTER;
-    uboundsArrayAllocFlag = 1;  // set
-    uboundsArray = new int[tensorCount];
+    undistUBoundArrayAllocFlag = 1;  // set
+    undistUBoundArray = new int[tensorCount];
     int tensorIndex = 0;  // reset
     for (int i=0; i<rank; i++)
       if (inverseDimmapArray[i] == 0){
-        uboundsArray[tensorIndex] = ubounds[i];
+        undistUBoundArray[tensorIndex] = undistUBound[i];
         ++tensorIndex;
       }
-    delete [] ubounds;
+    delete [] undistUBound;
   }
   // tensorElementCount
   int tensorElementCount = 1;  // prime tensorElementCount
   for (int i=0; i<tensorCount; i++)
-    tensorElementCount *= (uboundsArray[i] - lboundsArray[i] + 1);
+    tensorElementCount *= (undistUBoundArray[i] - undistLBoundArray[i] + 1);
   // prepare temporary staggerLoc and vectorDim arrays
   int *staggerLoc = new int[tensorElementCount];
   if (staggerLocArg)
@@ -746,8 +746,8 @@ Array *Array::create(
   // allocate LocalArray list that holds all PET-local DEs and adjust elements
   ESMC_LocalArray **larrayList = new ESMC_LocalArray*[localDeCount];
   int *temp_counts = new int[rank];
-  int *temp_lbounds = new int[rank];
-  int *temp_ubounds = new int[rank];
+  int *temp_undistLBound = new int[rank];
+  int *temp_undistUBound = new int[rank];
   for (int i=0; i<localDeCount; i++){
     larrayListArg[i]->ESMC_LocalArrayGetCounts(rank, temp_counts);
     int jjj=0;  // reset
@@ -764,21 +764,23 @@ Array *Array::create(
         // move the total bounds according to input info
         if (totalLBoundFlag){
           // totalLBound fixed
-          temp_lbounds[jj] = totalLBound[i*dimCount+j];
+          temp_undistLBound[jj] = totalLBound[i*dimCount+j];
           if (totalUBoundFlag){
             // totalUBound fixed
             // this case allows total allocation to be larger than total region!
-            temp_ubounds[jj] = totalUBound[i*dimCount+j];
+            temp_undistUBound[jj] = totalUBound[i*dimCount+j];
           }else{
             // totalUBound not fixed
-            temp_ubounds[jj] = temp_counts[jj] + totalLBound[i*dimCount+j] - 1;
+            temp_undistUBound[jj] = temp_counts[jj] + totalLBound[i*dimCount+j]
+            - 1;
           }
         }else{
           // totalLBound not fixed
           if (totalUBoundFlag){
             // totalUBound fixed
-            temp_ubounds[jj] = totalUBound[i*dimCount+j];
-            temp_lbounds[jj] = totalUBound[i*dimCount+j] - temp_counts[jj] + 1;
+            temp_undistUBound[jj] = totalUBound[i*dimCount+j];
+            temp_undistLBound[jj] = totalUBound[i*dimCount+j] - temp_counts[jj]
+              + 1;
           }else{
             // totalLBound and totalUBound not fixed
             // -> shift computational/excl. region into center of total region
@@ -788,45 +790,45 @@ Array *Array::create(
             int uBound = computationalUBound[i*dimCount+j];
             if (exclusiveUBound[i*dimCount+j]>computationalUBound[i*dimCount+j])
               uBound = exclusiveUBound[i*dimCount+j];
-            temp_lbounds[jj] = lBound
+            temp_undistLBound[jj] = lBound
                - (0.5 * (temp_counts[jj] - 1 + lBound - uBound));
-            temp_ubounds[jj] = temp_counts[jj] + temp_lbounds[jj] - 1;
+            temp_undistUBound[jj] = temp_counts[jj] + temp_undistLBound[jj] - 1;
           }
         }
-        totalLBound[i*dimCount+j] = temp_lbounds[jj]; // write back
-        totalUBound[i*dimCount+j] = temp_ubounds[jj]; // write back
+        totalLBound[i*dimCount+j] = temp_undistLBound[jj]; // write back
+        totalUBound[i*dimCount+j] = temp_undistUBound[jj]; // write back
       }else{
         // non-distributed dimension
         if (temp_counts[jj] < 
-          uboundsArray[jjj] - lboundsArray[jjj] + 1){
+          undistUBoundArray[jjj] - undistLBoundArray[jjj] + 1){
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
             "- LocalArray does not accommodate requested element count", rc);
           return ESMC_NULL_POINTER;
         }
-        temp_lbounds[jj] = lboundsArray[jjj];
-        temp_ubounds[jj] = uboundsArray[jjj];
+        temp_undistLBound[jj] = undistLBoundArray[jjj];
+        temp_undistUBound[jj] = undistUBoundArray[jjj];
         ++jjj;
       }
     }
-    // Adjust LocalArray object for specific lbounds and ubounds.
+    // Adjust LocalArray object for specific undistLBound and undistUBound.
     // This will allocate memory for a _new_ LocalArray object for each element,
     // however, the original memory used for data storage will be referenced!
     larrayList[i] = larrayListArg[i]->
-      ESMC_LocalArrayAdjust(temp_lbounds, temp_ubounds, &localrc);
+      ESMC_LocalArrayAdjust(temp_undistLBound, temp_undistUBound, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }
   delete [] temp_counts;
-  delete [] temp_lbounds;
-  delete [] temp_ubounds;
+  delete [] temp_undistLBound;
+  delete [] temp_undistUBound;
   
   // call class constructor
   try{
     array = new Array(typekind, rank, larrayList, distgrid, exclusiveLBound,
       exclusiveUBound, computationalLBound, computationalUBound,
-      totalLBound, totalUBound, tensorCount, tensorElementCount, lboundsArray,
-      uboundsArray, staggerLoc, vectorDim, dimmapArray, inverseDimmapArray,
-      indexflag, &localrc);
+      totalLBound, totalUBound, tensorCount, tensorElementCount,
+      undistLBoundArray, undistUBoundArray, staggerLoc, vectorDim,
+      dimmapArray, inverseDimmapArray, indexflag, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }catch(...){
@@ -847,8 +849,8 @@ Array *Array::create(
   delete [] inverseDimmapArray;
   delete [] staggerLoc;
   delete [] vectorDim;
-  if (lboundsArrayAllocFlag) delete [] lboundsArray;
-  if (uboundsArrayAllocFlag) delete [] uboundsArray;
+  if (undistLBoundArrayAllocFlag) delete [] undistLBoundArray;
+  if (undistUBoundArrayAllocFlag) delete [] undistUBoundArray;
   
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -889,8 +891,8 @@ Array *Array::create(
   ESMC_IndexFlag *indexflagArg,               // (in)
   int *staggerLocArg,                         // (in)
   int *vectorDimArg,                          // (in)
-  InterfaceInt *lboundsArg,                   // (in)
-  InterfaceInt *uboundsArg,                   // (in)
+  InterfaceInt *undistLBoundArg,              // (in)
+  InterfaceInt *undistUBoundArg,              // (in)
   int *rc                                     // (out) return code
   ){
 //
@@ -965,49 +967,52 @@ Array *Array::create(
     if (dimmapArray[i] > 0)
       inverseDimmapArray[dimmapArray[i]-1] = i+1;
   }
-  // check for lbounds and ubounds arguments and that they match dimCount, rank
-  if (tensorCount > 0 && lboundsArg == NULL){
+  // check for undistLBound and undistUBound arguments and that they match
+  // dimCount, rank
+  if (tensorCount > 0 && undistLBoundArg == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- Valid lbounds argument required to create Array with tensor dims", rc);
+      "- Valid undistLBound argument required to create Array with tensor dims",
+      rc);
     return ESMC_NULL_POINTER;
   }
-  if (tensorCount > 0 && uboundsArg == NULL){
+  if (tensorCount > 0 && undistUBoundArg == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- Valid ubounds argument required to create Array with tensor dims", rc);
+      "- Valid undistUBound argument required to create Array with tensor dims",
+      rc);
     return ESMC_NULL_POINTER;
   }
-  int *lboundsArray = NULL; // reset
-  if (lboundsArg != NULL){
-    if (lboundsArg->dimCount != 1){
+  int *undistLBoundArray = NULL; // reset
+  if (undistLBoundArg != NULL){
+    if (undistLBoundArg->dimCount != 1){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-        "- lbounds array must be of rank 1", rc);
+        "- undistLBound array must be of rank 1", rc);
       return ESMC_NULL_POINTER;
     }
-    if (lboundsArg->extent[0] != tensorCount){
+    if (undistLBoundArg->extent[0] != tensorCount){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-        "- lbounds, arrayspec, distgrid mismatch", rc);
+        "- undistLBound, arrayspec, distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
-    lboundsArray = lboundsArg->array;
+    undistLBoundArray = undistLBoundArg->array;
   }
-  int *uboundsArray = NULL; // reset
-  if (uboundsArg != NULL){
-    if (uboundsArg->dimCount != 1){
+  int *undistUBoundArray = NULL; // reset
+  if (undistUBoundArg != NULL){
+    if (undistUBoundArg->dimCount != 1){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-        "- ubounds array must be of rank 1", rc);
+        "- undistUBound array must be of rank 1", rc);
       return ESMC_NULL_POINTER;
     }
-    if (uboundsArg->extent[0] != tensorCount){
+    if (undistUBoundArg->extent[0] != tensorCount){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-        "- ubounds, arrayspec, distgrid mismatch", rc);
+        "- undistUBound, arrayspec, distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
-    uboundsArray = uboundsArg->array;
+    undistUBoundArray = undistUBoundArg->array;
   }
   // tensorElementCount
   int tensorElementCount = 1;  // prime tensorElementCount
   for (int i=0; i<tensorCount; i++)
-    tensorElementCount *= (uboundsArray[i] - lboundsArray[i] + 1);
+    tensorElementCount *= (undistUBoundArray[i] - undistLBoundArray[i] + 1);
   // prepare temporary staggerLoc and vectorDim arrays
   int *staggerLoc = new int[tensorElementCount];
   if (staggerLocArg)
@@ -1272,8 +1277,8 @@ Array *Array::create(
   // allocate LocalArray list that holds all PET-local DEs
   ESMC_LocalArray **larrayList = new ESMC_LocalArray*[localDeCount];
   int *temp_counts = new int[rank];
-  int *temp_lbounds = new int[rank];
-  int *temp_ubounds = new int[rank];
+  int *temp_undistLBound = new int[rank];
+  int *temp_undistUBound = new int[rank];
   for (int i=0; i<localDeCount; i++){
     int jjj=0;  // reset
     for (int jj=0; jj<rank; jj++){
@@ -1282,34 +1287,34 @@ Array *Array::create(
         int j = inverseDimmapArray[jj] - 1; // shift to basis 0
         temp_counts[jj] =
           totalUBound[i*dimCount+j] - totalLBound[i*dimCount+j] + 1;
-        temp_lbounds[jj] = totalLBound[i*dimCount+j];
-        temp_ubounds[jj] = totalUBound[i*dimCount+j];
+        temp_undistLBound[jj] = totalLBound[i*dimCount+j];
+        temp_undistUBound[jj] = totalUBound[i*dimCount+j];
       }else{
         // non-distributed dimension
-        temp_counts[jj] = uboundsArray[jjj] - lboundsArray[jjj] + 1;
-        temp_lbounds[jj] = lboundsArray[jjj];
-        temp_ubounds[jj] = uboundsArray[jjj];
+        temp_counts[jj] = undistUBoundArray[jjj] - undistLBoundArray[jjj] + 1;
+        temp_undistLBound[jj] = undistLBoundArray[jjj];
+        temp_undistUBound[jj] = undistUBoundArray[jjj];
         ++jjj;
       }
     }
-    // allocate LocalArray object with specific lbounds and ubounds
+    // allocate LocalArray object with specific undistLBound and undistUBound
     larrayList[i] = ESMC_LocalArray::ESMC_LocalArrayCreate(rank, typekind,
-      temp_counts, temp_lbounds, temp_ubounds, NULL, ESMC_DATA_REF, NULL,
-      &localrc);
+      temp_counts, temp_undistLBound, temp_undistUBound, NULL, ESMC_DATA_REF,
+      NULL, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }
   delete [] temp_counts;
-  delete [] temp_lbounds;
-  delete [] temp_ubounds;
+  delete [] temp_undistLBound;
+  delete [] temp_undistUBound;
   
   // call class constructor
   try{
     array = new Array(typekind, rank, larrayList, distgrid, exclusiveLBound,
       exclusiveUBound, computationalLBound, computationalUBound,
-      totalLBound, totalUBound, tensorCount, tensorElementCount, lboundsArray,
-      uboundsArray, staggerLoc, vectorDim, dimmapArray, inverseDimmapArray,
-      indexflag, &localrc);
+      totalLBound, totalUBound, tensorCount, tensorElementCount,
+      undistLBoundArray, undistUBoundArray, staggerLoc, vectorDim, dimmapArray,
+      inverseDimmapArray, indexflag, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }catch(...){
@@ -1444,7 +1449,7 @@ int Array::getLinearIndexExclusive(
     }else{
       // tensor dimension
       // first time multiply with zero intentionally:
-      linIndex *= ubounds[tensorIndex] - lbounds[tensorIndex] + 1;
+      linIndex *= undistUBound[tensorIndex] - undistLBound[tensorIndex] + 1;
       linIndex += index[jj];
       --tensorIndex;
     }
@@ -1521,7 +1526,8 @@ SeqIndex Array::getSequenceIndexExclusive(
     if (j==0){
       // tensor dimension
       // first time multiply with zero intentionally:
-      tensorSeqIndex *= ubounds[tensorIndex] - lbounds[tensorIndex] + 1;
+      tensorSeqIndex *= undistUBound[tensorIndex] - undistLBound[tensorIndex]
+      + 1;
       tensorSeqIndex += index[jj];
       --tensorIndex;
     }
@@ -1752,8 +1758,8 @@ int Array::print()const{
             computationalUBound[i*dimCount+j], totalUBound[i*dimCount+j]);
         }else{
           // non-distributed dimension
-          printf("dim %d: lbounds[%d]=%d            ubounds[%d]=%d\n",
-            jj+1, jjj, lbounds[jjj], jjj, ubounds[jjj]);
+          printf("dim %d: undistLBound[%d]=%d            undistUBound[%d]=%d\n",
+            jj+1, jjj, undistLBound[jjj], jjj, undistUBound[jjj]);
           ++jjj;
         }
       }
@@ -1870,8 +1876,8 @@ int Array::serialize(
   ip = (int *)ifp;
   *ip++ = tensorCount;
   for (int i=0; i<tensorCount; i++){
-    *ip++ = lbounds[i];
-    *ip++ = ubounds[i];
+    *ip++ = undistLBound[i];
+    *ip++ = undistUBound[i];
     *ip++ = staggerLoc[i];
     *ip++ = vectorDim[i];
   }
@@ -1942,13 +1948,13 @@ int Array::deserialize(
   indexflag = *ifp++;
   ip = (int *)ifp;
   tensorCount = *ip++;
-  lbounds = new int[tensorCount];
-  ubounds = new int[tensorCount];
+  undistLBound = new int[tensorCount];
+  undistUBound = new int[tensorCount];
   staggerLoc = new int[tensorCount];
   vectorDim = new int[tensorCount];
   for (int i=0; i<tensorCount; i++){
-    lbounds[i] = *ip++;
-    ubounds[i] = *ip++;
+    undistLBound[i] = *ip++;
+    undistUBound[i] = *ip++;
     staggerLoc[i] = *ip++;
     vectorDim[i] = *ip++;
   }
@@ -2080,7 +2086,8 @@ int Array::gather(
         }
       }else{
         // tensor dimension
-        if (counts[i] != ubounds[tensorIndex] - lbounds[tensorIndex] + 1){
+        if (counts[i] != undistUBound[tensorIndex] - undistLBound[tensorIndex]
+          + 1){
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
             "- Extent mismatch between array argument and Array object", &rc);
           return rc;
@@ -2173,9 +2180,10 @@ int Array::gather(
         }else{
           // tensor dimension
           iiSrt[jj] = 0;
-          iiEnd[jj] = ubounds[tensorIndex] - lbounds[tensorIndex] + 1;
+          iiEnd[jj] = undistUBound[tensorIndex] - undistLBound[tensorIndex] + 1;
           skipWidth[jj] = totalWidthProd;
-          totalWidthProd *= ubounds[tensorIndex] - lbounds[tensorIndex] + 1;
+          totalWidthProd *=
+            undistUBound[tensorIndex] - undistLBound[tensorIndex] + 1;
           ++tensorIndex;
         }
         ii[jj] = iiSrt[jj];
@@ -2283,7 +2291,8 @@ int Array::gather(
             iiEnd[jj] = indexCountPDimPDe[de*dimCount+j];
           }else{
             // tensor dimension
-            iiEnd[jj] = ubounds[tensorIndex] - lbounds[tensorIndex] + 1;
+            iiEnd[jj] = undistUBound[tensorIndex] - undistLBound[tensorIndex]
+              + 1;
             ++tensorIndex;
           }
         }
@@ -2494,7 +2503,8 @@ int Array::scatter(
         }
       }else{
         // tensor dimension
-        if (counts[i] != ubounds[tensorIndex] - lbounds[tensorIndex] + 1){
+        if (counts[i] != undistUBound[tensorIndex] - undistLBound[tensorIndex]
+          + 1){
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
             "- Extent mismatch between array argument and Array object", &rc);
           return rc;
@@ -2566,7 +2576,8 @@ int Array::scatter(
             iiEnd[jj] = indexCountPDimPDe[de*dimCount+j];
           }else{
             // tensor dimension
-            iiEnd[jj] = ubounds[tensorIndex] - lbounds[tensorIndex] + 1;
+            iiEnd[jj] = undistUBound[tensorIndex] - undistLBound[tensorIndex]
+              + 1;
             ++tensorIndex;
           }
         }
@@ -2742,9 +2753,10 @@ int Array::scatter(
         }else{
           // tensor dimension
           iiSrt[jj] = 0;
-          iiEnd[jj] = ubounds[tensorIndex] - lbounds[tensorIndex] + 1;
+          iiEnd[jj] = undistUBound[tensorIndex] - undistLBound[tensorIndex] + 1;
           skipWidth[jj] = totalWidthProd;
-          totalWidthProd *= ubounds[tensorIndex] - lbounds[tensorIndex] + 1;
+          totalWidthProd *=
+            undistUBound[tensorIndex] - undistLBound[tensorIndex] + 1;
           ++tensorIndex;
         }
         ii[jj] = iiSrt[jj];
@@ -3408,8 +3420,8 @@ int Array::sparseMatMulStore(
             - srcArray->exclusiveLBound[joff+j] + 1;
         }else{
           // tensor dimension
-          iiEnd[jj] = srcArray->ubounds[tensorIndex]
-            - srcArray->lbounds[tensorIndex] + 1;
+          iiEnd[jj] = srcArray->undistUBound[tensorIndex]
+            - srcArray->undistLBound[tensorIndex] + 1;
           ++tensorIndex;
         }
       }
@@ -3498,8 +3510,8 @@ int Array::sparseMatMulStore(
             - dstArray->exclusiveLBound[joff+j] + 1;
         }else{
           // tensor dimension
-          iiEnd[jj] = dstArray->ubounds[tensorIndex]
-            - dstArray->lbounds[tensorIndex] + 1;
+          iiEnd[jj] = dstArray->undistUBound[tensorIndex]
+            - dstArray->undistLBound[tensorIndex] + 1;
           ++tensorIndex;
         }
       }

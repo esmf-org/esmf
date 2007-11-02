@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.31 2007/10/29 19:10:36 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.32 2007/11/02 19:22:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -1842,7 +1842,7 @@ program ESMF_ArrayEx
 !BOC
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     totalLWidth=(/0,1/), totalUWidth=(/0,1/), staggerLoc=1, &
-    lbounds=(/1/), ubounds=(/2/), rc=rc)
+    undistLBound=(/1/), undistUBound=(/2/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
     
@@ -1931,7 +1931,7 @@ program ESMF_ArrayEx
   call ESMF_ArrayDestroy(array, rc=rc)
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     dimmap=(/3, 1/), totalLWidth=(/0,1/), totalUWidth=(/0,1/), &
-    lbounds=(/1/), ubounds=(/2/), rc=rc)
+    undistLBound=(/1/), undistUBound=(/2/), rc=rc)
   call ESMF_ArraySet(array, tensorIndex=(/1/), staggerLoc=1, rc=rc)
   call ESMF_ArraySet(array, tensorIndex=(/2/), staggerLoc=2, rc=rc)
 !EOC
@@ -2121,7 +2121,7 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-    dimmap=(/0,1/), lbounds=(/11/), ubounds=(/14/), rc=rc)
+    dimmap=(/0,1/), undistLBound=(/11/), undistUBound=(/14/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
 !  call ESMF_ArrayPrint(array, rc=rc)
@@ -2138,7 +2138,7 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-    dimmap=(/0,0/), lbounds=(/11,21/), ubounds=(/14,22/), rc=rc)
+    dimmap=(/0,0/), undistLBound=(/11,21/), undistUBound=(/14,22/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
 !BOE

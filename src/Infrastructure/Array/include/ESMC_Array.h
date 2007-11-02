@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.81 2007/10/29 19:10:36 theurich Exp $
+// $Id: ESMC_Array.h,v 1.82 2007/11/02 19:22:03 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -74,8 +74,8 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     int *totalUBound;                 // [dimCount*localDeCount]
     int tensorCount;                  // number of tensor dimensions
     int tensorElementCount;           // number of tensor elements per excl. ele
-    int *lbounds;                     // [tensorCount]
-    int *ubounds;                     // [tensorCount]
+    int *undistLBound;                // [tensorCount]
+    int *undistUBound;                // [tensorCount]
     int *staggerLoc;                  // [tensorElementCount]
     int *vectorDim;                   // [tensorElementCount]
     int *dimmap;                      // [dimCount]
@@ -107,8 +107,8 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
       totalLBound = NULL;
       totalUBound = NULL;
       tensorCount = 0;
-      lbounds = NULL;
-      ubounds = NULL;
+      undistLBound = NULL;
+      undistUBound = NULL;
       staggerLoc = NULL;
       vectorDim = NULL;
       dimmap = NULL;
@@ -122,9 +122,9 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
       DistGrid *distgrid, int *exclusiveLBound, int *exclusiveUBound, 
       int *computationalLBound, int *computationalUBound, int *totalLBound,
       int *totalUBound, int tensorCount, int tensorElementCount,
-      int *lboundsArray, int *uboundsArray, int *staggerLoc, int *vectorDim,
-      int *dimmapArray, int *inverseDimmapArray, ESMC_IndexFlag indexflagArg,
-      int *rc);
+      int *undistLBoundArray, int *undistUBoundArray, int *staggerLoc,
+      int *vectorDim, int *dimmapArray, int *inverseDimmapArray,
+      ESMC_IndexFlag indexflagArg, int *rc);
   public:
     ~Array();
     // create() and destroy()
@@ -136,15 +136,15 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
       InterfaceInt *computationalUWidthArg,
       InterfaceInt *totalLWidthArg, InterfaceInt *totalUWidthArg,
       ESMC_IndexFlag *indexflag, int *staggerLoc, int *vectorDim,
-      InterfaceInt *lboundsArg, InterfaceInt *uboundsArg, int *rc);
+      InterfaceInt *undistLBoundArg, InterfaceInt *undistUBoundArg, int *rc);
     static Array *create(ESMC_ArraySpec *arrayspec, DistGrid *distgrid,
       InterfaceInt *dimmap, InterfaceInt *computationalEdgeLWidthArg,
       InterfaceInt *computationalEdgeUWidthArg,
       InterfaceInt *computationalLWidthArg, 
       InterfaceInt *computationalUWidthArg, InterfaceInt *totalLWidthArg,
       InterfaceInt *totalUWidthArg, ESMC_IndexFlag *indexflag,
-      int *staggerLoc, int *vectorDim, InterfaceInt *lboundsArg,
-      InterfaceInt *uboundsArg, int *rc);
+      int *staggerLoc, int *vectorDim, InterfaceInt *undistLBoundArg,
+      InterfaceInt *undistUBoundArg, int *rc);
     static int destroy(Array **array);
     // get() and set()
     ESMC_TypeKind getTypekind()             const {return typekind;}
@@ -158,8 +158,8 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     const int *getTotalLBound()             const {return totalLBound;}
     const int *getTotalUBound()             const {return totalUBound;}
     int getTensorCount()                    const {return tensorCount;}
-    const int *getLBounds()                 const {return lbounds;}
-    const int *getUBounds()                 const {return ubounds;}
+    const int *getUndistLBound()            const {return undistLBound;}
+    const int *getUndistUBound()            const {return undistUBound;}
     const int *getStaggerLoc()              const {return staggerLoc;}
     const int *getVectorDim()               const {return vectorDim;}
     const int *getDeElementCount()          const {return deElementCount;}

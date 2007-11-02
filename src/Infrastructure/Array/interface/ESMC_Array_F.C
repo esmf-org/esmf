@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.71 2007/10/29 19:10:37 theurich Exp $
+// $Id: ESMC_Array_F.C,v 1.72 2007/11/02 19:22:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -54,7 +54,8 @@ extern "C" {
     ESMCI::InterfaceInt **computationalUWidthArg, 
     ESMCI::InterfaceInt **totalLWidthArg, ESMCI::InterfaceInt **totalUWidthArg,
     ESMC_IndexFlag *indexflag, int *staggerLoc, int *vectorDim, 
-    ESMCI::InterfaceInt **lboundsArg, ESMCI::InterfaceInt **uboundsArg,
+    ESMCI::InterfaceInt **undistLBoundArg,
+    ESMCI::InterfaceInt **undistUBoundArg,
     char *name, int *len_name, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraycreatealldecomp()"
@@ -67,7 +68,7 @@ extern "C" {
       *computationalLWidthArg, *computationalUWidthArg, *totalLWidthArg,
       *totalUWidthArg, ESMC_NOT_PRESENT_FILTER(indexflag),
       ESMC_NOT_PRESENT_FILTER(staggerLoc), ESMC_NOT_PRESENT_FILTER(vectorDim),
-      *lboundsArg, *uboundsArg, &localrc);
+      *undistLBoundArg, *undistUBoundArg, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // set the name in the Array object
@@ -91,7 +92,8 @@ extern "C" {
     ESMCI::InterfaceInt **computationalUWidthArg, 
     ESMCI::InterfaceInt **totalLWidthArg, ESMCI::InterfaceInt **totalUWidthArg,
     ESMC_IndexFlag *indexflag, int *staggerLoc, int *vectorDim, 
-    ESMCI::InterfaceInt **lboundsArg, ESMCI::InterfaceInt **uboundsArg,
+    ESMCI::InterfaceInt **undistLBoundArg,
+    ESMCI::InterfaceInt **undistUBoundArg,
     char *name, int *len_name, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraycreatealldecomp()"
@@ -104,7 +106,7 @@ extern "C" {
       *computationalLWidthArg, *computationalUWidthArg, *totalLWidthArg,
       *totalUWidthArg, ESMC_NOT_PRESENT_FILTER(indexflag),
       ESMC_NOT_PRESENT_FILTER(staggerLoc), ESMC_NOT_PRESENT_FILTER(vectorDim),
-      *lboundsArg, *uboundsArg, &localrc);
+      *undistLBoundArg, *undistUBoundArg, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // set the name in the Array object
@@ -705,18 +707,18 @@ extern "C" {
         "- first dim of tensorIndexArg array must be of size tensorCount", rc);
       return;
     }
-    const int *lbounds = (*array)->getLBounds();
-    const int *ubounds = (*array)->getUBounds();
+    const int *undistLBound = (*array)->getUndistLBound();
+    const int *undistUBound = (*array)->getUndistUBound();
     int tensorIndex = 0;
     for (int i=tensorCount-1; i>=0; i--){
-      tensorIndex *= ubounds[i] - lbounds[i] + 1;
-      if ((*tensorIndexArg)->array[i] < lbounds[i] ||
-        (*tensorIndexArg)->array[i] > ubounds[i]){
+      tensorIndex *= undistUBound[i] - undistLBound[i] + 1;
+      if ((*tensorIndexArg)->array[i] < undistLBound[i] ||
+        (*tensorIndexArg)->array[i] > undistUBound[i]){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
           "- tensorIndexArg entry is out of range", rc);
         return;
       }
-      tensorIndex += (*tensorIndexArg)->array[i] - lbounds[i];
+      tensorIndex += (*tensorIndexArg)->array[i] - undistLBound[i];
     }
     
     // set staggerLoc

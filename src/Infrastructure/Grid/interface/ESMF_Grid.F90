@@ -149,7 +149,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.39 2007/11/01 23:47:03 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.40 2007/11/02 19:22:07 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -947,7 +947,8 @@ end interface
               computationalEdgeLWidth=compELWidth, computationalEdgeUWidth=compEUWidth, &
               totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
               indexflag=indexflag, staggerLoc=localStaggerLoc%staggerloc, &
-              lbounds=arrayLBound, ubounds=arrayUBound, name=name, rc=localrc)
+              undistLBound=arrayLBound, undistUBound=arrayUBound, name=name, &
+              rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 

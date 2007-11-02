@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.19 2007/10/26 21:56:59 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.20 2007/11/02 19:22:04 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -106,7 +106,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.19 2007/10/26 21:56:59 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.20 2007/11/02 19:22:04 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -160,7 +160,8 @@ contains
 ! function ESMF_ArrayCreateAssmdShape<rank><type><kind>(farray, & @\
 !   distgrid, dimmap, computationalEdgeLWidth, computationalEdgeUWidth, & @\
 !   computationalLWidth, computationalUWidth, totalLWidth, & @\
-!   totalUWidth, indexflag, staggerLoc, vectorDim, lbounds, ubounds, name, rc) @\
+!   totalUWidth, indexflag, staggerLoc, vectorDim, & @\
+!   undistLBound, undistUBound, name, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   <type> (ESMF_KIND_<kind>),dimension(<rank>),intent(in),target :: farray @\
@@ -175,8 +176,8 @@ contains
 !   type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag @\
 !   integer,               intent(in),   optional  :: staggerLoc @\
 !   integer,               intent(in),   optional  :: vectorDim @\
-!   integer,               intent(in),   optional  :: lbounds(:) @\
-!   integer,               intent(in),   optional  :: ubounds(:) @\
+!   integer,               intent(in),   optional  :: undistLBound(:) @\
+!   integer,               intent(in),   optional  :: undistUBound(:) @\
 !   character (len=*),     intent(in),   optional  :: name @\
 !   integer,               intent(out),  optional  :: rc @\
 ! @\
@@ -190,7 +191,8 @@ contains
 ! The local arrays provided must be dimensioned according to the DE-local @\
 ! total region. Bounds of the exclusive regions are set as specified in the @\
 ! distgrid argument. Bounds for array dimensions that are not distributed can @\
-! be chosen freely using the {\tt lbounds} and {\tt ubounds} arguments. @\
+! be chosen freely using the {\tt undistLBound} and {\tt undistUBound} @\
+! arguments. @\
 ! @\
 ! This interface requires a 1 DE per PET decomposition. The Array object will @\
 ! not be created and an error will be returned if this condition is not met. @\
@@ -285,10 +287,10 @@ contains
 !      along which the vector component is aligned. This information is used to @\
 !      correctly apply the {\tt signChangeVector} defined in the connection @\
 !      transformations of the corresponding DistGrid during halo operations. @\
-! \item[{[lbounds]}] @\
+! \item[{[undistLBound]}] @\
 !      Lower bounds for the array dimensions that are not distributed. @\
 !      By default lbound is 1. @\
-! \item[{[ubounds]}] @\
+! \item[{[undistUBound]}] @\
 !      Upper bounds for the array dimensions that are not distributed. @\
 !      By default ubound is equal to the extent of the corresponding @\
 !      dimension in {\tt farray}. @\
@@ -308,7 +310,8 @@ contains
   function ESMF_ArrayCreateAssmdShape##mrank##D##mtypekind(farray, & @\
     distgrid, dimmap, computationalEdgeLWidth, computationalEdgeUWidth, & @\
     computationalLWidth, computationalUWidth, totalLWidth, & @\
-    totalUWidth, indexflag, staggerLoc, vectorDim, lbounds, ubounds, name, rc) @\
+    totalUWidth, indexflag, staggerLoc, vectorDim, & @\
+    undistLBound, undistUBound, name, rc) @\
 @\
     type(ESMF_Array) :: ESMF_ArrayCreateAssmdShape##mrank##D##mtypekind @\
 @\
@@ -324,8 +327,8 @@ contains
     type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag @\
     integer,               intent(in),   optional  :: staggerLoc @\
     integer,               intent(in),   optional  :: vectorDim @\
-    integer,               intent(in),   optional  :: lbounds(:) @\
-    integer,               intent(in),   optional  :: ubounds(:) @\
+    integer,               intent(in),   optional  :: undistLBound(:) @\
+    integer,               intent(in),   optional  :: undistUBound(:) @\
     character (len=*),     intent(in),   optional  :: name @\
     integer,               intent(out),  optional  :: rc @\
 @\
@@ -356,7 +359,7 @@ contains
     array = ESMF_ArrayCreate(larrayList, distgrid, dimmap, & @\
       computationalEdgeLWidth, computationalEdgeUWidth, computationalLWidth, & @\
       computationalUWidth, totalLWidth, totalUWidth, indexflag, staggerLoc, & @\
-      vectorDim, lbounds, ubounds, name, status) @\
+      vectorDim, undistLBound, undistUBound, name, status) @\
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
@@ -392,7 +395,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
   function ESMF_ArrayCreateLocalArray(larrayList, distgrid, dimmap, &
     computationalEdgeLWidth, computationalEdgeUWidth, computationalLWidth, &
     computationalUWidth, totalLWidth, totalUWidth, &
-    indexflag, staggerLoc, vectorDim, lbounds, ubounds, name, rc)
+    indexflag, staggerLoc, vectorDim, undistLBound, undistUBound, name, rc)
 !
 ! !ARGUMENTS:
        type(ESMF_LocalArray), intent(in)              :: larrayList(:)
@@ -407,8 +410,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: staggerLoc
        integer,               intent(in),   optional  :: vectorDim
-       integer,               intent(in),   optional  :: lbounds(:)
-       integer,               intent(in),   optional  :: ubounds(:)
+       integer,               intent(in),   optional  :: undistLBound(:)
+       integer,               intent(in),   optional  :: undistUBound(:)
        character (len=*),     intent(in),   optional  :: name
        integer,               intent(out),  optional  :: rc
 !     
@@ -422,7 +425,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! object. The local arrays provided must be dimensioned according to the 
 ! DE-local total region. Bounds of the exclusive regions are set as specified 
 ! in the distgrid argument. Bounds for array dimensions that are not distributed
-! can be chosen freely using the {\tt lbounds} and {\tt ubounds} arguments. @\
+! can be chosen freely using the {\tt undistLBound} and {\tt undistUBound} @\
+! arguments. @\
 !
 ! This interface is able to handle multiple DEs per PET.
 !
@@ -516,10 +520,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      along which the vector component is aligned. This information is used to
 !      correctly apply the {\tt signChangeVector} defined in the connection
 !      transformations of the corresponding DistGrid during halo operations.
-! \item[{[lbounds]}]
+! \item[{[undistLBound]}]
 !      Lower bounds for the array dimensions that are not distributed.
 !      By default lbound is 1.
-! \item[{[ubounds]}]
+! \item[{[undistUBound]}]
 !      Upper bounds for the array dimensions that are not distributed.
 !      By default ubound is equal to the extent of the corresponding
 !      dimension in {\tt larrayList}.
@@ -542,8 +546,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     type(ESMF_InterfaceInt) :: computationalUWidthArg ! helper variable
     type(ESMF_InterfaceInt) :: totalLWidthArg         ! helper variable
     type(ESMF_InterfaceInt) :: totalUWidthArg         ! helper variable
-    type(ESMF_InterfaceInt) :: lboundsArg             ! helper variable
-    type(ESMF_InterfaceInt) :: uboundsArg             ! helper variable
+    type(ESMF_InterfaceInt) :: undistLBoundArg        ! helper variable
+    type(ESMF_InterfaceInt) :: undistUBoundArg        ! helper variable
     type(ESMF_Pointer), allocatable :: larrayPointerList(:) ! helper variable
     integer                 :: len_name               ! helper variable
 
@@ -596,10 +600,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     totalUWidthArg = ESMF_InterfaceIntCreate(totalUWidth, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    lboundsArg = ESMF_InterfaceIntCreate(lbounds, rc=status)
+    undistLBoundArg = ESMF_InterfaceIntCreate(undistLBound, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    uboundsArg = ESMF_InterfaceIntCreate(ubounds, rc=status)
+    undistUBoundArg = ESMF_InterfaceIntCreate(undistUBound, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -615,7 +619,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
         computationalEdgeUWidthArg, computationalLWidthArg, &
         computationalUWidthArg, totalLWidthArg, totalUWidthArg, &
         indexflag, staggerLoc, vectorDim, &
-        lboundsArg, uboundsArg, name, len_name, status)
+        undistLBoundArg, undistUBoundArg, name, len_name, status)
     else
       len_name = 0
       call c_ESMC_ArrayCreateLocalArray(array, larrayPointerList, larrayCount, &
@@ -623,7 +627,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
         computationalEdgeUWidthArg, computationalLWidthArg, &
         computationalUWidthArg, totalLWidthArg, totalUWidthArg, &
         indexflag, staggerLoc, vectorDim, &
-        lboundsArg, uboundsArg, "", len_name, status)
+        undistLBoundArg, undistUBoundArg, "", len_name, status)
     endif    
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -651,10 +655,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     call ESMF_InterfaceIntDestroy(totalUWidthArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(lboundsArg, rc=status)
+    call ESMF_InterfaceIntDestroy(undistLBoundArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(uboundsArg, rc=status)
+    call ESMF_InterfaceIntDestroy(undistUBoundArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -682,7 +686,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
   function ESMF_ArrayCreateAllocate(arrayspec, distgrid, dimmap, &
     computationalEdgeLWidth, computationalEdgeUWidth, &
     computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
-    indexflag, staggerLoc, vectorDim, lbounds, ubounds, name, rc)
+    indexflag, staggerLoc, vectorDim, undistLBound, undistUBound, name, rc)
 !
 ! !ARGUMENTS:
        type(ESMF_ArraySpec),  intent(inout)           :: arrayspec
@@ -697,8 +701,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: staggerLoc
        integer,               intent(in),   optional  :: vectorDim
-       integer,               intent(in),   optional  :: lbounds(:)
-       integer,               intent(in),   optional  :: ubounds(:)
+       integer,               intent(in),   optional  :: undistLBound(:)
+       integer,               intent(in),   optional  :: undistUBound(:)
        character (len=*),     intent(in),   optional  :: name
        integer,               intent(out),  optional  :: rc
 !     
@@ -790,9 +794,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      along which the vector component is aligned. This information is used to
 !      correctly apply the {\tt signChangeVector} defined in the connection
 !      transformations of the corresponding DistGrid during halo operations.
-! \item[{[lbounds]}]
+! \item[{[undistLBound]}]
 !      Lower bounds for the array dimensions that are not distributed.
-! \item[{[ubounds]}]
+! \item[{[undistUBound]}]
 !      Upper bounds for the array dimensions that are not distributed.
 ! \item[{[name]}]
 !      Name of the Array object.
@@ -812,8 +816,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     type(ESMF_InterfaceInt) :: computationalUWidthArg ! helper variable
     type(ESMF_InterfaceInt) :: totalLWidthArg         ! helper variable
     type(ESMF_InterfaceInt) :: totalUWidthArg         ! helper variable
-    type(ESMF_InterfaceInt) :: lboundsArg             ! helper variable
-    type(ESMF_InterfaceInt) :: uboundsArg             ! helper variable
+    type(ESMF_InterfaceInt) :: undistLBoundArg        ! helper variable
+    type(ESMF_InterfaceInt) :: undistUBoundArg        ! helper variable
     integer                 :: len_name               ! helper variable
 
     ! Initialize return code; assume failure until success is certain
@@ -850,10 +854,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     totalUWidthArg = ESMF_InterfaceIntCreate(totalUWidth, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    lboundsArg = ESMF_InterfaceIntCreate(lbounds, rc=status)
+    undistLBoundArg = ESMF_InterfaceIntCreate(undistLBound, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    uboundsArg = ESMF_InterfaceIntCreate(ubounds, rc=status)
+    undistUBoundArg = ESMF_InterfaceIntCreate(undistUBound, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -868,14 +872,14 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
         computationalEdgeLWidthArg, computationalEdgeUWidthArg, &
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
         totalUWidthArg, indexflag, staggerLoc, vectorDim, &
-        lboundsArg, uboundsArg, name, len_name, status)
+        undistLBoundArg, undistUBoundArg, name, len_name, status)
     else
       len_name = 0
       call c_ESMC_ArrayCreateAllocate(array, arrayspec, distgrid, dimmapArg, &
         computationalEdgeLWidthArg, computationalEdgeUWidthArg, &
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
         totalUWidthArg, indexflag, staggerLoc, vectorDim, &
-        lboundsArg, uboundsArg, "", len_name, status)
+        undistLBoundArg, undistUBoundArg, "", len_name, status)
     endif
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -902,10 +906,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     call ESMF_InterfaceIntDestroy(totalUWidthArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(lboundsArg, rc=status)
+    call ESMF_InterfaceIntDestroy(undistLBoundArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(uboundsArg, rc=status)
+    call ESMF_InterfaceIntDestroy(undistUBoundArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
