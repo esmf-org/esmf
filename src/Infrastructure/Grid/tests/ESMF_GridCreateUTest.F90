@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.59 2007/11/01 23:49:41 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.60 2007/11/02 20:04:00 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.59 2007/11/01 23:49:41 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.60 2007/11/02 20:04:00 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -58,7 +58,8 @@ program ESMF_GridCreateUTest
   integer :: dimmap(2), coordRank(2), dimcount
   integer :: coordRank2(3),coordDimMap2(3,3)
   integer :: gridEdgeLWidth(3),gridEdgeUWidth(3),gridAlign(3)
- 
+  integer :: exlbnd(3),exubnd(3)
+  integer :: clbnd(3),cubnd(3)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -967,11 +968,17 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) correct=.false.
 
   ! Get array info and make sure its correct
-  call ESMF_ArrayGet(array,dimmap=dimmap,rc=localrc)
+  call ESMF_ArrayGet(array,dimmap=dimmap, &
+         undistLBound=lbounds, undistUBound=ubounds, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Make sure info is as expected
   if ((dimmap(1) .ne. 1) .or. (dimmap(2) .ne. 3)) correct=.false.
+  if ((lbounds(1) .ne. 2) .or. (lbounds(2) .ne. 1) .or. &
+      (lbounds(3) .ne. 3)) correct=.false.
+  if ((ubounds(1) .ne. 7) .or. (ubounds(2) .ne. 5) .or. &
+      (ubounds(3) .ne. 6)) correct=.false.
+
 
   ! destroy grid
   call ESMF_GridDestroy(grid,rc=localrc)

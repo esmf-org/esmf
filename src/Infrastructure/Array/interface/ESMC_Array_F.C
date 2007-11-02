@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.72 2007/11/02 19:22:04 theurich Exp $
+// $Id: ESMC_Array_F.C,v 1.73 2007/11/02 20:04:00 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -137,7 +137,10 @@ extern "C" {
     int *len_localArrayList, ESMCI::DistGrid **distgrid,
     ESMCI::DELayout **delayout,
     ESMC_IndexFlag *indexflag, ESMCI::InterfaceInt **dimmap,
-    ESMCI::InterfaceInt **inverseDimmap, ESMCI::InterfaceInt **exclusiveLBound,
+    ESMCI::InterfaceInt **inverseDimmap,
+    ESMCI::InterfaceInt **undistLBound,
+    ESMCI::InterfaceInt **undistUBound,
+    ESMCI::InterfaceInt **exclusiveLBound,
     ESMCI::InterfaceInt **exclusiveUBound,
     ESMCI::InterfaceInt **computationalLBound,
     ESMCI::InterfaceInt **computationalUBound,
@@ -210,6 +213,46 @@ extern "C" {
       memcpy((*inverseDimmap)->array, (*ptr)->getInverseDimmap(),
         sizeof(int) * (*ptr)->getRank());
     }
+
+    // fill undistLBound
+    if (*undistLBound != NULL){
+      //  undistLBound was provided -> do some error checking
+      if ((*undistLBound)->dimCount != 1){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+          "- undistLBound array must be of rank 1", rc);
+        return;
+      }
+      if ((*undistLBound)->extent[0] < (*ptr)->getTensorCount()){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+          "- undistLBound array must at least be of size tensorCount", rc);
+        return;
+      }
+      // fill in undistLBound
+      if ((*ptr)->getTensorCount()) { // 0 - sized undistLBound are legit, but memcpy may not behave
+        memcpy((*undistLBound)->array, (*ptr)->getUndistLBound(), sizeof(int) * (*ptr)->getTensorCount());
+      }
+    }
+
+    // fill undistUBound
+    if (*undistUBound != NULL){
+      //  undistUBound was provided -> do some error checking
+      if ((*undistUBound)->dimCount != 1){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+          "- undistUBound array must be of rank 1", rc);
+        return;
+      }
+      if ((*undistUBound)->extent[0] < (*ptr)->getTensorCount()){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+          "- undistUBound array must at least be of size tensorCount", rc);
+        return;
+      }
+      // fill in undistUBound
+      if ((*ptr)->getTensorCount()) { // 0 - sized undistUBound are legit, but memcpy may not behave
+        memcpy((*undistUBound)->array, (*ptr)->getUndistUBound(), sizeof(int) * (*ptr)->getTensorCount());
+      }
+    }
+
+
     // fill exclusiveLBound
     if (*exclusiveLBound != NULL){
       // exclusiveLBound was provided -> do some error checking

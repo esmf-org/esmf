@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.26 2007/10/26 21:56:59 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.27 2007/11/02 20:04:00 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.26 2007/10/26 21:56:59 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.27 2007/11/02 20:04:00 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -125,7 +125,7 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_Get()
   subroutine ESMF_ArrayGetDefault(array, typekind, rank, larrayList, &
-    indexflag, dimmap, inverseDimmap, exclusiveLBound, exclusiveUBound,&
+    indexflag, dimmap, inverseDimmap, undistLBound, undistUBound, exclusiveLBound, exclusiveUBound,&
     computationalLBound, computationalUBound, totalLBound, totalUBound, &
     computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
     name, distgrid, dimCount, patchCount, minIndexPDimPPatch, &
@@ -140,6 +140,8 @@ contains
     type(ESMF_IndexFlag),          intent(out), optional :: indexflag
     integer,                       intent(out), optional :: dimmap(:)
     integer,                       intent(out), optional :: inverseDimmap(:)
+    integer,                       intent(out), optional :: undistLBound(:)
+    integer,                       intent(out), optional :: undistUBound(:)
     integer,                       intent(out), optional :: exclusiveLBound(:,:)
     integer,                       intent(out), optional :: exclusiveUBound(:,:)
     integer,                       intent(out), optional :: computationalLBound(:,:)
@@ -197,6 +199,14 @@ contains
 !     Array dimensions are mapped. {\tt inverseDimmap} must be allocated to
 !     of size {\tt rank}. An entry of zero indicates that the respective
 !     Array dimension is not decomposed, rendering it a tensor dimension.
+!   \item[{[undistLBound]}]
+!     Upon return this array holds the lower bounds of the undistributed
+!     dimensions of the Array. {\tt UndistLBound} must be allocated to be
+!     of size {\tt rank-dimCount}. 
+!   \item[{[undistUBound]}]
+!     Upon return this array holds the upper bounds of the undistributed
+!     dimensions of the Array. {\tt UndistUBound} must be allocated to be
+!     of size {\tt rank-dimCount}. 
 !   \item[{[exclusiveLBound]}]
 !     Upon return this holds the lower bounds of the exclusive regions for
 !     all PET-local DEs. {\tt exclusiveLBound} must be allocated to be
@@ -281,6 +291,8 @@ contains
     integer                       :: len_larrayPtrList, i   ! helper variable
     type(ESMF_InterfaceInt)       :: dimmapArg              ! helper variable
     type(ESMF_InterfaceInt)       :: inverseDimmapArg       ! helper variable
+    type(ESMF_InterfaceInt)       :: undistLBoundArg             ! helper variable
+    type(ESMF_InterfaceInt)       :: undistUBoundArg             ! helper variable
     type(ESMF_InterfaceInt)       :: exclusiveLBoundArg     ! helper variable
     type(ESMF_InterfaceInt)       :: exclusiveUBoundArg     ! helper variable
     type(ESMF_InterfaceInt)       :: computationalLBoundArg ! helper variable
@@ -313,6 +325,12 @@ contains
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     inverseDimmapArg = ESMF_InterfaceIntCreate(inverseDimmap, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    undistLBoundArg = ESMF_InterfaceIntCreate(undistLBound, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    undistUBoundArg = ESMF_InterfaceIntCreate(undistUBound, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveLBoundArg = ESMF_InterfaceIntCreate(farray2D=exclusiveLBound, &
@@ -355,7 +373,7 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayGet(array, typekind, rank, opt_larrayPtrList, &
       len_larrayPtrList, opt_distgrid, opt_delayout, indexflag, dimmapArg, &
-      inverseDimmapArg, exclusiveLBoundArg, exclusiveUBoundArg, &
+      inverseDimmapArg, undistLBoundArg, undistUBoundArg, exclusiveLBoundArg, exclusiveUBoundArg, &
       computationalLBoundArg, computationalUBoundArg, &
       totalLBoundArg, totalUBoundArg, &
       computationalLWidthArg, computationalUWidthArg, &
@@ -394,6 +412,12 @@ contains
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(inverseDimmapArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(undistLBoundArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(undistUBoundArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=status)
