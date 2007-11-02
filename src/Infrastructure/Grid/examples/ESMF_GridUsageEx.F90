@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.24 2007/10/30 19:31:53 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.25 2007/11/02 20:59:52 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1370,7 +1370,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
             distgrid=distgrid, dimmap=dimmap, &
             computationalEdgeLWidth=celwdth, &
             computationalEdgeUWidth=ceuwdth, &
-            lbounds=lbnd1D, ubounds=ubnd1D, rc=rc)
+            undistLBound=lbnd1D, undistUBound=ubnd1D, rc=rc)
 
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
