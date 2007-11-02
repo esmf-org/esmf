@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterUTest.F90,v 1.29 2007/10/25 05:16:58 theurich Exp $
+! $Id: ESMF_ArrayScatterUTest.F90,v 1.30 2007/11/02 23:13:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArrayScatterUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayScatterUTest.F90,v 1.29 2007/10/25 05:16:58 theurich Exp $'
+    '$Id: ESMF_ArrayScatterUTest.F90,v 1.30 2007/11/02 23:13:08 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -434,7 +434,8 @@ print *, min_R4, min_R8
     regDecomp=(/2,2/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-    indexflag=ESMF_INDEX_GLOBAL, lbounds=(/-5/), ubounds=(/4/), rc=rc)
+    indexflag=ESMF_INDEX_GLOBAL, undistLBound=(/-5/), undistUBound=(/4/), &
+    rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !call ESMF_ArrayPrint(array)
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr3d, rc=rc)
@@ -513,8 +514,8 @@ print *, min_R4, min_R8
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=3, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-    totalLWidth=(/2,3/), totalUWidth=(/3,4/), &
-    indexflag=ESMF_INDEX_GLOBAL, lbounds=(/-5/), ubounds=(/4/), rc=rc)
+    totalLWidth=(/2,3/), totalUWidth=(/3,4/), indexflag=ESMF_INDEX_GLOBAL, &
+    undistLBound=(/-5/), undistUBound=(/4/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !call ESMF_ArrayPrint(array)
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr3d, rc=rc)
@@ -612,7 +613,7 @@ print *, min_R4, min_R8
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     totalLWidth=(/2,3/), totalUWidth=(/3,4/), &
-    lbounds=(/-5/), ubounds=(/4/), rc=rc)
+    undistLBound=(/-5/), undistUBound=(/4/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !call ESMF_ArrayPrint(array)
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr3d, rc=rc)

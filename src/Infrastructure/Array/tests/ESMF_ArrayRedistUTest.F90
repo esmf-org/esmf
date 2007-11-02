@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistUTest.F90,v 1.2 2007/10/25 05:16:57 theurich Exp $
+! $Id: ESMF_ArrayRedistUTest.F90,v 1.3 2007/11/02 23:13:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ArrayRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayRedistUTest.F90,v 1.2 2007/10/25 05:16:57 theurich Exp $'
+    '$Id: ESMF_ArrayRedistUTest.F90,v 1.3 2007/11/02 23:13:08 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -160,7 +160,7 @@ program ESMF_ArrayRedistUTest
   write(name, *) "dstArray3 Create Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   dstArray3 = ESMF_ArrayCreate(arrayspec=arrayspec3, distgrid=dstDistgrid, &
-    lbounds=(/1/), ubounds=(/2/), rc=rc)
+    undistLBound=(/1/), undistUBound=(/2/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 #endif
@@ -376,7 +376,7 @@ call ESMF_ArrayPrint(dstArray)
   write(name, *) "srcArray3 Create Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   srcArray3 = ESMF_ArrayCreate(arrayspec=arrayspec3, distgrid=srcDistgrid2, &
-    lbounds=(/0/), ubounds=(/1/), rc=rc)
+    undistLBound=(/0/), undistUBound=(/1/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
   
