@@ -149,7 +149,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.40 2007/11/02 19:22:07 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.41 2007/11/02 22:46:31 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -1998,7 +1998,7 @@ end interface
    if (rank .gt. 2) then
       if (isDimDist(3)) then
          minIndexDG(d)=minIndexLocal(3)
-         maxIndexDG(d)=sum(countsPerDEDim2Local)+minIndexDG(d)-1
+         maxIndexDG(d)=sum(countsPerDEDim3Local)+minIndexDG(d)-1
          dimMap(d)=3      
          d=d+1
       endif
@@ -7068,7 +7068,7 @@ endif
    if (rank .gt. 2) then
       if (isDimDist(3)) then
          minIndexDG(d)=minIndexLocal(3)
-         maxIndexDG(d)=sum(countsPerDEDim2Local)+minIndexDG(d)-1
+         maxIndexDG(d)=sum(countsPerDEDim3Local)+minIndexDG(d)-1
          dimMap(d)=3      
          d=d+1
       endif
