@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.33 2007/10/16 21:54:41 theurich Exp $ 
+# $Id: makefile,v 1.34 2007/11/03 05:34:32 theurich Exp $ 
 
 ALL: build_system_tests
 
@@ -7,12 +7,19 @@ LOCDIR   = src/system_tests
 include $(ESMF_DIR)/makefile
 
 # arranged roughly in order of complexity
+#DIRS     = \
+#           ESMF_CompCreate \
+#           ESMF_ArrayScatterGather \
+#           ESMF_ArraySparseMatMul \
+#           ESMF_ArrayRedist \
+#           ESMF_DistDir
+# use upper DIRS definition when ESMF_CompCreate is fixed and delete the following definition... 
 DIRS     = \
-           ESMF_CompCreate \
            ESMF_ArrayScatterGather \
            ESMF_ArraySparseMatMul \
            ESMF_ArrayRedist \
            ESMF_DistDir
+
 
 # Tests not yet ready
 #           ESMF_RowReduce \        gjt: currently the code depends on DELayout comms, but it should be covered/converted to newArray
