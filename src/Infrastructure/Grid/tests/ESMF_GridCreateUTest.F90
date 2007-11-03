@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.61 2007/11/02 22:46:31 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.62 2007/11/03 05:39:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.61 2007/11/02 22:46:31 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.62 2007/11/03 05:39:23 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -968,7 +968,7 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) correct=.false.
 
   ! Get array info and make sure its correct
-  call ESMF_ArrayGet(array,dimmap=dimmap, &
+  call ESMF_ArrayGet(array,distgridToArrayMap=dimmap, &
          undistLBound=lbounds, undistUBound=ubounds, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.16 2007/10/30 23:31:30 oehmke Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.17 2007/11/03 05:39:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.16 2007/10/30 23:31:30 oehmke Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.17 2007/11/03 05:39:23 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -186,7 +186,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Set/Get Coordinates from Array check dimmap matching"
+  write(name, *) "Set/Get Coordinates from Array check distgridToArrayMap matching"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! init success flag
@@ -206,7 +206,7 @@ program ESMF_GridCoordUTest
   ! First make bad Array and make sure it fails
   ! Create Array 
   array1D=ESMF_ArrayCreate(arrayspec=arrayspec1D, distgrid=tmpdistgrid, &
-                            dimmap=(/0,1/),indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+    distgridToArrayMap=(/0,1/),indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Set Coord From Array
@@ -221,7 +221,7 @@ program ESMF_GridCoordUTest
   ! Then make a good Array and make sure it passes
   ! Create Array 
   array1D=ESMF_ArrayCreate(arrayspec=arrayspec1D, distgrid=tmpdistgrid, &
-                            dimmap=(/1,0/),indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+    distgridToArrayMap=(/1,0/),indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Set Coord From Array

@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.82 2007/11/02 19:22:03 theurich Exp $
+// $Id: ESMC_Array.h,v 1.83 2007/11/03 05:39:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -78,8 +78,8 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     int *undistUBound;                // [tensorCount]
     int *staggerLoc;                  // [tensorElementCount]
     int *vectorDim;                   // [tensorElementCount]
-    int *dimmap;                      // [dimCount]
-    int *inverseDimmap;               // [rank]
+    int *distgridToArrayMap;          // [dimCount]
+    int *arrayToDistGridMap;          // [rank]
     int *contiguousFlag;              // [localDeCount]
     int *deElementCount;              // [deCount] number of elements in
                                       // exclusive region only considering
@@ -111,8 +111,8 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
       undistUBound = NULL;
       staggerLoc = NULL;
       vectorDim = NULL;
-      dimmap = NULL;
-      inverseDimmap = NULL;
+      distgridToArrayMap = NULL;
+      arrayToDistGridMap = NULL;
       contiguousFlag = NULL;
       tensorElementCount = 0;
       deElementCount = NULL;
@@ -123,13 +123,13 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
       int *computationalLBound, int *computationalUBound, int *totalLBound,
       int *totalUBound, int tensorCount, int tensorElementCount,
       int *undistLBoundArray, int *undistUBoundArray, int *staggerLoc,
-      int *vectorDim, int *dimmapArray, int *inverseDimmapArray,
-      ESMC_IndexFlag indexflagArg, int *rc);
+      int *vectorDim, int *distgridToArrayMapArray,
+      int *arrayToDistGridMapArray, ESMC_IndexFlag indexflagArg, int *rc);
   public:
     ~Array();
     // create() and destroy()
     static Array *create(ESMC_LocalArray **larrayList, int larrayCount,
-      DistGrid *distgrid, InterfaceInt *dimmap,
+      DistGrid *distgrid, InterfaceInt *distgridToArrayMap,
       InterfaceInt *computationalEdgeLWidthArg,
       InterfaceInt *computationalEdgeUWidthArg,
       InterfaceInt *computationalLWidthArg,
@@ -138,7 +138,8 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
       ESMC_IndexFlag *indexflag, int *staggerLoc, int *vectorDim,
       InterfaceInt *undistLBoundArg, InterfaceInt *undistUBoundArg, int *rc);
     static Array *create(ESMC_ArraySpec *arrayspec, DistGrid *distgrid,
-      InterfaceInt *dimmap, InterfaceInt *computationalEdgeLWidthArg,
+      InterfaceInt *distgridToArrayMap,
+      InterfaceInt *computationalEdgeLWidthArg,
       InterfaceInt *computationalEdgeUWidthArg,
       InterfaceInt *computationalLWidthArg, 
       InterfaceInt *computationalUWidthArg, InterfaceInt *totalLWidthArg,
@@ -164,8 +165,8 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     const int *getVectorDim()               const {return vectorDim;}
     const int *getDeElementCount()          const {return deElementCount;}
     int getTensorElementCount()             const {return tensorElementCount;}
-    const int *getDimmap()                  const {return dimmap;}
-    const int *getInverseDimmap()           const {return inverseDimmap;}
+    const int *getDistGridToArrayMap()      const {return distgridToArrayMap;}
+    const int *getArrayToDistGridMap()      const {return arrayToDistGridMap;}
     DistGrid *getDistGrid()                 const {return distgrid;}
     DELayout *getDELayout()                 const {return delayout;}
     int getLinearIndexExclusive(int localDe, int *index, int *rc=NULL) const;

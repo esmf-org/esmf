@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.25 2007/11/02 20:59:52 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.26 2007/11/03 05:39:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1367,7 +1367,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
     ! Create an Array based on the presence of distributed dimensions
     array=ESMF_ArrayCreate(arrayspec=arrayspec, &
-            distgrid=distgrid, dimmap=dimmap, &
+            distgrid=distgrid, distgridToArrayMap=dimmap, &
             computationalEdgeLWidth=celwdth, &
             computationalEdgeUWidth=ceuwdth, &
             undistLBound=lbnd1D, undistUBound=ubnd1D, rc=rc)

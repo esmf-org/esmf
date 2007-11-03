@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.27 2007/11/02 20:04:00 oehmke Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.28 2007/11/03 05:39:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.27 2007/11/02 20:04:00 oehmke Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.28 2007/11/03 05:39:21 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -125,7 +125,8 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_Get()
   subroutine ESMF_ArrayGetDefault(array, typekind, rank, larrayList, &
-    indexflag, dimmap, inverseDimmap, undistLBound, undistUBound, exclusiveLBound, exclusiveUBound,&
+    indexflag, distgridToArrayMap, arrayToDistGridMap, undistLBound, &
+    undistUBound, exclusiveLBound, exclusiveUBound, &
     computationalLBound, computationalUBound, totalLBound, totalUBound, &
     computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
     name, distgrid, dimCount, patchCount, minIndexPDimPPatch, &
@@ -138,8 +139,8 @@ contains
     integer,                       intent(out), optional :: rank
     type(ESMF_LocalArray), target, intent(out), optional :: larrayList(:)
     type(ESMF_IndexFlag),          intent(out), optional :: indexflag
-    integer,                       intent(out), optional :: dimmap(:)
-    integer,                       intent(out), optional :: inverseDimmap(:)
+    integer,                       intent(out), optional :: distgridToArrayMap(:)
+    integer,                       intent(out), optional :: arrayToDistGridMap(:)
     integer,                       intent(out), optional :: undistLBound(:)
     integer,                       intent(out), optional :: undistUBound(:)
     integer,                       intent(out), optional :: exclusiveLBound(:,:)
@@ -188,16 +189,16 @@ contains
 !   \item[{[indexflag]}]
 !     Upon return this flag indicates how the DE-local indices are defined.
 !     See section \ref{opt:indexflag} for a list of possible return values.
-!   \item[{[dimmap]}]
+!   \item[{[distgridToArrayMap]}]
 !     Upon return this list holds the Array dimensions against which the
-!     DistGrid dimensions are mapped. {\tt dimmap} must be allocated to be
-!     of size {\tt dimCount}. An entry of zero indicates that the respective
-!     DistGrid dimension is replicating the Array across the DEs along this
-!     direction.
-!   \item[{[inverseDimmap]}]
+!     DistGrid dimensions are mapped. {\tt distgridToArrayMap} must be allocated
+!     to be of size {\tt dimCount}. An entry of zero indicates that the
+!     respective DistGrid dimension is replicating the Array across the DEs
+!     along this direction.
+!   \item[{[arrayToDistGridMap]}]
 !     Upon return this list holds the DistGrid dimensions against which the
-!     Array dimensions are mapped. {\tt inverseDimmap} must be allocated to
-!     of size {\tt rank}. An entry of zero indicates that the respective
+!     Array dimensions are mapped. {\tt arrayToDistGridMap} must be allocated
+!     to be of size {\tt rank}. An entry of zero indicates that the respective
 !     Array dimension is not decomposed, rendering it a tensor dimension.
 !   \item[{[undistLBound]}]
 !     Upon return this array holds the lower bounds of the undistributed
@@ -289,10 +290,10 @@ contains
     integer                       :: status         ! local error status
     type(ESMF_Pointer), pointer   :: opt_larrayPtrList(:)   ! helper variable
     integer                       :: len_larrayPtrList, i   ! helper variable
-    type(ESMF_InterfaceInt)       :: dimmapArg              ! helper variable
-    type(ESMF_InterfaceInt)       :: inverseDimmapArg       ! helper variable
-    type(ESMF_InterfaceInt)       :: undistLBoundArg             ! helper variable
-    type(ESMF_InterfaceInt)       :: undistUBoundArg             ! helper variable
+    type(ESMF_InterfaceInt)       :: distgridToArrayMapArg  ! helper variable
+    type(ESMF_InterfaceInt)       :: arrayToDistGridMapArg  ! helper variable
+    type(ESMF_InterfaceInt)       :: undistLBoundArg        ! helper variable
+    type(ESMF_InterfaceInt)       :: undistUBoundArg        ! helper variable
     type(ESMF_InterfaceInt)       :: exclusiveLBoundArg     ! helper variable
     type(ESMF_InterfaceInt)       :: exclusiveUBoundArg     ! helper variable
     type(ESMF_InterfaceInt)       :: computationalLBoundArg ! helper variable
@@ -321,10 +322,12 @@ contains
       len_larrayPtrList = 0
       allocate(opt_larrayPtrList(1))
     endif
-    dimmapArg = ESMF_InterfaceIntCreate(dimmap, rc=status)
+    distgridToArrayMapArg = ESMF_InterfaceIntCreate(distgridToArrayMap, &
+      rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    inverseDimmapArg = ESMF_InterfaceIntCreate(inverseDimmap, rc=status)
+    arrayToDistGridMapArg = ESMF_InterfaceIntCreate(arrayToDistGridMap, &
+      rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     undistLBoundArg = ESMF_InterfaceIntCreate(undistLBound, rc=status)
@@ -372,8 +375,10 @@ contains
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayGet(array, typekind, rank, opt_larrayPtrList, &
-      len_larrayPtrList, opt_distgrid, opt_delayout, indexflag, dimmapArg, &
-      inverseDimmapArg, undistLBoundArg, undistUBoundArg, exclusiveLBoundArg, exclusiveUBoundArg, &
+      len_larrayPtrList, opt_distgrid, opt_delayout, indexflag, &
+      distgridToArrayMapArg, arrayToDistGridMapArg, &
+      undistLBoundArg, undistUBoundArg, &
+      exclusiveLBoundArg, exclusiveUBoundArg, &
       computationalLBoundArg, computationalUBoundArg, &
       totalLBoundArg, totalUBoundArg, &
       computationalLWidthArg, computationalUWidthArg, &
@@ -408,10 +413,10 @@ contains
     
     ! Garbage collection
     deallocate(opt_larrayPtrList)
-    call ESMF_InterfaceIntDestroy(dimmapArg, rc=status)
+    call ESMF_InterfaceIntDestroy(distgridToArrayMapArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(inverseDimmapArg, rc=status)
+    call ESMF_InterfaceIntDestroy(arrayToDistGridMapArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(undistLBoundArg, rc=status)

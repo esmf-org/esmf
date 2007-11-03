@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.32 2007/11/02 19:22:02 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.33 2007/11/03 05:39:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -48,7 +48,7 @@ program ESMF_ArrayEx
 !  integer, allocatable:: deBlockList(:,:), connectionList(:,:), connectionTransformList(:,:)
 !  integer, allocatable:: deNeighborList(:), deNeighborInterface(:,:)
 !  integer, allocatable:: linkList(:,:)
-  integer, allocatable:: inverseDimmap(:)
+  integer, allocatable:: arrayToDistGridMap(:)
   integer, allocatable:: localDeList(:)
   integer, allocatable:: exclusiveLBound(:,:), exclusiveUBound(:,:)
   integer, allocatable:: totalLWidth(:,:), totalUWidth(:,:)
@@ -1803,10 +1803,10 @@ program ESMF_ArrayEx
 ! Array dimensions that are not mapped to DistGrid dimensions are
 ! considered extra or {\em tensor} dimensions of the Array. They are not part
 ! of the index space. The mapping is specified during {\tt ESMF\_ArrayCreate()}
-! via the the {\tt dimmap} argument. DistGrid dimensions that have not been
-! associated with Array dimensions are {\tt replicating} dimensions. The Array
-! will be replicated across the DEs that lie along replication DistGrid
-! dimensions.
+! via the the {\tt distgridToArrayMap} argument. DistGrid dimensions that have
+! not been associated with Array dimensions are {\tt replicating} dimensions.
+! The Array will be replicated across the DEs that lie along replication
+! DistGrid dimensions.
 !
 ! Array tensor dimensions can be used to store multi-dimensional data for each
 ! Array index space element. A special purpose of tensor dimensions is to store
@@ -1916,11 +1916,11 @@ program ESMF_ArrayEx
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
 ! For some applications the default association rules between DistGrid and Array
-! dimensions may not satisfy the user's needs. The optional {\tt dimmap} 
+! dimensions may not satisfy the user's needs. The optional {\tt distgridToArrayMap} 
 ! argument may be used during Array creation to explicitly specify the mapping 
 ! between Array and DistGrid dimensions. To demonstrate this the
 ! following lines of code reproduce the above example but with rearranged
-! dimensions. Here the {\tt dimmap} argument is a list with two elements 
+! dimensions. Here the {\tt distgridToArrayMap} argument is a list with two elements 
 ! corresponding to the DistGrid {\tt dimCount} of 2. The first element indicates
 ! which Array dimension the first DistGrid dimension is mapped against. Here the
 ! 1st DistGrid dimension maps against the 3rd Array and the 2nd DistGrid
@@ -1930,7 +1930,7 @@ program ESMF_ArrayEx
 !BOC
   call ESMF_ArrayDestroy(array, rc=rc)
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-    dimmap=(/3, 1/), totalLWidth=(/0,1/), totalUWidth=(/0,1/), &
+    distgridToArrayMap=(/3, 1/), totalLWidth=(/0,1/), totalUWidth=(/0,1/), &
     undistLBound=(/1/), undistUBound=(/2/), rc=rc)
   call ESMF_ArraySet(array, tensorIndex=(/1/), staggerLoc=1, rc=rc)
   call ESMF_ArraySet(array, tensorIndex=(/2/), staggerLoc=2, rc=rc)
@@ -1957,12 +1957,13 @@ program ESMF_ArrayEx
 ! in the Array. The DistGrid dimension order thus becomes a common reference
 ! frame for all Arrays that use the same DistGrid.
 !
-! The {\tt dimmap} argument optionally provided during Array create indicates
-! the DistGrid to Array dimension mapping. Depending on the formulation of the
-! computational kernel, the inverse mapping, i.e. Array to DistGrid dimension
-! mapping, is just as important. The {\tt ESMF\_ArrayGet()} call offers
-! both mappings as {\tt dimmap} and {\tt inverseDimmap}, respectively. The
-! number of elements in {\tt inverseDimmap} is equal to the rank of the Array.
+! The {\tt distgridToArrrayMap} argument optionally provided during Array create
+! indicates the DistGrid to Array dimension mapping. Depending on the 
+! formulation of the computational kernel, the inverse mapping, i.e. Array to
+! DistGrid dimension mapping, is just as important. The {\tt ESMF\_ArrayGet()}
+! call offers both mappings as {\tt distgridToArrrayMap} and
+! {\tt arrayToDistGridMap}, respectively. The number of elements in 
+! {\tt arrayToDistGridMap} is equal to the rank of the Array.
 ! Each element corresponds to an Array dimension and indicates the associated
 ! DistGrid dimension by an integer number. An entry of "0" indicates an
 ! extra Array dimension.
@@ -1974,19 +1975,19 @@ program ESMF_ArrayEx
 ! dimension is a tensor dimension is correct. 
 !EOE
 !BOC
-  allocate(inverseDimmap(3))  ! arrayRank = 3
-  call ESMF_ArrayGet(array, inverseDimmap=inverseDimmap, &
+  allocate(arrayToDistGridMap(3))  ! arrayRank = 3
+  call ESMF_ArrayGet(array, arrayToDistGridMap=arrayToDistGridMap, &
     exclusiveLBound=exclusiveLBound, exclusiveUBound=exclusiveUBound, &
     localDeCount=localDeCount, rc=rc)  
-  if (inverseDimmap(2) /= 0) then   ! check if extra dimension at expected index
+  if (arrayToDistGridMap(2) /= 0) then   ! check if extra dimension at expected index
     ! indicate problem and bail out
   endif
   ! obtain larrayList for local DEs
   allocate(larrayList(localDeCount))
   call ESMF_ArrayGet(array, larrayList=larrayList, rc=rc)
-  ! prepare inverse dimmap variables for kernel loop
-  idm1=inverseDimmap(1)
-  idm3=inverseDimmap(3)
+  ! prepare inverse distgridToArrayMap variables for kernel loop
+  idm1=arrayToDistGridMap(1)
+  idm3=arrayToDistGridMap(3)
   do de=1, localDeCount
     call ESMF_LocalArrayGetData(larrayList(de), myF90Array3D, ESMF_DATA_REF, rc=rc)
     myF90Array3D(exclusiveLBound(idm1,de):exclusiveUBound(idm1,de), &
@@ -1995,7 +1996,7 @@ program ESMF_ArrayEx
       2, exclusiveLBound(idm3,de):exclusiveUBound(idm3,de)) = 23.3 ! dummy assignment
   enddo
   deallocate(exclusiveLBound, exclusiveUBound)
-  deallocate(inverseDimmap)
+  deallocate(arrayToDistGridMap)
   deallocate(larrayList)
   call ESMF_ArrayDestroy(array, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -2009,7 +2010,7 @@ program ESMF_ArrayEx
 ! equal to the Array {\tt rank}. The previous section introduced the concept
 ! of Array {\em tensor} dimensions when {\tt dimCount < rank}. In this section
 ! the general case of completely arbitrary {\tt dimCount} and {\tt rank} and 
-! their relationship to {\tt dimmap} will be considered.
+! their relationship to {\tt distgridToArrayMap} will be considered.
 !
 ! The Array class allows completely arbitrary mapping between Array and
 ! DistGrid dimensions. Most cases considered in the previous sections used
@@ -2018,14 +2019,15 @@ program ESMF_ArrayEx
 ! non-distributed tensor dimensions for which the optional {\tt lbounds} and
 ! {\tt ubounds} arguments must be specified.
 !
-! The optional {\tt dimmap} argument provides the option to override the default
-! DistGrid to Array dimension mapping. The entries of the {\tt dimmap} array
-! correspond to the DistGrid dimensions in sequence and assign a unique Array
-! dimension to each DistGrid dimension. DistGrid and Array dimensions are 
-! indexed starting at {\tt 1} for the lowest dimension. A value of {\tt "0"}
-! in the {\tt dimmap} array indicates that the respective DistGrid dimension is
-! {\em not} mapped against any Array dimension. What this means is that the 
-! Array will be replicated along this DistGrid dimension.
+! The optional {\tt distgridToArrayMap} argument provides the option to override
+! the default DistGrid to Array dimension mapping. The entries of the
+! {\tt distgridToArrayMap} array correspond to the DistGrid dimensions in
+! sequence and assign a unique Array dimension to each DistGrid dimension.
+! DistGrid and Array dimensions are indexed starting at {\tt 1} for the lowest
+! dimension. A value of {\tt "0"} in the {\tt distgridToArrayMap} array 
+! indicates that the respective DistGrid dimension is {\em not} mapped against
+! any Array dimension. What this means is that the Array will be replicated 
+! along this DistGrid dimension.
 ! 
 ! As a first example consider the case where a 1D Array
 !EOE
@@ -2100,7 +2102,8 @@ program ESMF_ArrayEx
 ! The Fortran array pointer in the above loop was of rank 1 because the
 ! Array object was of rank 1. However, the {\tt distgrid} object associated
 ! with {\tt array} is 2-dimensional! Consequently DistGrid based information
-! queried from {\tt array} will be 2D. The {\tt dimmap} and {\tt inverseDimmap}
+! queried from {\tt array} will be 2D. The {\tt distgridToArrayMap} and
+! {\tt arrayToDistGridMap}
 ! arrays provide the necessary mapping to correctly associate DistGrid based 
 ! information with Array dimensions.
 !
@@ -2111,9 +2114,10 @@ program ESMF_ArrayEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
 !BOE
-! on the previously used 2D DistGrid. By default, i.e. without the {\tt dimmap}
+! on the previously used 2D DistGrid. By default, i.e. without the
+! {\tt distgridToArrayMap}
 ! argument, both DistGrid dimensions would be associated with the two Array
-! dimensions. However, the {\tt dimmap} specified in the following
+! dimensions. However, the {\tt distgridToArrayMap} specified in the following
 ! call will only associate the second DistGrid dimension with the first Array 
 ! dimension. This will render the first DistGrid dimension a replicator
 ! dimension and the second Array dimension a tensor dimension for which 1D
@@ -2121,7 +2125,7 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-    dimmap=(/0,1/), undistLBound=(/11/), undistUBound=(/14/), rc=rc)
+    distgridToArrayMap=(/0,1/), undistLBound=(/11/), undistUBound=(/14/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
 !  call ESMF_ArrayPrint(array, rc=rc)
@@ -2138,7 +2142,8 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-    dimmap=(/0,0/), undistLBound=(/11,21/), undistUBound=(/14,22/), rc=rc)
+    distgridToArrayMap=(/0,0/), undistLBound=(/11,21/), undistUBound=(/14,22/), &
+    rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
 !BOE
@@ -2206,7 +2211,7 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   array = ESMF_ArrayCreate(farray=myF90Array2D, distgrid=distgrid, &
-    dimmap=(/0,2/), rc=rc)
+    distgridToArrayMap=(/0,2/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
 !BOE

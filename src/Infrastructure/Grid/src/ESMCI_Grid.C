@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.31 2007/11/02 19:22:07 theurich Exp $
+// $Id: ESMCI_Grid.C,v 1.32 2007/11/03 05:39:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.31 2007/11/02 19:22:07 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.32 2007/11/03 05:39:23 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -1378,7 +1378,7 @@ int Grid::setCoordArray(
   }
 
   //// get the Array's dimmap 
-  arrayDimMap=arrayArg->getDimmap();
+  arrayDimMap=arrayArg->getDistGridToArrayMap();
 
   //// Check if the Array's dimmap matches what we expect for the coord
   ok=true;

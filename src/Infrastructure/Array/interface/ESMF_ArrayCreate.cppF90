@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.20 2007/11/02 19:22:04 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.21 2007/11/03 05:39:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -106,7 +106,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.20 2007/11/02 19:22:04 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.21 2007/11/03 05:39:21 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -158,15 +158,16 @@ contains
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_ArrayCreate() @\
 ! function ESMF_ArrayCreateAssmdShape<rank><type><kind>(farray, & @\
-!   distgrid, dimmap, computationalEdgeLWidth, computationalEdgeUWidth, & @\
-!   computationalLWidth, computationalUWidth, totalLWidth, & @\
+!   distgrid, distgridToArrayMap, computationalEdgeLWidth, & @\
+!   computationalEdgeUWidth, computationalLWidth, & @\
+!   computationalUWidth, totalLWidth, & @\
 !   totalUWidth, indexflag, staggerLoc, vectorDim, & @\
 !   undistLBound, undistUBound, name, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   <type> (ESMF_KIND_<kind>),dimension(<rank>),intent(in),target :: farray @\
 !   type(ESMF_DistGrid),   intent(in)              :: distgrid @\
-!   integer,               intent(in),   optional  :: dimmap(:) @\
+!   integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
 !   integer,               intent(in),   optional  :: computationalEdgeLWidth(:) @\
 !   integer,               intent(in),   optional  :: computationalEdgeUWidth(:) @\
 !   integer,               intent(in),   optional  :: computationalLWidth(:) @\
@@ -218,21 +219,21 @@ contains
 !      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and @\
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal @\
 !      to the rank of farray. @\
-! \item[{[dimmap]}] @\
+! \item[{[distgridToArrayMap]}] @\
 !      List that contains as many elements as is indicated by @\
 !      {\tt distgrids}|s dimCount. The list elements map each dimension of @\
 !      the DistGrid object to a dimension in {\tt farray} by specifying the @\
 !      appropriate Array dimension index. The default is to map all of @\
 !      {\tt distgrid}|s dimensions against the lower dimensions of the @\
-!      {\tt farray} argument in sequence, i.e. {\tt dimmap = (/1, 2, .../)}. @\
+!      {\tt farray} argument in sequence, i.e. {\tt distgridToArrayMap = (/1, 2, .../)}. @\
 !      Unmapped {\tt farray} dimensions are not decomposed dimensions and @\
 !      form a tensor of rank = farray.rank - distgrid.dimCount. @\
-!      All {\tt dimmap} entries must be greater than or equal to one and @\
+!      All {\tt distgridToArrayMap} entries must be greater than or equal to one and @\
 !      smaller than or equal to the Array rank. It is erroneous to specify @\
 !      the same entry multiple times unless it is zero. @\
 !      If the Array rank is less than the DistGrid dimCount then the default @\
-!      dimmap will contain zeros for the dimCount - rank right most entries. @\
-!      A zero entry in the {\tt dimmap} indicates that the particular @\
+!      distgridToArrayMap will contain zeros for the dimCount - rank right most entries. @\
+!      A zero entry in the {\tt distgridToArrayMap} indicates that the particular @\
 !      DistGrid dimension will be replicating the Array across the DEs @\
 !      along this direction. @\
 ! \item[{[computationalEdgeLWidth]}] @\
@@ -308,7 +309,8 @@ contains
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_ArrayCreateAssmdShape" @\
   function ESMF_ArrayCreateAssmdShape##mrank##D##mtypekind(farray, & @\
-    distgrid, dimmap, computationalEdgeLWidth, computationalEdgeUWidth, & @\
+    distgrid, distgridToArrayMap, & @\
+    computationalEdgeLWidth, computationalEdgeUWidth, & @\
     computationalLWidth, computationalUWidth, totalLWidth, & @\
     totalUWidth, indexflag, staggerLoc, vectorDim, & @\
     undistLBound, undistUBound, name, rc) @\
@@ -317,7 +319,7 @@ contains
 @\
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),intent(in),target :: farray @\
     type(ESMF_DistGrid),   intent(in)              :: distgrid @\
-    integer,               intent(in),   optional  :: dimmap(:) @\
+    integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
     integer,               intent(in),   optional  :: computationalEdgeLWidth(:) @\
     integer,               intent(in),   optional  :: computationalEdgeUWidth(:) @\
     integer,               intent(in),   optional  :: computationalLWidth(:) @\
@@ -356,7 +358,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     ! Create the Array object by calling into overloaded ArrayCreate() interf. @\
-    array = ESMF_ArrayCreate(larrayList, distgrid, dimmap, & @\
+    array = ESMF_ArrayCreate(larrayList, distgrid, distgridToArrayMap, & @\
       computationalEdgeLWidth, computationalEdgeUWidth, computationalLWidth, & @\
       computationalUWidth, totalLWidth, totalUWidth, indexflag, staggerLoc, & @\
       vectorDim, undistLBound, undistUBound, name, status) @\
@@ -392,7 +394,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
-  function ESMF_ArrayCreateLocalArray(larrayList, distgrid, dimmap, &
+  function ESMF_ArrayCreateLocalArray(larrayList, distgrid, distgridToArrayMap, &
     computationalEdgeLWidth, computationalEdgeUWidth, computationalLWidth, &
     computationalUWidth, totalLWidth, totalUWidth, &
     indexflag, staggerLoc, vectorDim, undistLBound, undistUBound, name, rc)
@@ -400,7 +402,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! !ARGUMENTS:
        type(ESMF_LocalArray), intent(in)              :: larrayList(:)
        type(ESMF_DistGrid),   intent(in)              :: distgrid
-       integer,               intent(in),   optional  :: dimmap(:)
+       integer,               intent(in),   optional  :: distgridToArrayMap(:)
        integer,               intent(in),   optional  :: computationalEdgeLWidth(:)
        integer,               intent(in),   optional  :: computationalEdgeUWidth(:)
        integer,               intent(in),   optional  :: computationalLWidth(:)
@@ -453,21 +455,21 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal
 !      to the rank specified in arrayspec, otherwise a runtime ESMF error will be
 !      raised.
-! \item[{[dimmap]}]
+! \item[{[distgridToArrayMap]}]
 !      List that contains as many elements as is indicated by
 !      {\tt distgrids}|s dimCount. The list elements map each dimension of
 !      the DistGrid object to a dimension in {\tt farray} by specifying the
 !      appropriate Array dimension index. The default is to map all of
 !      {\tt distgrid}|s dimensions against the lower dimensions of the
-!      {\tt farray} argument in sequence, i.e. {\tt dimmap = (/1, 2, .../)}.
+!      {\tt farray} argument in sequence, i.e. {\tt distgridToArrayMap = (/1, 2, .../)}.
 !      Unmapped {\tt farray} dimensions are not decomposed dimensions and
 !      form a tensor of rank = farray.rank - distgrid.dimCount.
-!      All {\tt dimmap} entries must be greater than or equal to one and
+!      All {\tt distgridToArrayMap} entries must be greater than or equal to one and
 !      smaller than or equal to the Array rank. It is erroneous to specify
 !      the same entry multiple times unless it is zero.
 !      If the Array rank is less than the DistGrid dimCount then the default
-!      dimmap will contain zeros for the dimCount - rank right most entries.
-!      A zero entry in the {\tt dimmap} indicates that the particular
+!      distgridToArrayMap will contain zeros for the dimCount - rank right most entries.
+!      A zero entry in the {\tt distgridToArrayMap} indicates that the particular
 !      DistGrid dimension will be replicating the Array across the DEs
 !      along this direction.
 ! \item[{[computationalEdgeLWidth]}]
@@ -539,7 +541,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     integer                 :: status     ! local error status
     type(ESMF_Array)        :: array      ! opaque pointer to new C++ Array
     integer                 :: larrayCount, i         ! helper variable
-    type(ESMF_InterfaceInt) :: dimmapArg              ! helper variable
+    type(ESMF_InterfaceInt) :: distgridToArrayMapArg  ! helper variable
     type(ESMF_InterfaceInt) :: computationalEdgeLWidthArg ! helper variable
     type(ESMF_InterfaceInt) :: computationalEdgeUWidthArg ! helper variable
     type(ESMF_InterfaceInt) :: computationalLWidthArg ! helper variable
@@ -575,7 +577,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     enddo
     
     ! Deal with (optional) array arguments
-    dimmapArg = ESMF_InterfaceIntCreate(dimmap, rc=status)
+    distgridToArrayMapArg = ESMF_InterfaceIntCreate(distgridToArrayMap, &
+      rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalEdgeLWidthArg = &
@@ -615,7 +618,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     if (present(name)) then
       len_name = len(name)
       call c_ESMC_ArrayCreateLocalArray(array, larrayPointerList, larrayCount, &
-        distgrid, dimmapArg, computationalEdgeLWidthArg, &
+        distgrid, distgridToArrayMapArg, computationalEdgeLWidthArg, &
         computationalEdgeUWidthArg, computationalLWidthArg, &
         computationalUWidthArg, totalLWidthArg, totalUWidthArg, &
         indexflag, staggerLoc, vectorDim, &
@@ -623,7 +626,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     else
       len_name = 0
       call c_ESMC_ArrayCreateLocalArray(array, larrayPointerList, larrayCount, &
-        distgrid, dimmapArg, computationalEdgeLWidthArg, &
+        distgrid, distgridToArrayMapArg, computationalEdgeLWidthArg, &
         computationalEdgeUWidthArg, computationalLWidthArg, &
         computationalUWidthArg, totalLWidthArg, totalUWidthArg, &
         indexflag, staggerLoc, vectorDim, &
@@ -634,7 +637,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
       
     ! Garbage collection
     deallocate(larrayPointerList)
-    call ESMF_InterfaceIntDestroy(dimmapArg, rc=status)
+    call ESMF_InterfaceIntDestroy(distgridToArrayMapArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalEdgeLWidthArg, rc=status)
@@ -683,7 +686,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
-  function ESMF_ArrayCreateAllocate(arrayspec, distgrid, dimmap, &
+  function ESMF_ArrayCreateAllocate(arrayspec, distgrid, distgridToArrayMap, &
     computationalEdgeLWidth, computationalEdgeUWidth, &
     computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
     indexflag, staggerLoc, vectorDim, undistLBound, undistUBound, name, rc)
@@ -691,7 +694,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! !ARGUMENTS:
        type(ESMF_ArraySpec),  intent(inout)           :: arrayspec
        type(ESMF_DistGrid),   intent(in)              :: distgrid
-       integer,               intent(in),   optional  :: dimmap(:)
+       integer,               intent(in),   optional  :: distgridToArrayMap(:)
        integer,               intent(in),   optional  :: computationalEdgeLWidth(:)
        integer,               intent(in),   optional  :: computationalEdgeUWidth(:)
        integer,               intent(in),   optional  :: computationalLWidth(:)
@@ -728,21 +731,21 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal
 !      to the rank specified in arrayspec, otherwise a runtime ESMF error will be
 !      raised.
-! \item[{[dimmap]}]
+! \item[{[distgridToArrayMap]}]
 !      List that contains as many elements as is indicated by
 !      {\tt distgrids}|s dimCount. The list elements map each dimension of
 !      the DistGrid object to a dimension in {\tt farray} by specifying the
 !      appropriate Array dimension index. The default is to map all of
 !      {\tt distgrid}|s dimensions against the lower dimensions of the
-!      {\tt farray} argument in sequence, i.e. {\tt dimmap = (/1, 2, .../)}.
+!      {\tt farray} argument in sequence, i.e. {\tt distgridToArrayMap = (/1, 2, .../)}.
 !      Unmapped {\tt farray} dimensions are not decomposed dimensions and
 !      form a tensor of rank = farray.rank - distgrid.dimCount.
-!      All {\tt dimmap} entries must be greater than or equal to one and
+!      All {\tt distgridToArrayMap} entries must be greater than or equal to one and
 !      smaller than or equal to the Array rank. It is erroneous to specify
 !      the same entry multiple times unless it is zero.
 !      If the Array rank is less than the DistGrid dimCount then the default
-!      dimmap will contain zeros for the dimCount - rank right most entries.
-!      A zero entry in the {\tt dimmap} indicates that the particular
+!      distgridToArrayMap will contain zeros for the dimCount - rank right most entries.
+!      A zero entry in the {\tt distgridToArrayMap} indicates that the particular
 !      DistGrid dimension will be replicating the Array across the DEs
 !      along this direction.
 ! \item[{[computationalEdgeLWidth]}]
@@ -809,7 +812,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !------------------------------------------------------------------------------
     integer                 :: status     ! local error status
     type(ESMF_Array)        :: array      ! opaque pointer to new C++ Array
-    type(ESMF_InterfaceInt) :: dimmapArg              ! helper variable
+    type(ESMF_InterfaceInt) :: distgridToArrayMapArg      ! helper variable
     type(ESMF_InterfaceInt) :: computationalEdgeLWidthArg ! helper variable
     type(ESMF_InterfaceInt) :: computationalEdgeUWidthArg ! helper variable
     type(ESMF_InterfaceInt) :: computationalLWidthArg ! helper variable
@@ -829,7 +832,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
 
     ! Deal with (optional) array arguments
-    dimmapArg = ESMF_InterfaceIntCreate(dimmap, rc=status)
+    distgridToArrayMapArg = ESMF_InterfaceIntCreate(distgridToArrayMap, &
+      rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalEdgeLWidthArg = &
@@ -868,14 +872,16 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     ! Optional name argument requires separate calls into C++
     if (present(name)) then
       len_name = len(name)
-      call c_ESMC_ArrayCreateAllocate(array, arrayspec, distgrid, dimmapArg, &
+      call c_ESMC_ArrayCreateAllocate(array, arrayspec, distgrid, &
+        distgridToArrayMapArg, &
         computationalEdgeLWidthArg, computationalEdgeUWidthArg, &
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
         totalUWidthArg, indexflag, staggerLoc, vectorDim, &
         undistLBoundArg, undistUBoundArg, name, len_name, status)
     else
       len_name = 0
-      call c_ESMC_ArrayCreateAllocate(array, arrayspec, distgrid, dimmapArg, &
+      call c_ESMC_ArrayCreateAllocate(array, arrayspec, distgrid, &
+        distgridToArrayMapArg, &
         computationalEdgeLWidthArg, computationalEdgeUWidthArg, &
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
         totalUWidthArg, indexflag, staggerLoc, vectorDim, &
@@ -885,7 +891,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(dimmapArg, rc=status)
+    call ESMF_InterfaceIntDestroy(distgridToArrayMapArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalEdgeLWidthArg, rc=status)

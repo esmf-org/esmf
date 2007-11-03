@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.157 2007/11/02 19:22:04 theurich Exp $
+// $Id: ESMC_Array.C,v 1.158 2007/11/03 05:39:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.157 2007/11/02 19:22:04 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.158 2007/11/03 05:39:21 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -89,8 +89,8 @@ Array::Array(
   int *undistUBoundArray,                 // (in)
   int *staggerLocArray,                   // (in)
   int *vectorDimArray,                    // (in)
-  int *dimmapArray,                       // (in)
-  int *inverseDimmapArray,                // (in)
+  int *distgridToArrayMapArray,           // (in)
+  int *arrayToDistGridMapArray,           // (in)
   ESMC_IndexFlag indexflagArg,            // (in)
   int *rc                                 // (out)
   ){
@@ -154,11 +154,11 @@ Array::Array(
   memcpy(staggerLoc, staggerLocArray, tensorElementCount * sizeof(int));
   vectorDim = new int[tensorElementCount];
   memcpy(vectorDim, vectorDimArray, tensorElementCount * sizeof(int));
-  // dimmap and inverseDimmap
-  dimmap = new int[dimCount];
-  memcpy(dimmap, dimmapArray, dimCount * sizeof(int));
-  inverseDimmap = new int[rank];
-  memcpy(inverseDimmap, inverseDimmapArray, rank * sizeof(int));
+  // distgridToArrayMap and arrayToDistGridMap
+  distgridToArrayMap = new int[dimCount];
+  memcpy(distgridToArrayMap, distgridToArrayMapArray, dimCount * sizeof(int));
+  arrayToDistGridMap = new int[rank];
+  memcpy(arrayToDistGridMap, arrayToDistGridMapArray, rank * sizeof(int));
   // indexflag
   indexflag = indexflagArg;
   // contiguous flag
@@ -172,7 +172,7 @@ Array::Array(
   for (int i=0; i<deCount; i++){
     deElementCount[i] = 1;   // prime deElementCount element
     for (int jj=0; jj<rank; jj++){
-      int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor dims
+      int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 for tensor d
       if (j){
         // decomposed dimension 
         --j;  // shift to basis 0
@@ -186,7 +186,7 @@ Array::Array(
     int de = localDeList[i];
     contiguousFlag[i] = 1;  // initialize as contiguous
     for (int jj=0; jj<rank; jj++){
-      int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor dims
+      int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 for tensor d
       if (j){
         // decomposed dimension 
         --j;  // shift to basis 0
@@ -268,10 +268,10 @@ Array::~Array(){
     delete [] staggerLoc;
   if (vectorDim != NULL)
     delete [] vectorDim;
-  if (dimmap != NULL)
-    delete [] dimmap;
-  if (inverseDimmap != NULL)
-    delete [] inverseDimmap;
+  if (distgridToArrayMap != NULL)
+    delete [] distgridToArrayMap;
+  if (arrayToDistGridMap != NULL)
+    delete [] arrayToDistGridMap;
   if (contiguousFlag != NULL)
     delete [] contiguousFlag;
   if (deElementCount != NULL)
@@ -303,7 +303,7 @@ Array *Array::create(
   ESMC_LocalArray **larrayListArg,            // (in)
   int larrayCount,                            // (in)
   DistGrid *distgrid,                         // (in)
-  InterfaceInt *dimmap,                       // (in)
+  InterfaceInt *distgridToArrayMap,           // (in)
   InterfaceInt *computationalEdgeLWidthArg,   // (in)
   InterfaceInt *computationalEdgeUWidthArg,   // (in)
   InterfaceInt *computationalLWidthArg,       // (in)
@@ -364,48 +364,48 @@ Array *Array::create(
   }
   const DELayout *delayout = distgrid->getDELayout();
   int dimCount = distgrid->getDimCount();
-  // check if dimmap was provided and matches rest of arguments
-  int *dimmapArray = new int[dimCount];
+  // check if distgridToArrayMap was provided and matches rest of arguments
+  int *distgridToArrayMapArray = new int[dimCount];
   for (int i=0; i<dimCount; i++){
     if (i < rank)
-      dimmapArray[i] = i+1; // default (basis 1)
+      distgridToArrayMapArray[i] = i+1; // default (basis 1)
     else
-      dimmapArray[i] = 0;   // default (replicator dims beyond rank)
+      distgridToArrayMapArray[i] = 0;   // default (replicator dims beyond rank)
   }
-  if (dimmap != NULL){
-    if (dimmap->dimCount != 1){
+  if (distgridToArrayMap != NULL){
+    if (distgridToArrayMap->dimCount != 1){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-        "- dimmap array must be of rank 1", rc);
+        "- distgridToArrayMap array must be of rank 1", rc);
       return ESMC_NULL_POINTER;
     }
-    if (dimmap->extent[0] != dimCount){
+    if (distgridToArrayMap->extent[0] != dimCount){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-        "- dimmap and distgrid mismatch", rc);
+        "- distgridToArrayMap and distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
     for (int i=0; i<dimCount; i++){
-      if (dimmapArray[i] < 0 || dimmapArray[i] > rank){
+      if (distgridToArrayMapArray[i] < 0 || distgridToArrayMapArray[i] > rank){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-          "- invalid dimmap element", rc);
+          "- invalid distgridToArrayMap element", rc);
         return ESMC_NULL_POINTER;
       }
-      dimmapArray[i] = dimmap->array[i];  // copy dimmap array element
+      distgridToArrayMapArray[i] = distgridToArrayMap->array[i];  // copy
     }
   }
   // determine replicatorCount
   int replicatorCount = 0;  // initialize
   for (int i=0; i<dimCount; i++)
-    if (dimmapArray[i] == 0) ++replicatorCount;
+    if (distgridToArrayMapArray[i] == 0) ++replicatorCount;
   // determine tensorCount
   int tensorCount = rank - (dimCount - replicatorCount);
   if (tensorCount < 0) tensorCount = 0;
-  // generate inverseDimmap
-  int *inverseDimmapArray = new int[rank];
+  // generate arrayToDistGridMap
+  int *arrayToDistGridMapArray = new int[rank];
   for (int i=0; i<rank; i++)
-    inverseDimmapArray[i] = 0; // reset  (basis 1), 0 indicates tensor dim
+    arrayToDistGridMapArray[i] = 0; // reset  (basis 1), 0 indicates tensor dim
   for (int i=0; i<dimCount; i++){
-    if (dimmapArray[i] > 0)
-      inverseDimmapArray[dimmapArray[i]-1] = i+1;
+    if (distgridToArrayMapArray[i] > 0)
+      arrayToDistGridMapArray[distgridToArrayMapArray[i]-1] = i+1;
   }
   // check for undistLBound and undistUBound arguments and that they match
   // dimCount, rank. By default use undistLBound and undistUBound of LocalArray
@@ -433,7 +433,7 @@ Array *Array::create(
     undistLBoundArray = new int[tensorCount];
     int tensorIndex = 0;  // reset
     for (int i=0; i<rank; i++)
-      if (inverseDimmapArray[i] == 0){
+      if (arrayToDistGridMapArray[i] == 0){
         undistLBoundArray[tensorIndex] = undistLBound[i];
         ++tensorIndex;
       }
@@ -462,7 +462,7 @@ Array *Array::create(
     undistUBoundArray = new int[tensorCount];
     int tensorIndex = 0;  // reset
     for (int i=0; i<rank; i++)
-      if (inverseDimmapArray[i] == 0){
+      if (arrayToDistGridMapArray[i] == 0){
         undistUBoundArray[tensorIndex] = undistUBound[i];
         ++tensorIndex;
       }
@@ -752,9 +752,9 @@ Array *Array::create(
     larrayListArg[i]->ESMC_LocalArrayGetCounts(rank, temp_counts);
     int jjj=0;  // reset
     for (int jj=0; jj<rank; jj++){
-      if (inverseDimmapArray[jj]){
+      if (arrayToDistGridMapArray[jj]){
         // distributed dimension
-        int j = inverseDimmapArray[jj] - 1; // shift to basis 0
+        int j = arrayToDistGridMapArray[jj] - 1; // shift to basis 0
         if (temp_counts[jj] < 
           totalUBound[i*dimCount+j] - totalLBound[i*dimCount+j] + 1){
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
@@ -828,7 +828,7 @@ Array *Array::create(
       exclusiveUBound, computationalLBound, computationalUBound,
       totalLBound, totalUBound, tensorCount, tensorElementCount,
       undistLBoundArray, undistUBoundArray, staggerLoc, vectorDim,
-      dimmapArray, inverseDimmapArray, indexflag, &localrc);
+      distgridToArrayMapArray, arrayToDistGridMapArray, indexflag, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }catch(...){
@@ -845,8 +845,8 @@ Array *Array::create(
   delete [] computationalUBound;
   delete [] totalLBound;
   delete [] totalUBound;
-  delete [] dimmapArray;
-  delete [] inverseDimmapArray;
+  delete [] distgridToArrayMapArray;
+  delete [] arrayToDistGridMapArray;
   delete [] staggerLoc;
   delete [] vectorDim;
   if (undistLBoundArrayAllocFlag) delete [] undistLBoundArray;
@@ -881,7 +881,7 @@ Array *Array::create(
 //
   ESMC_ArraySpec *arrayspec,                  // (in)
   DistGrid *distgrid,                         // (in)
-  InterfaceInt *dimmap,                       // (in)
+  InterfaceInt *distgridToArrayMap,           // (in)
   InterfaceInt *computationalEdgeLWidthArg,   // (in)
   InterfaceInt *computationalEdgeUWidthArg,   // (in)
   InterfaceInt *computationalLWidthArg,       // (in)
@@ -924,48 +924,48 @@ Array *Array::create(
   }
   const DELayout *delayout = distgrid->getDELayout();
   int dimCount = distgrid->getDimCount();
-  // check if dimmap was provided and matches rest of arguments
-  int *dimmapArray = new int[dimCount];
+  // check if distgridToArrayMap was provided and matches rest of arguments
+  int *distgridToArrayMapArray = new int[dimCount];
   for (int i=0; i<dimCount; i++){
     if (i < rank)
-      dimmapArray[i] = i+1; // default (basis 1)
+      distgridToArrayMapArray[i] = i+1; // default (basis 1)
     else
-      dimmapArray[i] = 0;   // default (replicator dims beyond rank)
+      distgridToArrayMapArray[i] = 0;   // default (replicator dims beyond rank)
   }
-  if (dimmap != NULL){
-    if (dimmap->dimCount != 1){
+  if (distgridToArrayMap != NULL){
+    if (distgridToArrayMap->dimCount != 1){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-        "- dimmap array must be of rank 1", rc);
+        "- distgridToArrayMap array must be of rank 1", rc);
       return ESMC_NULL_POINTER;
     }
-    if (dimmap->extent[0] != dimCount){
+    if (distgridToArrayMap->extent[0] != dimCount){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-        "- dimmap and distgrid mismatch", rc);
+        "- distgridToArrayMap and distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
     for (int i=0; i<dimCount; i++){
-      if (dimmapArray[i] < 0 || dimmapArray[i] > rank){
+      if (distgridToArrayMapArray[i] < 0 || distgridToArrayMapArray[i] > rank){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-          "- invalid dimmap element", rc);
+          "- invalid distgridToArrayMap element", rc);
         return ESMC_NULL_POINTER;
       }
-      dimmapArray[i] = dimmap->array[i];  // copy dimmap array element
+      distgridToArrayMapArray[i] = distgridToArrayMap->array[i];  // copy
     }
   }
   // determine replicatorCount
   int replicatorCount = 0;  // initialize
   for (int i=0; i<dimCount; i++)
-    if (dimmapArray[i] == 0) ++replicatorCount;
+    if (distgridToArrayMapArray[i] == 0) ++replicatorCount;
   // determine tensorCount
   int tensorCount = rank - (dimCount - replicatorCount);
   if (tensorCount < 0) tensorCount = 0;
-  // generate inverseDimmap
-  int *inverseDimmapArray = new int[rank];
+  // generate arrayToDistGridMap
+  int *arrayToDistGridMapArray = new int[rank];
   for (int i=0; i<rank; i++)
-    inverseDimmapArray[i] = 0; // reset  (basis 1), 0 indicates tensor dim
+    arrayToDistGridMapArray[i] = 0; // reset  (basis 1), 0 indicates tensor dim
   for (int i=0; i<dimCount; i++){
-    if (dimmapArray[i] > 0)
-      inverseDimmapArray[dimmapArray[i]-1] = i+1;
+    if (distgridToArrayMapArray[i] > 0)
+      arrayToDistGridMapArray[distgridToArrayMapArray[i]-1] = i+1;
   }
   // check for undistLBound and undistUBound arguments and that they match
   // dimCount, rank
@@ -1282,9 +1282,9 @@ Array *Array::create(
   for (int i=0; i<localDeCount; i++){
     int jjj=0;  // reset
     for (int jj=0; jj<rank; jj++){
-      if (inverseDimmapArray[jj]){
+      if (arrayToDistGridMapArray[jj]){
         // distributed dimension
-        int j = inverseDimmapArray[jj] - 1; // shift to basis 0
+        int j = arrayToDistGridMapArray[jj] - 1; // shift to basis 0
         temp_counts[jj] =
           totalUBound[i*dimCount+j] - totalLBound[i*dimCount+j] + 1;
         temp_undistLBound[jj] = totalLBound[i*dimCount+j];
@@ -1313,8 +1313,8 @@ Array *Array::create(
     array = new Array(typekind, rank, larrayList, distgrid, exclusiveLBound,
       exclusiveUBound, computationalLBound, computationalUBound,
       totalLBound, totalUBound, tensorCount, tensorElementCount,
-      undistLBoundArray, undistUBoundArray, staggerLoc, vectorDim, dimmapArray,
-      inverseDimmapArray, indexflag, &localrc);
+      undistLBoundArray, undistUBoundArray, staggerLoc, vectorDim,
+      distgridToArrayMapArray, arrayToDistGridMapArray, indexflag, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }catch(...){
@@ -1331,8 +1331,8 @@ Array *Array::create(
   delete [] computationalUBound;
   delete [] totalLBound;
   delete [] totalUBound;
-  delete [] dimmapArray;
-  delete [] inverseDimmapArray;
+  delete [] distgridToArrayMapArray;
+  delete [] arrayToDistGridMapArray;
   delete [] staggerLoc;
   delete [] vectorDim;
   
@@ -1439,7 +1439,7 @@ int Array::getLinearIndexExclusive(
   int linIndex = 0;                 // reset
   int tensorIndex = tensorCount-1;  // reset
   for (int jj=rank-1; jj>=0; jj--){
-    int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor
+    int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 for tensor
     if (j){
       // decomposed dimension 
       --j;  // shift to basis 0
@@ -1499,9 +1499,9 @@ SeqIndex Array::getSequenceIndexExclusive(
   int dimCount = distgrid->getDimCount();
   int *decompIndex = new int[dimCount];
   for (int i=0; i<dimCount; i++){
-    if (dimmap[i] > 0){
+    if (distgridToArrayMap[i] > 0){
       // DistGrid dim associated with Array dim
-      decompIndex[i] = index[dimmap[i]-1];
+      decompIndex[i] = index[distgridToArrayMap[i]-1];
     }else{
       // DistGrid dim _not_ associated with Array dim
       decompIndex[i] = 0; // use smallest seq index for replicated dims
@@ -1522,7 +1522,7 @@ SeqIndex Array::getSequenceIndexExclusive(
   int tensorSeqIndex = 0;             // reset
   int tensorIndex = tensorCount - 1;  // reset
   for (int jj=rank-1; jj>=0; jj--){
-    int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor
+    int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 for tensor
     if (j==0){
       // tensor dimension
       // first time multiply with zero intentionally:
@@ -1748,9 +1748,9 @@ int Array::print()const{
       // associated DE
       int jjj=0;  // reset
       for (int jj=0; jj<rank; jj++){
-        if (inverseDimmap[jj]){
+        if (arrayToDistGridMap[jj]){
           // distributed dimension
-          int j = inverseDimmap[jj] - 1;  // shift to basis 0
+          int j = arrayToDistGridMap[jj] - 1;  // shift to basis 0
           printf("dim %d: [%d]: [%d [%d [%d, %d] %d] %d]\n", 
             jj+1, j, 
             totalLBound[i*dimCount+j], computationalLBound[i*dimCount+j],
@@ -1882,9 +1882,9 @@ int Array::serialize(
     *ip++ = vectorDim[i];
   }
   for (int i=0; i<distgrid->getDimCount(); i++)
-    *ip++ = dimmap[i];
+    *ip++ = distgridToArrayMap[i];
   for (int i=0; i<rank; i++)
-    *ip++ = inverseDimmap[i];
+    *ip++ = arrayToDistGridMap[i];
   *ip++ = tensorElementCount;
   for (int i=0; i<delayout->getDeCount(); i++)
     *ip++ = deElementCount[i];
@@ -1958,12 +1958,12 @@ int Array::deserialize(
     staggerLoc[i] = *ip++;
     vectorDim[i] = *ip++;
   }
-  dimmap = new int[distgrid->getDimCount()];
+  distgridToArrayMap = new int[distgrid->getDimCount()];
   for (int i=0; i<distgrid->getDimCount(); i++)
-    dimmap[i] = *ip++;
-  inverseDimmap = new int[rank];
+    distgridToArrayMap[i] = *ip++;
+  arrayToDistGridMap = new int[rank];
   for (int i=0; i<rank; i++)
-    inverseDimmap[i] = *ip++;
+    arrayToDistGridMap[i] = *ip++;
   tensorElementCount = *ip++;
   deElementCount = new int[delayout->getDeCount()];
   for (int i=0; i<delayout->getDeCount(); i++)
@@ -2075,7 +2075,7 @@ int Array::gather(
     }
     int tensorIndex=0;  // reset
     for (int i=0; i<rank; i++){
-      int j = inverseDimmap[i];
+      int j = arrayToDistGridMap[i];
       if (j){
         // decomposed dimension
         --j;  // shift to basis 0
@@ -2164,7 +2164,7 @@ int Array::gather(
       int tensorIndex = 0;    // reset
       int totalWidthProd = 1; // reset
       for (int jj=0; jj<rank; jj++){
-        int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor dims
+        int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 for tensor
         if (j){
           // decomposed dimension 
           --j;  // shift to basis 0
@@ -2194,7 +2194,7 @@ int Array::gather(
       // determine start lin. index for this element into larrayBaseAddrList[i]
       int linearIndex = ii[rank-1];  // init
       for (int jj=rank-2; jj>=0; jj--){
-        int j = inverseDimmap[jj];
+        int j = arrayToDistGridMap[jj];
         if (j){
           // decomposed dimension 
           --j;  // shift to basis 0
@@ -2266,7 +2266,7 @@ int Array::gather(
         int tensorIndex=0;  // reset
         int commhListCount = 0;  // reset
         for (int j=0; j<dimCount; j++){
-          if(dimmap[j]!=0 && contigFlagPDimPDe[de*dimCount+j]==0){
+          if(distgridToArrayMap[j]!=0 && contigFlagPDimPDe[de*dimCount+j]==0){
             // associated and non-contiguous dimension
             // -> obtain indexList for this DE and dim
             indexList[j] = new int[indexCountPDimPDe[de*dimCount+j]];
@@ -2284,7 +2284,7 @@ int Array::gather(
         tensorIndex=0;  // reset
         for (int jj=0; jj<rank; jj++){
           ii[jj] = 0;  // reset
-          int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor
+          int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 f tensor
           if (j){
             // decomposed dimension 
             --j;  // shift to basis 0
@@ -2311,7 +2311,7 @@ int Array::gather(
           int linearIndex = 0;  // reset
           for (int jj=rank-1; jj>=0; jj--){
             linearIndex *= counts[jj];  // first time zero o.k.
-            int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor
+            int j = arrayToDistGridMap[jj];// j is dimIndex bas 1, or 0 f tensor
             if (j){
               // decomposed dimension 
               --j;  // shift to basis 0
@@ -2366,7 +2366,7 @@ int Array::gather(
       if (patchListPDe[de] == patch){
         // this DE is located on receiving patch -> must send info to rootPet
         for (int j=0; j<dimCount; j++){
-          if(dimmap[j]!=0 && contigFlagPDimPDe[de*dimCount+j]==0){
+          if(distgridToArrayMap[j]!=0 && contigFlagPDimPDe[de*dimCount+j]==0){
             // associated and non-contiguous dimension
             // -> send local indexList for this DE and dim to rootPet
             commhList[commhListCount] = NULL; // prime for later test
@@ -2492,7 +2492,7 @@ int Array::scatter(
     }
     int tensorIndex=0;  // reset
     for (int i=0; i<rank; i++){
-      int j = inverseDimmap[i];
+      int j = arrayToDistGridMap[i];
       if (j){
         // decomposed dimension
         --j;  // shift to basis 0
@@ -2548,7 +2548,7 @@ int Array::scatter(
         int tensorIndex=0;  // reset
         int commhListCount = 0;  // reset
         for (int j=0; j<dimCount; j++){
-          if(dimmap[j]!=0 && contigFlagPDimPDe[de*dimCount+j]==0){
+          if(distgridToArrayMap[j]!=0 && contigFlagPDimPDe[de*dimCount+j]==0){
             // associated and non-contiguous dimension
             // -> obtain indexList for this DE and dim
             indexList[j] = new int[indexCountPDimPDe[de*dimCount+j]];
@@ -2569,7 +2569,7 @@ int Array::scatter(
         tensorIndex=0;  // reset
         for (int jj=0; jj<rank; jj++){
           ii[jj] = 0;  // reset
-          int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor
+          int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 f tensor
           if (j){
             // decomposed dimension 
             --j;  // shift to basis 0
@@ -2596,7 +2596,7 @@ int Array::scatter(
           int linearIndex = 0;  // reset
           for (int jj=rank-1; jj>=0; jj--){
             linearIndex *= counts[jj];  // first time zero o.k.
-            int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor
+            int j = arrayToDistGridMap[jj];// j is dimIndex bas 1, or 0 f tensor
             if (j){
               // decomposed dimension 
               --j;  // shift to basis 0
@@ -2666,7 +2666,7 @@ int Array::scatter(
       if (patchListPDe[de] == patch){
         // this DE is located on receiving patch -> must send info to rootPet
         for (int j=0; j<dimCount; j++){
-          if(dimmap[j]!=0 && contigFlagPDimPDe[de*dimCount+j]==0){
+          if(distgridToArrayMap[j]!=0 && contigFlagPDimPDe[de*dimCount+j]==0){
             // associated and non-contiguous dimension
             // -> send local indexList for this DE and dim to rootPet
             commhList[commhListCount] = NULL; // prime for later test
@@ -2737,7 +2737,7 @@ int Array::scatter(
       int tensorIndex = 0;    // reset
       int totalWidthProd = 1; // reset
       for (int jj=0; jj<rank; jj++){
-        int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor dims
+        int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 for tensor
         if (j){
           // decomposed dimension 
           --j;  // shift to basis 0
@@ -2767,7 +2767,7 @@ int Array::scatter(
       // determine start lin. index for this element into larrayBaseAddrList[i]
       int linearIndex = ii[rank-1];  // init
       for (int jj=rank-2; jj>=0; jj--){
-        int j = inverseDimmap[jj];
+        int j = arrayToDistGridMap[jj];
         if (j){
           // decomposed dimension 
           --j;  // shift to basis 0
@@ -3411,7 +3411,7 @@ int Array::sparseMatMulStore(
       int tensorIndex = 0;    // reset
       for (int jj=0; jj<srcRank; jj++){
         ii[jj] = 0;  // reset
-        int j = srcArray->inverseDimmap[jj];
+        int j = srcArray->arrayToDistGridMap[jj];
         // j is dimIndex basis 1, or 0 for tensor dims
         if (j){
           // decomposed dimension 
@@ -3501,7 +3501,7 @@ int Array::sparseMatMulStore(
       int tensorIndex = 0;    // reset
       for (int jj=0; jj<dstRank; jj++){
         ii[jj] = 0;  // reset
-        int j = dstArray->inverseDimmap[jj];
+        int j = dstArray->arrayToDistGridMap[jj];
         // j is dimIndex basis 1, or 0 for tensor dims
         if (j){
           // decomposed dimension 
