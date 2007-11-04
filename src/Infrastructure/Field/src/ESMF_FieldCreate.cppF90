@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.4 2007/11/01 14:44:37 cdeluca Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.5 2007/11/04 17:20:50 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cppF90,v 1.4 2007/11/01 14:44:37 cdeluca Exp $'
+      '$Id: ESMF_FieldCreate.cppF90,v 1.5 2007/11/04 17:20:50 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -112,7 +112,7 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreate()
       function ESMF_FieldCreateNew(grid, arrayspec, allocflag, staggerloc, &
-                                   gridDimMap, ungriddedLBound, &
+                                   gridToFieldMap, ungriddedLBound, &
                                    ungriddedUBound, maxHaloLWidth, &
                                    maxHaloUWidth, indexflag, name, iospec, rc)
 !
@@ -124,7 +124,7 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
       type(ESMF_ArraySpec), intent(inout) :: arrayspec     
       type(ESMF_AllocFlag), intent(in), optional :: allocflag
       type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
-      integer, intent(in), optional :: gridDimMap(:)    
+      integer, intent(in), optional :: gridToFieldMap(:)    
       integer, intent(in), optional :: ungriddedLBound(:)
       integer, intent(in), optional :: ungriddedUBound(:)
       integer, intent(in), optional :: maxHaloLWidth(:)
@@ -153,18 +153,21 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 !           Relative location of data per grid cell/vertex in the grid.  
 !           If specified here, takes precedence over the same setting
 !           in the {\tt datamap} argument.
-!     \item [{[gridDimMap]}]
-!           List that contains as many elements as is indicated by the {\tt grid}'s rank. 
-!           The list elements map each dimension of the Grid object to a dimension in the
-!           Field's Array by specifying the appropriate Array dimension index. The default is to
-!           map all of the grid's dimensions against the lower dimensions of the Field's
-!           Array in sequence, i.e. gridDimmap = (/1, 2, .../). Unmapped dimensions are
-!           undistributed dimensions.  The total undistributed dimensions are the total 
-!           Array dimensions - the distributed dimensions in the Grid (distRank).  All
-!           gridDimMap entries must be greater than or equal to one and smaller than or equal
-!           to the Array rank. It is erroneous to specify the same entry multiple times
+!     \item [{[gridToFieldMap]}]
+!           List that contains as many elements as is indicated by the
+!           {\tt grid}'s
+!           rank.  The list elements map each dimension of the Grid object to a
+!           dimension in the Field's Array by specifying the appropriate Array
+!           dimension index. The default is to map all of the grid's dimensions
+!           against the lower dimensions of the Field's Array in sequence, i.e.
+!           gridToFieldMap = (/1, 2, .../). Unmapped dimensions are undistributed
+!           dimensions.  The total undistributed dimensions are the total
+!           Array dimensions - the distributed dimensions in the Grid (distRank).
+!           All gridToFieldMap entries must be greater than or equal to one and
+!           smaller than or equal to the Array rank. It is erroneous to specify
+!           the same entry multiple times
 !           unless it is zero.  If the Array rank is less than the Grid dimCount then
-!           the default gridDimMap will contain zeros for the dimCount.
+!           the default gridToFieldMap will contain zeros for the dimCount.
 !           A zero entry in the dimmap indicates that the particular Grid dimension will
 !           be replicating the Array across the DEs along this direction.
 !     \item [{[ungriddedLBound]}]
@@ -213,7 +216,7 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 
       ! Call construction method to allocate and initialize field internals.
       call ESMF_FieldConstructIA(ftype, grid, arrayspec, allocflag, &
-                                  staggerloc, gridDimMap, ungriddedLBound, &
+                                  staggerloc, gridToFieldMap, ungriddedLBound, &
                                   ungriddedUBound, maxHaloLWidth, &
                                   maxHaloUWidth, indexflag, name, iospec, localrc)
       if (ESMF_LogMsgFoundError(localrc, &

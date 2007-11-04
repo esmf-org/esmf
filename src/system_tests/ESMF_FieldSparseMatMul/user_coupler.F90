@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.1 2007/10/29 01:53:54 cdeluca Exp $
+! $Id: user_coupler.F90,v 1.2 2007/11/04 17:20:50 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -80,7 +80,7 @@ module user_coupler
 
     ! Local variables
     integer :: itemcount, localPet
-    type(ESMF_Array) :: srcField, dstField
+    type(ESMF_Field) :: srcField, dstField
     type(ESMF_Array) :: srcArray, dstArray
     type(ESMF_VM) :: vm
     real(ESMF_KIND_R8):: factorList(10000)
@@ -112,11 +112,11 @@ module user_coupler
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get Array out of srcField
-    call ESMF_FieldGet(srcField, srcArray, rc=rc)
+    call ESMF_FieldGet(srcField, array=srcArray, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get Array out of dstField
-    call ESMF_FieldGet(dstField, dstArray, rc=rc)
+    call ESMF_FieldGet(dstField, array=dstArray, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! get localPet
@@ -193,11 +193,11 @@ module user_coupler
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get Array out of srcField
-    call ESMF_FieldGet(srcField, srcArray, rc=rc)
+    call ESMF_FieldGet(srcField, array=srcArray, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get Array out of dstField
-    call ESMF_FieldGet(dstField, dstArray, rc=rc)
+    call ESMF_FieldGet(dstField, array=dstArray, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Use ArraySparseMatMul() to take data from srcArray to dstArray

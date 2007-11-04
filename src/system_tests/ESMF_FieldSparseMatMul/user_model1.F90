@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.1 2007/10/29 01:53:54 cdeluca Exp $
+! $Id: user_model1.F90,v 1.2 2007/11/04 17:20:50 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -80,7 +80,7 @@ module user_model1
     ! Local variables
     type(ESMF_ArraySpec)  :: arrayspec
     type(ESMF_Grid)       :: grid
-    type(ESMF_Array)      :: field
+    type(ESMF_Field)      :: field
     type(ESMF_VM)         :: vm
     integer               :: petCount
     
@@ -98,12 +98,12 @@ module user_model1
     ! Create the source Field and add it to the export State
     call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    grid = ESMF_GridCreate(minIndex=(/1,1/), maxIndex=(/100,150/), &
+    grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/100,150/), &
       regDecomp=(/petCount,1/), rc=rc)
-    field = ESMF_FieldCreate(grid=grid, arrayspec=arrayspec,
-      indexflag=ESMF_INDEX_GLOBAL, name="field data", rc=rc)
+    field = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
+      name="field data", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAddField(exportState, field, rc=rc)
+    call ESMF_StateAddField(exportState, field=field, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     print *, "User Comp1 Init returning"
@@ -140,7 +140,7 @@ module user_model1
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get the Array from the Field
-    call ESMF_FieldGet(field, array, rc=rc)
+    call ESMF_FieldGet(field, array=array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer

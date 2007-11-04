@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.1 2007/10/29 01:53:54 cdeluca Exp $
+! $Id: user_model2.F90,v 1.2 2007/11/04 17:20:50 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -98,13 +98,13 @@ module user_model2
     ! Create the destination Field and add it to the import State
     call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    grid = ESMF_GridCreate(minIndex=(/1,1/), maxIndex=(/100,150/), &
+    grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/100,150/), &
       regDecomp=(/1,petCount/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    array = ESMF_FieldCreate(grid=grid, arrayspec=arrayspec,
-      indexflag=ESMF_INDEX_GLOBAL, name="field data", rc=rc)
+    field = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
+      name="field data", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAddField(importState, field, rc=rc)
+    call ESMF_StateAddField(importState, field=field, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     print *, "User Comp2 Init returning"
@@ -137,11 +137,11 @@ module user_model2
     pi = 3.14159d0
 
     ! Get the destination Field from the import State
-    call ESMF_StateGetField(importState, "field data", field, rc=rc)
+    call ESMF_StateGetField(importState, fieldName="field data", field=field, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     ! Get the Array from the Field
-    call ESMF_FieldGet(field, array, rc=rc)
+    call ESMF_FieldGet(field, array=array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer
