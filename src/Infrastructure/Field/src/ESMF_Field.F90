@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.257 2007/11/03 05:39:21 theurich Exp $
+! $Id: ESMF_Field.F90,v 1.258 2007/11/04 06:21:08 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -176,7 +176,7 @@
    public ESMF_FieldGetAttributeInfo   ! get type, length by name or number
 
    public ESMF_FieldValidate           ! Check internal consistency
-!   public ESMF_FieldPrint              ! Print contents of a Field
+   public ESMF_FieldPrint              ! Print contents of a Field
 
    public ESMF_FieldWrite              ! Write data and Grid from a Field
 
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.257 2007/11/03 05:39:21 theurich Exp $'
+      '$Id: ESMF_Field.F90,v 1.258 2007/11/04 06:21:08 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -219,7 +219,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_FieldCreateNoDataPtr
 !        module procedure ESMF_FieldCreateNoArray
-!        module procedure ESMF_FieldCreateNoGridArray  
+        module procedure ESMF_FieldCreateNoGridArray  
 
 ! !DESCRIPTION:
 !     This interface provides an entry point for methods that create 
@@ -604,8 +604,7 @@
       end function ESMF_FieldCreateNoArray
 #endif
 
-! TODO:FIELDINTEGRATION Decide if FieldCreateNoArray is still needed
-#if 0
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldCreateNoGridArray"
@@ -670,7 +669,7 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_FieldCreateNoGridArray
-#endif
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1952,8 +1951,7 @@
 
       end subroutine ESMF_FieldGetAttrInfoByNum
 
-! TODO:FIELDINTEGRATION Finish implementation of FieldPrint
-#if 0
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldPrint"
@@ -2067,7 +2065,6 @@
         if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_FieldPrint
-#endif
 
 
 !------------------------------------------------------------------------------
@@ -4131,8 +4128,7 @@
       end subroutine ESMF_FieldConstructNoArray
 #endif
 
-! TODO:FIELDINTEGRATION Restore FieldConstructNoGridArray method
-#if 0
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldConstructNoGridArray"
@@ -4151,9 +4147,7 @@
 !
 ! !DESCRIPTION:
 ! 
-!     Constructs {\tt ESMF\_Field} internals except those related to {\tt ESMF\_Grid} 
-!     and {\tt ESMF\_Data}.
-!
+!     Constructs an empty {\tt ESMF\_Field}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -4169,7 +4163,6 @@
 !
 !
 !EOPI
-
 
       ! Local variables
       integer :: localrc
@@ -4187,24 +4180,16 @@
       ! Initialize field contents
       ftypep%gridstatus = ESMF_STATUS_UNINIT
       ftypep%datastatus = ESMF_STATUS_UNINIT
-      ftypep%datamapstatus = ESMF_STATUS_UNINIT
 
       ! Init Local flag 
       ftypep%localFlag=.true.
 
-      ! Set the mapping as unknown/invalid
-      call ESMF_FieldDataMapSetInvalid(ftypep%mapping, localrc)
-
       ftypep%fieldstatus = ESMF_STATUS_READY
 
-!
-! add more code here
-!
-     
       if (present(rc)) rc = ESMF_SUCCESS
       
       end subroutine ESMF_FieldConstructNoGridArray
-#endif
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
