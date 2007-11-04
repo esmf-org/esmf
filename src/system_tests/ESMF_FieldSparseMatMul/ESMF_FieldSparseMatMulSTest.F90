@@ -1,7 +1,7 @@
-! $Id: ESMF_FieldSparseMatMulSTest.F90,v 1.1 2007/10/29 01:53:54 cdeluca Exp $
+! $Id: ESMF_FieldSparseMatMulSTest.F90,v 1.2 2007/11/04 18:25:11 cdeluca Exp $
 !
 !-------------------------------------------------------------------------
-!SYSTEM_removeTEST        String used by test script to count system tests.
+!SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !-------------------------------------------------------------------------
