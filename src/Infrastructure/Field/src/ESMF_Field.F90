@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.258 2007/11/04 06:21:08 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.259 2007/11/05 16:04:51 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.258 2007/11/04 06:21:08 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.259 2007/11/05 16:04:51 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -3661,9 +3661,11 @@
 !     \item [{[ungriddedUBound]}]
 !           Upper bounds of the ungridded dimensions of the Field.
 !     \item [{[maxHaloLWidth]}]
-!           Lower bound of halo region.  Defaults to 0.
+!           Lower bound of halo region.  Halo widths should be in the same order as
+!           the DistGrid in {\tt grid}.  Defaults to 0.
 !     \item [{[maxHaloUWidth]}]
-!           Upper bound of halo region.  Defaults to 0.
+!           Upper bound of halo region.  Halo widths should be in the same order as
+!           the DistGrid in {\tt grid}.  Defaults to 0.
 !     \item [{[indexflag]}]
 !           Local or global indices.  See section \ref{opt:indexflag} for a 
 !           list of valid indexflag options.  The default is {ESMF\_INDEX\_DELOCAL}.
@@ -3717,48 +3719,27 @@
          return
       endif
 
-#if 0
-
-! TODO:FIELDINTEGRATION Finish the FieldConstructIANew method
-
-
-      ! this sets the grid status, and the datamap status
-      call ESMF_FieldConstructNoArray(ftype, grid, staggerloc, &
-                                      dmap, name, &
-                                      iospec, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      ! make sure localStaggerloc has a value before Array create call
+      ! Make sure localStaggerloc has a value before Array create call
       if (present(staggerloc)) then
           ftype%staggerloc = staggerloc
       else
-          ftype%staggerloc = ESMF_STAGGERLOC_UNKNOWN
+          ftype%staggerloc = ESMF_STAGGERLOC_CENTER
       endif
 
-! TODO:FIELDINTEGRATION Adjust array size in field create for halo widths 
+! TODO:FIELDINTEGRATION Check that Field halo is same rank as distgrid dim count
+! TODO:FIELDINTEGRATION Does ArrayCreateFromGrid need an indexflag argument?  
 
-!      Field halo needs to be same rank as distgrid dim count - this 
-!      should be checked.
-      
-!      Array assumes the halo arguments are in the same order as the
-!      distgrid dimensions.
-      
-!      The ArrayCreateFromGrid call needs to be updated so you can
-!      pass in the ungriddedLBound and ungriddedUBound, and 
-!      the gridToFieldMap.  The halo widths should go in as the total
-!      width argument.           
+      array = ESMF_ArrayCreateFromGrid(grid, staggerloc=staggerloc, name=name, &
+        typekind=typekind, gridToArrayMap=gridToFieldMap, ungriddedLBound=ungriddedLBound, &
+        ungriddedUBound=ungriddedUBound, totalLWidth=maxHaloLWidth, totalUWidth=maxHaloUWidth, &
+        rc=localrc) 
 
-      array = ESMF_ArrayCreateFromGrid(grid, staggerloc=staggerloc, &
-                                       typekind=typekind, rc=localrc) 
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       ftype%array = array
       ftype%datastatus = ESMF_STATUS_READY
-#endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 

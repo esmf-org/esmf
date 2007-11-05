@@ -183,7 +183,7 @@ Underlying these data classes are native language arrays.  ESMF allows
 you to reference an existing Fortran array to an ESMF Array, 
 Field, or Bundle, so that ESMF data classes can be readily 
 introduced into existing code.  You can perform communication operations 
-directly on Fortran arrays through the DELayout class, which serves 
+directly on Fortran arrays through the VM class, which serves 
 as a unifying wrapper for distributed and shared memory communication 
 libraries.
 
@@ -230,7 +230,7 @@ a topology to a collection of grid cells.
 \item {\bf Field}  A Field may contain more dimensions than the 
 Grid that it is discretized on.  For example, for convenience 
 during integration, a user may want to define a single Field object 
-that holds snapshots of the data at multiple times.  The Field 
+that holds snapshots of the data at multiple times.  The user
 must track what these additional dimensions mean.  Fields also 
 keep track of the location of a Field data point within its 
 associated Grid cell.
@@ -241,28 +241,17 @@ Although it is not an ESMF class, the linear {\bf address space}
 of the computer is another fundamental index space that must be 
 mapped to data stored by the ESMF system.  
 
-\subsection{ESMF DataMap Classes}
+\subsection{ESMF Maps}
 
-In order to map the index spaces of the spatial classes,
-we require either implicit rules (in which case the relationship 
-between index spaces is defined by default), or special classes that 
-allow the user to specify the desired association.  The following
-classes define how the data is laid out in memory.
+In order to define how the index spaces of the spatial classes relate
+to each other, we require either implicit rules (in which case the
+relationship between spaces is defined by default), or special Map arrays
+that allow the user to specify the desired association.  The form of the 
+specification is usually that the position of the array element carries
+information about the first object, and the value of the array element carries
+information about the second object.  ESMF includes a distGridToArrayMap,
+a gridToFieldMap, a distGridToGridMap, and others.
 
-\begin{itemize}
-
-\item {\bf ArrayDataMap} The ArrayDataMap class specifies how the 
-address space of the computer relates to the array rank (e.g. row 
-or column major order), and, optionally, how a list of array ranks 
-corresponds to a list of Grid dimensions.   
-
-\item {\bf FieldDataMap} The FieldDataMap specifies the number of 
-directional components in a vector Field, and how they are interleaved.
-
-\item {\bf BundleDataMap} The BundleDataMap dictates how the Fields
-within a Bundle are interleaved.  
-
-\end{itemize}
 
 \subsection{ESMF Specification Classes}
 
