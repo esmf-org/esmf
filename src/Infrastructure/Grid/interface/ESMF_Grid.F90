@@ -149,7 +149,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.43 2007/11/05 05:17:45 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.44 2007/11/05 23:32:35 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -170,7 +170,6 @@ interface ESMF_GridAllocCoord
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_GridAllocCoordNoValues
-
       
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -364,15 +363,15 @@ end interface
 ! !INTERFACE:
   ! Private name; call using ESMF_GridAllocCoord()
      subroutine ESMF_GridAllocCoordNoValues(grid, staggerloc,  &
-                staggerLWidth, staggerUWidth, staggerAlign, &
+                staggerEdgeLWidth, staggerEdgeUWidth, staggerAlign, &
                 totalLWidth, totalUWidth,rc)
 
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)              :: grid 
       type (ESMF_StaggerLoc), intent(in),optional     :: staggerloc
-      integer,                intent(in),optional     :: staggerLWidth(:)
-      integer,                intent(in),optional     :: staggerUWidth(:)
+      integer,                intent(in),optional     :: staggerEdgeLWidth(:)
+      integer,                intent(in),optional     :: staggerEdgeUWidth(:)
       integer,                intent(in),optional     :: staggerAlign(:)
       integer,                intent(out), optional   :: totalLWidth(:)         ! N. IMP
       integer,                intent(out), optional   :: totalUWidth(:)         ! N. IMP
@@ -385,7 +384,7 @@ end interface
 !  storage (creates internal ESMF\_Arrays and associated memory) for  a particular
 !  stagger location. Note that this
 !  call doesn't assign any values to the storage, it only allocates it. The
-!  remaining options {\tt staggerLWidth}, etc. allow the user to adjust the 
+!  remaining options {\tt staggerEdgeLWidth}, etc. allow the user to adjust the 
 !  padding on the coordinate arrays.
 !
 ! The arguments are:
@@ -395,10 +394,10 @@ end interface
 ! \item[{[staggerloc]}]
 !      The stagger location to add. Please see Section~\ref{sec:opt:staggerloc} for a list 
 !      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
-! \item[{[staggerLWidth]}] 
+! \item[{[staggerEdgeLWidth]}] 
 !      This array should be the same rank as the grid. It specifies the lower corner of the stagger
 !      region with respect to the lower corner of the exclusive region.
-! \item[{[staggerUWidth]}] 
+! \item[{[staggerEdgeUWidth]}] 
 !      This array should be the same rank as the grid. It specifies the upper corner of the stagger
 !      region with respect to the upper corner of the exclusive region.
 ! \item[{[staggerAlign]}] 
@@ -407,7 +406,7 @@ end interface
 !      has the same index value as the center. For example, 
 !      for a 2D cell with corner stagger it specifies which 
 !      of the 4 corners has the same index as the center. 
-!      If this is set and either staggerUWidth or staggerLWidth is not,
+!      If this is set and either staggerEdgeUWidth or staggerEdgeLWidth is not,
 !      this determines the default array padding for a stagger. 
 !      If not set, then this defaults to all negative. (e.g. 
 !      The most negative part of the stagger in a cell is aligned with the 
@@ -418,7 +417,7 @@ end interface
 !     [CURRENTLY NOT IMPLEMENTED]
 !\item[{[totalUWidth]}]
 !     The lower boundary of the computatational region in reference to the computational region. 
-!     Note, the computational region includes the extra padding specified by {\tt staggerLWidth}.
+!     Note, the computational region includes the extra padding specified by {\tt staggerEdgeLWidth}.
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -428,8 +427,8 @@ end interface
 
     integer :: tmp_staggerloc
     integer :: localrc ! local error status
-    type(ESMF_InterfaceInt) :: staggerLWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: staggerUWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: staggerEdgeLWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: staggerEdgeUWidthArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: staggerAlignArg  ! Language Interface Helper Var
 
     ! Initialize return code; assume failure until success is certain
@@ -462,18 +461,13 @@ end interface
        tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc
     endif
 
-    !! staggerLWidth
-    staggerLWidthArg = ESMF_InterfaceIntCreate(staggerLWidth, rc=localrc)
+    !! staggerEdgeLWidth
+    staggerEdgeLWidthArg = ESMF_InterfaceIntCreate(staggerEdgeLWidth, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    !! staggerUWidth
-    staggerUWidthArg = ESMF_InterfaceIntCreate(staggerUWidth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    !! staggerAlign
-    staggerAlignArg = ESMF_InterfaceIntCreate(staggerAlign, rc=localrc)
+    !! staggerEdgeUWidth
+    staggerEdgeUWidthArg = ESMF_InterfaceIntCreate(staggerEdgeUWidth, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -481,20 +475,19 @@ end interface
     staggerAlignArg = ESMF_InterfaceIntCreate(staggerAlign, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
 
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridalloccoord(grid%this,tmp_staggerloc, &
-      staggerLWidthArg, staggerUWidthArg, staggerAlignArg, localrc)
+      staggerEdgeLWidthArg, staggerEdgeUWidthArg, staggerAlignArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate helper variables
-    call ESMF_InterfaceIntDestroy(staggerLWidthArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(staggerEdgeLWidthArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_InterfaceIntDestroy(staggerUWidthArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(staggerEdgeUWidthArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -505,7 +498,6 @@ end interface
     if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridAllocCoordNoValues
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -635,7 +627,7 @@ end interface
 ! !DESCRIPTION:
 !  
 !  Create an ESMF Array which is suitable to hold data for a particular
-!  stagger location in a Grid. The Array will have the correct bounds, dimmap,
+!  stagger location in a Grid. The Array will have the correct bounds, distgridToGridMap,
 !  distgrid, etc. The {\tt totalWidth} variables can be used to add extra padding
 !  around the Array (e.g. for use as a halo). 
 !
@@ -794,7 +786,7 @@ end interface
 
 
     ! Get info from Grid
-    call ESMF_GridGet(grid, dimmap=distgridToGridMap, rc=localrc)
+    call ESMF_GridGet(grid, distgridToGridMap=distgridToGridMap, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -906,7 +898,7 @@ end interface
 
          !!! Get staggerloc grid bounds
          call ESMF_GridGetPSloc(grid, localStaggerLoc, &
-              lbounds=gridLBound,ubounds=gridUBound, rc=localrc)
+              undistLBound=gridLBound,undistUBound=gridUBound, rc=localrc)
 
          !!! Fill new array undistributed bounds
          bndpos=1
@@ -996,7 +988,7 @@ end interface
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
       function ESMF_GridCreateFromDistGrid(name,coordTypeKind,distgrid, &
-                         dimmap, lbounds, ubounds, coordRank, coordDimMap, &
+                         distgridToGridMap, undistLBound, undistUBound, coordRank, coordDimMap, &
                          gridEdgeLWidth, gridEdgeUWidth, gridAlign, indexflag, rc)
 !
 ! !RETURN VALUE:
@@ -1006,9 +998,9 @@ end interface
        character (len=*), intent(in), optional :: name
        type(ESMF_TypeKind),  intent(in),   optional  :: coordTypeKind
        type(ESMF_DistGrid),   intent(in)              :: distgrid
-       integer,               intent(in),   optional  :: dimmap(:)
-       integer,               intent(in),   optional  :: lbounds(:)
-       integer,               intent(in),   optional  :: ubounds(:)
+       integer,               intent(in),   optional  :: distgridToGridMap(:)
+       integer,               intent(in),   optional  :: undistLBound(:)
+       integer,               intent(in),   optional  :: undistUBound(:)
        integer,               intent(in),   optional  :: coordRank(:)
        integer,               intent(in),   optional  :: coordDimMap(:,:)
        integer,               intent(in),   optional  :: gridEdgeLWidth(:)
@@ -1022,7 +1014,7 @@ end interface
 ! object. It allows the user to fully specify the topology and index space
 ! (of the distributed dimensions) using the DistGrid methods and then build a grid out
 ! of the resulting {\tt distgrid}.  Optional {\tt lbound} and {\tt ubound}
-! arguments can be used to specify extra undistributed dimensions. The {\tt dimmap} argument
+! arguments can be used to specify extra undistributed dimensions. The {\tt distgridToGridMap} argument
 ! specifies how the distributed (from {\tt distgrid}) and undistributed (from {\tt bounds})
 ! dimensions are intermixed. The {\tt coordRank} and {\tt coordDimMap} arguments
 ! allow the user to specify how the coordinate arrays should map to the grid
@@ -1042,16 +1034,16 @@ end interface
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal
 !      to the grid rank, otherwise a runtime ESMF error will be
 !      raised.
-! \item[{[dimmap]}] 
+! \item[{[distgridToGridMap]}] 
 !      List that has as many elements as indicated by distgrid's dimCount value.
 !      The elements map each dimension of distgrid to a dimension in the grid.
 !       (i.e. the values should range from 1 to gridrank). If not specified, the default
 !       is to map all of distgrid's dimensions against the lower dimensions of the
 !       grid in sequence. 
-! \item[{[lbounds]}] 
-!      Lower bounds for undistributed array dimensions. Must be the same size as {\tt ubounds}.
-! \item[{[ubounds]}] 
-!      Upper bounds for undistributed array dimensions. Must be the same size as {\tt lbounds}.
+! \item[{[undistLBound]}] 
+!      Lower bounds for undistributed array dimensions. Must be the same size as {\tt undistUBound}.
+! \item[{[undistUBound]}] 
+!      Upper bounds for undistributed array dimensions. Must be the same size as {\tt undistLBound}.
 ! \item[{[coordRank]}]
 !      List that has as many elements as the grid rank .
 !      Gives the dimension of each component (e.g. x) array. This is 
@@ -1096,9 +1088,9 @@ end interface
     type(ESMF_InterfaceInt) :: gridEdgeLWidthArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: gridEdgeUWidthArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: gridAlignArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: dimmapArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: lboundsArg ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: uboundsArg ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: distgridToGridMapArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: undistLBoundArg ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: undistUBoundArg ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordRankArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
 
@@ -1130,16 +1122,16 @@ end interface
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    !! dimmap
-    dimmapArg = ESMF_InterfaceIntCreate(dimmap, rc=localrc)
+    !! distgridToGridMap
+    distgridToGridMapArg = ESMF_InterfaceIntCreate(distgridToGridMap, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! undistributed bounds
-    lboundsArg = ESMF_InterfaceIntCreate(lbounds, rc=localrc)
+    undistLBoundArg = ESMF_InterfaceIntCreate(undistLBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    uboundsArg = ESMF_InterfaceIntCreate(ubounds, rc=localrc)
+    undistUBoundArg = ESMF_InterfaceIntCreate(undistUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1156,8 +1148,8 @@ end interface
 
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridcreatefromdistgrid(grid%this, nameLen, name, &
-      coordTypeKind, distgrid, dimmapArg, &
-      lboundsArg, uboundsArg, coordRankArg, coordDimMapArg, &
+      coordTypeKind, distgrid, distgridToGridMapArg, &
+      undistLBoundArg, undistUBoundArg, coordRankArg, coordDimMapArg, &
       gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, &
       indexflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1173,13 +1165,13 @@ end interface
     call ESMF_InterfaceIntDestroy(gridAlignArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(dimmapArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(distgridToGridMapArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(lboundsArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(undistLBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(uboundsArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(undistUBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(coordRankArg, rc=localrc)
@@ -1475,14 +1467,14 @@ end interface
     type(ESMF_DistGrid)  :: distgrid
     type(ESMF_DELayout)  :: delayout
     integer, pointer     :: petList(:)
-    integer, pointer     :: lbounds(:)
-    integer, pointer     :: ubounds(:)
+    integer, pointer     :: undistLBound(:)
+    integer, pointer     :: undistUBound(:)
     integer, pointer     :: coordRank(:)
     integer, pointer     :: coordDimMap(:,:)
     integer              :: localrc
     integer              :: rank,i,distRank,undistRank,maxSizeDEDim
     integer, pointer     :: minIndexDG(:),maxIndexDG(:)
-    integer, pointer     :: dimMap(:), deDimCount(:)
+    integer, pointer     :: distgridToGridMap(:), deDimCount(:)
     integer, pointer     :: minIndexLocal(:)
     integer, pointer     :: gridEdgeLWidthLocal(:)
     integer, pointer     :: gridEdgeUWidthLocal(:)
@@ -1830,7 +1822,7 @@ end interface
 
    ! TODO: can you create an array without a distgrid??? What if everything they specify is undistributed?
    !       for now make a totally undistributed grid an error. Work on handling it later.
-   !       Perhaps don't use lbounds, ubounds
+   !       Perhaps don't use undistLBound, undistUBound
     if (distRank .eq. 0) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
                  "- Need to have at least one distributed dimension", & 
@@ -1968,31 +1960,31 @@ end interface
     endif
 
 
-   ! Calc minIndex,maxIndex,dimMap for DistGrid -----------------------------------
+   ! Calc minIndex,maxIndex,distgridToGridMap for DistGrid -----------------------------------
    allocate(minIndexDG(distRank), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexDG", &
                ESMF_CONTEXT, rc)) return
    allocate(maxIndexDG(distRank), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexDG", &
                ESMF_CONTEXT, rc)) return
-   allocate(dimMap(distRank), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating dimMap", &
+   allocate(distgridToGridMap(distRank), stat=localrc)
+   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToGridMap", &
                ESMF_CONTEXT, rc)) return
           
 
-   ! Fill in minIndex, maxIndex, dimMap
+   ! Fill in minIndex, maxIndex, distgridToGridMap
    d=1
    if (isDimDist(1)) then
       minIndexDG(d)=minIndexLocal(1)
       maxIndexDG(d)=sum(countsPerDEDim1Local)+minIndexDG(d)-1
-      dimMap(d)=1      
+      distgridToGridMap(d)=1      
       d=d+1
    endif
 
    if (isDimDist(2)) then
       minIndexDG(d)=minIndexLocal(2)
       maxIndexDG(d)=sum(countsPerDEDim2Local)+minIndexDG(d)-1
-      dimMap(d)=2      
+      distgridToGridMap(d)=2      
       d=d+1
    endif
 
@@ -2000,7 +1992,7 @@ end interface
       if (isDimDist(3)) then
          minIndexDG(d)=minIndexLocal(3)
          maxIndexDG(d)=sum(countsPerDEDim3Local)+minIndexDG(d)-1
-         dimMap(d)=3      
+         distgridToGridMap(d)=3      
          d=d+1
       endif
    endif
@@ -2188,33 +2180,33 @@ end interface
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-   ! Calc lbounds, ubounds for Grid -----------------------------------------------
+   ! Calc undistLBound, undistUBound for Grid -----------------------------------------------
    if (undistRank .gt. 0) then
-      allocate(lbounds(undistRank), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating lbounds", &
+      allocate(undistLBound(undistRank), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating undistLBound", &
               ESMF_CONTEXT, rc)) return
-      allocate(ubounds(undistRank), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating ubounds", &
+      allocate(undistUBound(undistRank), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating undistUBound", &
               ESMF_CONTEXT, rc)) return     
 
-      ! Fill in minIndex, maxIndex, dimMap
+      ! Fill in minIndex, maxIndex, distgridToGridMap
        d=1
       if (.not. isDimDist(1)) then
-         lbounds(d)=minIndexLocal(1)
-         ubounds(d)=countsPerDEDim1Local(1)+lbounds(d)-1
+         undistLBound(d)=minIndexLocal(1)
+         undistUBound(d)=countsPerDEDim1Local(1)+undistLBound(d)-1
          d=d+1
       endif
 
       if (.not. isDimDist(2)) then
-         lbounds(d)=minIndexLocal(2)
-         ubounds(d)=countsPerDEDim2Local(1)+lbounds(d)-1
+         undistLBound(d)=minIndexLocal(2)
+         undistUBound(d)=countsPerDEDim2Local(1)+undistLBound(d)-1
          d=d+1
       endif
 
       if (rank .gt. 2) then
          if (.not. isDimDist(3)) then
-            lbounds(d)=minIndexLocal(3)
-            ubounds(d)=countsPerDEDim3Local(1)+lbounds(d)-1
+            undistLBound(d)=minIndexLocal(3)
+            undistUBound(d)=countsPerDEDim3Local(1)+undistLBound(d)-1
             d=d+1
          endif
       endif
@@ -2274,8 +2266,8 @@ end interface
    ! Create Grid from specification -----------------------------------------------
    if (undistRank .gt. 0) then
        ESMF_GridCreateShapeTileIrreg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
-                                    distgrid, dimmap=dimmap, &
-                                    lbounds=lbounds, ubounds=ubounds, &
+                                    distgrid, distgridToGridMap=distgridToGridMap, &
+                                    undistLBound=undistLBound, undistUBound=undistUBound, &
                                     coordRank=coordRank, coordDimMap=coordDimMap, &
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
@@ -2283,7 +2275,7 @@ end interface
                                     indexflag=indexflag, rc=localrc)
     else
        ESMF_GridCreateShapeTileIrreg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
-                                    distgrid=distgrid, dimmap=dimmap, &
+                                    distgrid=distgrid, distgridToGridMap=distgridToGridMap, &
                                     coordRank=coordRank, coordDimMap=coordDimMap, &
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
@@ -2301,14 +2293,14 @@ end interface
     deallocate(coordDimMap)
     deallocate(minIndexDG)
     deallocate(maxIndexDG)
-    deallocate(dimMap)
+    deallocate(distgridToGridMap)
     deallocate(maxPerDEDim)
     deallocate(minPerDEDim)
     deallocate(deDimCount)
     deallocate(deBlockList)
     if (undistRank .gt. 0) then
-       deallocate(lbounds)
-       deallocate(ubounds)
+       deallocate(undistLBound)
+       deallocate(undistUBound)
     endif
     deallocate(gridEdgeLWidthLocal)
     deallocate(gridEdgeUWidthLocal)
@@ -2535,8 +2527,8 @@ end interface
     type(ESMF_DELayout)  :: delayout
     type(ESMF_VM)        :: vm
     integer, pointer     :: petList(:)
-    integer, pointer     :: lbounds(:)
-    integer, pointer     :: ubounds(:)
+    integer, pointer     :: undistLBound(:)
+    integer, pointer     :: undistUBound(:)
     integer, pointer     :: coordRank(:)
     integer, pointer     :: coordDimMap(:,:)
     integer              :: localrc
@@ -2546,7 +2538,7 @@ end interface
     type(ESMF_DecompFlag), pointer :: decompflagDG(:)
     integer, pointer     :: regDecompLocal(:)
     type(ESMF_DecompFlag), pointer :: decompflagLocal(:)
-    integer, pointer     :: dimMap(:), deDimCount(:)
+    integer, pointer     :: distgridToGridMap(:), deDimCount(:)
     integer, pointer     :: minIndexLocal(:), maxIndexLocal(:)
     integer, pointer     :: gridEdgeLWidthLocal(:)
     integer, pointer     :: gridEdgeUWidthLocal(:)
@@ -2860,7 +2852,7 @@ end interface
 
    ! TODO: can you create an array without a distgrid??? What if everything they specify is undistributed?
    !       for now make a totally undistributed grid an error. Work on handling it later.
-   !       Perhaps don't use lbounds, ubounds
+   !       Perhaps don't use undistLBound, undistUBound
     if (distRank .eq. 0) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
                  "- Need to have at least one distributed dimension", & 
@@ -3022,15 +3014,15 @@ end interface
     enddo
 
 
-   ! Calc minIndex,maxIndex,dimMap for DistGrid -----------------------------------
+   ! Calc minIndex,maxIndex,distgridToGridMap for DistGrid -----------------------------------
    allocate(minIndexDG(distRank), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexDG", &
                ESMF_CONTEXT, rc)) return
    allocate(maxIndexDG(distRank), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexDG", &
                ESMF_CONTEXT, rc)) return
-   allocate(dimMap(distRank), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating dimMap", &
+   allocate(distgridToGridMap(distRank), stat=localrc)
+   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToGridMap", &
                ESMF_CONTEXT, rc)) return          
    allocate(regDecompDG(distRank), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating dimMap", &
@@ -3038,39 +3030,39 @@ end interface
    allocate(decompFlagDG(distRank), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating dimMap", &
                ESMF_CONTEXT, rc)) return
-   allocate(lbounds(undistRank), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating lbounds", &
+   allocate(undistLBound(undistRank), stat=localrc)
+   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating undistLBound", &
               ESMF_CONTEXT, rc)) return
-   allocate(ubounds(undistRank), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating ubounds", &
+   allocate(undistUBound(undistRank), stat=localrc)
+   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating undistUBound", &
               ESMF_CONTEXT, rc)) return     
 
-   ! Fill in minIndex, maxIndex, dimMap, lbound, ubounds
+   ! Fill in minIndex, maxIndex, distgridToGridMap, lbound, undistUBound
    d=1
    ud=1
    if (isDimDist(1)) then
       minIndexDG(d)=minIndexLocal(1)
       maxIndexDG(d)=maxIndexLocal(1)
-      dimMap(d)=1      
+      distgridToGridMap(d)=1      
       regDecompDG(d)=regDecompLocal(1)
       decompFlagDG(d)=decompFlagLocal(1)
       d=d+1
    else
-     lbounds(ud)=minIndexLocal(1)
-     ubounds(ud)=maxIndexLocal(1)
+     undistLBound(ud)=minIndexLocal(1)
+     undistUBound(ud)=maxIndexLocal(1)
      ud=ud+1
    endif
 
    if (isDimDist(2)) then
       minIndexDG(d)=minIndexLocal(2)
       maxIndexDG(d)=maxIndexLocal(2)
-      dimMap(d)=2      
+      distgridToGridMap(d)=2      
       regDecompDG(d)=regDecompLocal(2)
       decompFlagDG(d)=decompFlagLocal(2)
       d=d+1
    else
-     lbounds(ud)=minIndexLocal(2)
-     ubounds(ud)=maxIndexLocal(2)
+     undistLBound(ud)=minIndexLocal(2)
+     undistUBound(ud)=maxIndexLocal(2)
      ud=ud+1
    endif
 
@@ -3078,13 +3070,13 @@ end interface
       if (isDimDist(3)) then
          minIndexDG(d)=minIndexLocal(3)
          maxIndexDG(d)=maxIndexLocal(3)
-         dimMap(d)=3      
+         distgridToGridMap(d)=3      
          regDecompDG(d)=regDecompLocal(3)
          decompFlagDG(d)=decompFlagLocal(3)
          d=d+1
        else
-         lbounds(ud)=minIndexLocal(3)
-         ubounds(ud)=maxIndexLocal(3)
+         undistLBound(ud)=minIndexLocal(3)
+         undistUBound(ud)=maxIndexLocal(3)
          ud=ud+1
        endif
    endif
@@ -3211,8 +3203,8 @@ end interface
    ! Create Grid from specification -----------------------------------------------
    if (undistRank .gt. 0) then
        ESMF_GridCreateShapeTileReg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
-                                    distgrid=distgrid, dimmap=dimmap, &
-                                    lbounds=lbounds, ubounds=ubounds, &
+                                    distgrid=distgrid, distgridToGridMap=distgridToGridMap, &
+                                    undistLBound=undistLBound, undistUBound=undistUBound, &
                                     coordRank=coordRank, coordDimMap=coordDimMap, &
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
@@ -3220,7 +3212,7 @@ end interface
                                     indexflag=indexflag, rc=localrc)
     else
        ESMF_GridCreateShapeTileReg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
-                                    distgrid=distgrid, dimmap=dimmap, &
+                                    distgrid=distgrid, distgridToGridMap=distgridToGridMap, &
                                     coordRank=coordRank, coordDimMap=coordDimMap, &
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
@@ -3243,9 +3235,9 @@ end interface
     deallocate(maxIndexDG)
     deallocate(minIndexLocal)
     deallocate(maxIndexLocal)
-    deallocate(dimMap)
-    deallocate(lbounds)
-    deallocate(ubounds)
+    deallocate(distgridToGridMap)
+    deallocate(undistLBound)
+    deallocate(undistUBound)
     deallocate(gridEdgeLWidthLocal)
     deallocate(gridEdgeUWidthLocal)
     deallocate(gridAlignLocal)
@@ -3318,7 +3310,7 @@ end interface
       subroutine ESMF_GridGet(grid, name, coordTypeKind, &
           rank, distRank, undistRank,  &
           tileCount, staggerlocsCount, localDECount, distgrid, &
-          dimmap, lbounds, ubounds, coordRank, coordDimMap, &
+          distgridToGridMap, undistLBound, undistUBound, coordRank, coordDimMap, &
           gridEdgeLWidth, gridEdgeUWidth, gridAlign,  &
           indexFlag, rc)
 !
@@ -3333,9 +3325,9 @@ end interface
       integer,               intent(out), optional :: staggerlocsCount
       integer,               intent(out), optional :: localDECount
       type(ESMF_DistGrid),   intent(out), optional :: distgrid
-      integer,               intent(out), optional :: dimmap(:)
-      integer,               intent(out), optional :: lbounds(:)
-      integer,               intent(out), optional :: ubounds(:)
+      integer,               intent(out), optional :: distgridToGridMap(:)
+      integer,               intent(out), optional :: undistLBound(:)
+      integer,               intent(out), optional :: undistUBound(:)
       integer,               intent(out), optional :: coordRank(:)
       integer,               intent(out), optional :: coordDimMap(:,:)
       integer,               intent(out), optional :: gridEdgeLWidth(:)
@@ -3371,12 +3363,12 @@ end interface
 !   The number of DEs in this grid on this PET.
 !\item[{[distgrid]}]
 !   The structure describing the distribution of the grid. 
-!\item[{[dimmap]}]
+!\item[{[distgridToGridMap]}]
 !   List that has as many elements as the distgrid rank. This array describes
 !   mapping between the grids dimensions and the distgrid.
-!\item[{[lbounds]}] 
+!\item[{[undistLBound]}] 
 !   Lower bounds for undistributed array dimensions.
-!\item[{[ubounds]}] 
+!\item[{[undistUBound]}] 
 !   Upper bounds for undistributed array dimensions. 
 ! \item[{[coordRank]}]
 !   List that has as many elements as the grid rank (from arrayspec).
@@ -3404,9 +3396,9 @@ end interface
 !
 !EOP
     integer :: localrc ! local error status
-    type(ESMF_InterfaceInt) :: dimmapArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: lboundsArg ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: uboundsArg ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: distgridToGridMapArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: undistLBoundArg ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: undistUBoundArg ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordRankArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: gridEdgeLWidthArg  ! Language Interface Helper Var
@@ -3430,16 +3422,16 @@ end interface
     !! coordTypeKind
     ! It doesn't look like it needs to be translated, but test to make sure
 
-    !! dimmap
-    dimmapArg = ESMF_InterfaceIntCreate(dimmap, rc=localrc)
+    !! distgridToGridMap
+    distgridToGridMapArg = ESMF_InterfaceIntCreate(distgridToGridMap, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! undistributed bounds
-    lboundsArg = ESMF_InterfaceIntCreate(lbounds, rc=localrc)
+    undistLBoundArg = ESMF_InterfaceIntCreate(undistLBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    uboundsArg = ESMF_InterfaceIntCreate(ubounds, rc=localrc)
+    undistUBoundArg = ESMF_InterfaceIntCreate(undistUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3467,20 +3459,20 @@ end interface
     ! Call C++ Subroutine to do the get
     call c_ESMC_gridget(grid%this, &
       coordTypeKind, rank, tileCount, distgrid,  staggerlocsCount, &
-      dimmapArg, lboundsArg, uboundsArg, coordRankArg, coordDimMapArg, &
+      distgridToGridMapArg, undistLBoundArg, undistUBoundArg, coordRankArg, coordDimMapArg, &
       gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, &
       indexflag, localDECount, distRank, undistRank, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate helper variables
-    call ESMF_InterfaceIntDestroy(dimmapArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(distgridToGridMapArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(lboundsArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(undistLBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(uboundsArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(undistUBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(coordRankArg, rc=localrc)
@@ -3684,7 +3676,7 @@ end subroutine ESMF_GridGet
   ! Private name; call using ESMF_GridGet()
       subroutine ESMF_GridGetPSloc(grid, staggerloc, &
           computationalEdgeLWidth, computationalEdgeUWidth, &
-          lbounds,ubounds, rc)
+          undistLBound,undistUBound, rc)
 
 !
 ! !ARGUMENTS:
@@ -3692,8 +3684,8 @@ end subroutine ESMF_GridGet
       type (ESMF_StaggerLoc), intent(in)            :: staggerloc
       integer,                intent(out), optional :: computationalEdgeLWidth(:)
       integer,                intent(out), optional :: computationalEdgeUWidth(:)
-      integer,                intent(out), optional :: lbounds(:)
-      integer,                intent(out), optional :: ubounds(:)
+      integer,                intent(out), optional :: undistLBound(:)
+      integer,                intent(out), optional :: undistUBound(:)
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3721,16 +3713,16 @@ end subroutine ESMF_GridGet
 !     mapped to correspond to those dimensions. 
 !     {\tt computationalEdgeUWidth} must be allocated to be of size equal to the grid distRank
 !     (i.e. the grid's distgrid's dimCount).
-!\item[{[lbounds]}]
+!\item[{[undistLBound]}]
 !     Upon return this holds the lower bound of the stagger region.
 !     This bound is the lower bound used to create the grid modified by
-!     the appropriate staggerLWidths.  
-!     {\tt lbounds} must be allocated to be of size equal to the grid undistRank.
-!\item[{[ubounds]}]
+!     the appropriate staggerEdgeLWidths.  
+!     {\tt undistLBound} must be allocated to be of size equal to the grid undistRank.
+!\item[{[undistUBound]}]
 !     Upon return this holds the upper bound of the stagger region.
 !     This bound is the upper bound used to create the grid modified by
-!     the appropriate staggerUWidths.  
-!     {\tt ubounds} must be allocated to be of size equal to the grid undistRank.
+!     the appropriate staggerEdgeUWidths.  
+!     {\tt undistUBound} must be allocated to be of size equal to the grid undistRank.
 !\item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -3740,8 +3732,8 @@ end subroutine ESMF_GridGet
     integer :: localrc ! local error status
     type(ESMF_InterfaceInt) :: computationalEdgeLWidthArg ! helper variable
     type(ESMF_InterfaceInt) :: computationalEdgeUWidthArg ! helper variable
-    type(ESMF_InterfaceInt) :: lboundsArg ! helper variable
-    type(ESMF_InterfaceInt) :: uboundsArg ! helper variable
+    type(ESMF_InterfaceInt) :: undistLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: undistUBoundArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code
@@ -3759,10 +3751,10 @@ end subroutine ESMF_GridGet
     computationalEdgeUWidthArg=ESMF_InterfaceIntCreate(computationalEdgeUWidth, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    lboundsArg=ESMF_InterfaceIntCreate(lbounds, rc=localrc)
+    undistLBoundArg=ESMF_InterfaceIntCreate(undistLBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    uboundsArg=ESMF_InterfaceIntCreate(ubounds, rc=localrc)
+    undistUBoundArg=ESMF_InterfaceIntCreate(undistUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3770,7 +3762,7 @@ end subroutine ESMF_GridGet
 
     call c_ESMC_GridGetPSloc(grid, tmp_staggerLoc, &
       computationalEdgeLWidthArg, computationalEdgeUWidthArg, &
-      lboundsArg,uboundsArg,localrc)
+      undistLBoundArg,undistUBoundArg,localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3781,10 +3773,10 @@ end subroutine ESMF_GridGet
     call ESMF_InterfaceIntDestroy(computationalEdgeUWidthArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(lboundsArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(undistLBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(uboundsArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(undistUBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -6085,7 +6077,7 @@ endif
 ! !INTERFACE:
   ! Private name; call using ESMF_GridSet()
     subroutine ESMF_GridSetFromDistGrid(grid, name, coordTypeKind, distgrid, & 
-                 dimmap, lbounds, ubounds, coordRank, coordDimMap,           &
+                 distgridToGridMap, undistLBound, undistUBound, coordRank, coordDimMap,           &
                  gridEdgeLWidth, gridEdgeUWidth, gridAlign,                  &
                  indexflag, rc)
 !
@@ -6097,9 +6089,9 @@ endif
        character (len=*),     intent(in),   optional  :: name
        type(ESMF_TypeKind),   intent(in),   optional  :: coordTypeKind
        type(ESMF_DistGrid),   intent(in),   optional  :: distgrid
-       integer,               intent(in),   optional  :: dimmap(:)
-       integer,               intent(in),   optional  :: lbounds(:)
-       integer,               intent(in),   optional  :: ubounds(:)
+       integer,               intent(in),   optional  :: distgridToGridMap(:)
+       integer,               intent(in),   optional  :: undistLBound(:)
+       integer,               intent(in),   optional  :: undistUBound(:)
        integer,               intent(in),   optional  :: coordRank(:)
        integer,               intent(in),   optional  :: coordDimMap(:,:)
        integer,               intent(in),   optional  :: gridEdgeLWidth(:)
@@ -6128,15 +6120,15 @@ endif
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal
 !      to the grid rank, otherwise a runtime ESMF error will be
 !      raised.
-! \item[{[dimmap]}] 
+! \item[{[distgridToGridMap]}] 
 !      List that has as many elements as indicated by distgrid's dimCount value.
 !      The elements map each dimension of distgrid to a dimension in the grid.
 !       (i.e. the values should range from 1 to gridrank). If not specified, the default
 !       is to map all of distgrid's dimensions against the lower dimensions of the
 !       grid in sequence. 
-! \item[{[lbounds]}] 
+! \item[{[undistLBound]}] 
 !      Lower bounds for undistributed array dimensions.
-! \item[{[ubounds]}] 
+! \item[{[undistUBound]}] 
 !      Upper bounds for undistributed array dimensions.
 ! \item[{[gridEdgeLWidth]}] 
 !      The padding around the lower edges of the grid. This padding is between
@@ -6167,9 +6159,9 @@ endif
     type(ESMF_InterfaceInt) :: gridEdgeLWidthArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: gridEdgeUWidthArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: gridAlignArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: dimmapArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: lboundsArg ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: uboundsArg ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: distgridToGridMapArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: undistLBoundArg ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: undistUBoundArg ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordRankArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
 
@@ -6203,16 +6195,16 @@ endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    !! dimmap
-    dimmapArg = ESMF_InterfaceIntCreate(dimmap, rc=localrc)
+    !! distgridToGridMap
+    distgridToGridMapArg = ESMF_InterfaceIntCreate(distgridToGridMap, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! undistributed bounds
-    lboundsArg = ESMF_InterfaceIntCreate(lbounds, rc=localrc)
+    undistLBoundArg = ESMF_InterfaceIntCreate(undistLBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    uboundsArg = ESMF_InterfaceIntCreate(ubounds, rc=localrc)
+    undistUBoundArg = ESMF_InterfaceIntCreate(undistUBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -6227,7 +6219,7 @@ endif
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridsetfromdistgrid(grid%this, nameLen, name, &
       coordTypeKind, distgrid, &
-      dimmapArg, lboundsArg, uboundsArg, coordRankArg, coordDimMapArg, &
+      distgridToGridMapArg, undistLBoundArg, undistUBoundArg, coordRankArg, coordDimMapArg, &
       gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, &
       indexflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6243,13 +6235,13 @@ endif
     call ESMF_InterfaceIntDestroy(gridAlignArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(dimmapArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(distgridToGridMapArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(lboundsArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(undistLBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(uboundsArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(undistUBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(coordRankArg, rc=localrc)
@@ -6568,14 +6560,14 @@ endif
     type(ESMF_DistGrid)  :: distgrid
     type(ESMF_DELayout)  :: delayout
     integer, pointer     :: petList(:)
-    integer, pointer     :: lbounds(:)
-    integer, pointer     :: ubounds(:)
+    integer, pointer     :: undistLBound(:)
+    integer, pointer     :: undistUBound(:)
     integer, pointer     :: coordRank(:)
     integer, pointer     :: coordDimMap(:,:)
     integer              :: localrc
     integer              :: rank,i,distRank,undistRank,maxSizeDEDim
     integer, pointer     :: minIndexDG(:),maxIndexDG(:)
-    integer, pointer     :: dimMap(:), deDimCount(:)
+    integer, pointer     :: distgridToGridMap(:), deDimCount(:)
     integer, pointer     :: minIndexLocal(:)
     integer, pointer     :: gridEdgeLWidthLocal(:)
     integer, pointer     :: gridEdgeUWidthLocal(:)
@@ -6923,7 +6915,7 @@ endif
 
    ! TODO: can you create an array without a distgrid??? What if everything they specify is undistributed?
    !       for now make a totally undistributed grid an error. Work on handling it later.
-   !       Perhaps don't use lbounds, ubounds
+   !       Perhaps don't use undistLBound, undistUBound
     if (distRank .eq. 0) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
                  "- Need to have at least one distributed dimension", & 
@@ -7061,31 +7053,31 @@ endif
     endif
 
 
-   ! Calc minIndex,maxIndex,dimMap for DistGrid -----------------------------------
+   ! Calc minIndex,maxIndex,distgridToGridMap for DistGrid -----------------------------------
    allocate(minIndexDG(distRank), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexDG", &
                ESMF_CONTEXT, rc)) return
    allocate(maxIndexDG(distRank), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexDG", &
                ESMF_CONTEXT, rc)) return
-   allocate(dimMap(distRank), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating dimMap", &
+   allocate(distgridToGridMap(distRank), stat=localrc)
+   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToGridMap", &
                ESMF_CONTEXT, rc)) return
           
 
-   ! Fill in minIndex, maxIndex, dimMap
+   ! Fill in minIndex, maxIndex, distgridToGridMap
    d=1
    if (isDimDist(1)) then
       minIndexDG(d)=minIndexLocal(1)
       maxIndexDG(d)=sum(countsPerDEDim1Local)+minIndexDG(d)-1
-      dimMap(d)=1      
+      distgridToGridMap(d)=1      
       d=d+1
    endif
 
    if (isDimDist(2)) then
       minIndexDG(d)=minIndexLocal(2)
       maxIndexDG(d)=sum(countsPerDEDim2Local)+minIndexDG(d)-1
-      dimMap(d)=2      
+      distgridToGridMap(d)=2      
       d=d+1
    endif
 
@@ -7093,7 +7085,7 @@ endif
       if (isDimDist(3)) then
          minIndexDG(d)=minIndexLocal(3)
          maxIndexDG(d)=sum(countsPerDEDim3Local)+minIndexDG(d)-1
-         dimMap(d)=3      
+         distgridToGridMap(d)=3      
          d=d+1
       endif
    endif
@@ -7281,33 +7273,33 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-   ! Calc lbounds, ubounds for Grid -----------------------------------------------
+   ! Calc undistLBound, undistUBound for Grid -----------------------------------------------
    if (undistRank .gt. 0) then
-      allocate(lbounds(undistRank), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating lbounds", &
+      allocate(undistLBound(undistRank), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating undistLBound", &
               ESMF_CONTEXT, rc)) return
-      allocate(ubounds(undistRank), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating ubounds", &
+      allocate(undistUBound(undistRank), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating undistUBound", &
               ESMF_CONTEXT, rc)) return     
 
-      ! Fill in minIndex, maxIndex, dimMap
+      ! Fill in minIndex, maxIndex, distgridToGridMap
        d=1
       if (.not. isDimDist(1)) then
-         lbounds(d)=minIndexLocal(1)
-         ubounds(d)=countsPerDEDim1Local(1)+lbounds(d)-1
+         undistLBound(d)=minIndexLocal(1)
+         undistUBound(d)=countsPerDEDim1Local(1)+undistLBound(d)-1
          d=d+1
       endif
 
       if (.not. isDimDist(2)) then
-         lbounds(d)=minIndexLocal(2)
-         ubounds(d)=countsPerDEDim2Local(1)+lbounds(d)-1
+         undistLBound(d)=minIndexLocal(2)
+         undistUBound(d)=countsPerDEDim2Local(1)+undistLBound(d)-1
          d=d+1
       endif
 
       if (rank .gt. 2) then
          if (.not. isDimDist(3)) then
-            lbounds(d)=minIndexLocal(3)
-            ubounds(d)=countsPerDEDim3Local(1)+lbounds(d)-1
+            undistLBound(d)=minIndexLocal(3)
+            undistUBound(d)=countsPerDEDim3Local(1)+undistLBound(d)-1
             d=d+1
          endif
       endif
@@ -7367,8 +7359,8 @@ endif
    ! Create Grid from specification -----------------------------------------------
    if (undistRank .gt. 0) then
        call ESMF_GridSetFromDistGrid(grid, name, coordTypeKind, &
-                                    distgrid, dimmap=dimmap, &
-                                    lbounds=lbounds, ubounds=ubounds, &
+                                    distgrid, distgridToGridMap=distgridToGridMap, &
+                                    undistLBound=undistLBound, undistUBound=undistUBound, &
                                     coordRank=coordRank, coordDimMap=coordDimMap, &
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
@@ -7376,7 +7368,7 @@ endif
                                     indexflag=indexflag, rc=localrc)
     else
        call ESMF_GridSetFromDistGrid(grid, name, coordTypeKind, &
-                                    distgrid=distgrid, dimmap=dimmap, &
+                                    distgrid=distgrid, distgridToGridMap=distgridToGridMap, &
                                     coordRank=coordRank, coordDimMap=coordDimMap, &
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
@@ -7394,14 +7386,14 @@ endif
     deallocate(coordDimMap)
     deallocate(minIndexDG)
     deallocate(maxIndexDG)
-    deallocate(dimMap)
+    deallocate(distgridToGridMap)
     deallocate(maxPerDEDim)
     deallocate(minPerDEDim)
     deallocate(deDimCount)
     deallocate(deBlockList)
     if (undistRank .gt. 0) then
-       deallocate(lbounds)
-       deallocate(ubounds)
+       deallocate(undistLBound)
+       deallocate(undistUBound)
     endif
     deallocate(gridEdgeLWidthLocal)
     deallocate(gridEdgeUWidthLocal)
@@ -7634,8 +7626,8 @@ endif
     type(ESMF_DELayout)  :: delayout
     type(ESMF_VM)        :: vm
     integer, pointer     :: petList(:)
-    integer, pointer     :: lbounds(:)
-    integer, pointer     :: ubounds(:)
+    integer, pointer     :: undistLBound(:)
+    integer, pointer     :: undistUBound(:)
     integer, pointer     :: coordRank(:)
     integer, pointer     :: coordDimMap(:,:)
     integer              :: localrc
@@ -7645,7 +7637,7 @@ endif
     type(ESMF_DecompFlag), pointer :: decompflagDG(:)
     integer, pointer     :: regDecompLocal(:)
     type(ESMF_DecompFlag), pointer :: decompflagLocal(:)
-    integer, pointer     :: dimMap(:), deDimCount(:)
+    integer, pointer     :: distgridToGridMap(:), deDimCount(:)
     integer, pointer     :: minIndexLocal(:), maxIndexLocal(:)
     integer, pointer     :: gridEdgeLWidthLocal(:)
     integer, pointer     :: gridEdgeUWidthLocal(:)
@@ -7959,7 +7951,7 @@ endif
 
    ! TODO: can you create an array without a distgrid??? What if everything they specify is undistributed?
    !       for now make a totally undistributed grid an error. Work on handling it later.
-   !       Perhaps don't use lbounds, ubounds
+   !       Perhaps don't use undistLBound, undistUBound
     if (distRank .eq. 0) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
                  "- Need to have at least one distributed dimension", & 
@@ -8121,15 +8113,15 @@ endif
     enddo
 
 
-   ! Calc minIndex,maxIndex,dimMap for DistGrid -----------------------------------
+   ! Calc minIndex,maxIndex,distgridToGridMap for DistGrid -----------------------------------
    allocate(minIndexDG(distRank), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexDG", &
                ESMF_CONTEXT, rc)) return
    allocate(maxIndexDG(distRank), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexDG", &
                ESMF_CONTEXT, rc)) return
-   allocate(dimMap(distRank), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating dimMap", &
+   allocate(distgridToGridMap(distRank), stat=localrc)
+   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToGridMap", &
                ESMF_CONTEXT, rc)) return          
    allocate(regDecompDG(distRank), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating dimMap", &
@@ -8137,39 +8129,39 @@ endif
    allocate(decompFlagDG(distRank), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating dimMap", &
                ESMF_CONTEXT, rc)) return
-   allocate(lbounds(undistRank), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating lbounds", &
+   allocate(undistLBound(undistRank), stat=localrc)
+   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating undistLBound", &
               ESMF_CONTEXT, rc)) return
-   allocate(ubounds(undistRank), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating ubounds", &
+   allocate(undistUBound(undistRank), stat=localrc)
+   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating undistUBound", &
               ESMF_CONTEXT, rc)) return     
 
-   ! Fill in minIndex, maxIndex, dimMap, lbound, ubounds
+   ! Fill in minIndex, maxIndex, distgridToGridMap, lbound, undistUBound
    d=1
    ud=1
    if (isDimDist(1)) then
       minIndexDG(d)=minIndexLocal(1)
       maxIndexDG(d)=maxIndexLocal(1)
-      dimMap(d)=1      
+      distgridToGridMap(d)=1      
       regDecompDG(d)=regDecompLocal(1)
       decompFlagDG(d)=decompFlagLocal(1)
       d=d+1
    else
-     lbounds(ud)=minIndexLocal(1)
-     ubounds(ud)=maxIndexLocal(1)
+     undistLBound(ud)=minIndexLocal(1)
+     undistUBound(ud)=maxIndexLocal(1)
      ud=ud+1
    endif
 
    if (isDimDist(2)) then
       minIndexDG(d)=minIndexLocal(2)
       maxIndexDG(d)=maxIndexLocal(2)
-      dimMap(d)=2      
+      distgridToGridMap(d)=2      
       regDecompDG(d)=regDecompLocal(2)
       decompFlagDG(d)=decompFlagLocal(2)
       d=d+1
    else
-     lbounds(ud)=minIndexLocal(2)
-     ubounds(ud)=maxIndexLocal(2)
+     undistLBound(ud)=minIndexLocal(2)
+     undistUBound(ud)=maxIndexLocal(2)
      ud=ud+1
    endif
 
@@ -8177,13 +8169,13 @@ endif
       if (isDimDist(3)) then
          minIndexDG(d)=minIndexLocal(3)
          maxIndexDG(d)=maxIndexLocal(3)
-         dimMap(d)=3      
+         distgridToGridMap(d)=3      
          regDecompDG(d)=regDecompLocal(3)
          decompFlagDG(d)=decompFlagLocal(3)
          d=d+1
        else
-         lbounds(ud)=minIndexLocal(3)
-         ubounds(ud)=maxIndexLocal(3)
+         undistLBound(ud)=minIndexLocal(3)
+         undistUBound(ud)=maxIndexLocal(3)
          ud=ud+1
        endif
    endif
@@ -8310,8 +8302,8 @@ endif
    ! Create Grid from specification -----------------------------------------------
    if (undistRank .gt. 0) then
        call ESMF_GridSetFromDistGrid(grid, name=name, coordTypeKind=coordTypeKind, &
-                                    distgrid=distgrid, dimmap=dimmap, &
-                                    lbounds=lbounds, ubounds=ubounds, &
+                                    distgrid=distgrid, distgridToGridMap=distgridToGridMap, &
+                                    undistLBound=undistLBound, undistUBound=undistUBound, &
                                     coordRank=coordRank, coordDimMap=coordDimMap, &
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
@@ -8319,7 +8311,7 @@ endif
                                     indexflag=indexflag, rc=localrc)
     else
        call ESMF_GridSetFromDistGrid(grid, name=name, coordTypeKind=coordTypeKind, &
-                                    distgrid=distgrid, dimmap=dimmap, &
+                                    distgrid=distgrid, distgridToGridMap=distgridToGridMap, &
                                     coordRank=coordRank, coordDimMap=coordDimMap, &
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
@@ -8342,9 +8334,9 @@ endif
     deallocate(maxIndexDG)
     deallocate(minIndexLocal)
     deallocate(maxIndexLocal)
-    deallocate(dimMap)
-    deallocate(lbounds)
-    deallocate(ubounds)
+    deallocate(distgridToGridMap)
+    deallocate(undistLBound)
+    deallocate(undistUBound)
     deallocate(gridEdgeLWidthLocal)
     deallocate(gridEdgeUWidthLocal)
     deallocate(gridAlignLocal)

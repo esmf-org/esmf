@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.63 2007/11/05 05:17:45 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.64 2007/11/05 23:32:36 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.63 2007/11/05 05:17:45 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.64 2007/11/05 23:32:36 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -53,9 +53,10 @@ program ESMF_GridCreateUTest
   type(ESMF_VM) :: vm
   type(ESMF_DistGrid) :: distgrid,distgrid2
   type(ESMF_Array) :: array
-  integer :: coordDimMap(2,2), rank, lbounds(3), ubounds(3)
+  integer :: coordDimMap(2,2), rank, undistLBound(3), undistUBound(3)
   type(ESMF_IndexFlag) :: indexflag
-  integer :: dimmap(2), coordRank(2), dimcount
+  integer :: distgridToGridMap(2), coordRank(2), dimcount
+  integer :: distgridToArrayMap(2)
   integer :: coordRank2(3),coordDimMap2(3,3)
   integer :: gridEdgeLWidth(3),gridEdgeUWidth(3),gridAlign(3)
   integer :: exlbnd(3),exubnd(3)
@@ -117,7 +118,7 @@ program ESMF_GridCreateUTest
 
   ! get info from Grid
   call ESMF_GridGet(grid, rank=rank, coordTypeKind=typekind, &
-         dimmap=dimmap, coordRank=coordRank, coordDimMap=coordDimMap, &
+         distgridToGridMap=distgridToGridMap, coordRank=coordRank, coordDimMap=coordDimMap, &
          indexflag=indexflag, &
          gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
          gridAlign=gridAlign, rc=localrc)
@@ -127,8 +128,8 @@ program ESMF_GridCreateUTest
   correct=.true.
   if (typekind .ne. ESMF_TYPEKIND_R8) correct=.false.
   if (rank .ne. 2) correct=.false.
-  if ((dimmap(1) .ne. 1) .or. (dimmap(2) .ne. 2)) correct=.false.
-  !TODO: what to do about lbounds and ubounds
+  if ((distgridToGridMap(1) .ne. 1) .or. (distgridToGridMap(2) .ne. 2)) correct=.false.
+  !TODO: what to do about undistLBound and undistUBound
   if ((coordRank(1) .ne. 2) .or. (coordRank(2) .ne. 2)) correct=.false.
   if ((coordDimMap(1,1) .ne. 1) .or. (coordDimMap(1,2) .ne. 2) .or. & 
       (coordDimMap(2,1) .ne. 1) .or. (coordDimMap(2,2) .ne. 2)) correct=.false.
@@ -201,21 +202,21 @@ program ESMF_GridCreateUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Creating a Grid with non-default ubounds"
+  write(name, *) "Creating a Grid with non-default undistUBound"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
-  grid=ESMF_GridCreate(distgrid=distgrid, ubounds=(/10,20/),rc=localrc)
+  grid=ESMF_GridCreate(distgrid=distgrid, undistUBound=(/10,20/),rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get info back from grid
-  call ESMF_GridGet(grid, ubounds=ubounds, rc=localrc)
+  call ESMF_GridGet(grid, undistUBound=undistUBound, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! check that output is as expected
   correct=.true.
-  if ((ubounds(1) .ne. 10) .or. (ubounds(2) .ne. 20)) correct=.false.
+  if ((undistUBound(1) .ne. 10) .or. (undistUBound(2) .ne. 20)) correct=.false.
 
   ! destroy grid
   call ESMF_GridDestroy(grid,rc=localrc)
@@ -226,23 +227,23 @@ program ESMF_GridCreateUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Creating a Grid with non-default lbounds and ubounds"
+  write(name, *) "Creating a Grid with non-default undistLBound and undistUBound"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
-  grid=ESMF_GridCreate(distgrid=distgrid,lbounds=(/2,1/), ubounds=(/10,20/), &
+  grid=ESMF_GridCreate(distgrid=distgrid,undistLBound=(/2,1/), undistUBound=(/10,20/), &
                                    rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get info back from grid
-  call ESMF_GridGet(grid, lbounds=lbounds, ubounds=ubounds, rc=localrc)
+  call ESMF_GridGet(grid, undistLBound=undistLBound, undistUBound=undistUBound, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! check that output is as expected
   correct=.true.
-  if ((lbounds(1) .ne. 2) .or. (lbounds(2) .ne. 1)) correct=.false.
-  if ((ubounds(1) .ne. 10) .or. (ubounds(2) .ne. 20)) correct=.false.
+  if ((undistLBound(1) .ne. 2) .or. (undistLBound(2) .ne. 1)) correct=.false.
+  if ((undistUBound(1) .ne. 10) .or. (undistUBound(2) .ne. 20)) correct=.false.
 
   ! destroy grid
   call ESMF_GridDestroy(grid,rc=localrc)
@@ -308,21 +309,21 @@ program ESMF_GridCreateUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Creating a Grid with non-default dimmap"
+  write(name, *) "Creating a Grid with non-default distgridToGridMap"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
-  grid=ESMF_GridCreate(distgrid=distgrid, dimmap=(/1,2/),rc=localrc)
+  grid=ESMF_GridCreate(distgrid=distgrid, distgridToGridMap=(/1,2/),rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get info back from grid
-  call ESMF_GridGet(grid, dimmap=dimmap, rc=localrc)
+  call ESMF_GridGet(grid, distgridToGridMap=distgridToGridMap, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! check that output is as expected
   correct=.true.
-  if ((dimmap(1) .ne. 1) .or. (dimmap(2) .ne. 2)) correct=.false.
+  if ((distgridToGridMap(1) .ne. 1) .or. (distgridToGridMap(2) .ne. 2)) correct=.false.
 
   ! destroy grid
   call ESMF_GridDestroy(grid,rc=localrc)
@@ -531,7 +532,7 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get info back from grid
-  call ESMF_GridGet(grid, distgrid=distgrid2, lbounds=lbounds, ubounds=ubounds, rc=localrc)
+  call ESMF_GridGet(grid, distgrid=distgrid2, undistLBound=undistLBound, undistUBound=undistUBound, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   call ESMF_DistGridGet(distgrid2, dimCount=dimCount, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -539,8 +540,8 @@ program ESMF_GridCreateUTest
   ! check that output is as expected
   correct=.true.
   if (dimcount .ne. 2) correct=.false.
-  if (lbounds(1) .ne. 1) correct=.false.
-  if (ubounds(1) .ne. 7) correct=.false.
+  if (undistLBound(1) .ne. 1) correct=.false.
+  if (undistUBound(1) .ne. 7) correct=.false.
 
   ! destroy grid
   call ESMF_GridDestroy(grid,rc=localrc)
@@ -564,7 +565,7 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get info back from grid
-  call ESMF_GridGet(grid, distgrid=distgrid2, lbounds=lbounds, ubounds=ubounds, rc=localrc)
+  call ESMF_GridGet(grid, distgrid=distgrid2, undistLBound=undistLBound, undistUBound=undistUBound, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   call ESMF_DistGridGet(distgrid2, dimCount=dimCount, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -572,8 +573,8 @@ program ESMF_GridCreateUTest
   ! check that output is as expected
   correct=.true.
   if (dimcount .ne. 2) correct=.false.
-  if (lbounds(1) .ne. 2) correct=.false.
-  if (ubounds(1) .ne. 7) correct=.false.
+  if (undistLBound(1) .ne. 2) correct=.false.
+  if (undistUBound(1) .ne. 7) correct=.false.
 
   ! destroy grid
   call ESMF_GridDestroy(grid,rc=localrc)
@@ -753,7 +754,7 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get info back from grid
-  call ESMF_GridGet(grid, distgrid=distgrid2, lbounds=lbounds, ubounds=ubounds, rc=localrc)
+  call ESMF_GridGet(grid, distgrid=distgrid2, undistLBound=undistLBound, undistUBound=undistUBound, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   call ESMF_DistGridGet(distgrid2, dimCount=dimCount, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -761,8 +762,8 @@ program ESMF_GridCreateUTest
   ! check that output is as expected
   correct=.true.
   if (dimcount .ne. 1) correct=.false.
-  if (lbounds(1) .ne. 1) correct=.false.
-  if (ubounds(1) .ne. 5) correct=.false.
+  if (undistLBound(1) .ne. 1) correct=.false.
+  if (undistUBound(1) .ne. 5) correct=.false.
 
   ! destroy grid
   call ESMF_GridDestroy(grid,rc=localrc)
@@ -874,7 +875,7 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get info back from grid
-  call ESMF_GridGet(grid, distgrid=distgrid2, lbounds=lbounds, ubounds=ubounds, rc=localrc)
+  call ESMF_GridGet(grid, distgrid=distgrid2, undistLBound=undistLBound, undistUBound=undistUBound, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   call ESMF_DistGridGet(distgrid2, dimCount=dimCount, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -882,8 +883,8 @@ program ESMF_GridCreateUTest
   ! check that output is as expected
   correct=.true.
   if (dimcount .ne. 2) correct=.false.
-  if (lbounds(1) .ne. 2) correct=.false.
-  if (ubounds(1) .ne. 6) correct=.false.
+  if (undistLBound(1) .ne. 2) correct=.false.
+  if (undistUBound(1) .ne. 6) correct=.false.
 
   ! destroy grid
   call ESMF_GridDestroy(grid,rc=localrc)
@@ -912,7 +913,7 @@ program ESMF_GridCreateUTest
 
   ! get info from Grid
   call ESMF_GridGet(grid, rank=rank, coordTypeKind=typekind, &
-         dimmap=dimmap, coordRank=coordRank, coordDimMap=coordDimMap, &
+         distgridToGridMap=distgridToGridMap, coordRank=coordRank, coordDimMap=coordDimMap, &
          indexflag=indexflag, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -920,8 +921,8 @@ program ESMF_GridCreateUTest
   correct=.true.
   if (typekind .ne. ESMF_TYPEKIND_R8) correct=.false.
   if (rank .ne. 2) correct=.false.
-  if ((dimmap(1) .ne. 1) .or. (dimmap(2) .ne. 2)) correct=.false.
-  !TODO: what to do about lbounds and ubounds
+  if ((distgridToGridMap(1) .ne. 1) .or. (distgridToGridMap(2) .ne. 2)) correct=.false.
+  !TODO: what to do about undistLBound and undistUBound
   if ((coordRank(1) .ne. 2) .or. (coordRank(2) .ne. 2)) correct=.false.
   if ((coordDimMap(1,1) .ne. 1) .or. (coordDimMap(1,2) .ne. 2) .or. & 
       (coordDimMap(2,1) .ne. 1) .or. (coordDimMap(2,2) .ne. 2)) correct=.false.
@@ -934,7 +935,7 @@ program ESMF_GridCreateUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Creating a Grid with non-default parameter (ubounds) using CreateEmpty/Set/Commit"
+  write(name, *) "Creating a Grid with non-default parameter (undistUBound) using CreateEmpty/Set/Commit"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! create grid with nondefault parameter
@@ -942,22 +943,22 @@ program ESMF_GridCreateUTest
   grid=ESMF_GridCreateEmpty(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  call ESMF_GridSet(grid, distgrid=distgrid, ubounds=(/100,200/),rc=localrc)
+  call ESMF_GridSet(grid, distgrid=distgrid, undistUBound=(/100,200/),rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  call ESMF_GridSet(grid, ubounds=(/10,20/),rc=localrc)
+  call ESMF_GridSet(grid, undistUBound=(/10,20/),rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   call ESMF_GridCommit(grid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get info back from grid
-  call ESMF_GridGet(grid, ubounds=ubounds, rc=localrc)
+  call ESMF_GridGet(grid, undistUBound=undistUBound, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! check that output is as expected
   correct=.true.
-  if ((ubounds(1) .ne. 10) .or. (ubounds(2) .ne. 20)) correct=.false.
+  if ((undistUBound(1) .ne. 10) .or. (undistUBound(2) .ne. 20)) correct=.false.
 
   ! destroy grid
   call ESMF_GridDestroy(grid,rc=localrc)
@@ -1033,16 +1034,16 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) correct=.false.
 
   ! Get array info and make sure its correct
-  call ESMF_ArrayGet(array,distgridToArrayMap=dimmap, &
-         undistLBound=lbounds, undistUBound=ubounds, rc=localrc)
+  call ESMF_ArrayGet(array,distgridToArrayMap=distgridToArrayMap, &
+         undistLBound=undistLBound, undistUBound=undistUBound, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Make sure info is as expected
-  if ((dimmap(1) .ne. 1) .or. (dimmap(2) .ne. 3)) correct=.false.
-  if ((lbounds(1) .ne. 2) .or. (lbounds(2) .ne. 1) .or. &
-      (lbounds(3) .ne. 3)) correct=.false.
-  if ((ubounds(1) .ne. 7) .or. (ubounds(2) .ne. 5) .or. &
-      (ubounds(3) .ne. 6)) correct=.false.
+  if ((distgridToArrayMap(1) .ne. 1) .or. (distgridToArrayMap(2) .ne. 3)) correct=.false.
+  if ((undistLBound(1) .ne. 2) .or. (undistLBound(2) .ne. 1) .or. &
+      (undistLBound(3) .ne. 3)) correct=.false.
+  if ((undistUBound(1) .ne. 7) .or. (undistUBound(2) .ne. 5) .or. &
+      (undistUBound(3) .ne. 6)) correct=.false.
 
 
   ! destroy grid
