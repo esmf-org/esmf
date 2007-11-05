@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.259 2007/11/05 16:04:51 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.260 2007/11/05 23:01:47 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.259 2007/11/05 16:04:51 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.260 2007/11/05 23:01:47 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -417,7 +417,7 @@
       function ESMF_FieldCreateNoDataPtr(grid, arrayspec, staggerloc, &
                                          gridToFieldMap, ungriddedLBound, &
                                          ungriddedUBound, maxHaloLWidth, &
-                                         maxHaloUWidth, indexflag, name, iospec, rc)
+                                         maxHaloUWidth, name, iospec, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Field) :: ESMF_FieldCreateNoDataPtr   
@@ -431,7 +431,6 @@
       integer, intent(in), optional :: ungriddedUBound(:)
       integer, intent(in), optional :: maxHaloLWidth(:)
       integer, intent(in), optional :: maxHaloUWidth(:)
-      type(ESMF_IndexFlag), intent(in), optional ::indexflag
       character (len=*), intent(in), optional :: name    
       type(ESMF_IOSpec), intent(in), optional :: iospec  
       integer, intent(out), optional :: rc               
@@ -474,9 +473,6 @@
 !           Lower bound of halo region.  Defaults to 0.
 !     \item [{[maxHaloUWidth]}]
 !           Upper bound of halo region.  Defaults to 0.
-!     \item [{[indexflag]}]
-!           Local or global indices.  See section \ref{opt:indexflag} for a 
-!           list of valid indexflag options.  The default is {ESMF\_INDEX\_DELOCAL}.
 !     \item [{[name]}] 
 !           {\tt Field} name. 
 !     \item [{[iospec]}] 
@@ -504,7 +500,7 @@
       call ESMF_FieldConstructNoDataPtr(ftype, grid, arrayspec, staggerloc, &
                                        gridToFieldMap, ungriddedLBound, &
                                        ungriddedUBound, maxHaloLWidth, &
-                                       maxHaloUWidth, indexflag, name, iospec, localrc)
+                                       maxHaloUWidth, name, iospec, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -3598,7 +3594,7 @@
                                         allocflag, staggerloc, &
                                         gridToFieldMap, ungriddedLBound, &
                                         ungriddedUBound, maxHaloLWidth, &
-                                        maxHaloUWidth, indexflag, name, iospec, rc)
+                                        maxHaloUWidth, name, iospec, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldType), pointer :: ftype 
@@ -3611,7 +3607,6 @@
       integer, intent(in), optional :: ungriddedUBound(:)      
       integer, intent(in), optional :: maxHaloLWidth(:)
       integer, intent(in), optional :: maxHaloUWidth(:)
-      type(ESMF_IndexFlag), intent(in), optional :: indexflag
       character (len=*), intent(in), optional :: name
       type(ESMF_IOSpec), intent(in), optional :: iospec 
       integer, intent(out), optional :: rc              
@@ -3666,9 +3661,6 @@
 !     \item [{[maxHaloUWidth]}]
 !           Upper bound of halo region.  Halo widths should be in the same order as
 !           the DistGrid in {\tt grid}.  Defaults to 0.
-!     \item [{[indexflag]}]
-!           Local or global indices.  See section \ref{opt:indexflag} for a 
-!           list of valid indexflag options.  The default is {ESMF\_INDEX\_DELOCAL}.
 !     \item [{[name]}] 
 !           {\tt ESMF\_Field} name. 
 !     \item [{[iospec]}] 
@@ -3727,7 +3719,6 @@
       endif
 
 ! TODO:FIELDINTEGRATION Check that Field halo is same rank as distgrid dim count
-! TODO:FIELDINTEGRATION Does ArrayCreateFromGrid need an indexflag argument?  
 
       array = ESMF_ArrayCreateFromGrid(grid, staggerloc=staggerloc, name=name, &
         typekind=typekind, gridToArrayMap=gridToFieldMap, ungriddedLBound=ungriddedLBound, &
@@ -3863,7 +3854,7 @@
       subroutine ESMF_FieldConstructNoDataPtr(ftype, grid, arrayspec, staggerloc, &
                                        gridToFieldMap, ungriddedLBound, &
                                        ungriddedUBound, maxHaloLWidth, &
-                                       maxHaloUWidth, indexflag, name, iospec, rc)
+                                       maxHaloUWidth, name, iospec, rc)
 
 !
 ! !ARGUMENTS:     
@@ -3876,7 +3867,6 @@
       integer, intent(in), optional :: ungriddedUBound(:)
       integer, intent(in), optional :: maxHaloLWidth(:)
       integer, intent(in), optional :: maxHaloUWidth(:)
-      type(ESMF_IndexFlag), intent(in), optional ::indexflag
       character (len=*), intent(in), optional :: name
       type(ESMF_IOSpec), intent(in), optional :: iospec 
       integer, intent(out), optional :: rc              
@@ -3923,9 +3913,6 @@
 !           Lower bound of halo region.  Defaults to 0.
 !     \item [{[maxHaloUWidth]}]
 !           Upper bound of halo region.  Defaults to 0.
-!     \item [{[indexflag]}]
-!           Local or global indices.  See section \ref{opt:indexflag} for a 
-!           list of valid indexflag options.  The default is {ESMF\_INDEX\_DELOCAL}.
 !     \item [{[name]}] 
 !           {\tt ESMF\_Field} name. 
 !     \item [{[iospec]}] 
