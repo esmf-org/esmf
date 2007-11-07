@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.104 2007/10/31 16:58:53 cdeluca Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.105 2007/11/07 00:02:05 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.104 2007/10/31 16:58:53 cdeluca Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.105 2007/11/07 00:02:05 feiliu Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -58,7 +58,6 @@
       type(ESMF_ArraySpec) :: arrayspec
       real, dimension(:,:), pointer :: f90ptr2, f90ptr4, f90ptr5
       real(ESMF_KIND_R8) :: minCoord(2), deltas(10)
-      type(ESMF_FieldDataMap) :: dm, dm1
       !type(ESMF_RelLoc) :: rl
       character (len = 20) :: fname, fname1, fname2
       character (len = 20) :: gname, gname3
@@ -153,7 +152,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! Verifing that an initialized Field can be printed
-!      call ESMF_FieldPrint(f1, rc=rc)
+      call ESMF_FieldPrint(f1, rc=rc)
 !      write(failMsg, *) ""
 !      write(name, *) "Printing an initialized Field with no data Test"
 !      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -306,8 +305,8 @@
       call ESMF_Test((fname1.ne.fname2), name, failMsg, result, ESMF_SRCLINE)
       !print *, "Field (f1) name = ", trim(fname1)
       print *, "Field (f2) name = ", trim(fname2)
-!      call ESMF_FieldPrint(f1)
-!      call ESMF_FieldPrint(f2)
+      call ESMF_FieldPrint(f1)
+      call ESMF_FieldPrint(f2)
       call ESMF_FieldDestroy(f1)
       call ESMF_FieldDestroy(f2)
 
@@ -386,12 +385,12 @@
       ! Creation with external data 
       ! Fields may be created as in FLD1.1.1 with a data array passed into 
       ! the argument list. The data array is referenced and not copied.
-      ! Verifing that a Field can be created with a Grid and DataMap
+      ! Verifing that a Field can be created with a Grid
       call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
-      call ESMF_FieldDataMapSetDefault(dm, ESMF_INDEX_IJ)
       f3 = ESMF_FieldCreate(grid, arrayspec, allocflag=ESMF_ALLOC, &
                         staggerloc=ESMF_STAGGERLOC_CENTER, &
-                        haloWidth=2, datamap=dm, name="Field 0", iospec=ios, rc=rc)
+!                        haloWidth=2, name="Field 0", iospec=ios, rc=rc)
+                        name="Field 0", iospec=ios, rc=rc)
 
       write(failMsg, *) ""
       write(name, *) "Creating a Field with a Grid and Array Test"
@@ -435,9 +434,7 @@
       !  setting a different datamap in an existing field which already has
       !  data is not implemented yet (it is interpreted as a request to 
       !  reorder the data).  this will work if the field has no data yet.
-      call ESMF_FieldDataMapSetDefault(dm1, 2, (/ 1, 0 /), rc=rc)
       f1 = ESMF_FieldCreateNoData(rc=rc) 
-      call ESMF_FieldSetDataMap(f1, datamap=dm1, rc=rc)
       write(failMsg, *) "Did return ESMF_SUCCESS"
       write(name, *) "Setting a Field Data Map Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -477,7 +474,8 @@
       call ESMF_GridDestroy(grid2, rc=rc)
       f6 = ESMF_FieldCreate(grid2, arrayspec, allocflag=ESMF_ALLOC, &
                         staggerloc=ESMF_STAGGERLOC_CENTER, &
-                        haloWidth=3, datamap=dm, name="Field 0", iospec=ios, rc=rc)
+!                        haloWidth=3, name="Field 0", iospec=ios, rc=rc)
+                        name="Field 0", iospec=ios, rc=rc)
 
       write(failMsg, *) ""
       write(name, *) "Creating a Field with an uninitialized Grid and Array"
@@ -502,7 +500,8 @@
       call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
       f3 = ESMF_FieldCreate(grid, arrayspec, allocflag=ESMF_ALLOC, &
                         staggerloc=ESMF_STAGGERLOC_CENTER, &
-                        haloWidth=1, datamap=dm, name="Field 0", iospec=ios, rc=rc)
+!                        haloWidth=1, name="Field 0", iospec=ios, rc=rc)
+                        name="Field 0", iospec=ios, rc=rc)
       call ESMF_FieldGet(f3, grid=grid3, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting a Grid from a Field created with no data Test"
@@ -781,11 +780,6 @@ print *, "done with test"
       ! or column major at field creation and to rearrange it (assumes 
       ! local copy).
       !EX_removeUTest
-      call ESMF_FieldGet(f3, datamap=dm, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Getting a DataMap from a Field"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_FieldDataMapPrint(dm, "", rc=rc)
 
       ! Requirement 1.3 Index Order
       ! It shall be possible to specify the index order of field data and 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.260 2007/11/05 23:01:47 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.261 2007/11/07 00:02:45 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -167,7 +167,7 @@
 
 !   public ESMF_FieldSetArray           ! Set a data Array in a Field
 !   public ESMF_FieldSetDataValues      ! Set Field data values 
-!   public ESMF_FieldSetGrid
+   public ESMF_FieldSetGrid
 
    public ESMF_FieldSetAttribute       ! Set and Get attributes
    public ESMF_FieldGetAttribute       !  
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.260 2007/11/05 23:01:47 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.261 2007/11/07 00:02:45 feiliu Exp $'
 
 !==============================================================================
 !
@@ -3005,8 +3005,6 @@
 
       end subroutine ESMF_FieldSetCharAttr
 
-! TODO:FIELDINTEGRATION Restore the FieldSetGrid method
-#if 0
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldSetGrid"
@@ -3087,7 +3085,6 @@
         if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_FieldSetGrid
-#endif
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -3224,7 +3221,7 @@
 
           hasarray = .TRUE.
           ! verify array computational bounds match grid computational bounds per localDE
-          do lDE=0, localDECount
+          do lDE=1, localDECount
               allocate(gridCompUBnd(dimCount), gridCompLBnd(dimCount))
               call ESMF_GridGet(ftypep%grid, staggerloc=staggerloc, localDE=lDE, &
                   computationalUBound=gridCompUBnd, computationalLBound=gridCompLBnd, &
@@ -3693,6 +3690,11 @@
 !          hwidth = 0
 !      endif
 
+      call ESMF_BaseCreate(ftype%base, "Field", name, 0, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       call ESMF_ArraySpecGet(arrayspec, rank=arrayRank, typekind=typekind, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -3731,6 +3733,10 @@
 
       ftype%array = array
       ftype%datastatus = ESMF_STATUS_READY
+      ftype%arrayspec = arrayspec
+      ftype%grid  = grid
+      ftype%gridstatus = ESMF_STATUS_READY
+      ftype%fieldstatus = ESMF_STATUS_READY 
 
       if (present(rc)) rc = ESMF_SUCCESS
 
