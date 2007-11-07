@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.261 2007/11/07 00:02:45 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.262 2007/11/07 21:45:23 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.261 2007/11/07 00:02:45 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.262 2007/11/07 21:45:23 feiliu Exp $'
 
 !==============================================================================
 !
@@ -3199,18 +3199,18 @@
                                     ESMF_CONTEXT, rc)) return
           
           ! Verify the distgrids in array and grid match.
-!          if(gridDistGrid.this .ne. arrayDistGrid.this) then
-!              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-!                 "grid DistGrid does not match array DistGrid", &
-!                  ESMF_CONTEXT, rc)
-!              return
-!          endif
+          if(ESMF_DistGridMatch(gridDistGrid, arrayDistGrid, rc=localrc) .ne. ESMF_TRUE) then
+              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                 "grid DistGrid does not match array DistGrid", &
+                  ESMF_CONTEXT, rc)
+              return
+          endif
 
           ! Verify that the computational bounds of array and grid contained
           ! in the field match.
           allocate(dimmap(dimCount))
-          allocate(arrayCompLBnd(dimCount, localDECount))
-          allocate(arrayCompUBnd(dimCount, localDECount))
+          allocate(arrayCompLBnd(dimCount, 0:localDECount-1))
+          allocate(arrayCompUBnd(dimCount, 0:localDECount-1))
 
           call ESMF_ArrayGet(ftypep%array, distgridToArrayMap=dimmap, &
               computationalLBound=arrayCompLBnd, &
@@ -3221,7 +3221,7 @@
 
           hasarray = .TRUE.
           ! verify array computational bounds match grid computational bounds per localDE
-          do lDE=1, localDECount
+          do lDE=0, localDECount-1
               allocate(gridCompUBnd(dimCount), gridCompLBnd(dimCount))
               call ESMF_GridGet(ftypep%grid, staggerloc=staggerloc, localDE=lDE, &
                   computationalUBound=gridCompUBnd, computationalLBound=gridCompLBnd, &
