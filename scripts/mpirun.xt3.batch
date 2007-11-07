@@ -1,5 +1,5 @@
 #!/bin/ksh
-# $Id: mpirun.xt3.batch,v 1.1 2007/11/06 22:28:58 svasquez Exp $
+# $Id: mpirun.xt3.batch,v 1.2 2007/11/07 16:25:12 svasquez Exp $
 # This script provides an interface such that the simple command
 # mpirun -np #
 # runs # copies of the program in parallel.
@@ -13,6 +13,12 @@ fi
 export num_procs=$2
 shift 2
 export prog=$*
+
+# must be multiples of 2
+if [ $num_procs = 1 ]
+then
+        export num_procs=2
+fi
 
 export working_dir=`pwd`
 
@@ -48,4 +54,4 @@ mv -f *$proc_id*  $prog.stdout
 
 
 # Clean up
-rm -f $ESMF_DIR/scripts/esmf_script
+#rm -f $ESMF_DIR/scripts/esmf_script
