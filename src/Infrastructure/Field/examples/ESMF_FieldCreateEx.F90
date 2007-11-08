@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.52 2007/10/31 16:58:52 cdeluca Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.53 2007/11/08 23:01:17 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
     program ESMF_FieldCreateEx
 
 !------------------------------------------------------------------------------
-!EXremoveAMPLE        String used by test script to count examples.
+!EXAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
 ! !PROGRAM: ESMF_FieldCreateEx - Field creation
@@ -30,17 +30,15 @@
     ! Local variables
     integer :: rc
     integer :: mycell
-    integer :: gridCount(2)
-    integer :: lbound_(0:1), ubound_(0:1)
     type(ESMF_Grid) :: grid
+    type(ESMF_DistGrid) :: distgrid
     type(ESMF_ArraySpec) :: arrayspec
-    type(ESMF_InternArray) :: iarray1, iarray2
+    type(ESMF_Array) :: iarray1, iarray2
     type(ESMF_DELayout) :: layout
     type(ESMF_VM) :: vm
     !type(ESMF_RelLoc) :: relativelocation
     !type(ESMF_FieldDataMap) :: datamap
     type(ESMF_Field) :: field1, field2, field3
-    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1, f90ptr2
     real (ESMF_KIND_R8), dimension(2) :: origin
     character (len = ESMF_MAXSTR) :: fname
 !EOC
@@ -56,39 +54,29 @@
 !   !  We first create a Grid with a regular distribution that is
 !   !  10x20 DEs.  This version of create simply
 !   !  associates the data with the Grid.  The data is referenced
-!   !  explicitly on a regular 2x2 uniform grid. The shape of data
-!   !  is retrieved from the grid structure through GridGet API.
-!   !  Although one could use 10,20 directly to intialize f90ptr1
-!   !  as well in this case. 
+!   !  explicitly on a regular 2x2 uniform grid. 
+!   !  Then we create an arrayspec. With grid and arrayspec,
+!   !  we then create a field.
     grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
                                   regDecomp=(/2,2/), name="atmgrid", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridGet(grid, localDE=0, staggerloc=ESMF_STAGGERLOC_CENTER, computationalLBound=lbound_, &
-        computationalUBound=ubound_, rc=rc)
+    call ESMF_GridGet(grid, distgrid=distgrid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    gridCount(1) = ubound_(0)-lbound_(0)+1
-    gridCount(2) = ubound_(1)-lbound_(1)+1
-
-    allocate(f90ptr1(gridCount(1),gridCount(2)))
-
-    iarray1 = ESMF_InternArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)  
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    call ESMF_InternArrayPrint(iarray1, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
+    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc)
+!EOC
 
 !BOE
-!\subsubsection{Field Create with Grid and InternArray}
+!\subsubsection{Field Create with Grid and Arrayspec}
       
 !  The user has already created an {\tt ESMF\_Grid} and an
-!  {\tt ESMF\_InternArray} with data.  This create associates the
-!  two objects.  An {\tt ESMF\_FieldDataMap} is created with all defaults.
+!  {\tt ESMF\_Arrayspec} with data.  This create associates the
+!  two objects.  
 !EOE
       
 !BOC
-    field1 = ESMF_FieldCreate(grid, iarray1, &
+    field1 = ESMF_FieldCreate(grid, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="pressure", rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -98,55 +86,28 @@
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-!BOE
-!\subsubsection{Field Create with Grid and ArraySpec}
-      
-!  The user has already created an {\tt ESMF\_Grid} and an
-!  {\tt ESMF\_ArraySpec} which describes the data.  This version of 
-!  create will create an {\tt ESMF\_Array} based on the grid size
-!  and the {\tt ESMF\_ArraySpec}. 
-!  An {\tt ESMF\_FieldDataMap} is created with all defaults.
-!EOE
-      
-
 !-------------------------------------------------------------------------
 !   ! Example 2:
-!   !
-!   !  The user creates an ArraySpec that describes the data and the
-!   !  Field create call allocates the appropriate memory for it. 
-
-!BOC
-    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!BOC
-    field2 = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, &
-                              name="rh", rc=rc)
-!EOC
-    print *, "Field example 2 returned"
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!-------------------------------------------------------------------------
-!   ! Example 3:
 !   !
 !   !  The user wishes to associate different data with the Field
 !   !  created in example 1.  The get data call returns the 
 !   !  pointer to the old data array; the set call passes in the 
 !   !  pointer to the new array.
 
-    call ESMF_FieldGetInternArray(field1, array=iarray1, rc=rc)
+    call ESMF_FieldGetArray(field1, array=iarray1, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! the size of the data in the array still has to line up with the Grid
     ! and its decomposition
-    allocate(f90ptr2(gridCount(1),gridCount(2)))
-    iarray2 = ESMF_InternArrayCreate(f90ptr2, ESMF_DATA_REF, rc=rc)  
-
+!    iarray2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+!        computationalLWidth=(/0,0/), computationalUWidth=(/0,0/), rc=rc)  
+    iarray2 = ESMF_ArrayCreateFromGrid(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+        rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_FieldSetInternArray(field1, array=iarray2, rc=rc)
-    print *, "Field example 3 returned"
+    !call ESMF_FieldSetArray(field1, iarray2, rc=rc)
+    print *, "Field example 2 returned"
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -155,12 +116,10 @@
 !\subsubsection{Empty Field Create}
 
 !  The user creates an empty {\tt ESMF\_Field} object.
-!  The {\tt ESMF\_Grid}, {\tt ESMF\_InternArray}, and {\tt ESMF\_FieldDataMap}
-!  can be added later using the set methods.
 !EOE
 
 !-------------------------------------------------------------------------
-!   ! Example 4:
+!   ! Example 3:
 !   !
 !   !  The user creates an empty Field, and adds the Grid and 
 !   !  data in later calls.
@@ -177,12 +136,12 @@
 
 !    ! ...and associate a data Array.
 !    call ESMF_FieldAttachArray(field3, array1, rc=rc)
-     print *, "Field example 4 returned"
+     print *, "Field example 3 returned"
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !-------------------------------------------------------------------------
-!   ! Example 5:
+!   ! Example 4:
 !   !
 !   ! Query a Field for number of local grid cells.
 !   COMMENT THIS TEST OUT FOR NOW BECAUSE THE SUBROUTINE
@@ -205,10 +164,6 @@
 !BOC
     call ESMF_FieldDestroy(field1, rc=rc)
 !EOC
-
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    call ESMF_FieldDestroy(field2, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 

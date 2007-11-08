@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.262 2007/11/07 21:45:23 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.263 2007/11/08 23:01:17 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -165,7 +165,7 @@
 
    public ESMF_FieldGetArray           ! Return the data Array
 
-!   public ESMF_FieldSetArray           ! Set a data Array in a Field
+   public ESMF_FieldSetArray           ! Set a data Array in a Field
 !   public ESMF_FieldSetDataValues      ! Set Field data values 
    public ESMF_FieldSetGrid
 
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.262 2007/11/07 21:45:23 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.263 2007/11/08 23:01:17 feiliu Exp $'
 
 !==============================================================================
 !
@@ -2114,8 +2114,6 @@
 
         end function ESMF_FieldReadRestart
 
-! TODO:FIELDINTEGRATION Restore the FieldSetArray method
-#if 0 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldSetArray"
@@ -2190,7 +2188,6 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldSetArray
-#endif
 
 ! TODO:FIELDINTEGRATION Restore the FieldSetLocalArray method 
 #if 0
