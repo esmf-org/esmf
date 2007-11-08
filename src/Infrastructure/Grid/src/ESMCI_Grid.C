@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.33 2007/11/05 23:32:35 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.34 2007/11/08 21:17:00 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.33 2007/11/05 23:32:35 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.34 2007/11/08 21:17:00 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -1687,6 +1687,13 @@ int Grid::constructInternal(
 
     //// allocate storage for array allocation flag
     didIAllocList=_allocate2D<bool>(staggerLocCount,rank);
+    //// set default
+    for(int i=0; i<staggerLocCount; i++) {
+      for(int j=0; j<rank; j++) {
+          didIAllocList[i][j]=false;
+      }
+    }
+
 
     //// setup map from Grid dimensions to distgrid or undistUBound/undistLBound 
     //// dimensions 
@@ -1913,6 +1920,7 @@ Grid::Grid(
   coordArrayList = ESMC_NULL_POINTER;
   staggerEdgeLWidthList = ESMC_NULL_POINTER;
   staggerEdgeUWidthList = ESMC_NULL_POINTER;
+  didIAllocList = ESMC_NULL_POINTER;
   
   gridIsDist = ESMC_NULL_POINTER;
   gridMapDim = ESMC_NULL_POINTER;
@@ -1956,29 +1964,29 @@ Grid::Grid(
 
    // delete distributed dimension stuff
    if (distRank) {
-     delete [] distgridToGridMap;
+     if (distgridToGridMap !=ESMC_NULL_POINTER) delete [] distgridToGridMap;
    }
 
    // delete undistributed dimension stuff
    if (undistRank) {
-     delete [] undistLBound;
-     delete [] undistUBound;
+     if (undistLBound !=ESMC_NULL_POINTER) delete [] undistLBound;
+     if (undistUBound !=ESMC_NULL_POINTER) delete [] undistUBound;
    }
 
    // delete all dimension stuff
    if (rank) {
-     delete [] gridEdgeLWidth;
-     delete [] gridEdgeUWidth;
-     delete [] gridAlign;
-     delete [] coordRank;
+     if (gridEdgeLWidth !=ESMC_NULL_POINTER) delete [] gridEdgeLWidth;
+     if (gridEdgeUWidth !=ESMC_NULL_POINTER) delete [] gridEdgeUWidth;
+     if (gridAlign !=ESMC_NULL_POINTER) delete [] gridAlign;
+     if (coordRank !=ESMC_NULL_POINTER) delete [] coordRank;
      _free2D<int>(&coordDimMap);
      _free2D<Array *>(&coordArrayList);
      _free2D<int>(&staggerEdgeLWidthList);
      _free2D<int>(&staggerEdgeUWidthList);
      _free2D<int>(&staggerAlignList);
      _free2D<bool>(&didIAllocList);
-     delete [] gridIsDist;
-     delete [] gridMapDim;
+     if (gridIsDist !=ESMC_NULL_POINTER) delete [] gridIsDist;
+     if (gridMapDim !=ESMC_NULL_POINTER) delete [] gridMapDim;
      _free2D<bool>(&coordIsDist); 
      _free2D<int>(&coordMapDim); 
   }
@@ -2193,10 +2201,6 @@ int Grid::setStaggerInfo(
 }
 //-----------------------------------------------------------------------------
 
-#if 0
-//
-//   TODO: Serialize and deserialize still need work before being functional
-//
 //-----------------------------------------------------------------------------
 //
 // serialize() and deserialize()
@@ -2218,25 +2222,35 @@ int Grid::serialize(
 // !ARGUMENTS:
   char *buffer,          // inout - byte stream to fill
   int *length,           // inout - buf length
-  int *offset)const{     // inout - original offset, updated to point 
+  int *offset)           // inout - original offset, updated to point 
                          //         to first free byte after current obj info
+{
+                         
 //
 // !DESCRIPTION:
 //    Turn info in grid class into a stream of bytes.
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  int localoffset
-
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
+  bool cp, done;
+  int loffset;
 
-  // Prepare pointer variables of different type
-  char *cp;
-  int *ip;
-  ESMC_TypeKind *dkp;
-  ESMC_IndexFlag *ifp;
+  // Define serialization macros
+#define SERIALIZE_VAR(cp,bufptr,loff,var,t) \
+  if (cp) *((t *)(bufptr+loff))=var;    \
+  loff += (sizeof(t));  
+
+#define SERIALIZE_VAR1D(cp,bufptr,loff,varptr,s1,t)    \
+  if (cp) memcpy(bufptr+loff,varptr,(s1*sizeof(t)));       \
+  loff += (s1*sizeof(t));  
+
+#define SERIALIZE_VAR2D(cp,bufptr,loff,varptr,s1,s2,t) \
+  if (cp) memcpy(bufptr+loff,((t *)varptr)+s1,(s1*s2*sizeof(t))); \
+  loff += (s1*s2*sizeof(t));  
+
 
   // Check status
   if (status < ESMC_GRIDSTATUS_SHAPE_READY) {
@@ -2245,67 +2259,103 @@ int Grid::serialize(
     return rc;
   }
 
-  // Check if buffer has enough free memory to hold object
-  // TODO: write better check of size
-  //  if ((*length - *offset) < sizeof(Grid)){
-  //  ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-  //    "Buffer too short to add an Grid object", &rc);
-  //  return rc;
-  // }
+  // Run twice:
+  //    1. check the sizes
+  //    2. do the actual copies
+  cp=false;
+  done=false;
+  while (!done) {
+    // get localoffset
+    loffset=*offset;
+    
+    // First, serialize the base class,
+    localrc = ESMC_Base::ESMC_Serialize(buffer, length, &loffset);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      return rc;
+    
+    // Since we're not allowing the serialization of 
+    // non-ready Grids don't worry about serializing
+    // the protogrid
+    
+    // Don't do status since we're changing it anyway
 
-  // get localoffset
-  localoffset=*offset
+    SERIALIZE_VAR(cp, buffer,loffset,typekind,ESMC_TypeKind);
+    
+    SERIALIZE_VAR(cp, buffer,loffset,distRank,int);    
 
-  // First, serialize the base class,
-  localrc = ESMC_Base::ESMC_Serialize(buffer, length, &localoffset);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;
+    SERIALIZE_VAR1D(cp, buffer,loffset,distgridToGridMap,distRank,int);
 
-  // store status
-  call memcpy(buffer+localoffset,&status,sizeof(ESMC_GridStatus));
-  localoffset += sizeof(ESMC_GridStatus)
+    SERIALIZE_VAR(cp, buffer,loffset,undistRank,int);
 
-  // store typekind
-  call memcpy(buffer+localoffset,&typekind,sizeof(ESMC_TypeKind));
-  localoffset += sizeof(ESMC_GridStatus)
+    SERIALIZE_VAR1D(cp, buffer,loffset,undistLBound,undistRank,int);
+    SERIALIZE_VAR1D(cp, buffer,loffset,undistUBound,undistRank,int);
+    
+    SERIALIZE_VAR(cp, buffer,loffset,rank,int);    
 
-  // store distRank
-  call memcpy(buffer+localoffset,&distRank,sizeof(int));
-  localoffset += sizeof(int)
+    SERIALIZE_VAR1D(cp, buffer,loffset,gridEdgeLWidth,rank,int);
+    SERIALIZE_VAR1D(cp, buffer,loffset,gridEdgeUWidth,rank,int);
+    SERIALIZE_VAR1D(cp, buffer,loffset,gridAlign,rank,int);
+    
+    SERIALIZE_VAR1D(cp, buffer,loffset,coordRank,rank,int);
+    SERIALIZE_VAR2D(cp, buffer,loffset,coordDimMap,rank,rank,int);
+    
+    SERIALIZE_VAR(cp, buffer,loffset,staggerLocCount,int);
+    
+    SERIALIZE_VAR2D(cp, buffer,loffset,staggerAlignList,staggerLocCount,rank,int);
+    SERIALIZE_VAR2D(cp, buffer,loffset,staggerEdgeLWidthList,staggerLocCount,rank,int);
+    SERIALIZE_VAR2D(cp, buffer,loffset,staggerEdgeUWidthList,staggerLocCount,rank,int);
+    SERIALIZE_VAR2D(cp, buffer,loffset,didIAllocList,staggerLocCount,rank, bool);
+    
+    SERIALIZE_VAR1D(cp, buffer,loffset,gridIsDist,rank,bool);
+    SERIALIZE_VAR1D(cp, buffer,loffset,gridMapDim,rank,int);
 
-  // store distgridToGridMap
-  call memcpy(buffer+localoffset,distgridToGridMap,distRank*sizeof(int));
-  localoffset += (distRank*sizeof(int))
+    SERIALIZE_VAR2D(cp, buffer,loffset,coordIsDist,rank,rank,bool);
+    SERIALIZE_VAR2D(cp, buffer,loffset,coordMapDim,rank,rank,int);
+        
+    
+    // Don't do isDEBnds because a proxy object isn't on a valid DE
+    
+    // Don't do Coordinate Arrays right now because it doesn't
+    // seem necessary. Will be easy enough to add in the 
+    // future if necessary (just serialize an array indicating
+    // which staggerloc's contain valid Arrays and then serialize
+    // the Arrays (using the Array serialize) in order.
+    
+    
+    // Serialize the DistGrid
+    localrc = distgrid->serialize(buffer, length, &loffset);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+     return rc;  
+    
+    // Check if buffer has enough free memory to hold object
+    if (*length < loffset){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                      "Buffer too short to add an Grid object", &rc);
+      return rc;
+    }
 
-  // store undistRank
-  call memcpy(buffer+localoffset,&undistRank,sizeof(int));
-  localoffset += sizeof(int)
-
-  // store undistLBound
-  call memcpy(buffer+localoffset,undistLBound,undistRank*sizeof(int));
-  localoffset += (undistRank*sizeof(int))
-
-  // store undistUBound
-  call memcpy(buffer+localoffset,undistUBound,undistRank*sizeof(int));
-  localoffset += (undistRank*sizeof(int))
-
-
- // TODO: contiue with rank, coordRank and so on...
-
-
-  // Serialize the DistGrid
-  localrc = distgrid->serialize(buffer, length, &localoffset);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;
+    // If we've done the copy then we're done
+    if (cp) {
+      done=true;
+    } else { 
+      // if we haven't done the the copy,
+      // then loop through again and do the copy
+      cp=true;
+    }
+  }
 
   // output localoffset
-  *offset=localoffset
+  *offset=loffset;
+
+  // Undefine serialization macros, so they don't cause troubles elsewhere
+#undef SERIALIZE_VAR
+#undef SERIALIZE_VAR1D
+#undef SERIALIZE_VAR2D
  
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
 }
-
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -2332,44 +2382,97 @@ int Grid::deserialize(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
+  int loffset;
 
-  // Prepare pointer variables of different types
-  char *cp;
-  int *ip;
-  ESMC_TypeKind *dkp;
-  ESMC_IndexFlag *ifp;
+  // Define serialization macros
+#define DESERIALIZE_VAR(bufptr,loff,var,t) \
+  var=*((t *)(bufptr+loff));    \
+  loff += (sizeof(t));  
+
+#define DESERIALIZE_VAR1D(bufptr,loff,varptr,s1,t)  \
+  varptr = new t[s1];           \
+  memcpy(varptr,bufptr+loff,(s1*sizeof(t)));      \
+  loff += (s1*sizeof(t));  
+
+#define DESERIALIZE_VAR2D(bufptr,loff,varptr,s1,s2,t) \
+  varptr=_allocate2D<t>(s1,s2);         \
+  memcpy(((t *)varptr)+s1,bufptr+loff,(s1*s2*sizeof(t))); \
+  loff += (s1*s2*sizeof(t));  
+
+  // get localoffset
+  loffset=*offset;
 
   // First, deserialize the base class
-  localrc = ESMC_Base::ESMC_Deserialize(buffer, offset);
+  localrc = ESMC_Base::ESMC_Deserialize(buffer, &loffset);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
+  
+  // Since we're not allowing the serialization of 
+  // non-ready Grids don't worry about serializing
+  // the protogrid
 
+  // Set status (instead of reading it)
+  status =  ESMC_GRIDSTATUS_STUB_READY;
+  
+  DESERIALIZE_VAR( buffer,loffset,typekind,ESMC_TypeKind);
+  
+  DESERIALIZE_VAR( buffer,loffset,distRank,int);    
+  
+  DESERIALIZE_VAR1D( buffer,loffset,distgridToGridMap,distRank,int);
+  
+  DESERIALIZE_VAR( buffer,loffset,undistRank,int);
+  
+  DESERIALIZE_VAR1D( buffer,loffset,undistLBound,undistRank,int);
+  DESERIALIZE_VAR1D( buffer,loffset,undistUBound,undistRank,int);
+  
+  DESERIALIZE_VAR( buffer,loffset,rank,int);    
+  
+  DESERIALIZE_VAR1D( buffer,loffset,gridEdgeLWidth,rank,int);
+  DESERIALIZE_VAR1D( buffer,loffset,gridEdgeUWidth,rank,int);
+  DESERIALIZE_VAR1D( buffer,loffset,gridAlign,rank,int);
+  
+  DESERIALIZE_VAR1D( buffer,loffset,coordRank,rank,int);
+  DESERIALIZE_VAR2D( buffer,loffset,coordDimMap,rank,rank,int);
+    
+  DESERIALIZE_VAR( buffer,loffset,staggerLocCount,int);
+
+  DESERIALIZE_VAR2D( buffer,loffset,staggerAlignList,staggerLocCount,rank,int);
+  DESERIALIZE_VAR2D( buffer,loffset,staggerEdgeLWidthList,staggerLocCount,rank,int);
+  DESERIALIZE_VAR2D( buffer,loffset,staggerEdgeUWidthList,staggerLocCount,rank,int);
+  DESERIALIZE_VAR2D( buffer,loffset,didIAllocList,staggerLocCount,rank, bool);
+
+  DESERIALIZE_VAR1D( buffer,loffset,gridIsDist,rank,bool);
+  DESERIALIZE_VAR1D( buffer,loffset,gridMapDim,rank,int);
+
+  DESERIALIZE_VAR2D( buffer,loffset,coordIsDist,rank,rank,bool);
+  DESERIALIZE_VAR2D( buffer,loffset,coordMapDim,rank,rank,int);
+
+
+  // Don't do isDEBnds because a proxy object isn't on a valid DE
+  
+  // Don't do Coordinate Arrays right now because it doesn't
+  // seem necessary. Will be easy enough to add in the 
+  // future if necessary (just serialize an array indicating
+  // which staggerloc's contain valid Arrays and then serialize
+  // the Arrays (using the Array serialize) in order.
+      
   // Deserialize the DistGrid
-  distgrid = DistGrid::deserialize(buffer, offset);
-  // Pull DELayout out of DistGrid
-  delayout = distgrid->getDELayout();
-  // Then, deserialize Grid meta data
-  dkp = (ESMC_TypeKind *)(buffer + *offset);
-  typekind = *dkp++;
-  ip = (int *)dkp;
-  rank = *ip++;
-  ifp = (ESMC_IndexFlag *)ip;
-  indexflag = *ifp++;
-  
-  // fix offset
-  cp = (char *)ifp;
-  *offset = (cp - buffer);
-  
-  // set values with local dependency
-  larrayList = new ESMC_LocalGrid*[0];     // no DE on proxy object
-  larrayBaseAddrList = new void*[0];        // no DE on proxy object
+  distgrid = DistGrid::deserialize(buffer, &loffset);
 
+  // output localoffset
+  *offset=loffset;
+
+
+  // Undefine serialization macros, so they don't cause troubles elsewhere
+#undef DESERIALIZE_VAR
+#undef DESERIALIZE_VAR1D
+#undef DESERIALIZE_VAR2D
+ 
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
 }
 
-#endif
 
 //-----------------------------------------------------------------------------
 //
@@ -2445,6 +2548,7 @@ static  Type ***_allocate3D(int sizeDim1, int sizeDim2, int sizeDim3)
 
     return array;
   }
+
 
 // Deallocate a 3D array of ints in one chunk of memory
 template <class Type>

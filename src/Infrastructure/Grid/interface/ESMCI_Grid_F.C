@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.21 2007/11/05 23:32:35 oehmke Exp $
+// $Id: ESMCI_Grid_F.C,v 1.22 2007/11/08 21:16:59 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -144,6 +144,13 @@ extern "C" {
     localrc = ESMC_RC_NOT_IMPL;
     if (_rc!=NULL) *_rc = ESMC_RC_NOT_IMPL;
 
+    // make sure status is correct
+    if (grid->getStatus() < ESMC_GRIDSTATUS_STUB_READY) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
+              "- grid not ready for this operation ", ESMC_NOT_PRESENT_FILTER(_rc));
+      return;
+    }
+
     // Use grid access methods to retrieve information seperately
     // I'm a little leary of putting this much logic in an interface call, but
     // it makes things less convoluted to do it this way. 
@@ -171,9 +178,14 @@ extern "C" {
       *_undistRank = undistRank;
 
     // undistrank
-    if (ESMC_NOT_PRESENT_FILTER(_localDECount) != ESMC_NULL_POINTER)
-      *_localDECount = grid->getDistGrid()->getDELayout()->getLocalDeCount();
-
+    if (ESMC_NOT_PRESENT_FILTER(_localDECount) != ESMC_NULL_POINTER) {
+      if (grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
+        *_localDECount = 0; 
+      } else {
+        *_localDECount = grid->getDistGrid()->getDELayout()->getLocalDeCount();
+      }
+    }
+    
     // tileCount
     if (ESMC_NOT_PRESENT_FILTER(_tileCount) != ESMC_NULL_POINTER)
       *_tileCount = grid->getTileCount();
@@ -500,6 +512,14 @@ extern "C" {
     localrc = ESMC_RC_NOT_IMPL;
     if (_rc!=NULL) *_rc = ESMC_RC_NOT_IMPL;
 
+    // Check grid status
+   if (grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
+          "- grid not ready for this operation ", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+    }
+
+
     // get some useful info
     rank = grid->getRank();
     distRank = grid->getDistRank();
@@ -553,12 +573,6 @@ extern "C" {
    if ((staggerloc < 0) || (staggerloc >=  grid->getStaggerLocCount())) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
           "- staggerloc outside of range for grid", ESMC_NOT_PRESENT_FILTER(_rc));
-        return;
-    }
-
-   if (grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
-          "- grid not ready for this operation ", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
     }
 
@@ -894,6 +908,14 @@ extern "C" {
     localrc = ESMC_RC_NOT_IMPL;
     if (_rc!=NULL) *_rc = ESMC_RC_NOT_IMPL;
 
+
+    // Check grid status
+   if (grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
+          "- grid not ready for this operation ", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+    }
+
     // get some useful info
     rank = grid->getRank();
     distRank = grid->getDistRank();
@@ -1163,6 +1185,13 @@ extern "C" {
     localrc = ESMC_RC_NOT_IMPL;
     if (_rc!=NULL) *_rc = ESMC_RC_NOT_IMPL;
 
+    // Check grid status
+   if (grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
+          "- grid not ready for this operation ", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+    }
+
     // get some useful info
     rank = grid->getRank();
     distRank = grid->getDistRank();
@@ -1374,6 +1403,34 @@ extern "C" {
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
+
+
+  void FTN(c_esmc_gridserialize)(ESMCI::Grid **grid, char *buf, int *length,
+    int *offset, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridserialize()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*grid)->serialize(
+      buf, length, offset),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN(c_esmc_griddeserialize)(ESMCI::Grid **grid, char *buf,
+    int *offset, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_griddeserialize()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    *grid = new ESMCI::Grid;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*grid)->deserialize(
+      buf, offset),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
 
 
 

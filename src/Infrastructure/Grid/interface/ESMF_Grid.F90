@@ -136,10 +136,15 @@ public  ESMF_DefaultFlag
   public ESMF_GridSetCoord
 
   public ESMF_GridSetShapeTile
+  public ESMF_GridSerialize
+  public ESMF_GridDeserialize
+
   public ESMF_GridValidate
 
   public operator(.eq.), operator(.ne.) 
   public ESMF_ArrayCreateFromGrid
+
+
 
 ! - ESMF-internal methods:
   public ESMF_GridGetInit  
@@ -149,7 +154,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.44 2007/11/05 23:32:35 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.45 2007/11/08 21:16:59 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -1870,8 +1875,6 @@ end interface
     endif
 
 
-
-
     ! Set Default for connections (although they don't work yet in distgrid/array, so they aren't really used anywhere yet.)
     if (present(connDim1)) then
        if (size(connDim1) .eq. 1) then
@@ -1911,6 +1914,33 @@ end interface
        connDim3Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
        connDim3Local(2)=ESMF_GRIDCONN_NONE
     endif
+
+
+    ! check for not implemented functionality
+    if (connDim1Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
+        connDim1Local(2) .ne. ESMF_GRIDCONN_NONE) then
+       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    if (connDim2Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
+        connDim2Local(2) .ne. ESMF_GRIDCONN_NONE) then
+       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    if (connDim3Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
+        connDim3Local(2) .ne. ESMF_GRIDCONN_NONE) then
+       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
 
 
    ! Make alterations to size due to GridEdgeWidths ----------------------------
@@ -2930,8 +2960,8 @@ end interface
           connDim1Local(2)=connDim1(2)
        endif
     else
-!       connDim1Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-!       connDim1Local(2)=ESMF_GRIDCONN_NONE
+       connDim1Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connDim1Local(2)=ESMF_GRIDCONN_NONE
     endif
 
     if (present(connDim2)) then
@@ -2943,8 +2973,8 @@ end interface
           connDim2Local(2)=connDim2(2)
        endif
     else
-!       connDim2Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-!       connDim2Local(2)=ESMF_GRIDCONN_NONE
+       connDim2Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connDim2Local(2)=ESMF_GRIDCONN_NONE
     endif
 
     if (present(connDim3)) then
@@ -2956,9 +2986,38 @@ end interface
           connDim3Local(2)=connDim3(2)
        endif
     else
-!       connDim3Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-!       connDim3Local(2)=ESMF_GRIDCONN_NONE
+       connDim3Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connDim3Local(2)=ESMF_GRIDCONN_NONE
     endif
+
+
+
+    ! check for not implemented functionality
+    if (connDim1Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
+        connDim1Local(2) .ne. ESMF_GRIDCONN_NONE) then
+       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    if (connDim2Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
+        connDim2Local(2) .ne. ESMF_GRIDCONN_NONE) then
+       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    if (connDim3Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
+        connDim3Local(2) .ne. ESMF_GRIDCONN_NONE) then
+       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+
 
 
   ! Further Error Checking which is easier after setting defaults ----------------------
@@ -6068,6 +6127,135 @@ endif
 
       end subroutine ESMF_GridGetCoordIntoArray
 
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSerialize"
+
+!BOPI
+! !IROUTINE: ESMF_GridSerialize - Serialize grid info into a byte stream
+!
+! !INTERFACE:
+      subroutine ESMF_GridSerialize(grid, buffer, length, offset, rc) 
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(inout) :: grid 
+      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      integer, intent(inout) :: length
+      integer, intent(inout) :: offset
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Takes an {\tt ESMF\_Grid} object and adds all the information needed
+!      to  recreate the object based on this information.  
+!      Expected to be used by {\tt ESMF\_StateReconcile()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           {\tt ESMF\_Grid} object to be serialized.
+!     \item [buffer]
+!           Data buffer which will hold the serialized information.
+!     \item [length]
+!           Current length of buffer, in bytes.  If the serialization
+!           process needs more space it will allocate it and update
+!           this length.
+!     \item [offset]
+!           Current write offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           available byte in the buffer.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
+      call c_ESMC_GridSerialize(grid, buffer(1), length, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      ! return success
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridSerialize
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridDeserialize"
+
+!BOPI
+! !IROUTINE: ESMF_GridDeserialize - Deserialize a byte stream into a Grid
+!
+! !INTERFACE:
+      function ESMF_GridDeserialize(vm, buffer, offset, rc) 
+!
+! !RETURN VALUE:
+      type(ESMF_Grid) :: ESMF_GridDeserialize   
+!
+! !ARGUMENTS:
+      type(ESMF_VM), intent(in) :: vm
+      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      integer, intent(inout) :: offset
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Takes a byte-stream buffer and reads the information needed to
+!      recreate a Grid object.  Recursively calls the deserialize routines
+!      needed to recreate the subobjects.
+!      Expected to be used by {\tt ESMF\_StateReconcile()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [vm]
+!           Current VM in which this object should be created.
+!     \item [buffer]
+!           Data buffer which holds the serialized information.
+!     \item [offset]
+!           Current read offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           unread byte in the buffer.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc
+      type(ESMF_Grid) :: grid
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if  (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! Call into C++ to Deserialize the Grid
+      call c_ESMC_GridDeserialize(grid%this, buffer(1), offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      ! Set return value
+      ESMF_GridDeserialize = grid
+
+     ! Set init status
+      ESMF_INIT_SET_CREATED(ESMF_GridDeserialize)
+
+      if  (present(rc)) rc = ESMF_SUCCESS
+
+
+      end function ESMF_GridDeserialize
+
+
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetFromDistGrid"
@@ -7004,6 +7192,35 @@ endif
        connDim3Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
        connDim3Local(2)=ESMF_GRIDCONN_NONE
     endif
+
+
+    ! check for not implemented functionality
+    if (connDim1Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
+        connDim1Local(2) .ne. ESMF_GRIDCONN_NONE) then
+       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    if (connDim2Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
+        connDim2Local(2) .ne. ESMF_GRIDCONN_NONE) then
+       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    if (connDim3Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
+        connDim3Local(2) .ne. ESMF_GRIDCONN_NONE) then
+       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+
+
 
 
    ! Make alterations to size due to GridEdgeWidths ----------------------------
@@ -8029,8 +8246,8 @@ endif
           connDim1Local(2)=connDim1(2)
        endif
     else
-!       connDim1Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-!       connDim1Local(2)=ESMF_GRIDCONN_NONE
+       connDim1Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connDim1Local(2)=ESMF_GRIDCONN_NONE
     endif
 
     if (present(connDim2)) then
@@ -8042,8 +8259,8 @@ endif
           connDim2Local(2)=connDim2(2)
        endif
     else
-!       connDim2Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-!       connDim2Local(2)=ESMF_GRIDCONN_NONE
+       connDim2Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connDim2Local(2)=ESMF_GRIDCONN_NONE
     endif
 
     if (present(connDim3)) then
@@ -8055,9 +8272,40 @@ endif
           connDim3Local(2)=connDim3(2)
        endif
     else
-!       connDim3Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-!       connDim3Local(2)=ESMF_GRIDCONN_NONE
+       connDim3Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connDim3Local(2)=ESMF_GRIDCONN_NONE
     endif
+
+
+
+    ! check for not implemented functionality
+    if (connDim1Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
+        connDim1Local(2) .ne. ESMF_GRIDCONN_NONE) then
+       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    if (connDim2Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
+        connDim2Local(2) .ne. ESMF_GRIDCONN_NONE) then
+       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    if (connDim3Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
+        connDim3Local(2) .ne. ESMF_GRIDCONN_NONE) then
+       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+
+
+
 
 
   ! Further Error Checking which is easier after setting defaults ----------------------

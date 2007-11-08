@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.19 2007/11/05 23:32:34 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.20 2007/11/08 21:16:58 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -40,6 +40,7 @@
 
 // Eventually move this to ESMCI_Util.h
 enum ESMC_GridStatus {ESMC_GRIDSTATUS_NOT_READY=1,
+		      ESMC_GRIDSTATUS_STUB_READY,
 		      ESMC_GRIDSTATUS_SHAPE_READY
 };
 
@@ -65,10 +66,6 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   
   int distRank;
 
-  int *gridEdgeLWidth; // size of grid rank
-  int *gridEdgeUWidth; // size of grid rank
-  int *gridAlign; // size of grid rank
-
   int *distgridToGridMap;    // size of distgridToGridMap = distRank, entries are 0-based
 
   int undistRank;
@@ -76,6 +73,12 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   int *undistUBound; // size of undistUBound = undistRank
   
   int rank;
+  
+  // information about edge widths of the Grid
+  int *gridEdgeLWidth; // size of grid rank
+  int *gridEdgeUWidth; // size of grid rank
+  int *gridAlign; // size of grid rank
+
   // User info about coord ranks and distgridToGridMap
   int *coordRank; // size of coordRank = rank
   int **coordDimMap; // size of coordDimMap = rankxrank  [coord][dim of coord array], 0-based
@@ -154,8 +157,6 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 		    int *staggerEdgeUWidth  // (in)
 		    );
 
-  // Grid Construct (grid NOT usable after construction)
-  Grid();
 
  public:
 
@@ -205,6 +206,19 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 	  ESMC_IndexFlag *_indexflag                  // (in)
 	  );
 
+  // serialize Grid info into bytestream
+  int serialize(
+                char *buffer,   // inout - byte stream to fill
+                int *length,    // inout - buf length
+                int *offset);   // inout - original offset, updated to point 
+                                //         to first free byte after current obj info
+
+  int deserialize(
+                  char *buffer,          // in - byte stream to read
+                  int *offset);          // inout - original offset, updated to point 
+
+  
+
   // create fully formed grid
  static Grid *create(int nameLen,                                // (in)
 	       char *name,                                 // (in)
@@ -232,6 +246,9 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 
   // deallocate a grid and all internal structures
   static int destroy(Grid **grid);
+
+  // Grid Construct (grid NOT usable after construction)
+  Grid();
 
   // Grid Destruct
   ~Grid();

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.64 2007/11/05 23:32:36 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.65 2007/11/08 21:17:00 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.64 2007/11/05 23:32:36 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.65 2007/11/08 21:17:00 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -49,7 +49,7 @@ program ESMF_GridCreateUTest
   character(ESMF_MAXSTR) :: failMsg
   character(ESMF_MAXSTR) :: name, grid_name
 
-  type(ESMF_Grid) :: grid
+  type(ESMF_Grid) :: grid, grid2
   type(ESMF_VM) :: vm
   type(ESMF_DistGrid) :: distgrid,distgrid2
   type(ESMF_Array) :: array
@@ -61,6 +61,8 @@ program ESMF_GridCreateUTest
   integer :: gridEdgeLWidth(3),gridEdgeUWidth(3),gridAlign(3)
   integer :: exlbnd(3),exubnd(3)
   integer :: clbnd(3),cubnd(3)
+  integer(ESMF_KIND_I4), pointer :: buf(:)
+  integer :: bufCount, offset, localDECount
 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -1057,6 +1059,74 @@ program ESMF_GridCreateUTest
 
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test Serialize and Deserialize"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  rc=ESMF_SUCCESS
+  correct=.true.
+
+  ! create a grid with all defaults
+  grid=ESMF_GridCreate(distgrid=distgrid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! create a buffer to put the grid in
+  bufCount=10000
+  allocate(buf(bufCount))
+
+  ! Serialize
+  offset=0
+  call ESMF_GridSerialize(grid, buf, bufCount, offset, rc=localrc) 
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Deserialize
+   offset=0
+   grid2=ESMF_GridDeserialize(vm, buf, offset, rc=localrc) 
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get rid of buffer
+  deallocate(buf)
+
+  ! get info from Grid
+  call ESMF_GridGet(grid2, rank=rank, coordTypeKind=typekind, &
+         distgridToGridMap=distgridToGridMap, coordRank=coordRank, coordDimMap=coordDimMap, &
+         indexflag=indexflag, &
+         gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
+         gridAlign=gridAlign, localDECount=localDECount, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! check that defaults are as expected
+
+  if (typekind .ne. ESMF_TYPEKIND_R8) correct=.false.
+  if (rank .ne. 2) correct=.false.
+  if ((distgridToGridMap(1) .ne. 1) .or. (distgridToGridMap(2) .ne. 2)) correct=.false.
+  !TODO: what to do about undistLBound and undistUBound
+
+  if ((coordRank(1) .ne. 2) .or. (coordRank(2) .ne. 2)) correct=.false.
+  if ((coordDimMap(1,1) .ne. 1) .or. (coordDimMap(1,2) .ne. 2) .or. & 
+      (coordDimMap(2,1) .ne. 1) .or. (coordDimMap(2,2) .ne. 2)) correct=.false.
+!  if (indexflag .ne. ESMF_INDEX_DELOCAL) correct=.false.
+
+  if ((gridEdgeLWidth(1) .ne. 0) .or. (gridEdgeLWidth(2) .ne. 0)) correct=.false. 
+  if ((gridEdgeUWidth(1) .ne. 1) .or. (gridEdgeUWidth(2) .ne. 1)) correct=.false. 
+  if ((gridAlign(1) .ne. -1) .or. (gridAlign(2) .ne. -1)) correct=.false. 
+  if (localDECount .ne. 0) correct=.false. 
+
+  ! destroy grids
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridDestroy(grid2,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
 
 
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2007/08/23 17:15:57 cdeluca Exp $
+# $Id: makefile,v 1.18 2007/11/08 21:17:00 oehmke Exp $
 
 # leave alone.
 ALL: build_here 
@@ -37,7 +37,6 @@ include ${ESMF_DIR}/makefile
 
 # Leave the following line blank.
 DIRS	  = 
-
 
 
 # If you have class files which need to be compiled in a particular
