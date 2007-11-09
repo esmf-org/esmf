@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.53 2007/11/08 23:01:17 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.54 2007/11/09 04:41:17 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -98,10 +98,9 @@
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    ! the size of the data in the array still has to line up with the Grid
-    ! and its decomposition
-!    iarray2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-!        computationalLWidth=(/0,0/), computationalUWidth=(/0,0/), rc=rc)  
+    ! The size of the data in the array still has to line up with the Grid
+    ! and its decomposition.
+
     iarray2 = ESMF_ArrayCreateFromGrid(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
         rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -112,11 +111,11 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 
-!BOE
+!BremoveOE
 !\subsubsection{Empty Field Create}
 
 !  The user creates an empty {\tt ESMF\_Field} object.
-!EOE
+!EremoveOE
 
 !-------------------------------------------------------------------------
 !   ! Example 3:
@@ -124,9 +123,9 @@
 !   !  The user creates an empty Field, and adds the Grid and 
 !   !  data in later calls.
 
-!BOC
+!BremoveOC
      field3 = ESMF_FieldCreateNoData("precip", rc=rc)
-!EOC
+!EremoveOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !
 !    ! At some later time, associate a Grid with this Field
