@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.8 2007/06/23 04:00:18 cdeluca Exp $
+// $Id: ESMC_Field.h,v 1.9 2007/11/09 04:09:47 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -46,14 +46,13 @@ extern "C" {
   
    void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus, 
               ESMC_Status *igridstatus, ESMC_Status *datastatus, 
-              ESMC_Status *datamapstatus, ESMC_Status *iostatus,
+              ESMC_Status *iostatus, 
               void *buffer, int *length, int *offset, int *localrc);
    
    void FTN(c_esmc_fielddeserialize)(ESMC_Status *fieldstatus,
               ESMC_Status *igridstatus, ESMC_Status *datastatus,
-              ESMC_Status *datamapstatus, ESMC_Status *iostatus,
+              ESMC_Status *iostatus, 
               void *buffer, int *offset, int *localrc);
-
 };
 
 

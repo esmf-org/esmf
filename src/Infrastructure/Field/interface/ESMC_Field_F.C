@@ -1,4 +1,4 @@
-// $Id: ESMC_Field_F.C,v 1.9 2007/08/30 05:06:31 cdeluca Exp $
+// $Id: ESMC_Field_F.C,v 1.10 2007/11/09 04:09:47 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_Field_F.C,v 1.9 2007/08/30 05:06:31 cdeluca Exp $";
+             "$Id: ESMC_Field_F.C,v 1.10 2007/11/09 04:09:47 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -44,27 +44,14 @@ extern "C" {
 //
 //
 
-#if 0
-     type ESMF_FieldType
-        type (ESMF_Base) :: base             ! base class object
-        type (ESMF_Status) :: fieldstatus
-        type (ESMF_Status) :: gridstatus
-        type (ESMF_Status) :: datastatus
-        type (ESMF_Status) :: datamapstatus
-        type (ESMF_Grid) :: grid             ! save to satisfy query routines
-        type (ESMF_LocalField) :: localfield ! this differs per DE
-        type (ESMF_FieldDataMap) :: mapping  ! mapping of array indices to grid
-        type (ESMF_IOSpec) :: iospec         ! iospec values
-        type (ESMF_Status) :: iostatus       ! if unset, inherit from gcomp
-#endif
-
 // non-method functions
 void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus, 
-                           ESMC_Status *gridstatus, 
-                           ESMC_Status *datastatus, 
-                           ESMC_Status *datamapstatus, 
-                           ESMC_Status *iostatus, 
-                           void *buffer, int *length, int *offset, int *localrc){
+				ESMC_Status *gridstatus, 
+				ESMC_Status *datastatus, 
+				ESMC_Status *iostatus,
+				void *buffer, int *length, int *offset, int *localrc){
+    int i;
+
 
     // Initialize return code; assume routine not implemented
     if (localrc) *localrc = ESMC_RC_NOT_IMPL;
@@ -72,7 +59,7 @@ void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus,
     ESMC_Status *sp;
 
     // TODO: verify length > 5 status vars, and if not, make room.
-    int fixedpart = 5 * sizeof(int *);
+    int fixedpart = 4 * sizeof(int *);
     if ((*length - *offset) < fixedpart) {
          
          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
@@ -89,7 +76,6 @@ void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus,
     *sp++ = *fieldstatus;
     *sp++ = *gridstatus; 
     *sp++ = *datastatus; 
-    *sp++ = *datamapstatus; 
     *sp++ = *iostatus; 
 
     *offset = (char *)sp - (char *)buffer;
@@ -101,11 +87,12 @@ void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus,
 
 
 void FTN(c_esmc_fielddeserialize)(ESMC_Status *fieldstatus, 
-                             ESMC_Status *gridstatus, 
-                             ESMC_Status *datastatus, 
-                             ESMC_Status *datamapstatus, 
-                             ESMC_Status *iostatus, 
-                             void *buffer, int *offset, int *localrc){
+				  ESMC_Status *gridstatus, 
+				  ESMC_Status *datastatus, 
+				  ESMC_Status *iostatus, 
+				  void *buffer, int *offset, int *localrc){
+
+    int i;
 
     // Initialize return code; assume routine not implemented
     if (localrc) *localrc = ESMC_RC_NOT_IMPL;
@@ -116,7 +103,6 @@ void FTN(c_esmc_fielddeserialize)(ESMC_Status *fieldstatus,
     *fieldstatus = *sp++;
     *gridstatus = *sp++;
     *datastatus = *sp++;
-    *datamapstatus = *sp++;
     *iostatus = *sp++;
 
     *offset = (char *)sp - (char *)buffer;
