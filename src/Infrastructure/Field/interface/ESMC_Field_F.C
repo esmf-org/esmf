@@ -1,4 +1,4 @@
-// $Id: ESMC_Field_F.C,v 1.10 2007/11/09 04:09:47 cdeluca Exp $
+// $Id: ESMC_Field_F.C,v 1.11 2007/11/09 20:37:13 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_Field_F.C,v 1.10 2007/11/09 04:09:47 cdeluca Exp $";
+             "$Id: ESMC_Field_F.C,v 1.11 2007/11/09 20:37:13 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -58,7 +58,7 @@ void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus,
     // either put the code here, or call into a real C++ function
     ESMC_Status *sp;
 
-    // TODO: verify length > 5 status vars, and if not, make room.
+    // TODO: verify length > 4 status vars, and if not, make room.
     int fixedpart = 4 * sizeof(int *);
     if ((*length - *offset) < fixedpart) {
          
