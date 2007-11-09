@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.265 2007/11/09 21:21:24 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.266 2007/11/09 22:53:10 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.265 2007/11/09 21:21:24 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.266 2007/11/09 22:53:10 feiliu Exp $'
 
 !==============================================================================
 !
@@ -4414,7 +4414,7 @@
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      !if  (present(rc)) rc = ESMF_SUCCESS
+      if  (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldSerialize
 
