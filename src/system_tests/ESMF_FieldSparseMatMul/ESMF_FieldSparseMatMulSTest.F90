@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSparseMatMulSTest.F90,v 1.2 2007/11/04 18:25:11 cdeluca Exp $
+! $Id: ESMF_FieldSparseMatMulSTest.F90,v 1.3 2007/11/10 19:12:31 cdeluca Exp $
 !
 !-------------------------------------------------------------------------
 !SYSTEM_TEST        String used by test script to count system tests.
@@ -180,7 +180,8 @@ program ESMF_FieldSparseMatMulSTest
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
- 
+
+#if 0 
   ! note that the coupler's import is comp1's export state
   ! and coupler's export is comp2's import state
   call ESMF_CplCompInitialize(cpl, c1exp, c2imp, rc=localrc)
@@ -266,6 +267,7 @@ program ESMF_FieldSparseMatMulSTest
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   print *, "All Destroy routines done"
+#endif
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

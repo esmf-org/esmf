@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.266 2007/11/09 22:53:10 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.267 2007/11/10 19:12:26 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -17,7 +17,7 @@
 !==============================================================================
 !
 ! This file contains the Field class definition and all Field
-! class methods.
+! class method.
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.266 2007/11/09 22:53:10 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.267 2007/11/10 19:12:26 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -4399,20 +4399,22 @@
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
-      if (fp%gridstatus .eq. ESMF_STATUS_READY) then
-         call ESMF_GridSerialize(fp%grid, buffer, length, offset, localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
-      endif
 
-      if (fp%datastatus .eq. ESMF_STATUS_READY) then
-          call c_ESMC_ArraySerialize(fp%array, buffer(1),&
-                                     length, offset, localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
-      endif
+! TODO:FIELDINTEGRATION Restore grid and array serialize
+!      if (fp%gridstatus .eq. ESMF_STATUS_READY) then
+!         call c_ESMC_GridSerialize(fp%grid, buffer(1), length, offset, localrc)
+!          if (ESMF_LogMsgFoundError(localrc, &
+!                                     ESMF_ERR_PASSTHRU, &
+!                                     ESMF_CONTEXT, rc)) return
+!      endif
+
+!      if (fp%datastatus .eq. ESMF_STATUS_READY) then
+!          call c_ESMC_ArraySerialize(fp%array, buffer(1),&
+!                                    length, offset, localrc)
+!          if (ESMF_LogMsgFoundError(localrc, &
+!                                     ESMF_ERR_PASSTHRU, &
+!                                     ESMF_CONTEXT, rc)) return
+!      endif
 
       if  (present(rc)) rc = ESMF_SUCCESS
 
@@ -4497,20 +4499,20 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      if (fp%gridstatus .eq. ESMF_STATUS_READY) then
-          fp%grid = ESMF_GridDeserialize(vm, buffer, offset, localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
-      endif
+! TODO:FIELDINTEGRATION Restore grid and array deserialize
+!      if (fp%gridstatus .eq. ESMF_STATUS_READY) then
+!          call c_ESMC_GridDeserialize(fp%grid, buffer(1), offset, localrc)
+!          if (ESMF_LogMsgFoundError(localrc, &
+!                                     ESMF_ERR_PASSTHRU, &
+!                                     ESMF_CONTEXT, rc)) return
+!      endif
 
-      if (fp%datastatus .eq. ESMF_STATUS_READY) then
-          call c_ESMC_ArrayDeserialize(fp%array, &
-                                       buffer(1), offset, localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
-      endif
+!      if (fp%datastatus .eq. ESMF_STATUS_READY) then
+!          call c_ESMC_ArrayDeserialize(fp%array, buffer(1), offset, localrc)
+!          if (ESMF_LogMsgFoundError(localrc, &
+!                                     ESMF_ERR_PASSTHRU, &
+!                                     ESMF_CONTEXT, rc)) return
+!      endif
     
       ESMF_FieldDeserialize%ftypep => fp
       ESMF_INIT_SET_CREATED(ESMF_FieldDeserialize)
