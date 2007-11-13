@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.159 2007/11/13 18:38:45 theurich Exp $
+// $Id: ESMC_Array.C,v 1.160 2007/11/13 19:05:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.159 2007/11/13 18:38:45 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.160 2007/11/13 19:05:50 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3605,7 +3605,7 @@ int Array::sparseMatMulStore(
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
   
-#define ASMMSTORETIMING
+#define ASMMSTORETIMING___disable
 #ifdef ASMMSTORETIMING
   double t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10X, t10Y, t11;//gjt - profile
   double t4a, t4b, t4c, t5a, t5b, t5c;  //gjt - profile
@@ -5769,7 +5769,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   VMK::wtime(&t8);   //gjt - profile
 #endif
     
-#define ASMMPROFILE
+#define ASMMPROFILE___disable
 #ifdef ASMMPROFILE
   // <XXE profiling element>
   xxe->stream[xxe->count].opId = XXE::wtimer;
