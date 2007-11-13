@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.158 2007/11/03 05:39:21 theurich Exp $
+// $Id: ESMC_Array.C,v 1.159 2007/11/13 18:38:45 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.158 2007/11/03 05:39:21 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.159 2007/11/13 18:38:45 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1370,7 +1370,6 @@ int Array::destroy(
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
   try{
@@ -1565,7 +1564,6 @@ int Array::setComputationalLWidth(
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // check computationalLWidthArg input and process
@@ -1640,7 +1638,6 @@ int Array::setComputationalUWidth(
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // check computationalUWidthArg input and process
@@ -1717,7 +1714,6 @@ int Array::print()const{
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // return with errors for NULL pointer
@@ -3068,6 +3064,488 @@ int Array::redistRelease(
 //-----------------------------------------------------------------------------
 
 
+namespace DD{
+  struct Interval{
+    int min;
+    int max;
+    int count;
+    int countEff;
+  };
+  struct FactorElement{
+    SeqIndex partnerSeqIndex;
+    int partnerDe;
+    int padding;    // padding for 8-byte alignment
+    char factor[8]; // large enough for R8 and I8
+  };
+  struct SeqIndexFactorLookup{
+    int de;
+    int factorCount;
+    FactorElement *factorList;
+  };
+  
+  // the following structs could be moved out of this namespace
+  struct AssociationElement{
+    int linIndex;
+    SeqIndex seqIndex;
+    int factorCount;
+    FactorElement *factorList;
+  };
+  struct FillLinSeqListInfo{
+    AssociationElement **linSeqList;
+    int localPet;
+    int localDeCount;
+    const int *localDeElementCount;
+    const Interval *seqIndexInterval;
+    const SeqIndexFactorLookup *seqIndexFactorLookup;
+    bool tensorMixFlag;
+  };
+  struct FillPartnerDeInfo{
+    int localPet;
+    const Interval *seqIndexIntervalIn;
+    const Interval *seqIndexIntervalOut;
+    const SeqIndexFactorLookup *seqIndexFactorLookupIn;
+    const SeqIndexFactorLookup *seqIndexFactorLookupOut;
+    bool tensorMixFlag;
+  };
+
+
+template<typename T>
+int requestSizeFactor(T *t);
+
+template<typename T>
+void clientRequest(T *t, int i, char **requestStreamClient);
+
+template<typename T>
+void localClientServerExchange(T *t);
+
+template<typename T>
+int serverResponseSize(T *t, int count, int i, char **requestStreamServer);
+
+template<typename T>
+void serverResponse(T *t, int count, int i, char **requestStreamServer,
+  char **responseStreamServer);
+
+template<typename T>
+void clientProcess(T *t, char *responseStream, int responseStreamSize);
+
+template<typename T>
+void accessLookup(
+  ESMCI::VM *vm,
+  int petCount,
+  int localPet,
+  int *localIntervalPerPetCount,
+  int *localElementsPerIntervalCount,
+  T *t
+  ){
+  // access look up table
+  vmk_commhandle **send1commhList = new vmk_commhandle*[petCount];
+  vmk_commhandle **send2commhList = new vmk_commhandle*[petCount];
+  vmk_commhandle **send3commhList = new vmk_commhandle*[petCount];
+  vmk_commhandle **recv1commhList = new vmk_commhandle*[petCount];
+  vmk_commhandle **recv2commhList = new vmk_commhandle*[petCount];
+  vmk_commhandle **recv3commhList = new vmk_commhandle*[petCount];
+  char **requestStreamClient = new char*[petCount];
+  char **requestStreamServer = new char*[petCount];
+  int *responseStreamSizeClient = new int[petCount];
+  int *responseStreamSizeServer = new int[petCount];
+  char **responseStreamClient = new char*[petCount];
+  char **responseStreamServer = new char*[petCount];
+  // t-specific routine
+  int requestFactor = requestSizeFactor(t);
+  // localPet acts as server, posts non-blocking recvs for all client requests
+  for (int ii=localPet+1; ii<localPet+petCount; ii++){
+    // localPet-dependent shifted loop reduces communication contention
+    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
+    // receive request from Pet "i"
+    int count = localIntervalPerPetCount[i];
+    if (count>0){
+      requestStreamServer[i] = new char[requestFactor*count];
+      recv3commhList[i] = NULL;
+      vm->vmk_recv(requestStreamServer[i], requestFactor*count, i,
+        &(recv3commhList[i]));
+    }
+  }
+  // localPet acts as a client, sends its requests to the appropriate servers
+  for (int ii=localPet+1; ii<localPet+petCount; ii++){
+    // localPet-dependent shifted loop reduces communication contention
+    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
+    if (localElementsPerIntervalCount[i]>0){
+      // localPet has elements that are located in interval of server Pet "i"
+      requestStreamClient[i] =
+        new char[requestFactor*localElementsPerIntervalCount[i]];
+      // t-specific client routine
+      clientRequest(t, i, requestStreamClient);
+      // send information to the serving Pet
+      send1commhList[i] = NULL;
+      vm->vmk_send(requestStreamClient[i],
+        requestFactor*localElementsPerIntervalCount[i], i, 
+        &(send1commhList[i]));
+      // post receive to obtain response size from server Pet
+      recv1commhList[i] = NULL;
+      vm->vmk_recv(&(responseStreamSizeClient[i]), sizeof(int), i,
+        &(recv1commhList[i]));
+    }
+  }
+  // localPet locally acts as server and client to fill its own request
+  // t-specific client-server routine
+  localClientServerExchange(t);
+  // localPet acts as server, processing requests from clients, send responses
+  for (int ii=localPet+1; ii<localPet+petCount; ii++){
+    // localPet-dependent shifted loop reduces communication contention
+    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
+    int count = localIntervalPerPetCount[i];
+    if (count>0){
+      // wait for request from Pet "i"
+      vm->commwait(&(recv3commhList[i]));
+      // t-specific server routine
+      int responseStreamSize =
+        serverResponseSize(t, count, i, requestStreamServer);
+      // send response size to client Pet "i"
+      responseStreamSizeServer[i] = responseStreamSize;
+      send2commhList[i] = NULL;
+      vm->vmk_send(&(responseStreamSizeServer[i]), sizeof(int), i,
+        &(send2commhList[i]));
+      if (responseStreamSize>0){
+        // construct response stream
+        responseStreamServer[i] = new char[responseStreamSize];
+        // t-specific server routine
+        serverResponse(t, count, i, requestStreamServer, responseStreamServer);
+        // send response stream to client Pet "i"
+        send3commhList[i] = NULL;
+        vm->vmk_send(responseStreamServer[i], responseStreamSize, i,
+          &(send3commhList[i]));
+        // garbage collection
+        delete [] requestStreamServer[i];
+      }
+    }
+  }
+  // localPet acts as a client, waits for response size from server and posts
+  // 2nd receive for response stream
+  for (int ii=localPet+1; ii<localPet+petCount; ii++){
+    // localPet-dependent shifted loop reduces communication contention
+    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
+    if (localElementsPerIntervalCount[i]>0){
+      // localPet has elements that are located in interval of server Pet i
+      // wait to receive response size from the serving Pet "i"
+      vm->commwait(&(recv1commhList[i]));
+      int responseStreamSize = responseStreamSizeClient[i];
+      if (responseStreamSize>0){
+        responseStreamClient[i] = new char[responseStreamSize];
+        recv2commhList[i] = NULL;
+        vm->vmk_recv(responseStreamClient[i], responseStreamSize, i,
+          &(recv2commhList[i]));
+      }
+    }
+  }
+  // localPet acts as a client, waits for response stream from server, process
+  for (int ii=localPet+1; ii<localPet+petCount; ii++){
+    // localPet-dependent shifted loop reduces communication contention
+    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
+    if (localElementsPerIntervalCount[i]>0){
+      // localPet has elements that are located in interval of server Pet i
+      int responseStreamSize = responseStreamSizeClient[i];
+      if (responseStreamSize>0){
+        // wait to receive response stream from the serving Pet "i"
+        vm->commwait(&(recv2commhList[i]));
+        // process responseStream and complete t[][] info
+        char *responseStream = responseStreamClient[i];
+        // t-specific client routine
+        clientProcess(t, responseStream, responseStreamSize);
+        // garbage collection
+        delete [] responseStreamClient[i];
+      }
+    }
+  }
+  // localPet acts as a client, wait for sends to complete and collect garbage
+  for (int ii=localPet+1; ii<localPet+petCount; ii++){
+    // localPet-dependent shifted loop reduces communication contention
+    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
+    if (localElementsPerIntervalCount[i]>0){
+      // localPet has elements that are located in interval of server Pet i
+      // wait for send
+      vm->commwait(&(send1commhList[i]));
+      // garbage collection
+      delete [] requestStreamClient[i];
+    }
+  }
+  // localPet acts as server, wait for sends to complete and collect garbage
+  for (int ii=localPet+1; ii<localPet+petCount; ii++){
+    // localPet-dependent shifted loop reduces communication contention
+    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
+    int count = localIntervalPerPetCount[i];
+    if (count>0){
+      vm->commwait(&(send2commhList[i]));
+      if (responseStreamSizeServer[i]>0){
+        vm->commwait(&(send3commhList[i]));
+        // garbage collection
+        delete [] responseStreamServer[i];
+      }
+    }
+  }  
+  // garbage collection
+  delete [] requestStreamClient;
+  delete [] requestStreamServer;
+  delete [] responseStreamClient;
+  delete [] responseStreamServer;
+  delete [] responseStreamSizeClient;
+  delete [] responseStreamSizeServer;
+  delete [] send1commhList;
+  delete [] send2commhList;
+  delete [] send3commhList;
+  delete [] recv1commhList;
+  delete [] recv2commhList;
+  delete [] recv3commhList;
+}
+} // namespace DD
+
+
+// FillLinSeqListInfo-specific DD routines
+
+int DD::requestSizeFactor(FillLinSeqListInfo *fillLinSeqListInfo){
+  return 3*sizeof(int); // lookupIndex, j, k
+}
+
+void DD::clientRequest(FillLinSeqListInfo *fillLinSeqListInfo, int i,
+  char **requestStreamClient){
+  const int localDeCount = fillLinSeqListInfo->localDeCount;
+  const int *localDeElementCount = fillLinSeqListInfo->localDeElementCount;
+  AssociationElement **linSeqList = fillLinSeqListInfo->linSeqList;
+  const Interval *seqIndexInterval = fillLinSeqListInfo->seqIndexInterval;
+  const bool tensorMixFlag = fillLinSeqListInfo->tensorMixFlag;
+  // fill the requestStreamClient[i] element
+  int seqIndexMin = seqIndexInterval[i].min;
+  int seqIndexMax = seqIndexInterval[i].max;
+  int seqIndexCount = seqIndexInterval[i].count;
+  int jj = 0; // reset
+  for (int j=0; j<localDeCount; j++){
+    for (int k=0; k<localDeElementCount[j]; k++){
+      int seqIndex = linSeqList[j][k].seqIndex.decompSeqIndex;
+      if (seqIndex >= seqIndexMin && seqIndex <= seqIndexMax){
+        int lookupIndex = seqIndex - seqIndexMin;
+        if (tensorMixFlag){
+          lookupIndex +=
+            (linSeqList[j][k].seqIndex.tensorSeqIndex - 1) * seqIndexCount;
+        }
+        int *requestStreamClientInt = (int *)requestStreamClient[i];
+        requestStreamClientInt[3*jj] = lookupIndex;
+        requestStreamClientInt[3*jj+1] = j;
+        requestStreamClientInt[3*jj+2] = k;
+        ++jj; // increment counter
+      }
+    }
+  }
+}
+
+void DD::localClientServerExchange(FillLinSeqListInfo *fillLinSeqListInfo){
+  const int localPet = fillLinSeqListInfo->localPet;
+  const int localDeCount = fillLinSeqListInfo->localDeCount;
+  const int *localDeElementCount = fillLinSeqListInfo->localDeElementCount;
+  AssociationElement **linSeqList = fillLinSeqListInfo->linSeqList;
+  const Interval *seqIndexInterval = fillLinSeqListInfo->seqIndexInterval;
+  const bool tensorMixFlag = fillLinSeqListInfo->tensorMixFlag;
+  const SeqIndexFactorLookup *seqIndexFactorLookup =
+    fillLinSeqListInfo->seqIndexFactorLookup;
+  // localPet locally acts as server and client
+  int seqIndexMin = seqIndexInterval[localPet].min;
+  int seqIndexMax = seqIndexInterval[localPet].max;
+  int seqIndexCount = seqIndexInterval[localPet].count;
+  for (int j=0; j<localDeCount; j++){
+    for (int k=0; k<localDeElementCount[j]; k++){
+      int seqIndex = linSeqList[j][k].seqIndex.decompSeqIndex;
+      if (seqIndex >= seqIndexMin && seqIndex <= seqIndexMax){
+        int kk = seqIndex - seqIndexMin;
+        if (tensorMixFlag){
+          kk += (linSeqList[j][k].seqIndex.tensorSeqIndex - 1)
+            * seqIndexCount;
+        }
+        int factorCount = seqIndexFactorLookup[kk].factorCount;
+        if (factorCount){
+          linSeqList[j][k].factorCount = factorCount;
+          linSeqList[j][k].factorList = new DD::FactorElement[factorCount];
+          memcpy(linSeqList[j][k].factorList, 
+            seqIndexFactorLookup[kk].factorList,
+            factorCount * sizeof(FactorElement));
+        }
+      }
+    }
+  }
+}
+
+int DD::serverResponseSize(FillLinSeqListInfo *fillLinSeqListInfo, int count,
+  int i, char **requestStreamServer){
+  const SeqIndexFactorLookup *seqIndexFactorLookup =
+    fillLinSeqListInfo->seqIndexFactorLookup;
+  // process requestStreamServer[i] and return response stream size
+  int indexCounter = 0; // reset
+  int factorElementCounter = 0; // reset
+  int *requestStreamServerInt = (int *)requestStreamServer[i];
+  for (int j=0; j<count; j++){
+    int lookupIndex = requestStreamServerInt[3*j];
+    int factorCount = seqIndexFactorLookup[lookupIndex].factorCount;
+    if (factorCount){
+      ++indexCounter;
+      factorElementCounter += factorCount;
+    }
+  }
+  int responseStreamSize = 4*indexCounter*sizeof(int)
+    + factorElementCounter*sizeof(FactorElement);
+  return responseStreamSize;
+}
+      
+void DD::serverResponse(FillLinSeqListInfo *fillLinSeqListInfo, int count,
+  int i, char **requestStreamServer, char **responseStreamServer){
+  const SeqIndexFactorLookup *seqIndexFactorLookup =
+    fillLinSeqListInfo->seqIndexFactorLookup;
+  // construct response stream
+  int *responseStreamInt;
+  FactorElement *responseStreamFactorElement =
+    (FactorElement *)responseStreamServer[i];
+  int *requestStreamServerInt = (int *)requestStreamServer[i];
+  for (int jj=0; jj<count; jj++){
+    int lookupIndex = requestStreamServerInt[3*jj];
+    int factorCount = seqIndexFactorLookup[lookupIndex].factorCount;
+    if (factorCount){
+      responseStreamInt = (int *)responseStreamFactorElement;
+      *responseStreamInt++ = requestStreamServerInt[3*jj+1];  // j
+      *responseStreamInt++ = requestStreamServerInt[3*jj+2];  // k
+      *responseStreamInt++ = factorCount;
+      *responseStreamInt++ = 0; // padding for 8-byte alignment
+      responseStreamFactorElement = (FactorElement *)responseStreamInt;
+      memcpy(responseStreamFactorElement,
+        seqIndexFactorLookup[lookupIndex].factorList,
+        factorCount * sizeof(FactorElement));
+      responseStreamFactorElement += factorCount;
+    }
+  }
+}        
+        
+void DD::clientProcess(FillLinSeqListInfo *fillLinSeqListInfo,
+  char *responseStream, int responseStreamSize){
+  AssociationElement **linSeqList = fillLinSeqListInfo->linSeqList;
+  // process responseStream and complete linSeqList[][] info
+  int *responseStreamInt;
+  FactorElement *responseStreamFactorElement =
+    (FactorElement *)responseStream;
+  while ((char *)responseStreamFactorElement !=
+    responseStream+responseStreamSize){
+    responseStreamInt = (int *)responseStreamFactorElement;
+    int j = *responseStreamInt++;
+    int k = *responseStreamInt++;
+    int factorCount = *responseStreamInt++;
+    responseStreamInt++;  // skip padding
+    linSeqList[j][k].factorCount = factorCount;
+    linSeqList[j][k].factorList = new DD::FactorElement[factorCount];
+    responseStreamFactorElement = (FactorElement *)responseStreamInt;
+    memcpy(linSeqList[j][k].factorList, responseStreamFactorElement,
+      factorCount * sizeof(FactorElement));
+    responseStreamFactorElement += factorCount;
+  }
+}
+        
+// FillPartnerDeInfo-specific DD routines
+
+int DD::requestSizeFactor(FillPartnerDeInfo *fillPartnerDeInfo){
+  return 3*sizeof(int); // lookupIndex, j, k
+}
+
+void DD::clientRequest(FillPartnerDeInfo *fillPartnerDeInfo, int i,
+  char **requestStreamClient){
+  const int localPet = fillPartnerDeInfo->localPet;
+  const Interval *seqIndexIntervalIn = fillPartnerDeInfo->seqIndexIntervalIn;
+  const Interval *seqIndexIntervalOut = fillPartnerDeInfo->seqIndexIntervalOut;
+  const SeqIndexFactorLookup *seqIndexFactorLookupOut =
+    fillPartnerDeInfo->seqIndexFactorLookupOut;
+  const bool tensorMixFlag = fillPartnerDeInfo->tensorMixFlag;
+  // fill the requestStreamClient[i] element
+  int seqIndexMin = seqIndexIntervalIn[i].min;
+  int seqIndexMax = seqIndexIntervalIn[i].max;
+  int seqIndexCount = seqIndexIntervalIn[i].count;
+  int jj = 0; // reset
+  for (int j=0; j<seqIndexIntervalOut[localPet].countEff; j++){
+    for (int k=0; k<seqIndexFactorLookupOut[j].factorCount; k++){
+      int partnerSeqIndex = seqIndexFactorLookupOut[j].factorList[k]
+        .partnerSeqIndex.decompSeqIndex;
+      if (partnerSeqIndex >= seqIndexMin && partnerSeqIndex <= seqIndexMax){
+        int lookupIndex = partnerSeqIndex - seqIndexMin;
+        if (tensorMixFlag){
+          lookupIndex += (seqIndexFactorLookupOut[j].factorList[k]
+            .partnerSeqIndex.tensorSeqIndex - 1) * seqIndexCount;
+        }
+        int *requestStreamClientInt = (int *)requestStreamClient[i];
+        requestStreamClientInt[3*jj] = lookupIndex;
+        requestStreamClientInt[3*jj+1] = j;
+        requestStreamClientInt[3*jj+2] = k;
+        ++jj; // increment counter
+      }
+    }
+  }
+}
+
+void DD::localClientServerExchange(FillPartnerDeInfo *fillPartnerDeInfo){
+  const int localPet = fillPartnerDeInfo->localPet;
+  const Interval *seqIndexIntervalIn = fillPartnerDeInfo->seqIndexIntervalIn;
+  const Interval *seqIndexIntervalOut = fillPartnerDeInfo->seqIndexIntervalOut;
+  const SeqIndexFactorLookup *seqIndexFactorLookupIn =
+    fillPartnerDeInfo->seqIndexFactorLookupIn;
+  const SeqIndexFactorLookup *seqIndexFactorLookupOut =
+    fillPartnerDeInfo->seqIndexFactorLookupOut;
+  const bool tensorMixFlag = fillPartnerDeInfo->tensorMixFlag;
+  // localPet locally acts as server and client
+  int seqIndexMin = seqIndexIntervalIn[localPet].min;
+  int seqIndexMax = seqIndexIntervalIn[localPet].max;
+  int seqIndexCount = seqIndexIntervalIn[localPet].count;
+  for (int j=0; j<seqIndexIntervalOut[localPet].countEff; j++){
+    for (int k=0; k<seqIndexFactorLookupOut[j].factorCount; k++){
+      int partnerSeqIndex = seqIndexFactorLookupOut[j].factorList[k]
+        .partnerSeqIndex.decompSeqIndex;
+      if (partnerSeqIndex >= seqIndexMin && partnerSeqIndex <= seqIndexMax){
+        int kk = partnerSeqIndex - seqIndexMin;
+        if (tensorMixFlag){
+          kk += (seqIndexFactorLookupOut[j].factorList[k]
+            .partnerSeqIndex.tensorSeqIndex - 1) * seqIndexCount;
+        }
+        seqIndexFactorLookupOut[j].factorList[k].partnerDe =
+          seqIndexFactorLookupIn[kk].de;
+      }
+    }
+  }
+}
+
+int DD::serverResponseSize(FillPartnerDeInfo *fillPartnerDeInfo, int count,
+  int i, char **requestStreamServer){
+  int responseStreamSize = 3*count*sizeof(int);
+  return responseStreamSize;
+}
+      
+void DD::serverResponse(FillPartnerDeInfo *fillPartnerDeInfo, int count,
+  int i, char **requestStreamServer, char **responseStreamServer){
+  const SeqIndexFactorLookup *seqIndexFactorLookupIn =
+    fillPartnerDeInfo->seqIndexFactorLookupIn;
+  // construct response stream
+  int *responseStreamInt = (int *)responseStreamServer[i];
+  int *requestStreamServerInt = (int *)requestStreamServer[i];
+  for (int jj=0; jj<count; jj++){
+    int lookupIndex = requestStreamServerInt[3*jj];
+    *responseStreamInt++ = seqIndexFactorLookupIn[lookupIndex].de;  // de
+    *responseStreamInt++ = requestStreamServerInt[3*jj+1];  // j
+    *responseStreamInt++ = requestStreamServerInt[3*jj+2];  // k
+  }
+}        
+        
+void DD::clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
+  char *responseStream, int responseStreamSize){
+  const SeqIndexFactorLookup *seqIndexFactorLookupOut =
+    fillPartnerDeInfo->seqIndexFactorLookupOut;
+  // process responseStream and complete seqIndexFactorLookupOut info
+  int *responseStreamInt = (int *)responseStream;
+  while ((char *)responseStreamInt != responseStream+responseStreamSize){
+    int de = *responseStreamInt++;
+    int j = *responseStreamInt++;
+    int k = *responseStreamInt++;
+    seqIndexFactorLookupOut[j].factorList[k].partnerDe = de;
+  }
+}
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::sparseMatMulStore()"
@@ -3113,7 +3591,7 @@ int Array::sparseMatMulStore(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-
+  
   try{
   
   //---------------------------------------------------------------------------
@@ -3127,7 +3605,7 @@ int Array::sparseMatMulStore(
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
   
-#define ASMMSTORETIMING___disable
+#define ASMMSTORETIMING
 #ifdef ASMMSTORETIMING
   double t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10X, t10Y, t11;//gjt - profile
   double t4a, t4b, t4c, t5a, t5b, t5c;  //gjt - profile
@@ -3135,7 +3613,7 @@ int Array::sparseMatMulStore(
   double t4c3a, t4c3b, t4c3c, t4c3d;  //gjt - profile
   double dt4c34=0., dt4c45=0.;  //gjt - profile
   double dt4c3ab=0., dt4c3bc=0., dt4c3cd=0.;  //gjt - profile
-  double t10Xa, t10Xb, t10Xc, t10Xd, t10Xe; //gjt - profile
+  double t10Xa, t10Xb, t10Xd, t10Xe; //gjt - profile
   double t10Xc1, t10Xc2; //gjt - profile
   double t10Yf, t10Yg; //gjt - profile
   VMK::wtime(&t0);   //gjt - profile
@@ -3360,50 +3838,49 @@ int Array::sparseMatMulStore(
   
   // local structs to simplify code
 
-  struct Interval{
-    int min;
-    int max;
-    int count;
-    int countEff;
-  };
+//  struct Interval{
+//    int min;
+//    int max;
+//    int count;
+//    int countEff;
+//  };
 
-  struct FactorElement{
-    SeqIndex partnerSeqIndex;
-    int partnerDe;
-    int padding;    // padding for 8-byte alignment
-    char factor[8]; // large enough for R8 and I8
-  };
+//  struct FactorElement{
+//    SeqIndex partnerSeqIndex;
+//    int partnerDe;
+//    int padding;    // padding for 8-byte alignment
+//    char factor[8]; // large enough for R8 and I8
+//  };
   
-  struct SeqIndexFactorLookup{
-    int de;
-    int factorCount;
-    FactorElement *factorList;
-  };
+//  struct SeqIndexFactorLookup{
+//    int de;
+//    int factorCount;
+//    FactorElement *factorList;
+//  };
   
   struct SeqIndexDeInfo{
     int lookupIndex;
     int de;
   };
 
-  struct AssociationElement{
-    int linIndex;
-    SeqIndex seqIndex;
-    int factorCount;
-    FactorElement *factorList;
-  };
+//  struct AssociationElement{
+//    int linIndex;
+//    SeqIndex seqIndex;
+//    int factorCount;
+//    FactorElement *factorList;
+//  };
   
   // determine linIndex <-> seqIndex association for all elements in exclusive 
   // region on all localDEs on srcArray
   int srcRank = srcArray->rank;
   int *ii = new int[srcRank];     // index tuple basis 0
   int *iiEnd = new int[srcRank];
-  AssociationElement **srcLinSeqList = 
-    new AssociationElement*[srcLocalDeCount];
+  DD::AssociationElement **srcLinSeqList = 
+    new DD::AssociationElement*[srcLocalDeCount];
   int srcSeqIndexMinMax[2]; // [0]=min, [1]=max
   for (int i=0; i<srcLocalDeCount; i++){
-    int de = srcLocalDeList[i];  // global DE index
     // allocate memory in srcLinSeqList for this DE
-    srcLinSeqList[i] = new AssociationElement[srcLocalDeElementCount[i]];
+    srcLinSeqList[i] = new DD::AssociationElement[srcLocalDeElementCount[i]];
     // only go into the multi-dim loop if there are elements for the local DE
     if (srcLocalDeElementCount[i]){
       // reset counters
@@ -3487,13 +3964,12 @@ int Array::sparseMatMulStore(
   int dstRank = dstArray->rank;
   ii = new int[dstRank];     // index tuple basis 0
   iiEnd = new int[dstRank];
-  AssociationElement **dstLinSeqList = 
-    new AssociationElement*[dstLocalDeCount];
+  DD::AssociationElement **dstLinSeqList = 
+    new DD::AssociationElement*[dstLocalDeCount];
   int dstSeqIndexMinMax[2]; // [0]=min, [1]=max
   for (int i=0; i<dstLocalDeCount; i++){
-    int de = dstLocalDeList[i];  // global DE index
     // allocate memory in dstLinSeqList for this DE
-    dstLinSeqList[i] = new AssociationElement[dstLocalDeElementCount[i]];
+    dstLinSeqList[i] = new DD::AssociationElement[dstLocalDeElementCount[i]];
     // only go into the multi-dim loop if there are elements for the local DE
     if (dstLocalDeElementCount[i]){
       // reset counters
@@ -3597,16 +4073,12 @@ int Array::sparseMatMulStore(
     }
   }
     
-#ifdef ASMMSTORETIMING
-  VMK::wtime(&t4a);   //gjt - profile
-#endif
-  
   // set up a distributed directory for srcArray seqIndex look-up
   int indicesPerPet = (srcSeqIndexMaxGlobal - srcSeqIndexMinGlobal + 1)
     / petCount;
   int extraIndices = (srcSeqIndexMaxGlobal - srcSeqIndexMinGlobal + 1)
     % petCount;
-  Interval *srcSeqIndexInterval = new Interval[petCount];
+  DD::Interval *srcSeqIndexInterval = new DD::Interval[petCount];
   srcSeqIndexInterval[0].min = srcSeqIndexMinGlobal;  // start
   for (int i=0; i<petCount-1; i++){
     srcSeqIndexInterval[i].max = srcSeqIndexInterval[i].min + indicesPerPet - 1;
@@ -3634,9 +4106,32 @@ int Array::sparseMatMulStore(
     srcSeqIndexInterval[localPet].min, srcSeqIndexInterval[localPet].max);
 #endif
 
+  int *srcLocalElementsPerIntervalCount = new int[petCount];
+  for (int i=0; i<petCount; i++){
+    // Pet "i" is the active srcSeqIndex interval
+    int seqIndexMin = srcSeqIndexInterval[i].min;
+    int seqIndexMax = srcSeqIndexInterval[i].max;
+    int count = 0; // reset
+    for (int j=0; j<srcLocalDeCount; j++){
+      for (int k=0; k<srcLocalDeElementCount[j]; k++){
+        int srcSeqIndex = srcLinSeqList[j][k].seqIndex.decompSeqIndex;
+        if (srcSeqIndex >= seqIndexMin && srcSeqIndex <= seqIndexMax)
+          ++count; // increment counter
+      }
+    }
+    srcLocalElementsPerIntervalCount[i] = count;
+  }
+  int *srcLocalIntervalPerPetCount = new int[petCount];
+  vm->vmk_alltoall(srcLocalElementsPerIntervalCount, sizeof(int),
+    srcLocalIntervalPerPetCount, sizeof(int), vmBYTE);
+  
+#ifdef ASMMSTORETIMING
+  VMK::wtime(&t4a);   //gjt - profile
+#endif
+  
   // allocate local look-up table indexed by srcSeqIndex
-  SeqIndexFactorLookup *srcSeqIndexFactorLookup = 
-    new SeqIndexFactorLookup[srcSeqIndexInterval[localPet].countEff];
+  DD::SeqIndexFactorLookup *srcSeqIndexFactorLookup = 
+    new DD::SeqIndexFactorLookup[srcSeqIndexInterval[localPet].countEff];
   for (int i=0; i<srcSeqIndexInterval[localPet].countEff; i++){
     srcSeqIndexFactorLookup[i].de = 0; // use during initialization as counter
     srcSeqIndexFactorLookup[i].factorCount = 0; // reset
@@ -3775,12 +4270,12 @@ int Array::sparseMatMulStore(
               srcSeqIndexFactorCount += factorCount;  // add to the total count
               int prevFactorCount = srcSeqIndexFactorLookup[j].factorCount;
               // allocate new factorList
-              FactorElement *factorList = 
-                new FactorElement[prevFactorCount + factorCount];
+              DD::FactorElement *factorList = 
+                new DD::FactorElement[prevFactorCount + factorCount];
               if (prevFactorCount){
                 // copy previous factorList elements into new factorList
                 memcpy(factorList, srcSeqIndexFactorLookup[j].factorList,
-                  prevFactorCount * sizeof(FactorElement));
+                  prevFactorCount * sizeof(DD::FactorElement));
                 // delete previous factorList
                 delete [] srcSeqIndexFactorLookup[j].factorList;
               }
@@ -4137,12 +4632,12 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
           srcSeqIndexFactorCount += factorCount;  // add to the total count
           int prevFactorCount = srcSeqIndexFactorLookup[j].factorCount;
           // allocate new factorList
-          FactorElement *factorList = 
-            new FactorElement[prevFactorCount + factorCount];
+          DD::FactorElement *factorList = 
+            new DD::FactorElement[prevFactorCount + factorCount];
           if (prevFactorCount){
             // copy previous factorList elements into new factorList
             memcpy(factorList, srcSeqIndexFactorLookup[j].factorList,
-              prevFactorCount * sizeof(FactorElement));
+              prevFactorCount * sizeof(DD::FactorElement));
             // delete previous factorList
             delete [] srcSeqIndexFactorLookup[j].factorList;
           }
@@ -4333,14 +4828,10 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     }
   }
     
-#ifdef ASMMSTORETIMING
-  VMK::wtime(&t5a);   //gjt - profile
-#endif
-  
   // set up a distributed directory for dstArray seqIndex look-up
   indicesPerPet = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1) / petCount;
   extraIndices = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1) % petCount;
-  Interval *dstSeqIndexInterval = new Interval[petCount];
+  DD::Interval *dstSeqIndexInterval = new DD::Interval[petCount];
   dstSeqIndexInterval[0].min = dstSeqIndexMinGlobal;  // start
   for (int i=0; i<petCount-1; i++){
     dstSeqIndexInterval[i].max = dstSeqIndexInterval[i].min + indicesPerPet - 1;
@@ -4368,9 +4859,32 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     dstSeqIndexInterval[localPet].min, dstSeqIndexInterval[localPet].max);
 #endif
 
+  int *dstLocalElementsPerIntervalCount = new int[petCount];
+  for (int i=0; i<petCount; i++){
+    // Pet "i" is the active dstSeqIndex interval
+    int seqIndexMin = dstSeqIndexInterval[i].min;
+    int seqIndexMax = dstSeqIndexInterval[i].max;
+    int count = 0; // reset
+    for (int j=0; j<dstLocalDeCount; j++){
+      for (int k=0; k<dstLocalDeElementCount[j]; k++){
+        int dstSeqIndex = dstLinSeqList[j][k].seqIndex.decompSeqIndex;
+        if (dstSeqIndex >= seqIndexMin && dstSeqIndex <= seqIndexMax)
+          ++count; // increment counter
+      }
+    }
+    dstLocalElementsPerIntervalCount[i] = count;
+  }
+  int *dstLocalIntervalPerPetCount = new int[petCount];
+  vm->vmk_alltoall(dstLocalElementsPerIntervalCount, sizeof(int),
+    dstLocalIntervalPerPetCount, sizeof(int), vmBYTE);
+  
+#ifdef ASMMSTORETIMING
+  VMK::wtime(&t5a);   //gjt - profile
+#endif
+  
   // allocate local look-up table indexed by dstSeqIndex
-  SeqIndexFactorLookup *dstSeqIndexFactorLookup = 
-    new SeqIndexFactorLookup[dstSeqIndexInterval[localPet].countEff];
+  DD::SeqIndexFactorLookup *dstSeqIndexFactorLookup = 
+    new DD::SeqIndexFactorLookup[dstSeqIndexInterval[localPet].countEff];
   for (int i=0; i<dstSeqIndexInterval[localPet].countEff; i++){
     dstSeqIndexFactorLookup[i].de = 0; // use during initialization as counter
     dstSeqIndexFactorLookup[i].factorCount = 0; // reset
@@ -4504,12 +5018,12 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
               dstSeqIndexFactorCount += factorCount;  // add to the total count
               int prevFactorCount = dstSeqIndexFactorLookup[j].factorCount;
               // allocate new factorList
-              FactorElement *factorList = 
-                new FactorElement[prevFactorCount + factorCount];
+              DD::FactorElement *factorList = 
+                new DD::FactorElement[prevFactorCount + factorCount];
               if (prevFactorCount){
                 // copy previous factorList elements into new factorList
                 memcpy(factorList, dstSeqIndexFactorLookup[j].factorList,
-                  prevFactorCount * sizeof(FactorElement));
+                  prevFactorCount * sizeof(DD::FactorElement));
                 // delete previous factorList
                 delete [] dstSeqIndexFactorLookup[j].factorList;
               }
@@ -4828,12 +5342,12 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
           dstSeqIndexFactorCount += factorCount;  // add to the total count
           int prevFactorCount = dstSeqIndexFactorLookup[j].factorCount;
           // allocate new factorList
-          FactorElement *factorList = 
-            new FactorElement[prevFactorCount + factorCount];
+          DD::FactorElement *factorList = 
+            new DD::FactorElement[prevFactorCount + factorCount];
           if (prevFactorCount){
             // copy previous factorList elements into new factorList
             memcpy(factorList, dstSeqIndexFactorLookup[j].factorList,
-              prevFactorCount * sizeof(FactorElement));
+              prevFactorCount * sizeof(DD::FactorElement));
             // delete previous factorList
             delete [] dstSeqIndexFactorLookup[j].factorList;
           }
@@ -5000,190 +5514,86 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   VMK::wtime(&t5);   //gjt - profile
 #endif
 
-  // fill in the partnerDe member in srcSeqIndexFactorLookup using dst distdir
-  for (int i=0; i<petCount; i++){
-    // Pet "i" is the active dstSeqIndex interval
-    int seqIndexMin = dstSeqIndexInterval[i].min;
-    int seqIndexMax = dstSeqIndexInterval[i].max;
-    int seqIndexCount = dstSeqIndexInterval[i].count;
-    if (localPet!=i){
-      // localPet is a client for the active dstSeqIndex interval
-      // construct a request from the srcSeqIndexFactorLookup for this interval
-      int *requestDstSeqIndexList = new int[srcSeqIndexFactorCount];
-      int *srcSeqIndexFactorLookupIndex = new int[2*srcSeqIndexFactorCount];
-      int count = 0; // reset
-      for (int j=0; j<srcSeqIndexInterval[localPet].countEff; j++)
-        for (int k=0; k<srcSeqIndexFactorLookup[j].factorCount; k++){
-          int partnerSeqIndex = srcSeqIndexFactorLookup[j].factorList[k]
-            .partnerSeqIndex.decompSeqIndex;
-          if (partnerSeqIndex >= seqIndexMin && partnerSeqIndex <= seqIndexMax){
-            srcSeqIndexFactorLookupIndex[2*count] = j;
-            srcSeqIndexFactorLookupIndex[2*count+1] = k;
-            requestDstSeqIndexList[count] = partnerSeqIndex - seqIndexMin;
-            if (tensorMixFlag){
-              requestDstSeqIndexList[count] += 
-                (srcSeqIndexFactorLookup[j].factorList[k]       
-                .partnerSeqIndex.tensorSeqIndex - 1) * seqIndexCount;
-            }
-            ++count;
-          }
-        }
-      // send request to the serving Pet "i"
-      vm->vmk_send(&count, sizeof(int), i);
-      if (count)
-        vm->vmk_send(requestDstSeqIndexList, count*sizeof(int), i);
-      // receive response from the serving Pet "i"
-      int *responseDstDeList = new int[count];
-      if (count)
-        vm->vmk_recv(responseDstDeList, count*sizeof(int), i);
-      // process responseDstDeList and set partnerDe member
-      for (int j=0; j<count; j++){
-        int jj =  srcSeqIndexFactorLookupIndex[2*j];
-        int k = srcSeqIndexFactorLookupIndex[2*j+1];
-        srcSeqIndexFactorLookup[jj].factorList[k].partnerDe =
-          responseDstDeList[j];
-      }
-      // garbage collection
-      delete [] requestDstSeqIndexList;
-      delete [] responseDstDeList;
-      delete [] srcSeqIndexFactorLookupIndex;
-    }else{
-      // localPet serves the active dstSeqIndex interval
-      // todo: this can be rewritten with nb-recv to hide latencies
-      for (int ii=0; ii<petCount; ii++){
-        if (ii==i){
-          // server Pet itself
-          for (int j=0; j<srcSeqIndexInterval[localPet].countEff; j++)
-            for (int k=0; k<srcSeqIndexFactorLookup[j].factorCount; k++){
-              int partnerSeqIndex = srcSeqIndexFactorLookup[j].factorList[k]
-                .partnerSeqIndex.decompSeqIndex;
-              if (partnerSeqIndex >= seqIndexMin &&
-                partnerSeqIndex <= seqIndexMax){
-                int kk = partnerSeqIndex - seqIndexMin;
-                if (tensorMixFlag){
-                  kk += (srcSeqIndexFactorLookup[j].factorList[k]
-                    .partnerSeqIndex.tensorSeqIndex - 1) * seqIndexCount;
-                }
-                srcSeqIndexFactorLookup[j].factorList[k].partnerDe =
-                  dstSeqIndexFactorLookup[kk].de;
-              }
-            }
-        }else{
-          // receive requestDstSeqIndexList from Pet "ii"
-          int count;
-          vm->vmk_recv(&count, sizeof(int), ii);
-          int *requestDstSeqIndexList = new int[count];
-          if (count)
-            vm->vmk_recv(requestDstSeqIndexList, count*sizeof(int), ii);
-          // process requestDstSeqIndexList and set up response
-          int *responseDstDeList = new int[count];
-          for (int j=0; j<count; j++){
-            int k = requestDstSeqIndexList[j];
-            responseDstDeList[j] = dstSeqIndexFactorLookup[k].de;
-          }
-          // send response back to Pet "ii"
-          if (count)
-            vm->vmk_send(responseDstDeList, count*sizeof(int), ii);
-          // garbage collection
-          delete [] requestDstSeqIndexList;
-          delete [] responseDstDeList;
-        }
-      } // for ii
-    }
-  }
-  
-  // fill in the partnerDe member in dstSeqIndexFactorLookup using src distdir
+  // prepare count arrays for src partner loop-up in dstSeqIndexFactorLookup
+  int *srcLocalPartnerElementsPerIntervalCount = new int[petCount];
   for (int i=0; i<petCount; i++){
     // Pet "i" is the active srcSeqIndex interval
+    int seqIndexMin = dstSeqIndexInterval[i].min;
+    int seqIndexMax = dstSeqIndexInterval[i].max;
+    int count = 0; // reset
+    for (int j=0; j<srcSeqIndexInterval[localPet].countEff; j++){
+      for (int k=0; k<srcSeqIndexFactorLookup[j].factorCount; k++){
+        int partnerSeqIndex = srcSeqIndexFactorLookup[j].factorList[k]
+          .partnerSeqIndex.decompSeqIndex;
+        if (partnerSeqIndex >= seqIndexMin && partnerSeqIndex <= seqIndexMax)
+          ++count; // increment counter
+      }
+    }
+    srcLocalPartnerElementsPerIntervalCount[i] = count;
+  }
+  int *dstLocalPartnerIntervalPerPetCount = new int[petCount];
+  vm->vmk_alltoall(srcLocalPartnerElementsPerIntervalCount, sizeof(int),
+    dstLocalPartnerIntervalPerPetCount, sizeof(int), vmBYTE);
+  
+  // fill partnerDe in srcSeqIndexFactorLookup using dstSeqIndexFactorLookup
+  {
+    DD::FillPartnerDeInfo *fillPartnerDeInfo = new DD::FillPartnerDeInfo;
+    fillPartnerDeInfo->localPet = localPet;
+    fillPartnerDeInfo->seqIndexIntervalIn = dstSeqIndexInterval;
+    fillPartnerDeInfo->seqIndexIntervalOut = srcSeqIndexInterval;
+    fillPartnerDeInfo->seqIndexFactorLookupIn = dstSeqIndexFactorLookup;
+    fillPartnerDeInfo->seqIndexFactorLookupOut = srcSeqIndexFactorLookup;
+    fillPartnerDeInfo->tensorMixFlag = tensorMixFlag;
+      
+    DD::accessLookup(vm, petCount, localPet, dstLocalPartnerIntervalPerPetCount,
+      srcLocalPartnerElementsPerIntervalCount, fillPartnerDeInfo);
+    delete fillPartnerDeInfo;
+  }
+
+  // garbage collection
+  delete [] srcLocalPartnerElementsPerIntervalCount;
+  delete [] dstLocalPartnerIntervalPerPetCount;
+      
+  // prepare count arrays for dst partner loop-up in srcSeqIndexFactorLookup
+  int *dstLocalPartnerElementsPerIntervalCount = new int[petCount];
+  for (int i=0; i<petCount; i++){
+    // Pet "i" is the active dstSeqIndex interval
     int seqIndexMin = srcSeqIndexInterval[i].min;
     int seqIndexMax = srcSeqIndexInterval[i].max;
-    int seqIndexCount = srcSeqIndexInterval[i].count;
-    if (localPet!=i){
-      // localPet is a client for the active srcSeqIndex interval
-      // construct a request from the dstSeqIndexFactorLookup for this interval
-      int *requestSrcSeqIndexList = new int[dstSeqIndexFactorCount];
-      int *dstSeqIndexFactorLookupIndex = new int[2*dstSeqIndexFactorCount];
-      int count = 0; // reset
-      for (int j=0; j<dstSeqIndexInterval[localPet].countEff; j++)
-        for (int k=0; k<dstSeqIndexFactorLookup[j].factorCount; k++){
-          int partnerSeqIndex = dstSeqIndexFactorLookup[j].factorList[k]
-            .partnerSeqIndex.decompSeqIndex;
-          if (partnerSeqIndex >= seqIndexMin && partnerSeqIndex <= seqIndexMax){
-            dstSeqIndexFactorLookupIndex[2*count] = j;
-            dstSeqIndexFactorLookupIndex[2*count+1] = k;
-            requestSrcSeqIndexList[count] = partnerSeqIndex - seqIndexMin;
-            if (tensorMixFlag){
-              requestSrcSeqIndexList[count] += 
-                (dstSeqIndexFactorLookup[j].factorList[k]       
-                .partnerSeqIndex.tensorSeqIndex - 1) * seqIndexCount;
-            }
-            ++count;
-          }
-        }
-      // send request to the serving Pet "i"
-      vm->vmk_send(&count, sizeof(int), i);
-      if (count)
-        vm->vmk_send(requestSrcSeqIndexList, count*sizeof(int), i);
-      // receive response from the serving Pet "i"
-      int *responseSrcDeList = new int[count];
-      if (count)
-        vm->vmk_recv(responseSrcDeList, count*sizeof(int), i);
-      // process responseSrcDeList and set partnerDe member
-      for (int j=0; j<count; j++){
-        int jj =  dstSeqIndexFactorLookupIndex[2*j];
-        int k = dstSeqIndexFactorLookupIndex[2*j+1];
-        dstSeqIndexFactorLookup[jj].factorList[k].partnerDe =
-          responseSrcDeList[j];
+    int count = 0; // reset
+    for (int j=0; j<dstSeqIndexInterval[localPet].countEff; j++){
+      for (int k=0; k<dstSeqIndexFactorLookup[j].factorCount; k++){
+        int partnerSeqIndex = dstSeqIndexFactorLookup[j].factorList[k]
+          .partnerSeqIndex.decompSeqIndex;
+        if (partnerSeqIndex >= seqIndexMin && partnerSeqIndex <= seqIndexMax)
+          ++count; // increment counter
       }
-      // garbage collection
-      delete [] requestSrcSeqIndexList;
-      delete [] responseSrcDeList;
-      delete [] dstSeqIndexFactorLookupIndex;
-    }else{
-      // localPet serves the active srcSeqIndex interval
-      // todo: this can be rewritten with nb-recv to hide latencies
-      for (int ii=0; ii<petCount; ii++){
-        if (ii==i){
-          // server Pet itself
-          for (int j=0; j<dstSeqIndexInterval[localPet].countEff; j++)
-            for (int k=0; k<dstSeqIndexFactorLookup[j].factorCount; k++){
-              int partnerSeqIndex = dstSeqIndexFactorLookup[j].factorList[k]
-                .partnerSeqIndex.decompSeqIndex;
-              if (partnerSeqIndex >= seqIndexMin &&
-                partnerSeqIndex <= seqIndexMax){
-                int kk = partnerSeqIndex - seqIndexMin;
-                if (tensorMixFlag){
-                  kk += (dstSeqIndexFactorLookup[j].factorList[k]
-                    .partnerSeqIndex.tensorSeqIndex - 1)* seqIndexCount;
-                }
-                dstSeqIndexFactorLookup[j].factorList[k].partnerDe =
-                  srcSeqIndexFactorLookup[kk].de;
-              }
-            }
-        }else{
-          // receive requestSrcSeqIndexList from Pet "ii"
-          int count;
-          vm->vmk_recv(&count, sizeof(int), ii);
-          int *requestSrcSeqIndexList = new int[count];
-          if (count)
-            vm->vmk_recv(requestSrcSeqIndexList, count*sizeof(int), ii);
-          // process requestSrcSeqIndexList and set up response
-          int *responseSrcDeList = new int[count];
-          for (int j=0; j<count; j++){
-            int k = requestSrcSeqIndexList[j];
-            responseSrcDeList[j] = srcSeqIndexFactorLookup[k].de;
-          }
-          // send response back to Pet "ii"
-          if (count)
-            vm->vmk_send(responseSrcDeList, count*sizeof(int), ii);
-          // garbage collection
-          delete [] requestSrcSeqIndexList;
-          delete [] responseSrcDeList;
-        }
-      } // for ii
     }
+    dstLocalPartnerElementsPerIntervalCount[i] = count;
   }
+  int *srcLocalPartnerIntervalPerPetCount = new int[petCount];
+  vm->vmk_alltoall(dstLocalPartnerElementsPerIntervalCount, sizeof(int),
+    srcLocalPartnerIntervalPerPetCount, sizeof(int), vmBYTE);
   
+  // fill partnerDe in dstSeqIndexFactorLookup using srcSeqIndexFactorLookup
+  {
+    DD::FillPartnerDeInfo *fillPartnerDeInfo = new DD::FillPartnerDeInfo;
+    fillPartnerDeInfo->localPet = localPet;
+    fillPartnerDeInfo->seqIndexIntervalIn = srcSeqIndexInterval;
+    fillPartnerDeInfo->seqIndexIntervalOut = dstSeqIndexInterval;
+    fillPartnerDeInfo->seqIndexFactorLookupIn = srcSeqIndexFactorLookup;
+    fillPartnerDeInfo->seqIndexFactorLookupOut = dstSeqIndexFactorLookup;
+    fillPartnerDeInfo->tensorMixFlag = tensorMixFlag;
+      
+    DD::accessLookup(vm, petCount, localPet, srcLocalPartnerIntervalPerPetCount,
+      dstLocalPartnerElementsPerIntervalCount, fillPartnerDeInfo);
+    delete fillPartnerDeInfo;
+  }
+
+  // garbage collection
+  delete [] dstLocalPartnerElementsPerIntervalCount;
+  delete [] srcLocalPartnerIntervalPerPetCount;
+
 #ifdef ASMMSTOREPRINT
   // some serious printing for src info
   for (int i=0; i<srcSeqIndexInterval[localPet].count; i++){
@@ -5223,295 +5633,36 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   VMK::wtime(&t6);   //gjt - profile
 #endif
   
-  struct SeqIndexIndexInfo{
-    int lookupIndex;
-    int listIndex1;
-    int listIndex2;
-  };
-  
-  // communicate between Pets to obtain complete srcArray info on localPet
-  for (int i=0; i<petCount; i++){
-    // Pet "i" is the active srcSeqIndex interval
-    int seqIndexMin = srcSeqIndexInterval[i].min;
-    int seqIndexMax = srcSeqIndexInterval[i].max;
-    int seqIndexCount = srcSeqIndexInterval[i].count;
-    int seqIndexCountTotal = seqIndexCount * srcArray->tensorElementCount;
-    if (localPet!=i){
-      // localPet is a client for the active srcSeqIndex interval
-      SeqIndexIndexInfo *seqIndexIndexInfoList =
-        new SeqIndexIndexInfo[seqIndexCountTotal];
-      int count = 0; // reset
-      for (int j=0; j<srcLocalDeCount; j++){
-        for (int k=0; k<srcLocalDeElementCount[j]; k++){
-          int srcSeqIndex = srcLinSeqList[j][k].seqIndex.decompSeqIndex;
-          if (srcSeqIndex >= seqIndexMin && srcSeqIndex <= seqIndexMax){
-            int lookupIndex = srcSeqIndex - seqIndexMin;
-            if (tensorMixFlag){
-              lookupIndex +=
-                (srcLinSeqList[j][k].seqIndex.tensorSeqIndex - 1)
-                * seqIndexCount;
-            }
-            seqIndexIndexInfoList[count].lookupIndex = lookupIndex;
-            seqIndexIndexInfoList[count].listIndex1 = j;
-            seqIndexIndexInfoList[count].listIndex2 = k;
-            ++count; // increment counter
-          }
-        }
-      }
-      // send information to the serving Pet
-      vm->vmk_send(&count, sizeof(int), i);
-      if (count)
-        vm->vmk_send(seqIndexIndexInfoList, count*sizeof(SeqIndexIndexInfo), i);
-      // receive response from the serving Pet "i"
-      int responseStreamSize;
-      vm->vmk_recv(&responseStreamSize, sizeof(int), i);
-      char *responseStream = new char[responseStreamSize];
-      if (responseStreamSize)
-        vm->vmk_recv(responseStream, responseStreamSize, i);
-      // process responseStream and complete srcLinSeqList[][] info
-      if (responseStreamSize){
-        int *responseStreamInt;
-        FactorElement *responseStreamFactorElement =
-          (FactorElement *)responseStream;
-        while ((char *)responseStreamFactorElement !=
-          responseStream+responseStreamSize){
-          responseStreamInt = (int *)responseStreamFactorElement;
-          int j = *responseStreamInt++;
-          int k = *responseStreamInt++;
-          int factorCount = *responseStreamInt++;
-          responseStreamInt++;  // skip padding
-          srcLinSeqList[j][k].factorCount = factorCount;
-          srcLinSeqList[j][k].factorList = new FactorElement[factorCount];
-          responseStreamFactorElement = (FactorElement *)responseStreamInt;
-          memcpy(srcLinSeqList[j][k].factorList, responseStreamFactorElement,
-            factorCount * sizeof(FactorElement));
-          responseStreamFactorElement += factorCount;
-        }
-      }
-      // garbage collection
-      delete [] seqIndexIndexInfoList;
-      delete [] responseStream;
-    }else{
-      // localPet serves the active srcSeqIndex interval
-      // todo: this can be rewritten with nb-recv to hide latencies
-      for (int ii=0; ii<petCount; ii++){
-        if (ii==i){
-          // server Pet itself
-          for (int j=0; j<srcLocalDeCount; j++){
-            for (int k=0; k<srcLocalDeElementCount[j]; k++){
-              int srcSeqIndex = srcLinSeqList[j][k].seqIndex.decompSeqIndex;
-              if (srcSeqIndex >= seqIndexMin && srcSeqIndex <= seqIndexMax){
-                int kk = srcSeqIndex - seqIndexMin;
-                if (tensorMixFlag){
-                  kk += (srcLinSeqList[j][k].seqIndex.tensorSeqIndex - 1)
-                    * seqIndexCount;
-                }
-                int factorCount = srcSeqIndexFactorLookup[kk].factorCount;
-                if (factorCount){
-                  srcLinSeqList[j][k].factorCount = factorCount;
-                  srcLinSeqList[j][k].factorList =
-                    new FactorElement[factorCount];
-                  memcpy(srcLinSeqList[j][k].factorList,
-                    srcSeqIndexFactorLookup[kk].factorList,
-                    factorCount * sizeof(FactorElement));
-                }
-              }
-            }
-          }
-        }else{
-          // receive seqIndexWithinInterval from Pet "ii"
-          int count;
-          vm->vmk_recv(&count, sizeof(int), ii);
-          SeqIndexIndexInfo *seqIndexIndexInfoList =
-            new SeqIndexIndexInfo[count];
-          if (count)
-            vm->vmk_recv(seqIndexIndexInfoList, count*sizeof(SeqIndexIndexInfo),
-              ii);
-          // process seqIndexIndexInfoList and set up response
-          int indexCounter = 0; // reset
-          int factorElementCounter = 0; // reset
-          for (int j=0; j<count; j++){
-            int k = seqIndexIndexInfoList[j].lookupIndex;
-            int factorCount = srcSeqIndexFactorLookup[k].factorCount;
-            if (factorCount){
-              ++indexCounter;
-              factorElementCounter += factorCount;
-            }
-          }
-          int responseStreamSize = 4*indexCounter*sizeof(int)
-            + factorElementCounter*sizeof(FactorElement);
-          char *responseStream = new char[responseStreamSize];
-          int *responseStreamInt;
-          FactorElement *responseStreamFactorElement =
-            (FactorElement *)responseStream;
-          for (int j=0; j<count; j++){
-            int k = seqIndexIndexInfoList[j].lookupIndex;
-            int factorCount = srcSeqIndexFactorLookup[k].factorCount;
-            if (factorCount){
-              responseStreamInt = (int *)responseStreamFactorElement;
-              *responseStreamInt++ = seqIndexIndexInfoList[j].listIndex1;
-              *responseStreamInt++ = seqIndexIndexInfoList[j].listIndex2;
-              *responseStreamInt++ = factorCount;
-              *responseStreamInt++ = 0; // padding for 8-byte alignment
-              responseStreamFactorElement = (FactorElement *)responseStreamInt;
-              memcpy(responseStreamFactorElement,
-                srcSeqIndexFactorLookup[k].factorList,
-                factorCount * sizeof(FactorElement));
-              responseStreamFactorElement += factorCount;
-            }
-          }
-          // send response back to Pet "ii"
-          vm->vmk_send(&responseStreamSize, sizeof(int), ii);
-          if (responseStreamSize)
-            vm->vmk_send(responseStream, responseStreamSize, ii);
-          // garbage collection
-          delete [] seqIndexIndexInfoList;
-          delete [] responseStream;
-        }
-      } // for ii
-    }
+  // access srcSeqIndexFactorLookup to obtain complete srcLinSeqList
+  {  
+    DD::FillLinSeqListInfo *fillLinSeqListInfo = new DD::FillLinSeqListInfo;
+    fillLinSeqListInfo->linSeqList = srcLinSeqList;
+    fillLinSeqListInfo->localPet = localPet;
+    fillLinSeqListInfo->localDeCount = srcLocalDeCount;
+    fillLinSeqListInfo->localDeElementCount = srcLocalDeElementCount;
+    fillLinSeqListInfo->seqIndexInterval = srcSeqIndexInterval;
+    fillLinSeqListInfo->seqIndexFactorLookup = srcSeqIndexFactorLookup;
+    fillLinSeqListInfo->tensorMixFlag = tensorMixFlag;
+      
+    DD::accessLookup(vm, petCount, localPet, srcLocalIntervalPerPetCount,
+      srcLocalElementsPerIntervalCount, fillLinSeqListInfo);
+    delete fillLinSeqListInfo;
   }
-  // communicate between Pets to obtain complete dstArray info on localPet
-  for (int i=0; i<petCount; i++){
-    // Pet "i" is the active dstSeqIndex interval
-    int seqIndexMin = dstSeqIndexInterval[i].min;
-    int seqIndexMax = dstSeqIndexInterval[i].max;
-    int seqIndexCount = dstSeqIndexInterval[i].count;
-    int seqIndexCountTotal = seqIndexCount * dstArray->tensorElementCount;
-    if (localPet!=i){
-      // localPet is a client for the active dstSeqIndex interval
-      SeqIndexIndexInfo *seqIndexIndexInfoList =
-        new SeqIndexIndexInfo[seqIndexCountTotal];
-      int count = 0; // reset
-      for (int j=0; j<dstLocalDeCount; j++){
-        for (int k=0; k<dstLocalDeElementCount[j]; k++){
-          int dstSeqIndex = dstLinSeqList[j][k].seqIndex.decompSeqIndex;
-          if (dstSeqIndex >= seqIndexMin && dstSeqIndex <= seqIndexMax){
-            int lookupIndex = dstSeqIndex - seqIndexMin;
-            if (tensorMixFlag){
-              lookupIndex +=
-                (dstLinSeqList[j][k].seqIndex.tensorSeqIndex - 1)
-                * seqIndexCount;
-            }
-            seqIndexIndexInfoList[count].lookupIndex = lookupIndex;
-            seqIndexIndexInfoList[count].listIndex1 = j;
-            seqIndexIndexInfoList[count].listIndex2 = k;
-            ++count; // increment counter
-          }
-        }
-      }
-      // send information to the serving Pet
-      vm->vmk_send(&count, sizeof(int), i);
-      if (count)
-        vm->vmk_send(seqIndexIndexInfoList, count*sizeof(SeqIndexIndexInfo), i);
-      // receive response from the serving Pet "i"
-      int responseStreamSize;
-      vm->vmk_recv(&responseStreamSize, sizeof(int), i);
-      char *responseStream = new char[responseStreamSize];
-      if (responseStreamSize)
-        vm->vmk_recv(responseStream, responseStreamSize, i);
-      // process responseStream and complete dstLinSeqList[][] info
-      if (responseStreamSize){
-        int *responseStreamInt;
-        FactorElement *responseStreamFactorElement =
-          (FactorElement *)responseStream;
-        while ((char *)responseStreamFactorElement !=
-          responseStream+responseStreamSize){
-          responseStreamInt = (int *)responseStreamFactorElement;
-          int j = *responseStreamInt++;
-          int k = *responseStreamInt++;
-          int factorCount = *responseStreamInt++;
-          responseStreamInt++;  // skip padding
-          dstLinSeqList[j][k].factorCount = factorCount;
-          dstLinSeqList[j][k].factorList = new FactorElement[factorCount];
-          responseStreamFactorElement = (FactorElement *)responseStreamInt;
-          memcpy(dstLinSeqList[j][k].factorList, responseStreamFactorElement,
-            factorCount * sizeof(FactorElement));
-          responseStreamFactorElement += factorCount;
-        }
-      }
-      // garbage collection
-      delete [] seqIndexIndexInfoList;
-      delete [] responseStream;
-    }else{
-      // localPet serves the active dstSeqIndex interval
-      // todo: this can be rewritten with nb-recv to hide latencies
-      for (int ii=0; ii<petCount; ii++){
-        if (ii==i){
-          // server Pet itself
-          for (int j=0; j<dstLocalDeCount; j++){
-            for (int k=0; k<dstLocalDeElementCount[j]; k++){
-              int dstSeqIndex = dstLinSeqList[j][k].seqIndex.decompSeqIndex;
-              if (dstSeqIndex >= seqIndexMin && dstSeqIndex <= seqIndexMax){
-                int kk = dstSeqIndex - seqIndexMin;
-                if (tensorMixFlag){
-                  kk += (dstLinSeqList[j][k].seqIndex.tensorSeqIndex - 1)
-                    * seqIndexCount;
-                }
-                int factorCount = dstSeqIndexFactorLookup[kk].factorCount;
-                if (factorCount){
-                  dstLinSeqList[j][k].factorCount = factorCount;
-                  dstLinSeqList[j][k].factorList =
-                    new FactorElement[factorCount];
-                  memcpy(dstLinSeqList[j][k].factorList,
-                    dstSeqIndexFactorLookup[kk].factorList,
-                    factorCount * sizeof(FactorElement));
-                }
-              }
-            }
-          }
-        }else{
-          // receive seqIndexWithinInterval from Pet "ii"
-          int count;
-          vm->vmk_recv(&count, sizeof(int), ii);
-          SeqIndexIndexInfo *seqIndexIndexInfoList =
-            new SeqIndexIndexInfo[count];
-          if (count)
-            vm->vmk_recv(seqIndexIndexInfoList, count*sizeof(SeqIndexIndexInfo),
-              ii);
-          // process seqIndexIndexInfoList and set up response
-          int indexCounter = 0; // reset
-          int factorElementCounter = 0; // reset
-          for (int j=0; j<count; j++){
-            int k = seqIndexIndexInfoList[j].lookupIndex;
-            int factorCount = dstSeqIndexFactorLookup[k].factorCount;
-            if (factorCount){
-              ++indexCounter;
-              factorElementCounter += factorCount;
-            }
-          }
-          int responseStreamSize = 4*indexCounter*sizeof(int)
-            + factorElementCounter*sizeof(FactorElement);
-          char *responseStream = new char[responseStreamSize];
-          int *responseStreamInt;
-          FactorElement *responseStreamFactorElement =
-            (FactorElement *)responseStream;
-          for (int j=0; j<count; j++){
-            int k = seqIndexIndexInfoList[j].lookupIndex;
-            int factorCount = dstSeqIndexFactorLookup[k].factorCount;
-            if (factorCount){
-              responseStreamInt = (int *)responseStreamFactorElement;
-              *responseStreamInt++ = seqIndexIndexInfoList[j].listIndex1;
-              *responseStreamInt++ = seqIndexIndexInfoList[j].listIndex2;
-              *responseStreamInt++ = factorCount;
-              *responseStreamInt++ = 0; // padding for 8-byte alignment
-              responseStreamFactorElement = (FactorElement *)responseStreamInt;
-              memcpy(responseStreamFactorElement,
-                dstSeqIndexFactorLookup[k].factorList,
-                factorCount * sizeof(FactorElement));
-              responseStreamFactorElement += factorCount;
-            }
-          }
-          // send response back to Pet "ii"
-          vm->vmk_send(&responseStreamSize, sizeof(int), ii);
-          if (responseStreamSize)
-            vm->vmk_send(responseStream, responseStreamSize, ii);
-          // garbage collection
-          delete [] seqIndexIndexInfoList;
-          delete [] responseStream;
-        }
-      } // for ii
-    }
+  
+  // access dstSeqIndexFactorLookup to obtain complete dstLinSeqList
+  {
+    DD::FillLinSeqListInfo *fillLinSeqListInfo = new DD::FillLinSeqListInfo;
+    fillLinSeqListInfo->linSeqList = dstLinSeqList;
+    fillLinSeqListInfo->localPet = localPet;
+    fillLinSeqListInfo->localDeCount = dstLocalDeCount;
+    fillLinSeqListInfo->localDeElementCount = dstLocalDeElementCount;
+    fillLinSeqListInfo->seqIndexInterval = dstSeqIndexInterval;
+    fillLinSeqListInfo->seqIndexFactorLookup = dstSeqIndexFactorLookup;
+    fillLinSeqListInfo->tensorMixFlag = tensorMixFlag;
+
+    DD::accessLookup(vm, petCount, localPet, dstLocalIntervalPerPetCount,
+      dstLocalElementsPerIntervalCount, fillLinSeqListInfo);
+    delete fillLinSeqListInfo;
   }
 
 #ifdef ASMMSTOREPRINT
@@ -5547,6 +5698,12 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     }
   }
 #endif
+  
+  // garbage colletion
+  delete [] srcLocalElementsPerIntervalCount;
+  delete [] srcLocalIntervalPerPetCount;
+  delete [] dstLocalElementsPerIntervalCount;
+  delete [] dstLocalIntervalPerPetCount;
 
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t7);   //gjt - profile
@@ -5612,7 +5769,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   VMK::wtime(&t8);   //gjt - profile
 #endif
     
-#define ASMMPROFILE___disable
+#define ASMMPROFILE
 #ifdef ASMMPROFILE
   // <XXE profiling element>
   xxe->stream[xxe->count].opId = XXE::wtimer;
