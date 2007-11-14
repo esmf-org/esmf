@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.160 2007/11/13 19:05:50 theurich Exp $
+// $Id: ESMC_Array.C,v 1.161 2007/11/14 16:52:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.160 2007/11/13 19:05:50 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.161 2007/11/14 16:52:15 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -791,7 +791,7 @@ Array *Array::create(
             if (exclusiveUBound[i*dimCount+j]>computationalUBound[i*dimCount+j])
               uBound = exclusiveUBound[i*dimCount+j];
             temp_undistLBound[jj] = lBound
-               - (0.5 * (temp_counts[jj] - 1 + lBound - uBound));
+               - (int)(0.5 * (temp_counts[jj] - 1 + lBound - uBound));
             temp_undistUBound[jj] = temp_counts[jj] + temp_undistLBound[jj] - 1;
           }
         }
@@ -3296,16 +3296,14 @@ void accessLookup(
   delete [] recv2commhList;
   delete [] recv3commhList;
 }
-} // namespace DD
-
 
 // FillLinSeqListInfo-specific DD routines
 
-int DD::requestSizeFactor(FillLinSeqListInfo *fillLinSeqListInfo){
+int requestSizeFactor(FillLinSeqListInfo *fillLinSeqListInfo){
   return 3*sizeof(int); // lookupIndex, j, k
 }
 
-void DD::clientRequest(FillLinSeqListInfo *fillLinSeqListInfo, int i,
+void clientRequest(FillLinSeqListInfo *fillLinSeqListInfo, int i,
   char **requestStreamClient){
   const int localDeCount = fillLinSeqListInfo->localDeCount;
   const int *localDeElementCount = fillLinSeqListInfo->localDeElementCount;
@@ -3336,7 +3334,7 @@ void DD::clientRequest(FillLinSeqListInfo *fillLinSeqListInfo, int i,
   }
 }
 
-void DD::localClientServerExchange(FillLinSeqListInfo *fillLinSeqListInfo){
+void localClientServerExchange(FillLinSeqListInfo *fillLinSeqListInfo){
   const int localPet = fillLinSeqListInfo->localPet;
   const int localDeCount = fillLinSeqListInfo->localDeCount;
   const int *localDeElementCount = fillLinSeqListInfo->localDeElementCount;
@@ -3361,7 +3359,7 @@ void DD::localClientServerExchange(FillLinSeqListInfo *fillLinSeqListInfo){
         int factorCount = seqIndexFactorLookup[kk].factorCount;
         if (factorCount){
           linSeqList[j][k].factorCount = factorCount;
-          linSeqList[j][k].factorList = new DD::FactorElement[factorCount];
+          linSeqList[j][k].factorList = new FactorElement[factorCount];
           memcpy(linSeqList[j][k].factorList, 
             seqIndexFactorLookup[kk].factorList,
             factorCount * sizeof(FactorElement));
@@ -3371,7 +3369,7 @@ void DD::localClientServerExchange(FillLinSeqListInfo *fillLinSeqListInfo){
   }
 }
 
-int DD::serverResponseSize(FillLinSeqListInfo *fillLinSeqListInfo, int count,
+int serverResponseSize(FillLinSeqListInfo *fillLinSeqListInfo, int count,
   int i, char **requestStreamServer){
   const SeqIndexFactorLookup *seqIndexFactorLookup =
     fillLinSeqListInfo->seqIndexFactorLookup;
@@ -3392,7 +3390,7 @@ int DD::serverResponseSize(FillLinSeqListInfo *fillLinSeqListInfo, int count,
   return responseStreamSize;
 }
       
-void DD::serverResponse(FillLinSeqListInfo *fillLinSeqListInfo, int count,
+void serverResponse(FillLinSeqListInfo *fillLinSeqListInfo, int count,
   int i, char **requestStreamServer, char **responseStreamServer){
   const SeqIndexFactorLookup *seqIndexFactorLookup =
     fillLinSeqListInfo->seqIndexFactorLookup;
@@ -3419,7 +3417,7 @@ void DD::serverResponse(FillLinSeqListInfo *fillLinSeqListInfo, int count,
   }
 }        
         
-void DD::clientProcess(FillLinSeqListInfo *fillLinSeqListInfo,
+void clientProcess(FillLinSeqListInfo *fillLinSeqListInfo,
   char *responseStream, int responseStreamSize){
   AssociationElement **linSeqList = fillLinSeqListInfo->linSeqList;
   // process responseStream and complete linSeqList[][] info
@@ -3434,7 +3432,7 @@ void DD::clientProcess(FillLinSeqListInfo *fillLinSeqListInfo,
     int factorCount = *responseStreamInt++;
     responseStreamInt++;  // skip padding
     linSeqList[j][k].factorCount = factorCount;
-    linSeqList[j][k].factorList = new DD::FactorElement[factorCount];
+    linSeqList[j][k].factorList = new FactorElement[factorCount];
     responseStreamFactorElement = (FactorElement *)responseStreamInt;
     memcpy(linSeqList[j][k].factorList, responseStreamFactorElement,
       factorCount * sizeof(FactorElement));
@@ -3444,11 +3442,11 @@ void DD::clientProcess(FillLinSeqListInfo *fillLinSeqListInfo,
         
 // FillPartnerDeInfo-specific DD routines
 
-int DD::requestSizeFactor(FillPartnerDeInfo *fillPartnerDeInfo){
+int requestSizeFactor(FillPartnerDeInfo *fillPartnerDeInfo){
   return 3*sizeof(int); // lookupIndex, j, k
 }
 
-void DD::clientRequest(FillPartnerDeInfo *fillPartnerDeInfo, int i,
+void clientRequest(FillPartnerDeInfo *fillPartnerDeInfo, int i,
   char **requestStreamClient){
   const int localPet = fillPartnerDeInfo->localPet;
   const Interval *seqIndexIntervalIn = fillPartnerDeInfo->seqIndexIntervalIn;
@@ -3481,7 +3479,7 @@ void DD::clientRequest(FillPartnerDeInfo *fillPartnerDeInfo, int i,
   }
 }
 
-void DD::localClientServerExchange(FillPartnerDeInfo *fillPartnerDeInfo){
+void localClientServerExchange(FillPartnerDeInfo *fillPartnerDeInfo){
   const int localPet = fillPartnerDeInfo->localPet;
   const Interval *seqIndexIntervalIn = fillPartnerDeInfo->seqIndexIntervalIn;
   const Interval *seqIndexIntervalOut = fillPartnerDeInfo->seqIndexIntervalOut;
@@ -3511,13 +3509,13 @@ void DD::localClientServerExchange(FillPartnerDeInfo *fillPartnerDeInfo){
   }
 }
 
-int DD::serverResponseSize(FillPartnerDeInfo *fillPartnerDeInfo, int count,
+int serverResponseSize(FillPartnerDeInfo *fillPartnerDeInfo, int count,
   int i, char **requestStreamServer){
   int responseStreamSize = 3*count*sizeof(int);
   return responseStreamSize;
 }
       
-void DD::serverResponse(FillPartnerDeInfo *fillPartnerDeInfo, int count,
+void serverResponse(FillPartnerDeInfo *fillPartnerDeInfo, int count,
   int i, char **requestStreamServer, char **responseStreamServer){
   const SeqIndexFactorLookup *seqIndexFactorLookupIn =
     fillPartnerDeInfo->seqIndexFactorLookupIn;
@@ -3532,7 +3530,7 @@ void DD::serverResponse(FillPartnerDeInfo *fillPartnerDeInfo, int count,
   }
 }        
         
-void DD::clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
+void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
   char *responseStream, int responseStreamSize){
   const SeqIndexFactorLookup *seqIndexFactorLookupOut =
     fillPartnerDeInfo->seqIndexFactorLookupOut;
@@ -3545,6 +3543,8 @@ void DD::clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
     seqIndexFactorLookupOut[j].factorList[k].partnerDe = de;
   }
 }
+
+} // namespace DD
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
