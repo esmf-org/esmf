@@ -1,13 +1,14 @@
-# $Id: makefile,v 1.7 2006/04/24 22:00:43 theurich Exp $
+# $Id: makefile,v 1.8 2007/11/15 21:20:29 theurich Exp $
 
 # leave alone.
 ALL: build_here 
 
-# Don't set these unless absolutely necessary - they've got to be
-# architecture and compiler independent and should be inherited
-# from the upper level makefile if possible.
-CFLAGS    =
-FFLAGS    =
+# on the Cray X1 default template instantiation is a pain
+ifeq ($(ESMF_OS),Unicos)
+ifeq ($(ESMF_COMPILER),default)
+ESMF_CXXCOMPILEOPTS += -h simple_templates
+endif
+endif
 
 # If you have C files in this directory, list them all on the line below.
 SOURCEC	  = ESMC_Array.C
