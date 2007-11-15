@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.268 2007/11/11 06:37:32 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.269 2007/11/15 18:26:51 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.268 2007/11/11 06:37:32 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.269 2007/11/15 18:26:51 feiliu Exp $'
 
 !==============================================================================
 !
@@ -2045,7 +2045,7 @@
         write(*, *)  "Data status = ", trim(str)
         !TODO: add code here to print more info
         if (fp%datastatus .eq. ESMF_STATUS_READY) then 
-           call c_ESMC_ArrayPrint(fp%array, "", localrc)
+           call c_ESMC_ArrayPrint(fp%array, localrc)
         endif
 
 ! TODO:FIELDINTEGRATION Finish implementation of FieldPrint - gridToFieldMap etc.
