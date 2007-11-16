@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.28 2007/09/20 17:44:20 cdeluca Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.29 2007/11/16 22:59:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.28 2007/09/20 17:44:20 cdeluca Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.29 2007/11/16 22:59:47 theurich Exp $'
 
 !==============================================================================
 
@@ -179,10 +179,9 @@ module ESMF_ArraySpecMod
 ! \item[arrayspec]
 !   The {\tt ESMF\_ArraySpec} to query.
 ! \item[rank]
-!   {\tt ESMF\_Array} rank (dimensionality -- 1D, 2D, etc). Maximum
-!    possible is 7D.
+!   Array rank (dimensionality -- 1D, 2D, etc). Maximum possible is 7D.
 ! \item[typekind]
-!   {\tt ESMF\_Array} typekind.  See section \ref{opt:typekind} for valid values.
+!   Array typekind.  See section \ref{opt:typekind} for valid values.
 ! \item[[rc]]
 !  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -246,7 +245,7 @@ module ESMF_ArraySpecMod
 ! \item[rank]
 !   Array rank (dimensionality -- 1D, 2D, etc). Maximum allowed is 7D.
 ! \item[typekind]
-!   {\tt ESMF\_Array} typekind.  See section \ref{opt:typekind} for valid values.
+!   Array typekind.  See section \ref{opt:typekind} for valid values.
 ! \item[{[rc]}]
 !  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
