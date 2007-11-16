@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.271 2007/11/16 16:01:19 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.272 2007/11/16 16:18:57 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.271 2007/11/16 16:01:19 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.272 2007/11/16 16:18:57 feiliu Exp $'
 
 !==============================================================================
 !
@@ -3176,18 +3176,16 @@
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
-! TODO:FIELDINTEGRATION Replace bound calculation with cellCount from GridGet()
           ! Bounds only valid if there are local DE's
-          if (localDECount .gt. 0) then
-             call ESMF_GridGet(ftypep%grid, localDE=0, staggerloc=staggerloc, &
+          do lDE=0, localDECount-1
+             call ESMF_GridGet(ftypep%grid, localDE=lDE, staggerloc=staggerloc, &
                                exclusiveLBound=exclLBounds, &
                                exclusiveUBound=exclUBounds, &
                                rc=localrc)
              if (ESMF_LogMsgFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rc)) return
-          endif	
-
+          enddo
           hasgrid = .TRUE.
       endif
 
