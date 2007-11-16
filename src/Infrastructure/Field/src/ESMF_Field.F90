@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.270 2007/11/16 04:33:03 oehmke Exp $
+! $Id: ESMF_Field.F90,v 1.271 2007/11/16 16:01:19 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.270 2007/11/16 04:33:03 oehmke Exp $'
+      '$Id: ESMF_Field.F90,v 1.271 2007/11/16 16:01:19 feiliu Exp $'
 
 !==============================================================================
 !
@@ -3134,7 +3134,6 @@
       integer, allocatable :: arrayCompUBnd(:, :), arrayCompLBnd(:, :)
       integer, allocatable :: gridCompUBnd(:), gridCompLBnd(:)
       type(ESMF_DistGrid)  :: arrayDistGrid, gridDistGrid
-      integer :: localDECount    
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -3192,7 +3191,6 @@
           hasgrid = .TRUE.
       endif
 
-#if 0
       ! make sure there is data before asking it questions.
       if (ftypep%datastatus .eq. ESMF_STATUS_READY) then
           call ESMF_ArrayGet(ftypep%array, dimCount=dimCount, localDECount=localDECount, &
@@ -3250,7 +3248,7 @@
           enddo
           deallocate(dimmap, arrayCompUBnd, arrayCompLBnd)
       endif
-#endif
+
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldValidate
