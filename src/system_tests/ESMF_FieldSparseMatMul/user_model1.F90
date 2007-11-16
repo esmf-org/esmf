@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.2 2007/11/04 17:20:50 cdeluca Exp $
+! $Id: user_model1.F90,v 1.3 2007/11/16 04:34:55 oehmke Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -99,9 +99,11 @@ module user_model1
     call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/100,150/), &
-      regDecomp=(/petCount,1/), rc=rc)
+      regDecomp=(/petCount,1/), &
+      gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), & ! no stagger padding
+      indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     field = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
-      name="field data", rc=rc)
+              staggerloc=ESMF_STAGGERLOC_CENTER, name="field data", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_StateAddField(exportState, field=field, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -125,8 +127,10 @@ module user_model1
     real(ESMF_KIND_R8)    :: pi
     type(ESMF_Field)      :: field
     type(ESMF_Array)      :: array
+    type(ESMF_Grid)      :: grid
     real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
     integer               :: i, j
+    integer               :: compLBnd(2),compUBnd(2)
     
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -140,16 +144,21 @@ module user_model1
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get the Array from the Field
-    call ESMF_FieldGet(field, array=array, rc=rc)
+    call ESMF_FieldGet(field, grid=grid, array=array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer
     call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
+    ! Get Bounds
+    call ESMF_GridGet(grid, localDe=0, staggerloc=ESMF_STAGGERLOC_CENTER, &
+           computationalLBound=compLBnd, computationalUBound=compUBnd, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+  
     ! Fill source Array with data
-    do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
-      do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
+    do j = compLBnd(2), compUbnd(2)
+      do i = compLBnd(1), compUBnd(1)
         farrayPtr(i,j) = 10.0d0 &
           + 5.0d0 * sin(real(i,ESMF_KIND_R8)/100.d0*pi) &
           + 2.0d0 * sin(real(j,ESMF_KIND_R8)/150.d0*pi)
