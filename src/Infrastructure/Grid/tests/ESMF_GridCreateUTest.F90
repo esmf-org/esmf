@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.66 2007/11/16 04:30:14 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.67 2007/11/16 16:13:09 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.66 2007/11/16 04:30:14 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.67 2007/11/16 16:13:09 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -876,7 +876,8 @@ program ESMF_GridCreateUTest
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
-  grid=ESMF_GridCreateShapeTile(minIndex=(/1,2,3/),maxIndex=(/4,5,6/),regDecomp=(/2,1,2/), distDim=(/.true.,.false.,.true./), rc=localrc)
+  grid=ESMF_GridCreateShapeTile(minIndex=(/1,2,3/),maxIndex=(/4,5,6/),regDecomp=(/2,1,2/), &
+       distDim=(/.true.,.false.,.true./), rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get info back from grid
