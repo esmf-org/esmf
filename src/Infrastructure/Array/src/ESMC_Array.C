@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.161 2007/11/14 16:52:15 theurich Exp $
+// $Id: ESMC_Array.C,v 1.162 2007/11/16 18:10:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.161 2007/11/14 16:52:15 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.162 2007/11/16 18:10:21 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3166,7 +3166,7 @@ void accessLookup(
     }
   }
   // localPet acts as a client, sends its requests to the appropriate servers
-  for (int ii=localPet+1; ii<localPet+petCount; ii++){
+  for (int ii=localPet+petCount-1; ii>localPet; ii--){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
     if (localElementsPerIntervalCount[i]>0){
@@ -3221,7 +3221,7 @@ void accessLookup(
   }
   // localPet acts as a client, waits for response size from server and posts
   // 2nd receive for response stream
-  for (int ii=localPet+1; ii<localPet+petCount; ii++){
+  for (int ii=localPet+petCount-1; ii>localPet; ii--){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
     if (localElementsPerIntervalCount[i]>0){
@@ -3238,7 +3238,7 @@ void accessLookup(
     }
   }
   // localPet acts as a client, waits for response stream from server, process
-  for (int ii=localPet+1; ii<localPet+petCount; ii++){
+  for (int ii=localPet+petCount-1; ii>localPet; ii--){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
     if (localElementsPerIntervalCount[i]>0){
@@ -3257,7 +3257,7 @@ void accessLookup(
     }
   }
   // localPet acts as a client, wait for sends to complete and collect garbage
-  for (int ii=localPet+1; ii<localPet+petCount; ii++){
+  for (int ii=localPet+petCount-1; ii>localPet; ii--){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
     if (localElementsPerIntervalCount[i]>0){
