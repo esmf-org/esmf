@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.18 2007/11/05 23:32:36 oehmke Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.19 2007/11/16 04:30:14 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.18 2007/11/05 23:32:36 oehmke Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.19 2007/11/16 04:30:14 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -2076,6 +2076,7 @@ program ESMF_GridCoordUTest
          	              ! use default for coordDep3
                               gridEdgeLWidth=(/1,2,3/), &
                               gridEdgeUWidth=(/4,5,6/), &  
+                              distDim=(/.true.,.true., .false./), &
                               petMap=petMap2D, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   else
@@ -2088,6 +2089,7 @@ program ESMF_GridCoordUTest
          	              ! use default for coordDep3  
                               gridEdgeLWidth=(/1,2,3/), &
                               gridEdgeUWidth=(/4,5,6/), &  
+                              distDim=(/.true.,.true., .false./), &
                               rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   endif
@@ -2245,6 +2247,7 @@ program ESMF_GridCoordUTest
                               indexflag=ESMF_INDEX_GLOBAL, &
                               gridEdgeLWidth=(/1,2,3/), &
                               gridEdgeUWidth=(/4,5,6/), &  
+                              distDim=(/.true.,.true., .false./), &
                               petMap=petMap2D, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   else
@@ -2253,6 +2256,7 @@ program ESMF_GridCoordUTest
                               countsPerDeDim3=(/5/),  & 
                               gridEdgeLWidth=(/1,2,3/), &
                               gridEdgeUWidth=(/4,5,6/), &  
+                              distDim=(/.true.,.true., .false./), &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE

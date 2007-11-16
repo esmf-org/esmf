@@ -154,7 +154,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.45 2007/11/08 21:16:59 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.46 2007/11/16 04:30:13 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -1268,7 +1268,7 @@ end interface
                         bipolePos1, bipolePos2, bipolePos3, &
                         coordDep1, coordDep2, coordDep3, &
                         gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
-                        indexflag, petMap, rc)
+                        indexflag, distDim, petMap, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateShapeTileIrreg
@@ -1296,6 +1296,7 @@ end interface
        integer,               intent(in),   optional  :: gridEdgeUWidth(:)
        integer,               intent(in),   optional  :: gridAlign(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
+       logical,               intent(in),   optional  :: distDim(:)
        integer,               intent(in),   optional  :: petMap(:,:,:)
        integer,               intent(out),  optional  :: rc
 !
@@ -1313,8 +1314,8 @@ end interface
 ! countsPerDEDim<> arrays that are specified. 
 !
 ! To specify an undistributed dimension, the array in that dimension
-! should have only one element, and its value should be the number of
-! grid cells in that dimension.
+! should have only one element and the corresponding entry
+! in {\tt distDim} should be false. 
 !
 ! Section \ref{example:2DIrregUniGrid} shows an example
 ! of using this method to create a 2D Grid with uniformly spaced 
@@ -1459,6 +1460,11 @@ end interface
 !     implies the EdgeWidths.
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
+! \item[{[distDim]}]
+!       Array of the same rank as the Grid. It specifies if each
+!       dimensions should be distributed. If not
+!       specified, defaults to all true. Only dimensions
+!       with size(countsPerDeDim)=1 may be made undistributed. 
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
 !       should be of size size(countsPerDEDim1) x size(countsPerDEDim2) x
@@ -1509,28 +1515,22 @@ end interface
 	rank=2
     endif
 
-    ! initialize isDimDist
-    isDimDist(:)=.false.
-
-    ! check for distributed dimensions
-    if (size(countsPerDEDim1) .gt. 1) then
-       isDimDist(1)=.true.
-    endif
-
-    if (size(countsPerDEDim2) .gt. 1) then
-       isDimDist(2)=.true.
-    endif
-
-    if (rank .gt. 2) then
-       if (size(countsPerDEDim3) .gt. 1) then
-          isDimDist(3)=.true.
+    ! check distribution info
+    if (present(distDim)) then
+       if (size(distDim) .ne. rank) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+                 "- distDim must be same rank as Grid", & 
+                 ESMF_CONTEXT, rc) 
+            return 
        endif
     endif
-
-    ! if nothing is distributed then make everything distributed
-    if (.not. (isDimDist(1) .or. isDimDist(2) .or. isDimDist(3))) then
+    
+    ! initialize isDimDist
+    if (present(distDim)) then
+       isDimDist(1:rank)=distDim(1:rank)
+    else
        isDimDist(:)=.true.
-    endif 
+    endif
 
     ! rank of distributed part
     distRank=0 
@@ -1575,6 +1575,30 @@ end interface
             return 
         endif
     endif
+
+    if (.not. isDimDist(1) .and. size(countsPerDEDim1) .gt. 1) then
+       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+      "- can't have undist dim 1 with size(countsPerDEDim1) > 1", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    if (.not. isDimDist(2) .and. size(countsPerDEDim2) .gt. 1) then
+       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+      "- can't have undist dim 2 with size(countsPerDEDim2) > 1", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    if (rank .gt. 2) then
+       if (.not. isDimDist(3) .and. size(countsPerDEDim3) .gt. 1) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+            "- can't have undist dim 3 with size(countsPerDEDim3) > 1", & 
+                 ESMF_CONTEXT, rc) 
+          return 
+       endif
+    endif
+
 
     if ((rank .lt. 3) .and. present(connDim3)) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
@@ -1823,11 +1847,7 @@ end interface
 
    ! Check for non-valid connection types here
 
-
-
-   ! TODO: can you create an array without a distgrid??? What if everything they specify is undistributed?
-   !       for now make a totally undistributed grid an error. Work on handling it later.
-   !       Perhaps don't use undistLBound, undistUBound
+    ! can't have all undistributed dimensions
     if (distRank .eq. 0) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
                  "- Need to have at least one distributed dimension", & 
@@ -2362,7 +2382,7 @@ end interface
                         bipolePos1, bipolePos2, bipolePos3, &
                         coordDep1, coordDep2, coordDep3, &
                         gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
-                        indexflag, petMap, rc)
+                        indexflag, distDim, petMap, rc)
 
 
 !
@@ -2392,6 +2412,7 @@ end interface
        integer,               intent(in),   optional  :: gridEdgeUWidth(:)
        integer,               intent(in),   optional  :: gridAlign(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
+       logical,               intent(in),   optional  :: distDim(:)
        integer,               intent(in),   optional  :: petMap(:,:,:)
        integer,               intent(out),  optional  :: rc
 !
@@ -2542,6 +2563,11 @@ end interface
 !     implies the EdgeWidths.
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
+! \item[{[distDim]}]
+!       Array of the same rank as the Grid. It specifies if each
+!       dimensions should be distributed. If not
+!       specified, defaults to all true. Only dimensions
+!       with regDecomp()=1 may be made undistributed. 
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
 !       should be of size regDecomp(1) x regDecomp(2) x regDecomp(3)
@@ -2596,24 +2622,22 @@ end interface
          return 
     endif
 
+    ! check distribution info
+    if (present(distDim)) then
+       if (size(distDim) .ne. rank) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+                 "- distDim must be same rank as Grid", & 
+                 ESMF_CONTEXT, rc) 
+            return 
+       endif
+    endif
+
     ! initialize isDimDist
-    isDimDist(:)=.false.
-
-    ! rank of distributed part
-    if (present(regDecomp)) then
-       do i=1,size(regDecomp)
-         if (regDecomp(i) .gt. 1) isDimDist(i)=.true.
-       enddo
+    if (present(distDim)) then
+       isDimDist(1:rank)=distDim(1:rank)
     else
-       ! If not specified then distribute along all dim
-       isDimDist(:)=.true. 
-    endif 
-
-
-    ! if nothing is distributed then make everything distributed
-    if (.not. (isDimDist(1) .or. isDimDist(2) .or. isDimDist(3))) then
        isDimDist(:)=.true.
-    endif 
+    endif
 
     ! rank of distributed part
     distRank=0 
@@ -2653,6 +2677,7 @@ end interface
             return 
         endif
     endif
+
 
     if ((rank .lt. 3) .and. present(connDim3)) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
@@ -3021,6 +3046,30 @@ end interface
 
 
   ! Further Error Checking which is easier after setting defaults ----------------------
+    if (.not. isDimDist(1) .and. regDecompLocal(1) .gt. 1) then
+       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+      "- can't have undist dim 1 with regDecomp(1) > 1", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    if (.not. isDimDist(2) .and. regDecompLocal(2) .gt. 1) then
+       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+      "- can't have undist dim 2 with regDecompLocal(2) > 1", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    if (rank .gt. 2) then
+       if (.not. isDimDist(3) .and. regDecompLocal(3) .gt. 1) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+            "- can't have undist dim 3 with regDecomp(3) > 1", & 
+                 ESMF_CONTEXT, rc) 
+          return 
+       endif
+    endif
+
+
   if (present(petMap)) then
      if (rank .gt. 2) then
           if ((size(petMap,1) .ne. regDecompLocal(1)) .or. &
@@ -6533,7 +6582,7 @@ endif
                         bipolePos1, bipolePos2, bipolePos3, &
                         coordDep1, coordDep2, coordDep3, &
                         gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
-                        indexflag, petMap, rc)
+                        indexflag, distDim, petMap, rc)
 
 !
 ! !ARGUMENTS:
@@ -6560,6 +6609,7 @@ endif
        integer,               intent(in),   optional  :: gridEdgeUWidth(:)
        integer,               intent(in),   optional  :: gridAlign(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
+       logical,               intent(in),   optional  :: distDim(:)
        integer,               intent(in),   optional  :: petMap(:,:,:)
        integer,               intent(out),  optional  :: rc
 !
@@ -6583,8 +6633,8 @@ endif
 ! countsPerDEDim<> arrays that are specified. 
 !
 ! To specify an undistributed dimension, the array in that dimension
-! should have only one element, and its value should be the number of
-! grid cells in that dimension.
+! should have only one element and the corresponding entry
+! in {\tt distDim} should be false. 
 !
 ! Section \ref{example:2DIrregUniGrid} shows an example
 ! of using this method to create a 2D Grid with uniformly spaced 
@@ -6735,6 +6785,11 @@ endif
 !     implies the EdgeWidths.
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
+! \item[{[distDim]}]
+!       Array of the same rank as the Grid. It specifies if each
+!       dimensions should be distributed. If not
+!       specified, defaults to all true. Only dimensions
+!       with size(countsPerDeDim)=1 may be made undistributed. 
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
 !       should be of size size(countsPerDEDim1) x size(countsPerDEDim2) x
@@ -6785,28 +6840,22 @@ endif
 	rank=2
     endif
 
-    ! initialize isDimDist
-    isDimDist(:)=.false.
-
-    ! check for distributed dimensions
-    if (size(countsPerDEDim1) .gt. 1) then
-       isDimDist(1)=.true.
-    endif
-
-    if (size(countsPerDEDim2) .gt. 1) then
-       isDimDist(2)=.true.
-    endif
-
-    if (rank .gt. 2) then
-       if (size(countsPerDEDim3) .gt. 1) then
-          isDimDist(3)=.true.
+    ! check distribution info
+    if (present(distDim)) then
+       if (size(distDim) .ne. rank) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+                 "- distDim must be same rank as Grid", & 
+                 ESMF_CONTEXT, rc) 
+            return 
        endif
     endif
-
-    ! if nothing is distributed then make everything distributed
-    if (.not. (isDimDist(1) .or. isDimDist(2) .or. isDimDist(3))) then
+    
+    ! initialize isDimDist
+    if (present(distDim)) then
+       isDimDist(1:rank)=distDim(1:rank)
+    else
        isDimDist(:)=.true.
-    endif 
+    endif
 
     ! rank of distributed part
     distRank=0 
@@ -6850,6 +6899,29 @@ endif
                     ESMF_CONTEXT, rc) 
             return 
         endif
+    endif
+
+    if (.not. isDimDist(1) .and. size(countsPerDEDim1) .gt. 1) then
+       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+      "- can't have undist dim 1 with size(countsPerDEDim1) > 1", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    if (.not. isDimDist(2) .and. size(countsPerDEDim2) .gt. 1) then
+       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+      "- can't have undist dim 2 with size(countsPerDEDim2) > 1", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    if (rank .gt. 2) then
+       if (.not. isDimDist(3) .and. size(countsPerDEDim3) .gt. 1) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+            "- can't have undist dim 3 with size(countsPerDEDim3) > 1", & 
+                 ESMF_CONTEXT, rc) 
+          return 
+       endif
     endif
 
     if ((rank .lt. 3) .and. present(connDim3)) then
@@ -7643,7 +7715,7 @@ endif
                         bipolePos1, bipolePos2, bipolePos3, &
                         coordDep1, coordDep2, coordDep3, &
                         gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
-                        indexflag, petMap, rc)
+                        indexflag, distDim, petMap, rc)
 
 !
 ! !ARGUMENTS:
@@ -7670,6 +7742,7 @@ endif
        integer,               intent(in),   optional  :: gridEdgeUWidth(:)
        integer,               intent(in),   optional  :: gridAlign(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
+       logical,               intent(in),   optional  :: distDim(:)
        integer,               intent(in),   optional  :: petMap(:,:,:)
        integer,               intent(out),  optional  :: rc
 !
@@ -7828,6 +7901,11 @@ endif
 !     implies the EdgeWidths.
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
+! \item[{[distDim]}]
+!       Array of the same rank as the Grid. It specifies if each
+!       dimensions should be distributed. If not
+!       specified, defaults to all true. Only dimensions
+!       with regDecomp()=1 may be made undistributed. 
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
 !       should be of size regDecomp(1) x regDecomp(2) x regDecomp(3)
@@ -7882,24 +7960,22 @@ endif
          return 
     endif
 
+    ! check distribution info
+    if (present(distDim)) then
+       if (size(distDim) .ne. rank) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+                 "- distDim must be same rank as Grid", & 
+                 ESMF_CONTEXT, rc) 
+            return 
+       endif
+    endif
+
     ! initialize isDimDist
-    isDimDist(:)=.false.
-
-    ! rank of distributed part
-    if (present(regDecomp)) then
-       do i=1,size(regDecomp)
-         if (regDecomp(i) .gt. 1) isDimDist(i)=.true.
-       enddo
+    if (present(distDim)) then
+       isDimDist(1:rank)=distDim(1:rank)
     else
-       ! If not specified then distribute along all dim
-       isDimDist(:)=.true. 
-    endif 
-
-
-    ! if nothing is distributed then make everything distributed
-    if (.not. (isDimDist(1) .or. isDimDist(2) .or. isDimDist(3))) then
        isDimDist(:)=.true.
-    endif 
+    endif
 
     ! rank of distributed part
     distRank=0 
@@ -8309,6 +8385,29 @@ endif
 
 
   ! Further Error Checking which is easier after setting defaults ----------------------
+    if (.not. isDimDist(1) .and. regDecompLocal(1) .gt. 1) then
+       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+      "- can't have undist dim 1 with regDecomp(1) > 1", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    if (.not. isDimDist(2) .and. regDecompLocal(2) .gt. 1) then
+       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+      "- can't have undist dim 2 with regDecompLocal(2) > 1", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    if (rank .gt. 2) then
+       if (.not. isDimDist(3) .and. regDecompLocal(3) .gt. 1) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+            "- can't have undist dim 3 with regDecomp(3) > 1", & 
+                 ESMF_CONTEXT, rc) 
+          return 
+       endif
+    endif
+
   if (present(petMap)) then
      if (rank .gt. 2) then
           if ((size(petMap,1) .ne. regDecompLocal(1)) .or. &

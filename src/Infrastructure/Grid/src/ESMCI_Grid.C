@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.34 2007/11/08 21:17:00 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.35 2007/11/16 04:30:14 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.34 2007/11/08 21:17:00 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.35 2007/11/16 04:30:14 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -2253,7 +2253,7 @@ int Grid::serialize(
 
 
   // Check status
-  if (status < ESMC_GRIDSTATUS_SHAPE_READY) {
+  if (status < ESMC_GRIDSTATUS_PROXY_READY) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
       "- Grid not fully created", &rc);
     return rc;
@@ -2412,7 +2412,7 @@ int Grid::deserialize(
   // the protogrid
 
   // Set status (instead of reading it)
-  status =  ESMC_GRIDSTATUS_STUB_READY;
+  status =  ESMC_GRIDSTATUS_PROXY_READY;
   
   DESERIALIZE_VAR( buffer,loffset,typekind,ESMC_TypeKind);
   

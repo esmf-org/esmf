@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.22 2007/11/08 21:16:59 oehmke Exp $
+// $Id: ESMCI_Grid_F.C,v 1.23 2007/11/16 04:30:12 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -145,7 +145,7 @@ extern "C" {
     if (_rc!=NULL) *_rc = ESMC_RC_NOT_IMPL;
 
     // make sure status is correct
-    if (grid->getStatus() < ESMC_GRIDSTATUS_STUB_READY) {
+    if (grid->getStatus() < ESMC_GRIDSTATUS_PROXY_READY) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
               "- grid not ready for this operation ", ESMC_NOT_PRESENT_FILTER(_rc));
       return;
