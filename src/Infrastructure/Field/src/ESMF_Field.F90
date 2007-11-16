@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.269 2007/11/15 18:26:51 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.270 2007/11/16 04:33:03 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.269 2007/11/15 18:26:51 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.270 2007/11/16 04:33:03 oehmke Exp $'
 
 !==============================================================================
 !
@@ -3134,7 +3134,8 @@
       integer, allocatable :: arrayCompUBnd(:, :), arrayCompLBnd(:, :)
       integer, allocatable :: gridCompUBnd(:), gridCompLBnd(:)
       type(ESMF_DistGrid)  :: arrayDistGrid, gridDistGrid
-    
+      integer :: localDECount    
+
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -3172,18 +3173,22 @@
 
           ! get grid dim and extents for the local piece
           call ESMF_GridGet(ftypep%grid, distRank=gridrank, &
-                            distgrid=gridDistGrid, rc=localrc)
+                            distgrid=gridDistGrid, localDECount=localDECount, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 ! TODO:FIELDINTEGRATION Replace bound calculation with cellCount from GridGet()
-          call ESMF_GridGet(ftypep%grid, localDE=0, staggerloc=staggerloc, &
-                            exclusiveLBound=exclLBounds, &
-                            exclusiveUBound=exclUBounds, &
-                            rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
-                            ESMF_ERR_PASSTHRU, &
-                            ESMF_CONTEXT, rc)) return
+          ! Bounds only valid if there are local DE's
+          if (localDECount .gt. 0) then
+             call ESMF_GridGet(ftypep%grid, localDE=0, staggerloc=staggerloc, &
+                               exclusiveLBound=exclLBounds, &
+                               exclusiveUBound=exclUBounds, &
+                               rc=localrc)
+             if (ESMF_LogMsgFoundError(localrc, &
+                              ESMF_ERR_PASSTHRU, &
+                              ESMF_CONTEXT, rc)) return
+          endif	
+
           hasgrid = .TRUE.
       endif
 
@@ -4401,20 +4406,20 @@
 
 
 ! TODO:FIELDINTEGRATION Restore grid and array serialize
-!      if (fp%gridstatus .eq. ESMF_STATUS_READY) then
-!         call c_ESMC_GridSerialize(fp%grid, buffer(1), length, offset, localrc)
-!          if (ESMF_LogMsgFoundError(localrc, &
-!                                     ESMF_ERR_PASSTHRU, &
-!                                     ESMF_CONTEXT, rc)) return
-!      endif
+      if (fp%gridstatus .eq. ESMF_STATUS_READY) then
+         call ESMF_GridSerialize(fp%grid, buffer, length, offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+      endif
 
-!      if (fp%datastatus .eq. ESMF_STATUS_READY) then
-!          call c_ESMC_ArraySerialize(fp%array, buffer(1),&
-!                                    length, offset, localrc)
-!          if (ESMF_LogMsgFoundError(localrc, &
-!                                     ESMF_ERR_PASSTHRU, &
-!                                     ESMF_CONTEXT, rc)) return
-!      endif
+      if (fp%datastatus .eq. ESMF_STATUS_READY) then
+          call c_ESMC_ArraySerialize(fp%array, buffer(1),&
+                                    length, offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+      endif
 
       if  (present(rc)) rc = ESMF_SUCCESS
 
@@ -4500,19 +4505,24 @@
                                 ESMF_CONTEXT, rc)) return
 
 ! TODO:FIELDINTEGRATION Restore grid and array deserialize
-!      if (fp%gridstatus .eq. ESMF_STATUS_READY) then
-!          call c_ESMC_GridDeserialize(fp%grid, buffer(1), offset, localrc)
-!          if (ESMF_LogMsgFoundError(localrc, &
-!                                     ESMF_ERR_PASSTHRU, &
-!                                     ESMF_CONTEXT, rc)) return
-!      endif
+      if (fp%gridstatus .eq. ESMF_STATUS_READY) then
+          fp%grid=ESMF_GridDeserialize(vm, buffer, offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+      endif
 
-!      if (fp%datastatus .eq. ESMF_STATUS_READY) then
-!          call c_ESMC_ArrayDeserialize(fp%array, buffer(1), offset, localrc)
-!          if (ESMF_LogMsgFoundError(localrc, &
-!                                     ESMF_ERR_PASSTHRU, &
-!                                     ESMF_CONTEXT, rc)) return
-!      endif
+      if (fp%datastatus .eq. ESMF_STATUS_READY) then
+          call c_ESMC_ArrayDeserialize(fp%array, buffer(1), offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+
+          call ESMF_ArraySetInitCreated(fp%array,rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+      endif
     
       ESMF_FieldDeserialize%ftypep => fp
       ESMF_INIT_SET_CREATED(ESMF_FieldDeserialize)
