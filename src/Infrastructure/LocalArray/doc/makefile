@@ -1,13 +1,11 @@
-# $Id: makefile,v 1.4 2007/09/27 06:07:08 theurich Exp $
+# $Id: makefile,v 1.5 2007/11/17 00:33:14 theurich Exp $
 
 All: onedoc
 
 LOCDIR = src/Infrastructure/LocalArray/doc
 
 DVIFILES = LocalArray_refdoc.dvi
-
 PDFFILES  = $(ESMC_DOCDIR)/LocalArray_refdoc.pdf
-
 HTMLFILES = $(ESMC_DOCDIR)/LocalArray_refdoc
 
 #
@@ -33,13 +31,11 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 # These lists almost certainly will not be an exhaustive list of 
 # all of the dependent files, but even a partial listing  will be helpful.
 #
-REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) 
-
+REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) LocalArray_desc.tex LocalArray_rest.tex
 
 include $(ESMF_DIR)/makefile
 
 DIRS = 
-
 CLEANDIRS   = LocalArray_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
               LocalArray_refdoc.tex $(PDFFILES)

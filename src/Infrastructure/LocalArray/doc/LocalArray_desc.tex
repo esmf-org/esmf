@@ -1,0 +1,6 @@
+% $Id: LocalArray_desc.tex,v 1.1 2007/11/17 00:33:14 theurich Exp $
+
+The {\tt ESMF\_LocalArray} class provides a language independent representation of data in array format. One of the major functions of the LocalArray class is to bridge the Fortran/C/C++ language difference that exists with respect to array representation. All ESMF Field and Array data is internally stored in ESMF LocalArray objects allowing transparent access from Fortran and C/C++.
+
+In the ESMF Fortran API the LocalArray becomes visible in those cases where a local PET may be associated with multiple pieces of an Array, e.g. if there are multiple DEs associated with a single PET. The Fortran language standard does not provide an array of arrays construct, however arrays of derived types holding arrays are possible. ESMF calls use arguments that are of type {\tt ESMF\_LocalArray} with {\tt dimension} attribute where necessary.
+

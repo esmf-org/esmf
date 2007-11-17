@@ -1,0 +1,6 @@
+% $Id: LocalArray_rest.tex,v 1.1 2007/11/17 00:33:14 theurich Exp $
+
+%\subsubsection{Restrictions and Future Work}
+\begin{itemize}
+\item The TKR (type/kind/rank) overloaded LocalArray interfaces declare the dummy Fortran array arguments with the pointer attribute. The advantage of doing this is that it allows ESMF to inquire information about the provided Fortran array. The disadvantage of this choice is that actual Fortran arrays passed into these interfaces {\em must} also be defined with pointer attribute in the user code.
+\end{itemize}

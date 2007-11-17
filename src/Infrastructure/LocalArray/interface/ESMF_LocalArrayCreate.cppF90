@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.3 2007/11/16 23:08:50 theurich Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.4 2007/11/17 00:33:14 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -161,7 +161,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.3 2007/11/16 23:08:50 theurich Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.4 2007/11/17 00:33:14 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -173,22 +173,21 @@ AllTypesMacro(LocalArrayType)
 ! !IROUTINE: ESMF_LocalArrayCreate -- Generic interface to create an LocalArray
 
 ! !INTERFACE:
-     interface ESMF_LocalArrayCreate
+  interface ESMF_LocalArrayCreate
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-        module procedure ESMF_LocalArrayCreateByTKR   ! specify explicit TKR 
-        module procedure ESMF_LocalArrayCreateBySpec  ! specify ArraySpec
-        module procedure ESMF_LocalArrayCreateCopy    ! create a copy
-        ! Plus interfaces for each T/K/R expanded by macro.
+    module procedure ESMF_LocalArrayCreateByTKR   ! specify explicit TKR 
+    module procedure ESMF_LocalArrayCreateBySpec  ! specify ArraySpec
+    module procedure ESMF_LocalArrayCreateCopy    ! create a copy
+    ! Plus interfaces for each T/K/R expanded by macro.
 !EOPI
         
-       ! < interfaces for each T/K/R >
-TypeKindRankInterfaceMacro(LocalArrCreateByMTPtr)
+    ! < interfaces for each T/K/R >
+    TypeKindRankInterfaceMacro(LocalArrCreateByMTPtr)
 
-       ! < interfaces for each T/K/R >
-TypeKindRankInterfaceMacro(LocalArrCreateByFlPtr)
-
+    ! < interfaces for each T/K/R >
+    TypeKindRankInterfaceMacro(LocalArrCreateByFlPtr)
 
 !BOPI
 ! !DESCRIPTION: 
@@ -246,11 +245,15 @@ interface operator (.ne.)
  module procedure ESMF_cfne
 end interface
 
-!==============================================================================
 
-      contains
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-!==============================================================================
+contains
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 
 ! functions to compare two ESMF_CopyFlags to see if they are the same or not
 
@@ -285,8 +288,8 @@ end function
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocalArrayCreate()
-  function ESMF_LocalArrayCreateByTKR(rank, typekind, counts, lbounds, ubounds,&
-    rc)
+  function ESMF_LocalArrayCreateByTKR(rank, typekind, counts, lbounds, &
+    ubounds, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByTKR
@@ -321,7 +324,7 @@ end function
 !   \end{description}
 !
 !EOP
-
+!------------------------------------------------------------------------------
     ! Local vars
     integer                 :: localrc          ! local return code
     type (ESMF_LocalArray)  :: array            ! new C++ LocalArray
@@ -367,6 +370,7 @@ end function
     if (present(rc)) rc = ESMF_SUCCESS
 
   end function ESMF_LocalArrayCreateByTKR
+!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
@@ -391,7 +395,7 @@ end function
 !
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_LocalArray} and allocate data space, which remains
-!  uninitialized.  The return value is a new LocalArray.
+!  uninitialized. The return value is a new LocalArray.
 !    
 !  The arguments are:
 !  \begin{description}
@@ -409,7 +413,7 @@ end function
 !  \end{description}
 !
 !EOP
-
+!------------------------------------------------------------------------------
     ! Local vars
     type (ESMF_LocalArray) :: array     ! new C++ LocalArray
     integer                :: localrc   ! local return code
@@ -444,47 +448,48 @@ end function
     if (present(rc)) rc = ESMF_SUCCESS
 
   end function ESMF_LocalArrayCreateBySpec
-
+!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_LocalArrayCreateCopy"
-!BOPI
-! !IROUTINE: ESMF_LocalArrayCreate -- Create a new LocalArray from existing one
+!BOP
+! !IROUTINE: ESMF_LocalArrayCreate -- Create a LocalArray from existing one
 
 ! !INTERFACE:
-      ! Private name; call using ESMF_LocalArrayCreate()
-      function ESMF_LocalArrayCreateCopy(arrayIn, rc)
+  ! Private name; call using ESMF_LocalArrayCreate()
+  function ESMF_LocalArrayCreateCopy(larray, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_LocalArray) :: ESMF_LocalArrayCreateCopy
+    type(ESMF_LocalArray) :: ESMF_LocalArrayCreateCopy
 !
 ! !ARGUMENTS:
-      type(ESMF_LocalArray), intent(in) :: arrayIn
-      integer, intent(out), optional    :: rc 
+    type(ESMF_LocalArray), intent(in)            :: larray
+    integer,               intent(out), optional :: rc 
 
 !
 ! !DESCRIPTION:
-!  Perform a deep copy of an existing {\tt ESMF\_LocalArray}.
+!  Perform a deep copy of an existing {\tt ESMF\_LocalArray} object. The return
+!  value is a new LocalArray.
 !
 !  The arguments are:
 !  \begin{description}
-!   \item[array]
-!    Input local array
-!   \item[{[rc]}]
+!  \item[larray]
+!    Existing LocalArray to be copied.
+!  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
 !
-!EOPI
+!EOP
         ! Local vars
         integer :: status                   ! local error status
         logical :: rcpresent                ! did user specify rc?
         integer :: localkind
         integer :: rank
 
-        type(ESMF_LocalArray)           :: arrayOut
-        type(ESMF_TypeKind)             :: kind
+        type(ESMF_LocalArray)           :: larrayOut
+        type(ESMF_TypeKind)             :: typekind
         type(ESMF_Pointer)              :: base
         character(len=ESMF_MAXSTR)      :: name
         integer, dimension(ESMF_MAXDIM) :: counts
@@ -501,14 +506,14 @@ end function
         endif
 
         ! Check init status of arguments
-        ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, arrayIn, rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, larray, rc)
 
-        arrayOut%this = ESMF_NULL_POINTER
+        larrayOut%this = ESMF_NULL_POINTER
 
-        call ESMF_LocalArrayGet(arrayIn, rank, kind, counts, &
+        call ESMF_LocalArrayGet(larray, rank, typekind, counts, &
                                 lbounds, ubounds, base, name, rc=status)
 
-        localkind = kind%dkind
+        localkind = typekind%dkind
 
         ! Call a T/K/R specific interface in order to create the proper
         !  type of F90 pointer, allocate the space, set the values in the
@@ -522,20 +527,20 @@ end function
           case (ESMF_TYPEKIND_I1%dkind)
             select case (rank)
 	      case (1)
-                call ESMF_LocalArrayCopy1DI1(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy1DI1(larray, larrayOut, rc=status)
 	      case (2)
-                call ESMF_LocalArrayCopy2DI1(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy2DI1(larray, larrayOut, rc=status)
 	      case (3)
-                call ESMF_LocalArrayCopy3DI1(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy3DI1(larray, larrayOut, rc=status)
 	      case (4)
-                call ESMF_LocalArrayCopy4DI1(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy4DI1(larray, larrayOut, rc=status)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	      case (5)
-                call ESMF_LocalArrayCopy5DI1(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy5DI1(larray, larrayOut, rc=status)
 	      case (6)
-                call ESMF_LocalArrayCopy6DI1(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy6DI1(larray, larrayOut, rc=status)
               case (7)
-                call ESMF_LocalArrayCopy7DI1(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy7DI1(larray, larrayOut, rc=status)
 ^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -547,20 +552,20 @@ end function
           case (ESMF_TYPEKIND_I2%dkind) 
 	    select case(rank)
 	      case (1) 
-                call ESMF_LocalArrayCopy1DI2(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy1DI2(larray, larrayOut, rc=status)
 	      case (2)
-                call ESMF_LocalArrayCopy2DI2(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy2DI2(larray, larrayOut, rc=status)
 	      case (3)
-                call ESMF_LocalArrayCopy3DI2(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy3DI2(larray, larrayOut, rc=status)
 	      case (4)
-                call ESMF_LocalArrayCopy4DI2(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy4DI2(larray, larrayOut, rc=status)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	      case (5)
-                call ESMF_LocalArrayCopy5DI2(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy5DI2(larray, larrayOut, rc=status)
 	      case (6)
-                call ESMF_LocalArrayCopy6DI2(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy6DI2(larray, larrayOut, rc=status)
               case (7)
-                call ESMF_LocalArrayCopy7DI2(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy7DI2(larray, larrayOut, rc=status)
 ^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -571,20 +576,20 @@ end function
           case (ESMF_TYPEKIND_I4%dkind) 
 	    select case(rank)
 	      case (1)
-                call ESMF_LocalArrayCopy1DI4(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy1DI4(larray, larrayOut, rc=status)
 	      case (2)
-                call ESMF_LocalArrayCopy2DI4(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy2DI4(larray, larrayOut, rc=status)
 	      case (3)
-                call ESMF_LocalArrayCopy3DI4(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy3DI4(larray, larrayOut, rc=status)
 	      case (4)
-                call ESMF_LocalArrayCopy4DI4(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy4DI4(larray, larrayOut, rc=status)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	      case (5)
-                call ESMF_LocalArrayCopy5DI4(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy5DI4(larray, larrayOut, rc=status)
 	      case (6)
-                call ESMF_LocalArrayCopy6DI4(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy6DI4(larray, larrayOut, rc=status)
               case (7)
-                call ESMF_LocalArrayCopy7DI4(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy7DI4(larray, larrayOut, rc=status)
 ^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -594,20 +599,20 @@ end function
           case (ESMF_TYPEKIND_I8%dkind) 
 	    select case(rank)
 	      case (1)
-                call ESMF_LocalArrayCopy1DI8(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy1DI8(larray, larrayOut, rc=status)
 	      case (2)
-                call ESMF_LocalArrayCopy2DI8(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy2DI8(larray, larrayOut, rc=status)
 	      case (3)
-                call ESMF_LocalArrayCopy3DI8(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy3DI8(larray, larrayOut, rc=status)
 	      case (4)
-                call ESMF_LocalArrayCopy4DI8(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy4DI8(larray, larrayOut, rc=status)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	      case (5)
-                call ESMF_LocalArrayCopy5DI8(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy5DI8(larray, larrayOut, rc=status)
 	      case (6)
-                call ESMF_LocalArrayCopy6DI8(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy6DI8(larray, larrayOut, rc=status)
               case (7)
-                call ESMF_LocalArrayCopy7DI8(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy7DI8(larray, larrayOut, rc=status)
 ^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -617,20 +622,20 @@ end function
           case (ESMF_TYPEKIND_R4%dkind)            
 	    select case(rank)
 	      case (1)
-                call ESMF_LocalArrayCopy1DR4(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy1DR4(larray, larrayOut, rc=status)
 	      case (2)
-                call ESMF_LocalArrayCopy2DR4(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy2DR4(larray, larrayOut, rc=status)
 	      case (3)
-                call ESMF_LocalArrayCopy3DR4(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy3DR4(larray, larrayOut, rc=status)
 	      case (4)
-                call ESMF_LocalArrayCopy4DR4(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy4DR4(larray, larrayOut, rc=status)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	      case (5)
-                call ESMF_LocalArrayCopy5DR4(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy5DR4(larray, larrayOut, rc=status)
 	      case (6)
-                call ESMF_LocalArrayCopy6DR4(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy6DR4(larray, larrayOut, rc=status)
               case (7)
-                call ESMF_LocalArrayCopy7DR4(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy7DR4(larray, larrayOut, rc=status)
 ^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -640,20 +645,20 @@ end function
           case (ESMF_TYPEKIND_R8%dkind)            
 	    select case(rank)
 	      case (1)
-                call ESMF_LocalArrayCopy1DR8(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy1DR8(larray, larrayOut, rc=status)
 	      case (2)
-                call ESMF_LocalArrayCopy2DR8(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy2DR8(larray, larrayOut, rc=status)
 	      case (3)
-                call ESMF_LocalArrayCopy3DR8(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy3DR8(larray, larrayOut, rc=status)
 	      case (4)
-                call ESMF_LocalArrayCopy4DR8(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy4DR8(larray, larrayOut, rc=status)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	      case (5)
-                call ESMF_LocalArrayCopy5DR8(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy5DR8(larray, larrayOut, rc=status)
 	      case (6)
-                call ESMF_LocalArrayCopy6DR8(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy6DR8(larray, larrayOut, rc=status)
               case (7)
-                call ESMF_LocalArrayCopy7DR8(arrayIn, arrayOut, rc=status)
+                call ESMF_LocalArrayCopy7DR8(larray, larrayOut, rc=status)
 ^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -666,15 +671,17 @@ end function
                                  ESMF_CONTEXT, rc)) return
         end select
 
-        ESMF_INIT_SET_CREATED(arrayOut)
-        ESMF_LocalArrayCreateCopy = arrayOut
+        ESMF_INIT_SET_CREATED(larrayOut)
+        ESMF_LocalArrayCreateCopy = larrayOut
         ! Set init code
 
         ! Set return code if caller specified it
         if (rcpresent) rc = status
 
-        end function ESMF_LocalArrayCreateCopy
+  end function ESMF_LocalArrayCreateCopy
 !------------------------------------------------------------------------------
+
+
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_LocalArrConstrF90Ptr"
@@ -999,47 +1006,47 @@ TypeKindRankDeclarationMacro(LocalArrayDeallocate)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_LocalArrayDestroy"
 !BOP
-! !IROUTINE: ESMF_LocalArrayDestroy - Remove a LocalArray
+! !IROUTINE: ESMF_LocalArrayDestroy - Destroy a LocalArray object
 !
 ! !INTERFACE:
-  subroutine ESMF_LocalArrayDestroy(array, rc)
+  subroutine ESMF_LocalArrayDestroy(larray, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_LocalArray),  intent(inout)           :: array
+    type(ESMF_LocalArray),  intent(inout)           :: larray
     integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!     Releases all resources associated with this {\tt ESMF\_LocalArray}.
+!   Releases all resources associated with this {\tt ESMF\_LocalArray} object.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[array]
-!       Destroy contents of this {\tt ESMF\_LocalArray}.
-!     \item[[rc]]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!  To reduce the depth of crossings of the F90/C++ boundary we first
-!   query to see if we are responsible for deleting the data space.  If so,
-!   first deallocate the space and then call the C++ code to release
-!   the object space.  When it returns we are done and can return to the user.
-!   Otherwise we would need to make a nested call back into F90 from C++ to do
-!   the deallocate() during the object delete.
+!   The arguments are:
+!   \begin{description}
+!   \item[larray]
+!     Destroy contents of this {\tt ESMF\_LocalArray}.
+!   \item[[rc]]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP
-
+!------------------------------------------------------------------------------
     ! Local vars
     integer :: localrc                  ! local return code
     logical :: needsdealloc             ! do we need to free space?
     integer :: rank
     type(ESMF_TypeKind) :: kind
 
+!  To reduce the depth of crossings of the F90/C++ boundary we first
+!   query to see if we are responsible for deleting the data space.  If so,
+!   first deallocate the space and then call the C++ code to release
+!   the object space.  When it returns we are done and can return to the user.
+!   Otherwise we would need to make a nested call back into F90 from C++ to do
+!   the deallocate() during the object delete.
+
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, array, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, larray, rc)
 
     needsdealloc = .FALSE.
 
@@ -1049,24 +1056,24 @@ TypeKindRankDeclarationMacro(LocalArrayDeallocate)
     !   (we will ignore the data) and call deallocate themselves.
 
     ! Call Destruct first, then free this memory
-    call c_ESMC_LocalArrayNeedsDealloc(array, needsdealloc, localrc)
+    call c_ESMC_LocalArrayNeedsDealloc(larray, needsdealloc, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
     if (needsdealloc) then
-      call c_ESMC_LocalArrayGetRank(array, rank, localrc)
+      call c_ESMC_LocalArrayGetRank(larray, rank, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
-      call c_ESMC_LocalArrayGetTypeKind(array, kind, localrc)
+      call c_ESMC_LocalArrayGetTypeKind(larray, kind, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
-      call ESMF_LocalArrayF90Deallocate(array, rank, kind, localrc)
+      call ESMF_LocalArrayF90Deallocate(larray, rank, kind, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
-      call c_ESMC_LocalArraySetNoDealloc(array, localrc)
+      call c_ESMC_LocalArraySetNoDealloc(larray, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
@@ -1074,18 +1081,19 @@ TypeKindRankDeclarationMacro(LocalArrayDeallocate)
 
     ! Calling deallocate first means this will not return back to F90
     !  before returning for good.
-    call c_ESMC_LocalArrayDestroy(array, localrc)
+    call c_ESMC_LocalArrayDestroy(larray, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
     ! Set init code
-    ESMF_INIT_SET_DELETED(array)
+    ESMF_INIT_SET_DELETED(larray)
  
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_LocalArrayDestroy
+!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
@@ -1112,7 +1120,7 @@ TypeKindRankDeclarationMacro(LocalArrayDeallocate)
 !      will happen.
 !
 !EOPI
-
+!------------------------------------------------------------------------------
     integer :: localrc
 
     ! Initialize return code; assume routine not implemented
@@ -1132,6 +1140,7 @@ TypeKindRankDeclarationMacro(LocalArrayDeallocate)
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_LocalArraySetInfo
+!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
@@ -1157,7 +1166,7 @@ TypeKindRankDeclarationMacro(LocalArrayDeallocate)
 !      from an already created array object.
 !
 !EOPI
-
+!------------------------------------------------------------------------------
     integer :: localrc
 
     ! Initialize return code; assume routine not implemented
@@ -1177,9 +1186,9 @@ TypeKindRankDeclarationMacro(LocalArrayDeallocate)
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_LocalArrayGetInfo
-
-
 !------------------------------------------------------------------------------
+
+
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_LocalArraySetData"
@@ -1202,7 +1211,7 @@ TypeKindRankDeclarationMacro(LocalArrayDeallocate)
 !      associated with a {\tt ESMF\_LocalArray}.  
 !
 !EOPI
-
+!------------------------------------------------------------------------------
 !
 !  added BOPI/EOPI until code is written
 ! TODO: code goes here
@@ -1213,6 +1222,7 @@ TypeKindRankDeclarationMacro(LocalArrayDeallocate)
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
   end subroutine ESMF_LocalArraySetData
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -1222,32 +1232,29 @@ TypeKindRankDeclarationMacro(LocalArrayDeallocate)
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_LocalArrayGet"
-!BOPI
-! !IROUTINE: ESMF_LocalArrayGet - return information about a LocalArray
+!BOP
+! !IROUTINE: ESMF_LocalArrayGet - Return LocalArray information.
 !
 ! !INTERFACE:
-  subroutine ESMF_LocalArrayGet(array, rank, kind, counts, lbounds, &
+  subroutine ESMF_LocalArrayGet(larray, rank, typekind, counts, lbounds, &
     ubounds, base, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_LocalArray), intent(in) :: array
+    type(ESMF_LocalArray), intent(in) :: larray
     integer, intent(out), optional :: rank
-    type(ESMF_TypeKind), intent(out), optional :: kind
+    type(ESMF_TypeKind), intent(out), optional :: typekind
     integer, dimension(:), intent(out), optional :: counts
     integer, dimension(:), intent(out), optional :: lbounds
     integer, dimension(:), intent(out), optional :: ubounds
     type(ESMF_Pointer), intent(out), optional :: base
     character(len=ESMF_MAXSTR), intent(out), optional :: name
     integer, intent(out), optional :: rc             
-
 !
 ! !DESCRIPTION:
-!      Returns information about the {\tt ESMF\_LocalArray}.  For queries
-!      where the caller only wants a single value, specify the argument by name.
-!      All the arguments after the array input are optional to facilitate this.
+!      Returns information about the {\tt ESMF\_LocalArray}.
 !
-!EOPI
-
+!EOP
+!------------------------------------------------------------------------------
     integer :: localrc    ! local return code
     integer :: lrank      ! Local use to get rank
 
@@ -1256,64 +1263,64 @@ TypeKindRankDeclarationMacro(LocalArrayDeallocate)
     localrc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, array, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, larray, rc)
 
     if (present(rank)) then
-      call c_ESMC_LocalArrayGetRank(array, rank, localrc)
+      call c_ESMC_LocalArrayGetRank(larray, rank, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
-    if (present(kind)) then
-      call c_ESMC_LocalArrayGetTypeKind(array, kind, localrc)
+    if (present(typekind)) then
+      call c_ESMC_LocalArrayGetTypeKind(larray, typekind, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(counts)) then
-      call c_ESMC_LocalArrayGetRank(array, lrank, localrc)
+      call c_ESMC_LocalArrayGetRank(larray, lrank, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-      call c_ESMC_LocalArrayGetLengths(array, lrank, counts, localrc)
+      call c_ESMC_LocalArrayGetLengths(larray, lrank, counts, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(lbounds)) then
-      call c_ESMC_LocalArrayGetRank(array, lrank, localrc)
+      call c_ESMC_LocalArrayGetRank(larray, lrank, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-      call c_ESMC_LocalArrayGetLbounds(array, lrank, lbounds, localrc)
+      call c_ESMC_LocalArrayGetLbounds(larray, lrank, lbounds, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(ubounds)) then
-      call c_ESMC_LocalArrayGetRank(array, lrank, localrc)
+      call c_ESMC_LocalArrayGetRank(larray, lrank, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-      call c_ESMC_LocalArrayGetUbounds(array, lrank, ubounds, localrc)
+      call c_ESMC_LocalArrayGetUbounds(larray, lrank, ubounds, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(base)) then
-      call c_ESMC_LocalArrayGetBaseAddr(array, base, localrc)
+      call c_ESMC_LocalArrayGetBaseAddr(larray, base, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(name)) then
-      call c_ESMC_GetName(array, name, localrc)
+      call c_ESMC_GetName(larray, name, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1323,6 +1330,8 @@ TypeKindRankDeclarationMacro(LocalArrayDeallocate)
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_LocalArrayGet
+!------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD

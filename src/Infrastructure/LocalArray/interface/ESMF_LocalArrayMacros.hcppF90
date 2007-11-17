@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.hcppF90,v 1.1 2007/11/16 23:08:50 theurich Exp $
+! $Id: ESMF_LocalArrayMacros.hcppF90,v 1.2 2007/11/17 00:33:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -41,51 +41,47 @@
 
 #define LocalArrayCreateByMTPtrDoc() \
 !------------------------------------------------------------------------------ @\
-! <Created by macro - do not edit directly > @\
-!BOPI @\
-! !IROUTINE: ESMF_LocalArrayCreate - Create an ESMF array from an unallocated Fortran pointer @\
+!BOP @\
+! !IROUTINE: ESMF_LocalArrayCreate - Create a LocalArray from an unallocated Fortran pointer @\
 ! @\
 ! !INTERFACE: @\
-!      ! Private name; call using ESMF_LocalArrayCreate() @\
-!      function ESMF_LocalArrCreateByMTPtr<rank><type><kind>(fptr, counts, lbounds, ubounds, rc) @\
+! ! Private name; call using ESMF_LocalArrayCreate() @\
+! function ESMF_LocalArrCreateByMTPtr<rank><type><kind>(fptr, counts, & @\
+!   lbounds, ubounds, rc) @\
 ! @\
 ! !RETURN VALUE: @\
-!      type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtr<rank><type><kind> @\
+!   type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtr<rank><type><kind> @\
 ! @\
 ! !ARGUMENTS: @\
-!      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: fptr @\
-!      integer, dimension(:), intent(in) :: counts @\
-!      integer, dimension(:), intent(in), optional :: lbounds @\
-!      integer, dimension(:), intent(in), optional :: ubounds @\
-!      integer, intent(out), optional :: rc   @\
+!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: fptr @\
+!   integer, intent(in) :: counts(:) @\
+!   integer, intent(in), optional :: lbounds(:) @\
+!   integer, intent(in), optional :: ubounds(:) @\
+!   integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
 ! Creates an {\tt ESMF\_LocalArray} based on an unassociated Fortran pointer. @\
 ! This routine allocates memory to the array pointer and fills in @\
-! the array object with all necessary information. @\
-! Valid type/kind/rank combinations supported by the @\
-! framework are: ranks 1 to 7, type real of kind *4 or *8, @\
-! and type integer of kind *1, *2, *4, or *8. @\
+! the LocalArray object with all necessary information. @\
 ! @\
 ! The function return is an ESMF\_LocalArray type with space allocated for data. @\
 ! @\
 ! The arguments are: @\
-!  \begin{description} @\
-!  \item[fptr] @\
+! \begin{description} @\
+! \item[fptr] @\
 !   An unassociated Fortran array pointer.  @\
-!  \item[counts] @\
+! \item[counts] @\
 !   An integer array of counts.  Must be the same length as the rank. @\
-!  \item[{[lbounds]}] @\
-!  An integer array of lower index values.  Must be the same length as the rank. @\
-!  \item[{[ubounds]}] @\
-! An integer array of upper index values.  Must be the same length as the rank. @\
-!  \item[{[rc]}] @\
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
-!  \end{description} @\
+! \item[{[lbounds]}] @\
+!   An integer array of lower index values.  Must be the same length as the rank. @\
+! \item[{[ubounds]}] @\
+!   An integer array of upper index values.  Must be the same length as the rank. @\
+! \item[{[rc]}] @\
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+! \end{description} @\
 ! @\
-!EOPI @\
- @\
-
+!EOP @\
+!---------------------------------------------------------------------------- @\
 
 #define LocalArrayCreateByMTPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
@@ -157,47 +153,44 @@
 
 #define LocalArrayCreateByFlPtrDoc() \
 !------------------------------------------------------------------------------ @\
-! <Created by macro - do not edit directly > @\
-!BOPI @\
-! !IROUTINE: ESMF_LocalArrayCreate - make an ESMF array from an allocated Fortran pointer @\
+!BOP @\
+! !IROUTINE: ESMF_LocalArrayCreate - Create a LocalArray from an allocated Fortran pointer @\
 ! @\
 ! !INTERFACE: @\
-!      ! Private name; call using ESMF_LocalArrayCreate() @\
-!      function ESMF_LocalArrCreateByFlPtr<rank><type><kind>(fptr, docopy, rc) @\
+! ! Private name; call using ESMF_LocalArrayCreate() @\
+! function ESMF_LocalArrCreateByFlPtr<rank><type><kind>(fptr, docopy, rc) @\
 ! @\
 ! !RETURN VALUE: @\
-!      type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtr<rank><type><kind> @\
+!   type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtr<rank><type><kind> @\
 ! @\
 ! !ARGUMENTS: @\
-!      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: fptr @\
-!      type(ESMF_CopyFlag), intent(in), optional :: docopy @\
-!      integer, intent(out), optional :: rc   @\
+!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: fptr @\
+!   type(ESMF_CopyFlag), intent(in), optional :: docopy @\
+!   integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
 ! Creates an {\tt ESMF\_LocalArray} based on an already allocated @\
 ! Fortran array pointer.  This routine can make a copy or reference the @\
-! existing data and fills in the array object with all necessary information. @\
-! Valid type/kind/rank combinations supported by the @\
-! framework are: ranks 1 to 7, type real of kind *4 or *8, @\
-! and type integer of kind *1, *2, *4, or *8. @\
+! existing data and fills in the LocalArray object with all necessary @\
+! information. @\
 ! @\
 ! The function return is an ESMF\_LocalArray type. @\
 ! @\
 ! The arguments are: @\
-!  \begin{description} @\
-!  \item[fptr] @\
+! \begin{description} @\
+! \item[fptr] @\
 !   An allocated Fortran array pointer.  @\
-!  \item[{[docopy]}] @\
+! \item[{[docopy]}] @\
 !   Default to {\tt ESMF\_DATA\_REF}, makes the {\tt ESMF\_LocalArray} reference @\
 !   the existing data array.  If set to {\tt ESMF\_DATA\_COPY} this routine @\
-!   allocates new space and copies the data from the pointer into the @\
-!   new array. @\
-!  \item[{[rc]}] @\
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
-!  \end{description} @\
+!   allocates new memory and copies the data from the pointer into the @\
+!   new LocalArray allocation. @\
+! \item[{[rc]}] @\
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+! \end{description} @\
 ! @\
-!EOPI @\
- @\
+!EOP @\
+!---------------------------------------------------------------------------- @\
 
 #define LocalArrayCreateByFlPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
@@ -564,39 +557,37 @@
 
 #define LocalArrayGetDataDoc() \
 !------------------------------------------------------------------------------ @\
-! <Created by macro - do not edit directly >  @\
-!BOPI @\
+!BOP @\
+! !IROUTINE: ESMF_LocalArrayGetData - Get access to data in LocalArray object @\
+! @\
 ! !INTERFACE: @\
-!     subroutine ESMF_LocalArrayGetData<rank><type><kind>(array, fptr, docopy, rc) @\
+! subroutine ESMF_LocalArrayGetData<rank><type><kind>(larray, fptr, docopy, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!     type(ESMF_LocalArray) :: array @\
-!     <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: fptr @\
-!     type(ESMF_CopyFlag), intent(in), optional :: docopy @\
-!     integer, intent(out), optional :: rc @\
+!   type(ESMF_LocalArray) :: larray @\
+!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: fptr @\
+!   type(ESMF_CopyFlag), intent(in), optional :: docopy @\
+!   integer, intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
 ! Return a Fortran pointer to the data buffer, or return a Fortran pointer @\
 ! to a new copy of the data. @\
-! Valid type/kind/rank combinations supported by the @\
-! framework are: ranks 1 to 7, type real of kind *4 or *8, @\
-! and type integer of kind *1, *2, *4, or *8. @\
 ! @\
 ! The arguments are: @\
-!  \begin{description} @\
-!  \item[array] @\
+! \begin{description} @\
+! \item[larray] @\
 !   The {\tt ESMF\_LocalArray} to get the value from. @\
-!  \item[fptr] @\
-!   An unassociated Fortran pointer. @\
-!  \item[{[docopy]}] @\
+! \item[fptr] @\
+!   An unassociated or associated Fortran pointer correctly allocated.@\
+! \item[{[docopy]}] @\
 !   An optional copy flag which can be specified. @\
 !   Can either make a new copy of the data or reference existing data. @\
-!  \item[{[rc]}] @\
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
-!  \end{description} @\
+! \item[{[rc]}] @\
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+! \end{description} @\
 ! @\
-!EOPI @\
- @\
+!EOP @\
+!------------------------------------------------------------------------------ @\
 
 #define LocalArrayGetDataMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
@@ -604,9 +595,9 @@
 ^undef  ESMF_METHOD @\
 !define ESMF_METHOD "ESMF_LocalArrayGetData##mrank##D##mtypekind" @\
 ^define ESMF_METHOD "ESMF_LocalArrayGetData" @\
-      subroutine ESMF_LocalArrayGetData##mrank##D##mtypekind(array, fptr, docopy, rc) @\
+      subroutine ESMF_LocalArrayGetData##mrank##D##mtypekind(larray, fptr, docopy, rc) @\
  @\
-      type(ESMF_LocalArray) :: array @\
+      type(ESMF_LocalArray) :: larray @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fptr @\
       type(ESMF_CopyFlag), intent(in), optional :: docopy @\
       integer, intent(out), optional :: rc @\
@@ -635,18 +626,18 @@
           if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. @\
         endif @\
  @\
-        call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) @\
+        call c_ESMC_LocalArrayGetF90Ptr(larray, wrap, status) @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
  @\
         ! Allocate a new buffer if requested and return a copy @\
         if (copyreq) then @\
-          call c_ESMC_IArrayGetLbounds(array, mrank, lb, status) @\
+          call c_ESMC_IArrayGetLbounds(larray, mrank, lb, status) @\
           if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
-          call c_ESMC_IArrayGetUbounds(array, mrank, ub, status) @\
+          call c_ESMC_IArrayGetUbounds(larray, mrank, ub, status) @\
           if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
