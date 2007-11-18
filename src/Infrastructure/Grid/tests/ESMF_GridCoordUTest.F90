@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.19 2007/11/16 04:30:14 oehmke Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.20 2007/11/18 04:26:00 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.19 2007/11/16 04:30:14 oehmke Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.20 2007/11/18 04:26:00 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -2267,6 +2267,7 @@ program ESMF_GridCoordUTest
                staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
+
   ! check widths and bounds for ESMF_STAGGERLOC_CENTER
   call ESMF_GridGet(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER, &
           computationalEdgeLWidth=compELWidth, computationalEdgeUWidth=compEUWidth, &
@@ -2286,6 +2287,7 @@ program ESMF_GridCoordUTest
 
   if ((compELWidth(1) .ne. 0) .or. (compELWidth(2) .ne. 0)) correct=.false.
   if ((compEUWidth(1) .ne. 0) .or. (compEUWidth(2) .ne. 0)) correct=.false.
+  write(*,*) lbnds(1),ubnds(1) ! Line to stop Absoft Complier from messing up
   if (lbnds(1) .ne. -2) correct=.false.
   if (ubnds(1) .ne. 11) correct=.false.
 
