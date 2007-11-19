@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.33 2007/11/03 05:39:21 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.34 2007/11/19 19:53:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -230,7 +230,7 @@ program ESMF_ArrayEx
 !       LR chunks. {\em Element exclusive} means that there is no element overlap
 !       between DE-local chunks. This, however, does not exclude degeneracies 
 !       between staggering locations for certain topologies (e.g. bipolar).
-! \item The layout of DEs over the available PETs an thus the distribution of
+! \item The layout of DEs over the available PETs and thus the distribution of
 !       the Array data.
 ! \end{itemize}
 !

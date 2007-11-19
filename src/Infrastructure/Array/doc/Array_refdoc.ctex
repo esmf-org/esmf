@@ -1,4 +1,4 @@
-% $Id: Array_refdoc.ctex,v 1.16 2007/11/17 00:33:13 theurich Exp $ 
+% $Id: Array_refdoc.ctex,v 1.17 2007/11/19 19:53:31 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -21,7 +21,7 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{\Large {\bf Array Reference}\\{\sc D R A F T - Version 5+}}
+\newcommand{\mytitle}{\Large {\bf Array Reference}}
 \newcommand{\myauthors}{\large {\it Gerhard Theurich}}
 #endif
 
