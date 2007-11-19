@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayLarrayEx.F90,v 1.6 2007/10/26 21:56:58 theurich Exp $
+! $Id: ESMF_ArrayLarrayEx.F90,v 1.7 2007/11/19 23:12:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -118,7 +118,7 @@ program ESMF_ArrayLarrayEx
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
-  call ESMF_LocalArrayGetData(larrayRef, farrayPtr, rc=rc)
+  call ESMF_LocalArrayGet(larrayRef, farrayPtr, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !call ESMF_ArrayPrint(array, rc=rc)
@@ -249,7 +249,7 @@ program ESMF_ArrayLarrayEx
 !EOE
 !BOC
   do de=1, 2
-    call ESMF_LocalArrayGetData(larrayRefList(de), farrayPtr, rc=rc)
+    call ESMF_LocalArrayGet(larrayRefList(de), farrayPtr, rc=rc)
     localSum = 0.
     do j=1, 2
       do i=1, 4
@@ -271,7 +271,7 @@ program ESMF_ArrayLarrayEx
 !EOE
 !BOC
   do de=1, 2
-    call ESMF_LocalArrayGetData(larrayList(de), farrayPtr, rc=rc)
+    call ESMF_LocalArrayGet(larrayList(de), farrayPtr, rc=rc)
     deallocate(farrayPtr)
     call ESMF_LocalArrayDestroy(larrayList(de), rc=rc)
   enddo

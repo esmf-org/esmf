@@ -154,7 +154,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.46 2007/11/16 04:30:13 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47 2007/11/19 23:12:28 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -4246,7 +4246,7 @@ end subroutine ESMF_GridGet
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGetData(larrayList(lDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(lDE+1), fptr, doCopy, rc=localrc) 
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -4558,7 +4558,7 @@ end subroutine ESMF_GridGet
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGetData(larrayList(lDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(lDE+1), fptr, doCopy, rc=localrc) 
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -4872,7 +4872,7 @@ endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGetData(larrayList(lDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(lDE+1), fptr, doCopy, rc=localrc) 
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -5186,7 +5186,7 @@ endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGetData(larrayList(lDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(lDE+1), fptr, doCopy, rc=localrc) 
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -5499,7 +5499,7 @@ endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGetData(larrayList(lDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(lDE+1), fptr, doCopy, rc=localrc) 
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -5813,7 +5813,7 @@ endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGetData(larrayList(lDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(lDE+1), fptr, doCopy, rc=localrc) 
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 

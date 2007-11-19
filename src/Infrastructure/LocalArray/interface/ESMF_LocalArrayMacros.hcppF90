@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.hcppF90,v 1.2 2007/11/17 00:33:16 theurich Exp $
+! $Id: ESMF_LocalArrayMacros.hcppF90,v 1.3 2007/11/19 23:12:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -558,9 +558,10 @@
 #define LocalArrayGetDataDoc() \
 !------------------------------------------------------------------------------ @\
 !BOP @\
-! !IROUTINE: ESMF_LocalArrayGetData - Get access to data in LocalArray object @\
+! !IROUTINE: ESMF_LocalArrayGet - Get access to data in LocalArray object @\
 ! @\
 ! !INTERFACE: @\
+! ! Private name; call using ESMF_LocalArrayGet() @\
 ! subroutine ESMF_LocalArrayGetData<rank><type><kind>(larray, fptr, docopy, rc) @\
 ! @\
 ! !ARGUMENTS: @\
@@ -582,6 +583,7 @@
 ! \item[{[docopy]}] @\
 !   An optional copy flag which can be specified. @\
 !   Can either make a new copy of the data or reference existing data. @\
+!   See section \ref{opt:copyflag} for a list of possible values. @\
 ! \item[{[rc]}] @\
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\

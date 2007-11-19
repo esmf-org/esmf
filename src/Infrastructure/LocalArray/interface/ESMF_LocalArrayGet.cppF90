@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayGet.cppF90,v 1.3 2007/11/17 00:33:15 theurich Exp $
+! $Id: ESMF_LocalArrayGet.cppF90,v 1.4 2007/11/19 23:12:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -10,9 +10,10 @@
 !
 !==============================================================================
 ^define ESMF_FILENAME "ESMF_LocalArrayGet.F90"
+!==============================================================================
 !
-!     ESMF LocalArrayCreate module
-      module ESMF_LocalArrayGetMod
+! ESMF LocalArrayCreate module
+module ESMF_LocalArrayGetMod
 !
 !==============================================================================
 !
@@ -43,25 +44,28 @@
 ! must be able to obtain this information from the Fortran description
 ! (which is called the "dope vector" in Fortran), either through a priori
 ! knowledge or through query.
-!
+!EOPI
 !------------------------------------------------------------------------------
 ! !USES:
-      use ESMF_UtilTypesMod
-      use ESMF_BaseMod
-      use ESMF_LogErrMod
-      use ESMF_IOSpecMod
-      use ESMF_ArraySpecMod
-      use ESMF_LocalArrayCreateMod
-      implicit none
-
+  use ESMF_UtilTypesMod     ! ESMF utility types
+  use ESMF_InitMacrosMod    ! ESMF initializer macros
+  use ESMF_BaseMod          ! ESMF base class
+  use ESMF_LogErrMod        ! ESMF error handling
+  use ESMF_IOSpecMod
+  use ESMF_ArraySpecMod
+      
+  ! class sub modules
+  use ESMF_LocalArrayCreateMod  ! contains the ESMF_LocalArray derived type
+      
+  implicit none
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
-      private
+  private
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArrayGet.cppF90,v 1.3 2007/11/17 00:33:15 theurich Exp $'
+character(*), parameter, private :: version = &
+  '$Id: ESMF_LocalArrayGet.cppF90,v 1.4 2007/11/19 23:12:29 theurich Exp $'
 
 !------------------------------------------------------------------------------
 !     ! Internal wrapper structures for passing f90 pointers to C++ and
@@ -75,8 +79,8 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_LocalArrayGetData
-
+  public ESMF_LocalArrayGet
+  
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -89,12 +93,12 @@ AllTypesMacro(LocalArrayType)
 ! !IROUTINE: ESMF_LocalArrayGetData -- Get an F90 pointer to the data contents
 
 ! !INTERFACE:
-     interface ESMF_LocalArrayGetData
+  interface ESMF_LocalArrayGet
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-      ! < declarations of interfaces for each T/K/R >
-TypeKindRankInterfaceMacro(LocalArrayGetData)
+    module procedure ESMF_LocalArrayGetDefault
+    TypeKindRankInterfaceMacro(LocalArrayGetData)
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -117,11 +121,143 @@ contains
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+! 
+! Query for information from the array.
+!
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_LocalArrayGetDefault"
+!BOP
+! !IROUTINE: ESMF_LocalArrayGet - Return LocalArray information.
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_LocalArrayGet()
+  subroutine ESMF_LocalArrayGetDefault(larray, rank, typekind, counts, lbounds, &
+    ubounds, base, name, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_LocalArray),      intent(in)            :: larray
+    integer,                    intent(out), optional :: rank
+    type(ESMF_TypeKind),        intent(out), optional :: typekind
+    integer,                    intent(out), optional :: counts(:)
+    integer,                    intent(out), optional :: lbounds(:)
+    integer,                    intent(out), optional :: ubounds(:)
+    type(ESMF_Pointer),         intent(out), optional :: base
+    character(len=ESMF_MAXSTR), intent(out), optional :: name
+    integer,                    intent(out), optional :: rc             
+!
+! !DESCRIPTION:
+!   Returns information about the {\tt ESMF\_LocalArray}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[larray] 
+!     Queried {\tt ESMF\_LocalArray} object.
+!   \item[{[rank]}]
+!     Rank of the LocalArray object.
+!   \item[{[typekind]}]
+!     TypeKind of the LocalArray object.
+!   \item[{[counts]}]
+!     Count per dimension.
+!   \item[{[lbounds]}]
+!     Lower bound per dimension.
+!   \item[{[ubounds]}]
+!     Upper bound per dimension.
+!   \item[{[base]}]
+!     Base class object.
+!   \item[{[name]}]
+!     Name of the LocalArray object.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc    ! local return code
+    integer :: lrank      ! Local use to get rank
+
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, larray, rc)
+
+    if (present(rank)) then
+      call c_ESMC_LocalArrayGetRank(larray, rank, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    if (present(typekind)) then
+      call c_ESMC_LocalArrayGetTypeKind(larray, typekind, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    if (present(counts)) then
+      call c_ESMC_LocalArrayGetRank(larray, lrank, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call c_ESMC_LocalArrayGetLengths(larray, lrank, counts, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    if (present(lbounds)) then
+      call c_ESMC_LocalArrayGetRank(larray, lrank, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call c_ESMC_LocalArrayGetLbounds(larray, lrank, lbounds, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    if (present(ubounds)) then
+      call c_ESMC_LocalArrayGetRank(larray, lrank, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call c_ESMC_LocalArrayGetUbounds(larray, lrank, ubounds, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    if (present(base)) then
+      call c_ESMC_LocalArrayGetBaseAddr(larray, base, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    if (present(name)) then
+      call c_ESMC_GetName(larray, name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_LocalArrayGetDefault
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 
 !! < start of macros which become actual function bodies after expansion >
 TypeKindRankDeclarationMacro(LocalArrayGetData)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+
 
 end module ESMF_LocalArrayGetMod

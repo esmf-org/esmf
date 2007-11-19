@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.21 2007/11/03 05:39:21 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.22 2007/11/19 23:12:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -12,7 +12,7 @@
 ^define ESMF_FILENAME "ESMF_ArrayCreate.F90"
 !==============================================================================
 !
-! ESMF LocalArrayCreate module
+! ESMF ArrayCreate module
 module ESMF_ArrayCreateMod
 !
 !==============================================================================
@@ -106,7 +106,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.21 2007/11/03 05:39:21 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.22 2007/11/19 23:12:27 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -536,7 +536,6 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer                 :: status     ! local error status
     type(ESMF_Array)        :: array      ! opaque pointer to new C++ Array
@@ -808,7 +807,6 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer                 :: status     ! local error status
     type(ESMF_Array)        :: array      ! opaque pointer to new C++ Array
@@ -958,7 +956,6 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer                 :: status       ! local error status
 
@@ -1049,7 +1046,6 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
@@ -1128,7 +1124,6 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
     integer :: laRank

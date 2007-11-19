@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.45 2007/06/27 21:57:36 oehmke Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.46 2007/11/19 23:12:29 theurich Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -122,15 +122,15 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting Local Array with Integer 1D Data Test"
-    call ESMF_LocalArrayGetData(array1, intptr2, ESMF_DATA_REF, rc)
+    call ESMF_LocalArrayGet(array1, intptr2, ESMF_DATA_REF, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-    print *, "array 1b getdata returned"
+    print *, "array 1b get returned"
 
     !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting lower and upper index bounds"
-    call ESMF_LocalArrayGetData(array1, intptr2, ESMF_DATA_REF, rc)
+    call ESMF_LocalArrayGet(array1, intptr2, ESMF_DATA_REF, rc=rc)
     call ESMF_LocalArrayGet(array1, lbounds=lb, ubounds=ub, rc=rc)  
     rlb = lbound(intptr2)
     rub = ubound(intptr2)
@@ -151,7 +151,7 @@
     write(failMsg, *) "Array data did not compare."
     write(name, *) "Compare Local Array Integer 1D Data Test"
     call ESMF_Test((result.eq.0), name, failMsg, result, ESMF_SRCLINE)
-    print *, "array 1b getdata returned"
+    print *, "array 1b get returned"
     print *, "first 10 intptr2 data = ", intptr2(5:15)
 
     !--------------------------------------------------------------------------
@@ -193,7 +193,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting Local Array Data Test"
-    call ESMF_LocalArrayGetData(array1, intptr2, ESMF_DATA_REF, rc)
+    call ESMF_LocalArrayGet(array1, intptr2, ESMF_DATA_REF, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest
@@ -256,7 +256,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting Local Array with Integer 1D Data Test"
-    call ESMF_LocalArrayGetData(array1, intptr2, ESMF_DATA_REF, rc)
+    call ESMF_LocalArrayGet(array1, intptr2, ESMF_DATA_REF, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
@@ -317,8 +317,8 @@
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting Local Array 2D Real Data Test"
-    call ESMF_LocalArrayGetData(array2, realptr2, ESMF_DATA_REF, rc)
-    print *, "array 2a getdata returned"
+    call ESMF_LocalArrayGet(array2, realptr2, ESMF_DATA_REF, rc=rc)
+    print *, "array 2a get returned"
     print *, "bounds: ", lbound(realptr2), ubound(realptr2)
     print *, "partial print of realptr2 data = ", realptr2(3:7,7:9)
 
@@ -369,8 +369,8 @@
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting Local Array 2D Real Data Test"
-    call ESMF_LocalArrayGetData(array2, realptr2, ESMF_DATA_REF, rc)
-    print *, "array 2b getdata returned"
+    call ESMF_LocalArrayGet(array2, realptr2, ESMF_DATA_REF, rc=rc)
+    print *, "array 2b get returned"
     print *, "partial print of realptr2 data = ", realptr2(1:3,1:3)
 
     !--------------------------------------------------------------------------
@@ -432,17 +432,17 @@
     enddo
     print *, "realptr data changed after docopy set, now = ", realptr(1:3,1:3)
 
-    call ESMF_LocalArrayGetData(array2, realptr2, ESMF_DATA_REF, rc)
-    print *, "array 2c getdata returned"
+    call ESMF_LocalArrayGet(array2, realptr2, ESMF_DATA_REF, rc=rc)
+    print *, "array 2c get returned"
     print *, "realptr2 data = ", realptr2(1:3,1:3)
 
     !--------------------------------------------------------------------------
    !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting Local Array 2D Real Data Test"
-    call ESMF_LocalArrayGetData(array2, realptr2, ESMF_DATA_REF, rc)
+    call ESMF_LocalArrayGet(array2, realptr2, ESMF_DATA_REF, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-    print *, "array 2c getdata returned"
+    print *, "array 2c get returned"
     print *, "realptr2 data = ", realptr2(1:3,1:3)
 
     !--------------------------------------------------------------------------
@@ -496,7 +496,7 @@
 
     !write(failMsg, *) "Did returned ESMF_SUCCESS incorrectly"
     !write(name, *) "Getting Local Array 3D Real Data with wrong dimension array Test"
-    !call ESMF_LocalArrayGetData(array4, realptr2, ESMF_DATA_COPY, rc)
+    !call ESMF_LocalArrayGet(array4, realptr2, ESMF_DATA_COPY, rc=rc)
     !call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
@@ -504,9 +504,9 @@
     nullify(real3d2ptr)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting Local Array 3D Real Data without allocating array size Test"
-    call ESMF_LocalArrayGetData(array4, real3d2ptr, ESMF_DATA_COPY, rc)
+    call ESMF_LocalArrayGet(array4, real3d2ptr, ESMF_DATA_COPY, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-    print *, "array 4a getdata returned"
+    print *, "array 4a get returned"
 
     do i=1,ni
      do j=1,nj
@@ -534,9 +534,9 @@
     allocate(real3d2ptr(ni,nj,nk))
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting Local Array 3D Real Data Test"
-    call ESMF_LocalArrayGetData(array4, real3d2ptr, ESMF_DATA_COPY, rc)
+    call ESMF_LocalArrayGet(array4, real3d2ptr, ESMF_DATA_COPY, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-    print *, "array 4a getdata returned"
+    print *, "array 4a get returned"
 
     do i=1,ni
      do j=1,nj

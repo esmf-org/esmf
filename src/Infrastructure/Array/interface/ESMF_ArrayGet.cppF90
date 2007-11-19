@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.29 2007/11/19 22:13:47 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.30 2007/11/19 23:12:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -12,7 +12,7 @@
 ^define ESMF_FILENAME "ESMF_ArrayGet.F90"
 !==============================================================================
 !
-! ESMF LocalArrayGet module
+! ESMF ArrayGet module
 module ESMF_ArrayGetMod
 !
 !==============================================================================
@@ -69,7 +69,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.29 2007/11/19 22:13:47 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.30 2007/11/19 23:12:27 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -285,7 +285,6 @@ contains
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer                       :: status         ! local error status
     type(ESMF_Pointer), pointer   :: opt_larrayPtrList(:)   ! helper variable
@@ -526,7 +525,6 @@ contains
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer             :: status         ! local error status
     type(ESMF_DistGrid) :: distgrid       ! helper variable
@@ -697,7 +695,7 @@ contains
     call ESMF_ArrayGet(array, larrayList=larrayList, rc=status) @\
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
-    call ESMF_LocalArrayGetData(larrayList(1), farrayPtr, ESMF_DATA_REF, & @\
+    call ESMF_LocalArrayGet(larrayList(1), farrayPtr, ESMF_DATA_REF, & @\
       rc=status) @\
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -746,7 +744,6 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer                             :: status         ! local error status
     type(ESMF_DELayout)                 :: delayout
@@ -828,7 +825,6 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 !        Queried {\tt ESMF\_Array} object.
 !     \end{description}
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
@@ -867,7 +863,6 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 !        Queried {\tt ESMF\_Array} object.
 !     \end{description}
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
@@ -906,7 +901,6 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 !        Queried {\tt ESMF\_Array} object.
 !     \end{description}
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
@@ -968,7 +962,6 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 

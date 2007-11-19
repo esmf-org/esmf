@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayDataUTest.F90,v 1.2 2007/04/09 22:48:04 theurich Exp $
+! $Id: ESMF_LocalArrayDataUTest.F90,v 1.3 2007/11/19 23:12:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_LocalArrayDataUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_LocalArrayDataUTest.F90,v 1.2 2007/04/09 22:48:04 theurich Exp $'
+    '$Id: ESMF_LocalArrayDataUTest.F90,v 1.3 2007/11/19 23:12:29 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -98,7 +98,7 @@ program ESMF_LocalArrayDataUTest
   !NEX_UTest
   write(name, *) "Obtaining access to data in LocalArray via F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_LocalArrayGetData(la, fptr, ESMF_DATA_REF, rc=rc)
+  call ESMF_LocalArrayGet(la, fptr, ESMF_DATA_REF, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -124,7 +124,7 @@ program ESMF_LocalArrayDataUTest
   !NEX_UTest
   write(name, *) "Obtaining access to data in LocalArray via F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_LocalArrayGetData(la, fptr2, ESMF_DATA_REF, rc=rc)
+  call ESMF_LocalArrayGet(la, fptr2, ESMF_DATA_REF, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -184,7 +184,7 @@ program ESMF_LocalArrayDataUTest
   !NEX_UTest
   write(name, *) "Obtaining access to data in LocalArray via F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_LocalArrayGetData(la, fptr, ESMF_DATA_REF, rc=rc)
+  call ESMF_LocalArrayGet(la, fptr, ESMF_DATA_REF, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.34 2007/11/19 19:53:32 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.35 2007/11/19 23:12:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -201,7 +201,7 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   do de=1, localDeCount
-    call ESMF_LocalArrayGetData(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
+    call ESMF_LocalArrayGet(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
     myF90Array = 0.
   enddo
 !EOC
@@ -359,7 +359,7 @@ program ESMF_ArrayEx
 !
 !BOC
   do de=1, localDeCount
-    call ESMF_LocalArrayGetData(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
+    call ESMF_LocalArrayGet(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
     do i=1, size(myF90Array, 1)
       do j=1, size(myF90Array, 2)
         print *, "PET-local DE=", de, ": array(",i,",",j,")=", myF90Array(i,j)
@@ -406,7 +406,7 @@ program ESMF_ArrayEx
     ! this is the default
 !    print *, "DE-local exclusive regions start at (1,1)"
     do de=1, localDeCount
-      call ESMF_LocalArrayGetData(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
+      call ESMF_LocalArrayGet(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
       do i=1, exclusiveUBound(1, de)
         do j=1, exclusiveUBound(2, de)
 !          print *, "DE-local exclusive region for PET-local DE=", de, &
@@ -418,7 +418,7 @@ program ESMF_ArrayEx
     ! only if set during ESMF_ArrayCreate()
 !    print *, "DE-local exclusive regions of this Array have global bounds"
     do de=1, localDeCount
-      call ESMF_LocalArrayGetData(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
+      call ESMF_LocalArrayGet(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
       do i=exclusiveLBound(1, de), exclusiveUBound(1, de)
         do j=exclusiveLBound(2, de), exclusiveUBound(2, de)
 !          print *, "DE-local exclusive region for PET-local DE=", de, &
@@ -542,7 +542,7 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   do de=1, localDeCount
-    call ESMF_LocalArrayGetData(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
+    call ESMF_LocalArrayGet(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
     ! initialize the DE-local array
     myF90Array = 0.1d0 * localDeList(de)
     ! first time through the total region of array    
@@ -1456,9 +1456,9 @@ program ESMF_ArrayEx
   call ESMF_ArrayGet(array1, computationalLBound=computationalLBound, &
     computationalUBound=computationalUBound, rc=rc)
   do de=1, localDeCount
-    call ESMF_LocalArrayGetData(larrayList1(de), myF90Array1, ESMF_DATA_REF, &
+    call ESMF_LocalArrayGet(larrayList1(de), myF90Array1, ESMF_DATA_REF, &
       rc=rc)
-    call ESMF_LocalArrayGetData(larrayList2(de), myF90Array2, ESMF_DATA_REF, &
+    call ESMF_LocalArrayGet(larrayList2(de), myF90Array2, ESMF_DATA_REF, &
       rc=rc)
     ! use the computational bounds of array1 for the kernel
     do i=computationalLBound(de, 1), computationalUBound(de, 1)
@@ -1747,10 +1747,10 @@ program ESMF_ArrayEx
   allocate(larrayList2(localDeCount))
   call ESMF_ArrayGet(array2D, larrayList=larrayList2, rc=rc)
   do de=1, localDeCount
-    call ESMF_LocalArrayGetData(larrayList1(de), myF90Array3D, ESMF_DATA_REF, &
+    call ESMF_LocalArrayGet(larrayList1(de), myF90Array3D, ESMF_DATA_REF, &
       rc=rc)
     myF90Array3D = 0.1d0 * de ! initialize
-    call ESMF_LocalArrayGetData(larrayList2(de), myF90Array2D, ESMF_DATA_REF, &
+    call ESMF_LocalArrayGet(larrayList2(de), myF90Array2D, ESMF_DATA_REF, &
       rc=rc)
     myF90Array2D = 0.5d0 * de ! initialize
     do k=1, 4
@@ -1903,7 +1903,7 @@ program ESMF_ArrayEx
   call ESMF_ArrayGet(array, exclusiveLBound=exclusiveLBound, &
     exclusiveUBound=exclusiveUBound, rc=rc)
   do de=1, localDeCount
-    call ESMF_LocalArrayGetData(larrayList(de), myF90Array3D, ESMF_DATA_REF, rc=rc)
+    call ESMF_LocalArrayGet(larrayList(de), myF90Array3D, ESMF_DATA_REF, rc=rc)
     myF90Array3D = 0.0 ! initialize
     myF90Array3D(exclusiveLBound(1,de):exclusiveUBound(1,de), &
       exclusiveLBound(2,de):exclusiveUBound(2,de), 1) = 5.1 ! dummy assignment
@@ -1989,7 +1989,7 @@ program ESMF_ArrayEx
   idm1=arrayToDistGridMap(1)
   idm3=arrayToDistGridMap(3)
   do de=1, localDeCount
-    call ESMF_LocalArrayGetData(larrayList(de), myF90Array3D, ESMF_DATA_REF, rc=rc)
+    call ESMF_LocalArrayGet(larrayList(de), myF90Array3D, ESMF_DATA_REF, rc=rc)
     myF90Array3D(exclusiveLBound(idm1,de):exclusiveUBound(idm1,de), &
       1, exclusiveLBound(idm3,de):exclusiveUBound(idm3,de)) = 10.5 ! dummy assignment
     myF90Array3D(exclusiveLBound(idm1,de):exclusiveUBound(idm1,de), &
@@ -2087,7 +2087,7 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   do de=1, localDeCount
-    call ESMF_LocalArrayGetData(larrayList(de), myF90Array1D, ESMF_DATA_REF, &
+    call ESMF_LocalArrayGet(larrayList(de), myF90Array1D, ESMF_DATA_REF, &
       rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     print *, "DE ",localDeList(de)," [", lbound(myF90Array1D), &
