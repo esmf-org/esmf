@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.28 2007/11/03 05:39:21 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.29 2007/11/19 22:13:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.28 2007/11/03 05:39:21 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.29 2007/11/19 22:13:47 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -123,7 +123,7 @@ contains
 ! !IROUTINE: ESMF_ArrayGet - Get Array internals
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_Get()
+  ! Private name; call using ESMF_ArrayGet()
   subroutine ESMF_ArrayGetDefault(array, typekind, rank, larrayList, &
     indexflag, distgridToArrayMap, arrayToDistGridMap, undistLBound, &
     undistUBound, exclusiveLBound, exclusiveUBound, &
@@ -491,7 +491,7 @@ contains
 ! !IROUTINE: ESMF_ArrayGet - Get Array internals per dim per local DE
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_Get()
+  ! Private name; call using ESMF_ArrayGet()
   subroutine ESMF_ArrayGetPLocalDePDim(array, localDe, dim, indexCount, indexList, rc)
 !
 ! !ARGUMENTS:
@@ -598,7 +598,7 @@ contains
 ! !IROUTINE: ESMF_ArrayGet - Get access to PET-local Array patch via Fortran90 array pointer @\
 @\
 ! !INTERFACE: @\
-! ! Private name; call using ESMF_Get() @\
+! ! Private name; call using ESMF_ArrayGet() @\
 ! subroutine ESMF_ArrayGetFPtr<rank><type><kind>(array, farrayPtr, rc) @\
 ! @\
 ! !ARGUMENTS: @\
@@ -719,7 +719,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 ! !IROUTINE: ESMF_ArrayGet - Get access to PET-local Array patch via LocalArray object.
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_Get()
+  ! Private name; call using ESMF_ArrayGet()
   subroutine ESMF_ArrayGetLarray(array, larray, rc)
 !
 ! !ARGUMENTS:
@@ -807,7 +807,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 ! !IROUTINE: ESMF_ArrayGet - Get Array internals for local DE
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_Get()
+  ! Private name; call using ESMF_ArrayGet()
   subroutine ESMF_ArrayGetTotalElementMask1D(array, routehandlelist, localDe, &
     totalElementMask, rc)
 !
@@ -846,7 +846,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 ! !IROUTINE: ESMF_ArrayGet - Get Array internals for local DE
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_Get()
+  ! Private name; call using ESMF_ArrayGet()
   subroutine ESMF_ArrayGetTotalElementMask2D(array, routehandlelist, localDe, &
     totalElementMask, rc)
 !
@@ -885,7 +885,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 ! !IROUTINE: ESMF_ArrayGet - Get Array internals for local DE
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_Get()
+  ! Private name; call using ESMF_ArrayGet()
   subroutine ESMF_ArrayGetTotalElementMask3D(array, routehandlelist, localDe, &
     totalElementMask, rc)
 !
@@ -924,7 +924,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 ! !IROUTINE: ESMF_ArrayGet - Get information about a stored halo operation
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_Get()
+  ! Private name; call using ESMF_ArrayGet()
   subroutine ESMF_ArrayGetHalo(array, routehandle, regionflag, &
     haloLDepth, haloUDepth, rc)
 !
