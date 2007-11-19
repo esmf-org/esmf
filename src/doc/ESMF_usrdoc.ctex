@@ -1,4 +1,4 @@
-% $Id: ESMF_usrdoc.ctex,v 1.30 2007/05/17 18:37:55 cdeluca Exp $
+% $Id: ESMF_usrdoc.ctex,v 1.31 2007/11/19 23:04:26 svasquez Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -14,7 +14,7 @@
 \newcommand{\sreq}[1]{\subsection{\hspace{.2in}#1}}
 \newcommand{\ssreq}[1]{\subsubsection{\hspace{.2in}#1}}
 \newcommand{\mytitle}{\longname \docmttype ~~}
-\newcommand{\myversion}{Version 3.0}
+\newcommand{\myversion}{Version 3.1}
 
 \newenvironment
 {reqlist}
