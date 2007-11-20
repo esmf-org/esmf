@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.6 2007/11/05 23:01:48 cdeluca Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7 2007/11/20 20:57:34 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cppF90,v 1.6 2007/11/05 23:01:48 cdeluca Exp $'
+      '$Id: ESMF_FieldCreate.cppF90,v 1.7 2007/11/20 20:57:34 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -231,7 +231,7 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldCreateFromArray"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldCreate - Create a Field from an existing ESMF Array
 
 ! !INTERFACE:
@@ -285,7 +285,7 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: FLD1.1.2, FLD1.5.1
 
 
@@ -333,7 +333,7 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldCreateRemap"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldCreate - Create a Field by remapping another Field
 
 ! !INTERFACE:
@@ -383,7 +383,7 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: FLD1.1.5, FLD1.5.1, FLD1.6.1
 
 

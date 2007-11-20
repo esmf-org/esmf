@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.23 2007/10/31 16:58:53 cdeluca Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.24 2007/11/20 20:57:34 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -27,7 +27,7 @@
 #define FieldCreateDPtrDoc() \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
-!BOP @\
+!BOPI @\
 ! !IROUTINE: ESMF_FieldCreate - Create a Field using an existing Fortran data pointer @\
 ! @\
 ! !INTERFACE: @\
@@ -80,7 +80,7 @@
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !   \end{description} @\
 ! @\
-!EOP @\
+!EOPI @\
 
 #if 0
 !------------------------------------------------------------------------------
