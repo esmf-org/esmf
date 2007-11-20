@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.162 2007/11/16 18:10:21 theurich Exp $
+// $Id: ESMC_Array.C,v 1.163 2007/11/20 05:49:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.162 2007/11/16 18:10:21 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.163 2007/11/20 05:49:15 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -6542,10 +6542,28 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
         factorList[kk] = (void *)
           (localDeFactorList[j] + (dstInfo->localDeFactorListIndex) * dataSize);
         valueList[kk] = (void *)(buffer[j][k] + kk*dataSize);
-        // need to fill in sensible values or else timing will be bogus
-        *(ESMC_R4 *)(rraList[srcLocalDeCount]+rraOffsetList[kk]) = 0.; //element
-        *(ESMC_R4 *)valueList[kk] = 0.01; // value
       } // for kk - termCount
+      // need to fill in sensible values or else timing will be bogus
+      if (typekindArg == ESMC_TYPEKIND_R4)
+        for (int kk=0; kk<termCount; kk++){
+          *(ESMC_R4 *)(rraList[srcLocalDeCount]+rraOffsetList[kk]) = 0.; //elemt
+          *(ESMC_R4 *)valueList[kk] = 0.01; // value
+        }
+      else if (typekindArg == ESMC_TYPEKIND_R8)
+        for (int kk=0; kk<termCount; kk++){
+          *(ESMC_R8 *)(rraList[srcLocalDeCount]+rraOffsetList[kk]) = 0.; //elemt
+          *(ESMC_R8 *)valueList[kk] = 0.01; // value
+        }
+      else if (typekindArg == ESMC_TYPEKIND_I4)
+        for (int kk=0; kk<termCount; kk++){
+          *(ESMC_I4 *)(rraList[srcLocalDeCount]+rraOffsetList[kk]) = 0; //elemt
+          *(ESMC_I4 *)valueList[kk] = 1; // value
+        }
+      else if (typekindArg == ESMC_TYPEKIND_I8)
+        for (int kk=0; kk<termCount; kk++){
+          *(ESMC_I8 *)(rraList[srcLocalDeCount]+rraOffsetList[kk]) = 0; //elemt
+          *(ESMC_I8 *)valueList[kk] = 1; // value
+        }
       xxeSub->optimizeElement(xxeIndex);
       double dt_sScalar;
       localrc = xxeSub->exec(rraCount, rraList, &dt_sScalar, xxeIndex,
