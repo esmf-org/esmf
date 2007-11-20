@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.9 2007/06/26 23:22:38 cdeluca Exp $
+! $Id: ESMF_Test.F90,v 1.10 2007/11/20 18:13:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -51,7 +51,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.9 2007/06/26 23:22:38 cdeluca Exp $'
+      '$Id: ESMF_Test.F90,v 1.10 2007/11/20 18:13:18 theurich Exp $'
 
 !==============================================================================
 
@@ -491,6 +491,7 @@
         enddo
         if (finalrc.EQ.ESMF_SUCCESS) then
             print *, " PASS: ", trim(file), line
+            call c_ESMC_PrintPassFlush(); ! print and flush out of C++
         else
             print *, " FAIL: ", trim(file), line
         endif
