@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.272 2007/11/16 16:18:57 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.273 2007/11/20 16:55:15 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.272 2007/11/16 16:18:57 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.273 2007/11/20 16:55:15 feiliu Exp $'
 
 !==============================================================================
 !
@@ -1978,15 +1978,16 @@
 !
 !EOPI
 
-        character(len=ESMF_MAXSTR) :: name, str
-        type(ESMF_FieldType), pointer :: fp 
-        integer :: localrc
+        character(len=ESMF_MAXSTR)      :: name, str
+        type(ESMF_FieldType), pointer   :: fp 
+        integer                         :: i, localrc
+        integer                         :: gridrank, arrayrank
         !character(len=ESMF_MAXSTR) :: msgbuf
-        character(len=6) :: defaultopts
+        character(len=6)                :: defaultopts
 
 
 !	Initialize
-	localrc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check variables
@@ -2047,16 +2048,27 @@
         if (fp%datastatus .eq. ESMF_STATUS_READY) then 
            call c_ESMC_ArrayPrint(fp%array, localrc)
         endif
+!        if (fp%datastatus .eq. ESMF_STATUS_READY) then
+!            call ESMF_ArraySpecPrint(fp%arrayspec, localrc)
+!        endif
+!        call ESMF_StaggerLocPrint(fp%staggerloc, localrc)
 
-! TODO:FIELDINTEGRATION Finish implementation of FieldPrint - gridToFieldMap etc.
+        call ESMF_GridGet(fp%grid, rank=gridrank, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        call ESMF_ArrayGet(fp%array, rank=arrayrank, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-
-        ! global field contents
-        !type (ESMF_IOSpec) :: iospec             ! iospec values
-        !type (ESMF_Status) :: iostatus           ! if unset, inherit from gcomp
-
-        ! local field contents
-        !type (ESMF_Mask) :: mask                 ! may belong in Grid
+        write(*, *) "gridrank = ", gridrank, "arrayrank = ", arrayrank
+        write(*, *) "gridToFieldMap ungriddedLBound ungriddedUBound maxHaloLWidth", &
+            " maxHaloUWidth"
+        do i = 1, ESMF_MAXDIM
+            write(*, *) fp%gridToFieldMap(i), fp%ungriddedLBound(i), fp%ungriddedUBound(i), &
+                "    ", fp%maxHaloLWidth(i), fp%maxHaloUWidth(i)
+        enddo
 
         if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3729,6 +3741,13 @@
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
+
+      ! Default of gridToFieldMap should be {1,2,3...}
+!      if (.not. present(gridToFieldMap)) then
+!          do i = 1, ESMF_MAXDIM
+!            gridToFieldMap(i) = i
+!          enddo
+!      endif
 
       ftype%array = array
       ftype%datastatus = ESMF_STATUS_READY
