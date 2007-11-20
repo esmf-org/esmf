@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.35 2007/11/16 04:30:14 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.36 2007/11/20 22:56:12 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.35 2007/11/16 04:30:14 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.36 2007/11/20 22:56:12 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -2236,12 +2236,16 @@ int Grid::serialize(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   bool cp, done;
-  int loffset;
+  int loffset,r;
+
 
   // Define serialization macros
 #define SERIALIZE_VAR(cp,bufptr,loff,var,t) \
   if (cp) *((t *)(bufptr+loff))=var;    \
   loff += (sizeof(t));  
+
+  // if (cp) memcpy(bufptr+loff,&var,sizeof(t));    \
+
 
 #define SERIALIZE_VAR1D(cp,bufptr,loff,varptr,s1,t)    \
   if (cp) memcpy(bufptr+loff,varptr,(s1*sizeof(t)));       \
@@ -2259,6 +2263,7 @@ int Grid::serialize(
     return rc;
   }
 
+
   // Run twice:
   //    1. check the sizes
   //    2. do the actual copies
@@ -2267,7 +2272,7 @@ int Grid::serialize(
   while (!done) {
     // get localoffset
     loffset=*offset;
-    
+
     // First, serialize the base class,
     localrc = ESMC_Base::ESMC_Serialize(buffer, length, &loffset);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
@@ -2276,9 +2281,8 @@ int Grid::serialize(
     // Since we're not allowing the serialization of 
     // non-ready Grids don't worry about serializing
     // the protogrid
-    
-    // Don't do status since we're changing it anyway
 
+    // Don't do status since we're changing it anyway
     SERIALIZE_VAR(cp, buffer,loffset,typekind,ESMC_TypeKind);
     
     SERIALIZE_VAR(cp, buffer,loffset,distRank,int);    
@@ -2295,25 +2299,29 @@ int Grid::serialize(
     SERIALIZE_VAR1D(cp, buffer,loffset,gridEdgeLWidth,rank,int);
     SERIALIZE_VAR1D(cp, buffer,loffset,gridEdgeUWidth,rank,int);
     SERIALIZE_VAR1D(cp, buffer,loffset,gridAlign,rank,int);
-    
+
     SERIALIZE_VAR1D(cp, buffer,loffset,coordRank,rank,int);
+
     SERIALIZE_VAR2D(cp, buffer,loffset,coordDimMap,rank,rank,int);
-    
+
     SERIALIZE_VAR(cp, buffer,loffset,staggerLocCount,int);
-    
+
     SERIALIZE_VAR2D(cp, buffer,loffset,staggerAlignList,staggerLocCount,rank,int);
     SERIALIZE_VAR2D(cp, buffer,loffset,staggerEdgeLWidthList,staggerLocCount,rank,int);
     SERIALIZE_VAR2D(cp, buffer,loffset,staggerEdgeUWidthList,staggerLocCount,rank,int);
     SERIALIZE_VAR2D(cp, buffer,loffset,didIAllocList,staggerLocCount,rank, bool);
-    
     SERIALIZE_VAR1D(cp, buffer,loffset,gridIsDist,rank,bool);
     SERIALIZE_VAR1D(cp, buffer,loffset,gridMapDim,rank,int);
 
     SERIALIZE_VAR2D(cp, buffer,loffset,coordIsDist,rank,rank,bool);
     SERIALIZE_VAR2D(cp, buffer,loffset,coordMapDim,rank,rank,int);
-        
-    
+
     // Don't do isDEBnds because a proxy object isn't on a valid DE
+
+    // make sure loffset is aligned correctly
+    r=loffset%8;
+    if (r!=0) loffset += 8-r;
+
     
     // Don't do Coordinate Arrays right now because it doesn't
     // seem necessary. Will be easy enough to add in the 
@@ -2326,7 +2334,11 @@ int Grid::serialize(
     localrc = distgrid->serialize(buffer, length, &loffset);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
      return rc;  
-    
+
+    // make sure loffset is aligned correctly
+    r=loffset%8;
+    if (r!=0) loffset += 8-r;
+
     // Check if buffer has enough free memory to hold object
     if (*length < loffset){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
@@ -2382,7 +2394,7 @@ int Grid::deserialize(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  int loffset;
+  int loffset,r;
 
   // Define serialization macros
 #define DESERIALIZE_VAR(bufptr,loff,var,t) \
@@ -2447,9 +2459,12 @@ int Grid::deserialize(
   DESERIALIZE_VAR2D( buffer,loffset,coordIsDist,rank,rank,bool);
   DESERIALIZE_VAR2D( buffer,loffset,coordMapDim,rank,rank,int);
 
-
   // Don't do isDEBnds because a proxy object isn't on a valid DE
-  
+
+  // make sure loffset is aligned correctly
+  r=loffset%8;
+  if (r!=0) loffset += 8-r;
+    
   // Don't do Coordinate Arrays right now because it doesn't
   // seem necessary. Will be easy enough to add in the 
   // future if necessary (just serialize an array indicating
@@ -2458,6 +2473,10 @@ int Grid::deserialize(
       
   // Deserialize the DistGrid
   distgrid = DistGrid::deserialize(buffer, &loffset);
+
+    // make sure loffset is aligned correctly
+    r=loffset%8;
+    if (r!=0) loffset += 8-r;
 
   // output localoffset
   *offset=loffset;
