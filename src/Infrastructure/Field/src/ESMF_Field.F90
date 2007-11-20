@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.273 2007/11/20 16:55:15 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.274 2007/11/20 22:40:26 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.273 2007/11/20 16:55:15 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.274 2007/11/20 22:40:26 feiliu Exp $'
 
 !==============================================================================
 !
@@ -1952,7 +1952,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldPrint"
 
-!BOPI
+!BOP
 ! !IROUTINE:  ESMF_FieldPrint - Print the contents of a Field
 
 ! !INTERFACE:
@@ -1966,6 +1966,8 @@
 !
 ! !DESCRIPTION:
 !     Prints information about the {\tt field} to {\tt stdout}.
+!  This subroutine goes through the internal data members of a field
+!  data type and prints information of each data member.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1976,7 +1978,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 
         character(len=ESMF_MAXSTR)      :: name, str
         type(ESMF_FieldType), pointer   :: fp 
@@ -1997,7 +1999,7 @@
         defaultopts = "brief"
 
         !nsc call ESMF_LogWrite("Field Print:", ESMF_LOG_INFO)
-        write(*,*) "Field Print:"
+        write(*,*) "Field Print Starts ====>"
         if (.not. associated(field%ftypep)) then
         !jw  call ESMF_LogWrite("Empty or Uninitialized Field", ESMF_LOG_INFO)
           write(*,*) "Empty or Uninitialized Field"
@@ -2069,6 +2071,7 @@
             write(*, *) fp%gridToFieldMap(i), fp%ungriddedLBound(i), fp%ungriddedUBound(i), &
                 "    ", fp%maxHaloLWidth(i), fp%maxHaloUWidth(i)
         enddo
+        write(*,*) "Field Print Ends ====>"
 
         if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3113,7 +3116,12 @@
 ! !DESCRIPTION:
 !      Validates that the {\tt field} is internally consistent.
 !      Currently this method determines if the {\tt field} is uninitialized 
-!      or already destroyed.  The code also checks if the data and Grid sizes agree.
+!      or already destroyed. It validates the contained array and grid objects.
+!      The code also checks if the array and grid sizes agree.
+!      This check compares the distgrid contained in array and grid; 
+!      then it proceeds to compare the computational bounds contained 
+!      in array and grid. 
+!
 !      The method returns an error code if problems are found.  
 !
 !     The arguments are:
@@ -3181,6 +3189,10 @@
 
       ! make sure there is a grid before asking it questions.
       if (ftypep%gridstatus .eq. ESMF_STATUS_READY) then
+          !call ESMF_GridValidate(grid=ftypep%grid, rc=localrc)
+          !if (ESMF_LogMsgFoundError(localrc, &
+          !                          ESMF_ERR_PASSTHRU, &
+          !                          ESMF_CONTEXT, rc)) return
 
           ! get grid dim and extents for the local piece
           call ESMF_GridGet(ftypep%grid, distRank=gridrank, &
@@ -3203,6 +3215,10 @@
 
       ! make sure there is data before asking it questions.
       if (ftypep%datastatus .eq. ESMF_STATUS_READY) then
+          call ESMF_ArrayValidate(array=ftypep%array, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
           call ESMF_ArrayGet(ftypep%array, dimCount=dimCount, localDECount=localDECount, &
               distgrid=arrayDistGrid, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
