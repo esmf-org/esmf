@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.274 2007/11/20 22:40:26 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.275 2007/11/21 22:17:51 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.274 2007/11/20 22:40:26 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.275 2007/11/21 22:17:51 feiliu Exp $'
 
 !==============================================================================
 !
@@ -2050,10 +2050,10 @@
         if (fp%datastatus .eq. ESMF_STATUS_READY) then 
            call c_ESMC_ArrayPrint(fp%array, localrc)
         endif
-!        if (fp%datastatus .eq. ESMF_STATUS_READY) then
-!            call ESMF_ArraySpecPrint(fp%arrayspec, localrc)
-!        endif
-!        call ESMF_StaggerLocPrint(fp%staggerloc, localrc)
+        if (fp%datastatus .eq. ESMF_STATUS_READY) then
+            call ESMF_ArraySpecPrint(fp%arrayspec, localrc)
+        endif
+        call ESMF_StaggerLocPrint(fp%staggerloc, localrc)
 
         call ESMF_GridGet(fp%grid, rank=gridrank, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -2071,7 +2071,7 @@
             write(*, *) fp%gridToFieldMap(i), fp%ungriddedLBound(i), fp%ungriddedUBound(i), &
                 "    ", fp%maxHaloLWidth(i), fp%maxHaloUWidth(i)
         enddo
-        write(*,*) "Field Print Ends ====>"
+        write(*,*) "Field Print Ends   ====>"
 
         if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3146,7 +3146,7 @@
       integer :: exclUBounds(ESMF_MAXGRIDDIM)  ! exclusive grid upper bounds
       integer :: maplist(ESMF_MAXDIM)          ! mapping between them
       integer :: otheraxes(ESMF_MAXDIM)        ! counts for non-grid dims
-      integer :: gridrank, maprank
+      integer :: gridrank, arrayrank
       logical :: hasgrid, hasarray             ! decide what we can validate
       integer :: i, lDE                        ! helper variables to verify bounds
       integer :: localDECount, dimCount        ! and distgrid
@@ -3195,7 +3195,7 @@
           !                          ESMF_CONTEXT, rc)) return
 
           ! get grid dim and extents for the local piece
-          call ESMF_GridGet(ftypep%grid, distRank=gridrank, &
+          call ESMF_GridGet(ftypep%grid, rank=gridrank, &
                             distgrid=gridDistGrid, localDECount=localDECount, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
@@ -3220,10 +3220,18 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
           call ESMF_ArrayGet(ftypep%array, dimCount=dimCount, localDECount=localDECount, &
-              distgrid=arrayDistGrid, rc=localrc)
+              distgrid=arrayDistGrid, rank=arrayrank, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
+
+          ! Verify that array rank is greater than or equal to grid rank
+          if (gridrank .gt. arrayrank) then
+              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                 "grid DistGrid does not match array DistGrid", &
+                  ESMF_CONTEXT, rc)
+              return
+          endif
           
           ! Verify the distgrids in array and grid match.
           if(ESMF_DistGridMatch(gridDistGrid, arrayDistGrid, rc=localrc) .ne. ESMF_TRUE) then

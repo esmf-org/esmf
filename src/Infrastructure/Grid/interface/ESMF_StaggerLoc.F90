@@ -1,4 +1,4 @@
-! $Id: ESMF_StaggerLoc.F90,v 1.10 2007/10/11 22:23:49 oehmke Exp $
+! $Id: ESMF_StaggerLoc.F90,v 1.11 2007/11/21 22:17:52 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -62,6 +62,7 @@
 ! !PUBLIC MEMBER FUNCTIONS:
   public ESMF_StaggerLocString
   public ESMF_StaggerLocSet
+  public ESMF_StaggerLocPrint
   public operator(.eq.), operator(.ne.) 
   public operator(.gt.), operator(.ge.) 
   public operator(.lt.), operator(.le.) 
@@ -97,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StaggerLoc.F90,v 1.10 2007/10/11 22:23:49 oehmke Exp $'
+      '$Id: ESMF_StaggerLoc.F90,v 1.11 2007/11/21 22:17:52 feiliu Exp $'
 
 
 !==============================================================================
@@ -642,6 +643,42 @@ end interface
                                  StaggerLoc2%staggerloc)
 
       end function ESMF_StaggerLocLessEqual
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StaggerLocPrint"
+!BOP
+! !IROUTINE: ESMF_StaggerLocPrint - Print information of a ESMF_StaggerLoc object
+
+! !INTERFACE:
+      subroutine ESMF_StaggerLocPrint(staggerloc, rc)
+!
+! !ARGUMENTS:
+      type (ESMF_StaggerLoc), intent(in) :: staggerloc
+      integer, intent(out), optional     :: rc 
+
+! !DESCRIPTION:
+!     Print the internal data members of a ESMF_StaggerLoc object
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[staggerloc]
+!          ESMF_StaggerLoc object as the method input
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      write(*, *) "StaggerLoc Print Begins =====>"
+      write(*, *) "   staggerloc = ", staggerloc%staggerloc
+      write(*, *) "StaggerLoc Print Ends   =====>"
+
+      rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StaggerLocPrint
 
       end module ESMF_StaggerLocMod
 

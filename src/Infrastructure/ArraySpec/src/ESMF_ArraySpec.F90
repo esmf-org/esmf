@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.29 2007/11/16 22:59:47 theurich Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.30 2007/11/21 22:17:51 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -105,13 +105,15 @@ module ESMF_ArraySpecMod
 ! - ESMF-internal methods:
   public ESMF_ArraySpecInit
   public ESMF_ArraySpecGetInit
+  public ESMF_ArraySpecPrint
+  private ESMF_ArraySpecStatusPrint
 
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.29 2007/11/16 22:59:47 theurich Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.30 2007/11/21 22:17:51 feiliu Exp $'
 
 !==============================================================================
 
@@ -489,7 +491,70 @@ module ESMF_ArraySpecMod
 
       end function ESMF_ArraySpecStatusNotEqual
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySpecStatusPrint"
+!BOP
+! !IROUTINE: ESMF_ArraySpecStatusPrint - Print information of ArraySpecStatus
 
+! !INTERFACE:
+  subroutine ESMF_ArraySpecStatusPrint(arrayspecstatus)
+!
+! !ARGUMENTS:
+    type(ESMF_ArraySpecStatus), intent(in)              :: arrayspecstatus
+!         
+!
+! !DESCRIPTION:
+!      Print ArraySpecStatus internals.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[arrayspecstatus] 
+!          Specified {\tt ESMF\_ArraySpecStatus} object.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    write(*, *) "ArraySpecStatus Print Begins =====>"
+    write(*, *) "   status = ", arrayspecstatus%status
+    write(*, *) "ArraySpecStatus Print Ends   =====>"
+    
+  end subroutine ESMF_ArraySpecStatusPrint
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySpecPrint"
+!BOP
+! !IROUTINE: ESMF_ArraySpecPrint - Print information of ArraySpec
+
+! !INTERFACE:
+  subroutine ESMF_ArraySpecPrint(arrayspec, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_ArraySpec), intent(in)              :: arrayspec
+    integer, intent(out), optional                :: rc
+!         
+!
+! !DESCRIPTION:
+!      Print ArraySpec internals.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[arrayspec] 
+!          Specified {\tt ESMF\_ArraySpec} object.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    write(*, *) "ArraySpec Print Begins =====>"
+    write(*, *) "   rank = ", arrayspec%rank    
+    write(*, *) "   typekind = ", arrayspec%typekind
+    call ESMF_ArraySpecStatusPrint(arrayspec%status)
+    write(*, *) "ArraySpec Print Ends   =====>"
+
+    rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_ArraySpecPrint
 !------------------------------------------------------------------------------
 
 
