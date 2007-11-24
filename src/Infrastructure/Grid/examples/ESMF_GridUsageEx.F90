@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.27 2007/11/05 23:32:34 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.28 2007/11/24 20:44:44 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -79,22 +79,21 @@ program ESMF_GridCreateEx
 !
 ! The {\tt ESMF\_GridCreateShapeTile()} method will eventually support 
 ! the three types of distributions described in 
-! Section~\ref{sec:desc:dist}. It currently supports only 
-! irregular distribution.
+! Section~\ref{sec:desc:dist}. It currently supports 
+! two of these types: regular and irregular.
 !
-! Although regular distribution is not yet implemented, the design
-! has been completed and its usage is described here.  To create a Grid 
+! To create a Grid 
 ! with a regular distribution the user specifies the global
-! maximum and minimum ranges of the index space ({\tt maxIndex} and
+! maximum and minimum ranges of the Grid cell index space ({\tt maxIndex} and
 ! {\tt minIndex}), and the number of pieces in which to partition
 ! each dimension (via a {\tt regDecomp} argument).
 ! ESMF then divides the index space as evenly as possible 
-! into the specified number of pieces. If there are elements
+! into the specified number of pieces. If there are cells
 ! left over then they are distributed one per DE starting from
 ! the first DE until they are gone.
 !
 ! If {\tt minIndex} is 
-! not specified, then the bottom of the index range is assumed
+! not specified, then the bottom of the Grid cell index range is assumed
 ! to be (1,1,...,1). If {\tt regDecomp} is not specified, then
 ! by default ESMF creates a distribution that partitions the
 ! grid cells in the first dimension (e.g. NPx1x1...1) as evenly 
@@ -102,14 +101,15 @@ program ESMF_GridCreateEx
 ! The remaining dimensions are not partitioned.
 ! The rank of the Grid is the size of {\tt maxIndex}. To create
 ! an undistributed dimension set that entry in {\tt regDecomp}
-! to 1. The following is an example of creating a 10x20x30 3D grid
+! to 1, and set the corresponding entry in distDim to .false.. 
+! The following is an example of creating a 10x20x30 3D grid
 ! where the first dimensions is broken into 2 pieces, the second
 ! is broken into 4 pieces, and the third is undistributed. 
 !EOE
 
 !BOC
   grid3D=ESMF_GridCreateShapeTile(regDecomp=(/2,4,1/), maxIndex=(/10,20,30/), &
-           rc=rc)   
+           distDim=(/.true.,.true.,.false./), rc=rc)   
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    !-------------------------------------------------------------------
@@ -120,7 +120,7 @@ program ESMF_GridCreateEx
 
 !BOE
 ! Irregular distribution requires the user to specify the
-! exact number of grid cells per DE in each dimension.  In the
+! exact number of Grid cells per DE in each dimension.  In the
 ! {\tt ESMF\_GridCreateShapeTile()} call the {\tt countsPerDEDim1},
 ! {\tt countsPerDim2}, and {\tt countsPerDim3}
 ! arguments are used to specify a rectangular distribution
@@ -131,8 +131,7 @@ program ESMF_GridCreateEx
 ! {\tt countsPerDEDim3}.  If it's present the Grid
 ! will be 3D. If just {\tt countsPerDEDim1} and 
 ! {\tt countsPerDEDim2} are specified the Grid 
-! will be 2D.  If any of these arrays has size
-! 1 then that index dimension is undistributed.
+! will be 2D.
 !
 ! The following call illustrates the creation of 
 ! a 10x20 two dimensional rectangular Grid distributed across six DEs
@@ -455,7 +454,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! loading in a set of coordinates. It creates a 10x20
 ! 2D grid where the coordinates vary along every dimension. 
 ! The grid is partitioned using an irregular distribution. The first dimension
-! it is divided into two pieces, the first with 3 grid cells per
+! is divided into two pieces, the first with 3 grid cells per
 ! DE and the second with 7 grid cells per DE. In the second dimension,
 ! the Grid is divided into 3 pieces, with 5, 9, and 6 cells per DE respectively.
 ! The Grid is created with global indices. After grid creation the
@@ -592,7 +591,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension.
    !-------------------------------------------------------------------
-   do i=lbnd_corner(1),ubnd_corner(1)
+    do i=lbnd_corner(1),ubnd_corner(1)
         cornerX(i) = (i-1)*(360.0/180.0)
    enddo
 
@@ -776,13 +775,12 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! of a set of Grid stagger locations.) Users can put coordinates, 
 ! which are necessary
 ! for operations such as regrid, at multiple stagger
-! locations in a Grid.  The new Grid class is not yet integrated with
-! the Field class, but once it is the user will be able to put Field data
+! locations in a Grid. In addition, the user can put Field data
 ! at any of the stagger locations in a Grid.  
 !
 ! By default the coordinate array at the center stagger location
 ! starts at the bottom index of the Grid (default (1,1..,1)) and extends
-! up to the number of elements described by the {\tt countsPerDE} arrays.
+! up to the maximum cell index in the Grid (e.g. given by the {\tt maxIndex} argument).
 ! Other stagger locations also start at the bottom index of the Grid, however, 
 ! they can extend to +1 element beyond the center in some dimensions to allow
 ! for the extra space to surround the center elements. See Section~\ref{sec:usage:staggerloc:adv}
@@ -892,7 +890,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! 10x20x30 2D plus 1 curvilinear grid where 
 ! coordinate component 1 and 2 are still 10x20, but
 ! coordinate component 3 is mapped just to the 
-! undistributed third index dimension.
+! third index dimension.
 !EOE
 
 !BOC
@@ -1064,30 +1062,23 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !
 ! The default stagger padding depends on the topology of the Grid. 
 ! For an unconnected dimension the stagger padding is a width
-! of 1 on the upper side (i.e. {\tt staggerEdgeUWidth=(1,1,1,1...)}).
+! of 1 on the upper side (i.e. {\tt gridEdgeUWidth=(1,1,1,1...)}).
 ! For a periodic dimension there is no stagger padding.
-! By adjusting {\tt staggerEdgeLWidth} and {\tt staggerEdgeUWidth}, the 
-! user can set the stagger padding arbitrarily and
+! By adjusting {\tt gridEdgeLWidth} and {\tt gridEdgeUWidth}, the 
+! user can set the stagger padding for the whole Grid and
 ! thus the exclusive region can be adjusted at will around the 
-! index space corresponding to the cells. 
+! index space corresponding to the cells. The user can
+! also use {\tt staggerEdgeLWidth} and {\tt staggerEdgeUWidth} to
+! adjust individual stagger location padding within the
+! Grid's padding (Please see Section~\ref{sec:usage:staggerpadding:adv} for
+! further discussion of customizing the stagger padding).
 !
-! The cell counts are what are specified in the create calls, so
-! for example, if the user does the folowing call
-! with the default stagger padding the resulting excusive region will
-! look like the following image.
-!
-! 
 ! The Grid computational region is a subset of the the Grid exclusive
 ! region.  The computational region indicates which index locations in 
 ! the Grid are active for a particular stagger. The computational region
 ! is typically the region that a user would compute over (e.g.
 ! would iterate over setting values for).
 ! 
-! Given the previous Grid create and default stagger padding, the
-! following is what the corner stagger location computational region
-! would look like. 
-!
-!
 ! The total region is the outermost boundary of the memory allocated 
 ! on each DE to hold the data for the Grid on that DE. This region 
 ! can be as small as the computational region, but may be larger to 
@@ -1098,12 +1089,8 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! so information about it is only retrievable when an Array has
 ! been set or allocated. 
 !
-! The following shows the previous Grid with a coordinate halo width
-! of 1. 
-!
-! 
-! There are actually three types of bounds the user can 
-! get: exclusive bounds, computational bounds, 
+! The user can retrieve a set of bounds for each index space region 
+! described above: exclusive bounds, computational bounds, 
 ! and total bounds. Note that although some of these are similar
 ! to bounds provided by ESMF\_Array subroutines 
 ! (see Section~\ref{Array_regions_and_default_bounds}) 
@@ -1120,7 +1107,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! referring to the maximums contain a 'U' for upper. The parameters referring 
 ! to the minimums contain an 'L' for lower. The bounds and associated
 ! quantities are almost always given on a per DE basis. The three types of
-! bounds exclusiveBounds, computationaundistLBound, and totaundistLBound refer
+! bounds exclusiveBounds, computationalBounds, and totalBounds refer
 ! to the ranges of the exlusive region, the computational region, and the
 ! total region. Each of these bounds also has a corresponding count parameter
 ! which gives the number of items across that region (on a DE) in each dimension.
@@ -1132,15 +1119,15 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! other bound information these are typically on a per DE basis, for example
 ! specifying {\tt totalLWidth=(1,1)} makes the bottom of the total
 ! region one lower in each dimension than the computational region on
-! each DE. The exception to the per DE rule is {\tt computationalEdgeWidth},
-! which gives the spacing only on the DEs along the boundaries of the Grid.
-!
+! each DE. The exceptions to the per DE rule are
+! {\tt computationalEdgeWidth}, {\tt staggerEdgeWidth}, and {\tt gridEdgeWidth}
+! which give the spacing only on the DEs along the boundary of the Grid.
 !EOE
 
 !BOE
 !\subsubsection{Getting Grid Coordinate Bounds}
 !
-! When operating on coordiantes the user may often wish to 
+! When operating on coordinates the user may often wish to 
 ! retrieve the bounds of the piece of coordinate data on
 ! a particular local DE. This is useful for iterating through the
 ! data to set coordinates, retrieve coordinates, or do calculations. 
@@ -1333,7 +1320,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! may be obtained from the same call using the {\tt undistLBound} and 
 ! {\tt undistUBound} arguments. Note that if the Grid doesn't contain 
 ! undistributed dimensions, then this second set of 
-! bounds doesn't need to be used. 
+! bounds shouldn't be used. 
 !
 ! The following is an example of using information from the Grid
 ! to create an Array corresponding to a stagger location.
@@ -2067,7 +2054,9 @@ call ESMF_GridDestroy(grid2D,rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 
-!
+!BOE
+!\subsubsection{Specifying Custom Stagger Padding}
+!\label{sec:usage:staggerpadding:adv}
 !
 !There is an added complication with the data (e.g. coordinates) stored at stagger locations in 
 !that they can require different amounts of storage depending
@@ -2103,26 +2092,117 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! requires n+1 x m+1, and the edges, depending on the side, require n+1 x m or
 ! m+1 x n.  In order to add the extra storage, but also to 
 ! allow the the different stagger location arrays to remain on the same DistGrid,
-! the capability of the ESMF Array class to have extra computational
-! padding is used. By default, when the coordinate arrays are created, one extra
+! the capability of the ESMF Array class to have computational
+! bounds different from exclusive bounds is used.
+! By default, when the coordinate arrays are created, one extra
 ! layer of padding is added to the arrays to create symmetric staggers 
 ! (i.e. the center location is surrounded). The default is to add this padding 
 ! on the positive side, and to only add this padding where needed 
 ! (e.g. no padding for the center, padding
 ! on both dimensions for the corner, in only one dimension for the 
-! edge in 2D.)  To change these defaults the {\tt coordWidth} arguments 
-! can be used to adjust the width and placement of the padding for each
-! stagger location. 
+! edge in 2D.) There are two ways for the user to change
+! these defaults. 
 !
+! One way is to use the {\tt GridEdgeWidth} or {\tt GridAlign} arguments
+! when creating a Grid. These arguments can be used to change the padding
+! around the Grid cell index space. This extra padding is the extra
+! space used by all the stagger locations, and no stagger location
+! can extend outside of it. 
+!
+! The {\tt gridEdgeLWidth} and 
+! {\tt gridEdgeUWidth} arguments are both 1D arrays of the
+! same size as the Grid rank. The entries in the arrays
+! give the extra offset from the outer boundary of
+! the grid cell index space to the exclusive region of the
+! Grid. The following example shows the creation of 
+! a Grid with all the extra space to hold stagger padding
+! on the negative side of a Grid. This is the reverse of
+! the default behavior. The resulting Grid will have
+! an exclusive region which extends from $(-1,-1)$ to
+! $(10,10)$, however, the cell center stagger location
+! will still extend from $(1,1)$ to $(10,10)$.
 !EOE
 
+!!!!!!!!!!!!!!!!!!!!!!!
+! Setup For Example
+!!!!!!!!!!!!!!!!!!!!!!
+
+!BOC 
+   grid2D=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/10,10/), &
+            gridEdgeLWidth=(/1,1/), gridEdgeUWidth=(/0,0/), rc=rc)
+
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Cleanup after Example
+!!!!!!!!!!!!!!!!!!!!!!!
+   call ESMF_GridDestroy(grid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+
 !BOE
+! To indicate how the data in a Grid's stagger locations are aligned with the 
+! cell centers, the optional {\tt gridAlign} parameter 
+! may be used. This parameter indicates which stagger elements 
+! in a cell share the same index values as the cell center. 
+! For example, in a 2D cell, it would indicate which of the four corners has
+! the same index value as the center. To set {\tt gridAlign},  
+! the values -1,+1 are used to indicate the alignment in
+! each dimension. This parameter is mostly 
+! informational, however, if the {\tt gridEdgeWidth} parameters 
+! are not set then its value determines where the default padding
+! is placed. If not specified, then the default is to align all 
+! staggers to the most negative, so the padding is on the positive side. 
+! The following code illustrates creating a Grid aligned to the reverse of
+! default (with everything to the positive side). This creates a
+! Grid identical to that created in the previous example. 
+!EOE
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Setup For Example
+!!!!!!!!!!!!!!!!!!!!!!
+
+!BOC 
+   grid2D=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/10,10/), &
+            gridAlign=(/1,1/), rc=rc)
+
+!EOC  
+
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Cleanup after Example
+!!!!!!!!!!!!!!!!!!!!!!!
+   call ESMF_GridDestroy(grid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! The {\tt gridEdgeWidth} and {\tt gridAlign} arguments both
+! allow the user to set the extra padding available to be used
+! by stagger locations in a Grid. By default, stagger locations
+! allocated in a Grid set their stagger padding based on these
+! values.  A stagger location's padding in each dimension is
+! equal to the value of {\tt gridEdgeWidth} (or the value implied
+! by {\tt gridAlign}), unless the stagger location is centered
+! in a dimension in which case the stagger padding is 0. For example,
+! the cell center stagger location has 0 stagger padding in all
+! dimensions, whereas the edge stagger location lower padding
+! is equal to {\tt gridEdgeLWidth} and the upper padding is equal
+! to {\tt gridEdgeUWidth} in one dimension, but both are 0 in the other,
+! centered, dimension.  If the user wishes to set the stagger padding
+! individually for each stagger location they may use the
+! {\tt staggerEdgeWidth} and {\tt staggerAlign} arguments,
+! however, the padding set this way must be within that specified
+! by the {\tt gridEdgeWidth} and {\tt gridAlign} 
+! used when the Grid was created (or the defaults if none were used).
+! 
 ! The {\tt staggerEdgeLWidth} and 
 ! {\tt staggerEdgeUWidth} arguments are both 1D arrays of the
 ! same size as the Grid rank. The entries in the arrays
-! give the extra offset from the outer boundary of
-! the tile exclusive region for
-! each stagger location. The following example shows the
+! give the extra offset from the Grid cell index space
+! for a stagger location. The following example shows the
 ! addition of two stagger locations. The
 ! corner location has no extra boundary and the 
 ! center has a single layer of extra padding on 
@@ -2135,11 +2215,11 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !!!!!!!!!!!!!!!!!!!!!!
    distgrid2D=ESMF_DistGridCreate(minIndex=(/1,1/), &
                                   maxIndex=(/10,10/), rc=rc)
-   grid2D=ESMF_GridCreate(distgrid=distgrid2D, &
-            gridEdgeLWidth=(/1,1/), gridEdgeUWidth=(/1,1/), rc=rc)
-
 
 !BOC 
+   grid2D=ESMF_GridCreate(distgrid=distgrid2D, &
+            gridEdgeLWidth=(/1,1/), gridEdgeUWidth=(/0,0/), rc=rc)
+
    call ESMF_GridAllocCoord(grid2D, &
           staggerLoc=ESMF_STAGGERLOC_CORNER, &
           staggerEdgeLWidth=(/0,0/), staggerEdgeUWidth=(/0,0/), rc=rc)
@@ -2172,7 +2252,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! each dimension. If a stagger location is 
 ! centered in a dimension (e.g. an edge in 2D), then that
 ! dimension is ignored in the alignment. This parameter is mostly 
-! informational, however, if the {\tt coordWidth} parameters 
+! informational, however, if the {\tt staggerEdgeWidth} parameters 
 ! are not set then its value determines where the default padding
 ! is placed. If not specified, then the default is to align all 
 ! staggers to the most negative, so the padding is on the positive side. 
@@ -2191,6 +2271,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    call ESMF_GridAllocCoord(grid2D, &
           staggerLoc=ESMF_STAGGERLOC_CORNER, staggerAlign=(/1,1/), rc=rc)
 !EOC  
+
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !!!!!!!!!!!!!!!!!!!!!!!

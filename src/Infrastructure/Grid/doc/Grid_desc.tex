@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.36 2007/10/30 19:31:53 oehmke Exp $
+% $Id: Grid_desc.tex,v 1.37 2007/11/24 20:44:44 oehmke Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -16,16 +16,13 @@ The most frequent use of the Grid class is to describe physical grids
 in user code so that sufficient information is available to perform ESMF
 methods such as regridding.  
 
-In the current release (v3.0.3)
+In the current release (v3.1.0)
 the functionality in this class is partially implemented.  
 Multi-tile grids are not supported, and edge connectivities 
-are not implemented and default to aperiodic.  Only irregular 
-distributions can be defined.  Specific interfaces for regular
-and arbitrary distributions have not been implemented, though
-regular distributions can be defined as a special case of 
-irregular distributions.  Also, each coordinate array in a 
-grid has the full rank of the grid itself (i.e., the grid
-is assumed to be curvilinear).  Other constraints of the current
+are not implemented and default to aperiodic.  Both regular and 
+irregular distributions can be defined, but arbitrary
+distributions have not yet been implemented.  
+Other constraints of the current
 implementation are noted in the usage section and in the API
 descriptions.
 
@@ -93,7 +90,7 @@ more logically rectangular grid Tiles with connectivities specified
 between cells.  For more details see section \ref{sec:ShapeShortcut}.
 \item Types of distributions supported.  ESMF supports  regular,
 irregular, or arbitrary distributions of data.  Note that arbitrary
-distributions have not been implemented as of v3.0.3.
+distributions have not been implemented as of v3.1.0.
 For more details see section \ref{sec:desc:dist}.
 \item Types of coordinates supported.  ESMF supports uniform, rectilinear,
 and curvilinear coordinates.  For more details see section \ref{sec:coordspec}.
@@ -115,7 +112,7 @@ The table below shows the ESMF\_GridConn settings used to create
 standard shapes in 2D using the ESMF\_GridCreateShapeTile() call.  Two values
 are specified for each dimension, one for the low end and one for 
 the high end of the dimension's index values.  Note that connectivities
-have not been implemented as of v3.0.3 and default to aperiodic bounds.
+have not been implemented as of v3.1.0 and default to aperiodic bounds.
 
 \medskip
 \begin{tabular}{|l|c|c||c|c||}
@@ -153,7 +150,7 @@ DE in the distributed dimension.  An {\bf arbitrary} distribution is
 one in which any gridpoint can be assigned to any DE.  Any of these
 distribution options can be applied to any of the grid shapes (i.e.,
 rectangle) or types (i.e., rectilinear).  Arbitrary distributions
-have not been implemented as of v3.0.3.
+have not been implemented as of v3.1.0.
 
 Figure \ref{fig:GridDecomps} illustrates options for distribution.
 \begin{figure}
@@ -183,7 +180,7 @@ does not affect the computations performed on an ocean model grid.  Figure
 
 Any of these logically rectangular grid types can be combined through edge
 connections to form a mosaic.  Cubed sphere and yin-yang grids are examples
-of mosaic grids.  Note that as of v3.0.3 multi-tile grids have not yet been
+of mosaic grids.  Note that as of v3.1.0 multi-tile grids have not yet been
 implemented.
  
 \begin{figure}
@@ -267,8 +264,7 @@ These stages are:
 \item Create the Grid topology or shape.  At the completion of this
 stage, the Grid has a specific topology and distribution, but
 empty coordinate arrays.  The Grid can be used as the basis for
-allocating a Field (once Grid is integrated with Field; as of 
-v3.0.3, it is not).  Its {\tt ESMF\_GridStatus} parameter has 
+allocating a Field. Its {\tt ESMF\_GridStatus} parameter has 
 a value of {\tt ESMF\_GRIDSTATUS\_SHAPE\_READY}.  
 
 The options for specifying the Grid shape are:
@@ -286,7 +282,7 @@ pass the DistGrid into a general {\tt ESMF\_GridCreate()} method.
 required for regridding (this can vary depending on the particular
 regridding method).  At the completion of this stage, the Grid can
 be used in a regridding operation (once Grid is connected to regrid;
-as of v3.0.3, it is not).  Its {\tt ESMF\_GridStatus}
+as of v3.1.0, it is not).  Its {\tt ESMF\_GridStatus}
 has a value of {\tt ESMF\_GRIDSTATUS\_REGRID\_READY}.
 \end{enumerate}
 
