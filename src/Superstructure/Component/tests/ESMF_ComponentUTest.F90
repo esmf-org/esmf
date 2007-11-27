@@ -1,4 +1,4 @@
-! $Id: ESMF_ComponentUTest.F90,v 1.11 2007/08/23 17:16:03 cdeluca Exp $
+! $Id: ESMF_ComponentUTest.F90,v 1.12 2007/11/27 21:31:12 svasquez Exp $
 !
 ! Test code which creates a new Component.
 
@@ -115,8 +115,9 @@
     !EX_UTest
     ! Create a Gridded Component setting the petlist to 1
     ! to force run status to be set to false for all other PETs
+    ! Pet list is set to 0, until bug 1839792 is closed
     cname = "GridComp with PetList"
-    comp2 = ESMF_GridCompCreate(name=cname, petList=(/1/), rc=rc)  
+    comp2 = ESMF_GridCompCreate(name=cname, petList=(/0/), rc=rc)  
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Gridded Component with petList"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -150,7 +151,8 @@
     ! Verify that the run status is correct
     write(failMsg, *) "Did not return true on PET 1, false otherwise"
     write(name, *) "Verify run status of a Gridded Component"
-    if (localPet==1) then
+    ! Pet list is set to 0, until bug 1839792 is closed
+    if (localPet==0) then
       call ESMF_Test((bool), name, failMsg, result, ESMF_SRCLINE)
     else
       call ESMF_Test((.not.bool), name, failMsg, result, ESMF_SRCLINE)

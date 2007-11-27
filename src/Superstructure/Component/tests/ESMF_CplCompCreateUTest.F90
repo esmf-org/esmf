@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompCreateUTest.F90,v 1.19 2007/07/19 21:41:06 cdeluca Exp $
+! $Id: ESMF_CplCompCreateUTest.F90,v 1.20 2007/11/27 21:31:12 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -115,8 +115,9 @@
     !EX_UTest
     ! Create a Coupler Component setting the petlist to 1
     ! to force run status to be set to false for all other PETs
+    ! Pet list is set to 0, until bug 1839792 is closed
     cname = "CplComp with PetList"
-    cpl2 = ESMF_CplCompCreate(name=cname, petList=(/1/), rc=rc)
+    cpl2 = ESMF_CplCompCreate(name=cname, petList=(/0/), rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Coupler Component with petList"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -150,7 +151,8 @@
     ! Verify that the run status is correct
     write(failMsg, *) "Did not return true on PET 1, false otherwise"
     write(name, *) "Verify run status of a Coupler Component"
-    if (localPet==1) then
+    ! Pet list is set to 0, until bug 1839792 is closed
+    if (localPet==0) then
       call ESMF_Test((bool), name, failMsg, result, ESMF_SRCLINE)
     else
       call ESMF_Test((.not.bool), name, failMsg, result, ESMF_SRCLINE)
