@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.30 2007/11/21 22:17:51 feiliu Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.31 2007/11/27 18:35:09 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.30 2007/11/21 22:17:51 feiliu Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.31 2007/11/27 18:35:09 feiliu Exp $'
 
 !==============================================================================
 
@@ -493,7 +493,7 @@ module ESMF_ArraySpecMod
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySpecStatusPrint"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArraySpecStatusPrint - Print information of ArraySpecStatus
 
 ! !INTERFACE:
@@ -512,7 +512,7 @@ module ESMF_ArraySpecMod
 !          Specified {\tt ESMF\_ArraySpecStatus} object.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     write(*, *) "ArraySpecStatus Print Begins =====>"
