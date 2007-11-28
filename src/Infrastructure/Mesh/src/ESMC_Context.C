@@ -1,4 +1,4 @@
-// $Id: ESMC_Context.C,v 1.2 2007/11/28 16:28:02 dneckels Exp $
+// $Id: ESMC_Context.C,v 1.3 2007/11/28 16:42:39 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,8 +9,8 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <mesh/ESMC_Context.h>
-#include <mesh/ESMC_Exception.h>
+#include <ESMC_Context.h>
+#include <ESMC_Exception.h>
 
 #include <iostream>
 #include <iomanip>

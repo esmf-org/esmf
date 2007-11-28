@@ -1,4 +1,4 @@
-// $Id: ESMC_MEValues.h,v 1.2 2007/11/28 16:23:21 dneckels Exp $
+// $Id: ESMC_MEValues.h,v 1.3 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -13,14 +13,14 @@
 #ifndef ESMC_MEValues_h
 #define ESMC_MEValues_h
 
-#include <mesh/ESMC_MasterElement.h>
-#include <mesh/ESMC_MeshObj.h>
-#include <mesh/ESMC_MeshUtils.h>
-#include <mesh/ESMC_MEField.h>
-#include <mesh/ESMC_Mapping.h>
-#include <mesh/ESMC_Kernel.h>
+#include <ESMC_MasterElement.h>
+#include <ESMC_MeshObj.h>
+#include <ESMC_MeshUtils.h>
+#include <ESMC_MEField.h>
+#include <ESMC_Mapping.h>
+#include <ESMC_Kernel.h>
 
-#include <mesh/ESMC_MeshTypes.h>
+#include <ESMC_MeshTypes.h>
 
 
 namespace ESMC {

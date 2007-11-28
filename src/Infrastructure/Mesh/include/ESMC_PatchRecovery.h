@@ -1,4 +1,4 @@
-// $Id: ESMC_PatchRecovery.h,v 1.2 2007/11/28 16:23:22 dneckels Exp $
+// $Id: ESMC_PatchRecovery.h,v 1.3 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -14,12 +14,12 @@
 #define ESMC_PatchRecovery_h
 
 
-#include <mesh/ESMC_MeshDB.h>
-#include <mesh/ESMC_MeshObj.h>
-#include <mesh/ESMC_MEField.h>
-#include <mesh/ESMC_MasterElement.h>
-#include <mesh/ESMC_Exception.h>
-#include <mesh/ESMC_MCoord.h>
+#include <ESMC_MeshDB.h>
+#include <ESMC_MeshObj.h>
+#include <ESMC_MEField.h>
+#include <ESMC_MasterElement.h>
+#include <ESMC_Exception.h>
+#include <ESMC_MCoord.h>
 
 namespace ESMC {
 

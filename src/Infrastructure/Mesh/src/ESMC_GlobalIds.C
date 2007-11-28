@@ -1,4 +1,4 @@
-// $Id: ESMC_GlobalIds.C,v 1.2 2007/11/28 16:28:02 dneckels Exp $
+// $Id: ESMC_GlobalIds.C,v 1.3 2007/11/28 16:42:41 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,10 +9,10 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <mesh/ESMC_GlobalIds.h>
-#include <mesh/ESMC_ParEnv.h>
-#include <mesh/ESMC_SparseMsg.h>
-#include <mesh/ESMC_Exception.h>
+#include <ESMC_GlobalIds.h>
+#include <ESMC_ParEnv.h>
+#include <ESMC_SparseMsg.h>
+#include <ESMC_Exception.h>
 
 #include <mpi.h> 
 #include <bitset>

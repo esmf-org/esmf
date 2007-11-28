@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldReg.h,v 1.5 2007/11/28 16:23:21 dneckels Exp $
+// $Id: ESMC_FieldReg.h,v 1.6 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -13,15 +13,15 @@
 #ifndef ESMC_FieldReg_h
 #define ESMC_FieldReg_h
 
-#include <mesh/ESMC_Attr.h>
-#include <mesh/ESMC_MEField.h>
-#include <mesh/ESMC_MeshDB.h>
-#include <mesh/ESMC_MEFamily.h>
-#include <mesh/ESMC_MeshllField.h>
+#include <ESMC_Attr.h>
+#include <ESMC_MEField.h>
+#include <ESMC_MeshDB.h>
+#include <ESMC_MEFamily.h>
+#include <ESMC_MeshllField.h>
 #include <map>
-#include <mesh/ESMC_MeshDB.h>
-#include <mesh/ESMC_Iterator.h>
-#include <mesh/ESMC_IOField.h>
+#include <ESMC_MeshDB.h>
+#include <ESMC_Iterator.h>
+#include <ESMC_IOField.h>
 
 /**
  * @defgroup field

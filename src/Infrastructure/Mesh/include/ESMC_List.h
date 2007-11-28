@@ -1,4 +1,4 @@
-// $Id: ESMC_List.h,v 1.3 2007/11/28 16:23:21 dneckels Exp $
+// $Id: ESMC_List.h,v 1.4 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -13,7 +13,7 @@
 #ifndef ESMC_List_h
 #define ESMC_List_h
 
-#include <mesh/ESMC_Exception.h>
+#include <ESMC_Exception.h>
 
 #include <cstddef>
 #include <iterator>

@@ -1,4 +1,4 @@
-// $Id: ESMC_PatchRecovery.C,v 1.7 2007/11/28 16:28:03 dneckels Exp $
+// $Id: ESMC_PatchRecovery.C,v 1.8 2007/11/28 16:42:45 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,15 +9,15 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <mesh/ESMC_PatchRecovery.h>
-#include <mesh/ESMC_Exception.h>
-#include <mesh/ESMC_MeshObjConn.h>
-#include <mesh/ESMC_MeshUtils.h>
-#include <mesh/ESMC_MEValues.h>
-#include <mesh/ESMC_Polynomial.h>
-#include <mesh/ESMC_MeshField.h>
-#include <mesh/ESMC_MeshTypes.h>
-#include <mesh/ESMC_Ftn.h>
+#include <ESMC_PatchRecovery.h>
+#include <ESMC_Exception.h>
+#include <ESMC_MeshObjConn.h>
+#include <ESMC_MeshUtils.h>
+#include <ESMC_MEValues.h>
+#include <ESMC_Polynomial.h>
+#include <ESMC_MeshField.h>
+#include <ESMC_MeshTypes.h>
+#include <ESMC_Ftn.h>
 
 
 #include <set>

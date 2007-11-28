@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshField.C,v 1.4 2007/11/28 16:28:03 dneckels Exp $
+// $Id: ESMC_MeshField.C,v 1.5 2007/11/28 16:42:42 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <mesh/ESMC_MeshField.h>
+#include <ESMC_MeshField.h>
 
 #include <iostream>
 #include <algorithm>

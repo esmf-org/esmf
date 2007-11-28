@@ -1,4 +1,4 @@
-// $Id: ESMC_Search.C,v 1.4 2007/11/28 16:28:03 dneckels Exp $
+// $Id: ESMC_Search.C,v 1.5 2007/11/28 16:42:46 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,13 +9,13 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <mesh/ESMC_Search.h>
-#include <mesh/ESMC_MeshTypes.h>
-#include <mesh/ESMC_MeshObjTopo.h>
-#include <mesh/ESMC_Mapping.h>
-#include <mesh/ESMC_MeshObj.h>
-#include <mesh/ESMC_Mesh.h>
-#include <mesh/ESMC_MeshUtils.h>
+#include <ESMC_Search.h>
+#include <ESMC_MeshTypes.h>
+#include <ESMC_MeshObjTopo.h>
+#include <ESMC_Mapping.h>
+#include <ESMC_MeshObj.h>
+#include <ESMC_Mesh.h>
+#include <ESMC_MeshUtils.h>
 #include <octbox3d.h>
  
 #include <iostream>
@@ -29,7 +29,7 @@
 #include <limits>
 #include <vector>
 
-#include <mesh/ESMC_BBox.h>
+#include <ESMC_BBox.h>
 
 namespace ESMC {
 

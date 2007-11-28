@@ -1,4 +1,4 @@
-// $Id: ESMC_Migrator.C,v 1.1 2007/11/28 16:28:03 dneckels Exp $
+// $Id: ESMC_Migrator.C,v 1.2 2007/11/28 16:42:44 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,8 +9,8 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <mesh/ESMC_Migrator.h>
-#include <mesh/ESMC_ParEnv.h>
+#include <ESMC_Migrator.h>
+#include <ESMC_ParEnv.h>
 
 namespace ESMC { 
 

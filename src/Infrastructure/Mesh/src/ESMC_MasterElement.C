@@ -1,4 +1,4 @@
-// $Id: ESMC_MasterElement.C,v 1.5 2007/11/28 16:28:02 dneckels Exp $
+// $Id: ESMC_MasterElement.C,v 1.6 2007/11/28 16:42:41 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,11 +9,11 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <mesh/ESMC_MasterElement.h>
+#include <ESMC_MasterElement.h>
 
-#include <mesh/ESMC_Quadrature.h>
+#include <ESMC_Quadrature.h>
 
-#include <mesh/ESMC_Exception.h>
+#include <ESMC_Exception.h>
 #include <sacado/Sacado.hpp>
 
 #include <cmath>

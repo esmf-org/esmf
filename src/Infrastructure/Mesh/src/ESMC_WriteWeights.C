@@ -1,4 +1,4 @@
-// $Id: ESMC_WriteWeights.C,v 1.1 2007/11/28 16:28:04 dneckels Exp $
+// $Id: ESMC_WriteWeights.C,v 1.2 2007/11/28 16:42:46 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,10 +9,10 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <mesh/ESMC_WriteWeights.h>
-#include <mesh/ESMC_Interp.h>
-#include <mesh/ESMC_MeshUtils.h>
-#include <mesh/ESMC_ParEnv.h>
+#include <ESMC_WriteWeights.h>
+#include <ESMC_Interp.h>
+#include <ESMC_MeshUtils.h>
+#include <ESMC_ParEnv.h>
 
 #include <netcdf.h>
 

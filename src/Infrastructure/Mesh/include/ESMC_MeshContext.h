@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshContext.h,v 1.2 2007/11/28 16:23:22 dneckels Exp $
+// $Id: ESMC_MeshContext.h,v 1.3 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -13,7 +13,7 @@
 #ifndef ESMC_MeshContext_h
 #define ESMC_MeshContext_h
 
-#include <mesh/ESMC_MeshTypes.h>
+#include <ESMC_MeshTypes.h>
 
 // Manage the number of context bits.
 // Both Mesh and context include this file to determine the

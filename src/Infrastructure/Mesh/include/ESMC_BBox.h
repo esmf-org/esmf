@@ -1,4 +1,4 @@
-// $Id: ESMC_BBox.h,v 1.3 2007/11/28 16:23:21 dneckels Exp $
+// $Id: ESMC_BBox.h,v 1.4 2007/11/28 16:43:49 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -13,12 +13,12 @@
 #ifndef ESMC_BBox_h
 #define ESMC_BBox_h
 
-#include <mesh/ESMC_MeshDB.h>
-#include <mesh/ESMC_MeshObj.h>
-#include <mesh/ESMC_MEField.h>  // for coords
+#include <ESMC_MeshDB.h>
+#include <ESMC_MeshObj.h>
+#include <ESMC_MEField.h>  // for coords
 
 
-#include <mesh/ESMC_MeshTypes.h>
+#include <ESMC_MeshTypes.h>
 
 #include <iostream>
 

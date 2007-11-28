@@ -1,4 +1,4 @@
-// $Id: ESMC_Mapping.C,v 1.4 2007/11/28 16:28:02 dneckels Exp $
+// $Id: ESMC_Mapping.C,v 1.5 2007/11/28 16:42:41 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,15 +9,15 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <mesh/ESMC_Mapping.h>
-#include <mesh/ESMC_ShapeFunc.h>
-#include <mesh/ESMC_ParEnv.h>
+#include <ESMC_Mapping.h>
+#include <ESMC_ShapeFunc.h>
+#include <ESMC_ParEnv.h>
 #include <iostream>
 #include <limits>
 
 #include <sacado/Sacado.hpp>
 
-#include <mesh/ESMC_Exception.h>
+#include <ESMC_Exception.h>
 
 namespace ESMC {
 

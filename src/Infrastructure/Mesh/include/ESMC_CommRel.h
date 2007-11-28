@@ -1,4 +1,4 @@
-// $Id: ESMC_CommRel.h,v 1.4 2007/11/28 16:23:21 dneckels Exp $
+// $Id: ESMC_CommRel.h,v 1.5 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -16,9 +16,9 @@
 #include <vector>
 #include <iostream>
 
-#include <mesh/ESMC_MeshDB.h>
-#include <mesh/ESMC_MeshllField.h>
-#include <mesh/ESMC_SparseMsg.h>
+#include <ESMC_MeshDB.h>
+#include <ESMC_MeshllField.h>
+#include <ESMC_SparseMsg.h>
 
 namespace ESMC {
 

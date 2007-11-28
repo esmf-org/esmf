@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshObjConn.C,v 1.5 2007/11/28 16:28:03 dneckels Exp $
+// $Id: ESMC_MeshObjConn.C,v 1.6 2007/11/28 16:42:42 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,12 +9,12 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <mesh/ESMC_MeshObjConn.h>
-#include <mesh/ESMC_MeshObj.h>
-#include <mesh/ESMC_MeshObjTopo.h>
-#include <mesh/ESMC_Kernel.h>
-#include <mesh/ESMC_ParEnv.h>
-#include <mesh/ESMC_Mesh.h>
+#include <ESMC_MeshObjConn.h>
+#include <ESMC_MeshObj.h>
+#include <ESMC_MeshObjTopo.h>
+#include <ESMC_Kernel.h>
+#include <ESMC_ParEnv.h>
+#include <ESMC_Mesh.h>
 
 #include <mpi.h>
 

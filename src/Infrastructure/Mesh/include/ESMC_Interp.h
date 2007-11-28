@@ -1,4 +1,4 @@
-// $Id: ESMC_Interp.h,v 1.3 2007/11/28 16:23:21 dneckels Exp $
+// $Id: ESMC_Interp.h,v 1.4 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -13,11 +13,11 @@
 #ifndef ESMC_Interp_h
 #define ESMC_Interp_h
 
-#include <mesh/ESMC_MEField.h>
-#include <mesh/ESMC_Search.h>
-#include <mesh/ESMC_GeomRendezvous.h>
-#include <mesh/ESMC_Migrator.h>
-#include <mesh/ESMC_SparseMsg.h>
+#include <ESMC_MEField.h>
+#include <ESMC_Search.h>
+#include <ESMC_GeomRendezvous.h>
+#include <ESMC_Migrator.h>
+#include <ESMC_SparseMsg.h>
 
 #include <vector>
 #include <ostream>

@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshObjConn.h,v 1.3 2007/11/28 16:23:22 dneckels Exp $
+// $Id: ESMC_MeshObjConn.h,v 1.4 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -13,8 +13,8 @@
 #ifndef ESMC_MeshObjConn_h
 #define ESMC_MeshObjConn_h
 
-#include <mesh/ESMC_MeshObj.h>
-#include <mesh/ESMC_CommRel.h>
+#include <ESMC_MeshObj.h>
+#include <ESMC_CommRel.h>
 
 #include <set>
 

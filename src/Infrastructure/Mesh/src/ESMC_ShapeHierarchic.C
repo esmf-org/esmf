@@ -1,4 +1,4 @@
-// $Id: ESMC_ShapeHierarchic.C,v 1.5 2007/11/28 16:28:03 dneckels Exp $
+// $Id: ESMC_ShapeHierarchic.C,v 1.6 2007/11/28 16:42:46 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,9 +9,9 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <mesh/ESMC_ShapeHierarchic.h>
-#include <mesh/ESMC_Ftn.h>
-#include <mesh/ESMC_Quadrature.h>
+#include <ESMC_ShapeHierarchic.h>
+#include <ESMC_Ftn.h>
+#include <ESMC_Quadrature.h>
 
 #include <iostream>
 

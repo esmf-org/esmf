@@ -1,4 +1,4 @@
-// $Id: ESMC_SmallAlloc.C,v 1.3 2007/11/28 16:28:04 dneckels Exp $
+// $Id: ESMC_SmallAlloc.C,v 1.4 2007/11/28 16:42:46 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,9 +9,9 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <mesh/ESMC_SmallAlloc.h>
+#include <ESMC_SmallAlloc.h>
 
-#include <mesh/ESMC_Exception.h>
+#include <ESMC_Exception.h>
 
 namespace ESMC {
 
@@ -191,7 +191,7 @@ SmallObject<ObjType>::~SmallObject() {
 
 // *********** Type instantiations **********
 
-#include <mesh/ESMC_MeshObj.h>
+#include <ESMC_MeshObj.h>
 
 
 namespace ESMC {

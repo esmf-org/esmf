@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshDB.h,v 1.4 2007/11/28 16:23:22 dneckels Exp $
+// $Id: ESMC_MeshDB.h,v 1.5 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -13,13 +13,13 @@
 #ifndef ESMC_MeshDB_h
 #define ESMC_MeshDB_h
 
-#include <mesh/ESMC_MeshObj.h>
-#include <mesh/ESMC_Context.h>
-#include <mesh/ESMC_MeshContext.h>
-#include <mesh/ESMC_Attr.h>
-#include <mesh/ESMC_Kernel.h>
-#include <mesh/ESMC_MeshObjTopo.h>
-#include <mesh/ESMC_Tree.h>
+#include <ESMC_MeshObj.h>
+#include <ESMC_Context.h>
+#include <ESMC_MeshContext.h>
+#include <ESMC_Attr.h>
+#include <ESMC_Kernel.h>
+#include <ESMC_MeshObjTopo.h>
+#include <ESMC_Tree.h>
 
 #include <map>
 #include <set>

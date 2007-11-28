@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldReg.C,v 1.6 2007/11/28 16:28:02 dneckels Exp $
+// $Id: ESMC_FieldReg.C,v 1.7 2007/11/28 16:42:40 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,9 +9,9 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <mesh/ESMC_FieldReg.h>
-#include <mesh/ESMC_MEImprint.h>
-#include <mesh/ESMC_ParEnv.h>
+#include <ESMC_FieldReg.h>
+#include <ESMC_MEImprint.h>
+#include <ESMC_ParEnv.h>
 
 #include <algorithm>
 

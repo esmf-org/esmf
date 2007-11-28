@@ -1,4 +1,4 @@
-// $Id: ESMC_RefineTopo.h,v 1.2 2007/11/28 16:23:22 dneckels Exp $
+// $Id: ESMC_RefineTopo.h,v 1.3 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -13,9 +13,9 @@
 #ifndef ESMC_RefineTopo_h
 #define ESMC_RefineTopo_h
 
-#include <mesh/ESMC_MeshTypes.h>
-#include <mesh/ESMC_MeshObjTopo.h>
-#include <mesh/ESMC_Exception.h>
+#include <ESMC_MeshTypes.h>
+#include <ESMC_MeshObjTopo.h>
+#include <ESMC_Exception.h>
 
 namespace ESMC {
 

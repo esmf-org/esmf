@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshNC.C,v 1.4 2007/11/28 16:28:03 dneckels Exp $
+// $Id: ESMC_MeshNC.C,v 1.5 2007/11/28 16:42:42 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,17 +9,17 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <mesh/ESMC_MeshNC.h>
-#include <mesh/ESMC_MeshDB.h>
+#include <ESMC_MeshNC.h>
+#include <ESMC_MeshDB.h>
 
-#include <mesh/ESMC_Exception.h>
-#include <mesh/ESMC_MeshObjTopo.h>
-#include <mesh/ESMC_MeshSkin.h>
-#include <mesh/ESMC_MeshField.h>
-#include <mesh/ESMC_Mesh.h>
-#include <mesh/ESMC_IOField.h>
-#include <mesh/ESMC_ParEnv.h>
-#include <mesh/ESMC_MeshObj.h>
+#include <ESMC_Exception.h>
+#include <ESMC_MeshObjTopo.h>
+#include <ESMC_MeshSkin.h>
+#include <ESMC_MeshField.h>
+#include <ESMC_Mesh.h>
+#include <ESMC_IOField.h>
+#include <ESMC_ParEnv.h>
+#include <ESMC_MeshObj.h>
 
 #include <netcdf.h>
 

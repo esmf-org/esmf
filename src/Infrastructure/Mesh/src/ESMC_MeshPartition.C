@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshPartition.C,v 1.5 2007/11/28 16:28:03 dneckels Exp $
+// $Id: ESMC_MeshPartition.C,v 1.6 2007/11/28 16:42:43 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,16 +9,16 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <mesh/ESMC_MeshPartition.h>
-#include <mesh/ESMC_MeshObjConn.h>
+#include <ESMC_MeshPartition.h>
+#include <ESMC_MeshObjConn.h>
 
-#include <mesh/ESMC_MeshDB.h>
-#include <mesh/ESMC_MeshObjTopo.h>
+#include <ESMC_MeshDB.h>
+#include <ESMC_MeshObjTopo.h>
 
-#include <mesh/ESMC_MeshField.h>
-#include <mesh/ESMC_MeshExodus.h>
-#include <mesh/ESMC_MeshUtils.h>
-#include <mesh/ESMC_MeshRead.h>
+#include <ESMC_MeshField.h>
+#include <ESMC_MeshExodus.h>
+#include <ESMC_MeshUtils.h>
+#include <ESMC_MeshRead.h>
 
 #include <iostream>
 #include <iterator>

@@ -1,4 +1,4 @@
-// $Id: ESMC_Rebalance.C,v 1.8 2007/11/28 16:28:03 dneckels Exp $
+// $Id: ESMC_Rebalance.C,v 1.9 2007/11/28 16:42:45 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,12 +9,12 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <mesh/ESMC_Rebalance.h>
-#include <mesh/ESMC_Mesh.h>
-#include <mesh/ESMC_MeshUtils.h>
-#include <mesh/ESMC_ParEnv.h>
-#include <mesh/ESMC_MeshObjConn.h>
-#include <mesh/ESMC_MeshField.h>
+#include <ESMC_Rebalance.h>
+#include <ESMC_Mesh.h>
+#include <ESMC_MeshUtils.h>
+#include <ESMC_ParEnv.h>
+#include <ESMC_MeshObjConn.h>
+#include <ESMC_MeshField.h>
 
 
 #include <zoltan/zoltan.h>

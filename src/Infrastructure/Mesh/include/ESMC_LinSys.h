@@ -1,4 +1,4 @@
-// $Id: ESMC_LinSys.h,v 1.1 2007/11/28 16:23:21 dneckels Exp $
+// $Id: ESMC_LinSys.h,v 1.2 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -13,8 +13,8 @@
 #ifndef ESMC_LinSys_h
 #define ESMC_LinSys_h
 
-#include <mesh/ESMC_MeshObj.h>
-#include <mesh/ESMC_MEField.h>
+#include <ESMC_MeshObj.h>
+#include <ESMC_MEField.h>
 
 #ifdef ESMC_TRILINOS
 #include <Epetra_Map.h>

@@ -1,4 +1,4 @@
-// $Id: ESMC_GeomRendezvous.C,v 1.4 2007/11/28 16:28:02 dneckels Exp $
+// $Id: ESMC_GeomRendezvous.C,v 1.5 2007/11/28 16:42:41 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,13 +9,13 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <mesh/ESMC_GeomRendezvous.h>
-#include <mesh/ESMC_Exception.h>
-#include <mesh/ESMC_BBox.h>
-#include <mesh/ESMC_MeshUtils.h>
-#include <mesh/ESMC_ParEnv.h>
-#include <mesh/ESMC_MeshRead.h>
-#include <mesh/ESMC_MeshObjConn.h>
+#include <ESMC_GeomRendezvous.h>
+#include <ESMC_Exception.h>
+#include <ESMC_BBox.h>
+#include <ESMC_MeshUtils.h>
+#include <ESMC_ParEnv.h>
+#include <ESMC_MeshRead.h>
+#include <ESMC_MeshObjConn.h>
 
 #include <zoltan/zoltan.h>
 

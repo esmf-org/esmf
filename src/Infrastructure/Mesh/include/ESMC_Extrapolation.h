@@ -1,4 +1,4 @@
-// $Id: ESMC_Extrapolation.h,v 1.1 2007/11/28 16:23:21 dneckels Exp $
+// $Id: ESMC_Extrapolation.h,v 1.2 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -13,7 +13,7 @@
 #ifndef ESMC_EXTRAPOLATION_H_
 #define ESMC_EXTRAPOLATION_H_
 
-#include <mesh/ESMC_MeshTypes.h>
+#include <ESMC_MeshTypes.h>
 
 namespace ESMC {
 

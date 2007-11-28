@@ -1,4 +1,4 @@
-// $Id: ESMC_MEFamily.h,v 1.2 2007/11/28 16:23:21 dneckels Exp $
+// $Id: ESMC_MEFamily.h,v 1.3 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -13,10 +13,10 @@
 #ifndef ESMC_MEFamily_h
 #define ESMC_MEFamily_h
 
-#include <mesh/ESMC_MasterElement.h>
-#include <mesh/ESMC_MasterElementV.h>
+#include <ESMC_MasterElement.h>
+#include <ESMC_MasterElementV.h>
 
-#include <mesh/ESMC_Quadrature.h>
+#include <ESMC_Quadrature.h>
 
 #include <map>
 #include <string>

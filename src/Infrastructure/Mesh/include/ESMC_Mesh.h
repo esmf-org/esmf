@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.h,v 1.5 2007/11/28 16:23:22 dneckels Exp $
+// $Id: ESMC_Mesh.h,v 1.6 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -13,10 +13,10 @@
 #ifndef ESMC_Mesh_h
 #define ESMC_Mesh_h
 
-#include <mesh/ESMC_MeshDB.h>
-#include <mesh/ESMC_CommRel.h>
-#include <mesh/ESMC_FieldReg.h>
-#include <mesh/ESMC_CommReg.h>
+#include <ESMC_MeshDB.h>
+#include <ESMC_CommRel.h>
+#include <ESMC_FieldReg.h>
+#include <ESMC_CommReg.h>
 #include <mpi.h>
 
 /**

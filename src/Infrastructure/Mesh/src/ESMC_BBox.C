@@ -1,4 +1,4 @@
-// $Id: ESMC_BBox.C,v 1.3 2007/11/28 16:28:02 dneckels Exp $
+// $Id: ESMC_BBox.C,v 1.4 2007/11/28 16:42:38 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,12 +9,12 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <mesh/ESMC_BBox.h>
-#include <mesh/ESMC_MeshTypes.h>
-#include <mesh/ESMC_MeshObjTopo.h>
-#include <mesh/ESMC_MeshUtils.h>
-#include <mesh/ESMC_Mapping.h>
-#include <mesh/ESMC_MeshllField.h>
+#include <ESMC_BBox.h>
+#include <ESMC_MeshTypes.h>
+#include <ESMC_MeshObjTopo.h>
+#include <ESMC_MeshUtils.h>
+#include <ESMC_Mapping.h>
+#include <ESMC_MeshllField.h>
 
 #include <limits>
 #include <vector>

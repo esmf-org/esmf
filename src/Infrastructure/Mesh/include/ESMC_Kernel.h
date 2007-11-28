@@ -1,4 +1,4 @@
-// $Id: ESMC_Kernel.h,v 1.3 2007/11/28 16:23:21 dneckels Exp $
+// $Id: ESMC_Kernel.h,v 1.4 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -13,8 +13,8 @@
 #ifndef ESMC_Kernel_h
 #define ESMC_Kernel_h
 
-#include <mesh/ESMC_Attr.h>
-#include <mesh/ESMC_MeshObj.h>
+#include <ESMC_Attr.h>
+#include <ESMC_MeshObj.h>
 
 #include <ostream>
 

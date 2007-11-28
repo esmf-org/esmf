@@ -1,4 +1,4 @@
-// $Id: ESMC_Kernel.C,v 1.4 2007/11/28 16:28:02 dneckels Exp $
+// $Id: ESMC_Kernel.C,v 1.5 2007/11/28 16:42:41 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,11 +9,11 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <mesh/ESMC_Kernel.h>
-#include <mesh/ESMC_MEField.h>
-#include <mesh/ESMC_MEImprint.h>
-#include <mesh/ESMC_MeshObjConn.h>
-#include <mesh/ESMC_MeshllField.h>
+#include <ESMC_Kernel.h>
+#include <ESMC_MEField.h>
+#include <ESMC_MEImprint.h>
+#include <ESMC_MeshObjConn.h>
+#include <ESMC_MeshllField.h>
 #include <iterator>
 
 

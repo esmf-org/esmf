@@ -1,4 +1,4 @@
-// $Id: ESMC_Mapping.h,v 1.2 2007/11/28 16:23:21 dneckels Exp $
+// $Id: ESMC_Mapping.h,v 1.3 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -13,10 +13,10 @@
 #ifndef ESMC_Mapping_h
 #define ESMC_Mapping_h
 
-#include <mesh/ESMC_MeshTypes.h>
-#include <mesh/ESMC_MeshObjTopo.h>
-#include <mesh/ESMC_Exception.h>
-#include <mesh/ESMC_ShapeFunc.h>
+#include <ESMC_MeshTypes.h>
+#include <ESMC_MeshObjTopo.h>
+#include <ESMC_Exception.h>
+#include <ESMC_ShapeFunc.h>
 
 #include <string>
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshObj.h,v 1.3 2007/11/28 16:23:22 dneckels Exp $
+// $Id: ESMC_MeshObj.h,v 1.4 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -14,10 +14,10 @@
 #define ESMC_MeshObj_h
 
 
-#include <mesh/ESMC_MeshTypes.h>
-#include <mesh/ESMC_List.h>
-#include <mesh/ESMC_Tree.h>
-#include <mesh/ESMC_SmallAlloc.h>
+#include <ESMC_MeshTypes.h>
+#include <ESMC_List.h>
+#include <ESMC_Tree.h>
+#include <ESMC_SmallAlloc.h>
 
 #include <stdlib.h>
 #include <stdio.h>
