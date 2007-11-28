@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.36 2007/11/20 22:56:12 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.37 2007/11/28 22:14:39 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.36 2007/11/20 22:56:12 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.37 2007/11/28 22:14:39 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -768,6 +768,272 @@ Array *Grid::getCoordArray(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::getComputationalLBound()"
+//BOPI
+// !IROUTINE:  Grid::getComputationalLBound()"
+//
+// !INTERFACE:
+int Grid::getComputationalLBound(
+//
+// !RETURN VALUE:
+//   return code
+//
+// !ARGUMENTS:
+//
+                                 int staggerlocArg, //(in)
+                                 int localDEArg,     // (in)
+                                 int *lBndArg      // (out) needs to be of size > distRank
+                                 ){
+//
+// !DESCRIPTION:
+//  The computational lower bound for this localde.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int rc,localrc;
+  int offsetL[ESMF_MAXDIM];
+
+  // initialize return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+  
+  // Check status
+  if (status < ESMC_GRIDSTATUS_SHAPE_READY) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Grid not fully created", &rc);
+    return rc;
+  }
+
+  // Check staggerloc
+  if ((staggerlocArg < 0) || (staggerlocArg >= staggerLocCount)) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- stagger location out of range", &rc);
+    return rc;
+  }
+
+  // Ensure localDEArg isn't out of range for this PET
+  if ((localDEArg < 0) || (localDEArg >=distgrid->getDELayout()->getLocalDeCount())) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+          "- localDE outside range on this processor", &rc);
+        return rc;
+  }
+
+   // get grid distributed exclusive bounds
+   localrc=this->getExclusiveLBound(localDEArg, lBndArg);
+   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) return rc;
+
+   // get computational offset
+   localrc=this->getLDEStaggerLOffset(staggerlocArg, localDEArg, offsetL);
+   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) return rc;
+
+   // Add offset
+   for (int i=0; i<rank; i++) {
+     lBndArg[i] += offsetL[i];  
+   }
+
+  // tell the calling subroutine that we've had a successful outcome
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::getComputationalUBound()"
+//BOPI
+// !IROUTINE:  Grid::getComputationalUBound()"
+//
+// !INTERFACE:
+int Grid::getComputationalUBound(
+//
+// !RETURN VALUE:
+//   return code
+//
+// !ARGUMENTS:
+//
+                                 int staggerlocArg, //(in)
+                                 int localDEArg,     // (in)
+                                 int *uBndArg      // (out) needs to be of size > distRank
+                                 ){
+//
+// !DESCRIPTION:
+//  The computational lower bound for this localde.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int rc,localrc;
+  int offsetU[ESMF_MAXDIM];
+
+  // initialize return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+  
+  // Check status
+  if (status < ESMC_GRIDSTATUS_SHAPE_READY) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Grid not fully created", &rc);
+    return rc;
+  }
+
+  // Check staggerloc
+  if ((staggerlocArg < 0) || (staggerlocArg >= staggerLocCount)) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- stagger location out of range", &rc);
+    return rc;
+  }
+
+  // Ensure localDEArg isn't out of range for this PET
+  if ((localDEArg < 0) || (localDEArg >=distgrid->getDELayout()->getLocalDeCount())) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+          "- localDE outside range on this processor", &rc);
+        return rc;
+  }
+
+   // get grid distributed exclusive bounds
+   localrc=this->getExclusiveUBound(localDEArg, uBndArg);
+   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) return rc;
+
+   // get computational offset
+   localrc=this->getLDEStaggerUOffset(staggerlocArg, localDEArg, offsetU);
+   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) return rc;
+
+   // Add offset
+   for (int i=0; i<rank; i++) {
+     uBndArg[i] -= offsetU[i];  
+   }
+
+  // tell the calling subroutine that we've had a successful outcome
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::getExclusiveLBound()"
+//BOPI
+// !IROUTINE:  Grid::getExclusiveLBound()"
+//
+// !INTERFACE:
+int Grid::getExclusiveLBound(
+//
+// !RETURN VALUE:
+//   return code
+//
+// !ARGUMENTS:
+//
+  int localDEArg,     // (in)
+  int *lBndArg      // (out) needs to be of size > distRank
+  ){
+//
+// !DESCRIPTION:
+//  The exclusive lower bound for this localde.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int rc,localrc;
+  int distExLBnd[ESMF_MAXDIM];
+
+  // initialize return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+  
+  // Check status
+  if (status < ESMC_GRIDSTATUS_SHAPE_READY) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Grid not fully created", &rc);
+    return rc;
+  }
+
+  // Ensure localDEArg isn't out of range for this PET
+  if ((localDEArg < 0) || (localDEArg >=distgrid->getDELayout()->getLocalDeCount())) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+          "- localDE outside range on this processor", &rc);
+        return rc;
+  }
+
+   // get grid distributed exclusive bounds
+   localrc=this->getDistExclusiveLBound(localDEArg, distExLBnd);
+   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) return rc;
+
+   // Combine Dist and Undist Bounds
+   for (int i=0; i<rank; i++) {
+     if (gridIsDist[i]) {
+       lBndArg[i]=distExLBnd[gridMapDim[i]];
+     } else {
+       lBndArg[i]=undistLBound[gridMapDim[i]];
+     }
+   }
+  
+  // tell the calling subroutine that we've had a successful outcome
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::getExclusiveUBound()"
+//BOPI
+// !IROUTINE:  Grid::getExclusiveUBound()"
+//
+// !INTERFACE:
+int Grid::getExclusiveUBound(
+//
+// !RETURN VALUE:
+//   return code
+//
+// !ARGUMENTS:
+//
+  int localDEArg,     // (in)
+  int *uBndArg      // (out) needs to be of size > distRank
+  ){
+//
+// !DESCRIPTION:
+//  The exclusive lower bound for this localde.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int rc,localrc;
+  int distExUBnd[ESMF_MAXDIM];
+
+  // initialize return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+  
+  // Check status
+  if (status < ESMC_GRIDSTATUS_SHAPE_READY) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Grid not fully created", &rc);
+    return rc;
+  }
+
+  // Ensure localDEArg isn't out of range for this PET
+  if ((localDEArg < 0) || (localDEArg >=distgrid->getDELayout()->getLocalDeCount())) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+          "- localDE outside range on this processor", &rc);
+        return rc;
+  }
+
+   // get grid distributed exclusive bounds
+   localrc=this->getDistExclusiveUBound(localDEArg, distExUBnd);
+   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) return rc;
+
+   // Combine Dist and Undist Bounds
+   for (int i=0; i<rank; i++) {
+     if (gridIsDist[i]) {
+       uBndArg[i]=distExUBnd[gridMapDim[i]];
+     } else {
+       uBndArg[i]=undistUBound[gridMapDim[i]];
+     }
+   }
+  
+  // tell the calling subroutine that we've had a successful outcome
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Grid::getDistExclusiveLBound()"
 //BOPI
 // !IROUTINE:  Grid::getDistExclusiveLBound()"
@@ -939,6 +1205,47 @@ int Grid::getDistExclusiveUBound(
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
+
+
+#if 0
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::getCoordInternal()"
+//BOPI
+// !IROUTINE:  Grid::getCoordInternal()"
+//
+// !INTERFACE:
+void Grid::getCoordInternal(
+//
+// !RETURN VALUE:
+//   void
+//
+// !ARGUMENTS:
+//
+                                 int staggerloc, // (in)
+                                 int localDE,    // (in)
+                                 int *index,     // (in)  needs to be of size Grid rank
+                                 int *coord      // (out) needs to be of size Grid rank
+                                 ){
+//
+// !DESCRIPTION:
+//  Get coordinates from an index tuple. For efficiency reasons this version doesn't do error checking
+//  for a public version with error checking see  Grid::getCoord().  
+//
+//EOPI
+//-----------------------------------------------------------------------------
+
+   // Loop Getting coordinates
+  for (int c=0; c<rank; c++) {
+
+
+
+
+  }
+
+}
+//-----------------------------------------------------------------------------
+#endif
 
 
 
@@ -1959,6 +2266,17 @@ Grid::Grid(
 //EOPI
 //-----------------------------------------------------------------------------
 
+   // Delete external class contents of Grid before deleting Grid
+   //// Delete Arrays
+   for(int i=0; i<staggerLocCount; i++) {
+     for(int j=0; j<rank; j++) {
+       if (didIAllocList[i][j] && (coordArrayList[i][j]!=ESMC_NULL_POINTER)) {
+         Array::destroy(&coordArrayList[i][j]);
+       }
+     }
+   }
+
+   // Delete the internals of the Grid...
    // If present delete ProtoGrid
    if (proto != ESMC_NULL_POINTER) delete proto;
 

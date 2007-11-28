@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.21 2007/11/16 04:30:12 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.22 2007/11/28 22:14:39 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -273,10 +273,34 @@ int getDistExclusiveLBound(
                            int *lBndArg    
                            );
 
+
 int getDistExclusiveUBound(
                            int localDEArg, 
                            int *lBndArg    
                            );
+
+int getExclusiveLBound(
+                       int localDEArg, 
+                       int *lBndArg    
+                       );
+
+int getExclusiveUBound(
+                       int localDEArg, 
+                       int *uBndArg    
+                       );
+
+int getComputationalLBound(
+                           int staggerloc, 
+                           int localDEArg, 
+                           int *lBndArg    
+                           );
+
+int getComputationalUBound(
+                           int staggerloc, 
+                           int localDEArg, 
+                           int *uBndArg    
+                           );
+
 
  // Set Array for holding coordinates
  int setCoordArray(
