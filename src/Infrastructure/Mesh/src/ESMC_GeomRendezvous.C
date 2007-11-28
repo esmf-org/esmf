@@ -1,4 +1,4 @@
-// $Id: ESMC_GeomRendezvous.C,v 1.3 2007/09/17 19:05:39 dneckels Exp $
+// $Id: ESMC_GeomRendezvous.C,v 1.4 2007/11/28 16:28:02 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,22 +9,19 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_GeomRendezvous.h>
-#include <ESMC_Exception.h>
-#include <ESMC_BBox.h>
-#include <ESMC_MeshUtils.h>
-#include <ESMC_ParEnv.h>
-#include <ESMC_MeshRead.h>
-#include <ESMC_MeshObjConn.h>
+#include <mesh/ESMC_GeomRendezvous.h>
+#include <mesh/ESMC_Exception.h>
+#include <mesh/ESMC_BBox.h>
+#include <mesh/ESMC_MeshUtils.h>
+#include <mesh/ESMC_ParEnv.h>
+#include <mesh/ESMC_MeshRead.h>
+#include <mesh/ESMC_MeshObjConn.h>
 
-#include <Mesh/src/Zoltan/zoltan.h>
+#include <zoltan/zoltan.h>
 
 #include <limits>
 
-#define GEOM_DEBUG
-
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 /*-----------------------------------------------------------------------------------*/
 // Zoltan callbacks
@@ -131,7 +128,7 @@ void GeomRend::build_dest(double cmin[], double cmax[], ZoltanUD &zud) {
   std::fill(cmax, cmax+sdim, -std::numeric_limits<double>::max());
 
   MEField<> &coord = *dstmesh.GetCoordField();
-
+  
   // Loop the kernels
   KernelList::iterator ki = dstmesh.set_begin(), ke = dstmesh.set_end();
   for (; ki != ke; ++ki) {
@@ -162,7 +159,7 @@ void GeomRend::build_dest(double cmin[], double cmax[], ZoltanUD &zud) {
 
           for (; ri != re; ++ri) {
 
-            if (ri->type == MeshObj::USES && ri->obj->get_type() & dcfg.obj_type) {
+            if (ri->type == MeshObj::USES && (ri->obj->get_type() & dcfg.obj_type)) {
 
               std::vector<MeshObj*>::iterator lb =
                 std::lower_bound(zud.dstObj.begin(), zud.dstObj.end(), ri->obj);
@@ -253,12 +250,12 @@ static void rcb_isect(Zoltan_Struct *zz, MEField<> &coord, std::vector<MeshObj*>
     BBox ebox(coord, elem, geom_tol);
 
     // Insersect with the cuts
-    Zoltan_LB_Box_Assign(zz, ebox.getMin()[0],
-                             ebox.getMin()[1],
-                             sdim > 2 ? ebox.getMin()[2] : 0,
-                             ebox.getMax()[0],
-                             ebox.getMax()[1],
-                             sdim > 2 ? ebox.getMax()[2] : 0,
+    Zoltan_LB_Box_Assign(zz, ebox.getMin()[0]-geom_tol,
+                             ebox.getMin()[1]-geom_tol,
+                             (sdim > 2 ? ebox.getMin()[2] : 0) - geom_tol,
+                             ebox.getMax()[0]+geom_tol,
+                             ebox.getMax()[1]+geom_tol,
+                             (sdim > 2 ? ebox.getMax()[2] : 0) + geom_tol,
                              &procs[0],
                              &numprocs);
 
@@ -305,16 +302,18 @@ static void add_neighbors(CommRel &src_mig) {
       
       UInt proc = di->processor;
       
-      CommRel::CommNode cnode(node, proc);
-      
-      CommRel::MapType::iterator lb = 
-        std::lower_bound(src_mig.domain_begin(), src_mig.domain_end(), cnode);
+      for (UInt e = 0; e < elem.size(); e++) {
         
-      if (lb == src_mig.domain_end() || *lb != cnode) {
-       // std::cout << "Inserting neighbor:" << cnode.obj->get_id() << std::endl;
-        src_mig.domain_insert(lb, cnode);
+        CommRel::CommNode cnode(elem[e], proc);
+        
+        CommRel::MapType::iterator lb = 
+          std::lower_bound(src_mig.domain_begin(), src_mig.domain_end(), cnode);
+          
+        if (lb == src_mig.domain_end() || *lb != cnode) {
+          //std::cout << "Inserting neighbor:" << cnode.obj->get_id() << std::endl;
+          src_mig.domain_insert(lb, cnode);
+        }
       }
-      
       ++di;
     }
     
@@ -477,10 +476,10 @@ void GeomRend::migrate_meshes() {
   Trace __trace("GeomRend::migrate_meshes()");
   
   // First the sourcemesh
-  srcComm.GetCommRel(MeshObj::NODE).build_range(true);
-  srcComm.GetCommRel(MeshObj::EDGE).build_range(true);
-  srcComm.GetCommRel(MeshObj::FACE).build_range(true);
-  srcComm.GetCommRel(MeshObj::ELEMENT).build_range(true);
+  srcComm.GetCommRel(MeshObj::NODE).build_range();
+  srcComm.GetCommRel(MeshObj::EDGE).build_range();
+  srcComm.GetCommRel(MeshObj::FACE).build_range();
+  srcComm.GetCommRel(MeshObj::ELEMENT).build_range();
   
   MEField<> *sc = srcmesh.GetCoordField();
   MEField<> *sc_r = srcmesh_rend.GetCoordField();
@@ -491,13 +490,13 @@ void GeomRend::migrate_meshes() {
   
   
   // And now the destination
-  dstComm.GetCommRel(MeshObj::NODE).build_range(true);
+  dstComm.GetCommRel(MeshObj::NODE).build_range();
   
   // Only for the 'conserv' case
   if (iter_is_obj) {
-    dstComm.GetCommRel(MeshObj::EDGE).build_range(true);
-    dstComm.GetCommRel(MeshObj::FACE).build_range(true);
-    dstComm.GetCommRel(MeshObj::ELEMENT).build_range(true);
+    dstComm.GetCommRel(MeshObj::EDGE).build_range();
+    dstComm.GetCommRel(MeshObj::FACE).build_range();
+    dstComm.GetCommRel(MeshObj::ELEMENT).build_range();
   }
   
   MEField<> *dc = dstmesh.GetCoordField();
@@ -622,7 +621,7 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF)
   // Now migrate the meshes.
   migrate_meshes();
   
-  WriteMesh(srcmesh_rend, "srcrend");
+  //WriteMesh(srcmesh_rend, "srcrend");
 
 
   // Now, IMPORTANT: We transpose the destination comm since this is how is will be
@@ -640,5 +639,4 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF)
 
 }
 
-} // namespace
-} // namespace
+} // namespace ESMC

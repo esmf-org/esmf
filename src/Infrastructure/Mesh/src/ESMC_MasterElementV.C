@@ -1,4 +1,4 @@
-// $Id: ESMC_MasterElementV.C,v 1.2 2007/08/07 20:46:00 dneckels Exp $
+// $Id: ESMC_MasterElementV.C,v 1.3 2007/11/28 16:28:02 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,14 +9,12 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_MasterElementV.h>
+#include <mesh/ESMC_MasterElementV.h>
 
 #include <iostream>
 #include <iterator>
 
-namespace ESMCI {
-namespace MESH {
-
+namespace ESMC {
 
 template <class METRAITS>
 std::map<std::string, MasterElementV<METRAITS>*>  MasterElementV<METRAITS>::meVMap;
@@ -38,19 +36,17 @@ template <class METRAITS>
 MasterElementV<METRAITS>::MasterElementV(
                                    const ShapeFunc *shape) :
 MasterElement<METRAITS>(" SHAPE:<" + shape->name() + ">"),
-m_shape(shape),
-me1(NULL),
-me2(NULL),
-me3(NULL),
-me4(NULL)
+m_shape(shape)
 {
   compute_imprint(*this, this->dofvalset);
 
+  /*
 std::cout << "ME:" << this->name << ", imprint:" << std::endl;
 for (UInt i = 0; i < num_functions(); i++) {
   const int *dd = GetDofDescription(i);
   std::cout << " (" << dd[0] << ", " << dd[1] << ", " << dd[2] << ") valset:" << this->GetDofValSet(i) << std::endl;
 }
+*/
 
 }
 
@@ -63,7 +59,6 @@ template <class METRAITS>
 MasterElement<METraits<> > *MasterElementV<METRAITS>::operator()(METraits<>) const {
   return MasterElementV<METraits<> >::instance(m_shape);
 }
-
 
 template <class METRAITS>
 MasterElement<METraits<fad_type,double> > *MasterElementV<METRAITS>::operator()(METraits<fad_type,double>) const {
@@ -91,21 +86,18 @@ void MasterElementV<METRAITS>::JxW(
 
   for (UInt i = 0; i < intg->npoints(); i++) result[i] = intg->weights()[i]*Jx[i];
 }
-
 template <class METRAITS>
 void MasterElementV<METRAITS>::shape_grads(UInt npts,
       const Mapping<typename ME2MPTraits<METRAITS>::value> *mapping, 
-      const mdata_type mdata[], const double pcoord[], mdata_type result[]) const 
+      const mdata_type mdata[], const double pcoord[], const double param_shape_grads[],
+      mdata_type result[]) const 
 {
   // First get the mapping derivatives
   UInt ndofs = m_shape->NumFunctions();
   UInt pdim = mapping->parametric_dim();
-  std::vector<double> sgrads(ndofs*pdim);
   UInt sdim = mapping->spatial_dim();
   std::vector<mdata_type> jac_inv(sdim*sdim);
   for (UInt j = 0; j < npts; j++) {
-    // Get shape function derivs
-    m_shape->shape_grads(1, &pcoord[j*pdim], &sgrads[0]);
 
     // Mapping inv jac
     mapping->jac_inv(mdata, &pcoord[j*pdim], &jac_inv[0]);
@@ -116,7 +108,7 @@ void MasterElementV<METRAITS>::shape_grads(UInt npts,
         result[(j*ndofs + nd)*sdim + i] = 0.0;
         // Only do to pdim, not sdim, because assume zero deriv w/rspt d coord
         for (UInt k = 0; k < pdim; k++) {
-          result[(j*ndofs + nd)*sdim + i] += sgrads[nd*pdim+k]*jac_inv[k*sdim+i];
+          result[(j*ndofs + nd)*sdim + i] += param_shape_grads[(j*ndofs+nd)*pdim+k]*jac_inv[k*sdim+i];
         }
       }
     } // nd
@@ -127,13 +119,11 @@ template <class METRAITS>
 void MasterElementV<METRAITS>::function_grads(UInt npts, UInt fdim,
    const Mapping<typename ME2MPTraits<METRAITS>::value> *mapping,
     const mdata_type mdata[], const double pcoord[], const field_type fdata[], 
-   typename richest_type<mdata_type,field_type>::value result[]) const 
+   typename richest_type<mdata_type,field_type>::value result[],
+   mdata_type shape_grads[]) const 
 {
   UInt sdim = mapping->spatial_dim();
   UInt ndofs = m_shape->NumFunctions();
-  std::vector<mdata_type> sgrads(npts*ndofs*sdim);
-
-  this->shape_grads(npts, mapping, mdata, pcoord, &sgrads[0]);
 
   // Now contract
   for (UInt p = 0; p < npts; p++) {
@@ -141,7 +131,7 @@ void MasterElementV<METRAITS>::function_grads(UInt npts, UInt fdim,
       for (UInt d = 0; d < sdim; d++) {
         result[(p*fdim + fd)*sdim + d] = 0;
         for (UInt n = 0; n < ndofs; n++) {
-          result[(p*fdim+fd)*sdim+d] += fdata[n*fdim +fd]*sgrads[(p*ndofs+n)*sdim+d];
+          result[(p*fdim+fd)*sdim+d] += fdata[n*fdim +fd]*shape_grads[(p*ndofs+n)*sdim+d];
         }
       }
     }
@@ -152,7 +142,8 @@ template <class METRAITS>
 void MasterElementV<METRAITS>::function_curl(UInt npts,
   const Mapping<typename ME2MPTraits<METRAITS>::value> *mapping,
   const mdata_type mdata[], const double pcoord[], const field_type fdata[], 
-  typename richest_type<mdata_type,field_type>::value result[]) const 
+  typename richest_type<mdata_type,field_type>::value result[],
+  mdata_type shape_grads[]) const 
 {
   // This is a dumb implementation, since it calculates way to many grads.  TODO optimize.
   UInt sdim = mapping->spatial_dim();
@@ -161,7 +152,7 @@ void MasterElementV<METRAITS>::function_curl(UInt npts,
   if (sdim != 3) throw("function_curl not yet implemented for sdim != 3");
 
   // First get all gradients of function
-  function_grads(npts, sdim, mapping, mdata, pcoord, fdata, &fgrads[0]);
+  function_grads(npts, sdim, mapping, mdata, pcoord, fdata, &fgrads[0], shape_grads);
 
   // Curl is {dyf3-dzf2, dzf1-dxf3,dxf2-dyf1} 
   for (UInt p = 0; p < npts; p++) {
@@ -172,32 +163,36 @@ void MasterElementV<METRAITS>::function_curl(UInt npts,
 }
 
 template <class METRAITS>
-void MasterElementV<METRAITS>::normal(UInt npts, 
-  const Mapping<typename ME2MPTraits<METRAITS>::value> *mapping,
-  const mdata_type mdata[], const double pcoord[], mdata_type result[]) const 
+void MasterElementV<METRAITS>::function_values(
+               UInt npts, UInt fdim, const double pcoord[],
+                const field_type fdata[], field_type results[]) const
 {
-  // get normals
-  mapping->normal(npts, mdata, pcoord, result);
+  UInt ndofs = m_shape->NumFunctions();
+  std::vector<double> svals(npts*ndofs);
+  m_shape->shape(npts, pcoord, &svals[0]);
+
+  function_values(npts, fdim, pcoord, fdata, results, &svals[0]);
 
 }
 
 template <class METRAITS>
-void MasterElementV<METRAITS>::unit_normal(UInt npts, 
-  const Mapping<typename ME2MPTraits<METRAITS>::value> *mapping,
-  const mdata_type mdata[], const double pcoord[], mdata_type result[]) const 
+void MasterElementV<METRAITS>::function_values(
+               UInt npts, UInt fdim, const double pcoord[],
+               const field_type fdata[], field_type results[],
+               double shape_vals[]) const
 {
-  UInt sdim = mapping->spatial_dim();
+  UInt ndofs = m_shape->NumFunctions();
 
-  // get normals
-  mapping->normal(npts, mdata, pcoord, result);
-
-  // normalize
-  for (UInt p = 0; p < npts; p++) {
-    mdata_type rnorm_i = 0;
-    for (UInt i = 0; i < sdim; i++) rnorm_i += result[p*sdim+i]*result[p*sdim+i];
-    rnorm_i = 1.0/std::sqrt(rnorm_i);
-    for (UInt i = 0; i < sdim; i++) result[p*sdim+i] *= rnorm_i;
+  // contract
+  for (UInt j = 0; j < npts; j++) {
+   for (UInt f = 0; f < fdim; f++) {
+     results[j*fdim + f] = 0;
+     for (UInt n = 0; n < ndofs; n++) {
+        results[j*fdim + f] += shape_vals[j*ndofs+n]*fdata[n*fdim + f];
+      }
+    }
   }
+
 }
 
 template <class METRAITS>
@@ -218,14 +213,25 @@ void MasterElementV<METRAITS>::InterpPoints(
 }
 
 template <class METRAITS>
-void MasterElementV<METRAITS>::Interpolate(const double vals[], double res[]) const
+void MasterElementV<METRAITS>::Interpolate(UInt fdim, const double vals[], double res[]) const
 {
-  m_shape->Interpolate(vals, res);
+  UInt nip = m_shape->NumInterp();
+  UInt nfunc = num_functions();
+  
+  std::vector<double> ires(nfunc);
+  
+  for (UInt d = 0; d < fdim; d++) {
+    m_shape->Interpolate(&vals[d*nip], &ires[0]);
+    
+    for (UInt n = 0; n < nfunc; ++n) 
+      res[n*fdim+d] = ires[n];
+  }
+
 }
 
 // Side element specializations
 template<class METRAITS>
-MasterElement<METRAITS> *MasterElementV<METRAITS>::side_element(UInt side) {
+MasterElement<METRAITS> *MasterElementV<METRAITS>::side_element(UInt side) const {
   Throw() << "Could not find side element, side=" << side << "ME=" << this->name << std::endl;
 }
 
@@ -234,5 +240,4 @@ template class MasterElementV<METraits<fad_type,double> >;
 template class MasterElementV<METraits<double,fad_type> >;
 template class MasterElementV<METraits<fad_type,fad_type> >;
 
-} // namespace 
 } // namespace 

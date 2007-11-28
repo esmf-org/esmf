@@ -1,4 +1,4 @@
-// $Id: ESMC_Attr.C,v 1.1 2007/08/07 17:47:59 dneckels Exp $
+// $Id: ESMC_Attr.C,v 1.2 2007/11/28 16:28:02 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,11 +9,10 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_Attr.h>
-#include <ESMC_MeshObj.h>
+#include <mesh/ESMC_Attr.h>
+#include <mesh/ESMC_MeshObj.h>
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 std::ostream &operator<<(std::ostream &os, const Attr &attr) {
   os << MeshObjTypeString(attr.type);
@@ -22,7 +21,7 @@ std::ostream &operator<<(std::ostream &os, const Attr &attr) {
  
   // verbose print the local contexts
   for (UInt i = 0; i < Attr::numReservedContexts; i++) {
-    if (attr.get_context().is_set(i))
+    if (attr.GetContext().is_set(i))
       os << Attr::reservedContextNames[i] << ", ";
   }
   os << "} ";
@@ -56,5 +55,4 @@ char *Attr::reservedContextNames[] =
 };
 
 
-} // namespace
 } // namespace

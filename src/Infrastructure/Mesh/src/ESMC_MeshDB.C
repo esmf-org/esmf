@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshDB.C,v 1.3 2007/09/10 17:38:29 dneckels Exp $
+// $Id: ESMC_MeshDB.C,v 1.4 2007/11/28 16:28:02 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,23 +9,22 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_MeshDB.h>
+#include <mesh/ESMC_MeshDB.h>
 
-#include <ESMC_MeshObjTopo.h>
-#include <ESMC_Exception.h>
-#include <ESMC_MeshObjConn.h>
-#include <ESMC_Mapping.h>
-#include <ESMC_Quadrature.h>
-#include <ESMC_MEField.h>
-#include <ESMC_ParEnv.h>
+#include <mesh/ESMC_MeshObjTopo.h>
+#include <mesh/ESMC_Exception.h>
+#include <mesh/ESMC_MeshObjConn.h>
+#include <mesh/ESMC_Mapping.h>
+#include <mesh/ESMC_Quadrature.h>
+#include <mesh/ESMC_MEField.h>
+#include <mesh/ESMC_ParEnv.h>
 
 #include <iterator>
 #include <iostream>
 #include <ostream>
 #include <algorithm>
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 //#define DEL_DEBUG
 
@@ -48,6 +47,8 @@ max_mapping_data(0),
 fname("NONE"),
 committed(false),
 use_sides(false),
+use_edges(false),
+skinned(false),
 Fields()
 {
   // Set up context(s)
@@ -109,6 +110,19 @@ MeshDB::~MeshDB() {
 void MeshDB::UseSides(bool val) {
   ThrowRequire(!committed);
   use_sides = val;
+  
+  if (side_type() == MeshObj::EDGE)
+    use_edges = val;
+  
+}
+
+void MeshDB::UseEdges(bool val) {
+  ThrowRequire(!committed);
+  use_edges = val;
+  
+  if (side_type() == MeshObj::EDGE)
+    use_sides = val;
+  
 }
 
 void MeshDB::Print(std::ostream &os, bool summary_only) const {
@@ -198,7 +212,7 @@ void MeshDB::update_obj(MeshObj *obj, const Attr &attr) {
   const Attr &oattr = GetAttr(*obj);
   if (attr == oattr) return; // nothing to do
   // Make sure object is not changing type.
-  if (attr.get_type() != oattr.get_type())
+  if (attr.GetType() != oattr.GetType())
     Throw() << "update_object, attr type changing:" << attr << " to " << oattr << std::endl;
 
   // Take object out of old list.
@@ -371,9 +385,9 @@ void MeshDB::add_edge(MeshObj &edge, MeshObj &element, int ordinal, UInt edgeset
   Attr attr(MeshObj::EDGE, edgeset);
   if (local) {
     // if local, then not part of the original mesh
-    attr.get_context().set(Attr::PENDING_CREATE_ID);
-    attr.get_context().clear(Attr::GENESIS_ID);
-    attr.get_context() |= ctxt;
+    attr.GetContext().set(Attr::PENDING_CREATE_ID);
+    attr.GetContext().clear(Attr::GENESIS_ID);
+    attr.GetContext() |= ctxt;
   }
   push_back_sorted(edge, attr, topo);
 
@@ -448,9 +462,9 @@ void MeshDB::add_side(MeshObj &side, MeshObj &element, int ordinal, UInt sideset
   Attr attr(side_type(), sideset);
   if (local) {
     // if local, then not part of the original mesh
-    attr.get_context().set(Attr::PENDING_CREATE_ID);
-    attr.get_context().clear(Attr::GENESIS_ID);
-    attr.get_context() |= ctxt;
+    attr.GetContext().set(Attr::PENDING_CREATE_ID);
+    attr.GetContext().clear(Attr::GENESIS_ID);
+    attr.GetContext() |= ctxt;
   }
   push_back_sorted(side, attr, topo);
 
@@ -783,7 +797,7 @@ void MeshDB::ResolvePendingDelete(int obj_type) {
         get_map(ni->get_type()).erase(ti);
 
 #ifdef DEL_DEBUG
-Par::Out() << "MeshDB delete " << MeshObjTypeString(ni->get_type()) << " " << ni->get_id() << std::endl;
+Par::Out() << "MeshDB delete " << MeshObjTypeString(ni->GetType()) << " " << ni->get_id() << std::endl;
 #endif
         mi->erase(*ni);  // PENDING DELETE HAS NO DATA
         delete &*ni;
@@ -828,7 +842,7 @@ void MeshDB::ResolvePendingCreate() {
   remove_unused_kernels();
 }
 
-void MeshDB::remove_unused_nodes() {
+void MeshDB::remove_unused_nodes(bool del_node) {
   MeshDB::iterator ni = node_begin_all(), ne = node_end_all(), nn;
 
   UInt ndeleted = 0;
@@ -851,7 +865,12 @@ void MeshDB::remove_unused_nodes() {
 
   //std::cout << "ndeleted=" << ndeleted << std::endl;
 
-  ResolvePendingDelete();
+  if (del_node) {
+    ResolvePendingDelete();
+  
+    remove_unused_kernels();
+
+  }
 }
 
 void MeshDB::linearize_data_index() {
@@ -905,38 +924,74 @@ void MeshDB::AssumeContexts(const MeshDB &rhs) {
   // simple enough
 }
 
-// In some ways, this is simpler than creating an arbitraty side, since we
-// know the object is always shared across processors.  Assumption: the mesh has
-// already been skinned, which tells us when an edge/face is on a proc boundry
-// as opposed to an exterior.
+/*
+ * Duplicate objects on proc boundaries will be resolved by calling 
+ * Mesh.ResolvePendingCreate()
+ */
 void MeshDB::CreateAllSides() {
   Trace __trace("MeshDB::CreateAllSides()");
-Par::Out() << "CreateAllSides" << std::endl;
 
-  // Loop elements: create all faces, edges
+  ThrowRequire(skinned);
+  
+  if (side_type() == MeshObj::EDGE) {
+    CreateAllEdges();
+    return;
+  }
+  
+  // Loop elements: create all faces
   MeshDB::iterator eit = elem_begin(), eet = elem_end();
+  
   for (; eit != eet; ++eit) {
     MeshObj &elem = *eit;
+    
     // Loop sides.  If side not there, create
     const MeshObjTopo *topo = GetMeshObjTopo(elem);
-    // Edges
-    if (side_type() != MeshObj::EDGE) {
-      for (int e = 0; e < topo->num_edges; e++) {
-        MeshObjRelationList::iterator ei = MeshObjConn::find_relation(elem, MeshObj::EDGE, e);
-        if (ei != elem.Relations.end()) continue;
-        MeshObj *nedge = new MeshObj(MeshObj::EDGE, get_new_local_id(MeshObj::EDGE));
-        const MeshObjTopo *etopo = topo->edge_topo(e);
-        add_edge_local(*nedge, elem, e, 0, etopo);
-      }
-    }
+    
     for (UInt s = 0; s < topo->num_sides; s++) {
       MeshObjRelationList::iterator si = MeshObjConn::find_relation(elem, side_type(), s);
+      
       // If there, fine; move on.
       if (si != elem.Relations.end()) continue;
+      
       MeshObj *nside = new MeshObj(side_type(), get_new_local_id(side_type()));
+      
       const MeshObjTopo *stopo = topo->side_topo(s);
+    
       add_side_local(*nside, elem, s, 0, stopo);
+   
     } // sides
+    
+  } // elements
+}
+
+void MeshDB::CreateAllEdges() {
+  Trace __trace("MeshDB::CreateAllEdges()");
+
+  ThrowRequire(skinned);
+  
+  // Loop elements: create all faces, edges
+  MeshDB::iterator eit = elem_begin(), eet = elem_end();
+  
+  for (; eit != eet; ++eit) {
+    MeshObj &elem = *eit;
+  
+    // Loop sides.  If side not there, create
+    const MeshObjTopo *topo = GetMeshObjTopo(elem);
+    
+    for (int e = 0; e < topo->num_edges; e++) {
+      
+      MeshObjRelationList::iterator ei = MeshObjConn::find_relation(elem, MeshObj::EDGE, e);
+    
+      if (ei != elem.Relations.end()) continue;
+      
+      MeshObj *nedge = new MeshObj(MeshObj::EDGE, get_new_local_id(MeshObj::EDGE));
+      
+      const MeshObjTopo *etopo = topo->edge_topo(e);
+      add_edge_local(*nedge, elem, e, 0, etopo);
+      
+    }
+    
+    
   } // elements
 }
 
@@ -949,5 +1004,18 @@ void MeshDB::remove_unused_kernels() {
   }
 }
 
-} // namespace
+void MeshDB::CompactData() {
+  KernelList::iterator ki = set_begin(), ke = set_end(), kn;
+  for (; ki != ke; ++ki) {
+    ki->CompactStores();
+  }
+}
+
+void MeshDB::DataStoreInfo(std::ostream &os) {
+  KernelList::iterator ki = set_begin(), ke = set_end(), kn;
+  for (; ki != ke; ++ki) {
+    ki->PrintStoreInfo(os);
+  }
+}
+
 } // namespace

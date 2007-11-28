@@ -1,4 +1,4 @@
-// $Id: ESMC_Polynomial.C,v 1.4 2007/08/20 22:22:46 dneckels Exp $
+// $Id: ESMC_Polynomial.C,v 1.5 2007/11/28 16:28:03 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,7 +9,8 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_Polynomial.h>
+#include <mesh/ESMC_Polynomial.h>
+#include <mesh/ESMC_Ftn.h>
 
 #include <iterator>
 #include <iostream>
@@ -18,8 +19,7 @@
 extern "C" void FTN(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,double*,int*,double*,int*,int*);
 #endif
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 void generate_ILkernel(std::vector<double> &coef) {
   UInt k = coef.size() - 3;
@@ -144,5 +144,4 @@ template void PolyFit1D(UInt, const double*, const double*, const std::vector<Le
 template void PolyFit1D(UInt, const double*, const double*, const std::vector<ILegendre<double>*> &, double *);
 template void PolyFit1D(UInt, const double*, const double*, const std::vector<Monomial<double>*> &, double *);
 
-} // namespace
 } // namespace

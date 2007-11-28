@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshObjConn.C,v 1.4 2007/09/10 17:38:29 dneckels Exp $
+// $Id: ESMC_MeshObjConn.C,v 1.5 2007/11/28 16:28:03 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,19 +9,18 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_MeshObjConn.h>
-#include <ESMC_MeshObj.h>
-#include <ESMC_MeshObjTopo.h>
-#include <ESMC_Kernel.h>
-#include <ESMC_ParEnv.h>
-#include <ESMC_Mesh.h>
+#include <mesh/ESMC_MeshObjConn.h>
+#include <mesh/ESMC_MeshObj.h>
+#include <mesh/ESMC_MeshObjTopo.h>
+#include <mesh/ESMC_Kernel.h>
+#include <mesh/ESMC_ParEnv.h>
+#include <mesh/ESMC_Mesh.h>
 
 #include <mpi.h>
 
 #include <set>
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 namespace MeshObjConn {
 
@@ -177,9 +176,9 @@ MeshObjRelationList::iterator find_relation(MeshObj &obj, UInt objtype) {
   return ri;
 }
 
-void PatchNodes(const MeshObj &elem, std::set<const MeshObj*> &nodes) {
+void PatchNodes(const MeshObj &elem, std::set<MeshObj*> &nodes) {
 
- std::set<const MeshObj*>().swap(nodes);
+ std::set<MeshObj*>().swap(nodes);
 
  std::set<MeshObj*> elems;
   // Get the patch of elements
@@ -201,13 +200,44 @@ void PatchNodes(const MeshObj &elem, std::set<const MeshObj*> &nodes) {
       UInt npe = GetMeshObjTopo(selem)->num_nodes;
       // Loop the nodes as described by the rme
       for (UInt i = 0; i < npe; i++) {
-        const MeshObj &snode = *selem.Relations[i].obj;
+        MeshObj &snode = *selem.Relations[i].obj;
         nodes.insert(&snode);
       }
     }
 
   } // for n
 
+}
+
+// Return all neighboring elements of this element
+void NeighborElements(MeshObj &elem, std::set<MeshObj*> &nbors) {
+  
+  const MeshObjTopo *etopo = GetMeshObjTopo(elem);
+  
+  for (UInt n = 0; n < etopo->num_vertices; n++) {
+    
+    const MeshObj &node = *elem.Relations[n].obj;
+    
+    MeshObjRelationList::const_iterator ei = node.Relations.begin(), ee = node.Relations.end();
+    
+    for (; ei != ee; ++ei) {
+      
+      if (ei->obj->get_type() == MeshObj::ELEMENT && ei->type == MeshObj::USED_BY)
+        nbors.insert(ei->obj);
+    }
+    
+  }
+  
+}
+
+void common_objs(MeshObj *obj,
+                 UInt rel_type, 
+                 UInt out_obj_type, 
+                 std::vector<MeshObj*> &out_obj)
+{
+  std::vector<MeshObj*> on(1, obj);
+
+  common_objs(&on[0], &on[on.size()], rel_type, out_obj_type, out_obj);
 }
 
 template<typename obj_iter>
@@ -1009,4 +1039,4 @@ bool verify_face_relations(Mesh &mesh) {
 
 } // namespace 
 } // namespace 
-} // namespace 
+

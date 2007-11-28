@@ -1,4 +1,4 @@
-// $Id: ESMC_MCoord.C,v 1.1 2007/08/07 17:48:00 dneckels Exp $
+// $Id: ESMC_MCoord.C,v 1.2 2007/11/28 16:28:02 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,11 +9,10 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_MCoord.h>
+#include <mesh/ESMC_MCoord.h>
 #include <cmath>
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 MCoord::MCoord(const double c[], const double n[]) {
   for (UInt i = 0; i < SpaceDim(); i++) {
@@ -25,6 +24,32 @@ MCoord::MCoord(const double c[], const double n[]) {
   u[3] = tmp; u[4] = -n[0]*n[1]/tmp; u[5] = -n[0]*n[2]/tmp;
 }
 
+MCoord::MCoord() {
+  for (UInt i = 0; i < 3; i++) {
+    ct[i] = 0;
+    u[2*i] = 0;
+    u[2*i+1] = 0;
+  }
+}
+
+MCoord &MCoord::operator=(const MCoord &rhs) {
+  if (this == &rhs) return *this;
+  
+  for (UInt i = 0; i < 3; i++) {
+    ct[i] = rhs.ct[i];
+    u[2*i] = rhs.u[2*i];
+    u[2*i+1] = rhs.u[2*i+1];
+  }
+
+  return *this;
+}
+
+MCoord::MCoord(const MCoord &rhs) {
+
+  *this = rhs;
+  
+}
+
 void MCoord::Transform(const double in[], double out[]) const {
   for (UInt i = 0; i < ManifoldDim(); i++) {
     out[i] = 0;
@@ -34,5 +59,4 @@ void MCoord::Transform(const double in[], double out[]) const {
   }
 }
 
-} // namespace
 } // namespace

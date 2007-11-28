@@ -1,4 +1,4 @@
-// $Id: ESMC_MEField.C,v 1.2 2007/09/10 17:38:29 dneckels Exp $
+// $Id: ESMC_MEField.C,v 1.3 2007/11/28 16:28:02 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,12 +9,15 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_MEField.h>
-#include <ESMC_MeshField.h>
+#include <mesh/ESMC_MEField.h>
+#include <mesh/ESMC_MeshField.h>
+#include <mesh/ESMC_MeshUtils.h>
+#include <mesh/ESMC_MeshObjConn.h>
+
+#include <mesh/ESMC_ParEnv.h>
 
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 // ********** New style fields ************
 // MEFieldBase (no templates)
@@ -97,8 +100,223 @@ void MEField<_FIELD>::Getfields(std::vector<_FIELD*> &res) const {
   }
 }
 
-template class MEField<_field>;
-template class MEField<SField>;
+// MEField<SField> specialization
+MEField<SField>::MEField(MEField<_field> &rhs) :
+MEFieldBase(rhs.name(), rhs.GetMEFamily(), rhs.ObjType(), rhs.GetContext(), rhs.dim(), false, false, rhs.FType()),
+fidx_table(),
+fields(),
+primaryfield(NULL),
+f(rhs),
+dof_buffer(0)
+{
+  fidx_table = rhs.fidx_table;
+  
+  for (UInt i = 0; i < rhs.fields.size(); i++) {
+    fields.push_back(new SField(*rhs.fields[i]));  
+  }
+  
+  if (rhs.is_nodal()) primaryfield = fields[0];
+  
+  MEFieldBase::ordinal = rhs.ordinal;
+  
+  field_objs.resize(fields.size());
+  
+}
 
-} // namespace
+/*-------------------------------------------------------*/
+// The MEField<SField> specialization
+/*-------------------------------------------------------*/
+
+MEField<SField>::~MEField() {
+  
+  for (UInt i = 0; i < fields.size(); i++) 
+    delete fields[i];
+}
+
+UInt MEField<SField>::Numfields() const {
+  return fidx_table.size();
+}
+
+SField *MEField<SField>::Getfield(UInt nval) const {
+  std::vector<UInt>::const_iterator i = 
+    std::lower_bound(fidx_table.begin(), fidx_table.end(), nval);
+  // Error if not there
+  if (i == fidx_table.end() || *i != nval) {
+    Throw() << "Field:" << fname << ", could not get nval:" << nval;
+  }
+
+  UInt pos = std::distance(fidx_table.begin(), i);
+  return *(fields.begin() + pos);
+};
+
+UInt MEField<SField>::get_field_index(UInt nval) const {
+  
+  std::vector<UInt>::const_iterator i = 
+    std::lower_bound(fidx_table.begin(), fidx_table.end(), nval);
+  // Error if not there
+  if (i == fidx_table.end() || *i != nval) {
+    Throw() << "Field:" << fname << ", could not get nval:" << nval;
+  }
+
+  UInt pos = std::distance(fidx_table.begin(), i);
+  return pos;
+};
+
+UInt MEField<SField>::AssignElement(MeshObj &element) {
+  
+  cur_elems.clear();
+  
+  cur_elems.push_back(&element);
+  
+  return do_assign_elements(cur_elems);
+}
+
+UInt MEField<SField>::do_assign_elements(std::vector<MeshObj*> &elems) {
+  
+  UInt fdim = f.dim();
+  
+  // Reset the state of the objects.  Cur_elems == elems
+  {
+
+    for (UInt f = 0; f < fields.size(); ++f) {
+      fields[f]->Reset();
+      field_objs[f].clear();
+    }
+    
+  }
+  
+  UInt dof_count;
+  
+  // Count the unique degrees of freedom.  Set aside the objects for each
+  // sfield.
+  for (UInt e = 0; e < elems.size(); ++e) {
+    
+    MeshObj &elem = *cur_elems[e];
+
+    MasterElementBase &meb = GetME( f, elem);
+
+    // Loop dofs
+    for (UInt df = 0; df < meb.num_functions(); df++) {
+      
+      const int *dd = meb.GetDofDescription(df);
+
+      // Get the object;
+      MeshObj *dofobj = NULL;
+
+      if (dof2mtype(dd[0]) != MeshObj::ELEMENT) {
+        
+        MeshObjRelationList::const_iterator ri =
+           MeshObjConn::find_relation(elem, dof2mtype(dd[0]), dd[1], MeshObj::USES);
+
+        ThrowRequire(ri != elem.Relations.end());
+
+        dofobj = ri->obj;
+
+      } else dofobj = &elem;
+
+      UInt nval = meb.GetDofValSet(df);
+      
+      UInt fidx = get_field_index(nval);
+      
+      std::set<MeshObj*> &fs = field_objs[fidx];
+      
+      fs.insert(dofobj);
+      
+    } // num_func
+    
+    
+  } // for e
+  
+  // Count of dofs is:
+  UInt count = 0;
+  for (UInt f = 0; f < field_objs.size(); f++) {
+    
+    std::set<MeshObj*> &fs = field_objs[f];
+    
+    count += fs.size()*fidx_table[f]*fdim;  // dofs per field*num_objs
+    
+  }
+  
+  
+  return count;
+}
+
+void MEField<SField>::ReInit(fad_type *_dof_buffer) {
+  
+  dof_buffer = _dof_buffer;
+  
+  // Assign the dof buffer to each SField
+  UInt cur = 0;
+  for (UInt i = 0; i < fields.size(); i++) {
+    
+    std::set<MeshObj*> &fs = field_objs[i];
+    
+    SField &sf = *fields[i];
+    
+    sf.SetData(fs.begin(), fs.end(), &dof_buffer[cur]);
+    
+//Par::Out() << "fname=" << fields[i]->name() << ", nobjs:" << fs.size();
+    cur += fs.size()*sf.dim();
+      
+  }
+  
+}
+
+void MEField<SField>::set_diff(UInt offset, UInt total_dofs) {
+  
+  UInt idx = offset;
+  
+  ThrowRequire(cur_elems.size() == 1);
+  
+  UInt fdim = f.dim();
+  
+  MeshObj &elem = *cur_elems[0];
+  
+  MasterElementBase &meb = GetME( f, elem);
+  
+  UInt nfunc = meb.num_functions();
+  
+  // Loop dofs
+  for (UInt df = 0; df < meb.num_functions(); df++) {
+    
+    const int *dd = meb.GetDofDescription(df);
+
+    // Get the object;
+    MeshObj *dofobj = NULL;
+
+    if (dof2mtype(dd[0]) != MeshObj::ELEMENT) {
+      
+      MeshObjRelationList::const_iterator ri =
+         MeshObjConn::find_relation(elem, dof2mtype(dd[0]), dd[1], MeshObj::USES);
+
+      ThrowRequire(ri != elem.Relations.end());
+
+      dofobj = ri->obj;
+
+    } else dofobj = &elem;
+
+    UInt nval = meb.GetDofValSet(df);
+  
+    SField &llf = *Getfield(nval);
+    fad_type *fad = llf.data(*dofobj);
+//Par::Out() << "sdof: " << llf.name() << std::endl;
+    
+    for (UInt d = 0; d < fdim; ++d) {
+    
+/*
+Par::Out() << "\tfad[" << dd[2]*fdim+d << "] = diff:" << offset+d*nfunc+df << std::endl;
+Par::Out() << "\t&fad[" << &fad[dd[2]*fdim+d] << "] = diff:" << offset+d*nfunc+df << std::endl;
+fad[dd[2]*fdim+d] = df;
+*/
+      fad[dd[2]*fdim+d].diff(offset + d*nfunc + df,total_dofs);
+      
+    }
+    
+  } // num_func
+  
+}
+
+//************* Instantiations ***************
+template class MEField<_field>;
+
 } // namespace

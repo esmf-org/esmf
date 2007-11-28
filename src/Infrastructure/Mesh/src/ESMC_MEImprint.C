@@ -1,4 +1,4 @@
-// $Id: ESMC_MEImprint.C,v 1.2 2007/08/20 19:34:51 dneckels Exp $
+// $Id: ESMC_MEImprint.C,v 1.3 2007/11/28 16:28:02 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,15 +9,14 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_MEImprint.h>
-#include <ESMC_MeshObjConn.h>
-#include <ESMC_MeshUtils.h>
-#include <ESMC_MasterElement.h>
+#include <mesh/ESMC_MEImprint.h>
+#include <mesh/ESMC_MeshObjConn.h>
+#include <mesh/ESMC_MeshUtils.h>
+#include <mesh/ESMC_MasterElement.h>
 
 #include <map>
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 void MEImprintValSets(const std::string &imname, MeshObj &obj, const MasterElementBase &me,
                std::vector<UInt> &nvalSet, std::vector<UInt> &valSetObj) {
@@ -99,5 +98,4 @@ void MEImprint(const std::string &imname, MeshObj &obj, const MasterElementBase 
 
 } 
 
-} // namespace
 } // namespace

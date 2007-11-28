@@ -1,4 +1,4 @@
-// $Id: ESMC_Kernel.C,v 1.3 2007/09/10 17:38:29 dneckels Exp $
+// $Id: ESMC_Kernel.C,v 1.4 2007/11/28 16:28:02 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,15 +9,15 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_Kernel.h>
-#include <ESMC_MEField.h>
-#include <ESMC_MEImprint.h>
-#include <ESMC_MeshObjConn.h>
+#include <mesh/ESMC_Kernel.h>
+#include <mesh/ESMC_MEField.h>
+#include <mesh/ESMC_MEImprint.h>
+#include <mesh/ESMC_MeshObjConn.h>
+#include <mesh/ESMC_MeshllField.h>
 #include <iterator>
 
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 const MeshObjTopo *GetMeshObjTopo(const MeshObj &obj) {
   return obj.GetKernel()->GetTopo();
@@ -57,7 +57,7 @@ Kernel::Kernel(MeshDB &_mesh, const Attr &rhs) :
     irule(NULL)
 {
   // Just make sure context is not zero (could cause trouble)
-  if (!my_attr.get_context().any(my_attr.get_context())) 
+  if (!my_attr.GetContext().any(my_attr.GetContext())) 
     Throw() << "Zero context in kernel, attr=" << my_attr;
 }
 
@@ -86,7 +86,7 @@ void Kernel::Commit(UInt nFields, MEFieldBase **fds, UInt nfields, _field **_fie
     if (this->type() == meF->GetType() && this->GetContext().any(meF->GetContext())) {
       ThrowRequire(topo);
       const MEFamily &Fam = meF->GetMEFamily();
-          MasterElement<> &me = *Fam.getME(topo->name);
+          MasterElement<> &me = *Fam.getME(topo->name, METraits<>());
           this->AddME(meF->GetOrdinal(), &me);
     } // if field matches
   }
@@ -102,7 +102,7 @@ void Kernel::Commit(UInt nFields, MEFieldBase **fds, UInt nfields, _field **_fie
   // Assign MeshObjs to stores.  Do this in reverse so that
   // the non-full bucket(s) is always at the front.
   // Pending create/delete do not have data
-  if (!(my_attr.get_context().is_set(Attr::PENDING_CREATE_ID))) {
+  if (!(my_attr.GetContext().is_set(Attr::PENDING_CREATE_ID))) {
     obj_iterator oi = objects.begin(), oe = objects.end();
     store_iterator se = stores.end(), sb = stores.begin();
 
@@ -162,7 +162,7 @@ void Kernel::AssimilateObject(MeshObj &obj) {
   // Don't get rid of old store until after CopyIn below!!!
   const std::pair<_fieldStore*,UInt> &st = obj.GetStore();
 
-  if (my_attr.get_context().is_set(Attr::PENDING_CREATE_ID)) {
+  if (my_attr.GetContext().is_set(Attr::PENDING_CREATE_ID)) {
 
 //std::cout << "Assimilate pending create obj:" << MeshObjTypeString(obj.get_type()) << " id:" << obj.get_id() << std::endl;
     // if object had data, free it
@@ -240,17 +240,46 @@ void Kernel::Imprint(MeshObj &obj) const {
   }
 }
 
-void Kernel::PrintStoreInfo() const {
+void Kernel::PrintStoreInfo(std::ostream &os) const {
   store_const_iterator si = stores.begin(), se = stores.end();
   
-  std::cout << "Kernel store report: ";
+  os << "Kernel store report: ";
 
   for (; si != se; ++si) {
     
-    std::cout << si->FillRatio()*100.0 << "% ";
+    os << si->FillRatio()*100.0 << "% ";
   }
-  std::cout << std::endl;
+  os << std::endl;
 }
 
-} // namespace
+/*
+ * In the process of migrating a mesh, deleting objects, etc... the stores
+ * may become fragmented.  The algorithm is this: find the fullest non-full store
+ * and fill with the elements of the most empty.  Repeat until there is only one
+ * non-empty store.
+ */
+void Kernel::CompactStores() {
+  // First, remove any empty stores.
+  store_iterator si = stores.begin(), se = stores.end(), sn;
+
+  for (; si != se; ) {
+
+    sn = si; ++sn;
+
+    if (si->empty()) stores.erase(*si);
+
+    si = sn;
+
+  }
+
+  // Next, iterate until done.
+  bool done = false;
+
+/*
+  while (!done) {
+  }
+*/
+
+}
+
 } // namespace

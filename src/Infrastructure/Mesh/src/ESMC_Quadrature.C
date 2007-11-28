@@ -1,4 +1,4 @@
-// $Id: ESMC_Quadrature.C,v 1.1 2007/08/07 17:48:01 dneckels Exp $
+// $Id: ESMC_Quadrature.C,v 1.2 2007/11/28 16:28:03 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,8 +9,10 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_Quadrature.h>
-#include <ESMC_Exception.h>
+#include <mesh/ESMC_Quadrature.h>
+#include <mesh/ESMC_Exception.h>
+#include <mesh/ESMC_MeshObjTopo.h>
+#include <mesh/ESMC_Mapping.h>
 
 #include <cmath>
 
@@ -19,8 +21,7 @@
 
 #include <sstream>
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 std::string int2string(UInt i) {
   std::ostringstream oss;
@@ -593,5 +594,86 @@ intgRule *Topo2Intg::operator()(UInt q, const std::string &name) {
   Throw() << "Can't find intg  for topo " << name << ", integration=" << q;
 }
 
-} // namespace
+
+/*---------------------------------------------------------------*/
+// Side integration rule factory.
+/*---------------------------------------------------------------*/
+
+sideIntgFactory::InstanceMap &get_side_intg_factory_map() {
+  static sideIntgFactory::InstanceMap theMap;
+
+  return theMap;
+}
+
+const sideIntgFactory *sideIntgFactory::instance(const std::string &toponame, const intgRule *base) {
+
+  InstanceMap &theMap = get_side_intg_factory_map();
+
+  InstanceMap::iterator mi = theMap.find(std::make_pair(toponame, base));
+
+  sideIntgFactory *ret = 0;
+  if (mi == theMap.end()) {
+
+    const MeshObjTopo *topo = GetTopo(toponame);
+
+    ThrowRequire(topo);
+    ThrowRequire(topo->parametric_dim == (base->parametric_dim() + 1));
+
+    ret = new sideIntgFactory(topo, base);
+
+    theMap[std::make_pair(toponame,base)] = ret;
+
+  } else ret = mi->second;
+
+  return ret;
+
+}
+
+// We must transform the coords from the base pdim space to one higher dimension,
+// on the side.
+static void build_rules(const MeshObjTopo *topo, const intgRule *base,
+            std::vector<const intgRule*> &side_rules)
+{
+
+  UInt pdim = topo->parametric_dim;
+
+
+  for (UInt s = 0; s < topo->num_sides; s++) {
+
+
+    const MeshObjTopo *side_topo = topo->side_topo(s);
+    const int *side_nodes = topo->get_side_nodes(s);
+
+    std::vector<double> mdata(side_topo->num_nodes*pdim);
+
+    for (UInt sn = 0; sn < side_topo->num_nodes; sn++) {
+
+      for (UInt p = 0; p < pdim; p++)
+        mdata[sn*pdim+p] = topo->node_coord()[side_nodes[sn]*pdim+p];
+
+    }
+
+    std::vector<double> pcoord(pdim*base->npoints());
+
+    Mapping<> *side_map = Topo2Map()(side_topo->name)->operator()(MPTraits<>());
+
+    side_map->forward(base->npoints(), &mdata[0], base->locations(), &pcoord[0]);
+    
+    side_rules.push_back(new arbq(pdim, base->npoints(),
+                                  &pcoord[0], base->weights()));
+  }
+
+}
+
+sideIntgFactory::sideIntgFactory(const MeshObjTopo *_topo, const intgRule *_base) :
+ topo(_topo),
+ base(_base)
+{
+
+  side_rules.reserve(topo->num_sides);
+
+  build_rules(topo, base, side_rules);
+
+}
+
 } // namespace

@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshExodus.C,v 1.4 2007/09/17 19:05:39 dneckels Exp $
+// $Id: ESMC_MeshExodus.C,v 1.5 2007/11/28 16:28:03 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,10 +9,10 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_MeshExodus.h>
+#include <mesh/ESMC_MeshExodus.h>
 
-#include <ESMC_MeshDB.h>
-#include <ESMC_MeshObjTopo.h>
+#include <mesh/ESMC_MeshDB.h>
+#include <mesh/ESMC_MeshObjTopo.h>
 #include <iostream>
 #include <stdexcept>
 #include <sstream>
@@ -20,23 +20,20 @@
 #include <iterator>
 #include <string>
 
-#include <ESMC_MeshField.h>
-#include <ESMC_MeshUtils.h>
-#include <ESMC_MeshSkin.h>
+#include <mesh/ESMC_MeshField.h>
+#include <mesh/ESMC_MeshUtils.h>
+#include <mesh/ESMC_MeshSkin.h>
 
-#include <ESMC_Exception.h>
-#include <ESMC_ParEnv.h>
+#include <mesh/ESMC_Exception.h>
+#include <mesh/ESMC_ParEnv.h>
 
 
-#ifdef ESMC_EXODUS
 extern "C" {
 #include "exodusII.h"
 }
-#endif
 
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 
 static UInt share_parametric_dim(UInt pdim) {
@@ -44,22 +41,13 @@ static UInt share_parametric_dim(UInt pdim) {
   UInt nproc = Par::Size();
 
   if (nproc == 1) return pdim;
-
-  int rank = pdim == 0 ? nproc : Par::Rank();
-  int lowest_rank = nproc;
-
-  // Find the minimum processor number that has a valid pdim
-
-  MPI_Allreduce(&rank, &lowest_rank, 1, MPI_INT, MPI_MIN, Par::Comm());
-
-  // Someone needs to have a valid pdim.
-  ThrowRequire(lowest_rank < nproc);
-
-  // Let that rank scatter the pdim
+  
   int i_pdim = pdim;
   int i_pdim_r = 0;
-
-  MPI_Scatter(&i_pdim, 1, MPI_INT, &i_pdim_r, 1, MPI_INT, lowest_rank, Par::Comm());
+  
+  MPI_Allreduce(&i_pdim, &i_pdim_r, 1, MPI_INT, MPI_MAX, Par::Comm());
+  
+  ThrowRequire(i_pdim_r > 0);
 
   return i_pdim_r;
 
@@ -67,7 +55,6 @@ static UInt share_parametric_dim(UInt pdim) {
  
 void LoadExMesh(Mesh &mesh, const std::string &filename, int nstep) {
   Trace __trace("LoadExMesh(Mesh &mesh, const std::string &filename, int nstep)");
-#ifdef ESMC_EXODUS
 
   char   title[250];
   int    ws1, ws2, exoid, exoerr;
@@ -399,7 +386,6 @@ std::cout << std::endl;
 
   std::cout << "MeshExodus Load file " << filename << " complete." << std::endl;
 
-#endif
 }
 
 // Load data into an array from the mesh, switching on the correct typeid
@@ -455,7 +441,6 @@ void get_data(iter ni, iter ne, const FIELD &llf, double data[], UInt d) {
 
 void WriteExMesh(const Mesh &mesh, const std::string &filename, int nstep, double tstep) {
   Trace __trace("WriteExMesh(const Mesh &mesh, const std::string &filename, int nstep, double tstep)");
-#ifdef ESMC_EXODUS
 
   int wsize = sizeof(double);
   int ex_id = ex_create(filename.c_str(), EX_CLOBBER, &wsize, &wsize);
@@ -788,13 +773,10 @@ for (UInt i = 0; i < nvars_to_output; i++) {
   } // element vars
 
   ex_close(ex_id);
-#endif
 }
 
 void WriteExMeshTimeStep(int nstep, double tstep, const Mesh &mesh, const std::string &filename) {
   Trace __trace("WriteExMeshTimeStep(int nstep, double tstep, const Mesh &mesh, const std::string &filename)");
-#ifdef ESMC_EXODUS
-
   int    ws1, ws2, ex_id;
   float  version;
 
@@ -937,8 +919,6 @@ void WriteExMeshTimeStep(int nstep, double tstep, const Mesh &mesh, const std::s
 
   ex_close(ex_id);
 
-#endif
 }
 
-} //namespace
 } //namespace

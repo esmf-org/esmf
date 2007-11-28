@@ -1,4 +1,4 @@
-// $Id: ESMC_Meshfield.C,v 1.2 2007/09/10 17:38:29 dneckels Exp $
+// $Id: ESMC_MeshllField.C,v 1.1 2007/11/28 16:28:03 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,14 +9,10 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_Meshfield.h>
+#include <mesh/ESMC_MeshllField.h>
 
+namespace ESMC {
 
-namespace ESMCI {
-namespace MESH {
-
-
-// ******** type holders *********
 
 template<typename SCALAR>
 _fieldTypeBase *_fieldType<SCALAR>::classInstance = NULL;
@@ -93,7 +89,8 @@ next_free(0),
 free_stride(0),
 data(NULL),
 is_committed(false),
-nfield(0)
+nfield(0),
+num_objs(0)
 {
   if (NOBJS > 254) Throw() << "Max NOBJS=254, due to using UCHAR for next free";
 }
@@ -166,6 +163,7 @@ std::cout << "free_stride def=" << free_stride << std::endl;
 void _fieldStore::remove(UInt idx) {
   data[offsize+idx*free_stride] = next_free;
   next_free = idx;
+  num_objs--;
 }
 
 UInt _fieldStore::insert() {
@@ -175,6 +173,8 @@ UInt _fieldStore::insert() {
   UInt idx = next_free;
 //std::cout << "next_free=" << next_free << " fs:" << free_stride << std::endl;
   next_free = data[offsize+next_free*free_stride];
+
+  num_objs++;
 
   return idx;
 }
@@ -220,5 +220,4 @@ double _fieldStore::FillRatio() const {
   return (double) (NOBJS - left) / NOBJS;
 }
 
-} // namespace
 } // namespace

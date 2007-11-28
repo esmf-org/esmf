@@ -1,4 +1,4 @@
-// $Id: ESMC_ShapeHierarchic.C,v 1.4 2007/08/20 22:19:47 dneckels Exp $
+// $Id: ESMC_ShapeHierarchic.C,v 1.5 2007/11/28 16:28:03 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,19 +9,18 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_ShapeHierarchic.h>
-
-#include <ESMC_Quadrature.h>
+#include <mesh/ESMC_ShapeHierarchic.h>
+#include <mesh/ESMC_Ftn.h>
+#include <mesh/ESMC_Quadrature.h>
 
 #include <iostream>
 
-
+ 
 #ifdef ESMC_LAPACK
 extern "C" void FTN(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,double*,int*,double*,int*,int*);
 #endif
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 static void solve_sys(UInt nsamples, UInt ncoef, const double vals[],
     double mat[], double coef[])
@@ -247,7 +246,10 @@ ilf(_q+1),
 iPoints()
 {
   build_quad_dtable(q, dtable);
-  nfunc = dtable.size() / 4;
+
+  nfunc = 4+4*(q-1)+(q-1)*(q-1); //dtable.size() / 4;
+  ThrowRequire(nfunc == (dtable.size()/4));
+
   build_quad_itable(nfunc, q, iPoints);
   char buf[512];
   sprintf(buf, "QuadHier_%d", q);
@@ -402,13 +404,13 @@ void qh_shape_grads(UInt pdim, UInt ndofs, const std::vector<ILegendre<Real> > &
                &results[p*ndofs*pdim]);
     EvalTensorPolyDeriv(pdim, &pcoord[p*pdim],
                TensorPolynomial<ILegendre<Real> >(&func[1], &func[0]),
-               &results[p*(ndofs+1)*pdim]);
+               &results[(p*ndofs+1)*pdim]);
     EvalTensorPolyDeriv(pdim, &pcoord[p*pdim],
                TensorPolynomial<ILegendre<Real> >(&func[1], &func[1]),
-               &results[p*(ndofs+2)*pdim]);
+               &results[(p*ndofs+2)*pdim]);
     EvalTensorPolyDeriv(pdim, &pcoord[p*pdim],
                TensorPolynomial<ILegendre<Real> >(&func[0], &func[1]),
-               &results[p*(ndofs+3)*pdim]);
+               &results[(p*ndofs+3)*pdim]);
 
     // Edges
     UInt ofs = 4; // offset
@@ -420,7 +422,7 @@ void qh_shape_grads(UInt pdim, UInt ndofs, const std::vector<ILegendre<Real> > &
         pc[1] = (j & 0x01) ? eta : xi;
         pc[0] = (j & 0x01) ? xi : eta;
         TensorPolynomial<ILegendre<Real> > tp(&f1, &func[j]);
-        EvalTensorPolyDeriv(2, pc, tp, &results[p*(ndofs+ofs++)*pdim]);
+        EvalTensorPolyDeriv(2, pc, tp, &results[(p*ndofs+ofs++)*pdim]);
       }
     }
 
@@ -428,7 +430,7 @@ void qh_shape_grads(UInt pdim, UInt ndofs, const std::vector<ILegendre<Real> > &
     for (UInt i = 2; i <= q; i++) {
       for (UInt j = 2; j <= q; j++) {
         TensorPolynomial<ILegendre<Real> > tp(&func[i], &func[j]);
-        EvalTensorPolyDeriv(2, &pcoord[p*pdim], tp, &results[p*(ndofs+ofs++)*pdim]);
+        EvalTensorPolyDeriv(2, &pcoord[p*pdim], tp, &results[(p*ndofs+ofs++)*pdim]);
       }
     }
    
@@ -437,11 +439,43 @@ void qh_shape_grads(UInt pdim, UInt ndofs, const std::vector<ILegendre<Real> > &
 }
 
 void QuadHier::shape_grads(UInt npts, const double pcoord[], double results[]) const {
+/*
   qh_shape_grads(ParametricDim(), NumFunctions(), ild, npts, pcoord, results);
+return;
+*/
+
+  UInt nfunc = NumFunctions();
+
+  std::vector<fad_type> shape_fad(nfunc);
+
+  UInt pdim = ParametricDim();
+
+  ThrowAssert(pdim == 2);
+
+  std::vector<fad_type> pcoord_fad(pdim);
+
+  for (UInt i = 0; i < npts; i++) {
+    pcoord_fad[0] = pcoord[i*pdim];
+    pcoord_fad[0].diff(0, 2);
+    
+    pcoord_fad[1] = pcoord[i*pdim+1];
+    pcoord_fad[1].diff(1, 2);
+
+    shape(1, &pcoord_fad[0], &shape_fad[0]);
+    //qh_shape(ParametricDim(), NumFunctions(), ilf, 1, &pcoord_fad[0],&shape_fad[0]);
+
+    for (UInt j = 0; j < nfunc; j++) {
+      const double *diff = &(shape_fad[j].fastAccessDx(0));
+
+      results[(i*nfunc+j)*pdim] = diff[0];
+      results[(i*nfunc+j)*pdim+1] = diff[1];
+    }
+  }
 }
 
 void QuadHier::shape_grads(UInt npts, const fad_type pcoord[], fad_type results[]) const {
-  qh_shape_grads(ParametricDim(), NumFunctions(), ilf, npts, pcoord, results);
+  Throw() << "Hierarchic shape for fad not implemented";
+  //qh_shape_grads(ParametricDim(), NumFunctions(), ilf, npts, pcoord, results);
 }
 
 
@@ -1012,5 +1046,4 @@ void HexHier::shape_grads(UInt npts, const fad_type pcoord[], fad_type results[]
   hh_shape_grads(ParametricDim(), NumFunctions(), ilf, npts, pcoord, results);
 }
 
-} // namespace
 } // namespace

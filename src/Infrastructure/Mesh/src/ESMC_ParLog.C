@@ -1,4 +1,4 @@
-// $Id: ESMC_ParLog.C,v 1.1 2007/08/07 17:48:01 dneckels Exp $
+// $Id: ESMC_ParLog.C,v 1.2 2007/11/28 16:28:03 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,14 +9,13 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_ParLog.h>
+#include <mesh/ESMC_ParLog.h>
 
 #include <mpi.h>
 #include <cstdlib>
 
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 ParLog *ParLog::classInstance = NULL;
 
@@ -38,5 +37,4 @@ of(fname.c_str(), std::ios::out)
 {
 }
 
-} // namespace
 } // namespace

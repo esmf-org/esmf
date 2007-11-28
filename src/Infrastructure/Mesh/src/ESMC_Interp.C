@@ -1,4 +1,4 @@
-// $Id: ESMC_Interp.C,v 1.2 2007/09/17 19:05:39 dneckels Exp $
+// $Id: ESMC_Interp.C,v 1.3 2007/11/28 16:28:02 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,43 +9,632 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_Interp.h>
-#include <ESMC_Exception.h>
-#include <ESMC_Search.h>
-#include <ESMC_ParEnv.h>
-#include <ESMC_MEValues.h>
-#include <ESMC_PatchRecovery.h>
+#include <mesh/ESMC_Interp.h>
+#include <mesh/ESMC_Exception.h>
+#include <mesh/ESMC_Search.h>
+#include <mesh/ESMC_ParEnv.h>
+#include <mesh/ESMC_MEValues.h>
+#include <mesh/ESMC_PatchRecovery.h>
+#include <mesh/ESMC_MeshField.h>
+#include <mesh/ESMC_CommRel.h>
+#include <mesh/ESMC_MeshObjConn.h>
+#include <mesh/ESMC_Migrator.h>
+#include <mesh/ESMC_MeshObj.h>
+#include <mesh/ESMC_MeshUtils.h>
 
-namespace ESMCI {
-namespace MESH {
+#include <iostream>
+#include <fstream>
+#include <cmath>
+
+//#define CHECK_SENS
+
+namespace ESMC {
+
+
+/*-----------------------------------------------------------------*/
+// IWeights 
+/*-----------------------------------------------------------------*/
+IWeights::IWeights() :
+weights()
+{
+}
+
+IWeights::IWeights(const IWeights &rhs) {
+  weights = rhs.weights;
+}
+
+IWeights &IWeights::operator=(const IWeights &rhs) {
   
-/*
- * Basic routines to interpolate data.
- */
+  if (this == &rhs) return *this;
+  
+  weights = rhs.weights;
+  
+  return *this;
+}
+
+void IWeights::InsertRow(const Entry &row, const std::vector<Entry> &cols) {
+  
+  std::pair<WeightMap::iterator, bool> wi =
+    weights.insert(std::make_pair(row, cols));
+    
+  if (wi.second == false) {
+    // Just verify that entries are the same
+    std::vector<Entry> &tcol = wi.first->second;
+    ThrowRequire(tcol.size() == cols.size());
+    for (UInt i = 0; i < cols.size(); i++) {
+      ThrowRequire(tcol[i].id == cols[i].id);
+      ThrowRequire(tcol[i].idx == cols[i].idx);
+      ThrowRequire(std::abs(tcol[i].value-cols[i].value) < 1e-5);
+    }
+  } else {
+    
+    // Sort the column entries (invariant used elsewhere).
+    std::sort(wi.first->second.begin(), wi.first->second.end());
+
+    // compress storage
+    std::vector<Entry>(wi.first->second).swap(wi.first->second);
+    
+  }
+  
+}
+
+void IWeights::Print(std::ostream &os) {
+  
+  WeightMap::iterator wi = weights.begin(), we = weights.end();
+  
+  for (; wi != we; ++wi) {
+    os << "Row:" << wi->first;
+    std::vector<Entry> &col = wi->second;
+    
+    double sum = 0.0;
+    for (UInt i = 0; i < col.size(); i++) {
+      
+      os << col[i] << ", ";
+      
+      sum += col[i].value;
+      
+    }
+    
+    os << "SUM=" << sum << std::endl;
+  }
+  
+}
+
+//void IWeights::Migrate(CommRel &crel) {
+void IWeights::Migrate(Mesh &mesh) { 
+  Trace __trace("IWeights::Migrate(Mesh &mesh)");
+  
+  // Gather pole constraints
+  {
+    std::vector<UInt> mesh_dist, iw_dist;
+    
+    Context c; c.set(Attr::ACTIVE_ID);
+    Attr a(MeshObj::NODE, c);
+    getMeshGIDS(mesh, a, mesh_dist);
+    GetRowGIDS(iw_dist);
+    
+    Migrator mig(mesh_dist.size(), mesh_dist.size() > 0 ? &mesh_dist[0] : NULL, 0,
+        iw_dist.size(), iw_dist.size() > 0 ? &iw_dist[0] : NULL);
+    
+    mig.Migrate(*this);
+    
+//#define CHECK_WEIGHT_MIG
+#ifdef CHECK_WEIGHT_MIG
+// Check something: should have 1 to 1 coresp ids and entries
+for (UInt i = 0; i < mesh_dist.size(); i++) {
+  Entry ent(mesh_dist[i]);
+  WeightMap::iterator wi = weights.lower_bound(ent);
+  if (wi == weights.end() || wi->first.id != ent.id)
+    Throw() << "Did not find id:" << ent.id << std::endl;
+}
+// And the other way
+std::sort(mesh_dist.begin(), mesh_dist.end());
+WeightMap::iterator wi = weights.begin(), we = weights.end();
+for (; wi != we; ++wi) {
+  std::vector<UInt>::iterator lb =
+    std::lower_bound(mesh_dist.begin(), mesh_dist.end(), wi->first.id);
+  
+  if (lb == mesh_dist.end() || *lb != wi->first.id)
+    Throw() << "Weight entry:" << wi->first.id << " not a mesh id!";
+}
+#endif
+  
+    
+  }
+  
+  return;
+  
+}
+  
+void IWeights::clear() {
+  
+  // Loop weightmap; swap each row out
+  WeightMap::iterator wi = begin_row(), we = end_row();
+  
+  for (; wi != we; ++wi)
+    std::vector<Entry>().swap(wi->second);
+  
+  WeightMap().swap(weights);
+  
+}  
+
+struct entry_mult {
+  entry_mult(double _mval) : mval(_mval) {}
+  IWeights::Entry operator()(const IWeights::Entry &rhs) {
+    return IWeights::Entry(rhs.id, rhs.idx, rhs.value*mval);
+  }
+  double mval;
+};
+
+void IWeights::AssimilateConstraints(const IWeights &constraints) {
+  Trace __trace("IWeights::AssimilateConstraints(const IWeights &constraints)");
+  
+  // Loop the current entries; see if any constraint rows need to be resolved;
+  WeightMap::iterator wi = weights.begin(), we = weights.end();
+  
+  for (; wi != we; ++wi) {
+    
+    std::vector<Entry> &col = wi->second;
+    
+    // Loop constraints; find the entries
+    WeightMap::const_iterator ci = constraints.weights.begin(), ce = constraints.weights.end();
+    
+    for (; ci != ce; ++ci) {
+      
+      const Entry &crow = ci->first;
+      
+      std::vector<Entry>::iterator lb = 
+        std::lower_bound(col.begin(), col.end(), crow);
+        
+      // If we found an entry, condense;
+      if (lb != col.end() && *lb == crow) {
+        
+        double val = lb->value;
+        
+        const std::vector<Entry> &ccol = ci->second;
+        
+        // Delete entry
+        col.erase(lb);
+        
+        // Add replacements to end
+        std::transform(ccol.begin(), ccol.end(), std::back_inserter(col), entry_mult(val));
+        
+        // Now sort
+        std::sort(col.begin(), col.end());
+        
+        // And condense any duplicates
+        std::vector<Entry>::iterator condi = col.begin(), condn, cond_del;
+        
+        while (condi != col.end()) {
+          
+          condn = condi; condn++;
+          
+          // Sum in result while entries are duplicate
+          while (condn != col.end() && *condn == *condi) {
+            
+            condi->value += condn->value;
+            
+            ++condn;
+          }
+          
+          // Move to next entry
+          ++condi;
+
+          // Condense the list if condn != condi (there were duplicaes)
+          if (condn != condi) {
+            cond_del = std::copy(condn, col.end(), condi);
+            
+            col.erase(cond_del, col.end());
+          }
+          
+        }  // condi; condensation loop
+        
+      } // Found an entry
+      
+    } // for ci
+    
+  } // for wi
+  
+}
+
+void IWeights::GatherToCol(IWeights &rhs) {
+  Trace __trace("IWeights::GatherToCol(IWeights &rhs)");
+  
+  // Gather rhs to col dist of this
+  {
+    std::vector<UInt> distd, dists;
+    
+    this->GetColGIDS(distd);
+    rhs.GetRowGIDS(dists);
+    
+    Migrator mig(distd.size(), distd.size() > 0 ? &distd[0] : NULL, 0,
+        dists.size(), dists.size() > 0 ? &dists[0] : NULL);
+    
+    mig.Migrate(rhs);
+    
+  }
+}
+
+void IWeights::ChangeCoords(const IWeights &src_uv, const IWeights &dst_uv) {
+  Trace __trace("IWeights::ChangeCoords(const IWeights &src_uv, const IWeights &dst_uv)");
+  
+  struct UV_vect {
+    double U[3];
+    double V[3];
+  };
+  
+  WeightMap new_weights; // will create whole new matrix
+  
+  // Loop rows in matrix
+  WeightMap::iterator wi = weights.begin(), we = weights.end();
+  
+  for (; wi != we;) {
+    
+    // There must be 3 consecutive entries with this id (index 0,1,2)
+
+    std::vector<const Entry*> rows(3);
+    std::vector<std::vector<Entry>*> cols(3);
+    
+ //   long id = wi->first.id;
+    // Get three rows.  Since weights are redundant, reuse 
+    {
+      rows[0] = &wi->first; cols[0] = &wi->second;
+      ThrowRequire(wi->first.idx == 0);
+      rows[1] = &wi->first; cols[1] = &wi->second;
+      rows[2] = &wi->first; cols[2] = &wi->second;
+      ++wi;
+    }
+    
+    // Lookup UV destination for this row.  These are stored as
+    // (U V)^T, i.e.
+    // (gid, 0) -> (gid, 0, Ux) (gid, 1, Uy) (gid, 2, Uz)
+    // (gid, 1) -> (gid, 0, Vx) (gid, 1, Vy) (gid, 2, Vz)
+    WeightMap::const_iterator ruv_i = dst_uv.weights.lower_bound(Entry(rows[0]->id, 0));
+  
+    UV_vect ruv;
+    for (UInt r = 0; r < 2; r++) {
+      
+      ThrowRequire(ruv_i != dst_uv.weights.end());
+      ThrowRequire(ruv_i->first.id == rows[0]->id);
+      ThrowRequire((UInt) ruv_i->first.idx == r);
+      
+      {
+        const std::vector <Entry> &ruv_col = ruv_i->second;
+        ThrowRequire(ruv_col.size() == 3);
+        double *val = r == 0 ? ruv.U : ruv.V;
+        val[0] = ruv_col[0].value;
+        val[1] = ruv_col[1].value;
+        val[2] = ruv_col[2].value;
+      }
+      
+      ++ruv_i;
+    }
+    
+    // Loop columns
+    UInt ncols = cols[0]->size();
+    ThrowRequire(ncols == cols[1]->size() && ncols == cols[2]->size());
+    
+    Entry row_u(*rows[0]);
+    Entry row_v(*rows[1]); row_v.idx = 1;
+    
+    std::vector<std::vector<Entry> > new_cols(2, std::vector<Entry>(2*ncols));
+    
+    for (UInt i = 0; i < ncols; i++) {
+      
+      // Get the UV for row
+      Entry &col_x = cols[0]->operator[](i);
+      Entry &col_y = cols[1]->operator[](i);
+      Entry &col_z = cols[2]->operator[](i);
+      
+      // Entries should reference the same id
+      UInt col_id = col_x.id;
+      ThrowRequire(col_id == col_y.id && col_id == col_z.id);
+
+      // Get column UV vectors (source)
+      // stored as (U V), i.e.
+      // (gid, 0) -> (gid, 0, Ux) (gid, 1, Vx)
+      // (gid, 1) -> (gid, 0, Uy) (gid, 1, Vy)
+      // (gid, 2) -> (gid, 0, Uz) (gid, 1, Vz)
+      // Get the column uv vectors
+      WeightMap::const_iterator cuv_i = src_uv.weights.lower_bound(Entry(col_id, 0));
+      
+      UV_vect cuv;
+      
+      for (UInt r = 0; r < 3; r++) {
+        
+        ThrowRequire(cuv_i != src_uv.weights.end() && (UInt) cuv_i->first.id == col_id && (UInt) cuv_i->first.idx == r);
+        
+        {
+          const std::vector <Entry> &cuv_col = cuv_i->second;
+          ThrowRequire(cuv_col.size() == 2);
+          
+          cuv.U[r] = cuv_col[0].value;
+          cuv.V[r] = cuv_col[1].value;
+        }
+        
+        ++cuv_i;
+        
+      }
+      
+      // Add the u entries
+      {
+        Entry &u_col_u = new_cols[0][2*i];
+        Entry &u_col_v = new_cols[0][2*i+1];
+        
+        u_col_u.id = u_col_v.id = col_x.id; 
+        u_col_u.idx = 0; u_col_v.idx = 1;
+        
+        // After all this data structure ado, the heart of the
+        // numerical algorithm:
+        u_col_u.value = ruv.U[0]*col_x.value*cuv.U[0] +
+                        ruv.U[1]*col_y.value*cuv.U[1] +
+                        ruv.U[2]*col_z.value*cuv.U[2];
+        
+        u_col_v.value = ruv.U[0]*col_x.value*cuv.V[0] +
+                        ruv.U[1]*col_y.value*cuv.V[1] +
+                        ruv.U[2]*col_z.value*cuv.V[2];                
+                                
+      }
+      
+      // Add the v entries
+      {
+        Entry &v_col_u = new_cols[1][2*i];
+        Entry &v_col_v = new_cols[1][2*i+1];
+        
+        v_col_u.id = v_col_v.id = col_x.id; 
+        v_col_u.idx = 0; v_col_v.idx = 1;
+        
+        v_col_u.value = ruv.V[0]*col_x.value*cuv.U[0] +
+                        ruv.V[1]*col_y.value*cuv.U[1] +
+                        ruv.V[2]*col_z.value*cuv.U[2];
+        
+        v_col_v.value = ruv.V[0]*col_x.value*cuv.V[0] +
+                        ruv.V[1]*col_y.value*cuv.V[1] +
+                        ruv.V[2]*col_z.value*cuv.V[2];                
+                                    
+      }
+      
+    } // for i
+    
+    // Insert new rows 
+    new_weights[row_u] = new_cols[0];
+    new_weights[row_v] = new_cols[1];
+    
+  } // for wi
+  
+  weights.swap(new_weights);
+  
+}
+
+void IWeights::Prune(const Mesh &mesh, const MEField<> &mask) {
+
+  WeightMap::iterator wi = begin_row(), we = end_row(), wn;
+  
+  for (; wi != we;) {
+    
+    wn = wi; ++wn;
+    UInt gid = wi->first.id;
+    
+    Mesh::MeshObjIDMap::const_iterator mi = mesh.map_find(MeshObj::NODE, gid);
+    
+    ThrowRequire(mi != mesh.map_end(MeshObj::NODE));
+    
+    double *mval = mask.data(*mi);
+    
+    if (*mval < 0.5 || !GetMeshObjContext(*mi).is_set(Attr::OWNED_ID))
+      weights.erase(wi);
+    
+    wi = wn;
+  }
+  
+}
+
+void IWeights::GetRowGIDS(std::vector<UInt> &gids) {
+  Trace __trace("IWeights::GetRowGIDS(std::vector<UInt> &gids)");
+  
+  gids.clear();
+  
+  WeightMap::iterator ri = weights.begin(), re = weights.end();
+  
+  for (; ri != re;) {
+    
+    gids.push_back(ri->first.id);
+    
+    UInt gid = ri->first.id;
+    
+    // Don't repeat a row:
+    while (ri != re && ri->first.id == gid)
+      ++ri;
+    
+  }
+  
+}
+
+void IWeights::GetColGIDS(std::vector<UInt> &gids) {
+  Trace __trace("IWeights::GetColGIDS(std::vector<UInt> &gids)");
+  
+  gids.clear();
+  
+  std::set<UInt> _gids; // use a set for efficieny
+
+  WeightMap::iterator wi = weights.begin(), we = weights.end();
+  
+  for (; wi != we; ++wi) {
+    
+    std::vector<Entry> &col = wi->second;
+    
+    for (UInt i = 0; i < col.size(); i++) {
+      
+      _gids.insert(col[i].id);
+      
+    }
+    
+  }
+  
+  std::copy(_gids.begin(), _gids.end(), std::back_inserter(gids));
+  
+}
+
+std::pair<int, int> IWeights::count_matrix_entries() const {
+  
+  int n_s = 0;
+  int max_idx = 0;
+  
+  IWeights::WeightMap::const_iterator wi = begin_row(), we = end_row();
+  
+  for (; wi != we; ++wi) {
+    n_s += wi->second.size();
+    if (wi->first.idx > max_idx) max_idx = wi->first.idx;
+  }
+  
+  return std::make_pair(n_s, max_idx);;
+    
+}
+
+// SparsePack/Unpack
+SparsePack<IWeights::WeightMap::value_type>::SparsePack(SparseMsg::buffer &b, IWeights::WeightMap::value_type &t)
+{
+ // UInt res = 0;
+  
+  const IWeights::Entry &row = t.first;
+  
+  std::vector<IWeights::Entry> &col = t.second;
+
+  // GID
+  SparsePack<IWeights::Entry::id_type>(b, row.id);
+  
+  // IDX
+ SparsePack<IWeights::Entry::idx_type>(b, row.idx);
+  
+  // Number of columns, this row/idx
+  SparsePack<UInt>(b, col.size());
+      
+    for (UInt i = 0; i < col.size(); i++) {
+      
+    IWeights::Entry &cent = col[i];
+      
+    // col id
+    SparsePack<IWeights::Entry::id_type>(b, cent.id);
+    
+    // col idx
+    SparsePack<IWeights::Entry::idx_type>(b, cent.idx);
+    
+    // Matrix value
+    SparsePack<IWeights::Entry::value_type>(b, cent.value);
+      
+    } // i
+}
+
+UInt SparsePack<IWeights::WeightMap::value_type>::size(IWeights::WeightMap::value_type &t)
+{
+  
+  UInt res = 0;
+  
+  //const IWeights::Entry &ent = t.first;
+  
+  std::vector<IWeights::Entry> &col = t.second;
+
+  // GID
+  res += SparsePack<IWeights::Entry::id_type>::size();
+  
+  // IDX
+  res += SparsePack<IWeights::Entry::idx_type>::size();
+  
+  // Number of columns, this row/idx
+  res += SparsePack<UInt>::size();
+      
+    for (UInt i = 0; i < col.size(); i++) {
+      
+    // col id
+    res += SparsePack<IWeights::Entry::id_type>::size();
+    
+    // col idx
+    res+= SparsePack<IWeights::Entry::idx_type>::size();
+    
+    // Matrix value
+    res += SparsePack<IWeights::Entry::value_type>::size();
+      
+    } // i
+    
+    return res;
+    
+}
+
+SparseUnpack<IWeights::WeightMap::value_type>::SparseUnpack(SparseMsg::buffer &b, IWeights::WeightMap::value_type &t)
+{
+  
+  IWeights::Entry &row = const_cast<IWeights::Entry&>(t.first);
+  
+  // GID
+  SparseUnpack<IWeights::Entry::id_type>(b, row.id);
+  
+  // Idx
+  SparseUnpack<IWeights::Entry::idx_type>(b, row.idx);
+  
+  // ncols
+  UInt ncols;
+  SparseUnpack<UInt>(b, ncols);
+  
+  std::vector<IWeights::Entry> &col = t.second;
+  
+  col.clear(); col.reserve(ncols);
+  
+  for (UInt i = 0; i < ncols; i++) {
+    
+    IWeights::Entry cent;
+    
+    // Col id
+    SparseUnpack<IWeights::Entry::id_type>(b, cent.id);
+    
+    // col idx
+    SparseUnpack<IWeights::Entry::idx_type>(b, cent.idx);
+    
+    // value
+    SparseUnpack<IWeights::Entry::value_type>(b, cent.value);
+    
+    col.push_back(cent);
+    
+  } // i
+  
+}
+
+std::ostream &operator <<(std::ostream &os, const IWeights::Entry &ent) {
+  os << "{id=" << ent.id << ", idx:" << (int) ent.idx << ", " << ent.value << "}";
+  return os;
+}
+
+/*----------------------------------------------------------------*/
+// Interp:
+// Basic routines to interpolate data.
+/*----------------------------------------------------------------*/
    
 /*
  * Patch interpolation, where destination and source fields are nodal.
  */
-void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>* const* _sfields, _field* const *_dfields, int *iflag, SearchResult &sres) {
+void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>* const* _sfields, _field* const *_dfields, const std::vector<Interp::FieldPair> &fpairs, SearchResult &sres) {
    Trace __trace("patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>* const* _sfields, _field* const *_dfields, int *iflag, SearchResult &sres)");
+
+   std::set<int> pdeg_set;
+   std::map<int, ElemPatch<> > patch_map;
    
-    
-  const int pdeg = 2; // TODO: deduce this.  For instance, deg source + 1 is reasonable
-    
   if (_nfields == 0) return;
 
   std::vector<MEField<>* > fields;
   std::vector<_field* > dfields;
+  std::vector<int> orders;
   UInt nrhs = 0;
   
   for (UInt i = 0; i < _nfields; i++) {
   
     // Only process interp_patch  
-    if (iflag[i] != Interp::INTERP_PATCH) continue;
-    
+    if (fpairs[i].idata != Interp::INTERP_PATCH) continue;
+   
+    pdeg_set.insert(fpairs[i].patch_order);
+
     ThrowRequire(_sfields[i]->is_nodal());
   
     fields.push_back(_sfields[i]); dfields.push_back(_dfields[i]);
+    orders.push_back(fpairs[i].patch_order);
     
     ThrowRequire(_sfields[i]->dim() == _dfields[i]->dim());
 
@@ -61,16 +650,26 @@ void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>*
     const MeshObj &elem = *(*sb)->elem;
 //std::cout << "Transfer: elem:" << elem.get_id() << std::endl;
 
-    ElemPatch<> epatch;
-
-    epatch.CreateElemPatch(pdeg, ElemPatch<>::GAUSS_PATCH,
-                           elem,
-                           src_coord_field,
-                           fields.size(),
-                           &fields[0],
-                           700000
-                            );
-
+    {
+      std::set<int>::iterator pi = pdeg_set.begin(), pe = pdeg_set.end();
+      
+      for (; pi != pe; ++pi) {
+        
+        ElemPatch<> epatch;
+    
+        epatch.CreateElemPatch(*pi, ElemPatch<>::GAUSS_PATCH,
+                               elem,
+                               src_coord_field,
+                               fields.size(),
+                               &fields[0],
+                               700000
+                                );
+  
+        patch_map[*pi] = epatch;
+        
+      }
+    }
+    
     // Gather parametric coords into an array.
     UInt pdim = GetMeshObjTopo(elem)->parametric_dim;
     UInt npts = sres.nodes.size(); // number of points to interpolate
@@ -86,9 +685,33 @@ void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>*
     
     }
 
-    std::vector<double> result(nrhs*npts);
-    epatch.Eval(npts, &pc[0], &result[0]);
+    std::map<int, std::vector<double> > result;
+    
+    {
+      std::set<int>::iterator pi = pdeg_set.begin(), pe = pdeg_set.end();
+      
+      for (; pi != pe; ++pi) {
 
+        std::pair<std::map<int, std::vector<double> >::iterator, bool> ri
+             = result.insert(std::make_pair(*pi, std::vector<double>()));
+        
+        ThrowRequire(ri.second == true);
+        
+        ri.first->second.resize(nrhs*npts);
+        
+        ElemPatch<> &epatch = patch_map[*pi];
+        
+        epatch.Eval(npts, &pc[0], &(ri.first->second[0]));
+        
+      }
+      
+    }
+    
+    std::vector<std::vector<double>* > field_results;
+    
+    for (UInt i = 0; i < dfields.size(); i++)
+      field_results.push_back(&result[orders[i]]);
+    
     // Now copy data into fields
     for (UInt np = 0; np < npts; np++) {
     
@@ -98,22 +721,26 @@ void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>*
       for (UInt i = 0; i < dfields.size(); i++) {
     
         const _field &dfield = *dfields[i];
-    
+
+        std::vector<double> &results = *field_results[i];
+        
         if (dfield.OnObj(snode)) {
           UInt fdim = dfield.dim();
           double *data = dfield.data(snode);
     
           for (UInt f = 0; f < fdim; f++) {
-            data[f] = result[np*nrhs+(cur_field+f)];
+            data[f] = results[np*nrhs+(cur_field+f)];
           }
 
         }
-        cur_field++;
+        
+        cur_field += dfield.dim();
 
       } // for fi
 
     } // for np
 
+      
   } // for searchresult
   
 }
@@ -143,7 +770,7 @@ void point_serial_transfer(UInt num_fields, MEField<> *const *sfields, _field *c
       MEField<> &sfield = *sfields[i];
       _field &dfield = *dfields[i];
 
-      MEValues<> mev(sfield.GetMEFamily(), sfield);
+      MEValues<> mev(sfield.GetMEFamily());
 
       if (dfield.dim() != sfield.dim())
         Throw() << "dest and source fields have incompatible dimensions";
@@ -157,7 +784,7 @@ void point_serial_transfer(UInt num_fields, MEField<> *const *sfields, _field *c
      }
 
      arbq pintg(pdim, npts, &pcoord[0]);
-     mev.Setup(elem, 0, &pintg);
+     mev.Setup(elem, MEV::update_sf, &pintg);
      mev.ReInit(elem);
 
      std::vector<double> ires(npts*dfield.dim());
@@ -171,6 +798,266 @@ void point_serial_transfer(UInt num_fields, MEField<> *const *sfields, _field *c
      }
 
     } // for fields
+
+  } // for searchresult
+}
+ 
+
+struct dof_add_col {
+
+dof_add_col(std::vector<IWeights::Entry> &_col, UInt _fdim, double *_sens) :
+  idx(0),
+  col(_col),
+  fdim(_fdim),
+  sens(_sens)
+{}
+
+void operator()(MeshObj *obj, UInt nvalset, UInt n) {
+  
+  // Weights are redundant per field dimension entry; just take first
+  if (n == 0) 
+    col.push_back(IWeights::Entry(obj->get_id(), n, sens[idx*fdim+n]));
+  
+  ++idx;
+}
+
+UInt idx;
+std::vector<IWeights::Entry> &col;
+double *sens;
+UInt fdim;
+
+};
+ 
+/** Matrix patch transfer **/
+void mat_patch_serial_transfer(MEField<> &src_coord_field, MEField<> &_sfield, _field &_dfield, SearchResult &sres, IWeights &iw) {
+  Trace __trace("mat_patch_serial_transfer(MEField<> &sfield, _field &dfield, SearchResult &sres, IWeights &iw)");
+    
+  const int pdeg = 2; // TODO: deduce this.  For instance, deg source + 1 is reasonable
+    
+  MEField<>* field = &_sfield;
+  MEField<> &sfield = _sfield;
+  _field* dfield = &_dfield;
+  UInt nrhs = field->dim();
+  
+  
+  // Create the sensitivity field
+  MEField<SField> sF(sfield);
+  MEField<SField> *sFp = &sF;
+  
+  // Create the  recovery field
+  SearchResult::iterator sb = sres.begin(), se = sres.end();
+
+  for (; sb != se; sb++) {
+    
+    Search_result &sres = **sb;
+    
+    // Trick:  Gather the data from the source field so we may call interpolate point
+    MeshObj &elem = const_cast<MeshObj&>(*(*sb)->elem);
+
+    // Create a sensitivity field residing on the degrees of
+    // freedom used in this interpolation.
+    std::set<MeshObj*> elems;
+    
+    MeshObjConn::NeighborElements(elem, elems);
+
+    UInt nlocal_dof = sF.AssignElements(elems.begin(), elems.end());
+    
+    std::vector<fad_type> fads(nlocal_dof, 0);
+    
+    sF.ReInit(&fads[0]);
+    
+    // Set up the fad degrees of freedom.
+    for (UInt i = 0; i < nlocal_dof; i++) {
+      fads[i].diff(i, nlocal_dof);
+    }
+
+    ElemPatch<MEField<SField>, fad_type> epatch;
+
+    epatch.CreateElemPatch(pdeg, ElemPatch<>::GAUSS_PATCH,
+                           elem,
+                           src_coord_field,
+                           1,
+                           &sFp,
+                           700000
+                            );
+
+    // Gather parametric coords into an array.
+    UInt pdim = GetMeshObjTopo(elem)->parametric_dim;
+    UInt npts = sres.nodes.size(); // number of points to interpolate
+    std::vector<double> pc(pdim*npts);
+    
+    for (UInt np = 0; np < npts; np++) {
+    
+      for (UInt pd = 0; pd < pdim; pd++) {
+    
+        pc[np*pdim+pd] = sres.nodes[np].pcoord[pd];
+    
+      }
+    
+    }
+
+    std::vector<fad_type> result(nrhs*npts);
+    epatch.Eval(npts, &pc[0], &result[0]);
+
+    // Now copy data into fields and save sensitivies
+    for (UInt n = 0; n < npts; n++) {
+    
+      const MeshObj &snode = *sres.nodes[n].node;
+    
+        if (dfield->OnObj(snode)) {
+          
+     //     UInt fdim = dfield->dim();
+          double *data = dfield->data(snode);
+    
+          //for (UInt d = 0; d < fdim; d++) {
+          for (UInt d = 0; d < 1; d++) { // weights are redundant per entry
+            
+            data[d] = result[n*nrhs+d].val();
+        
+            IWeights::Entry row(snode.get_id(), d);
+        
+            std::vector<IWeights::Entry> col;
+            col.reserve(nlocal_dof);
+//#define CHECK_SENS
+#ifdef CHECK_SENS       
+Par::Out() << "sens=" << result[n*nrhs+d] << std::endl;
+
+double sval = 0;
+#endif
+
+            double *sens = &(result[n*nrhs+d].fastAccessDx(0));
+            
+            dof_add_col addc(col, dfield->dim(), sens);
+            
+            sF.dof_iterator(addc);
+            
+            iw.InsertRow(row, col);
+            
+#ifdef CHECK_SENS
+            int dof_div_dim = nlocal_dof/dfield->dim();
+            for (UInt s = 0; s < dof_div_dim; s++) {
+          
+  sval += fads[s*nrhs+d].val()*sens[s*nrhs+d];
+            } // for s
+        
+double diff = sval - result[n*nrhs+d].val();
+Par::Out() << "**diff=" << diff << std::endl;
+if (std::fabs(diff) > 1e-4) {
+for (UInt s = 0; s < nlocal_dof/dfield->dim(); s++) {
+  Par::Out() << fads[s*nrhs+d].val() << " ";
+}
+Par::Out() << std::endl;
+}
+  
+#endif
+
+        } // for d
+
+      } // if data on node
+
+    } // for np
+
+  } // for searchresult
+}
+ 
+ /* Matrix version of point serial transfer */
+ void mat_point_serial_transfer(MEField<> &sfield, _field &dfield, SearchResult &sres, IWeights &iw) {
+  Trace __trace("mat_point_serial_transfer(UInt num_fields, MEField<> *const *sfields, _field *const *dfields, int *iflag, SearchResult &sres)");
+  
+  SearchResult::iterator sb = sres.begin(), se = sres.end();
+
+  UInt nrhs = sfield.dim();
+  
+  MEField<SField> sF(sfield);
+
+  for (; sb != se; sb++) {
+
+    Search_result &sres = **sb;
+
+    // Trick:  Gather the data from the source field so we may call interpolate point
+    MeshObj &elem = const_cast<MeshObj&>(*(*sb)->elem);
+
+    const MeshObjTopo *etopo = GetMeshObjTopo(elem);
+
+    UInt pdim = etopo->parametric_dim;
+
+    // Create a sensitivity field residing on the degrees of
+    // freedom used in this interpolation.
+    
+    UInt nlocal_dof = sF.AssignElement(elem);
+    
+    std::vector<fad_type> fads(nlocal_dof);
+
+    sF.ReInit(&fads[0]);
+    
+    // Set up the fad degrees of freedom.
+    for (UInt i = 0; i < nlocal_dof; i++) {
+      fads[i].diff(i, nlocal_dof);
+    }
+    
+
+
+    // Inner loop through fields
+    MEValues<METraits<fad_type,double>,METraits<>,MEField<SField> > mev(sfield.GetMEFamily());
+
+    if (dfield.dim() != sfield.dim())
+      Throw() << "dest and source fields have incompatible dimensions";
+
+    // Load Parametric coords
+    UInt npts = sres.nodes.size(); // number of points to interpolate
+    std::vector<double> pcoord(pdim*npts);
+    for (UInt np = 0; np < npts; np++) {
+     for (UInt pd = 0; pd < pdim; pd++)
+       pcoord[np*pdim+pd] = sres.nodes[np].pcoord[pd];
+    }
+
+    arbq pintg(pdim, npts, &pcoord[0]);
+    mev.Setup(elem, MEV::update_sf, &pintg);
+    mev.ReInit(elem);
+
+    std::vector<fad_type> ires(npts*dfield.dim());
+    mev.GetFunctionValues(sF, &ires[0]);
+
+    // Copy data to nodes
+    for (UInt n = 0; n < npts; n++) {
+      
+      const MeshObj &node = *sres.nodes[n].node;
+      
+      
+      for (UInt d = 0; d < 1; d++) {
+        
+        ((double*)dfield.data(node))[d] = ires[n*dfield.dim()+d].val();
+        
+        IWeights::Entry row(node.get_id(), d);
+        
+        std::vector<IWeights::Entry> col;
+        col.reserve(nlocal_dof);
+ 
+#ifdef CHECK_SENS       
+std::cout << "sens=" << ires[n*nrhs+d] << std::endl;
+double sval = 0;
+#endif
+
+        double *sens = &(ires[n*nrhs+d].fastAccessDx(0));
+
+        dof_add_col addc(col, dfield.dim(), sens);
+        
+        sF.dof_iterator(addc);
+        
+        iw.InsertRow(row, col);       
+        
+#ifdef CHECK_SENS
+        for (UInt s = 0; s < nlocal_dof/dfield.dim(); s++) {
+          
+  sval += fads[s*nrhs+d].val()*sens[s*nrhs+d];
+        } // for s
+        
+std::cout << "**diff=" << sval - ires[n*nrhs+d].val() << std::endl;
+#endif
+
+      } // for d
+        
+    }
 
   } // for searchresult
 }
@@ -222,6 +1109,9 @@ dstmesh(dest)
   for (UInt i = 0; i < fpairs.size(); i++) {
     srcF.push_back(fpairs[i].first);
     dstF.push_back(fpairs[i].second);
+    
+    ThrowRequire(fpairs[i].second->GetInterp());
+    
     dstf.push_back(fpairs[i].second->GetInterp());
     iflag.push_back(fpairs[i].idata);
   }
@@ -229,14 +1119,43 @@ dstmesh(dest)
   if (is_parallel) {
    
     // Form the parallel rendezvous meshes/specs
+     if (Par::Rank() == 0)
+       std::cout << "Building rendezvous..." << std::endl;
     grend.Build(srcF.size(), &srcF[0], dstF.size(), &dstF[0]);
     
+//#define MYSEARCH
+#ifdef MYSEARCH
+    if (Par::Rank() == 0) std::cout << "Start search" << std::endl;
     Search(grend.GetSrcRend(), grend.GetDstRend(), grend.GetDstObjType(), sres);
+    if (Par::Rank() == 0) std::cout << "end search" << std::endl;
+#else
+     if (Par::Rank() == 0)
+       std::cout << "Starting search..." << std::endl;
+    OctSearch(grend.GetSrcRend(), grend.GetDstRend(), grend.GetDstObjType(), sres);
+     if (Par::Rank() == 0)
+       std::cout << "Done with search..." << std::endl;
+#endif
+    /*
+    Par::Out() << "SrcRend **************" << std::endl;
+    grend.GetSrcRend().Print(Par::Out());
+    */
     
   } else {
     // Serial track.  Meshes already in geometric rendezvous.  (Perhaps get
     // the subset of the mesh for interpolating??)
-     Search(src, dest, search_obj_type, sres);
+#ifdef MYSEARCH
+    if (Par::Rank() == 0) std::cout << "Start search" << std::endl;
+    Search(src, dest, search_obj_type, sres);
+    if (Par::Rank() == 0) std::cout << "end search" << std::endl;
+#else
+     if (Par::Rank() == 0)
+       std::cout << "Starting search..." << std::endl;
+     OctSearch(src, dest, search_obj_type, sres);
+     if (Par::Rank() == 0)
+       std::cout << "Done with search..." << std::endl;
+#endif
+     
+     //PrintSearchResult(sres);
   }
   
   // Update has_[std/patch] flags
@@ -257,6 +1176,24 @@ void Interp::operator()() {
   
 }
 
+/*
+ * There is an ASSUMPTION here that the field is nodal, both sides
+ */
+void Interp::operator()(int fpair_num, IWeights &iw) {
+  Trace __trace("Interp::operator()(int fpair_num, IWeights &iw)");
+  
+  ThrowRequire((UInt) fpair_num < fpairs.size());
+  
+  if (is_parallel) mat_transfer_parallel(fpair_num, iw); else mat_transfer_serial(fpair_num, iw);
+  
+  // Migrate weights back to row decomposition
+  if (is_parallel) {
+    iw.Migrate(dstmesh);
+  }
+  
+}
+
+
 void Interp::transfer_serial() {
   Trace __trace("Interp::transfer_serial()");
   
@@ -265,7 +1202,7 @@ void Interp::transfer_serial() {
 
     point_serial_transfer(srcF.size(), &(*srcF.begin()), &(*dstf.begin()), &iflag[0], sres);
   
-  } else {
+  } else if (!fpairs[0].second->is_nodal()) {
   
     Throw() << "Non nodal serial not yet implemented";
   
@@ -274,11 +1211,10 @@ void Interp::transfer_serial() {
   // Patch interpolation
   if (has_patch) {
     
-    patch_serial_transfer(*srcmesh.GetCoordField(), srcF.size(), &(*srcF.begin()), &(*dstf.begin()), &iflag[0], sres);
+    patch_serial_transfer(*srcmesh.GetCoordField(), srcF.size(), &(*srcF.begin()), &(*dstf.begin()), fpairs, sres);
   
   } else {
   
-    Throw() << "Non nodal serial not yet implemented";
   
   }
   
@@ -300,7 +1236,7 @@ void Interp::transfer_parallel() {
   ThrowRequire(dst_rend_fields.size() == src_rend_Fields.size());
   
   if (has_std) point_serial_transfer(dst_rend_fields.size(), &(*src_rend_Fields.begin()), &(*dst_rend_fields.begin()), &iflag[0], sres);
-  if (has_patch) patch_serial_transfer(*grend.GetSrcRend().GetCoordField(), src_rend_Fields.size(), &(*src_rend_Fields.begin()), &(*dst_rend_fields.begin()), &iflag[0], sres);
+  if (has_patch) patch_serial_transfer(*grend.GetSrcRend().GetCoordField(), src_rend_Fields.size(), &(*src_rend_Fields.begin()), &(*dst_rend_fields.begin()), fpairs, sres);
   
   // Retrieve the interpolated data
   CommRel &dst_node_rel = grend.GetDstComm().GetCommRel(MeshObj::NODE);
@@ -314,6 +1250,59 @@ void Interp::transfer_parallel() {
   
 }
 
+void Interp::mat_transfer_serial(int fpair_num, IWeights &iw) {
+  Trace __trace("Interp::mat_transfer_serial(int fpair_num)");
+
+  FieldPair &fpair = fpairs[fpair_num];
   
-} // namespace
+  // Only implemented for nodal to nodal.  Higher interpolation must
+  // use the full interpolation framework.
+  ThrowRequire(fpair.first->is_nodal() && fpair.second->is_nodal());
+  
+  if (fpair.idata == INTERP_STD) mat_point_serial_transfer(*fpair.first, *fpair.second->GetNodalfield(), sres, iw);
+  else if (fpair.idata == INTERP_PATCH) mat_patch_serial_transfer(*srcmesh.GetCoordField(), *fpair.first, *fpair.second->GetNodalfield(), sres, iw);
+    
+}
+
+void Interp::mat_transfer_parallel(int fpair_num, IWeights &iw) {
+    
+  // By all rights, here we don't HAVE to actually perform the interpolation.
+  // However, we actually do it as a cross check.
+    
+  // Send source data to rendezvous decomp
+  const std::vector<MEField<> *> &src_rend_Fields = grend.GetSrcRendFields();
+  
+  MEField<> *sFR = src_rend_Fields[fpair_num], *sF = srcF[fpair_num];
+  
+  grend.GetSrcComm().SendFields(1, &sF, &sFR);
+  
+  // Perform the interpolation
+  const std::vector<_field*> &dst_rend_fields = grend.GetDstRendfields();
+  
+  _field *dfR = dst_rend_fields[fpair_num], *df = dstf[fpair_num]; 
+   
+  if (fpairs[fpair_num].idata == INTERP_STD)
+     mat_point_serial_transfer(*sFR, *dfR, sres, iw);
+  else if (fpairs[fpair_num].idata == INTERP_PATCH)
+     mat_patch_serial_transfer(*grend.GetSrcRend().GetCoordField(), *sFR, *dfR, sres, iw);
+  
+  // Retrieve the interpolated data
+  CommRel &dst_node_rel = grend.GetDstComm().GetCommRel(MeshObj::NODE);
+
+  // Send the data back (comm has been transposed in GeomRend::Build)
+  dst_node_rel.send_fields(1, &dfR, &df);
+  
+}
+
+void DestrySearchResult(SearchResult &sres) {
+  
+  for (UInt i = 0; i < sres.size(); i++) {
+   delete sres[i]; 
+  }
+  
+  SearchResult().swap(sres);
+  
+}
+  
+  
 } // namespace

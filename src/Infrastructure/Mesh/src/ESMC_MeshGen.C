@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshGen.C,v 1.4 2007/09/17 19:05:39 dneckels Exp $
+// $Id: ESMC_MeshGen.C,v 1.5 2007/11/28 16:28:03 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,17 +9,17 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_MeshGen.h>
+#include <mesh/ESMC_MeshGen.h>
 
-#include <ESMC_Mesh.h>
-#include <ESMC_MeshObj.h>
-#include <ESMC_MeshObjTopo.h>
-#include <ESMC_Exception.h>
-#include <ESMC_ParEnv.h>
-#include <ESMC_IOField.h>
+#include <mesh/ESMC_Mesh.h>
+#include <mesh/ESMC_MeshObj.h>
+#include <mesh/ESMC_MeshObjTopo.h>
+#include <mesh/ESMC_Exception.h>
+#include <mesh/ESMC_ParEnv.h>
+#include <mesh/ESMC_IOField.h>
+#include <mesh/ESMC_MeshSkin.h>
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 static void gen2d(Mesh &mesh, const MeshObjTopo *topo) {
   Trace __trace("gen2d(Mesh &mesh, const MeshObjTopo *topo");
@@ -44,10 +44,10 @@ static void gen2d(Mesh &mesh, const MeshObjTopo *topo) {
         node[2] = new MeshObj(MeshObj::NODE, 3, 2);
         node[3] = new MeshObj(MeshObj::NODE, 4, 3);
   
-        mesh.add_node(node[0], 1);
-        mesh.add_node(node[1], 1);
-        mesh.add_node(node[2], 1);
-        mesh.add_node(node[3], 1);
+        mesh.add_node(node[0], 0);
+        mesh.add_node(node[1], 0);
+        mesh.add_node(node[2], 0);
+        mesh.add_node(node[3], 0);
   
         // Set as locally owned
         node[0]->set_owner(0);
@@ -90,10 +90,10 @@ static void gen2d(Mesh &mesh, const MeshObjTopo *topo) {
         node[2] = new MeshObj(MeshObj::NODE, 3, 2);
         node[3] = new MeshObj(MeshObj::NODE, 4, 3);
   
-        mesh.add_node(node[0], 1);
-        mesh.add_node(node[1], 1);
-        mesh.add_node(node[2], 1);
-        mesh.add_node(node[3], 1);
+        mesh.add_node(node[0], 0);
+        mesh.add_node(node[1], 0);
+        mesh.add_node(node[2], 0);
+        mesh.add_node(node[3], 0);
   
         // Set as locally owned
         node[0]->set_owner(0);
@@ -163,14 +163,14 @@ static void gen3d(Mesh &mesh, const MeshObjTopo *topo) {
         node[6] = new MeshObj(MeshObj::NODE, 7, 6);
         node[7] = new MeshObj(MeshObj::NODE, 8, 7);
   
-        mesh.add_node(node[0], 1);
-        mesh.add_node(node[1], 1);
-        mesh.add_node(node[2], 1);
-        mesh.add_node(node[3], 1);
-        mesh.add_node(node[4], 1);
-        mesh.add_node(node[5], 1);
-        mesh.add_node(node[6], 1);
-        mesh.add_node(node[7], 1);
+        mesh.add_node(node[0], 0);
+        mesh.add_node(node[1], 0);
+        mesh.add_node(node[2], 0);
+        mesh.add_node(node[3], 0);
+        mesh.add_node(node[4], 0);
+        mesh.add_node(node[5], 0);
+        mesh.add_node(node[6], 0);
+        mesh.add_node(node[7], 0);
   
         // Set as locally owned
         node[0]->set_owner(0);
@@ -231,15 +231,15 @@ static void gen3d(Mesh &mesh, const MeshObjTopo *topo) {
         node[7] = new MeshObj(MeshObj::NODE, 8, 7);
         node[8] = new MeshObj(MeshObj::NODE, 9, 8);
   
-        mesh.add_node(node[0], 1);
-        mesh.add_node(node[1], 1);
-        mesh.add_node(node[2], 1);
-        mesh.add_node(node[3], 1);
-        mesh.add_node(node[4], 1);
-        mesh.add_node(node[5], 1);
-        mesh.add_node(node[6], 1);
-        mesh.add_node(node[7], 1);
-        mesh.add_node(node[8], 1);
+        mesh.add_node(node[0], 0);
+        mesh.add_node(node[1], 0);
+        mesh.add_node(node[2], 0);
+        mesh.add_node(node[3], 0);
+        mesh.add_node(node[4], 0);
+        mesh.add_node(node[5], 0);
+        mesh.add_node(node[6], 0);
+        mesh.add_node(node[7], 0);
+        mesh.add_node(node[8], 0);
   
         // Set as locally owned
         node[0]->set_owner(0);
@@ -333,7 +333,8 @@ void HyperCube(Mesh &mesh, const MeshObjTopo *topo) {
     default:
       Throw() << "Unsupported dimension " << mesh.parametric_dim();
   }
+  
+  Skin(mesh);
 }
 
-} // namespace
 } // namespace

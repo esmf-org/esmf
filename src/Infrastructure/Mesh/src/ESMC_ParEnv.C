@@ -1,4 +1,4 @@
-// $Id: ESMC_ParEnv.C,v 1.2 2007/09/10 17:38:29 dneckels Exp $
+// $Id: ESMC_ParEnv.C,v 1.3 2007/11/28 16:28:03 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,14 +9,13 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_ParEnv.h>
-#include <ESMC_Exception.h>
+#include <mesh/ESMC_ParEnv.h>
+#include <mesh/ESMC_Exception.h>
 
 #include <mpi.h>
 #include <cstdlib>
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 ParLog *ParLog::classInstance = NULL;
 
@@ -68,5 +67,4 @@ void Par::End() {
   if (!serial) MPI_Finalize();
 }
 
-} // namespace
 } // namespace

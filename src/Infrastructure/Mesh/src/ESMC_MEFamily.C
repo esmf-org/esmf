@@ -1,4 +1,4 @@
-// $Id: ESMC_MEFamily.C,v 1.1 2007/08/07 17:48:00 dneckels Exp $
+// $Id: ESMC_MEFamily.C,v 1.2 2007/11/28 16:28:02 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,29 +9,23 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_MEFamily.h>
-#include <ESMC_Exception.h>
+#include <mesh/ESMC_MEFamily.h>
+#include <mesh/ESMC_Exception.h>
 
-#include <ESMC_ShapeHierarchic.h>
-
-
-namespace ESMCI {
-namespace MESH {
+#include <mesh/ESMC_ShapeHierarchic.h>
+#include <mesh/ESMC_ShapeLagrange.h>
 
 
+namespace ESMC {
+
+/*
 MasterElement<METraits<> > *MEFamily::getME(const std::string &toponame) const {
   return getME(toponame, METraits<>());
 };
-
-MasterElement<METraits<double,fad_type> > *MEFamily::getME(const std::string &toponame, METraits<double,fad_type> ) const {
-  return getME(toponame, METraits<>())->operator()(METraits<double,fad_type>());
-}
-MasterElement<METraits<fad_type,double> > *MEFamily::getME(const std::string &toponame, METraits<fad_type,double> ) const {
-  return getME(toponame, METraits<>())->operator()(METraits<fad_type,double>());
-}
+*/
 
 const intgRule *MEFamily::GetIntg(const std::string &toponame) const {
-  return Topo2Intg()(this->getME(toponame)->IntgOrder(), toponame);
+  return Topo2Intg()(this->getME(toponame, METraits<>())->IntgOrder(), toponame);
 }
 
 
@@ -112,8 +106,7 @@ std::map<UInt, MEFamilyHier*> MEFamilyHier::classInstances;
 MEFamilyHier::MEFamilyHier(UInt _order) :
 MEFamily(),
 fname("Hier"),
-order(_order),
-meMap()
+order(_order)
 {
 }
 
@@ -136,5 +129,60 @@ MasterElement<METraits<> > *MEFamilyHier::getME(const std::string &name, METrait
   } else Throw() << "Hierar not implemented for topo:" << name;
 }
 
+// Lagrange
+
+std::map<UInt, MEFLagrange*> MEFLagrange::classInstances;
+
+MEFLagrange::MEFLagrange(UInt _order) :
+MEFamily(),
+fname("Lagrange"),
+order(_order)
+{
+}
+
+const MEFLagrange &MEFLagrange::instance(UInt order) {
+  std::map<UInt, MEFLagrange*>::iterator fi = classInstances.find(order);
+  MEFLagrange *mef;
+  if (fi == classInstances.end()) {
+    mef = new MEFLagrange(order);
+    classInstances[order] = mef;
+  } else mef = fi->second;
+
+  return *mef;
+}
+
+MasterElement<METraits<> > *MEFLagrange::getME(const std::string &name, METraits<>) const {
+  if (name == "SHELL" || name == "SHELL4" || name == "QUAD" || name == "QUAD4" || name == "QUAD_3D") {
+    return MasterElementV<METraits<> >::instance(ShapeLagrangeQuad::instance(order));
+  } else Throw() << "Hierar not implemented for topo:" << name;
+}
+
+// Lagrange DG
+std::map<UInt, MEFLagrangeDG*> MEFLagrangeDG::classInstances;
+
+MEFLagrangeDG::MEFLagrangeDG(UInt _order) :
+MEFamily(),
+fname("LagrangeDG"),
+order(_order)
+{
+}
+
+const MEFLagrangeDG &MEFLagrangeDG::instance(UInt order) {
+  std::map<UInt, MEFLagrangeDG*>::iterator fi = classInstances.find(order);
+  MEFLagrangeDG *mef;
+  if (fi == classInstances.end()) {
+    mef = new MEFLagrangeDG(order);
+    classInstances[order] = mef;
+  } else mef = fi->second;
+
+  return *mef;
+}
+
+MasterElement<METraits<> > *MEFLagrangeDG::getME(const std::string &name, METraits<>) const {
+  if (name == "SHELL" || name == "SHELL4" || name == "QUAD" || name == "QUAD4" || name == "QUAD_3D") {
+    return MasterElementV<METraits<> >::instance(ShapeLagrangeQuadDG::instance(order));
+  } else Throw() << "Hierar not implemented for topo:" << name;
+}
+
 } // namespace 
-} // namespace 
+

@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshObj.C,v 1.2 2007/08/09 17:33:11 dneckels Exp $
+// $Id: ESMC_MeshObj.C,v 1.3 2007/11/28 16:28:03 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,17 +9,16 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_MeshObj.h>
+#include <mesh/ESMC_MeshObj.h>
 #include <iostream>
 #include <set>
 #include <algorithm>
-#include <ESMC_ParEnv.h>
+#include <mesh/ESMC_ParEnv.h>
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 MeshObj::MeshObj(UChar _type, int _id, long _data_index, int _owner) :
-TreeNode<MeshObj_id_type>(_id), 
+TreeNode<MeshObj_id_type>(_id),
 type(_type),
 data_index(_data_index), 
 meshset(NULL), 
@@ -38,7 +37,7 @@ void MeshObj::printrelations(std::ostream &os) const {
   for (MeshObjRelationList::const_iterator it = Relations.begin(); it != Relations.end(); it++) {
     std::string stype;
     const MeshObj::Relation &rel = (*it);
-    stype = MeshObjTypeString(rel.obj->type);
+    stype = MeshObjTypeString(rel.obj->get_type());
     os << "\tid=" << rel.obj->get_id() << ", type=" << stype << ", ordinal=" << rel.ordinal <<
          ", polarity:" << rel.polarity << ", rotation:" << static_cast<int>(rel.rotation)
          << ", type:" << RelationTypeString(rel.type) << std::endl;
@@ -105,13 +104,18 @@ MeshObjRelationList::iterator AddMeshObjRelation(MeshObj &obj, const MeshObj::Re
   return obj.Relations.insert(ip, r);
 }
 
-
+#ifdef ESMC_MESHOBJ_MMANAGE
 void *MeshObj::operator new(std::size_t size) {
   return ObjPool<MeshObj>::instance()->Allocate(size);
 }
 
 void MeshObj::operator delete(void *p, std::size_t size) {
   ObjPool<MeshObj>::instance()->Deallocate(p, size);
+}
+#endif
+
+UInt MeshObj::get_type() const {
+  return type;
 }
 
 UInt MeshObjRelationConverse(UInt rel_type) {
@@ -129,5 +133,5 @@ UInt MeshObjRelationConverse(UInt rel_type) {
   }
 }
 
-} //namespacd
-} //namespacd
+
+} // namespace
