@@ -1,4 +1,4 @@
-// $Id: ESMC_CommRel.h,v 1.3 2007/09/17 19:05:39 dneckels Exp $
+// $Id: ESMC_CommRel.h,v 1.4 2007/11/28 16:23:21 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -8,25 +8,19 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-
-// (all lines below between the !BOP and !EOP markers will be included in
-//  the automated document processing.)
-//-------------------------------------------------------------------------
-// these lines prevent this file from being read more than once if it
-// ends up being included multiple times
-
+//
+//-----------------------------------------------------------------------------
 #ifndef ESMC_CommRel
 #define ESMC_CommRel
 
 #include <vector>
 #include <iostream>
 
-#include <ESMC_MeshDB.h>
-#include <ESMC_Meshfield.h>
-#include <ESMC_SparseMsg.h>
+#include <mesh/ESMC_MeshDB.h>
+#include <mesh/ESMC_MeshllField.h>
+#include <mesh/ESMC_SparseMsg.h>
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 /**
  * A class to describe the communication path
@@ -92,6 +86,11 @@ CommRel(const std::string &name, MeshDB &dom, MeshDB &ran);
 // arrive, this function copies over.  sfields[i] -> rfields[i]
 void send_fields(UInt nfields, _field *const *sfield, _field *const *rfields);
 
+/*
+ * Remove inactive objects from a symmetric spec.
+ */
+void remove_inactive();
+
 // Copy fields from owner to ghosted copies.  Assumes sym spec
 void halo_fields(UInt nfields, _field **sfield) const;
 
@@ -149,7 +148,7 @@ void complete_range();
 void build_range(bool ghosting = false);
 
 // Delete the range of the spec (only if objects not used or children of others)
-void delete_range();
+void delete_domain(); 
 
 // For an element (or side) domain CommRel (range need not be built yet), build the
 // domain side object for the dependents, i.e. nodes.  Names this the same as
@@ -174,6 +173,7 @@ void commit_range(const std::vector<MeshObj::id_type> &rid);
 // and checking id's
 bool verify_symmetric_comm();
 
+UInt domain_size() const { return domain.size(); }
 MapType::iterator domain_begin() {return domain.begin();}
 MapType::iterator domain_end() {return domain.end();}
 MapType::const_iterator domain_begin() const {return domain.begin();}
@@ -196,6 +196,9 @@ std::vector<UInt>::const_iterator range_processors_begin() const { return range_
 std::vector<UInt>::const_iterator range_processors_end() const { return range_processors.end();}
 
 void Print(std::ostream &) const;
+
+// Set message pattern according to domain mapping.  Returns nsend.
+UInt SetMsgPattern(SparseMsg &msg);
 
 // Is a symmetric spec sane globally, i.e. is there
 // one and only one owner?
@@ -329,7 +332,6 @@ void CommRel::swap_op(UInt nfields, FTYPE **sfields, int op) const {
   if (!msg.empty()) throw("halo, CommRel, didn't use up buffer!");
 }
 
-} // namespace 
 } // namespace 
 
 #endif

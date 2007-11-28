@@ -1,4 +1,4 @@
-// $Id: ESMC_ShapeHierarchic.h,v 1.1 2007/08/07 17:47:59 dneckels Exp $
+// $Id: ESMC_ShapeHierarchic.h,v 1.2 2007/11/28 16:23:22 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -8,26 +8,34 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-
-// (all lines below between the !BOP and !EOP markers will be included in
-//  the automated document processing.)
-//-------------------------------------------------------------------------
-// these lines prevent this file from being read more than once if it
-// ends up being included multiple times
-
+//
+//-----------------------------------------------------------------------------
 #ifndef ESMC_Hierarchic_h
 #define ESMC_Hierarchic_h
 
-#include <ESMC_MeshTypes.h>
-#include <ESMC_ShapeFunc.h>
-#include <ESMC_Polynomial.h>
+#include <mesh/ESMC_MeshTypes.h>
+#include <mesh/ESMC_ShapeFunc.h>
+#include <mesh/ESMC_Polynomial.h>
+#include <mesh/ESMC_MasterElement.h>
 #include <map>
 
-namespace ESMCI {
-namespace MESH {
+/**
+ * @defgroup shapehier
+ * 
+ * Hierarchical shape functions.
+ * 
+ * @ingroup shapefunc
+ * 
+ */ 
 
-// ********* Base class for Hierarchic.  Implements Interpolation *****
+namespace ESMC {
 
+/**
+ * Basic functionality (such as interpolation) for all hierarchic
+ * shape functions.
+ * 
+ * @ingroup shapehier
+ */
 class ShapeHier : public ShapeFunc {
 protected:
   ShapeHier() {}
@@ -73,8 +81,10 @@ private:
 };
 
 
-// ******* Quadrilateral ***********
-
+/**
+ * Quadrilater hierarchic shape function of arbitrary order.
+ * @ingroup shapehier
+ */
 class QuadHier : public ShapeHier {
 QuadHier(UInt q);
 ~QuadHier() {}
@@ -94,10 +104,12 @@ void shape_grads(UInt npts, const fad_type pcoord[], fad_type results[]) const;
 
 const std::string &name() const { return m_name;}
 
-UInt IntgOrder() const { return q; }
+UInt IntgOrder() const { return q+1; }
 
 // Return true if values only occur at nodes and interpolation is from node values.
 bool is_nodal() const { return false; }
+
+UInt orientation() const { return MasterElementBase::ME_SIGN_ORIENTED; }
 
 UInt NumInterp() const { return nfunc; };
 
@@ -160,7 +172,11 @@ std::vector<double> iPoints; // interpolation points.
 
 
 
-// *************** Triangle *****************
+/**
+ * Triangular hierarchic shape function of
+ * abribtary order.
+ * @ingroup shapehier
+ */
 class TriHier : public ShapeHier {
 TriHier(UInt q);
 ~TriHier() {}
@@ -184,6 +200,8 @@ UInt IntgOrder() const { return q; }
 
 // Return true if values only occur at nodes and interpolation is from node values.
 bool is_nodal() const { return false; }
+
+UInt orientation() const { return MasterElementBase::ME_SIGN_ORIENTED; }
 
 UInt NumInterp() const { return nfunc; }
 
@@ -270,6 +288,8 @@ UInt IntgOrder() const { return q; }
 // Return true if values only occur at nodes and interpolation is from node values.
 bool is_nodal() const { return false; }
 
+UInt orientation() const { return MasterElementBase::ME_SIGN_ORIENTED; }
+
 UInt NumInterp() const { return nfunc; }
 
 // List of parametric points needed for interpolation, (NumInterp x pdim).
@@ -329,7 +349,6 @@ std::vector<ILegendre<fad_type> > ilf;
 std::vector<double> iPoints; // interpolation points.
 };
 
-} // namespace
 } // namespace
 
 

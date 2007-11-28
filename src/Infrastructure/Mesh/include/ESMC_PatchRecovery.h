@@ -1,4 +1,4 @@
-// $Id: ESMC_PatchRecovery.h,v 1.1 2007/08/07 17:47:59 dneckels Exp $
+// $Id: ESMC_PatchRecovery.h,v 1.2 2007/11/28 16:23:22 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -8,26 +8,20 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-
-// (all lines below between the !BOP and !EOP markers will be included in
-//  the automated document processing.)
-//-------------------------------------------------------------------------
-// these lines prevent this file from being read more than once if it
-// ends up being included multiple times
-
+//
+//-----------------------------------------------------------------------------
 #ifndef ESMC_PatchRecovery_h
 #define ESMC_PatchRecovery_h
 
 
-#include <ESMC_MeshDB.h>
-#include <ESMC_MeshObj.h>
-#include <ESMC_MEField.h>
-#include <ESMC_MasterElement.h>
-#include <ESMC_Exception.h>
-#include <ESMC_MCoord.h>
+#include <mesh/ESMC_MeshDB.h>
+#include <mesh/ESMC_MeshObj.h>
+#include <mesh/ESMC_MEField.h>
+#include <mesh/ESMC_MasterElement.h>
+#include <mesh/ESMC_Exception.h>
+#include <mesh/ESMC_MCoord.h>
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 template <typename NFIELD=MEField<>, typename Real=double>
 class PatchRecov {
@@ -36,10 +30,24 @@ PatchRecov();
 PatchRecov(const PatchRecov &rhs);
 PatchRecov &operator=(const PatchRecov &rhs);  
 
+PatchRecov operator*(double val); 
+
+
+void operator+=(const PatchRecov &rhs);
+
+/*
+ * Create a patch that just gives back the value of the field
+ * at the node.
+ */
+void CreateConstantPatch(const MeshObj &node,
+                         UInt numfields,
+                         NFIELD **rfield);
+
 // Create a patch using gauss points.  If you send _mc, YOU must delete it later.
 void CreatePatch(UInt pdeg,
            const MeshDB &mesh,
            const MeshObj &node,  // The node to gather around
+           const MeshObj *elem_hint, // element forming patch around
            UInt numfields,
            NFIELD **rfield,
            UInt threshold,       // How far from num dofs to invalidate.  If the
@@ -64,7 +72,8 @@ UInt idim;
 UInt ncoeff;
 bool patch_ok;
 std::vector<Real> coeff;
-const MCoord *mc;
+MCoord mc;
+bool use_mc;
 };
 
 // An object that wraps a patchrecov for each node of an element and
@@ -94,16 +103,18 @@ void Eval( UInt npts,
           const double pcoord[], // parametric coords
           Real results[]) const;
 
+ElemPatch &operator=(const ElemPatch &rhs);
+ElemPatch(const ElemPatch &rhs);
+
 private:
   std::vector<PatchRecov<NFIELD,Real> > patches;
-  std::vector<MCoord*> mcs;
+  std::vector<MCoord> mcs;
   const MeshObj *pelem;
   const MeshDB *pmesh;
   const MEField<> *pcfield;
   UInt flen; // total length of fields (including dimensions)
 };
 
-} // namespace
 } // namespace
 
 #endif

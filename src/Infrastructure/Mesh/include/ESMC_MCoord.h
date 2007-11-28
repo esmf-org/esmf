@@ -1,4 +1,4 @@
-// $Id: ESMC_MCoord.h,v 1.1 2007/08/07 17:47:55 dneckels Exp $
+// $Id: ESMC_MCoord.h,v 1.2 2007/11/28 16:23:21 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -8,20 +8,14 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-
-// (all lines below between the !BOP and !EOP markers will be included in
-//  the automated document processing.)
-//-------------------------------------------------------------------------
-// these lines prevent this file from being read more than once if it
-// ends up being included multiple times
-
+//
+//-----------------------------------------------------------------------------
 #ifndef ESMC_MCoord_h
 #define ESMC_MCoord_h
 
-#include <ESMC_MeshTypes.h>
+#include <mesh/ESMC_MeshTypes.h>
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 // Define local manifold coordinates from a normal vector.  Hardcoded for 2d in 3d.
 // Make an abstract class and inherit to generalize.
@@ -30,6 +24,12 @@ class MCoord {
 public:
 // coordinates where normal was taken, normal.
 MCoord(const double c[], const double n[]);
+
+MCoord();
+
+MCoord &operator =(const MCoord &rhs);
+MCoord(const MCoord &rhs);
+
 // Transform the in coords to local system (in out);
 void Transform(const double in[], double out[]) const;
 UInt ManifoldDim() const { return 2;}
@@ -39,7 +39,6 @@ double ct[3];
 double u[2*3];
 };
 
-} // namespace
 } // namespace
 
 #endif

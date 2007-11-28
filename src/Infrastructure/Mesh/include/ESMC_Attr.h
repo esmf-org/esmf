@@ -1,4 +1,4 @@
-// $Id: ESMC_Attr.h,v 1.1 2007/08/07 17:47:54 dneckels Exp $
+// $Id: ESMC_Attr.h,v 1.2 2007/11/28 16:23:21 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -8,30 +8,25 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-
-// (all lines below between the !BOP and !EOP markers will be included in
-//  the automated document processing.)
-//-------------------------------------------------------------------------
-// these lines prevent this file from being read more than once if it
-// ends up being included multiple times
-
+//
+//-----------------------------------------------------------------------------
 #ifndef ESMC_Attr_h
 #define ESMC_Attr_h
 
-#include <ESMC_Context.h>
-#include <ESMC_MeshObj.h>
+#include <mesh/ESMC_Context.h>
+#include <mesh/ESMC_MeshObj.h>
 
 #include <ostream>
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 template <typename> class SparsePack;
 template <typename> class SparseUnpack;
 
 /**
- * Basic key for different types of mesh objects.  The attr holds a context,
+ * Basic relational key for different types of mesh objects.  The attr holds a context,
  * the object type, and other attributes.
+ * @ingroup meshdatabase
  */
 class Attr {
 public:
@@ -119,10 +114,11 @@ public:
   bool any(const Attr &rhs) const;
   // operator= (use standard)
 
-  UInt get_type() const { return type;}
-  UInt get_key() const { return globalKey;}
-  Context &get_context() { return context;}
-  const Context &get_context() const { return context;}
+  UInt GetType() const { return type;}
+  UInt GetBlock() const { return globalKey;}
+
+  Context &GetContext() { return context;}
+  const Context &GetContext() const { return context;}
   bool is_shared() const { return context.is_set(SHARED_ID); }
   bool is_locally_owned() const { return context.is_set(OWNED_ID);}
   friend std::ostream &operator<<(std::ostream &os, const Attr &attr);
@@ -140,7 +136,6 @@ private:
 std::ostream &operator<<(std::ostream &os, const Attr &attr);
 
 
-} // namespace
 } // namespace
 
 #endif

@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshVTK.h,v 1.2 2007/08/20 19:26:53 dneckels Exp $
+// $Id: ESMC_MeshVTK.h,v 1.3 2007/11/28 16:23:22 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -8,19 +8,16 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
+//
+//-----------------------------------------------------------------------------
+#ifndef ESMC_MeshVTK_h
+#define ESMC_MeshVTK_h
 
-// (all lines below between the !BOP and !EOP markers will be included in
-//  the automated document processing.)
-//-------------------------------------------------------------------------
-// these lines prevent this file from being read more than once if it
-// ends up being included multiple times
-
-#include <ESMC_MeshTypes.h>
+#include <mesh/ESMC_MeshTypes.h>
 
 #include <string>
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 class Mesh;
 
@@ -29,4 +26,5 @@ void WriteVTKMesh(const Mesh &mesh, const std::string &filename);
 void ReadVTKMesh(Mesh &mesh, const std::string &filename);
 
 } // namespace
-} // namespace
+
+#endif

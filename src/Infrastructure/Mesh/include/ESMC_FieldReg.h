@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldReg.h,v 1.4 2007/09/17 19:05:39 dneckels Exp $
+// $Id: ESMC_FieldReg.h,v 1.5 2007/11/28 16:23:21 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -8,34 +8,36 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-
-// (all lines below between the !BOP and !EOP markers will be included in
-//  the automated document processing.)
-//-------------------------------------------------------------------------
-// these lines prevent this file from being read more than once if it
-// ends up being included multiple times
-
+//
+//-----------------------------------------------------------------------------
 #ifndef ESMC_FieldReg_h
 #define ESMC_FieldReg_h
 
-#include <ESMC_Attr.h>
-#include <ESMC_MEField.h>
-#include <ESMC_MeshDB.h>
-#include <ESMC_MEFamily.h>
-#include <ESMC_Meshfield.h>
+#include <mesh/ESMC_Attr.h>
+#include <mesh/ESMC_MEField.h>
+#include <mesh/ESMC_MeshDB.h>
+#include <mesh/ESMC_MEFamily.h>
+#include <mesh/ESMC_MeshllField.h>
 #include <map>
-#include <ESMC_MeshDB.h>
-#include <ESMC_Iterator.h>
-#include <ESMC_IOField.h>
+#include <mesh/ESMC_MeshDB.h>
+#include <mesh/ESMC_Iterator.h>
+#include <mesh/ESMC_IOField.h>
 
-namespace ESMCI {
-namespace MESH {
+/**
+ * @defgroup field
+ * 
+ * The field subsystem contains methods that allow the storage of data on
+ * the mesh database.
+ * @ingroup mesh
+ */
+namespace ESMC {
 
 class Kernel;
 
 /**
  * A collector for fields, i.e. the Field Registrar.  A field (with a particular name)
- * may be registered multiple times, with multiple attrs. 
+ * may be registered multiple times, with multiple attrs.
+ * @ingroup field 
 */
 class FieldReg {
 public:
@@ -117,7 +119,6 @@ std::vector<IOField<NodalField>*> ndfields;
 std::vector<IOField<ElementField>*> efields;
 };
 
-} // namespace 
 } // namespace 
 
 #endif

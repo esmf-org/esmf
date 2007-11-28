@@ -1,4 +1,4 @@
-// $Id: ESMC_HAdapt.h,v 1.2 2007/08/20 19:34:50 dneckels Exp $
+// $Id: ESMC_HAdapt.h,v 1.3 2007/11/28 16:23:21 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -8,21 +8,15 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-
-// (all lines below between the !BOP and !EOP markers will be included in
-//  the automated document processing.)
-//-------------------------------------------------------------------------
-// these lines prevent this file from being read more than once if it
-// ends up being included multiple times
-
+//
+//-----------------------------------------------------------------------------
 #ifndef ESMC_HAdapt_h
 #define ESMC_HAdapt_h
 
 #include <vector>
 
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 class Mesh;
 class _field;
@@ -41,7 +35,6 @@ class MeshObj;
  *   -) Call MarkerResolution
  *   -) Call Unrefine Mesh
  *   -) Call Refine Mesh
- *   -) Call RefinementResolution
 */
 class HAdapt {
 public:
@@ -89,10 +82,6 @@ void UnrefineMesh();
 */
 void RefineMesh();
 
-/**
- * Update the constraints, attributes, etc as needed.
-*/
-void RefinementResolution() const;
 
 Mesh &GetMesh() { return mesh; }
 
@@ -104,8 +93,12 @@ HAdapt &operator=(const HAdapt &);
 
 Mesh &mesh;
 
-void resolve_refinement(std::vector<MeshObj*>&);
-void resolve_unrefinement(std::vector<MeshObj*>&);
+/**
+ * Update the constraints, attributes, etc as needed.
+*/
+void refinement_resolution() const;
+void resolve_refinement_markers(std::vector<MeshObj*>&);
+void resolve_unrefinement_markers(std::vector<MeshObj*>&);
 
 /** Field for resolving 2-1 (helps across processors) */
 MEField<_field> *node_marker; 
@@ -121,7 +114,6 @@ std::vector<MeshObj*> unrefine_list;
 
 };
 
-} // namespace
 } // namespace
 
 #endif

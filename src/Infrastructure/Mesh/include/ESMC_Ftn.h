@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshGen.h,v 1.2 2007/11/28 16:23:22 dneckels Exp $
+// $Id: ESMC_Ftn.h,v 1.1 2007/11/28 16:23:21 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -10,19 +10,11 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_MeshGen_h
-#define ESMC_MeshGen_h
+#ifndef ESMC_Ftn_h
+#define ESMC_Ftn_h
 
-#include <ostream>
+// TODO: figure out how to make platform indep.
 
-namespace ESMC {
-
-class Mesh;
-class MeshObjTopo;
-
-// Generate a hyper cube on proc 0
-void HyperCube(Mesh &mesh, const MeshObjTopo *topo);
-
-} // namespace
+#define FTN(a) a##_
 
 #endif

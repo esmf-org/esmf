@@ -1,4 +1,4 @@
-// $Id: ESMC_Meshfield.h,v 1.3 2007/09/17 19:05:39 dneckels Exp $
+// $Id: ESMC_MeshllField.h,v 1.1 2007/11/28 16:23:22 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -8,36 +8,39 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
+//
+//-----------------------------------------------------------------------------
+#ifndef ESMC_MeshllField_h
+#define ESMC_MeshllField_h
 
-// (all lines below between the !BOP and !EOP markers will be included in
-//  the automated document processing.)
-//-------------------------------------------------------------------------
-// these lines prevent this file from being read more than once if it
-// ends up being included multiple times
-#ifndef ESMC_Meshfield_h
-#define ESMC_Meshfield_h
-
-#include <ESMC_MeshTypes.h>
-#include <ESMC_Attr.h>
-#include <ESMC_List.h>
+#include <mesh/ESMC_MeshTypes.h>
+#include <mesh/ESMC_Attr.h>
+#include <mesh/ESMC_List.h>
 
 #include <typeinfo>
 #include <cstddef>
 #include <string>
 
-namespace ESMCI {
-namespace MESH {
 
-// ********* Low level Field ***********
+/**
+ * @defgroup BaseField
+ * 
+ * A subsystem that implements a fixed size field on a given set of
+ * mesh objects (described by an Attr).
+ * 
+ * @ingroup field
+ */
 
-
-// ******* Field storage ********
+namespace ESMC {
 
 class _field;
 
 /**
  * The basic field storage object for a set of mesh objects that
- * all have the same fields present.
+ * all have the same fields present.  All fields for a small set of
+ * objects of homogenous attribute are store in this object in an
+ * array (actually a table) of values.
+ * @ingroup BaseField
 */
 class _fieldStore : public ListNode<_fieldStore> {
 public:
@@ -64,18 +67,37 @@ void Create(UInt nfields, _field **fields, const Attr &attr);
 // to place the object.
 void CopyIn(UInt nfields, _field **fields, MeshObj &obj, UInt idx);
 
-// Zero out a slot
+/*
+ * Zero out a slot for an object.
+ */
 void Zero(UInt nfields, _field **fields, UInt idx);
+
 bool Full() const { return next_free == TABLE_FULL; }
-void remove(UInt idx); // free a slot
-// Insert an object (return slot number)
+bool empty() const { return num_objs == 0; }
+
+/*
+ * Free a data slot referenced by idx.
+ */
+void remove(UInt idx); 
+
+/*
+ * Insert an object (return slot number) into the next free (should check
+ * to make sure not full first)
+ */
 UInt insert();
 
 UChar *Offset(UInt fnum) const { ThrowAssert(fnum < nfield && is_committed); return offsets[fnum];}
 
 UChar *GetData() const { return data;}
 
-// Return ration of num slots used / total num
+/*
+ * Return number of objects in store.
+ */
+UInt NumObjs() const { return num_objs; }
+
+/* 
+ * Return ration of num slots used / total num
+ */
 double FillRatio() const;
 
 private:
@@ -87,11 +109,13 @@ UInt free_stride; // stride of first field
 UChar *data;
 bool is_committed;
 UInt nfield;
+UInt num_objs;
 };
 
 /**
- * A class to help encapsulate the type a given field is.  This
+ * A class to help encapsulate the C++ type a given field is.  This
  * class helps provide type safety in debug mode.
+ * @ingroup BaseField
 */
 class _fieldTypeBase {
 public:
@@ -101,7 +125,10 @@ public:
   virtual std::size_t size() const = 0;
   virtual const std::type_info &type() const = 0;
 };
-
+/**
+ * Provide an easy template style interface to the base
+ * @ingroup BaseField
+ */
 template<typename SCALAR>
 class _fieldType : public _fieldTypeBase {
 public:
@@ -120,6 +147,7 @@ private:
 /**
  * Object that facilitates casting a block of memory to a type pointer.
  * Provides for type checking in debug mode, and fast casting in optimized.
+ * @ingroup BaseField
 */
 class _fieldValuePtr {
 public:
@@ -177,11 +205,12 @@ const std::type_info &ti;
 };
 
 /**
- * Basic class representing a low level field that lives on some set of
+ * Basic class representing a BaseField that lives on some set of
  * mesh objects.
  * This field lives on the union of subsets described by a context value.
  * i.e. if the context is 1000111, the field will life on any kernel that
  * has any one of these bits set.
+ * @ingroup BaseField
 */
 class _field {
 public:
@@ -219,7 +248,6 @@ const std::type_info &ti;
 
 
 
-} // namespace
 } // namespace
 
 

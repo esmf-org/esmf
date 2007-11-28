@@ -1,4 +1,4 @@
-// $Id: ESMC_Iterator.h,v 1.2 2007/08/09 17:33:08 dneckels Exp $
+// $Id: ESMC_Iterator.h,v 1.3 2007/11/28 16:23:21 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -8,18 +8,12 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-
-// (all lines below between the !BOP and !EOP markers will be included in
-//  the automated document processing.)
-//-------------------------------------------------------------------------
-// these lines prevent this file from being read more than once if it
-// ends up being included multiple times
-
+//
+//-----------------------------------------------------------------------------
 #ifndef ESMC_Iterator_h
 #define ESMC_Iterator_h
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 // Adapts a map to a linear iterator, so that
 // *it yields *it->second.  This both dereferences the right
@@ -77,7 +71,6 @@ private:
 Map_iterator mi;
 };
 
-} // namespace
 } // namespace
 
 #endif

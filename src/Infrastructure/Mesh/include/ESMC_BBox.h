@@ -1,4 +1,4 @@
-// $Id: ESMC_BBox.h,v 1.2 2007/09/10 17:38:26 dneckels Exp $
+// $Id: ESMC_BBox.h,v 1.3 2007/11/28 16:23:21 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -8,27 +8,25 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-
-// (all lines below between the !BOP and !EOP markers will be included in
-//  the automated document processing.)
-//-------------------------------------------------------------------------
-// these lines prevent this file from being read more than once if it
-// ends up being included multiple times
-
+//
+//-----------------------------------------------------------------------------
 #ifndef ESMC_BBox_h
 #define ESMC_BBox_h
 
-#include <ESMC_MeshDB.h>
-#include <ESMC_MeshObj.h>
-#include <ESMC_MEField.h>  // for coords
-#include <ESMC_MeshTypes.h>
+#include <mesh/ESMC_MeshDB.h>
+#include <mesh/ESMC_MeshObj.h>
+#include <mesh/ESMC_MEField.h>  // for coords
+
+
+#include <mesh/ESMC_MeshTypes.h>
 
 #include <iostream>
 
 // Class to support basic bounding box type operations such
 // as creation, intersection, etc...
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
+
+class _field;
 
 /**
  * A bounding box utility class.  Forms boxes around meshes and
@@ -82,7 +80,6 @@ bool BBoxSubset(const BBox &b1, const BBox &b2);
 std::ostream &operator<<(std::ostream &os, const BBox &cn);
 
 
-} // namespace
 } // namespace
 
 #endif

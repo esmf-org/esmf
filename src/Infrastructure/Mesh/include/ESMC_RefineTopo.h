@@ -1,4 +1,4 @@
-// $Id: ESMC_RefineTopo.h,v 1.1 2007/08/07 17:47:59 dneckels Exp $
+// $Id: ESMC_RefineTopo.h,v 1.2 2007/11/28 16:23:22 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -8,22 +8,16 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-
-// (all lines below between the !BOP and !EOP markers will be included in
-//  the automated document processing.)
-//-------------------------------------------------------------------------
-// these lines prevent this file from being read more than once if it
-// ends up being included multiple times
-
+//
+//-----------------------------------------------------------------------------
 #ifndef ESMC_RefineTopo_h
 #define ESMC_RefineTopo_h
 
-#include <ESMC_MeshTypes.h>
-#include <ESMC_MeshObjTopo.h>
-#include <ESMC_Exception.h>
+#include <mesh/ESMC_MeshTypes.h>
+#include <mesh/ESMC_MeshObjTopo.h>
+#include <mesh/ESMC_Exception.h>
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 class RefineTopo {
 public:
@@ -75,7 +69,6 @@ const RefineTopo *etopo;
 
 const RefineTopo *GetHomoRefineTopo(const std::string &tname);
 
-} // namespace
 } // namespace
 
 #endif

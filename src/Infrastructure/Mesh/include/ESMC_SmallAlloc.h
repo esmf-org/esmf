@@ -1,4 +1,4 @@
-// $Id: ESMC_SmallAlloc.h,v 1.1 2007/08/07 17:47:59 dneckels Exp $
+// $Id: ESMC_SmallAlloc.h,v 1.2 2007/11/28 16:23:22 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -8,18 +8,13 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-
-// (all lines below between the !BOP and !EOP markers will be included in
-//  the automated document processing.)
-//-------------------------------------------------------------------------
-// these lines prevent this file from being read more than once if it
-// ends up being included multiple times
-
+//
+//-----------------------------------------------------------------------------
 #ifndef ESMC_SmallAlloc_h
 #define ESMC_SmallAlloc_h
 
-#include <ESMC_MeshTypes.h>
-#include <ESMC_List.h>
+#include <mesh/ESMC_MeshTypes.h>
+#include <mesh/ESMC_List.h>
 
 #include <cstddef>
 
@@ -27,8 +22,7 @@
 // A class to efficiently store a large collection of uniformly sized
 // small objects.
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 class Chunk : public ListNode<Chunk> {
 public:
@@ -87,7 +81,6 @@ public:
   virtual ~SmallObject();
 };
 
-} // namespace
 } // namespace
 
 #endif

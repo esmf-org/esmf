@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshGen.h,v 1.2 2007/11/28 16:23:22 dneckels Exp $
+// $Id: ESMC_MeshPNC.h,v 1.1 2007/11/28 16:23:22 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -10,19 +10,21 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_MeshGen_h
-#define ESMC_MeshGen_h
+#ifndef ESMC_MESHPNC_H_
+#define ESMC_MESHPNC_H_
 
-#include <ostream>
+#include <string>
 
 namespace ESMC {
 
 class Mesh;
-class MeshObjTopo;
 
-// Generate a hyper cube on proc 0
-void HyperCube(Mesh &mesh, const MeshObjTopo *topo);
+/* Load the dual mesh of a given netcdf file.  Note: this loads the file on
+ * processor zero only.  It should, however, be called from all processors.
+ * Will generate a bilinear mesh unless use_quad = true, then a quadratic.
+ */
+void LoadNCDualMeshPar(Mesh &mesh, const std::string fname, bool use_quad=false);
 
 } // namespace
 
-#endif
+#endif /*ESMC_MESHPNC_H_*/

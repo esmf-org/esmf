@@ -1,4 +1,4 @@
-// $Id: ESMC_MEImprint.h,v 1.2 2007/08/20 19:34:51 dneckels Exp $
+// $Id: ESMC_MEImprint.h,v 1.3 2007/11/28 16:23:21 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -8,23 +8,17 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-
-// (all lines below between the !BOP and !EOP markers will be included in
-//  the automated document processing.)
-//-------------------------------------------------------------------------
-// these lines prevent this file from being read more than once if it
-// ends up being included multiple times
-
+//
+//-----------------------------------------------------------------------------
 #ifndef ESMC_MEImprint_h
 #define ESMC_MEImprint_h
 
-#include <ESMC_MeshObj.h>
+#include <mesh/ESMC_MeshObj.h>
 
 #include <string>
 #include <vector>
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 class MasterElementBase;
 
@@ -37,7 +31,6 @@ void MEImprintValSets(const std::string &imname, MeshObj &obj,
 void MEImprint(const std::string &imname, MeshObj &obj,
                const MasterElementBase &me);
 
-} // namespace
 } // namespace
 
 #endif

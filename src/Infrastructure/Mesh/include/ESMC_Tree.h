@@ -1,4 +1,4 @@
-// $Id: ESMC_Tree.h,v 1.1 2007/08/07 17:47:59 dneckels Exp $
+// $Id: ESMC_Tree.h,v 1.2 2007/11/28 16:23:22 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -8,73 +8,20 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-
-// (all lines below between the !BOP and !EOP markers will be included in
-//  the automated document processing.)
-//-------------------------------------------------------------------------
-// these lines prevent this file from being read more than once if it
-// ends up being included multiple times
-
-/*
-Red-black tree class, designed for use in implementing STL
-associative containers (set, multiset, map, and multimap). The
-insertion and deletion algorithms are based on those in Cormen,
-Leiserson, and Rivest, Introduction to Algorithms (MIT Press, 1990),
-except that
-
-(1) the header cell is maintained with links not only to the root
-but also to the leftmost node of the tree, to enable constant time
-begin(), and to the rightmost node of the tree, to enable linear time
-performance when used with the generic set algorithms (set_union,
-etc.);
-
-(2) when a node being deleted has two children its successor node is
-relinked into its place, rather than copied, so that the only
-iterators invalidated are those referring to the deleted node.
-
-*/
-
-/*
- *
- * Copyright (c) 1996
- * Silicon Graphics Computer Systems, Inc.
- *
- * Permission to use, copy, modify, distribute and sell this software
- * and its documentation for any purpose is hereby granted without fee,
- * provided that the above copyright notice appear in all copies and
- * that both that copyright notice and this permission notice appear
- * in supporting documentation.  Silicon Graphics makes no
- * representations about the suitability of this software for any
- * purpose.  It is provided "as is" without express or implied warranty.
- *
- *
- * Copyright (c) 1994
- * Hewlett-Packard Company
- *
- * Permission to use, copy, modify, distribute and sell this software
- * and its documentation for any purpose is hereby granted without fee,
- * provided that the above copyright notice appear in all copies and
- * that both that copyright notice and this permission notice appear
- * in supporting documentation.  Hewlett-Packard Company makes no
- * representations about the suitability of this software for any
- * purpose.  It is provided "as is" without express or implied warranty.
- *
- *
- */
-
+//
+//-----------------------------------------------------------------------------
 #ifndef ESMC_Tree_h
 #define ESMC_Tree_h
 
 
-#include <ESMC_Exception.h>
+#include <mesh/ESMC_Exception.h>
 
 #include <cstddef>
 #include <algorithm>
 #include <iterator>
 #include <functional>
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 typedef bool _Tree_color_type;
 const _Tree_color_type _Tree_red = false;
@@ -178,15 +125,15 @@ struct _Tree_base_iterator
   }
 };
 
-template <class _T, typename Ref, typename Ptr, typename Key>
+template <class TT, typename Ref, typename Ptr, typename Key>
 struct _Tree_iterator : public _Tree_base_iterator<Key>
 {
-  typedef _T value_type;
+  typedef TT value_type;
   typedef Ref reference;
   typedef Ptr pointer;
   typedef _Tree_iterator             iterator;
-  typedef _Tree_iterator<_T, const _T&, const _T*, Key> const_iterator;
-  typedef _Tree_iterator<_T, Ref, Ptr, Key>                   self;
+  typedef _Tree_iterator<TT, const TT&, const TT*, Key> const_iterator;
+  typedef _Tree_iterator<TT, Ref, Ptr, Key>                   self;
   typedef TreeNode<Key>* link_type;
 
   _Tree_iterator() {}
@@ -442,7 +389,7 @@ _Tree_rebalance_for_erase(TreeNode<Key>* z,
  * to objects that we want to categorize; also allows for instance deletes of
  * objects, given pointers to them.
 */
-template <class Key, class _T, class Compare = std::less<Key> >
+template <class Key, class TT, class Compare = std::less<Key> >
 class Tree {
 protected:
     typedef void* void_pointer;
@@ -450,7 +397,7 @@ protected:
     typedef _Tree_color_type color_type;
 public:
     typedef Key key_type;
-    typedef _T value_type;
+    typedef TT value_type;
     typedef value_type* pointer;
     typedef const value_type* const_pointer;
     typedef value_type& reference;
@@ -514,9 +461,9 @@ public:
 
 private:
     // disallow
-    Tree(const Tree<Key, _T, Compare>& x); 
-    Tree<Key, _T, Compare>& 
-        operator=(const Tree<Key, _T, Compare>& x);
+    Tree(const Tree<Key, TT, Compare>& x); 
+    Tree<Key, TT, Compare>& 
+        operator=(const Tree<Key, TT, Compare>& x);
 public:
     ~Tree() {
         clear();
@@ -595,22 +542,22 @@ public:
   bool __rb_verify() const;
 };
 
-template <class Key, class _T, class Compare>
-inline bool operator==(const Tree<Key, _T, Compare>& x, 
-                       const Tree<Key, _T, Compare>& y) {
+template <class Key, class TT, class Compare>
+inline bool operator==(const Tree<Key, TT, Compare>& x, 
+                       const Tree<Key, TT, Compare>& y) {
     return x.size() == y.size() && equal(x.begin(), x.end(), y.begin());
 }
 
-template <class Key, class _T, class Compare>
-inline bool operator<(const Tree<Key, _T, Compare>& x, 
-                      const Tree<Key, _T, Compare>& y) {
+template <class Key, class TT, class Compare>
+inline bool operator<(const Tree<Key, TT, Compare>& x, 
+                      const Tree<Key, TT, Compare>& y) {
     return std::lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());
 }
 
-template <class Key, class _T, class Compare>
-typename Tree<Key, _T, Compare>::iterator
-Tree<Key, _T, Compare>::
-__insert(base_ptr x_, base_ptr y_, _T& v) {
+template <class Key, class TT, class Compare>
+typename Tree<Key, TT, Compare>::iterator
+Tree<Key, TT, Compare>::
+__insert(base_ptr x_, base_ptr y_, TT& v) {
   link_type x = (link_type) x_;
   link_type y = (link_type) y_;
   link_type z = &v;
@@ -637,9 +584,9 @@ __insert(base_ptr x_, base_ptr y_, _T& v) {
   return iterator(z);
 }
 
-template <class Key, class _T, class Compare>
-typename Tree<Key, _T, Compare>::iterator
-Tree<Key, _T, Compare>::insert_equal( value_type& v)
+template <class Key, class TT, class Compare>
+typename Tree<Key, TT, Compare>::iterator
+Tree<Key, TT, Compare>::insert_equal( value_type& v)
 {
     link_type y = header;
     link_type x = root();
@@ -651,9 +598,9 @@ Tree<Key, _T, Compare>::insert_equal( value_type& v)
 }
 
 
-template <class Key, class _T, class Compare>
-typename std::pair<typename Tree<Key, _T, Compare>::iterator, bool>
-Tree<Key, _T, Compare>::insert_unique(value_type& v)
+template <class Key, class TT, class Compare>
+typename std::pair<typename Tree<Key, TT, Compare>::iterator, bool>
+Tree<Key, TT, Compare>::insert_unique(value_type& v)
 {
     link_type y = header;
     link_type x = root();
@@ -675,9 +622,9 @@ Tree<Key, _T, Compare>::insert_unique(value_type& v)
 }
 
 
-template <class Key, class _T, class Compare>
-typename Tree<Key, _T, Compare>::iterator 
-Tree<Key, _T, Compare>::insert_unique(iterator position,
+template <class Key, class TT, class Compare>
+typename Tree<Key, TT, Compare>::iterator 
+Tree<Key, TT, Compare>::insert_unique(iterator position,
                                                              value_type& v) {
     if (position.node == header->left) // begin()
         if (size() > 0 && key_compare(v.KeyOfValue(), key(position.node)))
@@ -705,9 +652,9 @@ Tree<Key, _T, Compare>::insert_unique(iterator position,
     }
 }
 
-template <class Key, class _T, class Compare>
-typename Tree<Key, _T, Compare>::iterator 
-Tree<Key, _T, Compare>::insert_equal(iterator position,
+template <class Key, class TT, class Compare>
+typename Tree<Key, TT, Compare>::iterator 
+Tree<Key, TT, Compare>::insert_equal(iterator position,
                                                             value_type& v) {
     if (position.node == header->left) // begin()
         if (size() > 0 && key_compare(v.KeyOfValue(), key(position.node)))
@@ -736,22 +683,22 @@ Tree<Key, _T, Compare>::insert_equal(iterator position,
 }
 
 
-template <class K, class _T, class Cmp> template<class II>
-void Tree<K, _T, Cmp>::insert_equal(II first, II last) {
+template <class K, class TT, class Cmp> template<class II>
+void Tree<K, TT, Cmp>::insert_equal(II first, II last) {
   for ( ; first != last; ++first)
     insert_equal(*first);
 }
 
-template <class K, class _T, class Cmp> template<class II>
-void Tree<K, _T, Cmp>::insert_unique(II first, II last) {
+template <class K, class TT, class Cmp> template<class II>
+void Tree<K, TT, Cmp>::insert_unique(II first, II last) {
   for ( ; first != last; ++first)
     insert_unique(*first);
 }
 
          
-template <class Key, class _T, class Compare>
+template <class Key, class TT, class Compare>
 inline void
-Tree<Key, _T, Compare>::erase(iterator position) {
+Tree<Key, TT, Compare>::erase(iterator position) {
   link_type y = (link_type) _Tree_rebalance_for_erase(position.node,
                                                           header->parent,
                                                           header->left,
@@ -760,9 +707,9 @@ Tree<Key, _T, Compare>::erase(iterator position) {
   --node_count;
 }
 
-template <class Key, class _T, class Compare>
-typename Tree<Key, _T, Compare>::size_type 
-Tree<Key, _T, Compare>::erase(const Key& x) {
+template <class Key, class TT, class Compare>
+typename Tree<Key, TT, Compare>::size_type 
+Tree<Key, TT, Compare>::erase(const Key& x) {
     std::pair<iterator,iterator> p = equal_range(x);
     size_type n = 0;
     distance(p.first, p.second, n);
@@ -770,8 +717,8 @@ Tree<Key, _T, Compare>::erase(const Key& x) {
     return n;
 }
 
-template <class Key, class _T, class Compare>
-void Tree<Key, _T, Compare>::__erase(link_type x) {
+template <class Key, class TT, class Compare>
+void Tree<Key, TT, Compare>::__erase(link_type x) {
                                 // erase without rebalancing
   while (x != 0) {
     __erase(right(x));
@@ -781,8 +728,8 @@ void Tree<Key, _T, Compare>::__erase(link_type x) {
   }
 }
 
-template <class Key, class _T, class Compare>
-void Tree<Key, _T, Compare>::erase(iterator first, 
+template <class Key, class TT, class Compare>
+void Tree<Key, TT, Compare>::erase(iterator first, 
                                                             iterator last) {
     if (first == begin() && last == end())
         clear();
@@ -790,15 +737,15 @@ void Tree<Key, _T, Compare>::erase(iterator first,
         while (first != last) erase(first++);
 }
 
-template <class Key, class _T, class Compare>
-void Tree<Key, _T, Compare>::erase(const Key* first, 
+template <class Key, class TT, class Compare>
+void Tree<Key, TT, Compare>::erase(const Key* first, 
                                                             const Key* last) {
     while (first != last) erase(*first++);
 }
 
-template <class Key, class _T, class Compare>
-typename Tree<Key, _T, Compare>::iterator 
-Tree<Key, _T, Compare>::find(const Key& k) {
+template <class Key, class TT, class Compare>
+typename Tree<Key, TT, Compare>::iterator 
+Tree<Key, TT, Compare>::find(const Key& k) {
    link_type y = header;        // Last node which is not less than k. 
    link_type x = root();        // Current node. 
 
@@ -812,9 +759,9 @@ Tree<Key, _T, Compare>::find(const Key& k) {
    return (j == end() || key_compare(k, key(j.node))) ? end() : j;
 }
 
-template <class Key, class _T, class Compare>
-typename Tree<Key, _T, Compare>::const_iterator 
-Tree<Key, _T, Compare>::find(const Key& k) const {
+template <class Key, class TT, class Compare>
+typename Tree<Key, TT, Compare>::const_iterator 
+Tree<Key, TT, Compare>::find(const Key& k) const {
    link_type y = header; /* Last node which is not less than k. */
    link_type x = root(); /* Current node. */
 
@@ -828,18 +775,18 @@ Tree<Key, _T, Compare>::find(const Key& k) const {
    return (j == end() || key_compare(k, key(j.node))) ? end() : j;
 }
 
-template <class Key, class _T, class Compare>
-typename Tree<Key, _T, Compare>::size_type 
-Tree<Key, _T, Compare>::count(const Key& k) const {
+template <class Key, class TT, class Compare>
+typename Tree<Key, TT, Compare>::size_type 
+Tree<Key, TT, Compare>::count(const Key& k) const {
     std::pair<const_iterator, const_iterator> p = equal_range(k);
     size_type n = 0;
     distance(p.first, p.second, n);
     return n;
 }
 
-template <class Key, class _T, class Compare>
-typename Tree<Key, _T, Compare>::iterator 
-Tree<Key, _T, Compare>::lower_bound(const Key& k) {
+template <class Key, class TT, class Compare>
+typename Tree<Key, TT, Compare>::iterator 
+Tree<Key, TT, Compare>::lower_bound(const Key& k) {
    link_type y = header; /* Last node which is not less than k. */
    link_type x = root(); /* Current node. */
 
@@ -852,9 +799,9 @@ Tree<Key, _T, Compare>::lower_bound(const Key& k) {
    return iterator(y);
 }
 
-template <class Key, class _T, class Compare>
-typename Tree<Key, _T, Compare>::const_iterator 
-Tree<Key, _T, Compare>::lower_bound(const Key& k) const {
+template <class Key, class TT, class Compare>
+typename Tree<Key, TT, Compare>::const_iterator 
+Tree<Key, TT, Compare>::lower_bound(const Key& k) const {
    link_type y = header; /* Last node which is not less than k. */
    link_type x = root(); /* Current node. */
 
@@ -867,9 +814,9 @@ Tree<Key, _T, Compare>::lower_bound(const Key& k) const {
    return const_iterator(y);
 }
 
-template <class Key, class _T, class Compare>
-typename Tree<Key, _T, Compare>::iterator 
-Tree<Key, _T, Compare>::upper_bound(const Key& k) {
+template <class Key, class TT, class Compare>
+typename Tree<Key, TT, Compare>::iterator 
+Tree<Key, TT, Compare>::upper_bound(const Key& k) {
   link_type y = header; /* Last node which is greater than k. */
   link_type x = root(); /* Current node. */
 
@@ -882,9 +829,9 @@ Tree<Key, _T, Compare>::upper_bound(const Key& k) {
    return iterator(y);
 }
 
-template <class Key, class _T, class Compare>
-typename Tree<Key, _T, Compare>::const_iterator 
-Tree<Key, _T, Compare>::upper_bound(const Key& k) const {
+template <class Key, class TT, class Compare>
+typename Tree<Key, TT, Compare>::const_iterator 
+Tree<Key, TT, Compare>::upper_bound(const Key& k) const {
   link_type y = header; /* Last node which is greater than k. */
   link_type x = root(); /* Current node. */
 
@@ -897,17 +844,17 @@ Tree<Key, _T, Compare>::upper_bound(const Key& k) const {
    return const_iterator(y);
 }
 
-template <class Key, class _T, class Compare>
-inline typename std::pair<typename Tree<Key, _T, Compare>::iterator,
-            typename Tree<Key, _T, Compare>::iterator>
-Tree<Key, _T, Compare>::equal_range(const Key& k) {
+template <class Key, class TT, class Compare>
+inline typename std::pair<typename Tree<Key, TT, Compare>::iterator,
+            typename Tree<Key, TT, Compare>::iterator>
+Tree<Key, TT, Compare>::equal_range(const Key& k) {
     return std::pair<iterator, iterator>(lower_bound(k), upper_bound(k));
 }
 
-template <class Key, class _T, class Compare>
-inline typename std::pair<typename Tree<Key, _T, Compare>::const_iterator,
-            typename Tree<Key, _T, Compare>::const_iterator>
-Tree<Key, _T, Compare>::equal_range(const Key& k) const {
+template <class Key, class TT, class Compare>
+inline typename std::pair<typename Tree<Key, TT, Compare>::const_iterator,
+            typename Tree<Key, TT, Compare>::const_iterator>
+Tree<Key, TT, Compare>::equal_range(const Key& k) const {
     return std::pair<const_iterator,const_iterator>(lower_bound(k), upper_bound(k));
 }
 
@@ -925,9 +872,9 @@ inline int __black_count(TreeNode<Key>* node, TreeNode<Key>* root)
   }
 }
 
-template <class Key, class _T, class Compare>
+template <class Key, class TT, class Compare>
 bool 
-Tree<Key, _T, Compare>::__rb_verify() const
+Tree<Key, TT, Compare>::__rb_verify() const
 {
   if (node_count == 0 || begin() == end())
     return node_count == 0 && begin() == end() &&
@@ -961,7 +908,6 @@ Tree<Key, _T, Compare>::__rb_verify() const
   return true;
 }
 
-} // namespace
 } // namespace
 
 #endif 

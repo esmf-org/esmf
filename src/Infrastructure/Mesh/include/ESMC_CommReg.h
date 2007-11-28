@@ -1,4 +1,4 @@
-// $Id: ESMC_CommReg.h,v 1.2 2007/09/10 17:38:26 dneckels Exp $
+// $Id: ESMC_CommReg.h,v 1.3 2007/11/28 16:23:21 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -8,24 +8,18 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-
-// (all lines below between the !BOP and !EOP markers will be included in
-//  the automated document processing.)
-//-------------------------------------------------------------------------
-// these lines prevent this file from being read more than once if it
-// ends up being included multiple times
-
+//
+//-----------------------------------------------------------------------------
 #ifndef ESMC_CommReg_h
 #define ESMC_CommReg_h
 
-#include <ESMC_CommRel.h>
-#include <ESMC_MEField.h>
+#include <mesh/ESMC_CommRel.h>
+#include <mesh/ESMC_MEField.h>
 
 #include <iostream>
 
 
-namespace ESMCI {
-namespace MESH {
+namespace ESMC {
 
 /**
  * A class to represent a connection between two meshes (possible the same mesh).
@@ -54,12 +48,29 @@ void HaloFields(UInt nfields, MEField<> **sfields);
 template<typename VTYPE>
 void SwapOp(UInt nfields, MEField<> **fields, int op);
 
-/** Synchronize attributes in parallel. */
+/*
+ * Synchronize attributes for shared objects.
+ * This consists of or'ing attributes together, except
+ * for the following bits:
+ *   Attr::SHARED_ID
+ *   Attr::OWNED_ID
+ *   Attr::ACTIVE_ID
+ *   Attr::GENESIS_ID
+ * 
+ * Consistency checks are enfoced for these bits,
+ * meaning they should be fixed before calling sync.
+ */
 void SyncAttributes();
+
+/*
+ * Same as @func{SyncAttributes}, but
+ * only for the object types that are or'ed into
+ * the argument.
+ */
+void SyncAttributes(UInt obj_type);
 
 // Verify the symmetric comms (if they are symmetric);
 bool VerifySymComm();
-
 void CommPrint(std::ostream &);
 
 void clear();
@@ -73,7 +84,6 @@ const MeshDB *dom;
 const MeshDB *ran;
 };
 
-} // namespace
 } // namespace
 
 #endif

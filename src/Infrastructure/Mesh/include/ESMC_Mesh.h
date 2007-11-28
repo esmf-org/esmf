@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.h,v 1.4 2007/09/17 19:05:39 dneckels Exp $
+// $Id: ESMC_Mesh.h,v 1.5 2007/11/28 16:23:22 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -8,29 +8,31 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-
-// (all lines below between the !BOP and !EOP markers will be included in
-//  the automated document processing.)
-//-------------------------------------------------------------------------
-// these lines prevent this file from being read more than once if it
-// ends up being included multiple times
-
+//
+//-----------------------------------------------------------------------------
 #ifndef ESMC_Mesh_h
 #define ESMC_Mesh_h
 
-#include <ESMC_MeshDB.h>
-#include <ESMC_CommRel.h>
-#include <ESMC_FieldReg.h>
-#include <ESMC_CommReg.h>
+#include <mesh/ESMC_MeshDB.h>
+#include <mesh/ESMC_CommRel.h>
+#include <mesh/ESMC_FieldReg.h>
+#include <mesh/ESMC_CommReg.h>
 #include <mpi.h>
 
+/**
+ * @defgroup mesh
+ * 
+ * The basic system that is comprised of a topological mesh database,
+ * field registrars, and communication.
+ * 
+ */
 
-namespace ESMCI {
-namespace MESH {
-
+namespace ESMC {
 /**
  * Basic parallel mesh operations.  Aggregates the serial meshes,
- * the list of fields, and the parallel communiation relations
+ * the list of fields, and the parallel communiation relations.
+ * 
+ * @ingroup mesh
  */
 class Mesh : public MeshDB, public FieldReg, public CommReg {
 public:
@@ -47,6 +49,8 @@ Mesh();
  * prior to calling this function
  */
 void Commit();
+
+bool is_committed() const { return committed; }
 
 bool IsParallel() const { return true;}
 
@@ -77,13 +81,20 @@ CommReg &GhostComm() { ThrowRequire(sghost); return *sghost; }
 // Create the sym rel
 void build_sym_comm_rel(UInt obj_type);
 
+/*
+ * When shared objects are marked to delete, we must find a new owner
+ * for the shared object (on a proc that will keep it around)..  This 
+ * function sets a new valid owner, or nproc if everyone is going away.
+ * The spec is left unchanged.
+ */
+void resolve_cspec_delete_owners(UInt obj_type);
+
 private:
 void assign_new_ids();
 CommReg *sghost;
 bool committed;
 };
 
-} // namespace 
 } // namespace 
 
 #endif
