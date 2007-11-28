@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.24 2007/11/20 20:57:34 cdeluca Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.25 2007/11/28 00:25:59 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -182,7 +182,7 @@
 #define FieldCreateEPtrDoc() \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
-!BOP @\
+!BOPI @\
 ! !IROUTINE: ESMF_FieldCreate - Create a Field using an unallocated Fortran data pointer @\
  @\
 ! !INTERFACE: @\
@@ -251,7 +251,7 @@
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\
 ! @\
-!EOP @\
+!EOPI @\
 
 
 #if 0
