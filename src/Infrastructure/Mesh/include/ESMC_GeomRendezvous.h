@@ -1,4 +1,4 @@
-// $Id: ESMC_GeomRendezvous.h,v 1.5 2007/11/28 16:43:50 dneckels Exp $
+// $Id: ESMC_GeomRendezvous.h,v 1.6 2007/11/28 16:49:02 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -19,7 +19,7 @@
 #include <ESMC_Mesh.h>
 #include <ESMC_MEField.h>
 
-#include <zoltan/zoltan.h>
+#include <Zoltan/zoltan.h>
 
 namespace ESMC {
 

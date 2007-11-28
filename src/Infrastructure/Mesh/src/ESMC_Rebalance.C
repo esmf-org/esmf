@@ -1,4 +1,4 @@
-// $Id: ESMC_Rebalance.C,v 1.9 2007/11/28 16:42:45 dneckels Exp $
+// $Id: ESMC_Rebalance.C,v 1.10 2007/11/28 16:45:55 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -17,7 +17,7 @@
 #include <ESMC_MeshField.h>
 
 
-#include <zoltan/zoltan.h>
+#include <Zoltan/zoltan.h>
 
 namespace ESMC {
 
