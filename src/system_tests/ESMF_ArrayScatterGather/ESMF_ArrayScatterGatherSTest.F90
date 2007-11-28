@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherSTest.F90,v 1.1 2007/10/08 23:17:02 theurich Exp $
+! $Id: ESMF_ArrayScatterGatherSTest.F90,v 1.2 2007/11/28 23:41:13 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !SYSTEM_TEST        String used by test script to count system tests.
@@ -14,8 +14,8 @@
 !    The first gridded component runs on 3 PETs (0,1,3) and defines two 2D 
 !    Arrays: srcArray1 and dstArray1. Both Arrays have a total index space of
 !    100x150 elements and use the default DELayout. However, srcArray1
-!    decomposes into (petCount x 1) = (4 x 1) DEs while dstArray1 decomposes
-!    into (1 x petCount) = (1 x 4) DEs.
+!    decomposes into (petCount x 1) = (3 x 1) DEs while dstArray1 decomposes
+!    into (1 x petCount) = (1 x 3) DEs.
 !
 !    During Initialize() srcArray1 is initialized via ESMF_ArrayScatter() from
 !    an initialized Fortran array and then added to the coupler's importState.
