@@ -7,7 +7,7 @@
  * CVS File Information :
  *    $RCSfile: lb_box_assign.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/09 17:33:23 $
+ *    $Date: 2007/11/28 16:13:51 $
  *    Revision: 1.6 $
  ****************************************************************************/
 #include "zz_const.h"

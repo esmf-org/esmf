@@ -8,7 +8,7 @@
  * CVS File Information :
  *    $RCSfile: hsfc_point_assign.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/09 17:33:21 $
+ *    $Date: 2007/11/28 16:13:50 $
  *    Revision: 1.18 $
  ****************************************************************************/
 

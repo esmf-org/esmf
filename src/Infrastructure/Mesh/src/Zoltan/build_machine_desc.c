@@ -7,7 +7,7 @@
  * CVS File Information :
  *    $RCSfile: build_machine_desc.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/09 17:33:15 $
+ *    $Date: 2007/11/28 16:13:44 $
  *    Revision: 1.22 $
  ****************************************************************************/
 

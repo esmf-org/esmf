@@ -7,7 +7,7 @@
 #ifndef EntityInfoPortHSeen
 #define EntityInfoPortHSeen
 
-#include "cca.h"
+//#include "cca.h"
 
 // namespace conversion
 #include "CONV_NS.h"

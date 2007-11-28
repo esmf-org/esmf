@@ -4,8 +4,8 @@
   jaideep ray, 08/26/02
 */
 
-#ifndef OctTree_LBHSeen
-#define OctTree_LBHSeen
+#ifndef RCB_LBHSeen
+#define RCB_LBHSeen
 
 // CCA specific
 //#include "cca.h"
@@ -27,23 +27,23 @@
 #include <iostream>
 #include <string>
 #include <map>
-using namespace std ;
+using namespace std;
 
 namespace ZoltanSpace
 {
-  class OctTree_LB : public virtual BaseLB
+  class RCB_LB : public virtual BaseLB
   {
     public :
 
-    OctTree_LB(PartitionerFactory_JR *q, int index, MPI_Comm *A) : BaseLB(q, index, A)
+    RCB_LB(PartitionerFactory_JR *q, int index, MPI_Comm *A) : BaseLB(q, index, A)
     {      
-      myname = "OctTree" ; is_init = false ;
-      Zoltan_Set_Param(BaseLB::my_zz, "LB_METHOD", "OCTPART");
+      myname = "RCB" ; is_init = false ;
+      Zoltan_Set_Param(BaseLB::my_zz, "LB_METHOD", "RCB");
 
       init() ;
     }
 
-    virtual ~OctTree_LB() { is_init = false ; }
+    virtual ~RCB_LB() { is_init = false ; }
     
      /// Set/Get methods to configure a load balancer
      /** @name Load-balancer configuring methods 
@@ -73,6 +73,9 @@ namespace ZoltanSpace
 		   max_load / av_load, where these numbers are calculated for 
 		   a given mesh distribution across all processors.
 		   E.g. ImbalanceTolerance = 1.2 is nice.
+	      2.   RCB_OVERALLOC : Extra temporary memory allocated by RCB to hold
+	           objects when object-to-processor assignments change. 1.0 = 
+		   no extra memory, 1.5 - 50 % more.  By default, no extra memory.
 	 @param val = a double precision number. specifying the imbalance.
 	 @return - 1 if the keyword is not found - perhaps the load-balancer
 	 doesn't allow the setting of the imbalance tolerance
@@ -118,23 +121,30 @@ namespace ZoltanSpace
 	         dump info only for itself.
 	      7. CommWtDim : length of an array which contains the communication costs
                  between procs.
-	      8. OCT_DIM : specifies whether a 2D or 3D Oct-tree algorithm should be
-	         used. The 3D algo will work for the 2D case, but will waste memory.
-		 The 2D algo will work for the 3D case, if the 3rd axis can be projected
-		 to 2D without overlapping points. 2 = used 2D algo, 3 = used 3D algo.
-		 Default : 3
-	      9. OCT_METHOD : the SFC method to be used. 0 = Morton indexing, 1 = 
-	         Grey-code, 2=Hilbert.
-	     10. OCT_MINOBJECTS : the minimum number of objects to allow in a leaf
-	         octant of an oct-tree. These will be assigned as a group to a processor.
-		 The determines the granularity of a partitioning. Any number >= 1 is
-		 good. Default : 1
-	     11. OCT_MAXOBJECTS : the max number of objects to allow in a leaf
-	         octant of an oct-tree. These will be assigned as a group to a processor.
-		 The determines the granularity of a partitioning. Any number >= 1 is
-		 good. Default : 1 
-             12. OCT_OUTPUT_LEVEL : Amount of load-balancing report to be produced.
-	         0 = no report, 1 = statistics summary, 2 = debugging info.
+	      8. RCB_REUSE : flag to indicate whether to use the previous invocation's
+	         cuts to get an initial guess for this invocation. 0 = don't use previous
+		 cuts, 1 = use them. Default : 0
+	      9. RCB_OUTPUT_LEVEL : flag controlling the amount of timing and diagnostic
+	         info required. 0 = no output, 1 = print a summary, 2 = print report 
+		 for each proc. Default : 0
+	     10. CHECK_GEOM : flag controlling error-checking for inputs and outputs.
+	         0 = no checking, 1 = check it. Default : 0
+	     11. KEEP_CUTS : flag controlling whether to preserve the current 
+	         decomposition. Helps if you need to add in an object later in a balanced
+		 fashion. 0 = do not preserve the decomposition, 1 = do so. Default : 0.
+	     12. RCB_LOCK_DIRECTIONS : flag to determine if the direction of cuts are to
+	         preserved after 1st invocation, so that they can be repeated over-and-over
+		 again in subsequent invocations.
+	     13. RCB_SET_DIRECTIONS : if this flag is set, all the cuts in one direction
+	         are done together. The cuts are determined first and then the value to
+		 this parameter is checked regarding how to proceed. 0 = don't order
+		 cuts, 1 = xyz, 2=xzy, 3=yzx, 4=yxz, 5=zxy, 6=zyx. Default : 0
+             14. RCB_RECTILINEAR_BLOCKS :  flag controlling the shape of the resulting
+	         region. If specified, when a cut is made, dots located on the cut are
+		 moved to the same side of the cut. the region is then rectilinear,
+		 but the load-balance is less uniform. Alternatively, the points can
+		 be moved individually. 0 = move dots individually 1 = move as a goup.
+		 Default : 0
 	 @param value = an integer number
 	 @return -1 if the key is not offered by the load-balancer for modification.
      */
@@ -145,8 +155,9 @@ namespace ZoltanSpace
 	@return 0 if no error.
      */
     virtual int PrintKeywordsToScreen() ;
+    
     //@}
- 
+
     virtual int IncrementalAssignPoint(double *coords, int ndims, int *proc) ;
     
     virtual int IncrementalAssignBox(double *lbbc, double *ubbc, int ndim, 

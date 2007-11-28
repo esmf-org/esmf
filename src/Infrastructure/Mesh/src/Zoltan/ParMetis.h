@@ -8,7 +8,7 @@
 #define ParMetis_LBHSeen
 
 // CCA specific
-#include "cca.h"
+//#include "cca.h"
 #include "mpi.h"
 
 // abstract class for all load-balancers

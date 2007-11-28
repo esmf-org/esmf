@@ -7,7 +7,7 @@
  * CVS File Information :
  *    $RCSfile: par_tflops_special_const.h,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:55 $
+ *    $Date: 2007/11/28 16:13:53 $
  *    Revision: 1.4 $
  ****************************************************************************/
 

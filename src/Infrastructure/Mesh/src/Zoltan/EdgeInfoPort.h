@@ -7,7 +7,7 @@
 #ifndef EdgeInfoPortHSeen
 #define EdgeInfoPortHSeen
 
-#include "cca.h"
+//#include "cca.h"
 
 // namespace conversion
 #include "CONV_NS.h"

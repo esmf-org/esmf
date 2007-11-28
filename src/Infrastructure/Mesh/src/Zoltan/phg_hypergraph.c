@@ -7,7 +7,7 @@
  * CVS File Information :
  *    $RCSfile: phg_hypergraph.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:56 $
+ *    $Date: 2007/11/28 16:13:53 $
  *    Revision: 1.1.2.1 $
  ****************************************************************************/
 #include <float.h>

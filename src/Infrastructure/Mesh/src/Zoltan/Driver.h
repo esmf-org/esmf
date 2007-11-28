@@ -8,6 +8,7 @@
 #define DriverHSeen
 
 // CCA standard definition of Port and Component
+#ifdef NOT
 #include "cca.h"
 #include "stdPorts.h"
 
@@ -17,6 +18,7 @@
 #include "parameters/parametersStar.h"
 #include "port/supportInterfaces.h"
 #include "dc/port/DefaultParameterPort.h"
+#endif
 
 //Ports I use
 #include "IOPort.h"

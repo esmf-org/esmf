@@ -2,7 +2,7 @@
  * CVS File Information :
  *    $RCSfile: migoct_const.h,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:53 $
+ *    $Date: 2007/11/28 16:13:51 $
  *    Revision: 1.17 $
  ****************************************************************************/
 

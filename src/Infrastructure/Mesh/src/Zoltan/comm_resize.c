@@ -8,7 +8,7 @@
  * CVS File Information :
  *    $RCSfile: comm_resize.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:46 $
+ *    $Date: 2007/11/28 16:13:46 $
  *    Revision: 1.14 $
  ****************************************************************************/
 

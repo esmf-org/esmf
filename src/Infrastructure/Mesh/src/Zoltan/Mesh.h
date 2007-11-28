@@ -8,8 +8,10 @@
 #define MeshHSeen
 
 // CCA standard definition of Port and Component
+#ifdef NOT
 #include "cca.h"
 #include "stdPorts.h"
+#endif
 
 //Ports I present
 #include "EntityInfoPort.h"

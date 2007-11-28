@@ -2,7 +2,7 @@
 #define  IOPortHSeen
 
 // CCA standard definition of Port and Component
-#include "cca.h"
+//#include "cca.h"
 #include "CONV_NS.h"
 
 namespace ZoltanTestSpace

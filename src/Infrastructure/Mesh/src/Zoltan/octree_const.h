@@ -2,7 +2,7 @@
  * CVS File Information :
  *    $RCSfile: octree_const.h,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/09 17:33:35 $
+ *    $Date: 2007/11/28 16:13:52 $
  *    Revision: 1.10 $
  ****************************************************************************/
 

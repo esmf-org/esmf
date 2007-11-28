@@ -7,7 +7,7 @@
  * CVS File Information :
  *    $RCSfile: all_allo_const.h,v $
  *    $Author: dneckels $
- *    $Date: 2007/08/08 22:43:41 $
+ *    $Date: 2007/11/28 16:13:44 $
  *    Revision: 1.27 $
  ****************************************************************************/
 

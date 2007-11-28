@@ -4,11 +4,11 @@
   jaideep ray, 08/26/02
 */
 
-#ifndef RCB_LBHSeen
-#define RCB_LBHSeen
+#ifndef RIB_LBHSeen
+#define RIB_LBHSeen
 
 // CCA specific
-#include "cca.h"
+//#include "cca.h"
 #include "mpi.h"
 
 // abstract class for all load-balancers
@@ -31,19 +31,19 @@ using namespace std;
 
 namespace ZoltanSpace
 {
-  class RCB_LB : public virtual BaseLB
+  class RIB_LB : public virtual BaseLB
   {
     public :
 
-    RCB_LB(PartitionerFactory_JR *q, int index, MPI_Comm *A) : BaseLB(q, index, A)
+    RIB_LB(PartitionerFactory_JR *q, int index, MPI_Comm *A) : BaseLB(q, index, A)
     {      
-      myname = "RCB" ; is_init = false ;
-      Zoltan_Set_Param(BaseLB::my_zz, "LB_METHOD", "RCB");
+      myname = "RIB" ; is_init = false ;
+      Zoltan_Set_Param(BaseLB::my_zz, "LB_METHOD", "RIB");
 
       init() ;
     }
 
-    virtual ~RCB_LB() { is_init = false ; }
+    virtual ~RIB_LB() { is_init = false ; }
     
      /// Set/Get methods to configure a load balancer
      /** @name Load-balancer configuring methods 
@@ -73,7 +73,7 @@ namespace ZoltanSpace
 		   max_load / av_load, where these numbers are calculated for 
 		   a given mesh distribution across all processors.
 		   E.g. ImbalanceTolerance = 1.2 is nice.
-	      2.   RCB_OVERALLOC : Extra temporary memory allocated by RCB to hold
+	      2.   RIB_OVERALLOC : Extra temporary memory allocated by RCB to hold
 	           objects when object-to-processor assignments change. 1.0 = 
 		   no extra memory, 1.5 - 50 % more.  By default, no extra memory.
 	 @param val = a double precision number. specifying the imbalance.
@@ -121,30 +121,14 @@ namespace ZoltanSpace
 	         dump info only for itself.
 	      7. CommWtDim : length of an array which contains the communication costs
                  between procs.
-	      8. RCB_REUSE : flag to indicate whether to use the previous invocation's
-	         cuts to get an initial guess for this invocation. 0 = don't use previous
-		 cuts, 1 = use them. Default : 0
-	      9. RCB_OUTPUT_LEVEL : flag controlling the amount of timing and diagnostic
+	      8. RIB_OUTPUT_LEVEL : flag controlling the amount of timing and diagnostic
 	         info required. 0 = no output, 1 = print a summary, 2 = print report 
 		 for each proc. Default : 0
-	     10. CHECK_GEOM : flag controlling error-checking for inputs and outputs.
+	      9. CHECK_GEOM : flag controlling error-checking for inputs and outputs.
 	         0 = no checking, 1 = check it. Default : 0
-	     11. KEEP_CUTS : flag controlling whether to preserve the current 
+	     10. KEEP_CUTS : flag controlling whether to preserve the current 
 	         decomposition. Helps if you need to add in an object later in a balanced
 		 fashion. 0 = do not preserve the decomposition, 1 = do so. Default : 0.
-	     12. RCB_LOCK_DIRECTIONS : flag to determine if the direction of cuts are to
-	         preserved after 1st invocation, so that they can be repeated over-and-over
-		 again in subsequent invocations.
-	     13. RCB_SET_DIRECTIONS : if this flag is set, all the cuts in one direction
-	         are done together. The cuts are determined first and then the value to
-		 this parameter is checked regarding how to proceed. 0 = don't order
-		 cuts, 1 = xyz, 2=xzy, 3=yzx, 4=yxz, 5=zxy, 6=zyx. Default : 0
-             14. RCB_RECTILINEAR_BLOCKS :  flag controlling the shape of the resulting
-	         region. If specified, when a cut is made, dots located on the cut are
-		 moved to the same side of the cut. the region is then rectilinear,
-		 but the load-balance is less uniform. Alternatively, the points can
-		 be moved individually. 0 = move dots individually 1 = move as a goup.
-		 Default : 0
 	 @param value = an integer number
 	 @return -1 if the key is not offered by the load-balancer for modification.
      */
@@ -155,7 +139,6 @@ namespace ZoltanSpace
 	@return 0 if no error.
      */
     virtual int PrintKeywordsToScreen() ;
-    
     //@}
 
     virtual int IncrementalAssignPoint(double *coords, int ndims, int *proc) ;

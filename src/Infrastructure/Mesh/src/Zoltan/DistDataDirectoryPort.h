@@ -9,7 +9,7 @@
 #ifndef DistDataDirHSeen
 #define  DistDataDirHSeen
 
-#include "cca.h"
+//#include "cca.h"
 #include "mpi.h"
 #include "EntityList.h"
 

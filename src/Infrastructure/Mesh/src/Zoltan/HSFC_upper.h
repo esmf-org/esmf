@@ -4,11 +4,11 @@
   jaideep ray, 08/26/02
 */
 
-#ifndef RIB_LBHSeen
-#define RIB_LBHSeen
+#ifndef HSFC_LBHSeen
+#define HSFC_LBHSeen
 
 // CCA specific
-#include "cca.h"
+//#include "cca.h"
 #include "mpi.h"
 
 // abstract class for all load-balancers
@@ -31,19 +31,19 @@ using namespace std;
 
 namespace ZoltanSpace
 {
-  class RIB_LB : public virtual BaseLB
+  class HSFC_LB : public virtual BaseLB
   {
     public :
 
-    RIB_LB(PartitionerFactory_JR *q, int index, MPI_Comm *A) : BaseLB(q, index, A)
+    HSFC_LB(PartitionerFactory_JR *q, int index, MPI_Comm *A) : BaseLB(q, index, A)
     {      
-      myname = "RIB" ; is_init = false ;
-      Zoltan_Set_Param(BaseLB::my_zz, "LB_METHOD", "RIB");
+      myname = "HSFC" ; is_init = false ;
+      Zoltan_Set_Param(BaseLB::my_zz, "LB_METHOD", "HSFC");
 
       init() ;
     }
 
-    virtual ~RIB_LB() { is_init = false ; }
+    virtual ~HSFC_LB() { is_init = false ; }
     
      /// Set/Get methods to configure a load balancer
      /** @name Load-balancer configuring methods 
@@ -73,9 +73,6 @@ namespace ZoltanSpace
 		   max_load / av_load, where these numbers are calculated for 
 		   a given mesh distribution across all processors.
 		   E.g. ImbalanceTolerance = 1.2 is nice.
-	      2.   RIB_OVERALLOC : Extra temporary memory allocated by RCB to hold
-	           objects when object-to-processor assignments change. 1.0 = 
-		   no extra memory, 1.5 - 50 % more.  By default, no extra memory.
 	 @param val = a double precision number. specifying the imbalance.
 	 @return - 1 if the keyword is not found - perhaps the load-balancer
 	 doesn't allow the setting of the imbalance tolerance
@@ -97,41 +94,36 @@ namespace ZoltanSpace
     virtual int SetParameter(char *key, bool b) ;
     virtual int GetParameter(char *key, bool *b) ;
 
-     /** To set/get some very important parameter describing the mesh etc.
-	 In case of GetParameter() method, you allocate an integer and I will
-	 fill it in.
-	 @param key : 
-	      1. NumGidEntries : Entities in the mesh to be partitioned are
-		 identified by unsigned int IDs, unique across all processors. 
-		 These need not be single numbers; each "entity" (a mesh 
-		 points/element) can be identified by a 1D array too, Q-elements 
-		 long. NumGidEntried sets this integer value  Q.
-	      2. NumLidEntries : Just as "entities" are identified by an ID globally,
-	         they might be identified locally on a processors by another set of
-		 unsigned ints (perhaps a direct mapping into a local-to-a-processor
-		 array ?). This local ID can be a 1D array, R-elements long. Set "R"
-		 using this keyword.
-	      3. ObjWtDim : Each "entity" has a weight proportional to its CPU
-	         requirements. Again, this can be a 1D array, S-elements long.
-		 Set "S" using this keyword.
-	      4. EdgeWtDim : Same as above, but Edge weights are proportional to
-	         the communication requirements for a mesh point.
-	      5. DebugLevel : Starting from 0, increasingly more debug info.
-              6. DebugProc : Starting from 0, which proc dumps debug info. It will
-	         dump info only for itself.
-	      7. CommWtDim : length of an array which contains the communication costs
-                 between procs.
-	      8. RIB_OUTPUT_LEVEL : flag controlling the amount of timing and diagnostic
-	         info required. 0 = no output, 1 = print a summary, 2 = print report 
-		 for each proc. Default : 0
-	      9. CHECK_GEOM : flag controlling error-checking for inputs and outputs.
-	         0 = no checking, 1 = check it. Default : 0
-	     10. KEEP_CUTS : flag controlling whether to preserve the current 
-	         decomposition. Helps if you need to add in an object later in a balanced
-		 fashion. 0 = do not preserve the decomposition, 1 = do so. Default : 0.
+    /** To set/get some very important parameter describing the mesh etc.
+	In case of GetParameter() method, you allocate an integer and I will
+	fill it in.
+	@param key : 
+	     1. NumGidEntries : Entities in the mesh to be partitioned are
+	        identified by unsigned int IDs, unique across all processors. 
+		These need not be single numbers; each "entity" (a mesh 
+		points/element) can be identified by a 1D array too, Q-elements 
+		long. NumGidEntried sets this integer value  Q.
+	     2. NumLidEntries : Just as "entities" are identified by an ID globally,
+	        they might be identified locally on a processors by another set of
+		unsigned ints (perhaps a direct mapping into a local-to-a-processor
+		array ?). This local ID can be a 1D array, R-elements long. Set "R"
+		using this keyword.
+	     3. ObjWtDim : Each "entity" has a weight proportional to its CPU
+	        requirements. Again, this can be a 1D array, S-elements long.
+		Set "S" using this keyword.
+	     4. EdgeWtDim : Same as above, but Edge weights are proportional to
+	        the communication requirements for a mesh point.
+	     5. DebugLevel : Starting from 0, increasingly more debug info.
+             6. DebugProc : Starting from 0, which proc dumps debug info. It will
+	        dump info only for itself.
+	     7. CommWtDim : length of an array which contains the communication costs
+                between procs.
+	     8. KEEP_CUTS : flag controlling whether to preserve the current 
+	        decomposition. Helps if you need to add in an object later in a balanced
+		fashion. 0 = do not preserve the decomposition, 1 = do so. Default : 0.
 	 @param value = an integer number
 	 @return -1 if the key is not offered by the load-balancer for modification.
-     */
+     */    
     virtual int SetParameter(char *, int i) ;
     virtual int GetParameter(char *, int *i) ;
 

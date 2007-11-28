@@ -1,5 +1,5 @@
 /*
-** $Id: exmesh.c,v 1.1 2007/08/08 22:43:51 dneckels Exp $
+** $Id: exmesh.c,v 1.2 2007/11/28 16:13:48 dneckels Exp $
 **
 ** Functions to support writing simple Zoltan examples.
 **   Create a simple rectilinear mesh with global IDs and
