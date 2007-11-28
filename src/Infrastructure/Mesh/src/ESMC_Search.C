@@ -1,4 +1,4 @@
-// $Id: ESMC_Search.C,v 1.5 2007/11/28 16:42:46 dneckels Exp $
+// $Id: ESMC_Search.C,v 1.6 2007/11/28 16:48:22 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -16,7 +16,7 @@
 #include <ESMC_MeshObj.h>
 #include <ESMC_Mesh.h>
 #include <ESMC_MeshUtils.h>
-#include <octbox3d.h>
+#include <ESMC_OctBox3d.h>
  
 #include <iostream>
 #include <algorithm>
