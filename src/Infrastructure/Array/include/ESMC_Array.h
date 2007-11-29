@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.83 2007/11/03 05:39:21 theurich Exp $
+// $Id: ESMC_Array.h,v 1.84 2007/11/29 22:06:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     int *totalLBound;                 // [dimCount*localDeCount]
     int *totalUBound;                 // [dimCount*localDeCount]
     int tensorCount;                  // number of tensor dimensions
-    int tensorElementCount;           // number of tensor elements per excl. ele
+    int tensorElementCount;           // number of tensor elements per element
     int *undistLBound;                // [tensorCount]
     int *undistUBound;                // [tensorCount]
     int *staggerLoc;                  // [tensorElementCount]
@@ -81,13 +81,20 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     int *distgridToArrayMap;          // [dimCount]
     int *arrayToDistGridMap;          // [rank]
     int *contiguousFlag;              // [localDeCount]
-    int *deElementCount;              // [deCount] number of elements in
+    int *exclusiveElementCountPDe;    // [deCount] number of elements in
                                       // exclusive region only considering
                                       // DistGrid dims that are associated with
                                       // the Array dims. 
                                       // Multiply with tensorElementCount to get
-                                      // total number of exclusive elements in
-                                      // Array.
+                                      // total number of elements in exclusive
+                                      // Array region.
+    int *totalElementCountPLocalDe;   // [localDeCount] number of elements in
+                                      // total region only considering
+                                      // DistGrid dims that are associated with
+                                      // the Array dims. 
+                                      // Multiply with tensorElementCount to get
+                                      // total number of elements in total
+                                      // Array region.
     // lower level object references
     DistGrid *distgrid;
     DELayout *delayout;
@@ -115,7 +122,8 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
       arrayToDistGridMap = NULL;
       contiguousFlag = NULL;
       tensorElementCount = 0;
-      deElementCount = NULL;
+      exclusiveElementCountPDe = NULL;
+      totalElementCountPLocalDe = NULL;
     }
   private:
     Array(ESMC_TypeKind typekind, int rank, ESMC_LocalArray **larrayList,
@@ -163,7 +171,10 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     const int *getUndistUBound()            const {return undistUBound;}
     const int *getStaggerLoc()              const {return staggerLoc;}
     const int *getVectorDim()               const {return vectorDim;}
-    const int *getDeElementCount()          const {return deElementCount;}
+    const int *getExclusiveElementCountPDe()const
+      {return exclusiveElementCountPDe;}
+    const int *getTotalElementCountPLocalDe()const
+      {return totalElementCountPLocalDe;}
     int getTensorElementCount()             const {return tensorElementCount;}
     const int *getDistGridToArrayMap()      const {return distgridToArrayMap;}
     const int *getArrayToDistGridMap()      const {return arrayToDistGridMap;}

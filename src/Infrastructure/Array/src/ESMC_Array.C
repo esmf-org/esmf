@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.163 2007/11/20 05:49:15 theurich Exp $
+// $Id: ESMC_Array.C,v 1.164 2007/11/29 22:06:54 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.163 2007/11/20 05:49:15 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.164 2007/11/29 22:06:54 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -163,21 +163,28 @@ Array::Array(
   indexflag = indexflagArg;
   // contiguous flag
   contiguousFlag = new int[localDeCount];
-  // deElementCount
+  // exclusiveElementCountPDe
   int deCount = delayout->getDeCount();
-  deElementCount = new int[deCount];
-  
+  exclusiveElementCountPDe = new int[deCount];
   const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
-  
   for (int i=0; i<deCount; i++){
-    deElementCount[i] = 1;   // prime deElementCount element
+    exclusiveElementCountPDe[i] = 1;   // prime exclusiveElementCountPDe element
     for (int jj=0; jj<rank; jj++){
       int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 for tensor d
       if (j){
         // decomposed dimension 
         --j;  // shift to basis 0
-        deElementCount[i] *= indexCountPDimPDe[i*dimCount+j];
+        exclusiveElementCountPDe[i] *= indexCountPDimPDe[i*dimCount+j];
       }
+    }
+  }
+  // totalElementCountPLocalDe
+  totalElementCountPLocalDe = new int[localDeCount];
+  for (int i=0; i<localDeCount; i++){
+    totalElementCountPLocalDe[i] = 1;   // prime totalElementCountPLocalDe elem
+    for (int j=0; j<dimCount; j++){
+      totalElementCountPLocalDe[i] *=
+        totalUBound[i*dimCount+j] - totalLBound[i*dimCount+j] + 1;
     }
   }
   
@@ -274,8 +281,10 @@ Array::~Array(){
     delete [] arrayToDistGridMap;
   if (contiguousFlag != NULL)
     delete [] contiguousFlag;
-  if (deElementCount != NULL)
-    delete [] deElementCount;
+  if (exclusiveElementCountPDe != NULL)
+    delete [] exclusiveElementCountPDe;
+  if (totalElementCountPLocalDe != NULL)
+    delete [] totalElementCountPLocalDe;
 }
 //-----------------------------------------------------------------------------
 
@@ -1740,7 +1749,7 @@ int Array::print()const{
     int de = localDeList[i];
     printf("~ local data in LocalArray for DE %d ~\n", de);
     larrayList[i]->ESMC_LocalArrayPrint();
-    if (deElementCount[de]){
+    if (exclusiveElementCountPDe[de]){
       // associated DE
       int jjj=0;  // reset
       for (int jj=0; jj<rank; jj++){
@@ -1883,7 +1892,7 @@ int Array::serialize(
     *ip++ = arrayToDistGridMap[i];
   *ip++ = tensorElementCount;
   for (int i=0; i<delayout->getDeCount(); i++)
-    *ip++ = deElementCount[i];
+    *ip++ = exclusiveElementCountPDe[i];
   
   // fix offset  
   cp = (char *)ip;
@@ -1961,9 +1970,9 @@ int Array::deserialize(
   for (int i=0; i<rank; i++)
     arrayToDistGridMap[i] = *ip++;
   tensorElementCount = *ip++;
-  deElementCount = new int[delayout->getDeCount()];
+  exclusiveElementCountPDe = new int[delayout->getDeCount()];
   for (int i=0; i<delayout->getDeCount(); i++)
-    deElementCount[i] = *ip++;
+    exclusiveElementCountPDe[i] = *ip++;
   
   // fix offset
   cp = (char *)ip;
@@ -1972,6 +1981,7 @@ int Array::deserialize(
   // set values with local dependency
   larrayList = new ESMC_LocalArray*[0];     // no DE on proxy object
   larrayBaseAddrList = new void*[0];        // no DE on proxy object
+  totalElementCountPLocalDe = NULL;         // no De on proxy object
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -2122,7 +2132,8 @@ int Array::gather(
       if (patchListPDe[de] == patch){
         // this DE is located on sending patch
         // prepare contiguous recvBuffer for this DE and issue non-blocking recv
-        int recvSize = deElementCount[de]*tensorElementCount*dataSize;  // bytes
+        int recvSize =
+          exclusiveElementCountPDe[de]*tensorElementCount*dataSize;  // bytes
         recvBuffer[de] = new char[recvSize];
         int srcPet;
         delayout->getDEMatchPET(de, *vm, NULL, &srcPet, 1);
@@ -2146,7 +2157,8 @@ int Array::gather(
     int de = localDeList[i];
     if (patchListPDe[de] != patch) continue; // skip to next local DE
     sendBuffer[i] = (char *)larrayBaseAddrList[i]; // default: contiguous
-    int sendSize = deElementCount[de]*tensorElementCount*dataSize;  // bytes
+    int sendSize =
+      exclusiveElementCountPDe[de]*tensorElementCount*dataSize;  // bytes
     if (!contiguousFlag[i]){
       // only if this DE has a non-contiguous decomposition the contiguous
       // send buffer must be compiled from DE-local array segment piece by p.
@@ -2559,7 +2571,8 @@ int Array::scatter(
         } // j
 
         // prepare contiguous sendBuffer for this DE
-        int sendSize = deElementCount[de]*tensorElementCount*dataSize;  // bytes
+        int sendSize =
+          exclusiveElementCountPDe[de]*tensorElementCount*dataSize;  // bytes
         sendBuffer[de] = new char[sendSize];
         // reset counters for multi-dim while-loop
         tensorIndex=0;  // reset
@@ -2691,7 +2704,8 @@ int Array::scatter(
     int de = localDeList[i];
     if (patchListPDe[de] != patch) continue; // skip to next local DE
     recvBuffer[i] = (char *)larrayBaseAddrList[i]; // default: contiguous
-    int recvSize = deElementCount[de]*tensorElementCount*dataSize; // bytes
+    int recvSize =
+      exclusiveElementCountPDe[de]*tensorElementCount*dataSize; // bytes
     if (!contiguousFlag[i])
       recvBuffer[i] = new char[recvSize];
     *commh = NULL; // invalidate
@@ -3799,7 +3813,7 @@ int Array::sparseMatMulStore(
   int srcElementCount = 0;   // initialize
   for (int i=0; i<srcLocalDeCount; i++){
     int de = srcLocalDeList[i];  // global DE index
-    srcLocalDeElementCount[i] = srcArray->deElementCount[de]
+    srcLocalDeElementCount[i] = srcArray->exclusiveElementCountPDe[de]
       * srcArray->tensorElementCount;
     srcElementCount += srcLocalDeElementCount[i];
   }
@@ -3814,7 +3828,7 @@ int Array::sparseMatMulStore(
   int dstElementCount = 0;   // initialize
   for (int i=0; i<dstLocalDeCount; i++){
     int de = dstLocalDeList[i];  // global DE index
-    dstLocalDeElementCount[i] = dstArray->deElementCount[de]
+    dstLocalDeElementCount[i] = dstArray->exclusiveElementCountPDe[de]
       * dstArray->tensorElementCount;
     dstElementCount += dstLocalDeElementCount[i];
   }
@@ -6923,11 +6937,25 @@ int Array::sparseMatMul(
   if (zeroflag==ESMF_TRUE){
     for (int i=0; i<dstArray->delayout->getLocalDeCount(); i++){
       char *start = (char *)(dstArray->larrayBaseAddrList[i]);
-      int dataSize = ESMC_TypeKindSize(dstArray->typekind);
       int elementCount =
-        dstArray->deElementCount[dstArray->delayout->getLocalDeList()[i]]
-        * dstArray->tensorElementCount;
-      memset(start, 0, dataSize * elementCount);
+        dstArray->totalElementCountPLocalDe[i] * dstArray->tensorElementCount;
+      if (dstArray->typekind == ESMC_TYPEKIND_R4){
+        ESMC_R4 *total = (ESMC_R4 *)start;
+        for (int j=0; j<elementCount; j++)
+          total[j] = 0.;
+      }else if(dstArray->typekind == ESMC_TYPEKIND_R8){
+        ESMC_R8 *total = (ESMC_R8 *)start;
+        for (int j=0; j<elementCount; j++)
+          total[j] = 0.;
+      }else if(dstArray->typekind == ESMC_TYPEKIND_I4){
+        ESMC_I4 *total = (ESMC_I4 *)start;
+        for (int j=0; j<elementCount; j++)
+          total[j] = 0;
+      }else if(dstArray->typekind == ESMC_TYPEKIND_I8){
+        ESMC_I8 *total = (ESMC_I8 *)start;
+        for (int j=0; j<elementCount; j++)
+          total[j] = 0;
+      }
     }
   }
   
