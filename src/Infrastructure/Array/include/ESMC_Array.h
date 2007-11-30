@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.84 2007/11/29 22:06:53 theurich Exp $
+// $Id: ESMC_Array.h,v 1.83.2.1 2007/11/30 17:00:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
