@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.48 2007/06/20 01:29:19 theurich Exp $
+// $Id: ESMC_Base_F.C,v 1.49 2007/11/30 22:27:33 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.48 2007/06/20 01:29:19 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.49 2007/11/30 22:27:33 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -753,6 +753,66 @@ extern "C" {
   return;
 
 }  // end c_ESMC_AttributeSetChar
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttributeSetAttPack - Setup the attribute package
+//
+// !INTERFACE:
+      void FTN(c_esmc_attributesetattpack)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      char *name,               // in - F90, non-null terminated string
+      int *convention,          // in - integer convention value
+      int *purpose,            // in - integer purpose value
+      int *rc,                  // in - return code
+      int nlen) {               // hidden/in - strlen count for name
+// 
+// !DESCRIPTION:
+//     Associate a convention and purpose with an attribute package
+//
+//EOP
+
+  int status;
+  char *cname;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    if (rc) *rc = ESMF_FAILURE;
+    return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cname = ESMC_F90toCstring(name, nlen);
+  if (!cname) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // Set the attribute on the object.
+  *rc = (*base)->ESMC_AttributeSetAttPack(cname, *convention, *purpose);
+
+  delete [] cname;
+  return;
+
+}  // end c_ESMC_AttributeSetAttPack
+
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

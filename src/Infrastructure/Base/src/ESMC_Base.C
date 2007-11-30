@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.83 2007/10/05 00:42:00 peggyli Exp $
+// $Id: ESMC_Base.C,v 1.84 2007/11/30 22:27:33 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.83 2007/10/05 00:42:00 peggyli Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.84 2007/11/30 22:27:33 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -1401,52 +1401,48 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
 }  // end ESMC_AttributeSet
 
-
-//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#define ESMC_METHOD "ESMC_AttributeSetAttPack"
 //BOP
-// !IROUTINE:  ESMC_AttributeGet - get attribute from an ESMF type
+// !IROUTINE:  ESMC_AttributeSetAttPack() - setup the Attribute package
 //
 // !INTERFACE:
-      ESMC_Attribute *ESMC_Base::ESMC_AttributeGet(
-// 
+      int ESMC_Base::ESMC_AttributeSetAttPack(
+//
 // !RETURN VALUE:
-//    pointer to requested attribute
+//    int return code
 // 
 // !ARGUMENTS:
-      char *name) const {        // in - attr name to retrieve
+      char *name,           // in - attribute name
+      int convention,       // in - attribute name
+      int purpose) {        // in - attribute value
 // 
 // !DESCRIPTION:
+//     setup the name, convention and purpose of an attribute package
 //
 //EOP
 
-  int i;
+  int rc;
+  ESMC_Attribute *attr;
 
-  // simple sanity checks
-  if ((!name) || (name[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                               "bad attribute name", NULL);
-       return NULL;
-  }
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
 
-  for (i=0; i<attrCount; i++) {
-      if (strcmp(name, attrList[i]->attrName))
-          continue;
+  attr = new ESMC_Attribute(name, convention, purpose);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
 
-      // if you get here, you found a match. 
-      return attrList[i]; 
-  }   
+  return rc;
 
-  // bad news - you get here if no matches found
-  return NULL;
+}  // end ESMC_AttributeSetAttPack()
 
-}  // end ESMC_AttributeGet
-
-//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttributeGet"
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_AttributeGet(int) - get attribute from an ESMF type
 //
@@ -2324,6 +2320,47 @@ if (count) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttributeGet"
 //BOP
+// !IROUTINE:  ESMC_AttributeGet - get attribute from an ESMF type
+//
+// !INTERFACE:
+      ESMC_Attribute *ESMC_Base::ESMC_AttributeGet(
+// 
+// !RETURN VALUE:
+//    pointer to requested attribute
+// 
+// !ARGUMENTS:
+      char *name) const {        // in - attr name to retrieve
+// 
+// !DESCRIPTION:
+//
+//EOP
+
+  int i;
+
+  // simple sanity checks
+  if ((!name) || (name[0] == '\0')) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                               "bad attribute name", NULL);
+       return NULL;
+  }
+
+  for (i=0; i<attrCount; i++) {
+      if (strcmp(name, attrList[i]->attrName))
+          continue;
+
+      // if you get here, you found a match. 
+      return attrList[i]; 
+  }   
+
+  // bad news - you get here if no matches found
+  return NULL;
+
+}  // end ESMC_AttributeGet
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeGet"
+//BOP
 // !IROUTINE:  ESMC_AttributeGet - get an ESMF object's attribute by number
 //
 // !INTERFACE:
@@ -2772,6 +2809,8 @@ if (count) {
   tk = source.tk;
   items = source.items;
   slen = source.slen;
+  attrConvention = source.attrConvention;
+  attrPurpose = source.attrPurpose;
   
   if (items == 0)
     voidp = NULL;
@@ -2847,6 +2886,8 @@ if (count) {
   attrName[0] = '\0';
   items = 0;
   slen = 0;
+  attrConvention = 0;
+  attrPurpose = 0;
   voidp = NULL;
 
  } // end ESMC_Attribute
@@ -2891,6 +2932,9 @@ if (count) {
   tk = typekind;
   items = numitems;
   slen = 0;          // only used for string values
+  attrConvention = 0;
+  attrPurpose = 0;
+
   
   if (items == 0)
       voidp = NULL;
@@ -2949,6 +2993,46 @@ if (count) {
            // error - arrays of char strings not allowed
                 voidp = NULL;
   }
+
+ } // end ESMC_Attribute
+ 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Attribute()"
+//BOP
+// !IROUTINE:  ESMC_Attribute - native C++ constructor for ESMC_Attribute class
+//
+// !INTERFACE:
+      ESMC_Attribute::ESMC_Attribute(
+//
+// !RETURN VALUE:
+//    new attribute object
+//
+// !ARGUMENTS:
+        char *name,                // attribute name
+        int conv,                  // convention number
+        int purp) {                // purpose number
+//
+// !DESCRIPTION:
+//   initialize an attribute and set the name, convention, and purpose
+//
+//EOP
+  int len, rc;
+  char msgbuf[ESMF_MAXSTR];
+
+  if (!name)
+      attrName[0] = '\0';
+  else {
+      len = strlen(name)+1;   // strlen doesn't count trailing null
+      if (len > ESMF_MAXSTR) {
+        sprintf(msgbuf, "attr name %d bytes longer than limit of %d bytes\n",
+                       len, ESMF_MAXSTR);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+      }
+      memcpy(attrName, name, len);
+  }
+
+  attrConvention = conv;
+  attrPurpose = purp;
 
  } // end ESMC_Attribute
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.76 2007/06/20 01:29:19 theurich Exp $
+// $Id: ESMC_Base.h,v 1.77 2007/11/30 22:27:33 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -57,6 +57,10 @@ class ESMC_Attribute
     ESMC_TypeKind tk;           // typekind indicator
     int items;                  // number of items (NOT byte count) for lists
     int slen;                   // for string, length, inc trailing NULL. 
+
+    int attrConvention;             // for att packages
+    int attrPurpose;                // for att packages
+
     union {                     // overload pointers to conserve space 
       ESMC_I4    vi;       // integer, or
       ESMC_I4  *vip;       // pointer to integer list, or
@@ -81,6 +85,7 @@ class ESMC_Attribute
     ESMC_Attribute& operator=(const ESMC_Attribute &);
     ESMC_Attribute(void);
     ESMC_Attribute(char *name, ESMC_TypeKind tk, int numitems, void *datap);
+    ESMC_Attribute(char *name, int conv, int purp);
     ~ESMC_Attribute(void);
 
 
@@ -159,6 +164,14 @@ class ESMC_Base
     virtual int ESMC_Validate(const char *options=0) const;
     virtual int ESMC_Print(const char *options=0) const;
 
+    // Attribute Methods
+    
+    // extend pointer list
+    int ESMC_AttributeAlloc(int adding);
+    
+    // setting when you have an attribute already assembled
+    int ESMC_AttributeSet(ESMC_Attribute *attr);
+
     // attribute methods - set
     int ESMC_AttributeSet(char *name, ESMC_I4 value);
     int ESMC_AttributeSet(char *name, int count, ESMC_I4 *value);
@@ -172,6 +185,7 @@ class ESMC_Base
     int ESMC_AttributeSet(char *name, int count, ESMC_Logical *value);
     int ESMC_AttributeSet(char *name, char *value);
     int ESMC_AttributeSet(char *name, ESMC_TypeKind tk, int count, void *value);
+    int ESMC_AttributeSetAttPack(char *name, int convention, int purpose);
 
     // attribute methods - get
     int ESMC_AttributeGet(char *name, ESMC_I4 *value) const;
@@ -193,16 +207,9 @@ class ESMC_Base
     // count of attributes on an object
     int ESMC_AttributeGetCount(void) const;
 
-
-    // setting when you have an attribute already assembled
-    int ESMC_AttributeSet(ESMC_Attribute *attr);
-
     // getting either by name or number directly return attribute ptr
-    ESMC_Attribute *ESMC_AttributeGet(char *name) const;
+    ESMC_Attribute *ESMC_AttributeGet(char *name) const;  // can't find this one !!!
     ESMC_Attribute *ESMC_AttributeGet(int num) const;
-
-    // extend pointer list
-    int ESMC_AttributeAlloc(int adding);
 
     // not implemented yet
     int ESMC_AttributeGetNameList(int *count, char **namelist) const;

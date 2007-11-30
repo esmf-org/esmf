@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.114 2007/10/31 01:04:01 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.115 2007/11/30 22:29:30 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -87,7 +87,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.114 2007/10/31 01:04:01 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.115 2007/11/30 22:29:30 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -311,6 +311,23 @@ end interface
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that retrieve
 !     information about attributes from an {\tt ESMF\_State}.
+ 
+!EOPI
+      end interface
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_StateSetAttPack - Set an attribute package
+!
+! !INTERFACE:
+      interface ESMF_StateSetAttPack
+   
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_StateSetAttPack
+        !module procedure ESMF_StateGetAttrInfoByNum
+
+! !DESCRIPTION:
+!     This interface sets up the attributes for an {\tt ESMF\_State}, that 
+!     correspond to the attribute package as it currently exists
  
 !EOPI
       end interface
@@ -3836,6 +3853,89 @@ end interface
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateSetCharAttr
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateSetAttPack"
+!BOPI
+! !IROUTINE: ESMF_StateSetAttPack - Setup the attribute package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateSetAttribute()
+      subroutine ESMF_StateSetAttPack(state, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      integer, intent(in), optional :: convention
+      integer, intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Sets up the attribute package for the {\tt state}.
+!     The attribute package defines the convention and type of the three 
+!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!      An {\tt ESMF\_State} object.
+!     \item [convention]
+!      The convention of the attribute package.
+!     \item [value]
+!      The purpose of the attribute package.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                           ! Error status
+      character(ESMF_MAXSTR) :: name1, name2, name3
+      integer :: fconvention, fpurpose
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 0;
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 0;
+      endif
+
+      name1 = 'purpose'
+      name2 = 'organization'
+      name3 = 'discipline'
+
+      call c_ESMC_AttributeSetAttPack(state%statep%base, name1, fconvention, &
+        fpurpose, localrc)
+      call c_ESMC_AttributeSetAttPack(state%statep%base, name2, fconvention, &
+        fpurpose, localrc)
+      call c_ESMC_AttributeSetAttPack(state%statep%base, name3, fconvention, &
+        fpurpose, localrc)
+      
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateSetAttPack
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
