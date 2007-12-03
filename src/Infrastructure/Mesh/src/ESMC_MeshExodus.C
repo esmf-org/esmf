@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshExodus.C,v 1.6 2007/11/28 16:42:42 dneckels Exp $
+// $Id: ESMC_MeshExodus.C,v 1.7 2007/12/03 23:26:17 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -28,9 +28,11 @@
 #include <ESMC_ParEnv.h>
 
 
+#ifdef ESMC_EXODUS
 extern "C" {
 #include "exodusII.h"
 }
+#endif
 
 
 namespace ESMC {
@@ -55,6 +57,7 @@ static UInt share_parametric_dim(UInt pdim) {
  
 void LoadExMesh(Mesh &mesh, const std::string &filename, int nstep) {
   Trace __trace("LoadExMesh(Mesh &mesh, const std::string &filename, int nstep)");
+#ifdef ESMC_EXODUS
 
   char   title[250];
   int    ws1, ws2, exoid, exoerr;
@@ -385,7 +388,9 @@ std::cout << std::endl;
   ex_close(exoid);
 
   std::cout << "MeshExodus Load file " << filename << " complete." << std::endl;
-
+#else
+  Throw() << "Please recompile and enable exodusii";
+#endif
 }
 
 // Load data into an array from the mesh, switching on the correct typeid
@@ -441,6 +446,8 @@ void get_data(iter ni, iter ne, const FIELD &llf, double data[], UInt d) {
 
 void WriteExMesh(const Mesh &mesh, const std::string &filename, int nstep, double tstep) {
   Trace __trace("WriteExMesh(const Mesh &mesh, const std::string &filename, int nstep, double tstep)");
+
+#ifdef ESMC_EXODUS
 
   int wsize = sizeof(double);
   int ex_id = ex_create(filename.c_str(), EX_CLOBBER, &wsize, &wsize);
@@ -773,10 +780,15 @@ for (UInt i = 0; i < nvars_to_output; i++) {
   } // element vars
 
   ex_close(ex_id);
+#else
+  Throw() << "Please enable exodusii and recompile";
+#endif
 }
 
 void WriteExMeshTimeStep(int nstep, double tstep, const Mesh &mesh, const std::string &filename) {
   Trace __trace("WriteExMeshTimeStep(int nstep, double tstep, const Mesh &mesh, const std::string &filename)");
+
+#ifdef ESMC_EXODUS
   int    ws1, ws2, ex_id;
   float  version;
 
@@ -918,7 +930,9 @@ void WriteExMeshTimeStep(int nstep, double tstep, const Mesh &mesh, const std::s
   }
 
   ex_close(ex_id);
-
+#else
+  Throw() << "Please enable exodusii and recompile";
+#endif
 }
 
 } //namespace

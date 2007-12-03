@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshPartition.C,v 1.6 2007/11/28 16:42:43 dneckels Exp $
+// $Id: ESMC_MeshPartition.C,v 1.7 2007/12/03 23:26:18 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -48,6 +48,7 @@ void MeshMetisPartition(const Mesh &mesh, UInt npart, const MEField<> &ep, const
 
 
 void GetMetisPartition(const Mesh &mesh, UInt npart, const MEField<> &ep) {
+#ifdef ESMC_METIS
 //mesh.Print();
 
 
@@ -115,6 +116,10 @@ void GetMetisPartition(const Mesh &mesh, UInt npart, const MEField<> &ep) {
     epdata[0] = part[i];
     i++;
   }
+
+#else
+  Throw() << "Please recompile with metis";
+#endif
 
 }
 

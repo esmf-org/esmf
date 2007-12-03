@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshObjConn.C,v 1.6 2007/11/28 16:42:42 dneckels Exp $
+// $Id: ESMC_MeshObjConn.C,v 1.7 2007/12/03 23:26:18 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -64,7 +64,7 @@ MeshObj *opposite_element(const MeshObj &obj, const int side_ordinal, int &ordin
         std::cout << "\ttopo:" << GetMeshObjTopo(**si)->name << std::endl;
         (*si)->printrelations(std::cout);
       }
-      throw("opposite.  Expected two elements");
+      Throw() << "opposite.  Expected two elements, found:" << out_objs.size();
   }
 
   int pols[2];
@@ -240,6 +240,7 @@ void common_objs(MeshObj *obj,
   common_objs(&on[0], &on[on.size()], rel_type, out_obj_type, out_obj);
 }
 
+#ifdef OLD_COMMON_OBJS
 template<typename obj_iter>
 void common_objs(obj_iter in_obj_begin, obj_iter in_obj_end, 
                  UInt rel_type, 
@@ -312,6 +313,67 @@ std::cout << "Inserting object:" << *mi->obj;
   for (; si != se; ++si) {
     out_obj.push_back(*si);
   }
+  
+}
+#endif
+
+template<typename obj_iter>
+void common_objs(obj_iter in_obj_begin, obj_iter in_obj_end, 
+                 UInt rel_type, 
+                 UInt out_obj_type, 
+                 std::vector<MeshObj*> &out_obj)
+{
+
+  out_obj.clear();
+
+  if (in_obj_begin == in_obj_end) return;
+
+  // Iterate first objects matches
+  MeshObj *fobj = *(in_obj_begin++);
+
+  MeshObjRelationList::iterator fri = MeshObjConn::find_relation(*fobj, out_obj_type);
+
+#ifdef COBJ_DBG
+Par::Out() << "outtype=" << out_obj_type << ", rel_type:" << rel_type << " first obj:" << *fobj; 
+#endif
+  for (; fri != fobj->Relations.end()
+          && fri->obj->get_type() == out_obj_type; ++fri)
+  {
+    if (fri->type != rel_type) continue;
+#ifdef COBJ_DBG
+Par::Out() << "considering relation object:" << *fri->obj;
+#endif
+
+    bool found = true;
+    obj_iter oi = in_obj_begin, oe = in_obj_end;
+    for (; oi != oe && found; ++oi) {
+  
+      MeshObj *nobj = *oi;
+#ifdef COBJ_DBG
+Par::Out() << "** subloop obj:" << *nobj;
+#endif
+  
+      MeshObjRelationList::iterator ri = MeshObjConn::find_relation(*nobj, out_obj_type);
+  
+      found = false;
+      for (; ri != nobj->Relations.end() && !found
+              && ri->obj->get_type() == out_obj_type; ++ri)
+      {
+#ifdef COBJ_DBG
+Par::Out() << "rel=" << *ri->obj;
+#endif
+        if (ri->type == rel_type && ri->obj == fri->obj) found = true;
+      }
+#ifdef COBJ_DBG
+if (found) Par::Out() << "found in object:" << std::endl;
+if (!found) Par::Out() << "Object not found by " << std::endl;
+#endif
+  
+    }
+
+    if (found) out_obj.push_back(fri->obj);
+
+  } // fobj
   
 }
 
