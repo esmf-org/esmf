@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2005/05/16 22:16:51 nscollins Exp $ 
+# $Id: makefile,v 1.2 2007/12/04 00:15:46 theurich Exp $ 
 
 ALL: build_here
 
@@ -7,7 +7,7 @@ LOCDIR   = src/epilogue
 include $(ESMF_DIR)/makefile
 
 
-DIRS     =	src 
+DIRS     =	src tests
 
 CLEANDIRS   =
 CLEANFILES  =
