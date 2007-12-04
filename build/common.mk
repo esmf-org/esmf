@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.201 2007/10/29 18:01:39 svasquez Exp $
+#  $Id: common.mk,v 1.202 2007/12/04 00:16:28 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1585,6 +1585,10 @@ $(ESMF_TESTDIR)/ESMC_%UTest : ESMC_%UTest.o $(ESMFLIB)
 	$(ESMF_CXXLINKER) $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) -o $@ $(UTEST_$(*)_OBJS) $< $(ESMF_CXXESMFLINKLIBS)
 	$(ESMF_RM) -f *.o *.mod
 
+$(ESMF_TESTDIR)/ESMCI_%UTest : ESMCI_%UTest.o $(ESMFLIB)
+	$(ESMF_CXXLINKER) $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) -o $@ $(UTEST_$(*)_OBJS) $< $(ESMF_CXXESMFLINKLIBS)
+	$(ESMF_RM) -f *.o *.mod
+
 # debugging aid:  link the executable, standard output, and log file to
 # temporary names in the current directory (they are built in the test
 # directory which is a long ways away from the source.  debuggers work
@@ -1768,6 +1772,18 @@ ctest:
 	cat ./PET*$(TNAME)UTest.Log > ./ESMC_$(TNAME)UTest.Log ; \
 	$(ESMF_RM) ./PET*$(TNAME)UTest.Log
 
+citest:
+	-@cd $(ESMF_TESTDIR) ; \
+	$(ESMF_RM) ./PET*$(TNAME)UTest.Log ; \
+	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
+	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMCI_$(TNAME)UTest ; \
+	  $(ESMF_MPIRUN) -np $(NP) ./ESMCI_$(TNAME)UTest ; \
+	else \
+	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMCI_$(TNAME)UTest 1\> ./ESMCI_$(TNAME)UTest.stdout 2\>\&1 ; \
+	  $(ESMF_MPIRUN) -np $(NP) ./ESMCI_$(TNAME)UTest 1> ./ESMCI_$(TNAME)UTest.stdout 2>&1 ; \
+	fi ; \
+	cat ./PET*$(TNAME)UTest.Log > ./ESMCI_$(TNAME)UTest.Log ; \
+	$(ESMF_RM) ./PET*$(TNAME)UTest.Log
 
 #-------------------------------------------------------------------------------
 #  Obsolete targets for building and running unit tests.  Echo an error
