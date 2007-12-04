@@ -1,4 +1,4 @@
-// $Id: ESMCI_Test.h,v 1.2 2007/12/04 00:13:26 theurich Exp $
+// $Id: ESMC_Test.h,v 1.5 2007/12/04 00:13:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -10,22 +10,22 @@
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-// ESMCI Test include file for C++
+// ESMC Test include file for C
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 // prevent this file from being read more than once
-#ifndef ESMCI_Test_H
-#define ESMCI_Test_H
+#ifndef ESMC_Test_H
+#define ESMC_Test_H
 
 //-----------------------------------------------------------------------------
 //BOPI
-// !MODULE:  ESMCI_Test - Contains general utilities to support testing
+// !MODULE:  ESMC_Test - Contains general utilities to support testing
 //
 // !DESCRIPTION:
 //
 // The code in this file defines the C++ Test members and declares method
-// signatures (prototypes).  The companion file ESMCI_Test.C contains
+// signatures (prototypes).  The companion file ESMC_Test.C contains
 // the definitions (full code bodies) for the Test methods.
 //
 //EOPI
@@ -33,19 +33,15 @@
 //
 // !PUBLIC MEMBER FUNCTIONS:
 
-namespace ESMCI {
+extern "C" {
 
 // TODO: These need an optional Log argument.
-int TestStart(char *file, int line, int only = 1);
-int TestEnd(int result, char *file, int line, int only = 1);
+int ESMC_TestStart(char *file, int line, int only = 1);
+int ESMC_TestEnd(int result, char *file, int line, int only = 1);
 
-int Test(int condition, char *name, char *failMsg, int *result, 
+int ESMC_Test(int condition, char *name, char *failMsg, int *result,
   char *file, int line, int only = 1);
 
-bool TestNumPETs(int petCount, char *file, int line, int only = 1);
-bool TestMinPETs(int petCount, char *file, int line, int only = 1);
-bool TestMaxPETs(int petCount, char *file, int line, int only = 1);
+};  // extern "C"
 
-} // namespace ESMCI
-
-#endif // ESMCI_Test_H
+#endif // ESMC_Test_H
