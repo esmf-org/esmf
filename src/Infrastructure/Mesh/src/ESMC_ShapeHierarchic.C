@@ -239,7 +239,7 @@ void ShapeHier::Interpolate(const fad_type fvals[], fad_type mdata[]) const {
 }
 
 // ************ 1D hierarchic ************
-static void build_bar_dtable(UInt q, std::vector<int> &table) {
+void build_bar_dtable(UInt q, std::vector<int> &table) {
   // Int dofs first
   for (UInt i = 0; i < 2; i++) {
     table.push_back(DOF_NODE);
@@ -260,7 +260,7 @@ static void build_bar_dtable(UInt q, std::vector<int> &table) {
   }
 }
 
-static void build_bar_itable(UInt nfunc, UInt q, std::vector<double> &ip) {
+void build_bar_itable(UInt nfunc, UInt q, std::vector<double> &ip) {
   // First the nodes:
   ip.clear(); ip.resize(nfunc*1, 0);
   ip[0] = -1; 
@@ -353,7 +353,7 @@ void bh_shape(UInt pdim, UInt ndofs, const std::vector<ILegendre<Real> > &func,
   UInt q = func.size()-1;
 
   bh_shape_node(pdim, ndofs, func, npts, pcoord, &results[0]);
-  qh_shape_edge(0, pdim, ndofs, func, npts, pcoord, &results[4]);
+  bh_shape_edge(0, pdim, ndofs, func, npts, pcoord, &results[4]);
 
 }
 
@@ -441,7 +441,7 @@ void BarHier::shape_grads(UInt npts, const fad_type pcoord[], fad_type results[]
 }
 
 // ************ Quadrilateral ************
-static void build_quad_dtable(UInt q, std::vector<int> &table) {
+void build_quad_dtable(UInt q, std::vector<int> &table) {
   // Int dofs first
   for (UInt i = 0; i < 4; i++) {
     table.push_back(DOF_NODE);
@@ -473,7 +473,7 @@ static void build_quad_dtable(UInt q, std::vector<int> &table) {
   }
 }
 
-static void build_quad_itable(UInt nfunc, UInt q, std::vector<double> &ip) {
+void build_quad_itable(UInt nfunc, UInt q, std::vector<double> &ip) {
   // First the nodes:
   ip.clear(); ip.resize(nfunc*2, 0);
   ip[0] = -1; ip[1] = -1;
@@ -767,7 +767,7 @@ void QuadHier::shape_grads(UInt npts, const fad_type pcoord[], fad_type results[
 
 
 // ************ Triangle ************
-static void build_tri_dtable(UInt q, std::vector<int> &table) {
+void build_tri_dtable(UInt q, std::vector<int> &table) {
   // Int dofs first
   for (UInt i = 0; i < 3; i++) {
     table.push_back(DOF_NODE);
@@ -801,7 +801,7 @@ static void build_tri_dtable(UInt q, std::vector<int> &table) {
   }
 }
 
-static void build_tri_itable(UInt nfunc, UInt q, std::vector<double> &ip) {
+void build_tri_itable(UInt nfunc, UInt q, std::vector<double> &ip) {
   // First the nodes:
   ip.clear(); ip.resize(nfunc*2, 0);
   ip[0] = 0; ip[1] = 0;
@@ -1044,7 +1044,7 @@ void TriHier::shape_elem(UInt stride, // how to stride when storing results
 
 
 // ************ Hexahedron ************
-static void build_hex_dtable(UInt q, std::vector<int> &table) {
+void build_hex_dtable(UInt q, std::vector<int> &table) {
   // Int dofs first
   for (UInt i = 0; i < 8; i++) {
     table.push_back(DOF_NODE);
@@ -1090,7 +1090,7 @@ static void build_hex_dtable(UInt q, std::vector<int> &table) {
   } 
 }
 
-static void build_hex_itable(UInt nfunc, UInt q, std::vector<double> &ip) {
+void build_hex_itable(UInt nfunc, UInt q, std::vector<double> &ip) {
   
   // First the nodes:
   ip.clear(); ip.resize(nfunc*2, 0);
