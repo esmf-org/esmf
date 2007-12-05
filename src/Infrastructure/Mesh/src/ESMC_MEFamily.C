@@ -1,4 +1,3 @@
-// $Id: ESMC_MEFamily.C,v 1.3 2007/11/28 16:42:41 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -14,6 +13,7 @@
 
 #include <ESMC_ShapeHierarchic.h>
 #include <ESMC_ShapeLagrange.h>
+#include <ESMC_SFuncAdaptor.h>
 
 
 namespace ESMC {
@@ -94,9 +94,9 @@ MasterElement<METraits<> > *MEFamilyDG0::getME(const std::string &toponame, METr
   const MeshObjTopo *topo = GetTopo(toponame);
   if (!topo) Throw() << "DG0 get Me, couldn't get topo";
   if (topo->parametric_dim == 2) {
-    return MasterElementImpl<dg0_shape_func<2>, METraits<> >::instance();
+    return MasterElementV<METraits<> >::instance(SFuncAdaptor<dg0_shape_func<2> >::instance());
   } else if (topo->parametric_dim == 3) {
-    return MasterElementImpl<dg0_shape_func<3>, METraits<> >::instance();
+    return MasterElementV<METraits<> >::instance(SFuncAdaptor<dg0_shape_func<3> >::instance());
   } else Throw() << "DG0 getME, unexpected pdim";
 }
 

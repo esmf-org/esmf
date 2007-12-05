@@ -1,4 +1,3 @@
-// $Id: ESMC_LinSys.C,v 1.2 2007/11/28 16:42:41 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -17,6 +16,7 @@
 #include <ESMC_ParEnv.h>
 #include <ESMC_SparseMsg.h>
 #include <ESMC_Exception.h>
+#include <ESMC_ShapeFunc.h>
 
 #ifdef ESMC_TRILINOS
 #include <Epetra_MpiComm.h>
@@ -24,10 +24,15 @@
 #include <AztecOO.h>
 //#include <Teuchos_ParameterList.hpp>
 #define HAVE_IFPACCK_TEUCHOS
+#define HAVE_ML_TEUCHOS
+#define HAVE_ML_EPETRA
 #include <Ifpack.h>
 #include <Amesos.h>
 #include "ml_include.h"
+#include <ml_epetra_utils.h>
 #include "ml_MultiLevelPreconditioner.h"
+#include "ml_MultiLevelOperator.h"
+#include "Teuchos_ParameterList.hpp"
 #endif
 
 namespace ESMC {
@@ -37,15 +42,15 @@ LinSys::LinSys(Mesh &_mesh, UInt nfields, MEField<> **fields) :
  mesh(_mesh),
  elem_dofs(),
  field_on(),
- nelem_dofs(0)
+ nelem_dofs(0),
 #ifdef ESMC_TRILINOS
- ,
  map(NULL),
  umap(NULL),
  matrix(NULL),
  x(NULL),
- b(NULL)
+ b(NULL),
 #endif
+has_neg_dofs(false)
 {
   for (UInt i = 0; i < nfields; i++) {
 
@@ -129,6 +134,7 @@ void LinSys::ReInit(MeshObj &elem) {
   
   UInt cur_loc = 0;
 
+  has_neg_dofs = false;
   for (UInt f = 0; f < nfields; f++) {
     if (field_on[f]) {
 
@@ -139,10 +145,16 @@ void LinSys::ReInit(MeshObj &elem) {
       GatherElemData<METraits<>,MEField<>,DField_type>(me, static_cast<MEField<>&>(*DFields[f]), elem, &elem_dofs[cur_loc]);
 
       // Some elements may negate the dofs, so adjust this
-      if (me.orientation() == MasterElementBase::ME_SIGN_ORIENTED) {
+      if (me.orientation() == ShapeFunc::ME_SIGN_ORIENTED) {
         for (UInt i = 0; i < ndofs; i++) {
-          elem_dof_signs[cur_loc+i] = elem_dofs[cur_loc+i] >= 0 ? 1 : -1;
-          elem_dofs[cur_loc+i] = std::abs(elem_dofs[cur_loc+i]);
+          if (elem_dofs[cur_loc+i] >= 0) {
+            elem_dof_signs[cur_loc+i] = 1;
+            //elem_dofs[cur_loc+i] = std::abs(elem_dofs[cur_loc+i]);
+          } else {
+            has_neg_dofs = true;
+            elem_dof_signs[cur_loc+i] = -1;
+            elem_dofs[cur_loc+i] = -1*elem_dofs[cur_loc+i];
+          }
         }
       }
 
@@ -153,11 +165,13 @@ void LinSys::ReInit(MeshObj &elem) {
 
   
 
+/*
 Par::Out() << "elem dofs, signs:" << std::endl;
 std::copy(elem_dofs.begin(), elem_dofs.end(), std::ostream_iterator<DField_type>(Par::Out(), " "));
 Par::Out() << std::endl;
 std::copy(elem_dof_signs.begin(), elem_dof_signs.end(), std::ostream_iterator<DField_type>(Par::Out(), " "));
 Par::Out() << std::endl;
+*/
 }
 
 void LinSys::BeginAssembly() {
@@ -169,15 +183,71 @@ void LinSys::BeginAssembly() {
 
 }
 
-void LinSys::EndAssembly() {
+void LinSys::GlobalAssemble() {
 #ifdef ESMC_TRILINOS
 
-  matrix->GlobalAssemble(*umap, *umap);
-  //matrix->FillComplete();
+  //matrix->GlobalAssemble(*umap, *umap);
+  matrix->GlobalAssemble(false);
 
   // Sum rhs together
   b->GlobalAssemble();
 #endif
+
+}
+
+void LinSys::EndAssembly() {
+#ifdef ESMC_TRILINOS
+
+  //matrix->GlobalAssemble(*umap, *umap);
+  matrix->FillComplete();
+
+  // Sum rhs together
+#endif
+
+}
+
+void LinSys::ApplyHNodeConstraints() {
+/*
+  std::vector<MeshObj*> celems;
+
+  // Loop the mesh and find all elements that have constrained dofs.  Basically
+  // anyone that USES a constraint.
+  KernelList::iterator ki = mesh.set_begin(), ke = mesh.set_end();
+  for (; ki != ke; ++ki) {
+
+     const Context &ctxt = ker.GetContext();
+     if (!ctxt.is_set(Attr::CONSTRAINED_ID)) continue;
+
+    Kernel::obj_iterator oi = ker.obj_begin(), oe = ker.obj_end();
+ 
+    for (; oi != oe; ++oi) {
+
+      MeshObj &obj = *oi;
+
+      MeshObjRelationList::iterator ri = 
+         MesObjConn::find_relation(obj, MeshObj::ELEMENT);
+      for (; ri != obj.Relations.end() && ri->obj->get_type() == MeshObj::ELEMENT) {
+        if (ri->type == MeshObj::USED_BY) {
+          std::vector<MeshObj*>::iterator lb =
+            std::lower_bound(celems.begin(), celems.end(), ri->obj);
+
+          if (lb == celems.end() || *lb != ri->obj)
+            celems.insert(lb, ri->obj);
+
+        }
+
+      }
+
+    } // oi
+
+  } // for ki
+
+  // Okay, now we have the constrained objects, so we loop through them.
+  // For each such element, we gather his dofs, find a parent, and gather their dofs.
+  // Then, for any child dofs on a constrained object we must select the row of the
+  // prolongation matrix, trimming any parent id's that are zero (which should be
+  // the ones that don't live on the side).
+*/
 
 }
 
@@ -189,6 +259,7 @@ for (UInt i = 0; i < nelem_dofs; i++) {
   Par::Out() << "\t(" << elem_dofs[i] << ", " << mat_row[i] << ")" << std::endl; 
 }
 */
+/*
   if (elem_dof_signs[row] < 0) {
 
 for (UInt i = 0; i < nelem_dofs; i++) {
@@ -196,12 +267,28 @@ for (UInt i = 0; i < nelem_dofs; i++) {
 }
 
   }
+*/
+//if (elem_dof_signs[row] > 0) {
 
+  // If the me is oriented, we have to negate all such columns (except on the diagonal, since
+  // the dof will have cancelled itself)
+  if(has_neg_dofs) {
+  for (UInt i = 0; i < nelem_dofs; i++) {
+    if (elem_dof_signs[row] < 0 && row != i) const_cast<double&>(mat_row[i])*=-1.0;
+  }
+  }
+
+/*
   int ret = matrix->SumIntoGlobalValues(elem_dofs[row],
             static_cast<int>(nelem_dofs), const_cast<double*>(&mat_row[0]), &elem_dofs[0]);
+*/
+
+  int ret = matrix->SumIntoGlobalValues(1, &elem_dofs[row],
+            static_cast<int>(nelem_dofs), &elem_dofs[0],
+            const_cast<double*>(&mat_row[0]));
 
 //Par::Out() << "\tret=" << ret << std::endl;
-  ThrowRequire(ret == 0);
+  //ThrowRequire(ret == 0);
   
   b->SumIntoGlobalValues(1, &elem_dofs[row], &rhs_val);
 #endif
@@ -209,6 +296,7 @@ for (UInt i = 0; i < nelem_dofs; i++) {
 
 void LinSys::SetFadCoef(UInt offset, std::vector<double> &mcoef, std::vector<fad_type> &fad_coef) {
 
+/*
   for (UInt i = 0; i < nelem_dofs; i++) {
     if (elem_dof_signs[i] < 0) {
       fad_coef[offset + i] = -mcoef[i];
@@ -218,6 +306,11 @@ void LinSys::SetFadCoef(UInt offset, std::vector<double> &mcoef, std::vector<fad
       fad_coef[offset + i] = mcoef[i];
       fad_coef[offset + i].diff(offset+i, nelem_dofs);
     }
+  }
+*/
+  for (UInt i = 0; i < nelem_dofs; i++) {
+      fad_coef[offset + i] = mcoef[i];
+      fad_coef[offset + i].diff(offset+i, nelem_dofs);
   }
 
 }
@@ -473,12 +566,13 @@ void LinSys::BuildMatrix() {
   
   Epetra_MpiComm comm(Par::Comm());
 
-  map = new Epetra_Map(-1, my_global.size(), &my_global[0], 0, comm);
+  //map = new Epetra_Map(-1, my_global.size(), &my_global[0], 0, comm);
 
   umap = new Epetra_Map(-1, my_owned.size(), &my_owned[0], 0, comm);
 
 
-  x = new Epetra_FEVector(*map);
+  x = new Epetra_FEVector(*umap);
+  //b = new Epetra_FEVector(*umap);
   b = new Epetra_FEVector(*umap);
 
   // Now to the matrix
@@ -488,9 +582,9 @@ void LinSys::BuildMatrix() {
   for (UInt lp = 0; lp < 2; lp++) {
 
   if (lp == 1) {
-    max_df = 300;
+    max_df *= 8;
     Par::Out() << "max_df=" << max_df << std::endl;
-    matrix = new Epetra_FECrsMatrix(Copy, *map, max_df); // 100 = approx entries per row??
+    matrix = new Epetra_FECrsMatrix(Copy, *umap, max_df); // 100 = approx entries per row??
   }
 
   KernelList::iterator ki = mesh.set_begin(), ke = mesh.set_end();
@@ -572,7 +666,7 @@ void LinSys::BuildMatrix() {
           // owned key, add all others.
 
           int msize = dofindices.size();
-          std::vector<double> vals(msize*msize, 1.1);
+          std::vector<double> vals(msize*msize, 0.0);
           
           /*
 Par::Out() << "insert global rows:";
@@ -691,8 +785,8 @@ struct solver_params_type {
 
 solver_params_type solver_params;
 solver_params.OUTPUT = solver_params_type::VERBOSE;
-solver_params.ILUT_DROP = 1e-12;
-solver_params.ILUT_FILL = 3.0;
+solver_params.ILUT_DROP = 1e-6;
+solver_params.ILUT_FILL = 1.5;
 solver_params.ILUT_ATOL = 1e-12;
 solver_params.ILUT_RTOL = 1.00;
 solver_params.MAX_ITERS = 1000;
@@ -700,18 +794,11 @@ solver_params.RES = 1e-12;
 
                                  // For the iterative solvers, we use Aztec.
     AztecOO Solver;
-
-                                 // Select the appropriate level of verbosity.
-    if (solver_params.OUTPUT == solver_params_type::QUIET)
-    Solver.SetAztecOption(AZ_output, AZ_none);
-
-    if (solver_params.OUTPUT == solver_params_type::VERBOSE)
-    Solver.SetAztecOption(AZ_output, AZ_all);
-
-                                 // Select gmres.  Other solvers are available.
-    Solver.SetAztecOption(AZ_solver, AZ_gmres);
+    Solver.SetUserMatrix(matrix);
     Solver.SetRHS(b);
     Solver.SetLHS(x);
+
+#ifdef NOT
 
                                  // Set up the ILUT preconditioner.  I do not know
                        // why, but we must pretend like we are in parallel
@@ -727,21 +814,37 @@ solver_params.RES = 1e-12;
     Solver.SetAztecParam(AZ_ilut_fill, solver_params.ILUT_FILL);
     Solver.SetAztecParam(AZ_athresh, solver_params.ILUT_ATOL);
     Solver.SetAztecParam(AZ_rthresh, solver_params.ILUT_RTOL);
-    
-#ifdef NOT
-    Teuchos::ParameterList MList;
-    // default values for smoothed aggregation
-    ML_Epetra::SetDefaults("SA",MLList);
-    MLList.set("max levels",6);
-    MLList.set("increasing or decreasing","decreasing");
-    MLList.set("aggregation: type", "MIS");
-    MLList.set("coarse: type","Amesos_KLU");
-    ML_Epetra::MultiLevelPreconditioner * MLPrec =
-    new ML_Epetra::MultiLevelPreconditioner(A, MLList, true);
-    solver.SetPrecOperator(MLPrec);
 #endif
+
+ML *ml_handle;
+int N_levels = 10;
+ML_Set_PrintLevel(10);
+ML_Create(&ml_handle,N_levels);
+EpetraMatrix2MLMatrix(ml_handle, 0, matrix);
+ML_Aggregate *agg_object;
+ML_Aggregate_Create(&agg_object);
+N_levels = ML_Gen_MGHierarchy_UsingAggregation(ml_handle,
+0,
+ML_INCREASING,
+agg_object);
+ML_Gen_Smoother_SymGaussSeidel(ml_handle, ML_ALL_LEVELS,
+ML_BOTH, 1, ML_DEFAULT);
+ML_Gen_Solver (ml_handle, ML_MGV, 0, N_levels-1);
+Epetra_MpiComm comm(Par::Comm());
+ML_Epetra::MultiLevelOperator MLop(ml_handle,comm,*umap,*umap);
+Solver.SetPrecOperator(&MLop);
+
     
-    Solver.SetUserMatrix(matrix);
+
+                                 // Select the appropriate level of verbosity.
+    if (solver_params.OUTPUT == solver_params_type::QUIET)
+    Solver.SetAztecOption(AZ_output, AZ_none);
+
+    if (solver_params.OUTPUT == solver_params_type::VERBOSE)
+    Solver.SetAztecOption(AZ_output, AZ_all);
+
+                                 // Select gmres.  Other solvers are available.
+    Solver.SetAztecOption(AZ_solver, AZ_gmres);
 
                                  // Run the solver iteration.  Collect the number
                                  // of iterations and the residual.
@@ -758,7 +861,6 @@ solver_params.RES = 1e-12;
 void LinSys::Dirichlet(DField_type row_id, double val, bool owned) {
 #ifdef ESMC_TRILINOS
   
-  owned = true;
   
   std::vector<double> new_row;
   double *old_row;
@@ -768,13 +870,13 @@ void LinSys::Dirichlet(DField_type row_id, double val, bool owned) {
 
   int ret = matrix->ExtractGlobalRowView(row_id, nentries, old_row, old_indices);
  
-if (nentries == 0) return;
+if (nentries == 0) {Par::Out() << "row:" << row_id << ", nentries = 0" << std::endl; return;}
   if (ret == -2)
     Throw() << "Extract view failed.  Perhaps EndAssemble not called before dirichlet??";
   
   //ThrowRequire(ret == 0);
   
-  Par::Out() << "Extract ret=" << ret << std::endl;
+  //Par::Out() << "Extract ret=" << ret << std::endl;
 
   if (nentries <= 0)
     Throw() << "nentries==0, for row_id=" << row_id;
@@ -796,7 +898,7 @@ for (UInt i = 0; i < nentries; ++i) {
 }
 Par::Out() << std::endl;
   
-  matrix->ReplaceGlobalValues(row_id, nentries, &new_row[0], old_indices);
+  matrix->ReplaceGlobalValues(1, &row_id, nentries, old_indices, &new_row[0]);
 
   if (!owned) val = 0.0;
   x->ReplaceGlobalValues(1, &row_id, &val);

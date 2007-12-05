@@ -1,4 +1,3 @@
-// $Id: ESMC_Polynomial.C,v 1.6 2007/11/28 16:42:45 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 

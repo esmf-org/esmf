@@ -1,4 +1,3 @@
-// $Id: ESMC_MeshObjConn.C,v 1.7 2007/12/03 23:26:18 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -26,11 +25,11 @@ namespace MeshObjConn {
 
 MeshObj *opposite_element(const MeshObj &obj, const int side_ordinal) {
   int ord, pol, rot;
-  return opposite_element(obj, side_ordinal, ord, pol, rot);
+  return opposite_element(obj, side_ordinal, ord, pol, rot, false);
 }
 
 MeshObj *opposite_element(const MeshObj &obj, const int side_ordinal, int &ordinal,
-             int &polarity, int &rotation) {
+             int &polarity, int &rotation, bool compute_side_info) {
   const MeshObjTopo *topo = GetMeshObjTopo(obj);
   const int * const side_nodes = topo->get_side_nodes(side_ordinal);
   int num_side_nodes = topo->get_num_side_nodes();
@@ -67,6 +66,10 @@ MeshObj *opposite_element(const MeshObj &obj, const int side_ordinal, int &ordin
       Throw() << "opposite.  Expected two elements, found:" << out_objs.size();
   }
 
+  int idx = out_objs[0] == &obj ? 1: 0;
+
+  if (!compute_side_info) return out_objs[idx];
+
   int pols[2];
   int rots[2];
   int ords[2];
@@ -78,7 +81,6 @@ MeshObj *opposite_element(const MeshObj &obj, const int side_ordinal, int &ordin
       ords, pols);
   }
 
-  int idx = out_objs[0] == &obj ? 1: 0;
   ThrowRequire(out_objs[1-idx] == &obj);
 
   if (topo->parametric_dim == 3) {

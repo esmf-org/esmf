@@ -1,4 +1,3 @@
-// $Id: ESMC_Kernel.h,v 1.4 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -108,6 +107,7 @@ public:
   bool is_shared() const { return GetContext().is_set(Attr::SHARED_ID); }
   bool is_exposed() const { return GetContext().is_set(Attr::EXPOSED_BOUNDARY_ID); }
   bool is_genesis() const { return GetContext().is_set(Attr::GENESIS_ID); }
+  bool is_owned() const { return GetContext().is_set(Attr::OWNED_ID); }
 
   const MappingBase &GetMapping() const { ThrowRequire(mapping); return *mapping;}
 

@@ -1,4 +1,3 @@
-// $Id: ESMC_Interp.C,v 1.4 2007/11/28 16:42:41 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -35,224 +34,23 @@ namespace ESMC {
 // IWeights 
 /*-----------------------------------------------------------------*/
 IWeights::IWeights() :
-weights()
+WMat()
 {
 }
 
-IWeights::IWeights(const IWeights &rhs) {
-  weights = rhs.weights;
+IWeights::IWeights(const IWeights &rhs) :
+WMat(rhs)
+{
 }
 
-IWeights &IWeights::operator=(const IWeights &rhs) {
+IWeights &IWeights::operator=(const IWeights &rhs) 
+{
+
+  WMat::operator=(rhs);
   
   if (this == &rhs) return *this;
   
-  weights = rhs.weights;
-  
   return *this;
-}
-
-void IWeights::InsertRow(const Entry &row, const std::vector<Entry> &cols) {
-  
-  std::pair<WeightMap::iterator, bool> wi =
-    weights.insert(std::make_pair(row, cols));
-    
-  if (wi.second == false) {
-    // Just verify that entries are the same
-    std::vector<Entry> &tcol = wi.first->second;
-    ThrowRequire(tcol.size() == cols.size());
-    for (UInt i = 0; i < cols.size(); i++) {
-      ThrowRequire(tcol[i].id == cols[i].id);
-      ThrowRequire(tcol[i].idx == cols[i].idx);
-      ThrowRequire(std::abs(tcol[i].value-cols[i].value) < 1e-5);
-    }
-  } else {
-    
-    // Sort the column entries (invariant used elsewhere).
-    std::sort(wi.first->second.begin(), wi.first->second.end());
-
-    // compress storage
-    std::vector<Entry>(wi.first->second).swap(wi.first->second);
-    
-  }
-  
-}
-
-void IWeights::Print(std::ostream &os) {
-  
-  WeightMap::iterator wi = weights.begin(), we = weights.end();
-  
-  for (; wi != we; ++wi) {
-    os << "Row:" << wi->first;
-    std::vector<Entry> &col = wi->second;
-    
-    double sum = 0.0;
-    for (UInt i = 0; i < col.size(); i++) {
-      
-      os << col[i] << ", ";
-      
-      sum += col[i].value;
-      
-    }
-    
-    os << "SUM=" << sum << std::endl;
-  }
-  
-}
-
-//void IWeights::Migrate(CommRel &crel) {
-void IWeights::Migrate(Mesh &mesh) { 
-  Trace __trace("IWeights::Migrate(Mesh &mesh)");
-  
-  // Gather pole constraints
-  {
-    std::vector<UInt> mesh_dist, iw_dist;
-    
-    Context c; c.set(Attr::ACTIVE_ID);
-    Attr a(MeshObj::NODE, c);
-    getMeshGIDS(mesh, a, mesh_dist);
-    GetRowGIDS(iw_dist);
-    
-    Migrator mig(mesh_dist.size(), mesh_dist.size() > 0 ? &mesh_dist[0] : NULL, 0,
-        iw_dist.size(), iw_dist.size() > 0 ? &iw_dist[0] : NULL);
-    
-    mig.Migrate(*this);
-    
-//#define CHECK_WEIGHT_MIG
-#ifdef CHECK_WEIGHT_MIG
-// Check something: should have 1 to 1 coresp ids and entries
-for (UInt i = 0; i < mesh_dist.size(); i++) {
-  Entry ent(mesh_dist[i]);
-  WeightMap::iterator wi = weights.lower_bound(ent);
-  if (wi == weights.end() || wi->first.id != ent.id)
-    Throw() << "Did not find id:" << ent.id << std::endl;
-}
-// And the other way
-std::sort(mesh_dist.begin(), mesh_dist.end());
-WeightMap::iterator wi = weights.begin(), we = weights.end();
-for (; wi != we; ++wi) {
-  std::vector<UInt>::iterator lb =
-    std::lower_bound(mesh_dist.begin(), mesh_dist.end(), wi->first.id);
-  
-  if (lb == mesh_dist.end() || *lb != wi->first.id)
-    Throw() << "Weight entry:" << wi->first.id << " not a mesh id!";
-}
-#endif
-  
-    
-  }
-  
-  return;
-  
-}
-  
-void IWeights::clear() {
-  
-  // Loop weightmap; swap each row out
-  WeightMap::iterator wi = begin_row(), we = end_row();
-  
-  for (; wi != we; ++wi)
-    std::vector<Entry>().swap(wi->second);
-  
-  WeightMap().swap(weights);
-  
-}  
-
-struct entry_mult {
-  entry_mult(double _mval) : mval(_mval) {}
-  IWeights::Entry operator()(const IWeights::Entry &rhs) {
-    return IWeights::Entry(rhs.id, rhs.idx, rhs.value*mval);
-  }
-  double mval;
-};
-
-void IWeights::AssimilateConstraints(const IWeights &constraints) {
-  Trace __trace("IWeights::AssimilateConstraints(const IWeights &constraints)");
-  
-  // Loop the current entries; see if any constraint rows need to be resolved;
-  WeightMap::iterator wi = weights.begin(), we = weights.end();
-  
-  for (; wi != we; ++wi) {
-    
-    std::vector<Entry> &col = wi->second;
-    
-    // Loop constraints; find the entries
-    WeightMap::const_iterator ci = constraints.weights.begin(), ce = constraints.weights.end();
-    
-    for (; ci != ce; ++ci) {
-      
-      const Entry &crow = ci->first;
-      
-      std::vector<Entry>::iterator lb = 
-        std::lower_bound(col.begin(), col.end(), crow);
-        
-      // If we found an entry, condense;
-      if (lb != col.end() && *lb == crow) {
-        
-        double val = lb->value;
-        
-        const std::vector<Entry> &ccol = ci->second;
-        
-        // Delete entry
-        col.erase(lb);
-        
-        // Add replacements to end
-        std::transform(ccol.begin(), ccol.end(), std::back_inserter(col), entry_mult(val));
-        
-        // Now sort
-        std::sort(col.begin(), col.end());
-        
-        // And condense any duplicates
-        std::vector<Entry>::iterator condi = col.begin(), condn, cond_del;
-        
-        while (condi != col.end()) {
-          
-          condn = condi; condn++;
-          
-          // Sum in result while entries are duplicate
-          while (condn != col.end() && *condn == *condi) {
-            
-            condi->value += condn->value;
-            
-            ++condn;
-          }
-          
-          // Move to next entry
-          ++condi;
-
-          // Condense the list if condn != condi (there were duplicaes)
-          if (condn != condi) {
-            cond_del = std::copy(condn, col.end(), condi);
-            
-            col.erase(cond_del, col.end());
-          }
-          
-        }  // condi; condensation loop
-        
-      } // Found an entry
-      
-    } // for ci
-    
-  } // for wi
-  
-}
-
-void IWeights::GatherToCol(IWeights &rhs) {
-  Trace __trace("IWeights::GatherToCol(IWeights &rhs)");
-  
-  // Gather rhs to col dist of this
-  {
-    std::vector<UInt> distd, dists;
-    
-    this->GetColGIDS(distd);
-    rhs.GetRowGIDS(dists);
-    
-    Migrator mig(distd.size(), distd.size() > 0 ? &distd[0] : NULL, 0,
-        dists.size(), dists.size() > 0 ? &dists[0] : NULL);
-    
-    mig.Migrate(rhs);
-    
-  }
 }
 
 void IWeights::ChangeCoords(const IWeights &src_uv, const IWeights &dst_uv) {
@@ -429,180 +227,6 @@ void IWeights::Prune(const Mesh &mesh, const MEField<> &mask) {
   
 }
 
-void IWeights::GetRowGIDS(std::vector<UInt> &gids) {
-  Trace __trace("IWeights::GetRowGIDS(std::vector<UInt> &gids)");
-  
-  gids.clear();
-  
-  WeightMap::iterator ri = weights.begin(), re = weights.end();
-  
-  for (; ri != re;) {
-    
-    gids.push_back(ri->first.id);
-    
-    UInt gid = ri->first.id;
-    
-    // Don't repeat a row:
-    while (ri != re && ri->first.id == gid)
-      ++ri;
-    
-  }
-  
-}
-
-void IWeights::GetColGIDS(std::vector<UInt> &gids) {
-  Trace __trace("IWeights::GetColGIDS(std::vector<UInt> &gids)");
-  
-  gids.clear();
-  
-  std::set<UInt> _gids; // use a set for efficieny
-
-  WeightMap::iterator wi = weights.begin(), we = weights.end();
-  
-  for (; wi != we; ++wi) {
-    
-    std::vector<Entry> &col = wi->second;
-    
-    for (UInt i = 0; i < col.size(); i++) {
-      
-      _gids.insert(col[i].id);
-      
-    }
-    
-  }
-  
-  std::copy(_gids.begin(), _gids.end(), std::back_inserter(gids));
-  
-}
-
-std::pair<int, int> IWeights::count_matrix_entries() const {
-  
-  int n_s = 0;
-  int max_idx = 0;
-  
-  IWeights::WeightMap::const_iterator wi = begin_row(), we = end_row();
-  
-  for (; wi != we; ++wi) {
-    n_s += wi->second.size();
-    if (wi->first.idx > max_idx) max_idx = wi->first.idx;
-  }
-  
-  return std::make_pair(n_s, max_idx);;
-    
-}
-
-// SparsePack/Unpack
-SparsePack<IWeights::WeightMap::value_type>::SparsePack(SparseMsg::buffer &b, IWeights::WeightMap::value_type &t)
-{
- // UInt res = 0;
-  
-  const IWeights::Entry &row = t.first;
-  
-  std::vector<IWeights::Entry> &col = t.second;
-
-  // GID
-  SparsePack<IWeights::Entry::id_type>(b, row.id);
-  
-  // IDX
- SparsePack<IWeights::Entry::idx_type>(b, row.idx);
-  
-  // Number of columns, this row/idx
-  SparsePack<UInt>(b, col.size());
-      
-    for (UInt i = 0; i < col.size(); i++) {
-      
-    IWeights::Entry &cent = col[i];
-      
-    // col id
-    SparsePack<IWeights::Entry::id_type>(b, cent.id);
-    
-    // col idx
-    SparsePack<IWeights::Entry::idx_type>(b, cent.idx);
-    
-    // Matrix value
-    SparsePack<IWeights::Entry::value_type>(b, cent.value);
-      
-    } // i
-}
-
-UInt SparsePack<IWeights::WeightMap::value_type>::size(IWeights::WeightMap::value_type &t)
-{
-  
-  UInt res = 0;
-  
-  //const IWeights::Entry &ent = t.first;
-  
-  std::vector<IWeights::Entry> &col = t.second;
-
-  // GID
-  res += SparsePack<IWeights::Entry::id_type>::size();
-  
-  // IDX
-  res += SparsePack<IWeights::Entry::idx_type>::size();
-  
-  // Number of columns, this row/idx
-  res += SparsePack<UInt>::size();
-      
-    for (UInt i = 0; i < col.size(); i++) {
-      
-    // col id
-    res += SparsePack<IWeights::Entry::id_type>::size();
-    
-    // col idx
-    res+= SparsePack<IWeights::Entry::idx_type>::size();
-    
-    // Matrix value
-    res += SparsePack<IWeights::Entry::value_type>::size();
-      
-    } // i
-    
-    return res;
-    
-}
-
-SparseUnpack<IWeights::WeightMap::value_type>::SparseUnpack(SparseMsg::buffer &b, IWeights::WeightMap::value_type &t)
-{
-  
-  IWeights::Entry &row = const_cast<IWeights::Entry&>(t.first);
-  
-  // GID
-  SparseUnpack<IWeights::Entry::id_type>(b, row.id);
-  
-  // Idx
-  SparseUnpack<IWeights::Entry::idx_type>(b, row.idx);
-  
-  // ncols
-  UInt ncols;
-  SparseUnpack<UInt>(b, ncols);
-  
-  std::vector<IWeights::Entry> &col = t.second;
-  
-  col.clear(); col.reserve(ncols);
-  
-  for (UInt i = 0; i < ncols; i++) {
-    
-    IWeights::Entry cent;
-    
-    // Col id
-    SparseUnpack<IWeights::Entry::id_type>(b, cent.id);
-    
-    // col idx
-    SparseUnpack<IWeights::Entry::idx_type>(b, cent.idx);
-    
-    // value
-    SparseUnpack<IWeights::Entry::value_type>(b, cent.value);
-    
-    col.push_back(cent);
-    
-  } // i
-  
-}
-
-std::ostream &operator <<(std::ostream &os, const IWeights::Entry &ent) {
-  os << "{id=" << ent.id << ", idx:" << (int) ent.idx << ", " << ent.value << "}";
-  return os;
-}
-
 /*----------------------------------------------------------------*/
 // Interp:
 // Basic routines to interpolate data.
@@ -615,7 +239,7 @@ void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>*
    Trace __trace("patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>* const* _sfields, _field* const *_dfields, int *iflag, SearchResult &sres)");
 
    std::set<int> pdeg_set;
-   std::map<int, ElemPatch<> > patch_map;
+   std::map<int, ElemPatch<>*> patch_map;
    
   if (_nfields == 0) return;
 
@@ -631,7 +255,7 @@ void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>*
    
     pdeg_set.insert(fpairs[i].patch_order);
 
-    ThrowRequire(_sfields[i]->is_nodal());
+    //ThrowRequire(_sfields[i]->is_nodal());
   
     fields.push_back(_sfields[i]); dfields.push_back(_dfields[i]);
     orders.push_back(fpairs[i].patch_order);
@@ -655,9 +279,9 @@ void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>*
       
       for (; pi != pe; ++pi) {
         
-        ElemPatch<> epatch;
+        ElemPatch<> *epatch = new ElemPatch<>();
     
-        epatch.CreateElemPatch(*pi, ElemPatch<>::GAUSS_PATCH,
+        epatch->CreateElemPatch(*pi, ElemPatch<>::GAUSS_PATCH,
                                elem,
                                src_coord_field,
                                fields.size(),
@@ -699,7 +323,7 @@ void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>*
         
         ri.first->second.resize(nrhs*npts);
         
-        ElemPatch<> &epatch = patch_map[*pi];
+        ElemPatch<> &epatch = *patch_map[*pi];
         
         epatch.Eval(npts, &pc[0], &(ri.first->second[0]));
         
@@ -740,6 +364,9 @@ void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>*
 
     } // for np
 
+   std::map<int, ElemPatch<>*>::iterator pi = patch_map.begin(), pe = patch_map.end();
+   for (; pi != pe; ++pi) delete pi->second;
+    
       
   } // for searchresult
   
@@ -815,10 +442,16 @@ dof_add_col(std::vector<IWeights::Entry> &_col, UInt _fdim, double *_sens) :
 void operator()(MeshObj *obj, UInt nvalset, UInt n) {
   
   // Weights are redundant per field dimension entry; just take first
-  if (n == 0) 
+  if (n == 0) {
     col.push_back(IWeights::Entry(obj->get_id(), n, sens[idx*fdim+n]));
+
+/*
+    Par::Out() << "Adding id:" << obj->get_id() <<", val:" << sens[idx*fdim+n] << std::endl;
+    std::cout << "Adding id:" << obj->get_id() <<", val:" << sens[idx*fdim+n] << std::endl;
+*/
+    ++idx;
+  }
   
-  ++idx;
 }
 
 UInt idx;
@@ -998,7 +631,7 @@ Par::Out() << std::endl;
 
 
     // Inner loop through fields
-    MEValues<METraits<fad_type,double>,METraits<>,MEField<SField> > mev(sfield.GetMEFamily());
+    MEValues<METraits<fad_type,double>,MEField<SField> > mev(sfield.GetMEFamily());
 
     if (dfield.dim() != sfield.dim())
       Throw() << "dest and source fields have incompatible dimensions";

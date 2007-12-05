@@ -1,4 +1,3 @@
-// $Id: ESMC_DCatEx.C,v 1.2 2007/09/10 17:38:26 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +42,7 @@
 #include <cmath>
 
 
-using namespace ESMCI::MESH;
+using namespace ESMC;
 
 void usage(const std::string &pname) {
     std::cout << "Usage:" << pname << " file nparts" << std::endl;

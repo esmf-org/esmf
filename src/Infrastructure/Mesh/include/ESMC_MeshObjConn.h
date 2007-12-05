@@ -1,4 +1,3 @@
-// $Id: ESMC_MeshObjConn.h,v 1.4 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -34,7 +33,7 @@ MeshObj *opposite_element(const MeshObj &obj, const int side_ordinal);
 // mainly when adding a face, so we know the face has the standard orientation, since
 // it was added as such.
 MeshObj *opposite_element(const MeshObj &obj, const int side_ordinal, int &ordinal,
-             int &polarity, int &rotation);
+             int &polarity, int &rotation, bool compute_side_info = true);
 
 MeshObjRelationList::const_iterator find_relation(const MeshObj &obj, UInt objtype, int ordinal, int rel_type);
 MeshObjRelationList::iterator find_relation(MeshObj &obj, UInt objtype, int ordinal, int rel_type);

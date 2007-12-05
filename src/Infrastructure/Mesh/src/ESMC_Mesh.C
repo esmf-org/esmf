@@ -1,4 +1,3 @@
-// $Id: ESMC_Mesh.C,v 1.7 2007/11/28 16:42:42 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -881,9 +880,14 @@ void Mesh::ResolvePendingDelete() {
   // but we do not delete ourselves yet.
   UInt csize = Par::Size();
 
-  for (int tp = NumMeshObjTypes - 1; csize > 1 && tp >= 0; tp--) 
+  for (int tp = NumMeshObjTypes - 1; tp >= 0; tp--) 
   {
+
     UInt obj_type = MeshObjTypes[tp];
+
+   if (csize > 1) {
+
+
     std::vector<CommRel::CommNode> ecnodes;
 
     std::vector<MeshObj*> to_delete_list;
@@ -1380,6 +1384,8 @@ for (UInt i = 0; i < to_delete_list.size(); i++)  {
 Par::Out() << "New commrel after delete:" << std::endl;
     GetCommRel(obj_type).Print(Par::Out());
 #endif
+
+  } // csize > 1
 
     // Wipes out objects.
     MeshDB::ResolvePendingDelete(obj_type);

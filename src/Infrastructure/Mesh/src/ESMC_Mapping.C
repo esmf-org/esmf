@@ -1,4 +1,3 @@
-// $Id: ESMC_Mapping.C,v 1.5 2007/11/28 16:42:41 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -575,6 +574,12 @@ const Mapping<MPTRAITS> *POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC
 
 template<>
 const Mapping<MPTraits<> > *POLY_Mapping<quad_shape_func,MPTraits<>,2, 2>::side_mapping(UInt side_num) const
+{
+  return POLY_Mapping<bar_shape_func,MPTraits<>,2,1>::instance();
+}
+
+template<>
+const Mapping<MPTraits<> > *POLY_Mapping<tri_shape_func,MPTraits<>,2, 2>::side_mapping(UInt side_num) const
 {
   return POLY_Mapping<bar_shape_func,MPTraits<>,2,1>::instance();
 }

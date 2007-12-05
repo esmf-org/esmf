@@ -1,4 +1,3 @@
-// $Id: ESMC_RefineTopo.h,v 1.3 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -28,18 +27,28 @@ public:
   virtual const MeshObjTopo *ChildTopo(UInt child) const = 0;
   virtual const RefineTopo *FaceRTopo(UInt face) const = 0;
   virtual const RefineTopo *EdgeRTopo(UInt face) const = 0;
+  friend const RefineTopo *GetHomoRefineTopo(const MeshObjTopo*);
+  const MeshObjTopo *GetParentTopo() const { return parent_topo; }
+protected:
+  RefineTopo(const MeshObjTopo *_tp) : parent_topo(_tp) {}
 private:
+  RefineTopo(const RefineTopo&);
+  RefineTopo &operator=(const RefineTopo &);
+  const MeshObjTopo *parent_topo;
 };
 
 // Class to describe a homogeneous refinement strategy
 class HomoRefineTopo : public RefineTopo {
 public:
-  HomoRefineTopo(UInt _numChild,
+  HomoRefineTopo(
+                 const MeshObjTopo *parent_topo,
+                 UInt _numChild,
                  const  MeshObjTopo *_ctopo,
                  const UInt *_childNode,
                  const  RefineTopo *_ftopo,
                  const RefineTopo *_etopo
                  ) :
+  RefineTopo(parent_topo),
   numChild(_numChild),
   nchildNode(_ctopo->num_nodes),
   childNode(_childNode),
@@ -67,7 +76,7 @@ const RefineTopo *ftopo;
 const RefineTopo *etopo;
 };
 
-const RefineTopo *GetHomoRefineTopo(const std::string &tname);
+const RefineTopo *GetHomoRefineTopo(const MeshObjTopo*);
 
 } // namespace
 

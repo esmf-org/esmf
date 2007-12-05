@@ -1,4 +1,3 @@
-// $Id: ESMC_LinSys.h,v 1.2 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,20 +37,42 @@ public:
 
   LinSys(Mesh &mesh, UInt nfields, MEField<> **fields);
 
-  // Reset the lin sys (same fields, though)
+  /**
+   * Reset the lin sys (same fields, though)
+   */
   void clear();
 
-  // Loop the mesh, find dofs, obtain global numbers
+  /**
+   * Loop the mesh, find dofs, obtain global numbers
+   */
   void BuildDofs();
 
-  // Build the sparsity pattern into the global matrix.  If matrix was created
-  // previously, it is cleared and then rebuilt.
+  /**
+   * Build the sparsity pattern into the global matrix.  If matrix was created
+   * previously, it is cleared and then rebuilt.
+   */
   void BuildMatrix();
 
   /**
    * Zero the matrix, create the rhs vector (and zero)
    */
   void BeginAssembly(); 
+
+  /**
+   * Bring the matrix and rhs to one processor.  This is necessary before
+   * applying any type of constraints, otherwise ExtractRowView will not
+   * get the shared contributions
+   */
+  void GlobalAssemble();
+
+  /**
+   * Form and apply the hnode constraints to the matrix
+   */
+  void ApplyHNodeConstraints();
+
+  /**
+   * End matrix assembly.  Convert matrix to local indicies for use with Aztec
+   */
   void EndAssembly(); 
 
  /**
@@ -127,6 +148,7 @@ private:
   Epetra_FEVector *x, *b; 
   std::vector<int> my_global,my_owned;
 #endif
+  bool has_neg_dofs;
 };
 
 } // namespace ESMC

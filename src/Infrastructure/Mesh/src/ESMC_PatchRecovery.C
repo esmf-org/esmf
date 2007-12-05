@@ -1,4 +1,3 @@
-// $Id: ESMC_PatchRecovery.C,v 1.8 2007/11/28 16:42:45 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -18,6 +17,7 @@
 #include <ESMC_MeshField.h>
 #include <ESMC_MeshTypes.h>
 #include <ESMC_Ftn.h>
+#include <ESMC_ParEnv.h>
 
 
 #include <set>
@@ -32,7 +32,9 @@
 
 
 
+#ifdef ESMC_LAPACK
 extern "C" void FTN(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,double*,int*,double*,int*,int*);
+#endif
 
           
 
@@ -48,6 +50,89 @@ UInt PatchRecov<NFIELD,Real>::get_ncoeff(UInt dim, UInt deg) {
   return res;
 }
 
+/**
+ * Needs a buffer of size buf(2*(pdeg+1)]
+ */
+static void eval_monomial2(UInt nsamples, UInt sample, UInt pdeg, const double coord[], double res[], double buf[]) {
+  // Lay out 1 x x^2 x^2 ... 1 y y^2 y
+  buf[0] = 1.0;
+  for (UInt i = 1; i <= pdeg; i++) {
+    buf[i] = coord[0];
+  }
+  for (UInt i = 2; i <= pdeg; i++) {
+    for (UInt j = i; j <= pdeg; j++)
+      buf[j] *= coord[0];
+  }
+ 
+  // Fill out 1 y y^2 ...
+  UInt off = pdeg+1;
+  buf[off] = 1.0;
+  for (UInt i = 1; i <= pdeg; i++) {
+    buf[off+i] = coord[1];
+  }
+  for (UInt i = 2; i <= pdeg; i++) {
+    for (UInt j = i; j <= pdeg; j++)
+      buf[off+j] *= coord[1];
+  }
+
+  // Now tensor product
+  UInt k = 0;
+  for (UInt i = 0; i <= pdeg; i++) {
+    for (UInt j = 0; j <= pdeg; j++) {
+      res[k++*nsamples+sample] = buf[i]*buf[off+j];
+    }
+  }
+
+} 
+
+/**
+ * Needs a buffer of size buf(3*(pdeg+1)]
+ */
+static void eval_monomial3(UInt nsamples, UInt sample, UInt pdeg, const double coord[], double res[], double buf[]) {
+  // Lay out 1 x x^2 x^2 ... 1 y y^2 y
+  buf[0] = 1.0;
+  for (UInt i = 1; i <= pdeg; i++) {
+    buf[i] = coord[0];
+  }
+  for (UInt i = 2; i <= pdeg; i++) {
+    for (UInt j = i; j <= pdeg; j++)
+      buf[j] *= coord[0];
+  }
+ 
+  // Fill out 1 y y^2 ...
+  UInt off = pdeg+1;
+  buf[off] = 1.0;
+  for (UInt i = 1; i <= pdeg; i++) {
+    buf[off+i] = coord[1];
+  }
+  for (UInt i = 2; i <= pdeg; i++) {
+    for (UInt j = i; j <= pdeg; j++)
+      buf[off+j] *= coord[1];
+  }
+
+  // 1 z z^2 ...
+  UInt off1 = 2*(pdeg+1);
+  buf[off1] = 1.0;
+  for (UInt i = 1; i <= pdeg; i++) {
+    buf[off1+i] = coord[2];
+  }
+  for (UInt i = 2; i <= pdeg; i++) {
+    for (UInt j = i; j <= pdeg; j++)
+      buf[off1+j] *= coord[2];
+  }
+
+  // Now tensor product
+  UInt l = 0;
+  for (UInt i = 0; i <= pdeg; i++) {
+    for (UInt j = 0; j <= pdeg; j++) {
+      for (UInt k = 0; k <= pdeg; k++) {
+        res[l++*nsamples+sample] = buf[i]*buf[off+j]*buf[off1+k];
+      }
+    }
+  }
+
+} 
+
 template<typename NFIELD, typename Real>
 void PatchRecov<NFIELD,Real>::eval_poly(UInt nsamples, UInt sample, UInt ldb, UInt cur_rhs, 
           UInt dim, std::vector<double> &mat, double coord[],
@@ -55,6 +140,7 @@ void PatchRecov<NFIELD,Real>::eval_poly(UInt nsamples, UInt sample, UInt ldb, UI
   if (pdeg == 0) {
     mat[0*nsamples + sample] = 1;
   } else if (dim == 2) {
+/*
     UInt k = 0;
     for (UInt i = 0; i <= pdeg; i++) {
       for (UInt j = 0; j <= pdeg; j++) {
@@ -66,7 +152,12 @@ void PatchRecov<NFIELD,Real>::eval_poly(UInt nsamples, UInt sample, UInt ldb, UI
           EvalTensorPoly(dim, coord, tp);
       }
     }
+*/
+    std::vector<double> buf(2*(pdeg+1));
+    eval_monomial2(nsamples,sample,pdeg,coord,&mat[0],&buf[0]);
+    
   } else if (dim == 3) {
+/*
     UInt l = 0;
     for (UInt i = 0; i <= pdeg; i++) {
       for (UInt j = 0; j <= pdeg; j++) {
@@ -78,6 +169,12 @@ void PatchRecov<NFIELD,Real>::eval_poly(UInt nsamples, UInt sample, UInt ldb, UI
         }
       }
     }
+*/
+
+    std::vector<double> buf(3*(pdeg+1));
+
+    eval_monomial3(nsamples,sample,pdeg,coord,&mat[0],&buf[0]);
+
   } else Throw() << "eval poly wrong dim=" << dim << ", deg=" << pdeg;
 
   // rhs
@@ -147,6 +244,128 @@ mc()
 {
 }
 
+/**
+ * The default creates the pseudo-inverse and applies, in case we
+ * need sensitivities of coef wrt field values.
+ */
+template <typename Real>
+struct DGELSY_Solver {
+void operator()(UInt ncoef, int ldb, int m, int n, int nrhs, std::vector<double> &mat, int rank, double work[], int lwork, int info, std::vector<Real> &rhs, Real coeff[])
+{
+
+  std::vector<int> jpvt(ncoef, 0);
+  //int lwork = std::max(std::min(m,n)+2*n+1, 2*std::min(m,n)+nrhs);
+  // TODO figure this out
+  double rcond=0.0000000000001;
+
+  std::vector<double> id_rhs(ldb*ldb, 0);
+  // Set up B=I
+  for (int i = 0; i < m; i++) id_rhs[i*ldb + i] = 1.0;
+
+#ifdef ESMC_LAPACK
+  FTN(dgelsy)(
+    &m, &n, &m, &mat[0], &m, &id_rhs[0], &ldb, &jpvt[0], &rcond, &rank, &work[0], &lwork, &info);
+#else
+  Throw() << "Please reconfigure with lapack enabled";
+#endif
+
+// Apply the pseudo inverse
+  std::vector<Real> b = rhs; // ughh
+  for (int i = 0; i < n; i++) {
+    for (int nr = 0; nr < nrhs; nr++) rhs[nr*ldb+i] = 0;
+    for (int j = 0; j < m; j++) {
+      for (int nr = 0; nr < nrhs; nr++) {
+         rhs[nr*ldb+i] += id_rhs[j*ldb+i]*b[nr*ldb+j];
+      }
+    }
+  }
+
+  // fill return array
+  for (UInt r = 0; r < (UInt) nrhs; r++) {
+    for (UInt c = 0; c < ncoef; c++) {
+      coeff[r*ncoef+c] = rhs[r*ldb+c];
+    }
+  }
+}
+
+};
+
+/**
+ * A specialization for double that does not build the full pseudo inverse, but just
+ * solves the system 
+ */
+template <>
+struct DGELSY_Solver<double> {
+void operator()(UInt ncoef, int ldb, int m, int n, int nrhs, std::vector<double> &mat, int rank, double work[], int lwork, int info, std::vector<double> &rhs, double coeff[])
+{
+
+  std::vector<int> jpvt(ncoef, 0);
+  //int lwork = std::max(std::min(m,n)+2*n+1, 2*std::min(m,n)+nrhs);
+  // TODO figure this out
+  double rcond=0.0000000000001;
+
+#ifdef RESIDUALS
+std::vector<double> saverhs = rhs;
+std::vector<double> matsav = mat;
+#endif
+
+#ifdef ESMC_LAPACK
+  FTN(dgelsy)(
+    &m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &jpvt[0], &rcond, &rank, &work[0], &lwork, &info);
+#else
+  Throw() << "Please recompile with ESMC_LAPACK enabled";
+#endif
+
+#ifdef RESIDUALS
+Par::Out() << "A(" << m << "," << n << ")=" << std::endl;
+for (UInt i = 0; i < m; i++) {
+for (UInt j = 0; j < n; j++) {
+Par::Out() << std::setw(10) << matsav[j*m+i] << " ";
+}
+Par::Out() << std::endl;
+}
+#endif
+
+#ifdef RESIDUALS
+// Wierd ; rhs comes back (Nxnrhs), so no ldb, just nsamples
+Par::Out() << "rcond=" << rcond << std::endl;
+std::vector<double> tst(m,0);
+
+Par::Out() << "rhs:" << std::endl;
+for (UInt s = 0; s < (UInt) nrhs; s++) {
+  for (UInt i = 0; i < m; i++) {
+    Par::Out() << saverhs[s*ldb+i] << " ";
+  }
+  Par::Out() << std::endl;
+}
+
+double err = 0;
+for (UInt s = 0; s < (UInt) nrhs; s++) {
+Par::Out() << "A*x=" << std::endl;
+    for (UInt i = 0; i < m; i++) {
+      tst[i] = 0;
+      for (UInt j = 0; j < ncoef; j++) {
+        tst[i] += matsav[j*m + i]*rhs[s*ldb+j];
+      }
+Par::Out() << tst[i] << " ";
+      err += (tst[i]-saverhs[s*ldb+i])*(tst[i]-saverhs[s*ldb+i]);
+    }
+Par::Out() << std::endl;
+}
+Par::Out() << "err=" << err << std::endl;
+if (err > 1e-10) Par::Out() << "\tnsamples=" << m << std::endl;
+#endif
+
+  for (UInt r = 0; r < (UInt) nrhs; r++) {
+    for (UInt c = 0; c < ncoef; c++) {
+      coeff[r*ncoef+c] = rhs[r*ldb+c];
+    }
+  }
+
+}
+
+};
+
 template<typename NFIELD, typename Real>
 void PatchRecov<NFIELD,Real>::CreatePatch(
            UInt _pdeg,
@@ -194,11 +413,26 @@ void PatchRecov<NFIELD,Real>::CreatePatch(
   // Use integration rule for field 0
   UInt nsamples = 0;
   std::set<const MeshObj*>::iterator esi = elems.begin(), ese = elems.end();
+
+  UInt num_elems = elems.size();
   
   for (; esi != ese; ++esi) {
     const MeshObj &selem = **esi;
     MasterElement<METraits<Real> > *me = GetME(*rfield[0], selem)(METraits<Real>());
-    const intgRule *ir = GetIntg(selem)->ChangeOrder(2);
+
+    // Find an integration rule that just overconstrains the problem
+    
+    const intgRule *ir = 0;
+    for (UInt q = 1; q < pdeg; q++) {
+      ir = GetIntg(selem)->ChangeOrder(q);
+      if (num_elems*ir->npoints() >= ncoef) {
+/*
+Par::Out() << "Patch irule deg=" << q <<", pdeg:" << pdeg << ", nelem:" << num_elems << ", ncoef:" << ncoef << ", irpoints:" << ir->npoints() << std::endl;
+*/
+        break;
+      }
+    }
+
     if (ir == NULL) Throw() << "Patch, no intg rule for me:" << me->name;
     nsamples += ir->npoints();
   }
@@ -211,7 +445,10 @@ void PatchRecov<NFIELD,Real>::CreatePatch(
   }
 */
 
-  
+
+  const static int lwork = 1*1024*1024;
+  static double work[lwork];
+  //static std::vector<double> work(lwork, 0);
 
   if (elems.size() == 0) Throw() << "PatchRecovery, found no elements, node:" << node.get_id();
 
@@ -248,9 +485,18 @@ std::cout << "threshold  tripped.  nsamples=" << nsamples << ", ncoef=" << ncoef
       // Loop Gauss points
       const MeshObj &selem = **ei;
       // Gather field data for element.
-      MEValues<METraits<Real,double>, METraits<>, NFIELD> mev(field.GetMEFamily(), &coord);
-      const intgRule *ir = GetIntg(selem)->ChangeOrder(2);
-      mev.Setup(selem, MEV::update_sf, ir);
+      MEValues<METraits<Real,double>, NFIELD> mev(field.GetMEFamily(), &coord);
+
+      const intgRule *ir = 0;
+      for (UInt q = 1; q < pdeg; q++) {
+        ir = GetIntg(selem)->ChangeOrder(q);
+        if (num_elems*ir->npoints() >= ncoef) {
+          break;
+        }
+      }
+      ThrowRequire(ir);
+
+      mev.Setup(selem, MEV::update_sf | MEV::update_map, ir);
       mev.ReInit(selem);
      
       std::vector<Real> felem(field.dim()*mev.GetNumFunctions());
@@ -274,29 +520,13 @@ std::cout << "threshold  tripped.  nsamples=" << nsamples << ", ncoef=" << ncoef
       cur_rhs += field.dim();
   } // f
 
-/*
-std::cout << "mat:" << std::endl;
-for (UInt i = 0; i < nsamples; i++) {
-for (UInt j = 0; j < ncoef; j++) {
-  std::cout << std::setw(8) << std::setprecision(4) <<  mat[j*nsamples+i] << " ";
-}
-std::cout << std::endl;
-}
-*/
+  DGELSY_Solver<Real> s;
+  s(ncoef, ldb, m, n, nrhs, mat, rank, &work[0], lwork, info, rhs, &coeff[0]);
 
-#ifdef RHS
-std::cout << "rhs:" << std::endl;
-for (UInt s = 0; s < (UInt) nrhs; s++) {
-std::copy(&rhs[s*ldb], &rhs[s*ldb+nsamples], std::ostream_iterator<Real>(std::cout, ", ")); std::cout << std::endl;
-std::cout << std::endl;
-}
-#endif
-
+#ifdef NOTNOT
   std::vector<int> jpvt(ncoef, 0);
   //int lwork = std::max(std::min(m,n)+2*n+1, 2*std::min(m,n)+nrhs);
   // TODO figure this out
-  int lwork = 4*4028;
-  std::vector<double> work(lwork, 0);
   double rcond=0.0000000000001;
 
 #ifdef RESIDUALS
@@ -387,6 +617,7 @@ std::copy(tst.begin(), tst.end(), std::ostream_iterator<double>(std::cout, ", ")
     }
   }
   //std::copy(&rhs[0], &rhs[nrhs*ncoef], coeff.begin());
+#endif // NOTNOT
 
   patch_ok = true;
 }
@@ -417,6 +648,239 @@ void PatchRecov<NFIELD,Real>::CreateConstantPatch(const MeshObj &node,
   
 }
 
+/**
+ * Needs a buffer of size buf(2*(pdeg+1)]
+ */
+template <typename Real>
+static Real EvalMonomial2(UInt pdeg, const double coord[], const Real coef[], double buf[]) {
+  // Lay out 1 x x^2 x^2 ... 1 y y^2 y
+  buf[0] = 1.0;
+  for (UInt i = 1; i <= pdeg; i++) {
+    buf[i] = coord[0];
+  }
+  for (UInt i = 2; i <= pdeg; i++) {
+    for (UInt j = i; j <= pdeg; j++)
+      buf[j] *= coord[0];
+  }
+ 
+  // Fill out 1 y y^2 ...
+  UInt off = pdeg+1;
+  buf[off] = 1.0;
+  for (UInt i = 1; i <= pdeg; i++) {
+    buf[off+i] = coord[1];
+  }
+  for (UInt i = 2; i <= pdeg; i++) {
+    for (UInt j = i; j <= pdeg; j++)
+      buf[off+j] *= coord[1];
+  }
+
+  // Now tensor product
+  Real res = 0;
+  UInt k = 0;
+  for (UInt i = 0; i <= pdeg; i++) {
+    for (UInt j = 0; j <= pdeg; j++) {
+      res += coef[k++]*buf[i]*buf[off+j];
+    }
+  }
+
+  return res;
+
+} 
+
+/** 
+ * needs a buffer of size 2*(pdeg+2)
+ */
+template <typename Real>
+static Real EvalMonomialDeriv2(UInt pdeg, const double coord[], const Real coef[], Real res[], double buf[], bool eval_func) {
+  // Lay out 0 1 x x^2 x^2 ... 1 y y^2 y
+  buf[0] = 0.0; buf[1] = 1.0;
+  for (UInt i = 1; i <= pdeg; i++) {
+    buf[1+i] = coord[0];
+  }
+  for (UInt i = 2; i <= pdeg; i++) {
+    for (UInt j = i; j <= pdeg; j++)
+      buf[j+1] *= coord[0];
+  }
+ 
+  // Fill out 1 y y^2 ...
+  UInt off = 1+pdeg+1;
+  buf[off] = 0.0; buf[off+1] = 1.0;
+  for (UInt i = 1; i <= pdeg; i++) {
+    buf[1+off+i] = coord[1];
+  }
+  for (UInt i = 2; i <= pdeg; i++) {
+    for (UInt j = i; j <= pdeg; j++)
+      buf[1+off+j] *= coord[1];
+  }
+
+  // Now tensor product
+  res[0] = 0;
+  UInt k = 0;
+  for (UInt i = 0; i <= pdeg; i++) {
+    for (UInt j = 0; j <= pdeg; j++) {
+      res[0] += coef[k++]*i*buf[i]*buf[1+off+j];
+    }
+  }
+
+  res[1] = 0;
+  k = 0;
+  for (UInt i = 0; i <= pdeg; i++) {
+    for (UInt j = 0; j <= pdeg; j++) {
+      res[1] += coef[k++]*buf[1+i]*j*buf[off+j];
+    }
+  }
+
+  Real pres = 0;
+  if (eval_func) {
+    k = 0;
+    for (UInt i = 0; i <= pdeg; i++) {
+      for (UInt j = 0; j <= pdeg; j++) {
+        pres += coef[k++]*buf[1+i]*buf[1+off+j];
+      }
+    }
+  } 
+
+  return pres;
+
+} 
+
+/**
+ * Needs a buffer of size buf(3*(pdeg+1)]
+ */
+template <typename Real>
+static Real EvalMonomial3(UInt pdeg, const double coord[], const Real coef[], double buf[]) {
+  // Lay out 1 x x^2 x^2 ... 1 y y^2 y
+  buf[0] = 1.0;
+  for (UInt i = 1; i <= pdeg; i++) {
+    buf[i] = coord[0];
+  }
+  for (UInt i = 2; i <= pdeg; i++) {
+    for (UInt j = i; j <= pdeg; j++)
+      buf[j] *= coord[0];
+  }
+ 
+  // Fill out 1 y y^2 ...
+  UInt off = pdeg+1;
+  buf[off] = 1.0;
+  for (UInt i = 1; i <= pdeg; i++) {
+    buf[off+i] = coord[1];
+  }
+  for (UInt i = 2; i <= pdeg; i++) {
+    for (UInt j = i; j <= pdeg; j++)
+      buf[off+j] *= coord[1];
+  }
+
+  // 1 z z^2 ...
+  UInt off1 = 2*(pdeg+1);
+  buf[off1] = 1.0;
+  for (UInt i = 1; i <= pdeg; i++) {
+    buf[off1+i] = coord[2];
+  }
+  for (UInt i = 2; i <= pdeg; i++) {
+    for (UInt j = i; j <= pdeg; j++)
+      buf[off1+j] *= coord[2];
+  }
+
+  // Now tensor product
+  UInt l = 0;
+  Real res = 0;
+  for (UInt i = 0; i <= pdeg; i++) {
+    for (UInt j = 0; j <= pdeg; j++) {
+      for (UInt k = 0; k <= pdeg; k++) {
+        res += coef[l++]*buf[i]*buf[off+j]*buf[off1+k];
+      }
+    }
+  }
+
+  return res;
+
+} 
+
+/**
+ * needs a buffer of size 3((pdeg+2)
+ */
+template <typename Real>
+static Real EvalMonomialDeriv3(UInt pdeg, const double coord[], const Real coef[], Real res[], double buf[], bool eval_func) {
+  // Lay out 0 1 x x^2 x^2 ... 1 y y^2 y
+  buf[0] = 0.0; buf[1] = 1.0;
+  for (UInt i = 1; i <= pdeg; i++) {
+    buf[1+i] = coord[0];
+  }
+
+  for (UInt i = 2; i <= pdeg; i++) {
+    for (UInt j = i; j <= pdeg; j++)
+      buf[1+j] *= coord[0];
+  }
+ 
+  // Fill out 0 1 y y^2 ...
+  UInt off = 1+pdeg+1;
+  buf[off] = 0.0; buf[off+1] = 1.0;
+  for (UInt i = 1; i <= pdeg; i++) {
+    buf[1+off+i] = coord[1];
+  }
+  for (UInt i = 2; i <= pdeg; i++) {
+    for (UInt j = i; j <= pdeg; j++)
+      buf[1+off+j] *= coord[1];
+  }
+
+  // 1 z z^2 ...
+  UInt off1 = 2+2*(pdeg+1);
+  buf[off1] = 0.0; buf[off1+1] = 1.0;
+  for (UInt i = 1; i <= pdeg; i++) {
+    buf[1+off1+i] = coord[2];
+  }
+  for (UInt i = 2; i <= pdeg; i++) {
+    for (UInt j = i; j <= pdeg; j++)
+      buf[1+off1+j] *= coord[2];
+  }
+
+  // Now tensor product
+  UInt l = 0;
+  res[0] = 0;
+  for (UInt i = 0; i <= pdeg; i++) {
+    for (UInt j = 0; j <= pdeg; j++) {
+      for (UInt k = 0; k <= pdeg; k++) {
+        res[0] += coef[l++]*i*buf[i]*buf[1+off+j]*buf[1+off1+k];
+      }
+    }
+  }
+
+  l = 0;
+  res[1] = 0;
+  for (UInt i = 0; i <= pdeg; i++) {
+    for (UInt j = 0; j <= pdeg; j++) {
+      for (UInt k = 0; k <= pdeg; k++) {
+        res[1] += coef[l++]*buf[1+i]*j*buf[off+j]*buf[1+off1+k];
+      }
+    }
+  }
+
+  l = 0;
+  res[2] = 0;
+  for (UInt i = 0; i <= pdeg; i++) {
+    for (UInt j = 0; j <= pdeg; j++) {
+      for (UInt k = 0; k <= pdeg; k++) {
+        res[2] += coef[l++]*buf[1+i]*buf[1+off+j]*k*buf[off1+k];
+      }
+    }
+  }
+
+  Real pres = 0;
+  if (eval_func) {
+    l = 0;
+    for (UInt i = 0; i <= pdeg; i++) {
+      for (UInt j = 0; j <= pdeg; j++) {
+        for (UInt k = 0; k <= pdeg; k++) {
+          pres += coef[l++]*buf[1+i]*buf[1+off+j]*buf[1+off1+k];
+        }
+      }
+    }
+  } 
+
+  return pres;
+
+} 
+
 template<typename NFIELD, typename Real>
 Real PatchRecov<NFIELD,Real>::EvalPatch(UInt nfield, const double coords[]) const {
   const double *cd = coords;
@@ -429,32 +893,138 @@ Real PatchRecov<NFIELD,Real>::EvalPatch(UInt nfield, const double coords[]) cons
   if (pdeg == 0) {
     return coef[0];
   } else if (idim == 2) {
-    Real res = 0;
+
+    std::vector<double> buf(2*(pdeg+1));
+    return EvalMonomial2(pdeg, cd, coef, &buf[0]);
+
+  } else if (idim == 3) {
+
+    std::vector<double> buf(3*(pdeg+1));
+    return EvalMonomial3(pdeg, cd, coef, &buf[0]);
+
+  } else Throw() << "dim, deg=" << idim << ", " << pdeg << " not yet supported";
+}
+
+template<typename NFIELD, typename Real>
+void PatchRecov<NFIELD,Real>::EvalPatchGrad(UInt nfield, const double coords[], Real result[]) const {
+
+  if (use_mc) Throw() << "EvalPatchGrad can not use mcoords";
+
+  const double *cd = coords;
+
+  for (UInt d = 0; d < idim; d++) result[d] = 0;
+
+  const Real *coef = &coeff[nfield*ncoeff];
+  if (pdeg == 0) {
+    for (UInt d = 0; d < idim; d++) result[d] = coef[0];
+  } else if (idim == 2) {
+
+    std::vector<double> buf(2*(pdeg+2));
+    EvalMonomialDeriv2(pdeg, cd,coef, result, &buf[0], false);
+/*
     UInt k = 0;
     for (UInt i = 0; i <= pdeg; i++) {
       for (UInt j = 0; j <= pdeg; j++) {
         Monomial<double> m1(i), m2(j);
         TensorPolynomial<Monomial<double> > tp(&m1, &m2);
-        res += coef[k++]*EvalTensorPoly(idim, cd, tp);
+
+        EvalTensorPolyDeriv(idim, cd, tp, tpd);
+//std::cout << "tpd=" << tpd[0] << ", " << tpd[1] << ", coef=" << coef[k] << std::endl;
+
+        for (UInt d = 0; d < idim; d++ ) {
+          result[d] += coef[k]*tpd[d];
+//std::cout << "result=" << result[d] << std::endl;
+        }
+        ++k;
       }
     }
-    return res;
+*/
   } else if (idim == 3) {
-    Real res = 0;
+
+    std::vector<double> buf(3*(pdeg+2));
+    EvalMonomialDeriv3(pdeg, cd,coef, result, &buf[0], false);
+
+/*
     UInt l = 0;
     for (UInt i = 0; i <= pdeg; i++) {
       for (UInt j = 0; j <= pdeg; j++) {
         for (UInt k = 0; k <= pdeg; k++) {
           Monomial<double> m1(i), m2(j), m3(k);
           TensorPolynomial<Monomial<double> > tp(&m1, &m2, &m3);
-          res += coef[l++]*EvalTensorPoly(idim, cd, tp);
+
+          EvalTensorPolyDeriv(idim, cd, tp, tpd);
+
+          for (UInt d = 0; d < idim; d++) {
+            result[d] += coef[l]*tpd[d];
+          }
+          ++l;
         }
       }
     }
-    return res;
+*/
   } else Throw() << "dim, deg=" << idim << ", " << pdeg << " not yet supported";
 }
 
+template<typename NFIELD, typename Real>
+Real PatchRecov<NFIELD,Real>::EvalPatchAndGrad(UInt nfield, const double coords[], Real result[]) const {
+
+  if (use_mc) Throw() << "EvalPatchGrad can not use mcoords";
+
+  const double *cd = coords;
+
+  for (UInt d = 0; d < idim; d++) result[d] = 0;
+
+  const Real *coef = &coeff[nfield*ncoeff];
+  if (pdeg == 0) {
+    for (UInt d = 0; d < idim; d++) result[d] = coef[0];
+  } else if (idim == 2) {
+
+    std::vector<double> buf(2*(pdeg+2));
+    return EvalMonomialDeriv2(pdeg, cd,coef, result, &buf[0], true);
+/*
+    UInt k = 0;
+    for (UInt i = 0; i <= pdeg; i++) {
+      for (UInt j = 0; j <= pdeg; j++) {
+        Monomial<double> m1(i), m2(j);
+        TensorPolynomial<Monomial<double> > tp(&m1, &m2);
+
+        EvalTensorPolyDeriv(idim, cd, tp, tpd);
+//std::cout << "tpd=" << tpd[0] << ", " << tpd[1] << ", coef=" << coef[k] << std::endl;
+
+        for (UInt d = 0; d < idim; d++ ) {
+          result[d] += coef[k]*tpd[d];
+//std::cout << "result=" << result[d] << std::endl;
+        }
+        ++k;
+      }
+    }
+*/
+  } else if (idim == 3) {
+
+    std::vector<double> buf(3*(pdeg+2));
+    return EvalMonomialDeriv3(pdeg, cd,coef, result, &buf[0], true);
+
+/*
+    UInt l = 0;
+    for (UInt i = 0; i <= pdeg; i++) {
+      for (UInt j = 0; j <= pdeg; j++) {
+        for (UInt k = 0; k <= pdeg; k++) {
+          Monomial<double> m1(i), m2(j), m3(k);
+          TensorPolynomial<Monomial<double> > tp(&m1, &m2, &m3);
+
+          EvalTensorPolyDeriv(idim, cd, tp, tpd);
+
+          for (UInt d = 0; d < idim; d++) {
+            result[d] += coef[l]*tpd[d];
+          }
+          ++l;
+        }
+      }
+    }
+*/
+  }
+ Throw() << "dim, deg=" << idim << ", " << pdeg << " not yet supported";
+}
 
 
 // ******* ElemPatch ************
@@ -465,10 +1035,25 @@ mcs(),
 pelem(NULL),
 pmesh(NULL),
 pcfield(NULL),
-flen(0)
+flen(0),
+nmap(0),
+pdeg(0)
 {
 }
 
+template <typename NFIELD, typename Real>
+ElemPatch<NFIELD,Real>::ElemPatch(NodePatchMap &_nmap) :
+patches(),
+mcs(),
+pelem(NULL),
+pmesh(NULL),
+pcfield(NULL),
+flen(0),
+nmap(&_nmap)
+{
+}
+
+/*
 template <typename NFIELD, typename Real>
 ElemPatch<NFIELD,Real>::ElemPatch(const ElemPatch &rhs) :
   patches(rhs.patches),
@@ -476,7 +1061,8 @@ ElemPatch<NFIELD,Real>::ElemPatch(const ElemPatch &rhs) :
   pelem(rhs.pelem),
   pmesh(rhs.pmesh),
   pcfield(rhs.pcfield),
-  flen(rhs.flen)
+  flen(rhs.flen),
+  nmap(rhs.nmap)
 {
 }
 
@@ -491,26 +1077,46 @@ ElemPatch<NFIELD,Real> &ElemPatch<NFIELD,Real>::operator=(const ElemPatch &rhs)
   pmesh = rhs.pmesh;
   pcfield = rhs.pcfield;
   flen = rhs.flen;
+  nmap = rhs.nmap;
   
   return *this;
 }
+*/
 
 
 template <typename NFIELD, typename Real>
 ElemPatch<NFIELD,Real>::~ElemPatch() 
 {
+  if (!nmap) {
+    for (UInt p = 0; p < patches.size(); ++p) {
+      delete patches[p];
+    }
+  }
 }
 
 template <typename NFIELD, typename Real>
-void ElemPatch<NFIELD,Real>::CreateElemPatch(UInt pdeg,
+void ElemPatch<NFIELD,Real>::FreePatchMap(NodePatchMap &nmap) {
+
+  typename NodePatchMap::iterator mi = nmap.begin(), me = nmap.end();
+  for (; mi != me; ++mi) {
+    delete mi->second;
+  }
+
+  NodePatchMap().swap(nmap);
+
+}
+
+template <typename NFIELD, typename Real>
+void ElemPatch<NFIELD,Real>::CreateElemPatch(UInt _pdeg,
            UInt ptype,
            const MeshObj &elem,  // the elem in question
            const MEField<> &cfield, 
            UInt numfields,
            NFIELD **rfield,
-           UInt threshold)       // How far from num dofs to invalidate.  If the
+           UInt threshold, bool boundary_ok)       // How far from num dofs to invalidate.  If the
 {
   // Set some things up
+  pdeg = _pdeg;
   pmesh = &GetMeshObjMesh(elem);
   pcfield = &cfield;
   flen = 0;
@@ -525,13 +1131,31 @@ void ElemPatch<NFIELD,Real>::CreateElemPatch(UInt pdeg,
   const MeshObjTopo *topo = GetMeshObjTopo(elem);
   UInt nv = topo->num_vertices;
 
-  patches.resize(nv);
+  patches.resize(nv, static_cast<PatchRecov<NFIELD,Real>*>(0));
+
   if (use_mc)
     mcs.resize(nv);
 
   // Loop vertices creating the appropriate patch
   for (UInt n = 0; n < nv; n++) {
     const MeshObj &node = *elem.Relations[n].obj;
+
+    // If using a nodal map, try to find the patch
+    bool patch_found = false;
+    if (nmap) {
+  
+      typename NodePatchMap::iterator lb =
+        nmap->lower_bound(node.get_id());
+
+      if (lb != nmap->end() && lb->first == node.get_id()) {
+        patches[n] = lb->second;
+        patch_found = true;
+      } else {
+        patches[n] = new PatchRecov<NFIELD,Real>();
+        nmap->insert(lb, std::make_pair(node.get_id(), patches[n]));
+      }
+
+    } else patches[n] = new PatchRecov<NFIELD,Real>();
     
     //if (use_mc) mcs[n] = getMCoordNode(*pcfield, node);
     
@@ -539,15 +1163,22 @@ void ElemPatch<NFIELD,Real>::CreateElemPatch(UInt pdeg,
     // all nodes are interior (otherwise patches have different coordinate systems)
     if (use_mc) mcs[n] = getMCoordElem(*pcfield, elem);
 
-    if (GetMeshObjContext(node).is_set(Attr::EXPOSED_BOUNDARY_ID)) {
+    if (!patch_found) {
+    if (!boundary_ok && GetMeshObjContext(node).is_set(Attr::EXPOSED_BOUNDARY_ID)) {
       
       //patches[n].CreateConstantPatch(node, numfields, rfield);
-      patches[n].MarkPatchBad();
+      patches[n]->MarkPatchBad();
       
       
     } else
-      patches[n].CreatePatch(pdeg, *pmesh, node, &elem, numfields, rfield,
+      patches[n]->CreatePatch(pdeg, *pmesh, node, &elem, numfields, rfield,
                      700000, *pcfield, use_mc ? &mcs[n] : NULL);
+    }
+
+    if (boundary_ok && !patches[n]->PatchOk()) {
+      patches[n]->CreatePatch(pdeg, *pmesh, node, &elem, numfields, rfield,
+                     700000, *pcfield, use_mc ? &mcs[n] : NULL);
+    }
     
   } // for nv
 
@@ -556,11 +1187,23 @@ void ElemPatch<NFIELD,Real>::CreateElemPatch(UInt pdeg,
   UInt nok = 0;
   std::vector<int> ok(nv,0);
   for (UInt n = 0; n < nv; n++) {
-    nok += patches[n].PatchOk() ? 1 : 0;
-    if (patches[n].PatchOk()) ok[n] = 1;
+    nok += patches[n]->PatchOk() ? 1 : 0;
+    if (patches[n]->PatchOk()) ok[n] = 1;
   }
 
-  if (nok == 0) Throw() << "Transfer, found no ok nodes";
+  if (nok == 0) {
+    Par::Out() <<"Warning, elem:" << elem.get_id() << ", no good nodes, turning on boundary";
+
+    ElemPatch<NFIELD,Real>::CreateElemPatch( _pdeg,
+           ptype,
+           elem,  // the elem in question
+           cfield, 
+           numfields,
+           rfield,
+           threshold,true);       // How far from num dofs to invalidate.  If the
+    return;
+    
+  } 
 //std::cout << "nok=" << nok << " , ok_idx=" << ok_idx<< std::endl;
 
   // do the copying
@@ -573,8 +1216,8 @@ void ElemPatch<NFIELD,Real>::CreateElemPatch(UInt pdeg,
       for (UInt n1 = 0; n1 < nv; n1++)
       {
         if (ok[n1] == 1)
-        //  patches[n] = patches[n1];
-          patches[n] += patches[n1]*avg;
+          patches[n] = patches[n1];
+          //*patches[n] += (*patches[n1])*avg;
       }
     }
   } // n
@@ -599,16 +1242,17 @@ void ElemPatch<NFIELD,Real>::Eval(UInt npts,
   arbq pintg(pdim, npts, pcoord);
 
   // Now the linear weights to combine nodal patches
-  MEValues<METraits<Real,double>, METraits<>, NFIELD, MEField<> > mevl(MEFamilyLow::instance(), // bilinear POU
+  MEValues<METraits<Real,double>, NFIELD> mevl(MEFamilyLow::instance(), // bilinear POU
                   pcfield);
                   
 
   // View pcoord as integration points so MEValues may be used.
-  mevl.Setup(*pelem, MEV::update_sf, &pintg);
+  mevl.Setup(*pelem, MEV::update_sf | MEV::update_map, &pintg);
   mevl.ReInit(*pelem); // shape values are now query'able 
 
   mevl.GetCoordinateValues(&rcoord[0]);
 
+  //const double one_o_nv = 1.0/nv;
 
   // Loop the points, interpolating fields
   for (UInt p = 0; p < npts; p++) {
@@ -616,8 +1260,54 @@ void ElemPatch<NFIELD,Real>::Eval(UInt npts,
       result[p*flen+f] = 0;
       for (UInt n = 0; n < nv; n++) {
         result[p*flen+f] += mevl.GetShapeValue(p, n)*
-          patches[n].EvalPatch(f, &rcoord[p*sdim]);
+          patches[n]->EvalPatch(f, &rcoord[p*sdim]);
       } 
+    } // f
+  } // npoints
+
+}
+
+template <typename NFIELD, typename Real>
+void ElemPatch<NFIELD,Real>::EvalGrad(UInt npts,
+                       const double pcoord[],
+                       Real result[]) const
+{
+  // Step 1: get physical coords
+  UInt sdim = pmesh->spatial_dim();
+  UInt pdim = pmesh->parametric_dim();
+  std::vector<double> rcoord(sdim*npts);
+  
+  const MeshObjTopo *topo = GetMeshObjTopo(*pelem);
+  const UInt nv = topo->num_vertices;
+  // View pcoord as integration points so MEValues may be used.
+  arbq pintg(pdim, npts, pcoord);
+
+  // Now the linear weights to combine nodal patches
+  MEValues<METraits<Real,double>, NFIELD> mevl(MEFamilyLow::instance(), // bilinear POU
+                  pcfield);
+                  
+
+  // View pcoord as integration points so MEValues may be used.
+  mevl.Setup(*pelem, MEV::update_sf | MEV::update_sfg, &pintg);
+  mevl.ReInit(*pelem); // shape values are now query'able 
+
+  mevl.GetCoordinateValues(&rcoord[0]);
+
+  Real pg[] = {0,0,0};
+
+  // Loop the points, interpolating fields
+  for (UInt p = 0; p < npts; p++) {
+    for (UInt f = 0; f < flen; f++) {
+      for (UInt d = 0; d < sdim; d++) {
+        result[(p*flen+f)*sdim+d] = 0;
+        for (UInt n = 0; n < nv; n++) {
+
+          Real pval = patches[n]->EvalPatchAndGrad(f, &rcoord[p*sdim], pg);
+
+            result[(p*flen+f)*sdim+d] += mevl.GetShapeValue(p, n)*pg[d] +
+             mevl.GetShapeGrads(p, n)[d]*pval;
+        } //nv
+      } // d
     } // f
   } // npoints
 

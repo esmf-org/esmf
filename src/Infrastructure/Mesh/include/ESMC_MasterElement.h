@@ -1,4 +1,3 @@
-// $Id: ESMC_MasterElement.h,v 1.4 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -20,6 +19,7 @@
 
 #include <ESMC_MeshTypes.h>
 
+#include <map>
 #include <string>
 
 /**
@@ -61,17 +61,6 @@ typedef MPTraits<typename METRAITS::mdata_type,double> value;
 template <typename METRAITS>
 class MasterElement;
 
-/** 
- * Manufacture an ME with for a given
- * Topology and integration order.  Returns the standard lagrange
- * for the topology.
- * 
- * @ingroup mesystem
- */
-template <typename METRAITS=METraits<>,UInt q=2>
-struct Topo2ME {
-MasterElement<METRAITS> *operator()(const std::string &tname);
-};
 
 /**
  * 
@@ -124,13 +113,9 @@ public:
                 double result[]) const = 0;
 
   /**
-   * Given the values of a function at the interpolation points, manufacture
-   * the array of ME coefficients.
-   * @param fdim dimension of field
-   * @param vals function values at ipoints, (fdim, ndof)
-   * @param res manufactured coefficients 
+   * Parametric interpolation points.
    */
-  virtual void Interpolate(UInt fdim, const double vals[], double res[]) const = 0;
+  virtual const double *InterpPoints() const = 0;
 
 
   /**
@@ -143,13 +128,6 @@ public:
   virtual MasterElement<METraits<fad_type,double> > *operator()(METraits<fad_type,double>) const = 0;
   virtual MasterElement<METraits<fad_type,fad_type> > *operator()(METraits<fad_type,fad_type>) const = 0;
 
-  enum { ME_NODAL = 0, // nodal element
-         ME_ELEMENTAL, // elemental dofs
-         ME_SIGN_ORIENTED, // hierarchical sign matter, no order
-         ME_ORIENTED,      // Lagrange; dofs ordered, no sign
-         ME_DG             // No gather is necessary all data on element.
-  };
-  
   /**
    * Return information about how the ME stores its coefficients, and how
    * edge/face orientation is to interact with the shape functions (i.e.
@@ -268,6 +246,19 @@ public:
     Throw() << "side element not implemented";
   }
 
+  /**
+   * Given the values of a function at the interpolation points, manufacture
+   * the array of ME coefficients.
+   * @param fdim dimension of field
+   * @param vals function values at ipoints, (fdim, ndof)
+   * @param res manufactured coefficients 
+   * 
+   * We provide a fad version of these function so that we may produce
+   * the interpolationg matrix.  This is useful, for instance, in the
+   * case of the prolongation and constraint matrix.
+   */
+  virtual void Interpolate(UInt fdim, const field_type vals[], field_type res[]) const = 0;
+
 
   /**
    * Switch out various traits.
@@ -279,48 +270,60 @@ public:
 
 };
 
+/**
+ * We implement the master element interface by using inheritance.
+ * This system uses a virtual ShapeFunction class, which, once
+ * implemented, can be extended to a full master element by the
+ * routines herein.
+ */
 
 /**
- * An implementation based on generic programming.  Piece together the Mapping,
- * shapefunctions and quadrature rule based on template pieces.
+ * Master elements implemented by using a virtual shape function
+ * object.
  * @ingroup mesystem
  */
-template<class SHAPE_FUNC, class METRAITS = METraits<> >
-class MasterElementImpl : public MasterElement<METRAITS> {
+template<class METRAITS = METraits<> >
+class MasterElementV : public MasterElement<METRAITS> {
 private:
-  MasterElementImpl();
-  ~MasterElementImpl();
+  MasterElementV(const ShapeFunc *shape);
+  ~MasterElementV();
+  
+  /**
+   * Pointer to the shape function object used by this ME.
+   */
+  const ShapeFunc *m_shape;
+  static std::map<std::string, MasterElementV*> meVMap;
 public:
+  
+  /**
+   * Singleton constructor.  The objects are stashed by
+   * the name of the shape function, so calling this again
+   * with the same name will return a pre-cached object.
+   */ 
+  static MasterElementV *instance(const ShapeFunc *shape);
+  
   typedef typename METRAITS::field_type field_type;
   typedef typename METRAITS::mdata_type mdata_type;
+  
+  /**
+   * For documentation of the following functions, see the MasterElement
+   * base class (this is called comment reuse).
+   */
 
-  UInt num_functions() const { return ndofs; }
+  UInt num_functions() const { return m_shape->NumFunctions(); }
 
-  virtual UInt IntgOrder() const { return SHAPE_FUNC::iorder; }
+  UInt IntgOrder() const { return m_shape->IntgOrder(); }
 
-  static MasterElementImpl *classInstance;
-  static MasterElementImpl *instance();
-
-  static const UInt pdim = SHAPE_FUNC::pdim;
-  static const UInt ndofs = SHAPE_FUNC::ndofs;
-
-  typedef SHAPE_FUNC shape_func_type;
-
-  // Query for all the shape function values (npts) at the parametric points
-  // pcoord(npts, pdim) and return in result(npts, nfunc)
   void shape_function(UInt npts, const double pcoord[], double result[]) const {
-    SHAPE_FUNC::shape(npts, pcoord, result);
+    m_shape->shape(npts, pcoord, result);
+  }
+
+  void param_shape_grads(UInt npts, const double pcoord[], double result[]) const {
+    m_shape->shape_grads(npts, pcoord, result);
   }
   
-  void param_shape_grads(UInt npts, const double pcoord[], double result[]) const {
-    SHAPE_FUNC::shape_grads(npts, pcoord, result);
-  }
-
-  // Get physical gradients.  mdata = mapping data
-  // result(npts, nfunc, sdim)
   void shape_grads(UInt npts, const Mapping<typename ME2MPTraits<METRAITS>::value > *mapping, const mdata_type mdata[],
-          const double pcoord[], const double param_sgrad[], mdata_type result[]) const;
-
+          const double pcoord[], const double param_shape_grads[], mdata_type result[]) const;
 
   void function_grads(UInt npts, UInt fdim, const Mapping<typename ME2MPTraits<METRAITS>::value > *mapping,
               const mdata_type mdata[], const double pcoord[],
@@ -328,30 +331,22 @@ public:
               typename richest_type<mdata_type,field_type>::value result[],
               mdata_type shape_grads[]) const;
 
-
   void function_curl(UInt npts, const Mapping<typename ME2MPTraits<METRAITS>::value > *mapping, 
              const mdata_type mdata[], const double pcoord[],
              const field_type fdata[], 
              typename richest_type<mdata_type,field_type>::value result[],
              mdata_type shape_grads[]) const;
+             
 
-  // Interpolate a field
-  // pcoord(npts,pdim)
-  // fdata(ndofs,fdim)
-  // results(npts,fdim)
   void function_values(
                UInt npts, UInt fdim, const double pcoord[],
                 const field_type fdata[], field_type results[]) const;
 
   void function_values(
                UInt npts, UInt fdim, const double pcoord[],
-                const field_type fdata[], field_type results[],
-                double shape_vals[]) const;
-
-  // Get tangent at intg points (line elements)
-  //void Itangent(const double mdata[], double result[]);
-
-  // Return the master element for a side (may be different by side; for instance prisms)
+               const field_type fdata[], field_type results[],
+               double shape_vals[]) const;
+ 
   MasterElement<METRAITS> *side_element(UInt side) const;
 
   void JxW(const Mapping<typename ME2MPTraits<METRAITS>::value > *mapping, const mdata_type mdata[],
@@ -359,25 +354,41 @@ public:
 
   const int *GetDofDescription(UInt dof) const;
 
-  UInt NumInterpPoints() const { return SHAPE_FUNC::NumInterp; }
-  // result(ninterp*sdim)
+  UInt NumInterpPoints() const { return m_shape->NumInterp(); }
+
   void InterpPoints(const MappingBase *mapping,
                 const double mdata[], // mapping data
                 double result[]) const;
-  void Interpolate(UInt fdim, const double vals[], double res[]) const;
+
+  const double *InterpPoints() const;
+
+  void Interpolate(UInt fdim, const field_type vals[], field_type res[]) const;
 
   MasterElement<METraits<> > *operator()(METraits<>) const;
   MasterElement<METraits<double,fad_type> > *operator()(METraits<double,fad_type>) const;
   MasterElement<METraits<fad_type,double> > *operator()(METraits<fad_type,double>) const;
   MasterElement<METraits<fad_type,fad_type> > *operator()(METraits<fad_type,fad_type>) const;
 
-  bool is_nodal() const { return SHAPE_FUNC::is_nodal(); }
-
-  // For now, assume these me's are nodal or elemental
-  UInt orientation() const { return SHAPE_FUNC::is_nodal() ? MasterElementBase::ME_NODAL : MasterElementBase::ME_ELEMENTAL; }
+  bool is_nodal() const { return m_shape->is_nodal(); }
   
+  UInt orientation() const { return m_shape->orientation(); }
+
   private:
 
+};
+
+
+
+/** 
+ * Manufacture an ME with for a given
+ * Topology and integration order.  Returns the standard lagrange
+ * for the topology.
+ * 
+ * @ingroup mesystem
+ */
+template <typename METRAITS=METraits<> >
+struct Topo2ME {
+MasterElement<METRAITS> *operator()(const std::string &tname);
 };
 
 void compute_imprint(const MasterElementBase &me, std::vector<int> &res);

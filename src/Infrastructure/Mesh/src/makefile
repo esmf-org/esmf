@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2007/11/28 16:42:46 dneckels Exp $
+# $Id: makefile,v 1.7 2007/12/05 21:00:57 dneckels Exp $
 
 # leave alone.
 ALL: build_here 
@@ -29,7 +29,6 @@ SOURCEC	  = \
            ESMC_LinSys.C \
            ESMC_Mapping.C \
            ESMC_MasterElement.C \
-           ESMC_MasterElementV.C \
            ESMC_MCoord.C \
            ESMC_MEFamily.C \
            ESMC_MEField.C \
@@ -54,6 +53,7 @@ SOURCEC	  = \
            ESMC_MeshVTK.C \
            ESMC_MEValues.C \
            ESMC_Migrator.C \
+           ESMC_OctBox3d.C \
            ESMC_ParEnv.C \
            ESMC_ParLog.C \
            ESMC_PatchRecovery.C \
@@ -62,11 +62,13 @@ SOURCEC	  = \
            ESMC_Rebalance.C \
            ESMC_RefineTopo.C \
            ESMC_Search.C \
+           ESMC_SFuncAdaptor.C \
            ESMC_ShapeFunc.C \
            ESMC_ShapeHierarchic.C \
            ESMC_ShapeLagrange.C \
            ESMC_SmallAlloc.C \
            ESMC_SparseMsg.C \
+           ESMC_WMat.C \
            ESMC_WriteWeights.C \
            ESMC_WriteWeightsPar.C 
 

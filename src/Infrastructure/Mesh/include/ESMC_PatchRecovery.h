@@ -1,4 +1,3 @@
-// $Id: ESMC_PatchRecovery.h,v 1.3 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -20,6 +19,8 @@
 #include <ESMC_MasterElement.h>
 #include <ESMC_Exception.h>
 #include <ESMC_MCoord.h>
+
+#include <map>
 
 namespace ESMC {
 
@@ -59,6 +60,10 @@ void CreatePatch(UInt pdeg,
 // field = linearized field index
 Real EvalPatch(UInt nfield, const double coords[]) const;
 
+void EvalPatchGrad(UInt nfield, const double coords[], Real result[]) const;
+
+Real EvalPatchAndGrad(UInt nfield, const double coords[], Real result[]) const;
+
 // This  may be done, for instance, on a boundary
 void MarkPatchBad() { patch_ok = false; } 
 bool PatchOk() { return patch_ok;}
@@ -83,6 +88,9 @@ template <typename NFIELD=MEField<>, typename Real=double>
 class ElemPatch {
 public:
 ElemPatch();
+typedef std::map<int, PatchRecov<NFIELD,Real>*> NodePatchMap;
+
+ElemPatch(NodePatchMap &nmap);
 ~ElemPatch();
 // Create a patch using gauss points.
 typedef enum {GAUSS_PATCH, NODAL_PATCH} patch_type;
@@ -93,26 +101,44 @@ void CreateElemPatch(UInt pdeg,
            const MEField<> &cfield,
            UInt numfields,
            NFIELD **rfield,
-           UInt threshold       // How far from num dofs to invalidate.  If the
+           UInt threshold,       // How far from num dofs to invalidate.  If the
+           bool boundary_ok = false // if true, forms the patch with boundary nodes that have >= 2 elems
            );
 
-// Evaluate the function at the given parametric coordinates
-// results(npts*allfieldsize) // value at the points
-// i.e. vals for every field at point1, the point2, etc...
+/**
+ * Evaluate the function at the given parametric coordinates
+ * results(npts*allfieldsize) // value at the points
+ * i.e. vals for every field at point1, the point2, etc...
+ */
 void Eval( UInt npts,
           const double pcoord[], // parametric coords
           Real results[]) const;
 
-ElemPatch &operator=(const ElemPatch &rhs);
-ElemPatch(const ElemPatch &rhs);
+/**
+ * Evaluate the patch gradients.  
+ * results(npts, sdim)
+ */
+void EvalGrad( UInt npts,
+          const double pcoord[], // parametric coords
+          Real results[]) const;
+
+
+/**
+ * Utility to delete users nodepatchmap.
+ */
+static void FreePatchMap(NodePatchMap &nmap);
 
 private:
-  std::vector<PatchRecov<NFIELD,Real> > patches;
+  ElemPatch &operator=(const ElemPatch &rhs);
+  ElemPatch(const ElemPatch &rhs);
+  std::vector<PatchRecov<NFIELD,Real>*> patches;
   std::vector<MCoord> mcs;
   const MeshObj *pelem;
   const MeshDB *pmesh;
   const MEField<> *pcfield;
   UInt flen; // total length of fields (including dimensions)
+  NodePatchMap *nmap;
+  UInt pdeg;
 };
 
 } // namespace

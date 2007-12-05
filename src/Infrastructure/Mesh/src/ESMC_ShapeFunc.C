@@ -1,4 +1,3 @@
-// $Id: ESMC_ShapeFunc.C,v 1.5 2007/11/28 16:42:46 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -15,6 +14,12 @@
 #include <sacado/Sacado.hpp>
 
 namespace ESMC {
+
+ShapeFunc::ShapeFunc() {
+}
+
+ShapeFunc::~ShapeFunc() {
+}
 
 // DG0
 
@@ -44,6 +49,12 @@ template<int PDIM>
 bool dg0_shape_func<PDIM>::is_in(const double pcoord[], double *dist) {
   return false;
 }
+
+template<int PDIM>
+const double dg0_shape_func<PDIM>::ipoints[1] = 
+{
+0
+};
 
 // Bar
 
@@ -81,6 +92,11 @@ bool bar_shape_func::is_in(const double pcoord[], double *dist) {
   if (pcoord[0] < -1.0-in_tol || pcoord[0] > 1.0+in_tol) return false;
   return true;
 }
+
+const double bar_shape_func::ipoints[ndofs*pdim] = {
+ -1,
+  1
+};
 
 // Bar3
 
@@ -124,6 +140,10 @@ bool bar3_shape_func::is_in(const double pcoord[], double *dist) {
   if (pcoord[0] < -1.0-in_tol || pcoord[0] > 1.0+in_tol) return false;
   return true;
 }
+
+const double bar3_shape_func::ipoints[ndofs*pdim] = {
+-1,1,0
+};
 
 // TRI 
 const std::string tri_shape_func::name("tri");
@@ -177,6 +197,12 @@ bool tri_shape_func::is_in(const double pcoord[], double *dist) {
   }
   return true;
 }
+
+const double tri_shape_func::ipoints[ndofs*pdim] = {
+ 0,  0,
+ 1,  0,
+ 0,  1
+};
 
 // QUAD
 const std::string quad_shape_func::name("quad");
@@ -264,6 +290,13 @@ bool quad_shape_func::is_in(const double pcoord[], double *dist) {
   }
   return true;
 }
+
+const double quad_shape_func::ipoints[ndofs*pdim] = {
+ -1, -1,  
+  1, -1,  
+  1,  1,
+ -1,  1
+};
 
 // Quad9
 const std::string quad9_shape_func::name("quad9");
@@ -355,6 +388,18 @@ bool quad9_shape_func::is_in(const double pcoord[], double *dist) {
   return true;
 }
 
+const double quad9_shape_func::ipoints[ndofs*pdim] = {
+ -1, -1,  
+  1, -1,  
+  1,  1,
+ -1,  1,
+  0, -1,
+  1,  0,
+  0,  1,
+ -1,  0,
+  0,  0
+};
+
 // HEX
 
 const std::string hex_shape_func::name("hex");
@@ -441,6 +486,17 @@ bool hex_shape_func::is_in(const double pcoord[], double *dist) {
   return true;
 }
 
+const double hex_shape_func::ipoints[ndofs*pdim] = {
+-1,  -1,  -1,
+ 1,  -1,  -1,
+ 1, 1, -1,
+ -1, 1, -1, 
+-1,-1,1,
+1, -1, 1,
+1, 1,  1,
+-1, 1, 1
+};
+
 // Tet
 const std::string tet_shape_func::name("tet");
 const int tet_shape_func::dof_description[ndofs][4] = {
@@ -497,6 +553,13 @@ bool tet_shape_func::is_in(const double pcoord[],double *dist) {
   return true;
 }
 
+const double tet_shape_func::ipoints[ndofs*pdim] = {
+  0, 0, 0,
+  1, 0, 0,
+  0, 1, 0,
+  0, 0, 1
+};
+
 // QUAD_ZERODERIV
 const std::string quad_zeroderiv_shape_func::name("quad_zero_deriv");
 const double quad_zeroderiv_shape_func::one16th = 1.0/16.0;
@@ -527,6 +590,13 @@ bool quad_zeroderiv_shape_func::is_in(const double pcoord[], double *dist) {
   if (pcoord[0] < -1.0-in_tol || pcoord[0] > 1.0+in_tol || pcoord[1] < -1.0-in_tol || pcoord[1] > 1.0+in_tol) return false;
   return true;
 }
+
+const double quad_zeroderiv_shape_func::ipoints[ndofs*pdim] = {
+ -1, -1,  
+  1, -1,  
+  1,  1,
+ -1,  1
+};
 
 // explicit instantiation.  The size in Sacado is the size of the sensitivity; it may be more appropriate to use the variable size
 // fad

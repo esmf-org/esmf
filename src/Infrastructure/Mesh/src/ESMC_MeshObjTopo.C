@@ -1,4 +1,3 @@
-// $Id: ESMC_MeshObjTopo.C,v 1.5 2007/11/28 16:42:43 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -57,7 +56,8 @@ static double hex_node_coord[] = {
 0, 1, -1,
 -1 ,0, -1,
 -1, -1, 0,
-1, 0, 0,
+//1, 0, 0,
+1, -1, 0,
 1,  1, 0,
 -1, 1, 0,
 0, -1, 1,
@@ -73,7 +73,6 @@ static double hex_node_coord[] = {
 0, 1, 0
 };
 
-#ifdef FACE_EDGE
 static int hex_face_edge[] = {
   0,  9,  4,  8,
   1, 10,  5,  9,
@@ -90,7 +89,6 @@ static int hex_face_edge_pol[] = {
   1, 0, 0, 1,
   1, 1, 1, 1
 };
-#endif
 
 
 static int quad_sides[] = {
@@ -193,7 +191,6 @@ static double tet_node_coord[] = {
   0, 0.5, 0.5
 };
 
-#ifdef FACE_EDGE
 static int tet_face_edge[] = {
   0, 4, 3,
   1, 5, 4,
@@ -207,7 +204,6 @@ static int tet_face_edge_pol[] = {
   1, 0, 1,
   0, 0, 0
 };
-#endif
 
 /*
  * Bar topology:
@@ -270,6 +266,8 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     AddHomoEdge(topo, "BAR2_3D");
     topo->ptable = NULL;
     topo->node_coords = hex_node_coord;
+    topo->face_edge_map = hex_face_edge;
+    topo->face_edge_pol = hex_face_edge_pol;
   }
   else if (name == "HEX27") {
     topo = new MeshObjTopo(name, 2, 8, 27, 6, 3,3);
@@ -287,6 +285,8 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     AddHomoEdge(topo, "BAR3_3D");
     topo->ptable = NULL;
     topo->node_coords = hex_node_coord;
+    topo->face_edge_map = hex_face_edge;
+    topo->face_edge_pol = hex_face_edge_pol;
   }
   else if (name == "TETRA4" || name == "TETRA") {
     topo = new MeshObjTopo(name, 3, 4, 4, 4, 3,3);
@@ -302,6 +302,8 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     AddHomoEdge(topo, "BAR2_3D");
     topo->ptable = NULL;
     topo->node_coords = tet_node_coord;
+    topo->face_edge_map = tet_face_edge;
+    topo->face_edge_pol = tet_face_edge_pol;
   }
   else if (name == "TETRA10") {
     topo = new MeshObjTopo(name, 4, 4, 10, 4, 3,3);
@@ -319,8 +321,10 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     AddHomoEdge(topo, "BAR3_3D");
     topo->ptable = NULL;
     topo->node_coords = tet_node_coord;
+    topo->face_edge_map = tet_face_edge;
+    topo->face_edge_pol = tet_face_edge_pol;
   }
-  else if (name == "TRI3") {
+  else if (name == "TRI3" || name == "TRI" || name == "TRI_L") {
     topo = new MeshObjTopo(name, 5, 3, 3, 3, 2,2);
     topo->side_node_map = tri_sides;
     topo->num_side_nodes = 2;
@@ -639,6 +643,20 @@ MeshObjTopo *LowerTopo(const MeshObjTopo &topo) {
   }
 
   return NULL;
+}
+
+const MeshObjTopo *FlattenTopo(const MeshObjTopo &topo) {
+  const std::string name = topo.name;
+
+  if (name == "SHELL" || name == "SHELL4") {
+    return GetTopo("QUAD");
+  } else if (name == "SHELL9") {
+    return GetTopo("QUAD9");
+  } else if (name == "SHELL3" || name == "TRISHELL") {
+    return GetTopo("TRI");
+  }
+
+  return &topo;
 }
 
 } // namespace

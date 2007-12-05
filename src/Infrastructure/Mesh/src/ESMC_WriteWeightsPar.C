@@ -1,4 +1,3 @@
-// $Id: ESMC_WriteWeightsPar.C,v 1.2 2007/11/28 16:42:46 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -15,7 +14,10 @@
 #include <ESMC_Migrator.h>
 #include <ESMC_MeshUtils.h>
 
+#ifdef ESMC_PNETCDF
 #include <pnetcdf.h>
+#endif
+
 #include <limits>
 
 namespace ESMC {
@@ -60,11 +62,11 @@ void GatherForWrite(IWeights &w) {
   */
 
   w.GetRowGIDS(iw_dist);
-    
+
   Migrator mig(new_dist.size(), new_dist.size() > 0 ? &new_dist[0] : NULL, 0,
         iw_dist.size(), iw_dist.size() > 0 ? &iw_dist[0] : NULL);
     
-  mig.Migrate(w);
+  mig.Migrate(static_cast<WMat&>(w));
   
 }
 
@@ -124,6 +126,7 @@ static void nc_grid_file1_2deg(nc_grid_file1 &ncf) {
 }
 
 static void get_nc_grid_file1(nc_grid_file1 &ncf, const std::string &ncfile, bool header_only) {
+#ifdef ESMC_PNETCDF
 
   int ncid, stat;
 
@@ -322,6 +325,7 @@ static void get_nc_grid_file1(nc_grid_file1 &ncf, const std::string &ncfile, boo
   
   ncmpi_close(ncid);
   
+#endif
 }
 
 void WriteNCMatFilePar(const std::string &src_ncfile,
@@ -330,6 +334,8 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
                     const IWeights &w,
                     int ordering)
 {
+  Trace __trace("WriteNCMatFilePar(const std::string &src_ncfile, const std::string &dst_ncfile, const std::string &outfile, const IWeights &w, int ordering"); 
+#ifdef ESMC_PNETCDF
 
   std::pair<int,int> pa = w.count_matrix_entries();
   int ln_s = pa.first;
@@ -696,6 +702,9 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
 
    ncmpi_close(ncid);
    
+#else
+   Throw() << "Please recompile with PNETCDF support";
+#endif
   
 }
 

@@ -1,4 +1,3 @@
-// $Id: ESMC_ShapeHierarchic.C,v 1.6 2007/11/28 16:42:46 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -22,13 +21,14 @@ extern "C" void FTN(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,doub
 
 namespace ESMC {
 
-static void solve_sys(UInt nsamples, UInt ncoef, const double vals[],
-    double mat[], double coef[])
+template<typename Real>
+void solve_sys(UInt nsamples, UInt ncoef, const Real vals[],
+    double mat[], Real coef[])
 {
 #ifdef ESMC_LAPACK
   int m = nsamples, n = ncoef, nrhs = 1, info = 0, rank, ldb;
   ldb = std::max(std::max(m,n),1);
-  std::vector<double> rhs(ldb);
+  std::vector<Real> rhs(ldb);
 
   for (UInt i = 0; i < nsamples; i++) {
     rhs[i] = vals[i]; // sizing might not be right, so copy
@@ -41,17 +41,44 @@ static void solve_sys(UInt nsamples, UInt ncoef, const double vals[],
   std::vector<double> work(lwork, 0);
   double rcond=0.0000000000001;
 
+  std::vector<double> id_rhs(ldb*ldb, 0);
+  // Set up B=I
+  for (int i = 0; i < m; i++) id_rhs[i*ldb + i] = 1.0;
+
+  FTN(dgelsy)(
+    &m, &n, &m, &mat[0], &m, &id_rhs[0], &ldb, &jpvt[0], &rcond, &rank, &work[0], &lwork, &info);
+
+/*
   FTN(dgelsy)(
     &m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &jpvt[0], &rcond, &rank, &work[0], &lwork, &info);
+*/
 
-  for (UInt i = 0; i < ncoef; i++) coef[i] = rhs[i];
+// Apply the pseudo inverse
+  std::vector<Real> b = rhs; // ughh
+  for (int i = 0; i < n; i++) {
+    for (int nr = 0; nr < nrhs; nr++) rhs[nr*ldb+i] = 0;
+    for (int j = 0; j < m; j++) {
+      for (int nr = 0; nr < nrhs; nr++) {
+         rhs[nr*ldb+i] += id_rhs[j*ldb+i]*b[nr*ldb+j];
+      }
+    }
+  }
+
+  for (UInt r = 0; r < (UInt) nrhs; r++) {
+    for (UInt c = 0; c < ncoef; c++) {
+      coef[r*ncoef+c] = rhs[r*ldb+c];
+    }
+  }
+ // for (UInt i = 0; i < ncoef; i++) coef[i] = rhs[i];
 
 #endif
 }
 
 // ************* Base Shape Hier ************
 
-void ShapeHier::do_Interpolate(UInt pdim, const double ipoints[], const double fvals[], double mcoef[]) const {
+template <typename Real>
+void ShapeHier::do_Interpolate(UInt pdim, const double ipoints[], const Real fvals[], Real mcoef[]) const {
+
   UInt nnodes = NumNodes();
   for (UInt i = 0; i < nnodes; i++)
     mcoef[i] = fvals[i];
@@ -75,11 +102,11 @@ void ShapeHier::do_Interpolate(UInt pdim, const double ipoints[], const double f
         }
       }
       std::vector<double> linvals(nnodes*nefunc);
-      std::vector<double> fevals(nefunc);
+      std::vector<Real> fevals(nefunc);
       // subtract off linear part
-      shape_node(nnodes, nefunc, pcoord, &linvals[0]);
+      this->shape_node(nnodes, nefunc, pcoord, &linvals[0]);
       for (UInt i = 0; i < nefunc; i++) {
-        double fv = 0;
+        Real fv = 0;
         for (UInt j = 0; j < nnodes; j++) {
           fv += linvals[i*nnodes + j]*fvals[j];
         }
@@ -114,10 +141,10 @@ void ShapeHier::do_Interpolate(UInt pdim, const double ipoints[], const double f
   }
 
   // values of f -fv - fe
-  std::vector<double> fevals(nbubble);
+  std::vector<Real> fevals(nbubble);
   // Form fv+fe
   for (UInt i = 0; i < nbubble; i++) {
-    double fv = 0;
+    Real fv = 0;
     // linear part
     for (UInt j = 0; j < nnodes; j++) {
       fv += linvals[i*nnodes + j]*fvals[j];
@@ -144,6 +171,273 @@ void ShapeHier::do_Interpolate(UInt pdim, const double ipoints[], const double f
   solve_sys(nbubble, nbubble, &fevals[0], 
         &mat[0], &mcoef[pofs]);
   
+}
+
+template <typename Real>
+void apply_interpolation_matrix(UInt nfunc, const double mat[], const Real fvals[], Real mdata[]) {
+
+  for (UInt f = 0; f < nfunc; f++) mdata[f] = 0.0;
+
+  for (UInt i = 0; i < nfunc; i++) {
+    for (UInt j = 0; j < nfunc; j++) {
+      mdata[i] += mat[i*nfunc+j]*fvals[j];
+    }
+  }
+
+}
+
+ShapeHier::ShapeHier() {
+}
+
+void ShapeHier::Interpolate(const double fvals[], double mdata[]) const {
+
+  UInt pdim = ParametricDim();
+
+  if (interpMatrix.size() == 0) {
+    std::vector<fad_type> fad_fvals(nfunc), fad_mcoef(nfunc);
+ 
+    for (UInt f = 0; f < nfunc; f++) {
+      fad_fvals[f] = fvals[f];
+      fad_fvals[f].diff(f, nfunc);
+    }
+    
+    do_Interpolate(ParametricDim(), &iPoints[0], &fad_fvals[0], &fad_mcoef[0]);
+
+    interpMatrix.resize(nfunc*nfunc);
+
+    for (UInt f = 0; f < nfunc; f++) {
+
+      // Assign the value
+      mdata[f] = fad_mcoef[f].val();
+
+      // Set up the matrix row.
+      double *row = &(fad_mcoef[f].fastAccessDx(0));
+      for (UInt j = 0; j < nfunc; j++) {
+        interpMatrix[f*nfunc+j] = row[j];
+      }
+
+    }
+
+  } else {
+
+    apply_interpolation_matrix(nfunc, &interpMatrix[0], fvals, mdata);
+
+  }
+
+}
+
+void ShapeHier::Interpolate(const fad_type fvals[], fad_type mdata[]) const {
+
+  if (interpMatrix.size() == 0) {
+    // spur creation of matrix
+    std::vector<double> f(nfunc),  m(nfunc);
+    Interpolate(&f[0], &m[0]);
+  }
+
+  apply_interpolation_matrix(nfunc, &interpMatrix[0], fvals, mdata);
+
+}
+
+// ************ 1D hierarchic ************
+static void build_bar_dtable(UInt q, std::vector<int> &table) {
+  // Int dofs first
+  for (UInt i = 0; i < 2; i++) {
+    table.push_back(DOF_NODE);
+    table.push_back(i); // ordinal
+    table.push_back(0); // index
+    table.push_back(1); // polarity
+  }
+
+  // And now edge dofs
+  for (UInt i = 0; i < 1; i++) {
+    // q -1 on each edge
+    for (UInt j = 2; j <= q; j++) {
+      table.push_back(DOF_EDGE);
+      table.push_back(i); // ordinal
+      table.push_back(j-2);
+      (j & 0x01) ?  table.push_back(-1) : table.push_back(1); // orientation
+    }
+  }
+}
+
+static void build_bar_itable(UInt nfunc, UInt q, std::vector<double> &ip) {
+  // First the nodes:
+  ip.clear(); ip.resize(nfunc*1, 0);
+  ip[0] = -1; 
+  ip[1] = 1; 
+
+  // Now q-1 integration points along the edges.
+  UInt ofs = 2;
+  std::vector<double> tmp(q-1,0);
+  gauss_legendre(q-1, &tmp[0]);
+
+  // edge 0
+  for (UInt i = 0; i < q-1; i++) {
+    ip[ofs++] = tmp[i];
+  }
+
+  ThrowRequire(ofs == nfunc*1);
+}
+
+std::map<UInt,BarHier*> BarHier::bhMap;
+
+BarHier *BarHier::instance(UInt _q) {
+  std::map<UInt,BarHier*>::iterator qi =
+    bhMap.find(_q);
+  BarHier *qp;
+  if (qi == bhMap.end()) {
+    qp = new BarHier(_q);
+    bhMap[_q] = qp;
+  } else qp = qi->second;
+  return qp;
+}
+
+BarHier::BarHier(UInt _q)
+{
+  q = _q;
+  nfunc = 0;
+  ild.resize(_q+1);
+  ilf.resize(_q+1);
+  build_bar_dtable(q, dtable);
+
+  nfunc = 2+1*(q-1);
+  ThrowRequire(nfunc == (dtable.size()/4));
+
+  build_bar_itable(nfunc, q, iPoints);
+  char buf[512];
+  sprintf(buf, "BarHier_%d", q);
+  m_name = std::string(buf);
+
+  // Initialize the integrated legendre polys
+  for (UInt i = 0; i <= q; i++) {
+    ild[i].Init(i);
+    ilf[i].Init(i);
+  }
+}
+
+// Eval shape funcs by node, edge, etc.
+// Note that the stride is ndofs, so these can interleave into a full array of points.
+template<typename Real>
+void bh_shape_node(UInt pdim, UInt ndofs, const std::vector<ILegendre<Real> > &func,
+              UInt npts, const Real pcoord[], Real results[]) {
+  for (UInt p = 0; p < npts; p++) {
+    Real xi = pcoord[p*pdim];
+
+    // Nodes
+    results[p*ndofs] = EvalPoly<ILegendre<Real> >()(func[0], xi);
+    results[p*ndofs+1] = EvalPoly<ILegendre<Real> >()(func[1], xi);
+  }
+}
+
+template<typename Real>
+void bh_shape_edge(UInt edge, UInt pdim, UInt ndofs, const std::vector<ILegendre<Real> > &func,
+              UInt npts, const Real pcoord[], Real results[]) {
+
+  ThrowRequire(edge == 0);
+
+  UInt q = func.size()-1;
+  for (UInt p = 0; p < npts; p++) {
+    Real xi = pcoord[p*pdim];
+
+    // Edges
+    UInt ofs = 0; // offset
+     for (UInt j = 2; j <= q; j++) {
+       results[p*ndofs+ofs++] = EvalPoly<ILegendre<Real> >()(func[j], xi);
+     }
+  }
+}
+
+template<typename Real>
+void bh_shape(UInt pdim, UInt ndofs, const std::vector<ILegendre<Real> > &func,
+              UInt npts, const Real pcoord[], Real results[]) {
+  UInt q = func.size()-1;
+
+  bh_shape_node(pdim, ndofs, func, npts, pcoord, &results[0]);
+  qh_shape_edge(0, pdim, ndofs, func, npts, pcoord, &results[4]);
+
+}
+
+void BarHier::shape(UInt npts, const double pcoord[], double results[]) const {
+  bh_shape(ParametricDim(), NumFunctions(), ild, npts, pcoord, results);
+}
+
+void BarHier::shape(UInt npts, const fad_type pcoord[], fad_type results[]) const {
+  bh_shape(ParametricDim(), NumFunctions(), ilf, npts, pcoord, results);
+}
+
+// Return shape values at node
+void BarHier::shape_node(UInt stride, // how to stride when storing results
+                          UInt npts, // how many points to evaluate at
+                          const double *pcoord, // parametric coords of point
+                          double res[] 
+                         ) const
+{
+  bh_shape_node(ParametricDim(), stride, ild, npts, pcoord, res);
+}
+
+// Return shape values at edge points
+void BarHier::shape_edge(UInt edge, // which edge
+                          UInt stride, // how to stride when storing results
+                          UInt npts, // how many points to evaluate at
+                          const double *pcoord, // parametric coords of point
+                          double res[] 
+                         ) const
+{
+  ThrowRequire(edge == 0);
+  bh_shape_edge(edge, ParametricDim(), stride, ild, npts, pcoord, res);
+}
+
+// Return shape values at face points
+void BarHier::shape_face(UInt face, // which face
+                          UInt stride, // how to stride when storing results
+                          UInt npts, // how many points to evaluate at
+                          const double *pcoord, // parametric coords of point
+                          double res[] 
+                         ) const
+{
+  Throw() << "No face on Quad hier, please dont call";
+}
+
+// Return shape values at face points
+void BarHier::shape_elem(UInt stride, // how to stride when storing results
+                          UInt npts, // how many points to evaluate at
+                          const double *pcoord, // parametric coords of point
+                          double res[] 
+                         ) const
+{
+  Throw() << "No face on Bar hier, please dont call";
+}
+
+void BarHier::shape_grads(UInt npts, const double pcoord[], double results[]) const {
+
+  UInt nfunc = NumFunctions();
+
+  std::vector<fad_type> shape_fad(nfunc);
+
+  UInt pdim = ParametricDim();
+
+  ThrowAssert(pdim == 1);
+
+  std::vector<fad_type> pcoord_fad(pdim);
+
+  for (UInt i = 0; i < npts; i++) {
+    pcoord_fad[0] = pcoord[i];
+    pcoord_fad[0].diff(0, 1);
+    
+    shape(1, &pcoord_fad[0], &shape_fad[0]);
+    //qh_shape(ParametricDim(), NumFunctions(), ilf, 1, &pcoord_fad[0],&shape_fad[0]);
+
+    for (UInt j = 0; j < nfunc; j++) {
+      const double *diff = &(shape_fad[j].fastAccessDx(0));
+
+      results[(i*nfunc+j)] = diff[0];
+    }
+  }
+}
+
+void BarHier::shape_grads(UInt npts, const fad_type pcoord[], fad_type results[]) const {
+  Throw() << "Hierarchic shape for fad not implemented";
+  //qh_shape_grads(ParametricDim(), NumFunctions(), ilf, npts, pcoord, results);
 }
 
 // ************ Quadrilateral ************
@@ -236,15 +530,12 @@ QuadHier *QuadHier::instance(UInt _q) {
   return qp;
 }
 
-QuadHier::QuadHier(UInt _q) :
-q(_q),
-dtable(),
-nfunc(0),
-m_name(),
-ild(_q+1),
-ilf(_q+1),
-iPoints()
+QuadHier::QuadHier(UInt _q)
 {
+  q = _q;
+  nfunc = 0;
+  ild.resize(_q+1);
+  ilf.resize(_q+1);
   build_quad_dtable(q, dtable);
 
   nfunc = 4+4*(q-1)+(q-1)*(q-1); //dtable.size() / 4;
@@ -386,10 +677,6 @@ void QuadHier::shape_elem(UInt stride, // how to stride when storing results
                          ) const
 {
   qh_shape_bubble(ParametricDim(), stride, ild, npts, pcoord, res);
-}
-
-void QuadHier::Interpolate(const double fvals[], double mcoef[]) const {
-  do_Interpolate(ParametricDim(), &iPoints[0], fvals, mcoef);
 }
 
 template<typename Real>
@@ -552,7 +839,7 @@ static void build_tri_itable(UInt nfunc, UInt q, std::vector<double> &ip) {
       if ((i+j) < q) {
         ip[ofs++] = tmp[i-1];
         ip[ofs++] = tmp[j-1];
-std::cout << ip[ofs-2] << " " << ip[ofs-1] << " +=" << ip[ofs-2] + ip[ofs-1] << std::endl;
+//std::cout << ip[ofs-2] << " " << ip[ofs-1] << " +=" << ip[ofs-2] + ip[ofs-1] << std::endl;
       }
     }
   }
@@ -572,15 +859,13 @@ TriHier *TriHier::instance(UInt _q) {
   return qp;
 }
 
-TriHier::TriHier(UInt _q) :
-q(_q),
-dtable(),
-nfunc(0),
-m_name(),
-ild(_q-1),
-ilf(_q-1),
-iPoints()
+TriHier::TriHier(UInt _q) 
 {
+  q = _q;
+  nfunc = 0;
+  ild.resize(_q-1);
+  ilf.resize(_q-1);
+
   build_tri_dtable(q, dtable);
   nfunc = dtable.size() / 4;
   build_tri_itable(nfunc, q, iPoints);
@@ -681,10 +966,38 @@ void th_shape_grads(UInt pdim, UInt ndofs, const std::vector<ILKernel<Real> > &f
 }
 
 void TriHier::shape_grads(UInt npts, const double pcoord[], double results[]) const {
-  th_shape_grads(ParametricDim(), NumFunctions(), ild, npts, pcoord, results);
+
+  UInt nfunc = NumFunctions();
+
+  std::vector<fad_type> shape_fad(nfunc);
+
+  UInt pdim = ParametricDim();
+
+  ThrowAssert(pdim == 2);
+
+  std::vector<fad_type> pcoord_fad(pdim);
+
+  for (UInt i = 0; i < npts; i++) {
+    pcoord_fad[0] = pcoord[i*pdim];
+    pcoord_fad[0].diff(0, 2);
+    
+    pcoord_fad[1] = pcoord[i*pdim+1];
+    pcoord_fad[1].diff(1, 2);
+
+    shape(1, &pcoord_fad[0], &shape_fad[0]);
+    //qh_shape(ParametricDim(), NumFunctions(), ilf, 1, &pcoord_fad[0],&shape_fad[0]);
+
+    for (UInt j = 0; j < nfunc; j++) {
+      const double *diff = &(shape_fad[j].fastAccessDx(0));
+
+      results[(i*nfunc+j)*pdim] = diff[0];
+      results[(i*nfunc+j)*pdim+1] = diff[1];
+    }
+  }
 }
 
 void TriHier::shape_grads(UInt npts, const fad_type pcoord[], fad_type results[]) const {
+  Throw() << "No TriHier fad shape grads!";
   th_shape_grads(ParametricDim(), NumFunctions(), ilf, npts, pcoord, results);
 }
 // Return shape values at node
@@ -727,10 +1040,6 @@ void TriHier::shape_elem(UInt stride, // how to stride when storing results
                          ) const
 {
   th_shape_bubble(ParametricDim(), stride, ild, npts, pcoord, res);
-}
-
-void TriHier::Interpolate(const double fvals[], double mcoef[]) const {
-  do_Interpolate(ParametricDim(), &iPoints[0], fvals, mcoef);
 }
 
 
@@ -839,15 +1148,14 @@ HexHier *HexHier::instance(UInt _q) {
   return qp;
 }
 
-HexHier::HexHier(UInt _q) :
-q(_q),
-dtable(),
-nfunc(0),
-m_name(),
-ild(_q+1),
-ilf(_q+1),
-iPoints()
+HexHier::HexHier(UInt _q)
 {
+
+  q = _q;
+  nfunc = 0;
+  ild.resize(_q+1);
+  ilf.resize(_q+1);
+
   build_hex_dtable(q, dtable);
   nfunc = dtable.size() / 4;
   build_hex_itable(nfunc, q, iPoints);
@@ -986,10 +1294,6 @@ void HexHier::shape_elem(UInt stride, // how to stride when storing results
                          ) const
 {
   hh_shape_bubble(ParametricDim(), stride, ild, npts, pcoord, res);
-}
-
-void HexHier::Interpolate(const double fvals[], double mcoef[]) const {
-  do_Interpolate(ParametricDim(), &iPoints[0], fvals, mcoef);
 }
 
 template<typename Real>

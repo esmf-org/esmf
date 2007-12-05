@@ -1,4 +1,3 @@
-// $Id: ESMC_ParEnv.C,v 1.4 2007/11/28 16:42:44 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 

@@ -1,4 +1,3 @@
-// $Id: ESMC_Polynomial.h,v 1.3 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -20,6 +19,20 @@
 
 namespace ESMC {
 
+/**
+ * @defgroup polynomials
+ * A suite of polynomial function evaluators, representros, and generators.
+ * Templated for generic programming. 
+ */
+
+/**
+ * A polynomial evaluator, using horner's method.  The poly is of
+ * generic type, but must provide 
+ * p.Degree() and p.GetCoefficients()
+ * The coefficients are double, so, for instance, to represent
+ * 1 + x + 3x*x*x, we would have degree == 3, and coefficients
+ * would return an array {1, 1, 0, 3}.
+ */
 template<typename POLY, typename Real=typename POLY::real_type>
 struct EvalPoly {
 Real operator()(const POLY &p, Real x) {
@@ -34,7 +47,10 @@ Real operator()(const POLY &p, Real x) {
 }
 };
 
-
+/**
+ * Evaluate a general polynomial derivative.  Polynomial supports
+ * p.Degree() and p.GetCoefficients()
+ */
 template<typename POLY, typename Real=typename POLY::real_type>
 struct EvalPolyDeriv {
 Real operator()(const POLY &p, Real x) {
@@ -49,7 +65,11 @@ Real operator()(const POLY &p, Real x) {
 }
 };
 
-// TPOLY overloads operator[i] to return a reference for the ith 1d poly
+/** 
+ * A tensor polynomial evaluator.  The TPOLY must return a reference to 
+ * a POLY of type used above, i.e. 
+ * TPOLY overloads operator[i] to return a reference for the ith 1d poly
+ */
 template<typename TPOLY>
 inline typename TPOLY::real_type EvalTensorPoly(UInt dim, const typename TPOLY::real_type x[], const TPOLY &poly) {
   typename TPOLY::real_type res = 1.;
@@ -58,7 +78,11 @@ inline typename TPOLY::real_type EvalTensorPoly(UInt dim, const typename TPOLY::
   }
  return res;
 }
-
+/**
+ * Evaluate the gradient of a tensor polynomial.  Assumes that each tensor
+ * entry is a different variable and returns the gradient under this assumption.
+ * @param res of size tensor dim, each gradient 
+ */
 template<typename TPOLY>
 inline void EvalTensorPolyDeriv(UInt dim, const typename TPOLY::real_type x[], const TPOLY &poly, typename TPOLY::real_type res[]) {
   // First eval the polys and derivs at point
@@ -77,7 +101,9 @@ inline void EvalTensorPolyDeriv(UInt dim, const typename TPOLY::real_type x[], c
   }
 }
 
-// Legendre coefficients on [-1,1]
+/**
+ * Generatre the Legendre coefficients on [-1,1]
+ */
 void set_legendre_coef(UInt k, std::vector<double> &coef);
 
 // A 1d polynomial class
@@ -95,9 +121,16 @@ std::vector<double> coef;
 UInt k;
 };
 
-// Integrated Legendre coefficients on [-1,1]
+/**
+ * Gerneates the Integrated Legendre coefficients on [-1,1]
+ */
 void set_Ilegendre_coef(UInt k, std::vector<double> &coef);
-// Integrate legendre
+
+
+/**
+ * An object supporting the POLY interface, and constructed from the
+ * legendre polynomials of a desired order.
+ */
 template <typename Real=double>
 class ILegendre {
 public:
@@ -115,8 +148,16 @@ UInt k;
 std::vector<double> coef;
 };
 
-void generate_ILkernel(std::vector<double> &);
-// IL Kernels phi_k = -l_k+2 / l0*l1
+/**
+ * Coefficient of the integrated legendre kernels, see below
+ */
+void generate_ILkernel(std::vector<double> &coef);
+
+/**
+ * The integrated legendre kernel functions, used in triangular and
+ * tetarahedral hierarchical shape functions.  Class supports the generic interface
+ * of a POLY
+ */
 template <typename Real=double>
 class ILKernel {
 public:
@@ -134,6 +175,9 @@ UInt k;
 std::vector<double> coef;
 };
 
+/**
+ * A monomial polynomial class (optimized muliplies)
+ */
 template<typename Real=double>
 class Monomial {
 public:
@@ -144,7 +188,9 @@ private:
 UInt deg;
 };
 
-// Faster specializations for monomials
+/** 
+ * A specialization of EvalPoly that works quickly for monomials
+ */
 template<typename Real>
 struct EvalPoly<Monomial<Real>, Real> {
 Real operator()(const Monomial<Real> &p, Real x) {
@@ -157,11 +203,14 @@ Real operator()(const Monomial<Real> &p, Real x) {
 }
 };
 
+/**
+ * Very fast monomial derivative evaluator
+ */
 template<typename Real>
 struct EvalPolyDeriv<Monomial<Real>, Real> {
 Real operator()(const Monomial<Real> &p, Real x) {
-  Real res = 1.;
-  int ord = p.GetDegree();
+  Real res = p.GetDegree();
+  int ord = p.GetDegree()-1;
   while (ord > 0) {
     res *= x; ord--;
   }
@@ -169,7 +218,10 @@ Real operator()(const Monomial<Real> &p, Real x) {
 }
 };
 
-// A tensor polynomial built from 1d polys (up to 3d)
+/**
+ * A class that allows one to build a tensor polynomial easily from a sequence of
+ * 1d polynomials
+ */
 template <typename POLY>
 class TensorPolynomial {
 public:
@@ -186,7 +238,10 @@ private:
   const POLY *poly[3];
 };
 
-// Return the coefficients that best fit the given set of polynomials through the given values (at the given locs)
+/**
+ * A function to return the coefficients that best fit the given set of polynomials
+ * through the given values (at the given locs)
+ */
 template<typename POLY>
 void PolyFit1D(UInt nsamples, const double coord[], const double vals[], const std::vector<POLY*> &poly, double coef[]);
 

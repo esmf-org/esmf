@@ -1,4 +1,3 @@
-// $Id: ESMC_MeshRefine.h,v 1.3 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -25,9 +24,6 @@ void RefineMeshObjLocal(MeshObj &obj, const RefineTopo &rtopo);
 
 // Unrefine a mesh object.  Remove any children that no longer have a parent.
 void UnrefineMeshObjLocal(MeshObj &obj);
-
-// elems is the list of (newly) refine elements
-void ProlongNodeCoords(std::vector<MeshObj*> &elems, MEField<> &coord);
 
 } // namespace
 

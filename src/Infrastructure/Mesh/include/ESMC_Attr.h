@@ -1,4 +1,3 @@
-// $Id: ESMC_Attr.h,v 1.3 2007/11/28 16:43:49 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 

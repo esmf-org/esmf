@@ -1,4 +1,3 @@
-// $Id: ESMC_ShapeFunc.h,v 1.3 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,8 +41,17 @@ typedef enum {DOF_NODE=0, DOF_EDGE=1, DOF_FACE=2, DOF_ELEM=3} DofLoc;
  */
 class ShapeFunc {
 public:
-  ShapeFunc() {}
-  virtual ~ShapeFunc() {}
+
+  enum { ME_NODAL = 0, // nodal element
+         ME_ELEMENTAL, // elemental dofs
+         ME_SIGN_ORIENTED, // hierarchical sign matter, no order
+         ME_ORIENTED,      // Lagrange; dofs ordered, no sign
+         ME_DG             // No gather is necessary all data on element.
+  };
+
+  ShapeFunc();
+  virtual ~ShapeFunc();
+
   virtual UInt NumFunctions() const = 0;
   virtual UInt ParametricDim() const = 0;
   virtual UInt IntgOrder() const = 0;
@@ -59,6 +67,8 @@ public:
    */ 
   virtual void shape_grads(UInt npts, const double pcoord[], double results[]) const = 0;
   virtual void shape_grads(UInt npts, const fad_type pcoord[], fad_type results[]) const = 0;
+
+  virtual ShapeFunc *side_shape(UInt side_num) const=0;
 
   virtual const std::string &name() const = 0;
 
@@ -86,6 +96,7 @@ public:
    *  Form coefficients, given function values at ipoints;
    */
   virtual void Interpolate(const double fvals[], double mcoef[]) const = 0;
+  virtual void Interpolate(const fad_type fvals[], fad_type mcoef[]) const = 0;
 
   /**
    *  description for each dof (Obj type, Obj ordinal, index).
@@ -133,6 +144,9 @@ class dg0_shape_func {
   static const UInt NumInterp = 1;
 
   const static int dof_description[ndofs][4];
+
+  const static double ipoints[1];
+
 };
 
 /**
@@ -167,6 +181,7 @@ class bar_shape_func {
 
   static bool is_nodal() { return true;}
 
+  const static double ipoints[ndofs*pdim];
 };
 
 /**
@@ -201,6 +216,8 @@ class bar3_shape_func {
 
   static bool is_nodal() { return true;}
 
+  const static double ipoints[ndofs*pdim];
+
 };
 
 /**
@@ -233,6 +250,8 @@ class tri_shape_func {
   static const UInt NumInterp = ndofs;
 
   static bool is_nodal() { return true;}
+
+  const static double ipoints[ndofs*pdim];
 };
 
 /**
@@ -266,6 +285,8 @@ class quad_shape_func {
   static const UInt NumInterp = ndofs;
 
   static bool is_nodal() { return true;}
+
+  const static double ipoints[ndofs*pdim];
 };
 
 /**
@@ -298,6 +319,8 @@ class quad9_shape_func {
   static const UInt NumInterp = ndofs;
 
   static bool is_nodal() { return true;}
+
+  const static double ipoints[ndofs*pdim];
 };
 
 /**
@@ -331,6 +354,8 @@ class hex_shape_func {
   static const UInt NumInterp = ndofs;
 
   static bool is_nodal() { return true;}
+
+  const static double ipoints[ndofs*pdim];
 };
 
 /**
@@ -364,6 +389,8 @@ class tet_shape_func {
   static const UInt NumInterp = ndofs;
 
   static bool is_nodal() { return true;}
+
+  const static double ipoints[ndofs*pdim];
 };
 
 /**
@@ -396,6 +423,8 @@ class quad_zeroderiv_shape_func {
   static const std::string name;
 
   static bool is_nodal() { return false;}
+
+  const static double ipoints[ndofs*pdim];
 };
 
 } // namespace

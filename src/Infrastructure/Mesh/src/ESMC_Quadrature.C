@@ -1,4 +1,3 @@
-// $Id: ESMC_Quadrature.C,v 1.3 2007/11/28 16:42:45 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -154,6 +153,7 @@ triq &triq::instance(UInt q) {
 }
 
 static UInt tri_order2q(UInt o) {
+  ThrowRequire( o < 8);
   UInt mp[] = {
   0, 1, 3, 4, 6, 7, 12, 13
   };

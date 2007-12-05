@@ -1,4 +1,3 @@
-// $Id: ESMC_HAdapt.C,v 1.8 2007/11/28 16:42:41 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -19,6 +18,9 @@
 #include <ESMC_Exception.h>
 #include <ESMC_MEField.h>
 #include <ESMC_ParEnv.h>
+#include <ESMC_MeshUtils.h>
+
+#include <map>
 
 namespace ESMC {
 
@@ -56,7 +58,7 @@ void HAdapt::RefineUniformly(bool keep_parents) {
 
   RefineMesh();
 
-  refinement_resolution();
+  //refinement_resolution(); --Now done in RefineMesh.
 
   // If not to keep parents, mark all inactive objects to delete
   if (!keep_parents) {
@@ -724,13 +726,13 @@ void HAdapt::RefineMesh() {
   std::vector<MeshObj*>::iterator ri = refine_list.begin(), re = refine_list.end();
 
   for (; ri != re; ++ri) {
-    RefineMeshObjLocal(**ri,  *GetHomoRefineTopo(GetMeshObjTopo(**ri)->name));
+    RefineMeshObjLocal(**ri,  *GetHomoRefineTopo(GetMeshObjTopo(**ri)));
   }
 
   mesh.ResolvePendingCreate();
 
   MEField<> &coord = *mesh.GetCoordField();
-  ProlongNodeCoords(refine_list, coord);
+  ProlongField(refine_list, coord);
 
   refinement_resolution();
 
@@ -758,5 +760,284 @@ Par::Out() << "UNREFINING:" << (*ri)->get_id() << std::endl;
   mesh.CompactData();
 
 }
+
+static void OldProlongField(std::vector<MeshObj*> &elems, MEField<> &coord) {
+
+  UInt fdim = coord.dim();
+  MeshObjRelationList::iterator nri;
+  for (UInt i = 0; i < elems.size(); i++) {
+    MeshObj &elem = *elems[i];
+   
+    const MeshObjTopo *topo = GetMeshObjTopo(elem);
+    // Start with edges
+    for (UInt e = 0; e < (UInt) topo->num_edges; e++) {
+      const int *edge_nodes = topo->get_edge_nodes(e);
+      ThrowRequire(topo->num_edge_child_nodes == 3); // only doing linears now
+      MeshObj *node[3]; double *d[3];
+      for (UInt n = 0; n < 3; n++) {
+        nri = MeshObjConn::find_relation(elem, MeshObj::NODE, edge_nodes[n]);
+        ThrowRequire(nri != elem.Relations.end());
+        node[n] = nri->obj;
+        d[n] = coord.data(*node[n]);  ThrowAssert(d[n]);
+      }
+      for (UInt dm = 0; dm < fdim; dm++)
+        d[2][dm] = 0.5*(d[0][dm] + d[1][dm]);
+        //d[2][dm] = node[2]->get_id();
+    } // e
+
+    // Faces??
+    // Centroid??
+    if (topo->parametric_dim == 2 && topo->num_nodes == 4) { // quad (hard code this)
+      MeshObj *node[5];
+      double *d[5];
+      for (UInt n = 0; n < 4; n++) {
+        nri = MeshObjConn::find_relation(elem, MeshObj::NODE, n);
+        ThrowRequire(nri != elem.Relations.end());
+        node[n] = nri->obj;
+        d[n] = coord.data(*node[n]);  ThrowAssert(d[n]);
+      }
+      nri = MeshObjConn::find_relation(elem, MeshObj::NODE, 8);
+      ThrowRequire(nri != elem.Relations.end());
+      node[4] = nri->obj;
+      d[4] = coord.data(*node[4]); ThrowAssert(d[4]);
+  
+      for (UInt dm = 0; dm < fdim; dm++) {
+        d[4][dm] = 0.25*(d[0][dm]+d[1][dm]+d[2][dm]+d[3][dm]);
+      }
+    } else if (topo->num_nodes == 8) { // hex 
+      MeshObj *node[9];
+      double *d[9];
+      // Face centroids first
+      for (UInt f = 0; f < 6; f++) {
+        const int *side_nodes = topo->get_side_nodes(f);
+        for (UInt n = 0; n < 4; n++) {
+          nri = MeshObjConn::find_relation(elem, MeshObj::NODE, side_nodes[n]);
+          ThrowRequire(nri != elem.Relations.end());
+          node[n] = nri->obj;
+          d[n] = coord.data(*node[n]);  ThrowAssert(d[n]);
+        }
+        nri = MeshObjConn::find_relation(elem, MeshObj::NODE, side_nodes[8]);
+        ThrowRequire(nri != elem.Relations.end());
+        node[4] = nri->obj;
+        d[4] = coord.data(*node[4]); ThrowAssert(d[4]);
+    
+        for (UInt dm = 0; dm < fdim; dm++) {
+          d[4][dm] = 0.25*(d[0][dm]+d[1][dm]+d[2][dm]+d[3][dm]);
+        }
+      }
+
+      // Now the centroid of the element
+      for (UInt n = 0; n < 8; n++) {
+        nri = MeshObjConn::find_relation(elem, MeshObj::NODE, n);
+        ThrowRequire(nri != elem.Relations.end());
+        node[n] = nri->obj;
+        d[n] = coord.data(*node[n]);  ThrowAssert(d[n]);
+      }
+      nri = MeshObjConn::find_relation(elem, MeshObj::NODE, 20);
+      ThrowRequire(nri != elem.Relations.end());
+      node[8] = nri->obj; d[8] = coord.data(*nri->obj); ThrowAssert(d[8]);
+      for (UInt dm = 0; dm < fdim; dm++) {
+        d[8][dm] = 0.125*(d[0][dm]+d[1][dm]+d[2][dm]+d[3][dm]+d[4][dm]+d[5][dm]+d[6][dm]+d[7][dm]);
+      }
+    } else if (topo->parametric_dim == 3 && topo->num_nodes == 4) { // tetrahedron
+      // Nothing
+    }
+  } // elem
+}
+
+void HAdapt::ProlongField(std::vector<MeshObj*> &elems, MEField<> &coord) {
+
+  UInt fdim = coord.dim();
+
+  for (UInt i = 0; i < elems.size(); i++) {
+    MeshObj &elem = *elems[i];
+
+//Par::Out() << "Prolonging element:" << elem.get_id() << std::endl;
+    MasterElementBase &meb = GetME(coord, elem);
+    MasterElement<> &me = dynamic_cast<MasterElement<>&>(meb);
+   
+    const MeshObjTopo *topo = GetMeshObjTopo(elem);
+    ThrowRequire(topo);
+    const RefineTopo *rtopo = GetHomoRefineTopo(topo);
+    ThrowRequire(rtopo);
+
+    const RefDual *rdual = RefDual::instance(rtopo, &meb);
+
+    // Gather parent coef
+    UInt nfunc = me.num_functions();
+    std::vector<double> pcoef(nfunc*fdim), ccoef(nfunc*fdim);
+
+    GatherElemData<>(me, coord, elem, &pcoef[0]);
+
+    for (UInt c = 0; c < rtopo->NumChild(); c++) {
+
+      MeshObjRelationList::iterator cri =
+          MeshObjConn::find_relation(elem, MeshObj::ELEMENT, c, MeshObj::CHILD);
+ 
+      ThrowRequire(cri != elem.Relations.end());
+
+      MeshObj &child = *cri->obj;
+
+      rdual->apply_prolongation(fdim, c, &pcoef[0], &ccoef[0]);
+
+      ScatterElemData(me, coord, child, &ccoef[0]);
+
+    }
+
+  }
+
+
+}
+
+/*---------------------------------------------------------------------------*/
+// Refinement dual
+/*---------------------------------------------------------------------------*/
+
+RefDual::ref_map &get_ref_dual_map() {
+  static RefDual::ref_map rd_map;
+
+  return rd_map;
+}
+
+const RefDual *RefDual::instance(const RefineTopo *topo, const MasterElementBase *me) {
+
+  ref_map &rd_map = get_ref_dual_map();
+
+  ref_map::iterator ri = rd_map.find(std::make_pair(topo,me));
+
+  RefDual *rd = 0;
+
+  if (ri == rd_map.end()) {
+
+    rd = new RefDual(topo, me);
+
+    rd_map.insert(std::make_pair(std::make_pair(topo,me), rd));
+
+  } else rd = ri->second;
+
+  return rd;
+}
+
+RefDual::RefDual(const RefineTopo *_rtopo, const MasterElementBase *_me) :
+nfunc(0),
+prolong_matrices()
+{
+  build_matrices(_rtopo, _me);
+}
+
+void RefDual::build_matrices(const RefineTopo *_rtopo, const MasterElementBase *_me)
+{
+
+ // TODO: this function assumes child has same me as parent.  This may not
+ // be true....
+
+ // Build the prolongation matrices 
+
+ const MasterElement<> &me = dynamic_cast<const MasterElement<>&>(*_me);
+ const MasterElement<METraits<fad_type,double> > &fme = *me(METraits<fad_type,double>());
+
+ // How to build the prolongation:
+ // 1) set up mapping to child parametric coords from parent
+ // 2) set parent coef fads to sensitive
+ // 3) map interpolation points to child, extract matrix
+ // 4) Apply interpolation on child, extract matrix
+ // 5) compose matrices of step 3,4
+
+ // First get parametric coordinates of interpolation points of child in parent space
+ const MeshObjTopo *ptopo1 = _rtopo->GetParentTopo();
+ ThrowRequire(ptopo1);
+
+
+ // We with to use the mapping to compute parametric coords of the child interp
+ // points in parent space, so we want to avoid going out to a higher dimension.
+ const MeshObjTopo *ptopo = FlattenTopo(*ptopo1);
+
+ UInt pdim = ptopo->parametric_dim; 
+ ThrowRequire(ptopo->parametric_dim == ptopo->spatial_dim);
+
+ UInt nip = me.NumInterpPoints();
+ nfunc = me.num_functions();
+
+ // Mapping for parametric coordinate space transforms
+ Mapping<> *map = dynamic_cast<Mapping<>*>(Topo2Map()(ptopo->name));
+ ThrowRequire(map);
+
+Par::Out() << "pdim=" << pdim << ", nip=" << nip << ", nfunc=" << nfunc << std::endl;
+Par::Out() << "ptopo->num_nodes=" << ptopo->num_nodes << std::endl;
+ const double *ipoints = me.InterpPoints();
+
+ std::vector<double> child_ipoints(nip*pdim);
+ std::vector<double> cmdata(ptopo->num_nodes*pdim);
+
+ prolong_matrices.resize(_rtopo->NumChild());
+ for (UInt c = 0; c < _rtopo->NumChild(); c++) {
+
+   const UInt *child_nodes = _rtopo->ChildNode(c);
+   const double *node_coord = ptopo->node_coord();
+
+   for (UInt n = 0; n < ptopo->num_nodes; n++) {
+     for (UInt p = 0; p < pdim; p++) {
+       cmdata[n*pdim+p] = node_coord[pdim*child_nodes[n]+p];
+     }
+   }
+
+   map->forward(nip, &cmdata[0], ipoints, &child_ipoints[0]);
+std::copy(child_ipoints.begin(), child_ipoints.end(), std::ostream_iterator<double>(Par::Out(), " "));
+Par::Out() << "\n end child ipoints" << std::endl;
+
+   // Now do an interpolation from parent to these points.  Record sensitivities.
+   std::vector<fad_type> pfdata(nfunc, 0), cfval(nip,0);
+
+   for (UInt i = 0; i < nfunc; i++) {
+     pfdata[i] = 1.0; pfdata[i].diff(i, nfunc);
+   }
+
+   fme.function_values(nip, 1, &child_ipoints[0], &pfdata[0], &cfval[0]);
+
+   // We now know how to take parent coef to values at child interp points.
+   // Now we must see how to get child coeff from such values.
+   std::vector<fad_type> ccoef(nfunc);
+
+   fme.Interpolate(1, &cfval[0], &ccoef[0]);
+
+/*
+std::copy(ccoef.begin(), ccoef.end(), std::ostream_iterator<fad_type>(Par::Out(), " ")); 
+Par::Out() << std::endl;
+*/
+
+   std::vector<double> &cmatrix = prolong_matrices[c];
+   cmatrix.resize(nfunc*nfunc);
+
+Par::Out() << "topo:" << ptopo->name << ", child:" << c << std::endl;
+   for (UInt i = 0; i < nfunc; i++) {
+     const double *dx = &(ccoef[i].fastAccessDx(0));
+     for (UInt j = 0; j < nfunc; j++) {
+       cmatrix[i*nfunc+j] = dx[j];
+Par::Out() << cmatrix[i*nfunc+j] << " ";
+     }
+Par::Out() << std::endl;
+   }
+
+ } // child
+
+}
+
+void RefDual::apply_prolongation(UInt fdim, UInt child_num, const double parent_mcoef[], double child_mcoef[]) const {
+
+  ThrowRequire(child_num < prolong_matrices.size());
+  const std::vector<double> &cmatrix = prolong_matrices[child_num];
+
+  for (UInt f = 0; f < fdim; f++) {
+    for (UInt i = 0; i < nfunc; i++) {
+      UInt ixfdim = i*fdim;
+      child_mcoef[ixfdim+f] = 0;
+      for (UInt j = 0; j < nfunc; j++) {
+        child_mcoef[ixfdim+f] += cmatrix[i*nfunc+j]*parent_mcoef[j*fdim+f];
+      }
+    }
+  }
+
+}
+
 
 } // namespace

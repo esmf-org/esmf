@@ -1,4 +1,3 @@
-// $Id: ESMC_MeshExodus.C,v 1.7 2007/12/03 23:26:17 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 

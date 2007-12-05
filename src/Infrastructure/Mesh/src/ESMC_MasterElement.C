@@ -1,4 +1,3 @@
-// $Id: ESMC_MasterElement.C,v 1.6 2007/11/28 16:42:41 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -10,6 +9,7 @@
 //
 //==============================================================================
 #include <ESMC_MasterElement.h>
+#include <ESMC_SFuncAdaptor.h>
 
 #include <ESMC_Quadrature.h>
 
@@ -61,54 +61,71 @@ int MasterElementBase::GetDofValSet(UInt dof) const {
   return dofvalset[dof];
 }
 
-// ********* A template implementation *******
-// Powerful in terms of speed, but inflexible in that the shape func class has to 
-// be compile time known.
-template<class SHAPE_FUNC, class METRAITS>
-MasterElementImpl<SHAPE_FUNC,METRAITS>* MasterElementImpl<SHAPE_FUNC,METRAITS>::classInstance = NULL;
+/*------------------------------------------------------------------*/
+// Virtual master element implementation
+/*------------------------------------------------------------------*/
 
-template<class SHAPE_FUNC, class METRAITS>
-MasterElementImpl<SHAPE_FUNC,METRAITS> *MasterElementImpl<SHAPE_FUNC,METRAITS>::instance()
-{
-  if (classInstance == NULL)
-    classInstance = new MasterElementImpl<SHAPE_FUNC,METRAITS>();
-  return classInstance;
+template <class METRAITS>
+std::map<std::string, MasterElementV<METRAITS>*>  MasterElementV<METRAITS>::meVMap;
+
+template <class METRAITS>
+MasterElementV<METRAITS> *MasterElementV<METRAITS>::instance(const ShapeFunc *shape) {
+  typename std::map<std::string, MasterElementV<METRAITS>*>::iterator mi =
+    meVMap.find(shape->name());
+  MasterElementV *me;
+  if (mi == meVMap.end()) {
+    me = new MasterElementV(shape);
+    meVMap[shape->name()] = me;
+  } else me = mi->second;
+  
+  return me;
 }
 
-template <class SHAPE_FUNC, class METRAITS>
-MasterElementImpl<SHAPE_FUNC,METRAITS>::MasterElementImpl() :
-MasterElement<METRAITS>("SHAPE:<" + SHAPE_FUNC::name + ">")
+template <class METRAITS>
+MasterElementV<METRAITS>::MasterElementV(
+                                   const ShapeFunc *shape) :
+MasterElement<METRAITS>(" SHAPE:<" + shape->name() + ">"),
+m_shape(shape)
 {
   compute_imprint(*this, this->dofvalset);
+
+  /*
+std::cout << "ME:" << this->name << ", imprint:" << std::endl;
+for (UInt i = 0; i < num_functions(); i++) {
+  const int *dd = GetDofDescription(i);
+  std::cout << " (" << dd[0] << ", " << dd[1] << ", " << dd[2] << ") valset:" << this->GetDofValSet(i) << std::endl;
+}
+*/
+
 }
 
-template <class SHAPE_FUNC, class METRAITS>
-MasterElementImpl<SHAPE_FUNC,METRAITS>::~MasterElementImpl()
+template <class METRAITS>
+MasterElementV<METRAITS>::~MasterElementV()
 {
 }
 
-template <class SHAPE_FUNC, class METRAITS>
-MasterElement<METraits<> > *MasterElementImpl<SHAPE_FUNC,METRAITS>::operator()(METraits<>) const {
-  return MasterElementImpl<SHAPE_FUNC,METraits<> >::instance();
+template <class METRAITS>
+MasterElement<METraits<> > *MasterElementV<METRAITS>::operator()(METraits<>) const {
+  return MasterElementV<METraits<> >::instance(m_shape);
 }
 
-template <class SHAPE_FUNC, class METRAITS>
-MasterElement<METraits<double,fad_type> > *MasterElementImpl<SHAPE_FUNC,METRAITS>::operator()(METraits<double,fad_type>) const {
-  return MasterElementImpl<SHAPE_FUNC,METraits<double,fad_type> >::instance();
+template <class METRAITS>
+MasterElement<METraits<fad_type,double> > *MasterElementV<METRAITS>::operator()(METraits<fad_type,double>) const {
+  return MasterElementV<METraits<fad_type,double> >::instance(m_shape);
 }
 
-template <class SHAPE_FUNC, class METRAITS>
-MasterElement<METraits<fad_type,double> > *MasterElementImpl<SHAPE_FUNC,METRAITS>::operator()(METraits<fad_type,double>) const {
-  return MasterElementImpl<SHAPE_FUNC,METraits<fad_type,double> >::instance();
+template <class METRAITS>
+MasterElement<METraits<double,fad_type> > *MasterElementV<METRAITS>::operator()(METraits<double,fad_type>) const {
+  return MasterElementV<METraits<double,fad_type> >::instance(m_shape);
 }
 
-template <class SHAPE_FUNC, class METRAITS>
-MasterElement<METraits<fad_type,fad_type> > *MasterElementImpl<SHAPE_FUNC,METRAITS>::operator()(METraits<fad_type,fad_type>) const {
-  return MasterElementImpl<SHAPE_FUNC,METraits<fad_type,fad_type> >::instance();
+template <class METRAITS>
+MasterElement<METraits<fad_type,fad_type> > *MasterElementV<METRAITS>::operator()(METraits<fad_type,fad_type>) const {
+  return MasterElementV<METraits<fad_type,fad_type> >::instance(m_shape);
 }
 
-template <class SHAPE_FUNC, class METRAITS>
-void MasterElementImpl<SHAPE_FUNC,METRAITS>::JxW(
+template <class METRAITS>
+void MasterElementV<METRAITS>::JxW(
   const Mapping<typename ME2MPTraits<METRAITS>::value> *mapping,
   const mdata_type mdata[],
   const intgRule *intg, mdata_type result[]) const
@@ -118,14 +135,15 @@ void MasterElementImpl<SHAPE_FUNC,METRAITS>::JxW(
 
   for (UInt i = 0; i < intg->npoints(); i++) result[i] = intg->weights()[i]*Jx[i];
 }
-
-template <class SHAPE_FUNC, class METRAITS>
-void MasterElementImpl<SHAPE_FUNC,METRAITS>::shape_grads(UInt npts,
+template <class METRAITS>
+void MasterElementV<METRAITS>::shape_grads(UInt npts,
       const Mapping<typename ME2MPTraits<METRAITS>::value> *mapping, 
-      const mdata_type mdata[], const double pcoord[], 
-      const double param_shape_grads[], mdata_type result[]) const 
+      const mdata_type mdata[], const double pcoord[], const double param_shape_grads[],
+      mdata_type result[]) const 
 {
   // First get the mapping derivatives
+  UInt ndofs = m_shape->NumFunctions();
+  UInt pdim = mapping->parametric_dim();
   UInt sdim = mapping->spatial_dim();
   std::vector<mdata_type> jac_inv(sdim*sdim);
   for (UInt j = 0; j < npts; j++) {
@@ -139,22 +157,22 @@ void MasterElementImpl<SHAPE_FUNC,METRAITS>::shape_grads(UInt npts,
         result[(j*ndofs + nd)*sdim + i] = 0.0;
         // Only do to pdim, not sdim, because assume zero deriv w/rspt d coord
         for (UInt k = 0; k < pdim; k++) {
-          //result[(j*ndofs + nd)*sdim + i] += sgrads[nd][k]*jac_inv[k*sdim+i];
-          result[(j*ndofs + nd)*sdim + i] += param_shape_grads[(j*ndofs + nd)*pdim+k]*jac_inv[k*sdim+i];
+          result[(j*ndofs + nd)*sdim + i] += param_shape_grads[(j*ndofs+nd)*pdim+k]*jac_inv[k*sdim+i];
         }
       }
     } // nd
   } // npts
 }
 
-template <class SHAPE_FUNC, class METRAITS>
-void MasterElementImpl<SHAPE_FUNC,METRAITS>::function_grads(UInt npts, UInt fdim,
+template <class METRAITS>
+void MasterElementV<METRAITS>::function_grads(UInt npts, UInt fdim,
    const Mapping<typename ME2MPTraits<METRAITS>::value> *mapping,
     const mdata_type mdata[], const double pcoord[], const field_type fdata[], 
    typename richest_type<mdata_type,field_type>::value result[],
    mdata_type shape_grads[]) const 
 {
   UInt sdim = mapping->spatial_dim();
+  UInt ndofs = m_shape->NumFunctions();
 
   // Now contract
   for (UInt p = 0; p < npts; p++) {
@@ -169,8 +187,8 @@ void MasterElementImpl<SHAPE_FUNC,METRAITS>::function_grads(UInt npts, UInt fdim
   }
 }
 
-template <class SHAPE_FUNC, class METRAITS>
-void MasterElementImpl<SHAPE_FUNC,METRAITS>::function_curl(UInt npts,
+template <class METRAITS>
+void MasterElementV<METRAITS>::function_curl(UInt npts,
   const Mapping<typename ME2MPTraits<METRAITS>::value> *mapping,
   const mdata_type mdata[], const double pcoord[], const field_type fdata[], 
   typename richest_type<mdata_type,field_type>::value result[],
@@ -183,7 +201,7 @@ void MasterElementImpl<SHAPE_FUNC,METRAITS>::function_curl(UInt npts,
   if (sdim != 3) throw("function_curl not yet implemented for sdim != 3");
 
   // First get all gradients of function
-  function_grads(npts, sdim, mapping, mdata, pcoord, fdata, &fgrads[0], &shape_grads[0]);
+  function_grads(npts, sdim, mapping, mdata, pcoord, fdata, &fgrads[0], shape_grads);
 
   // Curl is {dyf3-dzf2, dzf1-dxf3,dxf2-dyf1} 
   for (UInt p = 0; p < npts; p++) {
@@ -193,24 +211,27 @@ void MasterElementImpl<SHAPE_FUNC,METRAITS>::function_curl(UInt npts,
   }
 }
 
-template <class SHAPE_FUNC, class METRAITS>
-void MasterElementImpl<SHAPE_FUNC,METRAITS>::function_values(
+template <class METRAITS>
+void MasterElementV<METRAITS>::function_values(
                UInt npts, UInt fdim, const double pcoord[],
                 const field_type fdata[], field_type results[]) const
 {
+  UInt ndofs = m_shape->NumFunctions();
   std::vector<double> svals(npts*ndofs);
-  SHAPE_FUNC::shape(npts, pcoord, &svals[0]);
+  m_shape->shape(npts, pcoord, &svals[0]);
 
   function_values(npts, fdim, pcoord, fdata, results, &svals[0]);
 
 }
 
-template <class SHAPE_FUNC, class METRAITS>
-void MasterElementImpl<SHAPE_FUNC,METRAITS>::function_values(
+template <class METRAITS>
+void MasterElementV<METRAITS>::function_values(
                UInt npts, UInt fdim, const double pcoord[],
                const field_type fdata[], field_type results[],
                double shape_vals[]) const
 {
+  UInt ndofs = m_shape->NumFunctions();
+
   // contract
   for (UInt j = 0; j < npts; j++) {
    for (UInt f = 0; f < fdim; f++) {
@@ -220,165 +241,118 @@ void MasterElementImpl<SHAPE_FUNC,METRAITS>::function_values(
       }
     }
   }
+
 }
 
-template <class SHAPE_FUNC, class METRAITS>
-const int * MasterElementImpl<SHAPE_FUNC,METRAITS>::GetDofDescription(UInt dof) const {
-  return &SHAPE_FUNC::dof_description[dof][0];
+template <class METRAITS>
+const int * MasterElementV<METRAITS>::GetDofDescription(UInt dof) const {
+  return &m_shape->DofDescriptionTable()[dof*4];
 }
 
-template <class SHAPE_FUNC, class METRAITS>
-void MasterElementImpl<SHAPE_FUNC,METRAITS>::InterpPoints(
+template <class METRAITS>
+void MasterElementV<METRAITS>::InterpPoints(
   const MappingBase *mapping,
   const double mdata[], double result[]) const
 {
-  // For now, assume these are all nodal, so we should be using a nodal approach.
-  Throw() << "ME:" << this->name << " is a template version, most likely nodal, so use nodes" <<
-        " for interplation";
+  // Get the parametric points:
+  UInt np = m_shape->NumInterp();
+  Mapping<> *mp = (*mapping)(MPTraits<>());
+  const double *pcoord = m_shape->InterpPoints();
+  mp->forward(np, mdata, pcoord, result);
 }
 
-template <class SHAPE_FUNC, class METRAITS>
-void MasterElementImpl<SHAPE_FUNC,METRAITS>::Interpolate(UInt fdim, const double vals[], double res[]) const {
-  Throw() << "ME:" << this->name << " is a template version, most likely nodal, so use nodes" <<
-        " for interplation";
+template <class METRAITS>
+const double *MasterElementV<METRAITS>::InterpPoints() const
+{
+  return m_shape->InterpPoints();
+}
+
+template <class METRAITS>
+void MasterElementV<METRAITS>::Interpolate(UInt fdim, const field_type vals[], field_type res[]) const
+{
+  UInt nip = m_shape->NumInterp();
+  UInt nfunc = num_functions();
+  
+  std::vector<field_type> ires(nfunc);
+  
+  for (UInt d = 0; d < fdim; d++) {
+    m_shape->Interpolate(&vals[d*nip], &ires[0]);
+    
+    for (UInt n = 0; n < nfunc; ++n) {
+      res[n*fdim+d] = ires[n];
+    }
+  }
+
 }
 
 // Side element specializations
-template<class SHAPE_FUNC, class METRAITS>
-MasterElement<METRAITS> *MasterElementImpl<SHAPE_FUNC, METRAITS>::side_element(UInt side) const {
-  Throw() << "Could not find side element, side=" << side << "ME=" << this->name << std::endl;
+template<class METRAITS>
+MasterElement<METRAITS> *MasterElementV<METRAITS>::side_element(UInt side) const {
+
+  return MasterElementV<METRAITS>::instance(m_shape->side_shape(side));
+
 }
 
-template<>
-MasterElement<METraits<> > *MasterElementImpl<quad_shape_func,METraits<> >::side_element(UInt side) const {
-  return MasterElementImpl<bar_shape_func,METraits<> >::instance();
-}
-
-template<>
-MasterElement<METraits<> > *MasterElementImpl<hex_shape_func,METraits<> >::side_element(UInt side) const {
-  return MasterElementImpl<quad_shape_func,METraits<> >::instance();
-}
-
-template<>
-MasterElement<METraits<> > *MasterElementImpl<tri_shape_func,METraits<> >::side_element(UInt side) const {
-  return MasterElementImpl<bar_shape_func,METraits<> >::instance();
-}
-
-template<>
-MasterElement<METraits<> > *MasterElementImpl<tet_shape_func,METraits<> >::side_element(UInt side) const {
-  return MasterElementImpl<tri_shape_func,METraits<> >::instance();
-}
-
-#ifdef NOT
-// TODO: see if these can be partial specifications covering more cases.
-// QUAD sides
-template<>
-MasterElement<METraits<> > *MasterElementImpl<quad_shape_func,POLY_Mapping<quad_shape_func>::value>, quadq<1>,METraits<>  >::side_element(UInt side) {
-  return MasterElementImpl<bar_shape_func,POLY_Mapping<bar_shape_func,ME2MPTraits<METraits<> > >, barq<1>,METraits<>  >::instance();
-}
-template<>
-MasterElement<METraits<> > *MasterElementImpl<quad_shape_func,POLY_Mapping<quad_shape_func>, quadq<2>,METraits<>  >::side_element(UInt side) {
-  return MasterElementImpl<bar_shape_func,POLY_Mapping<bar_shape_func,ME2MPTraits<METraits<> > >, barq<2>,METraits<>  >::instance();
-}
-template<>
-MasterElement<METraits<> > *MasterElementImpl<quad_shape_func,POLY_Mapping<quad_shape_func,ME2MPTraits<METraits<> >, quadq<3>,METraits<>  >::side_element(UInt side) {
-  return MasterElementImpl<bar_shape_func,POLY_Mapping<bar_shape_func>, barq<3>,METraits<>  >::instance();
-}
-
-// SHELL sides
-template<>
-MasterElement<METraits<> > *MasterElementImpl<quad_shape_func,POLY_Mapping<quad_shape_func,3,2>, quadq<1>,METraits<>  >::side_element(UInt side) {
-  return MasterElementImpl<bar_shape_func,POLY_Mapping<bar_shape_func,3,1>, barq<1>,METraits<>  >::instance();
-}
-template<>
-MasterElement<METraits<> > *MasterElementImpl<quad_shape_func,POLY_Mapping<quad_shape_func,3,2>, quadq<2>,METraits<>  >::side_element(UInt side) {
-  return MasterElementImpl<bar_shape_func,POLY_Mapping<bar_shape_func,3,1>, barq<2>,METraits<>  >::instance();
-}
-template<>
-MasterElement<METraits<> > *MasterElementImpl<quad_shape_func,POLY_Mapping<quad_shape_func,3,2>, quadq<3>,METraits<>  >::side_element(UInt side) {
-  return MasterElementImpl<bar_shape_func,POLY_Mapping<bar_shape_func,3,1>, barq<3>,METraits<>  >::instance();
-}
-#endif
+template class MasterElementV<METraits<> >;
+template class MasterElementV<METraits<fad_type,double> >;
+template class MasterElementV<METraits<double,fad_type> >;
+template class MasterElementV<METraits<fad_type,fad_type> >;
 
 
-
-// Also provides Explicit Instantiations!!
-template<typename METRAITS,UInt q>
-MasterElement<METRAITS> *Topo2ME<METRAITS,q>::operator()(const std::string &name) {
+// Topo2ME implementation
+template<typename METRAITS>
+MasterElement<METRAITS> *Topo2ME<METRAITS>::operator()(const std::string &name) {
 
   // _L selects the higher order mapping, the low order field
 
-  if (name == "QUAD" || name == "QUAD4") {
-      return MasterElementImpl<quad_shape_func, METRAITS >::instance();
+  if (name == "QUAD" || name == "QUAD4" || name == "QUAD_L") {
+      return MasterElementV<METRAITS>::instance(SFuncAdaptor<quad_shape_func>::instance());
   }
   if (name == "QUAD9") {
-      return MasterElementImpl<quad9_shape_func, METRAITS >::instance();
-  } else if (name == "TRI" || name == "TRI3") {
-      return MasterElementImpl<tri_shape_func, METRAITS >::instance();
+      return MasterElementV<METRAITS>::instance(SFuncAdaptor<quad9_shape_func>::instance());
+  } else if (name == "TRI" || name == "TRI3" || name == "TRI_L") {
+      return MasterElementV<METRAITS>::instance(SFuncAdaptor<tri_shape_func>::instance());
   }
   else if (name == "SHELL3" || name == "SHELL3_L") {
-      return MasterElementImpl<tri_shape_func, METRAITS >::instance();
+      return MasterElementV<METRAITS>::instance(SFuncAdaptor<tri_shape_func>::instance());
   }
   else if (name == "SHELL" || name == "SHELL4" || name == "SHELL_L" || name == "SHELL4_L") {
-      return MasterElementImpl<quad_shape_func, METRAITS >::instance();
+      return MasterElementV<METRAITS>::instance(SFuncAdaptor<quad_shape_func>::instance());
   }
   else if (name == "SHELL9_L") {
-      return MasterElementImpl<quad_shape_func, METRAITS >::instance();
+      return MasterElementV<METRAITS>::instance(SFuncAdaptor<quad_shape_func>::instance());
   }
   else if (name == "SHELL9") {
-      return MasterElementImpl<quad9_shape_func, METRAITS >::instance();
+      return MasterElementV<METRAITS>::instance(SFuncAdaptor<quad9_shape_func>::instance());
   }
   else if (name == "HEX" || name == "HEX_L" || name == "HEX8") {
-    return MasterElementImpl<hex_shape_func, METRAITS >::instance();
+      return MasterElementV<METRAITS>::instance(SFuncAdaptor<hex_shape_func>::instance());
   }
   else if (name == "TETRA" || name == "TETRA4" || name == "TETRA_L") {
 //TODO create the correct integration rule here!!!
-    return MasterElementImpl<tet_shape_func, METRAITS >::instance();
+    return MasterElementV<METRAITS>::instance(SFuncAdaptor<tet_shape_func>::instance());
   }
   else if (name == "BAR2_3D") {
-    return MasterElementImpl<bar_shape_func, METRAITS >::instance();
+    return MasterElementV<METRAITS>::instance(SFuncAdaptor<bar_shape_func>::instance());
   }
 
-  // Simply for the purpose of instantiation
-  MasterElementImpl<dg0_shape_func<1>, METRAITS>::instance();
-  MasterElementImpl<dg0_shape_func<2>, METRAITS>::instance();
-  MasterElementImpl<dg0_shape_func<3>, METRAITS>::instance();
+  MasterElementV<METRAITS>::instance(SFuncAdaptor<dg0_shape_func<1> >::instance());
+  MasterElementV<METRAITS>::instance(SFuncAdaptor<dg0_shape_func<2> >::instance());
+  MasterElementV<METRAITS>::instance(SFuncAdaptor<dg0_shape_func<3> >::instance());
 
-  Throw() << "Cant find master element, topo=" << name << ", integration=" << q;
+
+  Throw() << "Cant find master element, topo=" << name;
 
 }
 
 
-template struct Topo2ME<METraits<>,1>;
-template struct Topo2ME<METraits<>,2>;
-template struct Topo2ME<METraits<>,3>;
-template struct Topo2ME<METraits<>,4>;
+template struct Topo2ME<METraits<> >;
 
 typedef METraits<fad_type, double> fad_metraits1; // field sens, no map
 typedef METraits<fad_type, fad_type> fad_metraits2; // field and map sens
 typedef METraits<double, fad_type> fad_metraits3; // no field sens, map sens
-template struct Topo2ME<fad_metraits1,1>;
-template struct Topo2ME<fad_metraits1,2>;
-template struct Topo2ME<fad_metraits1,3>;
-template struct Topo2ME<fad_metraits1,4>;
-template struct Topo2ME<fad_metraits2,1>;
-template struct Topo2ME<fad_metraits2,2>;
-template struct Topo2ME<fad_metraits2,3>;
-template struct Topo2ME<fad_metraits2,4>;
-template struct Topo2ME<fad_metraits3,1>;
-template struct Topo2ME<fad_metraits3,2>;
-template struct Topo2ME<fad_metraits3,3>;
-template struct Topo2ME<fad_metraits3,4>;
-
-
-template class  MasterElementImpl<dg0_shape_func<2>, METraits<> >;
-template class  MasterElementImpl<dg0_shape_func<2>, fad_metraits1 >;
-template class  MasterElementImpl<dg0_shape_func<2>, fad_metraits2>;
-template class  MasterElementImpl<dg0_shape_func<2>, fad_metraits3>;
-
-template class  MasterElementImpl<dg0_shape_func<3>, METraits<> >;
-template class  MasterElementImpl<dg0_shape_func<3>, fad_metraits1 >;
-template class  MasterElementImpl<dg0_shape_func<3>, fad_metraits2>;
-template class  MasterElementImpl<dg0_shape_func<3>, fad_metraits3>;
+template struct Topo2ME<fad_metraits1>;
+template struct Topo2ME<fad_metraits2>;
+template struct Topo2ME<fad_metraits3>;
 
 } // namespace

@@ -1,4 +1,3 @@
-// $Id: ESMC_Interp.h,v 1.4 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -18,6 +17,7 @@
 #include <ESMC_GeomRendezvous.h>
 #include <ESMC_Migrator.h>
 #include <ESMC_SparseMsg.h>
+#include <ESMC_WMat.h>
 
 #include <vector>
 #include <ostream>
@@ -39,85 +39,16 @@ class Mesh;
 class Geom;
 
 // Store/Migrate interp weights
-class IWeights {
+class IWeights : public WMat {
 
 public:
 
-  /*
-   * Matrix entry object.  Entries are not linearized at this
-   * point (that is delayed).  Instead, they are indexed by object id
-   * and index on object.
-   */
-  struct Entry {
-    Entry() : id(0), idx(0), value(0.0) {}
-    Entry(long _id, char _idx = 0, double _value = 0.0) :
-      id(_id), idx(_idx), value(_value) {}
-    
-    Entry(const Entry &rhs) :
-     id(rhs.id), idx(rhs.idx), value(rhs.value)
-    {
-    }
-    
-    Entry &operator=(const Entry &rhs) {
-      if (this == &rhs) return *this;
-      id = rhs.id;
-      idx = rhs.idx;
-      value = rhs.value;
-      return *this;
-    }
-    
-    typedef UInt id_type;
-    typedef char idx_type;
-    typedef float value_type;
-    
-    id_type id;  // MeshObj id
-    idx_type idx; // field index
-    value_type value; // weight
-    
-    bool operator<(const Entry &rhs) const {
-      if (id != rhs.id) return id < rhs.id;
-      return idx < rhs.idx;
-    }
-    
-    // Equality does not consider value
-    bool operator==(const Entry &rhs) {
-      return (id == rhs.id && idx == rhs.idx);
-    }
-    
-  };  
-  
   IWeights();
   
   IWeights(const IWeights &);
   
   IWeights &operator=(const IWeights &);
-  
     
-  void InsertRow(const Entry &row, const std::vector<Entry> &cols);
-  
-  void GetRowGIDS(std::vector<UInt> &gids);
-  
-  void GetColGIDS(std::vector<UInt> &gids);
-  
-  void Print(std::ostream &);
-  
-  /*
-   * Migrate the matrix to the row decomposition given by
-   * mesh.
-   */
-  void Migrate(Mesh &mesh);
-  
-  // Return the number of rows that use this id
-  UInt NumRows(long id) const;
-  
-  void clear();
-  
-  /*
-   * Gather the right hand side matrix rows to the column space of this
-   * weightset.
-   */
-  void GatherToCol(IWeights &rhs);
-
   /*
    * Gather the tangent vectors for the mesh.  Template class TVECT supports
    * tv()(const MeshObj &node, const MEField<> &coords, double U[], double V[]) 
@@ -127,14 +58,6 @@ public:
    */ 
   template <typename TVECT>
   void GatherTangentVectors(const Mesh &mesh, TVECT tv, bool transpose = false); 
-  
-  /*
-   * Removes the columns referencing the constraint row entries.  
-   * Converts current column references to a constrained object into
-   * a reference to non-constrained objects by assimilating the constrained
-   * objects sensitivities.
-   */
-  void AssimilateConstraints(const IWeights &constraints);
   
   /*
    * Change a 3d->3d vector matrix into a matrix mapping u,v -> u,v
@@ -147,67 +70,9 @@ public:
    * a node that is not locally owned.
    */
   void Prune(const Mesh &mesh, const MEField<> &mask);
-  
-  typedef std::map<Entry, std::vector<Entry> > WeightMap;
-  
-  WeightMap::iterator begin_row() { return weights.begin(); }
-  WeightMap::iterator end_row() { return weights.end(); }
-  WeightMap::const_iterator begin_row() const { return weights.begin(); }
-  WeightMap::const_iterator end_row() const { return weights.end(); }
-  
-  void InsertRow(WeightMap::value_type &row) {
-    InsertRow(row.first, row.second);
-  }
-
-  std::pair<int, int> count_matrix_entries() const;
-  
-  WeightMap weights;
 
 };
 
-// Migration Traits for IWeights
-
-template <>
-class SparsePack<IWeights::WeightMap::value_type> {
-public:
-  SparsePack(SparseMsg::buffer &b, IWeights::WeightMap::value_type &t);
-  static UInt size(IWeights::WeightMap::value_type &t);
-};
-
-template <>
-class SparseUnpack<IWeights::WeightMap::value_type> {
-public:
-  SparseUnpack(SparseMsg::buffer &b, IWeights::WeightMap::value_type &t);
-};
-
-
-template <>
-struct MigTraits<IWeights> {
-  
-  typedef IWeights::WeightMap::iterator element_iterator;
-
-  typedef IWeights::WeightMap::value_type element_type;
-  
-  typedef SparsePack<element_type> element_pack;
-  
-  static UInt element_pack_size(element_type &t) { return element_pack::size(t); }
-  
-  typedef SparseUnpack<element_type> element_unpack;
-  
-  static UInt get_id(element_type &t) { return t.first.id; }
-    
-  static element_iterator element_begin(IWeights &t) { return t.begin_row(); }
-  
-  static element_iterator element_end(IWeights &t) { return t.end_row(); }
-  
-  static void insert_element(IWeights & t, UInt , element_type &el) { t.InsertRow(el); }
-  
-  static void resize_object(IWeights &, UInt) {}
-  
-  static void clear_object(IWeights &t) { t.clear(); }
-  
-};
- 
 // Tangent vector support
 template <typename TVECT>
 void IWeights::GatherTangentVectors(const Mesh &mesh, TVECT tv, bool transpose) {
@@ -251,8 +116,6 @@ void IWeights::GatherTangentVectors(const Mesh &mesh, TVECT tv, bool transpose) 
   
 }
 
-std::ostream &operator <<(std::ostream &os, const IWeights::Entry &ent);
-   
 /*
  * Hold the necessary state to perform an interpolation (either parallel
  * or serial).  The interpolated fields must have a certain uniform nature.

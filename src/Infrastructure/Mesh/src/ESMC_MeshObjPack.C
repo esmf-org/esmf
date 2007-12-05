@@ -1,4 +1,3 @@
-// $Id: ESMC_MeshObjPack.C,v 1.4 2007/11/28 16:42:43 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -67,6 +66,7 @@ void MeshObjPack(SparseMsg::buffer &b, MeshObj &obj, bool ghosting) {
     Attr a(GetAttr(obj));
     Context &ctxt = a.GetContext();
     ctxt.clear(Attr::ACTIVE_ID);
+    ctxt.set(Attr::SHARED_ID);
     SparsePack<Attr>(b, a);
   }
 

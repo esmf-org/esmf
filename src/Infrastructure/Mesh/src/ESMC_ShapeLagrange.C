@@ -1,4 +1,3 @@
-// $Id: ESMC_ShapeLagrange.C,v 1.2 2007/11/28 16:42:46 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -591,6 +590,240 @@ void lobatto_set ( int order, double *xtab, double *weight )
   return;
 }
 
+/*-----------------------------------------------------------------------*/
+// Basic lagrangian chores such as interpolation
+/*-----------------------------------------------------------------------*/
+void ShapeLagrangeBase::Interpolate(const double fvals[], double mcoef[]) const {
+
+  UInt nfunc = NumFunctions();
+
+  std::copy(&fvals[0], &fvals[nfunc], mcoef);
+
+}
+
+void ShapeLagrangeBase::Interpolate(const fad_type fvals[], fad_type mcoef[]) const {
+
+  UInt nfunc = NumFunctions();
+
+  std::copy(&fvals[0], &fvals[nfunc], mcoef);
+
+}
+
+
+/*-----------------------------------------------------------------------*/
+// Basic lagrangian shape function evaluation
+/*-----------------------------------------------------------------------*/
+template <typename Real>
+Real lagrange(int i, const double *x, const Real &xbar, int n)
+{
+   int j;
+
+  Real l = 1.0;
+  
+   for (j=0; j<n; j++) {
+     if(j != i) 
+       l *= (xbar-x[j])/(x[i]-x[j]);
+   }
+   
+   return l;
+}
+
+/*-----------------------------------------------------------------------*/
+// 1D continuous lagrange
+/*-----------------------------------------------------------------------*/
+static void build_bar_dofs(UInt q, std::vector<int> &table) {
+    
+  // Int dofs first
+  for (UInt i = 0; i < 2; i++) {
+    table.push_back(DOF_NODE); 
+    table.push_back(i); // ordinal
+    table.push_back(0); // index
+    table.push_back(1); // polarity
+  } 
+  
+  // And now edge dofs
+  for (UInt i = 0; i < 1; i++) {
+    // q -1 on each edge
+    for (UInt j = 1; j < q; j++) {
+      table.push_back(DOF_EDGE);
+      table.push_back(i); // ordinal
+      table.push_back(j-1);
+      table.push_back(1); // orientation
+    }
+  }
+}
+
+void ShapeLagrangeBar::build_itable(UInt nfunc, UInt q, std::vector<double> &ip) {
+  
+  // First the nodes:
+  ip.clear(); ip.resize(nfunc*1, 0);
+  ip[0] = -1;
+  ip[1] = 1;
+
+  // Now q-1 integration points along the edges.
+  UInt ofs = 2;
+
+  // edge 0
+  for (UInt i = 1; i < q; i++) {
+    ip[ofs++] = lobatto_points[i];
+  }
+
+  ThrowRequire(ofs == nfunc*1);
+}
+
+static std::map<UInt,ShapeLagrangeBar*> &get_bar_lgmap() {
+  static std::map<UInt,ShapeLagrangeBar*> lgmap;
+  
+  return lgmap;
+}
+
+
+ShapeLagrangeBar *ShapeLagrangeBar::instance(UInt _q) {
+  
+  std::map<UInt,ShapeLagrangeBar*> &lgMap = get_bar_lgmap();
+  
+  std::map<UInt,ShapeLagrangeBar*>::iterator qi =
+    lgMap.find(_q);
+  ShapeLagrangeBar *qp;
+  if (qi == lgMap.end()) {
+    qp = new ShapeLagrangeBar(_q);
+    lgMap[_q] = qp;
+  } else qp = qi->second;
+  return qp;
+}
+
+ShapeLagrangeBar::ShapeLagrangeBar(UInt _q) 
+{
+  q = _q;
+  lobatto_points.resize(_q+1);
+  
+  std::vector<double> temp_w(q+1, 0);
+  
+  lobatto_set(q+1, &lobatto_points[0], &temp_w[0]);
+
+  char buf[512];
+  
+  std::sprintf(buf, "LagrangeBar_%02d", q);
+  
+  ename = std::string(buf);
+  
+  build_bar_dofs(q, dofs);
+  
+  build_itable(NumFunctions(), q, ipoints);
+  
+}
+
+ShapeLagrangeBar::~ShapeLagrangeBar() {
+}
+
+UInt ShapeLagrangeBar::NumFunctions() const {
+  return 2 // nodes 
+  + 1*(q-1); // edges
+}
+
+
+template <typename Real>
+void ShapeLagrangeBar::shape_eval(UInt npts, const Real pcoord[], Real results[]) const {
+  
+  UInt nfunc = NumFunctions();
+  UInt pdim = ParametricDim();
+ 
+  std::vector<Real> x_shape((q+1)*npts, 0);
+  
+  // evaluate 
+  for (UInt i = 0; i < q+1; i++) {
+    
+    for (UInt j = 0; j < npts; j++) {
+      
+      x_shape[j*(q+1)+i] = lagrange(i, &lobatto_points[0], pcoord[j], q+1);
+      
+    }
+    
+  }
+
+  // And now contract to get results
+  
+  // Nodes
+  for (UInt n = 0; n < npts; n++) {
+    
+    UInt nnfunc = n*nfunc;
+    
+    UInt qn = (q+1)*n;
+    results[nnfunc] = x_shape[qn];
+    results[nnfunc+1] = x_shape[qn+q];
+    
+  }
+  
+  // Edges
+  for (UInt n = 0; n < npts; n++) {
+    UInt qn = (q+1)*n;
+    UInt nnfunc = n*nfunc;
+    
+    Real *r = &x_shape[qn];
+
+    UInt ebase = nnfunc + 2;
+      
+    for (UInt i = 1; i < q; i++)
+        results[ebase+(i-1)] = r[i];
+
+  }  // n
+  
+}
+
+template <typename Real>
+void bar_shape_grad_eval(UInt npts, const Real pcoord[], Real results[]) {
+}
+
+void ShapeLagrangeBar::shape(UInt npts, const double pcoord[], double results[]) const {
+  shape_eval(npts, pcoord, results);
+}
+
+void ShapeLagrangeBar::shape(UInt npts, const fad_type pcoord[], fad_type results[]) const {
+  shape_eval(npts, pcoord, results);
+}
+
+void ShapeLagrangeBar::shape_grads(UInt npts, const double pcoord[], double results[]) const {
+
+  UInt nfunc = NumFunctions();
+
+  std::vector<fad_type> shape_fad(nfunc);
+
+  UInt pdim = ParametricDim();
+
+  ThrowAssert(pdim == 1);
+
+  std::vector<fad_type> pcoord_fad(pdim);
+
+  for (UInt i = 0; i < npts; i++) {
+    pcoord_fad[0] = pcoord[i*pdim];
+    pcoord_fad[0].diff(0, 1);
+    
+    shape_eval(1, &pcoord_fad[0], &shape_fad[0]);
+
+    for (UInt j = 0; j < nfunc; j++) {
+      const double *diff = &(shape_fad[j].fastAccessDx(0));
+
+      results[(i*nfunc+j)] = diff[0];
+    }
+  }
+
+
+/*
+Par::Out() << "Lag shape grads: nqpoints:" << npts << ", nfunc=" << nfunc << std::endl;
+std::copy(&results[0], &results[npts*nfunc*pdim], std::ostream_iterator<double>(Par::Out(), " "));
+Par::Out() << std::endl;
+*/
+
+}
+
+void ShapeLagrangeBar::shape_grads(UInt npts, const fad_type pcoord[], fad_type results[]) const {
+  Throw() << "do you even need this for the fad_type??";
+}
+
+
+/*-----------------------------------------------------------------------*/
+// Quadratic continuous lagrange
+/*-----------------------------------------------------------------------*/
 static void build_dofs(UInt q, std::vector<int> &table) {
     
   // Int dofs first
@@ -692,13 +925,10 @@ ShapeLagrangeQuad *ShapeLagrangeQuad::instance(UInt _q) {
   return qp;
 }
 
-ShapeLagrangeQuad::ShapeLagrangeQuad(UInt _q) :
-  ShapeFunc(),
-  q(_q),
-  lobatto_points(_q+1),
-  ename(),
-  dofs()
+ShapeLagrangeQuad::ShapeLagrangeQuad(UInt _q) 
 {
+  q = _q;
+  lobatto_points.resize(_q+1);
   
   std::vector<double> temp_w(q+1, 0);
   
@@ -725,20 +955,6 @@ UInt ShapeLagrangeQuad::NumFunctions() const {
   + (q-1)*(q-1); // element
 }
 
-template <typename Real>
-Real lagrange(int i, const double *x, const Real &xbar, int n)
-{
-   int j;
-
-  Real l = 1.0;
-  
-   for (j=0; j<n; j++) {
-     if(j != i) 
-       l *= (xbar-x[j])/(x[i]-x[j]);
-   }
-   
-   return l;
-}
 
 
 template <typename Real>
@@ -888,16 +1104,9 @@ void ShapeLagrangeQuad::shape_grads(UInt npts, const fad_type pcoord[], fad_type
   Throw() << "do you even need this for the fad_type??";
 }
 
-void ShapeLagrangeQuad::Interpolate(const double fvals[], double mcoef[]) const 
-{
-  UInt nfunc = NumFunctions();
-  
-  std::copy(&fvals[0], &fvals[nfunc], mcoef);
-  
-}
-
-/*---------------------------------------------------------------------*/
-// DG version of the above.
+/*-----------------------------------------------------------------------*/
+// Quadratic dis-continuous lagrange
+/*-----------------------------------------------------------------------*/
 
 static void build_dofs_dg(UInt q, std::vector<int> &table) {
     
@@ -952,13 +1161,10 @@ ShapeLagrangeQuadDG *ShapeLagrangeQuadDG::instance(UInt _q) {
   return qp;
 }
 
-ShapeLagrangeQuadDG::ShapeLagrangeQuadDG(UInt _q) :
-  ShapeFunc(),
-  q(_q),
-  lobatto_points(_q+1),
-  ename(),
-  dofs()
+ShapeLagrangeQuadDG::ShapeLagrangeQuadDG(UInt _q) 
 {
+  q = _q;
+  lobatto_points.resize(_q+1);
   
   std::vector<double> temp_w(q+1, 0);
   
@@ -1042,14 +1248,6 @@ Throw() << "DG shape grad not yet implemented";
 
 void ShapeLagrangeQuadDG::shape_grads(UInt npts, const fad_type pcoord[], fad_type results[]) const {
 Throw() << "DG shape grad not yet implemented";
-}
-
-void ShapeLagrangeQuadDG::Interpolate(const double fvals[], double mcoef[]) const 
-{
-  UInt nfunc = NumFunctions();
-  
-  std::copy(&fvals[0], &fvals[nfunc], mcoef);
-  
 }
 
 template void ShapeLagrangeQuad::shape_eval(UInt npts, const double pcoord[], double results[]) const; 

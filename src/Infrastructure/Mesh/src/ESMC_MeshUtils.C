@@ -1,4 +1,3 @@
-// $Id: ESMC_MeshUtils.C,v 1.5 2007/11/28 16:42:44 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -18,6 +17,7 @@
 #include <ESMC_MEValues.h>
 #include <ESMC_MeshField.h>
 #include <ESMC_ParEnv.h>
+#include <ESMC_ShapeFunc.h>
 
 #include <iostream>
 #include <iomanip>
@@ -45,13 +45,12 @@ const intgRule *GetIntg(const MeshObj &obj) {
   return obj.GetKernel()->GetIntg();
 }
 
+static int bad_dof[] = {-1,-1,-1,-1};
+
 template<typename METRAITS, typename FTYPE, typename RESTYPE>
 GatherElemData<METRAITS,FTYPE,RESTYPE>::GatherElemData(const MasterElement<METRAITS> &me, const FTYPE &f,
      const MeshObj &obj, RESTYPE res[]) 
 {
-
-  // Make sure meptr and field are the same
-  ThrowAssert(me(METraits<>()) == f.GetMEFamily().getME(GetMeshObjTopo(obj)->name, METraits<>()));
 
   UInt fdim = f.dim();
   // Gather from the nodes
@@ -62,16 +61,14 @@ GatherElemData<METRAITS,FTYPE,RESTYPE>::GatherElemData(const MasterElement<METRA
         res[n*fdim+d] = ((RESTYPE*)f.data(node))[d];
       } // dim
     } // for nfunc
-  } else if (me.orientation() == MasterElementBase::ME_SIGN_ORIENTED) {
-    const int *ddl = me.GetDofDescription(0);
-    MeshObjRelationList::const_iterator ri = 
-      MeshObjConn::find_relation(obj, dof2mtype(ddl[0]), ddl[1]);
-    ThrowRequire(ri != obj.Relations.end());
+  } else if (me.orientation() == ShapeFunc::ME_SIGN_ORIENTED) {
+    const int *ddl = bad_dof;
+    MeshObjRelationList::const_iterator ri;
     const int *dd;
-    const MeshObj *gobj = ri->obj;
+    const MeshObj *gobj = 0;
     UInt n = 0;
-    bool pol = ri->polarity;
-    int rot = ri->rotation;
+    bool pol = true;
+    int rot = 0;
     for (UInt i = 0; i < me.num_functions(); i++) {
       dd = me.GetDofDescription(i);
       if ((dd[1] != ddl[1]) || (dd[0] != ddl[0])) {
@@ -105,16 +102,14 @@ GatherElemData<METRAITS,FTYPE,RESTYPE>::GatherElemData(const MasterElement<METRA
         }
       }
     } // i
-  } else if (me.orientation() == MasterElementBase::ME_ORIENTED) {
-    const int *ddl = me.GetDofDescription(0);
-    MeshObjRelationList::const_iterator ri = 
-      MeshObjConn::find_relation(obj, dof2mtype(ddl[0]), ddl[1]);
-    ThrowRequire(ri != obj.Relations.end());
+  } else if (me.orientation() == ShapeFunc::ME_ORIENTED) {
+    const int *ddl = bad_dof;
+    MeshObjRelationList::const_iterator ri;
     const int *dd;
-    const MeshObj *gobj = ri->obj;
+    const MeshObj *gobj = 0;
     UInt n = 0;
-    bool pol = ri->polarity;
-    int rot = ri->rotation;
+    bool pol = true;
+    int rot = 0;
     for (UInt i = 0; i < me.num_functions(); i++) {
       dd = me.GetDofDescription(i);
       if ((dd[1] != ddl[1]) || (dd[0] != ddl[0])) {
@@ -166,13 +161,12 @@ GatherSideData<METRAITS,FTYPE,RESTYPE>::GatherSideData(const MasterElement<METRA
   const MeshObjTopo *etopo = GetMeshObjTopo(elem);
   
   ThrowAssert(ordinal < etopo->num_sides);
-
+  //const MeshObjTopo *side_topo = etopo->side_topo(ordinal);
+  const int *side_nodes = etopo->get_side_nodes(ordinal);
 
   // Gather from the nodes
   if (me.is_nodal()) {
 
-    const MeshObjTopo *side_topo = etopo->side_topo(ordinal);
-    const int *side_nodes = etopo->get_side_nodes(ordinal);
 
     for (UInt n = 0; n < me.num_functions(); n++) {
 
@@ -183,8 +177,97 @@ GatherSideData<METRAITS,FTYPE,RESTYPE>::GatherSideData(const MasterElement<METRA
       } // dim
 
     } // for nfunc
+#ifdef NOT
+  } else if (me.orientation() == ShapeFunc::ME_SIGN_ORIENTED) {
+    const int *ddl = {-1, -1, -1, -1};
 
-  } else Throw() << "GetSideData only for nodal me's at current"; 
+    MeshObjRelationList::const_iterator ri = 
+      MeshObjConn::find_relation(elem, dof2mtype(ddl[0]), ddl[1]);
+    ThrowRequire(ri != obj.Relations.end());
+    const int *dd;
+    const MeshObj *gobj = ri->obj;
+    UInt n = 0;
+    bool pol = ri->polarity;
+    int rot = ri->rotation;
+    for (UInt i = 0; i < me.num_functions(); i++) {
+      dd = me.GetDofDescription(i);
+      if ((dd[1] != ddl[1]) || (dd[0] != ddl[0])) {
+        if (dof2mtype(dd[0]) != MeshObj::ELEMENT) {
+          ri = MeshObjConn::find_relation(obj, dof2mtype(dd[0]), dd[1]);
+          if (ri == obj.Relations.end())
+            Throw() << "Could not get object:" << MeshObjTypeString(dof2mtype(dd[0])) << ", ord:" << dd[1]
+                    << ", obj=" << obj;
+          gobj = ri->obj; pol = ri->polarity; rot = ri->rotation;
+        } else {
+           gobj = &obj; pol = true; rot = 0; // don't need topo
+        }
+        ddl = dd;
+      }
+
+      UInt nval = me.GetDofValSet(i);
+      const typename FTYPE::field_type &llf = *f.Getfield(nval);
+
+      if (dd[0] == DOF_NODE || dd[0] == DOF_ELEM || nval == 1 ) {
+        // no polarity/rotation to worry about
+        for (UInt d = 0; d < fdim; d++) {
+          res[n++] = ((RESTYPE*)llf.data(*gobj))[dd[2]*fdim+d];
+//Par::Out() << "res=" << res[n-1] << std::endl;
+        }
+      } else {
+        //int idx = pol ? (dd[2]-rot) % nval : (nval -1 - dd[2] + rot) % nval ;
+        for (UInt d = 0; d < fdim; d++) {
+          res[n++] = pol ? ((RESTYPE*)llf.data(*gobj))[dd[2]*fdim+d] :
+                     dd[3]*((RESTYPE*)llf.data(*gobj))[dd[2]*fdim+d];
+//Par::Out() << "res=" << res[n-1] << std::endl;
+        }
+      }
+    } // i
+  } else if (me.orientation() == ShapeFunc::ME_ORIENTED) {
+    const int *ddl = me.GetDofDescription(0);
+    MeshObjRelationList::const_iterator ri = 
+      MeshObjConn::find_relation(obj, dof2mtype(ddl[0]), ddl[1]);
+    ThrowRequire(ri != obj.Relations.end());
+    const int *dd;
+    const MeshObj *gobj = ri->obj;
+    UInt n = 0;
+    bool pol = ri->polarity;
+    int rot = ri->rotation;
+    for (UInt i = 0; i < me.num_functions(); i++) {
+      dd = me.GetDofDescription(i);
+      if ((dd[1] != ddl[1]) || (dd[0] != ddl[0])) {
+        if (dof2mtype(dd[0]) != MeshObj::ELEMENT) {
+          ri = MeshObjConn::find_relation(obj, dof2mtype(dd[0]), dd[1]);
+          if (ri == obj.Relations.end())
+            Throw() << "Could not get object:" << MeshObjTypeString(dof2mtype(dd[0])) << ", ord:" << dd[1]
+                    << ", obj=" << obj;
+          gobj = ri->obj; pol = ri->polarity; rot = ri->rotation;
+        } else {
+           gobj = &obj; pol = true; rot = 0; // don't need topo
+        }
+        ddl = dd;
+      }
+
+      UInt nval = me.GetDofValSet(i);
+      const typename FTYPE::field_type &llf = *f.Getfield(nval);
+
+      if (dd[0] == DOF_NODE || dd[0] == DOF_ELEM || nval == 1 ) {
+        // no polarity/rotation to worry about
+        for (UInt d = 0; d < fdim; d++) {
+          res[n++] = ((RESTYPE*)llf.data(*gobj))[dd[2]*fdim+d];
+//Par::Out() << "res=" << res[n-1] << std::endl;
+        }
+      } else {
+        //int idx = pol ? (dd[2]-rot) % nval : (nval -1 - dd[2] + rot) % nval ;
+        int idx = pol ? dd[2]*fdim : (nval-1-dd[2])*fdim;
+//std::cout << "pol=" << pol << ", idx=" << idx << std::endl;
+        for (UInt d = 0; d < fdim; d++) {
+          res[n++] = ((RESTYPE*)llf.data(*gobj))[idx+d];
+//Par::Out() << "res=" << res[n-1] << std::endl;
+        }
+      }
+    } // i
+#endif
+  } else Throw() << "Gather of unknown type:" << me.orientation();
 
 }
 template struct GatherSideData<METraits<>,MEField<>,double>;
@@ -229,7 +312,7 @@ void ScatterElemData(const MasterElement<METRAITS> &me, const FTYPE &f,
         ((typename METRAITS::field_type*)f.data(node))[d] = mcoef[n*fdim+d];
       } // dim
     } // for nfunc
-  } else if (me.orientation() == MasterElementBase::ME_SIGN_ORIENTED){
+  } else if (me.orientation() == ShapeFunc::ME_SIGN_ORIENTED){
     const int *ddl = me.GetDofDescription(0);
     MeshObjRelationList::const_iterator ri = 
       MeshObjConn::find_relation(obj, dof2mtype(ddl[0]), ddl[1]);
@@ -269,7 +352,7 @@ void ScatterElemData(const MasterElement<METRAITS> &me, const FTYPE &f,
         }
       }
     } // i
-  } else if (me.orientation() == MasterElementBase::ME_ORIENTED) {
+  } else if (me.orientation() == ShapeFunc::ME_ORIENTED) {
     const int *ddl = me.GetDofDescription(0);
     MeshObjRelationList::const_iterator ri = 
       MeshObjConn::find_relation(obj, dof2mtype(ddl[0]), ddl[1]);
@@ -460,7 +543,7 @@ MCoord getMCoordNode(const MEField<> &nfield, const MeshObj &node) {
   for (; ei != ee; ++ei) {
     const MeshObj &elem = **ei;
     MEValues<> mev(nfield.GetMEFamily(), &nfield);
-    mev.Setup(*elem.GetKernel(), 0, &pintg);
+    mev.Setup(*elem.GetKernel(), MEV::update_map, &pintg);
     mev.ReInit(elem);
     mev.GetNormals(&tn[0]);
     for (UInt i = 0; i < sdim; i++) n[i] += tn[i];
@@ -490,7 +573,7 @@ MCoord getMCoordElem(const MEField<> &nfield, const MeshObj &elem) {
   std::vector<double> tn(sdim,0);
   
   MEValues<> mev(nfield.GetMEFamily(), &nfield);
-  mev.Setup(*elem.GetKernel(), 0, &pintg);
+  mev.Setup(*elem.GetKernel(), MEV::update_map, &pintg);
   mev.ReInit(elem);
   mev.GetNormals(&n[0]);
 

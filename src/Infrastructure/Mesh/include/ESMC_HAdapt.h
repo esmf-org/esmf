@@ -1,4 +1,3 @@
-// $Id: ESMC_HAdapt.h,v 1.3 2007/11/28 16:23:21 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -14,6 +13,12 @@
 #define ESMC_HAdapt_h
 
 #include <vector>
+#include <map>
+
+#include <ESMC_Exception.h>
+#include <ESMC_MeshTypes.h>
+#include <ESMC_MEField.h>
+#include <ESMC_WMat.h>
 
 
 namespace ESMC {
@@ -54,13 +59,13 @@ HAdapt(Mesh &mesh);
 
 /** 
  * Zero the element refinement marker field
-*/
+ */
 void ZeroMarker() const;
 
 
 /** 
  * Mark an element to refine or unrefine
-*/
+ */
 void MarkElement(const MeshObj &elem, int val) const;
 
 /**
@@ -69,12 +74,12 @@ void MarkElement(const MeshObj &elem, int val) const;
  * function, some new elements will be marked with 1 (to satisfy
  * the 2-1 rule), and only a handful of the elements will still
  * have -1 (those that CAN refine).
-*/
+ */
 void MarkerResolution();
 
 /**
  *  Refine the mesh according to markers (which should be consistent).
-*/
+ */
 void UnrefineMesh();
 
 /**
@@ -86,6 +91,12 @@ void RefineMesh();
 Mesh &GetMesh() { return mesh; }
 
 const Mesh &GetMesh() const { return mesh; }
+
+void ProlongField(MEField<> &field) {
+  ProlongField(refine_list, field);
+}
+
+void ProlongField(std::vector<MeshObj*> &elems, MEField<> &field);
 
 private:
 HAdapt(const HAdapt &);
@@ -100,6 +111,8 @@ void refinement_resolution() const;
 void resolve_refinement_markers(std::vector<MeshObj*>&);
 void resolve_unrefinement_markers(std::vector<MeshObj*>&);
 
+
+
 /** Field for resolving 2-1 (helps across processors) */
 MEField<_field> *node_marker; 
 
@@ -113,6 +126,67 @@ std::vector<MeshObj*> refine_list;
 std::vector<MeshObj*> unrefine_list;
 
 };
+
+class RefineTopo;
+class MasterElementBase;
+
+/** 
+ * Manage prolongation and constraint operators for refinement.
+ * This class matrixes (MasterElement, RefinementTopo) so that
+ * we may consider different refinement strategies for our elements.
+ * For instance, if we implement anisotropic refinement or Rivara, we
+ * we not have the homogenous prolongation and constraint matrices hard-coded
+ * into our me.
+ */
+class RefDual {
+public:
+
+ /**
+  * Create an instance.
+  * TODO: what if the refinement creates new topologies with new me?
+  */
+ static const RefDual *instance(const RefineTopo*, const MasterElementBase*me);
+
+ /** 
+  * Matrix that takes parent coefficients array pcoef[] and manufactures the
+  * child coefficients, ccoef[];  Dimensions are (me.nfunc,me.nfuc)
+  */
+ const double *prolongation_matrix(UInt child_num) const  {
+   ThrowRequire(child_num < prolong_matrices.size());
+   return &(prolong_matrices[child_num][0]);
+ }
+
+ void apply_prolongation(UInt fdim, UInt child_num, const double parent_mcoef[], double child_mcoef[]) const;
+
+/*
+ struct cmatrix {
+   std::vector<int> rows, cols;
+   std::vector<double> mat;
+ };
+*/
+ /**
+  * Return the constraint matrix for a given side. mat(i,j) describes how the dof row(i) is constrained
+  * in terms of parent dof col(j).
+  */ 
+ //const cmatrix &constraint_matrix(UInt side_num);
+
+ //std::pair<const int*,const double*> constraint_matrix(UInt child_num, UInt side_num);
+ typedef std::map<std::pair<const RefineTopo*,const MasterElementBase*>,RefDual*> ref_map;
+private:
+
+ RefDual(const RefineTopo *, const MasterElementBase *me);
+ void build_matrices(const RefineTopo *, const MasterElementBase *me);
+ RefDual(const RefDual&);
+ RefDual &operator=(const RefDual&);
+
+
+ UInt nfunc;
+ std::vector<std::vector<double> > prolong_matrices;
+
+ //std::vector<cmatrix> cmatrices;
+
+};
+
 
 } // namespace
 

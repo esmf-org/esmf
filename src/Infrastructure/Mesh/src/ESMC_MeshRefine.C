@@ -1,4 +1,3 @@
-// $Id: ESMC_MeshRefine.C,v 1.4 2007/11/28 16:42:43 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -15,6 +14,7 @@
 #include <ESMC_MeshObjConn.h>
 #include <ESMC_Exception.h>
 #include <ESMC_ParEnv.h>
+#include <ESMC_MeshUtils.h>
 
 #include <functional>
 #include <algorithm>
@@ -512,8 +512,9 @@ Par::Out() << std::endl;
             }
           }
         }
-        // Imprint the child
-        child->GetKernel()->Imprint(*child);
+        // Imprint the child (12-03 moved this to end of routine, since we
+        // may need edges/sides to be hooked up when imprinting)
+        //child->GetKernel()->Imprint(*child);
       }
     } // for child
   } // create children
@@ -796,6 +797,20 @@ Par::Out() << std::endl;
   // Imprint nodes with exterior boundary, if they are on a face that is exterior
   if (obj.get_type() == MeshObj::ELEMENT) ImprintExterior(obj);
 
+  // Loop children, imprint.  Wait till this point, after edges, etc linked up.
+  if (obj.get_type() == MeshObj::ELEMENT)
+  for (UInt c = 0; c < rtopo.NumChild(); c++) {
+
+    MeshObjRelationList::iterator ci =
+       MeshObjConn::find_relation(obj, MeshObj::ELEMENT, c, MeshObj::CHILD);
+
+    ThrowRequire(ci != obj.Relations.end());
+
+    MeshObj *child = ci->obj;
+
+    child->GetKernel()->Imprint(*child);
+  }
+
   // Mark object refined, and remove from active roster.
   const Attr &oattr = GetAttr(obj);
   const Context &ctxt = GetMeshObjContext(obj);
@@ -812,6 +827,7 @@ Par::Out() << std::endl;
 /*--------------------------------------------------------------*/
 // Prolong the node coordinates.
 /*--------------------------------------------------------------*/
+/*
 void ProlongNodeCoords(std::vector<MeshObj*> &elems, MEField<> &coord) {
 
   UInt fdim = coord.dim();
@@ -895,6 +911,7 @@ void ProlongNodeCoords(std::vector<MeshObj*> &elems, MEField<> &coord) {
     }
   } // elem
 }
+*/
 
 bool can_unrefine_investigate(MeshObj &obj) {
   // For an element, we can always unrefine:
@@ -1097,11 +1114,6 @@ void UnrefineMeshObjLocal(MeshObj &obj) {
     } // if pdim >= 2
   } // if element
 
-
-  // Put object back on the active roster
-if (obj.get_id() == 738 && obj.get_type() == MeshObj::EDGE) {
-Par::Out() << "Unrefine edge 738!!" << std::endl;
-}
   const Attr &oattr = GetAttr(obj);
   const Context &ctxt = GetMeshObjContext(obj);
   Context newctxt(ctxt);

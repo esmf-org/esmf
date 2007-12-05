@@ -1,53 +1,49 @@
-//==============================================================================
-// $Id: ESMC_RefineEx.C,v 1.7 2007/09/10 17:38:26 dneckels Exp $
-//
-// Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
-// NASA Goddard Space Flight Center.
-// Licensed under the University of Illinois-NCSA License.
-//
-//==============================================================================
-#include <iostream>
-
-#include <stdexcept>
 #include <ESMC_Mesh.h>
 #include <ESMC_MeshSkin.h>
-
 #include <ESMC_ShapeFunc.h>
 #include <ESMC_Mapping.h>
 #include <ESMC_Search.h>
-
 #include <ESMC_MeshUtils.h>
 #include <ESMC_MasterElement.h>
-
 #include <ESMC_MeshRead.h>
 #include <ESMC_ParEnv.h>
 #include <ESMC_MeshRefine.h>
 #include <ESMC_RefineTopo.h>
 #include <ESMC_MeshObjConn.h>
 #include <ESMC_MeshGen.h>
-
 #include <ESMC_HAdapt.h>
-
 #include <ESMC_Rebalance.h>
+#include <ESMC_MeshTypes.h>
 
 #include <iterator>
 #include <ostream>
-
+#include <iostream>
+#include <stdexcept>
 #include <cmath>
-
-#include <ESMC_MeshTypes.h>
-
 #include <mpi.h>
 
-#include <stdlib.h>
+/*
+ * Example:x_refine
+ * This example shows how to use mesh adaptivity and load balancing.
+ * To run,
+ * mpirun -np 10 x_refine
+ * 
+ * We build a hypercube on proc 0, and refine while load balancing until
+ * we have a mesh of the unit cube/sphere load balanced.  We then 'advect' an
+ * adpativity pattern through the mesh, load balancing at each (or some frequency)
+ * step.
+ * 
+ * Output:
+ * The output is a time series of exodus files refine_out_[tstep].proc_num.proc.g.
+ * To view these files, run the MeshCat utility, provided in this directory.
+ * Then load the files in paraview.
+ * 
+ * ./MeshCat x_dcat refine_out 10
+ * 
+ */
 
 
-
-using namespace ESMCI::MESH;
+using namespace ESMC;
 
 
 MEField<> *hf;
@@ -65,20 +61,16 @@ void wave_refine_unrefine(HAdapt &hadapt, bool rebal)
   Par::Out() << "** Unrefining mesh ** " << std::endl;
   hadapt.UnrefineMesh();
 
-  // Resolve the mesh changes in parallel.
-  hadapt.RefinementResolution();
-
   Par::Out() << "** Refining mesh ** " << std::endl;
   hadapt.RefineMesh();
-
-  // Resolve the mesh changes in parallel.
-  hadapt.RefinementResolution();
 
   // Rebalance the mesh when flag is set.
   if (rebal) {
     Par::Out() << "** Rebalancing mesh ** " << std::endl;
     Rebalance(mesh);
   }
+
+//mesh.DataStoreInfo(std::cout);
 
 }
 
@@ -133,7 +125,7 @@ void get_avgerage_nodecoord(double &diameter, double ave[], Mesh &mesh, MeshObj 
 //   h: size down to which we refine.
 //   load_bal: load balance interval (number of steps between load balancing).
 /*-------------------------------------------------------------------------------------*/
-void adapt_wave(HAdapt &hadapt, Mesh &mesh) {
+void test_adapt_wave_exec(HAdapt &hadapt, Mesh &mesh) {
 
   int nout = 0;
   UInt sdim = mesh.spatial_dim();
@@ -163,9 +155,9 @@ void adapt_wave(HAdapt &hadapt, Mesh &mesh) {
     if (Par::Rank() == 0) std::cout << "**** Running step " << nstep << std::endl;
 
     // Loop and mark elements.
-    Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
-    for (; ei != ee; ++ei) {
-      MeshObj &elem = (*ei);
+    Mesh::iterator b_obj = mesh.elem_begin(), e_obj = mesh.elem_end(), i_obj;
+    for (i_obj = b_obj; i_obj != e_obj; ++i_obj) {
+      MeshObj &elem = (*i_obj);
 
       // First, is the element within epsilon of the circle?
       double ave[3];
@@ -231,7 +223,6 @@ void adapt_wave(HAdapt &hadapt, Mesh &mesh) {
 /*-------------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
 
-
   // Initialize mpi, logfiles
   Par::Init(argc, argv, "REFOUT");
 
@@ -240,45 +231,60 @@ int main(int argc, char *argv[]) {
 
   // Main execution loop; catch errors.
   try {
-
-  // To avoid reading a datafile, we generate a start mesh by a simple procedure:
-  // Build a hypercube on proc 0; Refine uniformly and then rebalance across
-  // processors.
-
-  // Choose any of the following topologies
-  const MeshObjTopo *topo = GetTopo("QUAD");
-  //const MeshObjTopo *topo = GetTopo("TRI3");
-
-  //const MeshObjTopo *topo = GetTopo("HEX");
-  //const MeshObjTopo *topo = GetTopo("TETRA");
-
-  HyperCube(srcmesh, topo);
-
-  // Initialize an adaptivity controller;
-  HAdapt hadapt(srcmesh);
-
-  // Register an element size variable (usefull for display in 3D)
-  Context ctxt; ctxt.flip();
-  hf = srcmesh.RegisterField("h", MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
-
-  // Commit the mesh.
-  srcmesh.Commit();
-  Par::Out() << "Mesh committed!" << std::endl;
-
-
-  // Uniformly refine.  Destroy parents so that the refined mesh
-  // is the genesis mesh.
-  for (UInt i = 0; i < 4; i++) {
-    hadapt.RefineUniformly(false);
+  
+      
+    // To avoid reading a datafile, we generate a start mesh by a simple procedure:
+    // Build a hypercube on proc 0; Refine uniformly and then rebalance across
+    // processors.
+  
+    // Choose any of the following topologies
+    const MeshObjTopo *topo = GetTopo("QUAD");
+    //const MeshObjTopo *topo = GetTopo("TRI3");
+  
+    //const MeshObjTopo *topo = GetTopo("HEX");
+    //const MeshObjTopo *topo = GetTopo("TETRA");
+  
+    HyperCube(srcmesh, topo);
+  
+    // Initialize an adaptivity controller;
+    HAdapt hadapt(srcmesh);
+  
+    // Register an element size variable (usefull for display in 3D)
+    Context ctxt; ctxt.flip();
+    hf = srcmesh.RegisterField("h",                      // field name
+                                MEFamilyDG0::instance(), // master element family (element field, here)
+                                MeshObj::ELEMENT,        // support type (face or element)
+                                ctxt,                    // Where to register field 
+                                1,                       // Field dimension
+                                true                     // Output status
+                                );
+  
+  
+   // srcmesh.UseSides(true);
+    
+    // Commit the mesh.
+    srcmesh.Commit();
+    Par::Out() << "Mesh committed!" << std::endl;
+  
+//srcmesh.Print(Par::Out());
+    // Uniformly refine.  Destroy parents so that the refined mesh
+    // is the genesis mesh.
+    const int nref = srcmesh.spatial_dim() == 3 ? 1 : 5;
+    for (UInt i = 0; i < nref; i++) {
+      hadapt.RefineUniformly(false);
+      if ((i % 3) == 0) Rebalance(srcmesh);
+    }
+  
+    // Now rebalance across processors
     Rebalance(srcmesh);
-  }
-
-  std::cout << "********* Mesh Print: *********" << std::endl;
-  srcmesh.Print(Par::Out());
-
-
-  // Run the adaptivity test.
-  adapt_wave(hadapt, srcmesh);
+  
+  
+    std::cout << "********* Mesh Print: *********" << std::endl;
+    srcmesh.Print(Par::Out());
+  
+  
+    // Run the adaptivity test.
+    test_adapt_wave_exec(hadapt, srcmesh);
 
   } 
    catch (std::exception &x) {
@@ -303,13 +309,4 @@ int main(int argc, char *argv[]) {
 
   return 0;
   
-}
-
-// These will be harmless on non pgi platforms.  On pgi, however, the inclusion of
-// the fortran libraries on the link line causes these symbols to be needed.
-extern "C" {
-void __pgi_trace() {
-}
-void __pgi_tracee() {
-}
 }

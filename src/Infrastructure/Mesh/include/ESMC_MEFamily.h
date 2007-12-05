@@ -1,4 +1,3 @@
-// $Id: ESMC_MEFamily.h,v 1.3 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -14,7 +13,6 @@
 #define ESMC_MEFamily_h
 
 #include <ESMC_MasterElement.h>
-#include <ESMC_MasterElementV.h>
 
 #include <ESMC_Quadrature.h>
 
@@ -22,6 +20,7 @@
 #include <string>
 
 namespace ESMC {
+
 
 /**
  * The basic role of this class is to provide for master elements

@@ -1,4 +1,3 @@
-// $Id: ESMC_ParLog.h,v 1.2 2007/11/28 16:23:22 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 

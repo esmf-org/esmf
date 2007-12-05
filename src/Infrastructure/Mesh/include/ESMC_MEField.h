@@ -1,4 +1,3 @@
-// $Id: ESMC_MEField.h,v 1.4 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -131,6 +130,8 @@ _fieldValuePtr data(const MeshObj &obj) const {
 }
 
 private:
+MEField(const MEField &rhs);
+MEField &operator=(const MEField &rhs);
 std::vector<UInt> fidx_table;
 std::vector<_FIELD*> fields;
 _FIELD *primaryfield; // if nodal or elemental

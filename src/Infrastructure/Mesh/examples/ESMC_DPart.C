@@ -1,4 +1,3 @@
-// $Id: ESMC_DPart.C,v 1.1 2007/08/07 17:47:54 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 

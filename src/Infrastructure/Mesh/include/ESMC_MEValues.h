@@ -1,4 +1,3 @@
-// $Id: ESMC_MEValues.h,v 1.3 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -28,7 +27,8 @@ namespace ESMC {
 namespace MEV {
 typedef enum {update_sf=0x01,    // shape functions
               update_sfg=0x02,   // shape function grads
-              update_jxw=0x04   // jacobian*iweights
+              update_jxw=0x04,   // jacobian*iweights
+              update_map=0x08   // mapping data
               } update_flag_enum;
 };
 
@@ -61,7 +61,7 @@ typedef enum {update_sf=0x01,    // shape functions
  * 11-16-2007:This class still needs conceptual work, but the basis 
  * is usefull and sound....
  */
-template<typename METRAITS=METraits<>, typename CMETRAITS=METraits<>, typename FIELD=MEField<>, typename CFIELD=MEField<> >
+template<typename METRAITS=METraits<>, typename FIELD=MEField<> >
 class MEValues {
 public:
   
@@ -71,9 +71,9 @@ public:
  * points, etc... are to be requested, we must pass a coordinate
  * field.
  */
-MEValues(const MEFamily &_fmef, const CFIELD *cf = NULL);
+MEValues(const MEFamily &_fmef, const MEField<> *cf = NULL);
 
-virtual ~MEValues() {}
+virtual ~MEValues();
 
 /**
  *  Assign the me, irule, etc.... By default, we use the 
@@ -113,31 +113,29 @@ virtual void Setup(const MeshObj &obj, UInt uflag, const intgRule *ir,
  */
 virtual void ReInit(const MeshObj &elem, UInt cur_rule = 0);
 
-typedef typename CMETRAITS::mdata_type mdata_type;
 typedef typename METRAITS::field_type field_type;
-typedef typename richest_type<typename METRAITS::mdata_type,typename METRAITS::field_type>::value rich_type;
 
 /**
  * Number of functions in the finite element associated with the
  * field.
  */
-UInt GetNumFunctions() const { return meptr->num_functions(); }
+UInt GetNumFunctions() const { return bmg->meptr->num_functions(); }
 
 /**
  * Number of quadrature points.
  */
-UInt GetNumQPoints() const { return irule->npoints(); }
+UInt GetNumQPoints() const { return bmg->irule->npoints(); }
 
 /**
  * Number of functions associated with the coordinate master element.
  */
-UInt GetNumCoordFunctions() const { return cmeptr->num_functions(); }
+UInt GetNumCoordFunctions() const { return bmg->cmeptr->num_functions(); }
 
 /**
  * Use the coordinate field and me to interpolate and evaluate
  * the coordinates of the integration points.
  */
-void GetCoordinateValues(mdata_type values[]);
+void GetCoordinateValues(double values[]);
 
 /**
  * @par Interpolation routines. 
@@ -150,7 +148,7 @@ void GetCoordinateValues(mdata_type values[]);
 /**
  * How many function values are needed for interpolation?
  */ 
-UInt GetNumInterpPoints() const { return meptr->NumInterpPoints(); }
+UInt GetNumInterpPoints() const { return bmg->meptr->NumInterpPoints(); }
 
 /**
  * Returns an array of the interpolation points, in physical space
@@ -177,9 +175,9 @@ template <typename FTYPE>
 void GetFunctionValues(const FIELD &field, const FTYPE mcoef[], FTYPE values[]) {
   ThrowRequire(update_flag & MEV::update_sf);
 
-  meptr->operator()(METraits<FTYPE,double>())->function_values(
-        irule->npoints(), field.dim(), irule->locations(),
-        &mcoef[0], &values[0], &sf[cur_sf_offset]);
+  bmg->meptr->operator()(METraits<FTYPE,double>())->function_values(
+        bmg->irule->npoints(), field.dim(), bmg->irule->locations(),
+        &mcoef[0], &values[0], &sf[bmg->cur_sf_offset]);
 
 }
 
@@ -197,18 +195,14 @@ void GetFunctionGrads(const FIELD &field, field_type grads[]);
 
 template <typename FTYPE>
 void GetFunctionGrads(const FIELD &field, const FTYPE mcoef[], FTYPE grads[]) {
-  std::vector<mdata_type> mdata;
 
-  mdata.resize(cmeptr->num_functions()*sdim);
-  GatherElemData<CMETRAITS,CFIELD>(*cmeptr, *cf, *cur_elem, &mdata[0]);
- 
   ThrowRequire(update_flag & MEV::update_sfg);
 
-  meptr->operator()(METraits<FTYPE,double>())->function_grads(
-                        irule->npoints(), field.dim(),
+  bmg->meptr->operator()(METraits<FTYPE,double>())->function_grads(
+                        bmg->irule->npoints(), field.dim(),
                         mapping, &mdata[0],
-                        irule->locations(), &mcoef[0],
-                        &grads[0], &sfg[cur_sfg_offset]);
+                        bmg->irule->locations(), &mcoef[0],
+                        &grads[0], &sfg[bmg->cur_sfg_offset]);
 
 }
 
@@ -220,76 +214,95 @@ void GetFunctionCurls(const FIELD &field, field_type curls[]);
 /**
  * Unit normals at the quadrature points.
  */
-virtual void GetUnitNormals(mdata_type unit_normals[]);
+virtual void GetUnitNormals(double unit_normals[]);
 
 /**
  * Normals at the quadrature points.
  */
-virtual void GetNormals(mdata_type normals[]);
+virtual void GetNormals(double normals[]);
 
 /**
  * Return the values of the shape functions at the quadrature points.
  * Must have called Setup with update_sf
  */
 double GetShapeValue(UInt q, UInt i) {
-  return sf[cur_sf_offset + q*meptr->num_functions()+i];
+  return sf[bmg->cur_sf_offset + q*bmg->meptr->num_functions()+i];
 }
 
 /**
  * Shape gradients at the quadrature points.  Must have
  * used update_sfg in Setup.
  */
-mdata_type *GetShapeGrads(UInt q, UInt i) {
-  return &sfg[cur_sfg_offset+(q*meptr->num_functions()+i)*sdim];
+double *GetShapeGrads(UInt q, UInt i) {
+  return &sfg[bmg->cur_sfg_offset+(q*bmg->meptr->num_functions()+i)*sdim];
 }
 
 /**
  * Integration weights at the quadrature points.  Should have used
  * update_jxw in Setup.
  */
-mdata_type GetJxW(UInt q) const {
-  return jxw[cur_jxw_offset+q];
+double GetJxW(UInt q) const {
+  return jxw[bmg->cur_jxw_offset+q];
 }
 
 /**
  * Returns the number of quadrature points for the default
  * quadrature rule.
  */
-UInt GetNQPoints() { return irule->npoints();}
+UInt GetNQPoints() { return bmg->irule->npoints();}
 
 protected:
 
 // virtual so Face values can compute face jxw
-virtual void compute_jxw(const MeshObj &,std::vector<mdata_type> &mdata);
+virtual void compute_jxw(const MeshObj &,const double mdata[]);
 
 const Kernel *cur_ker;
 const MEFamily &fmef;
 const MEFamily *cmef;
 const MeshObjTopo *topo;
-// Master element pointer for field
-const MasterElement<METRAITS> *meptr;
-// Master element pointer for coordinate field
-const MasterElement<CMETRAITS> *cmeptr;
 UInt update_flag;
 
-/** State for the object (precomputed values) */
-std::vector<double> sf;
-std::vector<mdata_type> sfg;
-std::vector<mdata_type> param_sfg; // parametric shape gradients.
-std::vector<mdata_type> jxw;
+/**
+ * State for the object (precomputed values).  We store all of
+ * the data that will be used during an assembly in a single contigous
+ * buffer to improve cache performance.
+ */
+double *sf;
+double *sfg;
+double *param_sfg;
+double *jxw;
+double *mdata;
 const MeshObj *cur_elem;
+
 UInt sdim;
-const CFIELD *cf;
-const intgRule *irule;
+const MEField<> *cf;
 std::vector<const intgRule*> irule_list;
 const Mapping<typename ME2MPTraits<METRAITS>::value> *mapping;
-UInt num_irules;
-UInt cur_rule;
-UInt cur_sf_offset;
-UInt cur_sfg_offset;
-UInt cur_psfg_offset;
-UInt cur_jxw_offset;
-UInt total_nqpoints;
+
+/**
+ * A struct to hold some data that we will use in the assembly.  This
+ * struct allows us to place that data in a buffer along with all other
+ * data, for cache performance
+ */
+struct buf_manage {
+  // Master element pointer for field
+  const MasterElement<METRAITS> *meptr;
+  // Master element pointer for coordinate field
+  const MasterElement<METraits<> > *cmeptr;
+  const intgRule *irule;
+  UInt num_irules;
+  UInt cur_rule;
+  UInt cur_sf_offset;
+  UInt cur_sfg_offset;
+  UInt cur_psfg_offset;
+  UInt cur_jxw_offset;
+  UInt total_nqpoints;
+};
+
+buf_manage *bmg;
+
+/** Precomputed values all in one big data buffer for cache efficiency */
+UChar *buf;
 };
 
 /**
@@ -298,11 +311,11 @@ UInt total_nqpoints;
  * This class takes a lower dimensional quadrature rule for Setup, and maps it
  * to a side quadrature.
  */
-template<typename METRAITS=METraits<>, typename CMETRAITS=METraits<>, typename FIELD=MEField<>, typename CFIELD=MEField<> >
-class MESideValues : public MEValues<METRAITS,CMETRAITS,FIELD,CFIELD> {
+template<typename METRAITS=METraits<>, typename FIELD=MEField<> >
+class MESideValues : public MEValues<METRAITS,FIELD> {
 public:
 
-MESideValues(const MEFamily &_fmef, const CFIELD *_cf=NULL);
+MESideValues(const MEFamily &_fmef, const MEField<> *_cf=NULL);
 
 ~MESideValues();
 
@@ -330,8 +343,8 @@ void ReInit(const MeshObj &elem) {
 }
 
 private:
-void compute_jxw(const MeshObj &,std::vector<typename METRAITS::mdata_type> &mdata);
-const MasterElement<CMETRAITS> *side_cmeptr;
+void compute_jxw(const MeshObj &,const double mdata[]);
+const MasterElement<METraits<> > *side_cmeptr;
 const Mapping<typename ME2MPTraits<METRAITS>::value> *side_mapping;
 UInt cur_side;
 };

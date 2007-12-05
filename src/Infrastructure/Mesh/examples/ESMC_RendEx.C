@@ -1,5 +1,4 @@
 //==============================================================================
-// $Id: ESMC_RendEx.C,v 1.5 2007/09/18 20:11:16 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +37,7 @@
 #include <cmath>
 
 
-using namespace ESMCI::MESH;
+using namespace ESMC;
 
 
 void fill_src(const Mesh &mesh, MEField<> *s, double t) {
@@ -53,7 +52,7 @@ void fill_src(const Mesh &mesh, MEField<> *s, double t) {
     double *c = cfield->data(node);
     double *data = s->data(node);
 
-    data[0] = sin((7*c[0]+t*6*c[1])*M_PI)*cos(4*c[2]*M_PI);
+    data[0] = sin((7*c[0]+t*2*c[1])*M_PI)*cos(4*c[2]*M_PI);
   }
 }
 
@@ -151,21 +150,33 @@ int main(int argc, char *argv[]) {
   // Adjust the destination coordinates so that the destination mesh is an arcing manifold
   set_dest_coords(dstmesh);
 
-  double T = 0, tstep = 0.3, TEND = 5;
+  double T = 0, tstep = 0.3, TEND = 2;
+  fill_src(srcmesh, s, T);
 
+
+srcmesh.Print(Par::Out());
+  WriteMesh(srcmesh, "src_mesh");
+  WriteMesh(dstmesh, "dst_mesh");
+
+  if (Par::Rank() == 0) std::cout << "Calling Zoltan!!" << std::endl;
+
+  std::vector<Interp::FieldPair> fpairs;
+  fpairs.push_back(Interp::FieldPair(s, d));
+#ifdef ESMC_LAPACK
+  fpairs.push_back(Interp::FieldPair(s, d1, Interp::INTERP_PATCH));
+#endif
+  
   // Ghost elements across parallel boundaries (needed by INTERP_PATCH)
   srcmesh.CreateGhost();
   
   Interp interp(srcmesh, dstmesh, fpairs);
+  
 
   UInt nstep = 0;
   while (T < TEND) {
-
     fill_src(srcmesh, s, T);
-
     // Send field values to the ghosted cells
     srcmesh.GhostComm().SendFields(1, &s, &s);
-
     // Perform the interpolation
     interp();
   

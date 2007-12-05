@@ -1,4 +1,3 @@
-// $Id: ESMC_RefineTopo.C,v 1.4 2007/11/28 16:42:45 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -56,10 +55,21 @@ static UInt tri_homorefine_cnodes[] = {
 4, 5, 3
 };
 
-static const HomoRefineTopo *ManufactureHomoRefineTopo(const std::string &name) {
+const RefineTopo *GetHomoRefineTopo(const std::string &tname) {
+  const MeshObjTopo *topo = GetTopo(tname);
+  ThrowRequire(topo);
+  return GetHomoRefineTopo(topo);
+}
+
+static const HomoRefineTopo *ManufactureHomoRefineTopo(const MeshObjTopo *parent_topo) {
+
+  const std::string &name = parent_topo->name;
+
   HomoRefineTopo *topo = NULL;
+
   if (name == "HEX8" || name == "HEX") {
-    return new HomoRefineTopo(8, // nchild
+    return new HomoRefineTopo(parent_topo,
+                8, // nchild
                 GetTopo(name), // ctopo
                 hex_homorefine_cnodes, // child nodes
                 GetHomoRefineTopo("QUAD_3D"), // face rtopo
@@ -67,7 +77,8 @@ static const HomoRefineTopo *ManufactureHomoRefineTopo(const std::string &name) 
                 );
   }
   else if (name == "TETRA4" || name == "TETRA") {
-    return new HomoRefineTopo(8, // nchild
+    return new HomoRefineTopo(parent_topo,
+                8, // nchild
                 GetTopo(name), // ctopo
                 tetra_homorefine_cnodes, // child nodes
                 GetHomoRefineTopo("TRI3_3D"), // face rtopo
@@ -75,7 +86,8 @@ static const HomoRefineTopo *ManufactureHomoRefineTopo(const std::string &name) 
                 );
   }
   else if (name == "TRI3") {
-    return new HomoRefineTopo(4, // nchild
+    return new HomoRefineTopo(parent_topo,
+                4, // nchild
                 GetTopo(name), // ctopo
                 tri_homorefine_cnodes, // child nodes
                 NULL, // face rtopo
@@ -83,7 +95,8 @@ static const HomoRefineTopo *ManufactureHomoRefineTopo(const std::string &name) 
                 );
   }
   else if (name == "TRI3_3D") {
-    return new HomoRefineTopo(4, // nchild
+    return new HomoRefineTopo(parent_topo,
+                4, // nchild
                 GetTopo(name), // ctopo
                 tri_homorefine_cnodes, // child nodes
                 NULL, // face rtopo
@@ -91,7 +104,8 @@ static const HomoRefineTopo *ManufactureHomoRefineTopo(const std::string &name) 
                 );
   }
   else if (name == "QUAD4" || name == "QUAD") {
-    return new HomoRefineTopo(4, // nchild
+    return new HomoRefineTopo(parent_topo,
+                4, // nchild
                 GetTopo(name), // ctopo
                 quad_homorefine_cnodes, // child nodes
                 NULL, // face rtopo
@@ -99,7 +113,8 @@ static const HomoRefineTopo *ManufactureHomoRefineTopo(const std::string &name) 
                 );
   }
   else if (name == "QUAD4_3D" || name == "QUAD_3D") {
-    return new HomoRefineTopo(4, // nchild
+    return new HomoRefineTopo(parent_topo,
+                4, // nchild
                 GetTopo(name), // ctopo
                 quad_homorefine_cnodes, // child nodes
                 NULL, // face rtopo
@@ -107,7 +122,8 @@ static const HomoRefineTopo *ManufactureHomoRefineTopo(const std::string &name) 
                 );
   }
   else if (name == "SHELL" || name == "SHELL4") {
-    return new HomoRefineTopo(4, // nchild
+    return new HomoRefineTopo(parent_topo,
+                4, // nchild
                 GetTopo(name), // ctopo
                 quad_homorefine_cnodes, // child nodes
                 NULL, // face rtopo
@@ -115,7 +131,8 @@ static const HomoRefineTopo *ManufactureHomoRefineTopo(const std::string &name) 
                 );
   }
   else if (name == "SHELL3") {
-    return new HomoRefineTopo(4, // nchild
+    return new HomoRefineTopo(parent_topo,
+                4, // nchild
                 GetTopo(name), // ctopo
                 tri_homorefine_cnodes, // child nodes
                 NULL, // face rtopo
@@ -123,7 +140,8 @@ static const HomoRefineTopo *ManufactureHomoRefineTopo(const std::string &name) 
                 );
   }
   else if (name == "BAR2") {
-    return new HomoRefineTopo(2, // nchild
+    return new HomoRefineTopo(parent_topo,
+                2, // nchild
                 GetTopo(name), // ctopo
                 bar_homorefine_cnodes, // child nodes
                 NULL, // face rtopo
@@ -131,7 +149,8 @@ static const HomoRefineTopo *ManufactureHomoRefineTopo(const std::string &name) 
                 );
   }
   else if (name == "BAR2_2D") {
-    return new HomoRefineTopo(2, // nchild
+    return new HomoRefineTopo(parent_topo,
+                2, // nchild
                 GetTopo(name), // ctopo
                 bar_homorefine_cnodes, // child nodes
                 NULL, // face rtopo
@@ -139,7 +158,8 @@ static const HomoRefineTopo *ManufactureHomoRefineTopo(const std::string &name) 
                 );
   }
   else if (name == "BAR2_3D") {
-    return new HomoRefineTopo(2, // nchild
+    return new HomoRefineTopo(parent_topo,
+                2, // nchild
                 GetTopo(name), // ctopo
                 bar_homorefine_cnodes, // child nodes
                 NULL, // face rtopo
@@ -150,16 +170,16 @@ static const HomoRefineTopo *ManufactureHomoRefineTopo(const std::string &name) 
 }
 
 
-const RefineTopo *GetHomoRefineTopo(const std::string &tname) {
+const RefineTopo *GetHomoRefineTopo(const MeshObjTopo *topo) {
   static std::map<std::string,const RefineTopo*> static_rtopo_map;
   const RefineTopo *rtopo;
   std::map<std::string, const RefineTopo*>::iterator mit;
   
-  mit = static_rtopo_map.find(tname);
+  mit = static_rtopo_map.find(topo->name);
 
   if (mit == static_rtopo_map.end()) {
-    rtopo = ManufactureHomoRefineTopo(tname);
-    static_rtopo_map[tname] = rtopo;
+    rtopo = ManufactureHomoRefineTopo(topo);
+    static_rtopo_map[topo->name] = rtopo;
   } else rtopo = mit->second;
 
   return rtopo;

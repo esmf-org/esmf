@@ -1,4 +1,3 @@
-// $Id: ESMC_ShapeLagrange.h,v 1.2 2007/11/28 16:43:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -14,7 +13,7 @@
 #define ESMC_SHAPELAGRANGE_H_
 
 #include <ESMC_ShapeFunc.h>
-#include <ESMC_MasterElement.h>
+#include <ESMC_Exception.h>
 
 
 #include <vector>
@@ -28,6 +27,90 @@ namespace ESMC {
  * 
  * @ingroup shapefunc
  */
+
+/** 
+ * Handles basic interpolation and other common tasks of the lagrange family.
+ * @ingroup shapelag
+ */
+class ShapeLagrangeBase : public ShapeFunc {
+public:
+  virtual UInt NumFunctions() const = 0;
+  
+  UInt IntgOrder() const { return q+1; }
+  
+  const std::string &name() const { return ename; }
+  
+  bool is_nodal() const { return false; }
+
+  ShapeFunc *side_shape(UInt side_num) const {
+    Throw() << "No side for lagrange";
+  }
+  
+  UInt orientation() const { return ShapeFunc::ME_ORIENTED; }
+  
+  UInt NumInterp() const { return NumFunctions(); }
+  
+  const double *InterpPoints() const { return &ipoints[0]; }
+
+  void Interpolate(const double fvals[], double mcoef[]) const; 
+  void Interpolate(const fad_type fvals[], fad_type mcoef[]) const; 
+  
+  const int *DofDescriptionTable() const { return &dofs[0];}
+
+protected:
+
+  ShapeLagrangeBase() {}
+  virtual ~ShapeLagrangeBase() {}
+ 
+  // ***** Data *****
+  UInt q;
+  std::vector<double> lobatto_points;
+  std::string ename;
+  std::vector<int> dofs;
+  std::vector<double> ipoints;
+};
+
+/**
+ * Continous quadrilateral lagrange. 
+ * Degrees of freedom are laid out first on nodes, then edges, 
+ * For instance, the third order:
+ *
+ *       o----*----*----o
+ *       0    2    3    1
+ *
+ *  The number is oriented in the same way for higher order elements.
+ *  The dofs are stacked on the edges in increasing order.  Hence,
+ *  if an edge has reverse polarity, they must be unpacked in 
+ *  reverse order.
+ * 
+ * @ingroup shapelag
+ */
+class ShapeLagrangeBar : public ShapeLagrangeBase {
+public:
+  ShapeLagrangeBar(UInt q);
+  ~ShapeLagrangeBar();
+  
+  static ShapeLagrangeBar *instance(UInt q);
+
+  UInt NumFunctions() const;
+  
+  UInt ParametricDim() const { return 1; }
+  
+  void shape(UInt npts, const double pcoord[], double results[]) const;
+  void shape(UInt npts, const fad_type pcoord[], fad_type results[]) const;
+  
+  void shape_grads(UInt npts, const double pcoord[], double results[]) const;
+  void shape_grads(UInt npts, const fad_type pcoord[], fad_type results[]) const;
+  
+private:
+  
+  template <typename Real>
+  void shape_eval(UInt npts, const Real pcoord[], Real results[]) const;
+  
+  void build_itable(UInt nfunc, UInt q, std::vector<double> &ip);
+
+};
+
 
 /**
  * Continous quadrilateral lagrange. 
@@ -54,18 +137,16 @@ namespace ESMC {
  * 
  * @ingroup shapelag
  */
-class ShapeLagrangeQuad : public ShapeFunc {
+class ShapeLagrangeQuad : public ShapeLagrangeBase {
 public:
   ShapeLagrangeQuad(UInt q);
   ~ShapeLagrangeQuad();
   
   static ShapeLagrangeQuad *instance(UInt q);
-  
+
   UInt NumFunctions() const;
   
   UInt ParametricDim() const { return 2; }
-  
-  UInt IntgOrder() const { return q+1; }
   
   void shape(UInt npts, const double pcoord[], double results[]) const;
   void shape(UInt npts, const fad_type pcoord[], fad_type results[]) const;
@@ -73,32 +154,13 @@ public:
   void shape_grads(UInt npts, const double pcoord[], double results[]) const;
   void shape_grads(UInt npts, const fad_type pcoord[], fad_type results[]) const;
   
-  const std::string &name() const { return ename; }
-  
-  bool is_nodal() const { return false; }
-  
-  UInt orientation() const { return MasterElementBase::ME_ORIENTED; }
-  
-  UInt NumInterp() const { return NumFunctions(); }
-  
-  const double *InterpPoints() const { return &ipoints[0]; }
-  
-  void Interpolate(const double fvals[], double mcoef[]) const;
-  
-  const int *DofDescriptionTable() const { return &dofs[0];}
-  
 private:
   
   template <typename Real>
   void shape_eval(UInt npts, const Real pcoord[], Real results[]) const;
   
   void build_itable(UInt nfunc, UInt q, std::vector<double> &ip);
-  
-  UInt q;
-  std::vector<double> lobatto_points;
-  std::string ename;
-  std::vector<int> dofs;
-  std::vector<double> ipoints;
+
 };
 
 
@@ -121,7 +183,7 @@ private:
  *       0    1    2    3
  * @ingroup shapelag
  */
-class ShapeLagrangeQuadDG : public ShapeFunc {
+class ShapeLagrangeQuadDG : public ShapeLagrangeBase {
 public:
   ShapeLagrangeQuadDG(UInt q);
   ~ShapeLagrangeQuadDG();
@@ -129,30 +191,13 @@ public:
   static ShapeLagrangeQuadDG *instance(UInt q);
   
   UInt NumFunctions() const;
-  
   UInt ParametricDim() const { return 2; }
-  
-  UInt IntgOrder() const { return q; }
   
   void shape(UInt npts, const double pcoord[], double results[]) const;
   void shape(UInt npts, const fad_type pcoord[], fad_type results[]) const;
   
   void shape_grads(UInt npts, const double pcoord[], double results[]) const;
   void shape_grads(UInt npts, const fad_type pcoord[], fad_type results[]) const;
-  
-  const std::string &name() const { return ename; }
-  
-  bool is_nodal() const { return false; }
-  
-  UInt orientation() const { return MasterElementBase::ME_DG; }
-  
-  UInt NumInterp() const { return NumFunctions(); }
-  
-  const double *InterpPoints() const { return &ipoints[0]; }
-  
-  void Interpolate(const double fvals[], double mcoef[]) const;
-  
-  const int *DofDescriptionTable() const { return &dofs[0];}
   
 private:
   
@@ -161,11 +206,6 @@ private:
   
   void build_itable(UInt nfunc, UInt q, std::vector<double> &ip);
   
-  UInt q;
-  std::vector<double> lobatto_points;
-  std::string ename;
-  std::vector<int> dofs;
-  std::vector<double> ipoints;
 };
 
 } // namespace

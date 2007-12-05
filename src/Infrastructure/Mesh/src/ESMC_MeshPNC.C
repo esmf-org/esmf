@@ -1,4 +1,3 @@
-// $Id: ESMC_MeshPNC.C,v 1.2 2007/11/28 16:42:43 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -22,7 +21,9 @@
 #include <ESMC_MeshObj.h>
 #include <ESMC_MeshUtils.h>
 
+#ifdef ESMC_PNETCDF
 #include <pnetcdf.h>
+#endif
 
 #include <cmath>
 #include <iostream>
@@ -34,6 +35,8 @@ namespace ESMC {
 
 
 void LoadNCDualMeshPar(Mesh &mesh, const std::string fname, bool use_quad) {
+  Trace __trace("LoadNCDualMeshPar(Mesh &mesh, const std::string fname, bool use_quad)");
+#ifdef ESMC_PNETCDF
 
   UInt rank = Par::Rank(), nproc = Par::Size();
   
@@ -428,6 +431,9 @@ void LoadNCDualMeshPar(Mesh &mesh, const std::string fname, bool use_quad) {
   }
   
   Skin(mesh);
+#else
+  Throw() << "Please recompile with PNETCDF support";
+#endif
 }
 
 
