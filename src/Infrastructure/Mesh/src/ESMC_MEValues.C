@@ -109,22 +109,22 @@ void MEValues<METRAITS,FIELD>::Setup(const Kernel &ker, UInt uflag,
   }
 
   // First a quick calculation to figure out sizes
-  buf_size += round_to_dword(sizeof(buf_manage));
+  buf_size += round_to_dword((UInt)(sizeof(buf_manage)));
 
   if (update_flag & MEV::update_sf) {
-    buf_size += round_to_dword(ltotal_nqpoints*lmeptr->num_functions()*sizeof(double));
+    buf_size += round_to_dword((UInt)(ltotal_nqpoints*lmeptr->num_functions()*sizeof(double)));
   }
   if (update_flag & MEV::update_sfg) {
     // param_sfg
-    buf_size += round_to_dword(ltotal_nqpoints*lmeptr->num_functions()*topo->parametric_dim*sizeof(double));
+    buf_size += round_to_dword((UInt)(ltotal_nqpoints*lmeptr->num_functions()*topo->parametric_dim*sizeof(double)));
     // sfg
-    buf_size += round_to_dword(ltotal_nqpoints*sdim*lmeptr->num_functions()*sizeof(double));
+    buf_size += round_to_dword((UInt)(ltotal_nqpoints*sdim*lmeptr->num_functions()*sizeof(double)));
   }
   if (update_flag & MEV::update_jxw) {
-    buf_size += round_to_dword(ltotal_nqpoints*sizeof(double));
+    buf_size += round_to_dword((UInt)(ltotal_nqpoints*sizeof(double)));
   }
   if (update_flag & MEV::update_map) {
-    buf_size += round_to_dword(lcmeptr->num_functions()*sdim*sizeof(double));
+    buf_size += round_to_dword((UInt)(lcmeptr->num_functions()*sdim*sizeof(double)));
   }
 
   // Allocate the buffer
@@ -137,27 +137,27 @@ void MEValues<METRAITS,FIELD>::Setup(const Kernel &ker, UInt uflag,
   buf_size = 0;
 
   bmg = reinterpret_cast<buf_manage*>(&buf[buf_size]);
-  buf_size += round_to_dword(sizeof(buf_manage));
+  buf_size += round_to_dword((UInt)(sizeof(buf_manage)));
 
   if (update_flag & MEV::update_sf) {
     sf = reinterpret_cast<double*>(&buf[buf_size]);
-    buf_size += round_to_dword(ltotal_nqpoints*lmeptr->num_functions()*sizeof(double));
+    buf_size += round_to_dword((UInt)(ltotal_nqpoints*lmeptr->num_functions()*sizeof(double)));
   }
   if (update_flag & MEV::update_sfg) {
     // param_sfg
     param_sfg = reinterpret_cast<double*>(&buf[buf_size]);
-    buf_size += round_to_dword(ltotal_nqpoints*lmeptr->num_functions()*topo->parametric_dim*sizeof(double));
+    buf_size += round_to_dword((UInt)(ltotal_nqpoints*lmeptr->num_functions()*topo->parametric_dim*sizeof(double)));
     // sfg
     sfg = reinterpret_cast<double*>(&buf[buf_size]);
-    buf_size += round_to_dword(ltotal_nqpoints*sdim*lmeptr->num_functions()*sizeof(double));
+    buf_size += round_to_dword((UInt)(ltotal_nqpoints*sdim*lmeptr->num_functions()*sizeof(double)));
   }
   if (update_flag & MEV::update_jxw) {
     jxw = reinterpret_cast<double*>(&buf[buf_size]);
-    buf_size += round_to_dword(ltotal_nqpoints*sizeof(double));
+    buf_size += round_to_dword((UInt)(ltotal_nqpoints*sizeof(double)));
   }
   if (update_flag & MEV::update_map) {
     mdata = reinterpret_cast<double*>(&buf[buf_size]);
-    buf_size += round_to_dword(lcmeptr->num_functions()*sdim*sizeof(double));
+    buf_size += round_to_dword((UInt)(lcmeptr->num_functions()*sdim*sizeof(double)));
   }
 
 
