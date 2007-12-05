@@ -53,7 +53,7 @@ UInt PatchRecov<NFIELD,Real>::get_ncoeff(UInt dim, UInt deg) {
 /**
  * Needs a buffer of size buf(2*(pdeg+1)]
  */
-static void eval_monomial2(UInt nsamples, UInt sample, UInt pdeg, const double coord[], double res[], double buf[]) {
+void eval_monomial2(UInt nsamples, UInt sample, UInt pdeg, const double coord[], double res[], double buf[]) {
   // Lay out 1 x x^2 x^2 ... 1 y y^2 y
   buf[0] = 1.0;
   for (UInt i = 1; i <= pdeg; i++) {
@@ -88,7 +88,7 @@ static void eval_monomial2(UInt nsamples, UInt sample, UInt pdeg, const double c
 /**
  * Needs a buffer of size buf(3*(pdeg+1)]
  */
-static void eval_monomial3(UInt nsamples, UInt sample, UInt pdeg, const double coord[], double res[], double buf[]) {
+void eval_monomial3(UInt nsamples, UInt sample, UInt pdeg, const double coord[], double res[], double buf[]) {
   // Lay out 1 x x^2 x^2 ... 1 y y^2 y
   buf[0] = 1.0;
   for (UInt i = 1; i <= pdeg; i++) {
@@ -652,7 +652,7 @@ void PatchRecov<NFIELD,Real>::CreateConstantPatch(const MeshObj &node,
  * Needs a buffer of size buf(2*(pdeg+1)]
  */
 template <typename Real>
-static Real EvalMonomial2(UInt pdeg, const double coord[], const Real coef[], double buf[]) {
+Real EvalMonomial2(UInt pdeg, const double coord[], const Real coef[], double buf[]) {
   // Lay out 1 x x^2 x^2 ... 1 y y^2 y
   buf[0] = 1.0;
   for (UInt i = 1; i <= pdeg; i++) {
@@ -691,7 +691,7 @@ static Real EvalMonomial2(UInt pdeg, const double coord[], const Real coef[], do
  * needs a buffer of size 2*(pdeg+2)
  */
 template <typename Real>
-static Real EvalMonomialDeriv2(UInt pdeg, const double coord[], const Real coef[], Real res[], double buf[], bool eval_func) {
+Real EvalMonomialDeriv2(UInt pdeg, const double coord[], const Real coef[], Real res[], double buf[], bool eval_func) {
   // Lay out 0 1 x x^2 x^2 ... 1 y y^2 y
   buf[0] = 0.0; buf[1] = 1.0;
   for (UInt i = 1; i <= pdeg; i++) {
@@ -748,7 +748,7 @@ static Real EvalMonomialDeriv2(UInt pdeg, const double coord[], const Real coef[
  * Needs a buffer of size buf(3*(pdeg+1)]
  */
 template <typename Real>
-static Real EvalMonomial3(UInt pdeg, const double coord[], const Real coef[], double buf[]) {
+Real EvalMonomial3(UInt pdeg, const double coord[], const Real coef[], double buf[]) {
   // Lay out 1 x x^2 x^2 ... 1 y y^2 y
   buf[0] = 1.0;
   for (UInt i = 1; i <= pdeg; i++) {
@@ -800,7 +800,7 @@ static Real EvalMonomial3(UInt pdeg, const double coord[], const Real coef[], do
  * needs a buffer of size 3((pdeg+2)
  */
 template <typename Real>
-static Real EvalMonomialDeriv3(UInt pdeg, const double coord[], const Real coef[], Real res[], double buf[], bool eval_func) {
+Real EvalMonomialDeriv3(UInt pdeg, const double coord[], const Real coef[], Real res[], double buf[], bool eval_func) {
   // Lay out 0 1 x x^2 x^2 ... 1 y y^2 y
   buf[0] = 0.0; buf[1] = 1.0;
   for (UInt i = 1; i <= pdeg; i++) {
