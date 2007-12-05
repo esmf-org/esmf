@@ -13,7 +13,9 @@
 #include <ESMC_MeshUtils.h>
 #include <ESMC_ParEnv.h>
 
+#ifdef ESMC_NETCDF
 #include <netcdf.h>
+#endif
 
 #include <algorithm>
 #include <iterator>
@@ -79,6 +81,8 @@ static std::string get_fname(const std::string &fbase, UInt psize, UInt rank) {
 }
 
 void WriteIWeights(const IWeights &w, const std::string &fbase) {
+  Trace __trace("WriteIWeights(const IWeights &w, const std::string &fbase)");
+#ifdef ESMC_NETCDF
 
   std::string newname = get_fname(fbase, Par::Size(), Par::Rank());
   
@@ -151,9 +155,14 @@ void WriteIWeights(const IWeights &w, const std::string &fbase) {
     Throw() << "NC error:" << nc_strerror(retval);
 
   nc_close(ncid);
+#else
+  Throw() << "Please recompile with netcdf enabled";
+#endif
 }
 
 void ReadIWeights(IWeights &w, const std::string &fbase, UInt nproc, UInt rank) {
+  Trace __trace("ReadIWeights(IWeights &w, const std::string &fbase, UInt nproc, UInt rank)");
+#ifdef ESMC_NETCDF
   
   std::string newname = get_fname(fbase, nproc, rank);
   
@@ -246,6 +255,10 @@ void ReadIWeights(IWeights &w, const std::string &fbase, UInt nproc, UInt rank) 
     w.InsertRow(_row, _col);
     
   }  // i < n_s
+
+#else
+  Throw() << "Please recompile with netcdf enabled";
+#endif
   
 }
 
@@ -302,6 +315,7 @@ static void nc_grid_file_2deg(nc_grid_file &ncf) {
 }
 
 static void get_nc_grid_file(nc_grid_file &ncf, const std::string &ncfile) {
+#ifdef ESMC_NETCDF
 
   int ncid, stat;
 
@@ -461,6 +475,10 @@ static void get_nc_grid_file(nc_grid_file &ncf, const std::string &ncfile) {
    }
   
   nc_close(ncid);
+
+#else
+  Throw() << "Please recompile with netcdf enabled";
+#endif
   
 }
 
@@ -470,7 +488,9 @@ void WriteNCMatFile(const std::string &src_ncfile,
                     const IWeights &w,
                     int ordering)
 {
+  Trace __trace("WriteNCMatFile(const std::string &src_ncfile, const std::string &dst_ncfile, const std::string &outfile, const IWeights &w, int ordering");
 
+#ifdef ESMC_NETCDF
   std::pair<int,int> pa = w.count_matrix_entries();
   int n_s = pa.first;
   int max_idx = pa.second;
@@ -767,6 +787,10 @@ void WriteNCMatFile(const std::string &src_ncfile,
       Throw() << "NC error:" << nc_strerror(retval);
    
    nc_close(ncid);
+
+#else
+  Throw() << "Please recompile with netcdf enabled";
+#endif
   
 }
 

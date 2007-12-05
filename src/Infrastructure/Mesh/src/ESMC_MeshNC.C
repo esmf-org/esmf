@@ -20,7 +20,9 @@
 #include <ESMC_ParEnv.h>
 #include <ESMC_MeshObj.h>
 
+#ifdef ESMC_NETCDF
 #include <netcdf.h>
+#endif
 
 #include <cmath>
 #include <iostream>
@@ -48,6 +50,8 @@ struct llnode {
 };
 
 void LoadNCMesh(Mesh &mesh, const std::string name) {
+  Trace __trace("LoadNCMesh(Mesh &mesh, const std::string name)");
+#ifdef ESMC_NETCDF
 
   
   int ncid, stat;
@@ -314,10 +318,14 @@ void LoadNCMesh(Mesh &mesh, const std::string name) {
   }
 
 
+#else
+  Throw() << "Please recompile with NETCDF enabled";
+#endif
 }
 
 void LoadNCDualMesh(Mesh &mesh, const std::string fname, bool use_quad) {
-
+  Trace __trace("LoadNCDualMesh(Mesh &mesh, const std::string fname, bool use_quad");
+#ifdef ESMC_NETCDF
   
   std::vector<double> xyz;
   int ncid, stat;
@@ -630,12 +638,17 @@ void LoadNCDualMesh(Mesh &mesh, const std::string fname, bool use_quad) {
   } // if rank == 0
   
   Skin(mesh);
+#else
+  Throw() << "Please recompile with netcdf enabled";
+#endif
 }
 
 // Load a spectral mesh with only lat/lon, not cell info
 void LoadNCTMesh(Mesh &mesh, const std::string name,
                  latlon_func *lf)
 {
+  Trace __trace("LoadNCTMesh(Mesh &mesh, const std::string name, latlon_func *lf)");
+#ifdef ESMC_NETCDF
 
   // open the netcdf file
   int ncid, stat;
@@ -772,6 +785,9 @@ std::cout << "size of ll:" << ll.size() << std::endl;
 
 
   nc_close(ncid);
+#else
+  Throw() << "please recompile with netcdf enabled";
+#endif
 
 }
 
@@ -780,6 +796,9 @@ bool LoadNCTData(MeshDB &mesh,
                  const std::vector<std::string> &vnames, // the names for each component
                  const MEField<> &field, int timestep)
 {
+  Trace __trace(" LoadNCTData(MeshDB &mesh, const std::string &filename,  std::vector<std::string> &vnames, const MEField<> &field, int timestep)");
+#ifdef ESMC_NETCDF
+
   if (vnames.size() != field.dim()) 
     Throw() << "NCTData, vnamesize=" << vnames.size() << ", but field dim=" << field.dim();
   // open the netcdf file
@@ -851,6 +870,9 @@ std::cout << "ntsteps:" << ntstep << std::endl;
 
   // Loop field dims
   nc_close(ncid);
+#else
+  Throw() << "Please recompile with netcdf enabled";
+#endif
 
   return true;
 }
