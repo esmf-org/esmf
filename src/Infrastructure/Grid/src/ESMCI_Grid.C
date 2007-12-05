@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.37 2007/11/28 22:14:39 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.38 2007/12/05 21:09:32 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.37 2007/11/28 22:14:39 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.38 2007/12/05 21:09:32 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -2627,7 +2627,9 @@ int Grid::serialize(
     SERIALIZE_VAR2D(cp, buffer,loffset,staggerAlignList,staggerLocCount,rank,int);
     SERIALIZE_VAR2D(cp, buffer,loffset,staggerEdgeLWidthList,staggerLocCount,rank,int);
     SERIALIZE_VAR2D(cp, buffer,loffset,staggerEdgeUWidthList,staggerLocCount,rank,int);
-    SERIALIZE_VAR2D(cp, buffer,loffset,didIAllocList,staggerLocCount,rank, bool);
+    // Don't serialize didIAllocList since this proxy grid won't
+    // have Array's allocated 
+
     SERIALIZE_VAR1D(cp, buffer,loffset,gridIsDist,rank,bool);
     SERIALIZE_VAR1D(cp, buffer,loffset,gridMapDim,rank,int);
 
@@ -2740,6 +2742,8 @@ int Grid::deserialize(
   // Since we're not allowing the serialization of 
   // non-ready Grids don't worry about serializing
   // the protogrid
+  // ... but make sure its NULL
+  proto=ESMC_NULL_POINTER;
 
   // Set status (instead of reading it)
   status =  ESMC_GRIDSTATUS_PROXY_READY;
@@ -2769,7 +2773,17 @@ int Grid::deserialize(
   DESERIALIZE_VAR2D( buffer,loffset,staggerAlignList,staggerLocCount,rank,int);
   DESERIALIZE_VAR2D( buffer,loffset,staggerEdgeLWidthList,staggerLocCount,rank,int);
   DESERIALIZE_VAR2D( buffer,loffset,staggerEdgeUWidthList,staggerLocCount,rank,int);
-  DESERIALIZE_VAR2D( buffer,loffset,didIAllocList,staggerLocCount,rank, bool);
+  // Setup didIAllocList as all false since this proxy grid won't
+  // have Array's allocated 
+  //// allocate storage for array allocation flag
+  didIAllocList=_allocate2D<bool>(staggerLocCount,rank);
+  //// set to all false since we're a proxy Grid
+  for(int i=0; i<staggerLocCount; i++) {
+    for(int j=0; j<rank; j++) {
+      didIAllocList[i][j]=false;
+    }
+  }
+  
 
   DESERIALIZE_VAR1D( buffer,loffset,gridIsDist,rank,bool);
   DESERIALIZE_VAR1D( buffer,loffset,gridMapDim,rank,int);
@@ -2778,6 +2792,9 @@ int Grid::deserialize(
   DESERIALIZE_VAR2D( buffer,loffset,coordMapDim,rank,rank,int);
 
   // Don't do isDEBnds because a proxy object isn't on a valid DE
+  // So make sure that they're NULL
+  isDELBnd=ESMC_NULL_POINTER;
+  isDEUBnd=ESMC_NULL_POINTER;
 
   // make sure loffset is aligned correctly
   r=loffset%8;
@@ -2788,7 +2805,13 @@ int Grid::deserialize(
   // future if necessary (just serialize an array indicating
   // which staggerloc's contain valid Arrays and then serialize
   // the Arrays (using the Array serialize) in order.
-      
+  // For now just create an empty list. 
+  coordArrayList=_allocate2D<Array *>(staggerLocCount,rank);
+  for(int i=0; i<staggerLocCount; i++)
+    for(int j=0; j<rank; j++)
+      coordArrayList[i][j]=ESMC_NULL_POINTER;
+  
+  
   // Deserialize the DistGrid
   distgrid = DistGrid::deserialize(buffer, &loffset);
 
