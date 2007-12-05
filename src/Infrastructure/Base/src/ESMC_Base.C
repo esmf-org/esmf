@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.84 2007/11/30 22:27:33 rokuingh Exp $
+// $Id: ESMC_Base.C,v 1.85 2007/12/05 19:19:58 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.84 2007/11/30 22:27:33 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.85 2007/12/05 19:19:58 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -1401,44 +1401,6 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
 }  // end ESMC_AttributeSet
 
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSetAttPack"
-//BOP
-// !IROUTINE:  ESMC_AttributeSetAttPack() - setup the Attribute package
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSetAttPack(
-//
-// !RETURN VALUE:
-//    int return code
-// 
-// !ARGUMENTS:
-      char *name,           // in - attribute name
-      int convention,       // in - attribute name
-      int purpose) {        // in - attribute value
-// 
-// !DESCRIPTION:
-//     setup the name, convention and purpose of an attribute package
-//
-//EOP
-
-  int rc;
-  ESMC_Attribute *attr;
-
-  // Initialize local return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
-
-  attr = new ESMC_Attribute(name, convention, purpose);  
-  if (!attr)
-    return ESMF_FAILURE;
- 
-  rc = ESMC_AttributeSet(attr);
-
-  return rc;
-
-}  // end ESMC_AttributeSetAttPack()
-
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttributeGet"
 //-----------------------------------------------------------------------------
@@ -2391,7 +2353,96 @@ if (count) {
   return attrList[number];
 
 }  // end ESMC_AttributeGet
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CreateAttPack"
+//BOP
+// !IROUTINE:  ESMC_CreateAttPack() - setup the Attribute package
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_CreateAttPack(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,           // in - attribute name
+      int convention,       // in - attribute name
+      int purpose) {        // in - attribute value
+// 
+// !DESCRIPTION:
+//     setup the name, convention and purpose of an attribute package
+//
+//EOP
 
+  int rc;
+  ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
+  attr = new ESMC_Attribute(name, convention, purpose);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_CreateAttPack()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_SetAttPack"
+//BOP
+// !IROUTINE:  ESMC_SetAttPack() - set an attribute in an attpack
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_SetAttPack(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,           // in - attribute name
+      char *value,          // in - attributte value
+      int convention,       // in - attpack convention (0 if not given)
+      int purpose) {        // in - attpack purpose (0 if not given)
+// 
+// !DESCRIPTION:
+//     set the value for name attribute belonging to attpack with convention and purpose
+//
+//EOP
+
+  int rc;
+  char msgbuf[ESMF_MAXSTR];
+  bool cflag, pflag;
+  ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
+  // Find out if convention or purpose or both are given
+  if (convention != 0) cflag = 1;
+  if (purpose != 0) pflag = 1;
+
+  if (cflag || pflag)
+  {
+
+  // Find the attpack attribute
+  attr = ESMC_AttributeGet(name);
+  if (!attr) {
+       sprintf(msgbuf, " This attribute package does have an attribute named %s\n", name);
+       printf(msgbuf);
+       return rc;
+  }
+  // Set the attribute
+  rc = attr->ESMC_ModifyAttValue(ESMC_TYPEKIND_CHARACTER, 1, value);
+  if (rc != ESMF_SUCCESS) return ESMF_FAILURE;
+  }
+
+  return rc;
+
+}  // end ESMC_SetAttPack()
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttributeGetNameList"
@@ -2996,6 +3047,7 @@ if (count) {
 
  } // end ESMC_Attribute
  
+//----------------------------------------------------------------------------- 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_Attribute()"
 //BOP
@@ -3035,6 +3087,102 @@ if (count) {
   attrPurpose = purp;
 
  } // end ESMC_Attribute
+ 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ModifyAttValue()"
+//BOP
+// !IROUTINE:  ESMC_ModifyAttValue - native C++ modifyer for ESMC_Attribute class
+//
+// !INTERFACE:
+      int ESMC_Attribute::ESMC_ModifyAttValue(
+//
+// !RETURN VALUE:
+//    set the value on an existing attribute object
+//
+// !ARGUMENTS:
+        ESMC_TypeKind typekind,    // typekind
+        int numitems,              // single or list
+        void *datap) {             // generic pointer to values
+//
+// !DESCRIPTION:
+//   initialize an attribute, and make a copy of the data if items > 1
+//
+//EOP
+  int i, rc;
+
+  tk = typekind;
+  items = numitems;
+  slen = 0;          // only used for string values
+  
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
+printf("Modify\n");
+
+  if (items == 0)
+      voidp = NULL;
+ 
+  else if (items == 1) {
+      if (!datap) 
+          voidp = NULL;
+      else  {
+            if (tk == ESMC_TYPEKIND_I4)
+                vi = *(ESMC_I4 *)datap;  
+            else if (tk == ESMC_TYPEKIND_I8)
+                vtl = *(ESMC_I8 *)datap;  
+            else if (tk == ESMC_TYPEKIND_R4)
+                vf = *(ESMC_R4 *)datap;  
+            else if (tk == ESMC_TYPEKIND_R8)
+                vd = *(ESMC_R8 *)datap;  
+            else if (tk == ESMC_TYPEKIND_LOGICAL)
+                vb = *(ESMC_Logical *)datap;  
+            else if (tk == ESMC_TYPEKIND_CHARACTER){
+                slen = strlen((char *)datap) + 1;
+                vcp = new char[slen];
+                strncpy(vcp, (char *)datap, slen);
+           }else
+                voidp = NULL;
+    }
+
+  } else {
+    // items > 1, alloc space for a list and do the copy
+        if (tk == ESMC_TYPEKIND_I4) {
+            vip = new ESMC_I4[items];      
+            if (datap) 
+              for (i=0; i<items; i++)
+                vip[i] = ((ESMC_I4 *)datap)[i];  
+        } else if (tk == ESMC_TYPEKIND_I8) {
+            vlp = new ESMC_I8[items];      
+            if (datap) 
+              for (i=0; i<items; i++)
+                vlp[i] = ((ESMC_I8 *)datap)[i];  
+        } else if (tk == ESMC_TYPEKIND_R4) {
+            vfp = new ESMC_R4[items];      
+            if (datap) 
+              for (i=0; i<items; i++)
+                vfp[i] = ((ESMC_R4 *)datap)[i];  
+        } else if (tk == ESMC_TYPEKIND_R8) {
+            vdp = new ESMC_R8[items];      
+            if (datap) 
+              for (i=0; i<items; i++)
+                vdp[i] = ((ESMC_R8 *)datap)[i];  
+        } else if (tk == ESMC_TYPEKIND_LOGICAL) {
+            vbp = new ESMC_Logical[items];      
+            if (datap) 
+              for (i=0; i<items; i++)
+                vbp[i] = ((ESMC_Logical *)datap)[i];  
+
+        } else
+           // error - arrays of char strings not allowed
+                voidp = NULL;
+  }
+
+  printf("Modify\n");
+
+  return ESMF_SUCCESS;
+
+ } // end ESMC_ModifyAttValue
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.77 2007/11/30 22:27:33 rokuingh Exp $
+// $Id: ESMC_Base.h,v 1.78 2007/12/05 19:19:57 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -82,6 +82,7 @@ class ESMC_Attribute
     int ESMC_Print(void) const;
     int ESMC_Serialize(char *buffer, int *length, int *offset) const;
     int ESMC_Deserialize(char *buffer, int *offset);
+    int ESMC_ModifyAttValue(ESMC_TypeKind typekind,int numitems,void *datap);
     ESMC_Attribute& operator=(const ESMC_Attribute &);
     ESMC_Attribute(void);
     ESMC_Attribute(char *name, ESMC_TypeKind tk, int numitems, void *datap);
@@ -185,7 +186,6 @@ class ESMC_Base
     int ESMC_AttributeSet(char *name, int count, ESMC_Logical *value);
     int ESMC_AttributeSet(char *name, char *value);
     int ESMC_AttributeSet(char *name, ESMC_TypeKind tk, int count, void *value);
-    int ESMC_AttributeSetAttPack(char *name, int convention, int purpose);
 
     // attribute methods - get
     int ESMC_AttributeGet(char *name, ESMC_I4 *value) const;
@@ -208,8 +208,12 @@ class ESMC_Base
     int ESMC_AttributeGetCount(void) const;
 
     // getting either by name or number directly return attribute ptr
-    ESMC_Attribute *ESMC_AttributeGet(char *name) const;  // can't find this one !!!
+    ESMC_Attribute *ESMC_AttributeGet(char *name) const; 
     ESMC_Attribute *ESMC_AttributeGet(int num) const;
+
+    // attpack methods
+    int ESMC_CreateAttPack(char *name, int convention, int purpose);
+    int ESMC_SetAttPack(char *name, char *value, int convention, int purpose);
 
     // not implemented yet
     int ESMC_AttributeGetNameList(int *count, char **namelist) const;

@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.49 2007/11/30 22:27:33 rokuingh Exp $
+// $Id: ESMC_Base_F.C,v 1.50 2007/12/05 19:19:57 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.49 2007/11/30 22:27:33 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.50 2007/12/05 19:19:57 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -756,10 +756,10 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeSetAttPack - Setup the attribute package
+// !IROUTINE:  c_ESMC_createattpack - Setup the attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributesetattpack)(
+      void FTN(c_esmc_createattpack)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -806,13 +806,88 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  *rc = (*base)->ESMC_AttributeSetAttPack(cname, *convention, *purpose);
+  *rc = (*base)->ESMC_CreateAttPack(cname, *convention, *purpose);
 
   delete [] cname;
   return;
 
-}  // end c_ESMC_AttributeSetAttPack
+}  // end c_ESMC_createattpack
 
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_setattpack - Set attributes in the attribute package
+//
+// !INTERFACE:
+      void FTN(c_esmc_setattpack)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      char *name,               // in - F90, non-null terminated string
+      char *value,              // in - F90, non-null terminated string
+      int *convention,          // in - integer convention value
+      int *purpose,             // in - integer purpose value
+      int *rc,                  // in - return code
+      int nlen,                 // hidden/in - strlen count for name
+      int vlen) {               // hidden/in - strlen count for value
+// 
+// !DESCRIPTION:
+//     Associate a convention and purpose with an attribute package
+//
+//EOP
+
+  int status;
+  char *cname, *cvalue;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    if (rc) *rc = ESMF_FAILURE;
+    return;
+  }
+
+  // simple sanity checks before doing any more work
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name", &status);
+      //printf("ESMF_AttributeSet: bad attribute name\n");
+      if (rc) *rc = status;
+      return;
+  }
+
+  if ((!value) || (vlen <= 0) || (value[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute value", &status);
+      //printf("ESMF_AttributeSet: bad attribute value\n");
+      if (rc) *rc = status;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cname = ESMC_F90toCstring(name, nlen);
+  if (!cname) {
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cvalue = ESMC_F90toCstring(value, vlen);
+  if (!cvalue) {
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  // Set the attribute on the object.
+  *rc = (*base)->ESMC_SetAttPack(cname, cvalue, *convention, *purpose);
+
+  delete [] cname;
+  delete [] cvalue;
+  return;
+
+}  // end c_ESMC_setattpack
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
