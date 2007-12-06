@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2007/12/05 06:03:33 theurich Exp $
+# $Id: makefile,v 1.13 2007/12/06 22:40:33 rosalind Exp $
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -7,13 +7,13 @@ run_uni:  run_unit_tests_uni
 LOCDIR	  =  src/Infrastructure/Config/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ConfigUTest \
-	        $(ESMF_TESTDIR)/ESMC_ConfigUTest 
+ 	        $(ESMF_TESTDIR)/ESMC_ConfigUTest 
 
 TESTS_RUN     = RUN_ESMF_ConfigUTest \
-		RUN_ESMC_ConfigUTest 
+ 		RUN_ESMC_ConfigUTest 
 
-TESTS_RUN_UNI = RUN_ESMF_ConfigUTestUNI \
-		RUN_ESMC_ConfigUTestUNI 
+TESTS_RUN_UNI = RUN_ESMC_ConfigUTestUNI \
+ 		RUN_ESMF_ConfigUTestUNI 
 
 
 include ${ESMF_DIR}/makefile

@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.44 2007/09/27 06:07:07 theurich Exp $
+! $Id: ESMF_Config.F90,v 1.45 2007/12/06 22:40:32 rosalind Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -479,7 +479,7 @@
       type(ESMF_Config) function ESMF_ConfigCreate( rc )
 
 ! !ARGUMENTS:
-      integer,intent(out), optional              :: rc 
+     integer,intent(out), optional              :: rc 
 !
 ! !DESCRIPTION: 
 !   Creates an {\tt ESMF\_Config} for use in subsequent calls.
@@ -492,34 +492,55 @@
 !
 !EOP -------------------------------------------------------------------
       integer :: iret
+      integer :: localrc
       type(ESMF_ConfigClass), pointer :: config_local
       type(ESMF_ConfigAttrUsed), dimension(:), pointer :: attr_used_local
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      
 
-      iret = 0
  
 ! Initialization
       allocate(config_local, stat=iret)
-      if (ESMF_LogMsgFoundAllocError(iret, "Allocating config class", &
+
+      if (iret .eq. 0) then 
+        localrc=ESMF_SUCCESS
+      else
+        localrc=ESMF_RC_PTR_NOTALLOC
+      endif
+
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating config class", &
                                         ESMF_CONTEXT, rc)) return
 
       allocate(config_local%buffer, config_local%this_line, stat = iret)
-      if (ESMF_LogMsgFoundAllocError(iret, "Allocating local buffer 1", &
+
+      if (iret .eq. 0) then 
+        localrc=ESMF_SUCCESS
+      else
+        localrc=ESMF_RC_PTR_NOTALLOC
+      endif
+
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating local buffer 1", &
                                         ESMF_CONTEXT, rc)) return
 
       ! TODO: Absoft 8 compiler bug necessitates allocating pointer within
       ! derived type via local pointer first.  Absoft 9/Jazz bug necessitates
       ! this must be a separate allocate statement.
+
       allocate(attr_used_local(MSZ), stat = iret)
-      if (ESMF_LogMsgFoundAllocError(iret, "Allocating local buffer 2", &
+
+      if (iret .eq. 0) then 
+        localrc=ESMF_SUCCESS
+      else
+        localrc=ESMF_RC_PTR_NOTALLOC
+      endif
+
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating local buffer 2", &
                                         ESMF_CONTEXT, rc)) return
       config_local%attr_used => attr_used_local
 
       ESMF_ConfigCreate%cptr => config_local
-      if (present( rc )) then
-        rc = iret
-      endif
+      if (present( rc ))  rc = localrc
 
       ESMF_INIT_SET_CREATED(ESMF_ConfigCreate)
       return

@@ -1,4 +1,4 @@
-!  $Id: ESMF_Config_C.F90,v 1.5 2007/04/30 21:14:43 rosalind Exp $
+!  $Id: ESMF_Config_C.F90,v 1.6 2007/12/06 22:40:32 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Config_C.F90,v 1.5 2007/04/30 21:14:43 rosalind Exp $'
+!      '$Id: ESMF_Config_C.F90,v 1.6 2007/12/06 22:40:32 rosalind Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -33,10 +33,10 @@
      use ESMF_ConfigMod
 
      type(ESMF_Config) :: config
-     integer, intent(out), optional :: rc              
+     integer, intent(out) :: rc              
 
      ! Initialize return code; assume routine not implemented
-     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+       rc = ESMF_RC_NOT_IMPL
 
      config = ESMF_ConfigCreate(rc=rc)
 
