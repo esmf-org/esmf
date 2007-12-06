@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2007/12/05 21:00:57 dneckels Exp $
+# $Id: makefile,v 1.8 2007/12/06 20:37:09 dneckels Exp $
 
 # leave alone.
 ALL: build_here 
@@ -26,7 +26,6 @@ SOURCEC	  = \
            ESMC_Interp.C \
            ESMC_IOField.C \
            ESMC_Kernel.C \
-           ESMC_LinSys.C \
            ESMC_Mapping.C \
            ESMC_MasterElement.C \
            ESMC_MCoord.C \
