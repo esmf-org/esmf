@@ -14,10 +14,13 @@ $ar_command=$ARGV[1];
 $archive=$ARGV[2];
 $file=$ARGV[3];
 
-open (FILE, ">> $lockfile");
-flock FILE, 2;
+open (FILE, "< $lockfile") || die "Can't open $lockfile";
+$ret = flock FILE, 2;
+if (!$ret) {
+  print "error, flock 2 failed!!", "\n";
+}
 
-print "AR_LOCK:<$ar_command> <$archive> <$file>", "\n";
+print "AR_LOCK <$lockfile>:<$ar_command> <$archive> <$file>", "\n";
 $output=`$ar_command $archive $file`;
 print "$output";
 
