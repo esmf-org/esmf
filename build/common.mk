@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.203 2007/12/06 22:29:33 dneckels Exp $
+#  $Id: common.mk,v 1.204 2007/12/07 15:57:49 dneckels Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2275,12 +2275,7 @@ endif
 
 .c.a:
 	$(ESMF_CXXCOMPILER) -c $(ESMF_CXXCOMPILEOPTS) $(ESMF_CXXCOMPILEPATHSLOCAL) $(ESMF_CXXCOMPILEPATHS) $(ESMF_CXXCOMPILECPPFLAGS) $<
-	@if [ "$(ESMF_PARBUILD)" = "on" ] ; then \
-	  $(ESMF_DIR)/scripts/ar_lock $(ESMF_DIR)/README "$(ESMF_AR) $(ESMF_ARCREATEFLAGS)" $(LIBNAME) "$*.o" ;\
-	else \
-	  $(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o ;\
-	  echo "$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o" ;\
-	fi
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
 	$(ESMF_RM) $*.o
 
 .C.a:
@@ -2290,12 +2285,7 @@ endif
            makedepend -f- --  $(ESMF_CXXCOMPILEOPTS) $(ESMF_CXXCOMPILEPATHSLOCAL) $(ESMF_CXXCOMPILEPATHS) $(ESMF_CXXCOMPILECPPFLAGS) $< -- 2> /dev/null | \
 	   perl -pe 's/(.*)\/([^\/]+):/$$ENV{'ESMF_TMP'}\/libesmf.a($$2):/' >> $(ESMF_DIR)/$(LOCDIR)/makefile.dep ; \
 	 fi
-	@if [ "$(ESMF_PARBUILD)" = "on" ] ; then \
-	  $(ESMF_DIR)/scripts/ar_lock $(ESMF_DIR)/README "$(ESMF_AR) $(ESMF_ARCREATEFLAGS)" $(LIBNAME) "$*.o" ;\
-	else \
-	  $(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o ;\
-	  echo "$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o" ;\
-	fi
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
 	$(ESMF_RM) $*.o
 
 # The rules below generate a valid Fortran file using gcc as a preprocessor:
