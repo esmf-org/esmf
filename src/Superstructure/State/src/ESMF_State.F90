@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.116 2007/12/05 19:21:39 rokuingh Exp $
+! $Id: ESMF_State.F90,v 1.117 2007/12/10 21:15:50 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -87,7 +87,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.116 2007/12/05 19:21:39 rokuingh Exp $'
+      '$Id: ESMF_State.F90,v 1.117 2007/12/10 21:15:50 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -3877,18 +3877,19 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateCreateAttPack()
-      subroutine ESMF_StateCreateAttPack(state, convention, purpose, rc)
+      subroutine ESMF_StateCreateAttPack(state, convention, purpose, object, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state  
-      integer, intent(in), optional :: convention
-      integer, intent(in), optional :: purpose
+      character (len = *), intent(in), optional :: convention
+      character (len = *), intent(in), optional :: purpose
+      character (len = *), intent(in), optional :: object
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !     Sets up the attribute package for the {\tt state}.
-!     The attribute package defines the convention and type of the three 
+!     The attribute package defines the convention, purpose, and object type of the three 
 !     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
 !
 !     The arguments are:
@@ -3899,6 +3900,8 @@ end interface
 !      The convention of the attribute package.
 !     \item [purpose]
 !      The purpose of the attribute package.
+!     \item [object]
+!      The object type of the attribute package.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3908,7 +3911,7 @@ end interface
 
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: name1, name2, name3
-      integer :: fconvention, fpurpose
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -3925,25 +3928,31 @@ end interface
       if (present(convention))  then
         fconvention = convention
       else 
-        fconvention = 0;
+        fconvention = 'N/A'
       endif
       
       if (present(purpose)) then
         fpurpose = purpose
       else 
-        fpurpose = 0;
+        fpurpose = 'N/A'
+      endif
+      
+      if (present(object)) then
+        fobject = object
+      else 
+        fobject = 'N/A'
       endif
 
-      name1 = 'purpose'
+      name1 = 'name'
       name2 = 'organization'
       name3 = 'discipline'
 
       call c_ESMC_CreateAttPack(state%statep%base, name1, fconvention, &
-        fpurpose, localrc)
+        fpurpose, fobject, localrc)
       call c_ESMC_CreateAttPack(state%statep%base, name2, fconvention, &
-        fpurpose, localrc)
+        fpurpose, fobject, localrc)
       call c_ESMC_CreateAttPack(state%statep%base, name3, fconvention, &
-        fpurpose, localrc)
+        fpurpose, fobject, localrc)
       
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3961,20 +3970,21 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateSetAttPack()
-      subroutine ESMF_StateSetAttPack(state, name, value, convention, purpose, rc)
+      subroutine ESMF_StateSetAttPack(state, name, value, convention, purpose, object, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state  
       character(ESMF_MAXSTR), intent(in) :: name
       character(ESMF_MAXSTR), intent(in) :: value
-      integer, intent(in), optional :: convention
-      integer, intent(in), optional :: purpose
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      character(ESMF_MAXSTR), intent(in), optional :: object
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !     Sets an attribute the attribute package for the {\tt state}.
-!     The attribute package defines the convention and type of the three 
+!     The attribute package defines the convention, purpose, and object type of the three 
 !     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
 !
 !     The arguments are:
@@ -3989,6 +3999,8 @@ end interface
 !      The convention of the attribute package.
 !     \item [purpose]
 !      The purpose of the attribute package.
+!     \item [object]
+!      The object type of the attribute package.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3997,7 +4009,7 @@ end interface
 !EOPI
 
       integer :: localrc                           ! Error status
-      integer :: fconvention, fpurpose
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -4014,17 +4026,23 @@ end interface
       if (present(convention))  then
         fconvention = convention
       else 
-        fconvention = 0;
+        fconvention = 'N/A'
       endif
       
       if (present(purpose)) then
         fpurpose = purpose
       else 
-        fpurpose = 0;
+        fpurpose = 'N/A'
+      endif
+      
+      if (present(object)) then
+        fobject = object
+      else 
+        fobject = 'N/A'
       endif
 
       call c_ESMC_SetAttPack(state%statep%base, name, value, fconvention, &
-        fpurpose, localrc)
+        fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
