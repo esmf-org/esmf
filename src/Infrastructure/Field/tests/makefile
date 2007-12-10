@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.42 2007/10/02 04:26:58 cdeluca Exp $ 
+# $Id: makefile,v 1.43 2007/12/10 21:20:23 feiliu Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -46,8 +46,8 @@ ESMF_FRoute8UTest.F90:  ESMF_FRoute4UTest.F90
 RUN_ESMF_FieldUTest:
 	$(MAKE) TNAME=Field NP=4 ftest
 
-RUN_ESMF_FieldUTestUNI:
-	$(MAKE) TNAME=Field NP=1 ftest
+#RUN_ESMF_FieldUTestUNI:
+#	$(MAKE) TNAME=Field NP=1 ftest
 
 
 #

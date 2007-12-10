@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.275 2007/11/21 22:17:51 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.276 2007/12/10 21:20:23 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -159,6 +159,7 @@
    public ESMF_FieldGetInit            ! For Standardized Initialization
 
    public ESMF_FieldCreateNoData       ! Create a new Field without data
+   public ESMF_FieldCreateEmpty        ! Create a new Field without grid or data
    public ESMF_FieldDestroy            ! Destroy a Field
 
    public ESMF_FieldGet                ! Generic Get() routine
@@ -201,7 +202,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.275 2007/11/21 22:17:51 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.276 2007/12/10 21:20:23 feiliu Exp $'
 
 !==============================================================================
 !
@@ -218,9 +219,7 @@
    
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_FieldCreateNoDataPtr
-!        module procedure ESMF_FieldCreateNoArray
-        module procedure ESMF_FieldCreateNoGridArray  
-
+        module procedure ESMF_FieldCreateNoArray
 ! !DESCRIPTION:
 !     This interface provides an entry point for methods that create 
 !     an {\tt ESMF\_Field} without allocating or referencing any associated data.
@@ -229,6 +228,23 @@
  
 !EOPI
       end interface
+
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_FieldCreateEmpty - Create an empty Field without grid or data
+!
+! !INTERFACE:
+    interface ESMF_FieldCreateEmpty
+        module procedure ESMF_FieldCreateNoGridArray
+! !DESCRIPTION:
+!     This interface provides an entry point for methods that create 
+!     an {\tt ESMF\_Field} without allocating or referencing any associated data.
+!     It allows Field creation without specifying {\tt ESMF\_Grid} or 
+!     {\tt ESMF\_Array}.
+
+!EOPI
+    end interface
 !
 !------------------------------------------------------------------------------
 !BOPI
@@ -239,7 +255,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_FieldConstructIANew
-!        module procedure ESMF_FieldConstructIANewArray
+        module procedure ESMF_FieldConstructIANewArray
 
 ! !DESCRIPTION:
 !     This interface provides an entry point for methods that construct a
@@ -258,7 +274,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_FieldConstructNoDataPtr
 !        module procedure ESMF_FieldConstructNoArray
-!        module procedure ESMF_FieldConstructNoGridArray  
+        module procedure ESMF_FieldConstructNoGridArray  
 
 ! !DESCRIPTION:
 !     This interface provides an entry point for {\tt ESMF\_Field} construction 
@@ -369,7 +385,6 @@
 !
 !==============================================================================
 
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldAssign()"
@@ -402,8 +417,6 @@
  ESMF_INIT_COPY(dval,sval)
 
  end subroutine
-
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -515,7 +528,6 @@
 
 !------------------------------------------------------------------------------
 ! TODO:FIELDINTEGRATION Decide if FieldCreateNoArray is still needed
-#if 0
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldCreateNoArray"
 
@@ -525,7 +537,7 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreateNoData()
       function ESMF_FieldCreateNoArray(grid, staggerloc, &
-                                       datamap, name, iospec, rc)
+                                       name, iospec, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Field) :: ESMF_FieldCreateNoArray 
@@ -533,7 +545,6 @@
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid                 
       type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
-      type(ESMF_FieldDataMap), intent(inout), optional :: datamap              
       character (len=*), intent(in), optional :: name    
       type(ESMF_IOSpec), intent(in), optional :: iospec  
       integer, intent(out), optional :: rc               
@@ -552,11 +563,6 @@
 !           predefined values see Section \ref{sec:opt:staggerloc}.
 !           To create a custom stagger location see Section
 !           \ref{sec:usage:staggerloc:adv}.
-!           If a stagger location is specified both as an argument
-!           here as well as set in the {\tt datamap}, this takes priority.
-!     \item [{[datamap]}]
-!           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
-!           data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
 !           {\tt Field} name. 
 !     \item [{[iospec]}] 
@@ -585,7 +591,7 @@
 
       ! Call field construction method
       call ESMF_FieldConstructNoArray(ftype, grid, staggerloc, &
-                                      datamap, name, &
+                                      name, &
                                       iospec, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -598,8 +604,6 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_FieldCreateNoArray
-#endif
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -3667,8 +3671,6 @@
 !           predefined values see Section \ref{sec:opt:staggerloc}.
 !           To create a custom stagger location see Section
 !           \ref{sec:usage:staggerloc:adv}.
-!           If a stagger location is specified both as an argument
-!           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[gridToFieldMap]}]
 !           List that contains as many elements as is indicated by the {\tt grid}'s rank. 
 !           The list elements map each dimension of the Grid object to a dimension in the
@@ -3784,8 +3786,6 @@
 
       end subroutine ESMF_FieldConstructIANew
 
-! TODO:FIELDINTEGRATION Restore the ConstructIANewArray method
-#if 0
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldConstructIANewArray"
@@ -3794,15 +3794,23 @@
 ! !IROUTINE: ESMF_FieldConstructIANewArray - Construct the internals of a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldConstructIANewArray(ftype, grid, array, staggerloc, &
-                                               datamap, name, iospec, rc)
+      subroutine ESMF_FieldConstructIANewArray(ftype, grid, array, &
+                                        copyflag, staggerloc, &
+                                        gridToFieldMap, ungriddedLBound, &
+                                        ungriddedUBound, maxHaloLWidth, &
+                                        maxHaloUWidth, name, iospec, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldType), pointer :: ftype 
       type(ESMF_Grid) :: grid               
       type(ESMF_Array), intent(in) :: array     
+      type(ESMF_CopyFlag), intent(in), optional :: copyflag
       type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
-      type(ESMF_FieldDataMap), intent(inout), optional :: datamap
+      integer, intent(in), optional :: gridToFieldMap(:)
+      integer, intent(in), optional :: ungriddedLBound(:)
+      integer, intent(in), optional :: ungriddedUBound(:)      
+      integer, intent(in), optional :: maxHaloLWidth(:)
+      integer, intent(in), optional :: maxHaloUWidth(:)
       character (len=*), intent(in), optional :: name
       type(ESMF_IOSpec), intent(in), optional :: iospec 
       integer, intent(out), optional :: rc              
@@ -3825,11 +3833,30 @@
 !           predefined values see Section \ref{sec:opt:staggerloc}.
 !           To create a custom stagger location see Section
 !           \ref{sec:usage:staggerloc:adv}.
-!           If a stagger location is specified both as an argument
-!           here as well as set in the {\tt datamap}, this takes priority.
-!     \item [{[datamap]}]
-!           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
-!           data to the {\tt ESMF\_Grid}.
+!     \item [{[gridToFieldMap]}]
+!           List that contains as many elements as is indicated by the {\tt grid}'s rank. 
+!           The list elements map each dimension of the Grid object to a dimension in the
+!           Field's Array by specifying the appropriate Array dimension index. The default is to
+!           map all of the grid's dimensions against the lower dimensions of the Field's
+!           Array in sequence, i.e. gridDimmap = (/1, 2, .../). Unmapped dimensions are
+!           undistributed dimensions.  The total undistributed dimensions are the total 
+!           Array dimensions - the distributed dimensions in the Grid (distRank).  All
+!           gridToFieldMap entries must be greater than or equal to one and smaller than or equal
+!           to the Array rank. It is erroneous to specify the same entry multiple times
+!           unless it is zero.  If the Array rank is less than the Grid dimCount then
+!           the default gridToFieldMap will contain zeros for the dimCount.
+!           A zero entry in the dimmap indicates that the particular Grid dimension will
+!           be replicating the Array across the DEs along this direction.
+!     \item [{[ungriddedLBound]}]
+!           Lower bounds of the ungridded dimensions of the Field.
+!     \item [{[ungriddedUBound]}]
+!           Upper bounds of the ungridded dimensions of the Field.
+!     \item [{[maxHaloLWidth]}]
+!           Lower bound of halo region.  Halo widths should be in the same order as
+!           the DistGrid in {\tt grid}.  Defaults to 0.
+!     \item [{[maxHaloUWidth]}]
+!           Upper bound of halo region.  Halo widths should be in the same order as
+!           the DistGrid in {\tt grid}.  Defaults to 0.
 !     \item [{[name]}] 
 !           {\tt ESMF\_Field} name. 
 !     \item [{[iospec]}] 
@@ -3853,7 +3880,7 @@
 
       ! this validates the grid already, no need to validate it first.
       call ESMF_FieldConstructNoArray(ftype, grid, staggerloc, &
-                                      datamap=datamap, name=name, &
+                                      name=name, &
                                       iospec=iospec, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -3888,8 +3915,6 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldConstructIANewArray
-#endif
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -4030,7 +4055,6 @@
       end subroutine ESMF_FieldConstructNoDataPtr
 
 ! TODO:FIELDINTEGRATION Restore FieldConstructNoArray method
-#if 0
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldConstructNoArray"
@@ -4040,13 +4064,12 @@
 
 ! !INTERFACE:
       subroutine ESMF_FieldConstructNoArray(ftype, grid, staggerloc, &
-                                            datamap, name, iospec, rc)
+                                            name, iospec, rc)
 !
 ! !ARGUMENTS:     
       type(ESMF_FieldType), pointer :: ftype   
       type(ESMF_Grid), intent(inout) :: grid                 
       type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
-      type(ESMF_FieldDataMap), intent(inout), optional :: datamap              
       character (len=*), intent(in), optional :: name    
       type(ESMF_IOSpec), intent(in), optional :: iospec  
       integer, intent(out), optional :: rc               
@@ -4110,40 +4133,12 @@
       ftype%gridstatus = ESMF_STATUS_READY
 
       call ESMF_GridGet(ftype%grid, distRank=gridRank, rc=localrc)
-      if (present(datamap)) then
-        ! this does a copy, datamap ok for user to delete now
-        ftype%mapping = datamap   
-
-        ! take care of override stagger locs.  if specified both in
-        ! the datamap and as explicit args, the arguments take priority.
-        call ESMF_FieldDataMapSet(ftype%mapping, staggerloc=staggerloc, &
-                             rc=localrc)
-      else
-        ! create default datamap with 1-for-1 correspondence to grid
-        if (gridRank .eq. 1) then
-          call ESMF_FieldDataMapSetDefault(ftype%mapping, ESMF_INDEX_I, &
-                                staggerloc=staggerloc, rc=localrc)
-        else if (gridRank .eq. 2) then
-          call ESMF_FieldDataMapSetDefault(ftype%mapping, ESMF_INDEX_IJ, &
-                                staggerloc=staggerloc, rc=localrc)
-        else if (gridRank .eq. 3) then
-          call ESMF_FieldDataMapSetDefault(ftype%mapping, ESMF_INDEX_IJK, &
-                                staggerloc=staggerloc, rc=localrc)
-        endif
-      endif
-      ftype%datamapstatus = ESMF_STATUS_READY
-
-!
-! add more code here
-!
      
       ftype%fieldstatus = ESMF_STATUS_READY
 
       if  (present(rc)) rc = ESMF_SUCCESS
       
       end subroutine ESMF_FieldConstructNoArray
-#endif
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

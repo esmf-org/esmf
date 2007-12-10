@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.56 2007/11/20 17:09:29 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.57 2007/12/10 21:20:23 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -124,7 +124,7 @@
 !   !  data in later calls.
 
 !BOC
-     field3 = ESMF_FieldCreateNoData("precip", rc=rc)
+     field3 = ESMF_FieldCreateEmpty("precip", rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !
