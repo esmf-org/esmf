@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.164 2007/11/29 22:06:54 theurich Exp $
+// $Id: ESMC_Array.C,v 1.165 2007/12/10 18:42:52 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.164 2007/11/29 22:06:54 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.165 2007/12/10 18:42:52 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3773,19 +3773,6 @@ int Array::sparseMatMulStore(
     }
   }
   
-  //TODO: maybe I will need these VMs to support exec() in model components?
-#if 0   
-  // get the srcArray VM and VM releated information
-  VM *srcVm = srcArray->delayout->getVM();
-  int srcLocalPet = srcVm->getLocalPet();
-  int srcPetCount = srcVm->getPetCount();
-  
-  // get the dstArray VM and VM releated information
-  VM *dstVm = dstArray->delayout->getVM();
-  int dstLocalPet = dstVm->getLocalPet();
-  int dstPetCount = dstVm->getPetCount();
-#endif  
-  
   // prepare for relative run-time addressing (RRA)
   // this is to support xxe->exec() during sparseMatMulStore()
   int rraCount = srcArray->delayout->getLocalDeCount();
@@ -5754,7 +5741,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   // allocate XXE and attach to RouteHandle
   XXE *xxe;
   try{
-    xxe = new XXE(1000, 10000, 1000);
+    xxe = new XXE(vm, 1000, 10000, 1000);
   }catch (...){
     ESMC_LogDefault.ESMC_LogAllocError(&rc);
     return rc;
@@ -6429,7 +6416,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       xxeWaitOnAnyIndexSubInfo->index[k] = recvnbIndex[j][k];
       
       // allocate sub XXE stream and attach to xxeWaitOnAnyIndexSubInfo
-      xxeWaitOnAnyIndexSubInfo->xxe[k] = new XXE(1000, 1000, 1000);
+      xxeWaitOnAnyIndexSubInfo->xxe[k] = new XXE(vm, 1000, 1000, 1000);
       XXE *xxeSub = xxeWaitOnAnyIndexSubInfo->xxe[k];
       xxe->xxeSubList[xxe->xxeSubCount] = xxeSub; // xxe garbage collection
       localrc = xxe->incXxeSubCount();
@@ -6883,23 +6870,19 @@ int Array::sparseMatMul(
   VMK::wtime(&t0);      //gjt - profile
 #endif
 
-  // basic error checking for input
-  if (srcArray == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to srcArray", &rc);
-    return rc;
-  }
-  if (dstArray == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to dstArray", &rc);
-    return rc;
-  }
+  // basic input checking
+  bool srcArrayFlag = false;
+  if (srcArray != ESMC_NULL_POINTER) srcArrayFlag = true;
+  bool dstArrayFlag = false;
+  if (dstArray != ESMC_NULL_POINTER) dstArrayFlag = true;
   
   // srcArray and dstArray may not point to the identical Array object
-  if (srcArray == dstArray){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-      "- srcArray and dstArray must not be identical", &rc);
-    return rc;
+  if (srcArrayFlag && dstArrayFlag){
+    if (srcArray == dstArray){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+        "- srcArray and dstArray must not be identical", &rc);
+      return rc;
+    }
   }
   
 #ifdef ASMMTIMING
@@ -6912,14 +6895,14 @@ int Array::sparseMatMul(
   // conditionally perform full input checks
   if (checkflag==ESMF_TRUE){
     // check that XXE's typekind matches srcArray typekind
-    if (xxe->typekind[0] != srcArray->getTypekind()){
+    if (srcArrayFlag && (xxe->typekind[0] != srcArray->getTypekind())){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- TypeKind mismatch between srcArray argument and precomputed XXE",
         &rc);
       return rc;
     }
     // check that XXE's typekind matches dstArray typekind
-    if (xxe->typekind[0] != dstArray->getTypekind()){
+    if (dstArrayFlag && (xxe->typekind[0] != dstArray->getTypekind())){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- TypeKind mismatch between dstArray argument and precomputed XXE",
         &rc);
@@ -6934,7 +6917,7 @@ int Array::sparseMatMul(
 #endif
   
   // conditionally zero out total regions of the dstArray for all localDEs
-  if (zeroflag==ESMF_TRUE){
+  if (dstArrayFlag && (zeroflag==ESMF_TRUE)){
     for (int i=0; i<dstArray->delayout->getLocalDeCount(); i++){
       char *start = (char *)(dstArray->larrayBaseAddrList[i]);
       int elementCount =
@@ -6964,22 +6947,31 @@ int Array::sparseMatMul(
 #endif
   
   // prepare for relative run-time addressing (RRA)
-  int rraCount = srcArray->delayout->getLocalDeCount();
-  rraCount += dstArray->delayout->getLocalDeCount();
+  int rraCount = 0; // init
+  if (srcArrayFlag)
+    rraCount += srcArray->delayout->getLocalDeCount();
+  if (dstArrayFlag)
+    rraCount += dstArray->delayout->getLocalDeCount();
   char **rraList = new char*[rraCount];
-  memcpy((char *)rraList, srcArray->larrayBaseAddrList,
-    srcArray->delayout->getLocalDeCount() * sizeof(char *));
-  memcpy((char *)rraList
-    + srcArray->delayout->getLocalDeCount() * sizeof(char *),
-    dstArray->larrayBaseAddrList,
-    dstArray->delayout->getLocalDeCount() * sizeof(char *));
+  char **rraListPtr = rraList;
+  if (srcArrayFlag){
+    memcpy((char *)rraListPtr, srcArray->larrayBaseAddrList,
+      srcArray->delayout->getLocalDeCount() * sizeof(char *));
+    rraListPtr += srcArray->delayout->getLocalDeCount();
+  }
+  if (dstArrayFlag)
+    memcpy((char *)rraListPtr, dstArray->larrayBaseAddrList,
+      dstArray->delayout->getLocalDeCount() * sizeof(char *));
 
 #ifdef ASMMTIMING
   VMK::wtime(&t4);      //gjt - profile
 #endif
   
+  //TODO: determine XXE predicate flag for XXE exec(),
+  // considering src vs. dst, DE, phase of nb-call...
+  
   // execute XXE stream
-  localrc = xxe->exec(rraCount, rraList);
+  localrc = xxe->exec(rraCount, rraList); //TODO: specify predicate flag
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 

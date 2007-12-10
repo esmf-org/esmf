@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.85 2007/10/25 16:02:58 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.86 2007/12/10 18:42:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.85 2007/10/25 16:02:58 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.86 2007/12/10 18:42:53 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2425,11 +2425,6 @@ int XXE::exec(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  // get the current VM
-  VM *vm = VM::getCurrent(&localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;
-  
 #if 0
   printf("gjt in ESMCI::XXE::exec(), stream=%p, %d, %d\n", stream, count, 
     sizeof(StreamElement));
@@ -2992,11 +2987,6 @@ int XXE::print(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  // get the current VM
-  VM *vm = VM::getCurrent(&localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;
-  
   // set index range
   int indexRangeStart = 0;        // default
   if (indexStart > 0) indexRangeStart = indexStart;
@@ -3441,11 +3431,6 @@ int XXE::printProfile(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  // get the current VM
-  VM *vm = VM::getCurrent(&localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;
-  
 #if 0
   printf("gjt in ESMCI::XXE::printProfile(), stream=%p, %d, %d\n", stream,
     count, sizeof(StreamElement));
@@ -3526,11 +3511,6 @@ int XXE::optimizeElement(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
-  // get the current VM
-  VM *vm = VM::getCurrent(&localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;
   
 #if 0
   printf("gjt in ESMCI::XXE::optimizeElement(), stream=%p, %d, %d\n", stream,

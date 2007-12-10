@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.73 2007/10/29 19:15:37 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.74 2007/12/10 18:42:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -128,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.73 2007/10/29 19:15:37 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.74 2007/12/10 18:42:52 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1406,8 +1406,8 @@ contains
     zeroflag, checkflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),       intent(in)              :: srcArray
-    type(ESMF_Array),       intent(inout)           :: dstArray
+    type(ESMF_Array),       intent(in),   optional  :: srcArray
+    type(ESMF_Array),       intent(inout),optional  :: dstArray
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
     type(ESMF_Logical),     intent(in),   optional  :: zeroflag
     type(ESMF_Logical),     intent(in),   optional  :: checkflag
@@ -1431,9 +1431,9 @@ contains
 !   This call is {\em collective} across the current VM.
 !
 !   \begin{description}
-!   \item [srcArray]
+!   \item [{[srcArray]}]
 !     {\tt ESMF\_Array} with source data.
-!   \item [dstArray]
+!   \item [{[dstArray]}]
 !     {\tt ESMF\_Array} with destination data.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
@@ -1459,15 +1459,31 @@ contains
     integer                 :: localrc      ! local return code
     type(ESMF_Logical)      :: opt_zeroflag ! helper variable
     type(ESMF_Logical)      :: opt_checkflag! helper variable
+    type(ESMF_Array)        :: opt_srcArray ! helper variable
+    type(ESMF_Array)        :: opt_dstArray ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
+    ! Check init status of arguments, deal with optional Array args
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+    if (present(srcArray)) then
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
+      opt_srcArray = srcArray
+    else
+      call ESMF_ArraySetThisNull(opt_srcArray, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    if (present(dstArray)) then
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
+      opt_dstArray = dstArray
+    else
+      call ESMF_ArraySetThisNull(opt_dstArray, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
     
     ! Set default flags
     opt_zeroflag = ESMF_TRUE
@@ -1476,7 +1492,7 @@ contains
     if (present(checkflag)) opt_checkflag = checkflag
         
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArraySparseMatMul(srcArray, dstArray, routehandle, &
+    call c_ESMC_ArraySparseMatMul(opt_srcArray, opt_dstArray, routehandle, &
       opt_zeroflag, opt_checkflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

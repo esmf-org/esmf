@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.48 2007/10/25 16:02:58 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.49 2007/12/10 18:42:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -239,6 +239,7 @@ class XXE{
     };
     
   public:
+    VM *vm;
     StreamElement *stream;
     int count;
     char **storage;
@@ -255,9 +256,10 @@ class XXE{
     int xxeSubMaxCount;
     
   public:
-    XXE(int maxArg=1000, int storageMaxCountArg=1000,
+    XXE(VM *vmArg, int maxArg=1000, int storageMaxCountArg=1000,
       int commhandleMaxCountArg=1000, int xxeSubMaxCountArg=1000){
       // constructor
+      vm = vmArg;
       stream = new StreamElement[maxArg]; count = 0; max = maxArg;
       storage = new char*[storageMaxCountArg];
       storageCount  = 0;
