@@ -12,8 +12,8 @@
 #ifndef ESMC_MeshObjConn_h
 #define ESMC_MeshObjConn_h
 
-#include <ESMC_MeshObj.h>
-#include <ESMC_CommRel.h>
+#include <Mesh/include/ESMC_MeshObj.h>
+#include <Mesh/include/ESMC_CommRel.h>
 
 #include <set>
 

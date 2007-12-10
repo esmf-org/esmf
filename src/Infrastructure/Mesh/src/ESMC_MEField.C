@@ -8,12 +8,12 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_MEField.h>
-#include <ESMC_MeshField.h>
-#include <ESMC_MeshUtils.h>
-#include <ESMC_MeshObjConn.h>
+#include <Mesh/include/ESMC_MEField.h>
+#include <Mesh/include/ESMC_MeshField.h>
+#include <Mesh/include/ESMC_MeshUtils.h>
+#include <Mesh/include/ESMC_MeshObjConn.h>
 
-#include <ESMC_ParEnv.h>
+#include <Mesh/include/ESMC_ParEnv.h>
 
 
 namespace ESMC {

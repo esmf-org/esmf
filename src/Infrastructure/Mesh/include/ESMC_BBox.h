@@ -12,12 +12,12 @@
 #ifndef ESMC_BBox_h
 #define ESMC_BBox_h
 
-#include <ESMC_MeshDB.h>
-#include <ESMC_MeshObj.h>
-#include <ESMC_MEField.h>  // for coords
+#include <Mesh/include/ESMC_MeshDB.h>
+#include <Mesh/include/ESMC_MeshObj.h>
+#include <Mesh/include/ESMC_MEField.h>  // for coords
 
 
-#include <ESMC_MeshTypes.h>
+#include <Mesh/include/ESMC_MeshTypes.h>
 
 #include <iostream>
 

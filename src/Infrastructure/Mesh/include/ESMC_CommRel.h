@@ -15,9 +15,9 @@
 #include <vector>
 #include <iostream>
 
-#include <ESMC_MeshDB.h>
-#include <ESMC_MeshllField.h>
-#include <ESMC_SparseMsg.h>
+#include <Mesh/include/ESMC_MeshDB.h>
+#include <Mesh/include/ESMC_MeshllField.h>
+#include <Mesh/include/ESMC_SparseMsg.h>
 
 namespace ESMC {
 

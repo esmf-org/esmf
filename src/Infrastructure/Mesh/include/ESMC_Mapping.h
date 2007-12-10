@@ -12,10 +12,10 @@
 #ifndef ESMC_Mapping_h
 #define ESMC_Mapping_h
 
-#include <ESMC_MeshTypes.h>
-#include <ESMC_MeshObjTopo.h>
-#include <ESMC_Exception.h>
-#include <ESMC_ShapeFunc.h>
+#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMC_MeshObjTopo.h>
+#include <Mesh/include/ESMC_Exception.h>
+#include <Mesh/include/ESMC_ShapeFunc.h>
 
 #include <string>
 

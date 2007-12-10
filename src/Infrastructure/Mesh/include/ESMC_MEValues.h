@@ -12,14 +12,14 @@
 #ifndef ESMC_MEValues_h
 #define ESMC_MEValues_h
 
-#include <ESMC_MasterElement.h>
-#include <ESMC_MeshObj.h>
-#include <ESMC_MeshUtils.h>
-#include <ESMC_MEField.h>
-#include <ESMC_Mapping.h>
-#include <ESMC_Kernel.h>
+#include <Mesh/include/ESMC_MasterElement.h>
+#include <Mesh/include/ESMC_MeshObj.h>
+#include <Mesh/include/ESMC_MeshUtils.h>
+#include <Mesh/include/ESMC_MEField.h>
+#include <Mesh/include/ESMC_Mapping.h>
+#include <Mesh/include/ESMC_Kernel.h>
 
-#include <ESMC_MeshTypes.h>
+#include <Mesh/include/ESMC_MeshTypes.h>
 
 
 namespace ESMC {

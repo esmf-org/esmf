@@ -8,13 +8,13 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_MeshRefine.h>
-#include <ESMC_Kernel.h>
-#include <ESMC_Attr.h>
-#include <ESMC_MeshObjConn.h>
-#include <ESMC_Exception.h>
-#include <ESMC_ParEnv.h>
-#include <ESMC_MeshUtils.h>
+#include <Mesh/include/ESMC_MeshRefine.h>
+#include <Mesh/include/ESMC_Kernel.h>
+#include <Mesh/include/ESMC_Attr.h>
+#include <Mesh/include/ESMC_MeshObjConn.h>
+#include <Mesh/include/ESMC_Exception.h>
+#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMC_MeshUtils.h>
 
 #include <functional>
 #include <algorithm>

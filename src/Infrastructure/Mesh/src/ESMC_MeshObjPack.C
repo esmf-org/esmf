@@ -8,9 +8,9 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_MeshObjPack.h>
-#include <ESMC_ParEnv.h>
-#include <ESMC_MeshObjConn.h>
+#include <Mesh/include/ESMC_MeshObjPack.h>
+#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMC_MeshObjConn.h>
 
 
 namespace ESMC {

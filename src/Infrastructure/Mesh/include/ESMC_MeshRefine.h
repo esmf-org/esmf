@@ -12,9 +12,9 @@
 #ifndef ESMC_MeshRefine_h
 #define ESMC_MeshRefine_h
 
-#include <ESMC_MeshObj.h>
-#include <ESMC_MEField.h>
-#include <ESMC_RefineTopo.h>
+#include <Mesh/include/ESMC_MeshObj.h>
+#include <Mesh/include/ESMC_MEField.h>
+#include <Mesh/include/ESMC_RefineTopo.h>
 
 namespace ESMC {
 

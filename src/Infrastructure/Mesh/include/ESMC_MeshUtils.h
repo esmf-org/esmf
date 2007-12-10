@@ -12,9 +12,9 @@
 #ifndef ESMC_MeshUtils_h
 #define ESMC_MeshUtils_h
 
-#include <ESMC_MEField.h>
-#include <ESMC_MCoord.h>
-#include <ESMC_Mesh.h>
+#include <Mesh/include/ESMC_MEField.h>
+#include <Mesh/include/ESMC_MCoord.h>
+#include <Mesh/include/ESMC_Mesh.h>
 
 namespace ESMC {
 

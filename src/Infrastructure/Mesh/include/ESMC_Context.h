@@ -12,8 +12,8 @@
 #ifndef ESMC_Context_h
 #define ESMC_Context_h
 
-#include <ESMC_MeshTypes.h>
-#include <ESMC_MeshContext.h>
+#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMC_MeshContext.h>
 
 #include <ostream>
 

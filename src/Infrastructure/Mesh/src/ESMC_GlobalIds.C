@@ -8,10 +8,10 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_GlobalIds.h>
-#include <ESMC_ParEnv.h>
-#include <ESMC_SparseMsg.h>
-#include <ESMC_Exception.h>
+#include <Mesh/include/ESMC_GlobalIds.h>
+#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMC_SparseMsg.h>
+#include <Mesh/include/ESMC_Exception.h>
 
 #include <mpi.h> 
 #include <bitset>

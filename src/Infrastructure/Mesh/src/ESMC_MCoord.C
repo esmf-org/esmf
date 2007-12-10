@@ -8,7 +8,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_MCoord.h>
+#include <Mesh/include/ESMC_MCoord.h>
 #include <cmath>
 
 namespace ESMC {

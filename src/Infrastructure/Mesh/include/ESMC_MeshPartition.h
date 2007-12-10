@@ -12,9 +12,9 @@
 #ifndef ESMC_MeshPartition_h
 #define ESMC_MeshPartition_h
 
-#include <ESMC_Mesh.h>
-#include <ESMC_MeshTypes.h>
-#include <ESMC_MeshField.h>
+#include <Mesh/include/ESMC_Mesh.h>
+#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMC_MeshField.h>
 
 // Partitions a mesh and saves the output as a nemesis file
 namespace ESMC {

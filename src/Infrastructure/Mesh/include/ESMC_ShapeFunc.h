@@ -12,7 +12,7 @@
 #ifndef ESMC_ShapeFunc_h
 #define ESMC_ShapeFunc_h
 
-#include <ESMC_MeshTypes.h>
+#include <Mesh/include/ESMC_MeshTypes.h>
 
 #include <string>
 

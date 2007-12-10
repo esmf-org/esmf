@@ -8,8 +8,8 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_Polynomial.h>
-#include <ESMC_Ftn.h>
+#include <Mesh/include/ESMC_Polynomial.h>
+#include <Mesh/include/ESMC_Ftn.h>
 
 #include <iterator>
 #include <iostream>

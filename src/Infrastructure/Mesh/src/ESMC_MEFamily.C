@@ -8,12 +8,12 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_MEFamily.h>
-#include <ESMC_Exception.h>
+#include <Mesh/include/ESMC_MEFamily.h>
+#include <Mesh/include/ESMC_Exception.h>
 
-#include <ESMC_ShapeHierarchic.h>
-#include <ESMC_ShapeLagrange.h>
-#include <ESMC_SFuncAdaptor.h>
+#include <Mesh/include/ESMC_ShapeHierarchic.h>
+#include <Mesh/include/ESMC_ShapeLagrange.h>
+#include <Mesh/include/ESMC_SFuncAdaptor.h>
 
 
 namespace ESMC {

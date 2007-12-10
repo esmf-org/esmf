@@ -6,7 +6,7 @@
  *   AUTHOR: Bob Oehmke 6/8/2007
  *
  ****************************************************/
-#include <ESMC_OctBox3d.h>
+#include <Mesh/include/ESMC_OctBox3d.h>
 #include <stdlib.h>
 #include <math.h>
 

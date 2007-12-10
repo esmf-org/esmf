@@ -12,12 +12,12 @@
 #ifndef ESMC_Interp_h
 #define ESMC_Interp_h
 
-#include <ESMC_MEField.h>
-#include <ESMC_Search.h>
-#include <ESMC_GeomRendezvous.h>
-#include <ESMC_Migrator.h>
-#include <ESMC_SparseMsg.h>
-#include <ESMC_WMat.h>
+#include <Mesh/include/ESMC_MEField.h>
+#include <Mesh/include/ESMC_Search.h>
+#include <Mesh/include/ESMC_GeomRendezvous.h>
+#include <Mesh/include/ESMC_Migrator.h>
+#include <Mesh/include/ESMC_SparseMsg.h>
+#include <Mesh/include/ESMC_WMat.h>
 
 #include <vector>
 #include <ostream>

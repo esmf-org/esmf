@@ -12,12 +12,12 @@
 #ifndef ESMC_MasterElement_h
 #define ESMC_MasterElement_h
 
-#include <ESMC_ShapeFunc.h>
-#include <ESMC_Mapping.h>
-#include <ESMC_MeshTypes.h>
-#include <ESMC_Quadrature.h>
+#include <Mesh/include/ESMC_ShapeFunc.h>
+#include <Mesh/include/ESMC_Mapping.h>
+#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMC_Quadrature.h>
 
-#include <ESMC_MeshTypes.h>
+#include <Mesh/include/ESMC_MeshTypes.h>
 
 #include <map>
 #include <string>

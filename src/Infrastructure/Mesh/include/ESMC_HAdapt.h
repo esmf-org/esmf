@@ -15,10 +15,10 @@
 #include <vector>
 #include <map>
 
-#include <ESMC_Exception.h>
-#include <ESMC_MeshTypes.h>
-#include <ESMC_MEField.h>
-#include <ESMC_WMat.h>
+#include <Mesh/include/ESMC_Exception.h>
+#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMC_MEField.h>
+#include <Mesh/include/ESMC_WMat.h>
 
 
 namespace ESMC {

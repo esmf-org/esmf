@@ -12,8 +12,8 @@
 #ifndef ESMC_CommReg_h
 #define ESMC_CommReg_h
 
-#include <ESMC_CommRel.h>
-#include <ESMC_MEField.h>
+#include <Mesh/include/ESMC_CommRel.h>
+#include <Mesh/include/ESMC_MEField.h>
 
 #include <iostream>
 

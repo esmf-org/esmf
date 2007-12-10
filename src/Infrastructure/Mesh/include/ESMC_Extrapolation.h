@@ -12,7 +12,7 @@
 #ifndef ESMC_EXTRAPOLATION_H_
 #define ESMC_EXTRAPOLATION_H_
 
-#include <ESMC_MeshTypes.h>
+#include <Mesh/include/ESMC_MeshTypes.h>
 
 namespace ESMC {
 

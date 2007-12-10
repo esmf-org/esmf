@@ -12,8 +12,8 @@
 #ifndef ESMC_SHAPELAGRANGE_H_
 #define ESMC_SHAPELAGRANGE_H_
 
-#include <ESMC_ShapeFunc.h>
-#include <ESMC_Exception.h>
+#include <Mesh/include/ESMC_ShapeFunc.h>
+#include <Mesh/include/ESMC_Exception.h>
 
 
 #include <vector>

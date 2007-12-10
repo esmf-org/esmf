@@ -8,14 +8,14 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_MeshSkin.h>
-#include <ESMC_MeshDB.h>
-#include <ESMC_MeshObj.h>
-#include <ESMC_MeshObjTopo.h>
-#include <ESMC_MeshObjConn.h>
-#include <ESMC_Kernel.h>
-#include <ESMC_SparseMsg.h>
-#include <ESMC_ParEnv.h>
+#include <Mesh/include/ESMC_MeshSkin.h>
+#include <Mesh/include/ESMC_MeshDB.h>
+#include <Mesh/include/ESMC_MeshObj.h>
+#include <Mesh/include/ESMC_MeshObjTopo.h>
+#include <Mesh/include/ESMC_MeshObjConn.h>
+#include <Mesh/include/ESMC_Kernel.h>
+#include <Mesh/include/ESMC_SparseMsg.h>
+#include <Mesh/include/ESMC_ParEnv.h>
 
 #include <iostream>
 #include <fstream>

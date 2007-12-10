@@ -12,8 +12,8 @@
 #ifndef ESMC_SmallAlloc_h
 #define ESMC_SmallAlloc_h
 
-#include <ESMC_MeshTypes.h>
-#include <ESMC_List.h>
+#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMC_List.h>
 
 #include <cstddef>
 

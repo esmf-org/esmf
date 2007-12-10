@@ -12,7 +12,7 @@
 #ifndef ESMC_MeshVTK_h
 #define ESMC_MeshVTK_h
 
-#include <ESMC_MeshTypes.h>
+#include <Mesh/include/ESMC_MeshTypes.h>
 
 #include <string>
 

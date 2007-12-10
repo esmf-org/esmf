@@ -8,10 +8,10 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_ShapeFunc.h>
-#include <ESMC_Exception.h>
+#include <Mesh/include/ESMC_ShapeFunc.h>
+#include <Mesh/include/ESMC_Exception.h>
 
-#include <sacado/Sacado.hpp>
+#include <Mesh/include/sacado/Sacado.hpp>
 
 namespace ESMC {
 

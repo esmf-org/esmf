@@ -8,11 +8,11 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_MeshObj.h>
+#include <Mesh/include/ESMC_MeshObj.h>
 #include <iostream>
 #include <set>
 #include <algorithm>
-#include <ESMC_ParEnv.h>
+#include <Mesh/include/ESMC_ParEnv.h>
 
 namespace ESMC {
 

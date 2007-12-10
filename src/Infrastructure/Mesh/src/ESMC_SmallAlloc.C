@@ -8,9 +8,9 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_SmallAlloc.h>
+#include <Mesh/include/ESMC_SmallAlloc.h>
 
-#include <ESMC_Exception.h>
+#include <Mesh/include/ESMC_Exception.h>
 
 namespace ESMC {
 
@@ -190,7 +190,7 @@ SmallObject<ObjType>::~SmallObject() {
 
 // *********** Type instantiations **********
 
-#include <ESMC_MeshObj.h>
+#include <Mesh/include/ESMC_MeshObj.h>
 
 
 namespace ESMC {

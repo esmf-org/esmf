@@ -12,8 +12,8 @@
 #ifndef ESMC_Quadrature_h
 #define ESMC_Quadrature_h
 
-#include <ESMC_MeshTypes.h>
-#include <ESMC_Exception.h>
+#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMC_Exception.h>
 
 #include <string>
 #include <algorithm>

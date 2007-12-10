@@ -8,12 +8,12 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_MEValues.h>
-#include <ESMC_Exception.h>
-#include <ESMC_MeshUtils.h>
-#include <ESMC_MeshField.h>
-#include <ESMC_ParEnv.h>
-#include <ESMC_ShapeFunc.h>
+#include <Mesh/include/ESMC_MEValues.h>
+#include <Mesh/include/ESMC_Exception.h>
+#include <Mesh/include/ESMC_MeshUtils.h>
+#include <Mesh/include/ESMC_MeshField.h>
+#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMC_ShapeFunc.h>
 
 #include <cstddef> // NULL
 #include <vector>

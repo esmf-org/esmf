@@ -8,13 +8,13 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_GeomRendezvous.h>
-#include <ESMC_Exception.h>
-#include <ESMC_BBox.h>
-#include <ESMC_MeshUtils.h>
-#include <ESMC_ParEnv.h>
-#include <ESMC_MeshRead.h>
-#include <ESMC_MeshObjConn.h>
+#include <Mesh/include/ESMC_GeomRendezvous.h>
+#include <Mesh/include/ESMC_Exception.h>
+#include <Mesh/include/ESMC_BBox.h>
+#include <Mesh/include/ESMC_MeshUtils.h>
+#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMC_MeshRead.h>
+#include <Mesh/include/ESMC_MeshObjConn.h>
 
 #include <Mesh/src/Zoltan/zoltan.h>
 

@@ -8,15 +8,15 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_MeshGen.h>
+#include <Mesh/include/ESMC_MeshGen.h>
 
-#include <ESMC_Mesh.h>
-#include <ESMC_MeshObj.h>
-#include <ESMC_MeshObjTopo.h>
-#include <ESMC_Exception.h>
-#include <ESMC_ParEnv.h>
-#include <ESMC_IOField.h>
-#include <ESMC_MeshSkin.h>
+#include <Mesh/include/ESMC_Mesh.h>
+#include <Mesh/include/ESMC_MeshObj.h>
+#include <Mesh/include/ESMC_MeshObjTopo.h>
+#include <Mesh/include/ESMC_Exception.h>
+#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMC_IOField.h>
+#include <Mesh/include/ESMC_MeshSkin.h>
 
 namespace ESMC {
 

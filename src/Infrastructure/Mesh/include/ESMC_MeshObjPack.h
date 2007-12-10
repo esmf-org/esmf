@@ -12,12 +12,12 @@
 #ifndef ESMC_MeshObjPack_h
 #define ESMC_MeshObjPack_h
 
-#include <ESMC_MeshObj.h>
-#include <ESMC_CommRel.h>
-#include <ESMC_Kernel.h>
-#include <ESMC_Context.h>
-#include <ESMC_SparseMsg.h>
-#include <ESMC_MeshDB.h>
+#include <Mesh/include/ESMC_MeshObj.h>
+#include <Mesh/include/ESMC_CommRel.h>
+#include <Mesh/include/ESMC_Kernel.h>
+#include <Mesh/include/ESMC_Context.h>
+#include <Mesh/include/ESMC_SparseMsg.h>
+#include <Mesh/include/ESMC_MeshDB.h>
 
 #include <cstddef>
 

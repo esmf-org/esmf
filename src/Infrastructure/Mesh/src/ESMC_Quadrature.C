@@ -8,10 +8,10 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_Quadrature.h>
-#include <ESMC_Exception.h>
-#include <ESMC_MeshObjTopo.h>
-#include <ESMC_Mapping.h>
+#include <Mesh/include/ESMC_Quadrature.h>
+#include <Mesh/include/ESMC_Exception.h>
+#include <Mesh/include/ESMC_MeshObjTopo.h>
+#include <Mesh/include/ESMC_Mapping.h>
 
 #include <cmath>
 

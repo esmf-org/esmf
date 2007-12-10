@@ -8,11 +8,11 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_WriteWeightsPar.h>
+#include <Mesh/include/ESMC_WriteWeightsPar.h>
 
-#include <ESMC_Interp.h>
-#include <ESMC_Migrator.h>
-#include <ESMC_MeshUtils.h>
+#include <Mesh/include/ESMC_Interp.h>
+#include <Mesh/include/ESMC_Migrator.h>
+#include <Mesh/include/ESMC_MeshUtils.h>
 
 #ifdef ESMC_PNETCDF
 #include <pnetcdf.h>

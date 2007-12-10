@@ -12,9 +12,9 @@
 #ifndef ESMC_MEFamily_h
 #define ESMC_MEFamily_h
 
-#include <ESMC_MasterElement.h>
+#include <Mesh/include/ESMC_MasterElement.h>
 
-#include <ESMC_Quadrature.h>
+#include <Mesh/include/ESMC_Quadrature.h>
 
 #include <map>
 #include <string>

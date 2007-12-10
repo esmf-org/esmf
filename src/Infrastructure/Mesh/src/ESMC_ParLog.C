@@ -8,7 +8,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_ParLog.h>
+#include <Mesh/include/ESMC_ParLog.h>
 
 #include <mpi.h>
 #include <cstdlib>

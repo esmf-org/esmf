@@ -12,9 +12,9 @@
 #ifndef ESMC_SFuncAdaptor_h
 #define ESMC_SFuncAdaptor_h
 
-#include <ESMC_MeshTypes.h>
-#include <ESMC_ShapeFunc.h>
-#include <ESMC_Exception.h>
+#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMC_ShapeFunc.h>
+#include <Mesh/include/ESMC_Exception.h>
 
 #include <string>
 

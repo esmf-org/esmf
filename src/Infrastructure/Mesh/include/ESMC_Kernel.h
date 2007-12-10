@@ -12,8 +12,8 @@
 #ifndef ESMC_Kernel_h
 #define ESMC_Kernel_h
 
-#include <ESMC_Attr.h>
-#include <ESMC_MeshObj.h>
+#include <Mesh/include/ESMC_Attr.h>
+#include <Mesh/include/ESMC_MeshObj.h>
 
 #include <ostream>
 

@@ -8,9 +8,9 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_ShapeHierarchic.h>
-#include <ESMC_Ftn.h>
-#include <ESMC_Quadrature.h>
+#include <Mesh/include/ESMC_ShapeHierarchic.h>
+#include <Mesh/include/ESMC_Ftn.h>
+#include <Mesh/include/ESMC_Quadrature.h>
 
 #include <iostream>
 

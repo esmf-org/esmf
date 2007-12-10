@@ -12,8 +12,8 @@
 #ifndef ESMC_MeshObjTopo_h
 #define ESMC_MeshObjTopo_h
 
-#include <ESMC_MeshTypes.h>
-#include <ESMC_Exception.h>
+#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMC_Exception.h>
 
 
 #include <string>

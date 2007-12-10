@@ -12,8 +12,8 @@
 #ifndef ESMC_MeshNC_h
 #define ESMC_MeshNC_h
 
-#include <ESMC_MEField.h>
-#include <ESMC_Mesh.h>
+#include <Mesh/include/ESMC_MEField.h>
+#include <Mesh/include/ESMC_Mesh.h>
 #include <string>
 
 namespace ESMC {

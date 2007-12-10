@@ -12,7 +12,7 @@
 #ifndef ESMC_MCoord_h
 #define ESMC_MCoord_h
 
-#include <ESMC_MeshTypes.h>
+#include <Mesh/include/ESMC_MeshTypes.h>
 
 namespace ESMC {
 

@@ -8,7 +8,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_Exception.h>
+#include <Mesh/include/ESMC_Exception.h>
 
 
 namespace ESMC {

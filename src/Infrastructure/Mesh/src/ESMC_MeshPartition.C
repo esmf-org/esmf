@@ -8,16 +8,16 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_MeshPartition.h>
-#include <ESMC_MeshObjConn.h>
+#include <Mesh/include/ESMC_MeshPartition.h>
+#include <Mesh/include/ESMC_MeshObjConn.h>
 
-#include <ESMC_MeshDB.h>
-#include <ESMC_MeshObjTopo.h>
+#include <Mesh/include/ESMC_MeshDB.h>
+#include <Mesh/include/ESMC_MeshObjTopo.h>
 
-#include <ESMC_MeshField.h>
-#include <ESMC_MeshExodus.h>
-#include <ESMC_MeshUtils.h>
-#include <ESMC_MeshRead.h>
+#include <Mesh/include/ESMC_MeshField.h>
+#include <Mesh/include/ESMC_MeshExodus.h>
+#include <Mesh/include/ESMC_MeshUtils.h>
+#include <Mesh/include/ESMC_MeshRead.h>
 
 #include <iostream>
 #include <iterator>

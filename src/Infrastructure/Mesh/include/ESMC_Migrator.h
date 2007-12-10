@@ -12,10 +12,10 @@
 #ifndef ESMC_MIGRATOR_H_
 #define ESMC_MIGRATOR_H_
 
-#include <ESMC_SparseMsg.h>
-#include <ESMC_MeshTypes.h>
-#include <ESMC_DDir.h>
-#include <ESMC_ParEnv.h>
+#include <Mesh/include/ESMC_SparseMsg.h>
+#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMC_DDir.h>
+#include <Mesh/include/ESMC_ParEnv.h>
 
 namespace ESMC {
 

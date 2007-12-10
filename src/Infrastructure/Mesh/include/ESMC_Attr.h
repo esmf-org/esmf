@@ -12,8 +12,8 @@
 #ifndef ESMC_Attr_h
 #define ESMC_Attr_h
 
-#include <ESMC_Context.h>
-#include <ESMC_MeshObj.h>
+#include <Mesh/include/ESMC_Context.h>
+#include <Mesh/include/ESMC_MeshObj.h>
 
 #include <ostream>
 

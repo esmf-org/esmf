@@ -8,7 +8,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_MasterElementV.h>
+#include <Mesh/include/ESMC_MasterElementV.h>
 
 #include <iostream>
 #include <iterator>

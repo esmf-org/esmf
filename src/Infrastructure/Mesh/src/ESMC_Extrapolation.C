@@ -8,11 +8,11 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_Extrapolation.h>
+#include <Mesh/include/ESMC_Extrapolation.h>
 
-#include <ESMC_Interp.h>
-#include <ESMC_Mesh.h>
-#include <ESMC_ParEnv.h>
+#include <Mesh/include/ESMC_Interp.h>
+#include <Mesh/include/ESMC_Mesh.h>
+#include <Mesh/include/ESMC_ParEnv.h>
 
 namespace ESMC {
 

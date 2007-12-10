@@ -8,14 +8,14 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_Search.h>
-#include <ESMC_MeshTypes.h>
-#include <ESMC_MeshObjTopo.h>
-#include <ESMC_Mapping.h>
-#include <ESMC_MeshObj.h>
-#include <ESMC_Mesh.h>
-#include <ESMC_MeshUtils.h>
-#include <ESMC_OctBox3d.h>
+#include <Mesh/include/ESMC_Search.h>
+#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMC_MeshObjTopo.h>
+#include <Mesh/include/ESMC_Mapping.h>
+#include <Mesh/include/ESMC_MeshObj.h>
+#include <Mesh/include/ESMC_Mesh.h>
+#include <Mesh/include/ESMC_MeshUtils.h>
+#include <Mesh/include/ESMC_OctBox3d.h>
  
 #include <iostream>
 #include <algorithm>
@@ -28,7 +28,7 @@
 #include <limits>
 #include <vector>
 
-#include <ESMC_BBox.h>
+#include <Mesh/include/ESMC_BBox.h>
 
 namespace ESMC {
 

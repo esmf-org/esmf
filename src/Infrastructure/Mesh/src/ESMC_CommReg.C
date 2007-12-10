@@ -8,12 +8,12 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_CommReg.h>
-#include <ESMC_MeshllField.h>
-#include <ESMC_MeshObjPack.h>
-#include <ESMC_SparseMsg.h>
-#include <ESMC_ParEnv.h>
-#include <ESMC_Mesh.h>
+#include <Mesh/include/ESMC_CommReg.h>
+#include <Mesh/include/ESMC_MeshllField.h>
+#include <Mesh/include/ESMC_MeshObjPack.h>
+#include <Mesh/include/ESMC_SparseMsg.h>
+#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMC_Mesh.h>
 
 
 namespace ESMC {

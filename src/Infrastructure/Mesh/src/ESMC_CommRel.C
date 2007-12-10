@@ -8,14 +8,14 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_CommRel.h>
-#include <ESMC_SparseMsg.h>
-#include <ESMC_MeshObjTopo.h>
-#include <ESMC_MeshField.h>
-#include <ESMC_Kernel.h>
-#include <ESMC_MeshObjPack.h>
-#include <ESMC_ParEnv.h>
-#include <ESMC_MeshObjConn.h>
+#include <Mesh/include/ESMC_CommRel.h>
+#include <Mesh/include/ESMC_SparseMsg.h>
+#include <Mesh/include/ESMC_MeshObjTopo.h>
+#include <Mesh/include/ESMC_MeshField.h>
+#include <Mesh/include/ESMC_Kernel.h>
+#include <Mesh/include/ESMC_MeshObjPack.h>
+#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMC_MeshObjConn.h>
 
 #include <iostream>
 #include <iterator>

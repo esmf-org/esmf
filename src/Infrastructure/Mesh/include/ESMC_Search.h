@@ -14,9 +14,9 @@
 
 #include <list>
 
-#include <ESMC_MeshTypes.h>
-#include <ESMC_MeshObj.h>
-#include <ESMC_OctBox3d.h>
+#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMC_MeshObj.h>
+#include <Mesh/include/ESMC_OctBox3d.h>
 #include <vector>
 
 

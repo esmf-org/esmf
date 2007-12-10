@@ -12,11 +12,11 @@
 #ifndef ESMC_GeomRendezvous_h
 #define ESMC_GeomRendezvous_h
 
-#include <ESMC_MeshTypes.h>
-#include <ESMC_Context.h>
-#include <ESMC_CommReg.h>
-#include <ESMC_Mesh.h>
-#include <ESMC_MEField.h>
+#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMC_Context.h>
+#include <Mesh/include/ESMC_CommReg.h>
+#include <Mesh/include/ESMC_Mesh.h>
+#include <Mesh/include/ESMC_MEField.h>
 
 #include <Mesh/src/Zoltan/zoltan.h>
 

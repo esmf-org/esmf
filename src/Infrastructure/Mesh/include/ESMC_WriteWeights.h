@@ -13,7 +13,7 @@
 #define ESMC_WRITEWEIGHTS_H_
 
 
-#include <ESMC_ParEnv.h>
+#include <Mesh/include/ESMC_ParEnv.h>
 
 #include <string>
 

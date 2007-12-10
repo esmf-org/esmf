@@ -13,10 +13,10 @@
 #define ESMC_MeshObj_h
 
 
-#include <ESMC_MeshTypes.h>
-#include <ESMC_List.h>
-#include <ESMC_Tree.h>
-#include <ESMC_SmallAlloc.h>
+#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMC_List.h>
+#include <Mesh/include/ESMC_Tree.h>
+#include <Mesh/include/ESMC_SmallAlloc.h>
 
 #include <stdlib.h>
 #include <stdio.h>

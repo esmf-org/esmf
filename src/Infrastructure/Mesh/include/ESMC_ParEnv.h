@@ -12,7 +12,7 @@
 #ifndef ESMC_ParEnv_h
 #define ESMC_ParEnv_h
 
-#include <ESMC_MeshTypes.h>
+#include <Mesh/include/ESMC_MeshTypes.h>
 
 #include <iostream>
 #include <fstream>

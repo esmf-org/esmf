@@ -8,15 +8,15 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_MeshRead.h>
-#include <ESMC_CommRel.h>
-#include <ESMC_MeshField.h>
-#include <ESMC_MeshUtils.h>
-#include <ESMC_Attr.h>
-#include <ESMC_MeshExodus.h>
-#include <ESMC_MeshSkin.h>
-#include <ESMC_ParEnv.h>
-#include <ESMC_MeshVTK.h>
+#include <Mesh/include/ESMC_MeshRead.h>
+#include <Mesh/include/ESMC_CommRel.h>
+#include <Mesh/include/ESMC_MeshField.h>
+#include <Mesh/include/ESMC_MeshUtils.h>
+#include <Mesh/include/ESMC_Attr.h>
+#include <Mesh/include/ESMC_MeshExodus.h>
+#include <Mesh/include/ESMC_MeshSkin.h>
+#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMC_MeshVTK.h>
 
 #include <mpi.h>
 

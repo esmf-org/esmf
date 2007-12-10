@@ -8,15 +8,15 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_MeshDB.h>
+#include <Mesh/include/ESMC_MeshDB.h>
 
-#include <ESMC_MeshObjTopo.h>
-#include <ESMC_Exception.h>
-#include <ESMC_MeshObjConn.h>
-#include <ESMC_Mapping.h>
-#include <ESMC_Quadrature.h>
-#include <ESMC_MEField.h>
-#include <ESMC_ParEnv.h>
+#include <Mesh/include/ESMC_MeshObjTopo.h>
+#include <Mesh/include/ESMC_Exception.h>
+#include <Mesh/include/ESMC_MeshObjConn.h>
+#include <Mesh/include/ESMC_Mapping.h>
+#include <Mesh/include/ESMC_Quadrature.h>
+#include <Mesh/include/ESMC_MEField.h>
+#include <Mesh/include/ESMC_ParEnv.h>
 
 #include <iterator>
 #include <iostream>

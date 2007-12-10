@@ -8,12 +8,12 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_MeshVTK.h>
-#include <ESMC_Mesh.h>
-#include <ESMC_MEField.h>
-#include <ESMC_MeshObjTopo.h>
-#include <ESMC_ParEnv.h>
-#include <ESMC_IOField.h>
+#include <Mesh/include/ESMC_MeshVTK.h>
+#include <Mesh/include/ESMC_Mesh.h>
+#include <Mesh/include/ESMC_MEField.h>
+#include <Mesh/include/ESMC_MeshObjTopo.h>
+#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMC_IOField.h>
 
 #include <iostream>
 #include <fstream>

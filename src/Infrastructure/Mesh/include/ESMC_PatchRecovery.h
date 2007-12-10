@@ -13,12 +13,12 @@
 #define ESMC_PatchRecovery_h
 
 
-#include <ESMC_MeshDB.h>
-#include <ESMC_MeshObj.h>
-#include <ESMC_MEField.h>
-#include <ESMC_MasterElement.h>
-#include <ESMC_Exception.h>
-#include <ESMC_MCoord.h>
+#include <Mesh/include/ESMC_MeshDB.h>
+#include <Mesh/include/ESMC_MeshObj.h>
+#include <Mesh/include/ESMC_MEField.h>
+#include <Mesh/include/ESMC_MasterElement.h>
+#include <Mesh/include/ESMC_Exception.h>
+#include <Mesh/include/ESMC_MCoord.h>
 
 #include <map>
 

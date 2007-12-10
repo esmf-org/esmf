@@ -8,9 +8,9 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <ESMC_WMat.h>
-#include <ESMC_Attr.h>
-#include <ESMC_MeshUtils.h>
+#include <Mesh/include/ESMC_WMat.h>
+#include <Mesh/include/ESMC_Attr.h>
+#include <Mesh/include/ESMC_MeshUtils.h>
 
 namespace ESMC {
 

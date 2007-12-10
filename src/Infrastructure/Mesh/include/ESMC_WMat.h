@@ -12,7 +12,7 @@
 #ifndef ESMC_WMat_h
 #define ESMC_WMat_h
 
-#include <ESMC_Migrator.h>
+#include <Mesh/include/ESMC_Migrator.h>
 
 #include <ostream>
 

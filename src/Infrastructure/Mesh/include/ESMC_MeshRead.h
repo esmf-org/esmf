@@ -14,7 +14,7 @@
 
 #include <mpi.h>
 
-#include <ESMC_Mesh.h>
+#include <Mesh/include/ESMC_Mesh.h>
 
 namespace ESMC {
 
