@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.50 2007/12/05 19:19:57 rokuingh Exp $
+// $Id: ESMC_Base_F.C,v 1.51 2007/12/10 21:14:08 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.50 2007/12/05 19:19:57 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.51 2007/12/10 21:14:08 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -765,20 +765,24 @@ extern "C" {
 //    none.  return code is passed thru the parameter list
 // 
 // !ARGUMENTS:
-      ESMC_Base **base,         // in/out - base object
-      char *name,               // in - F90, non-null terminated string
-      int *convention,          // in - integer convention value
-      int *purpose,            // in - integer purpose value
-      int *rc,                  // in - return code
-      int nlen) {               // hidden/in - strlen count for name
+      ESMC_Base **base,          // in/out - base object
+      char *name,                // in - F90, non-null terminated string
+      char *convention,          // in - convention
+      char *purpose,             // in - purpose
+      char *object,              // in - object type
+      int *rc,                   // in - return code
+      int nlen,                  // hidden/in - strlen count for name
+      int clen,                  // hidden/in - strlen count for convention
+      int plen,                  // hidden/in - strlen count for purpose           
+      int olen) {                // hidden/in - strlen count for object
 // 
 // !DESCRIPTION:
-//     Associate a convention and purpose with an attribute package
+//     Associate a convention, purpose, and object type with an attribute package
 //
 //EOP
 
   int status;
-  char *cname;
+  char *cname, *cconv, *cpurp, *cobj;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -795,6 +799,30 @@ extern "C" {
       if (rc) *rc = status;
       return;
   }
+  
+  // simple sanity check before doing any more work
+  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
 
   // copy and convert F90 string to null terminated one
   cname = ESMC_F90toCstring(name, nlen);
@@ -804,11 +832,41 @@ extern "C" {
       if (rc) *rc = status;
       return;
   }
+  
+  // copy and convert F90 string to null terminated one
+  cconv = ESMC_F90toCstring(convention, clen);
+  if (!cconv) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // copy and convert F90 string to null terminated one
+  cpurp = ESMC_F90toCstring(purpose, plen);
+  if (!cpurp) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // copy and convert F90 string to null terminated one
+  cobj = ESMC_F90toCstring(object, olen);
+  if (!cobj) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
 
   // Set the attribute on the object.
-  *rc = (*base)->ESMC_CreateAttPack(cname, *convention, *purpose);
+  *rc = (*base)->ESMC_CreateAttPack(cname, cconv, cpurp, cobj);
 
   delete [] cname;
+  delete [] cconv;
+  delete [] cpurp;
+  delete [] cobj;
   return;
 
 }  // end c_ESMC_createattpack
@@ -824,22 +882,26 @@ extern "C" {
 //    none.  return code is passed thru the parameter list
 // 
 // !ARGUMENTS:
-      ESMC_Base **base,         // in/out - base object
-      char *name,               // in - F90, non-null terminated string
-      char *value,              // in - F90, non-null terminated string
-      int *convention,          // in - integer convention value
-      int *purpose,             // in - integer purpose value
-      int *rc,                  // in - return code
-      int nlen,                 // hidden/in - strlen count for name
-      int vlen) {               // hidden/in - strlen count for value
+      ESMC_Base **base,          // in/out - base object
+      char *name,                // in - F90, non-null terminated string
+      char *value,               // in - F90, non-null terminated string
+      char *convention,          // in - convention
+      char *purpose,             // in - purpose
+      char *object,              // in - object type
+      int *rc,                   // in - return code
+      int nlen,                  // hidden/in - strlen count for name
+      int vlen,                  // hidden/in - strlen count for value
+      int clen,                  // hidden/in - strlen count for convention
+      int plen,                  // hidden/in - strlen count for purpose           
+      int olen) {                // hidden/in - strlen count for object
 // 
 // !DESCRIPTION:
-//     Associate a convention and purpose with an attribute package
+//     Set the convention, purpose, and object type on an attribute package
 //
 //EOP
 
   int status;
-  char *cname, *cvalue;
+  char *cname, *cvalue, *cconv, *cpurp, *cobj;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -866,6 +928,30 @@ extern "C" {
       return;
   }
 
+  // simple sanity check before doing any more work
+  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
   // copy and convert F90 string to null terminated one
   cname = ESMC_F90toCstring(name, nlen);
   if (!cname) {
@@ -880,11 +966,41 @@ extern "C" {
       return;
   }
 
+  // copy and convert F90 string to null terminated one
+  cconv = ESMC_F90toCstring(convention, clen);
+  if (!cconv) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // copy and convert F90 string to null terminated one
+  cpurp = ESMC_F90toCstring(purpose, plen);
+  if (!cpurp) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // copy and convert F90 string to null terminated one
+  cobj = ESMC_F90toCstring(object, olen);
+  if (!cobj) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
   // Set the attribute on the object.
-  *rc = (*base)->ESMC_SetAttPack(cname, cvalue, *convention, *purpose);
+  *rc = (*base)->ESMC_SetAttPack(cname, cvalue, cconv, cpurp, cobj);
 
   delete [] cname;
   delete [] cvalue;
+  delete [] cconv;
+  delete [] cpurp;
+  delete [] cobj;
   return;
 
 }  // end c_ESMC_setattpack

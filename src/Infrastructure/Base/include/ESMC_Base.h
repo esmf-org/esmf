@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.79 2007/12/06 22:34:34 rokuingh Exp $
+// $Id: ESMC_Base.h,v 1.80 2007/12/10 21:14:07 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -58,8 +58,9 @@ class ESMC_Attribute
     int items;                  // number of items (NOT byte count) for lists
     int slen;                   // for string, length, inc trailing NULL. 
 
-    int attrConvention;             // for att packages
-    int attrPurpose;                // for att packages
+    char attrConvention[ESMF_MAXSTR];             // for att packages
+    char attrPurpose[ESMF_MAXSTR];                // for att packages
+    char attrObject[ESMF_MAXSTR];                 // for att packages
 
     union {                     // overload pointers to conserve space 
       ESMC_I4    vi;       // integer, or
@@ -86,7 +87,7 @@ class ESMC_Attribute
     ESMC_Attribute& operator=(const ESMC_Attribute &);
     ESMC_Attribute(void);
     ESMC_Attribute(char *name, ESMC_TypeKind tk, int numitems, void *datap);
-    ESMC_Attribute(char *name, int conv, int purp);
+    ESMC_Attribute(char *name, char *conv, char *purp, char *obj);
     ~ESMC_Attribute(void);
 
 
@@ -212,10 +213,10 @@ class ESMC_Base
     ESMC_Attribute *ESMC_AttributeGet(int num) const;
 
     // attpack methods
-    int ESMC_CreateAttPack(char *name, int convention, int purpose);
-    int ESMC_SetAttPack(char *name, char *value, int convention, int purpose);
-    ESMC_Attribute **ESMC_AttributeGetListOf(int convention, int purpose, int *attpackCount) const;
-    int ESMC_PrintAttPack(int convention, int purpose) const;
+    int ESMC_CreateAttPack(char *name, char *convention, char *purpose, char *object);
+    int ESMC_SetAttPack(char *name, char *value, char *convention, char *purpose, char *object);
+    ESMC_Attribute **ESMC_AttributeGetListOf(char *convention, char *purpose, char *object, int *attpackCount) const;
+    int ESMC_PrintAttPack(char *convention, char *purpose, char *object) const;
 
     // not implemented yet
     int ESMC_AttributeGetNameList(int *count, char **namelist) const;
