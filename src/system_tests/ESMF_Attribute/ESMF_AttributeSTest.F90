@@ -26,7 +26,7 @@ program ESMF_AttributeSTest
   type(ESMF_VM):: vm
   type(ESMF_State) :: state1
   character(len=ESMF_MAXSTR) :: state1name, name, value
-  character(len=ESMF_MAXSTR) :: conv, purp, obj
+  character(len=ESMF_MAXSTR) :: conv, purp
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: testresult = 0
@@ -77,18 +77,20 @@ program ESMF_AttributeSTest
   value = 'NCAR'
   conv = 'ESG-CDP'
   purp = 'general'
-  obj = 'state'
 
   state1 = ESMF_StateCreate('comp1_import', ESMF_STATE_IMPORT, rc=rc)
   if (rc .ne. ESMF_SUCCESS) goto 10
 
-  call ESMF_StateCreateAttPack(state1, convention=conv, purpose=purp, object=obj, rc=rc)
+  call ESMF_StateCreateAttPack(state1, convention=conv, purpose=purp, rc=rc)
   if (rc .ne. ESMF_SUCCESS) goto 10
   
-  call ESMF_StateSetAttPack(state1, name, value, convention=conv, purpose=purp, object=obj, rc=rc)
+  call ESMF_StateSetAttPack(state1, name, value, convention=conv, purpose=purp, rc=rc)
   if (rc .ne. ESMF_SUCCESS) goto 10
   
-  call ESMF_StatePrint(state1, rc=rc)
+  call ESMF_StateWriteAttPack(state1, convention=conv, purpose=purp, rc=rc)
+  if (rc .ne. ESMF_SUCCESS) goto 10
+  
+!  call ESMF_StatePrint(state1, rc=rc)
   if (rc .ne. ESMF_SUCCESS) goto 10
 
 !-------------------------------------------------------------------------
