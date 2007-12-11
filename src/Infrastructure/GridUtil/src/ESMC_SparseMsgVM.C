@@ -1,4 +1,4 @@
-// $Id: ESMC_SparseMsg.C,v 1.6 2007/08/03 18:27:16 theurich Exp $
+// $Id: ESMC_SparseMsgVM.C,v 1.1 2007/12/11 20:49:30 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -8,13 +8,13 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-#define ESMF_FILENAME "ESMC_SparseMsg.C"
+#define ESMF_FILENAME "ESMC_SparseMsgVM.C"
 
 //-----------------------------------------------------------------------------
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ SparseMsg methods.
+// The code in this file implements the C++ SparseMsgVM methods.
 //
 //-----------------------------------------------------------------------------
 //
@@ -24,7 +24,7 @@
 #include <iterator>
 
 // associated class definition file
-#include <GridUtil/include/ESMC_SparseMsg.h>
+#include <GridUtil/include/ESMC_SparseMsgVM.h>
 #include <GridUtil/include/ESMC_Exception.h>
 #include <ESMC_LogErr.h>
 #include <ESMC_VMKernel.h>
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_SparseMsg.C,v 1.6 2007/08/03 18:27:16 theurich Exp $";
+            "$Id: ESMC_SparseMsgVM.C,v 1.1 2007/12/11 20:49:30 dneckels Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -48,12 +48,12 @@ static UInt round_to_dword(UInt size) {
 }
 //-----------------------------------------------------------------------------
 #undef  METHOD
-#define METHOD "ESMC::SparseMsg::SparseMsg"
+#define METHOD "ESMC::SparseMsgVM::SparseMsgVM"
 //BOPI
-// !IROUTINE:  SparseMsg - Constructor
+// !IROUTINE:  SparseMsgVM - Constructor
 //
 // !INTERFACE:
-SparseMsg::SparseMsg(
+SparseMsgVM::SparseMsgVM(
 //
 // !RETURN VALUE:
 
@@ -87,12 +87,12 @@ SparseMsg::SparseMsg(
 
 //-----------------------------------------------------------------------------
 #undef  METHOD
-#define METHOD "ESMC::SparseMsg::~SparseMsg"
+#define METHOD "ESMC::SparseMsgVM::~SparseMsgVM"
 //BOPI
-// !IROUTINE:  SparseMsg - Constructor
+// !IROUTINE:  SparseMsgVM - Constructor
 //
 // !INTERFACE:
-SparseMsg::~SparseMsg()
+SparseMsgVM::~SparseMsgVM()
 //
 // !RETURN VALUE:
 
@@ -111,12 +111,12 @@ SparseMsg::~SparseMsg()
 }
 
 #undef  METHOD
-#define METHOD "ESMC::SparseMsg::setPattern"
+#define METHOD "ESMC::SparseMsgVM::setPattern"
 //BOPI
 // !IROUTINE:  setPattern
 //
 // !INTERFACE:
-void SparseMsg::setPattern(
+void SparseMsgVM::setPattern(
 //
 // !RETURN VALUE:
 
@@ -137,7 +137,7 @@ void SparseMsg::setPattern(
 {
 
   // Error checking
-  if (obj_state != BASE) throw Ex() << "SparseMsg illegal transition from state:" << obj_state << " to PATTERN";
+  if (obj_state != BASE) throw Ex() << "SparseMsgVM illegal transition from state:" << obj_state << " to PATTERN";
   // Set dest proc
   nsend = num;
 
@@ -179,12 +179,12 @@ void SparseMsg::setPattern(
 
 //-----------------------------------------------------------------------------
 #undef  METHOD
-#define METHOD "ESMC::SparseMsg::setSizes"
+#define METHOD "ESMC::SparseMsgVM::setSizes"
 //BOPI
 // !IROUTINE:  setSizes - Establish the message sizes
 //
 // !INTERFACE:
-void SparseMsg::setSizes(
+void SparseMsgVM::setSizes(
 //
 // !RETURN VALUE:
 
@@ -202,7 +202,7 @@ void SparseMsg::setSizes(
 //-----------------------------------------------------------------------------
 {
   // Error checking
-  if (obj_state != PATTERN) throw Ex() << "SparseMsg illegal transition from state:" << obj_state << " to SIZE";
+  if (obj_state != PATTERN) throw Ex() << "SparseMsgVM illegal transition from state:" << obj_state << " to SIZE";
   // First, set up send buffers
   UInt totalsize = 0;
   // Find total buffer size; round up to word boundaries
@@ -326,12 +326,12 @@ void SparseMsg::setSizes(
 
 //-----------------------------------------------------------------------------
 #undef  METHOD
-#define METHOD "ESMC::SparseMsg::communicate"
+#define METHOD "ESMC::SparseMsgVM::communicate"
 //BOPI
 // !IROUTINE:  communicate
 //
 // !INTERFACE:
-void SparseMsg::communicate()
+void SparseMsgVM::communicate()
 //
 // !RETURN VALUE:
 //
@@ -376,12 +376,12 @@ void SparseMsg::communicate()
 
 //-----------------------------------------------------------------------------
 #undef  METHOD
-#define METHOD "ESMC::SparseMsg::filled"
+#define METHOD "ESMC::SparseMsgVM::filled"
 //BOPI
 // !IROUTINE:  filled
 //
 // !INTERFACE:
-bool SparseMsg::filled()
+bool SparseMsgVM::filled()
 //
 // !RETURN VALUE:
 //    bool : true = message filled to buffer size, false = not filled
@@ -417,12 +417,12 @@ bool SparseMsg::filled()
 
 //-----------------------------------------------------------------------------
 #undef  METHOD
-#define METHOD "ESMC::SparseMsg::empty"
+#define METHOD "ESMC::SparseMsgVM::empty"
 //BOPI
 // !IROUTINE:  empty
 //
 // !INTERFACE:
-bool SparseMsg::empty()
+bool SparseMsgVM::empty()
 //
 // !RETURN VALUE:
 //    bool : true = message completely unpacked, false = not unpacked
@@ -457,12 +457,12 @@ bool SparseMsg::empty()
 
 //-----------------------------------------------------------------------------
 #undef  METHOD
-#define METHOD "ESMC::SparseMsg::resetBuffers"
+#define METHOD "ESMC::SparseMsgVM::resetBuffers"
 //BOPI
 // !IROUTINE:  resetBuffers
 //
 // !INTERFACE:
-void SparseMsg::resetBuffers()
+void SparseMsgVM::resetBuffers()
 //
 // !RETURN VALUE:
 //
@@ -488,12 +488,12 @@ void SparseMsg::resetBuffers()
 
 //-----------------------------------------------------------------------------
 #undef  METHOD
-#define METHOD "ESMC::SparseMsg::resetSizes"
+#define METHOD "ESMC::SparseMsgVM::resetSizes"
 //BOPI
 // !IROUTINE:  resetSizes
 //
 // !INTERFACE:
-void SparseMsg::resetSizes()
+void SparseMsgVM::resetSizes()
 //
 // !RETURN VALUE:
 //

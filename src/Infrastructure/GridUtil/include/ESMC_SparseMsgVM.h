@@ -1,4 +1,4 @@
-// $Id: ESMC_SparseMsg.h,v 1.2 2007/06/20 01:29:21 theurich Exp $
+// $Id: ESMC_SparseMsgVM.h,v 1.1 2007/12/11 20:49:29 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -16,8 +16,8 @@
  // these lines prevent this file from being read more than once if it
  // ends up being included multiple times
 
-#ifndef ESMC_SparseMsg_h
-#define ESMC_SparseMsg_h
+#ifndef ESMC_SparseMsgVM_h
+#define ESMC_SparseMsgVM_h
 
 #include <vector>
 #include <map>
@@ -38,7 +38,7 @@ namespace ESMC {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !CLASS:  ESMC::SparseMsg_h - Sparse Message buffer communication primitive
+// !CLASS:  ESMC::SparseMsgVM_h - Sparse Message buffer communication primitive
 //
 // !DESCRIPTION:
 //
@@ -77,14 +77,14 @@ namespace ESMC {
 //
 ///EOP
 //-----------------------------------------------------------------------------
-class SparseMsg {
+class SparseMsgVM {
 public:
- SparseMsg(ESMCI::VM &vm);
- ~SparseMsg();
+ SparseMsgVM(ESMCI::VM &vm);
+ ~SparseMsgVM();
 
 //-----------------------------------------------------------------------------
 //BOP
-// !CLASS:  ESMC::SparseMsg::buffer - buffer to store messages
+// !CLASS:  ESMC::SparseMsgVM::buffer - buffer to store messages
 //
 // !DESCRIPTION:
 //     This class manages the pack and unpack buffers.
@@ -96,7 +96,7 @@ public:
 //-----------------------------------------------------------------------------
  class buffer {
  public:
-   friend class SparseMsg;
+   friend class SparseMsgVM;
    // Copy size bytes into destination.  Update current
    // location in buffer.
    void pop(UChar *dest, UInt size) {
@@ -189,8 +189,8 @@ public:
                 SIZE     // Size has been set
               } sparseState;   
 
- SparseMsg(const SparseMsg &); // disallow copying
- SparseMsg &operator=(const SparseMsg&); // disallow assignment
+ SparseMsgVM(const SparseMsgVM &); // disallow copying
+ SparseMsgVM &operator=(const SparseMsgVM&); // disallow assignment
  ESMCI::VM &vm; // reference since one should not change the VM
               // Not const since VM is not written to enforce const.
  std::vector<buffer> outBuffers;
@@ -249,7 +249,7 @@ public:
 template<class T>
 class SparsePack {
 public:
-  SparsePack(SparseMsg::buffer &buf, T t) {buf.push(reinterpret_cast<UChar*>(&t), sizeof(T));}
+  SparsePack(SparseMsgVM::buffer &buf, T t) {buf.push(reinterpret_cast<UChar*>(&t), sizeof(T));}
   SparsePack() {}
   static UInt size() { return sizeof(T);}
 };
@@ -267,7 +267,7 @@ public:
 template<class T>
 class SparseUnpack {
 public:
-  SparseUnpack(SparseMsg::buffer &buf, T &t) {buf.pop(reinterpret_cast<UChar*>(&t), sizeof(T));}
+  SparseUnpack(SparseMsgVM::buffer &buf, T &t) {buf.pop(reinterpret_cast<UChar*>(&t), sizeof(T));}
   SparseUnpack() {}
   static UInt size() { return sizeof(T);}
 };
@@ -275,4 +275,4 @@ public:
 
 } // namespace
 
-#endif  // SparseMsg_h
+#endif  // SparseMsgVM_h

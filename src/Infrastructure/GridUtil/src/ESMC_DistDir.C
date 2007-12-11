@@ -1,4 +1,4 @@
-// $Id: ESMC_DistDir.C,v 1.6 2007/08/03 18:27:16 theurich Exp $
+// $Id: ESMC_DistDir.C,v 1.7 2007/12/11 20:49:29 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 //-----------------------------------------------------------------------------
 
 #include <GridUtil/include/ESMC_DistDir.h>
-#include <GridUtil/include/ESMC_SparseMsg.h>
+#include <GridUtil/include/ESMC_SparseMsgVM.h>
 
 
 #include <limits>
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistDir.C,v 1.6 2007/08/03 18:27:16 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistDir.C,v 1.7 2007/12/11 20:49:29 dneckels Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -122,7 +122,7 @@ my_managed()
   for (UInt i = 0; i < nsend; i++) sizes[i] = send_sizes_all[to_pet[i]];
   send_sizes_all.clear();  // free memory
 
-  SparseMsg msg(vm);
+  SparseMsgVM msg(vm);
 
   msg.setPattern(nsend, nsend > 0 ? &to_pet[0] : NULL);
 
@@ -131,7 +131,7 @@ my_managed()
   // Now pack
   for (UInt i = 0; i < ngid; i++) {
     UInt pet = hash_func(gid[i], npet, gmin, gmax);
-    SparseMsg::buffer &b = *msg.getSendBuffer(pet);
+    SparseMsgVM::buffer &b = *msg.getSendBuffer(pet);
     // gid, lid
     SparsePack<id_type>(b, gid[i]);
     SparsePack<id_type>(b, lid[i]);
@@ -144,7 +144,7 @@ my_managed()
   // Now unpack
   for (UInt *p = msg.inPet_begin(); p != msg.inPet_end(); ++p) {
    UInt pet = *p;
-   SparseMsg::buffer &b = *msg.getRecvBuffer(pet);
+   SparseMsgVM::buffer &b = *msg.getRecvBuffer(pet);
 
    // Deduce the message size
    UInt nmsg = b.msg_size() / (2*SparsePack<id_type>::size());
@@ -254,7 +254,7 @@ bool id_found[])              // (out) true=found, false=not in directory
     for (UInt i = 0; i < nsend; i++) sizes[i] = send_sizes_all[to_pet[i]];
     send_sizes_all.clear();  // free memory
   
-    SparseMsg msg(vm);
+    SparseMsgVM msg(vm);
   
     msg.setPattern(nsend, nsend > 0 ? &to_pet[0] : NULL);
   
@@ -263,7 +263,7 @@ bool id_found[])              // (out) true=found, false=not in directory
     // Now pack
     for (UInt i = 0; i < ngid; i++) {
       UInt pet = hash_func(gid[i], npet, gmin, gmax);
-      SparseMsg::buffer &b = *msg.getSendBuffer(pet);
+      SparseMsgVM::buffer &b = *msg.getSendBuffer(pet);
       // gid, lid, origin_pet
       SparsePack<id_type>(b, gid[i]);
     }
@@ -275,7 +275,7 @@ bool id_found[])              // (out) true=found, false=not in directory
     // Now unpack
     for (UInt *p = msg.inPet_begin(); p != msg.inPet_end(); ++p) {
      UInt pet = *p;
-     SparseMsg::buffer &b = *msg.getRecvBuffer(pet);
+     SparseMsgVM::buffer &b = *msg.getRecvBuffer(pet);
   
      // Deduce the message size
      UInt nmsg = b.msg_size() / (1*SparsePack<id_type>::size());
@@ -313,7 +313,7 @@ bool id_found[])              // (out) true=found, false=not in directory
   // as the original request gid's.  When we send back, we use this same
   // ordering so that we can unpack straight into the request buffer.
   { // encapsulate the return message
-    SparseMsg msg(vm);
+    SparseMsgVM msg(vm);
     std::vector<UInt> to_pet; // pets I will send to
 
     std::vector<UInt> send_sizes_all(npet, 0);
@@ -346,7 +346,7 @@ bool id_found[])              // (out) true=found, false=not in directory
     for (UInt i = 0; i < req_size; i++) {
       dentry &req = requests[i];
       UInt pet = req.req_pet; // we send back to requestor
-      SparseMsg::buffer &b = *msg.getSendBuffer(pet);
+      SparseMsgVM::buffer &b = *msg.getSendBuffer(pet);
       // lid, origin_pet,valid
       SparsePack<id_type>(b, req.origin_lid);
       SparsePack<UInt>(b, req.origin_pet);
@@ -365,7 +365,7 @@ bool id_found[])              // (out) true=found, false=not in directory
 
     for (UInt i = 0; i < ngid; i++) {
       UInt pet = hash_func(gid[i], npet, gmin, gmax);
-      SparseMsg::buffer &b = *msg.getRecvBuffer(pet);
+      SparseMsgVM::buffer &b = *msg.getRecvBuffer(pet);
       // lid
       SparseUnpack<id_type>(b, lid[i]);
       // origin pet
