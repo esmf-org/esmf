@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.10 2007/06/23 07:00:57 cdeluca Exp $
+! $Id: user_model.F90,v 1.11 2007/12/11 21:18:35 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -138,7 +138,7 @@
                      mydatablock%scale_factor, mydatablock%flag
 
         ! Add an empty "humidity" field to the export state.
-        humidity = ESMF_FieldCreateNoData(name="humidity", rc=rc)
+        humidity = ESMF_FieldCreateEmpty(name="humidity", rc=rc)
         call ESMF_StateAddField(exportState, humidity, rc)
         call ESMF_StatePrint(exportState, rc=rc)
 
