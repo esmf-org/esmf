@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.277 2007/12/11 16:57:07 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.278 2007/12/11 17:08:08 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -202,7 +202,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.277 2007/12/11 16:57:07 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.278 2007/12/11 17:08:08 feiliu Exp $'
 
 !==============================================================================
 !
@@ -581,9 +581,6 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       nullify(ftype)
       nullify(ESMF_FieldCreateNoArray%ftypep)
-
-      ! check variables
-      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit,datamap)
 
       allocate(ftype, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Field information", &
