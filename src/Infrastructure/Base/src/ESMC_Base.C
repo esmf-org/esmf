@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.87 2007/12/10 21:14:08 rokuingh Exp $
+// $Id: ESMC_Base.C,v 1.88 2007/12/11 21:16:32 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.87 2007/12/10 21:14:08 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.88 2007/12/11 21:16:32 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -2444,7 +2444,7 @@ if (count) {
   if (rc != ESMF_SUCCESS) return ESMF_FAILURE;
    
   // this is temporary
-  rc = ESMC_PrintAttPack(convention, purpose, object);
+  //rc = ESMC_PrintAttPack(convention, purpose, object);
   if (rc != ESMF_SUCCESS) return ESMF_FAILURE;
   
   }
@@ -2524,12 +2524,12 @@ if (count) {
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_PrintAttPack"
+#define ESMC_METHOD "ESMC_WriteAttPack"
 //BOPI
-// !IROUTINE:  ESMC_PrintAttPack - Print contents of an attribute package
+// !IROUTINE:  ESMC_WriteAttPack - Print contents of an attribute package
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_PrintAttPack(
+      int ESMC_Base::ESMC_WriteAttPack(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -2572,7 +2572,7 @@ if (count) {
   
   return ESMF_SUCCESS;
 
- } // end ESMC_PrintAttPack
+ } // end ESMC_WriteAttPack
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

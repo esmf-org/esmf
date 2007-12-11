@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.51 2007/12/10 21:14:08 rokuingh Exp $
+// $Id: ESMC_Base_F.C,v 1.52 2007/12/11 21:16:32 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.51 2007/12/10 21:14:08 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.52 2007/12/11 21:16:32 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1004,6 +1004,103 @@ extern "C" {
   return;
 
 }  // end c_ESMC_setattpack
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_writeattpack - Setup the attribute package
+//
+// !INTERFACE:
+      void FTN(c_esmc_writeattpack)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,          // in/out - base object
+      char *convention,          // in - convention
+      char *purpose,             // in - purpose
+      char *object,              // in - object type
+      int *rc,                   // in - return code
+      int clen,                  // hidden/in - strlen count for convention
+      int plen,                  // hidden/in - strlen count for purpose           
+      int olen) {                // hidden/in - strlen count for object
+// 
+// !DESCRIPTION:
+//     Associate a convention, purpose, and object type with an attribute package
+//
+//EOP
+
+  int status;
+  char *cconv, *cpurp, *cobj;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    if (rc) *rc = ESMF_FAILURE;
+    return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cconv = ESMC_F90toCstring(convention, clen);
+  if (!cconv) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // copy and convert F90 string to null terminated one
+  cpurp = ESMC_F90toCstring(purpose, plen);
+  if (!cpurp) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // copy and convert F90 string to null terminated one
+  cobj = ESMC_F90toCstring(object, olen);
+  if (!cobj) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // Set the attribute on the object.
+  *rc = (*base)->ESMC_WriteAttPack(cconv, cpurp, cobj);
+
+  delete [] cconv;
+  delete [] cpurp;
+  delete [] cobj;
+  return;
+
+}  // end c_ESMC_writeattpack
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

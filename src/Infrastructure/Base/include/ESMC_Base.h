@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.80 2007/12/10 21:14:07 rokuingh Exp $
+// $Id: ESMC_Base.h,v 1.81 2007/12/11 21:16:31 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -216,7 +216,7 @@ class ESMC_Base
     int ESMC_CreateAttPack(char *name, char *convention, char *purpose, char *object);
     int ESMC_SetAttPack(char *name, char *value, char *convention, char *purpose, char *object);
     ESMC_Attribute **ESMC_AttributeGetListOf(char *convention, char *purpose, char *object, int *attpackCount) const;
-    int ESMC_PrintAttPack(char *convention, char *purpose, char *object) const;
+    int ESMC_WriteAttPack(char *convention, char *purpose, char *object) const;
 
     // not implemented yet
     int ESMC_AttributeGetNameList(int *count, char **namelist) const;
@@ -255,7 +255,8 @@ extern "C" {
                                     int *count, void *value, int *rc, int nlen);
   void FTN(c_esmc_attributesetchar)(ESMC_Base **base, char *name, char *value, 
                                     int *rc, int nlen, int vlen);
-
+  void FTN(c_esmc_writeattpack)(ESMC_Base ** base, char *convention, char *purpose,
+                                char *object, int *rc, int clen, int plen, int olen);
   void FTN(c_esmc_attributegetvalue)(ESMC_Base **base, char *name, 
                                     ESMC_TypeKind *tk,
                                     int *count, void *value, int *rc, int nlen);
