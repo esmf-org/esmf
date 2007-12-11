@@ -1,0 +1,54 @@
+# EXAMPLE 1 - retrieval of single parameters
+#--------------------------------------------
+
+Number_of_DEs: 32
+Number_of_Members: 30
+Relaxation_time_scale_in_days: 14
+Number_of_Constituents: 50
+Do_you_want_quality_control: yes
+Number_of_Delegates: 70
+restart_file_name: RestartFile123
+Optimization: off
+
+# EXAMPLE 2 - retrieval of group of parameters in a single line
+#---------------------------------------------------------------
+
+# Wind error statistics
+u-wind_error:   u_UprAir  6  2.0   2.0   2.2   2.3   2.7   3.2
+v-wind_error:   v_UprAir  6  2.2   2.2   2.3   2.7   3.2   3.4
+v-wind_flag:    v_Flag    6  T     F     T     T     F     F
+
+
+# EXAMPLE 3 - retrieval of group of parameters multiple lines
+#---------------------------------------------------------------
+
+ObsErr*QSCAT::   # kx = 154  Scatterometer
+  u_UprAir.u   6  2.0   2.0   2.2   2.3   2.7   3.2
+  v_UprAir.u   6  2.0   2.0   2.2   2.3   2.7   3.2
+  v_Flag.u     6  2.0   2.0   2.2   2.3   2.7   3.2
+::
+
+
+# EXAMPLE 4 - retrieval of table of unknown length
+#-------------------------------------------------
+
+ObsErr*vCor_HH-7::
+#pres 1000  925  850  700  500  400  300  250  200  150  100
+1000  1.00
+ 925  0.84 1.00
+ 850  0.68 0.84 1.00
+ 700  0.53 0.67 0.81 1.00
+ 500  0.35 0.46 0.56 0.81 1.00
+ 400  0.27 0.35 0.44 0.64 0.79 1.00
+ 300  0.18 0.25 0.32 0.46 0.58 0.75 1.00
+ 250  0.13 0.19 0.25 0.38 0.48 0.62 0.83 1.00
+ 200  0.09 0.14 0.19 0.29 0.38 0.49 0.66 0.80 1.00
+ 150  0.06 0.09 0.13 0.20 0.28 0.36 0.49 0.59 0.75 1.00
+ 100  0.00 0.03 0.06 0.10 0.17 0.23 0.32 0.39 0.50 0.75 1.00
+::
+
+
+# EXAMPLE 5 - retrival of a token
+#-------------------------------------------------
+Token_Example_1:  'This is a token example'
+Token_Example_2:  "This is a token example"
