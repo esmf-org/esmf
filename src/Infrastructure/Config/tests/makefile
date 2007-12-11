@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2007/12/06 22:40:33 rosalind Exp $
+# $Id: makefile,v 1.14 2007/12/11 15:29:05 rosalind Exp $
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -28,10 +28,12 @@ CLOBBERDIRS =
 #
 RUN_ESMF_ConfigUTest:
 	cp -f ESMF_Resource_File_Sample.rc $(ESMF_TESTDIR)
+	cp -f ESMF_Resource_File_Sample2.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=Config NP=4 ftest
 
 RUN_ESMF_ConfigUTestUNI:
 	cp -f ESMF_Resource_File_Sample.rc $(ESMF_TESTDIR)
+	cp -f ESMF_Resource_File_Sample2.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=Config NP=1 ftest
 
 
@@ -40,8 +42,10 @@ RUN_ESMF_ConfigUTestUNI:
 #
 RUN_ESMC_ConfigUTest:
 	cp -f ESMF_Resource_File_Sample.rc $(ESMF_TESTDIR)
+	cp -f ESMF_Resource_File_Sample2.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=Config NP=4 ctest
 
 RUN_ESMC_ConfigUTestUNI:
 	cp -f ESMF_Resource_File_Sample.rc $(ESMF_TESTDIR)
+	cp -f ESMF_Resource_File_Sample2.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=Config NP=1 ctest

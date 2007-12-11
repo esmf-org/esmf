@@ -1,4 +1,4 @@
-!  $Id: ESMF_Config_C.F90,v 1.6 2007/12/06 22:40:32 rosalind Exp $
+!  $Id: ESMF_Config_C.F90,v 1.7 2007/12/11 15:29:04 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Config_C.F90,v 1.6 2007/12/06 22:40:32 rosalind Exp $'
+!      '$Id: ESMF_Config_C.F90,v 1.7 2007/12/11 15:29:04 rosalind Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -70,24 +70,26 @@
 
      type(ESMF_Config)               :: config
      character(len=*), intent(in)    :: filename
-     integer, intent(in), optional   :: unique
-     integer, intent(out), optional  :: rc
+     integer, intent(in)             :: unique
+     integer, intent(out)            :: rc
 
+     integer localrc
      logical :: lunique
 
      ! Initialize return code; assume routine not implemented
-     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      rc = ESMF_RC_NOT_IMPL
 
-     if (present(unique)) then
+     if (unique .ne. ESMC_F77_Int_Null) then
        if (unique /= 0) then
          lunique = .true. 
        else 
          lunique = .false.
        endif
-       call ESMF_ConfigLoadFile(config, filename, unique=lunique, rc=rc)
-     else
-       call ESMF_ConfigLoadFile(config, filename, rc=rc)
      endif
+
+     call ESMF_ConfigLoadFile(config, filename, unique=lunique, rc=localrc)
+
+     rc = localrc
 
    end subroutine f_esmf_configloadfile
 !------------------------------------------------------------------------------

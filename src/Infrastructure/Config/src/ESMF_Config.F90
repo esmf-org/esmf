@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.45 2007/12/06 22:40:32 rosalind Exp $
+! $Id: ESMF_Config.F90,v 1.46 2007/12/11 15:29:04 rosalind Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -2112,26 +2112,23 @@
 !EOP -------------------------------------------------------------------
 
       integer :: iret
+      integer :: localrc
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
-      iret = 0
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
-      call ESMF_ConfigLoadFile_1proc_( config, filename, iret )
-      if(iret /= 0) then
-           if (ESMF_LogMsgFoundError(ESMF_RC_FILE_OPEN, &
+      call ESMF_ConfigLoadFile_1proc_( config, filename, localrc )
+           if (ESMF_LogMsgFoundError(localrc, &
                                 "unable to load file", &
                                  ESMF_CONTEXT, rc)) return
-      endif
 
-      call ESMF_ConfigParseAttributes( config, unique, iret )
-      if(iret /= 0) then
-           if (ESMF_LogMsgFoundError(iret, ESMF_ERR_PASSTHRU, &
+      call ESMF_ConfigParseAttributes( config, unique, localrc )
+           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
-      endif
 
       if ( present (delayout) ) then
          call ESMF_LogWrite("DELayout not used yet", ESMF_LOG_WARNING, &
@@ -2139,7 +2136,7 @@
       endif
 
       if (present( rc )) then
-        rc = iret
+        rc = localrc 
       endif
       return
 
@@ -2177,13 +2174,14 @@
 ! !DESCRIPTION: Resource file filename is loaded into memory
 !
 !EOPI -------------------------------------------------------------------
-      integer :: lu, ios, loop, ls, ptr, iret
+      integer :: lu, ios, loop, ls, ptr
       character(len=LSZ) :: line
+      integer :: localrc
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
-      iret = 0
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
@@ -2191,19 +2189,18 @@
 !     ---------     
       lu = luavail() ! a more portable version
       if ( lu .lt. 0 ) then
-         iret = -97
+         localrc = -97
          if ( present (rc )) then
-           rc = iret
+           rc = localrc
          endif
          return
       end if
-
       ! A open through an interface to avoid portability problems.
       ! (J.G.)
 
-      call opntext(lu,filename,'old',ios)
-      if ( ios .ne. 0 ) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_FILE_OPEN, &
+      call opntext(lu,filename,'old',localrc)
+      if ( localrc .ne. ESMF_SUCCESS ) then
+         if (ESMF_LogMsgFoundError(localrc, &
                               "opntext() error", &
                                ESMF_CONTEXT, rc)) return
       end if
@@ -2225,9 +2222,9 @@
          ls = index_(line,'#' ) - 1    ! line length
          if ( ls .gt. 0 ) then
             if ( (ptr+ls) .gt. NBUF_MAX ) then
-               iret = -99
+               localrc = ESMF_RC_MEM
                if ( present (rc )) then
-                 rc = iret
+                 rc = localrc
                endif
                return
             end if
@@ -2237,9 +2234,10 @@
 
       end do
       
-      iret = -98 ! good chance config%cptr%buffer is not big enough 
+      ! good chance config%cptr%buffer is not big enough 
+      localrc = ESMF_RC_MEM
       if ( present (rc )) then
-        rc = iret
+        rc = localrc
       endif
 
       return
@@ -2250,10 +2248,10 @@
 !     --------
 ! Close lu
       call clstext(lu,ios)
-      if(ios /= 0) then
-         iret = -99
+      if(ios /= ESMF_SUCCESS) then
+         localrc = ESMF_RC_MEM
          if ( present (rc )) then
-           rc = iret
+           rc = localrc
          endif
          return
       endif
@@ -2263,9 +2261,8 @@
       config%cptr%next_line=0
       config%cptr%value_begin=0
 
-      iret = 0
       if ( present (rc )) then
-        rc = iret
+        rc = ESMF_SUCCESS
       endif
 
       return
@@ -3041,13 +3038,13 @@ end function luavail
 !
 ! !INTERFACE:
 
-    subroutine opntext(lu,filename,status,ier)
+    subroutine opntext(lu,filename,status,localrc)
       implicit none
 
       integer,         intent(in) :: lu     ! logical unit number
       character(len=*),intent(in) :: filename  ! filename to be opended
       character(len=*),intent(in) :: status ! the value for STATUS=<>
-      integer,         intent(out):: ier    ! the status
+      integer,         intent(out):: localrc ! the status
 
 !-----------------------------------------------------------------------
 !
@@ -3060,10 +3057,12 @@ end function luavail
 
         character(len=len(status)) :: Ustat
         integer :: i,ic
+        integer :: ier
+
 
 #ifdef _UNICOS
-        call asnunit(lu,'-R',ier)        ! remove any set attributes
-        if(ier.ne.0) return                ! let the parent handle it
+        call asnunit(lu,'-R',localrc)         ! remove any set attributes
+        if(localrc .ne. ESMF_SUCCESS) return  ! let the parent handle it
 #endif
 
         do i=1,len(status)
@@ -3071,6 +3070,7 @@ end function luavail
           if(ic .ge. iA .and. ic .le. iZ) ic=ic+(mA-iA)
           Ustat(i:i)=char(ic)
         end do
+
 
         select case(Ustat)
 
@@ -3099,6 +3099,12 @@ end function luavail
             iostat      =ier                )
 
         end select
+
+        if (ier .eq. 0) then
+          localrc = ESMF_SUCCESS
+        else
+          localrc = ESMF_RC_FILE_OPEN
+        endif
 
         end subroutine opntext
 

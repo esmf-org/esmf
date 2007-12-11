@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.C,v 1.6 2007/05/04 21:37:33 tjcnrl Exp $
+// $Id: ESMC_Config.C,v 1.7 2007/12/11 15:29:03 rosalind Exp $
 //
 // Earth System Modeling Framework
 // copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
  static const char* const version = 
-             "$Id: ESMC_Config.C,v 1.6 2007/05/04 21:37:33 tjcnrl Exp $";
+             "$Id: ESMC_Config.C,v 1.7 2007/12/11 15:29:03 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -226,6 +226,10 @@ int ESMC_ConfigLoadFile(
   rc = ESMC_RC_NOT_IMPL;
   localrc = ESMC_RC_NOT_IMPL;
 
+  // Initialize unique
+  unique = ESMC_F77_Int_Null;
+  uniquep = &unique;
+
   // return with errors for NULL pointer
   if (config == ESMC_NULL_POINTER) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -253,7 +257,6 @@ int ESMC_ConfigLoadFile(
     switch ( argID ) {
       case ESMCI_ConfigArgUniqueID:
         unique = ESMCI_ArgGetInt(argPtr);
-        uniquep = &unique;
         break;
       default:
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
@@ -282,7 +285,7 @@ int ESMC_ConfigLoadFile(
   delete[] fName;
 
   // set return code for this branch
-  rc = ESMF_SUCCESS;
+  rc = localrc;
 
   // final return
   return rc;
