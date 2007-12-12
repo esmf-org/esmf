@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.88 2007/12/11 21:16:32 rokuingh Exp $
+// $Id: ESMC_Base.C,v 1.89 2007/12/12 05:12:33 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.88 2007/12/11 21:16:32 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.89 2007/12/12 05:12:33 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -2417,38 +2417,25 @@ if (count) {
 
   int rc;
   char msgbuf[ESMF_MAXSTR];
-  bool cflag = 0, pflag = 0, oflag = 0;
   ESMC_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
 
-  // Find out if convention or purpose or both are given
-  if (convention != NULL) cflag = 1;
-  if (purpose != NULL) pflag = 1;
-  if (object != NULL) oflag = 1;
-
-  if (cflag || pflag || oflag)
-  {
-
   // Find the attpack attribute
-  attr = ESMC_AttributeGet(name);
+  attr = ESMC_AttributeGetFromAttPack(name, convention, purpose, object);
   if (!attr) {
-       sprintf(msgbuf, " This attribute package does have an attribute named %s\n", name);
+       sprintf(msgbuf, "This attribute package does have an attribute named '%s'\n", name);
        printf(msgbuf);
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                             msgbuf, &rc);
        return rc;
   }
-    
+
   // Set the attribute
   rc = attr->ESMC_ModifyAttValue(ESMC_TYPEKIND_CHARACTER, 1, value);
   if (rc != ESMF_SUCCESS) return ESMF_FAILURE;
    
-  // this is temporary
-  //rc = ESMC_PrintAttPack(convention, purpose, object);
-  if (rc != ESMF_SUCCESS) return ESMF_FAILURE;
-  
-  }
-
   return rc;
 }  // end ESMC_SetAttPack()
 //-----------------------------------------------------------------------------
@@ -2498,7 +2485,7 @@ if (count) {
   }
 
   attpackList = (ESMC_Attribute **)malloc(sizeof(ESMC_Attribute *));
-
+  
   for (i=0; i<attrCount; i++) {
       if (strcmp(convention, attrList[i]->attrConvention) == 0 && 
           strcmp(purpose, attrList[i]->attrPurpose) == 0 &&
@@ -2516,11 +2503,81 @@ if (count) {
   }   
 
   *attpackCount = attNum;
-  
+
   if(attNum != 0) return attpackList;
   else return NULL;
 
 }  // end ESMC_AttributeGetListOf
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeGetFromAttPack"
+//BOP
+// !IROUTINE:  ESMC_AttributeGetFromList - get attribute from a the attpack
+//
+// !INTERFACE:
+      ESMC_Attribute *ESMC_Base::ESMC_AttributeGetFromAttPack(
+// 
+// !RETURN VALUE:
+//    pointer to requested attribute
+// 
+// !ARGUMENTS:
+      char *name,                   // in - attr name to retrieve
+      char *convention,             // in - attr convention to retrieve
+      char *purpose,                // in - attr purpose to retrieve
+      char *object) const {         // in - attr object type to retrieve)
+// 
+// !DESCRIPTION:
+//
+//EOP
+
+  int i;
+  int attCount;
+  ESMC_Attribute *attr;
+
+  // simple sanity checks
+  if ((!name) || (name[0] == '\0')) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                               "bad attribute name", NULL);
+       return NULL;
+  }
+
+  // simple sanity checks
+  if ((!purpose) || (purpose[0] == '\0')) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                               "bad attribute purpose", NULL);
+       return NULL;
+  }
+  
+  // simple sanity checks
+  if ((!convention) || (convention[0] == '\0')) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                               "bad attribute convention", NULL);
+       return NULL;
+  }
+  
+  // simple sanity checks
+  if ((!object) || (object[0] == '\0')) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                               "bad attribute object", NULL);
+       return NULL;
+  }
+
+  for (i=0; i<attrCount; i++) {
+      if (strcmp(name, attrList[i]->attrName) == 0 && 
+          strcmp(convention, attrList[i]->attrConvention) == 0 &&
+          strcmp(purpose, attrList[i]->attrPurpose) == 0 &&
+          strcmp(object, attrList[i]->attrObject) == 0) {
+
+      // if you get here, you found a match. 
+      return attrList[i]; 
+      }   
+  }
+  
+  // bad news - you get here if no matches found
+  return NULL;
+
+}  // end ESMC_AttributeGetFromAttPack
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
