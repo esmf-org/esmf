@@ -1,4 +1,4 @@
-!  $Id: ESMF_Config_C.F90,v 1.7 2007/12/11 15:29:04 rosalind Exp $
+!  $Id: ESMF_Config_C.F90,v 1.8 2007/12/12 02:05:21 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -19,11 +19,12 @@
 !------------------------------------------------------------------------------
 ! INCLUDES
 #include "ESMF.h"
+#include "ESMCI_Null.h"
 !==============================================================================
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Config_C.F90,v 1.7 2007/12/11 15:29:04 rosalind Exp $'
+!      '$Id: ESMF_Config_C.F90,v 1.8 2007/12/12 02:05:21 rosalind Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
