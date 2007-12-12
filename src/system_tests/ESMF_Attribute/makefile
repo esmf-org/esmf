@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2007/12/11 19:34:06 rokuingh Exp $ 
+# $Id: makefile,v 1.2 2007/12/12 15:18:51 rokuingh Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -23,14 +23,14 @@ SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_AttributeSTest
 # system tests executable will depend on.
 # List objects files in the order that they
 # are to be compiled/created.
-SYSTEM_TESTS_OBJ      = 
+SYSTEM_TESTS_OBJ      = user_model1.o user_model2.o user_coupler.o
 
 SYSTEM_TESTS_RUN      = RUN_Attribute
 
 SYSTEM_TESTS_RUN_UNI  = RUN_AttributeUNI
 
 
-#ESMF_AttributeSTest.o : $(SYSTEM_TESTS_OBJ)
+ESMF_AttributeSTest.o : $(SYSTEM_TESTS_OBJ)
 
 include $(ESMF_DIR)/makefile
 
