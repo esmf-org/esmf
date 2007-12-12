@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.73 2007/10/29 19:15:37 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.73.2.1 2007/12/12 06:08:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -128,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.73 2007/10/29 19:15:37 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.73.2.1 2007/12/12 06:08:49 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -976,10 +976,10 @@ contains
 !   the <type><kind> overloaded interface and provide the {\tt factorList} and
 !   {\tt factorIndexList} arguments. Providing {\tt factorList} and
 !   {\tt factorIndexList} arguments with {\tt size(factorList) = (/0/)} and
-!   {\tt size(factorIndexList) = (/2,0/)} indicates that a PET does not 
-!   provide matrix elements. Alternatively, PETs that do not provide matrix
-!   elements may also call into the overloaded interface {\em without}
-!   {\tt factorList} and {\tt factorIndexList} arguments.
+!   {\tt size(factorIndexList) = (/2,0/)} or {\tt (/4,0/)} indicates that a 
+!   PET does not provide matrix elements. Alternatively, PETs that do not 
+!   provide matrix elements may also call into the overloaded interface
+!   {\em without} {\tt factorList} and {\tt factorIndexList} arguments.
 !
 !   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
 !   vectors. The sequence is defined by the order of DistGrid dimensions and 
@@ -1001,8 +1001,8 @@ contains
 !   Congruent Arrays possess matching DistGrids and the shape of the local
 !   array tiles matches between the Arrays for every DE.
 !
-!   This method is overloaded for: 
-!   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I4},
+!   This method is overloaded for:\newline
+!   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
 !   \newline
 !
@@ -1018,15 +1018,31 @@ contains
 !   \item [factorList]
 !     List of non-zero coefficients.
 !   \item [factorIndexList]
-!     Pairs of sequence indices for the factors stored in {\tt factorList}. The
-!     second dimension of {\tt factorIndexList} steps through the list of 
+!     Pairs of sequence indices for the factors stored in {\tt factorList}.
+!
+!     The second dimension of {\tt factorIndexList} steps through the list of
 !     pairs, i.e. {\tt size(factorIndexList,2) == size(factorList)}. The first
-!     dimension of {\tt factorIndexList} is of size 2 where {\tt factorIndexList(1,:)}
-!     specifies the sequence index of the source element in the {\tt srcArray}
-!     while {\tt factorIndexList(2,:)} specifies the sequence index of the
-!     destination element in {\tt dstArray}. See section
-!     \ref{Array:SparseMatMul} for details on the definition of Array
-!     {\em sequence indices}.
+!     dimension of {\tt factorIndexList} is either of size 2 or size 4.
+!
+!     In the {\em size 2 format} {\tt factorIndexList(1,:)} specifies the
+!     sequence index of the source element in the {\tt srcArray} while
+!     {\tt factorIndexList(2,:)} specifies the sequence index of the
+!     destination element in {\tt dstArray}. For this format to be a valid
+!     option source and destination Arrays must have matching number of
+!     tensor elements (the product of the sizes of all Array tensor dimensions).
+!     Under this condition an identiy matrix can be applied within the space of
+!     tensor elements for each sparse matrix factor.
+!
+!     The {\em size 4 format} is more general and does not require a matching
+!     tensor element count. Here the {\tt factorIndexList(1,:)} specifies the
+!     sequence index while {\tt factorIndexList(2,:)} specifies the tensor
+!     sequence index of the source element in the {\tt srcArray}. Further
+!     {\tt factorIndexList(3,:)} specifies the sequence index and
+!     {\tt factorIndexList(4,:)} specifies the tensor sequence index of the 
+!     destination element in the {\tt dstArray}.
+!
+!     See section \ref{Array:SparseMatMul} for details on the definition of 
+!     Array {\em sequence indices} and {\em tensor sequence indices}.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1322,10 +1338,10 @@ contains
 !   the <type><kind> overloaded interface and provide the {\tt factorList} and
 !   {\tt factorIndexList} arguments. Providing {\tt factorList} and
 !   {\tt factorIndexList} arguments with {\tt size(factorList) = (/0/)} and
-!   {\tt size(factorIndexList) = (/2,0/)} indicates that a PET does not 
-!   provide matrix elements. Alternatively, PETs that do not provide matrix
-!   elements may also call into the overloaded interface {\em without}
-!   {\tt factorList} and {\tt factorIndexList} arguments.
+!   {\tt size(factorIndexList) = (/2,0/)} or {\tt (/4,0/)} indicates that a 
+!   PET does not provide matrix elements. Alternatively, PETs that do not 
+!   provide matrix elements may also call into the overloaded interface
+!   {\em without} {\tt factorList} and {\tt factorIndexList} arguments.
 !
 !   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
 !   vectors. The sequence is defined by the order of DistGrid dimensions and 
@@ -1347,8 +1363,8 @@ contains
 !   Congruent Arrays possess matching DistGrids and the shape of the local
 !   array tiles matches between the Arrays for every DE.
 !
-!   This method is overloaded for: 
-!   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I4},
+!   This method is overloaded for:\newline
+!   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
 !   \newline
 !

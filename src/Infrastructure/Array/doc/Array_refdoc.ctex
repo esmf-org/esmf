@@ -1,4 +1,4 @@
-% $Id: Array_refdoc.ctex,v 1.17 2007/11/19 19:53:31 theurich Exp $ 
+% $Id: Array_refdoc.ctex,v 1.17.2.1 2007/12/12 06:08:48 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -69,12 +69,18 @@
 \input{ESMF_ArrayFarrayHaloEx_fapi}
 \input{ESMF_ArrayLarrayEx_fapi}
 \input{ESMF_ArrayEx_fapi}
+\input{ESMF_ArrayScatterGatherEx_fapi}
+\input{ESMF_ArrayRedistEx_fapi}
+\input{ESMF_ArraySparseMatMulEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Array/doc/Array_usage}
 \input{../Infrastructure/Array/doc/ESMF_ArrayFarrayEx_fapi}
 \input{../Infrastructure/Array/doc/ESMF_ArrayFarrayHaloEx_fapi}
 \input{../Infrastructure/Array/doc/ESMF_ArrayLarrayEx_fapi}
 \input{../Infrastructure/Array/doc/ESMF_ArrayEx_fapi}
+\input{../Infrastructure/Array/doc/ESMF_ArrayScatterGatherEx_fapi}
+\input{../Infrastructure/Array/doc/ESMF_ArrayRedistEx_fapi}
+\input{../Infrastructure/Array/doc/ESMF_ArraySparseMatMulEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}

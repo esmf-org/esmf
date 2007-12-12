@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.35 2007/11/19 23:12:27 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.35.2.1 2007/12/12 06:08:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -28,10 +28,8 @@ program ESMF_ArrayEx
   type(ESMF_VM):: vm
   type(ESMF_DELayout):: delayout
   type(ESMF_DistGrid):: distgrid, distgrid3D, distgrid2D, distgrid1D
-  type(ESMF_DistGrid):: srcDistGrid, dstDistGrid
-  type(ESMF_ArraySpec):: arrayspec, arrayspec1D
+  type(ESMF_ArraySpec):: arrayspec
   type(ESMF_Array):: array, array1, array2, array1D, array2D, array3D
-  type(ESMF_Array):: srcArray, dstArray
 !  type(ESMF_Array):: arrayTracer, arrayNScalar, arrayNEu, arrayNEv
 !  type(ESMF_ArrayBundle):: arrayBundle
 !  type(ESMF_Array), allocatable:: arrayList(:)
@@ -40,7 +38,7 @@ program ESMF_ArrayEx
   real(ESMF_KIND_R8), pointer:: myF90Array(:,:)
 !  real(ESMF_KIND_R8), pointer:: myF90Array1(:,:), myF90Array2(:,:)
   real(ESMF_KIND_R8), pointer:: myF90Array1D(:), myF90Array3D(:,:,:)
-  real(ESMF_KIND_R8), pointer:: myF90Array2D(:,:), myF90Array2D2(:,:)
+  real(ESMF_KIND_R8), pointer:: myF90Array2D(:,:)
   real(ESMF_KIND_R8):: dummySum
   type(ESMF_IndexFlag):: indexflag
 !  integer, allocatable:: dimExtent(:,:), indexList(:), regDecompDeCoord(:)
@@ -59,10 +57,6 @@ program ESMF_ArrayEx
 !  integer, allocatable:: haloLDepth(:), haloUDepth(:)
 !  type(ESMF_Logical):: regDecompFlag
 !  type(ESMF_RouteHandle):: haloHandle, haloHandle2
-  type(ESMF_RouteHandle):: sparseMatMulHandle
-  real(ESMF_KIND_R8), allocatable:: factorList(:)
-  integer, allocatable:: factorIndexList(:,:)
-  integer:: seqIndexList(2)
 
   ! result code
   integer :: finalrc
@@ -268,7 +262,8 @@ program ESMF_ArrayEx
 !       with the exclusive region of another DE which makes them potential 
 !       receivers for Array halo operations. Elements outside the exclusive
 !       region that do not overlap with the exclusive region of another DE
-!       can be used to set boundary conditions and/or serve as memory padding.
+!       can be used to set boundary conditions and/or serve as extra memory 
+!       padding.
 ! \end{itemize}
 !
 ! \begin{verbatim}
@@ -1019,265 +1014,6 @@ program ESMF_ArrayEx
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #endif
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-!BOE
-!
-! \subsubsection{SparseMatMul communication}
-! \label{Array:SparseMatMul}
-! 
-! Sparse matrix multiplication is a fundamental Array communication method. One
-! frequently used application of this method is the interpolation between pairs
-! of Arrays. The principle is this: the value of each element in the exclusive 
-! region of the destination Array is expressed as a linear combination of {\em 
-! potentially all} the exclusive elements of the source Array. Naturally most of
-! the coefficients of these linear combinations will be zero and it is more 
-! efficient to store explicit information about the non-zero elements than to 
-! keep track of all the coefficients.
-!
-! There is a choice to be made with respect to the format in which to store the
-! information about the non-zero elements. One option is to store the value
-! of each coefficient together with the corresponding destination element index
-! and source element index. Destination and source indices could be expressed in
-! terms of the corresponding DistGrid patch index together with the coordinate
-! tuple within the patch. While this format may be the most natural way to
-! express elements in the source and destination Array, it has two major drawbacks.
-! First the coordinate tuple is {\tt dimCount} specific and second the format
-! is extremly bulky. For 2D source and destination Arrays it would require 6
-! integers to store the source and destination element information for each
-! non-zero coefficient and matters get worse for higher dimensions.
-!
-! Both problems can be circumvented by {\em interpreting} source and destination
-! Arrays as sequentialized strings or {\em vectors} of elements. This is done
-! by assigning a unique {\em sequence index} to each exclusive element in both
-! Arrays. With that the operation of updating the elements in the destination Array
-! as linear combinations of source Array elements takes the form of a {\em sparse
-! matrix multiplication}.
-!
-! The default sequence index rule assigns index $1$ to the {\tt minIndex} corner
-! element of the first patch of the DistGrid on which the Array is defined. It then
-! increments the sequence index by $1$ for each element running through the
-! DistGrid dimensions by order. The index space position of the DistGrid patches
-! does not affect the sequence labeling of elements. The default sequence indices
-! for
-!EOE
-!BOC
-  srcDistgrid = ESMF_DistGridCreate(minIndex=(/-1,0/), maxIndex=(/1,3/), rc=rc)
-!EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOE
-! for each element are:
-! \begin{verbatim}
-!   -------------------------------------> 2nd dim
-!   |
-!   |   +------+------+------+------+
-!   |   |(-1,0)|      |      |(-1,3)|
-!   |   |      |      |      |      |
-!   |   |   1  |   4  |   7  |  10  |
-!   |   +------+------+------+------+
-!   |   |      |      |      |      |
-!   |   |      |      |      |      |
-!   |   |   2  |   5  |   8  |  11  |
-!   |   +------+------+------+------+
-!   |   | (1,0)|      |      | (1,3)|
-!   |   |      |      |      |      |
-!   |   |   3  |   6  |   9  |  12  |
-!   |   +------+------+------+------+
-!   |
-!   v
-!  1st dim
-! \end{verbatim}
-!
-! The assigned sequence indices are decomposition and distribution invariant by
-! construction. Furthermore, when an Array is created with extra elements per DE on
-! a DistGrid the sequence indices (which only cover the exclusive elements) remain
-! unchanged.
-!EOE
-!BOC
-  srcArray = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=srcDistgrid, &
-    totalLWidth=(/1,1/), totalUWidth=(/1,1/), indexflag=ESMF_INDEX_GLOBAL, &
-    rc=rc)
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOE
-! The extra padding of 1 element in each direction around the exclusive elements on
-! each DE are "invisible" to the Array spare matrix multiplication method. These
-! extra elements are either updated by the computational kernel or by Array halo
-! operations (not yet implemented!).
-!
-! An alternative way to assign sequence indices to all the elements in the patches
-! covered by a DistGrid object is to use a special {\tt ESMF\_DistGridCreate()}
-! call. This call has been specifically designed for 1D cases with arbitrary,
-! user-supplied sequence indices.
-!EOE
-!BOC
-  seqIndexList(1) = localPet*10
-  seqIndexList(2) = localPet*10 + 1
-  dstDistgrid = ESMF_DistGridCreate(arbSeqIndexList=seqIndexList, rc=rc)
-!EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOE
-! This call to {\tt ESMF\_DistGridCreate()} is collective across the current VM.
-! The {\tt arbSeqIndexList} argument specifies the PET-local arbitrary sequence
-! indices that need to be covered by the local DE. The resulting DistGrid has as
-! many 1D patches as there are PETs in the current VM. There is one local DE per
-! PET which covers the entire PET-local patch. The user supplied sequence
-! indices must be unique, but the sequence may be interrupted. The four patches
-! of {\tt dstDistgrid} have the following local 1D index space coordinates
-! (given between "()") and sequence indices:
-! \begin{verbatim}
-!  patch 0            patch 1           patch 2           patch 3
-!  covered by DE 0    covered by DE 1   covered by DE 2   covered by DE 3
-!  on PET 0           on PET 1          on PET 2          on PET 3
-!  ----------------------------------------------------------------------
-!  (1) : 0            (1) : 10          (1) : 20          (1) : 30
-!  (2) : 1            (2) : 11          (2) : 21          (2) : 31
-! \end{verbatim}
-!
-! Again the DistGrid object provides the sequence index labeling for the
-! exclusive elements of an Array created on the DistGrid regardless of extra,
-! non-exclusive elements.
-!EOE
-  call ESMF_ArraySpecSet(arrayspec1D, typekind=ESMF_TYPEKIND_R8, rank=1, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOC
-  dstArray = ESMF_ArrayCreate(arrayspec=arrayspec1D, distgrid=dstDistgrid, &
-    rc=rc)
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOE
-! With the definition of sequence indices, either by the default rule or as user
-! provided arbitrary sequence indices, it is now possible to uniquely identify
-! each exclusive element in the source and destination Array by a single integer
-! number. Specifying a pair of source and destination elements takes two integer
-! number regardless of the number of dimensions.
-!
-! The information required to carry out a sparse matrix multiplication are the
-! pair of source and destination sequence indices and the associated
-! multiplication factor for each pair. ESMF requires this information in form of
-! two Fortran arrays. The factors are stored in a 1D array of the appropriate
-! type and kind, e.g. {\tt real(ESMF\_KIND\_R8)::factorList(:)}. Array sparse
-! matrix multiplications are only supported between Arrays of the same type and
-! kind using factors of identical type and kind. The sequence index pairs
-! associated with the factors provided by {\tt factorList} are stored in a 2D
-! Fortran array of default integer kind of the shape {\tt
-! integer::factorIndexList(2,:)}. The sequence indices of the source Array elements
-! are stored in the first row of {\tt 
-! factorIndexList} while the sequence indices of the destination Array elements are
-! stored in the second row.
-!
-! Each PET in the current VM must call into {\tt ESMF\_ArraySparseMatMulStore()}
-! to precompute and store the communication pattern for the sparse matrix
-! multiplication. The multiplication factors may be provided in parallel, i.e.
-! multiple PETs may specify {\tt factorList} and {\tt factorIndexList} arguments
-! when calling into {\tt ESMF\_ArraySparseMatMulStore()}. PETs that do not
-! provide factors either call with {\tt factorList} and {\tt factorIndexList}
-! arguments containing zero elements or issue the call omitting both arguments.
-!EOE
-!BOC
-  if (localPet == 0) then
-    allocate(factorList(1))               ! PET 0 specifies 1 factor
-    allocate(factorIndexList(2,1))
-    factorList = (/0.2/)                  ! factors
-    factorIndexList(1,:) = (/5/)          ! seq indices into srcArray
-    factorIndexList(2,:) = (/30/)         ! seq indices into dstArray
-    
-    call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
-      routehandle=sparseMatMulHandle, factorList=factorList, &
-      factorIndexList=factorIndexList, rc=rc)
-      
-    deallocate(factorList)
-    deallocate(factorIndexList)
-  else if (localPet == 1) then
-    allocate(factorList(3))               ! PET 1 specifies 3 factor
-    allocate(factorIndexList(2,3))
-    factorList = (/0.5, 0.5, 0.8/)        ! factors
-    factorIndexList(1,:) = (/8, 2, 12/)   ! seq indices into srcArray
-    factorIndexList(2,:) = (/11, 11, 30/) ! seq indices into dstArray
-    
-    call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
-      routehandle=sparseMatMulHandle, factorList=factorList, &
-      factorIndexList=factorIndexList, rc=rc)
-      
-    deallocate(factorList)
-    deallocate(factorIndexList)
-  else
-    ! PETs 2 and 3 do not provide factors
-    
-    call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
-      routehandle=sparseMatMulHandle, rc=rc)
-      
-  endif
-!EOC
-!BOE
-! The RouteHandle object {\tt sparseMatMulHandle} produced by 
-! {\tt ESMF\_ArraySparseMatMulStore()} can now be used to call {\tt
-! ESMF\_ArraySparseMatMul()} collectively across all PETs of the current VM to
-! perform
-! \begin{verbatim}
-!   dstArray = 0.0
-!   do n=1, size(combinedFactorList)
-!       dstArray(combinedFactorIndexList(2, n)) += 
-!         combinedFactorList(n) * srcArray(combinedFactorIndexList(1, n))
-!   enddo
-! \end{verbatim}
-! in parallel. Here {\tt combinedFactorList} and {\tt combinedFactorIndexList}
-! are the combined lists defined by the respective local lists provided by 
-! PETs 0 and 1 in parallel. For this example
-!EOE
-!BOC
-  call ESMF_ArraySparseMatMul(srcArray=srcArray, dstArray=dstArray, &
-    routehandle=sparseMatMulHandle, rc=rc)
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOE
-! will initialize the entire {\tt dstArray} to 0.0 and then update two elements:
-!
-! \begin{verbatim}
-! on DE 1:
-! dstArray(2) = 0.5 * srcArray(0,0)  +  0.5 * srcArray(0,2)
-! \end{verbatim}
-!
-! and
-!
-! \begin{verbatim}
-! on DE 3:
-! dstArray(1) = 0.2 * srcArray(0,1)  +  0.8 * srcArray(1,3).
-! \end{verbatim}
-!
-! The call to {\tt ESMF\_ArraySparseMatMul()} does provide the option to turn
-! the default {\tt dstArray} initialization off. If argument {\tt zeroflag}
-! is set to {\tt ESMF\_FALSE}
-!EOE
-!BOC
-  call ESMF_ArraySparseMatMul(srcArray=srcArray, dstArray=dstArray, &
-    routehandle=sparseMatMulHandle, zeroflag=ESMF_FALSE, rc=rc)
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOE
-! skips the initialization and elements in {\tt dstArray} are updated according to:
-!
-! \begin{verbatim}
-!   do n=1, size(combinedFactorList)
-!       dstArray(combinedFactorIndexList(2, n)) += 
-!         combinedFactorList(n) * srcArray(combinedFactorIndexList(1, n)).
-!   enddo
-! \end{verbatim}
-!
-! Finally the RouteHandle can be used to release all memory allocation 
-! associated with the precomputed ArrayMatMul operation.
-!
-!EOE
-!BOC
-  call ESMF_RouteHandleRelease(routehandle=sparseMatMulHandle, rc=rc)
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
-!call ESMF_ArrayPrint(srcArray, rc=rc)
-!call ESMF_ArrayPrint(dstArray, rc=rc)
-  
-  call ESMF_ArrayDestroy(srcArray, rc=rc) ! finally destroy the array object
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_ArrayDestroy(dstArray, rc=rc) ! finally destroy the array object
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 !!!! UNTIL FURTHER IMPLEMENTATION SKIP SECTIONS OF THIS EXAMPLE >>>>>>>>>>>>>>>>
@@ -1820,6 +1556,7 @@ program ESMF_ArrayEx
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
     regDecomp=(/2,3/), rc=rc)
 !EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
 ! The rank in the {\tt arrayspec} argument, however, must change from 2 to 3 in
 ! order to provide for the extra Array dimension.
@@ -1827,12 +1564,13 @@ program ESMF_ArrayEx
 !BOC
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=3, rc=rc)
 !EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
 ! During Array creation with extra dimension(s) it is necessary to specify the
 ! bounds of these tensor dimension(s). This requires two additional arguments,
-! {\tt lbounds} and {\tt ubounds}, which are vectors in order to accommodate
-! higher order tensor dimensions. The other arguments remain unchanged and
-! apply across all tensor components. 
+! {\tt undistLBound} and {\tt undistUBound}, which are vectors in order to 
+! accommodate higher order tensor dimensions. The other arguments remain 
+! unchanged and apply across all tensor components. 
 !
 ! The optional arguments used in the following call are identical to those
 ! used to create {\tt array1} of section \ref{ArrayEx_staggeredArrays}. This
@@ -2006,18 +1744,19 @@ program ESMF_ArrayEx
 !
 ! \subsubsection{Arrays with replicated dimensions}
 !
-! Up until the previous section the DistGrid {\tt dimCount} was always assumed
-! equal to the Array {\tt rank}. The previous section introduced the concept
-! of Array {\em tensor} dimensions when {\tt dimCount < rank}. In this section
-! the general case of completely arbitrary {\tt dimCount} and {\tt rank} and 
-! their relationship to {\tt distgridToArrayMap} will be considered.
+! Thus far most examples demonstrated cases where the DistGrid {\tt dimCount}
+! was always equal to the Array {\tt rank}. The previous section introduced the
+! concept of Array {\em tensor} dimensions when {\tt dimCount < rank}. In this
+! section {\tt dimCount} and {\tt rank} are assumed completely unconstrained and
+! the relationship to {\tt distgridToArrayMap} and {\tt arrayToDistGridMap} will
+! be discussed.
 !
 ! The Array class allows completely arbitrary mapping between Array and
 ! DistGrid dimensions. Most cases considered in the previous sections used
 ! the default mapping which assigns the DistGrid dimensions in sequence to the
 ! lower Array dimensions. Extra Array dimensions, if present, are considered
-! non-distributed tensor dimensions for which the optional {\tt lbounds} and
-! {\tt ubounds} arguments must be specified.
+! non-distributed tensor dimensions for which the optional {\tt undistLBound}
+! and {\tt undistUBound} arguments must be specified.
 !
 ! The optional {\tt distgridToArrayMap} argument provides the option to override
 ! the default DistGrid to Array dimension mapping. The entries of the
@@ -2033,15 +1772,15 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=1, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
 ! is created on the 2D DistGrid used during the previous section.
 !EOE
 !BOC
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !  call ESMF_ArrayPrint(array, rc=rc)
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
@@ -2056,17 +1795,19 @@ program ESMF_ArrayEx
 ! DEs provide memory allocations for {\em identical} exclusive elements.
 !
 ! Access to the data storage of an Array that has been replicated along 
-! DistGrid dimensions is not different from Arrays without replication.
+! DistGrid dimensions is the same as for Arrays without replication.
 !EOE
 !BOC
   call ESMF_ArrayGet(array, localDeCount=localDeCount, rc=rc)
+!EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
   allocate(larrayList(localDeCount))
   allocate(localDeList(localDeCount))
   call ESMF_ArrayGet(array, larrayList=larrayList, localDeList=localDeList, &
     rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
 ! The {\tt array} object was created without additional padding which means
 ! that the bounds of the Fortran array pointer correspond to the bounds of
@@ -2089,15 +1830,17 @@ program ESMF_ArrayEx
   do de=1, localDeCount
     call ESMF_LocalArrayGet(larrayList(de), myF90Array1D, ESMF_DATA_REF, &
       rc=rc)
+!EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
     print *, "DE ",localDeList(de)," [", lbound(myF90Array1D), &
       ubound(myF90Array1D),"]"
   enddo
   deallocate(larrayList)
   deallocate(localDeList)
   call ESMF_ArrayDestroy(array, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
 ! The Fortran array pointer in the above loop was of rank 1 because the
 ! Array object was of rank 1. However, the {\tt distgrid} object associated
@@ -2111,8 +1854,8 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
 ! on the previously used 2D DistGrid. By default, i.e. without the
 ! {\tt distgridToArrayMap}
@@ -2121,19 +1864,19 @@ program ESMF_ArrayEx
 ! call will only associate the second DistGrid dimension with the first Array 
 ! dimension. This will render the first DistGrid dimension a replicator
 ! dimension and the second Array dimension a tensor dimension for which 1D
-! {\tt lbounds} and {\tt ubounds} arguments must be supplied.
+! {\tt undistLBound} and {\tt undistUBound} arguments must be supplied.
 !EOE
 !BOC
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     distgridToArrayMap=(/0,1/), undistLBound=(/11/), undistUBound=(/14/), rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !  call ESMF_ArrayPrint(array, rc=rc)
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
   call ESMF_ArrayDestroy(array, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
 ! Finally, the same {\tt arrayspec} and {\tt distgrid} arguments are used to
 ! create a 2D Array that is fully replicated in both dimensions of the DistGrid.
@@ -2144,45 +1887,19 @@ program ESMF_ArrayEx
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     distgridToArrayMap=(/0,0/), undistLBound=(/11,21/), undistUBound=(/14,22/), &
     rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
 ! The result will be an Array with local lower bound (/11,21/) and upper bound
 ! (/14,22/) on all 6 DEs of the DistGrid.
-!
-! The {\tt ESMF\_ArrayScatter()} operation can be used to fill the entire 
-! Array object with data coming from a single root Pet. The shape of the
-! Fortran source array used in the Scatter() call must be that of the 
-! contracted Array, i.e. contracted DistGrid dimensions do not count. For the
-! {\tt array} just created this means that the source array on {\tt rootPet}
-! must be of shape 4 x 2.
-!EOE
-!BOC
-  allocate(myF90Array2D(4,2))
-  
-  do j=1,2
-    do i=1,4
-      myF90Array2D(i,j) = i * 100.d0 + j * 1.2345d0 ! initialize
-    enddo
-  enddo
-  
-  call ESMF_ArrayScatter(array, farray=myF90Array2D, rootPet=0, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
-  deallocate(myF90Array2D)
-!EOC
-!BOE
-! This will have filled each local 4 x 2 Array piece with the replicated
-! data of {\tt myF90Array2D}.
-!EOE
-!  call ESMF_ArrayPrint(array, rc=rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
   call ESMF_ArrayDestroy(array, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_DistGridDestroy(distgrid, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOE
 ! Replicated Arrays can also be created from existing local Fortran arrays.
@@ -2198,120 +1915,37 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/40,10/), rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
 ! The following call creates an Array object on the above distgrid using
 ! the locally existing {\tt myF90Array2D} Fortran arrays. The difference 
 ! compared to the case with automatic memory allocation is that instead of
 ! {\tt arrayspec} the Fortran array is provided as argument. Futhermore,
-! the {\tt lbounds} and {\tt ubounds} arguments can be omitted, defaulting
-! into Array tensor dimension lbounds of 1 and an upper bound equal to the
-! size of the respective Fortran array dimension.
+! the {\tt undistLBound} and {\tt undistUBound} arguments can be omitted,
+! defaulting into Array tensor dimension lower bound of 1 and an upper
+! bound equal to the size of the respective Fortran array dimension.
 !EOE
 !BOC
   array = ESMF_ArrayCreate(farray=myF90Array2D, distgrid=distgrid, &
     distgridToArrayMap=(/0,2/), rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
 ! The {\tt array} object associates the 2nd DistGrid dimension with the 2nd
 ! Array dimension. The first DistGrid dimension is not associated with any
 ! Array dimension and will lead to replication of the Array along the DEs of
-! this direction. Still, the local arrays that comprise the {\tt array} 
-! object refer to independent pieces of memory and can be initialized 
-! indpendently.
+! this direction.
 !EOE
 !BOC
-  myF90Array2D = localPet ! initialize
-!EOC
-!  call ESMF_ArrayPrint(array, rc=rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOE
-! However, the notion of replication becomes visible when a local array of shape
-! 3 x 10 is scattered across the Array object.
-!EOE
-!BOC
-  allocate(myF90Array2D2(5:7,11:20))
-  
-  do j=11,20
-    do i=5,7
-      myF90Array2D2(i,j) = i * 100.d0 + j * 1.2345d0 ! initialize
-    enddo
-  enddo
-  
-  call ESMF_ArrayScatter(array, farray=myF90Array2D2, rootPet=0, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
-  deallocate(myF90Array2D2)
-!EOC
-!BOE
-! The Array pieces on every DE will receive the same source data, resulting
-! in a replication of data along DistGrid dimension 1.
-!EOE
-!  call ESMF_ArrayPrint(array, rc=rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOE
-! When the inverse operation, i.e. {\tt ESMF\_ArrayGather()}, is applied to
-! a replicated Array there is an intrinsic ambiguity that needs to be 
-! considered. ESMF defines the gathering of data of a replicated Array
-! as the collection of data originating from the numerically higher DEs. This
-! means that data in replicated elements associated with numerically lower DEs
-! will be ignored during {\tt ESMF\_ArrayGather()}.
-! For the current example this means that changing the Array contents on PET 1,
-! which here corresponds to DE 1,
-!EOE
-!BOC
-  if (localPet==1) then
-    myF90Array2D = real(1.2345, ESMF_KIND_R8)
-  endif
-!EOC
-!BOE
-! will not affect the result of
-!EOE
-  call ESMF_ArrayPrint(array, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOC
-  allocate(myF90Array2D2(3,10))
-  myF90Array2D2 = 0.d0    ! initialize to a known value
-  call ESMF_ArrayGather(array, farray=myF90Array2D2, rootPet=0, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!EOC
-  print *, "localPet = ", localPet, "myF90Array2D2: ", myF90Array2D2
-  
-!BOE
-! The result remains completely defined by the unmodified values of Array in 
-! DE 3, the numerically highest DE. However, overriding the DE-local Array
-! piece on DE 3
-!EOE
-!BOC
-  if (localPet==3) then
-    myF90Array2D = real(5.4321, ESMF_KIND_R8)
-  endif
-!EOC
-  call ESMF_ArrayPrint(array, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOE
-! will change the outcome of
-!EOE
-!BOC
-  call ESMF_ArrayGather(array, farray=myF90Array2D2, rootPet=0, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!EOC
-!BOE
-! as expected.
-!EOE
-  print *, "localPet = ", localPet, "myF90Array2D2: ", myF90Array2D2
-!BOC
-  deallocate(myF90Array2D2)
-
   call ESMF_ArrayDestroy(array, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_DistGridDestroy(distgrid, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
-  deallocate(myF90Array2D)
 !EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  deallocate(myF90Array2D)
 
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 !!!! UNTIL FURTHER IMPLEMENTATION SKIP SECTIONS OF THIS EXAMPLE >>>>>>>>>>>>>>>>
