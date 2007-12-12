@@ -1,4 +1,5 @@
-// $Id: ESMCI_Null.h,v 1.1 2007/12/12 02:06:55 rosalind Exp $
+#if 0
+// $Id: ESMCI_Null.h,v 1.2 2007/12/12 16:47:57 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -16,15 +17,14 @@
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-// prevent this file from being read more than once
-#ifndef ESMCI_Null_H
-#define ESMCI_Null_H
+#endif
+
+#ifndef ESMCI_Null
+#define ESMCI_Null
 
 #define ESMC_F77_Int_Null -99999
 #define ESMC_F77_Float_Null -1.e-99
-#define ESMC_F77_Char_Null "!@#$"
+#define ESMC_F77_Char_Null '!@#$'
 
-//-----------------------------------------------------------------------------
-
-#endif  // ESMCI_Arg_H
+#endif
 
