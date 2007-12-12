@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.89 2007/12/12 05:12:33 rokuingh Exp $
+// $Id: ESMC_Base.C,v 1.90 2007/12/12 14:19:32 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.89 2007/12/12 05:12:33 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.90 2007/12/12 14:19:32 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -2440,12 +2440,12 @@ if (count) {
 }  // end ESMC_SetAttPack()
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGetListOf"
+#define ESMC_METHOD "ESMC_AttPackGet"
 //BOP
-// !IROUTINE:  ESMC_AttributeGetListOf - get a list attributes from an ESMF type
+// !IROUTINE:  ESMC_AttPackGet - get a list attributes from an ESMF type
 //
 // !INTERFACE:
-      ESMC_Attribute **ESMC_Base::ESMC_AttributeGetListOf(
+      ESMC_Attribute **ESMC_Base::ESMC_AttPackGet(
 // 
 // !RETURN VALUE:
 //    list of pointers to requested attributes
@@ -2507,7 +2507,7 @@ if (count) {
   if(attNum != 0) return attpackList;
   else return NULL;
 
-}  // end ESMC_AttributeGetListOf
+}  // end ESMC_AttPackGet
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -2612,7 +2612,7 @@ if (count) {
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attpackList = ESMC_Base::ESMC_AttributeGetListOf(convention, purpose, object, attpackNum);
+  attpackList = ESMC_Base::ESMC_AttPackGet(convention, purpose, object, attpackNum);
   if (attpackList == NULL) return ESMF_FAILURE;
 
   attCount = *attpackNum;
