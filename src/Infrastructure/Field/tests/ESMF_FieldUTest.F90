@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.107 2007/12/10 21:20:23 feiliu Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.108 2007/12/12 21:02:22 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.107 2007/12/10 21:20:23 feiliu Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.108 2007/12/12 21:02:22 feiliu Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -75,6 +75,7 @@
       type(ESMF_Array)                            :: array8
       type(ESMF_ArraySpec)                        :: arrayspec8
       type(ESMF_DistGrid)                         :: distgrid
+      type(ESMF_StaggerLoc)                       :: staggerloc8
 
       integer :: im, jm, km
       real(ESMF_KIND_R8) :: xmin,xmax,ymin,ymax
@@ -574,7 +575,6 @@
       write(failMsg, *) ""
       write(name, *) "Creating Field with name Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_FieldPrint(f2)
       
       !------------------------------------------------------------------------
       !EX_UTest 
@@ -599,9 +599,24 @@
       
       !------------------------------------------------------------------------
       !EX_UTest 
-      ! FieldCreateFromArray creates a field from a ESMF_Array
+      ! ESMF_ArraySpecPrint test ArraySpecPrint public interface
       call ESMF_ArraySpecSet(arrayspec8, 2, ESMF_TYPEKIND_R8, rc=rc)
+      call ESMF_ArraySpecPrint(arrayspec8, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Test ESMF_ArraySpecPrint public interface"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
+      !EX_UTest 
+      ! ESMF_StaggerLocPrint test StaggerLoc public interface
+      call ESMF_StaggerLocPrint(staggerloc8, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Test ESMF_StaggerLocPrint public interface"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest 
+      ! FieldCreateFromArray creates a field from a ESMF_Array
       call ESMF_GridGet(grid, distgrid=distgrid, rc=rc)
 
       array8 = ESMF_ArrayCreate(farray, distgrid=distgrid, &
