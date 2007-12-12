@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.118 2007/12/11 21:17:21 rokuingh Exp $
+! $Id: ESMF_State.F90,v 1.119 2007/12/12 16:01:50 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -72,6 +72,10 @@
       public ESMF_StateSetAttribute       ! Set and Get Attributes
       public ESMF_StateGetAttribute       !  
 
+      public ESMF_StateCreateAttPack      ! Attribute packages
+      public ESMF_StateSetAttPack         ! Attribute packages
+      public ESMF_StateWriteAttPack       ! Attribute packages
+
       public ESMF_StateGetAttributeCount  ! number of Attributes
       public ESMF_StateGetAttributeInfo   ! get type, length by name or number
 
@@ -87,7 +91,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.118 2007/12/11 21:17:21 rokuingh Exp $'
+      '$Id: ESMF_State.F90,v 1.119 2007/12/12 16:01:50 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -315,55 +319,6 @@ end interface
 !EOPI
       end interface
 !------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_StateCreateAttPack - Set an attribute package
-!
-! !INTERFACE:
-      interface ESMF_StateCreateAttPack
-   
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_StateCreateAttPack
-        !module procedure ESMF_StateGetAttrInfoByNum
-
-! !DESCRIPTION:
-!     This interface sets up the attributes for an {\tt ESMF\_State}, that 
-!     correspond to the attribute package as it currently exists
- 
-!EOPI
-      end interface
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_StateSetAttPack - Set an attribute package
-!
-! !INTERFACE:
-      interface ESMF_StateSetAttPack
-   
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_StateSetAttPack
-
-! !DESCRIPTION:
-!     This interface sets the individual attributes for an {\tt ESMF\_State} 
-!     corresponding to a pre-existing attribute package 
- 
-!EOPI
-      end interface
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_StateWriteAttPack - Print an attribute package
-!
-! !INTERFACE:
-      interface ESMF_StateWriteAttPack
-   
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_StateWriteAttPack
-
-! !DESCRIPTION:
-!     This interface prints the individual attributes for an {\tt ESMF\_State} 
-!     corresponding to a pre-existing attribute package 
- 
-!EOPI
-      end interface
-
 
 !==============================================================================
 
