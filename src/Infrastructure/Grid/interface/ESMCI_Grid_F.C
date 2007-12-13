@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.24 2007/11/28 22:14:39 oehmke Exp $
+// $Id: ESMCI_Grid_F.C,v 1.25 2007/12/13 19:38:22 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -667,7 +667,7 @@ extern "C" {
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
 
       // Fill in the output array
-      for (int i=0; i<rank; i++) {
+      for (int i=0; i<coordRank[coord]; i++) {
         (*_exclusiveCount)->array[i]=uBnd[coordDimMap[coord][i]]-lBnd[coordDimMap[coord][i]]+1;
       }
     }
@@ -749,7 +749,7 @@ extern "C" {
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
 
       // Fill in the output array
-      for (int i=0; i<rank; i++) {
+      for (int i=0; i<coordRank[coord]; i++) {
         (*_computationalCount)->array[i]=uBnd[coordDimMap[coord][i]]-lBnd[coordDimMap[coord][i]]+1;
       }
     }
