@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.26 2007/12/10 21:20:23 feiliu Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.27 2007/12/13 17:39:54 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -162,6 +162,11 @@
         ESMF_FieldCreateDPtr##mrank##D##mtypekind%ftypep => ftype  @\
  @\
         ESMF_INIT_SET_CREATED(ESMF_FieldCreateDPtr##mrank##D##mtypekind) @\
+ @\
+        call ESMF_FieldValidate(ESMF_FieldCreateNoArray, rc=localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
  @\
         if (rcpresent) rc = localrc @\
  @\
@@ -330,6 +335,11 @@
                                       fptr, ESMF_DATA_REF, rc=localrc) @\
  @\
         ESMF_INIT_SET_CREATED(ESMF_FieldCreateEPtr##mrank##D##mtypekind) @\
+ @\
+        call ESMF_FieldValidate(ESMF_FieldCreateNoArray, rc=localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
         if (rcpresent) rc = localrc @\
  @\
         end function ESMF_FieldCreateEPtr##mrank##D##mtypekind  @\
@@ -352,7 +362,7 @@
 ! !INTERFACE: @\
 !   ! Private name; call using ESMF_FieldSetCommit() @\
 !   subroutine ESMF_FieldSetCommit<rank><type><kind>(field, grid, & @\
-!                                         farray, staggerloc, & @\
+!                                         farray, copyflag, staggerloc, & @\
 !                                         gridToFieldMap, ungriddedLBound, & @\
 !                                         ungriddedUBound, maxHaloLWidth, & @\
 !                                         maxHaloUWidth, rc) @\
@@ -361,6 +371,7 @@
 !      type(ESMF_Field) :: field @\
 !      type(ESMF_Grid) :: grid                  @\
 !      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: farray @\
+!      type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
 !      type(ESMF_StaggerLoc), intent(in), optional ::staggerloc  @\
 !      integer, intent(in), optional :: gridToFieldMap(:)     @\
 !      integer, intent(in), optional :: ungriddedLBound(:) @\
@@ -381,6 +392,9 @@
 !           Pointer to an {\tt ESMF\_Grid} object.  @\
 !     \item [farray] @\
 !           Native fortran data pointer to be copied/referenced in Field @\
+!     \item [copyflag] @\
+!           Whether to copy the existing data space or reference directly. Valid @\
+!           values are {\tt ESMF\_DATA\_COPY} or {\tt ESMF\_DATA\_REF}. @\
 !     \item [{[staggerloc]}] @\
 !           Stagger location of data in grid cells.  For valid  @\
 !           predefined values see Section \ref{sec:opt:staggerloc}. @\
@@ -424,7 +438,7 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
     subroutine ESMF_FieldSetCommit##mrank##D##mtypekind(field, grid, farray, & @\
-                                         staggerloc, & @\
+                                         copyflag, staggerloc, & @\
                                          gridToFieldMap, ungriddedLBound, & @\
                                          ungriddedUBound, maxHaloLWidth, & @\
                                          maxHaloUWidth, rc) @\
@@ -433,6 +447,7 @@
         type(ESMF_Field) :: field @\
         type(ESMF_Grid) :: grid                  @\
         mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farray @\
+        type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
         type(ESMF_StaggerLoc), intent(in), optional ::staggerloc  @\
         integer, intent(in), optional :: gridToFieldMap(:)     @\
         integer, intent(in), optional :: ungriddedLBound(:) @\
@@ -519,7 +534,7 @@
 ! !INTERFACE: @\
 !   ! Private name; call using ESMF_FieldCreateFromDataPtr() @\
 !   function ESMF_FieldCreateFromDataPtr<rank><type><kind>(grid, & @\
-!                                         farray, staggerloc, & @\
+!                                         farray, copyflag, staggerloc, & @\
 !                                         gridToFieldMap, ungriddedLBound, & @\
 !                                         ungriddedUBound, maxHaloLWidth, & @\
 !                                         maxHaloUWidth, name, iospec, rc) @\
@@ -530,6 +545,7 @@
 ! !ARGUMENTS: @\
 !      type(ESMF_Grid) :: grid                  @\
 !      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: farray @\
+!      type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
 !      type(ESMF_StaggerLoc), intent(in), optional ::staggerloc  @\
 !      integer, intent(in), optional :: gridToFieldMap(:)     @\
 !      integer, intent(in), optional :: ungriddedLBound(:) @\
@@ -550,6 +566,9 @@
 !           Pointer to an {\tt ESMF\_Grid} object.  @\
 !     \item [farray] @\
 !           Native fortran data pointer to be copied/referenced in Field @\
+!   \item [copyflag] @\
+!           Whether to copy the existing data space or reference directly. Valid @\
+!           values are {\tt ESMF\_DATA\_COPY} or {\tt ESMF\_DATA\_REF}. @\
 !     \item [{[staggerloc]}] @\
 !           Stagger location of data in grid cells.  For valid  @\
 !           predefined values see Section \ref{sec:opt:staggerloc}. @\
@@ -597,7 +616,7 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
     function ESMF_FieldCreateFromDataPtr##mrank##D##mtypekind(grid, & @\
-                                         farray, staggerloc, & @\
+                                         farray, copyflag, staggerloc, & @\
                                          gridToFieldMap, ungriddedLBound, & @\
                                          ungriddedUBound, maxHaloLWidth, & @\
                                          maxHaloUWidth, name, iospec, rc) @\
@@ -608,6 +627,7 @@
 ! input arguments @\
       type(ESMF_Grid) :: grid                  @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farray @\
+      type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
       type(ESMF_StaggerLoc), intent(in), optional ::staggerloc  @\
       integer, intent(in), optional :: gridToFieldMap(:)     @\
       integer, intent(in), optional :: ungriddedLBound(:) @\
@@ -630,7 +650,7 @@
  @\
       call ESMF_FieldSetCommit##mrank##D##mtypekind( & @\
           ESMF_FieldCreateFromDataPtr##mrank##D##mtypekind, & @\
-          grid, farray, & @\
+          grid, farray, copyflag, & @\
           staggerloc, gridToFieldMap, & @\
           ungriddedLBound, ungriddedUBound, maxHaloLWidth, maxHaloUWidth, & @\
           rc=localrc) @\

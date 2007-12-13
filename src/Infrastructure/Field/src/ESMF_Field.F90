@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.279 2007/12/11 22:19:54 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.280 2007/12/13 17:39:54 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -202,7 +202,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.279 2007/12/11 22:19:54 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.280 2007/12/13 17:39:54 feiliu Exp $'
 
 !==============================================================================
 !
@@ -522,6 +522,12 @@
       ESMF_FieldCreateNoDataPtr%ftypep => ftype
 
       ESMF_INIT_SET_CREATED(ESMF_FieldCreateNoDataPtr)
+      
+      call ESMF_FieldValidate(ESMF_FieldCreateNoDataPtr, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_FieldCreateNoDataPtr
@@ -598,6 +604,12 @@
       ESMF_FieldCreateNoArray%ftypep => ftype
 
       ESMF_INIT_SET_CREATED(ESMF_FieldCreateNoArray)
+
+      call ESMF_FieldValidate(ESMF_FieldCreateNoArray, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_FieldCreateNoArray
@@ -663,6 +675,12 @@
       ESMF_FieldCreateNoGridArray%ftypep => ftype
 
       ESMF_INIT_SET_CREATED(ESMF_FieldCreateNoGridArray)
+
+      call ESMF_FieldValidate(ESMF_FieldCreateNoGridArray, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_FieldCreateNoGridArray
@@ -3825,6 +3843,9 @@
 !           Pointer to an {\tt ESMF\_Grid} object. 
 !     \item [array]
 !           Data. 
+!   \item [copyflag]
+!           Whether to copy the existing data space or reference directly. Valid
+!           values are {\tt ESMF\_DATA\_COPY} or {\tt ESMF\_DATA\_REF}.
 !     \item [{[staggerloc]}] 
 !           Stagger location of data in grid cells.  For valid 
 !           predefined values see Section \ref{sec:opt:staggerloc}.
