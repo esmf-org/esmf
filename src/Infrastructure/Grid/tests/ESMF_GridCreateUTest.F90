@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.67 2007/11/16 16:13:09 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.68 2007/12/13 17:01:59 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.67 2007/11/16 16:13:09 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.68 2007/12/13 17:01:59 feiliu Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -63,6 +63,7 @@ program ESMF_GridCreateUTest
   integer :: clbnd(3),cubnd(3)
   integer(ESMF_KIND_I4), pointer :: buf(:)
   integer :: bufCount, offset, localDECount
+  type(ESMF_StaggerLoc)          :: staggerloc8
 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -151,6 +152,13 @@ program ESMF_GridCreateUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  !------------------------------------------------------------------------
+  !EX_UTest 
+  ! ESMF_StaggerLocPrint test StaggerLoc public interface
+  call ESMF_StaggerLocPrint(staggerloc8, rc=rc)
+  write(failMsg, *) ""
+  write(name, *) "Test ESMF_StaggerLocPrint public interface"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
