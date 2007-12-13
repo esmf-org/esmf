@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.108 2007/12/12 21:02:22 feiliu Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.109 2007/12/13 21:36:59 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.108 2007/12/12 21:02:22 feiliu Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.109 2007/12/13 21:36:59 feiliu Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -707,7 +707,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! Getting Attrubute Info from a Field
-      call ESMF_FieldGetAttributeInfo(f3, name="Scale Factor", count=count, rc=rc)
+      call ESMF_FieldGetAttributeInfo(f3, "Scale Factor", count=count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Attribute info from a Field "
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
