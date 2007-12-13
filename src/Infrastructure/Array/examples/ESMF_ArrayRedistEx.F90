@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistEx.F90,v 1.1.2.1 2007/12/12 06:08:48 theurich Exp $
+! $Id: ESMF_ArrayRedistEx.F90,v 1.1.2.2 2007/12/13 06:38:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -117,6 +117,117 @@ program ESMF_ArrayRedistEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
+  call ESMF_ArrayDestroy(srcArray, rc=rc) ! destroy the Array object
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_ArrayDestroy(dstArray, rc=rc) ! destroy the Array object
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! The {\tt ESMF\_ArrayRedist()} operation also applies to Arrays with 
+! undistributed dimensions. The additional requirement in this case is that
+! the total undistributed element count, i.e. the product of the sizes of all
+! undistributed dimensions, be the same for source and destination Array.
+!EOE
+!BOC
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=4, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+  srcArray = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=srcDistgrid, &
+    undistLBound=(/1,1/), undistUBound=(/2,4/), rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+  dstArray = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=dstDistgrid, &
+    distgridToArrayMap=(/2,3/), undistLBound=(/1,1/), undistUBound=(/2,4/), &
+    rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOE
+! Both {\tt srcArray} and {\tt dstArray} have two undistributed dimensions and
+! a total count of undistributed elements of $ 2 \times 4 = 8$.
+!
+! The Array redistribution operation is defined in terms of sequentialized
+! undistributed dimensions. In the above case this means that a unique sequence
+! index will be assigned to each of the 8 undistributed elements. The sequence
+! indices will be 1, 2, ..., 8, where sequence index 1 is assigned to the first
+! element in the first (i.e. fastest varying in memory) undistributed dimension.
+! The following undistributed elements are labeled in consecutive order as they
+! are stored in memory.
+!EOE
+!BOC
+  call ESMF_ArrayRedistStore(srcArray=srcArray, dstArray=dstArray, &
+    routehandle=redistHandle, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOE
+!BOE
+! The redistribution operation by default applies the identity operation between
+! the elements of undistributed dimensions. This means that source element with
+! sequence index 1 will be mapped against destination element with sequence
+! index 1 and so forth. Because of the way source and destination Arrays
+! in the current example were constructed this corresponds to a mapping of
+! dimensions 3 and 4 on {\tt srcArray} to dimensions 1 and 4 on {\tt dstArray},
+! respectively.
+!EOE
+!BOC
+  call ESMF_ArrayRedist(srcArray=srcArray, dstArray=dstArray, &
+    routehandle=redistHandle, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_RouteHandleRelease(routehandle=redistHandle, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_ArrayDestroy(dstArray, rc=rc) ! destroy the Array object
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! Array redistribution does {\em not} require the same number of undistributed
+! dimensions in source and destination Array, merely the total number of
+! undistributed elements must match.
+!EOE
+!BOC
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=3, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+  dstArray = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=dstDistgrid, &
+    distgridToArrayMap=(/1,3/), undistLBound=(/11/), undistUBound=(/18/), &
+    rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOE
+! This {\tt dstArray} object only has a single undistributed dimension, while
+! the {\tt srcArray}, defined further back, has two undistributed dimensions.
+! However, the total undistributed element count for both Arrays is 8.
+!EOE
+!BOC
+  call ESMF_ArrayRedistStore(srcArray=srcArray, dstArray=dstArray, &
+    routehandle=redistHandle, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOE
+!BOE
+! In this case the default identity operation between the elements of
+! undistributed dimensions corresponds to a {\tt merging} of dimensions
+! 3 and 4 on {\tt srcArray} into dimension 2 on {\tt dstArray}.
+!EOE
+!BOC
+  call ESMF_ArrayRedist(srcArray=srcArray, dstArray=dstArray, &
+    routehandle=redistHandle, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_RouteHandleRelease(routehandle=redistHandle, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! THIS IS WHERE I NEED TO ADD:
+!!!! - example for new ArrayRedistStore() interface that allows override of
+!!!!   default identity operation in tensor space -> transpose of undistr. dims.
+!!!! - example that demonstrates transposing between distributed and undistr. d
+
+
   call ESMF_ArrayDestroy(srcArray, rc=rc) ! destroy the Array object
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_DistGridDestroy(srcDistgrid, rc=rc) ! destroy the DistGrid object

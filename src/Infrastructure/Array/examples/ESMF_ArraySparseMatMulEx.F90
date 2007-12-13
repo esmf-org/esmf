@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.1.2.1 2007/12/12 06:08:48 theurich Exp $
+! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.1.2.2 2007/12/13 06:38:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -25,12 +25,16 @@ program ESMF_ArraySparseMatMulEx
   type(ESMF_VM):: vm
   type(ESMF_DistGrid):: srcDistGrid, dstDistGrid
   type(ESMF_Array):: srcArray, dstArray
-  type(ESMF_ArraySpec):: arrayspec, arrayspec1D
+  type(ESMF_ArraySpec):: arrayspec
   integer:: seqIndexList(2)
   type(ESMF_RouteHandle):: sparseMatMulHandle
   real(ESMF_KIND_R8), allocatable:: factorList(:)
   integer, allocatable:: factorIndexList(:,:)
   integer :: finalrc
+  
+  
+  integer:: counter,i,j,k
+  real(ESMF_KIND_R8), pointer:: farray3d(:,:,:)
   
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
@@ -166,11 +170,10 @@ program ESMF_ArraySparseMatMulEx
 ! exclusive elements of an Array created on the DistGrid regardless of extra,
 ! non-exclusive elements.
 !EOE
-  call ESMF_ArraySpecSet(arrayspec1D, typekind=ESMF_TYPEKIND_R8, rank=1, rc=rc)
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=1, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
-  dstArray = ESMF_ArrayCreate(arrayspec=arrayspec1D, distgrid=dstDistgrid, &
-    rc=rc)
+  dstArray = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=dstDistgrid, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
@@ -302,7 +305,272 @@ program ESMF_ArraySparseMatMulEx
   
 !call ESMF_ArrayPrint(srcArray, rc=rc)
 !call ESMF_ArrayPrint(dstArray, rc=rc)
+
+!BOE
+! The Array sparse matrix multiplication also applies to Arrays with
+! undistributed dimensions. The undistributed dimensions are interpreted
+! in a sequentialized manner, much like the distributed dimensions,
+! introducing a second sequence index for source and destination elements.
+! Sequence index 1 is assigned to the first element in the first 
+! (i.e. fastest varying in memory) undistributed dimension. The following
+! undistributed elements are labeled in consecutive order as they are stored in
+! memory.
+!
+! In the simplest case the Array sparse matrix multiplication will apply an
+! identity matrix to the vector of sequentialized undistributed Array elements
+! for every non-zero element in the sparse matrix. The requirement in this case
+! is that the total undistributed element count, i.e. the product of the sizes 
+! of all undistributed dimensions, be the same for source and destination Array.
+!EOE
+  call ESMF_ArrayDestroy(srcArray, rc=rc) ! destroy the Array object
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=3, rc=rc)
+  srcArray = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=srcDistgrid, &
+    totalLWidth=(/1,1/), totalUWidth=(/1,1/), indexflag=ESMF_INDEX_GLOBAL, &
+    distgridToArrayMap=(/1,2/), undistLBound=(/1/), undistUBound=(/2/), rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
+  call ESMF_ArrayGet(srcArray, farrayPtr=farray3d, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  counter = localPet*100
+  do k=lbound(farray3d,3),ubound(farray3d,3)
+    do j=lbound(farray3d,2),ubound(farray3d,2)
+      do i=lbound(farray3d,1),ubound(farray3d,1)
+        farray3d(i,j,k) = Real(counter, ESMF_KIND_R8)
+        counter = counter+1
+      enddo
+    enddo
+  enddo
+
+  call ESMF_ArrayDestroy(dstArray, rc=rc) ! destroy the Array object
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+!BOC
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
+  dstArray = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=dstDistgrid, &
+    distgridToArrayMap=(/2/), undistLBound=(/1/), undistUBound=(/2/), rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+
+!call ESMF_ArrayPrint(srcArray, rc=rc)
+!call ESMF_ArrayPrint(dstArray, rc=rc)
+
+!BOE
+! Setting up {\tt factorList} and {\tt factorIndexList} is identical to the 
+! case for Arrays without undistributed dimensions. Also the call to 
+! {\tt ESMF\_ArraySparseMatMulStore()} remains unchanged. Internally, however,
+! the source and destination Arrays are checked to make sure the total
+! undistributed element count matches.
+!EOE
+!BOC
+  if (localPet == 0) then
+    allocate(factorList(1))               ! PET 0 specifies 1 factor
+    allocate(factorIndexList(2,1))
+    factorList = (/0.2/)                  ! factors
+    factorIndexList(1,:) = (/5/)          ! seq indices into srcArray
+    factorIndexList(2,:) = (/30/)         ! seq indices into dstArray
+    
+    call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
+      routehandle=sparseMatMulHandle, factorList=factorList, &
+      factorIndexList=factorIndexList, rc=rc)
+      
+    deallocate(factorList)
+    deallocate(factorIndexList)
+  else if (localPet == 1) then
+    allocate(factorList(3))               ! PET 1 specifies 3 factor
+    allocate(factorIndexList(2,3))
+    factorList = (/0.5, 0.5, 0.8/)        ! factors
+    factorIndexList(1,:) = (/8, 2, 12/)   ! seq indices into srcArray
+    factorIndexList(2,:) = (/11, 11, 30/) ! seq indices into dstArray
+    
+    call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
+      routehandle=sparseMatMulHandle, factorList=factorList, &
+      factorIndexList=factorIndexList, rc=rc)
+      
+    deallocate(factorList)
+    deallocate(factorIndexList)
+  else
+    ! PETs 2 and 3 do not provide factors
+    
+    call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
+      routehandle=sparseMatMulHandle, rc=rc)  
+  endif
+!EOC
+
+!BOE
+! The call into the {\tt ESMF\_ArraySparseMatMul()} operation is completely
+! transparent with respect to whether source and/or destination Arrays contain
+! undistributed dimensions.
+!EOE
+
+!BOC
+  call ESMF_ArraySparseMatMul(srcArray=srcArray, dstArray=dstArray, &
+    routehandle=sparseMatMulHandle, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! This operation will initialize the entire {\tt dstArray} to 0.0 and then 
+! update four elements:
+!
+! \begin{verbatim}
+! on DE 1:
+! dstArray[1](2) = 0.5 * srcArray(0,0)[1]  +  0.5 * srcArray(0,2)[1],
+! dstArray[2](2) = 0.5 * srcArray(0,0)[2]  +  0.5 * srcArray(0,2)[2]
+! \end{verbatim}
+!
+! and
+!
+! \begin{verbatim}
+! on DE 3:
+! dstArray[1](1) = 0.2 * srcArray(0,1)[1]  +  0.8 * srcArray(1,3)[1],
+! dstArray[2](1) = 0.2 * srcArray(0,1)[2]  +  0.8 * srcArray(1,3)[2].
+! \end{verbatim}
+!
+! Here indices between "()" refer to distributed dimensions while indices
+! between "[]" correspond to undistributed dimensions.
+!EOE
+
+!call ESMF_ArrayPrint(srcArray, rc=rc)
+!call ESMF_ArrayPrint(dstArray, rc=rc)
+
+  call ESMF_RouteHandleRelease(routehandle=sparseMatMulHandle, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+ 
+!BOE
+! In a more general version of the Array sparse matrix multiplication the
+! total undistributed element count, i.e. the product of the sizes 
+! of all undistributed dimensions, need not be the same for source and
+! destination Array. In this formulation each non-zero element of the sparse
+! matrix is identified with a unique element in the source and destination
+! Array. This requires a generalization of the {\tt factorIndexList} argument
+! which now must contain four integer numbers for each element. These numbers
+! in sequence are the sequence index of the distributed dimensions and the
+! sequence index of the undistributed dimensions of the element in the source
+! Array, followed by the the sequence index of the distributed dimensions and
+! the sequence index of the undistributed dimensions of the element in the
+! destination Array.
+!EOE
+  call ESMF_ArrayDestroy(srcArray, rc=rc) ! destroy the Array object
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=3, rc=rc)
+  srcArray = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=srcDistgrid, &
+    totalLWidth=(/1,1/), totalUWidth=(/1,1/), indexflag=ESMF_INDEX_GLOBAL, &
+    distgridToArrayMap=(/1,2/), undistLBound=(/1/), undistUBound=(/2/), rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+  call ESMF_ArrayGet(srcArray, farrayPtr=farray3d, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  counter = localPet*100
+  do k=lbound(farray3d,3),ubound(farray3d,3)
+    do j=lbound(farray3d,2),ubound(farray3d,2)
+      do i=lbound(farray3d,1),ubound(farray3d,1)
+        farray3d(i,j,k) = Real(counter, ESMF_KIND_R8)
+        counter = counter+1
+      enddo
+    enddo
+  enddo
+
+  call ESMF_ArrayDestroy(dstArray, rc=rc) ! destroy the Array object
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+!BOC
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
+  dstArray = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=dstDistgrid, &
+    distgridToArrayMap=(/2/), undistLBound=(/1/), undistUBound=(/4/), rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+
+!call ESMF_ArrayPrint(srcArray, rc=rc)
+!call ESMF_ArrayPrint(dstArray, rc=rc)
+
+!BOE
+! Setting up {\tt factorList} is identical to the previous cases since there is
+! still only one value associated with each non-zero matrix element. However,
+! each entry in {\tt factorIndexList} now has four instead of just 2 components.
+!EOE
+!BOC
+  if (localPet == 0) then
+    allocate(factorList(1))               ! PET 0 specifies 1 factor
+    allocate(factorIndexList(4,1))
+    factorList = (/0.2/)                  ! factors
+    factorIndexList(1,:) = (/5/)          ! seq indices into srcArray
+    factorIndexList(2,:) = (/1/)          ! undistr. seq indices into srcArray
+    factorIndexList(3,:) = (/30/)         ! seq indices into dstArray
+    factorIndexList(4,:) = (/2/)          ! undistr. seq indices into dstArray
+    
+    call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
+      routehandle=sparseMatMulHandle, factorList=factorList, &
+      factorIndexList=factorIndexList, rc=rc)
+      
+    deallocate(factorList)
+    deallocate(factorIndexList)
+  else if (localPet == 1) then
+    allocate(factorList(3))               ! PET 1 specifies 3 factor
+    allocate(factorIndexList(4,3))
+    factorList = (/0.5, 0.5, 0.8/)        ! factors
+    factorIndexList(1,:) = (/8, 2, 12/)   ! seq indices into srcArray
+    factorIndexList(2,:) = (/2, 1, 1/)    ! undistr. seq indices into srcArray
+    factorIndexList(3,:) = (/11, 11, 30/) ! seq indices into dstArray
+    factorIndexList(4,:) = (/4, 4, 2/)    ! undistr. seq indices into dstArray
+    
+    call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
+      routehandle=sparseMatMulHandle, factorList=factorList, &
+      factorIndexList=factorIndexList, rc=rc)
+      
+    deallocate(factorList)
+    deallocate(factorIndexList)
+  else
+    ! PETs 2 and 3 do not provide factors
+    
+    call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
+      routehandle=sparseMatMulHandle, rc=rc)  
+  endif
+!EOC
+
+!BOE
+! The call into the {\tt ESMF\_ArraySparseMatMul()} operation remains
+! unchanged.
+!EOE
+
+!BOC
+  call ESMF_ArraySparseMatMul(srcArray=srcArray, dstArray=dstArray, &
+    routehandle=sparseMatMulHandle, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! This operation will initialize the entire {\tt dstArray} to 0.0 and then 
+! update two elements:
+!
+! \begin{verbatim}
+! on DE 1:
+! dstArray[4](2) = 0.5 * srcArray(0,0)[1]  +  0.5 * srcArray(0,2)[2],
+! \end{verbatim}
+!
+! and
+!
+! \begin{verbatim}
+! on DE 3:
+! dstArray[2](1) = 0.2 * srcArray(0,1)[1]  +  0.8 * srcArray(1,3)[1],
+! \end{verbatim}
+!
+! Here indices in $()$ refer to distributed dimensions while indices in $[]$
+! correspond to undistributed dimensions.
+!EOE
+
+!call ESMF_ArrayPrint(srcArray, rc=rc)
+!call ESMF_ArrayPrint(dstArray, rc=rc)
+
+  call ESMF_RouteHandleRelease(routehandle=sparseMatMulHandle, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+ 
   call ESMF_ArrayDestroy(srcArray, rc=rc) ! destroy the Array object
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_DistGridDestroy(srcDistgrid, rc=rc) ! destroy the DistGrid object
