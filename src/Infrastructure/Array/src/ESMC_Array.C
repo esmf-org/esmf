@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.163.2.1 2007/11/30 17:00:11 theurich Exp $
+// $Id: ESMC_Array.C,v 1.163.2.2 2007/12/13 06:38:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.163.2.1 2007/11/30 17:00:11 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.163.2.2 2007/12/13 06:38:04 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1453,7 +1453,7 @@ int Array::getLinearIndexExclusive(
       --j;  // shift to basis 0
       // first time multiply with zero intentionally:
       linIndex *= totalUBound[joff+j] - totalLBound[joff+j] + 1;
-      linIndex += exclusiveLBound[joff+j] - totalLBound[joff+j] + index[j];    
+      linIndex += exclusiveLBound[joff+j] - totalLBound[joff+j] + index[jj];    
     }else{
       // tensor dimension
       // first time multiply with zero intentionally:
