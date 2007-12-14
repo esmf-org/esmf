@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.73.2.1 2007/12/12 06:08:49 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.73.2.2 2007/12/14 06:51:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -128,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.73.2.1 2007/12/12 06:08:49 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.73.2.2 2007/12/14 06:51:47 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -494,12 +494,14 @@ contains
 ! !IROUTINE: ESMF_ArrayRedistStore - Precompute Array redistribution
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayRedistStore(srcArray, dstArray, routehandle, rc)
+  subroutine ESMF_ArrayRedistStore(srcArray, dstArray, routehandle, &
+    srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
     type(ESMF_Array),           intent(inout)           :: dstArray
     type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+    integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
     integer,                    intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -535,6 +537,11 @@ contains
 !     {\tt ESMF\_Array} with destination data.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
+!   \item [{[srcToDstTransposeMap]}]
+!     List with as many entries as there are dimensions in {\tt srcArray}. Each
+!     entry maps the corresponding {\tt srcArray} dimension against the 
+!     specified {\tt dstArray} dimension. Mixing of distributed and
+!     undistributed dimensions is supported.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -542,6 +549,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg   ! index helper
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -551,8 +559,15 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
     
+    ! Deal with (optional) array arguments
+    srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayRedistStore(srcArray, dstArray, routehandle, localrc)
+    call c_ESMC_ArrayRedistStore(srcArray, dstArray, routehandle, &
+      srcToDstTransposeMapArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -561,6 +576,11 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
+    ! garbage collection
+    call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
