@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: sys_tests_results.pl,v 1.3 2006/03/07 20:48:00 svasquez Exp $
+# $Id: sys_tests_results.pl,v 1.4 2007/12/14 19:56:46 svasquez Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 # The results are either complete results or a summary.
@@ -33,8 +33,8 @@ use File::Find
         }
         # Get all system tests files
         @st_files=grep (/STest/, @all_files);
-        # Find the system test files with the "!SYSTEM_TEST" string
-        # grep for "!SYSTEM_TEST"
+        # Find the system test files with the "ESMF_SYSTEM_TEST" string
+        # grep for "ESMF_SYSTEM_TEST"
         $count=0;
         $st_count=0;
         foreach $file ( @st_files) {
@@ -43,7 +43,7 @@ use File::Find
                         push(file_lines, $line);
                         }
                         close ($file);
-                        $count=grep ( /!SYSTEM_TEST/, @file_lines);
+                        $count=grep ( /ESMF_SYSTEM_TEST/, @file_lines);
                         if ($count != 0) {
                                 push (act_st_files, $file);
                                         $st_count=$st_count + 1;
