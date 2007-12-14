@@ -1,7 +1,7 @@
-! $Id: ESMF_FieldSparseMatMulSTest.F90,v 1.4 2007/11/16 04:34:55 oehmke Exp $
+! $Id: ESMF_FieldSparseMatMulSTest.F90,v 1.5 2007/12/14 19:53:24 svasquez Exp $
 !
 !-------------------------------------------------------------------------
-!SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !-------------------------------------------------------------------------

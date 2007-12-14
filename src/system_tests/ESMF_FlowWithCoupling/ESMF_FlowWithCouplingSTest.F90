@@ -1,11 +1,11 @@
-! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.27 2007/08/23 17:16:09 cdeluca Exp $
+! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.28 2007/12/14 19:53:24 svasquez Exp $
 !
 ! ESMF Coupled Flow Demo
 !  Description on Sourceforge under System Test #74559
 !
 
 !-------------------------------------------------------------------------
-!SYSTEM_removeTEST        String used by test script to count system tests.
+!ESMF_SYSTEM_removeTEST        String used by test script to count system tests.
 !=========================================================================
 
 !BOP

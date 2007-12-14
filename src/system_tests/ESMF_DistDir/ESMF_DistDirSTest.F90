@@ -1,7 +1,7 @@
-! $Id: ESMF_DistDirSTest.F90,v 1.6 2007/06/23 07:00:58 cdeluca Exp $
+! $Id: ESMF_DistDirSTest.F90,v 1.7 2007/12/14 19:53:22 svasquez Exp $
 !
 !-------------------------------------------------------------------------
-!SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !BOP

@@ -1,7 +1,7 @@
-! $Id: ESMF_ArrayScatterGatherSTest.F90,v 1.2 2007/11/28 23:41:13 theurich Exp $
+! $Id: ESMF_ArrayScatterGatherSTest.F90,v 1.3 2007/12/14 19:53:21 svasquez Exp $
 !
 !-------------------------------------------------------------------------
-!SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !-------------------------------------------------------------------------

@@ -1,10 +1,10 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.50 2007/08/30 20:05:44 cdeluca Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.51 2007/12/14 19:53:22 svasquez Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
 
 !-------------------------------------------------------------------------
-!SYSTEM_removeTEST        String used by test script to count system tests.
+!ESMF_SYSTEM_removeTEST        String used by test script to count system tests.
 !=========================================================================
 
 
