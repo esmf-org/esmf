@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16.2.1 2007/12/12 06:08:48 theurich Exp $
+# $Id: makefile,v 1.16.2.2 2007/12/14 20:10:47 theurich Exp $
 
 ALL:      build_examples
 run:      run_examples
@@ -74,7 +74,7 @@ run_ESMF_ArrayScatterGatherEx_uni:
 	$(MAKE) EXNAME=ArrayScatterGather NP=1 exfrun
 
 run_ESMF_ArrayRedistEx:
-	$(MAKE) EXNAME=ArrayRedist NP=4 exfrun
+	env P4_GLOBMEMSIZE=41943040 $(MAKE) EXNAME=ArrayRedist NP=4 exfrun
 
 run_ESMF_ArrayRedistEx_uni:
 	$(MAKE) EXNAME=ArrayRedist NP=1 exfrun

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.35.2.1 2007/12/12 06:08:48 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.35.2.2 2007/12/14 20:10:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -1745,7 +1745,7 @@ program ESMF_ArrayEx
 ! \subsubsection{Arrays with replicated dimensions}
 !
 ! Thus far most examples demonstrated cases where the DistGrid {\tt dimCount}
-! was always equal to the Array {\tt rank}. The previous section introduced the
+! was equal to the Array {\tt rank}. The previous section introduced the
 ! concept of Array {\em tensor} dimensions when {\tt dimCount < rank}. In this
 ! section {\tt dimCount} and {\tt rank} are assumed completely unconstrained and
 ! the relationship to {\tt distgridToArrayMap} and {\tt arrayToDistGridMap} will

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.1.2.2 2007/12/13 06:38:31 theurich Exp $
+! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.1.2.3 2007/12/14 20:10:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -151,14 +151,12 @@ program ESMF_ArraySparseMatMulEx
 !BOE
 ! This call to {\tt ESMF\_DistGridCreate()} is collective across the current VM.
 ! The {\tt arbSeqIndexList} argument specifies the PET-local arbitrary sequence
-! indices that need to be covered by the local DE. The resulting DistGrid has as
-! many 1D patches as there are PETs in the current VM. There is one local DE per
-! PET which covers the entire PET-local patch. The user supplied sequence
-! indices must be unique, but the sequence may be interrupted. The four patches
-! of {\tt dstDistgrid} have the following local 1D index space coordinates
-! (given between "()") and sequence indices:
+! indices that need to be covered by the local DE. The resulting DistGrid has
+! one local DE per PET which covers the entire PET-local index range. The user
+! supplied sequence indices must be unique, but the sequence may be interrupted.
+! The four DEs of {\tt dstDistgrid} have the following local 1D index space
+! coordinates (given between "()") and sequence indices:
 ! \begin{verbatim}
-!  patch 0            patch 1           patch 2           patch 3
 !  covered by DE 0    covered by DE 1   covered by DE 2   covered by DE 3
 !  on PET 0           on PET 1          on PET 2          on PET 3
 !  ----------------------------------------------------------------------
@@ -450,7 +448,7 @@ program ESMF_ArraySparseMatMulEx
 ! which now must contain four integer numbers for each element. These numbers
 ! in sequence are the sequence index of the distributed dimensions and the
 ! sequence index of the undistributed dimensions of the element in the source
-! Array, followed by the the sequence index of the distributed dimensions and
+! Array, followed by the sequence index of the distributed dimensions and
 ! the sequence index of the undistributed dimensions of the element in the
 ! destination Array.
 !EOE
@@ -493,7 +491,7 @@ program ESMF_ArraySparseMatMulEx
 !BOE
 ! Setting up {\tt factorList} is identical to the previous cases since there is
 ! still only one value associated with each non-zero matrix element. However,
-! each entry in {\tt factorIndexList} now has four instead of just 2 components.
+! each entry in {\tt factorIndexList} now has 4 instead of just 2 components.
 !EOE
 !BOC
   if (localPet == 0) then

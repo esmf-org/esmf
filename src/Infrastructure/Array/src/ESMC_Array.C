@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.163.2.3 2007/12/14 06:51:46 theurich Exp $
+// $Id: ESMC_Array.C,v 1.163.2.4 2007/12/14 20:10:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.163.2.3 2007/12/14 06:51:46 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.163.2.4 2007/12/14 20:10:47 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3065,18 +3065,29 @@ int Array::redistStore(
     // check srcToDstTransposeMap input
     if (srcToDstTransposeMap->dimCount != 1){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-        "- srcToDstTransposeMap array must be of rank 1", &rc);
+        "- srcToDstTransposeMap must be of rank 1", &rc);
       return rc;
     }
     if (srcToDstTransposeMap->extent[0] != rank){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-        "- srcToDstTransposeMap array must provide rank values", &rc);
+        "- srcToDstTransposeMap must provide rank values", &rc);
       return rc;
     }
-    int *srcToDstTMap = srcToDstTransposeMap->array;
+    int *srcToDstTMap = new int[rank];
+    for (int i=0; i<rank; i++){
+      srcToDstTMap[i] = srcToDstTransposeMap->array[i] - 1; // shift to base 0
+      int j;
+      for (j=0; j<rank; j++)
+        if (srcToDstTransposeMap->array[j] == i+1) break;
+      if (j==rank){
+        // did not find (i+1) value in transpose map
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          "- srcToDstTransposeMap values must be unique and within range:"
+          " [1,..,rank].", &rc);
+        return rc;
+      }
+    }
     
-    //TODO: need to check entries of srcToDstTMap for uniqueness and in bounds
-      
     // size of dims in src and dst Arrays must pairwise match in each patch
     const int *srcArrayToDistGridMap = srcArray->getArrayToDistGridMap();
     const int *dstArrayToDistGridMap = dstArray->getArrayToDistGridMap();
@@ -3145,7 +3156,7 @@ fprintf(stderr, "%d start:%d, size:%d\n", localPet, localStart[i], localSize[i])
           ++srcTensorIndex;
           patchFactorListCount *= srcSize;
         }
-        int jjj = srcToDstTMap[jj] - 1;     // src -> dst dimension mapping
+        int jjj = srcToDstTMap[jj];         // src -> dst dimension mapping
         j = dstArrayToDistGridMap[jjj];     // j is dimIndex bas 1, or 0 undist.
         if (j){
           // decomposed dimension 
@@ -3206,7 +3217,8 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
           }
         }else{
           // tensor dimension
-          srcTuple[jj] = srcArray->undistLBound[tensorIndex];
+          srcTupleStart[jj] = srcArray->undistLBound[tensorIndex];
+          srcTuple[jj] = srcTupleStart[jj];
           srcTupleEnd[jj] = srcArray->undistUBound[tensorIndex] + 1;
           ++tensorIndex;
         }
@@ -3215,7 +3227,7 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
       while (srcTuple[rank-1] < srcTupleEnd[rank-1]){
         // srcTuple --srcToDstTMap--> dstTuple
         for (int j=0; j<rank; j++)
-          dstTuple[srcToDstTMap[j]-1] = srcTuple[j];
+          dstTuple[srcToDstTMap[j]] = srcTuple[j];
         // determine seq indices
         SeqIndex srcSeqIndex = srcArray->getSequenceIndexPatch(i+1, srcTuple);
         SeqIndex dstSeqIndex = dstArray->getSequenceIndexPatch(i+1, dstTuple);
@@ -3226,7 +3238,7 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
         factorIndexListAlloc[fili+2] = dstSeqIndex.decompSeqIndex;
         factorIndexListAlloc[fili+3] = dstSeqIndex.tensorSeqIndex;
 
-#if 0        
+#if 0
 printf("factorIndexListIndex=%d (%d, %d) (%d, %d, %d, %d)\n",
   factorIndexListIndex,
   srcTuple[0], srcTuple[1],
@@ -3247,6 +3259,7 @@ printf("factorIndexListIndex=%d (%d, %d) (%d, %d, %d, %d)\n",
       }
     }
     // garbage collection    
+    delete [] srcToDstTMap;
     delete [] dstArrayToTensorMap;
     delete [] localStart;
     delete [] localSize;
