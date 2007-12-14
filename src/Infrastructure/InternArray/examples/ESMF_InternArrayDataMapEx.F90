@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayDataMapEx.F90,v 1.6 2007/06/23 04:00:29 cdeluca Exp $
+! $Id: ESMF_InternArrayDataMapEx.F90,v 1.6.2.1 2007/12/14 20:25:33 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
       program ESMF_ArrayDataMapEx
 
 !------------------------------------------------------------------------------
-!x_EXAMPLE	String used by test script to count examples.
+!ESMF_not_working_EXAMPLE	String used by test script to count examples.
 !==============================================================================
 !BOC
 ! !PROGRAM: ESMF_ArrayDataMapEx - Array DataMap manipulation examples

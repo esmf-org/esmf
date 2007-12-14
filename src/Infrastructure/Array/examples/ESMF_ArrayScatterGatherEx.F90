@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherEx.F90,v 1.1.2.1 2007/12/12 06:08:48 theurich Exp $
+! $Id: ESMF_ArrayScatterGatherEx.F90,v 1.1.2.2 2007/12/14 20:25:29 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -11,7 +11,7 @@
 !==============================================================================
 
 !==============================================================================
-!EXAMPLE        String used by test script to count examples.
+!ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 
 program ESMF_ArrayScatterGatherEx

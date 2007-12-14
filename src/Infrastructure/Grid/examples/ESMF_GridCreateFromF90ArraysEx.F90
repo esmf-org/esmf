@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateFromF90ArraysEx.F90,v 1.1 2007/06/25 18:28:08 cdeluca Exp $
+! $Id: ESMF_GridCreateFromF90ArraysEx.F90,v 1.1.2.1 2007/12/14 20:25:32 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
 program ESMF_GridCreateEx
 
 !==============================================================================
-!EX_NOTWORKING_AMPLE        String used by test script to count examples.
+!ESMF_EX_NOTWORKING_AMPLE        String used by test script to count examples.
 !==============================================================================
 
 !  !PROGRAM: ESMF_GridCreateEx - Examples of Grid creation.

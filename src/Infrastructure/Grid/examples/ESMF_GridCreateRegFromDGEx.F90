@@ -1,5 +1,5 @@
 
-! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.6 2007/07/24 21:46:45 oehmke Exp $
+! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.6.2.1 2007/12/14 20:25:32 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -14,7 +14,7 @@
 program ESMF_GridCreateEx
 
 !==============================================================================
-!EXAMPLE        String used by test script to count examples.
+!ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 
 !BOE

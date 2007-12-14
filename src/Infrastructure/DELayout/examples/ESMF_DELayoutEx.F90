@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutEx.F90,v 1.14 2007/06/27 20:36:05 cdeluca Exp $
+! $Id: ESMF_DELayoutEx.F90,v 1.14.2.1 2007/12/14 20:25:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -11,7 +11,7 @@
 !==============================================================================
 
 !==============================================================================
-!EXAMPLE        String used by test script to count examples.
+!ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 
 program ESMF_DELayoutEx

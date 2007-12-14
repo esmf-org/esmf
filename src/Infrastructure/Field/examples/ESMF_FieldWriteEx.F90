@@ -13,7 +13,7 @@
       program ESMF_FieldWriteEx
 
 !-------------------------------------------------------------------------
-!EXremoveAMPLE        String used by test script to count examples.
+!ESMF_EXremoveAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
 !

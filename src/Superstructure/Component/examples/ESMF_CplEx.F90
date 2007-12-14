@@ -1,9 +1,9 @@
-! $Id: ESMF_CplEx.F90,v 1.27 2006/02/02 01:59:59 theurich Exp $
+! $Id: ESMF_CplEx.F90,v 1.27.4.1 2007/12/14 20:25:35 svasquez Exp $
 !
 ! Example/test code which shows Coupler Component calls.
 
 !-------------------------------------------------------------------------
-!EXAMPLE        String used by test script to count examples.
+!ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
 ! !PROGRAM: ESMF_CplEx.F90 - Coupler Component example

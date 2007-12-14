@@ -12,7 +12,7 @@
       program ESMF_ConfigOverviewEx
 
 !-------------------------------------------------------------------------
-!EXAMPLE        String used by test script to count examples.
+!ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 !
 ! !DESCRIPTION:

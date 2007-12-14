@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistEx.F90,v 1.1.2.3 2007/12/14 20:10:46 theurich Exp $
+! $Id: ESMF_ArrayRedistEx.F90,v 1.1.2.4 2007/12/14 20:25:29 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -11,7 +11,7 @@
 !==============================================================================
 
 !==============================================================================
-!EXAMPLE        String used by test script to count examples.
+!ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 
 program ESMF_ArrayRedistEx

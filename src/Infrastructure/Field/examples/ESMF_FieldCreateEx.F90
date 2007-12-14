@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.56 2007/11/20 17:09:29 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.1 2007/12/14 20:25:31 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
     program ESMF_FieldCreateEx
 
 !------------------------------------------------------------------------------
-!EXAMPLE        String used by test script to count examples.
+!ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
 ! !PROGRAM: ESMF_FieldCreateEx - Field creation
@@ -33,7 +33,7 @@
     type(ESMF_Grid) :: grid
     type(ESMF_DistGrid) :: distgrid
     type(ESMF_ArraySpec) :: arrayspec
-    type(ESMF_Array) :: array1, array2, array3
+    type(ESMF_Array) :: iarray1, iarray2
     type(ESMF_DELayout) :: layout
     type(ESMF_VM) :: vm
     !type(ESMF_RelLoc) :: relativelocation
@@ -94,18 +94,18 @@
 !   !  pointer to the old data array; the set call passes in the 
 !   !  pointer to the new array.
 
-    call ESMF_FieldGetArray(field1, array=array1, rc=rc)
+    call ESMF_FieldGetArray(field1, array=iarray1, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! The size of the data in the array still has to line up with the Grid
     ! and its decomposition.
 
-    array2 = ESMF_ArrayCreateFromGrid(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+    iarray2 = ESMF_ArrayCreateFromGrid(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
         rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_FieldSetArray(field1, array2, rc=rc)
+    call ESMF_FieldSetArray(field1, iarray2, rc=rc)
     print *, "Field example 2 returned"
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -138,25 +138,6 @@
      print *, "Field example 3 returned"
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!-------------------------------------------------------------------------
-!   ! Example 4:
-!   !
-!   !  The user can substitute another array created by ArrayCreate in field1.
-!   ! This example demonstrates some of the topology nature of a field
-!   ! default created through FieldCreate which internally calls
-!   ! ArrayCreateFromGrid which is done in example 2. This example
-!   ! makes it clear that field1's array has a computational region smaller
-!   ! than its exclusive region.
-    array3 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, staggerLoc=0, &
-            computationalEdgeLWidth=(/0,0/), computationalEdgeUWidth=(/-1,-1/), rc=rc)
-        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    call ESMF_FieldSetArray(field1, array3, rc=rc)
-    print *, "Field example 4 returned"
-
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
 
 !-------------------------------------------------------------------------
 !   ! Example 4:

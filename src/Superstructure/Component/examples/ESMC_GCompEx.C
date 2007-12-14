@@ -1,9 +1,9 @@
-// $Id: ESMC_GCompEx.C,v 1.22 2007/07/19 21:41:04 cdeluca Exp $
+// $Id: ESMC_GCompEx.C,v 1.22.2.1 2007/12/14 20:28:54 svasquez Exp $
 //
 // Example/test code which creates a new comp.
 
 //-------------------------------------------------------------------------
-// !EXAMPLE        String used by test script to count examples.
+// ESMF_EXAMPLE        String used by test script to count examples.
 //-------------------------------------------------------------------------
 
 
