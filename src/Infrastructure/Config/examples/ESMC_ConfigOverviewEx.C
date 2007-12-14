@@ -11,7 +11,7 @@
 //
 
 //-------------------------------------------------------------------------
-//EX______AMPLE        String used by test script to count examples.
+//ESMF_EX______AMPLE        String used by test script to count examples.
 //==============================================================================
 //
 // //DESCRIPTION:

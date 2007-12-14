@@ -1,9 +1,9 @@
-! $Id: ESMF_InternArrayCommEx.F90,v 1.6 2007/06/23 04:00:33 cdeluca Exp $
+! $Id: ESMF_InternArrayCommEx.F90,v 1.7 2007/12/14 20:49:08 svasquez Exp $
 !
 ! Example code which shows how to use Array Communication routines
 
 !-------------------------------------------------------------------------------
-!x_EXAMPLE        String used by test script to count examples.
+!ESMF_not workingEXAMPLE        String used by test script to count examples.
 !-------------------------------------------------------------------------------
 
 !BOP

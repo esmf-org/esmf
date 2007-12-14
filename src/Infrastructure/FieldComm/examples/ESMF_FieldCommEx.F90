@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.21 2007/08/30 05:06:33 cdeluca Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.22 2007/12/14 20:49:07 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
     program ESMF_FieldCommEx
 
 !------------------------------------------------------------------------------
-!EXremoveAMPLE        String used by test script to count examples.
+!ESMF_EXremoveAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
 ! !PROGRAM: ESMF_FieldCommEx - Field level communication routines

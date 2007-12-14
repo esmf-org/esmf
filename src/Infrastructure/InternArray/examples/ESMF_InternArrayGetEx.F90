@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayGetEx.F90,v 1.7 2007/03/31 05:51:12 cdeluca Exp $
+! $Id: ESMF_InternArrayGetEx.F90,v 1.8 2007/12/14 20:49:08 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
     program ESMF_ArrayGetEx
 
 !-------------------------------------------------------------------------------
-!x_EXAMPLE        String used by test script to count examples.
+!ESMF_NOTWORKING_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
 ! !PROGRAM: ESMF_ArrayGetEx - Examples of Array Usage

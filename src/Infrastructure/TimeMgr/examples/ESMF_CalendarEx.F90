@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.32 2007/03/31 05:51:24 cdeluca Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.33 2007/12/14 20:49:08 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
       program ESMF_CalendarEx
 
 !------------------------------------------------------------------------------
-!EXAMPLE        String used by test script to count examples.
+!ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
 ! !PROGRAM: ESMF_CalendarEx - Calendar creation examples
