@@ -1,4 +1,4 @@
-// $Id: ESMC_DCatEx.C,v 1.2.2.1 2007/12/14 20:28:54 svasquez Exp $
+// $Id: ESMC_DCatEx.C,v 1.2.2.2 2007/12/14 21:12:03 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -10,7 +10,7 @@
 //
 //==============================================================================
 //==============================================================================
-// ESMF_EXAMPLE        String used by test script to count examples.
+// ESMF_disable_EXAMPLE        String used by test script to count examples.
 //==============================================================================
 
 /*
