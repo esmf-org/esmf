@@ -1,7 +1,7 @@
-! $Id: ESMF_ArraySparseMatMulSTest.F90,v 1.11 2007/10/08 18:16:19 theurich Exp $
+! $Id: ESMF_ArraySparseMatMulSTest.F90,v 1.11.2.1 2007/12/14 19:45:13 svasquez Exp $
 !
 !-------------------------------------------------------------------------
-!SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !-------------------------------------------------------------------------
