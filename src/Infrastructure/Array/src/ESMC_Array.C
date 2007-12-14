@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.166 2007/12/13 06:43:34 theurich Exp $
+// $Id: ESMC_Array.C,v 1.167 2007/12/14 23:31:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.166 2007/12/13 06:43:34 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.167 2007/12/14 23:31:27 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1552,6 +1552,87 @@ SeqIndex Array::getSequenceIndexExclusive(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::getSequenceIndexPatch()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::getSequenceIndexPatch
+//
+// !INTERFACE:
+SeqIndex Array::getSequenceIndexPatch(
+//
+// !RETURN VALUE:
+//    SeqIndex sequence index
+//
+// !ARGUMENTS:
+//
+  int patch,                        // in - patch = {1,..., patchCount}
+  int *index,                       // in - index tuple within patch 
+                                    //    - basis min (not basis 0)
+  int *rc                           // out - return code
+  )const{
+//
+// !DESCRIPTION:
+//    Get sequential index - assuming index input to be basis 0 in patch region
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  
+  // initialize seqIndex
+  SeqIndex seqIndex;
+  seqIndex.decompSeqIndex = seqIndex.tensorSeqIndex = -1;
+
+  // prepare decompIndex for decomposed dimensions in the DistGrid order
+  int dimCount = distgrid->getDimCount();
+  int *decompIndex = new int[dimCount];
+  for (int i=0; i<dimCount; i++){
+    if (distgridToArrayMap[i] > 0){
+      // DistGrid dim associated with Array dim
+      decompIndex[i] = index[distgridToArrayMap[i]-1];
+    }else{
+      // DistGrid dim _not_ associated with Array dim
+      decompIndex[i] = distgrid->getMinIndexPDimPPatch()[(patch-1)*dimCount+i];
+      // use smallest seq index for replicated dims
+    }
+  }
+  // determine the sequentialized index for decomposed dimensions
+  int decompSeqIndex;
+  decompSeqIndex = distgrid->getSequenceIndexPatch(patch, decompIndex,
+    &localrc);  
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    return seqIndex;
+  seqIndex.decompSeqIndex = decompSeqIndex;
+  
+  // garbage collection
+  delete [] decompIndex;
+        
+  // determine the sequentialized index for tensor dimensions
+  int tensorSeqIndex = 0;             // reset
+  int tensorIndex = tensorCount - 1;  // reset
+  for (int jj=rank-1; jj>=0; jj--){
+    int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 for tensor
+    if (j==0){
+      // tensor dimension
+      // first time multiply with zero intentionally:
+      tensorSeqIndex *= undistUBound[tensorIndex] - undistLBound[tensorIndex]
+      + 1;
+      tensorSeqIndex += index[jj] - undistLBound[tensorIndex];
+      --tensorIndex;
+    }
+  }
+  ++tensorSeqIndex; // shift tensor sequentialized index to basis 1 !!!!
+  seqIndex.tensorSeqIndex = tensorSeqIndex;
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return seqIndex;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::setComputationalLWidth()"
 //BOPI
 // !IROUTINE:  ESMCI::Array::setComputationalLWidth
@@ -2855,7 +2936,8 @@ int Array::redistStore(
 //
   Array *srcArray,                      // in    - source Array
   Array *dstArray,                      // in    - destination Array
-  ESMC_RouteHandle **routehandle        // inout - handle to precomputed comm
+  ESMC_RouteHandle **routehandle,       // inout - handle to precomputed comm
+  InterfaceInt *srcToDstTransposeMap    // in    - mapping src -> dst dims
   ){    
 //
 // !DESCRIPTION:
@@ -2885,67 +2967,308 @@ int Array::redistStore(
       "- srcArray and dstArray must not be identical", &rc);
     return rc;
   }
-  // src and dst Arrays must have identical number of exclusive elements
-  int srcElementCount = 0; // init
-  const int *srcElementCountPPatch =
-    srcArray->distgrid->getElementCountPPatch();
-  for (int i=0; i<srcArray->distgrid->getPatchCount(); i++)
-    srcElementCount += srcElementCountPPatch[i];
-  int dstElementCount = 0; // init
-  const int *dstElementCountPPatch =
-    dstArray->distgrid->getElementCountPPatch();
-  for (int i=0; i<dstArray->distgrid->getPatchCount(); i++)
-    dstElementCount += dstElementCountPPatch[i];
-  if (srcElementCount != dstElementCount){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-      "- srcArray and dstArray must provide identical number of exclusive"
-      " elements", &rc);
-    return rc;
-  }
   
-  // implemented via sparseMatMul using identity matrix
+  // get the current VM and VM releated information
+  VM *vm = VM::getCurrent(&localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  int localPet = vm->getLocalPet();
+  int petCount = vm->getPetCount();
+
   ESMC_TypeKind typekind = srcArray->getTypekind();
-  const int *srcElementCountPDe = srcArray->distgrid->getElementCountPDe();
-  const int *srcArbSeqIndexCountPLocalDe =
-    srcArray->distgrid->getArbSeqIndexCountPLocalDe();
-  const int *srcLocalDeList = srcArray->delayout->getLocalDeList();
-  int srcLocalDeCount = srcArray->delayout->getLocalDeCount();
-  int factorListCount = 0;  // init
-  for (int i=0; i<srcLocalDeCount; i++)
-    factorListCount += srcElementCountPDe[srcLocalDeList[i]];
-  // set up factorIndexList
-  int *factorIndexListAlloc = new int[2*factorListCount*sizeof(int)];
-  int *extent = new int[2];
-  extent[0] = 2;
-  extent[1] = factorListCount;
-  InterfaceInt *factorIndexList =
-    new InterfaceInt(factorIndexListAlloc, 2, extent);
-  delete [] extent;
-  int jj = 0; // reset
-  for (int i=0; i<srcLocalDeCount; i++){
-    int de = srcLocalDeList[i];
-    int arbSeqIndexCount = srcArbSeqIndexCountPLocalDe[i];
-    if (arbSeqIndexCount==srcElementCountPDe[de]){
-      const int *srcArbSeqIndexListPLocalDe =
-        srcArray->distgrid->getArbSeqIndexListPLocalDe(i);
-      for (int j=0; j<arbSeqIndexCount; j++){
-        factorIndexListAlloc[2*jj] = factorIndexListAlloc[2*jj+1] =
-          srcArbSeqIndexListPLocalDe[j];
-        ++jj;
+  int factorListCount;
+  void *factorList;
+  InterfaceInt *factorIndexList;
+  int *factorIndexListAlloc;
+  
+  if (srcToDstTransposeMap == NULL){
+    // srcToDstTransposeMap not specified -> default mode
+    
+    // src and dst Arrays must have identical number of exclusive elements
+    int srcElementCount = 0; // init
+    const int *srcElementCountPPatch =
+      srcArray->distgrid->getElementCountPPatch();
+    for (int i=0; i<srcArray->distgrid->getPatchCount(); i++)
+      srcElementCount += srcElementCountPPatch[i];
+    int dstElementCount = 0; // init
+    const int *dstElementCountPPatch =
+      dstArray->distgrid->getElementCountPPatch();
+    for (int i=0; i<dstArray->distgrid->getPatchCount(); i++)
+      dstElementCount += dstElementCountPPatch[i];
+    if (srcElementCount != dstElementCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+        "- srcArray and dstArray must provide identical number of exclusive"
+        " elements", &rc);
+      return rc;
+    }
+  
+    // implemented via sparseMatMul using identity matrix
+    const int *srcElementCountPDe = srcArray->distgrid->getElementCountPDe();
+    const int *srcArbSeqIndexCountPLocalDe =
+      srcArray->distgrid->getArbSeqIndexCountPLocalDe();
+    const int *srcLocalDeList = srcArray->delayout->getLocalDeList();
+    int srcLocalDeCount = srcArray->delayout->getLocalDeCount();
+    factorListCount = 0;  // init
+    for (int i=0; i<srcLocalDeCount; i++)
+      factorListCount += srcElementCountPDe[srcLocalDeList[i]];
+    // set up factorIndexList
+    factorIndexListAlloc = new int[2*factorListCount*sizeof(int)];
+    int *extent = new int[2];
+    extent[0] = 2;
+    extent[1] = factorListCount;
+    factorIndexList = new InterfaceInt(factorIndexListAlloc, 2, extent);
+    delete [] extent;
+    int jj = 0; // reset
+    for (int i=0; i<srcLocalDeCount; i++){
+      int de = srcLocalDeList[i];
+      int arbSeqIndexCount = srcArbSeqIndexCountPLocalDe[i];
+      if (arbSeqIndexCount==srcElementCountPDe[de]){
+        const int *srcArbSeqIndexListPLocalDe =
+          srcArray->distgrid->getArbSeqIndexListPLocalDe(i);
+        for (int j=0; j<arbSeqIndexCount; j++){
+          factorIndexListAlloc[2*jj] = factorIndexListAlloc[2*jj+1] =
+            srcArbSeqIndexListPLocalDe[j];
+          ++jj;
+        }
+      }else{
+        int seqIndexOffset = 1; // reset, seqIndex is basis 1
+        for (int j=0; j<de; j++)
+          seqIndexOffset += srcElementCountPDe[j];
+        for (int j=0; j<srcElementCountPDe[de]; j++){
+          factorIndexListAlloc[2*jj] = factorIndexListAlloc[2*jj+1] =
+            seqIndexOffset + jj;
+          ++jj;
+        }
       }
-    }else{
-      int seqIndexOffset = 1; // reset, seqIndex is basis 1
-      for (int j=0; j<de; j++)
-        seqIndexOffset += srcElementCountPDe[j];
-      for (int j=0; j<srcElementCountPDe[de]; j++){
-        factorIndexListAlloc[2*jj] = factorIndexListAlloc[2*jj+1] =
-          seqIndexOffset + jj;
-        ++jj;
+    }  
+    
+  }else{
+    // srcToDstTransposeMap specified -> transpose mode
+    
+    // src and dst Arrays must be of same rank
+    int rank = srcArray->getRank();
+    if (rank != dstArray->getRank()){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+        "- in transpose mode srcArray and dstArray must be of same rank", &rc);
+      return rc;
+    }
+
+    // src and dst Arrays must be have same number of patches
+    int patchCount = srcArray->distgrid->getPatchCount();
+    if (patchCount != dstArray->distgrid->getPatchCount()){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+        "- in transpose mode srcArray and dstArray must have same number of"
+        " patches", &rc);
+      return rc;
+    }
+
+    // check srcToDstTransposeMap input
+    if (srcToDstTransposeMap->dimCount != 1){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- srcToDstTransposeMap must be of rank 1", &rc);
+      return rc;
+    }
+    if (srcToDstTransposeMap->extent[0] != rank){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- srcToDstTransposeMap must provide rank values", &rc);
+      return rc;
+    }
+    int *srcToDstTMap = new int[rank];
+    for (int i=0; i<rank; i++){
+      srcToDstTMap[i] = srcToDstTransposeMap->array[i] - 1; // shift to base 0
+      int j;
+      for (j=0; j<rank; j++)
+        if (srcToDstTransposeMap->array[j] == i+1) break;
+      if (j==rank){
+        // did not find (i+1) value in transpose map
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          "- srcToDstTransposeMap values must be unique and within range:"
+          " [1,..,rank].", &rc);
+        return rc;
       }
     }
-  }  
+    
+    // size of dims in src and dst Arrays must pairwise match in each patch
+    const int *srcArrayToDistGridMap = srcArray->getArrayToDistGridMap();
+    const int *dstArrayToDistGridMap = dstArray->getArrayToDistGridMap();
+    const int *srcMinIndexPDimPPatch =
+      srcArray->distgrid->getMinIndexPDimPPatch();
+    const int *dstMinIndexPDimPPatch =
+      dstArray->distgrid->getMinIndexPDimPPatch();
+    const int *srcMaxIndexPDimPPatch =
+      srcArray->distgrid->getMaxIndexPDimPPatch();
+    const int *dstMaxIndexPDimPPatch =
+      dstArray->distgrid->getMaxIndexPDimPPatch();
+    int srcDimCount = srcArray->distgrid->getDimCount();
+    int dstDimCount = dstArray->distgrid->getDimCount();
+    // prepare dstArrayToTensorMap
+    int *dstArrayToTensorMap = new int[rank];
+    int tensorIndex = 0;
+    for (int jj=0; jj<rank; jj++){
+      int j = dstArrayToDistGridMap[jj];  // j is dimIndex bas 1, or 0 undist.
+      if (j==0){
+        // tensor dimension
+        dstArrayToTensorMap[jj] = tensorIndex;
+        ++tensorIndex;
+      }
+    }
+    factorListCount = 0;
+    int *localStart = new int[patchCount];  // localPet's start index
+    int *localSize = new int[patchCount];   // localPet's number of elements
+    for (int i=0; i<patchCount; i++){
+      int patchFactorListCount = 1;
+      // prepare decomposition along last distributed dim in srcArray
+      //TODO: this assumes that srcArray has at least one distr. dim
+      int lastDimSize = srcMaxIndexPDimPPatch[i*srcDimCount+srcDimCount-1]
+        - srcMinIndexPDimPPatch[i*srcDimCount+srcDimCount-1] + 1;
+      int intervalSize = lastDimSize/petCount;
+      int extraElements = lastDimSize%petCount;
+      localStart[i] = srcMinIndexPDimPPatch[i*srcDimCount+srcDimCount-1];
+      localStart[i] += localPet * intervalSize;
+      localSize[i] = intervalSize;
+      if (localPet < extraElements){
+        localStart[i] += localPet;
+        localSize[i] += 1;
+      }
+#if 0
+fprintf(stderr, "%d start:%d, size:%d\n", localPet, localStart[i], localSize[i]);
+#endif
+      // check every patch
+      int srcTensorIndex = 0;
+      int dstTensorIndex = 0;
+      for (int jj=0; jj<rank; jj++){
+        int srcSize;
+        int dstSize;
+        int j = srcArrayToDistGridMap[jj];  // j is dimIndex bas 1, or 0 undist.
+        if (j){
+          // decomposed dimension 
+          --j;  // shift to basis 0
+          srcSize = srcMaxIndexPDimPPatch[i*srcDimCount+j]
+            - srcMinIndexPDimPPatch[i*srcDimCount+j] + 1;
+          if (j == srcDimCount-1)
+            patchFactorListCount *= localSize[i];
+          else
+            patchFactorListCount *= srcSize;
+        }else{
+          // tensor dimension
+          srcSize = srcArray->undistUBound[srcTensorIndex]
+            - srcArray->undistLBound[srcTensorIndex] + 1;
+          ++srcTensorIndex;
+          patchFactorListCount *= srcSize;
+        }
+        int jjj = srcToDstTMap[jj];         // src -> dst dimension mapping
+        j = dstArrayToDistGridMap[jjj];     // j is dimIndex bas 1, or 0 undist.
+        if (j){
+          // decomposed dimension 
+          --j;  // shift to basis 0
+          dstSize = dstMaxIndexPDimPPatch[i*dstDimCount+j]
+            - dstMinIndexPDimPPatch[i*dstDimCount+j] + 1;
+        }else{
+          // tensor dimension
+          dstTensorIndex = dstArrayToTensorMap[jjj];
+          dstSize = dstArray->undistUBound[dstTensorIndex]
+            - dstArray->undistLBound[dstTensorIndex] + 1;
+        }
+#if 0
+fprintf(stderr, "%d, %d\n", srcSize, dstSize);
+#endif
+        if (srcSize != dstSize){
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+            "- in transpose mode the size of srcArray and dstArray dimensions"
+            " must pairwise match", &rc);
+          return rc;
+        }
+      }
+      factorListCount += patchFactorListCount;
+    }
+#if 0
+fprintf(stderr, "factorListCount = %d\n", factorListCount);
+#endif
+    // set up factorIndexList
+    factorIndexListAlloc = new int[4*factorListCount*sizeof(int)];
+    int *extent = new int[2];
+    extent[0] = 4;
+    extent[1] = factorListCount;
+    factorIndexList = new InterfaceInt(factorIndexListAlloc, 2, extent);
+    delete [] extent;
+    // prepare to fill in factorIndexList elements
+    int factorIndexListIndex = 0; // reset
+    int *srcTuple = new int[rank];
+    int *srcTupleStart = new int[rank];
+    int *srcTupleEnd = new int[rank];
+    int *dstTuple = new int[rank];
+    // fill in factorIndexList elements
+    for (int i=0; i<patchCount; i++){
+      // prepare for multi-dim loop through dims in srcArray patch
+      int tensorIndex = 0;  // reset
+      for (int jj=0; jj<rank; jj++){
+        int j = srcArrayToDistGridMap[jj];  // j is dimIndex bas 1, or 0 undist.
+        if (j){
+          // decomposed dimension 
+          --j;  // shift to basis 0
+          if (j == srcDimCount-1){
+            srcTupleStart[jj] =localStart[i];
+            srcTuple[jj] = srcTupleStart[jj];
+            srcTupleEnd[jj] = localStart[i] + localSize[i];
+          }else{
+            srcTupleStart[jj] = srcMinIndexPDimPPatch[i*srcDimCount+j];
+            srcTuple[jj] = srcTupleStart[jj];
+            srcTupleEnd[jj] = srcMaxIndexPDimPPatch[i*srcDimCount+j] + 1;
+          }
+        }else{
+          // tensor dimension
+          srcTupleStart[jj] = srcArray->undistLBound[tensorIndex];
+          srcTuple[jj] = srcTupleStart[jj];
+          srcTupleEnd[jj] = srcArray->undistUBound[tensorIndex] + 1;
+          ++tensorIndex;
+        }
+      }
+      // multi-dim loop through dims in srcArray patch
+      while (srcTuple[rank-1] < srcTupleEnd[rank-1]){
+        // srcTuple --srcToDstTMap--> dstTuple
+        for (int j=0; j<rank; j++)
+          dstTuple[srcToDstTMap[j]] = srcTuple[j];
+        // determine seq indices
+        SeqIndex srcSeqIndex = srcArray->getSequenceIndexPatch(i+1, srcTuple);
+        SeqIndex dstSeqIndex = dstArray->getSequenceIndexPatch(i+1, dstTuple);
+        // fill this info into factorIndexList
+        int fili = 4*factorIndexListIndex;
+        factorIndexListAlloc[fili]   = srcSeqIndex.decompSeqIndex;
+        factorIndexListAlloc[fili+1] = srcSeqIndex.tensorSeqIndex;
+        factorIndexListAlloc[fili+2] = dstSeqIndex.decompSeqIndex;
+        factorIndexListAlloc[fili+3] = dstSeqIndex.tensorSeqIndex;
+
+#if 0
+printf("factorIndexListIndex=%d (%d, %d) (%d, %d, %d, %d)\n",
+  factorIndexListIndex,
+  srcTuple[0], srcTuple[1],
+  srcSeqIndex.decompSeqIndex, srcSeqIndex.tensorSeqIndex,
+  dstSeqIndex.decompSeqIndex, dstSeqIndex.tensorSeqIndex);
+#endif   
+
+        ++factorIndexListIndex;        
+
+        // multi-dim index increment
+        ++srcTuple[0];
+        for (int j=0; j<rank-1; j++){
+          if (srcTuple[j] == srcTupleEnd[j]){
+            srcTuple[j] = srcTupleStart[j];  // reset
+            ++srcTuple[j+1];
+          }
+        }
+      }
+    }
+    // garbage collection    
+    delete [] srcToDstTMap;
+    delete [] dstArrayToTensorMap;
+    delete [] localStart;
+    delete [] localSize;
+    delete [] srcTuple;
+    delete [] srcTupleEnd;
+    delete [] dstTuple;
+  }
+  
   // load type specific factorList with "1"
-  void *factorList;  
   if (typekind == ESMC_TYPEKIND_R4){
     ESMC_R4 *factorListT = new ESMC_R4[factorListCount];
     for (int i=0; i<factorListCount; i++)

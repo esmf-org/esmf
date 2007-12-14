@@ -1,6 +1,9 @@
-% $Id: Array_rest.tex,v 1.5 2007/03/06 00:05:33 theurich Exp $
+% $Id: Array_rest.tex,v 1.6 2007/12/14 23:31:26 theurich Exp $
 
 %\subsubsection{Restrictions and Future Work}
 \begin{itemize}
+\item The Fortran array pointer {\tt farrayPtr} obtainable from
+{\tt ESMF\_ArrayGet()} is not suitable to be used in Fortran {\tt deallocate()}
+calls. Dealocation of user allocated Fortran arrays must use the appropriate variable returned by the Fortran {\tt allocate()} expression.
 \item Non-blocking communication, PET-based and DE-based, has not been formulated or implemented.
 \end{itemize}

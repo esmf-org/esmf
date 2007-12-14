@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.84 2007/11/29 22:06:53 theurich Exp $
+// $Id: ESMC_Array.h,v 1.85 2007/12/14 23:31:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -183,6 +183,7 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     int getLinearIndexExclusive(int localDe, int *index, int *rc=NULL) const;
     SeqIndex getSequenceIndexExclusive(int localDe, int *index,
       int *rc=NULL) const;
+    SeqIndex getSequenceIndexPatch(int patch, int *index, int *rc=NULL) const;
     void setStaggerLoc(int staggerLocArg){
       for (int i=0; i<tensorElementCount; i++) staggerLoc[i] = staggerLocArg;
     }
@@ -211,7 +212,7 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     int scatter(void *array, ESMC_TypeKind typekind, int rank,
       int *counts, int *patch, int rootPet, VM *vm);
     static int redistStore(Array *srcArray, Array *dstArray,
-      ESMC_RouteHandle **routehandle);
+      ESMC_RouteHandle **routehandle, InterfaceInt *srcToDstTransposeMap);
     static int redist(Array *srcArray, Array *dstArray,
       ESMC_RouteHandle **routehandle, ESMC_Logical checkflag=ESMF_FALSE);
     static int redistRelease(ESMC_RouteHandle *routehandle);
