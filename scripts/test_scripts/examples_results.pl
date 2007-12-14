@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: examples_results.pl,v 1.3 2007/10/26 19:26:39 svasquez Exp $
+# $Id: examples_results.pl,v 1.3.2.1 2007/12/14 20:27:25 svasquez Exp $
 # This subroutine is called at the end of the examples, "check_examples" and "check_results" targets.
 # The purpose is to give the user the results of running the examples.
 # The results are either complete results or a summary.
@@ -30,8 +30,8 @@ use File::Find;
 	}	
 	# Get all example files
 	@ex_files=grep (/Ex/, @all_files);
-	# Find the example files with the "!EXAMPLE" string
-	# grep for "!EXAMPLE"
+	# Find the example files with the "ESMF_EXAMPLE" string
+	# grep for "ESMF_EXAMPLE"
 	$count=0;
 	$ex_count=0;
 	foreach $file ( @ex_files) {
@@ -40,7 +40,7 @@ use File::Find;
 			push(file_lines, $line);
 			}
 			close ($file);
-			$count=grep ( /!EXAMPLE/, @file_lines);
+			$count=grep ( /ESMF_EXAMPLE/, @file_lines);
 			if ($count != 0) {
 				push (act_ex_files, $file);
                                         $ex_count=$ex_count + 1;
