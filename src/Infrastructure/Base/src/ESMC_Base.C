@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.90 2007/12/12 14:19:32 rokuingh Exp $
+// $Id: ESMC_Base.C,v 1.91 2007/12/17 15:45:26 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.90 2007/12/12 14:19:32 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.91 2007/12/17 15:45:26 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -2617,13 +2617,13 @@ if (count) {
 
   attCount = *attpackNum;
 
-  sprintf(msgbuf, "   Number of Attributes in the Attribute Package: %d\n", *attpackNum);
+  sprintf(msgbuf, " Attribute package contains %d attributes.\n", *attpackNum);
   printf(msgbuf);
-    // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+  ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   for (i=0; i<attCount; i++) {
       sprintf(msgbuf, " Attr %d: ", i);
       printf(msgbuf);
-        // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+      ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
       attpackList[i]->ESMC_Print();
   }
   
@@ -2887,50 +2887,19 @@ if (count) {
   rc = ESMC_RC_NOT_IMPL;
 
   // print name
-  if (tk != ESMF_NOKIND) 
-      sprintf(msgbuf, "name '%s',  typekind %s \n", 
-              attrName,  ESMC_TypeKindString(tk));
-  else
-      sprintf(msgbuf, "name '%s'\n",  attrName);
+  sprintf(msgbuf, "name: %s\n",  attrName);
   printf(msgbuf);
-  //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+  ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   
-  // print convention
-  if (tk != ESMF_NOKIND) 
-      sprintf(msgbuf, "convention '%s',  typekind %s \n", 
-              attrConvention,  ESMC_TypeKindString(tk));
-  else
-      sprintf(msgbuf, "convention '%s'\n",  attrConvention);
-  printf(msgbuf);
-  //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
-  
-  // print purpose
-  if (tk != ESMF_NOKIND) 
-      sprintf(msgbuf, "purpose '%s',  typekind %s \n", 
-              attrPurpose,  ESMC_TypeKindString(tk));
-  else
-      sprintf(msgbuf, "purpose '%s'\n",  attrPurpose);
-  printf(msgbuf);
-  //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
-  
-  // print object
-  if (tk != ESMF_NOKIND) 
-      sprintf(msgbuf, "object '%s',  typekind %s \n", 
-              attrObject,  ESMC_TypeKindString(tk));
-  else
-      sprintf(msgbuf, "object '%s'\n",  attrObject);
-  printf(msgbuf);
-  //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
-
   // print items if there are any
   if (items <= 0) {
-      printf("\n");
-      //ESMC_LogDefault.ESMC_LogWrite("\n", ESMC_LOG_INFO);
+      printf("         value: \n");
+      ESMC_LogDefault.ESMC_LogWrite("         value: \n", ESMC_LOG_INFO);
   }
 
   if (items == 1) {
-      printf(", value: ");
-      //ESMC_LogDefault.ESMC_LogWrite(", value: ", ESMC_LOG_INFO);
+      printf("         value: ");
+      ESMC_LogDefault.ESMC_LogWrite(", value: ", ESMC_LOG_INFO);
              if (tk == ESMC_TYPEKIND_I4)
                  sprintf(msgbuf, "%d\n", vi); 
              else if (tk == ESMC_TYPEKIND_I8)
@@ -2949,34 +2918,49 @@ if (count) {
                  return rc;
              }
       printf(msgbuf);
-      //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+      ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   }
 
   if (items > 1) { 
-      sprintf(msgbuf, ", %d items, values:\n", items);
+      sprintf(msgbuf, "         %d items, values:\n", items);
       printf(msgbuf);
-      //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+      ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
       for (int i=0; i<items; i++) {
                 if (tk == ESMC_TYPEKIND_I4) {
-                    sprintf(msgbuf, "\t item %d: %d\n", i, vip[i]); 
+                    sprintf(msgbuf, "           \t item %d: %d\n", i, vip[i]); 
                 } else if (tk == ESMC_TYPEKIND_I8) {
-                    sprintf(msgbuf, "\t item %d: %ld\n", i, vlp[i]); 
+                    sprintf(msgbuf, "           \t item %d: %ld\n", i, vlp[i]); 
                 } else if (tk == ESMC_TYPEKIND_R4) {
-                    sprintf(msgbuf, "\t item %d: %f\n", i, vfp[i]); 
+                    sprintf(msgbuf, "           \t item %d: %f\n", i, vfp[i]); 
                 } else if (tk == ESMC_TYPEKIND_R8) {
-                    sprintf(msgbuf, "\t item %d: %g\n", i, vdp[i]); 
+                    sprintf(msgbuf, "           \t item %d: %g\n", i, vdp[i]); 
                 } else if (tk == ESMC_TYPEKIND_LOGICAL) {
-                    sprintf(msgbuf, "\t item %d: %s\n", i,
+                    sprintf(msgbuf, "           \t item %d: %s\n", i,
                       ESMC_LogicalString(vbp[i]));
                 } else{
                     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
-                             "\t unknown value", &rc);
+                             "           \t unknown value", &rc);
                     return rc;
                 }
 		printf(msgbuf);
       }
-      //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+      ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   }
+
+  // print convention
+  sprintf(msgbuf, "         convention: %s\n",  attrConvention);
+  printf(msgbuf);
+  ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+  
+  // print purpose
+  sprintf(msgbuf, "         purpose: %s\n",  attrPurpose);
+  printf(msgbuf);
+  ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+  
+  // print object
+  sprintf(msgbuf, "         object: %s\n",  attrObject);
+  printf(msgbuf);
+  ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
 
   return ESMF_SUCCESS;
 
