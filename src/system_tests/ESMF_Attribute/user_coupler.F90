@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.1 2007/12/12 15:17:31 rokuingh Exp $
+! $Id: user_coupler.F90,v 1.2 2007/12/17 15:44:36 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -82,8 +82,8 @@ module user_coupler
 
     call ESMF_StateGet(importState, itemcount=imp_items, rc=rc)
     call ESMF_StateGet(exportState, itemcount=exp_items, rc=rc)
-    print *, 'Import state has ', imp_items, ' items' 
-    print *, 'Export state has ', exp_items, ' items' 
+    !print  *, 'Import state has ', imp_items, ' items' 
+    !print  *, 'Export state has ', exp_items, ' items' 
 
     ! Need to reconcile import and export states
     call ESMF_CplCompGet(comp, vm=vm, rc=status)
@@ -100,14 +100,15 @@ module user_coupler
     call ESMF_StateGetAttributeInfo(exportState, "forward_init", rc=forward_init)
     call ESMF_StateGetAttributeInfo(exportState, "backward_init", rc=backward_init)
 
-  ! Forward coupling initialization
-  if (forward_init .eq. ESMF_SUCCESS) then
-    !woopee!
-  endif
-  ! Backward coupling initialization
-  if (backward_init .eq. ESMF_SUCCESS) then
-    !woopee!
-  endif
+    ! Forward coupling initialization
+    if (forward_init .eq. ESMF_SUCCESS) then
+      !woopee!
+    endif
+    
+    ! Backward coupling initialization
+    if (backward_init .eq. ESMF_SUCCESS) then
+      !woopee!
+    endif
  
     rc = ESMF_SUCCESS
     return
@@ -134,6 +135,7 @@ module user_coupler
     type(ESMF_VM)               :: vm
     integer                     :: forward_run, backward_run, status, imp_items, exp_items, &
                                    myPet, petCount
+    character(len=ESMF_MAXSTR)  :: name, value, conv, purp 
 
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -143,8 +145,8 @@ module user_coupler
 
     call ESMF_StateGet(importState, itemcount=imp_items, rc=rc)
     call ESMF_StateGet(exportState, itemcount=exp_items, rc=rc)
-    print *, 'Import state has ', imp_items, ' items' 
-    print *, 'Export state has ', exp_items, ' items' 
+    !print  *, 'Import state has ', imp_items, ' items' 
+    !print  *, 'Export state has ', exp_items, ' items' 
 
     ! Need to reconcile import and export states
     call ESMF_CplCompGet(comp, vm=vm, rc=status)
@@ -164,9 +166,25 @@ module user_coupler
     if (forward_run .eq. ESMF_SUCCESS) then
       !woopee!
     endif
+    
     ! If this is backward coupling
     if (backward_run .eq. ESMF_SUCCESS) then
-      !woopee!
+      conv = 'ESG-CDP'  
+      purp = 'general'
+      name = 'organization'
+      value = 'NCAR'
+      call ESMF_StateSetAttPack(exportState, name, value, convention=conv, purpose=purp, rc=rc)
+      if (status .ne. ESMF_SUCCESS) goto 20
+      
+      if (myPet .eq. 0) then
+        conv = 'ESG-CDP'
+        purp = 'general'
+      
+        print *, 'Write the Attpack from the second run of the coupler.'
+    
+        call ESMF_StateWriteAttPack(exportState, convention=conv, purpose=purp, rc=rc)
+        if (status .ne. ESMF_SUCCESS) goto 20
+      endif
     endif
 
     rc = ESMF_SUCCESS

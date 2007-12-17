@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.1 2007/12/12 15:18:09 rokuingh Exp $
+! $Id: user_model1.F90,v 1.2 2007/12/17 15:44:36 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -106,28 +106,57 @@ module user_model1
 
     ! Local variables
     type(ESMF_VM)               :: vm
-    integer                     :: petCount, backward_run, status
-            
+    integer                     :: petCount, backward_run, status, myPet
+    character(len=ESMF_MAXSTR)  :: name, value, conv, purp        
+    
     ! Initialize return code
     rc = ESMF_SUCCESS
 
     ! Determine petCount
     call ESMF_GridCompGet(comp, vm=vm, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_VMGet(vm, petCount=petCount, rc=status)
+    call ESMF_VMGet(vm, petCount=petCount, localPet=myPet, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
 
     ! Get the direction of the run
     call ESMF_StateGetAttributeInfo(importState, "backward_run", rc=backward_run)
+    if (status .ne. ESMF_SUCCESS) goto 20
 
     ! if this is the forward interpolation
     if (backward_run .ne. ESMF_SUCCESS) then
-      !woopee!
+      conv = 'ESG-CDP'  
+      purp = 'general'
+      name = 'name'
+      value = 'State attribute package'
+      call ESMF_StateSetAttPack(importState, name, value, convention=conv, purpose=purp, rc=rc)
+      if (status .ne. ESMF_SUCCESS) goto 20
+      
+      if (myPet .eq. 0) then
+        print *, 'Write the Attpack from the first run of component 1.'
+    
+        call ESMF_StateWriteAttPack(importState, convention=conv, purpose=purp, rc=rc)
+        if (status .ne. ESMF_SUCCESS) goto 20
+      endif
     endif
 
     ! if this is the backward interpolation check error
     if (backward_run .eq. ESMF_SUCCESS) then
-      !woopee!
+      conv = 'ESG-CDP'  
+      purp = 'general'
+      name = 'discipline'
+      value = 'Sir, Yes! Sir.'
+      call ESMF_StateSetAttPack(importState, name, value, convention=conv, purpose=purp, rc=rc)
+      if (status .ne. ESMF_SUCCESS) goto 20
+      
+      if (myPet .eq. 0) then
+        conv = 'ESG-CDP'
+        purp = 'general'
+      
+        print *, 'Write the Attpack from the second run of component 1.'
+    
+        call ESMF_StateWriteAttPack(importState, convention=conv, purpose=purp, rc=rc)
+        if (status .ne. ESMF_SUCCESS) goto 20
+      endif
     endif
 
     rc = ESMF_SUCCESS

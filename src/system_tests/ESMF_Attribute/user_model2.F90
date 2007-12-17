@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.1 2007/12/12 15:18:23 rokuingh Exp $
+! $Id: user_model2.F90,v 1.2 2007/12/17 15:44:36 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -48,7 +48,7 @@ module user_model2
       ESMF_SINGLEPHASE, rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    print *, "Registered Initialize, Run, and Finalize routines"
+    !print *, "Registered Initialize, Run, and Finalize routines"
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
