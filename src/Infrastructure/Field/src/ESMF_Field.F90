@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.280 2007/12/13 17:39:54 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.281 2007/12/18 16:06:03 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -176,6 +176,10 @@
    public ESMF_FieldGetAttributeCount  ! number of attribs
    public ESMF_FieldGetAttributeInfo   ! get type, length by name or number
 
+   public ESMF_FieldCreateAttPack      ! Attribute packages
+   public ESMF_FieldSetAttPack         ! Attribute packages
+   public ESMF_FieldWriteAttPack       ! Attribute packages
+
    public ESMF_FieldValidate           ! Check internal consistency
    public ESMF_FieldPrint              ! Print contents of a Field
 
@@ -202,7 +206,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.280 2007/12/13 17:39:54 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.281 2007/12/18 16:06:03 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -3035,6 +3039,253 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldSetCharAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldCreateAttPack"
+!BOPI
+! !IROUTINE: ESMF_FieldCreateAttPack - Setup the attribute package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldCreateAttPack()
+      subroutine ESMF_FieldCreateAttPack(field, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in), optional :: convention
+      character (len = *), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Sets up the attribute package for the {\tt field}.
+!     The attribute package defines the convention, purpose, and object type of the three 
+!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!      An {\tt ESMF\_Field} object.
+!     \item [convention]
+!      The convention of the attribute package.
+!     \item [purpose]
+!      The purpose of the attribute package.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                           ! Error status
+      character(ESMF_MAXSTR) :: name1, name2, name3, name4
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
+      call ESMF_FieldValidate(field, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+
+      fobject = 'field'
+
+      name1 = 'longname'
+      name2 = 'shortname'
+      name3 = 'units'
+      name4 = 'coordinates'
+
+      call c_ESMC_CreateAttPack(field%ftypep%base, name1, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_CreateAttPack(field%ftypep%base, name2, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_CreateAttPack(field%ftypep%base, name3, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_CreateAttPack(field%ftypep%base, name4, fconvention, &
+        fpurpose, fobject, localrc)
+
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldCreateAttPack
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSetAttPack"
+!BOPI
+! !IROUTINE: ESMF_FieldSetAttPack - Setup the attribute package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldSetAttPack()
+      subroutine ESMF_FieldSetAttPack(field, name, value, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character(ESMF_MAXSTR), intent(in) :: name
+      character(ESMF_MAXSTR), intent(in) :: value
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Sets an attribute the attribute package for the {\tt field}.
+!     The attribute package defines the convention, purpose, and object type of the three 
+!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!      An {\tt ESMF\_Field} object.
+!     \item [name]
+!      The name of the attribute to be set.
+!     \item [value]
+!      The value of the attribute to be set.
+!     \item [convention]
+!      The convention of the attribute package.
+!     \item [purpose]
+!      The purpose of the attribute package.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                           ! Error status
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
+
+      call ESMF_FieldValidate(field, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'field'
+
+      call c_ESMC_SetAttPack(field%ftypep%base, name, value, fconvention, &
+        fpurpose, fobject, localrc)
+        
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldSetAttPack
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldWriteAttPack"
+!BOPI
+! !IROUTINE: ESMF_FieldWriteAttPack - Print the attribute package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldWriteAttPack()
+      subroutine ESMF_FieldWriteAttPack(field, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in), optional :: convention
+      character (len = *), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Print the attribute package for the {\tt field}.
+!     The attribute package defines the convention, purpose, and object type of the three 
+!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!      An {\tt ESMF\_Field} object.
+!     \item [convention]
+!      The convention of the attribute package.
+!     \item [purpose]
+!      The purpose of the attribute package.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                           ! Error status
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
+
+      call ESMF_FieldValidate(field, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'field'
+
+      call c_ESMC_WriteAttPack(field%ftypep%base, fconvention, &
+        fpurpose, fobject, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldWriteAttPack
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
