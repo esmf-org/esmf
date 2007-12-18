@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.2 2007/12/17 15:44:36 rokuingh Exp $
+! $Id: user_model1.F90,v 1.3 2007/12/18 16:05:09 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -106,8 +106,9 @@ module user_model1
 
     ! Local variables
     type(ESMF_VM)               :: vm
+    type(ESMF_Field)            :: field
     integer                     :: petCount, backward_run, status, myPet
-    character(len=ESMF_MAXSTR)  :: name, value, conv, purp        
+    character(len=ESMF_MAXSTR)  :: name, value, conv, purp, fconv, fpurp   
     
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -141,6 +142,7 @@ module user_model1
 
     ! if this is the backward interpolation check error
     if (backward_run .eq. ESMF_SUCCESS) then
+      ! state stuff
       conv = 'ESG-CDP'  
       purp = 'general'
       name = 'discipline'
@@ -148,13 +150,31 @@ module user_model1
       call ESMF_StateSetAttPack(importState, name, value, convention=conv, purpose=purp, rc=rc)
       if (status .ne. ESMF_SUCCESS) goto 20
       
+      ! field stuff
+      fconv = 'netCDF'
+      fpurp = 'basic'
+      name = 'longname'
+      value = 'precipitation'
+      
+      field = ESMF_FieldCreateEmpty("field1", rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+      
+      call ESMF_FieldCreateAttPack(field, convention=fconv, purpose=fpurp, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+      
+      call ESMF_FieldSetAttPack(field, name, value, convention=fconv, purpose=fpurp, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+      
       if (myPet .eq. 0) then
         conv = 'ESG-CDP'
         purp = 'general'
       
-        print *, 'Write the Attpack from the second run of component 1.'
-    
+        print *, 'Write the State Attpack from the second run of component 1.'
         call ESMF_StateWriteAttPack(importState, convention=conv, purpose=purp, rc=rc)
+        if (status .ne. ESMF_SUCCESS) goto 20
+        
+        print *, 'Write the Field Attpack from the second run of component 1.'
+        call ESMF_FieldWriteAttPack(field, convention=fconv, purpose=fpurp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
       endif
     endif
