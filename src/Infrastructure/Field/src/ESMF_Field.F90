@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.281 2007/12/18 16:06:03 rokuingh Exp $
+! $Id: ESMF_Field.F90,v 1.282 2007/12/20 21:33:44 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -206,7 +206,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.281 2007/12/18 16:06:03 rokuingh Exp $'
+      '$Id: ESMF_Field.F90,v 1.282 2007/12/20 21:33:44 feiliu Exp $'
 
 !==============================================================================
 !
@@ -3412,8 +3412,8 @@
       type(ESMF_FieldType), pointer :: ftypep
       type(ESMF_StaggerLoc) :: staggerloc
       character(len=ESMF_MAXSTR) :: msgbuf
-      integer :: exclLBounds(ESMF_MAXGRIDDIM)  ! exclusive grid lower bounds
-      integer :: exclUBounds(ESMF_MAXGRIDDIM)  ! exclusive grid upper bounds
+      integer :: exclLBounds(ESMF_MAXDIM)  ! exclusive grid lower bounds
+      integer :: exclUBounds(ESMF_MAXDIM)  ! exclusive grid upper bounds
       integer :: maplist(ESMF_MAXDIM)          ! mapping between them
       integer :: otheraxes(ESMF_MAXDIM)        ! counts for non-grid dims
       integer :: gridrank, arrayrank
