@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.22 2007/11/28 22:14:39 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.23 2007/12/21 17:03:33 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -217,7 +217,8 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
                   char *buffer,          // in - byte stream to read
                   int *offset);          // inout - original offset, updated to point 
 
-  
+  // attributes
+  int attributeset(char *name, ESMC_TypeKind tk, int count, void *value);
 
   // create fully formed grid
  static Grid *create(int nameLen,                                // (in)

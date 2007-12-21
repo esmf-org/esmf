@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.38 2007/12/05 21:09:32 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.39 2007/12/21 17:03:34 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.38 2007/12/05 21:09:32 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.39 2007/12/21 17:03:34 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -3669,7 +3669,41 @@ int setDefaultsLUA(
 }
 //-----------------------------------------------------------------------------
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::attributeset()"
+//BOPI
+// !IROUTINE:  ESMCI::Grid::serialize - Turn Grid into a byte stream
+//
+// !INTERFACE:
+int Grid::attributeset(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+  char *name,       // in - attribute name
+  ESMC_TypeKind tk, // in - typekind
+  int count,        // in - number of values
+  void *value) {    // in - attribute value                         
+//
+// !DESCRIPTION:
+//    Turn info in grid class into a stream of bytes.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
+  localrc = ESMC_Base::ESMC_AttributeSet(name, tk, count, value);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+    
+
+// return success
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
 
 
 

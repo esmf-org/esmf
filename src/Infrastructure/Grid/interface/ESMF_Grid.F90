@@ -144,7 +144,7 @@ public  ESMF_DefaultFlag
   public operator(.eq.), operator(.ne.) 
   public ESMF_ArrayCreateFromGrid
 
-
+  public ESMF_GridSetInt4Attr
 
 ! - ESMF-internal methods:
   public ESMF_GridGetInit  
@@ -154,7 +154,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47 2007/11/19 23:12:28 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.48 2007/12/21 17:03:33 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -8972,5 +8972,111 @@ endif
 
     end subroutine ESMF_GridLUADefault
 
-      end module ESMF_GridMod
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridSetAttribute - Set an attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_GridSetAttribute(grid, name, <value argument>, rc)
+!
+! !ARGUMENTS:
+!     type(ESMF_Grid), intent(inout) :: grid  
+!     character (len = *), intent(in) :: name
+!     <value argument>, see below for supported values
+!     integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Attaches an attribute to the {\tt grid}.
+!     The attribute has a {\tt name} and either a {\tt value} or a 
+!     {\tt valueList}.
+!     Supported values for the <value argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in) :: value
+!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(in) :: valueList
+!     \item integer(ESMF\_KIND\_I8), intent(in) :: value
+!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(in) :: valueList
+!     \item real (ESMF\_KIND\_R4), intent(in) :: value
+!     \item real (ESMF\_KIND\_R4), dimension(:), intent(in) :: valueList
+!     \item real (ESMF\_KIND\_R8), intent(in) :: value
+!     \item real (ESMF\_KIND\_R8), dimension(:), intent(in) :: valueList
+!     \item type(ESMF\_Logical), intent(in) :: value
+!     \item type(ESMF\_Logical), dimension(:), intent(in) :: valueList
+!     \item character (len = *), intent(in), value
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [<value argument>]
+!           The value of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetInt4Attr"
+
+!BOPI
+! !IROUTINE: ESMF_GridSetAttribute - Set a 4-byte integer attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridSetAttribute()
+      subroutine ESMF_GridSetInt4Attr(grid, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(inout) :: grid  
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I4), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a 4-byte integer attribute to the {\tt grid}.
+!      The attribute has a {\tt name} and a {\tt value}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [value]
+!           The integer value of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc 
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
+      call c_ESMC_GridAttributeSetValue(grid, name, &
+        ESMF_TYPEKIND_I4, 1, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridSetInt4Attr
+
+!------------------------------------------------------------------------------
+
+
+end module ESMF_GridMod
 

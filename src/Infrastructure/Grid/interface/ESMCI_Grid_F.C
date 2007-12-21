@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.25 2007/12/13 19:38:22 oehmke Exp $
+// $Id: ESMCI_Grid_F.C,v 1.26 2007/12/21 17:03:33 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -1356,6 +1356,55 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Attribute methods
+//-----------------------------------------------------------------------------
+
+
+  void FTN(c_esmc_gridattributesetvalue)(ESMCI::Grid **grid,char *name,ESMC_TypeKind *tk,
+      int *count,void *value,int *rc,int nlen) {
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridattributesetvalue()"
+
+  int status;
+  char *cname;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!grid) {
+    if (rc) *rc = ESMF_FAILURE;
+    return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cname = ESMC_F90toCstring(name, nlen);
+  if (!cname) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // Set the attribute on the object.
+  *rc = (*grid)->attributeset(cname, *tk, *count, value);
+
+  delete [] cname;
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}  // end c_ESMC_AttributeSetValue
 
 
   ///////////////////////////////////////////////////////////////////////////////////
@@ -1385,5 +1434,3 @@ extern "C" {
   
 #undef  ESMC_METHOD
 }
-
-
