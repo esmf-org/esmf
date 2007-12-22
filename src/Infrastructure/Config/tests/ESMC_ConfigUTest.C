@@ -1,4 +1,4 @@
-// $Id: ESMC_ConfigUTest.C,v 1.2 2007/12/11 15:29:05 rosalind Exp $
+// $Id: ESMC_ConfigUTest.C,v 1.3 2007/12/22 23:33:08 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -27,7 +27,7 @@ int main(void){
 
   ESMC_Config* cf;              // ESMC_Config object
   char* fileName = "ESMF_Resource_File_Sample.rc";                   // file name
-  char* fileName2= "ESMF_Resource_File_Sample2.rc";                   // file name
+  char* fileName2= "ESMF_Resource_File_Sample2.rc";                  // file name
   char name[80];
   char failMsg[80];
   int result = 0;
@@ -38,7 +38,6 @@ int main(void){
   ESMC_TestStart(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
-
   //----------------------------------------------------------------------------
   //NEX_UTest
   rc = ESMF_RC_NOT_IMPL;
@@ -63,7 +62,19 @@ int main(void){
   rc = ESMF_RC_NOT_IMPL;
   strcpy(name, "ConfigLoadFile Unit test \0");
   strcpy(failMsg, "Did not return ESMF_SUCCESS \0");
-  rc = ESMC_ConfigLoadFile(cf, fileName2, ESMC_ArgLast);
+  rc = ESMC_ConfigLoadFile(cf, fileName2,  ESMC_ArgLast);
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+ //----------------------------------------------------------------------------
+  //NEX_UTest
+  //Load resource file into memory - set optional argument unique to .true.
+  rc = ESMF_RC_NOT_IMPL;
+  unique = 1;
+  strcpy(name, "ConfigLoadFile Unit test - optional arg. \0");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS \0");
+  rc = ESMC_ConfigLoadFile(cf, fileName2, ESMCI_ConfigArgUniqueID,
+                            unique, ESMC_ArgLast);
   ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
  
@@ -76,7 +87,8 @@ int main(void){
   rc = ESMF_RC_NOT_IMPL;
   strcpy(name, "ConfigLoadFile Unit test \0");
   strcpy(failMsg, "Did not return ESMF_SUCCESS \0");
-  rc = ESMC_ConfigLoadFile(cf, fileName, ESMC_ArgLast);
+  rc = ESMC_ConfigLoadFile(cf, fileName, ESMCI_ConfigArgUniqueID,
+                            unique, ESMC_ArgLast);
   ESMC_Test((rc == ESMF_RC_DUP_NAME), name, failMsg, &result, __FILE__, __LINE__,
  0);
   //----------------------------------------------------------------------------

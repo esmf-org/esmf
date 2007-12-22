@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.C,v 1.7 2007/12/11 15:29:03 rosalind Exp $
+// $Id: ESMC_Config.C,v 1.8 2007/12/22 23:33:07 rosalind Exp $
 //
 // Earth System Modeling Framework
 // copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -24,6 +24,7 @@
 //-----------------------------------------------------------------------------
 
 // required includes
+#include "ESMCI_Util.h"
 #include "ESMCI_Config.h"
 #include "ESMCI_Arg.h"
 #include "ESMC_LogErr.h"
@@ -34,7 +35,7 @@
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
  static const char* const version = 
-             "$Id: ESMC_Config.C,v 1.7 2007/12/11 15:29:03 rosalind Exp $";
+             "$Id: ESMC_Config.C,v 1.8 2007/12/22 23:33:07 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -227,7 +228,7 @@ int ESMC_ConfigLoadFile(
   localrc = ESMC_RC_NOT_IMPL;
 
   // Initialize unique
-  unique = ESMC_F77_Int_Null;
+  unique = 0;
   uniquep = &unique;
 
   // return with errors for NULL pointer
@@ -268,6 +269,7 @@ int ESMC_ConfigLoadFile(
   // convert file name to fortran string
   nlen = strlen(name);
   fName = new char[nlen];
+  // debug!  localrc = ESMC_CtoF90string(name, fName, ESMF_MAXSTR);
   localrc = ESMC_CtoF90string(name, fName, nlen);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
     delete[] fName;

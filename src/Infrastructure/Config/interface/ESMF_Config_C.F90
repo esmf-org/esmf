@@ -1,4 +1,4 @@
-!  $Id: ESMF_Config_C.F90,v 1.8 2007/12/12 02:05:21 rosalind Exp $
+!  $Id: ESMF_Config_C.F90,v 1.9 2007/12/22 23:33:07 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -19,12 +19,11 @@
 !------------------------------------------------------------------------------
 ! INCLUDES
 #include "ESMF.h"
-#include "ESMCI_Null.h"
 !==============================================================================
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Config_C.F90,v 1.8 2007/12/12 02:05:21 rosalind Exp $'
+!      '$Id: ESMF_Config_C.F90,v 1.9 2007/12/22 23:33:07 rosalind Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -80,12 +79,9 @@
      ! Initialize return code; assume routine not implemented
       rc = ESMF_RC_NOT_IMPL
 
-     if (unique .ne. ESMC_F77_Int_Null) then
-       if (unique /= 0) then
-         lunique = .true. 
-       else 
-         lunique = .false.
-       endif
+     lunique = .false.
+     if (unique /= 0) then
+       lunique = .true. 
      endif
 
      call ESMF_ConfigLoadFile(config, filename, unique=lunique, rc=localrc)

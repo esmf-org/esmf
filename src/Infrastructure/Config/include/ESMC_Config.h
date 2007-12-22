@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.h,v 1.9 2007/12/11 15:29:03 rosalind Exp $
+// $Id: ESMC_Config.h,v 1.10 2007/12/22 23:33:07 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -55,9 +55,6 @@ enum {
 #define ESMC_ConfigArgTableEnd(ARG)   ESMCI_Arg(ESMCI_ConfigArgTableEndID,ARG)
 #define ESMC_ConfigArgOptions(ARG)    ESMCI_Arg(ESMCI_ConfigArgOptionsID,ARG)
 
-#define ESMC_F77_Int_Null -99999
-#define ESMC_F77_Float_Null -1.e-99
-#define ESMC_F77_Char_Null "!@#$"
 
 extern "C" {
 

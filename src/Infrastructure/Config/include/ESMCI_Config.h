@@ -1,4 +1,4 @@
-// $Id: ESMCI_Config.h,v 1.4 2007/05/04 21:37:33 tjcnrl Exp $
+// $Id: ESMCI_Config.h,v 1.5 2007/12/22 23:33:07 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -35,7 +35,6 @@
 // !USES:
 #include "ESMC_Config.h"
 #include "ESMCI_Util.h"
-
 //
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -52,6 +51,7 @@ extern "C" {
   void FTN(f_esmf_configdestroy)(ESMC_Config* config, int* rc);
 
   void FTN(f_esmf_configloadfile)(ESMC_Config* config, char* fname, int* unique,
+                            //    int* rc          );
                                   int* rc, int flen);
 
   void FTN(f_esmf_configfindlabel)(ESMC_Config* config, char* label, int* rc, int llen);

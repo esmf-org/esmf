@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.46 2007/12/11 15:29:04 rosalind Exp $
+! $Id: ESMF_Config.F90,v 1.47 2007/12/22 23:33:07 rosalind Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -2199,6 +2199,7 @@
       ! (J.G.)
 
       call opntext(lu,filename,'old',localrc)
+
       if ( localrc .ne. ESMF_SUCCESS ) then
          if (ESMF_LogMsgFoundError(localrc, &
                               "opntext() error", &
