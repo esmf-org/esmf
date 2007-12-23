@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2004/11/30 21:01:54 nscollins Exp $
+# $Id: makefile,v 1.5 2007/12/23 20:57:11 rosalind Exp $
 
 # Leave alone.
 ALL: build_here 
@@ -10,13 +10,13 @@ CFLAGS    = ${MPI_INCLUDE}
 FFLAGS    =
 
 # If you have C files in this directory, list them all on the line below.
-SOURCEC	  = ESMC_State.C  ESMC_State_F.C
+SOURCEC	  = ESMC_State.C ESMC_State_F.C 
 # If you have F90 files in this directory, list them all on the line below.
 SOURCEF	  =  ESMF_State_C.F90 
 # If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 # List .h files to be copied to higher level common include directory
-STOREH	  = ESMC_State.h
+STOREH	  = ESMCI_State.h  ESMC_State.h
 
 # Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))

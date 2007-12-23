@@ -21,7 +21,9 @@
 //-----------------------------------------------------------------------------
 //
  // insert any higher level, 3rd party or system includes here
- #include "ESMC_Start.h"
+#include "ESMCI_Util.h"
+#include "ESMCI_State.h"
+#include "ESMC_Start.h"
 #include "ESMC_LogErr.h"
 
 //-----------------------------------------------------------------------------
@@ -34,13 +36,9 @@
 //EOP
 //-----------------------------------------------------------------------------
 
- // associated class definition file
- #include <ESMC_State.h>
-
-//-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_State.C,v 1.11 2007/05/11 02:43:19 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_State.C,v 1.12 2007/12/23 20:57:10 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -72,10 +70,35 @@
 //      (see declaration in ESMC\_State.h)
 //
 //EOP
-    ESMC_State *state = NULL;
-    if (rc) *rc = ESMC_RC_NOT_IMPL;
+   //Local variables
+    int localrc;
+    int nlen;
+    char* fName = NULL;
 
-    FTN(f_esmf_statecreate)(state, name, rc);
+    // Initialize return code. Assume routine not implemented
+    if (rc) *rc = ESMF_RC_NOT_IMPL;
+    localrc = ESMF_RC_NOT_IMPL;
+
+    // allocate the nuew State object
+    ESMC_State* state;
+    try{
+      state = new ESMC_State;
+    }catch(...){
+      // allocation error
+      ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMC_State.", rc);
+      return ESMC_NULL_POINTER;
+    }
+
+    // convert file name to fortran string
+    nlen = strlen(name);
+    fName = new char[nlen];
+    localrc = ESMC_CtoF90string(name, fName, nlen);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) {
+      delete[] fName;
+      return ESMC_NULL_POINTER;
+    }
+
+    FTN(f_esmf_statecreate)(state, fName, rc, nlen);
 
     return state;
 
@@ -120,13 +143,13 @@
 // !IROUTINE:  ESMC_StateConstruct - fill in an already allocated State
 //
 // !INTERFACE:
-      int ESMC_State::ESMC_StateConstruct(
+     // int ESMC_State::ESMC_StateConstruct(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      void) {
+     // void) {
 //
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
@@ -142,22 +165,22 @@
 //
 //  code goes here
 //
-    int rc;
+   // int rc;
 
     // Initialize return code; assume routine not implemented
-    rc = ESMC_RC_NOT_IMPL;
+    //rc = ESMC_RC_NOT_IMPL;
 
 
-    return rc;
+    //return rc;
 
- } // end ESMC_StateConstruct
+ //} // end ESMC_StateConstruct
 
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_StateDestruct - release resources associated w/a State
 //
 // !INTERFACE:
-      int ESMC_State::ESMC_StateDestruct(void) {
+     // int ESMC_State::ESMC_StateDestruct(void) {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -178,14 +201,14 @@
 //
 //  code goes here
 //
-    int rc;
+    //int rc;
 
     // Initialize return code; assume routine not implemented
-    rc = ESMC_RC_NOT_IMPL;
+    //rc = ESMC_RC_NOT_IMPL;
 
-    return rc;
+    //return rc;
 
- } // end ESMC_StateDestruct
+// } // end ESMC_StateDestruct
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -256,13 +279,13 @@
 // !IROUTINE:  ESMC_StateValidate - internal consistency check for a State
 //
 // !INTERFACE:
-      int ESMC_State::ESMC_StateValidate(
+      //int ESMC_State::ESMC_StateValidate(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      const char *options) const {    // in - validate options
+      //const char *options) const {    // in - validate options
 //
 // !DESCRIPTION:
 //      Validates that a State is internally consistent.
@@ -274,14 +297,14 @@
 //
 //  code goes here
 //
-    int rc;
+    //int rc;
 
     // Initialize return code; assume routine not implemented
-    rc = ESMC_RC_NOT_IMPL;
+    //rc = ESMC_RC_NOT_IMPL;
 
-    return rc;
+    //return rc;
 
- } // end ESMC_StateValidate
+// } // end ESMC_StateValidate
 
 
 //-----------------------------------------------------------------------------
@@ -289,12 +312,12 @@
 // !IROUTINE:  ESMC_StatePrint - print contents of a State
 //
 // !INTERFACE:
-      int ESMC_State::ESMC_StatePrint(
+     // int ESMC_State::ESMC_StatePrint(
 //
 // !RETURN VALUE:
 //    int error return code
 //
-      const char *options) const {     //  in - print options
+      //const char *options) const {     //  in - print options
 //
 // !DESCRIPTION:
 //      Print information about a State.  The options control the
@@ -306,64 +329,13 @@
 //
 //  code goes here
 //
-    int rc;
+    //int rc;
 
     // Initialize return code; assume routine not implemented
-    rc = ESMC_RC_NOT_IMPL;
+    //rc = ESMC_RC_NOT_IMPL;
 
-    return rc;
+    //return rc;
 
- } // end ESMC_StatePrint
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_State - native C++ constructor
-//
-// !INTERFACE:
-      ESMC_State::ESMC_State(
-//
-// !RETURN VALUE:
-//    none
-//
-// !ARGUMENTS:
-      void) {
-//
-// !DESCRIPTION:
-//      Calls standard ESMF deep or shallow methods for initialization
-//      with default or passed-in values
-//
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
-
-//
-//  code goes here
-//
-    
-
- } // end ESMC_State
+// } // end ESMC_StatePrint
 
 //-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ~ESMC_State - native C++ destructor
-//
-// !INTERFACE:
-      ESMC_State::~ESMC_State(void) {
-//
-// !RETURN VALUE:
-//    none
-//
-// !ARGUMENTS:
-//    none
-//
-// !DESCRIPTION:
-//      Calls standard ESMF deep or shallow methods for destruction
-//
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
-
-//
-//  code goes here
-//
-    
-
- } // end ~ESMC_State
