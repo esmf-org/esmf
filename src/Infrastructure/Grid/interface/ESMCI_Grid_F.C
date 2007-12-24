@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.26 2007/12/21 17:03:33 rokuingh Exp $
+// $Id: ESMCI_Grid_F.C,v 1.27 2007/12/24 14:24:53 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -1404,7 +1404,218 @@ extern "C" {
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
-}  // end c_ESMC_AttributeSetValue
+  }  // end c_ESMC_AttributeSetValue
+  
+  void FTN(c_esmc_gridattributesetchar)(ESMCI::Grid **grid, char *name, char *value,              // in - char string
+          int *rc, int nlen, int vlen) {
+  
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridattributesetchar()"
+                          
+  int i, status;
+  char *cname, *cvalue;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!grid) {
+    if (rc) *rc = ESMF_FAILURE;    
+    return;
+  }
+
+  // simple sanity checks before doing any more work
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name", &status);
+      //printf("ESMF_AttributeSet: bad attribute name\n");
+      if (rc) *rc = status;
+      return;
+  }
+
+  if ((!value) || (vlen <= 0) || (value[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute value", &status);
+      //printf("ESMF_AttributeSet: bad attribute value\n");
+      if (rc) *rc = status;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cname = ESMC_F90toCstring(name, nlen);
+  if (!cname) {
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cvalue = ESMC_F90toCstring(value, vlen);
+  if (!cvalue) {
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  // Set the attribute on the object.
+  *rc = (*grid)->ESMC_AttributeSet(cname, cvalue);
+
+  delete [] cname;
+  delete [] cvalue;
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+  }  // end c_ESMC_AttributeSetChar
+
+  void FTN(c_esmc_gridattributegetvalue)(ESMCI::Grid **grid, char *name,
+          ESMC_TypeKind *tk, int *count, void *value, int *rc, int nlen) { 
+          
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridattributegetvalue()"
+                      
+  int status, attrCount;
+  ESMC_TypeKind attrTk;
+  char *cname;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!grid) {
+    *rc = ESMF_FAILURE;    
+    return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name", &status);
+      //printf("ESMF_AttributeSet: bad attribute name\n");
+      if (rc) *rc = status;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cname = ESMC_F90toCstring(name, nlen);
+  if (!cname) {
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  status = (*grid)->ESMC_AttributeGet(cname, &attrTk, &attrCount, NULL);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status,
+                         "failed getting attribute type and count", &status)) {
+    //printf("ESMF_AttributeGetValue: failed getting attribute info\n");
+    delete [] cname;
+    if (rc) *rc = status;
+    return;
+  }
+
+  if (attrTk != *tk) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_INCOMP,
+                         "attribute value not expected kind", &status);
+    //printf("attribute %s not expected kind %s, actually kind %d\n", 
+    //       name, ESMC_TypeKindString(*tk), ESMC_TypeKindString(attrTk));
+    delete [] cname;
+    if (rc) *rc = status;
+    return;
+  }
+  if (attrCount != *count) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_INCOMP,
+                         "attribute value not expected count", &status);
+    //printf("expected count %d does not match actual count %d\n", 
+    //           *count, attrCount);
+    delete [] cname;
+    if (rc) *rc = status;
+    return;
+  }
+
+  status = (*grid)->ESMC_AttributeGet(cname, NULL, NULL, value);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status,
+                         "failed getting attribute value", &status);
+  delete [] cname;
+  if (rc) *rc = status;
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+  }  // end c_ESMC_AttributeGetValue
+
+  void FTN(c_esmc_gridattributegetchar)(ESMCI::Grid **grid, char *name, 
+          char *value, int *rc, int nlen, int vlen) {
+          
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridattributegetchar()"
+              
+  int i;
+  ESMC_TypeKind attrTypeKind;
+  char *cname, *cvalue;
+  int slen;              // actual attribute string length
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!grid) {
+    *rc = ESMF_FAILURE;
+    return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
+      printf("ESMF_AttributeGet: bad attribute name\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cname = ESMC_F90toCstring(name, nlen);
+  if (!cname) {
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  *rc = (*grid)->ESMC_AttributeGet(cname, &attrTypeKind, &slen, NULL);
+  if (*rc != ESMF_SUCCESS) {
+    delete [] cname;
+    return;
+  }
+
+// TODO: re-enable the following error checking when ESMF_TYPEKIND_CHARACTER
+// becomes available
+  
+//  if (attrTypeKind != ESMF_TYPEKIND_CHARACTER) {
+      // TODO: this needs to sprintf into a buffer to format up the error msg
+//      printf("ESMF_AttributeGet: attribute %s not type character\n", name);
+//      delete [] cname;
+//      *rc = ESMF_FAILURE;
+//      return; 
+//  }
+
+  // make sure destination will be long enough
+  if (slen > vlen) {
+    printf("ESMF_AttributeGet: attribute %s is %d bytes long, buffer length "
+      "%d is too short", name, slen, vlen);
+    delete [] cname;
+    *rc = ESMF_FAILURE;
+    return; 
+  }
+
+  cvalue = new char[slen+1];
+
+  *rc = (*grid)->ESMC_AttributeGet(cname, cvalue);
+  if (*rc != ESMF_SUCCESS) {
+    delete [] cname;
+    delete [] cvalue;
+    return;
+  }
+
+  *rc = ESMC_CtoF90string(cvalue, value, vlen);
+
+  delete [] cname;
+  delete [] cvalue;
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+  }  // end c_ESMC_AttributeGetChar
+
 
 
   ///////////////////////////////////////////////////////////////////////////////////

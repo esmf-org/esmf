@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.23 2007/12/21 17:03:33 rokuingh Exp $
+// $Id: ESMCI_Grid.h,v 1.24 2007/12/24 14:24:53 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -219,6 +219,16 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 
   // attributes
   int attributeset(char *name, ESMC_TypeKind tk, int count, void *value);
+  int attributeset(char *name, char *value);
+  int attributeget(char *name, ESMC_TypeKind *tk, int *count, void *value) const;
+  int attributeget(char *name, char *value) const;
+  //int attributeget(int num, char *name, ESMC_TypeKind *tk, int *count, void *value) const;
+  /*
+  int attributegetcount(void) const;
+  int createattpack(char *name, char *convention, char *purpose, char *object);
+  int setattpack(char *name, char *value, char *convention, char *purpose, char *object);
+  int writeattpack(char *convention, char *purpose, char *object) const;
+  */
 
   // create fully formed grid
  static Grid *create(int nameLen,                                // (in)
