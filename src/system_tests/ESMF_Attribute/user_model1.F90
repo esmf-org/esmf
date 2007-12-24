@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.3 2007/12/18 16:05:09 rokuingh Exp $
+! $Id: user_model1.F90,v 1.4 2007/12/24 14:23:47 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -110,6 +110,8 @@ module user_model1
     integer                     :: petCount, backward_run, status, myPet
     character(len=ESMF_MAXSTR)  :: name, value, conv, purp, fconv, fpurp   
     
+    type(ESMF_Grid)             :: grid
+    
     ! Initialize return code
     rc = ESMF_SUCCESS
 
@@ -164,7 +166,23 @@ module user_model1
       
       call ESMF_FieldSetAttPack(field, name, value, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
+
+      ! grid stuff
+      grid = ESMF_GridCreateEmpty(rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+
+      call ESMF_GridSetAttribute(grid, name, value, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
       
+      if (myPet .eq. 0) then
+        !print *, 'Set an attribute on the grid with:'
+        !print *, 'name: ', name
+        !print *, 'value: ', value
+      endif
+      
+      !call ESMF_GridGetAttribute(grid, name, value, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+
       if (myPet .eq. 0) then
         conv = 'ESG-CDP'
         purp = 'general'
@@ -176,6 +194,7 @@ module user_model1
         print *, 'Write the Field Attpack from the second run of component 1.'
         call ESMF_FieldWriteAttPack(field, convention=fconv, purpose=fpurp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
+        
       endif
     endif
 
