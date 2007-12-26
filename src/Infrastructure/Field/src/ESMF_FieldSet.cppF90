@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cppF90,v 1.2 2007/10/31 16:58:53 cdeluca Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.3 2007/12/26 19:37:49 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -34,8 +34,10 @@
       use ESMF_BaseMod
       use ESMF_LogErrMod
       use ESMF_LocalArrayMod
-      use ESMF_InternArrayMod
-      use ESMF_InternArrayCreateMod
+      use ESMF_DistGridMod
+      use ESMF_GridMod
+      use ESMF_ArrayMod
+      use ESMF_ArrayCreateMod
       use ESMF_FieldMod
       use ESMF_InitMacrosMod
       implicit none
@@ -47,12 +49,12 @@
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_FieldSetDataPointer
+      public ESMF_FieldSetDataPtr
  
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldSet.cppF90,v 1.2 2007/10/31 16:58:53 cdeluca Exp $'
+      '$Id: ESMF_FieldSet.cppF90,v 1.3 2007/12/26 19:37:49 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -64,19 +66,19 @@
 !------------------------------------------------------------------------------
 
 !BOPI
-! !IROUTINE: ESMF_FieldSetDataPointer -- Set a Fortran pointer to the data contents
+! !IROUTINE: ESMF_FieldSetDataPtr -- Set a Fortran pointer to the data contents
 
 ! !INTERFACE:
-     interface ESMF_FieldSetDataPointer
+     interface ESMF_FieldSetDataPtr
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       ! < declarations of interfaces for each T/K/R >
-TypeKindRankInterfaceMacro(FieldSetDataPointer)
+TypeKindRankInterfaceMacro(FieldSetDataPtr)
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_FieldSetDataPointer} subroutines.   
+!  types of {\tt ESMF\_FieldSetDataPtr} subroutines.   
 !  
 !EOPI 
 end interface
@@ -90,6 +92,6 @@ end interface
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
       ! < declarations of subroutines for each T/K/R >
-TypeKindRankDeclarationMacro(FieldSetDataPointer)
+TypeKindRankDeclarationMacro(FieldSetDataPtr)
 
         end module ESMF_FieldSetMod

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.109 2007/12/13 21:36:59 feiliu Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.110 2007/12/26 19:37:49 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -30,13 +30,14 @@
 ! !USES:
       use ESMF_TestMod     ! test methods
       use ESMF_Mod
+      use ESMF_FieldSetMod
 
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.109 2007/12/13 21:36:59 feiliu Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.110 2007/12/26 19:37:49 feiliu Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -71,7 +72,7 @@
       type(ESMF_Logical) :: lattr, lattrlist(6)
       character (len=512) :: cattr, cattr2
       real(ESMF_KIND_R8), dimension(:,:), pointer :: farray
-      real(ESMF_KIND_R8), dimension(:,:), pointer :: farray1
+      real(ESMF_KIND_R8), dimension(:,:), pointer :: farray1, farray2
       type(ESMF_Array)                            :: array8
       type(ESMF_ArraySpec)                        :: arrayspec8
       type(ESMF_DistGrid)                         :: distgrid
@@ -641,8 +642,19 @@
             rc = ESMF_FAILURE
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      call ESMF_FieldDestroy(f8)
       call ESMF_ArrayDestroy(array8)
+      !------------------------------------------------------------------------
+      !EX_UTest 
+      ! FieldSetDataPtr sets the fortran data ptr in a ESMF_Field
+      ! This test uses f8 created from previous test
+      allocate(farray2(size(farray1,1), size(farray1,2)))
+      call ESMF_FieldSetDataPtr(f8, dataptr=farray2, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Sets the fortran data ptr in a ESMF_Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      deallocate(farray2)
+      call ESMF_FieldDestroy(f8)
+
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! Setting a (bad) data pointer directly in an empty Field
