@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.8 2007/12/10 21:20:23 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.9 2007/12/27 20:46:37 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -55,12 +55,11 @@
 
       public ESMF_FieldCreate
       public ESMF_FieldSetCommit
-      public ESMF_FieldGetDataPtr
  
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cppF90,v 1.8 2007/12/10 21:20:23 feiliu Exp $'
+      '$Id: ESMF_FieldCreate.cppF90,v 1.9 2007/12/27 20:46:37 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -112,21 +111,6 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 !   fill in the {\tt ESMF\_Field} internals. 
 
     end interface ESMF_FieldSetCommit
-!EOPI
-
-!BOPI 
-! !IROUTINE: ESMF_FieldGetDataPtr - Get the data pointer from a Field
-!
-! !INTERFACE:
-    interface ESMF_FieldGetDataPtr
-
-        TypeKindRankInterfaceMacro(FieldGetDataPtr)
-
-! !DESCRIPTION:
-!   This interface provides an entry point for methods that get the data pointer
-!   from a {\tt ESMF\_Field}.
-
-    end interface ESMF_FieldGetDataPtr
 !EOPI
 
 !
@@ -395,7 +379,6 @@ TypeKindRankDeclarationMacro(FieldCreateEPtr)
 
 TypeKindRankDeclarationMacro(FieldSetCommit)
 TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
-TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
 !------------------------------------------------------------------------------
 

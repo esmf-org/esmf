@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2 2007/10/31 16:58:53 cdeluca Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.3 2007/12/27 20:46:37 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -34,8 +34,8 @@
       use ESMF_BaseMod
       use ESMF_LogErrMod
       use ESMF_LocalArrayMod
-      use ESMF_InternArrayMod
-      use ESMF_InternArrayGetMod
+      use ESMF_ArrayMod
+      use ESMF_ArrayGetMod
       use ESMF_FieldMod
       use ESMF_InitMacrosMod
       implicit none
@@ -47,12 +47,12 @@
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_FieldGetDataPointer
+      public ESMF_FieldGetDataPtr
  
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGet.cppF90,v 1.2 2007/10/31 16:58:53 cdeluca Exp $'
+      '$Id: ESMF_FieldGet.cppF90,v 1.3 2007/12/27 20:46:37 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -64,19 +64,19 @@
 !------------------------------------------------------------------------------
 
 !BOPI
-! !IROUTINE: ESMF_FieldGetDataPointer -- Get a Fortran pointer to the data contents
+! !IROUTINE: ESMF_FieldGetDataPtr -- Get a Fortran pointer to the data contents
 
 ! !INTERFACE:
-     interface ESMF_FieldGetDataPointer
+     interface ESMF_FieldGetDataPtr
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       ! < declarations of interfaces for each T/K/R >
-TypeKindRankInterfaceMacro(FieldGetDataPointer)
+TypeKindRankInterfaceMacro(FieldGetDataPtr)
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_FieldGetDataPointer} subroutines.   
+!  types of {\tt ESMF\_FieldGetDataPtr} subroutines.   
 !  
 !EOPI 
 end interface
@@ -91,6 +91,6 @@ end interface
 !------------------------------------------------------------------------------
 
       ! < declarations of subroutines for each T/K/R >
-TypeKindRankDeclarationMacro(FieldGetDataPointer)
+TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
         end module ESMF_FieldGetMod
