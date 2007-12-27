@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.284 2007/12/26 19:37:49 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.285 2007/12/27 21:30:32 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -205,7 +205,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.284 2007/12/26 19:37:49 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.285 2007/12/27 21:30:32 feiliu Exp $'
 
 !==============================================================================
 !
@@ -3431,8 +3431,8 @@
 
       if (.not.associated(field%ftypep)) then 
          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Field", &
-                                 ESMF_CONTEXT, rc)
+            "Uninitialized or already destroyed Field: ftypep unassociated", &
+             ESMF_CONTEXT, rc)
          return
       endif 
 
@@ -3442,8 +3442,8 @@
       ! make sure the field is ready before trying to look at contents
       if (ftypep%fieldstatus .ne. ESMF_STATUS_READY) then
          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Field", &
-                                 ESMF_CONTEXT, rc)
+            "Uninitialized or already destroyed Field: fieldstatus not ready", &
+             ESMF_CONTEXT, rc)
          return
       endif 
 
@@ -3464,18 +3464,24 @@
           ! get grid dim and extents for the local piece
           call ESMF_GridGet(ftypep%grid, rank=gridrank, &
                             distgrid=gridDistGrid, localDECount=localDECount, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
+          if (localrc .ne. ESMF_SUCCESS) then
+             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                "Cannot retrieve distgrid, gridrank, localDECount from ftypep%grid", &
+                 ESMF_CONTEXT, rc)
+             return
+          endif 
           ! Bounds only valid if there are local DE's
           do lDE=0, localDECount-1
              call ESMF_GridGet(ftypep%grid, localDE=lDE, staggerloc=staggerloc, &
                                exclusiveLBound=exclLBounds, &
                                exclusiveUBound=exclUBounds, &
                                rc=localrc)
-             if (ESMF_LogMsgFoundError(localrc, &
-                              ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rc)) return
+              if (localrc .ne. ESMF_SUCCESS) then
+                 call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                    "Cannot retrieve exclusive bounds from ftypep%grid", &
+                     ESMF_CONTEXT, rc)
+                 return
+              endif 
           enddo
           hasgrid = .TRUE.
       endif
@@ -3483,15 +3489,20 @@
       ! make sure there is data before asking it questions.
       if (ftypep%datastatus .eq. ESMF_STATUS_READY) then
           call ESMF_ArrayValidate(array=ftypep%array, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
+          if (localrc .ne. ESMF_SUCCESS) then
+             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                "Cannot validate ftypep%array", &
+                 ESMF_CONTEXT, rc)
+             return
+          endif 
           call ESMF_ArrayGet(ftypep%array, dimCount=dimCount, localDECount=localDECount, &
               distgrid=arrayDistGrid, rank=arrayrank, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
-
+          if (localrc .ne. ESMF_SUCCESS) then
+             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                "Cannot retrieve dimCount, localDECount, arrayDistGrid, arrayrank from ftypep%array", &
+                 ESMF_CONTEXT, rc)
+             return
+          endif 
           ! Verify that array rank is greater than or equal to grid rank
           if (gridrank .gt. arrayrank) then
               call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
@@ -3517,9 +3528,12 @@
           call ESMF_ArrayGet(ftypep%array, distgridToArrayMap=dimmap, &
               computationalLBound=arrayCompLBnd, &
               computationalUBound=arrayCompUBnd, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
+          if (localrc .ne. ESMF_SUCCESS) then
+             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                "Cannot retrieve computational bounds and dimmap from ftypep%array", &
+                 ESMF_CONTEXT, rc)
+             return
+          endif 
 
           hasarray = .TRUE.
           ! verify array computational bounds match grid computational bounds per localDE
@@ -3528,9 +3542,12 @@
               call ESMF_GridGet(ftypep%grid, staggerloc=staggerloc, localDE=lDE, &
                   computationalUBound=gridCompUBnd, computationalLBound=gridCompLBnd, &
                   rc=localrc)
-              if (ESMF_LogMsgFoundError(localrc, &
-                                        ESMF_ERR_PASSTHRU, &
-                                        ESMF_CONTEXT, rc)) return
+              if (localrc .ne. ESMF_SUCCESS) then
+                 call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                    "Cannot retrieve computational bounds from ftypep%grid on localDE", &
+                     ESMF_CONTEXT, rc)
+                 return
+              endif 
               do i=1, dimCount
                   if(gridCompLBnd(dimmap(i)) .ne. arrayCompLBnd(i, lDE)) then
                       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &

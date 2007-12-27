@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.9 2007/12/27 20:46:37 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.10 2007/12/27 21:30:32 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -36,7 +36,6 @@
       use ESMF_IOSpecMod
       use ESMF_ArraySpecMod
       use ESMF_LocalArrayMod
-      use ESMF_InternArrayDataMapMod
       use ESMF_DELayoutMod
       use ESMF_StaggerLocMod
       use ESMF_GridMod
@@ -59,7 +58,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cppF90,v 1.9 2007/12/27 20:46:37 feiliu Exp $'
+      '$Id: ESMF_FieldCreate.cppF90,v 1.10 2007/12/27 21:30:32 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -80,13 +79,6 @@
         module procedure ESMF_FieldCreateNew
         module procedure ESMF_FieldCreateFromArray
         TypeKindRankInterfaceMacro(FieldCreateFromDataPtr)
-
-^if 0
-      ! < declarations of interfaces for each T/K/R >
-TypeKindRankInterfaceMacro(FieldCreateDPtr)
-
-TypeKindRankInterfaceMacro(FieldCreateEPtr)
-^endif
 
 ! !DESCRIPTION:
 !   This interface provides an entry point for methods that create a complete
@@ -371,11 +363,6 @@ TypeKindRankInterfaceMacro(FieldCreateEPtr)
 !------------------------------------------------------------------------------
 
       ! < declarations of subroutines for each T/K/R >
-^if 0
-TypeKindRankDeclarationMacro(FieldCreateDPtr)
-
-TypeKindRankDeclarationMacro(FieldCreateEPtr)
-^endif
 
 TypeKindRankDeclarationMacro(FieldSetCommit)
 TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
