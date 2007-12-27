@@ -18,8 +18,6 @@
 #include <Mesh/include/ESMC_Tree.h>
 #include <Mesh/include/ESMC_SmallAlloc.h>
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <utility>
 
 #include <string>
