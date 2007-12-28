@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// $Id: cdistdir_test.C,v 1.7 2007/12/27 16:28:17 dneckels Exp $
+// $Id: cdistdir_test.C,v 1.8 2007/12/28 22:07:34 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@ void FTN(cdistdir_test)(ESMCI::VM **vmpp, int*rc) {
   // Here is the test:  ON each pet, send messages to yourself and
   // every pet with an id less than you.  The particular message that you send
   // is your localPet #, localPet # + 1 times.  Simple enough.
-  ESMC::SparseMsg msg(*vm);
+  ESMC::SparseMsgVM msg(*vm);
 
 
   std::vector<UInt> procs(localPet+1, 0);
@@ -65,7 +65,7 @@ void FTN(cdistdir_test)(ESMCI::VM **vmpp, int*rc) {
 
   
   for (int i = localPet; i >= 0; i--)  {
-    ESMC::SparseMsg::buffer &b = *msg.getSendBuffer(i);
+    ESMC::SparseMsgVM::buffer &b = *msg.getSendBuffer(i);
     for (int j = 0; j < localPet+1; j++) 
       ESMC::SparsePack<int>(b, localPet);
   }
@@ -75,7 +75,7 @@ void FTN(cdistdir_test)(ESMCI::VM **vmpp, int*rc) {
   msg.communicate();
 
   for (UInt *p = msg.inPet_begin(); p != msg.inPet_end(); p++) {
-    ESMC::SparseMsg::buffer &b = *msg.getRecvBuffer(*p);
+    ESMC::SparseMsgVM::buffer &b = *msg.getRecvBuffer(*p);
     UInt num = b.msg_size() / ESMC::SparsePack<int>::size();
     if (num != *p+1) throw Ex() << "P:" << localPet << ", Error!!! Num=" << num << ", should have num=" << localPet+1 << std::endl;
     for (UInt i= 0; i < num; i++) {
