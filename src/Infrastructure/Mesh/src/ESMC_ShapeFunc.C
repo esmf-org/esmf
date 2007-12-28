@@ -27,8 +27,8 @@ template<int PDIM>
 const std::string dg0_shape_func<PDIM>::name("dgo");
 
 template<int PDIM>
-const int dg0_shape_func<PDIM>::dof_description[ndofs][4] = {
-{DOF_ELEM, 0, 0, 1},
+const int dg0_shape_func<PDIM>::dof_description[1][4] = {
+{DOF_ELEM, 0, 0, 1}
 };
 
 template<int PDIM>

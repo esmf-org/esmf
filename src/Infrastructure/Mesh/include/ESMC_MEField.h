@@ -63,7 +63,7 @@ bool Output() const { return output;}
 
 const _fieldTypeBase &FType() const { return ftype; }
 
-protected:
+//protected:
 std::string fname;
 const MEFamily &mef;
 UInt obj_type;
@@ -132,6 +132,7 @@ _fieldValuePtr data(const MeshObj &obj) const {
 private:
 MEField(const MEField &rhs);
 MEField &operator=(const MEField &rhs);
+public: // Since 
 std::vector<UInt> fidx_table;
 std::vector<_FIELD*> fields;
 _FIELD *primaryfield; // if nodal or elemental

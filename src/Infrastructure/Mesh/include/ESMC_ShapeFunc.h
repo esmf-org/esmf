@@ -143,7 +143,7 @@ class dg0_shape_func {
 
   static const UInt NumInterp = 1;
 
-  const static int dof_description[ndofs][4];
+  const static int dof_description[1][4];
 
   const static double ipoints[1];
 
