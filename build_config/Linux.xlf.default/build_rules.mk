@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.13 2006/10/23 18:12:27 theurich Exp $
+# $Id: build_rules.mk,v 1.14 2008/01/03 19:58:19 dneckels Exp $
 #
 # Linux.xlf.default
 #
@@ -32,6 +32,7 @@ ESMF_F90DEFAULT         = mpxlf90
 ESMF_F90LINKLIBS       += 
 ESMF_CXXDEFAULT         = mpxlC
 ESMF_CXXLINKLIBS       += 
+ESMF_CXXCOMPILECPPFLAGS+= -DMPICH_IGNORE_CXX_SEEK
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.cqsub
 else
 ifeq ($(ESMF_COMM),user)
