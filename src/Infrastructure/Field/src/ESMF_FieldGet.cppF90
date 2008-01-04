@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.5 2008/01/04 19:17:35 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.6 2008/01/04 19:28:20 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -53,7 +53,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGet.cppF90,v 1.5 2008/01/04 19:17:35 feiliu Exp $'
+      '$Id: ESMF_FieldGet.cppF90,v 1.6 2008/01/04 19:28:20 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -338,11 +338,11 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
         do i = 1, fieldrank 
             if(present(computationalCount)) &
-                computationalCount = computationalUBound(i) - computationalLBound(i) + 1
+                computationalCount(i) = computationalUBound(i) - computationalLBound(i) + 1
             if(present(exclusiveCount)) &
-                exclusiveCount = exclusiveUBound(i) - exclusiveLBound(i) + 1
+                exclusiveCount(i) = exclusiveUBound(i) - exclusiveLBound(i) + 1
             if(present(totalCount)) &
-                totalCount = totalUBound(i) - totalLBound(i) + 1
+                totalCount(i) = totalUBound(i) - totalLBound(i) + 1
         end do
 
         if (present(rc)) rc = localrc
