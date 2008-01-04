@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.C,v 1.27 2007/09/27 23:37:04 theurich Exp $
+// $Id: ESMC_LocalArray.C,v 1.28 2008/01/04 18:29:05 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_LocalArray.C,v 1.27 2007/09/27 23:37:04 theurich Exp $";
+static const char *const version = "$Id: ESMC_LocalArray.C,v 1.28 2008/01/04 18:29:05 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 // prototypes for Fortran calls
@@ -481,6 +481,18 @@ int ESMC_LocalArray::ESMC_LocalArrayConstruct(
       return rc;
   } 
 
+
+  // Setup info for calculating index tuple location quickly
+  // Needs to be done after lbounds and counts are set
+  int currOff=1;
+  lOff=0;
+  for (int i=0; i<rank; i++) {
+    dimOff[i]=currOff;
+    lOff +=currOff*lbound[i];
+
+    currOff *=counts[i];
+  }  
+
   // call base class routine to set name 
   ESMC_BaseSetName(name, "LocalArray");
     
@@ -597,6 +609,18 @@ int ESMC_LocalArray::ESMC_LocalArrayConstruct(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
     return NULL;
 
+  // Setup info for calculating index tuple location quickly
+  // Needs to be done after lbounds and counts are set
+  int currOff=1;
+  larray->lOff=0;
+  for (int i=0; i<rank; i++) {
+    larray->dimOff[i]=currOff;
+    larray->lOff +=currOff*(larray->lbound[i]);
+
+    currOff *=larray->counts[i];
+  }  
+
+
   // return successfully 
   if (rc) *rc = ESMF_SUCCESS;
   return larray;
@@ -692,6 +716,17 @@ int ESMC_LocalArray::ESMC_LocalArrayConstruct(
 
     byte_count = ESMC_TypeKindSize(kind) * totalcount;
 
+    // Setup info for calculating index tuple location quickly
+    // Needs to be done after lbounds and counts are set
+    int currOff=1;
+    lOff=0;
+    for (int i=0; i<rank; i++) {
+      dimOff[i]=currOff;
+      lOff +=currOff*lbound[i];
+      
+      currOff *=counts[i];
+    }  
+    
     rc = ESMF_SUCCESS;
     return rc;
 
@@ -843,6 +878,110 @@ int ESMC_LocalArray::ESMC_LocalArrayConstruct(
 
  } // end ESMC_LocalArraySetF90Ptr
 
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "getDataInternal"
+//BOPI
+// !IROUTINE:  getDataInternal - get the data at an index location without error checking
+//
+// !INTERFACE:
+template <class TYPE>
+      void ESMC_LocalArray::getDataInternal(
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+      int *index,          // in - index location
+      TYPE *data)          // out - pointer to data. 
+{      
+
+//
+// !DESCRIPTION:
+//    Get the data at a particular index location in a LocalArray. For efficiency's
+// sake this routine doesn't do error checking. It's assumed that the error checking
+// is occuring at a higher level. For error checking use getData.
+//
+//EOPI
+  int off;
+
+  // Loop through summing up offset for each dimension
+  off=-lOff;
+  for (int i=0; i<rank; i++) {
+    off +=dimOff[i]*index[i];
+  }
+  
+  // Get Data 
+  *data=*((TYPE *)((char *)base_addr+ESMC_TypeKindSize(kind)*off)); 
+
+  // return
+  return;
+  
+} // end getDataInternal
+
+// Add more types here if necessary
+template void ESMC_LocalArray::getDataInternal(int *index, ESMC_R8 *data);
+template void ESMC_LocalArray::getDataInternal(int *index, ESMC_R4 *data);
+template void ESMC_LocalArray::getDataInternal(int *index, ESMC_I4 *data);
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "getData"
+//BOPI
+// !IROUTINE:  getData - get the data at an index location
+//
+// !INTERFACE:
+template <class TYPE>
+      int ESMC_LocalArray::getData(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      int *index,          // in - index location
+      TYPE *data)          // out - pointer to data. 
+{      
+
+//
+// !DESCRIPTION:
+//    Get the data at a particular index location in a LocalArray. 
+//
+// TODO: This method should eventually be made more efficient by precalculating
+//        and storing the offsets per Dim. 
+//
+//EOPI
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // Make sure index is within bounds
+  for (int i=0; i<rank; i++) {   
+    if ((index[i] < lbound[i]) || (index[i] > ubound[i])) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                 "- index outside of LocalArray bounds", &rc);
+        return rc;
+    }
+  }
+
+  // Actually Get Data
+  this->getDataInternal(index,data);
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+  
+} // end getData
+
+// Add more types here if necessary
+template int ESMC_LocalArray::getData(int *index, ESMC_R8 *data);
+template int ESMC_LocalArray::getData(int *index, ESMC_R4 *data);
+template int ESMC_LocalArray::getData(int *index, ESMC_I4 *data);
+
+
+
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 
@@ -980,6 +1119,11 @@ int ESMC_LocalArray::ESMC_LocalArrayConstruct(
         *ip++ = bytestride[i];
     }
 
+
+    // Don't serialize dimOff and lOff, because they can be reconstructed
+    // on the other side from the other info. 
+
+
     // skip the F90 pointer - it will have to be reconstructed on
     // the remote side.
 
@@ -1054,6 +1198,17 @@ int ESMC_LocalArray::ESMC_LocalArrayConstruct(
     &localrc);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
+
+  // Reconstruct info for calculating index tuple location
+  // Needs to be done after lbounds and counts are set
+  int currOff=1;
+  lOff=0;
+  for (int i=0; i<rank; i++) {
+    dimOff[i]=currOff;
+    lOff +=currOff*lbound[i];
+
+    currOff *=counts[i];
+  }  
 
   cp = (char *)ip;
   // TODO: verify the buffer size first.
@@ -1178,7 +1333,9 @@ int ESMC_LocalArray::ESMC_LocalArrayConstruct(
         ubound[i] = 0;
         counts[i] = 0;
         bytestride[i] = 0;
+        dimOff[i] = 0;
     }
+    lOff=0;
 
     // zero out the f90 pointer area.
     cp = (char *) &f90dopev;

@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.21 2007/09/27 23:37:04 theurich Exp $
+// $Id: ESMC_LocalArray.h,v 1.22 2008/01/04 18:29:05 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -90,6 +90,8 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
     int lbound[ESMF_MAXDIM];       // used for fortran indexing
     int ubound[ESMF_MAXDIM];       // used for fortran indexing
     int counts[ESMF_MAXDIM];       // number of elements/dim
+    int dimOff[ESMF_MAXDIM];       // Offset size per dim for computing pos.
+    int lOff;                      // Offset due to lower bounds for pos. 
     int bytestride[ESMF_MAXDIM];   // byte spacing between elements/dim
     struct c_F90ptr f90dopev;      // opaque object which is real f90 ptr
                                    // this is memcpy'd to save and restore 
@@ -241,6 +243,12 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
     // different rank/sizes - the number of items must match.
     ESMC_LocalArray *ESMC_LocalArrayReshape(int rank, int *newcounts, int *rc)
       const;
+
+    // Get Data from a position in the LocalArray
+   template <class TYPE> int getData(int *index, TYPE *data);
+
+    // Get Data from a position in the LocalArray without internal error checking
+   template <class TYPE> void getDataInternal(int *index, TYPE *data);
   
 };  // class ESMC_LocalArray
 
