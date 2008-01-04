@@ -89,6 +89,10 @@ bool operator==(const dentry &rhs) const {
           origin_proc == rhs.origin_proc);
 }
 
+bool operator!=(const dentry &rhs) const {
+  return !(*this == rhs);
+}
+
 };
 
 // For the given global id's, request the owning processors and the

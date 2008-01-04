@@ -659,7 +659,7 @@ void decomp1d(long num_items, long num_proc, long rank, long &my_num, long &my_s
 {
   std::ldiv_t ans;
   
-  ans = std::div(num_items, num_proc);
+  ans = std::ldiv(num_items, num_proc);
   
   if (rank < ans.rem) {
     my_num = ans.quot + 1;
