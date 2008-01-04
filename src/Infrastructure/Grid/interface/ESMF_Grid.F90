@@ -162,7 +162,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.49 2007/12/24 14:24:53 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.50 2008/01/04 18:28:15 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -266,6 +266,7 @@ interface ESMF_GridGetCoord
       module procedure ESMF_GridGetCoord3DR8
       module procedure ESMF_GridGetCoordBounds
       module procedure ESMF_GridGetCoordIntoArray
+      module procedure ESMF_GridGetCoordR8
       
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -6237,6 +6238,97 @@ endif
     if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGetCoordIntoArray
+
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetCoordR8"
+!BOP
+! !IROUTINE: ESMF_GridGetCoord - Get coordinates from a specific index location
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridGetCoord()
+      subroutine ESMF_GridGetCoordR8(grid, localDE, staggerloc, index, coord, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in)                 :: grid
+      integer, intent(in),optional                :: localDE
+      type (ESMF_StaggerLoc), intent(in),optional :: staggerloc
+      integer, intent(in)                         :: index(:)
+      real(ESMF_KIND_R8)                          :: coord(:)
+      integer, intent(out), optional              :: rc
+!
+! !DESCRIPTION:
+!     Given a specific index location in a Grid, this method returns the full set
+!   of coordinates from that index location. This method will eventually be overloaded
+!   to support the full complement of types supported by the Grid. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          Grid to get the information from.
+!     \item[{[localDE]}]
+!          The local DE to get the information for. If not set, defaults to 
+!          the first DE on this processor. (localDE starts at 0)
+!     \item[{staggerloc}]
+!          The stagger location to get the information for. 
+!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          of predefined stagger locations. If not present, defaults to
+!          ESMF\_STAGGERLOC\_CENTER.
+!     \item[{index}]
+!          This array holds the index location to be queried in the Grid. This array must
+!          at least be of the size Grid rank.
+!     \item[{coord}]
+!          This array will be filled with the coordinate data. This array must
+!          at least be of the size Grid rank.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+
+ ! Local variables 
+ integer :: lDE, localrc
+ integer :: tmp_staggerloc
+
+   ! Initialize return code 
+   localrc = ESMF_RC_NOT_IMPL 
+   if (present(rc)) rc = ESMF_RC_NOT_IMPL 
+
+   ! Check init status of arguments 
+   ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
+
+
+   ! Have default option for localDE
+   if (present(localDE)) then
+      lDE=localDE
+   else
+      lDE=0
+   endif
+
+   ! Have default option for staggerloc
+   if (present(staggerloc)) then
+       tmp_staggerloc=staggerloc%staggerloc
+   else
+       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc  ! default
+   endif
+
+   ! NOTE THERE IS NO INPUT VALUE CHECKING HERE BECAUSE IT'S DONE IN 
+   ! THE C++ VERSION. 
+
+   ! Call into the C++ interface
+   call c_esmc_gridgetcoordr8(grid, lDE, tmp_staggerloc, &  
+                              index, coord, localrc)
+   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Return successfully 
+    if (present(rc)) rc = ESMF_SUCCESS 
+
+    end subroutine ESMF_GridGetCoordR8
 
 
 !------------------------------------------------------------------------------

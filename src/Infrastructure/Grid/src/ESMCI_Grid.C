@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.40 2007/12/24 14:24:53 rokuingh Exp $
+// $Id: ESMCI_Grid.C,v 1.41 2008/01/04 18:28:15 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.40 2007/12/24 14:24:53 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.41 2008/01/04 18:28:15 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -1207,7 +1207,7 @@ int Grid::getDistExclusiveUBound(
 //-----------------------------------------------------------------------------
 
 
-#if 0
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Grid::getCoordInternal()"
@@ -1215,6 +1215,7 @@ int Grid::getDistExclusiveUBound(
 // !IROUTINE:  Grid::getCoordInternal()"
 //
 // !INTERFACE:
+template <class TYPE>
 void Grid::getCoordInternal(
 //
 // !RETURN VALUE:
@@ -1225,29 +1226,179 @@ void Grid::getCoordInternal(
                                  int staggerloc, // (in)
                                  int localDE,    // (in)
                                  int *index,     // (in)  needs to be of size Grid rank
-                                 int *coord      // (out) needs to be of size Grid rank
+                                 TYPE *coord     // (out) needs to be of size Grid rank
                                  ){
 //
 // !DESCRIPTION:
 //  Get coordinates from an index tuple. For efficiency reasons this version doesn't do error checking
 //  for a public version with error checking see  Grid::getCoord().  
 //
+//
 //EOPI
 //-----------------------------------------------------------------------------
+  int coordIndex[ESMF_MAXDIM];
+  ESMC_LocalArray *localArray;
+
+  // TODO: need to make this function more efficient. Use templates? 
 
    // Loop Getting coordinates
   for (int c=0; c<rank; c++) {
 
+    //// Map Grid indices to coord indices
+    for (int i=0; i<coordRank[c]; i++) {
+      coordIndex[i]=index[coordDimMap[c][i]];
+    }
+
+    //// Get LocalArray cooresponding to staggerloc, coord and localDE
+    localArray=(coordArrayList[staggerloc][c]->getLocalarrayList())[localDE];
+   
+    //// Get pointer to LocalArray data
+    localArray->getDataInternal(coordIndex, coord+c);
+  }
+}
+
+// Add more types here if necessary
+template void Grid::getCoordInternal(int staggerloc, int localDE, int *index, ESMC_R8 *data);
+template void Grid::getCoordInternal(int staggerloc, int localDE, int *index, ESMC_R4 *data);
+template void Grid::getCoordInternal(int staggerloc, int localDE, int *index, ESMC_I4 *data);
 
 
+//-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::getCoord()"
+//BOPI
+// !IROUTINE:  Grid::getCoord()"
+//
+// !INTERFACE:
+template <class TYPE>
+int Grid::getCoord(
+//
+// !RETURN VALUE:
+//   return code
+//   
+// !ARGUMENTS:
+//
+                                 int staggerloc, // (in)
+                                 int localDE,    // (in)
+                                 int *index,     // (in)  needs to be of size Grid rank
+                                 TYPE *coord     // (out) needs to be of size Grid rank
+                                 ){
+//
+// !DESCRIPTION:
+//  Get coordinates from an index tuple. For efficiency reasons this version doesn't do error checking
+//  for a public version with error checking see  Grid::getCoord().  
+//
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int coordIndex[ESMF_MAXDIM];
+  ESMC_LocalArray *localArray;
+  int localrc = ESMC_RC_NOT_IMPL;
+  int rc = ESMC_RC_NOT_IMPL;
+
+  // Check status
+  if (status < ESMC_GRIDSTATUS_SHAPE_READY) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+      "- Grid not fully created", &rc);
+    return rc;
   }
 
+  // Check staggerloc
+  if ((staggerloc < 0) || (staggerloc >= staggerLocCount)) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+      "- stagger location out of range", &rc);
+    return rc;
+  }
+
+  // Ensure localDE isn't out of range for this PET
+  if ((localDE < 0) || (localDE >=distgrid->getDELayout()->getLocalDeCount())) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+          "- localDE outside range on this processor", &rc);
+        return rc;
+  }
+
+  // Check here for coordinate Array existance
+  if (!hasStaggerLoc(staggerloc)) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+               "- staggerloc is empty on this Grid", &rc);
+    return rc;
+  }
+
+  // Loop Getting coordinates
+  for (int c=0; c<rank; c++) {
+
+    //// Map Grid indices to coord indices
+    for (int i=0; i<coordRank[c]; i++) {
+      coordIndex[i]=index[coordDimMap[c][i]];
+    }
+
+    //// Get LocalArray cooresponding to staggerloc, coord and localDE
+    localArray=(coordArrayList[staggerloc][c]->getLocalarrayList())[localDE];
+   
+    //// Get pointer to LocalArray data
+    localrc=localArray->getData(coordIndex, coord+c);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+                                              &rc)) return rc; 
+  }
+  
+  // return success
+  return ESMF_SUCCESS;
+}
+
+// Add more types here if necessary
+template int Grid::getCoord(int staggerloc, int localDE, int *index, ESMC_R8 *data);
+template int Grid::getCoord(int staggerloc, int localDE, int *index, ESMC_R4 *data);
+template int Grid::getCoord(int staggerloc, int localDE, int *index, ESMC_I4 *data);
+
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::hasStaggerLoc()"
+//BOPI
+// !IROUTINE:  Grid::hasStaggerLoc()
+//
+// !INTERFACE:
+bool Grid::hasStaggerLoc(
+//
+// !RETURN VALUE:
+//   true if staggerloc is allocated in the Grid
+//   
+// !ARGUMENTS:
+//
+                                 int staggerloc // (in)
+                                 ){
+//
+// !DESCRIPTION:
+//  Used to detect if staggerloc has been allocated in the Grid.
+//
+//
+//EOPI
+//-----------------------------------------------------------------------------
+
+  // Check status
+  if (status < ESMC_GRIDSTATUS_SHAPE_READY) {
+    return false;
+  }
+
+  // Check staggerloc
+  if ((staggerloc < 0) || (staggerloc >= staggerLocCount)) {
+    return false;
+  }
+
+  // Loop Getting coordinates
+  for (int c=0; c<rank; c++) {
+    if (coordArrayList[staggerloc][c] == ESMC_NULL_POINTER) return false;
+  }
+  
+  // return success
+  return true;
 }
 //-----------------------------------------------------------------------------
-#endif
-
-
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

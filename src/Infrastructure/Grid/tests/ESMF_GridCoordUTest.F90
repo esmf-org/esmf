@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.20 2007/11/18 04:26:00 oehmke Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.21 2008/01/04 18:28:16 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.20 2007/11/18 04:26:00 oehmke Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.21 2008/01/04 18:28:16 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -56,10 +56,14 @@ program ESMF_GridCoordUTest
   type(ESMF_ArraySpec) :: arrayspec2D,arrayspec1D
   type(ESMF_StaggerLoc) :: customStagger
   real(ESMF_KIND_R8), pointer :: fptr(:,:), fptr3D(:,:,:)
+  real(kind=ESMF_KIND_R4), parameter :: var=1.0
   integer :: petMap2D(2,2,1)
   integer :: petMapReg2D(2,1,2)
   integer :: compELWidth(2),compEUWidth(2)
-  integer :: lbnds(1),ubnds(1)
+  integer :: lbnds(1),ubnds(1),clbnd(3),cubnd(3)
+  integer :: i1,i2,i3, index(3)
+  integer :: lDE, localDECount
+  real(ESMF_KIND_R8) :: coord(3)
   character(len=ESMF_MAXSTR) :: string
 
   !-----------------------------------------------------------------------------
@@ -2221,6 +2225,131 @@ program ESMF_GridCoordUTest
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!! Test Grid Get Coord XXX !!!!!!!!!!!!!!!!!!!! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test ESMF_GridGetCoord getting coordinate from an index location in grid"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! init success flag
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! if petCount >1, setup petMap
+  if (petCount .gt. 1) then
+     petMap2D(:,1,1)=(/0,1/)
+     petMap2D(:,2,1)=(/2,3/)
+
+     grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+                              countsPerDeDim2=(/3,4/),  &
+                              countsPerDeDim3=(/5/),  &
+                              indexflag=ESMF_INDEX_GLOBAL, &
+                              petMap=petMap2D, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  else
+     grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+                              countsPerDeDim2=(/3,4/),  &
+                              countsPerDeDim3=(/5/),  & 
+                              indexflag=ESMF_INDEX_GLOBAL, &
+                              rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  endif
+
+  ! Allocate coordinates
+  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get number of local DEs
+  call ESMF_GridGet(grid2D, localDECount=localDECount, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Get memory and set coords
+  do lDE=0,localDECount-1
+ 
+     !! get coord 1
+     call ESMF_GridGetCoord(grid2D, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=1, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptr3D, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
+
+     !! set coord 1  
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+     do i3=clbnd(3),cubnd(3)
+        fptr3D(i1,i2,i3)=REAL(i1,ESMF_KIND_R8)
+     enddo
+     enddo
+     enddo
+
+     !! get coord 2
+     call ESMF_GridGetCoord(grid2D, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=2, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptr3D, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
+
+     !! set coord 2  
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+     do i3=clbnd(3),cubnd(3)
+        fptr3D(i1,i2,i3)=REAL(i2,ESMF_KIND_R8)
+     enddo
+     enddo
+     enddo
+
+     !! get coord 3
+     call ESMF_GridGetCoord(grid2D, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=3, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptr3D, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
+
+     ! set coord 3  
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+     do i3=clbnd(3),cubnd(3)
+        fptr3D(i1,i2,i3)=REAL(i3,ESMF_KIND_R8)
+     enddo
+     enddo
+     enddo
+  enddo    
+
+  !check coords
+  do lDE=0,localDECount-1
+
+     ! Get Bounds of DE
+     call ESMF_GridGet(grid2D, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
+
+     ! check coord   
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+     do i3=clbnd(3),cubnd(3)
+        index(1)=i1
+        index(2)=i2
+        index(3)=i3
+
+        call ESMF_GridGetCoord(grid2D, localDE=lDE, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
+                              index=index, coord=coord, rc=localrc)
+        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
+
+        if ((coord(1) .ne. REAL(i1,ESMF_KIND_R8)) .or. &
+            (coord(2) .ne. REAL(i2,ESMF_KIND_R8)) .or. &
+            (coord(3) .ne. REAL(i3,ESMF_KIND_R8))) then
+            write(*,*) "(",i1,",",i2,",",i3,") .ne. (",coord(1),",",coord(2),",",coord(3),")"
+            correct=.false.
+        endif
+     enddo
+     enddo
+     enddo    
+  enddo
+
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !!!!!!!!!!!!!!!!!!! Test 2D Plus 1 Bounds with ESMF_GridGet  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.27 2007/12/24 14:24:53 rokuingh Exp $
+// $Id: ESMCI_Grid_F.C,v 1.28 2008/01/04 18:28:15 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -1077,6 +1077,8 @@ extern "C" {
 
 
 
+
+
   ///////////////////////////////////////////////////////////////////////////////////
   
   void FTN(c_esmc_gridgetpsloc)(ESMCI::Grid **_grid, 
@@ -1640,6 +1642,64 @@ extern "C" {
   } 
 
   ///////////////////////////////////////////////////////////////////////////////////
+
+
+
+  ///////////////////////////////////////////////////////////////////////////////////
+  
+  void FTN(c_esmc_gridgetcoordr8)(ESMCI::Grid **_grid, 
+		       		int *_localDE, int *_staggerloc,  
+                                int *index, ESMC_R8 *coord, int *_rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridgetcoordr8()"
+    int localrc;
+    int rank;
+    ESMCI::Grid *grid;
+
+    // Get Grid pointer
+    grid=*_grid;
+
+    //Initialize return code
+    localrc = ESMC_RC_NOT_IMPL;
+    if (_rc!=NULL) *_rc = ESMC_RC_NOT_IMPL;
+
+
+    // Check grid status
+   if (grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
+          "- grid not ready for this operation ", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+    }
+
+   // TODO: Make sure coords are within the correct bounds
+
+   // TODO: make sure _localDE and _staggerloc are not NULL?
+
+    // Input Error Checking
+    if ((*_localDE < 0) || (*_localDE >=grid->getDistGrid()->getDELayout()->getLocalDeCount())) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+          "- localDE outside range on this processor", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+    }
+
+   if ((*_staggerloc < 0) || (*_staggerloc >=  grid->getStaggerLocCount())) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+          "- staggerloc outside of range for grid", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+    }
+
+
+   // Get Coords 
+   grid->getCoord(*_staggerloc, *_localDE, index, coord);
+
+
+    // return successfully
+    if (_rc!=NULL) *_rc = ESMF_SUCCESS;
+  
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////////
+
 
 
   

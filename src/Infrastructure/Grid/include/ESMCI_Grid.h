@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.24 2007/12/24 14:24:53 rokuingh Exp $
+// $Id: ESMCI_Grid.h,v 1.25 2008/01/04 18:28:15 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -189,6 +189,9 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   const int   *getStaggerEdgeLWidth(int staggerloc) const {return staggerEdgeLWidthList[staggerloc];}
   const int   *getStaggerEdgeUWidth(int staggerloc) const {return staggerEdgeUWidthList[staggerloc];}
 
+  // detect if a given staggerloc is present in the Grid
+  bool hasStaggerLoc(int staggerloc);
+
   // Set data in an empty grid before commit
   int set(
 	  int _nameLen,                                // (in)
@@ -336,6 +339,23 @@ int getComputationalUBound(
                       ESMC_DataCopy *_docopy,
                       int *rcArg
                       );
+
+
+ // Get data from a specific coordinate location
+ template <class TYPE> int getCoord(
+                                     int staggerloc, // (in)
+                                     int localDE,    // (in)
+                                     int *index,     // (in)  needs to be of size Grid rank
+                                     TYPE *coord     // (out) needs to be of size Grid rank
+                                     );
+
+ // Get data from a specific coordinate location without error checking 
+ template <class TYPE> void getCoordInternal(
+                                 int staggerloc, // (in)
+                                 int localDE,    // (in)
+                                 int *index,     // (in)  needs to be of size Grid rank
+                                 TYPE *coord     // (out) needs to be of size Grid rank
+                                 );
  
 
  // setup internal structures in _grid based on parameters
