@@ -1,4 +1,4 @@
-/* $Id: mpi.h,v 1.11 2007/12/28 18:11:39 dneckels Exp $ */
+/* $Id: mpi.h,v 1.12 2008/01/04 18:03:08 w6ws Exp $ */
 
 /*
    This is a special set of bindings for uni-processor use of MPI by the PETSc library.
@@ -103,7 +103,7 @@ typedef void   *MPI_Group;
 typedef struct {int MPI_TAG,MPI_SOURCE,MPI_ERROR;} MPI_Status;
 typedef char*   MPI_Errhandler;
 
-extern int MPIUNI_Memcpy(void*,void*,int);
+extern int MPIUNI_Memcpy(void*,const void*,int);
 
 /* In order to handle datatypes, we make them into "sizeof(raw-type)";
     this allows us to do the MPIUNI_Memcpy's easily */

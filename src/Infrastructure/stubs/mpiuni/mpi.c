@@ -1,4 +1,4 @@
-/*$Id: mpi.c,v 1.4 2006/09/22 23:55:42 theurich Exp $*/
+/*$Id: mpi.c,v 1.5 2008/01/04 18:03:09 w6ws Exp $*/
 
 /*
       This provides a few of the MPI-uni functions that cannot be implemented
@@ -49,7 +49,7 @@ static int      num_attr = 1,mpi_tag_ub = 100000000;
 /* 
    To avoid problems with prototypes to the system memcpy() it is duplicated here
 */
-int MPIUNI_Memcpy(void *a,void* b,int n) {
+int MPIUNI_Memcpy(void *a,const void* b,int n) {
   int  i;
   char *aa= (char*)a;
   char *bb= (char*)b;
