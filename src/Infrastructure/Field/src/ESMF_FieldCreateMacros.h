@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.29 2007/12/27 21:30:32 feiliu Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.30 2008/01/04 00:45:53 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -129,7 +129,7 @@
         integer, intent(in), optional :: maxHaloUWidth(:) @\
         integer, intent(out), optional :: rc                @\
 ! local variables @\
-        integer                        :: localrc @\
+        integer                        :: localrc, i @\
         type(ESMF_Array)               :: array @\
         type(ESMF_DistGrid)            :: distgrid @\
         type(ESMF_ArraySpec)           :: arrayspec @\
@@ -161,9 +161,15 @@
             field%ftypep%staggerloc = ESMF_STAGGERLOC_CENTER @\
         endif @\
  @\
-        if(present(gridToFieldMap)) then @\
-            field%ftypep%gridToFieldMap  = gridToFieldMap @\
+      ! Default of gridToFieldMap should be {1,2,3...} @\
+        if (.not. present(gridToFieldMap)) then @\
+            do i = 1, ESMF_MAXDIM @\
+              field%ftypep%gridToFieldMap(i) = i @\
+            enddo @\
+        else @\
+            field%ftypep%gridToFieldMap = gridToFieldMap @\
         end if @\
+ @\
         if(present(ungriddedLBound)) then @\
             field%ftypep%ungriddedLBound = ungriddedLBound @\
         end if @\

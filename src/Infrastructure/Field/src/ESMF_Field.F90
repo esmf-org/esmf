@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.285 2007/12/27 21:30:32 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.286 2008/01/04 00:45:53 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -205,7 +205,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.285 2007/12/27 21:30:32 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.286 2008/01/04 00:45:53 feiliu Exp $'
 
 !==============================================================================
 !
@@ -3503,10 +3503,10 @@
                  ESMF_CONTEXT, rc)
              return
           endif 
-          ! Verify that array rank is greater than or equal to grid rank
-          if (gridrank .gt. arrayrank) then
+          ! Verify that array rank is greater than or equal to grid rank + ungridded bound rank
+          if ( arrayrank .lt. gridrank) then
               call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                 "grid DistGrid does not match array DistGrid", &
+                 "grid rank + ungridded Bound rank not equal to array rank", &
                   ESMF_CONTEXT, rc)
               return
           endif
@@ -4049,11 +4049,22 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! Default of gridToFieldMap should be {1,2,3...}
-!      if (.not. present(gridToFieldMap)) then
-!          do i = 1, ESMF_MAXDIM
-!            gridToFieldMap(i) = i
-!          enddo
-!      endif
+      if (.not. present(gridToFieldMap)) then
+          do i = 1, ESMF_MAXDIM
+            ftype%gridToFieldMap(i) = i
+          enddo
+      else
+         ftype%gridToFieldMap = gridToFieldMap
+      endif
+
+      if(present(ungriddedLBound)) &
+         ftype%ungriddedLBound = ungriddedLBound
+      if(present(ungriddedUBound)) &
+         ftype%ungriddedUBound = ungriddedUBound
+      if(present(maxHaloLWidth)) &
+         ftype%maxHaloLWidth = maxHaloLWidth
+      if(present(maxHaloUWidth)) &
+         ftype%maxHaloUWidth = maxHaloUWidth
 
       ftype%array = array
       ftype%datastatus = ESMF_STATUS_READY
@@ -4153,6 +4164,9 @@
 
       integer :: localrc 
       type(ESMF_Field) :: tfield                  ! temp field for error check
+      type(ESMF_ArraySpec) :: arrayspec
+      type(ESMF_TypeKind)  :: typekind
+      integer              :: arrayrank, i
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -4171,10 +4185,41 @@
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+      call ESMF_ArrayGet(array, typekind=typekind, &
+          rank=arrayrank, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      call ESMF_ArraySpecSet(arrayspec, typekind=typekind, &
+          rank=arrayrank, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
+      ! Default of gridToFieldMap should be {1,2,3...}
+      if (.not. present(gridToFieldMap)) then
+          do i = 1, ESMF_MAXDIM
+            ftype%gridToFieldMap(i) = i
+          enddo
+      else
+         ftype%gridToFieldMap = gridToFieldMap
+      end if
+
+      if(present(ungriddedLBound)) &
+         ftype%ungriddedLBound = ungriddedLBound
+      if(present(ungriddedUBound)) &
+         ftype%ungriddedUBound = ungriddedUBound
+      if(present(maxHaloLWidth)) &
+         ftype%maxHaloLWidth = maxHaloLWidth
+      if(present(maxHaloUWidth)) &
+         ftype%maxHaloUWidth = maxHaloUWidth
 
       ftype%array = array
+      ftype%arrayspec = arrayspec
       ftype%datastatus = ESMF_STATUS_READY
+      ftype%grid  = grid
+      ftype%gridstatus = ESMF_STATUS_READY
+      ftype%fieldstatus = ESMF_STATUS_READY 
 
       ! instead of adding error checking all over the place, call the
       ! validate routine to check sizes of array vs grid to be sure
