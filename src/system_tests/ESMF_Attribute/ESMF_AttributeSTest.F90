@@ -79,10 +79,24 @@ program ESMF_AttributeSTest
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   if (petCount .lt. 6) then
-    print *, "This system test needs to run at least 6-way, petCount = ", &
-      petCount
-    goto 10
-  endif
+    ! Create the 2 model components and coupler
+    cname1 = "user model 1"
+    ! use petList to define comp1 on PET 0,1,2,3
+    comp1 = ESMF_GridCompCreate(name=cname1, petList=(/0/), rc=rc)
+    !print  *, "Created component ", trim(cname1), "rc =", rc
+    if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) &
+      call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+
+    cname2 = "user model 2"
+    ! use petList to define comp2 on PET 4,5
+    comp2 = ESMF_GridCompCreate(name=cname2, petList=(/0/), rc=rc)
+    !print  *, "Created component ", trim(cname2), "rc =", rc
+    if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) &
+      call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  
+  else
 
   ! Create the 2 model components and coupler
   cname1 = "user model 1"
@@ -100,6 +114,8 @@ program ESMF_AttributeSTest
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  
+  endif
 
   cplname = "user two-way coupler"
   ! no petList means that coupler component runs on all PETs
