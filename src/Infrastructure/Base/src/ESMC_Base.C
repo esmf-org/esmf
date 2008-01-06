@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.91 2007/12/17 15:45:26 rokuingh Exp $
+// $Id: ESMC_Base.C,v 1.92 2008/01/06 20:21:38 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.91 2007/12/17 15:45:26 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.92 2008/01/06 20:21:38 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -2605,22 +2605,19 @@ if (count) {
   int i;
   char msgbuf[ESMF_MAXSTR];
   int localrc;
-  int *attpackNum;
-  int attCount;
+  int attpackNum=0;
   ESMC_Attribute **attpackList;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attpackList = ESMC_Base::ESMC_AttPackGet(convention, purpose, object, attpackNum);
+  attpackList = ESMC_Base::ESMC_AttPackGet(convention, purpose, object, &attpackNum);
   if (attpackList == NULL) return ESMF_FAILURE;
 
-  attCount = *attpackNum;
-
-  sprintf(msgbuf, " Attribute package contains %d attributes.\n", *attpackNum);
+  sprintf(msgbuf, " Attribute package contains %d attributes.\n", attpackNum);
   printf(msgbuf);
   ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
-  for (i=0; i<attCount; i++) {
+  for (i=0; i<attpackNum; i++) {
       sprintf(msgbuf, " Attr %d: ", i);
       printf(msgbuf);
       ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
