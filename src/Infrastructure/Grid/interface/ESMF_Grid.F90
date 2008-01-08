@@ -150,9 +150,9 @@ public  ESMF_DefaultFlag
   !public ESMF_GridGetAttributeCount  ! number of attribs
   !public ESMF_GridGetAttributeInfo   ! get type, length by name or number
 
-  !public ESMF_GridCreateAttPack      ! Attribute packages
-  !public ESMF_GridSetAttPack         ! Attribute packages
-  !public ESMF_GridWriteAttPack       ! Attribute packages
+  public ESMF_GridCreateAttPack      ! Attribute packages
+  public ESMF_GridSetAttPack         ! Attribute packages
+  public ESMF_GridWriteAttPack       ! Attribute packages
 
 ! - ESMF-internal methods:
   public ESMF_GridGetInit  
@@ -162,7 +162,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.51 2008/01/08 01:22:08 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.52 2008/01/08 01:48:18 rokuingh Exp $'
 
 !==============================================================================
 ! 
