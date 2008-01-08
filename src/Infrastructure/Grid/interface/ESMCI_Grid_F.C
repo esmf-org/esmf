@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.28 2008/01/04 18:28:15 oehmke Exp $
+// $Id: ESMCI_Grid_F.C,v 1.29 2008/01/08 01:22:08 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -1618,7 +1618,297 @@ extern "C" {
 
   }  // end c_ESMC_AttributeGetChar
 
+void FTN(c_esmc_gridcreateattpack)(ESMCI::Grid **grid, char *name, char *convention,
+          char *purpose, char *object, int *rc, int nlen, int clen, int plen, int olen) {
+          
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridcreateattpack()"          
+              
+  int status;
+  char *cname, *cconv, *cpurp, *cobj;
 
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!grid) {
+    if (rc) *rc = ESMF_FAILURE;
+    return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cname = ESMC_F90toCstring(name, nlen);
+  if (!cname) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // copy and convert F90 string to null terminated one
+  cconv = ESMC_F90toCstring(convention, clen);
+  if (!cconv) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // copy and convert F90 string to null terminated one
+  cpurp = ESMC_F90toCstring(purpose, plen);
+  if (!cpurp) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // copy and convert F90 string to null terminated one
+  cobj = ESMC_F90toCstring(object, olen);
+  if (!cobj) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // Set the attribute on the object.
+  *rc = (*grid)->ESMC_CreateAttPack(cname, cconv, cpurp, cobj);
+
+  delete [] cname;
+  delete [] cconv;
+  delete [] cpurp;
+  delete [] cobj;
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+  }  // end c_ESMC_createattpack
+
+  void FTN(c_esmc_gridsetattpack)(ESMCI::Grid **grid, char *name, char *value,
+          char *convention, char *purpose,  char *object,
+          int *rc, int nlen, int vlen, int clen, int plen, int olen) {
+          
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridsetattpack()"          
+              
+  int status;
+  char *cname, *cvalue, *cconv, *cpurp, *cobj;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!grid) {
+    if (rc) *rc = ESMF_FAILURE;
+    return;
+  }
+
+  // simple sanity checks before doing any more work
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name", &status);
+      //printf("ESMF_AttributeSet: bad attribute name\n");
+      if (rc) *rc = status;
+      return;
+  }
+
+  if ((!value) || (vlen <= 0) || (value[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute value", &status);
+      //printf("ESMF_AttributeSet: bad attribute value\n");
+      if (rc) *rc = status;
+      return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cname = ESMC_F90toCstring(name, nlen);
+  if (!cname) {
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cvalue = ESMC_F90toCstring(value, vlen);
+  if (!cvalue) {
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cconv = ESMC_F90toCstring(convention, clen);
+  if (!cconv) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // copy and convert F90 string to null terminated one
+  cpurp = ESMC_F90toCstring(purpose, plen);
+  if (!cpurp) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // copy and convert F90 string to null terminated one
+  cobj = ESMC_F90toCstring(object, olen);
+  if (!cobj) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // Set the attribute on the object.
+  *rc = (*grid)->ESMC_SetAttPack(cname, cvalue, cconv, cpurp, cobj);
+
+  delete [] cname;
+  delete [] cvalue;
+  delete [] cconv;
+  delete [] cpurp;
+  delete [] cobj;
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+  }  // end c_ESMC_setattpack
+
+  void FTN(c_esmc_gridwriteattpack)(ESMCI::Grid **grid, char *convention, char *purpose,
+          char *object, int *rc, int clen, int plen, int olen) { 
+          
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridwriteattpack()"
+              
+  int status;
+  char *cconv, *cpurp, *cobj;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!grid) {
+    if (rc) *rc = ESMF_FAILURE;
+    return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cconv = ESMC_F90toCstring(convention, clen);
+  if (!cconv) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // copy and convert F90 string to null terminated one
+  cpurp = ESMC_F90toCstring(purpose, plen);
+  if (!cpurp) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // copy and convert F90 string to null terminated one
+  cobj = ESMC_F90toCstring(object, olen);
+  if (!cobj) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // Set the attribute on the object.
+  *rc = (*grid)->ESMC_WriteAttPack(cconv, cpurp, cobj);
+
+  delete [] cconv;
+  delete [] cpurp;
+  delete [] cobj;
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+  }  // end c_ESMC_writeattpack
 
   ///////////////////////////////////////////////////////////////////////////////////
 

@@ -162,7 +162,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.50 2008/01/04 18:28:15 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.51 2008/01/08 01:22:08 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -10562,7 +10562,254 @@ endif
 
 
 !------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCreateAttPack"
+!BOPI
+! !IROUTINE: ESMF_GridCreateAttPack - Setup the attribute package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridCreateAttPack()
+      subroutine ESMF_GridCreateAttPack(grid, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid  
+      character (len = *), intent(in), optional :: convention
+      character (len = *), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
 
+!
+! !DESCRIPTION:
+!     Sets up the attribute package for the {\tt grid}.
+!     The attribute package defines the convention, purpose, and object type of the three 
+!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!      An {\tt ESMF\_Grid} object.
+!     \item [convention]
+!      The convention of the attribute package.
+!     \item [purpose]
+!      The purpose of the attribute package.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                           ! Error status
+      character(ESMF_MAXSTR) :: name1, name2, name3, name4
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
+      call ESMF_GridValidate(grid, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+
+      fobject = 'grid'
+
+      name1 = 'longname'
+      name2 = 'shortname'
+      name3 = 'units'
+      name4 = 'coordinates'
+
+      call c_ESMC_GridCreateAttPack(grid, name1, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_GridCreateAttPack(grid, name2, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_GridCreateAttPack(grid, name3, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_GridCreateAttPack(grid, name4, fconvention, &
+        fpurpose, fobject, localrc)
+
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridCreateAttPack
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetAttPack"
+!BOPI
+! !IROUTINE: ESMF_GridSetAttPack - Setup the attribute package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridSetAttPack()
+      subroutine ESMF_GridSetAttPack(grid, name, value, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid  
+      character(ESMF_MAXSTR), intent(in) :: name
+      character(ESMF_MAXSTR), intent(in) :: value
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Sets an attribute the attribute package for the {\tt grid}.
+!     The attribute package defines the convention, purpose, and object type of the three 
+!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!      An {\tt ESMF\_Grid} object.
+!     \item [name]
+!      The name of the attribute to be set.
+!     \item [value]
+!      The value of the attribute to be set.
+!     \item [convention]
+!      The convention of the attribute package.
+!     \item [purpose]
+!      The purpose of the attribute package.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                           ! Error status
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
+
+      call ESMF_GridValidate(grid, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'grid'
+
+      call c_ESMC_GridSetAttPack(grid, name, value, fconvention, &
+        fpurpose, fobject, localrc)
+        
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridSetAttPack
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridWriteAttPack"
+!BOPI
+! !IROUTINE: ESMF_GridWriteAttPack - Print the attribute package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridWriteAttPack()
+      subroutine ESMF_GridWriteAttPack(grid, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid  
+      character (len = *), intent(in), optional :: convention
+      character (len = *), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Print the attribute package for the {\tt grid}.
+!     The attribute package defines the convention, purpose, and object type of the three 
+!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!      An {\tt ESMF\_Grid} object.
+!     \item [convention]
+!      The convention of the attribute package.
+!     \item [purpose]
+!      The purpose of the attribute package.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                           ! Error status
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
+
+      call ESMF_GridValidate(grid, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'grid'
+
+      call c_ESMC_GridWriteAttPack(grid, fconvention, &
+        fpurpose, fobject, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridWriteAttPack
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 
 end module ESMF_GridMod
