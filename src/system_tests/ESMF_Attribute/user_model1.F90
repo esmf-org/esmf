@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.4 2007/12/24 14:23:47 rokuingh Exp $
+! $Id: user_model1.F90,v 1.5 2008/01/08 01:39:43 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -173,14 +173,24 @@ module user_model1
 
       call ESMF_GridSetAttribute(grid, name, value, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
-      
       if (myPet .eq. 0) then
-        !print *, 'Set an attribute on the grid with:'
-        !print *, 'name: ', name
-        !print *, 'value: ', value
+        print *, 'Set an attribute on the grid with:'
+        print *, 'name: ', name
+        print *, 'value: ', value
       endif
       
-      !call ESMF_GridGetAttribute(grid, name, value, rc=status)
+      call ESMF_GridGetAttribute(grid, name, value, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+      if (myPet .eq. 0) then
+        print *, 'Get an attribute on the grid with:'
+        print *, 'name: ', name
+        print *, 'value: ', value
+      endif
+
+      call ESMF_GridCreateAttPack(field, convention=fconv, purpose=fpurp, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+      
+      call ESMF_GridSetAttPack(field, name, value, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
 
       if (myPet .eq. 0) then
@@ -195,6 +205,9 @@ module user_model1
         call ESMF_FieldWriteAttPack(field, convention=fconv, purpose=fpurp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
         
+        print *, 'Write the Grid Attpack from the second run of component 1.'
+        call ESMF_GridWriteAttPack(field, convention=fconv, purpose=fpurp, rc=rc)
+        if (status .ne. ESMF_SUCCESS) goto 20
       endif
     endif
 
