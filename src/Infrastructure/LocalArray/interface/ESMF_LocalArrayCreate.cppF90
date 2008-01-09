@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.5 2007/11/19 23:12:28 theurich Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.6 2008/01/09 01:02:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -159,7 +159,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.5 2007/11/19 23:12:28 theurich Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.6 2008/01/09 01:02:31 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -295,7 +295,7 @@ end function
 ! !ARGUMENTS:
     integer,              intent(in)            :: rank
     type(ESMF_TypeKind),  intent(in)            :: typekind
-    integer,              intent(in)            :: counts(:)
+    integer,              intent(in),  optional :: counts(:)
     integer,              intent(in),  optional :: lbounds(:)
     integer,              intent(in),  optional :: ubounds(:)
     integer,              intent(out), optional :: rc 
@@ -310,9 +310,10 @@ end function
 !    Array rank (dimensionality, 1D, 2D, etc). Maximum allowed is 7D.
 !  \item[typekind]
 !    Array typekind. See section \ref{opt:typekind} for valid values.
-!  \item[counts]
-!    The number of items in each dimension of the array.  This is a 1D
-!    integer array the same length as the rank.
+!  \item[{[counts]}]
+!    The number of items in each dimension of the array. This is a 1D
+!    integer array the same length as the rank. The {\tt count} argument may
+!    be omitted if both {\tt lbounds} and {\tt ubounds} arguments are present.
 !  \item[{[lbounds]}]
 !   An integer array of length rank, with the lower index for each dimension.
 !  \item[{[ubounds]}]
@@ -326,34 +327,84 @@ end function
     ! Local vars
     integer                 :: localrc          ! local return code
     type (ESMF_LocalArray)  :: array            ! new C++ LocalArray
+    integer, dimension(ESMF_MAXDIM) :: cnts     ! local counts
     integer, dimension(ESMF_MAXDIM) :: lb, ub   ! local bounds
+    integer:: i
 
     array%this = ESMF_NULL_POINTER
 
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
+    
+    ! Check that enough info from counts, lbounds and ubounds is present
+    if (.not.present(counts)) then
+      if (.not.present(lbounds).or..not.present(ubounds)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_OPT, &
+          "- lbounds and ubounds must be present when counts argument is not present", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
+    endif
+    
+    ! Check size of optional counts and bounds and fill the local variables
+    if (present(lbounds)) then
+      if (size(lbounds)<rank) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &
+          "- lbounds argument must be of size rank", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
+      lb(1:rank) = lbounds(1:rank)
+    endif
+    if (present(ubounds)) then
+      if (size(ubounds)<rank) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &
+          "- ubounds argument must be of size rank", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
+      ub(1:rank) = ubounds(1:rank)
+    endif
+    if (present(counts)) then
+      if (size(counts)<rank) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &
+          "- counts argument must be of size rank", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
+      cnts(1:rank) = counts(1:rank)
+    else
+      cnts(1:rank) = ub(1:rank) - lb(1:rank) + 1 
+    endif
+    if (.not.present(lbounds).and..not.present(ubounds)) then
+      lb(1:rank) = 1
+      ub(1:rank) = cnts(1:rank)
+    else if (.not.present(lbounds)) then
+      lb(1:rank) = ub(1:rank) - cnts(1:rank) + 1
+    else if (.not.present(ubounds)) then
+      ub(1:rank) = lb(1:rank) + cnts(1:rank) - 1
+    endif
+    
+    ! Check that the local bounds and counts variables match
+    do i=1, rank
+      if (cnts(i).ne.(ub(i)-lb(i)+1)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+          "- counts and bounds mismatch detected", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
+    enddo
 
-    ! Assume defaults first, then alter if lb or ub specified. 
-    lb = 1
-    ub(1:size(counts)) = counts
-    if (present(lbounds)) then 
-        lb(1:size(lbounds)) = lbounds
-    endif 
-    if (present(ubounds)) then 
-        ub(1:size(ubounds)) = ubounds
-    endif 
-
-    ! TODO: should this take the counts, or not?  for now i am going to
-    !  set the counts after i have created the f90 array and not here.
+    ! Create an initial Array object that must be completed below
     call c_ESMC_LocalArrayCreateNoData(array, rank, typekind, &
       ESMF_FROM_FORTRAN, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
-    call ESMF_LocalArrConstrF90Ptr(array, counts, rank, typekind, lb, ub, &
-      localrc)
+    ! Complete the initial Array object
+    call ESMF_LocalArrConstrF90Ptr(array, cnts, rank, typekind, lb, ub, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
@@ -386,7 +437,7 @@ end function
 !
 ! !ARGUMENTS:
     type(ESMF_ArraySpec), intent(inout)         :: arrayspec
-    integer,              intent(in)            :: counts(:)
+    integer,              intent(in),  optional :: counts(:)
     integer,              intent(in),  optional :: lbounds(:)
     integer,              intent(in),  optional :: ubounds(:)
     integer,              intent(out), optional :: rc 
@@ -399,15 +450,16 @@ end function
 !  \begin{description}
 !  \item[arrayspec]
 !    ArraySpec object specifying typekind and rank.
-!  \item[counts]
-!   The number of items in each dimension of the array.  This is a 1D
-!   integer array the same length as the rank.
+!  \item[{[counts]}]
+!    The number of items in each dimension of the array. This is a 1D
+!    integer array the same length as the rank. The {\tt count} argument may
+!    be omitted if both {\tt lbounds} and {\tt ubounds} arguments are present.
 !  \item[{[lbounds]}]
-!   An integer array of length rank, with the lower index for each dimension.
+!    An integer array of length rank, with the lower index for each dimension.
 !  \item[{[ubounds]}]
-!   An integer array of length rank, with the upper index for each dimension.
+!    An integer array of length rank, with the upper index for each dimension.
 !  \item[{[rc]}]
-!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
 !
 !EOP
@@ -432,7 +484,7 @@ end function
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
     
-    ! Call the list function to make the array
+    ! Call the CreateByTKR function to make the array
     ESMF_LocalArrayCreateBySpec = ESMF_LocalArrayCreateByTKR(rank, &
       typekind, counts, lbounds, ubounds, localrc)
     if (ESMF_LogMsgFoundError(localrc, &

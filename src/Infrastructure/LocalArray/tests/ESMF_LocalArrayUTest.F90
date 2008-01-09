@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.46 2007/11/19 23:12:29 theurich Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.47 2008/01/09 01:02:31 theurich Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -49,10 +49,8 @@
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
 !------------------------------------------------------------------------------
-!   ! Test 1:
 !   !  Create based on an existing, allocated F90 pointer. 
 !   !  Data is type Integer, 1D.
-    print *, ">>> Test 1:"
  
     !--------------------------------------------------------------------------
     !NEX_UTest
@@ -67,7 +65,6 @@
     write(name, *) "Creating a Local Array with Integer 1D Data Test"
     array1 = ESMF_LocalArrayCreate(intptr, ESMF_DATA_REF, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-    print *, "array 1a create returned"
    
     !--------------------------------------------------------------------------
     !NEX_UTest
@@ -75,8 +72,123 @@
     write(name, *) "Local Array Destroy Test"
     call ESMF_LocalArrayDestroy(array1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-    print *, "array 1a destroy returned"
 
+!------------------------------------------------------------------------------
+ 
+    !--------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Creating a LocalArray from TKR without counts, lbounds, ubounds"
+    write(failMsg, *) "Did return ESMF_SUCCESS"
+    array1 = ESMF_LocalArrayCreate(rank=1, typekind=ESMF_TYPEKIND_I4, rc=rc)
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+   
+    !--------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Creating a LocalArray from TKR with counts and without lbounds, ubounds"
+    write(failMsg, *) "Did return ESMF_SUCCESS"
+    counts(1) = 10
+    array1 = ESMF_LocalArrayCreate(rank=1, typekind=ESMF_TYPEKIND_I4, &
+      counts=counts, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+   
+    !--------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Local Array Destroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS."
+    call ESMF_LocalArrayDestroy(array1, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !--------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Creating a LocalArray from TKR with counts and lbounds and without ubounds"
+    write(failMsg, *) "Did return ESMF_SUCCESS"
+    counts(1) = 10
+    lb(1) = -5
+    array1 = ESMF_LocalArrayCreate(rank=1, typekind=ESMF_TYPEKIND_I4, &
+      counts=counts, lbounds=lb, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+   
+    !--------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Local Array Destroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS."
+    call ESMF_LocalArrayDestroy(array1, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !--------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Creating a LocalArray from TKR with counts and ubounds and without lbounds"
+    write(failMsg, *) "Did return ESMF_SUCCESS"
+    counts(1) = 10
+    ub(1) = 20
+    array1 = ESMF_LocalArrayCreate(rank=1, typekind=ESMF_TYPEKIND_I4, &
+      counts=counts, ubounds=ub, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+   
+    !--------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Local Array Destroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS."
+    call ESMF_LocalArrayDestroy(array1, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !--------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Creating a LocalArray from TKR with matching counts, lbounds and ubounds"
+    write(failMsg, *) "Did return ESMF_SUCCESS"
+    counts(1) = 10
+    lb(1) = -5
+    ub(1) = 4
+    array1 = ESMF_LocalArrayCreate(rank=1, typekind=ESMF_TYPEKIND_I4, &
+      counts=counts, lbounds=lb, ubounds=ub, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+   
+    !--------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Local Array Destroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS."
+    call ESMF_LocalArrayDestroy(array1, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
+    !--------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Creating a LocalArray from TKR with mis-matching counts, lbounds and ubounds"
+    write(failMsg, *) "Did return ESMF_SUCCESS"
+    counts(1) = 9
+    lb(1) = -5
+    ub(1) = 4
+    array1 = ESMF_LocalArrayCreate(rank=1, typekind=ESMF_TYPEKIND_I4, &
+      counts=counts, lbounds=lb, ubounds=ub, rc=rc)
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+   
+    !--------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Creating a LocalArray from TKR with rank that does not match bounds"
+    write(failMsg, *) "Did return ESMF_SUCCESS"
+    counts(1) = 10
+    lb(1) = -5
+    ub(1) = 4
+    array1 = ESMF_LocalArrayCreate(rank=2, typekind=ESMF_TYPEKIND_I4, &
+      counts=counts, lbounds=lb, ubounds=ub, rc=rc)
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+   
+    !--------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Creating a LocalArray from TKR without counts"
+    write(failMsg, *) "Did return ESMF_SUCCESS"
+    lb(1) = -5
+    ub(1) = 4
+    array1 = ESMF_LocalArrayCreate(rank=1, typekind=ESMF_TYPEKIND_I4, &
+      lbounds=lb, ubounds=ub, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+   
+    !--------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Local Array Destroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS."
+    call ESMF_LocalArrayDestroy(array1, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
 #ifdef ESMF_EXHAUSTIVE
 
     !--------------------------------------------------------------------------
@@ -165,11 +277,8 @@
 
 
 !-------------------------------------------------------------------------------
-!   ! Test 2:
 !   !  Create based on an existing, allocated F90 pointer. 
 !   !  Data is type Integer, 1D.
-    print *, ">>> Test 2:"
- 
  
     ! Allocate and set initial data values
     ni = 835 
@@ -228,11 +337,8 @@
     deallocate(intptr)
 
 !-------------------------------------------------------------------------------
-!   ! Test 2a:
 !   !  Create based on an existing, allocated F90 pointer. 
 !   !  Data is type Integer, 1D.
-    print *, ">>> Test 2a:"
- 
  
     ! Allocate and set initial data values
     ni = 1022 
@@ -278,11 +384,8 @@
 
 
 !-------------------------------------------------------------------------------
-!   ! Test 3:
 !   !  Create based on an existing, allocated F90 pointer. 
 !   !  Data is type Real, 2D.
-    print *, ">>> Test 3:"
- 
  
     ! Allocate and set initial data values
     ni = 50
@@ -343,11 +446,8 @@
     deallocate(realptr)
 
 !-------------------------------------------------------------------------------
-!   ! Test 4:
 !   !  Create based on an existing, allocated F90 pointer. 
 !   !  Data is type Real, 2D.
-    print *, ">>> Test 4:"
- 
  
     ! Allocate and set initial data values
     ni = 15 
@@ -398,11 +498,8 @@
 
 
 !-------------------------------------------------------------------------------
-!   ! Test 5:
 !   !  Create based on an existing, allocated F90 pointer. 
 !   !  Data is type Real, 2D.  DATA_COPY set
-    print *, ">>> Test 5:"
- 
  
     ! Allocate and set initial data values
     ni = 4015 
@@ -466,11 +563,8 @@
 
 
 !-------------------------------------------------------------------------------
-!   ! Test 6:
 !   !  Create based on an existing, allocated F90 pointer. 
 !   !  Data is type Real, 3D.  DATA_COPY set
-    print *, ">>> Test 6:"
- 
  
     ! Allocate and set initial data values
     ni = 5 
@@ -668,10 +762,7 @@
 
 
 !-------------------------------------------------------------------------------
-!   ! Test 7:
 !   !  Create based on an array specification.
-    ! print *, ">>> Test 7:"
- 
 
     !--------------------------------------------------------------------------
     !EX_UTest
@@ -761,11 +852,8 @@
 
 
 !-------------------------------------------------------------------------------
-!   ! Test 8:
 !   !  Create based on an existing, allocated F90 pointer. 
 !   !  Data is type Integer, 1D.
-    print *, ">>> Test 8:"
- 
  
     ! Allocate and set initial data values
     ni = 35 
