@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.30 2008/01/09 00:40:56 rokuingh Exp $
+// $Id: ESMCI_Grid_F.C,v 1.31 2008/01/09 00:56:57 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -1618,7 +1618,7 @@ extern "C" {
 
   }  // end c_ESMC_AttributeGetChar
   
-  void FTN(c_esmc_gridattributegetattrinfoname)(ESMCI::Grid **grid, char *name, 
+  void FTN(c_esmc_gridgetattrinfoname)(ESMCI::Grid **grid, char *name, 
           ESMC_TypeKind *tk, int *count, int *rc, int nlen) {
 
 #undef  ESMC_METHOD
@@ -1669,7 +1669,7 @@ extern "C" {
 
   }  // end c_ESMC_AttributeGetAttrInfoName
 
-  void FTN(c_esmc_gridattributegetattrinfonum)(ESMCI::Grid **grid, int *num,
+  void FTN(c_esmc_gridgetattrinfonum)(ESMCI::Grid **grid, int *num,
           char *name, ESMC_TypeKind *tk, int *count, int *rc, int nlen) {
           
 #undef  ESMC_METHOD
