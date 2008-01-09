@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.29 2008/01/08 01:22:08 rokuingh Exp $
+// $Id: ESMCI_Grid_F.C,v 1.30 2008/01/09 00:40:56 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -1617,6 +1617,136 @@ extern "C" {
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
   }  // end c_ESMC_AttributeGetChar
+  
+  void FTN(c_esmc_gridattributegetattrinfoname)(ESMCI::Grid **grid, char *name, 
+          ESMC_TypeKind *tk, int *count, int *rc, int nlen) {
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridattributegetattrinfoname()"
+  
+  char *cname;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!grid) {
+    *rc = ESMF_FAILURE;    
+    return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
+      printf("ESMF_AttributeGetValue: bad attribute name\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  if (!tk) {
+      printf("ESMF_AttributeGetValue: bad attribute typekind argument\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  if (!count) {
+      printf("ESMF_AttributeGetValue: bad attribute count argument\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cname = ESMC_F90toCstring(name, nlen);
+  if (!cname) {
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  *rc = (*grid)->ESMC_AttributeGet(cname, tk, count, NULL);
+
+  delete [] cname;
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+  }  // end c_ESMC_AttributeGetAttrInfoName
+
+  void FTN(c_esmc_gridattributegetattrinfonum)(ESMCI::Grid **grid, int *num,
+          char *name, ESMC_TypeKind *tk, int *count, int *rc, int nlen) {
+          
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridattributegetattrinfonum()"          
+  
+  char *cname;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMF_RC_NOT_IMPL;
+
+  if (!grid) {
+    *rc = ESMF_FAILURE;
+    return;
+  }
+
+  if (!name) {
+      printf("ESMF_AttributeGetValue: bad attribute name argument\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  if (!tk) {
+      printf("ESMF_AttributeGetValue: bad attribute typekind argument\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  if (!count) {
+      printf("ESMF_AttributeGetValue: bad attribute count argument\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  cname = new char[ESMF_MAXSTR];
+
+  *rc = (*grid)->ESMC_AttributeGet((*num)-1, cname, tk, count, NULL);
+  if (*rc != ESMF_SUCCESS) {
+      delete [] cname;
+      return;
+  }
+
+  *rc = ESMC_CtoF90string(cname, name, nlen);
+  
+  delete [] cname;
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+  }  // end c_ESMC_AttributeGetAttrInfoNum
+
+  void FTN(c_esmc_gridattributegetcount)(ESMCI::Grid **grid, int *count, int *rc) {
+  
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridattributegetcount()"
+      
+  int i, status;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+  status = ESMC_RC_NOT_IMPL;
+
+  if (!grid) {
+    *rc = ESMF_FAILURE;
+    return;
+  }
+
+  if (!count) {
+      printf("ESMF_AttributeGetValue: bad attribute count argument\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  *count = (*grid)->ESMC_AttributeGetCount();
+
+  *rc = (count == 0) ? ESMF_FAILURE : ESMF_SUCCESS;
+
+  }  // end c_ESMC_AttributeGetCount
 
 void FTN(c_esmc_gridcreateattpack)(ESMCI::Grid **grid, char *name, char *convention,
           char *purpose, char *object, int *rc, int nlen, int clen, int plen, int olen) {

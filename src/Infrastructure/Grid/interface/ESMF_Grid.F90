@@ -147,8 +147,8 @@ public  ESMF_DefaultFlag
   public ESMF_GridSetAttribute       ! Set and Get attributes
   public ESMF_GridGetAttribute       !  
 
-  !public ESMF_GridGetAttributeCount  ! number of attribs
-  !public ESMF_GridGetAttributeInfo   ! get type, length by name or number
+  public ESMF_GridGetAttributeCount  ! number of attribs
+  public ESMF_GridGetAttributeInfo   ! get type, length by name or number
 
   public ESMF_GridCreateAttPack      ! Attribute packages
   public ESMF_GridSetAttPack         ! Attribute packages
@@ -162,7 +162,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.52 2008/01/08 01:48:18 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.53 2008/01/09 00:40:57 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -410,6 +410,24 @@ end interface
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that retrieve
 !     attributes from an {\tt ESMF\_Grid}.
+ 
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_GridGetAttributeInfo - Get type, count from a Grid attribute
+!
+! !INTERFACE:
+      interface ESMF_GridGetAttributeInfo
+   
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_GridGetAttrInfoByName
+        module procedure ESMF_GridGetAttrInfoByNum
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that retrieve
+!     information about attributes from an {\tt ESMF\_Grid}.
  
 !EOPI
       end interface
@@ -10562,6 +10580,192 @@ endif
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetAttributeCount"
+
+!BOP
+! !IROUTINE: ESMF_GridGetAttributeCount - Query the number of attributes
+!
+! !INTERFACE:
+      subroutine ESMF_GridGetAttributeCount(grid, count, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(inout) :: grid  
+      integer, intent(out) :: count   
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Returns the number of attributes associated with the given {\tt grid} 
+!     in the argument {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [count]
+!           The number of attributes associated with this object.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: localrc 
+
+      ! Initialize 
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
+      call c_ESMC_GridAttributeGetCount(grid, count, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetAttributeCount
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetAttrInfoByName"
+
+!BOP
+! !IROUTINE: ESMF_GridGetAttributeInfo - Query Grid attributes by name
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridGetAttributeInfo()
+      subroutine ESMF_GridGetAttrInfoByName(grid, name, typekind, count, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid  
+      character(len=*), intent(in) :: name
+      type(ESMF_TypeKind), intent(out), optional :: typekind
+      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Returns information associated with the named attribute, 
+!     including {\tt typekind} and {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to query.
+!     \item [{[typekind]}]
+!           The typekind of the attribute.
+!     \item [{[count]}]
+!           The number of items in this attribute.  For character types,
+!           the length of the character string.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: localrc             
+      type(ESMF_TypeKind) :: localTk
+      integer :: localCount
+
+      ! Initialize 
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
+      call c_ESMC_GridAttributeGetAttrInfoName(grid, name, &
+        localTk, localCount, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(typekind)) typekind = localTk
+      if (present(count)) count = localCount
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetAttrInfoByName
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetAttrInfoByNum"
+
+!BOP
+! !IROUTINE: ESMF_GridGetAttributeInfo - Query Grid attributes by index number
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridGetAttributeInfo()
+      subroutine ESMF_GridGetAttrInfoByNum(grid, attributeIndex, name, &
+        typekind, count, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(inout) :: grid  
+      integer, intent(in) :: attributeIndex
+      character(len=*), intent(out), optional :: name
+      type(ESMF_TypeKind), intent(out), optional :: typekind
+      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns information associated with the indexed attribute, 
+!      including {\tt name}, {\tt typekind} and {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [attributeIndex]
+!           The index number of the attribute to query.
+!     \item [name]
+!           Returns the name of the attribute.
+!     \item [{[typekind]}]
+!           The typekind of the attribute.
+!     \item [{[count]}]
+!           Returns the number of items in this attribute.  For character types,
+!           this is the length of the character string.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: localrc 
+      character(len=ESMF_MAXSTR) :: localName
+      type(ESMF_TypeKind) :: localTk
+      integer :: localCount
+
+      ! Initialize 
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
+      call c_ESMC_GridAttributeGetAttrInfoNum(grid, attributeIndex, &
+        localName, localTk, localCount, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(name)) name = localName
+      if (present(typekind)) typekind = localTk
+      if (present(count)) count = localCount
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetAttrInfoByNum
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateAttPack"
@@ -10604,15 +10808,16 @@ endif
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
       ! Initialize return code; assume failure until success is certain
+      localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
+    
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+      !ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
-      call ESMF_GridValidate(grid, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      !call ESMF_GridValidate(grid, rc=localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                            ESMF_ERR_PASSTHRU, &
+      !                            ESMF_CONTEXT, rc)) return
 
       if (present(convention))  then
         fconvention = convention
@@ -10649,8 +10854,7 @@ endif
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridCreateAttPack
-!------------------------------------------------------------------------------
-
+      
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetAttPack"
@@ -10698,16 +10902,16 @@ endif
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
       ! Initialize return code; assume failure until success is certain
+      localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+      ! check input variables
+      !ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
-        ! check input variables
-        ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-
-
-      call ESMF_GridValidate(grid, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      !call ESMF_GridValidate(grid, rc=localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                            ESMF_ERR_PASSTHRU, &
+      !                            ESMF_CONTEXT, rc)) return
 
       if (present(convention))  then
         fconvention = convention
@@ -10775,16 +10979,16 @@ endif
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
       ! Initialize return code; assume failure until success is certain
+      localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+      ! check input variables
+      !ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
-        ! check input variables
-        ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-
-
-      call ESMF_GridValidate(grid, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      !call ESMF_GridValidate(grid, rc=localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                            ESMF_ERR_PASSTHRU, &
+      !                            ESMF_CONTEXT, rc)) return
 
       if (present(convention))  then
         fconvention = convention
@@ -10809,6 +11013,7 @@ endif
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridWriteAttPack
+      
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 

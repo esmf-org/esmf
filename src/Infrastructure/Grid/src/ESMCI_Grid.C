@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.42 2008/01/08 01:22:08 rokuingh Exp $
+// $Id: ESMCI_Grid.C,v 1.43 2008/01/09 00:40:57 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.42 2008/01/08 01:22:08 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.43 2008/01/09 00:40:57 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -3946,6 +3946,74 @@ int Grid::attributeget(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   localrc = ESMC_Base::ESMC_AttributeGet(name, value);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+
+  // return success
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::attributegetcount()"
+//BOPI
+// !IROUTINE:  ESMCI::Grid::attributegetcount - Get a grid attribute count
+//
+// !INTERFACE:
+int Grid::attributegetcount(void) const {
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+   //none                        
+//
+// !DESCRIPTION:
+//    Get a grid attribute count.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  localrc = ESMC_Base::ESMC_AttributeGetCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+
+  // return success
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::attributeget()"
+//BOPI
+// !IROUTINE:  ESMCI::Grid::attributeget - Get a grid character string attribute
+//
+// !INTERFACE:
+int Grid::attributeget(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+  int num,          // in - this grid
+  char *name,       // in - attribute name
+  ESMC_TypeKind *tk, // in - typekind
+  int *count,        // in - number of values
+  void *value) const {    // in - attribute value                        
+//
+// !DESCRIPTION:
+//    Get a grid character string attribute.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  localrc = ESMC_Base::ESMC_AttributeGet(num, name, tk, count, value);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
