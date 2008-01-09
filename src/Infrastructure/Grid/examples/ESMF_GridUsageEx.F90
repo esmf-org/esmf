@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.29 2007/12/14 20:49:08 svasquez Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.30 2008/01/09 20:10:40 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -681,11 +681,13 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! ESMF Grids can be created using an incremental paradigm. To do this,
 ! the user first calls ESMF\_GridCreateEmpty to allocate the shell of
 ! a Grid. Next, a series of {\tt ESMF\_GridSet()} calls are used to fill
-! in the details of the grid. Here we use a convenient {\tt ESMF\_GridSetShapeTile()}
+! in the details of the grid. Here we use a convenient {\tt ESMF\_GridSetCommitShapeTile()}
 ! call that fills in the Grid via an interface much like the
-! {\tt ESMF\_GridCreateShapeTile()} call. Finally, after the set calls,
-! any other grid call will internally validate and create the final, 
-! usable, grid. For consistency's sake the initial {\tt ESMF\_GridCreateEmpty}
+! {\tt ESMF\_GridCreateShapeTile()} call. When using
+! {\tt ESMF\_GridSet} the user must explicitly call {\tt ESMF\_GridCommit}
+! afterwards to make the Grid usable. {\tt ESMF\_GridSetCommitShapeTile()}
+! contains this commit internally, so it doesn't need to be 
+! done separately. For consistency's sake the initial {\tt ESMF\_GridCreateEmpty}
 ! call must occur on the same or a superset of the processors as the
 ! {\tt ESMF\_GridSet()} calls. The following example uses the incremental
 ! technique to create a rectangular 10x20 grid with coordinates at the
@@ -708,16 +710,9 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! rectangular Grid.
 !---------------------------------------------------------------------------
 
-   call ESMF_GridSetShapeTile(grid2D,                    &
+   call ESMF_GridSetCommitShapeTile(grid2D,                    &
                           countsPerDEDim1=(/5,5/),   &
                           countsPerDEDim2=(/7,7,6/), rc=rc)
-
-!---------------------------------------------------------------------------
-! IN THE CHILD COMPONENT:
-! Commit 
-!
-!---------------------------------------------------------------------------
-   call ESMF_GridCommit(grid2D, rc=rc)
 
 !---------------------------------------------------------------------------
 ! Set Grid coordinates at the cell center location.
@@ -1759,7 +1754,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
 
    ! Set the Grid type and kind
-   grid=ESMF_GridSetShapeTile(coordTypeKind=ESMF_TYPEKIND_R4, rc=rc)
+   grid=ESMF_GridSetCommitShapeTile(coordTypeKind=ESMF_TYPEKIND_R4, rc=rc)
 
 
    ! Set the grid size and distribution
@@ -1768,11 +1763,11 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    petMap(:,1,1) = (/1,2/)
 
    ! Set Grid 
-   grid=ESMF_GridSetShapeTile(countsPerDEDim1=(/10,10/), &
+   grid=ESMF_GridSetCommitShapeTile(countsPerDEDim1=(/10,10/), &
           countsPerDEDim2=(/10,10/), petMap=petMap, rc=rc)   
 
    ! Set the grid coordinate array index dependency
-   grid=ESMF_GridSetShapeTile(coordDep1=(/1,2/), coordDep2=(/1,2/), &
+   grid=ESMF_GridSetCommitShapeTile(coordDep1=(/1,2/), coordDep2=(/1,2/), &
           rc=rc)   
 
   ! Create the grid and add a center stagger location and at the same time set {\tt grid} to 

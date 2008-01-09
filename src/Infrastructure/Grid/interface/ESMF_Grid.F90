@@ -135,7 +135,7 @@ public  ESMF_DefaultFlag
   public ESMF_GridSet
   public ESMF_GridSetCoord
 
-  public ESMF_GridSetShapeTile
+  public ESMF_GridSetCommitShapeTile
   public ESMF_GridSerialize
   public ESMF_GridDeserialize
 
@@ -162,7 +162,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.54 2008/01/09 00:56:57 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.55 2008/01/09 20:10:41 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -312,20 +312,20 @@ end interface
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
-! !IROUTINE: ESMF_GridSetShapeTile -- Generic interface
+! !IROUTINE: ESMF_GridSetCommitShapeTile -- Generic interface
 
 ! !INTERFACE:
-interface ESMF_GridSetShapeTile
+interface ESMF_GridSetCommitShapeTile
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-      module procedure ESMF_GridSetShapeTileReg
-      module procedure ESMF_GridSetShapeTileIrreg
+      module procedure ESMF_GridSetCmmitShapeTileReg
+      module procedure ESMF_GridSetCmmitShapeTileIrreg
 
       
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_GridSetShapeTile} functions.   
+!  types of {\tt ESMF\_GridSetCommitShapeTile} functions.   
 !EOPI 
 end interface
 !==============================================================================
@@ -6741,13 +6741,13 @@ endif
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridSetShapeTileIrreg"
+#define ESMF_METHOD "ESMF_GridSetCmmitShapeTileIrreg"
 !BOP
-! !IROUTINE: ESMF_GridSetShapeTile - Create a Grid with an irregular distribution
+! !IROUTINE: ESMF_GridSetCommitShapeTile - Create a Grid with an irregular distribution
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_GridSetShapeTile()
-     subroutine ESMF_GridSetShapeTileIrreg(grid, name,coordTypeKind, minIndex,  &
+  ! Private name; call using ESMF_GridSetCommitShapeTile()
+     subroutine ESMF_GridSetCmmitShapeTileIrreg(grid, name,coordTypeKind, minIndex,  &
                         countsPerDEDim1,countsPerDeDim2, countsPerDEDim3, &
                         connDim1, connDim2, connDim3, &
                         poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
@@ -6787,13 +6787,8 @@ endif
 !
 ! !DESCRIPTION:
 !
-! WARNING: Due to current implementation limitations this 
-!          set doesn't behave like the other set and may change 
-!          previous settings in a irregular way. It is recommended
-!          that this set be called only once on each partially formed Grid. 
-!
-! This method sets information into an empty Grid in preparation for
-! commiting to create a single tile, irregularly distributed grid 
+! This method sets information into an empty Grid and then commits it to 
+! create a single tile, irregularly distributed grid 
 ! (see Figure \ref{fig:GridDecomps}).
 ! To specify the irregular distribution, the user passes in an array 
 ! for each grid dimension, where the length of the array is the number
@@ -7841,6 +7836,11 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
+    ! Commit Grid -----------------------------------------------------------------
+    call ESMF_GridCommit(grid, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
 
     ! Clean up memory
     deallocate(coordRank)
@@ -7868,19 +7868,19 @@ endif
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
-    end subroutine ESMF_GridSetShapeTileIrreg
+    end subroutine ESMF_GridSetCmmitShapeTileIrreg
 
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridSetShapeTileReg"
+#define ESMF_METHOD "ESMF_GridSetCmmitShapeTileReg"
 !BOP
-! !IROUTINE: ESMF_GridSetShapeTile - Set a Grid with a regular distribution
+! !IROUTINE: ESMF_GridSetCommitShapeTile - Set a Grid with a regular distribution
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_GridSetShapeTile()
-      subroutine ESMF_GridSetShapeTileReg(grid, name, coordTypeKind, &
+  ! Private name; call using ESMF_GridSetCommitShapeTile()
+      subroutine ESMF_GridSetCmmitShapeTileReg(grid, name, coordTypeKind, &
                         regDecomp, decompFlag, minIndex, maxIndex, &
                         connDim1, connDim2, connDim3, &
                         poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
@@ -7920,13 +7920,8 @@ endif
 !
 ! !DESCRIPTION:
 !
-! WARNING: Due to current implementation limitations this 
-!          set doesn't behave like the other set and may change 
-!          previous settings in a irregular way. It is recommended
-!          that this set be called only once on each partially formed Grid. 
-!
-! This method sets information into an empty Grid in preparation for
-! commiting to create a single tile, regularly distributed grid 
+! This method sets information into an empty Grid and then commits it to 
+! create a single tile, regularly distributed grid 
 ! (see Figure \ref{fig:GridDecomps}).
 ! To specify the distribution, the user passes in an array 
 ! ({\tt regDecomp}) specifying the number of DEs to divide each 
@@ -8842,6 +8837,12 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
+    ! Commit Grid -----------------------------------------------------------------
+    call ESMF_GridCommit(grid, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
     ! Clean up memory
     deallocate(regDecompLocal)
     deallocate(decompFlagLocal)
@@ -8863,7 +8864,7 @@ endif
  
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
-    end subroutine ESMF_GridSetShapeTileReg
+    end subroutine ESMF_GridSetCmmitShapeTileReg
 
 
 

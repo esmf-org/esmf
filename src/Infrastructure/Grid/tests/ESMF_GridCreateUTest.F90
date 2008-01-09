@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.69 2008/01/03 22:20:38 theurich Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.70 2008/01/09 20:10:41 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.69 2008/01/03 22:20:38 theurich Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.70 2008/01/09 20:10:41 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -493,7 +493,7 @@ program ESMF_GridCreateUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Creating a 1 DE 3D  Grid with SetShapeTileIrreg"
+  write(name, *) "Creating a 1 DE 3D  Grid with SetCommitShapeTileIrreg"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! create grid with nondefault parameter
@@ -501,13 +501,10 @@ program ESMF_GridCreateUTest
   grid=ESMF_GridCreateEmpty(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  call ESMF_GridSetShapeTile(grid, countsPerDEDim1=(/4/), &
+  call ESMF_GridSetCommitShapeTile(grid, countsPerDEDim1=(/4/), &
                                     countsPerDeDim2=(/5/), &
                                     countsPerDeDim3=(/8/), &
                                     rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  call ESMF_GridCommit(grid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get info back from grid
@@ -983,7 +980,7 @@ program ESMF_GridCreateUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Creating a 2D  Grid with all defaults with SetShapeTileReg"
+  write(name, *) "Creating a 2D  Grid with all defaults with SetCommitShapeTileReg"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! create grid with nondefault parameter
@@ -994,11 +991,7 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Set information
-  call ESMF_GridSetShapeTile(grid, maxIndex=(/4,2/), rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! Commit Grid
-  call ESMF_GridCommit(grid, rc=localrc)
+  call ESMF_GridSetCommitShapeTile(grid, maxIndex=(/4,2/), rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get info back from grid

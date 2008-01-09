@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.38 2007/11/28 20:19:53 oehmke Exp $
+% $Id: Grid_desc.tex,v 1.39 2008/01/09 20:10:40 oehmke Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -308,7 +308,7 @@ for building Grids.
 {\tt grid = ESMF\_GridCreate(distgrid, ...)} \\
 {\it Incremental} \\
 {\tt grid = ESMF\_GridCreateEmpty(...)} \\
-{\tt call ESMF\_GridSetShapeTile(grid, ...)} \\ \hline
+{\tt call ESMF\_GridSetCommitShapeTile(grid, ...)} \\ \hline
 {\bf Set Coordinates} \\
 {\it Set coordinates by copy or reference} \\
 {\tt call ESMF\_GridSetCoord(grid, ...)} \\
