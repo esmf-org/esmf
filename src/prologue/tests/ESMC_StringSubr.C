@@ -1,4 +1,4 @@
-// $Id: ESMC_StringSubr.C,v 1.5 2007/03/31 05:51:35 cdeluca Exp $
+// $Id: ESMC_StringSubr.C,v 1.6 2008/01/10 19:21:14 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -25,14 +25,14 @@
 #include <ESMC_Conf.h>
 
 typedef void (*FUNC)(int *, int *, int *, int *, int *);
-typedef void (*FUNC2)(int *, int *, char *, int *, int *, int *, int);
-typedef void (*FUNC3)(int *, char *, int *, char *, int *, int *, int *, int, int);
+typedef void (*FUNC2)(int *, int *, char *, int *, int *, int *, long);
+typedef void (*FUNC3)(int *, char *, int *, char *, int *, int *, int *, long, long);
 
 extern "C" {
 
 void FTN(c_strings)(FUNC f90cb, FUNC2 f90cb2, FUNC3 f90cb3, 
                     int *i1, int *i2, char *fstr,
-                    int *i3, int *i4, int *rc, int slen) {
+                    int *i3, int *i4, int *rc, long slen) {
 
       int ni1, ni2, ni3, ni4;
       int clen, clen2;
@@ -47,8 +47,8 @@ void FTN(c_strings)(FUNC f90cb, FUNC2 f90cb2, FUNC3 f90cb3,
 
       strncpy(tbuf, fstr, slen);
       tbuf[slen] = '\0';
-      printf(" %d %d %d %d %d\n", *i1, *i2, *i3, *i4, slen);
-      printf(" strlen = %d, str='%s'\n", slen, tbuf);
+      printf(" %d %d %d %d %ld\n", *i1, *i2, *i3, *i4, slen);
+      printf(" strlen = %ld, str='%s'\n", slen, tbuf);
 
       ni1 = 102;
       ni2 = 204;
