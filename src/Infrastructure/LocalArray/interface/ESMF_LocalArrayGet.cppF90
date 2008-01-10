@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayGet.cppF90,v 1.4 2007/11/19 23:12:29 theurich Exp $
+! $Id: ESMF_LocalArrayGet.cppF90,v 1.4.2.1 2008/01/10 19:29:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ module ESMF_LocalArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 character(*), parameter, private :: version = &
-  '$Id: ESMF_LocalArrayGet.cppF90,v 1.4 2007/11/19 23:12:29 theurich Exp $'
+  '$Id: ESMF_LocalArrayGet.cppF90,v 1.4.2.1 2008/01/10 19:29:07 theurich Exp $'
 
 !------------------------------------------------------------------------------
 !     ! Internal wrapper structures for passing f90 pointers to C++ and
@@ -90,7 +90,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 
 !BOPI
-! !IROUTINE: ESMF_LocalArrayGetData -- Get an F90 pointer to the data contents
+! !IROUTINE: ESMF_LocalArrayGet -- Get LocalArray internal information
 
 ! !INTERFACE:
   interface ESMF_LocalArrayGet
@@ -102,7 +102,7 @@ AllTypesMacro(LocalArrayType)
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_LocalArrayGetData} functions.   
+!  types of {\tt ESMF\_LocalArrayGet} functions.   
 !  
 !EOPI
 end interface
