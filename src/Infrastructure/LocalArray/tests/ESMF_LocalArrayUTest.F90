@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.46.2.2 2008/01/09 21:32:30 theurich Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.46.2.3 2008/01/10 19:31:29 theurich Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -595,10 +595,12 @@
 
     print *, "array 4a create returned"
 
-    !write(failMsg, *) "Did returned ESMF_SUCCESS incorrectly"
-    !write(name, *) "Getting Local Array 3D Real Data with wrong dimension array Test"
-    !call ESMF_LocalArrayGet(array4, realptr2, ESMF_DATA_COPY, rc=rc)
-    !call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !--------------------------------------------------------------------------
+   !EX_UTest
+    write(failMsg, *) "Did returned ESMF_SUCCESS incorrectly"
+    write(name, *) "Getting Local Array 3D Real Data with wrong dimension array Test"
+    call ESMF_LocalArrayGet(array4, realptr2, ESMF_DATA_COPY, rc=rc)
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
    !EX_UTest
