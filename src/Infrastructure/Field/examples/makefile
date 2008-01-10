@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.25 2007/10/08 12:44:19 feiliu Exp $ 
+# $Id: makefile,v 1.26 2008/01/10 20:22:35 feiliu Exp $ 
 
 ALL:  build_examples
 
@@ -47,8 +47,8 @@ CLOBBERDIRS =
 run_ESMF_FieldCreateEx:
 	$(MAKE) EXNAME=FieldCreate NP=4 exfrun
 
-run_ESMF_FieldCreateEx_uni:
-	$(MAKE) EXNAME=FieldCreate NP=1 exfrun
+#run_ESMF_FieldCreateEx_uni:
+#	$(MAKE) EXNAME=FieldCreate NP=1 exfrun
 
 #
 # ESMF_FieldFromUserEx

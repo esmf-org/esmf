@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.58 2007/12/14 20:49:07 svasquez Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.59 2008/01/10 20:22:35 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -25,6 +25,7 @@
 
     ! ESMF Framework module
     use ESMF_Mod
+    use ESMF_FieldGetMod
     implicit none
     
     ! Local variables
@@ -41,6 +42,23 @@
     type(ESMF_Field) :: field1, field2, field3
     real (ESMF_KIND_R8), dimension(2) :: origin
     character (len = ESMF_MAXSTR) :: fname
+
+    real(ESMF_KIND_R8), dimension(:,:,:), pointer :: farray
+    real(ESMF_KIND_R8), dimension(:,:,:), pointer :: farray1
+    type(ESMF_Field)  :: f8
+    type(ESMF_Grid)   :: grid8
+    type(ESMF_DistGrid) :: distgrid8
+    type(ESMF_Array)  :: array8, array
+    integer           :: xdim, ydim, zdim
+
+    integer :: gridCompLBnd(ESMF_MAXDIM), gridCompUBnd(ESMF_MAXDIM)
+    integer :: gridExclLBnd(ESMF_MAXDIM), gridExclUBnd(ESMF_MAXDIM)
+    integer :: gridTotaLBnd(ESMF_MAXDIM), gridTotaUBnd(ESMF_MAXDIM)
+
+    integer :: comp_count(ESMF_MAXDIM)
+    integer :: excl_count(ESMF_MAXDIM)
+    integer :: total_count(ESMF_MAXDIM)
+
 !EOC
     integer :: finalrc       
 !   !Set finalrc to success
@@ -157,6 +175,43 @@
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!-------------------------------------------------------------------------
+!   ! Example 5:
+!   ! 
+!   ! The user can get various bounds and counts information from a Field
+!   ! through the ESMF_FieldGetDataPtr interface.
+    xdim = 12
+    ydim = 22
+    zdim = 31
+
+    grid8 = ESMF_GridCreateShapeTile(minIndex=(/1,1,1/), maxIndex=(/4*xdim-1,ydim-1,zdim-1/), &
+                              regDecomp=(/4,1,1/), name="grid", rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    allocate(farray(xdim,ydim,zdim))
+    call ESMF_GridGet(grid8, distgrid=distgrid8, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    array8 = ESMF_ArrayCreate(farray, distgrid=distgrid8, &
+        staggerloc=0, computationalEdgeLWidth=(/0,0,0/), computationalEdgeUWidth=(/-1,-1,-1/), rc=rc) 
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    f8 = ESMF_FieldCreate(grid8, array8, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  
+    call ESMF_FieldGetDataPtr(f8, farray1, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    call ESMF_FieldGetDataPtr (f8, localDE=0, &
+        computationalLBound=gridCompLBnd, computationalUBound=gridCompUBnd, &
+        exclusiveLBound=gridExclLBnd, exclusiveUBound=gridExclUBnd, &
+        totalLBound=gridTotaLBnd, totalUBound=gridTotaUBnd, &
+        computationalCount=comp_count, &
+        exclusiveCount=excl_count, &
+        totalCount=total_count, &
+        rc=rc)   
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    rc = finalrc
 
 !-------------------------------------------------------------------------
 !   ! Example 4:
