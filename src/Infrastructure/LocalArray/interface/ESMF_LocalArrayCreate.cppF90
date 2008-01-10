@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.6 2008/01/09 01:02:31 theurich Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.7 2008/01/10 03:42:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -159,7 +159,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.6 2008/01/09 01:02:31 theurich Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.7 2008/01/10 03:42:20 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -182,10 +182,7 @@ AllTypesMacro(LocalArrayType)
 !EOPI
         
     ! < interfaces for each T/K/R >
-    TypeKindRankInterfaceMacro(LocalArrCreateByMTPtr)
-
-    ! < interfaces for each T/K/R >
-    TypeKindRankInterfaceMacro(LocalArrCreateByFlPtr)
+    TypeKindRankInterfaceMacro(LocalArrCreateByPtr)
 
 !BOPI
 ! !DESCRIPTION: 
@@ -1018,13 +1015,7 @@ end function
 !------------------------------------------------------------------------------
 
 !! < start of macros which become actual function bodies after expansion >
-TypeKindRankDeclarationMacro(LocalArrayCreateByMTPtr)
-
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-
-!! < start of macros which become actual function bodies after expansion >
-TypeKindRankDeclarationMacro(LocalArrayCreateByFlPtr)
+TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
