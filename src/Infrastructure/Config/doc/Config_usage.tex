@@ -1,11 +1,11 @@
-% $Id: Config_usage.tex,v 1.8 2008/01/14 18:54:24 murphysj Exp $
+% $Id: Config_usage.tex,v 1.9 2008/01/14 19:24:32 murphysj Exp $
 
  \subsubsection{Resource Files}
 
-      A {\em Resource File} is a text file consisting of variable
-     length lines (records), each possibly starting with a {\em label}
-     (or {\em key}), followed by some data. A simple resource file 
-     looks like this:
+   A {\em Resource File} is a text file consisting of list of {\em label}- 
+   {\em value} pairs. The list can be of variable length (records).
+   Each {\em label}) should be followed by some data, the {\em value}. 
+   A simple resource file looks like this:
 
  \begin{verbatim}
  # Lines starting with # are comments which are
@@ -34,9 +34,10 @@
  \end{verbatim}
 
  Resource files are intended for random access (except between ::'s in a 
- table definition). Normally, the order of records should not be important. 
- However, the order of records may be important if the same label appears 
- multiple times.
+ table definition). This means that order in which a particular {\em label}- 
+ {\em value} pair is retreived is not dependent upon the original order 
+ of the pairs. The only exception to this, however, is when the same {\em label} appears 
+ multiple times within the Resource file.
 
 
 
