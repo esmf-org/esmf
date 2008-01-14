@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.29 2007/05/09 18:11:33 tjcnrl Exp $
+# $Id: build_rules.mk,v 1.30 2008/01/14 18:18:09 theurich Exp $
 #
 # Linux.pgi.default
 #
@@ -45,6 +45,13 @@ ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec
 else
+ifeq ($(ESMF_COMM),scalimpi)
+# scaliMPI -------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_CXXDEFAULT         = mpic++
+ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+else
 ifeq ($(ESMF_COMM),lam)
 # LAM (assumed to be built with pgf90) ---------------------
 ESMF_F90DEFAULT         = mpif77
@@ -66,6 +73,7 @@ ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------
 else
 $(error Invalid ESMF_COMM setting: $(ESMF_COMM))
+endif
 endif
 endif
 endif
