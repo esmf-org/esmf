@@ -16,8 +16,12 @@
 !==============================================================================
 !
 ! !DESCRIPTION:
-! Example/test code which performs simple Configuration File routines.
-!
+!BOE
+! This example/test code performs simple Config/Resource File routines. It does not
+! include attaching a Config to a component. The important thing to remember there
+! is that you can have one Config per component. 
+!EOE 
+
       ! ESMF Framework module
       use ESMF_Mod
       implicit none
@@ -27,9 +31,9 @@
       type(ESMF_VM)       :: vm
 
 !BOE
-!\subsubsection{Common Code Arguments}
+!\subsubsection{Variable Declarations}
 
-! Common Arguments used in the following code fragments:
+! The following are the variable declarations used as arguments in the following code fragments:
 !EOE
 
 !BOC
@@ -69,7 +73,7 @@
 
 ! The first step is to create the {\tt ESMF\_Config} and load the
 ! ASCII resource (rc) file into memory\footnote{See next section
-! for a complete description of parameters for each routine/function}:
+! for a complete description of parameters for each routine/function}.
 !EOE
 
 !BOC
@@ -92,9 +96,12 @@
       endif
 
 !BOE
-!\subsubsection{Retrieval of constants}
+!\subsubsection{Retrieval of Constants}
 
-! The next step is to select the label (record) of interest, say
+! The next step is to retrieve a label/value pair.  Remember,
+! that the order in which a particular label/value pair is retreived
+! is not dependent upon the order which they exist within the 
+! Resource File. 
 !EOE
 
 !BOC
@@ -112,8 +119,8 @@
 !EOE
 
 !BOC
-      call ESMF_ConfigGetAttribute(cf, radius, rc=rc)      ! results in radius = 3.1415
-      call ESMF_ConfigGetAttribute(cf, i_n, rc=rc)      ! results in i_n = 25
+      call ESMF_ConfigGetAttribute(cf, radius, rc=rc)   ! results in radius = 3.1415
+      call ESMF_ConfigGetAttribute(cf, i_n, rc=rc)      ! results in i_n    = 25
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -127,7 +134,7 @@
       endif
 
 !BOE
-!\subsubsection{Retrieval of file names}
+!\subsubsection{Retrieval of File Names}
 
 ! File names can be retrieved with the following code fragment:
 !EOE
@@ -159,7 +166,7 @@
       endif
 
 !BOE
-!\subsubsection{Retrieval of tables}
+!\subsubsection{Retrieval of Tables}
 
 ! To access tabular data, the user first must use
 ! {\tt ESMF\_ConfigFindLabel()} to locate the beginning of the table, e.g.,
