@@ -1,4 +1,4 @@
-% $Id: Config_refdoc.ctex,v 1.9 2007/09/27 06:07:06 theurich Exp $
+% $Id: Config_refdoc.ctex,v 1.10 2008/01/14 20:47:15 murphysj Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -73,16 +73,16 @@
 \subsection{Description}
 #ifdef STANDALONE
 \input{Config_desc}
+\input{Config_usage}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Config/doc/Config_desc}
+\input{../Infrastructure/Config/doc/Config_usage}
 #endif
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{Config_usage}
 \input{ESMF_ConfigOverviewEx_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Config/doc/Config_usage}
 \input{../Infrastructure/Config/doc/ESMF_ConfigOverviewEx_fapi}
 #endif
 
