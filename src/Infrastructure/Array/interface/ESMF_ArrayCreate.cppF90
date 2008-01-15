@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.22.2.1 2007/12/06 19:41:46 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.22.2.2 2008/01/15 18:58:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.22.2.1 2007/12/06 19:41:46 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.22.2.2 2008/01/15 18:58:13 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -127,6 +127,7 @@ module ESMF_ArrayCreateMod
     TypeKindRankInterfaceMacro(ArrayCreateAssmdShape)
     module procedure ESMF_ArrayCreateLocalArray
     module procedure ESMF_ArrayCreateAllocate
+    module procedure ESMF_ArrayCreateCopy
 
     module procedure ESMF_ArrayCreateFromLA         !1st prototype
 
@@ -932,6 +933,66 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_ArrayCreateAllocate
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayCreateCopy()"
+!BOP
+! !IROUTINE: ESMF_ArrayCreate - Create Array object as copy of existing Array object
+
+! !INTERFACE:
+  ! Private name; call using ESMF_ArrayCreate()
+  function ESMF_ArrayCreateCopy(array, rc)
+!
+! !ARGUMENTS:
+       type(ESMF_Array),  intent(in)              :: array
+       integer,           intent(out),  optional  :: rc
+!     
+! !RETURN VALUE:
+    type(ESMF_Array) :: ESMF_ArrayCreateCopy
+!
+! !DESCRIPTION:
+! Create an {\tt ESMF\_Array} object as the copy of an existing Array. 
+!
+! The return value is the newly created {\tt ESMF\_Array} object.
+!
+! The arguments are:
+! \begin{description}
+! \item[array] 
+!     {\tt ESMF\_Array} object to be copied.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc    ! local return code
+    type(ESMF_Array)        :: arrayOut   ! opaque pointer to new C++ Array
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Mark this Array object as invalid
+    arrayOut%this = ESMF_NULL_POINTER
+
+    ! Call into the C++ interface
+    call c_ESMC_ArrayCreateCopy(array, arrayOut, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! Set return value
+    ESMF_ArrayCreateCopy = arrayOut
+ 
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_ArrayCreateCopy)
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end function ESMF_ArrayCreateCopy
 !------------------------------------------------------------------------------
 
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.74.2.1 2007/12/14 06:51:47 theurich Exp $
+// $Id: ESMC_Array_F.C,v 1.74.2.2 2008/01/15 18:58:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -120,6 +120,19 @@ extern "C" {
         "- Not a valid string", ESMC_NOT_PRESENT_FILTER(rc));
       return;
     }
+  }
+  
+  void FTN(c_esmc_arraycreatecopy)(ESMCI::Array **ptr, 
+    ESMCI::Array **arrayOut, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraycreatecopy()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    *arrayOut = ESMCI::Array::create(*ptr, &localrc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
   }
   
   void FTN(c_esmc_arraydestroy)(ESMCI::Array **ptr, int *rc){
