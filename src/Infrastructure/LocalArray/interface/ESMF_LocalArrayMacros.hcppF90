@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.hcppF90,v 1.3.2.5 2008/01/10 19:30:18 theurich Exp $
+! $Id: ESMF_LocalArrayMacros.hcppF90,v 1.3.2.6 2008/01/15 18:54:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -675,7 +675,7 @@
         if (ESMF_LogMsgFoundError(status, & @\
           ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rc)) return @\
-        ! mrng is a macro that is correct construction of lb and ub elements @\
+        ! mrng is a macro that has correct construction of lb and ub elements @\
         allocate(lp(mrng), stat=status) @\
         if (ESMF_LogMsgFoundAllocError(status, & @\
           "local data space", & @\
@@ -745,54 +745,63 @@
 ^undef  ESMF_METHOD @\
 !define ESMF_METHOD "ESMF_LocalArrayCopy##mrank##D##mtypekind" @\
 ^define ESMF_METHOD "ESMF_LocalArrayCopy" @\
-      subroutine ESMF_LocalArrayCopy##mrank##D##mtypekind(arrayIn, arrayOut, rc) @\
+    subroutine ESMF_LocalArrayCopy##mrank##D##mtypekind(arrayIn, arrayOut, rc) @\
  @\
       type(ESMF_LocalArray) :: arrayIn @\
       type(ESMF_LocalArray) :: arrayOut @\
       integer, intent(out), optional :: rc @\
  @\
-        integer :: status                   ! local error status @\
-        logical :: rcpresent                ! did user specify rc? @\
+      integer :: status                   ! local error status @\
  @\
-        type (ESMF_ArrWrap##mrank##D##mtypekind) :: wrap     ! for passing f90 ptr to C++ @\
-        integer :: lb(mrank), ub(mrank)  ! size info for the array @\
-        mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: lp ! local copy @\
+      type (ESMF_ArrWrap##mrank##D##mtypekind) :: wrapIn  ! for passing f90 ptr to C++ @\
+      type (ESMF_ArrWrap##mrank##D##mtypekind) :: wrapOut  ! for passing f90 ptr to C++ @\
  @\
-        ! initialize return code; assume routine not implemented @\
-        status = ESMF_RC_NOT_IMPL @\
-        rcpresent = .FALSE. @\
-        if (present(rc)) then @\
-          rcpresent = .TRUE. @\
-          rc = ESMF_RC_NOT_IMPL @\
-        endif @\
+      integer :: lb(mrank), ub(mrank)  ! size info for the array @\
+      mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: lp ! local copy @\
  @\
-        call c_ESMC_LocalArrayGetF90Ptr(arrayIn, wrap, status) @\
-        if (ESMF_LogMsgFoundError(status, & @\
-                                  ESMF_ERR_PASSTHRU, & @\
-                                  ESMF_CONTEXT, rc)) return @\
+      ! initialize return code; assume routine not implemented @\
+      status = ESMF_RC_NOT_IMPL @\
+      if (present(rc)) then @\
+        rc = ESMF_RC_NOT_IMPL @\
+      endif @\
  @\
-        ! Allocate a new buffer and return a copy @\
-        call c_ESMC_IArrayGetLbounds(arrayIn, mrank, lb, status) @\
-        if (ESMF_LogMsgFoundError(status, & @\
-                                  ESMF_ERR_PASSTHRU, & @\
-                                  ESMF_CONTEXT, rc)) return @\
-        call c_ESMC_IArrayGetUbounds(arrayIn, mrank, ub, status) @\
-        if (ESMF_LogMsgFoundError(status, & @\
-                                  ESMF_ERR_PASSTHRU, & @\
-                                  ESMF_CONTEXT, rc)) return @\
-        allocate(lp(mrng), stat=status) @\
-        if (ESMF_LogMsgFoundAllocError(status, & @\
-                                     "local data space", & @\
-                                      ESMF_CONTEXT, rc)) return @\
-        ! this must do a contents assignment @\
-        lp = wrap%ptr##mrank##D##mtypekind @\
-        ! now simply associate the allocated array to the new array wrapper @\
-        call c_ESMC_LocalArrayGetF90Ptr(arrayOut, wrap, status) @\
-        wrap%ptr##mrank##D##mtypekind => lp  @\
+      call c_ESMC_LocalArrayGetF90Ptr(arrayIn, wrapIn, status) @\
+      if (ESMF_LogMsgFoundError(status, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rc)) return @\
  @\
-        if (rcpresent) rc = ESMF_SUCCESS @\
+      ! Allocate a new buffer and return a copy @\
+      call c_ESMC_IArrayGetLbounds(arrayIn, mrank, lb, status) @\
+      if (ESMF_LogMsgFoundError(status, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rc)) return @\
+      call c_ESMC_IArrayGetUbounds(arrayIn, mrank, ub, status) @\
+      if (ESMF_LogMsgFoundError(status, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rc)) return @\
+      ! mrng is a macro that has correct construction of lb and ub elements @\
+      allocate(lp(mrng), stat=status) @\
+      if (ESMF_LogMsgFoundAllocError(status, & @\
+        "local data space", & @\
+        ESMF_CONTEXT, rc)) return @\
+      ! this must do a contents assignment @\
+      lp = wrapIn%ptr##mrank##D##mtypekind @\
+      ! point to this memory allocation in the arrayOut @\
+      wrapOut%ptr##mrank##D##mtypekind => lp  @\
+      call c_ESMC_LocalArraySetF90Ptr(arrayOut, wrapOut, status) @\
+      if (ESMF_LogMsgFoundError(status, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rc)) return @\
+      call c_ESMC_LocalArraySetBaseAddr(arrayOut, & @\
+        ESMF_DATA_ADDRESS(lp(mloc)), status) @\
+      if (ESMF_LogMsgFoundError(status, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rc)) return @\
  @\
-        end subroutine ESMF_LocalArrayCopy##mrank##D##mtypekind @\
+      ! return successfully @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+    end subroutine ESMF_LocalArrayCopy##mrank##D##mtypekind @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\

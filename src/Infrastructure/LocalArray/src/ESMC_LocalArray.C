@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.C,v 1.27 2007/09/27 23:37:04 theurich Exp $
+// $Id: ESMC_LocalArray.C,v 1.27.2.1 2008/01/15 18:54:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_LocalArray.C,v 1.27 2007/09/27 23:37:04 theurich Exp $";
+static const char *const version = "$Id: ESMC_LocalArray.C,v 1.27.2.1 2008/01/15 18:54:15 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // prototypes for Fortran calls
@@ -58,6 +58,9 @@ extern "C" {
  
   void FTN(f_esmf_localarrayadjust)(ESMC_LocalArray**, int *,
     ESMC_TypeKind*, int *, int *, int *, int *);
+
+  void FTN(f_esmf_localarraycopyf90ptr)(ESMC_LocalArray** laIn, 
+    ESMC_LocalArray** laOut, int *rc);
 }
 
 
@@ -223,6 +226,60 @@ ESMC_LocalArray *ESMC_LocalArray::ESMC_LocalArrayCreate(
   
 } // end ESMC_LocalArrayCreate
 //-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_LocalArrayCreate"
+//BOP
+// !IROUTINE:  ESMC_LocalArrayCreate - create LocalArray from copy
+//
+// !INTERFACE:
+ESMC_LocalArray *ESMC_LocalArray::ESMC_LocalArrayCreate(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMC_LocalArray
+//
+// !ARGUMENTS:
+  ESMC_LocalArray *larrayIn,
+  int *rc) {                 // return code
+//
+// !DESCRIPTION:
+//      Deep copy from {\tt larrayIn} to {\tt larrayOut}.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int status;                 // local error status
+  
+  // Initialize return code; assume routine not implemented
+  if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
+  status = ESMC_RC_NOT_IMPL;
+
+  // allocate memory for new LocalArray object
+  ESMC_LocalArray *larrayOut = new ESMC_LocalArray;
+
+  // call base class routine to set name 
+  larrayOut->ESMC_BaseSetName(NULL, "LocalArray");
+  
+  // copy the contents
+  ESMC_Base baseTemp;
+  baseTemp = *larrayOut;  // store base object info in temp. variable
+  *larrayOut = *larrayIn; // copy larrayIn content into larrayOut includ. base
+  *((ESMC_Base*)larrayOut) = baseTemp; // override base part of larrayOut again
+  
+  // mark this copy to be responsible for deallocation of its data area alloc
+  larrayOut->needs_dealloc = ESMF_TRUE;
+
+  // call into F90 copy method
+  FTN(f_esmf_localarraycopyf90ptr)(&larrayIn, &larrayOut, &status);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
+    return ESMC_NULL_POINTER;
+
+  // return successfully 
+  if (rc != NULL) *rc = ESMF_SUCCESS;
+  return larrayOut;
+
+} // end ESMC_LocalArrayCreate
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -567,9 +624,9 @@ int ESMC_LocalArray::ESMC_LocalArrayConstruct(
   // local vars
   int status;                 // local error status
   
-   // Initialize return code; assume routine not implemented
-   if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
-   status = ESMC_RC_NOT_IMPL;
+  // Initialize return code; assume routine not implemented
+  if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
+  status = ESMC_RC_NOT_IMPL;
 
   // allocate memory for new LocalArray object
   ESMC_LocalArray *larray = new ESMC_LocalArray;

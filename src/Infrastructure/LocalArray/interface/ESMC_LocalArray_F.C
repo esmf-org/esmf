@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray_F.C,v 1.23 2007/09/27 23:37:04 theurich Exp $
+// $Id: ESMC_LocalArray_F.C,v 1.23.2.1 2008/01/15 18:54:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -60,6 +60,15 @@ char *name = NULL;
              
              (*ptr) = ESMC_LocalArray::ESMC_LocalArrayCreateNoData(*rank, *dk,
                   *oflag, name, status);
+
+             (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
+     }
+ 
+     void FTN(c_esmc_localarraycreatecopy)(ESMC_LocalArray **ptr, 
+       ESMC_LocalArray **larrayOut, int *status) {
+             
+             *larrayOut =
+               ESMC_LocalArray::ESMC_LocalArrayCreate(*ptr, status);
 
              (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }
