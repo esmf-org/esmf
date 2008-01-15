@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.46.2.3 2008/01/10 19:31:29 theurich Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.46.2.4 2008/01/15 18:52:38 theurich Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -34,7 +34,7 @@
     type(ESMF_ArraySpec) :: arrayspec, arrayspec1
     type(ESMF_TypeKind) :: akind
     integer :: counts(ESMF_MAXDIM), lb(1), ub(1), rlb(1), rub(1)
-    type(ESMF_LocalArray) :: array1, array2, array4
+    type(ESMF_LocalArray) :: array1, array2, array4, arrayCpy
     real(ESMF_KIND_R8), dimension(:,:,:), pointer :: real3dptr, real3d2ptr
     real(ESMF_KIND_R8), dimension(:,:), pointer :: realptr, realptr2
     integer(ESMF_KIND_I4), dimension(:), pointer :: intptr, intptr2
@@ -175,7 +175,7 @@
     !--------------------------------------------------------------------------
     !NEX_UTest
     write(name, *) "Creating a LocalArray from TKR without counts"
-    write(failMsg, *) "Did return ESMF_SUCCESS"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
     lb(1) = -5
     ub(1) = 4
     array1 = ESMF_LocalArrayCreate(rank=1, typekind=ESMF_TYPEKIND_I4, &
@@ -184,9 +184,30 @@
    
     !--------------------------------------------------------------------------
     !NEX_UTest
+    write(name, *) "Creating a LocalArray as a Copy of existing LocalArray"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    arrayCpy = ESMF_LocalArrayCreate(array1, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+   
+    !--------------------------------------------------------------------------
+    !NEX_UTest
     write(name, *) "Local Array Destroy Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS."
     call ESMF_LocalArrayDestroy(array1, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
+    !--------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Printing LocalArray Copy after original LocalArray destroy"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_LocalArrayPrint(arrayCpy, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+   
+    !--------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Local Array Copy Destroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS."
+    call ESMF_LocalArrayDestroy(arrayCpy, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     
     !--------------------------------------------------------------------------
