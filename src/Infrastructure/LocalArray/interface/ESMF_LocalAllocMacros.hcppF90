@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalAllocMacros.hcppF90,v 1.1 2007/11/16 23:08:50 theurich Exp $
+! $Id: ESMF_LocalAllocMacros.hcppF90,v 1.1.2.1 2008/01/16 00:08:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -25,8 +25,8 @@
 #endif
 #define AllocAllocateMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 ! <Created by macro - do not edit directly >  @\
-        allocate(l##mrank##D##mtypekind%ptr##mrank##D##mtypekind(mrng), stat=status) @\
-        if (ESMF_LogMsgFoundAllocError(status, "LocalArray allocate", & @\
+        allocate(l##mrank##D##mtypekind%ptr##mrank##D##mtypekind(mrng), stat=localrc) @\
+        if (ESMF_LogMsgFoundAllocError(localrc, "LocalArray allocate", & @\
                                        ESMF_CONTEXT, rc)) return @\
  @\
         ! Set all the new accumulated information about the array - the @\
@@ -38,9 +38,9 @@
         call c_ESMC_LocalArraySetInternal(array, l##mrank##D##mtypekind, & @\
                         ESMF_DATA_ADDRESS(l##mrank##D##mtypekind%ptr##mrank##D##mtypekind ( mloc )), & @\
                         counts, lbounds, ubounds, offsets, & @\
-                        ESMF_TRUE, ESMF_TRUE, status) @\
+                        ESMF_TRUE, ESMF_TRUE, localrc) @\
  @\
-        if (ESMF_LogMsgFoundError(status, & @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
 ! < End macro - do not edit directly >  @\
@@ -52,8 +52,8 @@
 #endif
 #define AllocDeallocateMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 ! <Created by macro - do not edit directly >  @\
-        call c_ESMC_LocalArrayGetF90Ptr(array, l##mrank##D##mtypekind, status) @\
-        deallocate(l##mrank##D##mtypekind%ptr##mrank##D##mtypekind, stat=status)  @\
+        call c_ESMC_LocalArrayGetF90Ptr(array, l##mrank##D##mtypekind, localrc) @\
+        deallocate(l##mrank##D##mtypekind%ptr##mrank##D##mtypekind, stat=localrc)  @\
         nullify(l##mrank##D##mtypekind%ptr##mrank##D##mtypekind) @\
 ! < End macro - do not edit directly >  @\
 

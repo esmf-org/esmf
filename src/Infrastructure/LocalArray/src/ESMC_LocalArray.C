@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.C,v 1.27.2.1 2008/01/15 18:54:15 theurich Exp $
+// $Id: ESMC_LocalArray.C,v 1.27.2.2 2008/01/16 00:08:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_LocalArray.C,v 1.27.2.1 2008/01/15 18:54:15 theurich Exp $";
+static const char *const version = "$Id: ESMC_LocalArray.C,v 1.27.2.2 2008/01/16 00:08:43 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // prototypes for Fortran calls
@@ -121,10 +121,10 @@ ESMC_LocalArray *ESMC_LocalArray::ESMC_LocalArrayCreate(
 //   The return from this routine is a pointer to the new LocalArray data.
 //
 //-----------------------------------------------------------------------------
-  int status;
+  int localrc;
   // Initialize return code; assume routine not implemented
   if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
-  status = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
 
   ESMC_LocalArray *a;
   try{
@@ -135,10 +135,10 @@ ESMC_LocalArray *ESMC_LocalArray::ESMC_LocalArrayCreate(
     return ESMC_NULL_POINTER;
   }
 
-  status = a->ESMC_LocalArrayConstruct(rank, dk, icounts, base, 
+  localrc = a->ESMC_LocalArrayConstruct(rank, dk, icounts, base, 
     ESMC_FROM_CPLUSPLUS,  NULL, ESMC_ARRAY_DO_ALLOCATE, docopy, ESMF_TRUE,
     name, NULL, NULL, NULL); 
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
     return ESMC_NULL_POINTER;
 
   // return successfully
@@ -200,10 +200,10 @@ ESMC_LocalArray *ESMC_LocalArray::ESMC_LocalArrayCreate(
 //   The return from this routine is a pointer to the new Array data.
 //
 //-----------------------------------------------------------------------------
-  int status;
+  int localrc;
   // Initialize return code; assume routine not implemented
   if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
-  status = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
 
   ESMC_LocalArray *a;
   try{
@@ -214,10 +214,10 @@ ESMC_LocalArray *ESMC_LocalArray::ESMC_LocalArrayCreate(
     return ESMC_NULL_POINTER;
   }
 
-  status = a->ESMC_LocalArrayConstruct(rank, dk, icounts, base, 
+  localrc = a->ESMC_LocalArrayConstruct(rank, dk, icounts, base, 
     ESMC_FROM_CPLUSPLUS, NULL, ESMC_ARRAY_DO_ALLOCATE, docopy, ESMF_TRUE, name,
     lbounds, ubounds, NULL); 
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
     return ESMC_NULL_POINTER;
 
   // return successfully
@@ -249,11 +249,11 @@ ESMC_LocalArray *ESMC_LocalArray::ESMC_LocalArrayCreate(
 //EOP
 //-----------------------------------------------------------------------------
   // local vars
-  int status;                 // local error status
+  int localrc;                 // local return code
   
   // Initialize return code; assume routine not implemented
   if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
-  status = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
 
   // allocate memory for new LocalArray object
   ESMC_LocalArray *larrayOut = new ESMC_LocalArray;
@@ -271,8 +271,8 @@ ESMC_LocalArray *ESMC_LocalArray::ESMC_LocalArrayCreate(
   larrayOut->needs_dealloc = ESMF_TRUE;
 
   // call into F90 copy method
-  FTN(f_esmf_localarraycopyf90ptr)(&larrayIn, &larrayOut, &status);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
+  FTN(f_esmf_localarraycopyf90ptr)(&larrayIn, &larrayOut, &localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
     return ESMC_NULL_POINTER;
 
   // return successfully 
@@ -347,10 +347,10 @@ ESMC_LocalArray *ESMC_LocalArray::ESMC_LocalArrayCreateNoData(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  int status;
+  int localrc;
   // Initialize return code; assume routine not implemented
   if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
-  status = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
 
   ESMC_LocalArray *a;
   try{
@@ -361,7 +361,7 @@ ESMC_LocalArray *ESMC_LocalArray::ESMC_LocalArrayCreateNoData(
     return ESMC_NULL_POINTER;
   }
 
-  status = a->ESMC_LocalArrayConstruct(rank, dk, NULL, NULL, oflag, NULL,
+  localrc = a->ESMC_LocalArrayConstruct(rank, dk, NULL, NULL, oflag, NULL,
     ESMC_ARRAY_NO_ALLOCATE, ESMC_DATA_NONE, ESMF_FALSE, name, NULL, NULL, NULL);
 
   // return successfully
@@ -430,10 +430,10 @@ ESMC_LocalArray *ESMC_LocalArray::ESMC_LocalArrayCreate_F(
 //   The return from this routine is a pointer to the new LocalArray data.
 //
 //-----------------------------------------------------------------------------
-  int status;
+  int localrc;
   // Initialize return code; assume routine not implemented
   if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
-  status = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
 
   ESMC_LocalArray *a;
   try{
@@ -445,11 +445,11 @@ ESMC_LocalArray *ESMC_LocalArray::ESMC_LocalArrayCreate_F(
   }
 
   if (base == NULL) 
-    status = a->ESMC_LocalArrayConstruct(rank, dk, icounts, base, 
+    localrc = a->ESMC_LocalArrayConstruct(rank, dk, icounts, base, 
       ESMC_FROM_FORTRAN, f90ptr, ESMC_ARRAY_DO_ALLOCATE, ESMC_DATA_NONE,
       ESMF_TRUE, name, lbounds, ubounds, offsets); 
   else
-    status = a->ESMC_LocalArrayConstruct(rank, dk, icounts, base, 
+    localrc = a->ESMC_LocalArrayConstruct(rank, dk, icounts, base, 
       ESMC_FROM_FORTRAN, f90ptr, ESMC_ARRAY_NO_ALLOCATE, docopy,
       ESMF_FALSE, name, lbounds, ubounds, offsets); 
 
@@ -622,11 +622,11 @@ int ESMC_LocalArray::ESMC_LocalArrayConstruct(
 //EOP
 
   // local vars
-  int status;                 // local error status
+  int localrc;                 // local return code
   
   // Initialize return code; assume routine not implemented
   if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
-  status = ESMC_RC_NOT_IMPL;
+  localrc = ESMC_RC_NOT_IMPL;
 
   // allocate memory for new LocalArray object
   ESMC_LocalArray *larray = new ESMC_LocalArray;
@@ -650,8 +650,8 @@ int ESMC_LocalArray::ESMC_LocalArrayConstruct(
 
   // adjust the F90 dope vector to reflect the new bounds
   FTN(f_esmf_localarrayadjust)(&larray, &rank, &kind, counts, larray->lbound,  
-    larray->ubound, &status);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
+    larray->ubound, &localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
     return NULL;
 
   // return successfully 

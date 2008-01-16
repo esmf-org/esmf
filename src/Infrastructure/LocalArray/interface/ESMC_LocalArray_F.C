@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray_F.C,v 1.23.2.1 2008/01/15 18:54:15 theurich Exp $
+// $Id: ESMC_LocalArray_F.C,v 1.23.2.2 2008/01/16 00:08:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -46,31 +46,31 @@ char *name = NULL;
      void FTN(c_esmc_localarraycreateall)(ESMC_LocalArray **ptr, int *rank, 
                                      ESMC_TypeKind *dk,
                                      int *counts, int *lbounds, int *ubounds,
-                                     int *status)  {
+                                     int *localrc)  {
          (*ptr) = ESMC_LocalArray::ESMC_LocalArrayCreate_F(*rank, *dk, counts, 
                                     NULL, NULL, ESMC_DATA_NONE, name,
-                                    lbounds, ubounds, NULL, status);
+                                    lbounds, ubounds, NULL, localrc);
 
-             (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
+             (*localrc) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }
 
      void FTN(c_esmc_localarraycreatenodata)(ESMC_LocalArray **ptr, int *rank, 
                                         ESMC_TypeKind *dk, 
-                                        ESMC_ArrayOrigin *oflag, int *status) {
+                                        ESMC_ArrayOrigin *oflag, int *localrc) {
              
              (*ptr) = ESMC_LocalArray::ESMC_LocalArrayCreateNoData(*rank, *dk,
-                  *oflag, name, status);
+                  *oflag, name, localrc);
 
-             (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
+             (*localrc) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }
  
      void FTN(c_esmc_localarraycreatecopy)(ESMC_LocalArray **ptr, 
-       ESMC_LocalArray **larrayOut, int *status) {
+       ESMC_LocalArray **larrayOut, int *localrc) {
              
              *larrayOut =
-               ESMC_LocalArray::ESMC_LocalArrayCreate(*ptr, status);
+               ESMC_LocalArray::ESMC_LocalArrayCreate(*ptr, localrc);
 
-             (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
+             (*localrc) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }
  
      void FTN(c_esmc_localarraysetinternal)(ESMC_LocalArray **ptr, 
@@ -79,13 +79,13 @@ char *name = NULL;
                                int *counts,
                                int *lbounds, int *ubounds, int *offsets,
                                ESMC_Logical *contig, ESMC_Logical *dealloc,
-                               int *status) {
+                               int *localrc) {
       
           if ((ptr == NULL) || (*ptr == NULL)) {
-              *status = ESMF_FAILURE;
+              *localrc = ESMF_FAILURE;
               return;
           }
-         *status = (*ptr)->ESMC_LocalArraySetInfo(fptr, XD base, counts, 
+         *localrc = (*ptr)->ESMC_LocalArraySetInfo(fptr, XD base, counts, 
                                                   lbounds, ubounds, offsets, 
                                                   contig, dealloc);
      }
@@ -93,13 +93,13 @@ char *name = NULL;
      void FTN(c_esmc_localarraysetinfo)(ESMC_LocalArray **ptr, 
                                         int *counts, int *lbounds, 
                                         int *ubounds, int *offsets,
-                                        int *status) {
+                                        int *localrc) {
       
           if ((ptr == NULL) || (*ptr == NULL)) {
-              *status = ESMF_FAILURE;
+              *localrc = ESMF_FAILURE;
               return;
           }
-         *status = (*ptr)->ESMC_LocalArraySetInfo(NULL, NULL, counts, 
+         *localrc = (*ptr)->ESMC_LocalArraySetInfo(NULL, NULL, counts, 
                                                   lbounds, ubounds, offsets, 
                                                   NULL, NULL);
      }
@@ -107,160 +107,160 @@ char *name = NULL;
      void FTN(c_esmc_localarraygetinfo)(ESMC_LocalArray **ptr, 
                                void **base, int *counts,
                                int *lbounds, int *ubounds, int *offsets,
-                               int *status) {
+                               int *localrc) {
       
           if ((ptr == NULL) || (*ptr == NULL)) {
-              *status = ESMF_FAILURE;
+              *localrc = ESMF_FAILURE;
               return;
           }
-         *status = (*ptr)->ESMC_LocalArrayGetInfo(NULL, base, counts, 
+         *localrc = (*ptr)->ESMC_LocalArrayGetInfo(NULL, base, counts, 
                                                   lbounds, ubounds, offsets);
      }
 
-     void FTN(c_esmc_localarraysetlengths)(ESMC_LocalArray **ptr, int *rank, int *lengths, int *status) {
+     void FTN(c_esmc_localarraysetlengths)(ESMC_LocalArray **ptr, int *rank, int *lengths, int *localrc) {
       
           if ((ptr == NULL) || (*ptr == NULL)) {
-              *status = ESMF_FAILURE;
+              *localrc = ESMF_FAILURE;
               return;
           }
-         *status = (*ptr)->ESMC_LocalArraySetLengths(*rank, lengths);
+         *localrc = (*ptr)->ESMC_LocalArraySetLengths(*rank, lengths);
      }
 
-     void FTN(c_esmc_localarraygetlengths)(ESMC_LocalArray **ptr, int *rank, int *lengths, int *status) {
+     void FTN(c_esmc_localarraygetlengths)(ESMC_LocalArray **ptr, int *rank, int *lengths, int *localrc) {
       
           if ((ptr == NULL) || (*ptr == NULL)) {
-              *status = ESMF_FAILURE;
+              *localrc = ESMF_FAILURE;
               return;
           }
-         *status = (*ptr)->ESMC_LocalArrayGetLengths(*rank, lengths);
+         *localrc = (*ptr)->ESMC_LocalArrayGetLengths(*rank, lengths);
      }
 
-     void FTN(c_esmc_localarraygetlbounds)(ESMC_LocalArray **ptr, int *rank, int *lbounds, int *status) {
+     void FTN(c_esmc_localarraygetlbounds)(ESMC_LocalArray **ptr, int *rank, int *lbounds, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
-              *status = ESMF_FAILURE;
+              *localrc = ESMF_FAILURE;
               return;
           }
-         *status = (*ptr)->ESMC_LocalArrayGetLbounds(*rank, lbounds);
+         *localrc = (*ptr)->ESMC_LocalArrayGetLbounds(*rank, lbounds);
      }
 
-     void FTN(c_esmc_localarraygetubounds)(ESMC_LocalArray **ptr, int *rank, int *ubounds, int *status) {
+     void FTN(c_esmc_localarraygetubounds)(ESMC_LocalArray **ptr, int *rank, int *ubounds, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
-              *status = ESMF_FAILURE;
+              *localrc = ESMF_FAILURE;
               return;
           }
-         *status = (*ptr)->ESMC_LocalArrayGetUbounds(*rank, ubounds);
+         *localrc = (*ptr)->ESMC_LocalArrayGetUbounds(*rank, ubounds);
      }
 
 
-     void FTN(c_esmc_localarraygetrank)(ESMC_LocalArray **ptr, int *rank, int *status) {
+     void FTN(c_esmc_localarraygetrank)(ESMC_LocalArray **ptr, int *rank, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
-              *status = ESMF_FAILURE;
+              *localrc = ESMF_FAILURE;
               return;
           }
          *rank = (*ptr)->ESMC_LocalArrayGetRank();
-         *status = ESMF_SUCCESS;
+         *localrc = ESMF_SUCCESS;
      }
 
-     void FTN(c_esmc_localarraygettypekind)(ESMC_LocalArray **ptr, int *kind, int *status) {
+     void FTN(c_esmc_localarraygettypekind)(ESMC_LocalArray **ptr, int *kind, int *localrc) {
       
           if ((ptr == NULL) || (*ptr == NULL)) {
-              *status = ESMF_FAILURE;
+              *localrc = ESMF_FAILURE;
               return;
           }
          *kind = (*ptr)->ESMC_LocalArrayGetTypeKind();
-         *status = ESMF_SUCCESS;
+         *localrc = ESMF_SUCCESS;
      }
 
      void FTN(c_esmc_localarraygetname)(ESMC_LocalArray **ptr, 
-                                        char *name, int *status, int nlen) {
+                                        char *name, int *localrc, int nlen) {
          if ((nlen <= 0) || (name == NULL)) {
-             if (status) *status = ESMF_FAILURE;
+             if (localrc) *localrc = ESMF_FAILURE;
              return;
          }
 
          memset(name, ' ', nlen);
          strncpy(name, (*ptr)->ESMC_BaseGetName(),
                                    MIN(nlen, strlen((*ptr)->ESMC_BaseGetName())));
-         *status = ESMF_SUCCESS;
+         *localrc = ESMF_SUCCESS;
      }
 
 
-     void FTN(c_esmc_localarraydestroy)(ESMC_LocalArray **ptr, int *status) {
+     void FTN(c_esmc_localarraydestroy)(ESMC_LocalArray **ptr, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
-              *status = ESMF_FAILURE;
+              *localrc = ESMF_FAILURE;
               return;
           }
-         *status = ESMC_LocalArray::ESMC_LocalArrayDestroy(*ptr);
+         *localrc = ESMC_LocalArray::ESMC_LocalArrayDestroy(*ptr);
      }
 
-     void FTN(c_esmc_localarraysetbaseaddr)(ESMC_LocalArray **ptr, void XD *base, int *status) {
+     void FTN(c_esmc_localarraysetbaseaddr)(ESMC_LocalArray **ptr, void XD *base, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
-              *status = ESMF_FAILURE;
+              *localrc = ESMF_FAILURE;
               return;
           }
-          *status = (*ptr)->ESMC_LocalArraySetBaseAddr(XD base);
+          *localrc = (*ptr)->ESMC_LocalArraySetBaseAddr(XD base);
      }
 
-     void FTN(c_esmc_localarraygetbaseaddr)(ESMC_LocalArray **ptr, float **base, int *status) {
+     void FTN(c_esmc_localarraygetbaseaddr)(ESMC_LocalArray **ptr, float **base, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
-              *status = ESMF_FAILURE;
+              *localrc = ESMF_FAILURE;
               return;
           }
-          *status = (*ptr)->ESMC_LocalArrayGetBaseAddr((void **)base);
+          *localrc = (*ptr)->ESMC_LocalArrayGetBaseAddr((void **)base);
      }
 
-     void FTN(c_esmc_localarraysetf90ptr)(ESMC_LocalArray **ptr, struct c_F90ptr *p, int *status) {
+     void FTN(c_esmc_localarraysetf90ptr)(ESMC_LocalArray **ptr, struct c_F90ptr *p, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
-              *status = ESMF_FAILURE;
+              *localrc = ESMF_FAILURE;
               return;
           }
         //fprintf(stderr, "interface code, setting f90 ptr to %lx, this = %lx, &this = %lx\n", 
         //                                (ESMC_I8)p, (ESMC_I8)(*ptr), (ESMC_I8)ptr);
-          *status = (*ptr)->ESMC_LocalArraySetF90Ptr(p);
+          *localrc = (*ptr)->ESMC_LocalArraySetF90Ptr(p);
      }
 
-     void FTN(c_esmc_localarraygetf90ptr)(ESMC_LocalArray **ptr, struct c_F90ptr *p, int *status) {
+     void FTN(c_esmc_localarraygetf90ptr)(ESMC_LocalArray **ptr, struct c_F90ptr *p, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
-              *status = ESMF_FAILURE;
+              *localrc = ESMF_FAILURE;
               return;
           }
         //fprintf(stderr, "interface code, getting f90 ptr into %lx, this = %lx, &this = %lx\n", 
         //                                (ESMC_I8)p, (ESMC_I8)(*ptr), (ESMC_I8)ptr);
-          *status = (*ptr)->ESMC_LocalArrayGetF90Ptr(p);
+          *localrc = (*ptr)->ESMC_LocalArrayGetF90Ptr(p);
      }
 
-     void FTN(c_esmc_localarraysetdealloc)(ESMC_LocalArray **ptr, int *status) {
+     void FTN(c_esmc_localarraysetdealloc)(ESMC_LocalArray **ptr, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
-              *status = ESMF_FAILURE;
+              *localrc = ESMF_FAILURE;
               return;
           }
-          *status = (*ptr)->ESMC_LocalArraySetDealloc();
+          *localrc = (*ptr)->ESMC_LocalArraySetDealloc();
      }
 
-     void FTN(c_esmc_localarraysetnodealloc)(ESMC_LocalArray **ptr, int *status) {
+     void FTN(c_esmc_localarraysetnodealloc)(ESMC_LocalArray **ptr, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
-              *status = ESMF_FAILURE;
+              *localrc = ESMF_FAILURE;
               return;
           }
-          *status = (*ptr)->ESMC_LocalArraySetNoDealloc();
+          *localrc = (*ptr)->ESMC_LocalArraySetNoDealloc();
      }
 
-     void FTN(c_esmc_localarrayneedsdealloc)(ESMC_LocalArray **ptr, int flag, int *status) {
+     void FTN(c_esmc_localarrayneedsdealloc)(ESMC_LocalArray **ptr, int flag, int *localrc) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               flag = ESMC_ARRAY_NO_ALLOCATE;
-              *status = ESMF_FAILURE;
+              *localrc = ESMF_FAILURE;
               return;
           }
           flag = (*ptr)->ESMC_LocalArrayNeedsDealloc();
-          *status = ESMF_SUCCESS;
+          *localrc = ESMF_SUCCESS;
      }
 
-     void FTN(c_esmc_localarrayprint)(ESMC_LocalArray **ptr, char *opts, int *status, 
+     void FTN(c_esmc_localarrayprint)(ESMC_LocalArray **ptr, char *opts, int *localrc, 
                                                                  int clen) {
          char *temp = NULL;
 
           if ((ptr == NULL) || (*ptr == NULL)) {
-              *status = ESMF_FAILURE;
+              *localrc = ESMF_FAILURE;
               return;
           }
          // make a local copy because opts may be non-writable or not
@@ -271,19 +271,19 @@ char *name = NULL;
              temp[clen] = '\0';
          }
 
-         *status = (*ptr)->ESMC_LocalArrayPrint(temp);
+         *localrc = (*ptr)->ESMC_LocalArrayPrint(temp);
 
          if (temp)
              delete[] temp;
      }
 
      void FTN(c_esmc_localarraywrite)(ESMC_LocalArray **ptr, char *opts, char *fname,
-                                    int *status, int optlen, int flen) {
+                                    int *localrc, int optlen, int flen) {
          char *opttemp = NULL;
          char *filetemp = NULL;
 
           if ((ptr == NULL) || (*ptr == NULL)) {
-              *status = ESMF_FAILURE;
+              *localrc = ESMF_FAILURE;
               return;
           }
          // make a local copy because opts may be non-writable or not
@@ -300,7 +300,7 @@ char *name = NULL;
              filetemp[flen] = '\0';
          }
 
-         *status = (*ptr)->ESMC_LocalArrayWrite(opttemp, filetemp);
+         *localrc = (*ptr)->ESMC_LocalArrayWrite(opttemp, filetemp);
 
          if (opttemp)
              delete[] opttemp;

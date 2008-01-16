@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.5.2.3 2008/01/15 18:54:15 theurich Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.5.2.4 2008/01/16 00:08:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -161,7 +161,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.5.2.3 2008/01/15 18:54:15 theurich Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.5.2.4 2008/01/16 00:08:43 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -838,11 +838,11 @@ end function
 !EOPI
 
         ! Local vars
-        integer :: status                   ! local error status
+        integer :: localrc                  ! local return code
         logical :: rcpresent                ! did user specify rc?
         integer :: localkind
 
-        status = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
 
         ! Initialize return code; assume routine not implemented
@@ -870,26 +870,26 @@ end function
             select case (rank)
 	      case (1)
                 call ESMF_LocalArrConstrF90Ptr1DI1(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 	      case (2)
                 call ESMF_LocalArrConstrF90Ptr2DI1(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 	      case (3)
                 call ESMF_LocalArrConstrF90Ptr3DI1(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 	      case (4)
                 call ESMF_LocalArrConstrF90Ptr4DI1(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	      case (5)
                 call ESMF_LocalArrConstrF90Ptr5DI1(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 	      case (6)
                 call ESMF_LocalArrConstrF90Ptr6DI1(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
               case (7)
                 call ESMF_LocalArrConstrF90Ptr7DI1(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 ^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -902,26 +902,26 @@ end function
 	    select case(rank)
 	      case (1) 
                 call ESMF_LocalArrConstrF90Ptr1DI2(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 	      case (2)
                 call ESMF_LocalArrConstrF90Ptr2DI2(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 	      case (3)
                 call ESMF_LocalArrConstrF90Ptr3DI2(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 	      case (4)
                 call ESMF_LocalArrConstrF90Ptr4DI2(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	      case (5)
                 call ESMF_LocalArrConstrF90Ptr5DI2(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 	      case (6)
                 call ESMF_LocalArrConstrF90Ptr6DI2(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
               case (7)
                 call ESMF_LocalArrConstrF90Ptr7DI2(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 ^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -933,26 +933,26 @@ end function
 	    select case(rank)
 	      case (1)
                 call ESMF_LocalArrConstrF90Ptr1DI4(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 	      case (2)
                 call ESMF_LocalArrConstrF90Ptr2DI4(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 	      case (3)
                 call ESMF_LocalArrConstrF90Ptr3DI4(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 	      case (4)
                 call ESMF_LocalArrConstrF90Ptr4DI4(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	      case (5)
                 call ESMF_LocalArrConstrF90Ptr5DI4(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 	      case (6)
                 call ESMF_LocalArrConstrF90Ptr6DI4(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
               case (7)
                 call ESMF_LocalArrConstrF90Ptr7DI4(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 ^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -963,26 +963,26 @@ end function
 	    select case(rank)
 	      case (1)
                 call ESMF_LocalArrConstrF90Ptr1DI8(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 	      case (2)
                 call ESMF_LocalArrConstrF90Ptr2DI8(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 	      case (3)
                 call ESMF_LocalArrConstrF90Ptr3DI8(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 	      case (4)
                 call ESMF_LocalArrConstrF90Ptr4DI8(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	      case (5)
                 call ESMF_LocalArrConstrF90Ptr5DI8(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 	      case (6)
                 call ESMF_LocalArrConstrF90Ptr6DI8(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
               case (7)
                 call ESMF_LocalArrConstrF90Ptr7DI8(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 ^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -993,26 +993,26 @@ end function
 	    select case(rank)
 	      case (1)
                 call ESMF_LocalArrConstrF90Ptr1DR4(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 	      case (2)
                 call ESMF_LocalArrConstrF90Ptr2DR4(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 	      case (3)
                 call ESMF_LocalArrConstrF90Ptr3DR4(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 	      case (4)
                 call ESMF_LocalArrConstrF90Ptr4DR4(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	      case (5)
                 call ESMF_LocalArrConstrF90Ptr5DR4(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 	      case (6)
                 call ESMF_LocalArrConstrF90Ptr6DR4(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
               case (7)
                 call ESMF_LocalArrConstrF90Ptr7DR4(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 ^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1023,26 +1023,26 @@ end function
 	    select case(rank)
 	      case (1)
                 call ESMF_LocalArrConstrF90Ptr1DR8(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 	      case (2)
                 call ESMF_LocalArrConstrF90Ptr2DR8(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 	      case (3)
                 call ESMF_LocalArrConstrF90Ptr3DR8(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 	      case (4)
                 call ESMF_LocalArrConstrF90Ptr4DR8(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	      case (5)
                 call ESMF_LocalArrConstrF90Ptr5DR8(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 	      case (6)
                 call ESMF_LocalArrConstrF90Ptr6DR8(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
               case (7)
                 call ESMF_LocalArrConstrF90Ptr7DR8(array, counts, &
-                                    lbounds=lbounds, ubounds=ubounds, rc=status)
+                                    lbounds=lbounds, ubounds=ubounds, rc=localrc)
 ^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -1057,7 +1057,7 @@ end function
 
 
         ! Set return code if caller specified it
-        if (rcpresent) rc = status
+        if (rcpresent) rc = localrc
 
         end subroutine ESMF_LocalArrConstrF90Ptr
 
@@ -1329,7 +1329,7 @@ TypeKindRankDeclarationMacro(LocalArrayDeallocate)
 ! 
 !EOPI
  
-    integer :: status                               ! local error status 
+    integer :: localrc                               ! local return code
     integer, dimension(ESMF_MAXDIM) :: lb, ub
     integer, dimension(ESMF_MAXDIM) :: offsets
     integer :: localkind
@@ -1338,7 +1338,7 @@ TypeKindRankDeclarationMacro(LocalArrayDeallocate)
 AllTypesMacro(ArrayLocalVar)
 
  
-    status = ESMF_RC_NOT_IMPL  
+    localrc = ESMF_RC_NOT_IMPL  
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
  
     lb(1:size(lbounds)) = lbounds
@@ -1500,7 +1500,7 @@ AllocAllocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
         end select
 
 
-        if (present(rc)) rc = status 
+        if (present(rc)) rc = localrc 
  
         end subroutine ESMF_LocalArrayF90Allocate
  
@@ -1536,7 +1536,7 @@ AllocAllocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 ! 
 !EOPI
  
-    integer :: status                               ! local error status 
+    integer :: localrc                               ! local return code
     integer :: localkind
 
     !! local variables, expanded by macro
@@ -1544,7 +1544,7 @@ AllTypesMacro(ArrayLocalVar)
 
 
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    status = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
  
     localkind = kind
 
@@ -1701,7 +1701,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
         end select
 
 
-     if (ESMF_LogMsgFoundAllocError(status, "LocalArray Deallocation", &
+     if (ESMF_LogMsgFoundAllocError(localrc, "LocalArray Deallocation", &
                                     ESMF_CONTEXT, rc)) return
 
      if (present(rc)) rc = ESMF_SUCCESS
@@ -1745,13 +1745,13 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 
         ! Local vars
         type (ESMF_LocalArray) :: newarray  ! new C++ LocalArray
-        integer :: status                   ! local error status
+        integer :: localrc                   ! local return code
         logical :: rcpresent                ! did user specify rc?
         integer :: rank
         type (ESMF_TypeKind) :: kind
         integer :: i, counts(ESMF_MAXDIM), lb(ESMF_MAXDIM), ub(ESMF_MAXDIM)
 
-        status = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
         rcpresent = .FALSE.
         newarray%this = ESMF_NULL_POINTER
 
@@ -1765,9 +1765,9 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
         ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, array, rc)
     
         ! Get info from the existing array
-        call c_ESMC_LocalArrayGetRank(array, rank, status)
-        call c_ESMC_LocalArrayGetTypeKind(array, kind, status)    
-        call c_ESMC_LocalArrayGetLengths(array, rank, counts, status)  
+        call c_ESMC_LocalArrayGetRank(array, rank, localrc)
+        call c_ESMC_LocalArrayGetTypeKind(array, kind, localrc)    
+        call c_ESMC_LocalArrayGetLengths(array, rank, counts, localrc)  
 
         ! Basic sanity checks - slice dim is ok, sliced location exists, etc.
         if ((slicedim .lt. 1) .or. (slicedim .gt. rank)) then
@@ -1795,22 +1795,22 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
         rank = rank - 1
 
         call c_ESMC_LocalArrayCreateNoData(newarray, rank, kind, &
-                                           ESMF_FROM_FORTRAN, status)
-        if (ESMF_LogMsgFoundError(status, &
+                                           ESMF_FROM_FORTRAN, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
         call ESMF_LocalArrConstrF90Ptr(newarray, counts, rank, kind, &
-                                          lb, ub, status)
+                                          lb, ub, localrc)
 
         ! At this point the new array exists, and has space allocated, but it
         ! does not contain data from the old array.  Now we have a T/K/R prob.
 
         ! put old F90 ptr into wrap
-        ! call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status)
+        ! call c_ESMC_LocalArrayGetF90Ptr(array, wrap, localrc)
 
         ! put new F90 ptr into wrap
-        ! call c_ESMC_LocalArrayGetF90Ptr(newarray, wrap, status)
+        ! call c_ESMC_LocalArrayGetF90Ptr(newarray, wrap, localrc)
 
         ! there must be something like this we can do here...
         ! newarray = RESHAPE(array(sliceloc, :, :), counts)
@@ -1818,7 +1818,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 
         ! Set return values
         ESMF_LocalArraySlice = newarray
-        if (rcpresent) rc = status
+        if (rcpresent) rc = localrc
 
         end function ESMF_LocalArraySlice
 
@@ -1927,11 +1927,11 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 
        character (len=16) :: defaultopts      ! default write options 
        character (len=16) :: defaultfile      ! default filename
-       integer :: status                      ! local error status
+       integer :: localrc                      ! local return code
        logical :: rcpresent        
 
        ! Initialize return code; assume routine not implemented
-       status = ESMF_RC_NOT_IMPL
+       localrc = ESMF_RC_NOT_IMPL
        rcpresent = .FALSE.
        if (present(rc)) then
          rcpresent = .TRUE.
@@ -1946,12 +1946,12 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
        defaultfile = "datafile"
 
        if(present(filename)) then
-           call c_ESMC_LocalArrayWrite(array, defaultopts, trim(filename), status) 
+           call c_ESMC_LocalArrayWrite(array, defaultopts, trim(filename), localrc) 
        else
-           call c_ESMC_LocalArrayWrite(array, defaultopts, trim(defaultfile), status) 
+           call c_ESMC_LocalArrayWrite(array, defaultopts, trim(defaultfile), localrc) 
        endif
 
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -2021,11 +2021,11 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 !EOPI
 
     character (len=6) :: defaultopts      ! default print options 
-    integer :: status                     ! local error status
+    integer :: localrc                     ! local return code
     logical :: rcpresent        
 
     ! Initialize return code; assume routine not implemented
-    status = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     rcpresent = .FALSE.
     if (present(rc)) then
       rcpresent = .TRUE.
@@ -2038,9 +2038,9 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
     defaultopts = "brief"
 
     if(present(options)) then
-      !call c_ESMC_LocalArrayValidate(array, options, status) 
+      !call c_ESMC_LocalArrayValidate(array, options, localrc) 
     else
-      !call c_ESMC_LocalArrayValidate(array, defaultopts, status) 
+      !call c_ESMC_LocalArrayValidate(array, defaultopts, localrc) 
     endif
 
     ! Return successfully
@@ -2070,12 +2070,12 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 !EOPI
 
     character (len=6) :: defaultopts      ! default print options 
-    integer :: status                     ! local error status
+    integer :: localrc                     ! local return code
     logical :: rcpresent        
     !character(len=ESMF_MAXSTR) :: msgbuf
 
     ! Initialize return code; assume routine not implemented
-    status = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     rcpresent = .FALSE.
     if (present(rc)) then
       rcpresent = .TRUE.
@@ -2099,12 +2099,12 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
     defaultopts = "brief"
 
     if(present(options)) then
-        call c_ESMC_LocalArrayPrint(array, options, status) 
+        call c_ESMC_LocalArrayPrint(array, options, localrc) 
     else
-        call c_ESMC_LocalArrayPrint(array, defaultopts, status) 
+        call c_ESMC_LocalArrayPrint(array, defaultopts, localrc) 
     endif
 
-    if (ESMF_LogMsgFoundError(status, &
+    if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
@@ -2140,10 +2140,10 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 !EOPI
 
         ! Local vars
-        integer :: status                   ! local error status
+        integer :: localrc                   ! local return code
         integer :: localkind
 
-        status = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
 
         ! Cannot check init status of array argument here because
         ! the array object is only partially created at this point
@@ -2158,26 +2158,26 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
             select case (rank)
 	      case (1)
                 call ESMF_LocalArrayAdjust1DI1(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 	      case (2)
                 call ESMF_LocalArrayAdjust2DI1(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 	      case (3)
                 call ESMF_LocalArrayAdjust3DI1(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 	      case (4)
                 call ESMF_LocalArrayAdjust4DI1(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	      case (5)
                 call ESMF_LocalArrayAdjust5DI1(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 	      case (6)
                 call ESMF_LocalArrayAdjust6DI1(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
               case (7)
                 call ESMF_LocalArrayAdjust7DI1(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 ^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -2190,26 +2190,26 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 	    select case(rank)
 	      case (1) 
                 call ESMF_LocalArrayAdjust1DI2(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 	      case (2)
                 call ESMF_LocalArrayAdjust2DI2(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 	      case (3)
                 call ESMF_LocalArrayAdjust3DI2(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 	      case (4)
                 call ESMF_LocalArrayAdjust4DI2(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	      case (5)
                 call ESMF_LocalArrayAdjust5DI2(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 	      case (6)
                 call ESMF_LocalArrayAdjust6DI2(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
               case (7)
                 call ESMF_LocalArrayAdjust7DI2(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 ^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -2221,26 +2221,26 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 	    select case(rank)
 	      case (1)
                 call ESMF_LocalArrayAdjust1DI4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 	      case (2)
                 call ESMF_LocalArrayAdjust2DI4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 	      case (3)
                 call ESMF_LocalArrayAdjust3DI4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 	      case (4)
                 call ESMF_LocalArrayAdjust4DI4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	      case (5)
                 call ESMF_LocalArrayAdjust5DI4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 	      case (6)
                 call ESMF_LocalArrayAdjust6DI4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
               case (7)
                 call ESMF_LocalArrayAdjust7DI4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 ^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -2251,26 +2251,26 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 	    select case(rank)
 	      case (1)
                 call ESMF_LocalArrayAdjust1DI8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 	      case (2)
                 call ESMF_LocalArrayAdjust2DI8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 	      case (3)
                 call ESMF_LocalArrayAdjust3DI8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 	      case (4)
                 call ESMF_LocalArrayAdjust4DI8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	      case (5)
                 call ESMF_LocalArrayAdjust5DI8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 	      case (6)
                 call ESMF_LocalArrayAdjust6DI8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
               case (7)
                 call ESMF_LocalArrayAdjust7DI8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 ^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -2281,26 +2281,26 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 	    select case(rank)
 	      case (1)
                 call ESMF_LocalArrayAdjust1DR4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 	      case (2)
                 call ESMF_LocalArrayAdjust2DR4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 	      case (3)
                 call ESMF_LocalArrayAdjust3DR4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 	      case (4)
                 call ESMF_LocalArrayAdjust4DR4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	      case (5)
                 call ESMF_LocalArrayAdjust5DR4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 	      case (6)
                 call ESMF_LocalArrayAdjust6DR4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
               case (7)
                 call ESMF_LocalArrayAdjust7DR4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 ^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -2311,26 +2311,26 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 	    select case(rank)
 	      case (1)
                 call ESMF_LocalArrayAdjust1DR8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 	      case (2)
                 call ESMF_LocalArrayAdjust2DR8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 	      case (3)
                 call ESMF_LocalArrayAdjust3DR8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 	      case (4)
                 call ESMF_LocalArrayAdjust4DR8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	      case (5)
                 call ESMF_LocalArrayAdjust5DR8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 	      case (6)
                 call ESMF_LocalArrayAdjust6DR8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
               case (7)
                 call ESMF_LocalArrayAdjust7DR8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=status)
+                                    lb=lbounds, ub=ubounds, rc=localrc)
 ^endif
               case default
                     if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
@@ -2343,8 +2343,8 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
                                  ESMF_CONTEXT, rc)) return
         end select
 
-       ! check status for errors
-       if (ESMF_LogMsgFoundError(status, &
+       ! check localrc for errors
+       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
