@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.48.2.14 2007/10/03 00:35:46 theurich Exp $
+# $Id: build_rules.mk,v 1.48.2.15 2008/01/16 23:03:06 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -54,6 +54,13 @@ ESMF_CXXDEFAULT         = mpiicpc
 ESMF_MPIRUNDEFAULT      = mpirun
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec
 else
+ifeq ($(ESMF_COMM),scalimpi)
+# scaliMPI -------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_CXXDEFAULT         = mpic++
+ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+else
 ifeq ($(ESMF_COMM),lam)
 # LAM (assumed to be built with ifort) ---------------------
 ESMF_F90DEFAULT         = mpif77
@@ -72,6 +79,7 @@ ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------
 else
 $(error Invalid ESMF_COMM setting: $(ESMF_COMM))
+endif
 endif
 endif
 endif
