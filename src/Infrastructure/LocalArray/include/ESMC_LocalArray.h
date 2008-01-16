@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.22 2008/01/04 18:29:05 oehmke Exp $
+// $Id: ESMC_LocalArray.h,v 1.23 2008/01/16 21:25:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -106,6 +106,8 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
       ESMC_TypeKind dk, int *counts, int *lbounds, int *ubounds,
       void *base = NULL, ESMC_DataCopy docopy = ESMC_DATA_REF,
       char *name = NULL, int *rc = NULL);
+    static ESMC_LocalArray *ESMC_LocalArrayCreate(ESMC_LocalArray *larrayIn,
+      int *rc = NULL);
     static int ESMC_LocalArrayDestroy(ESMC_LocalArray *array);
 
     static ESMC_LocalArray *ESMC_LocalArrayCreateNoData(int rank,  

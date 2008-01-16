@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.12 2007/10/15 18:49:14 theurich Exp $
+! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.13 2008/01/16 21:25:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ArrayCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.12 2007/10/15 18:49:14 theurich Exp $'
+    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.13 2008/01/16 21:25:09 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -54,7 +54,7 @@ program ESMF_ArrayCreateGetUTest
   type(ESMF_VM):: vm
   integer:: petCount, localPet
   type(ESMF_ArraySpec):: arrayspec
-  type(ESMF_Array):: array
+  type(ESMF_Array):: array, arrayCpy
   type(ESMF_DistGrid):: distgrid, distgrid2
   real(ESMF_KIND_R8)      :: farray1D(10)
   real(ESMF_KIND_R8)      :: farray2D(10,10)
@@ -133,9 +133,30 @@ program ESMF_ArrayCreateGetUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayCreate from Copy, 2D ESMF_TYPEKIND_R8 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  arrayCpy = ESMF_ArrayCreate(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayDestroy Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayPrint from Copy after original destroy, 2D ESMF_TYPEKIND_R8 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayPrint(arrayCpy, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayDestroy of Copy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(arrayCpy, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------

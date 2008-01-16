@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.30 2007/11/19 23:12:27 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.31 2008/01/16 21:25:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.30 2007/11/19 23:12:27 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.31 2008/01/16 21:25:09 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -286,7 +286,7 @@ contains
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                       :: status         ! local error status
+    integer                       :: localrc        ! local return code
     type(ESMF_Pointer), pointer   :: opt_larrayPtrList(:)   ! helper variable
     integer                       :: len_larrayPtrList, i   ! helper variable
     type(ESMF_InterfaceInt)       :: distgridToArrayMapArg  ! helper variable
@@ -307,7 +307,7 @@ contains
     type(ESMF_DELayout)           :: opt_delayout           ! helper variable
 
     ! Initialize return code
-    status = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
@@ -322,54 +322,54 @@ contains
       allocate(opt_larrayPtrList(1))
     endif
     distgridToArrayMapArg = ESMF_InterfaceIntCreate(distgridToArrayMap, &
-      rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     arrayToDistGridMapArg = ESMF_InterfaceIntCreate(arrayToDistGridMap, &
-      rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    undistLBoundArg = ESMF_InterfaceIntCreate(undistLBound, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    undistLBoundArg = ESMF_InterfaceIntCreate(undistLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    undistUBoundArg = ESMF_InterfaceIntCreate(undistUBound, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    undistUBoundArg = ESMF_InterfaceIntCreate(undistUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveLBoundArg = ESMF_InterfaceIntCreate(farray2D=exclusiveLBound, &
-      rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveUBoundArg = ESMF_InterfaceIntCreate(farray2D=exclusiveUBound, &
-      rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg = &
-      ESMF_InterfaceIntCreate(farray2D=computationalLBound, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_InterfaceIntCreate(farray2D=computationalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUBoundArg = &
-      ESMF_InterfaceIntCreate(farray2D=computationalUBound, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_InterfaceIntCreate(farray2D=computationalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg = ESMF_InterfaceIntCreate(farray2D=totalLBound, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    totalLBoundArg = ESMF_InterfaceIntCreate(farray2D=totalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(farray2D=totalUBound, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    totalUBoundArg = ESMF_InterfaceIntCreate(farray2D=totalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLWidthArg = &
-      ESMF_InterfaceIntCreate(farray2D=computationalLWidth, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_InterfaceIntCreate(farray2D=computationalLWidth, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUWidthArg = &
-      ESMF_InterfaceIntCreate(farray2D=computationalUWidth, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_InterfaceIntCreate(farray2D=computationalUWidth, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLWidthArg = ESMF_InterfaceIntCreate(farray2D=totalLWidth, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    totalLWidthArg = ESMF_InterfaceIntCreate(farray2D=totalLWidth, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUWidthArg = ESMF_InterfaceIntCreate(farray2D=totalUWidth, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    totalUWidthArg = ESMF_InterfaceIntCreate(farray2D=totalUWidth, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
@@ -381,19 +381,19 @@ contains
       computationalLBoundArg, computationalUBoundArg, &
       totalLBoundArg, totalUBoundArg, &
       computationalLWidthArg, computationalUWidthArg, &
-      totalLWidthArg, totalUWidthArg, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      totalLWidthArg, totalUWidthArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! Set init code for deep C++ objects
-    call ESMF_DELayoutSetInitCreated(opt_delayout, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_DELayoutSetInitCreated(opt_delayout, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     if (present(delayout)) then
       delayout = opt_delayout ! copy deep C++ pointer
     endif
-    call ESMF_DistGridSetInitCreated(opt_distgrid, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_DistGridSetInitCreated(opt_distgrid, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     if (present(distgrid)) then
       distgrid = opt_distgrid ! copy deep C++ pointer
@@ -401,64 +401,64 @@ contains
     if (present(larrayList)) then
       do i=1, len_larrayPtrList
         call ESMF_LocalArraySetThis(larrayList(i), opt_larrayPtrList(i), &
-          rc=status)
-        if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+          rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_LocalArraySetInitCreated(larrayList(i), rc=status)
-        if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+        call ESMF_LocalArraySetInitCreated(larrayList(i), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
     endif
     
     ! Garbage collection
     deallocate(opt_larrayPtrList)
-    call ESMF_InterfaceIntDestroy(distgridToArrayMapArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(distgridToArrayMapArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(arrayToDistGridMapArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(arrayToDistGridMapArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(undistLBoundArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(undistLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(undistUBoundArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(undistUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLWidthArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(computationalLWidthArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUWidthArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(computationalUWidthArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLWidthArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(totalLWidthArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUWidthArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_InterfaceIntDestroy(totalUWidthArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! Special call to get name out of Base class
     if (present(name)) then
-      call c_ESMC_GetName(array, name, status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      call c_ESMC_GetName(array, name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     
@@ -466,14 +466,14 @@ contains
     call ESMF_DistGridGet(opt_distgrid, dimCount=dimCount, &
       patchCount=patchCount, minIndexPDimPPatch=minIndexPDimPPatch, &
       maxIndexPDimPPatch=maxIndexPDimPPatch, patchListPDe=patchListPDe, &
-      indexCountPDimPDe=indexCountPDimPDe, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      indexCountPDimPDe=indexCountPDimPDe, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain DELayout information
     call ESMF_DELayoutGet(opt_delayout, deCount=deCount, &
-      localDeCount=localDeCount, localDeList=localDeList, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      localDeCount=localDeCount, localDeList=localDeList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
@@ -526,7 +526,7 @@ contains
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer             :: status         ! local error status
+    integer             :: localrc        ! local return code
     type(ESMF_DistGrid) :: distgrid       ! helper variable
     integer             :: dimCount       ! helper variable
     integer, allocatable:: indexCountInternal(:,:)  ! helper variable
@@ -538,7 +538,7 @@ contains
     integer             :: de             ! helper variable
 
     ! Initialize return code
-    status = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
@@ -546,17 +546,17 @@ contains
     
     ! Obtain auxiliary information
     call ESMF_ArrayGet(array, distgrid=distgrid, dimCount=dimCount, &
-      delayout=delayout, deCount=deCount, localDeCount=localDeCount, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      delayout=delayout, deCount=deCount, localDeCount=localDeCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     allocate(indexCountInternal(dimCount,0:deCount-1))
     call ESMF_DistGridGet(distgrid, indexCountPDimPDe=indexCountInternal, &
-      rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     allocate(localDeList(0:localDeCount-1))
-    call ESMF_DELayoutGet(delayout, localDeList=localDeList, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_DELayoutGet(delayout, localDeList=localDeList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     de=localDeList(localDe)
     deallocate(localDeList)
@@ -577,8 +577,8 @@ contains
         return
       endif
       call ESMF_DistGridGet(distgrid, localDe=localDe, dim=dim, &
-        indexList=indexList, rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+        indexList=indexList, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
@@ -635,14 +635,14 @@ contains
     integer,                    intent(out), optional :: rc @\
 @\
     ! Local variables @\
-    integer                             :: status      ! local error status @\
+    integer                             :: localrc     ! local return code @\
     type(ESMF_DELayout)                 :: delayout @\
     integer                             :: localDeCount, rank @\
     type(ESMF_TypeKind)                 :: typekind @\
     type(ESMF_LocalArray), allocatable  :: larrayList(:) @\
 @\
     ! Initialize return code @\
-    status = ESMF_RC_NOT_IMPL @\
+    localrc = ESMF_RC_NOT_IMPL @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
 @\
     ! Check init status of arguments @\
@@ -650,8 +650,8 @@ contains
 @\
     ! Check consistency @\
     call ESMF_ArrayGet(array, typekind=typekind, rank=rank, & @\
-      delayout=delayout, rc=status) @\
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & @\
+      delayout=delayout, rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
     ! Require farrayPtr typekind to match Array typekind @\
     if (typekind /= ESMF_TYPEKIND_##mtypekind) then @\
@@ -667,8 +667,8 @@ contains
         ESMF_CONTEXT, rc) @\
       return @\
     endif @\
-    call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=status) @\
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & @\
+    call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
     ! Require DELayout to be 1 DE per PET @\
     if (localDeCount < 0) then @\
@@ -692,12 +692,12 @@ contains
 @\
     ! Obtain the native F90 array pointer via the LocalArray interface @\
     allocate(larrayList(localDeCount)) @\
-    call ESMF_ArrayGet(array, larrayList=larrayList, rc=status) @\
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & @\
+    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
     call ESMF_LocalArrayGet(larrayList(1), farrayPtr, ESMF_DATA_REF, & @\
-      rc=status) @\
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & @\
+      rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
     deallocate(larrayList) @\
 @\
@@ -745,24 +745,24 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                             :: status         ! local error status
+    integer                             :: localrc        ! local return code
     type(ESMF_DELayout)                 :: delayout
     integer                             :: localDeCount
     type(ESMF_LocalArray), allocatable  :: larrayList(:)
     
     ! Initialize return code
-    status = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
     
     ! use general Get() method to obtain information
-    call ESMF_ArrayGet(array, delayout=delayout, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_ArrayGet(array, delayout=delayout, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     ! Require DELayout to be 1 DE per PET
     if (localDeCount < 0) then

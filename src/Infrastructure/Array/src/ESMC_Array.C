@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.167 2007/12/14 23:31:27 theurich Exp $
+// $Id: ESMC_Array.C,v 1.168 2008/01/16 21:25:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.167 2007/12/14 23:31:27 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.168 2008/01/16 21:25:09 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1357,7 +1357,141 @@ Array *Array::create(
 }
 //-----------------------------------------------------------------------------
 
-
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::create()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::create
+//
+// !INTERFACE:
+Array *Array::create(
+//
+// !RETURN VALUE:
+//    ESMC_Array * to newly allocated ESMC_Array
+//
+// !ARGUMENTS:
+//
+  Array *arrayIn,                             // (in) Array to copy
+  int *rc                                     // (out) return code
+  ){
+//
+// !DESCRIPTION:
+//    Create an {\tt ESMC\_Array} object as copy of an existing
+//    {\tt ESMC\_Array} object.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  
+  Array *arrayOut;
+  
+  try{
+    // get an allocation for the new Array object
+    try{
+      arrayOut = new Array();
+    }catch(...){
+      // allocation error
+      ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMCI::Array.", rc);  
+      return ESMC_NULL_POINTER;
+    }
+    // copy all scalar members and reference members
+    arrayOut->typekind = arrayIn->typekind;
+    int rank =
+      arrayOut->rank = arrayIn->rank;
+    arrayOut->indexflag = arrayIn->indexflag;
+    int tensorCount =
+      arrayOut->tensorCount = arrayIn->tensorCount;
+    int tensorElementCount = 
+      arrayOut->tensorElementCount = arrayIn->tensorElementCount;
+    arrayOut->distgrid = arrayIn->distgrid; // copy reference
+    arrayOut->delayout = arrayIn->delayout; // copy reference
+    // deep copy of members with allocations
+    // copy the PET-local LocalArray pointers
+    int localDeCount = arrayIn->delayout->getLocalDeCount();
+    arrayOut->larrayList = new ESMC_LocalArray*[localDeCount];
+    for (int i=0; i<localDeCount; i++){
+      arrayOut->larrayList[i] =
+        ESMC_LocalArray::ESMC_LocalArrayCreate(arrayIn->larrayList[i],
+        &localrc);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+        return ESMC_NULL_POINTER;
+    }
+    // determine the base addresses of the local arrays:
+    arrayOut->larrayBaseAddrList = new void*[localDeCount];
+    for (int i=0; i<localDeCount; i++)
+      arrayOut->larrayList[i]
+        ->ESMC_LocalArrayGetBaseAddr((void **)
+        &(arrayOut->larrayBaseAddrList[i]));
+    // copy the PET-local bound arrays
+    int dimCount = arrayIn->distgrid->getDimCount();
+    arrayOut->exclusiveLBound = new int[dimCount*localDeCount];
+    memcpy(arrayOut->exclusiveLBound, arrayIn->exclusiveLBound,
+      dimCount*localDeCount*sizeof(int));
+    arrayOut->exclusiveUBound = new int[dimCount*localDeCount];
+    memcpy(arrayOut->exclusiveUBound, arrayIn->exclusiveUBound,
+      dimCount*localDeCount*sizeof(int));
+    arrayOut->computationalLBound = new int[dimCount*localDeCount];
+    memcpy(arrayOut->computationalLBound, arrayIn->computationalLBound,
+      dimCount*localDeCount*sizeof(int));
+    arrayOut->computationalUBound = new int[dimCount*localDeCount];
+    memcpy(arrayOut->computationalUBound, arrayIn->computationalUBound,
+      dimCount*localDeCount*sizeof(int));
+    arrayOut->totalLBound = new int[dimCount*localDeCount];
+    memcpy(arrayOut->totalLBound, arrayIn->totalLBound,
+      dimCount*localDeCount*sizeof(int));
+    arrayOut->totalUBound = new int[dimCount*localDeCount];
+    memcpy(arrayOut->totalUBound, arrayIn->totalUBound,
+      dimCount*localDeCount*sizeof(int));
+    // tensor dimensions
+    arrayOut->undistLBound = new int[tensorCount];
+    memcpy(arrayOut->undistLBound, arrayIn->undistLBound,
+      tensorCount * sizeof(int));
+    arrayOut->undistUBound = new int[tensorCount];
+    memcpy(arrayOut->undistUBound, arrayIn->undistUBound,
+      tensorCount * sizeof(int));
+    // staggerLoc and vectorDim
+    arrayOut->staggerLoc = new int[tensorElementCount];
+    memcpy(arrayOut->staggerLoc, arrayIn->staggerLoc,
+      tensorElementCount * sizeof(int));
+    arrayOut->vectorDim = new int[tensorElementCount];
+    memcpy(arrayOut->vectorDim, arrayIn->vectorDim,
+      tensorElementCount * sizeof(int));
+    // distgridToArrayMap and arrayToDistGridMap
+    arrayOut->distgridToArrayMap = new int[dimCount];
+    memcpy(arrayOut->distgridToArrayMap, arrayIn->distgridToArrayMap,
+      dimCount * sizeof(int));
+    arrayOut->arrayToDistGridMap = new int[rank];
+    memcpy(arrayOut->arrayToDistGridMap, arrayIn->arrayToDistGridMap,
+      rank * sizeof(int));
+    // contiguous flag
+    arrayOut->contiguousFlag = new int[localDeCount];
+    memcpy(arrayOut->contiguousFlag, arrayIn->contiguousFlag,
+      localDeCount * sizeof(int));
+    // exclusiveElementCountPDe
+    int deCount = arrayIn->delayout->getDeCount();
+    arrayOut->exclusiveElementCountPDe = new int[deCount];
+    memcpy(arrayOut->exclusiveElementCountPDe,
+      arrayIn->exclusiveElementCountPDe, deCount * sizeof(int));
+    // totalElementCountPLocalDe
+    arrayOut->totalElementCountPLocalDe = new int[localDeCount];
+    memcpy(arrayOut->totalElementCountPLocalDe,
+      arrayIn->totalElementCountPLocalDe, localDeCount * sizeof(int));
+    // invalidate the name for this Array object in the Base class
+    arrayOut->ESMC_BaseSetName(NULL, "Array");
+  }catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught exception", rc);
+    return ESMC_NULL_POINTER;
+  }
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return arrayOut;
+}
+//-----------------------------------------------------------------------------
+    
+    
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::destroy()"

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatter.cppF90,v 1.11 2007/11/19 23:12:27 theurich Exp $
+! $Id: ESMF_ArrayScatter.cppF90,v 1.12 2008/01/16 21:25:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_ArrayScatterMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayScatter.cppF90,v 1.11 2007/11/19 23:12:27 theurich Exp $'
+    '$Id: ESMF_ArrayScatter.cppF90,v 1.12 2008/01/16 21:25:09 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -186,14 +186,14 @@ contains
     integer,                    intent(out),  optional  :: rc @\
 @\
     ! Local variables @\
-    integer                       :: status         ! local error status @\
+    integer                       :: localrc        ! local return code @\
     integer                       :: counts(mrank)  ! counts vector @\
     integer                       :: lb(mrank)      ! lb vector @\
     integer                       :: i, rank @\
     type(ESMF_TypeKind)           :: typekind @\
 @\
     ! Initialize return code @\
-    status = ESMF_RC_NOT_IMPL @\
+    localrc = ESMF_RC_NOT_IMPL @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
 @\
     ! Check init status of arguments @\
@@ -201,8 +201,8 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc) @\
 @\
     ! Check consistency @\
-    call ESMF_ArrayGet(array, typekind=typekind, rank=rank, rc=status) @\
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & @\
+    call ESMF_ArrayGet(array, typekind=typekind, rank=rank, rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
     ! Require farray typekind to match Array typekind @\
     if (typekind /= ESMF_TYPEKIND_##mtypekind) then @\
@@ -231,8 +231,8 @@ contains
 @\
     ! Call into the C++ interface, which will sort out optional arguments @\
     call c_ESMC_ArrayScatter(array, farray(mloc), & @\
-      ESMF_TYPEKIND_##mtypekind, mrank, counts, patch, rootPet, vm, status) @\
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, & @\
+      ESMF_TYPEKIND_##mtypekind, mrank, counts, patch, rootPet, vm, localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     ! Return successfully @\
@@ -256,10 +256,10 @@ TypeKindRankDeclarationMacro(ArrayScatter)
     integer,                    intent(out),  optional  :: rc
 
     ! Local variables
-    integer                       :: status         ! local error status
+    integer                       :: localrc        ! local return code
 
     ! Initialize return code
-    status = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
@@ -267,8 +267,8 @@ TypeKindRankDeclarationMacro(ArrayScatter)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayScatterNotRoot(array, patch, rootPet, vm, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    call c_ESMC_ArrayScatterNotRoot(array, patch, rootPet, vm, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully

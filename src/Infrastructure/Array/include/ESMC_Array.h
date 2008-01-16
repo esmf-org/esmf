@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.85 2007/12/14 23:31:27 theurich Exp $
+// $Id: ESMC_Array.h,v 1.86 2008/01/16 21:25:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -154,6 +154,7 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
       InterfaceInt *totalUWidthArg, ESMC_IndexFlag *indexflag,
       int *staggerLoc, int *vectorDim, InterfaceInt *undistLBoundArg,
       InterfaceInt *undistUBoundArg, int *rc);
+    static Array *create(Array *array, int *rc=NULL);
     static int destroy(Array **array);
     // get() and set()
     ESMC_TypeKind getTypekind()             const {return typekind;}
