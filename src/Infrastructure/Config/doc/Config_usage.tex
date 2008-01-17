@@ -1,12 +1,12 @@
-% $Id: Config_usage.tex,v 1.10 2008/01/17 20:31:07 murphysj Exp $
+% $Id: Config_usage.tex,v 1.11 2008/01/17 23:17:09 murphysj Exp $
 
  \subsubsection{Resource Files}
 
    A {\em Resource File (RF)} is a text file consisting of list of {\em label}- 
    {\em value} pairs. There is a limit of 250 characters per line and the Resource 
    File can contain a maximum of 200 records. Each {\em label}) should be followed 
-   by some data, the {\em value}. 
-   An example Resource File follows.  It is the file used in the example below. 
+   by some data, the {\em value}. An example Resource File follows.  It is the file 
+   used in the example below. 
 
  \begin{verbatim}
  # This is an example Resource File.  
@@ -43,14 +43,15 @@
     300     3000     295.8
 
  \end{verbatim}
+
  Note that the colon after the label is required and that the double colon is required
  to declare tabular data. 
 
  Resource files are intended for random access (except between ::'s in a 
- table definition). This means that order in which a particular {\em label}- 
- {\em value} pair is retreived is not dependent upon the original order 
+ table definition). This means that order in which a particular 
+ {\em label-value} pair is retreived is not dependent upon the original order 
  of the pairs. The only exception to this, however, is when the same {\em label} appears 
- multiple times within the Resource file.
+ multiple times within the Resource File.
 
 
 
