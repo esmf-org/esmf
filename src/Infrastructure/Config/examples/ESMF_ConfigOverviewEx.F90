@@ -39,9 +39,9 @@
 !BOE
 !\subsubsection{Variable Declarations}
 
-! The following are the variable declarations used as arguments in the following code fragments.
-! They represent the locals names for the variables listed in the Resource File (RF).  Note they do
-! not need to be the same.
+! The following are the variable declarations used as arguments in the following code 
+! fragments. They represent the locals names for the variables listed in the Resource 
+! File (RF).  Note they do not need to be the same.
 !EOE
 
 !BOC
@@ -160,7 +160,8 @@
 
 
 !BOE
-! This methodology works for all types. The following is an example of retrieving a string:
+! This methodology works for all types. The following is an example of retrieving a 
+! string:
 !EOE
 
 !BOC 
@@ -186,9 +187,9 @@
     endif
 
 !BOE
-! The same code fragment can be used to demonstrate what happens when the label is not present.  Note
-! that "file\_name" does not exist in the Resource File. The result of its abscense is the default value 
-! provided in the call.
+! The same code fragment can be used to demonstrate what happens when the label is not 
+! present.  Note that "file\_name" does not exist in the Resource File. The result of 
+! its abscense is the default value provided in the call.
 !EOE
 
 !BOC 
@@ -246,13 +247,13 @@
 !EOE
 
 !BOC
-      call ESMF_ConfigGetAttribute(cf, param_1, rc=rc)   ! Step b) read in the first 
-                                                         ! constant in the sequence
-      call ESMF_ConfigGetAttribute(cf, i_n, rc=rc)       ! Step c) read in the second 
-                                                         ! constant in the sequence
+      call ESMF_ConfigGetAttribute(cf, param_1, rc=rc) ! Step b) read in the first 
+                                                       ! constant in the sequence
+      call ESMF_ConfigGetAttribute(cf, i_n, rc=rc)     ! Step c) read in the second 
+                                                       ! constant in the sequence
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
+      if (rc. .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
         print*, "*****' call ESMF_ConfigGetAttribute' failed"
       else
@@ -337,9 +338,9 @@
 
 !BOC
       do i = 1, 7
-        call ESMF_ConfigNextLine(cf, rc=rc)                  ! Step b) Increment the rows
-        do j = 1, 3
-          call ESMF_ConfigGetAttribute(cf, table(i,j), rc=rc)! Step c) Fill in the table 
+        call ESMF_ConfigNextLine(cf, rc=rc)          ! Step b) Increment the rows
+        do j = 1, 3                                  ! Step c) Fill in the table 
+          call ESMF_ConfigGetAttribute(cf, table(i,j), rc=rc)
         enddo
       enddo
 !EOC
