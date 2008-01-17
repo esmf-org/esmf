@@ -45,11 +45,6 @@
   ! global storage of test specification
   type (harness_descriptor) :: harness
 
-!-----------superceeded remove
-  ! global storage of test specification - used in report - need to update
-  type (problem_descriptor_record), allocatable :: problem_descriptor(:)
-!-----------superceeded remove
-
   ! local variables
   integer :: localPet, petCount
   integer :: test_report_flag
@@ -72,17 +67,31 @@
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
   !
+  print*,'Start read testharness config'
   call read_testharness_config(rc)
+  print*,'End read testharness config'
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  print*,'Start read descriptor file'
   call read_descriptor_files(rc)
+  print*,'End read descriptor file'
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  print*,'Start parse descriptor string'
   call parse_descriptor_string(rc)
+  print*,'End parse descriptor string'
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+! do file=1,
+!    do k=1, 
+!       do n=1,harness%Record(file)%string(k)%gridfiles%size
+!          call read_grid_specification(                                       &
+!                   harness%Record(file)%string(k)%gridfiles%string(n)%name,rc)
+!       enddo
+!    enddo
+! enddo
   ! report results
 ! call TestHarnessReport(test_report_flag,rc)
 
   ! clean up and release memory
-! deallocate( problem_descriptor )
 
   !---------------------------------------------------------------------------
 999 continue
@@ -812,16 +821,30 @@ contains
   ! local character strings
   character(ESMF_MAXSTR) :: lstring, lname
   character(ESMF_MAXSTR) :: src_string, dst_string
+  type(character_array), allocatable :: lsrc(:), ldst(:)
+  type(character_array), allocatable :: src_grid_type(:), src_dist_type(:)
+  type(character_array), allocatable :: dst_grid_type(:), dst_dist_type(:)
 
   logical :: flag = .true.
 
   ! local integer variables
-  integer :: file, nfiles,string
+  integer :: k, kfile, nfiles,string
   integer, allocatable :: nstrings(:)
   integer :: tag, location(2)
   integer :: dst_beg, dst_end, src_beg, src_end
   integer :: srcMulti, dstMulti
   integer :: srcBlock,dstBlock
+  integer :: src_mem_rank, dst_mem_rank
+  integer :: src_grid_rank, dst_grid_rank
+  integer :: src_dist_rank, dst_dist_rank
+
+  integer, allocatable :: src_grid_order(:), src_dist_order(:)
+  integer, allocatable :: src_grid_HaloL(:), src_grid_HaloR(:)
+  integer, allocatable :: src_grid_StaggerLoc(:)
+
+  integer, allocatable :: dst_grid_order(:), dst_dist_order(:)
+  integer, allocatable :: dst_grid_HaloL(:), dst_grid_HaloR(:)
+  integer, allocatable :: dst_grid_StaggerLoc(:)
 
 
   ! local logical variable
@@ -838,9 +861,9 @@ contains
 
   !----------------------------------------------------------------------------
   !----------------------------------------------------------------------------
-  do file=1,nfiles
-     do string=1,nstrings(file)
-        lstring = trim( harness%Record(file)%string(string)%pds )
+  do kfile=1,nfiles
+     do string=1,nstrings(kfile)
+        lstring = trim( harness%Record(kfile)%string(string)%pds )
   !----------------------------------------------------------------------------
   ! find the test operation (address of strings)
   ! 1. search for "->" or "=>" - tip of symbol provides ending address
@@ -849,42 +872,195 @@ contains
   !    dst_beg = operation_end+1, dst_end = length(trim(string)
   !----------------------------------------------------------------------------
         call process_query(lstring, lname, tag, location, localrc)  
-        harness%Record(file)%string(string)%process%name = lname
-        harness%Record(file)%string(string)%process%tag = tag
+        harness%Record(kfile)%string(string)%process%name = lname
+        harness%Record(kfile)%string(string)%process%tag = tag
 
         call memory_topology(lstring, location, srcMulti, srcBlock,            &
                              dstMulti, dstBlock, localrc)
+
+        ! multiple block memory structure
         if( (srcMulti >= 1).or.(dstMulti >= 1) ) then
-           ! multiple block memory structure
            ! TODO break into multiple single block strings
+           ! and parse each string separately
+
+        ! single block memory structure
+        elseif( (srcMulti == 0).and.(dstMulti == 0) ) then
+           if( (srcBlock==1).and.(dstBlock==1) ) then
+              src_beg = 1
+              src_end = location(1)
+              dst_beg = location(2)
+              dst_end = len( trim(lstring) )
+              !----------------------------------------------------------------
+              ! separate string into source and destination strings
+              !----------------------------------------------------------------
+              src_string = adjustL( lstring(src_beg:src_end) )
+              dst_string = adjustL( lstring(dst_beg:dst_end) )
+
+              !----------------------------------------------------------------
+              ! check that the source and destination ranks are not empty and
+              ! the sizes agree
+              !----------------------------------------------------------------
+              src_mem_rank = pattern_query(src_string,';') + 1
+              dst_mem_rank = pattern_query(dst_string,';') + 1
+
+              if( (src_mem_rank == 0).or.(dst_mem_rank == 0).or.              &
+                  (src_mem_rank /= dst_mem_rank) )  then
+                  localrc = ESMF_FAILURE
+                  call ESMF_LogMsgSetError(ESMF_FAILURE,                      &
+                                       "symbols not properly paired",         &
+                                        rcToReturn=localrc)
+
+              endif
+
+              !----------------------------------------------------------------
+              ! create work space for parsing the source descriptor string
+              !----------------------------------------------------------------
+              allocate( lsrc(src_mem_rank+1) )
+              allocate( src_grid_order(src_mem_rank) )
+              allocate( src_grid_type(src_mem_rank) )
+              allocate( src_grid_HaloL(src_mem_rank) )
+              allocate( src_grid_HaloR(src_mem_rank) )
+              allocate( src_grid_StaggerLoc(src_mem_rank) )    
+              allocate( src_dist_order(src_mem_rank) )      
+              allocate( src_dist_type(src_mem_rank) )      
+
+              !----------------------------------------------------------------
+              ! partition the source descriptor string into separate parts which
+              ! correspond to memory locations and parse the substrings for 
+              ! grid and distribution descriptions.
+              !----------------------------------------------------------------
+              call memory_separate( src_string, src_mem_rank, lsrc, localrc) 
+
+              call interpret_descriptor_string( lsrc, src_mem_rank,           & 
+                        src_grid_rank, src_grid_order, src_grid_type,         &
+                        src_grid_HaloL, src_grid_HaloR, src_grid_StaggerLoc,  &  
+                        src_dist_rank, src_dist_order, src_dist_type,         &
+                        localrc)
+
+              print*,'Parse source'
+              print*,'--------',trim(src_string)
+              do k=1,src_mem_rank
+                 print*,lsrc(k)%name
+              enddo
+              print*,'Memory Rank ',src_mem_rank
+              print*,'Grid Rank ',src_grid_rank
+              print*,'Dist Rank ',src_dist_rank
+              do k=1,src_mem_rank
+                  print*,k, 'Grid type:',trim(src_grid_type(k)%name), &
+                      src_grid_order(k),                              &
+                      '  Dist type:',trim(src_dist_type(k)%name),':', &
+                      src_dist_order(k)
+              enddo
+              print*,'Stagger Location',src_grid_StaggerLoc(1:src_grid_rank)
+              print*,' grid layout '
+              do k=1,src_mem_rank
+                 if( src_grid_order(k) > 0 ) then
+                     print*,k,trim(src_grid_type(k)%name),src_grid_order(k) , &
+                       'H{',src_grid_HaloL(k), src_grid_HaloR(k),'}'
+                 endif
+              enddo
+              print*,' Dist layout '
+              do k=1,src_mem_rank
+                 if( src_dist_order(k) > 0 ) then
+                     print*,k,trim(src_dist_type(k)%name),src_dist_order(k)
+                 endif
+              enddo
+              print*,'----------------------'
+
+              deallocate( lsrc )
+              deallocate( src_grid_order, src_grid_type )
+              deallocate( src_grid_HaloL, src_grid_HaloR )
+              deallocate( src_grid_StaggerLoc )    
+              deallocate( src_dist_order, src_dist_type )      
+
+              print*,'deallocate source arrays'
+
+              !----------------------------------------------------------------
+              ! create work space for parsing the destination descriptor string
+              !----------------------------------------------------------------
+              allocate( ldst(dst_mem_rank+1) )
+              allocate( dst_grid_order(dst_mem_rank) )
+              allocate( dst_grid_type(dst_mem_rank) )
+              allocate( dst_grid_HaloL(dst_mem_rank) )
+              allocate( dst_grid_HaloR(dst_mem_rank) )
+              allocate( dst_grid_StaggerLoc(dst_mem_rank) )    
+              allocate( dst_dist_order(dst_mem_rank) )
+              allocate( dst_dist_type(src_mem_rank) )      
+
+              print*,'allocate destination arrays'
+
+              !----------------------------------------------------------------
+              ! partition the destination descriptor string into separate parts
+              ! which correspond to memory locations and parse the substrings 
+              ! for grid and distribution descriptions.
+              !----------------------------------------------------------------
+              call memory_separate( dst_string, dst_mem_rank, ldst, localrc) 
+
+              print*,'finish memory separate destination'
+
+              call interpret_descriptor_string( ldst, dst_mem_rank,           & 
+                        dst_grid_rank, dst_grid_order, dst_grid_type,         &
+                        dst_grid_HaloL, dst_grid_HaloR, dst_grid_StaggerLoc,  &  
+                        dst_dist_rank, dst_dist_order, dst_dist_type,         &
+                        localrc)
 
 
-        elseif( (srcMulti == 0).and.(srcBlock == 1) ) then
-           ! single block memory structure
+              print*,'Parse Destination'
+              print*,'--------',trim(dst_string)
+              do k=1,dst_mem_rank
+                 print*,ldst(k)%name
+              enddo
+              print*,'Memory Rank ',dst_mem_rank
+              print*,'Grid Rank ',dst_grid_rank
+              print*,'Dist Rank ',dst_dist_rank
+              do k=1,dst_mem_rank
+                  print*,k, 'Grid type:',trim(dst_grid_type(k)%name), &
+                      dst_grid_order(k),                              &
+                      '  Dist type:',trim(dst_dist_type(k)%name),':', &
+                      dst_dist_order(k)
+              enddo
+              print*,'Stagger Location',dst_grid_StaggerLoc(1:dst_grid_rank)
+              print*,' grid layout '
+              do k=1,dst_mem_rank
+                 if( dst_grid_order(k) > 0 ) then
+                     print*,k,trim(dst_grid_type(k)%name),dst_grid_order(k) , &
+                       'H{',dst_grid_HaloL(k), dst_grid_HaloR(k),'}'
+                 endif
+              enddo
+              print*,' Dist layout '
+              do k=1,dst_mem_rank
+                 if( dst_dist_order(k) > 0 ) then
+                     print*,k,trim(dst_dist_type(k)%name),dst_dist_order(k)
+                 endif
+              enddo
+              print*,'----------------------'
+
+
+              deallocate( ldst )
+              deallocate( dst_grid_order, dst_grid_type )
+              deallocate( dst_grid_HaloL, dst_grid_HaloR )
+              deallocate( dst_grid_StaggerLoc )    
+              deallocate( dst_dist_order, dst_dist_type )      
+
+           else
+              !error
+           endif
 
         else
+
         endif
 
 
 
-        src_beg = 1
-        src_end = location(1)
-        dst_beg = location(2)
-        dst_end = len( trim(lstring) )
-        !----------------------------------------------------------------------
-        ! separate string into source and destination strings
-        !----------------------------------------------------------------------
-        src_string = adjustL( lstring(src_beg:src_end) )
-        dst_string = adjustL( lstring(dst_beg:dst_end) )
         !----------------------------------------------------------------------
         !----------------------------------------------------------------------
-      print*,' TEST '
-      print*,src_beg, src_end, dst_beg,dst_end 
-      print*,'123456789012345678901234567890'
-      print*,trim(lstring)
-      print*,'process ', harness%Record(file)%string(string)%process%name
-      print*,'src',trim( src_string )
-      print*,'dst',trim( dst_string ) 
+    ! print*,' TEST '
+    ! print*,src_beg, src_end, dst_beg,dst_end 
+    ! print*,'123456789012345678901234567890'
+    ! print*,trim(lstring)
+    ! print*,'process ', harness%Record(kfile)%string(string)%process%name
+    ! print*,'src',trim( src_string )
+    ! print*,'dst',trim( dst_string ) 
   !--------------------------------------------------------------------------
   ! find rank of source and destination strings ( plus addresses of dividers ";")
   ! break into substrings, one for each dimension. Increment through, searching 

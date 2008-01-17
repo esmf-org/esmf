@@ -7,22 +7,22 @@
 ! NASA Goddard Space Flight Center.
 ! Licensed under the University of Illinois-NCSA License.
 !
-!==============================================================================
+!===============================================================================
 #define ESMF_FILENAME "ESMF_TestHarnessMod"
 !
 !  ESMF Test Harness Module
    module ESMF_TestHarnessMod
 !
-!==============================================================================
+!===============================================================================
 !
 ! This file contains parameters, global data types, and parser 
 ! functions/subroutines for the Testing Harness.
 ! These methods are used by the test harness driver ESMF_TestHarnessUTest.F90.
 !
-!------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 ! INCLUDES
 #include <ESMF.h>
-!==============================================================================
+!===============================================================================
 !BOPI
 ! !MODULE: ESMF_TestHarnessMod
 !
@@ -31,7 +31,7 @@
 ! The code in this file contains data types and basic functions for the
 ! {\tt ESMF\_TestHarness}.  
 !
-!------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 ! !USES:
 
   use ESMF_Mod
@@ -66,7 +66,7 @@
   integer, parameter :: HarnessTest_FAILURE      = 1001
 
 
-!------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
 !  private
   type name_record
@@ -94,27 +94,15 @@
      integer, pointer :: rank(:)
   end type memory_record
 
-  type grid_record
-     character(ESMF_MAXSTR) :: name
-     integer :: topology                ! key representing the geometry of the grid
-     integer :: rank                    ! rank of the grid
-     integer, pointer :: order(:)       ! axis number, zero for free.
-     integer, pointer :: size(:)        ! number of grid elements along axis
-     integer, pointer :: stagger(:,:)   ! stagger location (axis,rank)
-     logical, pointer :: periodicity(:) ! (rank) periodicity along axis
-     logical, pointer :: halo(:)        ! (rank) periodicity along axis
-     integer, pointer :: halo_size(:,:) ! (rank,2) halo size along axis
-  end type grid_record
-
-  type dist_record
-     character(ESMF_MAXSTR) :: name
-     integer :: topology           ! key (simple block, block-cyclic, arbitrary)
-     integer :: rank               ! rank of distribution
-     integer, pointer :: order(:)  ! axis number, zero for free.
-     integer, pointer :: size(:)   ! number of DE for axis number, zero for free.
-     integer, pointer :: period(:) ! period for block-cyclic, zero for simple block
-     integer, pointer :: specifier(:,:)  ! 
-  end type dist_record
+! type dist_record
+!    character(ESMF_MAXSTR) :: name
+!    integer :: topology           ! key (simple block, block-cyclic, arbitrary)
+!    integer :: rank               ! rank of distribution
+!    integer, pointer :: order(:)  ! axis number, zero for free.
+!    integer, pointer :: size(:)   ! number of DE for axis number, zero for free.
+!    integer, pointer :: period(:) ! period for block-cyclic, zero for simple block
+!    integer, pointer :: specifier(:,:)  ! 
+! end type dist_record
 
 
 
@@ -158,14 +146,14 @@
 !------------superceeded: to be removed
   type problem_descriptor_record
      character(ESMF_MAXSTR) :: string           ! problem descriptor string
-     type(test_report), pointer :: report(:)    ! record of test result
+!    type(test_report), pointer :: report(:)    ! record of test result
      type(process_record) :: process            ! method process
      type(sized_char_array) :: distfiles        ! distribution specification files
      type(sized_char_array) :: gridfiles        ! grid specification files
      type(memory_record) :: src_memory          ! memory topology
      type(memory_record) :: dst_memory          ! memory topology
-     type(dist_record) :: src_dist  ! src distribution specification
-     type(dist_record) :: dst_dist  ! dst distribution specification
+!    type(dist_record) :: src_dist  ! src distribution specification
+!    type(dist_record) :: dst_dist  ! dst distribution specification
      type(grid_record) :: src_grid  !  src grid specification
      type(grid_record) :: dst_grid  !  dst grid specification
   end type problem_descriptor_record
@@ -183,139 +171,273 @@
  !-----------------------------------------------------------------------------
 
   !----------------------------------------------------------------------------
-  subroutine interpret_descriptor_string(problem_descriptor, returnrc)
+  subroutine interpret_descriptor_string(lstring, nstring,                    &
+                                         grid_rank, grid_order, grid_type,    &
+                                         HaloL, HaloR, StaggerLoc,            &
+                                         dist_rank, dist_order, dist_type,    &
+                                         localrc)
   !----------------------------------------------------------------------------
-  ! Parse a single  problem descriptor string for problem description items
-  ! such as process (REDISTRIBUTION or REMAPPING), memory topology and rank,
-  ! distribution and grid rank.
+  ! This routine parses a part ( either source or destination) of a problem
+  ! descriptor string for for descriptions of the memory topology and rank,
+  ! the grid rank, order, halo and stagger, and the distribution type, rank,
+  ! and order. The routine assumes the string has beeen partitioned so that
+  ! each memory slot is stored in an element of a character array.
   !----------------------------------------------------------------------------
 
   ! arguments
-  type(problem_descriptor_record), intent(inout) :: problem_descriptor
-  integer, intent(out) :: returnrc
+  type(character_array), intent(in   ) :: lstring(:)
+  integer,               intent(in   ) :: nstring 
+  integer,               intent(  out) :: grid_rank, grid_order(:)
+  integer,               intent(  out) :: dist_rank, dist_order(:)
+  type(character_array), intent(  out) :: grid_type(:), dist_type(:)
+  integer,               intent(  out) :: HaloL(:), HaloR(:)
+  integer,               intent(  out) :: StaggerLoc(:)
+  integer,               intent(  out) :: localrc
+
 
   ! local variables
-  integer :: localrc = ESMF_SUCCESS ! assume success
+  character(ESMF_MAXSTR) :: ltmp, lstagger
+  integer :: k, kstring, rank, halo, ndelim
+  integer :: iloc(1), mloc(1)
+  integer :: hbeg, hmid, hend, sbeg, send, slen
+  integer :: itmp, itmp_beg, itmp_end
+  integer, allocatable ::  sdelim(:)
 
-  ! test variables
-! integer :: SrcMemRank, DstMemRank
-! integer, allocatable :: SrcMemLoc(:), DstMemLoc(:)
-! integer :: SrcMemBeg, SrcMemEnd, DstMemBeg, DstMemEnd
-! integer :: SrcDistRank, DstDistRank, SrcGridRank, DstGridRank
-
-
-  !----------------------------------------------------------------------------
-  ! initialize variables
-  !----------------------------------------------------------------------------
-  returnrc = ESMF_SUCCESS
-
-  ! Initialize to failure.
-  problem_descriptor%process%name = 'NONE'
-  problem_descriptor%process%tag = Harness_Error
 
   !----------------------------------------------------------------------------
-  ! Determine testing process (REDISTRIBUTION or REMAPPING)
+  ! initialize return variable
   !----------------------------------------------------------------------------
+  localrc = ESMF_RC_NOT_IMPL 
+
+  print*,' Determine grid layout'
+  !----------------------------------------------------------------------------
+  ! Determine grid layout (rank and order)
+  !----------------------------------------------------------------------------
+  grid_rank = 0 
+  do kstring=1, nstring
+     rank = set_query(lstring(kstring)%name, 'GU') 
+     if( rank == 0 ) then
+     ! no associated grid
+        grid_type(kstring)%name = ' '
+        grid_order(kstring) = 0
+     elseif( rank == 1 ) then
+     ! associated grid
+        grid_rank = grid_rank +  rank
+        call set_locate(lstring(kstring)%name, 'GU', rank , mloc)
+        grid_type(kstring)%name = lstring(kstring)%name(mloc(1):mloc(1))
+        read( lstring(kstring)%name(mloc(1)+1:mloc(1)+1), *) grid_order(kstring)
+        halo = set_query(lstring(kstring)%name, 'H') 
+        if( halo == 1 ) then
+        !----------------------------------------------------------------------
+        ! halo is specified, now check that the syntax is correct
+        !----------------------------------------------------------------------
+           halo = set_query(lstring(kstring)%name, '{:}') 
+           if( halo == 3 ) then
+              itmp = 1
+              call pattern_locate(lstring(kstring)%name, 'H{', itmp, iloc)    
+              hbeg = iloc(1)
+              if( itmp /= 1) then
+              !syntax error in halo specification
+              call ESMF_LogMsgSetError( ESMF_FAILURE,                          &
+                      "halo specification missing prefix",                     &
+                      rcToReturn=localrc)
+              endif
+
+              call set_locate(lstring(kstring)%name, ':', itmp, iloc)    
+              hmid = iloc(1)
+              if( itmp /= 1) then
+              !syntax error in halo specification
+              call ESMF_LogMsgSetError( ESMF_FAILURE,                          &
+                      "halo specification missing separator",                  &
+                      rcToReturn=localrc)
+              endif
+
+              call set_locate(lstring(kstring)%name, '}', itmp, iloc)    
+              hend = iloc(1)
+              if( itmp /= 1) then
+              !syntax error in halo specification
+              call ESMF_LogMsgSetError( ESMF_FAILURE,                          &
+                      "halo specification missing suffix",                     &
+                      rcToReturn=localrc)
+              endif
+              !----------------------------------------------------------------
+              ! halo syntax is correct, now read in the halo values as characters 
+              ! and convert then to integer values.
+              !----------------------------------------------------------------
+              read( trim(adjustL( lstring(kstring)%name(hmid-1:hbeg+2) )),*)   &
+                 HaloL(kstring)
+              read( trim(adjustL( lstring(kstring)%name(hend-1:hmid+1) )),*)   &
+                 HaloR(kstring)
+
+           else
+           ! syntax error for halo specification
+              call ESMF_LogMsgSetError( ESMF_FAILURE,                          &
+                      "halo specification wrong "//trim(lstring(kstring)%name),&
+                      rcToReturn=localrc)
+           endif   ! halo
+
+        elseif( halo == 0 ) then 
+        ! no halo 
+           HaloL(kstring) = 0
+           HaloR(kstring) = 0
+        else
+        ! syntax error for halo specification
+           HaloL(kstring) = -1
+           HaloR(kstring) = -1
+           call ESMF_LogMsgSetError( ESMF_FAILURE,                             &
+                   "halo specification wrong "//trim(lstring(kstring)%name),   &
+                   rcToReturn=localrc)
+        endif    ! halo
+
+     else 
+     ! error multiple grid specifications for single memory location
+        call ESMF_LogMsgSetError( ESMF_FAILURE,                                &
+                "multiple grid specifications for single memory location " //  &
+                trim(lstring(kstring)%name), rcToReturn=localrc)
+     endif
+
+  enddo    !  kstring
+
+  !--------------------------------------------------------------------------
+  ! initialize stagger location
+  !--------------------------------------------------------------------------
+  do k=1,grid_rank
+     staggerloc(k) = 0
+  enddo
+
+  !--------------------------------------------------------------------------
+  ! determine if the stagger location is specified by the problem descriptor
+  ! string. Look for trailing tag of the form "@{#,#,#}" following the 
+  ! closing "]". If it exists it will be placed in the memory_rank+1 element 
+  ! of the character array.
+  !--------------------------------------------------------------------------
+
+  itmp_beg = pattern_query(lstring(nstring+1)%name, ']@{')
+  if( itmp_beg == 1 ) then
+     call pattern_locate( lstring(nstring+1)%name, ']@{', itmp_beg, iloc)
+     sbeg = iloc(1)
+     slen = len( trim( lstring(nstring+1)%name ) )
+
+     ! extract the stagger substring for further parsing
+     ltmp = trim( adjustL( lstring(nstring+1)%name(sbeg+2:slen) ))
+     itmp_end = pattern_query(ltmp, '}')
+
+     if( itmp_end == 1 ) then
+        call pattern_locate( ltmp, '}', itmp_end, iloc )
+        send = iloc(1)
+        lstagger = trim( adjustL( ltmp(2:send) ))
+
+        ! determine the number of entries
+        ndelim = pattern_query( lstagger, ',')
+
+        if( ndelim >= 1 .and. ndelim <= grid_rank-1 ) then   
+           ! identify the separate entries, check that they are not empty,
+           ! and read the values
+           allocate( sdelim(ndelim) )
+           call pattern_locate( lstagger, ',', ndelim, sdelim)
+
+           if(  sdelim(1)-1 >= 1) then
+              read( trim(adjustL(lstagger( 1:sdelim(1)-1 ) )),*) staggerloc(1)
+           else
+           ! specification empty
+              call ESMF_LogMsgSetError( ESMF_FAILURE,                          &
+                      "stagger location specification empty ",                 &
+                       rcToReturn=localrc)
+           endif
+        
+           do k=2,ndelim
+              if(  sdelim(k)-1 > sdelim(k-1) ) then
+                 read( trim(adjustL(lstagger( sdelim(k-1)+1:sdelim(k)-1) )),*) &
+                         staggerloc(k)
+              else
+              ! specification empty
+                 call ESMF_LogMsgSetError( ESMF_FAILURE,                       &
+                         "stagger location specification empty ",              &
+                         rcToReturn=localrc)
+              endif
+           enddo     ! ndelim
+
+           send = len( trim( adjustL( lstagger ) ) )
+           if(  send-1 >= sdelim(ndelim) ) then
+              read( trim(adjustL(lstagger( send-1:sdelim(ndelim)+1)) ),*)      &
+                         staggerloc(ndelim+1)
+           else
+           ! specification empty
+              call ESMF_LogMsgSetError( ESMF_FAILURE,                          &
+                      "stagger location specification empty ",                 &
+                      rcToReturn=localrc)
+           endif
+           ! clean up workspace
+           deallocate( sdelim )
+
+        else    
+        ! wrong number of delimiters for grid rank
+           call ESMF_LogMsgSetError( ESMF_FAILURE,                             &
+                   "wrong number of delimiters for grid rank",                 &
+                   rcToReturn=localrc)
+        endif    ! number of delimiters
+     else
+     ! error missing ending delimiter
+        call ESMF_LogMsgSetError( ESMF_FAILURE,                                &
+                "missing stagger location ending delimitor from string",       &
+                   rcToReturn=localrc)
+     endif     ! proper ending syntax
+  elseif( itmp_beg == 0 ) then
+  ! no stagger assumption, assume cell center location
+     do k=1,grid_rank
+        staggerloc(k) = 0
+     enddo
+  else
+  ! syntax error
+     call ESMF_LogMsgSetError( ESMF_FAILURE,                                   &
+             "problem descriptor string syntax error, strings ends with " //   &
+             trim(lstring(nstring+1)%name), rcToReturn=localrc)
+  endif     ! proper starting syntax
 
   !----------------------------------------------------------------------------
-  ! Determine memory layout (Logically Rectangular or General)
+  ! check stagger location for acceptable values
   !----------------------------------------------------------------------------
-     !-----------------------------------------------------------------------
-     ! Determine the problem's destination distribution rank, order, topology 
-     !------------------------------------------------------------------------
-             
-     !-------------------------------------------------------------------------
-     ! Determine source grid rank and order
-     !-------------------------------------------------------------------------
-             
-     !-------------------------------------------------------------------------
-     ! Determine destination grid rank and order
-     !-------------------------------------------------------------------------
+  do k=1,grid_rank
+     if( staggerloc(k) /= 0 .and. staggerloc(k) /= 1 ) then
+        ! error invalid staggerlocs
+        call ESMF_LogMsgSetError( ESMF_FAILURE,                                &
+                "invalid stagger locations from problem descriptor string",    &
+                rcToReturn=localrc)
+     endif
+  enddo
 
+  !----------------------------------------------------------------------------
+  ! Determine Distribution layout (rank and order)
+  !----------------------------------------------------------------------------
+  dist_rank = 0
+  do kstring=1, nstring
+     rank = set_query(lstring(kstring)%name, 'BCA') 
+     if( rank == 0 ) then
+     ! no associated distribution
+        dist_type(kstring)%name = ' '
+        dist_order(kstring) = 0
+     elseif( rank == 1 ) then
+     ! associated grid
+        dist_rank = dist_rank +  rank
+        call set_locate(lstring(kstring)%name, 'BCA', rank , mloc)
+        dist_type(kstring)%name = lstring(kstring)%name(mloc(1):mloc(1))
+        read( lstring(kstring)%name(mloc(1)+1:mloc(1)+1), *) dist_order(kstring)
+     else 
+        ! error multiple distribution specifications for single memory location
+        call ESMF_LogMsgSetError( ESMF_FAILURE,                                &
+                "multiple distribution specifications in single memory" //     &
+                "location", rcToReturn=localrc)
+     endif
+
+  enddo    !  kstring
+
+  !----------------------------------------------------------------------------
+  ! 
+  !----------------------------------------------------------------------------
+  localrc = ESMF_SUCCESS     
   !----------------------------------------------------------------------------
   end subroutine interpret_descriptor_string
   !----------------------------------------------------------------------------
-
-
-  !----------------------------------------------------------------------------
-  subroutine read_distgrid(descriptor, returnrc)
-  !----------------------------------------------------------------------------
-  ! Routine extracts from the distgrid specifier files the DistGrid information
-  !----------------------------------------------------------------------------
-
-  ! arguments
-  type(problem_descriptor_record), intent(inout) :: descriptor
-  integer, intent(out) :: returnrc
-
-  ! local variables
-  integer :: localrc = ESMF_SUCCESS ! assume success
-
-  type(ESMF_Config)   :: localcf
-
-  integer :: ncount
-  integer :: src_dist_rank,dst_dist_rank
-  integer, allocatable :: partialcount(:)
-  character(ESMF_MAXSTR) :: lfile, ltag
-  integer :: ncol
-
-  ! initialize variables
-  returnrc = ESMF_SUCCESS
-
-  ! create a config handle and load the config file
-  localcf = ESMF_ConfigCreate(localrc)
-
-  ! allocate workspace to hold the count of the entries for each file.
-  print*,'number of descriptor files is:',descriptor%distfiles%size
-  allocate( partialcount(descriptor%distfiles%size) )
-
-  src_dist_rank = descriptor%src_dist%rank
-  dst_dist_rank = descriptor%dst_dist%rank
-
-  print*,'src/dst rank of dist is:',src_dist_rank,'/',dst_dist_rank
-
-  !----------------------------------------------------------------------------
-  ! loop over the number of DistGrid descriptor files, and count the total entries.
-  !----------------------------------------------------------------------------
-  do ncount=1, descriptor%distfiles%size
-     lfile = descriptor%distfiles%string(ncount)%name
-     call ESMF_ConfigLoadFile( localcf, trim( lfile ), rc=localrc )
-     if (localrc /= ESMF_SUCCESS) then
-        print*,'error, could not open DistGrid specifier file:',trim( lfile )
-        returnrc = ESMF_FAILURE
-        return
-     endif
-
-     !-------------------------------------------------------------------------
-     ! Search for the tag distgrid_block_#D#D to extract the source and
-     ! destination ranks sizes.
-     !-------------------------------------------------------------------------
- 10  format('distgrid_block_',i1.0,'D',i1.0,'D')
-     write(ltag,10) src_dist_rank,dst_dist_rank
-     print*,'looking for tag:', trim( ltag )
-     if( src_dist_rank /= dst_dist_rank) then
-        print*,'error,src dist rank ',src_dist_rank,' /= dst dist rank ',  &
-               dst_dist_rank
-        returnrc = ESMF_FAILURE
-        return
-     endif
-     ! obtain the number of config entries
-     call ESMF_ConfigGetDim(localcf,partialcount(ncount),ncol,trim(ltag),   &
-                            rc=localrc)
-
-     ! close config file before opening another
-     call ESMF_ConfigDestroy(localcf, localrc)
-  enddo    ! ncount
-
-! bunch of stuff here deleted 
-
-  ! clean up
-  deallocate(partialcount)
-
-
-  !----------------------------------------------------------------------------
-  end subroutine read_distgrid
-  !----------------------------------------------------------------------------
-
 
  !-----------------------------------------------------------------------------
  ! Routines to search strings
@@ -523,8 +645,8 @@
     subroutine grid_query(lstring, MemBeg, MemEnd, MemRank, &
                           MemTopology, MemOrder, localrc)
     !------------------------------------------------------------------------
-    ! This subroutine returns grid topology (G - tensor, S - spherical, 
-    ! U - unstructured) and order as specified by the descriptor string. 
+    ! This subroutine returns grid topology (G - tensor, U - unstructured)
+    ! and order as specified by the descriptor string. 
     !------------------------------------------------------------------------
 
     ! arguments
@@ -546,7 +668,7 @@
     !------------------------------------------------------------------------
     ! Check each memory chunk and extract distribution information. 
     !------------------------------------------------------------------------
-    pattern3 = 'GSU'
+    pattern3 = 'GU'
     allocate( MemLoc(MemRank) )
     tmpMemRank = MemRank
     call set_locate(lstring(MemBeg:MemEnd), pattern3, tmpMemRank, MemLoc)
@@ -569,11 +691,6 @@
           MemTopology = Harness_TensorGrid
           MemOrder(i) = char2int( lstring, MemLoc(i)+1, localrc )
                     
-       elseif ( lstring( MemLoc(i):MemLoc(i) ) == 'S' ) then
-       
-          MemTopology = Harness_SphericalGrid
-          MemOrder(i) = char2int( lstring, MemLoc(i)+1, localrc )
-          
        elseif ( lstring( MemLoc(i):MemLoc(i) ) == 'U' ) then
        
           MemTopology = Harness_UnstructuredGrid
@@ -672,7 +789,7 @@
  !-----------------------------------------------------------------------------
 
     !--------------------------------------------------------------------------
-    subroutine memory_rank(lstring, iRank, iBeg, iEnd, localrc)
+    subroutine memory_separate(lstring, iRank, lmem,  localrc)
     !--------------------------------------------------------------------------
     ! For a structured block of memory, return the memory rank as specified
     ! by the descriptor string. 
@@ -680,52 +797,81 @@
     !------------------------------------------------------------------------
 
     ! arguments
-    character(ESMF_MAXSTR), intent(in   ) :: lstring
-    integer,                intent(  out) :: iRank
-    integer,                intent(  out) :: iBeg, iEnd
+    character(*), intent(in   ) :: lstring
+    integer,                intent(in   ) :: iRank
+    type(character_array),  intent(  out) :: lmem(:)
     integer,                intent(  out) :: localrc
 
     ! local variables
     character(len=1) :: pattern
-    character(len=2) :: pattern2
-    integer :: nMemory
-    integer :: MemPos(2)
+    integer :: k, nMem, nEnd, iBeg, iEnd
+    integer :: EndPos(1)
+    integer, allocatable :: MemPos(:)
 
     ! initialize variables
     localrc = ESMF_RC_NOT_IMPL
 
     ! initialize variables
-    iRank = 0 
 
     !------------------------------------------------------------------------
     ! The structured memory is delineated by square brackets. To determine
     ! how this memory is specified, it is first necessary to determne 
     ! the existence of two matching pairs of square brackets.
     !------------------------------------------------------------------------
-    pattern2 = '[]'
-    nMemory = set_query(lstring, pattern2)
+    pattern = ';'
+    nMem = pattern_query(lstring, pattern)
+    nEnd = pattern_query(lstring, ']')
 
-    if ( (nMemory == 0).and.(nMemory >= 4) ) then
-       ! sanity check - syntax error, no brackets or more than one set
-       call ESMF_LogMsgSetError(ESMF_FAILURE,"symbols not properly paired",    &
+    if( nMem+1 /=  iRank .and. nEnd /= 1 ) then
+       call ESMF_LogMsgSetError(ESMF_FAILURE,                                 &
+                "asserted memory rank not agree with actual memory rank",     &
                 rcToReturn=localrc)
-    elseif (nMemory == 2) then
+    else
        !-----------------------------------------------------------------------
-       ! there must be two pairs of matching brackets
        !-----------------------------------------------------------------------
-       call set_locate(lstring,pattern2, nMemory, MemPos)
-       iBeg = MemPos(1)
-       iEnd = MemPos(2)
-       pattern = ';'
-       iRank = pattern_query(lstring(iBeg:iEnd),pattern) + 1
-    else 
-       ! brackets are mismatched
-        call ESMF_LogMsgSetError(ESMF_FAILURE,"symbols not properly paired",   &
-                 rcToReturn=localrc)
+       allocate( MemPos(nMem) )
+       call pattern_locate(lstring, pattern, nMem, MemPos)
+       call pattern_locate(lstring, ']', nEnd, EndPos)
+
+       !-----------------------------------------------------------------------
+       ! extract first memory location - not enclosed by "," on front side
+       !-----------------------------------------------------------------------
+       iBeg = 2
+       iEnd = MemPos(1)-1
+       lmem(1)%name = lstring(iBeg:iEnd)
+
+       !-----------------------------------------------------------------------
+       ! extract remaining memory locations
+       !-----------------------------------------------------------------------
+       do k=2,nMem
+          iBeg = MemPos(k-1) +1
+          iEnd = MemPos(k) -1
+          lmem(k)%name = lstring(iBeg:iEnd)
+       enddo
+
+       !-----------------------------------------------------------------------
+       ! extract last memory location - not enclosed by "," on back side
+       !-----------------------------------------------------------------------
+       iBeg = MemPos(nMeM) +1
+       iEnd = EndPos(1) -1
+       lmem(nMem+1)%name = lstring(iBeg:iEnd)
+
+       !-----------------------------------------------------------------------
+       ! extract stagger location if included
+       !-----------------------------------------------------------------------
+       iBeg = EndPos(1)
+       iEnd = len(trim(lstring)) 
+       if( iEnd > iBeg ) then
+          lmem(nMem+2)%name = lstring(iBeg:iEnd)
+       else
+          lmem(nMem+2)%name = ' '
+       endif
+
+       deallocate( MemPos )
     endif
      
     !---------------------------------------------------------------------------
-    end subroutine memory_rank
+    end subroutine memory_separate
     !---------------------------------------------------------------------------
 
  !------------------------------------------------------------------------------
@@ -737,9 +883,9 @@
     ! routine checks the whole input string to determine if the memory topology
     ! consists of a single structured Logically Rectangular block of memory, or 
     ! multiple structured blocks. It also conducts syntax checking on the
-    ! string. Output is through two variables; nBlock the number of single
-    ! contigous blocks of memory, and nMult the number of multiple memory
-    ! blocks.
+    ! string. Output is through two sets (source and destination) of two 
+    ! variables; *Block the number of single contigous blocks of memory, and 
+    ! *Multi the number of multiple memory blocks.
     !---------------------------------------------------------------------------
 
     ! arguments
@@ -767,7 +913,7 @@
     nsingle = set_query(lstring,'[]' )
 
     !---------------------------------------------------------------------------
-    ! check if memory is multiple block
+    ! check if memory is structured with multiple blocks
     !---------------------------------------------------------------------------
     if( (nmult >= 4).and.(nsingle >= 4) ) then
        !------------------------------------------------------------------------
@@ -806,9 +952,8 @@
        endif
 
     else   ! syntax error
-       call ESMF_LogMsgSetError( ESMF_FAILURE,                                 &
-               "symbols not paired properly",                                  &
-               rcToReturn=localrc)
+       call ESMF_LogMsgSetError( ESMF_FAILURE, "symbols not paired properly",  &
+                rcToReturn=localrc)
     endif
 
     !---------------------------------------------------------------------------
@@ -1109,10 +1254,10 @@
     !---------------------------------------------------------------------------
 
     ! arguments
-    character(len=*),     intent(in   ) :: lstring
-    character(len=*),     intent(in   ) :: lpattern
-    integer,              intent(inout) :: number_hits
-    integer, dimension(:),intent(inout) :: hit_loc
+    character(len=*), intent(in   ) :: lstring
+    character(len=*), intent(in   ) :: lpattern
+    integer,          intent(inout) :: number_hits
+    integer,          intent(inout) :: hit_loc(:)
     
     ! local variables
     integer :: k, klast, ncount

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2007/09/28 17:22:00 donstark Exp $ 
+# $Id: makefile,v 1.2 2008/01/17 01:15:10 donstark Exp $ 
 
 ALL:      build_unit_tests
 
@@ -24,6 +24,6 @@ CLEANDIRS   =
 CLEANFILES  = $(TESTS_BUILD)
 CLOBBERDIRS =
 
-UTEST_TestHarness_OBJS = ESMF_TestHarnessMod.o
+UTEST_TestHarness_OBJS = ESMF_TestHarnessMod.o ESMF_TestHarnessGridMod.o  ESMF_TestHarnessDistMod.o 
 
-ESMF_TestHarnessUTest.o: ESMF_TestHarnessMod.o
+ESMF_TestHarnessUTest.o: ESMF_TestHarnessMod.o  ESMF_TestHarnessGridMod.o  ESMF_TestHarnessDistMod.o 
