@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.286 2008/01/04 00:45:53 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.287 2008/01/17 21:44:09 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -112,11 +112,11 @@
         type (ESMF_Grid)              :: grid
         type (ESMF_IOSpec)            :: iospec           ! iospec values
         type (ESMF_Status)            :: iostatus         ! if unset, inherit from gcomp
-! TODO:FIELDINTEGRATION Reconcile the additions of arrayspec, array and localFlag with methods
+! TODO:FIELDINTEGRATION Reconcile the additions of arrayspec and array with methods
         type (ESMF_ArraySpec)         :: arrayspec
         type (ESMF_Array)             :: array
         type (ESMF_StaggerLoc)        :: staggerloc
-        logical                       :: localFlag        ! .true. if local data present
+        logical                       :: array_copied     ! .true. if field%array is a copy
         integer                       :: gridToFieldMap(ESMF_MAXDIM)
         integer                       :: ungriddedLBound(ESMF_MAXDIM)
         integer                       :: ungriddedUBound(ESMF_MAXDIM)
@@ -205,7 +205,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.286 2008/01/04 00:45:53 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.287 2008/01/17 21:44:09 feiliu Exp $'
 
 !==============================================================================
 !
@@ -3422,6 +3422,9 @@
       integer, allocatable :: gridCompUBnd(:), gridCompLBnd(:)
       type(ESMF_DistGrid)  :: arrayDistGrid, gridDistGrid
 
+      integer              :: as_rank          ! arrayspec rank
+      type(ESMF_TYPEKIND)  :: as_tk, a_tk      ! arrayspec typekind, array typekind
+
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -3496,10 +3499,17 @@
              return
           endif 
           call ESMF_ArrayGet(ftypep%array, dimCount=dimCount, localDECount=localDECount, &
-              distgrid=arrayDistGrid, rank=arrayrank, rc=localrc)
+              distgrid=arrayDistGrid, rank=arrayrank, typekind=a_tk, rc=localrc)
           if (localrc .ne. ESMF_SUCCESS) then
              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
                 "Cannot retrieve dimCount, localDECount, arrayDistGrid, arrayrank from ftypep%array", &
+                 ESMF_CONTEXT, rc)
+             return
+          endif 
+          call ESMF_ArraySpecGet(ftypep%arrayspec, rank=as_rank, typekind=as_tk, rc=localrc)
+          if((as_rank .ne. arrayrank) .or. (as_tk .ne. a_tk)) then
+             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                "Array rank or typekind does not agree with arrayspec rank or typekind", &
                  ESMF_CONTEXT, rc)
              return
           endif 
@@ -3915,8 +3925,8 @@
 ! !ARGUMENTS:
       type(ESMF_FieldType), pointer :: ftype 
       type(ESMF_Grid) :: grid               
-      type(ESMF_ArraySpec), intent(inout) :: arrayspec
-      type(ESMF_AllocFlag), intent(in), optional :: allocflag
+      type(ESMF_ArraySpec), intent(in)            :: arrayspec
+      type(ESMF_AllocFlag), intent(in), optional  :: allocflag
       type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
       integer, intent(in), optional :: gridToFieldMap(:)
       integer, intent(in), optional :: ungriddedLBound(:)
@@ -4067,6 +4077,7 @@
          ftype%maxHaloUWidth = maxHaloUWidth
 
       ftype%array = array
+      ftype%array_copied = .false.
       ftype%datastatus = ESMF_STATUS_READY
       ftype%arrayspec = arrayspec
       ftype%grid  = grid
@@ -4121,7 +4132,7 @@
 !           Data. 
 !   \item [copyflag]
 !           Whether to copy the existing data space or reference directly. Valid
-!           values are {\tt ESMF\_DATA\_COPY} or {\tt ESMF\_DATA\_REF}.
+!           values are {\tt ESMF\_DATA\_COPY} or {\tt ESMF\_DATA\_REF} (default).
 !     \item [{[staggerloc]}] 
 !           Stagger location of data in grid cells.  For valid 
 !           predefined values see Section \ref{sec:opt:staggerloc}.
@@ -4165,6 +4176,7 @@
       integer :: localrc 
       type(ESMF_Field) :: tfield                  ! temp field for error check
       type(ESMF_ArraySpec) :: arrayspec
+      type(ESMF_Array)     :: newarray
       type(ESMF_TypeKind)  :: typekind
       integer              :: arrayrank, i
 
@@ -4214,7 +4226,22 @@
       if(present(maxHaloUWidth)) &
          ftype%maxHaloUWidth = maxHaloUWidth
 
-      ftype%array = array
+      ! default copyflag value is ESMF_DATA_REF
+      if(.not. present(copyflag)) then
+          ftype%array = array
+      else
+          if(copyflag == ESMF_DATA_REF) then
+              ftype%array = array
+          else
+              newarray = ESMF_ArrayCreate(array, rc=localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+              ftype%array = newarray
+              ftype%array_copied = .true.
+          endif
+      endif
+          
       ftype%arrayspec = arrayspec
       ftype%datastatus = ESMF_STATUS_READY
       ftype%grid  = grid
@@ -4227,13 +4254,12 @@
       ! call the user level validate
       tfield%ftypep => ftype
       ESMF_INIT_SET_CREATED(tfield)
+
       call ESMF_FieldValidate(tfield, "", localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
-          ! rc is already set, we just need to mark that the array
-          ! is not valid.
-          ftype%datastatus = ESMF_STATUS_INVALID
+          ftype%fieldstatus = ESMF_STATUS_INVALID
           return
       endif
 
@@ -4331,9 +4357,6 @@
 
       !TODO:FIELDINTEGRATION Complete implementation of FieldConstructNoDataPtr
 #if 0
-      ! init local flag
-      ftype%localFlag=.true.
-
       ! Construct a default name if one is not given
       call ESMF_BaseCreate(ftype%base, "Field", name, 0, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -4437,9 +4460,6 @@
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      ! init local flag
-      ftype%localFlag=.true.
-
       ! Construct a default name if one is not given
       call ESMF_BaseCreate(ftype%base, "Field", name, 0, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -4514,9 +4534,6 @@
       ftypep%gridstatus = ESMF_STATUS_UNINIT
       ftypep%datastatus = ESMF_STATUS_UNINIT
 
-      ! Init Local flag 
-      ftypep%localFlag=.true.
-
       ftypep%fieldstatus = ESMF_STATUS_READY
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -4567,7 +4584,13 @@
 !
 ! TODO: more code goes here
 !
-
+      if(ftype%array_copied .and. &
+        ftype%datastatus .eq. ESMF_STATUS_READY) then
+          call ESMF_ArrayDestroy(ftype%array, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      endif
 
       if  (present(rc)) rc = ESMF_SUCCESS
 
@@ -4838,9 +4861,6 @@
       if (ESMF_LogMsgFoundAllocError(localrc, &
                                      "space for new Field object", &
                                      ESMF_CONTEXT, rc)) return
-
-      ! Indicate that this local Field is a proxy object
-      fp%localFlag = .false.    
 
       call ESMF_BaseCreate(fp%base, "Field", "dummy", 0, localrc)
       if (ESMF_LogMsgFoundError(localrc, &

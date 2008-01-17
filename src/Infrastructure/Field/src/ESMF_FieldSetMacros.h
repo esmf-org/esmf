@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldSetMacros.h,v 1.20 2007/12/26 19:37:49 feiliu Exp $
+! $Id: ESMF_FieldSetMacros.h,v 1.21 2008/01/17 21:44:09 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -100,9 +100,9 @@
       integer, intent(out), optional :: rc   @\
  @\
         ! Local variables @\
-        type(ESMF_Array) :: array          ! array object @\
+        type(ESMF_Array) :: array, newarray  ! array object @\
         integer :: localrc                   ! local error status @\
-        logical :: rcpresent                ! did user specify rc? @\
+        logical :: rcpresent                 ! did user specify rc? @\
  @\
         type(ESMF_DistGrid) :: distgrid    ! distgrid in field%grid @\
         integer, dimension(mrank) :: comp_edge_u_width @\
@@ -139,15 +139,29 @@
                                   ESMF_CONTEXT, rc)) return @\
  @\
         ! set array as data in field. @\
-        ! TODO: if grid present, call valiate to verify sizes match. @\
-        field%ftypep%array = array @\
-        field%ftypep%datastatus = ESMF_STATUS_READY @\
+        ! default copyflag value is ESMF_DATA_REF @\
+        if(.not. present(copyflag)) then @\
+            field%ftypep%array = array @\
+        else @\
+            if(copyflag == ESMF_DATA_REF) then @\
+                field%ftypep%array = array @\
+            else @\
+                newarray = ESMF_ArrayCreate(array, rc=localrc) @\
+                if (ESMF_LogMsgFoundError(localrc, & @\
+                                        ESMF_ERR_PASSTHRU, & @\
+                                        ESMF_CONTEXT, rc)) return @\
+                field%ftypep%array = newarray @\
+                field%ftypep%array_copied = .true. @\
+            endif @\
+        endif @\
  @\
         call ESMF_FieldValidate(field, rc=localrc) @\
  @\
         if (ESMF_LogMsgFoundError(localrc, & @\
           ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rc)) return @\
+ @\
+        field%ftypep%datastatus = ESMF_STATUS_READY @\
  @\
         if (rcpresent) rc = localrc @\
  @\

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.10 2007/12/27 21:30:32 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.11 2008/01/17 21:44:09 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cppF90,v 1.10 2007/12/27 21:30:32 feiliu Exp $'
+      '$Id: ESMF_FieldCreate.cppF90,v 1.11 2008/01/17 21:44:09 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -282,7 +282,7 @@
 !     \item [{[copyflag]}]
 !           Indicates whether to reference the array or make a 
 !           copy of it.  Valid values are {\tt ESMF\_DATA\_COPY} and 
-!           {\tt ESMF\_DATA\_REF}, respectively.
+!           {\tt ESMF\_DATA\_REF} (default), respectively.
 !     \item [{[staggerloc]}] 
 !           Relative location of data per grid cell/vertex in the grid.
 !     \item [{[gridToFieldMap]}]

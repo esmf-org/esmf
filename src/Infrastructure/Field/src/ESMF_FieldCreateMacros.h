@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.30 2008/01/04 00:45:53 feiliu Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.31 2008/01/17 21:44:09 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -65,7 +65,7 @@
 !           Native fortran data pointer to be copied/referenced in Field @\
 !     \item [copyflag] @\
 !           Whether to copy the existing data space or reference directly. Valid @\
-!           values are {\tt ESMF\_DATA\_COPY} or {\tt ESMF\_DATA\_REF}. @\
+!           values are {\tt ESMF\_DATA\_COPY} or {\tt ESMF\_DATA\_REF} (default). @\
 !     \item [{[staggerloc]}] @\
 !           Stagger location of data in grid cells.  For valid  @\
 !           predefined values see Section \ref{sec:opt:staggerloc}. @\
@@ -130,7 +130,7 @@
         integer, intent(out), optional :: rc                @\
 ! local variables @\
         integer                        :: localrc, i @\
-        type(ESMF_Array)               :: array @\
+        type(ESMF_Array)               :: array, newarray @\
         type(ESMF_DistGrid)            :: distgrid @\
         type(ESMF_ArraySpec)           :: arrayspec @\
  @\
@@ -183,8 +183,23 @@
            field%ftypep%maxHaloUWidth = maxHaloUWidth @\
         end if @\
  @\
+        ! default copyflag value is ESMF_DATA_REF @\
+        if(.not. present(copyflag)) then @\
+            field%ftypep%array = array @\
+        else @\
+            if(copyflag == ESMF_DATA_REF) then @\
+                field%ftypep%array = array @\
+            else @\
+                newarray = ESMF_ArrayCreate(array, rc=localrc) @\
+                if (ESMF_LogMsgFoundError(localrc, & @\
+                                        ESMF_ERR_PASSTHRU, & @\
+                                        ESMF_CONTEXT, rc)) return @\
+                field%ftypep%array = newarray @\
+                field%ftypep%array_copied = .true. @\
+            endif @\
+        endif @\
+ @\
         field%ftypep%arrayspec = arrayspec @\
-        field%ftypep%array = array @\
         field%ftypep%datastatus = ESMF_STATUS_READY @\
         field%ftypep%grid  = grid @\
         field%ftypep%gridstatus = ESMF_STATUS_READY @\
@@ -251,7 +266,7 @@
 !           Native fortran data pointer to be copied/referenced in Field @\
 !   \item [copyflag] @\
 !           Whether to copy the existing data space or reference directly. Valid @\
-!           values are {\tt ESMF\_DATA\_COPY} or {\tt ESMF\_DATA\_REF}. @\
+!           values are {\tt ESMF\_DATA\_COPY} or {\tt ESMF\_DATA\_REF} (default). @\
 !     \item [{[staggerloc]}] @\
 !           Stagger location of data in grid cells.  For valid  @\
 !           predefined values see Section \ref{sec:opt:staggerloc}. @\
