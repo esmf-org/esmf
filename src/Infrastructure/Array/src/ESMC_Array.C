@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.168 2008/01/16 21:25:09 theurich Exp $
+// $Id: ESMC_Array.C,v 1.169 2008/01/17 00:20:24 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.168 2008/01/16 21:25:09 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.169 2008/01/17 00:20:24 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -7525,6 +7525,313 @@ int Array::sparseMatMulRelease(
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
+}
+//-----------------------------------------------------------------------------
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::attributeset()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::attributeset - Set a array number value attribute
+//
+// !INTERFACE:
+int Array::attributeset(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+  char *name,       // in - attribute name
+  ESMC_TypeKind tk, // in - typekind
+  int count,        // in - number of values
+  void *value) {    // in - attribute value                         
+//
+// !DESCRIPTION:
+//    Set a array number value attribute.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  localrc = ESMC_Base::ESMC_AttributeSet(name, tk, count, value);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+
+  // return success
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::attributeset()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::attributeset - Set a array character string attribute
+//
+// !INTERFACE:
+int Array::attributeset(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+  char *name,       // in - attribute name
+  char *value) {    // in - attribute value                         
+//
+// !DESCRIPTION:
+//    Set a array character string attribute.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  localrc = ESMC_Base::ESMC_AttributeSet(name, value);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+
+  // return success
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::attributeget()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::attributeget - Get a array number value attribute
+//
+// !INTERFACE:
+int Array::attributeget(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+  char *name,       // in - attribute name
+  ESMC_TypeKind *tk, // in - typekind
+  int *count,        // in - number of values
+  void *value) const {    // in - attribute value                        
+//
+// !DESCRIPTION:
+//    Get a array number value attribute.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  localrc = ESMC_Base::ESMC_AttributeGet(name, tk, count, value);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+
+  // return success
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::attributeget()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::attributeget - Get a array character string attribute
+//
+// !INTERFACE:
+int Array::attributeget(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+  char *name,       // in - attribute name
+  char *value) const {    // in - attribute value                        
+//
+// !DESCRIPTION:
+//    Get a array character string attribute.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  localrc = ESMC_Base::ESMC_AttributeGet(name, value);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+
+  // return success
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::attributegetcount()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::attributegetcount - Get a array attribute count
+//
+// !INTERFACE:
+int Array::attributegetcount(void) const {
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+   //none                        
+//
+// !DESCRIPTION:
+//    Get a array attribute count.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  localrc = ESMC_Base::ESMC_AttributeGetCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+
+  // return success
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::attributeget()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::attributeget - Get a array character string attribute
+//
+// !INTERFACE:
+int Array::attributeget(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+  int num,          // in - this array
+  char *name,       // in - attribute name
+  ESMC_TypeKind *tk, // in - typekind
+  int *count,        // in - number of values
+  void *value) const {    // in - attribute value                        
+//
+// !DESCRIPTION:
+//    Get a array character string attribute.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  localrc = ESMC_Base::ESMC_AttributeGet(num, name, tk, count, value);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+
+  // return success
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::createattpack()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::createattpack - Create a array attribute package
+//
+// !INTERFACE:
+int Array::createattpack(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+   char *name,
+   char *convention,
+   char *purpose,
+   char *object) {                        
+//
+// !DESCRIPTION:
+//    Create a array attribute package.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  localrc = ESMC_Base::ESMC_CreateAttPack(name, convention, purpose, object);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+
+  // return success
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::setattpack()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::setattpack - Set an attribute on a array attribute package
+//
+// !INTERFACE:
+int Array::setattpack(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+   char *name,
+   char *value,
+   char *convention,
+   char *purpose,
+   char *object) {                        
+//
+// !DESCRIPTION:
+//    Set an attribute on a array attribute package.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  localrc = ESMC_Base::ESMC_SetAttPack(name, value, convention, purpose, object);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+
+  // return success
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::writeattpack()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::writeattpack - Write out a array attribute package
+//
+// !INTERFACE:
+int Array::writeattpack(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+   char *convention,
+   char *purpose,
+   char *object) const {                        
+//
+// !DESCRIPTION:
+//    Write out a array attribute package.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  localrc = ESMC_Base::ESMC_WriteAttPack(convention, purpose, object);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+
+  // return success
+  return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 

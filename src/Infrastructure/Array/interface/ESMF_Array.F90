@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.75 2007/12/14 23:31:27 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.76 2008/01/17 00:20:24 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -116,6 +116,16 @@ module ESMF_ArrayMod
   public ESMF_ArrayBundleSparseMatMul
   public ESMF_ArrayBundleValidate
 
+  public ESMF_ArraySetAttribute       ! Set and Get attributes
+  public ESMF_ArrayGetAttribute       !  
+
+  public ESMF_ArrayGetAttributeCount  ! number of attribs
+  public ESMF_ArrayGetAttributeInfo   ! get type, length by name or number
+
+  public ESMF_ArrayCreateAttPack      ! Attribute packages
+  public ESMF_ArraySetAttPack         ! Attribute packages
+  public ESMF_ArrayWriteAttPack       ! Attribute packages
+
 ! - ESMF-internal methods:
   public ESMF_ArrayGetInit            ! implemented in ESMF_ArrayCreateMod 
   public ESMF_ArraySetInitCreated     ! implemented in ESMF_ArrayCreateMod 
@@ -128,7 +138,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.75 2007/12/14 23:31:27 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.76 2008/01/17 00:20:24 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -217,7 +227,79 @@ module ESMF_ArrayMod
 !  types of {\tt ESMF\_ArrayReduce} functions.   
 !EOPI 
   end interface
-      
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_ArraySetAttribute  - Set Array attributes
+!
+! !INTERFACE:
+      interface ESMF_ArraySetAttribute 
+   
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_ArraySetInt4Attr
+        module procedure ESMF_ArraySetInt4ListAttr
+        module procedure ESMF_ArraySetInt8Attr
+        module procedure ESMF_ArraySetInt8ListAttr
+        module procedure ESMF_ArraySetReal4Attr
+        module procedure ESMF_ArraySetReal4ListAttr
+        module procedure ESMF_ArraySetReal8Attr
+        module procedure ESMF_ArraySetReal8ListAttr
+        module procedure ESMF_ArraySetLogicalAttr
+        module procedure ESMF_ArraySetLogicalListAttr
+        module procedure ESMF_ArraySetCharAttr
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that attach
+!     attributes to an {\tt ESMF\_Array}.
+ 
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_ArrayGetAttribute  - Get Array attributes
+!
+! !INTERFACE:
+      interface ESMF_ArrayGetAttribute 
+   
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_ArrayGetInt4Attr
+        module procedure ESMF_ArrayGetInt4ListAttr
+        module procedure ESMF_ArrayGetInt8Attr
+        module procedure ESMF_ArrayGetInt8ListAttr
+        module procedure ESMF_ArrayGetReal4Attr
+        module procedure ESMF_ArrayGetReal4ListAttr
+        module procedure ESMF_ArrayGetReal8Attr
+        module procedure ESMF_ArrayGetReal8ListAttr
+        module procedure ESMF_ArrayGetLogicalAttr
+        module procedure ESMF_ArrayGetLogicalListAttr
+        module procedure ESMF_ArrayGetCharAttr
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that retrieve
+!     attributes from an {\tt ESMF\_Array}.
+ 
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_ArrayGetAttributeInfo - Get type, count from a Array attribute
+!
+! !INTERFACE:
+      interface ESMF_ArrayGetAttributeInfo
+   
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_ArrayGetAttrInfoByName
+        module procedure ESMF_ArrayGetAttrInfoByNum
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that retrieve
+!     information about attributes from an {\tt ESMF\_Array}.
+ 
+!EOPI
+      end interface
+
 
 
 #ifdef FIRSTNEWARRAYPROTOTYPE
@@ -2615,5 +2697,1876 @@ contains
     end function ESMF_ArrayBundleGetInit
 !------------------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ArraySetAttribute - Set an attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_ArraySetAttribute(array, name, <value argument>, rc)
+!
+! !ARGUMENTS:
+!     type(ESMF_Array), intent(inout) :: array  
+!     character (len = *), intent(in) :: name
+!     <value argument>, see below for supported values
+!     integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Attaches an attribute to the {\tt array}.
+!     The attribute has a {\tt name} and either a {\tt value} or a 
+!     {\tt valueList}.
+!     Supported values for the <value argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in) :: value
+!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(in) :: valueList
+!     \item integer(ESMF\_KIND\_I8), intent(in) :: value
+!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(in) :: valueList
+!     \item real (ESMF\_KIND\_R4), intent(in) :: value
+!     \item real (ESMF\_KIND\_R4), dimension(:), intent(in) :: valueList
+!     \item real (ESMF\_KIND\_R8), intent(in) :: value
+!     \item real (ESMF\_KIND\_R8), dimension(:), intent(in) :: valueList
+!     \item type(ESMF\_Logical), intent(in) :: value
+!     \item type(ESMF\_Logical), dimension(:), intent(in) :: valueList
+!     \item character (len = *), intent(in), value
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [<value argument>]
+!           The value of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySetInt4Attr"
+
+!BOPI
+! !IROUTINE: ESMF_ArraySetAttribute - Set a 4-byte integer attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArraySetAttribute()
+      subroutine ESMF_ArraySetInt4Attr(array, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I4), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a 4-byte integer attribute to the {\tt array}.
+!      The attribute has a {\tt name} and a {\tt value}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [value]
+!           The integer value of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc 
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      call c_ESMC_ArrayAttributeSetValue(array, name, &
+        ESMF_TYPEKIND_I4, 1, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArraySetInt4Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySetInt4ListAttr"
+
+!BOPI
+! !IROUTINE: ESMF_ArraySetAttribute - Set a 4-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArraySetAttribute()
+      subroutine ESMF_ArraySetInt4ListAttr(array, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a 4-byte integer list attribute to the {\tt array}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of integer items in the {\tt valueList} is
+!     given by {\tt count}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [count]
+!           The number of integers in the {\tt valueList}.
+!     \item [valueList]
+!           The integer values of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc
+      integer :: limit
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_ArrayAttributeSetValue(array, name, &
+        ESMF_TYPEKIND_I4, count, valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArraySetInt4ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySetInt8Attr"
+
+!BOPI
+! !IROUTINE: ESMF_ArraySetAttribute - Set an 8-byte integer attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArraySetAttribute()
+      subroutine ESMF_ArraySetInt8Attr(array, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I8), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an 8-byte integer attribute to the {\tt array}.
+!      The attribute has a {\tt name} and a {\tt value}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [value]
+!           The integer value of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      call c_ESMC_ArrayAttributeSetValue(array, name, &
+        ESMF_TYPEKIND_I8, 1, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArraySetInt8Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySetInt8ListAttr"
+
+!BOPI
+! !IROUTINE: ESMF_ArraySetAttribute - Set an 8-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArraySetAttribute()
+      subroutine ESMF_ArraySetInt8ListAttr(array, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches an 8-byte integer list attribute to the {\tt array}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of integer items in the {\tt valueList} is
+!     given by {\tt count}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [count]
+!           The number of integers in the {\tt valueList}.
+!     \item [valueList]
+!           The integer values of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc
+      integer :: limit
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_ArrayAttributeSetValue(array, name, &
+        ESMF_TYPEKIND_I8, count, valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArraySetInt8ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySetReal4Attr"
+
+!BOPI
+! !IROUTINE: ESMF_ArraySetAttribute - Set a 4-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArraySetAttribute()
+      subroutine ESMF_ArraySetReal4Attr(array, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R4), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a 4-byte real attribute to the {\tt array}.
+!      The attribute has a {\tt name} and a {\tt value}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [value]
+!           The real value of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      call c_ESMC_ArrayAttributeSetValue(array, name, &
+        ESMF_TYPEKIND_R4, 1, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArraySetReal4Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySetReal4ListAttr"
+
+!BOPI
+! !IROUTINE: ESMF_ArraySetAttribute - Set a 4-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArraySetAttribute()
+      subroutine ESMF_ArraySetReal4ListAttr(array, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a 4-byte real list attribute to the {\tt array}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of real items in the {\tt valueList} is
+!     given by {\tt count}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [count]
+!           The number of reals in the {\tt valueList}.
+!     \item [value]
+!           The real values of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc
+      integer :: limit
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_ArrayAttributeSetValue(array, name, &
+        ESMF_TYPEKIND_R4, count, valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArraySetReal4ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySetReal8Attr"
+
+!BOPI
+! !IROUTINE: ESMF_ArraySetAttribute - Set an 8-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArraySetAttribute()
+      subroutine ESMF_ArraySetReal8Attr(array, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R8), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an 8-byte real attribute to the {\tt array}.
+!      The attribute has a {\tt name} and a {\tt value}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [value]
+!           The real value of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      call c_ESMC_ArrayAttributeSetValue(array, name, &
+        ESMF_TYPEKIND_R8, 1, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArraySetReal8Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySetReal8ListAttr"
+
+!BOPI
+! !IROUTINE: ESMF_ArraySetAttribute - Set an 8-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArraySetAttribute()
+      subroutine ESMF_ArraySetReal8ListAttr(array, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches an 8-byte real list attribute to the {\tt array}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of real items in the {\tt valueList} is
+!     given by {\tt count}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [count]
+!           The number of reals in the {\tt valueList}.
+!     \item [value]
+!           The real values of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc
+      integer :: limit
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_ArrayAttributeSetValue(array, name, &
+        ESMF_TYPEKIND_R8, count, valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArraySetReal8ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySetLogicalAttr"
+
+!BOPI
+! !IROUTINE: ESMF_ArraySetAttribute - Set a logical attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArraySetAttribute()
+      subroutine ESMF_ArraySetLogicalAttr(array, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character (len = *), intent(in) :: name
+      type(ESMF_Logical), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a logical attribute to the {\tt array}.
+!     The attribute has a {\tt name} and a {\tt value}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [value]
+!           The logical true/false value of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      call c_ESMC_ArrayAttributeSetValue(array, name, &
+        ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArraySetLogicalAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySetLogicalListAttr"
+
+!BOPI
+! !IROUTINE: ESMF_ArraySetAttribute - Set a logical list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArraySetAttribute()
+      subroutine ESMF_ArraySetLogicalListAttr(array, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      type(ESMF_Logical), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a logical list attribute to the {\tt array}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of logical items in the {\tt valueList} is
+!     given by {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [count]
+!           The number of logicals in the {\tt valueList}.
+!     \item [value]
+!           The logical true/false values of the attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc
+      integer :: limit
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_ArrayAttributeSetValue(array, name, &
+        ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArraySetLogicalListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySetCharAttr"
+
+!BOPI
+! !IROUTINE: ESMF_ArraySetAttribute - Set a character attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArraySetAttribute()
+      subroutine ESMF_ArraySetCharAttr(array, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character (len = *), intent(in) :: name
+      character (len = *), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a character attribute to the {\tt array}.
+!     The attribute has a {\tt name} and a {\tt value}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [value]
+!           The character value of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      call c_ESMC_ArrayAttributeSetChar(array, name, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArraySetCharAttr
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ArrayGetAttribute  - Retrieve an attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_ArrayGetAttribute(array, name, <value argument>, rc)
+!
+! !ARGUMENTS:
+!     type(ESMF_Array), intent(inout) :: array  
+!     character (len = *), intent(in) :: name
+!     <value argument>, see below for supported values
+!     integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Returns an attribute from the {\tt array}.
+!     Supported values for <value argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: value
+!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: valueList
+!     \item integer(ESMF\_KIND\_I8), intent(out) :: value
+!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: valueList
+!     \item real (ESMF\_KIND\_R4), intent(out) :: value
+!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: valueList
+!     \item real (ESMF\_KIND\_R8), intent(out) :: value
+!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: valueList
+!     \item type(ESMF\_Logical), intent(out) :: value
+!     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
+!     \item character (len = *), intent(out), value
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [<value argument>]
+!           The value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayGetInt4Attr"
+
+!BOPI
+! !IROUTINE: ESMF_ArrayGetAttribute  - Retrieve a 4-byte integer attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArrayGetAttribute()
+      subroutine ESMF_ArrayGetInt4Attr(array, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I4), intent(out) :: value
+      integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Returns an integer attribute from the {\tt array}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The integer value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                       
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      call c_ESMC_ArrayAttributeGetValue(array, name, &
+        ESMF_TYPEKIND_I4, 1, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayGetInt4Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayGetInt4ListAttr"
+
+!BOPI
+! !IROUTINE: ESMF_ArrayGetAttribute - Retrieve a 4-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArrayGetAttribute()
+      subroutine ESMF_ArrayGetInt4ListAttr(array, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a 4-byte integer list attribute from the {\tt array}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the attribute.
+!     \item [valueList]
+!           The integer values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc      
+      integer :: limit
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_ArrayAttributeGetValue(array, name, &
+        ESMF_TYPEKIND_I4, count, valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayGetInt4ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayGetInt8Attr"
+
+!BOPI
+! !IROUTINE: ESMF_ArrayGetAttribute  - Retrieve an 8-byte integer attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArrayGetAttribute()
+      subroutine ESMF_ArrayGetInt8Attr(array, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I8), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Returns an 8-byte integer attribute from the {\tt array}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The integer value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc       
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      call c_ESMC_ArrayAttributeGetValue(array, name, &
+        ESMF_TYPEKIND_I8, 1, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayGetInt8Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayGetInt8ListAttr"
+
+!BOPI
+! !IROUTINE: ESMF_ArrayGetAttribute - Retrieve an 8-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArrayGetAttribute()
+      subroutine ESMF_ArrayGetInt8ListAttr(array, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns an 8-byte integer list attribute from the {\tt array}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the attribute.
+!     \item [valueList]
+!           The integer values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                 
+      integer :: limit
+
+      ! Initialize 
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_ArrayAttributeGetValue(array, name, &
+        ESMF_TYPEKIND_I8, count, valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayGetInt8ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayGetReal4Attr"
+
+!BOPI
+! !IROUTINE: ESMF_ArrayGetAttribute - Retrieve a 4-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArrayGetAttribute()
+      subroutine ESMF_ArrayGetReal4Attr(array, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R4), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a 4-byte real attribute from the {\tt array}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The real value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc           
+
+      ! Initialize 
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      call c_ESMC_ArrayAttributeGetValue(array, name, &
+        ESMF_TYPEKIND_R4, 1, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayGetReal4Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayGetReal4ListAttr"
+
+!BOPI
+! !IROUTINE: ESMF_ArrayGetAttribute - Retrieve a 4-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArrayGetAttribute()
+      subroutine ESMF_ArrayGetReal4ListAttr(array, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a 4-byte real attribute from an {\tt ESMF\_Array}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the attribute.
+!     \item [valueList]
+!           The real values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                
+      integer :: limit
+
+      ! Initialize 
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_ArrayAttributeGetValue(array, name, &
+        ESMF_TYPEKIND_R4, count, valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayGetReal4ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayGetReal8Attr"
+
+!BOPI
+! !IROUTINE: ESMF_ArrayGetAttribute - Retrieve an 8-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArrayGetAttribute()
+      subroutine ESMF_ArrayGetReal8Attr(array, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R8), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns an 8-byte real attribute from the {\tt array}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The real value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc            
+
+      ! Initialize 
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      call c_ESMC_ArrayAttributeGetValue(array, name, &
+        ESMF_TYPEKIND_R8, 1, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayGetReal8Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayGetReal8ListAttr"
+
+!BOPI
+! !IROUTINE: ESMF_ArrayGetAttribute - Retrieve an 8-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArrayGetAttribute()
+      subroutine ESMF_ArrayGetReal8ListAttr(array, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns an 8-byte real attribute from an {\tt ESMF\_Array}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the attribute.
+!     \item [valueList]
+!           The real values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc     
+      integer :: limit
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_ArrayAttributeGetValue(array, name, &
+        ESMF_TYPEKIND_R8, count, valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayGetReal8ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayGetLogicalAttr"
+
+!BOPI
+! !IROUTINE: ESMF_ArrayGetAttribute - Retrieve a logical attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArrayGetAttribute()
+      subroutine ESMF_ArrayGetLogicalAttr(array, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character (len = *), intent(in) :: name
+      type(ESMF_Logical), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a logical attribute from the {\tt array}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The logical value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      call c_ESMC_ArrayAttributeGetValue(array, name, &
+        ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayGetLogicalAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayGetLogicalListAttr"
+
+!BOPI
+! !IROUTINE: ESMF_ArrayGetAttribute - Retrieve a logical list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArrayGetAttribute()
+      subroutine ESMF_ArrayGetLogicalListAttr(array, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      type(ESMF_Logical), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a logical list attribute from the {\tt array}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the attribute.
+!     \item [valueList]
+!           The logical values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                
+      integer :: limit
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                    "count longer than valueList", &
+                                     ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_ArrayAttributeGetValue(array, name, &
+        ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayGetLogicalListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayGetCharAttr"
+
+!BOPI
+! !IROUTINE: ESMF_ArrayGetAttribute - Retrieve a character attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArrayGetAttribute()
+      subroutine ESMF_ArrayGetCharAttr(array, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character (len = *), intent(in) :: name
+      character (len = *), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a character attribute from the {\tt array}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The character value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc 
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      call c_ESMC_ArrayAttributeGetChar(array, name, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayGetCharAttr
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayGetAttributeCount"
+
+!BOP
+! !IROUTINE: ESMF_ArrayGetAttributeCount - Query the number of attributes
+!
+! !INTERFACE:
+      subroutine ESMF_ArrayGetAttributeCount(array, count, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      integer, intent(out) :: count   
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Returns the number of attributes associated with the given {\tt array} 
+!     in the argument {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [count]
+!           The number of attributes associated with this object.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: localrc 
+
+      ! Initialize 
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      call c_ESMC_ArrayAttributeGetCount(array, count, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayGetAttributeCount
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayGetAttrInfoByName"
+
+!BOP
+! !IROUTINE: ESMF_ArrayGetAttributeInfo - Query Array attributes by name
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArrayGetAttributeInfo()
+      subroutine ESMF_ArrayGetAttrInfoByName(array, name, typekind, count, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(in) :: array  
+      character(len=*), intent(in) :: name
+      type(ESMF_TypeKind), intent(out), optional :: typekind
+      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Returns information associated with the named attribute, 
+!     including {\tt typekind} and {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the attribute to query.
+!     \item [{[typekind]}]
+!           The typekind of the attribute.
+!     \item [{[count]}]
+!           The number of items in this attribute.  For character types,
+!           the length of the character string.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: localrc             
+      type(ESMF_TypeKind) :: localTk
+      integer :: localCount
+
+      ! Initialize 
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      call c_ESMC_ArrayGetAttrInfoName(array, name, &
+        localTk, localCount, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(typekind)) typekind = localTk
+      if (present(count)) count = localCount
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayGetAttrInfoByName
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayGetAttrInfoByNum"
+
+!BOP
+! !IROUTINE: ESMF_ArrayGetAttributeInfo - Query Array attributes by index number
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArrayGetAttributeInfo()
+      subroutine ESMF_ArrayGetAttrInfoByNum(array, attributeIndex, name, &
+        typekind, count, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      integer, intent(in) :: attributeIndex
+      character(len=*), intent(out), optional :: name
+      type(ESMF_TypeKind), intent(out), optional :: typekind
+      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns information associated with the indexed attribute, 
+!      including {\tt name}, {\tt typekind} and {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [attributeIndex]
+!           The index number of the attribute to query.
+!     \item [name]
+!           Returns the name of the attribute.
+!     \item [{[typekind]}]
+!           The typekind of the attribute.
+!     \item [{[count]}]
+!           Returns the number of items in this attribute.  For character types,
+!           this is the length of the character string.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: localrc 
+      character(len=ESMF_MAXSTR) :: localName
+      type(ESMF_TypeKind) :: localTk
+      integer :: localCount
+
+      ! Initialize 
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      call c_ESMC_ArrayGetAttrInfoNum(array, attributeIndex, &
+        localName, localTk, localCount, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(name)) name = localName
+      if (present(typekind)) typekind = localTk
+      if (present(count)) count = localCount
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayGetAttrInfoByNum
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayCreateAttPack"
+!BOPI
+! !IROUTINE: ESMF_ArrayCreateAttPack - Setup the attribute package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArrayCreateAttPack()
+      subroutine ESMF_ArrayCreateAttPack(array, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(in) :: array  
+      character (len = *), intent(in), optional :: convention
+      character (len = *), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Sets up the attribute package for the {\tt array}.
+!     The attribute package defines the convention, purpose, and object type of the three 
+!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!      An {\tt ESMF\_Array} object.
+!     \item [convention]
+!      The convention of the attribute package.
+!     \item [purpose]
+!      The purpose of the attribute package.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                           ! Error status
+      character(ESMF_MAXSTR) :: name1, name2, name3, name4
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+
+      ! Initialize return code; assume failure until success is certain
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+      ! check input variables
+      !ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      !call ESMF_ArrayValidate(array, rc=localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                            ESMF_ERR_PASSTHRU, &
+      !                            ESMF_CONTEXT, rc)) return
+
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+
+      fobject = 'array'
+
+      name1 = 'longname'
+      name2 = 'shortname'
+      name3 = 'units'
+      name4 = 'coordinates'
+
+      call c_ESMC_ArrayCreateAttPack(array, name1, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_ArrayCreateAttPack(array, name2, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_ArrayCreateAttPack(array, name3, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_ArrayCreateAttPack(array, name4, fconvention, &
+        fpurpose, fobject, localrc)
+
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayCreateAttPack
+      
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySetAttPack"
+!BOPI
+! !IROUTINE: ESMF_ArraySetAttPack - Setup the attribute package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArraySetAttPack()
+      subroutine ESMF_ArraySetAttPack(array, name, value, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(in) :: array  
+      character(ESMF_MAXSTR), intent(in) :: name
+      character(ESMF_MAXSTR), intent(in) :: value
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Sets an attribute the attribute package for the {\tt array}.
+!     The attribute package defines the convention, purpose, and object type of the three 
+!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!      An {\tt ESMF\_Array} object.
+!     \item [name]
+!      The name of the attribute to be set.
+!     \item [value]
+!      The value of the attribute to be set.
+!     \item [convention]
+!      The convention of the attribute package.
+!     \item [purpose]
+!      The purpose of the attribute package.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                           ! Error status
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+
+      ! Initialize return code; assume failure until success is certain
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+      ! check input variables
+      !ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      !call ESMF_ArrayValidate(array, rc=localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                            ESMF_ERR_PASSTHRU, &
+      !                            ESMF_CONTEXT, rc)) return
+
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'array'
+
+      call c_ESMC_ArraySetAttPack(array, name, value, fconvention, &
+        fpurpose, fobject, localrc)
+        
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArraySetAttPack
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayWriteAttPack"
+!BOPI
+! !IROUTINE: ESMF_ArrayWriteAttPack - Print the attribute package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArrayWriteAttPack()
+      subroutine ESMF_ArrayWriteAttPack(array, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(in) :: array  
+      character (len = *), intent(in), optional :: convention
+      character (len = *), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Print the attribute package for the {\tt array}.
+!     The attribute package defines the convention, purpose, and object type of the three 
+!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!      An {\tt ESMF\_Array} object.
+!     \item [convention]
+!      The convention of the attribute package.
+!     \item [purpose]
+!      The purpose of the attribute package.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                           ! Error status
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+
+      ! Initialize return code; assume failure until success is certain
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+      ! check input variables
+      !ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      !call ESMF_ArrayValidate(array, rc=localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                            ESMF_ERR_PASSTHRU, &
+      !                            ESMF_CONTEXT, rc)) return
+
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'array'
+
+      call c_ESMC_ArrayWriteAttPack(array, fconvention, &
+        fpurpose, fobject, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayWriteAttPack
+      
+!------------------------------------------------------------------------------
 
 end module ESMF_ArrayMod
