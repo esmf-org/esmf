@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.61 2008/01/07 22:24:10 svasquez Exp $
+# $Id: build_rules.mk,v 1.62 2008/01/17 21:25:20 svasquez Exp $
 #
 # Linux.intel.default
 #
@@ -66,7 +66,11 @@ ifeq ($(ESMF_COMM),scalimpi)
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpic++
 ESMF_MPIRUNDEFAULT      = mpirun
+ifeq ($(ESMF_BATCH),scali.batch)
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.scali.batch
+else
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+endif
 else
 ifeq ($(ESMF_COMM),lam)
 # LAM (assumed to be built with ifort) ---------------------
