@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.6 2008/01/08 02:14:56 rokuingh Exp $
+! $Id: user_model1.F90,v 1.7 2008/01/17 00:19:06 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -107,10 +107,12 @@ module user_model1
     ! Local variables
     type(ESMF_VM)               :: vm
     type(ESMF_Field)            :: field
+    type(ESMF_Grid)             :: grid
+    type(ESMF_Array)            :: array
+    type(ESMF_DistGrid)         :: distgrid
+    type(ESMF_ArraySpec)        :: arrayspec
     integer                     :: petCount, backward_run, status, myPet
     character(len=ESMF_MAXSTR)  :: name, value, conv, purp, fconv, fpurp   
-    
-    type(ESMF_Grid)             :: grid
     
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -187,10 +189,39 @@ module user_model1
         print *, 'value: ', value
       endif
 
-      !call ESMF_GridCreateAttPack(grid, convention=fconv, purpose=fpurp, rc=status)
+      call ESMF_GridCreateAttPack(grid, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       
-      !call ESMF_GridSetAttPack(grid, name, value, convention=fconv, purpose=fpurp, rc=status)
+      call ESMF_GridSetAttPack(grid, name, value, convention=fconv, purpose=fpurp, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+
+      ! array stuff
+      call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
+      distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
+        regDecomp=(/2,3/), rc=rc)
+      array = ESMF_ArrayCreate(arrayspec, distgrid, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+
+      call ESMF_ArraySetAttribute(array, name, value, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+      if (myPet .eq. 0) then
+        print *, 'Set an attribute on the array with:'
+        print *, 'name: ', name
+        print *, 'value: ', value
+      endif
+      
+      call ESMF_ArrayGetAttribute(array, name, value, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+      if (myPet .eq. 0) then
+        print *, 'Get an attribute on the array with:'
+        print *, 'name: ', name
+        print *, 'value: ', value
+      endif
+
+      call ESMF_ArrayCreateAttPack(array, convention=fconv, purpose=fpurp, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+      
+      call ESMF_ArraySetAttPack(array, name, value, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
 
       if (myPet .eq. 0) then
@@ -206,7 +237,11 @@ module user_model1
         if (status .ne. ESMF_SUCCESS) goto 20
         
         print *, 'Write the Grid Attpack from the second run of component 1.'
-        !call ESMF_GridWriteAttPack(grid, convention=fconv, purpose=fpurp, rc=rc)
+        call ESMF_GridWriteAttPack(grid, convention=fconv, purpose=fpurp, rc=rc)
+        if (status .ne. ESMF_SUCCESS) goto 20
+        
+        print *, 'Write the Array Attpack from the second run of component 1.'
+        call ESMF_ArrayWriteAttPack(array, convention=fconv, purpose=fpurp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
       endif
     endif
