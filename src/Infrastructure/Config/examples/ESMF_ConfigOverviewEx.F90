@@ -20,6 +20,12 @@
 ! This example/test code performs simple Config/Resource File routines. It does not
 ! include attaching a Config to a component. The important thing to remember there
 ! is that you can have one Config per component. 
+!
+! There are two methodologies for accessing data in a Resource File.  This example will
+! demonstrate both.
+
+! Note the API section contains a complete description of arguments in
+! the methods/functions demonstrated in this example.
 !EOE 
 
       ! ESMF Framework module
@@ -33,169 +39,332 @@
 !BOE
 !\subsubsection{Variable Declarations}
 
-! The following are the variable declarations used as arguments in the following code fragments:
+! The following are the variable declarations used as arguments in the following code fragments.
+! They represent the locals names for the variables listed in the Resource File (RF).  Note they do
+! not need to be the same.
 !EOE
 
 !BOC
-      character(ESMF_MAXSTR) :: fname     ! file name
-      character*20  :: fn1, fn2, fn3
-      integer       :: rc                 ! error return code (0 is OK)
-      integer       :: i_n 
-      real          :: radius
-      real          :: table(7,3)
+      character(ESMF_MAXSTR) :: fname              ! config file name
+      character*20  :: fn1, fn2, fn3, input_file   ! strings to be read in
+      integer       :: rc                          ! error return code (0 is OK)
+      integer       :: i_n                         ! the first constant in the RF
+      real          :: param_1                     ! the second constant in the RF
+      real          :: radius                      ! radius of the earth
+      real          :: table(7,3)                  ! an array to hold the table in the RF
 
-      type(ESMF_Config)   :: cf
+      type(ESMF_Config)   :: cf                    ! the Config itself
 !EOC
 
+!--------------------------------------------------------
+! Set up the status messages and initialize the program
+!--------------------------------------------------------
       integer :: finalrc
-      finalrc = ESMF_SUCCESS
+      finalrc = ESMF_SUCCESS                      ! Establish initial success
   
-      call ESMF_Initialize(rc=rc)
+      call ESMF_Initialize(rc=rc)                 ! Initialize
 
-      if (rc.NE.ESMF_SUCCESS) then
+      if (rc .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
-        print*, "'call ESMF_Initialize' failed"
+        print*, "*****'call ESMF_Initialize' failed"
       endif
   
-      call ESMF_VMGetGlobal(vm, rc)
+      call ESMF_VMGetGlobal(vm, rc)               ! Establish the VM
 
-      if (rc.NE.ESMF_SUCCESS) then
+      if (rc .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
-        print*, "' call ESMF_VMGetGlobal' failed"
+        print*, "*****' call to ESMF_VMGetGlobal' failed"
       endif
 
 !-------------------------------------------------------------------------
-!   ! Example 1:
-!   !
+!  Begin the Example
+!------------------------------------------------------------------------
 
 !BOE
 !\subsubsection{Creation of a Config}
 
-! The first step is to create the {\tt ESMF\_Config} and load the
-! ASCII resource (rc) file into memory\footnote{See next section
-! for a complete description of parameters for each routine/function}.
+! While there are two methodologies for accessing the data within a Resource File, 
+! there is only one way to create the initial Config and load its ASCII text into 
+! memory. This is the first step in the process.
+
+! Note that subsequent calls to {\tt ESMF\_ConfigLoadFile} will OVERWRITE the current
+! Config NOT append to it. There is no means of appending to a Config. 
+!
 !EOE
 
 !BOC
-      cf = ESMF_ConfigCreate(rc)
+      cf = ESMF_ConfigCreate(rc)                    ! Create the empty Config
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
+      if (rc .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
-        print*, "' call ESMF_ConfigCreate' failed"
+        print*, "*****' call ESMF_ConfigCreate' failed"
       endif
 
 !BOC
-      fname = "myResourceFile.rc"
-      call ESMF_ConfigLoadFile(cf, fname, rc=rc)
+      fname = "myResourceFile.rc"                   ! Name the Resource File
+      call ESMF_ConfigLoadFile(cf, fname, rc=rc)    ! Load the Resource File into the 
+                                                    ! empty Config
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
+      if (rc .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
-        print*, "' call ESMF_ConfigLoadFile' failed"
+        print*, "*****' call ESMF_ConfigLoadFile' failed"
       endif
 
+!----------------------------------------------------------------
+! First Method of Retrieval
+!----------------------------------------------------------------
 !BOE
-!\subsubsection{Retrieval of Constants}
+!\subsubsection{How to Retrieve of Data Via Labels}
+! The first methodology for retrieving information from the 
+! Resource File is to take advantage of the <label,value> relationship
+! within the file and access the data in a dictionary-like manner. This is the
+! simplest methodology, but it does imply the use of only one value per label
+! in the Resource File.  
+! 
+! Remember,
+! that the order in which a particular label/value pair is retrieved
+! is not dependent upon the order which they exist within the Resource File. 
+!EOE
 
-! The next step is to retrieve a label/value pair.  Remember,
-! that the order in which a particular label/value pair is retreived
-! is not dependent upon the order which they exist within the 
-! Resource File. 
+!BOC 
+    call ESMF_ConfigGetAttribute(cf, radius, label='radius_of_the_earth:', &
+                                 default=1.0, rc=rc)
+!EOC
+
+
+    if (rc .ne. ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+        print*, "*****' call ESMF_ConfigGetAttribute' for radius failed"
+    else
+        print*, "---------------------------------------------------------------"
+        print*, "Results from using the dictionary-like method of data retrieval"
+        print*, "The radius of the earth was retrieved from the Resource File"
+        print*, "Its value is: ", radius
+        print*, "---------------------------------------------------------------"
+    endif
+
+    if(radius .ne. 6.37E6)then
+      finalrc = ESMF_FAILURE
+      print*, "******** Radius not retrieved correctly"
+      print*, input_file
+    endif
+
+
+!BOE
+! Note that the colon must be included in the label string when using this
+! methodology.  It is also important to provide a default value in case the label
+! does not exist in the file
+!EOE
+
+
+!BOE
+! This methodology works for all types. The following is an example of retrieving a string:
+!EOE
+
+!BOC 
+    call ESMF_ConfigGetAttribute(cf, input_file, label='input_file_name:', &
+                                 default="./default_input_file.nc", rc=rc)
+!EOC
+
+
+    if (rc .ne. ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+        print*, "*****' call ESMF_ConfigGetAttribute'  for input_file failed"
+    else
+        print*, "Results from using the dictionary-like method of data retrieval of a string"
+        print*, "The input file name (a string) was retrieved from the Resource File"
+        print*, "Its value is: ", input_file
+        print*, "---------------------------------------------------------------"
+    endif
+
+    if(input_file .ne. "dummy_input.netcdf")then
+       finalrc = ESMF_FAILURE
+       print*, "******* input_file not retrieved correctly"
+       print*, input_file
+    endif
+
+!BOE
+! The same code fragment can be used to demonstrate what happens when the label is not present.  Note
+! that "file\_name" does not exist in the Resource File. The result of its abscense is the default value 
+! provided in the call.
+!EOE
+
+!BOC 
+    call ESMF_ConfigGetAttribute(cf, input_file, label='file_name:', &
+                                 default="./default.nc", rc=rc)
+!EOC
+
+    if (rc .ne. ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+        print*, "*****' call ESMF_ConfigGetAttribute'  for input_file failed"
+    else
+        print*, "Results when the label in the call does not exist in the Resource File"
+        print*, "The default value is returned."
+        print*, "Its value is: ",input_file
+        print*, "---------------------------------------------------------------"
+    endif
+
+    if (input_file .ne. "./default.nc") then
+      finalrc = ESMF_FAILURE
+      print*, "****** Demonstration of default value (input_file) not working correctly"
+      print*, input_file
+    endif
+!----------------------------------------------------------------
+! Second Method of Retrieval
+!----------------------------------------------------------------
+!BOE
+!\subsubsection{How to Retrieve Data Via Pointers}
+! Behind the scenes, the Resource File is read into memory as one long
+! character string.  The second method of retrieval creates a pointer and 
+! sets that pointer in the string where a requested label exists. The values
+! associated with that label can then be retrieved sequentially.  While this
+! methodology is more complex, it does have the advantage of allowing for
+! mixed-type labels, and multiple label values retrieved without having to
+! declare an array.
+
+! A second reminder that the order in which a particular label/value pair is 
+! retrieved is not dependent upon the order which they exist within the 
+! Resource File. The pointer used in this method allows the user to skip to
+! any point in the file. 
 !EOE
 
 !BOC
-      call ESMF_ConfigFindLabel(cf, 'constants:', rc=rc)
+      call ESMF_ConfigFindLabel(cf, 'constants:', rc=rc) ! Step a) set the pointer 
+                                                         ! to the constants label
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
-        print*, "' call ESMF_ConfigFindLabel' failed"
-      endif
+        print*, "*****' call ESMF_ConfigFindLabel' failed"
+      endif 
 
 !BOE
-! Two constants, radius and i\_n, can be retrieved with the following code
-! fragment:
+! Two constants, radius and i\_n, can now be retrieved without having to specify their
+! label or use an array. They are also different types.
 !EOE
 
 !BOC
-      call ESMF_ConfigGetAttribute(cf, radius, rc=rc)   ! results in radius = 3.1415
-      call ESMF_ConfigGetAttribute(cf, i_n, rc=rc)      ! results in i_n    = 25
+      call ESMF_ConfigGetAttribute(cf, param_1, rc=rc)   ! Step b) read in the first 
+                                                         ! constant in the sequence
+      call ESMF_ConfigGetAttribute(cf, i_n, rc=rc)       ! Step c) read in the second 
+                                                         ! constant in the sequence
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
-        print*, "' call ESMF_ConfigGetAttribute' failed"
+        print*, "*****' call ESMF_ConfigGetAttribute' failed"
+      else
+        print*, "Results from using the pointer method of data retrieval"
+        print*, "The first constant was was retrieved from the Resource File"
+        print*, "Its value is: ", param_1
+        print*, "The second constant was was retrieved from the Resource File"
+        print*, "Its value is: ", i_n
+        print*, "---------------------------------------------------------------"
       endif
 
-      if (radius.ne.3.1415 .OR. i_n.ne.25) then
+      if (param_1 .ne. 3.1415 .or. i_n .ne. 25) then
         finalrc = ESMF_FAILURE
-        print*, "bad results from ConfigGetAttribute"
+        print*, "*****The constants param_1 and i_n did not retrieve correctly from the file"
       endif
 
 !BOE
-!\subsubsection{Retrieval of File Names}
-
-! File names can be retrieved with the following code fragment:
+! The pointer methodology also works with strings.
 !EOE
 
 !BOC
-       call ESMF_ConfigFindLabel(cf, 'my_file_names:', rc=rc)
+       call ESMF_ConfigFindLabel(cf, 'my_file_names:', rc=rc)  ! Step a) Set the pointer 
+                                                               ! to the right label
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
-        print*, "' call ESMF_ConfigFindLabel' failed"
+        print*, "*****' call ESMF_ConfigFindLabel' failed"
       endif
 
 !BOC
-       call ESMF_ConfigGetAttribute(cf, fn1, rc=rc)   ! results in fn1 = 'jan87.dat'
-       call ESMF_ConfigGetAttribute(cf, fn2, rc=rc)   ! results in fn2 = 'jan88.dat'
-       call ESMF_ConfigGetAttribute(cf, fn3, rc=rc)   ! results in fn3 = 'jan89.dat'
+       call ESMF_ConfigGetAttribute(cf, fn1, rc=rc) !Step b) retrieve the first filename
+       call ESMF_ConfigGetAttribute(cf, fn2, rc=rc) !Step c) retrieve the second filename
+       call ESMF_ConfigGetAttribute(cf, fn3, rc=rc) !Step d) retrieve the third filename
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
-        print*, "' call ESMF_ConfigGetAttribute' failed"
+        print*, "*****' call ESMF_ConfigGetAttribute' for multiple file name retrieval failed"
+      else
+        print*, "Results from using the pointer method of data retrieval of strings"
+        print*, "The first file name was was retrieved from the Resource File"
+        print*, "Its value is: ", fn1
+        print*, "The second file name was was retrieved from the Resource File"
+        print*, "Its value is: ", fn2
+        print*, "The third file name was was retrieved from the Resource File"
+        print*, "Its value is: ", fn3
+        print*, "---------------------------------------------------------------"
       endif
 
-      if (fn1.ne.'jan87.dat' .OR. fn2.ne.'jan88.dat' .OR. &
-          fn3.ne.'jan89.dat') then
+      if (fn1.ne.'jan87.dat' .or. fn2.ne.'jan88.dat' .or. fn3.ne.'jan89.dat') then
         finalrc = ESMF_FAILURE
-        print*, "bad results from ConfigGetAttribute"
+        print*, "*****The file names not retrieved correctly using the pointer method"
       endif
 
+!----------------------------------------------------------------
+! Retrieval of a Table
+!----------------------------------------------------------------
 !BOE
-!\subsubsection{Retrieval of Tables}
+!\subsubsection{How to Retrieve a Table}
 
-! To access tabular data, the user first must use
-! {\tt ESMF\_ConfigFindLabel()} to locate the beginning of the table, e.g.,
+! To access tabular data, the user first must use the second methodology of 
+! retrieving data: the pointer method. 
 !EOE
 
 !BOC
-      call ESMF_ConfigFindLabel(cf, 'my_table_name::', rc=rc)
+      call ESMF_ConfigFindLabel(cf, 'my_table_name::', rc=rc) ! Step a) Set the pointer 
+                                                              ! to the beginning of the 
+                                                              ! table
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
-        print*, "' call ESMF_ConfigFindLabel' failed"
+        print*, "*****' call ESMF_ConfigFindLabel' failed"
       endif
 
 !BOE
-! Subsequently, {\tt call ESMF\_ConfigNextLine()} can be used to gain
-! access to each row of the table. Here is a code fragment to read the above
-! table (7 rows, 3 columns):
+! Subsequently, {\tt call ESMF\_ConfigNextLine()} is used to move the pointer
+! to the next row of the table. The example table in the Resource File contains
+! 7 rows and 3 columns (7,3).
 !EOE
 
 !BOC
       do i = 1, 7
-        call ESMF_ConfigNextLine(cf, rc=rc)
+        call ESMF_ConfigNextLine(cf, rc=rc)                  ! Step b) Increment the rows
         do j = 1, 3
-          call ESMF_ConfigGetAttribute(cf, table(i,j), rc=rc)
+          call ESMF_ConfigGetAttribute(cf, table(i,j), rc=rc)! Step c) Fill in the table 
         enddo
       enddo
 !EOC
 
+
+      if (rc .ne. ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+        print*, "*****' call ESMF_ConfigGetAttribute' for table retrieval failed"
+      else
+        print*, "Results from using the pointer method to retrieve a table"
+        print*, "The (1,3) table value should be 263.0"
+        print*, "Its retrieved value is: ", table(1,3)
+        print*, "The (6,1) table value should be 400"
+        print*, "Its retrieved value is: ", table(6,1)
+        print*, "---------------------------------------------------------------"
+      endif
+
+      if(table(1,3) .ne. 263.0 .or. table(6,1) .ne. 400)then
+        finalrc = ESMF_FAILURE
+        print*, "***** Tables values are incorrect"
+      endif
+
+!----------------------------------------------------------------
+! Destruction of a Config
+!----------------------------------------------------------------
 !BOE
 !\subsubsection{Destruction of a Config}
 
@@ -204,14 +373,16 @@
 !EOE
 
 !BOC
-      call ESMF_ConfigDestroy(cf, rc)
+      call ESMF_ConfigDestroy(cf, rc) ! Destroy the Config
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
-        print*, "'call ESMF_ConfigDestroy' failed"
+        print*, "*****'call ESMF_ConfigDestroy' failed"
       end if
 
+      print*, "Final Word"
+      print*,"---------------------------------------------------"
       if (finalrc.eq.ESMF_SUCCESS) then
         print *, "PASS: ESMF_ConfigOverviewEx.F90"
       else
