@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.7 2008/01/17 00:19:06 rokuingh Exp $
+! $Id: user_model1.F90,v 1.8 2008/01/17 17:31:24 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -106,11 +106,11 @@ module user_model1
 
     ! Local variables
     type(ESMF_VM)               :: vm
-    type(ESMF_Field)            :: field
-    type(ESMF_Grid)             :: grid
-    type(ESMF_Array)            :: array
     type(ESMF_DistGrid)         :: distgrid
     type(ESMF_ArraySpec)        :: arrayspec
+    type(ESMF_Array)            :: array
+    type(ESMF_Field)            :: field
+    type(ESMF_Grid)             :: grid
     integer                     :: petCount, backward_run, status, myPet
     character(len=ESMF_MAXSTR)  :: name, value, conv, purp, fconv, fpurp   
     
@@ -245,6 +245,11 @@ module user_model1
         if (status .ne. ESMF_SUCCESS) goto 20
       endif
     endif
+
+    call ESMF_ArrayDestroy(array, rc=rc)
+    call ESMF_DistGridDestroy(distgrid, rc=rc)
+    call ESMF_FieldDestroy(field, rc=rc)
+    call ESMF_GridDestroy(grid, rc=rc)
 
     rc = ESMF_SUCCESS
     return
