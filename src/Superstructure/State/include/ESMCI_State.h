@@ -1,4 +1,4 @@
-// $Id: ESMCI_State.h,v 1.1 2007/12/23 20:57:09 rosalind Exp $
+// $Id: ESMCI_State.h,v 1.2 2008/01/18 05:00:16 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -46,7 +46,8 @@
 //-----------------------------------------------------------------------------
 extern "C" {
 
-  void FTN(f_esmf_statecreate)(ESMC_State* state, char* statename, int* rc, int nlen);
+  void FTN(f_esmf_statecreate)(ESMC_State* state, char* statename, int* rc,
+				ESMCI_FortranStrLenArg nlen);
 
   void FTN(f_esmf_statedestroy)(ESMC_State* state, int* rc);
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Config.h,v 1.5 2007/12/22 23:33:07 rosalind Exp $
+// $Id: ESMCI_Config.h,v 1.6 2008/01/18 05:00:15 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -52,58 +52,62 @@ extern "C" {
 
   void FTN(f_esmf_configloadfile)(ESMC_Config* config, char* fname, int* unique,
                             //    int* rc          );
-                                  int* rc, int flen);
+                                  int* rc, ESMCI_FortranStrLenArg flen);
 
-  void FTN(f_esmf_configfindlabel)(ESMC_Config* config, char* label, int* rc, int llen);
+  void FTN(f_esmf_configfindlabel)(ESMC_Config* config, char* label, int* rc,
+				ESMCI_FortranStrLenArg llen);
 
   void FTN(f_esmf_confignextline)(ESMC_Config* config, int* ltable, int* rc);
 
   void FTN(f_esmf_configgetchar)(ESMC_Config* config, char* value, char* label,
-                                 char* dvalue, int* rc, int, int llen, int);
+                                 char* dvalue, int* rc, ESMCI_FortranStrLenArg,
+				ESMCI_FortranStrLenArg llen, ESMCI_FortranStrLenArg);
 
   void FTN(f_esmf_configgetlen)(ESMC_Config* config, int* wordCount, char* label,
-                                int* rc, int llen);
+                                int* rc, ESMCI_FortranStrLenArg llen);
 
   void FTN(f_esmf_configgetdim)(ESMC_Config* config, int* lineCount, int* columnCount,
-                                char* label, int* rc, int llen);
+                                char* label, int* rc, ESMCI_FortranStrLenArg llen);
 
-  void FTN(f_esmf_configvalidate)(ESMC_Config* config, char* options, int* rc, int olen);
+  void FTN(f_esmf_configvalidate)(ESMC_Config* config, char* options, int* rc,
+				ESMCI_FortranStrLenArg olen);
 
   //
   // Functions for ConfigGetAttribute interface
   //
   void FTN(f_esmf_configgetstring)(ESMC_Config* config, char* value, char* label,
-                                   char* dvalue, int* rc, int vlen, int llen, int dlen);
+                                   char* dvalue, int* rc, ESMCI_FortranStrLenArg vlen,
+				ESMCI_FortranStrLenArg llen, ESMCI_FortranStrLenArg dlen);
 
   void FTN(f_esmf_configgetinti4)(ESMC_Config* config, ESMC_I4* value, char* label,
-                                  ESMC_I4* dvalue, int* rc, int llen);
+                                  ESMC_I4* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
 
   void FTN(f_esmf_configgetinti8)(ESMC_Config* config, ESMC_I8* value, char* label,
-                                  ESMC_I8* dvalue, int* rc, int llen);
+                                  ESMC_I8* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
 
   void FTN(f_esmf_configgetfloatr4)(ESMC_Config* config, ESMC_R4* value, char* label,
-                                    ESMC_R4* dvalue, int* rc, int llen);
+                                    ESMC_R4* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
 
   void FTN(f_esmf_configgetfloatr8)(ESMC_Config* config, ESMC_R8* value, char* label,
-                                    ESMC_R8* dvalue, int* rc, int llen);
+                                    ESMC_R8* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
 
   void FTN(f_esmf_configgetlogical)(ESMC_Config* config, int* value, char* label,
-                                    int* dvalue, int* rc, int llen);
+                                    int* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
 
   void FTN(f_esmf_configgetintsi4)(ESMC_Config* config, int* count,
-    ESMC_I4* value, char* label, ESMC_I4* dvalue, int* rc, int llen);
+    ESMC_I4* value, char* label, ESMC_I4* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
 
   void FTN(f_esmf_configgetintsi8)(ESMC_Config* config, int* count,
-    ESMC_I8* value, char* label, ESMC_I8* dvalue, int* rc, int llen);
+    ESMC_I8* value, char* label, ESMC_I8* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
 
   void FTN(f_esmf_configgetfloatsr4)(ESMC_Config* config, int* count,
-    ESMC_R4* value, char* label, ESMC_R4* dvalue, int* rc, int llen);
+    ESMC_R4* value, char* label, ESMC_R4* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
 
   void FTN(f_esmf_configgetfloatsr8)(ESMC_Config* config, int* count,
-    ESMC_R8* value, char* label, ESMC_R8* dvalue, int* rc, int llen);
+    ESMC_R8* value, char* label, ESMC_R8* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
 
   void FTN(f_esmf_configgetlogicals)(ESMC_Config* config, int* count,
-    int* value, char* label, int* dvalue, int* rc, int llen);
+    int* value, char* label, int* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
 
 }; // end prototypes for fortran interface
 
