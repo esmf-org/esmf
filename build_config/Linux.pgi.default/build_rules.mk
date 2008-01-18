@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.30 2008/01/14 18:18:09 theurich Exp $
+# $Id: build_rules.mk,v 1.31 2008/01/18 19:22:04 svasquez Exp $
 #
 # Linux.pgi.default
 #
@@ -50,7 +50,11 @@ ifeq ($(ESMF_COMM),scalimpi)
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpic++
 ESMF_MPIRUNDEFAULT      = mpirun
+ifeq ($(ESMF_BATCH),scali.batch)
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.scali.batch
+else
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+endif
 else
 ifeq ($(ESMF_COMM),lam)
 # LAM (assumed to be built with pgf90) ---------------------
