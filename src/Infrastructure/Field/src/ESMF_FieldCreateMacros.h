@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.31 2008/01/17 21:44:09 feiliu Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.32 2008/01/18 18:28:12 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -199,7 +199,7 @@
             endif @\
         endif @\
  @\
-        field%ftypep%arrayspec = arrayspec @\
+!        field%ftypep%arrayspec = arrayspec @\
         field%ftypep%datastatus = ESMF_STATUS_READY @\
         field%ftypep%grid  = grid @\
         field%ftypep%gridstatus = ESMF_STATUS_READY @\

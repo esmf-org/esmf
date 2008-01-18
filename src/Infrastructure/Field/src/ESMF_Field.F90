@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.288 2008/01/18 14:42:36 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.289 2008/01/18 18:28:11 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -112,9 +112,8 @@
         type (ESMF_Grid)              :: grid
         type (ESMF_IOSpec)            :: iospec           ! iospec values
         type (ESMF_Status)            :: iostatus         ! if unset, inherit from gcomp
-! TODO:FIELDINTEGRATION Reconcile the additions of arrayspec and array with methods
-        type (ESMF_ArraySpec)         :: arrayspec
         type (ESMF_Array)             :: array
+!        type (ESMF_ArraySpec)         :: arrayspec
         type (ESMF_StaggerLoc)        :: staggerloc
         logical                       :: array_copied     ! .true. if field%array is a copy
         integer                       :: gridToFieldMap(ESMF_MAXDIM)
@@ -205,7 +204,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.288 2008/01/18 14:42:36 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.289 2008/01/18 18:28:11 feiliu Exp $'
 
 !==============================================================================
 !
@@ -1175,9 +1174,9 @@
         if (fp%datastatus .eq. ESMF_STATUS_READY) then 
            call c_ESMC_ArrayPrint(fp%array, localrc)
         endif
-        if (fp%datastatus .eq. ESMF_STATUS_READY) then
-            call ESMF_ArraySpecPrint(fp%arrayspec, localrc)
-        endif
+!        if (fp%datastatus .eq. ESMF_STATUS_READY) then
+!            call ESMF_ArraySpecPrint(fp%arrayspec, localrc)
+!        endif
         call ESMF_StaggerLocPrint(fp%staggerloc, localrc)
 
         call ESMF_GridGet(fp%grid, rank=gridrank, rc=localrc)
@@ -3422,7 +3421,7 @@
       integer, allocatable :: gridCompUBnd(:), gridCompLBnd(:)
       type(ESMF_DistGrid)  :: arrayDistGrid, gridDistGrid
 
-      integer              :: as_rank          ! arrayspec rank
+!      integer              :: as_rank          ! arrayspec rank
       type(ESMF_TYPEKIND)  :: as_tk, a_tk      ! arrayspec typekind, array typekind
 
       ! Initialize
@@ -3506,13 +3505,13 @@
                  ESMF_CONTEXT, rc)
              return
           endif 
-          call ESMF_ArraySpecGet(ftypep%arrayspec, rank=as_rank, typekind=as_tk, rc=localrc)
-          if((as_rank .ne. arrayrank) .or. (as_tk .ne. a_tk)) then
-             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                "Array rank or typekind does not agree with arrayspec rank or typekind", &
-                 ESMF_CONTEXT, rc)
-             return
-          endif 
+!          call ESMF_ArraySpecGet(ftypep%arrayspec, rank=as_rank, typekind=as_tk, rc=localrc)
+!          if((as_rank .ne. arrayrank) .or. (as_tk .ne. a_tk)) then
+!             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+!                "Array rank or typekind does not agree with arrayspec rank or typekind", &
+!                 ESMF_CONTEXT, rc)
+!             return
+!          endif 
           ! Verify that array rank is greater than or equal to grid rank + ungridded bound rank
           if ( arrayrank .lt. gridrank) then
               call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
@@ -4079,7 +4078,7 @@
       ftype%array = array
       ftype%array_copied = .false.
       ftype%datastatus = ESMF_STATUS_READY
-      ftype%arrayspec = arrayspec
+!      ftype%arrayspec = arrayspec
       ftype%grid  = grid
       ftype%gridstatus = ESMF_STATUS_READY
       ftype%fieldstatus = ESMF_STATUS_READY 
@@ -4242,7 +4241,7 @@
           endif
       endif
           
-      ftype%arrayspec = arrayspec
+!      ftype%arrayspec = arrayspec
       ftype%datastatus = ESMF_STATUS_READY
       ftype%grid  = grid
       ftype%gridstatus = ESMF_STATUS_READY
