@@ -162,7 +162,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.55 2008/01/09 20:10:41 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.56 2008/01/18 21:06:08 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -1505,7 +1505,7 @@ end interface
 !     array specifies the number of dimensions of the first
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is /1,2,3/. 
+!     arrays map to. If not present the default is 1,2,...,grid rank. 
 ! \item[{[coordDep2]}] 
 !     This array specifies the dependence of the second 
 !     coordinate component on the three index dimensions
@@ -1513,7 +1513,7 @@ end interface
 !     array specifies the number of dimensions of the second
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is /1,2,3/. 
+!     arrays map to. If not present the default is 1,2,...,grid rank. 
 ! \item[{[coordDep3]}] 
 !     This array specifies the dependence of the third 
 !     coordinate component on the three index dimensions
@@ -1521,7 +1521,7 @@ end interface
 !     array specifies the number of dimensions of the third
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is /1,2,3/. 
+!     arrays map to. If not present the default is 1,2,...,grid rank. 
 ! \item[{[gridEdgeLWidth]}] 
 !      The padding around the lower edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
@@ -2608,7 +2608,7 @@ end interface
 !     array specifies the number of dimensions of the first
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is /1,2,3/. 
+!     arrays map to. If not present the default is 1,2,...,grid rank. 
 ! \item[{[coordDep2]}] 
 !     This array specifies the dependence of the second 
 !     coordinate component on the three index dimensions
@@ -2616,7 +2616,7 @@ end interface
 !     array specifies the number of dimensions of the second
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is /1,2,3/. 
+!     arrays map to. If not present the default is 1,2,...,grid rank.  
 ! \item[{[coordDep3]}] 
 !     This array specifies the dependence of the third 
 !     coordinate component on the three index dimensions
@@ -2624,7 +2624,7 @@ end interface
 !     array specifies the number of dimensions of the third
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is /1,2,3/. 
+!     arrays map to. If not present the default is 1,2,...,grid rank.  
 ! \item[{[gridEdgeLWidth]}] 
 !      The padding around the lower edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
@@ -6916,7 +6916,7 @@ endif
 !     array specifies the number of dimensions of the first
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is /1,2,3/. 
+!     arrays map to. If not present the default is 1,2,...,grid rank.  
 ! \item[{[coordDep2]}] 
 !     This array specifies the dependence of the second 
 !     coordinate component on the three index dimensions
@@ -6924,7 +6924,7 @@ endif
 !     array specifies the number of dimensions of the second
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is /1,2,3/. 
+!     arrays map to. If not present the default is 1,2,...,grid rank.  
 ! \item[{[coordDep3]}] 
 !     This array specifies the dependence of the third 
 !     coordinate component on the three index dimensions
@@ -6932,7 +6932,7 @@ endif
 !     array specifies the number of dimensions of the third
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is /1,2,3/. 
+!     arrays map to. If not present the default is 1,2,...,grid rank. 
 ! \item[{[gridEdgeLWidth]}] 
 !      The padding around the lower edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
@@ -8032,7 +8032,7 @@ endif
 !     array specifies the number of dimensions of the first
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is /1,2,3/. 
+!     arrays map to. If not present the default is 1,2,...,grid rank.  
 ! \item[{[coordDep2]}] 
 !     This array specifies the dependence of the second 
 !     coordinate component on the three index dimensions
@@ -8040,7 +8040,7 @@ endif
 !     array specifies the number of dimensions of the second
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is /1,2,3/. 
+!     arrays map to. If not present the default is 1,2,...,grid rank.  
 ! \item[{[coordDep3]}] 
 !     This array specifies the dependence of the third 
 !     coordinate component on the three index dimensions
@@ -8048,7 +8048,7 @@ endif
 !     array specifies the number of dimensions of the third
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. If not present the default is /1,2,3/. 
+!     arrays map to. If not present the default is 1,2,...,grid rank.  
 ! \item[{[gridEdgeLWidth]}] 
 !      The padding around the lower edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 

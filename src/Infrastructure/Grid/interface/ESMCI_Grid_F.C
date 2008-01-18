@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.31 2008/01/09 00:56:57 rokuingh Exp $
+// $Id: ESMCI_Grid_F.C,v 1.32 2008/01/18 21:06:08 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -2043,7 +2043,7 @@ void FTN(c_esmc_gridcreateattpack)(ESMCI::Grid **grid, char *name, char *convent
   ///////////////////////////////////////////////////////////////////////////////////
 
   
-  void FTN(c_esmc_gridvalidate)(ESMCI::Grid **grid, int *rc){
+  void FTN(c_esmc_gridvalidate)(ESMCI::Grid **_grid, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridvalidate()"
 
@@ -2051,11 +2051,12 @@ void FTN(c_esmc_gridcreateattpack)(ESMCI::Grid **grid, char *name, char *convent
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
 
     // Check status
-   if ((*grid)->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
+   if ((*_grid)->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
           "- grid status below ESMC_GRIDSTATUS_SHAPE_READY ", ESMC_NOT_PRESENT_FILTER(rc));
         return;
     }
+
 
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;

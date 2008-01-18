@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.28 2008/01/17 00:21:13 rokuingh Exp $
+// $Id: ESMCI_Grid.h,v 1.29 2008/01/18 21:06:08 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -188,6 +188,10 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
         int  **getCoordMapDim(void) const {return coordMapDim;} 
   const int   *getStaggerEdgeLWidth(int staggerloc) const {return staggerEdgeLWidthList[staggerloc];}
   const int   *getStaggerEdgeUWidth(int staggerloc) const {return staggerEdgeUWidthList[staggerloc];}
+
+  bool isLBnd(int localDE, int dim) {return (isDELBnd[localDE] & (0x1 << dim))?true:false;}
+  bool isUBnd(int localDE, int dim) {return (isDEUBnd[localDE] & (0x1 << dim))?true:false;}
+
 
   // detect if a given staggerloc is present in the Grid
   bool hasStaggerLoc(int staggerloc);
@@ -386,6 +390,51 @@ int getComputationalUBound(
                        int *gridEdgeUWidthOut,          // (out)
                        int *gridAlignOut            // (out)
                        );
+
+
+  // class for iterating through the indices in a grid stagger location
+  class GridIter {
+  private:
+    Grid *grid;     // grid being iterated through
+    int staggerloc; // staggerloc in grid being iterated through
+    
+    int rank; // rank of grid and number of valid entires in the below
+    int curInd[ESMF_MAXDIM];  // current position in index space
+
+    int lBndInd[ESMF_MAXDIM]; // start position for allon this local DE  
+    int uBndInd[ESMF_MAXDIM]; // end position on this local DE  
+
+    int dimOff[ESMF_MAXDIM]; // Offset for each dimension for computing lid
+    int lOff;                // lower bound offset
+    
+    int curDE; // current local DE
+    int uBndDE; // end local DE on this PET (the lower bnd is 0)
+
+    bool done; // are we done yet?
+
+    bool cellNodes; // include all the nodes attached to cells on this PET's Grid
+
+
+    void setDEBnds(int localDE);
+
+  public:
+
+  const bool isDone(void) const {return done;}
+  GridIter(Grid *gridArg, int  staggerlocArg, bool cellNodesArg);
+  ~GridIter();
+  GridIter *toBeg();
+  GridIter *adv();
+  GridIter *moveToLocalID(int localID);
+  int getGlobalID();
+  int getLocalID();
+  bool isLocal();
+
+  template <class TYPE> void getCoord(TYPE *coord);
+  }; 
+
+
+
+
 
 
  // Class for holding data set after grid empty creation, but before grid is finally created.

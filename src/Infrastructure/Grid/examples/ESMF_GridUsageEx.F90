@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.30 2008/01/09 20:10:40 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.31 2008/01/18 21:06:08 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -374,7 +374,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! The grid is partitioned using an irregular distribution. The first dimension
 ! it is divided into two pieces, the first with 3 grid cells per
 ! DE and the second with 7 grid cells per DE. In the second dimension,
-! the Grid is divided into 3 pieces, with 5, 9, and 6 cells per DE respectively.
+! the Grid is divided into 3 pieces, with 11, 2, and 7 cells per DE respectively.
 ! The Grid is created with global indices. After grid creation the
 ! local bounds and native Fortran arrays are retrieved and the
 ! coordinates are set by the user. 
