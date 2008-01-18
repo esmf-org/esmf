@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.63 2008/01/18 23:26:52 theurich Exp $
+# $Id: build_rules.mk,v 1.64 2008/01/18 23:30:54 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -38,20 +38,18 @@ ifeq ($(ESMF_COMM),mpich)
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpiCC
 ESMF_CXXCOMPILEOPTS    += -DESMF_MPICH
+ESMF_MPIRUNDEFAULT      = mpirun
 ifeq ($(ESMF_BATCH),sge.batch)
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.sge.batch
-else
-ESMF_MPIRUNDEFAULT      = mpirun
 endif
 else
 ifeq ($(ESMF_COMM),mpich2)
 # Mpich2 ---------------------------------------------------
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
+ESMF_MPIRUNDEFAULT      = mpirun
 ifeq ($(ESMF_BATCH),sge.batch)
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.sge.batch
-else
-ESMF_MPIRUNDEFAULT      = mpirun
 endif
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec
 else
@@ -66,10 +64,9 @@ ifeq ($(ESMF_COMM),scalimpi)
 # scaliMPI -------------------------------------------------
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpic++
+ESMF_MPIRUNDEFAULT      = mpirun
 ifeq ($(ESMF_BATCH),scali.batch)
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.scali.batch
-else
-ESMF_MPIRUNDEFAULT      = mpirun
 endif
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec
 else
