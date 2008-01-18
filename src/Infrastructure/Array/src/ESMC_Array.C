@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.169 2008/01/17 00:20:24 rokuingh Exp $
+// $Id: ESMC_Array.C,v 1.170 2008/01/18 01:13:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.169 2008/01/17 00:20:24 rokuingh Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.170 2008/01/18 01:13:16 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -7528,6 +7528,8 @@ int Array::sparseMatMulRelease(
 }
 //-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::attributeset()"
 //BOPI
@@ -7562,6 +7564,9 @@ int Array::attributeset(
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::attributeset()"
 //BOPI
@@ -7593,6 +7598,9 @@ int Array::attributeset(
   // return success
   return ESMF_SUCCESS;
 }
+//-----------------------------------------------------------------------------
+
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::attributeget()"
@@ -7629,6 +7637,8 @@ int Array::attributeget(
 }
 //-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::attributeget()"
 //BOPI
@@ -7662,6 +7672,8 @@ int Array::attributeget(
 }
 //-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::attributegetcount()"
 //BOPI
@@ -7694,6 +7706,8 @@ int Array::attributegetcount(void) const {
 }
 //-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::attributeget()"
 //BOPI
@@ -7730,6 +7744,8 @@ int Array::attributeget(
 }
 //-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::createattpack()"
 //BOPI
@@ -7765,6 +7781,8 @@ int Array::createattpack(
 }
 //-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::setattpack()"
 //BOPI
@@ -7792,7 +7810,8 @@ int Array::setattpack(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  localrc = ESMC_Base::ESMC_SetAttPack(name, value, convention, purpose, object);
+  localrc = ESMC_Base::ESMC_SetAttPack(name, value, convention, purpose,
+    object);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
@@ -7801,6 +7820,8 @@ int Array::setattpack(
 }
 //-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::writeattpack()"
 //BOPI
