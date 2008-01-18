@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.5 2007/03/31 05:50:44 cdeluca Exp $"
+"$Id: ESMC_Conf.h,v 1.5.2.1 2008/01/18 23:52:51 theurich Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -19,6 +19,12 @@ Licensed under the University of Illinois-NCSA License.
 #define PARCH_linux
 
 #define FTN(func) func##_
+
+#if defined (__cplusplus)
+// Typedef to match the data type of the 'hidden' string length
+// argument that Fortran uses when passing CHARACTER strings.
+typedef int ESMCI_FortranStrLenArg;
+#endif
 
 #if 0
 PGI method for marking F90 "not present" optional arguments uses

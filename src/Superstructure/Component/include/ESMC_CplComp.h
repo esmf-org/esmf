@@ -1,4 +1,4 @@
-// $Id: ESMC_CplComp.h,v 1.15 2007/08/23 17:15:58 cdeluca Exp $
+// $Id: ESMC_CplComp.h,v 1.15.2.1 2008/01/18 23:52:52 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -115,7 +115,8 @@
 extern "C" {
  void FTN(f_esmf_cplcompcreate)(ESMC_CplComp *comp, char *name, 
                          ESMC_Config *config, char *configFile, 
-                         ESMC_Clock *clock, int *rc, int nlen, int clen);
+                         ESMC_Clock *clock, int *rc,
+			 ESMCI_FortranStrLenArg nlen, ESMCI_FortranStrLenArg clen);
  void FTN(f_esmf_cplcompdestroy)(ESMC_CplComp *comp, int *rc);
  void FTN(f_esmf_cplcompinitialize)(ESMC_CplComp *ccomp, 
                          ESMC_State *importState, ESMC_State *exportState, 
@@ -131,8 +132,10 @@ extern "C" {
                          ESMC_BlockingFlag *blockingFlag, int *rc);
  void FTN(f_esmf_cplcompget)(const ESMC_CplComp *ccomp, int *rc);
  void FTN(f_esmf_cplcompset)(ESMC_CplComp *ccomp, int *rc);
- void FTN(f_esmf_cplcompvalidate)(const ESMC_CplComp *ccomp, const char *options, int *rc, int olen);
- void FTN(f_esmf_cplcompprint)(const ESMC_CplComp *ccomp, const char *options, int *rc, int olen);
+ void FTN(f_esmf_cplcompvalidate)(const ESMC_CplComp *ccomp, const char *options,
+				int *rc, ESMCI_FortranStrLenArg olen);
+ void FTN(f_esmf_cplcompprint)(const ESMC_CplComp *ccomp, const char *options,
+				int *rc, ESMCI_FortranStrLenArg olen);
 };
 
 #endif   // ESMC_CplComp_H
