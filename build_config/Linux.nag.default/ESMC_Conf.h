@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.5.2.3 2007/10/18 02:41:47 cdeluca Exp $"
+"$Id: ESMC_Conf.h,v 1.5.2.4 2008/01/19 03:58:32 theurich Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -33,6 +33,12 @@ Licensed under the University of Illinois-NCSA License.
 #define ESMC_SUBSTITUTE_CTRL_CHARS 1
 
 #define FTN(func) func##_
+
+#if defined (__cplusplus)
+// Typedef to match the data type of the 'hidden' string length
+// argument that Fortran uses when passing CHARACTER strings.
+typedef int ESMCI_FortranStrLenArg;
+#endif
 
 #undef ESMC_HAVE_OMP_THREADS 
 

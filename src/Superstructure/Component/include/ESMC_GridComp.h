@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.h,v 1.15.2.3 2007/10/18 02:43:45 cdeluca Exp $
+// $Id: ESMC_GridComp.h,v 1.15.2.4 2008/01/19 03:58:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -124,10 +124,11 @@ extern "C" {
                          ESMC_GridCompType *mtype, 
                          ESMC_Grid *grid, ESMC_Config *config, 
                          char *configFile, ESMC_Clock *clock, 
-                         int *rc, int nlen, int clen);
+                         int *rc, ESMCI_FortranStrLenArg nlen,
+			 ESMCI_FortranStrLenArg clen);
  void FTN(f_esmf_gridcompdestroy)(ESMC_GridComp *comp, int *rc);
  void FTN(esmf_gridcompsetentrypoint)(void *ptr, char *tname, void *func,
-		         int *phase, int *status, int slen);
+		         int *phase, int *status, ESMCI_FortranStrLenArg slen);
  void FTN(f_esmf_gridcompinitialize)(ESMC_GridComp *gcomp, 
                          ESMC_State *importState, ESMC_State *exportState, 
                          ESMC_Clock *clock, int *phase, 
@@ -142,7 +143,9 @@ extern "C" {
                          ESMC_BlockingFlag *blockingFlag, int *rc);
  void FTN(f_esmf_gridcompget)(const ESMC_GridComp *gcomp, int *rc);
  void FTN(f_esmf_gridcompset)(ESMC_GridComp *gcomp, int *rc);
- void FTN(f_esmf_gridcompvalidate)(const ESMC_GridComp *gcomp, const char *options, int *rc, int olen);
- void FTN(f_esmf_gridcompprint)(const ESMC_GridComp *gcomp, const char *options, int *rc, int olen);
+ void FTN(f_esmf_gridcompvalidate)(const ESMC_GridComp *gcomp, const char *options,
+			 int *rc, ESMCI_FortranStrLenArg olen);
+ void FTN(f_esmf_gridcompprint)(const ESMC_GridComp *gcomp, const char *options,
+			 int *rc, ESMCI_FortranStrLenArg olen);
 };
 #endif   // ESMC_GridComp_H

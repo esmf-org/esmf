@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.24.2.3 2007/10/18 02:43:45 cdeluca Exp $
+// $Id: ESMC_Comp.h,v 1.24.2.4 2008/01/19 03:58:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -143,13 +143,16 @@ extern "C" {
      void *vm, int *rc);
    void FTN(f_esmf_compcopy)(ESMC_Comp *compp, ESMC_Comp *compp_src, int *rc);
    void FTN(f_esmf_compdelete)(ESMC_Comp *compp, int *rc);
-   void FTN(f_esmf_compcreate)(ESMC_Comp *compp, char *name, int *rc, int nlen);
-   void FTN(f_esmf_compdestroy)(ESMC_Comp *compp, char *name, int *rc, int nlen);
+   void FTN(f_esmf_compcreate)(ESMC_Comp *compp, char *name, int *rc,
+				ESMCI_FortranStrLenArg nlen);
+   void FTN(f_esmf_compdestroy)(ESMC_Comp *compp, char *name, int *rc,
+				ESMCI_FortranStrLenArg nlen);
    void FTN(f_esmf_compinit)(ESMC_Comp *compp, char *name, void *func,
-                             int *rc, int nlen);
-   void FTN(f_esmf_comprun)(ESMC_Comp *compp, char *name, int *rc, int nlen);
+                             int *rc, ESMCI_FortranStrLenArg nlen);
+   void FTN(f_esmf_comprun)(ESMC_Comp *compp, char *name, int *rc,
+				ESMCI_FortranStrLenArg nlen);
    void FTN(f_esmf_compfinalize)(ESMC_Comp *compp, char *name, int *rc,
-                                 int nlen);
+                                ESMCI_FortranStrLenArg nlen);
 
 };
 
