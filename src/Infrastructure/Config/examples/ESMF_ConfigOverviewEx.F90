@@ -116,7 +116,7 @@
 ! First Method of Retrieval
 !----------------------------------------------------------------
 !BOE
-!\subsubsection{How to Retrieve of Data Via Labels}
+!\subsubsection{How to Retrieve a Label with a Single Value}
 ! The first methodology for retrieving information from the 
 ! Resource File is to take advantage of the <label,value> relationship
 ! within the file and access the data in a dictionary-like manner. This is the
@@ -166,7 +166,7 @@
 
 !BOC 
     call ESMF_ConfigGetAttribute(cf, input_file, label='input_file_name:', &
-                                 default="./default_input_file.nc", rc=rc)
+                                 default="./default.nc", rc=rc)
 !EOC
 
 
@@ -180,7 +180,7 @@
         print*, "---------------------------------------------------------------"
     endif
 
-    if(input_file .ne. "dummy_input.netcdf")then
+    if(input_file .ne. "dummy_input.nc")then
        finalrc = ESMF_FAILURE
        print*, "******* input_file not retrieved correctly"
        print*, input_file
@@ -216,15 +216,13 @@
 ! Second Method of Retrieval
 !----------------------------------------------------------------
 !BOE
-!\subsubsection{How to Retrieve Data Via Pointers}
-! Behind the scenes, the Resource File is read into memory as one long
-! character string.  The second method of retrieval creates a pointer and 
-! sets that pointer in the string where a requested label exists. The values
-! associated with that label can then be retrieved sequentially.  While this
-! methodology is more complex, it does have the advantage of allowing for
-! mixed-type labels, and multiple label values retrieved without having to
-! declare an array.
-
+!\subsubsection{How to Retrieve Data with Multiple Values}
+! When there are multi mixed-typed values associated with a label, the 
+! values can be retrieved in two steps:  1) Use ESMF\_ConfigFindLabel() 
+! to find the label in the Config class 2) use
+! ESMF\_ConfigGetAttribute() without the optional 'label' argument to 
+! retrieve the values one at a time. 
+!
 ! A second reminder that the order in which a particular label/value pair is 
 ! retrieved is not dependent upon the order which they exist within the 
 ! Resource File. The pointer used in this method allows the user to skip to
@@ -236,7 +234,7 @@
                                                          ! to the constants label
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
+      if (rc .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
         print*, "*****' call ESMF_ConfigFindLabel' failed"
       endif 
@@ -253,7 +251,7 @@
                                                        ! constant in the sequence
 !EOC
 
-      if (rc. .ne. ESMF_SUCCESS) then
+      if (rc .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
         print*, "*****' call ESMF_ConfigGetAttribute' failed"
       else
@@ -279,7 +277,7 @@
                                                                ! to the right label
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
+      if (rc .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
         print*, "*****' call ESMF_ConfigFindLabel' failed"
       endif
@@ -290,7 +288,7 @@
        call ESMF_ConfigGetAttribute(cf, fn3, rc=rc) !Step d) retrieve the third filename
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
+      if (rc .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
         print*, "*****' call ESMF_ConfigGetAttribute' for multiple file name retrieval failed"
       else
@@ -325,7 +323,7 @@
                                                               ! table
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
+      if (rc .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
         print*, "*****' call ESMF_ConfigFindLabel' failed"
       endif
@@ -377,7 +375,7 @@
       call ESMF_ConfigDestroy(cf, rc) ! Destroy the Config
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
+      if (rc .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
         print*, "*****'call ESMF_ConfigDestroy' failed"
       end if
