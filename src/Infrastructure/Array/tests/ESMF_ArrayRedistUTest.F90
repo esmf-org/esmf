@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistUTest.F90,v 1.3 2007/11/02 23:13:08 theurich Exp $
+! $Id: ESMF_ArrayRedistUTest.F90,v 1.4 2008/01/23 01:10:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ArrayRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayRedistUTest.F90,v 1.3 2007/11/02 23:13:08 theurich Exp $'
+    '$Id: ESMF_ArrayRedistUTest.F90,v 1.4 2008/01/23 01:10:32 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -57,6 +57,11 @@ program ESMF_ArrayRedistUTest
   type(ESMF_Array)      :: srcArray2, srcArray3
   type(ESMF_Array)      :: dstArray2, dstArray3
   type(ESMF_ArraySpec)  :: arrayspec3
+  type(ESMF_ArraySpec)  :: arrayspec4, arrayspec5
+  type(ESMF_Array)      :: srcArray4, dstArray5
+  real(ESMF_KIND_R8), pointer :: farrayPtr4(:)  ! matching F90 array pointer
+  real(ESMF_KIND_R4), pointer :: farrayPtr5(:)  ! matching F90 array pointer
+  type(ESMF_RouteHandle):: routehandle45
   type(ESMF_RouteHandle):: routehandle3
   integer(ESMF_KIND_I4), pointer :: farrayPtr2D(:,:)! matching F90 array pointer
 #endif
@@ -163,6 +168,20 @@ program ESMF_ArrayRedistUTest
     undistLBound=(/1/), undistUBound=(/2/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Array Spec rank=1, R4 Set Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArraySpecSet(arrayspec5, typekind=ESMF_TYPEKIND_R4, rank=1, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "dstArray5 Create Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  dstArray5 = ESMF_ArrayCreate(arrayspec=arrayspec5, distgrid=dstDistgrid, &
+    rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
 
 !------------------------------------------------------------------------
@@ -284,6 +303,144 @@ call ESMF_ArrayPrint(dstArray)
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayDestroy(srcArray, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+#ifdef ESMF_EXHAUSTIVE
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Array Spec rank=1, R8 Set Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArraySpecSet(arrayspec4, typekind=ESMF_TYPEKIND_R8, rank=1, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "srcArray4 Create Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  srcArray4 = ESMF_ArrayCreate(arrayspec=arrayspec4, distgrid=srcDistgrid, &
+    rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Get srcArray4 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayGet(srcArray4, farrayPtr=farrayPtr4, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  do i = lbound(farrayPtr4, 1), ubound(farrayPtr4, 1)
+    farrayPtr4(i) = real(localPet * 10 + i, ESMF_KIND_R8)    ! initialize
+  enddo
+  
+  ! The lbound(farrayPtr, 1) = 1 because ArrayCreate() by default sets local
+  ! bounds starting at 1. Thus the srcArray contents are locally set to:
+  !
+  ! PET   localDE   DE    srcArray contents
+  ! 0     0         0     1, 2, 3, 4, 5, 6, 7
+  ! 1     0         1     11, 12, 13, 14, 15, 16, 17
+  ! 2     0         2     21, 22, 23, 24, 25, 26, 27
+  ! 3     0         3     31, 32, 33, 34, 35, 36, 37
+  ! 4     0         4     41, 42, 43, 44, 45, 46, 47
+  ! 5     0         5     51, 52, 53, 54, 55, 56, 57
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayRedistStore Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayRedistStore(srcArray=srcArray4, dstArray=dstArray5, &
+    routehandle=routehandle45, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayRedist: srcArray4 -> dstArray5 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayRedist(srcArray=srcArray4, dstArray=dstArray5, &
+    routehandle=routehandle45, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  ! The expected result of the redistribution of srcArray into dstArray is:
+  !
+  ! PET   localDE   DE    dstArray contents
+  ! 0     0         0     1, 2, 3, 4, 5, 6, 7
+  ! 1     0         1     11, 12, 13, 14, 15, 16, 17
+  ! 2     0         2     21, 22, 23, 24, 25, 26, 27
+  ! 3     0         3     31, 32, 33, 34, 35, 36, 37
+  ! 4     0         4     41, 42, 43, 44, 45, 46, 47
+  ! 5     0         5     51, 52, 53, 54, 55, 56, 57
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "dstArray5 Get Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayGet(dstArray5, farrayPtr=farrayPtr5, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+call ESMF_ArrayPrint(dstArray5)
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Verify results in dstArray Test"
+  write(failMsg, *) "Wrong results" 
+  if (localPet == 0) then
+    call ESMF_Test(((farrayPtr5(1).eq.1).and. &
+      (farrayPtr5(2).eq.2).and.(farrayPtr5(3).eq.3).and. &
+      (farrayPtr5(4).eq.4).and.(farrayPtr5(5).eq.5).and. &
+      (farrayPtr5(6).eq.6).and.(farrayPtr5(7).eq.7)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 1) then
+    call ESMF_Test(((farrayPtr5(1).eq.11).and. &
+      (farrayPtr5(2).eq.12).and.(farrayPtr5(3).eq.13).and. &
+      (farrayPtr5(4).eq.14).and.(farrayPtr5(5).eq.15).and. &
+      (farrayPtr5(6).eq.16).and.(farrayPtr5(7).eq.17)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 2) then
+    call ESMF_Test(((farrayPtr5(1).eq.21).and. &
+      (farrayPtr5(2).eq.22).and.(farrayPtr5(3).eq.23).and. &
+      (farrayPtr5(4).eq.24).and.(farrayPtr5(5).eq.25).and. &
+      (farrayPtr5(6).eq.26).and.(farrayPtr5(7).eq.27)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 3) then
+    call ESMF_Test(((farrayPtr(1).eq.31).and. &
+      (farrayPtr5(2).eq.32).and.(farrayPtr5(3).eq.33).and. &
+      (farrayPtr5(4).eq.34).and.(farrayPtr5(5).eq.35).and. &
+      (farrayPtr5(6).eq.36).and.(farrayPtr5(7).eq.37)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 4) then
+    call ESMF_Test(((farrayPtr5(1).eq.41).and. &
+      (farrayPtr5(2).eq.42).and.(farrayPtr5(3).eq.43).and. &
+      (farrayPtr5(4).eq.44).and.(farrayPtr5(5).eq.45).and. &
+      (farrayPtr5(6).eq.46).and.(farrayPtr5(7).eq.47)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 5) then
+    call ESMF_Test(((farrayPtr5(1).eq.51).and. &
+      (farrayPtr5(2).eq.52).and.(farrayPtr5(3).eq.53).and. &
+      (farrayPtr5(4).eq.54).and.(farrayPtr5(5).eq.55).and. &
+      (farrayPtr5(6).eq.56).and.(farrayPtr5(7).eq.57)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  endif
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "routehandle45 Release Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_RouteHandleRelease(routehandle=routehandle45, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "srcArray4 Destroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayDestroy(srcArray4, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "dstArray5 Destroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayDestroy(dstArray5, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+#endif
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
