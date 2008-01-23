@@ -1,0 +1,143 @@
+! $Id: ESMF_GridToMeshUTest.F90,v 1.1 2008/01/23 19:38:24 oehmke Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2007, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the University of Illinois-NCSA License.
+!
+!==============================================================================
+!
+program ESMF_GridToMeshUTest
+
+!------------------------------------------------------------------------------
+
+#include <ESMF_Macros.inc>
+
+!==============================================================================
+!BOP
+! !PROGRAM: ESMF_GridToMeshUTest - Check Structured Grid to Mesh Conversion Routines
+!
+! !DESCRIPTION:
+!
+! The code in this file drives F90 GridToMesh unit tests.
+!
+!-----------------------------------------------------------------------------
+! !USES:
+  use ESMF_TestMod     ! test methods
+  use ESMF_Mod
+
+  implicit none
+
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+  character(*), parameter :: version = &
+    '$Id: ESMF_GridToMeshUTest.F90,v 1.1 2008/01/23 19:38:24 oehmke Exp $'
+!------------------------------------------------------------------------------
+    
+  ! cumulative result: count failures; no failures equals "all pass"
+  integer :: result = 0
+
+  ! individual test result code
+  integer :: localrc, rc, petCount,localPet
+
+  ! individual test failure message
+  character(ESMF_MAXSTR) :: name, failMsg
+
+  logical :: correct
+  type(ESMF_Grid) :: grid2D
+  type(ESMF_VM) :: vm
+  real(ESMF_KIND_R8), pointer :: fptr2D(:,:)
+  integer :: petMap2D(2,2,1)
+  integer :: clbnd(2),cubnd(2)
+  integer :: i1,i2, index(2)
+  integer :: lDE, localDECount
+  real(ESMF_KIND_R8) :: coord(2)
+  character(len=ESMF_MAXSTR) :: string
+
+  !-----------------------------------------------------------------------------
+  call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+  !-----------------------------------------------------------------------------
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test GridToMesh"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! init success flag
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! if petCount >1, setup petMap
+  if (petCount .gt. 1) then
+     petMap2D(:,1,1)=(/0,1/)
+     petMap2D(:,2,1)=(/2,3/)
+
+     grid2D=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/20,20/),regDecomp=(/2,2/), &
+                              indexflag=ESMF_INDEX_GLOBAL, &
+                              petMap=petMap2D, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  else
+     grid2D=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/10,10/),regDecomp=(/2,2/), &
+                              indexflag=ESMF_INDEX_GLOBAL, &
+                              rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  endif
+
+  ! Allocate coordinates
+  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get number of local DEs
+  call ESMF_GridGet(grid2D, localDECount=localDECount, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get memory and set coords
+  do lDE=0,localDECount-1
+ 
+     !! get coord 1
+     call ESMF_GridGetCoord(grid2D, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptr2D, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
+
+     !! set coord 1  
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+        fptr2D(i1,i2)=REAL(i1,ESMF_KIND_R8)
+     enddo
+     enddo
+
+     !! get coord 2
+     call ESMF_GridGetCoord(grid2D, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptr2D, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
+
+     !! set coord 2  
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+        fptr2D(i1,i2)=REAL(i2,ESMF_KIND_R8)
+     enddo
+     enddo
+  enddo    
+
+
+  call ESMF_GridDestroy(grid2D, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+
+  !-----------------------------------------------------------------------------
+  call ESMF_TestEnd(result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+end program ESMF_GridToMeshUTest

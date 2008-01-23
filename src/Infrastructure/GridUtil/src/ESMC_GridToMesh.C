@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.2 2007/12/18 18:46:29 dneckels Exp $
+// $Id: ESMC_GridToMesh.C,v 1.3 2008/01/23 19:38:23 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -24,9 +24,19 @@
 // compilation to successfully complete.
 #include <GridUtil/include/ESMC_GridToMesh.h>
 #include <Grid/include/ESMCI_Grid.h>
+#include "ESMC_VM.h"
 
+#include "ESMC_LogErr.h"                  // for LogErr
+#include "ESMF_LogMacros.inc"             // for LogErr
+
+#include "ESMC_Ptypes.h"
 #include <Mesh/include/ESMC_Mesh.h>
 #include <Mesh/include/ESMC_IOField.h>
+
+#include <limits>
+#include <iostream>
+
+using namespace ESMC;
 
 namespace ESMCI {
 
@@ -57,7 +67,8 @@ namespace ESMCI {
 // and, maybe, for simple single patch grids with a periodic component,
 // the dual, which is not so bad.  This will put us equivalent with
 // SCRIP.  
-void GridToMesh(const Grid &grid, int staggerLoc, ESMC::Mesh &mesh) {
+void GridToMesh(Grid &grid, int staggerLoc, ESMC::Mesh &mesh) {
+
 
 #ifdef NOT
 
@@ -65,42 +76,76 @@ void GridToMesh(const Grid &grid, int staggerLoc, ESMC::Mesh &mesh) {
 
  
    // *** Set some meta-data ***
-
      // We set the topological dimension of the mesh (quad = 2, hex = 3, etc...)
-   UInt pdim = grid.GetParametricDim();
+   UInt pdim = grid.getRank();
    mesh.set_parametric_dimension(pdim);
   
      // In what dimension is the grid embedded?? (sphere = 3, simple rectangle = 2, etc...)
-   UInt sdim = grid.GetSpatialDim();
+   // At this point the topological and spatial dim of the Grid is the same this should change soon
+   UInt sdim = grid.getRank();
    mesh.set_spatial_dimension(sdim);
   
-   // *** Create the Nodes ***
   
-     // Loop nodes of the grid.  Here we loop all nodes, both owned and not.
-   Grid::iterator ni = grid.node_begin(), ne = grid.node_end();
-  
+#if 0 // WHEN WE DO CELLS 
      // We save the nodes in a linear list so that we can access then as such
      // for cell creation.
    std::vector<MeshObj*> nodevect;
+#endif  
+
+   // Set the id of this processor here (me)
+   // Does David use the same procs as VM?????????????????????????
+   int localrc;
+   int rc;
+   int me = VM::getCurrent(&localrc)->getLocalPet();
+//   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) // How should I handle ESMF LogError?
+//      return;
+
+
+   // *** Create the Nodes ***
+     // Loop nodes of the grid.  Here we loop all nodes, both owned and not.
+   ESMCI::GridIter *gni=new ESMCI::GridIter(&grid,staggerLoc,true);
+
+   // loop through all nodes in the Grid owned by cells
+   for(gni->toBeg(); !gni->isDone(); gni->adv()) {   
+
+     // Different behavior if we're local...
+     if (gni->isLocal()) {
+       MeshObj *node = new MeshObj(MeshObj::NODE,     // node...
+                                   gni->getGlobalID(),   // unique global id
+                                   gni->getLocalID()     // local ID for boostrapping field data
+                                   );
+       
+       node->set_owner(me);  // Set owner to this proc
+       
+       UInt nodeset = 1;   // Do we need to partition the nodes in any sets?
+       mesh.add_node(node, nodeset);
+
+     } else { // ... or not
+
+       // get the global id of this Grid node
+       int gid=gni->getGlobalID(); 
+
+       // If Grid node is not already in the mesh then add 
+       Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::NODE, gid);
+       if (mi == mesh.map_end(MeshObj::NODE)) {
+         MeshObj *node = new MeshObj(MeshObj::NODE,     // node...
+                                     gid,               // unique global id
+                                     gni->getLocalID()   // local ID for boostrapping field data
+                                     );
+         
+         node->set_owner(std::numeric_limits<UInt>::max());  // Set owner to unknown (will have to ghost later)
+       
+         UInt nodeset = 1;   // Do we need to partition the nodes in any sets?
+         mesh.add_node(node, nodeset);
+       } else {
+         // Still need to add node to vector at appropriate place when doing cells
+       }
+     }
+   } // gni
   
-   
-   for (UInt i = 0; ni != ne; ++ni) {
-  
-     MeshObj *node = new MeshObj(MeshObj::NODE,        // node...
-                                 ni->get_global_id(),  // unique global id
-                                 i++                   // data index for boostrapping field data
-                                 );
-  
-     node->set_owner(ni->get_owner());  // What processor (uniquely) owns this node?
-  
-     UInt nodeset = 1;   // Do we need to partition the nodes in any sets?
-  
-     mesh.add_node(node, nodeset);
-  
-   } // ni
-  
-   // *** Create the Cells ***
-  
+
+#if 0
+   // *** Create the Cells ***  
      // Loop the cells
    Grid::iterator ci = grid.cell_begin(), ce = grid.cell_end();
   
@@ -146,33 +191,41 @@ void GridToMesh(const Grid &grid, int staggerLoc, ESMC::Mesh &mesh) {
      mesh.add_element(cell, nodes, block_id, ctopo);
      
    } // ci
+#endif
 
      // Now set up the nodal coordinates
    IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", sdim);
 
-
-   // I am not sure by what strategy the grid will hand over the coords.
-   // Here I assume I can call a function for each node.
-
+   // Loop through Mesh nodes setting up coordinates
    MeshDB::iterator ni = mesh.node_begin(), ne = mesh.node_end();
 
    for (; ni != ne; ++ni) {
-
      double *c = node_coord->data(*ni);
 
      UInt idx = ni->get_data_index(); // we set this above when creating the node
 
-     double *gc = grid.GetNodeCoords(idx);
-     
-     std::copy(gc, gc + sdim, c);
+     // Move to corresponding grid node
+    gni->moveToLocalID(idx);      
+
+    // If local fill in coords
+    if (gni->isLocal()) {
+     gni->getCoord(c);
+    } else { // set to Null value to be ghosted later
+      for (int i=0; i<sdim; i++) {
+        c[i]=std::numeric_limits<double>:max();
+      }
+    }
 
    } // ni
+
 
 
    // ** That's it.  The mesh is now in the pre-commit phase, so other
    // fields can be registered, sides/faces can be turned on, etc, or one
    // can simply call mesh.Commit() and then proceed.
-   
+   mesh.Print(std::cout);
+
+ 
 
  } // try catch block
   catch (std::exception &x) {
