@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldSetMacros.h,v 1.21 2008/01/17 21:44:09 feiliu Exp $
+! $Id: ESMF_FieldSetMacros.h,v 1.22 2008/01/23 21:04:56 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -94,6 +94,7 @@
  @\
       type(ESMF_Field), intent(inout) :: field @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: dataptr @\
+      mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: old_dataptr @\
       type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
       integer, intent(in), optional :: staggerloc  @\
       type(ESMF_IndexFlag), intent(in), optional :: indexflag @\
@@ -103,6 +104,7 @@
         type(ESMF_Array) :: array, newarray  ! array object @\
         integer :: localrc                   ! local error status @\
         logical :: rcpresent                 ! did user specify rc? @\
+        logical :: is_create                 ! need to create new array? @\
  @\
         type(ESMF_DistGrid) :: distgrid    ! distgrid in field%grid @\
         integer, dimension(mrank) :: comp_edge_u_width @\
@@ -125,21 +127,54 @@
                               "Data Ptr must already be associated", & @\
                               ESMF_CONTEXT, rc)) return @\
         endif @\
+ @\ 
+        ! do sanity check on existing internal data array @\
+        ! destroy existing internal data array if it was copied or @\
+        ! the passed in data ptr is different from that in the data array @\
+        is_create = .false. @\
+        if ( (field%ftypep%datastatus .eq. ESMF_STATUS_READY) ) then  @\
+            if (field%ftypep%array_copied) then @\
+                call ESMF_ArrayDestroy(field%ftypep%array, rc=localrc) @\
+                if (ESMF_LogMsgFoundError(localrc, & @\
+                  ESMF_ERR_PASSTHRU, & @\
+                  ESMF_CONTEXT, rc)) return @\
+            end if @\
+            call ESMF_ArrayGet(field%ftypep%array, old_dataptr, rc=localrc) @\
+            if (ESMF_LogMsgFoundError(localrc, & @\
+              ESMF_ERR_PASSTHRU, & @\
+              ESMF_CONTEXT, rc)) return @\
+            if(ESMF_DATA_ADDRESS(dataptr) .ne. ESMF_DATA_ADDRESS(old_dataptr)) then @\
+!            if(dataptr .ne. old_dataptr) then @\
+                call ESMF_ArrayDestroy(field%ftypep%array, rc=localrc) @\
+                if (ESMF_LogMsgFoundError(localrc, & @\
+                  ESMF_ERR_PASSTHRU, & @\
+                  ESMF_CONTEXT, rc)) return @\
+                is_create = .true. @\
+            end if @\
+        end if @\
  @\
+        ! fetch the distgrid from field%grid @\
         call ESMF_GridGet(field%ftypep%grid, distgrid=distgrid, rc=localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
           ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rc)) return @\
  @\
+        ! create a new array to be used to replace existing field%array @\
         comp_edge_u_width = -1 @\
-        array = ESMF_ArrayCreate(dataptr, distgrid=distgrid, staggerloc=staggerloc, & @\
+        if(is_create) then @\
+           array = ESMF_ArrayCreate(dataptr, distgrid=distgrid, staggerloc=staggerloc, & @\
                                  computationalEdgeUWidth=comp_edge_u_width, rc=localrc) @\
+        else @\
+           array = field%ftypep%array @\
+        endif @\
         if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
  @\
         ! set array as data in field. @\
         ! default copyflag value is ESMF_DATA_REF @\
+        ! in the case setdataptr creates an array first to be copied @\
+        ! that array is destroyed after being copied. @\
         if(.not. present(copyflag)) then @\
             field%ftypep%array = array @\
         else @\
@@ -152,6 +187,11 @@
                                         ESMF_CONTEXT, rc)) return @\
                 field%ftypep%array = newarray @\
                 field%ftypep%array_copied = .true. @\
+                if (is_create) & @\
+                    call ESMF_ArrayDestroy(array, rc=localrc) @\
+                if (ESMF_LogMsgFoundError(localrc, & @\
+                                        ESMF_ERR_PASSTHRU, & @\
+                                        ESMF_CONTEXT, rc)) return @\
             endif @\
         endif @\
  @\
