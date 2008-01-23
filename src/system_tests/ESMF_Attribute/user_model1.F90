@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.8 2008/01/17 17:31:24 rokuingh Exp $
+! $Id: user_model1.F90,v 1.9 2008/01/23 17:15:44 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -133,13 +133,13 @@ module user_model1
       purp = 'general'
       name = 'name'
       value = 'State attribute package'
-      call ESMF_StateSetAttPack(importState, name, value, convention=conv, purpose=purp, rc=rc)
+      call ESMF_StateAttPackSet(importState, name, value, convention=conv, purpose=purp, rc=rc)
       if (status .ne. ESMF_SUCCESS) goto 20
       
       if (myPet .eq. 0) then
         print *, 'Write the Attpack from the first run of component 1.'
     
-        call ESMF_StateWriteAttPack(importState, convention=conv, purpose=purp, rc=rc)
+        call ESMF_StateAttPackWrite(importState, convention=conv, purpose=purp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
       endif
     endif
@@ -151,7 +151,7 @@ module user_model1
       purp = 'general'
       name = 'discipline'
       value = 'Sir, Yes! Sir.'
-      call ESMF_StateSetAttPack(importState, name, value, convention=conv, purpose=purp, rc=rc)
+      call ESMF_StateAttPackSet(importState, name, value, convention=conv, purpose=purp, rc=rc)
       if (status .ne. ESMF_SUCCESS) goto 20
       
       ! field stuff
@@ -163,10 +163,10 @@ module user_model1
       field = ESMF_FieldCreateEmpty("field1", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       
-      call ESMF_FieldCreateAttPack(field, convention=fconv, purpose=fpurp, rc=status)
+      call ESMF_FieldAttPackCreate(field, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       
-      call ESMF_FieldSetAttPack(field, name, value, convention=fconv, purpose=fpurp, rc=status)
+      call ESMF_FieldAttPackSet(field, name, value, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
 
       ! grid stuff
@@ -189,10 +189,10 @@ module user_model1
         print *, 'value: ', value
       endif
 
-      call ESMF_GridCreateAttPack(grid, convention=fconv, purpose=fpurp, rc=status)
+      call ESMF_GridAttPackCreate(grid, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       
-      call ESMF_GridSetAttPack(grid, name, value, convention=fconv, purpose=fpurp, rc=status)
+      call ESMF_GridAttPackSet(grid, name, value, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
 
       ! array stuff
@@ -229,15 +229,15 @@ module user_model1
         purp = 'general'
       
         print *, 'Write the State Attpack from the second run of component 1.'
-        call ESMF_StateWriteAttPack(importState, convention=conv, purpose=purp, rc=rc)
+        call ESMF_StateAttPackWrite(importState, convention=conv, purpose=purp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
         
         print *, 'Write the Field Attpack from the second run of component 1.'
-        call ESMF_FieldWriteAttPack(field, convention=fconv, purpose=fpurp, rc=rc)
+        call ESMF_FieldAttPackWrite(field, convention=fconv, purpose=fpurp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
         
         print *, 'Write the Grid Attpack from the second run of component 1.'
-        call ESMF_GridWriteAttPack(grid, convention=fconv, purpose=fpurp, rc=rc)
+        call ESMF_GridAttPackWrite(grid, convention=fconv, purpose=fpurp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
         
         print *, 'Write the Array Attpack from the second run of component 1.'

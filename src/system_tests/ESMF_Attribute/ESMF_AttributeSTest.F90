@@ -167,7 +167,7 @@ program ESMF_AttributeSTest
   conv = 'ESG-CDP'
   purp = 'general'
 
-  call ESMF_StateCreateAttPack(c1imp, convention=conv, purpose=purp, rc=rc)
+  call ESMF_StateAttPackCreate(c1imp, convention=conv, purpose=purp, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
