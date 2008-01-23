@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.76 2008/01/17 00:20:24 rokuingh Exp $
+! $Id: ESMF_Array.F90,v 1.77 2008/01/23 01:11:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -138,7 +138,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.76 2008/01/17 00:20:24 rokuingh Exp $'
+    '$Id: ESMF_Array.F90,v 1.77 2008/01/23 01:11:21 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -597,9 +597,9 @@ contains
 !   definition of {\em sequence indices}. Redistribution corresponds to an
 !   identity mapping of the source Array vector to the destination Array vector.
 !
-!   Source and destination Arrays must be of identical <type> and <kind>.
-!   Further the number of elements must match for source and destination Arrays,
-!   but the shape may differ.
+!   Source and destination Arrays may be of different <type><kind>. Further
+!   source and destination Arrays may differ in shape, however, the number
+!   of elements must match.
 !
 !   It is erroneous to specify the identical Array object for {\tt srcArray} and
 !   {\tt dstArray} arguments.
@@ -1089,10 +1089,9 @@ contains
 !   sequence indices. See section \ref{Array:SparseMatMul} for details on the
 !   definition of {\em sequence indices}.
 !
-!   Source and destination Arrays must be of identical <type> and <kind>, but 
-!   may differ in shape and number of elements. The <type> and <kind> of a 
-!   supplied {\tt factorList} argument must also match the <type> and <kind> 
-!   of the Array arguments.
+!   Source and destination Arrays, as well as the supplied {\tt factorList}
+!   argument, may be of different <type><kind>. Further source and
+!   destination Arrays may differ in shape and number of elements.
 !
 !   It is erroneous to specify the identical Array object for {\tt srcArray} and
 !   {\tt dstArray} arguments.
@@ -1451,10 +1450,9 @@ contains
 !   sequence indices. See section \ref{Array:SparseMatMul} for details on the
 !   definition of {\em sequence indices}.
 !
-!   Source and destination Arrays must be of identical <type> and <kind>, but 
-!   may differ in shape and number of elements. The <type> and <kind> of a
-!   supplied {\tt factorList} argument must also match the <type> and <kind>
-!   of the Array arguments.
+!   Source and destination Arrays, as well as the supplied {\tt factorList}
+!   argument, may be of different <type><kind>. Further source and
+!   destination Arrays may differ in shape and number of elements.
 !
 !   It is erroneous to specify the identical Array object for {\tt srcArray} and
 !   {\tt dstArray} arguments.
