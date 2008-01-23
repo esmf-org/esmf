@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.33 2008/01/23 19:16:31 feiliu Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.34 2008/01/23 21:55:33 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -184,6 +184,8 @@
         end if @\
  @\
         ! default copyflag value is ESMF_DATA_REF @\
+        ! set array_internal to .true. @\
+        field%ftypep%array_internal = .true. @\
         if(.not. present(copyflag)) then @\
             field%ftypep%array = array @\
         else @\
@@ -195,7 +197,10 @@
                                         ESMF_ERR_PASSTHRU, & @\
                                         ESMF_CONTEXT, rc)) return @\
                 field%ftypep%array = newarray @\
-                field%ftypep%array_copied = .true. @\
+                call ESMF_ArrayDestroy(array, rc=localrc) @\
+                if (ESMF_LogMsgFoundError(localrc, & @\
+                                        ESMF_ERR_PASSTHRU, & @\
+                                        ESMF_CONTEXT, rc)) return @\
             endif @\
         endif @\
  @\

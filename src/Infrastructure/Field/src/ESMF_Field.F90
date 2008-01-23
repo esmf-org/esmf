@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.291 2008/01/23 19:16:31 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.292 2008/01/23 21:55:33 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -114,7 +114,8 @@
         type (ESMF_Status)            :: iostatus         ! if unset, inherit from gcomp
         type (ESMF_Array)             :: array
         type (ESMF_StaggerLoc)        :: staggerloc
-        logical                       :: array_copied     ! .true. if field%array is a copy
+        logical                       :: array_internal   ! .true. if field%array has 
+                                                          ! no external reference
         integer                       :: gridToFieldMap(ESMF_MAXDIM)
         integer                       :: ungriddedLBound(ESMF_MAXDIM)
         integer                       :: ungriddedUBound(ESMF_MAXDIM)
@@ -203,7 +204,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.291 2008/01/23 19:16:31 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.292 2008/01/23 21:55:33 feiliu Exp $'
 
 !==============================================================================
 !
@@ -2445,14 +2446,15 @@
  
       ftypep => field%ftypep
 
-      ! TODO: do we allow this?  if so, do we just destroy the old array?
-      !if (ftypep%datastatus .eq. ESMF_STATUS_READY) then
-      !   if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-      !                          "Data already associated with Field", &
-      !                           ESMF_CONTEXT, rc)) return
-      !endif
-
+      if( (ftypep%datastatus .eq. ESMF_STATUS_READY ) .and. &
+          ftypep%array_internal) then
+          call ESMF_ArrayDestroy(ftypep%array, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
       ftypep%array = array
+      ftypep%array_internal = .false.
       ftypep%datastatus = ESMF_STATUS_READY
    
       ! Now revalidate to be sure the grid and datamap, if they exist, are
@@ -4063,7 +4065,7 @@
          ftype%maxHaloUWidth = maxHaloUWidth
 
       ftype%array = array
-      ftype%array_copied = .false.
+      ftype%array_internal = .true.
       ftype%datastatus = ESMF_STATUS_READY
       ftype%grid  = grid
       ftype%gridstatus = ESMF_STATUS_READY
@@ -4212,6 +4214,7 @@
          ftype%maxHaloUWidth = maxHaloUWidth
 
       ! default copyflag value is ESMF_DATA_REF
+      ftype%array_internal = .false.
       if(.not. present(copyflag)) then
           ftype%array = array
       else
@@ -4223,7 +4226,7 @@
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
               ftype%array = newarray
-              ftype%array_copied = .true.
+              ftype%array_internal = .true.
           endif
       endif
           
@@ -4568,7 +4571,7 @@
 !
 ! TODO: more code goes here
 !
-      if(ftype%array_copied .and. &
+      if(ftype%array_internal .and. &
         ftype%datastatus .eq. ESMF_STATUS_READY) then
           call ESMF_ArrayDestroy(ftype%array, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
@@ -4951,6 +4954,7 @@
         s%fieldstatus   = ESMF_STATUS_UNINIT
         s%gridstatus    = ESMF_STATUS_UNINIT
         s%datastatus    = ESMF_STATUS_UNINIT
+        s%array_internal = .false.
         ESMF_INIT_SET_DEFINED(s)
     end subroutine ESMF_FieldTypeInit
 
