@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.86 2007/12/10 18:42:53 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.87 2008/01/23 01:11:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -29,6 +29,7 @@
 // include higher level, 3rd party or system headers
 #include <stdio.h>
 #include <string.h>
+#include <typeinfo>
 
 // include ESMF headers
 #include "ESMC_Start.h"
@@ -43,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.86 2007/12/10 18:42:53 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.87 2008/01/23 01:11:50 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2537,257 +2538,86 @@ int XXE::exec(
     case productSumVector:
       {
         xxeProductSumVectorInfo = (ProductSumVectorInfo *)xxeElement;
-        switch (xxeProductSumVectorInfo->opSubId){
-        case I4:
-          {
-            ESMC_I4 *element = (ESMC_I4 *)xxeProductSumVectorInfo->element;
-            ESMC_I4 *factorList =
-              (ESMC_I4 *)xxeProductSumVectorInfo->factorList;
-            ESMC_I4 *valueList = (ESMC_I4 *)xxeProductSumVectorInfo->valueList;
-            for (int j=0; j<xxeProductSumVectorInfo->factorCount; j++)
-              *element += factorList[j] * valueList[j];
-          }
-          break;
-        case I8:
-          {
-            ESMC_I8 *element = (ESMC_I8 *)xxeProductSumVectorInfo->element;
-            ESMC_I8 *factorList =
-              (ESMC_I8 *)xxeProductSumVectorInfo->factorList;
-            ESMC_I8 *valueList = (ESMC_I8 *)xxeProductSumVectorInfo->valueList;
-            for (int j=0; j<xxeProductSumVectorInfo->factorCount; j++)
-              *element += factorList[j] * valueList[j];
-          }
-          break;
-        case R4:
-          {
-            ESMC_R4 *element = (ESMC_R4 *)xxeProductSumVectorInfo->element;
-            ESMC_R4 *factorList =
-              (ESMC_R4 *)xxeProductSumVectorInfo->factorList;
-            ESMC_R4 *valueList = (ESMC_R4 *)xxeProductSumVectorInfo->valueList;
-            for (int j=0; j<xxeProductSumVectorInfo->factorCount; j++)
-              *element += factorList[j] * valueList[j];
-          }
-          break;
-        case R8:
-          {
-            ESMC_R8 *element = (ESMC_R8 *)xxeProductSumVectorInfo->element;
-            ESMC_R8 *factorList =
-              (ESMC_R8 *)xxeProductSumVectorInfo->factorList;
-            ESMC_R8 *valueList = (ESMC_R8 *)xxeProductSumVectorInfo->valueList;
-            for (int j=0; j<xxeProductSumVectorInfo->factorCount; j++)
-              *element += factorList[j] * valueList[j];
-          }
-          break;
-        default:
-          break;
-        }
+        // the following typecasts to int pointer types are necessary to 
+        // provide a valid TK combination to call into the recursive function
+        int *element = (int *)xxeProductSumVectorInfo->element;
+        int *factorList = (int *)xxeProductSumVectorInfo->factorList;
+        int *valueList = (int *)xxeProductSumVectorInfo->valueList;
+        // recursively resolve the TKs of the arguments and execute operation
+        psv(element, xxeProductSumVectorInfo->elementTK,
+          factorList, xxeProductSumVectorInfo->factorTK,
+          valueList, xxeProductSumVectorInfo->valueTK,
+          xxeProductSumVectorInfo->factorCount, 0);
       }
       break;
     case productSumScalar:
       {
         xxeProductSumScalarInfo = (ProductSumScalarInfo *)xxeElement;
-        switch (xxeProductSumScalarInfo->opSubId){
-        case I4:
-          {
-            ESMC_I4 *element = (ESMC_I4 *)xxeProductSumScalarInfo->element;
-            ESMC_I4 *factor = (ESMC_I4 *)xxeProductSumScalarInfo->factor;
-            ESMC_I4 *value = (ESMC_I4 *)xxeProductSumScalarInfo->value;
-            *element += *factor * *value;
-          }
-          break;
-        case I8:
-          {
-            ESMC_I8 *element = (ESMC_I8 *)xxeProductSumScalarInfo->element;
-            ESMC_I8 *factor = (ESMC_I8 *)xxeProductSumScalarInfo->factor;
-            ESMC_I8 *value = (ESMC_I8 *)xxeProductSumScalarInfo->value;
-            *element += *factor * *value;
-          }
-          break;
-        case R4:
-          {
-            ESMC_R4 *element = (ESMC_R4 *)xxeProductSumScalarInfo->element;
-            ESMC_R4 *factor = (ESMC_R4 *)xxeProductSumScalarInfo->factor;
-            ESMC_R4 *value = (ESMC_R4 *)xxeProductSumScalarInfo->value;
-            *element += *factor * *value;
-          }
-          break;
-        case R8:
-          {
-            ESMC_R8 *element = (ESMC_R8 *)xxeProductSumScalarInfo->element;
-            ESMC_R8 *factor = (ESMC_R8 *)xxeProductSumScalarInfo->factor;
-            ESMC_R8 *value = (ESMC_R8 *)xxeProductSumScalarInfo->value;
-            *element += *factor * *value;
-          }
-          break;
-        default:
-          break;
-        }
+        // the following typecasts to int pointer types are necessary to 
+        // provide a valid TK combination to call into the recursive function
+        int *element = (int *)xxeProductSumScalarInfo->element;
+        int *factor = (int *)xxeProductSumScalarInfo->factor;
+        int *value = (int *)xxeProductSumScalarInfo->value;
+        // recursively resolve the TKs of the arguments and execute operation
+        pss(element, xxeProductSumScalarInfo->elementTK,
+          factor, xxeProductSumScalarInfo->factorTK,
+          value, xxeProductSumScalarInfo->valueTK, 0);
       }
       break;
     case productSumScalarRRA:
       {
         xxeProductSumScalarRRAInfo = (ProductSumScalarRRAInfo *)xxeElement;
         char *rraBase = rraList[xxeProductSumScalarRRAInfo->rraIndex];
-        switch (xxeProductSumScalarRRAInfo->opSubId){
-        case I4:
-          {
-            ESMC_I4 *element = (ESMC_I4 *)
-              (rraBase + xxeProductSumScalarRRAInfo->rraOffset);
-            ESMC_I4 *factor = (ESMC_I4 *)xxeProductSumScalarRRAInfo->factor;
-            ESMC_I4 *value = (ESMC_I4 *)xxeProductSumScalarRRAInfo->value;
-            *element += *factor * *value;
-          }
-          break;
-        case I8:
-          {
-            ESMC_I8 *element = (ESMC_I8 *)
-              (rraBase + xxeProductSumScalarRRAInfo->rraOffset);
-            ESMC_I8 *factor = (ESMC_I8 *)xxeProductSumScalarRRAInfo->factor;
-            ESMC_I8 *value = (ESMC_I8 *)xxeProductSumScalarRRAInfo->value;
-            *element += *factor * *value;
-          }
-          break;
-        case R4:
-          {
-            ESMC_R4 *element = (ESMC_R4 *)
-              (rraBase + xxeProductSumScalarRRAInfo->rraOffset);
-            ESMC_R4 *factor = (ESMC_R4 *)xxeProductSumScalarRRAInfo->factor;
-            ESMC_R4 *value = (ESMC_R4 *)xxeProductSumScalarRRAInfo->value;
-            *element += *factor * *value;
-          }
-          break;
-        case R8:
-          {
-            ESMC_R8 *element = (ESMC_R8 *)
-              (rraBase + xxeProductSumScalarRRAInfo->rraOffset);
-            ESMC_R8 *factor = (ESMC_R8 *)xxeProductSumScalarRRAInfo->factor;
-            ESMC_R8 *value = (ESMC_R8 *)xxeProductSumScalarRRAInfo->value;
-            *element += *factor * *value;
-          }
-          break;
-        default:
-          break;
-        }
+        // the following typecasts to int pointer types are necessary to 
+        // provide a valid TK combination to call into the recursive function
+        int *element = (int *)(rraBase + xxeProductSumScalarRRAInfo->rraOffset);
+        int *factor = (int *)xxeProductSumScalarRRAInfo->factor;
+        int *value = (int *)xxeProductSumScalarRRAInfo->value;
+        // recursively resolve the TKs of the arguments and execute operation
+        pss(element, xxeProductSumScalarRRAInfo->elementTK,
+          factor, xxeProductSumScalarRRAInfo->factorTK,
+          value, xxeProductSumScalarRRAInfo->valueTK, 0);
       }
       break;
     case productSumSuperScalarRRA:
       {
         xxeProductSumSuperScalarRRAInfo =
           (ProductSumSuperScalarRRAInfo *)xxeElement;
-        char *rraBase = rraList[xxeProductSumSuperScalarRRAInfo->rraIndex];
         int *rraOffsetList = xxeProductSumSuperScalarRRAInfo->rraOffsetList;
-        void **factorList = xxeProductSumSuperScalarRRAInfo->factorList;
-        void **valueList = xxeProductSumSuperScalarRRAInfo->valueList;
         int termCount = xxeProductSumSuperScalarRRAInfo->termCount;
-        switch (xxeProductSumSuperScalarRRAInfo->opSubId){
-        case I4:
-          {
-            ESMC_I4 *element, *factor, *value;
-            for (int k=0; k<termCount; k++){
-              element = (ESMC_I4 *)(rraBase + rraOffsetList[k]);
-              factor = (ESMC_I4 *)factorList[k];
-              value = (ESMC_I4 *)valueList[k];
-              *element += *factor * *value;
-            }
-          }
-          break;
-        case I8:
-          {
-            ESMC_I8 *element, *factor, *value;
-            for (int k=0; k<termCount; k++){
-              element = (ESMC_I8 *)(rraBase + rraOffsetList[k]);
-              factor = (ESMC_I8 *)factorList[k];
-              value = (ESMC_I8 *)valueList[k];
-              *element += *factor * *value;
-            }
-          }
-          break;
-        case R4:
-          {
-            ESMC_R4 *element, *factor, *value;
-            for (int k=0; k<termCount; k++){
-              element = (ESMC_R4 *)(rraBase + rraOffsetList[k]);
-              factor = (ESMC_R4 *)factorList[k];
-              value = (ESMC_R4 *)valueList[k];
-              *element += *factor * *value;
-            }
-          }
-          break;
-        case R8:
-          {
-            ESMC_R8 *element, *factor, *value;
-            for (int k=0; k<termCount; k++){
-              element = (ESMC_R8 *)(rraBase + rraOffsetList[k]);
-              factor = (ESMC_R8 *)factorList[k];
-              value = (ESMC_R8 *)valueList[k];
-              *element += *factor * *value;
-            }
-          }
-          break;
-        default:
-          break;
-        }
+        // the following typecasts to int pointer types are necessary to 
+        // provide a valid TK combination to call into the recursive function
+        int *rraBase =
+          (int *)rraList[xxeProductSumSuperScalarRRAInfo->rraIndex];
+        int **factorList = (int **)xxeProductSumSuperScalarRRAInfo->factorList;
+        int **valueList = (int **)xxeProductSumSuperScalarRRAInfo->valueList;
+        // recursively resolve the TKs of the arguments and execute operation
+        psssRra(rraBase, xxeProductSumSuperScalarRRAInfo->elementTK,
+          rraOffsetList, factorList, xxeProductSumSuperScalarRRAInfo->factorTK,
+          valueList, xxeProductSumSuperScalarRRAInfo->valueTK, termCount, 0);
       }
       break;
     case productSumSuperScalarContigRRA:
       {
         xxeProductSumSuperScalarContigRRAInfo =
           (ProductSumSuperScalarContigRRAInfo *)xxeElement;
-        char *rraBase =
-          rraList[xxeProductSumSuperScalarContigRRAInfo->rraIndex];
         int *rraOffsetList =
           xxeProductSumSuperScalarContigRRAInfo->rraOffsetList;
-        void **factorList = xxeProductSumSuperScalarContigRRAInfo->factorList;
-        void *valueList = xxeProductSumSuperScalarContigRRAInfo->valueList;
         int termCount = xxeProductSumSuperScalarContigRRAInfo->termCount;
-        switch (xxeProductSumSuperScalarContigRRAInfo->opSubId){
-        case I4:
-          {
-            ESMC_I4 *element, factor;
-            ESMC_I4 *value = (ESMC_I4 *)valueList;
-            for (int k=0; k<termCount; k++){
-              element = (ESMC_I4 *)(rraBase + rraOffsetList[k]);
-              factor = *(ESMC_I4 *)factorList[k];
-              *element += factor * value[k];
-            }
-          }
-          break;
-        case I8:
-          {
-            ESMC_I8 *element, factor;
-            ESMC_I8 *value = (ESMC_I8 *)valueList;
-            for (int k=0; k<termCount; k++){
-              element = (ESMC_I8 *)(rraBase + rraOffsetList[k]);
-              factor = *(ESMC_I8 *)factorList[k];
-              *element += factor * value[k];
-            }
-          }
-          break;
-        case R4:
-          {
-            ESMC_R4 *element, factor;
-            ESMC_R4 *value = (ESMC_R4 *)valueList;
-            for (int k=0; k<termCount; k++){
-              element = (ESMC_R4 *)(rraBase + rraOffsetList[k]);
-              factor = *(ESMC_R4 *)factorList[k];
-              *element += factor * value[k];
-            }
-          }
-          break;
-        case R8:
-          {
-            ESMC_R8 *element, factor;
-            ESMC_R8 *value = (ESMC_R8 *)valueList;
-            for (int k=0; k<termCount; k++){
-              element = (ESMC_R8 *)(rraBase + rraOffsetList[k]);
-              factor = *(ESMC_R8 *)factorList[k];
-              *element += factor * value[k];
-            }
-          }
-          break;
-        default:
-          break;
-        }
+        // the following typecasts to int pointer types are necessary to 
+        // provide a valid TK combination to call into the recursive function
+        int *rraBase =
+          (int *)rraList[xxeProductSumSuperScalarContigRRAInfo->rraIndex];
+        int **factorList =
+          (int **)xxeProductSumSuperScalarContigRRAInfo->factorList;
+        int *valueList =
+          (int *)xxeProductSumSuperScalarContigRRAInfo->valueList;
+        // recursively resolve the TKs of the arguments and execute operation
+        pssscRra(rraBase, xxeProductSumSuperScalarContigRRAInfo->elementTK,
+          rraOffsetList, factorList,
+          xxeProductSumSuperScalarContigRRAInfo->factorTK,
+          valueList, xxeProductSumSuperScalarContigRRAInfo->valueTK,
+          termCount, 0);
       }
       break;
     case memCpy:
@@ -2813,7 +2643,7 @@ int XXE::exec(
         char *rraBase = rraList[xxeMemGatherSrcRRAInfo->rraIndex];
         int *rraOffsetList = xxeMemGatherSrcRRAInfo->rraOffsetList;
         int *countList = xxeMemGatherSrcRRAInfo->countList;
-        switch (xxeMemGatherSrcRRAInfo->opSubId){
+        switch (xxeMemGatherSrcRRAInfo->dstBaseTK){
         case BYTE:
           {
             char *dstPointer = dstBase;
@@ -2960,6 +2790,497 @@ int XXE::exec(
 
 
 //-----------------------------------------------------------------------------
+// templated XXE operations used in XXE::exec()
+//-----------------------------------------------------------------------------
+
+template<typename T, typename U, typename V>
+void XXE::psv(T *element, TKId elementTK, U *factorList, TKId factorTK,
+  V *valueList, TKId valueTK, int factorCount, int resolved){
+  // Recursively resolve the TKs and typecast the arguments appropriately
+  // before executing psv operation on the data.
+  if (resolved==0){
+    ++resolved;
+    switch (elementTK){
+    case I4:
+      {
+        ESMC_I4 *elementT = (ESMC_I4 *)element;
+        psv(elementT, elementTK, factorList, factorTK, valueList, valueTK,
+          factorCount, resolved);
+      }
+      break;
+    case I8:
+      {
+        ESMC_I8 *elementT = (ESMC_I8 *)element;
+        psv(elementT, elementTK, factorList, factorTK, valueList, valueTK,
+          factorCount, resolved);
+      }
+      break;
+    case R4:
+      {
+        ESMC_R4 *elementT = (ESMC_R4 *)element;
+        psv(elementT, elementTK, factorList, factorTK, valueList, valueTK,
+          factorCount, resolved);
+      }
+      break;
+    case R8:
+      {
+        ESMC_R8 *elementT = (ESMC_R8 *)element;
+        psv(elementT, elementTK, factorList, factorTK, valueList, valueTK,
+          factorCount, resolved);
+      }
+      break;
+    default:
+      break;
+    }
+    return;
+  }
+  if (resolved==1){
+    ++resolved;
+    switch (factorTK){
+    case I4:
+      {
+        ESMC_I4 *factorListT = (ESMC_I4 *)factorList;
+        psv(element, elementTK, factorListT, factorTK, valueList, valueTK,
+          factorCount, resolved);
+      }
+      break;
+    case I8:
+      {
+        ESMC_I8 *factorListT = (ESMC_I8 *)factorList;
+        psv(element, elementTK, factorListT, factorTK, valueList, valueTK,
+          factorCount, resolved);
+      }
+      break;
+    case R4:
+      {
+        ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
+        psv(element, elementTK, factorListT, factorTK, valueList, valueTK,
+          factorCount, resolved);
+      }
+      break;
+    case R8:
+      {
+        ESMC_R8 *factorListT = (ESMC_R8 *)factorList;
+        psv(element, elementTK, factorListT, factorTK, valueList, valueTK,
+          factorCount, resolved);
+      }
+      break;
+    default:
+      break;
+    }
+    return;
+  }
+  if (resolved==2){
+    ++resolved;
+    switch (valueTK){
+    case I4:
+      {
+        ESMC_I4 *valueListT = (ESMC_I4 *)valueList;
+        psv(element, elementTK, factorList, factorTK, valueListT, valueTK,
+          factorCount, resolved);
+      }
+      break;
+    case I8:
+      {
+        ESMC_I8 *valueListT = (ESMC_I8 *)valueList;
+        psv(element, elementTK, factorList, factorTK, valueListT, valueTK,
+          factorCount, resolved);
+      }
+      break;
+    case R4:
+      {
+        ESMC_R4 *valueListT = (ESMC_R4 *)valueList;
+        psv(element, elementTK, factorList, factorTK, valueListT, valueTK,
+          factorCount, resolved);
+      }
+      break;
+    case R8:
+      {
+        ESMC_R8 *valueListT = (ESMC_R8 *)valueList;
+        psv(element, elementTK, factorList, factorTK, valueListT, valueTK,
+          factorCount, resolved);
+      }
+      break;
+    default:
+      break;
+    }
+    return;
+  }
+  //printf("Arrived in psv kernel with %s, %s, %s\n", typeid(T).name(), 
+  //  typeid(U).name(), typeid(V).name());
+  for (int i=0; i<factorCount; i++)
+    *element += factorList[i] * valueList[i];
+}
+
+//-----------------------------------------------------------------------------
+
+template<typename T, typename U, typename V>
+void XXE::pss(T *element, TKId elementTK, U *factor, TKId factorTK,
+  V *value, TKId valueTK, int resolved){
+  // Recursively resolve the TKs and typecast the arguments appropriately
+  // before executing pss operation on the data.
+  if (resolved==0){
+    ++resolved;
+    switch (elementTK){
+    case I4:
+      {
+        ESMC_I4 *elementT = (ESMC_I4 *)element;
+        pss(elementT, elementTK, factor, factorTK, value, valueTK, resolved);
+      }
+      break;
+    case I8:
+      {
+        ESMC_I8 *elementT = (ESMC_I8 *)element;
+        pss(elementT, elementTK, factor, factorTK, value, valueTK, resolved);
+      }
+      break;
+    case R4:
+      {
+        ESMC_R4 *elementT = (ESMC_R4 *)element;
+        pss(elementT, elementTK, factor, factorTK, value, valueTK, resolved);
+      }
+      break;
+    case R8:
+      {
+        ESMC_R8 *elementT = (ESMC_R8 *)element;
+        pss(elementT, elementTK, factor, factorTK, value, valueTK, resolved);
+      }
+      break;
+    default:
+      break;
+    }
+    return;
+  }
+  if (resolved==1){
+    ++resolved;
+    switch (factorTK){
+    case I4:
+      {
+        ESMC_I4 *factorT = (ESMC_I4 *)factor;
+        pss(element, elementTK, factorT, factorTK, value, valueTK, resolved);
+      }
+      break;
+    case I8:
+      {
+        ESMC_I8 *factorT = (ESMC_I8 *)factor;
+        pss(element, elementTK, factorT, factorTK, value, valueTK, resolved);
+      }
+      break;
+    case R4:
+      {
+        ESMC_R4 *factorT = (ESMC_R4 *)factor;
+        pss(element, elementTK, factorT, factorTK, value, valueTK, resolved);
+      }
+      break;
+    case R8:
+      {
+        ESMC_R8 *factorT = (ESMC_R8 *)factor;
+        pss(element, elementTK, factorT, factorTK, value, valueTK, resolved);
+      }
+      break;
+    default:
+      break;
+    }
+    return;
+  }
+  if (resolved==2){
+    ++resolved;
+    switch (valueTK){
+    case I4:
+      {
+        ESMC_I4 *valueT = (ESMC_I4 *)value;
+        pss(element, elementTK, factor, factorTK, valueT, valueTK, resolved);
+      }
+      break;
+    case I8:
+      {
+        ESMC_I8 *valueT = (ESMC_I8 *)value;
+        pss(element, elementTK, factor, factorTK, valueT, valueTK, resolved);
+      }
+      break;
+    case R4:
+      {
+        ESMC_R4 *valueT = (ESMC_R4 *)value;
+        pss(element, elementTK, factor, factorTK, valueT, valueTK, resolved);
+      }
+      break;
+    case R8:
+      {
+        ESMC_R8 *valueT = (ESMC_R8 *)value;
+        pss(element, elementTK, factor, factorTK, valueT, valueTK, resolved);
+      }
+      break;
+    default:
+      break;
+    }
+    return;
+  }
+  //printf("Arrived in pss kernel with %s, %s, %s\n", typeid(T).name(), 
+  //  typeid(U).name(), typeid(V).name());
+  *element += *factor * *value;
+}
+
+//-----------------------------------------------------------------------------
+
+template<typename T, typename U, typename V>
+void XXE::psssRra(T *rraBase, TKId elementTK, int *rraOffsetList,
+  U **factorList, TKId factorTK, V **valueList, TKId valueTK,
+  int termCount, int resolved){
+  // Recursively resolve the TKs and typecast the arguments appropriately
+  // before executing psssRra operation on the data.
+  T *element;
+  U *factor;
+  V *value;
+  if (resolved==0){
+    ++resolved;
+    switch (elementTK){
+    case I4:
+      {
+        ESMC_I4 *rraBaseT = (ESMC_I4 *)rraBase;
+        psssRra(rraBaseT, elementTK, rraOffsetList, factorList, factorTK,
+          valueList, valueTK, termCount, resolved);
+      }
+      break;
+    case I8:
+      {
+        ESMC_I8 *rraBaseT = (ESMC_I8 *)rraBase;
+        psssRra(rraBaseT, elementTK, rraOffsetList, factorList, factorTK,
+          valueList, valueTK, termCount, resolved);
+      }
+      break;
+    case R4:
+      {
+        ESMC_R4 *rraBaseT = (ESMC_R4 *)rraBase;
+        psssRra(rraBaseT, elementTK, rraOffsetList, factorList, factorTK,
+          valueList, valueTK, termCount, resolved);
+      }
+      break;
+    case R8:
+      {
+        ESMC_R8 *rraBaseT = (ESMC_R8 *)rraBase;
+        psssRra(rraBaseT, elementTK, rraOffsetList, factorList, factorTK,
+          valueList, valueTK, termCount, resolved);
+      }
+      break;
+    default:
+      break;
+    }
+    return;
+  }
+  if (resolved==1){
+    ++resolved;
+    switch (factorTK){
+    case I4:
+      {
+        ESMC_I4 **factorListT = (ESMC_I4 **)factorList;
+        psssRra(rraBase, elementTK, rraOffsetList, factorListT, factorTK,
+          valueList, valueTK, termCount, resolved);
+      }
+      break;
+    case I8:
+      {
+        ESMC_I8 **factorListT = (ESMC_I8 **)factorList;
+        psssRra(rraBase, elementTK, rraOffsetList, factorListT, factorTK,
+          valueList, valueTK, termCount, resolved);
+      }
+      break;
+    case R4:
+      {
+        ESMC_R4 **factorListT = (ESMC_R4 **)factorList;
+        psssRra(rraBase, elementTK, rraOffsetList, factorListT, factorTK,
+          valueList, valueTK, termCount, resolved);
+      }
+      break;
+    case R8:
+      {
+        ESMC_R8 **factorListT = (ESMC_R8 **)factorList;
+        psssRra(rraBase, elementTK, rraOffsetList, factorListT, factorTK,
+          valueList, valueTK, termCount, resolved);
+      }
+      break;
+    default:
+      break;
+    }
+    return;
+  }
+  if (resolved==2){
+    ++resolved;
+    switch (valueTK){
+    case I4:
+      {
+        ESMC_I4 **valueListT = (ESMC_I4 **)valueList;
+        psssRra(rraBase, elementTK, rraOffsetList, factorList, factorTK,
+          valueListT, valueTK, termCount, resolved);
+      }
+      break;
+    case I8:
+      {
+        ESMC_I8 **valueListT = (ESMC_I8 **)valueList;
+        psssRra(rraBase, elementTK, rraOffsetList, factorList, factorTK,
+          valueListT, valueTK, termCount, resolved);
+      }
+      break;
+    case R4:
+      {
+        ESMC_R4 **valueListT = (ESMC_R4 **)valueList;
+        psssRra(rraBase, elementTK, rraOffsetList, factorList, factorTK,
+          valueListT, valueTK, termCount, resolved);
+      }
+      break;
+    case R8:
+      {
+        ESMC_R8 **valueListT = (ESMC_R8 **)valueList;
+        psssRra(rraBase, elementTK, rraOffsetList, factorList, factorTK,
+          valueListT, valueTK, termCount, resolved);
+      }
+      break;
+    default:
+      break;
+    }
+    return;
+  }
+  char *rraBaseT = (char *)rraBase;
+  //printf("Arrived in psssRra kernel with %s, %s, %s\n", typeid(T).name(), 
+  //  typeid(U).name(), typeid(V).name());
+  for (int i=0; i<termCount; i++){
+    element = (T *)(rraBaseT + rraOffsetList[i]);
+    factor = factorList[i];
+    value = valueList[i];
+    *element += *factor * *value;
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+template<typename T, typename U, typename V>
+void XXE::pssscRra(T *rraBase, TKId elementTK, int *rraOffsetList,
+  U **factorList, TKId factorTK, V *valueList, TKId valueTK,
+  int termCount, int resolved){
+  // Recursively resolve the TKs and typecast the arguments appropriately
+  // before executing pssscRra operation on the data.
+  T *element;
+  U *factor;
+  if (resolved==0){
+    ++resolved;
+    switch (elementTK){
+    case I4:
+      {
+        ESMC_I4 *rraBaseT = (ESMC_I4 *)rraBase;
+        pssscRra(rraBaseT, elementTK, rraOffsetList, factorList, factorTK,
+          valueList, valueTK, termCount, resolved);
+      }
+      break;
+    case I8:
+      {
+        ESMC_I8 *rraBaseT = (ESMC_I8 *)rraBase;
+        pssscRra(rraBaseT, elementTK, rraOffsetList, factorList, factorTK,
+          valueList, valueTK, termCount, resolved);
+      }
+      break;
+    case R4:
+      {
+        ESMC_R4 *rraBaseT = (ESMC_R4 *)rraBase;
+        pssscRra(rraBaseT, elementTK, rraOffsetList, factorList, factorTK,
+          valueList, valueTK, termCount, resolved);
+      }
+      break;
+    case R8:
+      {
+        ESMC_R8 *rraBaseT = (ESMC_R8 *)rraBase;
+        pssscRra(rraBaseT, elementTK, rraOffsetList, factorList, factorTK,
+          valueList, valueTK, termCount, resolved);
+      }
+      break;
+    default:
+      break;
+    }
+    return;
+  }
+  if (resolved==1){
+    ++resolved;
+    switch (factorTK){
+    case I4:
+      {
+        ESMC_I4 **factorListT = (ESMC_I4 **)factorList;
+        pssscRra(rraBase, elementTK, rraOffsetList, factorListT, factorTK,
+          valueList, valueTK, termCount, resolved);
+      }
+      break;
+    case I8:
+      {
+        ESMC_I8 **factorListT = (ESMC_I8 **)factorList;
+        pssscRra(rraBase, elementTK, rraOffsetList, factorListT, factorTK,
+          valueList, valueTK, termCount, resolved);
+      }
+      break;
+    case R4:
+      {
+        ESMC_R4 **factorListT = (ESMC_R4 **)factorList;
+        pssscRra(rraBase, elementTK, rraOffsetList, factorListT, factorTK,
+          valueList, valueTK, termCount, resolved);
+      }
+      break;
+    case R8:
+      {
+        ESMC_R8 **factorListT = (ESMC_R8 **)factorList;
+        pssscRra(rraBase, elementTK, rraOffsetList, factorListT, factorTK,
+          valueList, valueTK, termCount, resolved);
+      }
+      break;
+    default:
+      break;
+    }
+    return;
+  }
+  if (resolved==2){
+    ++resolved;
+    switch (valueTK){
+    case I4:
+      {
+        ESMC_I4 *valueListT = (ESMC_I4 *)valueList;
+        pssscRra(rraBase, elementTK, rraOffsetList, factorList, factorTK,
+          valueListT, valueTK, termCount, resolved);
+      }
+      break;
+    case I8:
+      {
+        ESMC_I8 *valueListT = (ESMC_I8 *)valueList;
+        pssscRra(rraBase, elementTK, rraOffsetList, factorList, factorTK,
+          valueListT, valueTK, termCount, resolved);
+      }
+      break;
+    case R4:
+      {
+        ESMC_R4 *valueListT = (ESMC_R4 *)valueList;
+        pssscRra(rraBase, elementTK, rraOffsetList, factorList, factorTK,
+          valueListT, valueTK, termCount, resolved);
+      }
+      break;
+    case R8:
+      {
+        ESMC_R8 *valueListT = (ESMC_R8 *)valueList;
+        pssscRra(rraBase, elementTK, rraOffsetList, factorList, factorTK,
+          valueListT, valueTK, termCount, resolved);
+      }
+      break;
+    default:
+      break;
+    }
+    return;
+  }
+  char *rraBaseT = (char *)rraBase;
+  //printf("Arrived in pssscRra kernel with %s, %s, %s\n", typeid(T).name(), 
+  //  typeid(U).name(), typeid(V).name());
+  for (int i=0; i<termCount; i++){
+    element = (T *)(rraBaseT + rraOffsetList[i]);
+    factor = factorList[i];
+    *element += *factor * valueList[i];
+  }
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::XXE::print()"
 //BOPI
@@ -3094,123 +3415,18 @@ int XXE::print(
       {
         xxeProductSumVectorInfo = (ProductSumVectorInfo *)xxeElement;
         printf("XXE::productSumVector <localPet=%d>\n", vm->getLocalPet());
-        switch (xxeProductSumVectorInfo->opSubId){
-        case I4:
-          {
-            ESMC_I4 *element = (ESMC_I4 *)xxeProductSumVectorInfo->element;
-            ESMC_I4 *factorList =
-              (ESMC_I4 *)xxeProductSumVectorInfo->factorList;
-            ESMC_I4 *valueList = (ESMC_I4 *)xxeProductSumVectorInfo->valueList;
-          }
-          break;
-        case I8:
-          {
-            ESMC_I8 *element = (ESMC_I8 *)xxeProductSumVectorInfo->element;
-            ESMC_I8 *factorList =
-              (ESMC_I8 *)xxeProductSumVectorInfo->factorList;
-            ESMC_I8 *valueList = (ESMC_I8 *)xxeProductSumVectorInfo->valueList;
-          }
-          break;
-        case R4:
-          {
-            ESMC_R4 *element = (ESMC_R4 *)xxeProductSumVectorInfo->element;
-            ESMC_R4 *factorList =
-              (ESMC_R4 *)xxeProductSumVectorInfo->factorList;
-            ESMC_R4 *valueList = (ESMC_R4 *)xxeProductSumVectorInfo->valueList;
-          }
-          break;
-        case R8:
-          {
-            ESMC_R8 *element = (ESMC_R8 *)xxeProductSumVectorInfo->element;
-            ESMC_R8 *factorList =
-              (ESMC_R8 *)xxeProductSumVectorInfo->factorList;
-            ESMC_R8 *valueList = (ESMC_R8 *)xxeProductSumVectorInfo->valueList;
-          }
-          break;
-        default:
-          break;
-        }
       }
       break;
     case productSumScalar:
       {
         xxeProductSumScalarInfo = (ProductSumScalarInfo *)xxeElement;
         printf("XXE::productSumScalar <localPet=%d>\n", vm->getLocalPet());
-        switch (xxeProductSumScalarInfo->opSubId){
-        case I4:
-          {
-            ESMC_I4 *element = (ESMC_I4 *)xxeProductSumScalarInfo->element;
-            ESMC_I4 *factor = (ESMC_I4 *)xxeProductSumScalarInfo->factor;
-            ESMC_I4 *value = (ESMC_I4 *)xxeProductSumScalarInfo->value;
-          }
-          break;
-        case I8:
-          {
-            ESMC_I8 *element = (ESMC_I8 *)xxeProductSumScalarInfo->element;
-            ESMC_I8 *factor = (ESMC_I8 *)xxeProductSumScalarInfo->factor;
-            ESMC_I8 *value = (ESMC_I8 *)xxeProductSumScalarInfo->value;
-          }
-          break;
-        case R4:
-          {
-            ESMC_R4 *element = (ESMC_R4 *)xxeProductSumScalarInfo->element;
-            ESMC_R4 *factor = (ESMC_R4 *)xxeProductSumScalarInfo->factor;
-            ESMC_R4 *value = (ESMC_R4 *)xxeProductSumScalarInfo->value;
-          }
-          break;
-        case R8:
-          {
-            ESMC_R8 *element = (ESMC_R8 *)xxeProductSumScalarInfo->element;
-            ESMC_R8 *factor = (ESMC_R8 *)xxeProductSumScalarInfo->factor;
-            ESMC_R8 *value = (ESMC_R8 *)xxeProductSumScalarInfo->value;
-          }
-          break;
-        default:
-          break;
-        }
       }
       break;
     case productSumScalarRRA:
       {
         xxeProductSumScalarRRAInfo = (ProductSumScalarRRAInfo *)xxeElement;
         printf("XXE::productSumScalarRRA <localPet=%d>\n", vm->getLocalPet());
-        char *rraBase = rraList[xxeProductSumScalarRRAInfo->rraIndex];
-        switch (xxeProductSumScalarRRAInfo->opSubId){
-        case I4:
-          {
-            ESMC_I4 *element = (ESMC_I4 *)
-              (rraBase + xxeProductSumScalarRRAInfo->rraOffset);
-            ESMC_I4 *factor = (ESMC_I4 *)xxeProductSumScalarRRAInfo->factor;
-            ESMC_I4 *value = (ESMC_I4 *)xxeProductSumScalarRRAInfo->value;
-          }
-          break;
-        case I8:
-          {
-            ESMC_I8 *element = (ESMC_I8 *)
-              (rraBase + xxeProductSumScalarRRAInfo->rraOffset);
-            ESMC_I8 *factor = (ESMC_I8 *)xxeProductSumScalarRRAInfo->factor;
-            ESMC_I8 *value = (ESMC_I8 *)xxeProductSumScalarRRAInfo->value;
-          }
-          break;
-        case R4:
-          {
-            ESMC_R4 *element = (ESMC_R4 *)
-              (rraBase + xxeProductSumScalarRRAInfo->rraOffset);
-            ESMC_R4 *factor = (ESMC_R4 *)xxeProductSumScalarRRAInfo->factor;
-            ESMC_R4 *value = (ESMC_R4 *)xxeProductSumScalarRRAInfo->value;
-          }
-          break;
-        case R8:
-          {
-            ESMC_R8 *element = (ESMC_R8 *)
-              (rraBase + xxeProductSumScalarRRAInfo->rraOffset);
-            ESMC_R8 *factor = (ESMC_R8 *)xxeProductSumScalarRRAInfo->factor;
-            ESMC_R8 *value = (ESMC_R8 *)xxeProductSumScalarRRAInfo->value;
-          }
-          break;
-        default:
-          break;
-        }
       }
       break;
     case productSumSuperScalarRRA:
@@ -3219,35 +3435,6 @@ int XXE::print(
           (ProductSumSuperScalarRRAInfo *)xxeElement;
         printf("XXE::productSumSuperScalarRRA <localPet=%d>\n",
           vm->getLocalPet());
-        char *rraBase = rraList[xxeProductSumSuperScalarRRAInfo->rraIndex];
-        int *rraOffsetList = xxeProductSumSuperScalarRRAInfo->rraOffsetList;
-        void **factorList = xxeProductSumSuperScalarRRAInfo->factorList;
-        void **valueList = xxeProductSumSuperScalarRRAInfo->valueList;
-        int termCount = xxeProductSumSuperScalarRRAInfo->termCount;
-        switch (xxeProductSumSuperScalarRRAInfo->opSubId){
-        case I4:
-          {
-            ESMC_I4 *element, *factor, *value;
-          }
-          break;
-        case I8:
-          {
-            ESMC_I8 *element, *factor, *value;
-          }
-          break;
-        case R4:
-          {
-            ESMC_R4 *element, *factor, *value;
-          }
-          break;
-        case R8:
-          {
-            ESMC_R8 *element, *factor, *value;
-          }
-          break;
-        default:
-          break;
-        }
       }
       break;
     case productSumSuperScalarContigRRA:
@@ -3256,41 +3443,6 @@ int XXE::print(
           (ProductSumSuperScalarContigRRAInfo *)xxeElement;
         printf("XXE::productSumSuperScalarContigRRA <localPet=%d>\n",
           vm->getLocalPet());
-        char *rraBase =
-          rraList[xxeProductSumSuperScalarContigRRAInfo->rraIndex];
-        int *rraOffsetList =
-          xxeProductSumSuperScalarContigRRAInfo->rraOffsetList;
-        void **factorList = xxeProductSumSuperScalarContigRRAInfo->factorList;
-        void *valueList = xxeProductSumSuperScalarContigRRAInfo->valueList;
-        int termCount = xxeProductSumSuperScalarContigRRAInfo->termCount;
-        switch (xxeProductSumSuperScalarContigRRAInfo->opSubId){
-        case I4:
-          {
-            ESMC_I4 *element, factor;
-            ESMC_I4 *value = (ESMC_I4 *)valueList;
-          }
-          break;
-        case I8:
-          {
-            ESMC_I8 *element, factor;
-            ESMC_I8 *value = (ESMC_I8 *)valueList;
-          }
-          break;
-        case R4:
-          {
-            ESMC_R4 *element, factor;
-            ESMC_R4 *value = (ESMC_R4 *)valueList;
-          }
-          break;
-        case R8:
-          {
-            ESMC_R8 *element, factor;
-            ESMC_R8 *value = (ESMC_R8 *)valueList;
-          }
-          break;
-        default:
-          break;
-        }
       }
       break;
     case memCpy:
@@ -3309,41 +3461,6 @@ int XXE::print(
       {
         xxeMemGatherSrcRRAInfo = (MemGatherSrcRRAInfo *)xxeElement;
         printf("XXE::memGatherSrcRRA <localPet=%d>\n", vm->getLocalPet());
-        char *dstBase = (char *)xxeMemGatherSrcRRAInfo->dstBase;
-        char *rraBase = rraList[xxeMemGatherSrcRRAInfo->rraIndex];
-        int *rraOffsetList = xxeMemGatherSrcRRAInfo->rraOffsetList;
-        int *countList = xxeMemGatherSrcRRAInfo->countList;
-        switch (xxeMemGatherSrcRRAInfo->opSubId){
-        case BYTE:
-          {
-            char *dstPointer = dstBase;
-          }
-          break;
-        case I4:
-          {
-            ESMC_I4 *dstPointer = (ESMC_I4*)dstBase;
-            ESMC_I4 *srcPointer;
-          }
-          break;
-        case I8:
-          {
-            ESMC_I8 *dstPointer = (ESMC_I8*)dstBase;
-            ESMC_I8 *srcPointer;
-          }
-          break;
-        case R4:
-          {
-            ESMC_R4 *dstPointer = (ESMC_R4*)dstBase;
-            ESMC_R4 *srcPointer;
-          }
-          break;
-        case R8:
-          {
-            ESMC_R8 *dstPointer = (ESMC_R8*)dstBase;
-            ESMC_R8 *srcPointer;
-          }
-          break;
-        }
       }
       break;
     case xxeSub:

@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.49 2007/12/10 18:42:53 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.50 2008/01/23 01:11:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -229,13 +229,15 @@ class XXE{
       waitOnAllSendnb, waitOnAllRecvnb
     };
     enum OpSubId{
-      I4, I8, R4, R8, BYTE,
       noSum
+    };
+    enum TKId{
+      I4, I8, R4, R8, BYTE
     };
     struct StreamElement{
       OpId opId;              // id of operation
       OpSubId opSubId;        // id of sub-operation
-      char opInfo[8*8];       // 7 x 8-byte to hold info associated with op
+      char opInfo[12*8];      // 12 x 8-byte to hold info associated with op
     };
     
   public:
@@ -304,6 +306,22 @@ class XXE{
     int incCommhandleCount();
     int incXxeSubCount();
     
+  private:
+    template<typename T, typename U, typename V>
+    static void psv(T *element, TKId elementTK, U *factorList, TKId factorTK,
+      V *valueList, TKId valueTK, int factorCount, int resolved);
+    template<typename T, typename U, typename V>
+    static void pss(T *element, TKId elementTK, U *factor, TKId factorTK,
+      V *value, TKId valueTK, int resolved);
+    template<typename T, typename U, typename V>
+    static void psssRra(T *rraBase, TKId elementTK, int *rraOffsetList,
+      U **factorList, TKId factorTK, V **valueList, TKId valueTK,
+      int termCount, int resolved);
+    template<typename T, typename U, typename V>
+    static void pssscRra(T *rraBase, TKId elementTK, int *rraOffsetList,
+      U **factorList, TKId factorTK, V *valueList, TKId valueTK,
+      int termCount, int resolved);
+
   // types with which to interpret the StreamElement elements
   public:
       
@@ -370,6 +388,9 @@ class XXE{
     typedef struct{
       OpId opId;
       OpSubId opSubId;
+      TKId elementTK;
+      TKId factorTK;
+      TKId valueTK;
       void *element;
       void *factorList;
       void *valueList;
@@ -379,6 +400,9 @@ class XXE{
     typedef struct{
       OpId opId;
       OpSubId opSubId;
+      TKId elementTK;
+      TKId factorTK;
+      TKId valueTK;
       void *element;
       void *factor;
       void *value;
@@ -387,6 +411,9 @@ class XXE{
     typedef struct{
       OpId opId;
       OpSubId opSubId;
+      TKId elementTK;
+      TKId factorTK;
+      TKId valueTK;
       int rraOffset;
       void *factor;
       void *value;
@@ -396,6 +423,9 @@ class XXE{
     typedef struct{
       OpId opId;
       OpSubId opSubId;
+      TKId elementTK;
+      TKId factorTK;
+      TKId valueTK;
       int *rraOffsetList;
       void **factorList;
       void **valueList;
@@ -406,6 +436,9 @@ class XXE{
     typedef struct{
       OpId opId;
       OpSubId opSubId;
+      TKId elementTK;
+      TKId factorTK;
+      TKId valueTK;
       int *rraOffsetList;
       void **factorList;
       void *valueList;
@@ -434,6 +467,7 @@ class XXE{
       OpId opId;
       OpSubId opSubId;
       void *dstBase;
+      TKId dstBaseTK;
       int *rraOffsetList;
       int *countList;
       int rraIndex;
