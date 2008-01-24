@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.3 2008/01/23 19:38:23 oehmke Exp $
+// $Id: ESMC_GridToMesh.C,v 1.4 2008/01/24 17:35:36 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -67,7 +67,7 @@ namespace ESMCI {
 // and, maybe, for simple single patch grids with a periodic component,
 // the dual, which is not so bad.  This will put us equivalent with
 // SCRIP.  
-void GridToMesh(Grid &grid, int staggerLoc, ESMC::Mesh &mesh) {
+void GridToMesh(const Grid &grid, int staggerLoc, ESMC::Mesh &mesh) {
 
 
 #ifdef NOT
