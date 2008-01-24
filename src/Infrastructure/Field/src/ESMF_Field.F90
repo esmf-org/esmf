@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.294 2008/01/24 21:58:01 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.295 2008/01/24 22:09:01 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -204,7 +204,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.294 2008/01/24 21:58:01 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.295 2008/01/24 22:09:01 feiliu Exp $'
 
 !==============================================================================
 !
@@ -431,7 +431,7 @@
       subroutine ESMF_FieldAttPackCreate(field, convention, purpose, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in), optional :: convention
       character (len = *), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -519,7 +519,7 @@
       subroutine ESMF_FieldAttPackSet(field, name, value, convention, purpose, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character(ESMF_MAXSTR), intent(in) :: name
       character(ESMF_MAXSTR), intent(in) :: value
       character(ESMF_MAXSTR), intent(in), optional :: convention
@@ -602,7 +602,7 @@
       subroutine ESMF_FieldAttPackWrite(field, convention, purpose, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in), optional :: convention
       character (len = *), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -868,7 +868,7 @@
 #define ESMF_METHOD "ESMF_FieldCreateNoGridArray"
 
 !BOP
-! !IROUTINE: ESMF_FieldCreateNoGridArray - Create a Field with no Grid or Array
+! !IROUTINE: ESMF_FieldCreateEmpty - Create a Field with no Grid or Array
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreateEmpty()
