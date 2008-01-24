@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.293 2008/01/24 21:44:31 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.294 2008/01/24 21:58:01 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -204,7 +204,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.293 2008/01/24 21:44:31 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.294 2008/01/24 21:58:01 feiliu Exp $'
 
 !==============================================================================
 !
@@ -671,7 +671,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldCreateNoDataPtr"
 
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no associated data buffer
 
 ! !INTERFACE:
@@ -743,7 +743,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 
       type(ESMF_FieldType), pointer :: ftype      ! Pointer to new field
       integer :: localrc                         
@@ -786,7 +786,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldCreateNoArray"
 
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no associated Array object
 
 ! !INTERFACE:
@@ -826,7 +826,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
  
       type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
       integer :: localrc                    
@@ -867,11 +867,11 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldCreateNoGridArray"
 
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldCreateNoGridArray - Create a Field with no Grid or Array
 
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldCreateNoData()
+      ! Private name; call using ESMF_FieldCreateEmpty()
       function ESMF_FieldCreateNoGridArray(name, iospec, rc)
 !
 ! !RETURN VALUE:
@@ -898,7 +898,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 
 
       type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
