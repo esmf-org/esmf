@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldSetMacros.h,v 1.24 2008/01/24 21:18:20 feiliu Exp $
+! $Id: ESMF_FieldSetMacros.h,v 1.25 2008/01/24 21:44:31 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -64,7 +64,7 @@
 !   at the copy.  If a new copy of the data is made, the caller is @\
 !   responsible for deallocating the space. @\
 !  \item[{[staggerloc]}] @\
-!   Defaults to 0.  If specified, the staggerloc specifies the relative position of
+!   Defaults to 0.  If specified, the staggerloc specifies the relative position of @\
 !   data array and grid. @\
 !  \item[{[indexflag]}] @\
 !   See Section~\ref{opt:indexflag} for possible values.  Defaults @\
