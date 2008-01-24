@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldGetMacros.h,v 1.17 2008/01/04 19:17:35 feiliu Exp $
+! $Id: ESMF_FieldGetMacros.h,v 1.18 2008/01/24 21:18:20 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -21,11 +21,11 @@
 #define FieldGetDataPtrDoc() \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
-!BOPI @\
+!BOP @\
 ! !IROUTINE: ESMF_FieldGetDataPtr - get the data pointer from a Field @\
 ! @\
 ! !INTERFACE: @\
-!   ! Private name; call using ESMF_FieldGetDataPtr() @\
+! ! Private name; call using ESMF_FieldGetDataPtr() @\
 !   subroutine ESMF_FieldGetDataPtr<rank><type><kind>(field, farray, & @\
 !          localDE, exclusiveLBound, exclusiveUBound, exclusiveCount, & @\
 !          computationalLBound, computationalUBound, computationalCount, & @\
@@ -107,7 +107,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
 ! @\
-!EOPI @\
+!EOP @\
 
 #if 0
 !------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.111 2007/12/27 20:46:37 feiliu Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.112 2008/01/24 21:18:20 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.111 2007/12/27 20:46:37 feiliu Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.112 2008/01/24 21:18:20 feiliu Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -65,7 +65,7 @@
       character (len = 20) :: gname, gname3
       type(ESMF_IOSpec) :: ios
       !type(ESMF_Mask) :: mask
-      type(ESMF_Field) :: f1, f2, f3, f4, f5, f6, f7, f8
+      type(ESMF_Field) :: f1, f2, f3, f4, f5, f6, f7, f8, f9
       integer(ESMF_KIND_I4) :: intattr, intattr2
       integer(ESMF_KIND_I4) :: intattrlist(6)
       real(ESMF_KIND_R8) :: rattr, rattrlist(2)
@@ -601,6 +601,16 @@
       
       !------------------------------------------------------------------------
       !EX_UTest 
+      ! FieldCreateFromDataPtr creates a field from a fortran data ptr
+      ! This test focus on the copy behavior
+      f8 = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creates a field from a fortran data ptr (copy)"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldDestroy(f8)
+
+      !------------------------------------------------------------------------
+      !EX_UTest 
       ! ESMF_ArraySpecPrint test ArraySpecPrint public interface
       call ESMF_ArraySpecSet(arrayspec8, 2, ESMF_TYPEKIND_R8, rc=rc)
       call ESMF_ArraySpecPrint(arrayspec8, rc=rc)
@@ -630,6 +640,20 @@
 
       !------------------------------------------------------------------------
       !EX_UTest 
+      ! FieldCreateFromArray creates a field from a ESMF_Array
+      ! This test focus on copy behavior
+      call ESMF_GridGet(grid, distgrid=distgrid, rc=rc)
+
+      array8 = ESMF_ArrayCreate(farray, distgrid=distgrid, &
+          staggerloc=0, computationalEdgeUWidth=(/-1,-1/), rc=rc) 
+      f9 = ESMF_FieldCreate(grid, array8, copyflag=ESMF_DATA_COPY, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creates a field from a ESMF_Array (copy)"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldDestroy(f9)
+
+      !------------------------------------------------------------------------
+      !EX_UTest 
       ! FieldGetDataPtr gets the fortran data ptr from a ESMF_Field
       ! This test uses f8 created from previous test
       call ESMF_FieldGetDataPtr(f8, farray1, rc=rc)
@@ -653,6 +677,17 @@
       write(failMsg, *) ""
       write(name, *) "Sets the fortran data ptr in a ESMF_Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest 
+      ! FieldSetDataPtr sets the fortran data ptr in a ESMF_Field
+      ! This test uses f8 created from previous test
+      ! This test test the copy behavior of setptr
+      allocate(farray2(size(farray1,1), size(farray1,2)))
+      call ESMF_FieldSetDataPtr(f8, dataptr=farray2, copyflag=ESMF_DATA_COPY, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Sets the fortran data ptr (copy) in a ESMF_Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
       deallocate(farray2)
       call ESMF_FieldDestroy(f8)
 

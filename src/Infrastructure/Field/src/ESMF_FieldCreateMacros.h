@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.34 2008/01/23 21:55:33 feiliu Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.35 2008/01/24 21:18:20 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -27,7 +27,7 @@
 #define FieldSetCommitDoc() \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
-!BOPI @\
+!BOP @\
 ! !IROUTINE: ESMF_FieldSetCommit - finishes the Field started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
@@ -97,7 +97,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
 ! @\
-!EOPI @\
+!EOP @\
 
 #if 0
 !------------------------------------------------------------------------------
@@ -133,6 +133,7 @@
         type(ESMF_Array)               :: array, newarray @\
         type(ESMF_DistGrid)            :: distgrid @\
         type(ESMF_ArraySpec)           :: arrayspec @\
+        integer, dimension(mrank)      :: comp_edge_u_width @\
  @\
         if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
@@ -148,8 +149,9 @@
             ESMF_ERR_PASSTHRU, & @\
             ESMF_CONTEXT, rc)) return @\
  @\
+        comp_edge_u_width = -1 @\
         array = ESMF_ArrayCreate(farray, distgrid=distgrid, & @\
-            staggerloc=0, computationalEdgeUWidth=(/-1,-1/), rc=localrc)  @\
+            staggerloc=0, computationalEdgeUWidth=comp_edge_u_width, rc=localrc)  @\
         if (ESMF_LogMsgFoundError(localrc, & @\
             ESMF_ERR_PASSTHRU, & @\
             ESMF_CONTEXT, rc)) return @\
@@ -230,7 +232,7 @@
 #define FieldCreateFromDataPtrDoc() \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
-!BOPI @\
+!BOP @\
 ! !IROUTINE: ESMF_FieldCreateFromDataPtr - creates a Field from fortran array @\
 ! @\
 ! !INTERFACE: @\
@@ -306,7 +308,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
 ! @\
-!EOPI @\
+!EOP @\
 
 #if 0
 !------------------------------------------------------------------------------
