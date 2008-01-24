@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.3 2007/08/23 21:22:52 dneckels Exp $
+# $Id: build_rules.mk,v 1.4 2008/01/24 17:36:48 dneckels Exp $
 #
 # Linux.intelgcc.default
 #
@@ -67,6 +67,7 @@ ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+ESMF_F90LINKLIBS       += -lmpi_cxx
 else
 ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------
