@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySparseMatMulSTest.F90,v 1.12 2007/12/14 19:53:21 svasquez Exp $
+! $Id: ESMF_ArraySparseMatMulSTest.F90,v 1.13 2008/01/25 17:41:06 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -275,12 +275,12 @@ program ESMF_ArraySparseMatMulSTest
   ! Normal ESMF Test output
   print *, testname, " complete."
 
+  ! IMPORTANT: TestGlobal() prints the PASS: string that the scripts grep for.
   call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), testname, failMsg, testresult, &
     ESMF_SRCLINE)
 
   if ((localPet .eq. 0) .and. (rc .eq. ESMF_SUCCESS)) then
     ! Separate message to console, for quick confirmation of success/failure
-    ! IMPORTANT: test scripts grep for "SUCCESS:" to determine success or fail.
     write(finalMsg, *) "SUCCESS: ",trim(testname)," finished correctly."
     write(0, *) ""
     write(0, *) trim(testname)
