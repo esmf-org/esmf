@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldGetMacros.h,v 1.18 2008/01/24 21:18:20 feiliu Exp $
+! $Id: ESMF_FieldGetMacros.h,v 1.19 2008/01/25 16:26:06 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !          rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!      type(ESMF_Field), intent(in) :: field                  @\
+!      type(ESMF_Field), intent(inout) :: field                  @\
 !      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: farray @\
 !      integer, intent(out), optional :: rc                @\
 ! @\
@@ -127,7 +127,7 @@
           rc) @\
  @\
 ! input arguments @\
-      type(ESMF_Field), intent(in) :: field                  @\
+      type(ESMF_Field), intent(inout) :: field                  @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farray @\
       integer,                intent(in) , optional :: localDE @\
       integer,                intent(out), optional :: exclusiveLBound(:) @\
