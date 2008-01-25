@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.121 2008/01/25 17:06:49 theurich Exp $
+! $Id: ESMF_State.F90,v 1.122 2008/01/25 22:05:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.121 2008/01/25 17:06:49 theurich Exp $'
+      '$Id: ESMF_State.F90,v 1.122 2008/01/25 22:05:26 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -392,7 +392,7 @@ end interface
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit,routehandle,rc)
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -460,7 +460,7 @@ end interface
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
       do i=1,routehandleCount
-         ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
+         ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit,routehandleList(i),rc)
       enddo
 
       ! Initialize return code; assume routine not implemented
@@ -4987,7 +4987,7 @@ end interface
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
       do i=1,acount
-         ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
+         ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit,routehandles(i),rc)
       enddo
 
 
