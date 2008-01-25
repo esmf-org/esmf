@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.32 2007/03/31 05:51:26 cdeluca Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.33 2008/01/25 20:51:12 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.32 2007/03/31 05:51:26 cdeluca Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.33 2008/01/25 20:51:12 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -172,8 +172,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      
-
+ 
 #ifdef ESMF_EXHAUSTIVE
       ! ----------------------------------------------------------------------------
       !EX_UTest
@@ -1788,6 +1787,71 @@
       enddo
       call ESMF_AlarmDestroy(alarm4, rc=rc)
       call ESMF_ClockDestroy(clock2, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      !Test Alarm ringTime increment, first forwards a fixed number of timesteps,
+      !then backwards.
+      !See ticket #1531948
+      write(failMsg, *) " Did not ring enough times during forward/backward march"
+      write(name, *) "Test forward, then backward ringTime increment"
+
+      testPass = .true.
+      call ESMF_TimeSet (startTime, yy=2008, mm=1, dd=23, h=0,  &
+          calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimePrint (startTime, "string isofrac", rc=rc)
+      call ESMF_TimeIntervalSet (timeStep, h=3, rc=rc)
+      clock = ESMF_ClockCreate (  &
+          name = "clock 1",  &
+          startTime = startTime, timeStep=timeStep, rc=rc)
+      if (rc /= ESMF_SUCCESS) testPass = .false.
+
+      call ESMF_TimeSet (alarmTime, yy=2008, mm=1, dd=23, h=6,  &
+          calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet (alarmStep, h=6, rc=rc)
+      alarm1 = ESMF_AlarmCreate (  &
+          name="Alarm 1", clock=clock,  &
+          ringTime=alarmTime, ringInterval=alarmStep, rc=rc)
+      if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+
+      alarmCount = 0
+      do, i=1,4
+	call ESMF_ClockAdvance (clock, rc=rc)
+        if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+	if (ESMF_alarmIsRinging (alarm1)) then
+          alarmCount = alarmCount + 1
+          print *, 'alarm is ringing at forwards timestep', i
+          call ESMF_AlarmRingerOff (alarm1, rc=rc)
+	end if
+      end do
+
+      print *, 'SETTING CLOCK BACKWARDS'
+      call ESMF_ClockSet (clock, direction=ESMF_MODE_REVERSE, rc=rc)
+      if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+      ! call ESMF_AlarmRingerOn (alarm1, rc=rc)
+
+      do, i=1,4
+	call ESMF_ClockAdvance (clock, rc=rc)
+        if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+	if (ESMF_alarmIsRinging (alarm1)) then
+          alarmCount = alarmCount + 1
+          print *, 'alarm is ringing at backwards timestep', i
+          call ESMF_AlarmRingerOff (alarm1, rc=rc)
+	end if
+      end do
+
+      if (.not. testPass .or. alarmCount /= 4) then
+          if (.not. testPass) print *, 'bad return codes discovered'
+          print *, 'alarmCount =', alarmCount
+          print *, 'The alarm ringTime may be stuck at:'
+          call ESMF_AlarmPrint (alarm1, "ringTime string")
+      end if
+
+      call ESMF_Test (testPass .and. alarmCount == 4, &
+                     name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_AlarmDestroy (alarm1, rc=rc)
+      call ESMF_ClockDestroy (clock1, rc=rc)
 
       ! ----------------------------------------------------------------------------
 #endif
