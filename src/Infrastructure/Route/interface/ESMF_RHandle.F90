@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.39 2007/07/07 04:21:37 samsoncheung Exp $
+! $Id: ESMF_RHandle.F90,v 1.40 2008/01/25 17:04:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -155,7 +155,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.39 2007/07/07 04:21:37 samsoncheung Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.40 2008/01/25 17:04:16 theurich Exp $'
 
 !==============================================================================
 
@@ -947,7 +947,7 @@ end function ESMF_RouteHandleGetInit
 ! !INTERFACE:
       subroutine ESMF_RouteHandleGet(rhandle, htype, route_count, rmaptype, &
                                      which_route, route, tv_count, tvmaptype, &
-                                     which_tv, tdata, label, rc)
+                                     which_tv, tdata, label, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_RouteHandle), intent(in) :: rhandle
@@ -961,6 +961,7 @@ end function ESMF_RouteHandleGetInit
       integer, intent(in), optional :: which_tv
       type(ESMF_TransformValues), intent(out), optional :: tdata
       character(len=*), intent(out), optional :: label
+      character(len=*), intent(out), optional :: name
       integer, intent(out), optional :: rc             
 
 !
@@ -1008,6 +1009,8 @@ end function ESMF_RouteHandleGetInit
 !     \item[{[label]}]
 !          If specified at store time, the optional character label is
 !          returned here.  If not set, {\tt "NONE"} is returned.
+!     \item [{[name]}]
+!          Name of the RouteHandle object.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1136,6 +1139,13 @@ end function ESMF_RouteHandleGetInit
         endif
 
 
+        ! Special call to get name out of Base class
+        if (present(name)) then
+          call c_ESMC_GetName(rhandle, name, status)
+          if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+    
         if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_RouteHandleGet
@@ -1149,7 +1159,7 @@ end function ESMF_RouteHandleGetInit
 ! !INTERFACE:
       subroutine ESMF_RouteHandleSet(rhandle, htype, route_count, rmaptype, &
                                      which_route, route, tv_count, tvmaptype, &
-                                     which_tv, tdata, label, rc)
+                                     which_tv, tdata, label, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_RouteHandle), intent(in) :: rhandle
@@ -1163,6 +1173,7 @@ end function ESMF_RouteHandleGetInit
       integer, intent(in), optional :: which_tv
       type(ESMF_TransformValues), intent(in), optional :: tdata
       character(len=*), intent(in), optional :: label
+      character(len = *), intent(in),   optional  :: name    
       integer, intent(out), optional :: rc            
 
 !
@@ -1210,6 +1221,8 @@ end function ESMF_RouteHandleGetInit
 !     \item[{[label]}]
 !          Optional character label.  Not interpreted by the framework;
 !          any value useful to the caller can be used.
+!     \item [{[name]}]
+!          The RouteHandle name.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1235,6 +1248,13 @@ end function ESMF_RouteHandleGetInit
             if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+        endif
+
+        ! Set the name in Base object
+        if (present(name)) then
+          call c_ESMC_SetName(rhandle, "RouteHandle", name, status)
+          if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
         if (present(route_count)) then

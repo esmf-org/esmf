@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle.h,v 1.10 2007/09/27 23:39:28 theurich Exp $
+// $Id: ESMC_RHandle.h,v 1.11 2008/01/25 17:04:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -83,7 +83,7 @@ typedef enum {
 // !PRIVATE TYPES:
 
  // class declaration type
- class ESMC_RouteHandle {   // does NOT inherit from Base class
+ class ESMC_RouteHandle : public ESMC_Base {    // inherits from ESMC_Base class
 
    private:
      ESMC_HandleType htype;         // halo, redist, or regrid
