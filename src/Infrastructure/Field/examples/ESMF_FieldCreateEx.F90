@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.59 2008/01/10 20:22:35 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.60 2008/01/25 21:37:07 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -66,6 +66,12 @@
 
     call ESMF_Initialize(rc=rc)
 
+!BOE
+!\subsubsection{Field Create with Grid and Arrayspec}
+!  The user has already created an {\tt ESMF\_Grid} and an
+!  {\tt ESMF\_Arrayspec} with data.  This create associates the
+!  two objects.  
+!EOE
 !-------------------------------------------------------------------------
 !   ! Example 1:
 !   !
@@ -75,25 +81,17 @@
 !   !  explicitly on a regular 2x2 uniform grid. 
 !   !  Then we create an arrayspec. With grid and arrayspec,
 !   !  we then create a field.
+
+!BOC
     grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
                                   regDecomp=(/2,2/), name="atmgrid", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_GridGet(grid, distgrid=distgrid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!BOC
-    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc)
-!EOC
 
-!BOE
-!\subsubsection{Field Create with Grid and Arrayspec}
-      
-!  The user has already created an {\tt ESMF\_Grid} and an
-!  {\tt ESMF\_Arrayspec} with data.  This create associates the
-!  two objects.  
-!EOE
-      
-!BOC
+    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc)
+
     field1 = ESMF_FieldCreate(grid, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="pressure", rc=rc)
 !EOC
@@ -104,6 +102,11 @@
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOE
+!\subsection{Replace the ESMF_Array inside a Field, first method}
+!  User can replace the {\tt ESMF\_Array} inside an existing Field by construct a proper
+!  shape {\tt ESMF\_Array}
+!EOE
 !-------------------------------------------------------------------------
 !   ! Example 2:
 !   !
@@ -118,12 +121,13 @@
 
     ! The size of the data in the array still has to line up with the Grid
     ! and its decomposition.
-
+!BOC
     array2 = ESMF_ArrayCreateFromGrid(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
         rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_FieldSetArray(field1, array2, rc=rc)
+!EOC
     print *, "Field example 2 returned"
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -133,8 +137,8 @@
 !\subsubsection{Empty Field Create}
 
 !  The user creates an empty {\tt ESMF\_Field} object.
+!  Then the user can add the Grid and data in later calls
 !EOE
-
 !-------------------------------------------------------------------------
 !   ! Example 3:
 !   !
@@ -151,12 +155,15 @@
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-!    ! ...and associate a data Array.
-!    call ESMF_FieldAttachArray(field3, array1, rc=rc)
-     print *, "Field example 3 returned"
+    print *, "Field example 3 returned"
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOE
+!\subsection{Replace the ESMF_Array inside a Field, second method}
+!  User can replace the {\tt ESMF\_Array} inside an existing Field by construct a proper
+!  shape {\tt ESMF\_Array}
+!EOE
 !-------------------------------------------------------------------------
 !   ! Example 4:
 !   !
@@ -166,19 +173,28 @@
 !   ! ArrayCreateFromGrid which is done in example 2. This example
 !   ! makes it clear that field1's array has a computational region smaller
 !   ! than its exclusive region.
+!BOC
     array3 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, staggerLoc=0, &
             computationalEdgeLWidth=(/0,0/), computationalEdgeUWidth=(/-1,-1/), rc=rc)
         if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_FieldSetArray(field1, array3, rc=rc)
+!EOC
     print *, "Field example 4 returned"
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOE
+!\subsubsection{Get bounds and counts information from a Field}
+!
+!  User can get various bounds and counts information from a Field
+!  through the ESMF_FieldGetDataPtr interface.
+!
+!EOE
 !-------------------------------------------------------------------------
 !   ! Example 5:
 !   ! 
-!   ! The user can get various bounds and counts information from a Field
+!   ! User can get various bounds and counts information from a Field
 !   ! through the ESMF_FieldGetDataPtr interface.
     xdim = 12
     ydim = 22
@@ -202,6 +218,7 @@
     call ESMF_FieldGetDataPtr(f8, farray1, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOC
     call ESMF_FieldGetDataPtr (f8, localDE=0, &
         computationalLBound=gridCompLBnd, computationalUBound=gridCompUBnd, &
         exclusiveLBound=gridExclLBnd, exclusiveUBound=gridExclUBnd, &
@@ -210,9 +227,20 @@
         exclusiveCount=excl_count, &
         totalCount=total_count, &
         rc=rc)   
+!EOC
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     rc = finalrc
 
+!BOE
+!\subsubsection{Destroy a Field}
+
+!  When finished with an {\tt ESMF\_Field}, the destroy method
+!  removes it.  However, the objects inside the {\tt ESMF\_Field}
+!  that has external reference should be deleted separately, 
+!  since objects can be added to
+!  more than one {\tt ESMF\_Field}, for example the same {\tt ESMF\_Grid}
+!  can be used in multiple {\tt ESMF\_Field}s.
+!EOE
 !-------------------------------------------------------------------------
 !   ! Example 4:
 !   !
@@ -223,16 +251,6 @@
 !     print *, "Field example 5 returned"
 !
 !    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOE
-!\subsubsection{Destroy a Field}
-
-!  When finished with an {\tt ESMF\_Field}, the destroy method
-!  removes it.  However, the objects inside the {\tt ESMF\_Field}
-!  should be deleted separately, since objects can be added to
-!  more than one {\tt ESMF\_Field}, for example the same {\tt ESMF\_Grid}
-!  can be used in multiple {\tt ESMF\_Field}s.
-!EOE
 
 !BOC
     call ESMF_FieldDestroy(field1, rc=rc)
@@ -255,7 +273,5 @@
     else
 	print *, "FAIL: ESMF_FieldCreateEx.F90"
     end if
-!BOC
-     end program ESMF_FieldCreateEx
-!EOC
+end program ESMF_FieldCreateEx
     

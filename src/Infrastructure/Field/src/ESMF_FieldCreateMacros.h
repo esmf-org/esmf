@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.35 2008/01/24 21:18:20 feiliu Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.36 2008/01/25 21:37:07 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOP @\
-! !IROUTINE: ESMF_FieldSetCommit - finishes the Field started with FieldCreateEmpty @\
+! !IROUTINE: ESMF_FieldSetCommit - Finishes creating Field started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
 !   ! Private name; call using ESMF_FieldSetCommit() @\
@@ -186,7 +186,7 @@
         end if @\
  @\
         ! default copyflag value is ESMF_DATA_REF @\
-        ! set array_internal to .true. @\
+        ! set array_internal to .true. because field%array is internal @\
         field%ftypep%array_internal = .true. @\
         if(.not. present(copyflag)) then @\
             field%ftypep%array = array @\
@@ -233,7 +233,7 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOP @\
-! !IROUTINE: ESMF_FieldCreateFromDataPtr - creates a Field from fortran array @\
+! !IROUTINE: ESMF_FieldCreateFromDataPtr - Creates a Field from Fortran data pointer @\
 ! @\
 ! !INTERFACE: @\
 !   ! Private name; call using ESMF_FieldCreateFromDataPtr() @\

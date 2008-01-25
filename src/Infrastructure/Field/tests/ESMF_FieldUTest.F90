@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.112 2008/01/24 21:18:20 feiliu Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.113 2008/01/25 21:37:07 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.112 2008/01/24 21:18:20 feiliu Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.113 2008/01/25 21:37:07 feiliu Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -402,6 +402,7 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Testing to see if Field is Valid"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldDestroy(f3)
 
       !------------------------------------------------------------------------
       !EX_removeUTest
@@ -571,14 +572,6 @@
 !      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
-      ! Verifing that a Field can be created with a name
-      f2 = ESMF_FieldCreateEmpty("pressure", rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Creating Field with name Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      
-      !------------------------------------------------------------------------
       !EX_UTest 
       ! Call FieldSetCommit on a field created from FieldCreateEmpty
       ! The data ptr size must match the grid size and only works when np=decomp
@@ -602,7 +595,7 @@
       !------------------------------------------------------------------------
       !EX_UTest 
       ! FieldCreateFromDataPtr creates a field from a fortran data ptr
-      ! This test focus on the copy behavior
+      ! This test focus on copy behavior
       f8 = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creates a field from a fortran data ptr (copy)"
