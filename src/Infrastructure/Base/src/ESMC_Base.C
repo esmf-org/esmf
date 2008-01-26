@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.92 2008/01/06 20:21:38 rokuingh Exp $
+// $Id: ESMC_Base.C,v 1.93 2008/01/26 01:55:21 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.92 2008/01/06 20:21:38 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.93 2008/01/26 01:55:21 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -2355,12 +2355,12 @@ if (count) {
 }  // end ESMC_AttributeGet
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_CreateAttPack"
+#define ESMC_METHOD "ESMC_AttPackCreate"
 //BOP
-// !IROUTINE:  ESMC_CreateAttPack() - setup the Attribute package
+// !IROUTINE:  ESMC_AttPackCreate() - setup the Attribute package
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_CreateAttPack(
+      int ESMC_Base::ESMC_AttPackCreate(
 //
 // !RETURN VALUE:
 //    int return code
@@ -2390,15 +2390,15 @@ if (count) {
 
   return rc;
 
-}  // end ESMC_CreateAttPack()
+}  // end ESMC_AttPackCreate()
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_SetAttPack"
+#define ESMC_METHOD "ESMC_AttPackSet"
 //BOP
-// !IROUTINE:  ESMC_SetAttPack() - set an attribute in an attpack
+// !IROUTINE:  ESMC_AttPackSet() - set an attribute in an attpack
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_SetAttPack(
+      int ESMC_Base::ESMC_AttPackSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -2433,11 +2433,11 @@ if (count) {
   }
 
   // Set the attribute
-  rc = attr->ESMC_ModifyAttValue(ESMC_TYPEKIND_CHARACTER, 1, value);
+  rc = attr->ESMC_AttrModifyValue(ESMC_TYPEKIND_CHARACTER, 1, value);
   if (rc != ESMF_SUCCESS) return ESMF_FAILURE;
    
   return rc;
-}  // end ESMC_SetAttPack()
+}  // end ESMC_AttPackSet()
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttPackGet"
@@ -2581,12 +2581,12 @@ if (count) {
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_WriteAttPack"
+#define ESMC_METHOD "ESMC_AttPackWrite"
 //BOPI
-// !IROUTINE:  ESMC_WriteAttPack - Print contents of an attribute package
+// !IROUTINE:  ESMC_AttPackWrite - Print contents of an attribute package
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_WriteAttPack(
+      int ESMC_Base::ESMC_AttPackWrite(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -2626,7 +2626,7 @@ if (count) {
   
   return ESMF_SUCCESS;
 
- } // end ESMC_WriteAttPack
+ } // end ESMC_AttPackWrite
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -3030,12 +3030,12 @@ if (count) {
 }  // end ESMC_AttributeGetObjectList
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_ModifyAttValue()"
+#define ESMC_METHOD "ESMC_AttrModifyValue()"
 //BOP
-// !IROUTINE:  ESMC_ModifyAttValue - native C++ modifyer for ESMC_Attribute class
+// !IROUTINE:  ESMC_AttrModifyValue - native C++ modifyer for ESMC_Attribute class
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_ModifyAttValue(
+      int ESMC_Attribute::ESMC_AttrModifyValue(
 //
 // !RETURN VALUE:
 //    set the value on an existing attribute object
@@ -3118,7 +3118,7 @@ if (count) {
 
   return ESMF_SUCCESS;
 
- } // end ESMC_ModifyAttValue
+ } // end ESMC_AttrModifyValue
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttributeCopy(=)"

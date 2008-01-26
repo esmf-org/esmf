@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.53 2007/12/21 17:10:21 rokuingh Exp $
+// $Id: ESMC_Base_F.C,v 1.54 2008/01/26 01:55:21 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.53 2007/12/21 17:10:21 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.54 2008/01/26 01:55:21 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -941,10 +941,10 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeGetAttrInfoName - get type and number of items in an attr
+// !IROUTINE:  c_ESMC_AttributeGetInfoName - get type and number of items in an attr
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributegetattrinfoname)(
+      void FTN(c_esmc_attributegetinfoname)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -1004,14 +1004,14 @@ extern "C" {
   delete [] cname;
   return;
 
-}  // end c_ESMC_AttributeGetAttrInfoName
+}  // end c_ESMC_AttributeGetInfoName
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeGetAttrInfoNum - get type and number of items in an attr
+// !IROUTINE:  c_ESMC_AttributeGetInfoNum - get type and number of items in an attr
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributegetattrinfonum)(
+      void FTN(c_esmc_attributegetinfonum)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -1072,7 +1072,7 @@ if (rc) *rc = ESMF_RC_NOT_IMPL;
   delete [] cname;
   return;
 
-}  // end c_ESMC_AttributeGetAttrInfoNum
+}  // end c_ESMC_AttributeGetInfoNum
 
 
 //-----------------------------------------------------------------------------
@@ -1121,10 +1121,10 @@ if (rc) *rc = ESMF_RC_NOT_IMPL;
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_createattpack - Setup the attribute package
+// !IROUTINE:  c_ESMC_attpackcreate - Setup the attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_createattpack)(
+      void FTN(c_esmc_attpackcreate)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -1226,7 +1226,7 @@ if (rc) *rc = ESMF_RC_NOT_IMPL;
   }
 
   // Set the attribute on the object.
-  *rc = (*base)->ESMC_CreateAttPack(cname, cconv, cpurp, cobj);
+  *rc = (*base)->ESMC_AttPackCreate(cname, cconv, cpurp, cobj);
 
   delete [] cname;
   delete [] cconv;
@@ -1234,14 +1234,14 @@ if (rc) *rc = ESMF_RC_NOT_IMPL;
   delete [] cobj;
   return;
 
-}  // end c_ESMC_createattpack
+}  // end c_ESMC_attpackcreate
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_setattpack - Set attributes in the attribute package
+// !IROUTINE:  c_ESMC_attpackset - Set attributes in the attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_setattpack)(
+      void FTN(c_esmc_attpackset)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -1359,7 +1359,7 @@ if (rc) *rc = ESMF_RC_NOT_IMPL;
   }
 
   // Set the attribute on the object.
-  *rc = (*base)->ESMC_SetAttPack(cname, cvalue, cconv, cpurp, cobj);
+  *rc = (*base)->ESMC_AttPackSet(cname, cvalue, cconv, cpurp, cobj);
 
   delete [] cname;
   delete [] cvalue;
@@ -1368,14 +1368,14 @@ if (rc) *rc = ESMF_RC_NOT_IMPL;
   delete [] cobj;
   return;
 
-}  // end c_ESMC_setattpack
+}  // end c_ESMC_attpackset
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_writeattpack - Setup the attribute package
+// !IROUTINE:  c_ESMC_attpackwrite - Setup the attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_writeattpack)(
+      void FTN(c_esmc_attpackwrite)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -1458,13 +1458,13 @@ if (rc) *rc = ESMF_RC_NOT_IMPL;
   }
 
   // Set the attribute on the object.
-  *rc = (*base)->ESMC_WriteAttPack(cconv, cpurp, cobj);
+  *rc = (*base)->ESMC_AttPackWrite(cconv, cpurp, cobj);
 
   delete [] cconv;
   delete [] cpurp;
   delete [] cobj;
   return;
 
-}  // end c_ESMC_writeattpack
+}  // end c_ESMC_attpackwrite
 
 } // extern "C"
