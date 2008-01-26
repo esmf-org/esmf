@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.29 2008/01/18 21:06:08 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.30 2008/01/26 02:00:03 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -225,15 +225,15 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
                   int *offset);          // inout - original offset, updated to point 
 
   // attributes
-  int attributeset(char *name, ESMC_TypeKind tk, int count, void *value);
-  int attributeset(char *name, char *value);
+  int attpackcreate(char *name, char *convention, char *purpose, char *object);
+  int attpackset(char *name, char *value, char *convention, char *purpose, char *object);
+  int attpackwrite(char *convention, char *purpose, char *object) const;
   int attributeget(char *name, ESMC_TypeKind *tk, int *count, void *value) const;
   int attributeget(char *name, char *value) const;
   int attributeget(int num, char *name, ESMC_TypeKind *tk, int *count, void *value) const;
   int attributegetcount(void) const;
-  int createattpack(char *name, char *convention, char *purpose, char *object);
-  int setattpack(char *name, char *value, char *convention, char *purpose, char *object);
-  int writeattpack(char *convention, char *purpose, char *object) const;
+  int attributeset(char *name, ESMC_TypeKind tk, int count, void *value);
+  int attributeset(char *name, char *value);
 
   // create fully formed grid
  static Grid *create(int nameLen,                                // (in)

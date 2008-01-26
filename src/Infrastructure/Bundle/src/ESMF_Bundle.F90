@@ -1,5 +1,5 @@
 
-! $Id: ESMF_Bundle.F90,v 1.119 2007/12/13 21:36:58 feiliu Exp $
+! $Id: ESMF_Bundle.F90,v 1.120 2008/01/26 02:00:56 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -217,11 +217,11 @@
        public ESMF_BundleGet          ! Get Bundle information
        public ESMF_BundleGetFieldNames
 
-       public ESMF_BundleSetAttribute       ! Set and Get attributes
-       public ESMF_BundleGetAttribute       !   interface to Base class
+       public ESMF_BundleAttributeSet       ! Set and Get attributes
+       public ESMF_BundleAttributeGet       !   interface to Base class
 
-       public ESMF_BundleGetAttributeCount  ! number of attribs
-       public ESMF_BundleGetAttributeInfo   ! get type, length by name or number
+       public ESMF_BundleAttributeGetCount  ! number of attribs
+       public ESMF_BundleAttributeGetInfo   ! get type, length by name or number
 
        public ESMF_BundleGetField      ! Get one or more Fields by name or number
        public ESMF_BundleAddField      ! Add one or more Fields 
@@ -343,20 +343,20 @@
 ! !IROUTINE: ESMF_BundleSetAttribute - Set a Bundle attribute
 !
 ! !INTERFACE:
-      interface ESMF_BundleSetAttribute 
+      interface ESMF_BundleAttributeSet
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_BundleSetInt4Attr
-        module procedure ESMF_BundleSetInt4ListAttr
-        module procedure ESMF_BundleSetInt8Attr
-        module procedure ESMF_BundleSetInt8ListAttr
-        module procedure ESMF_BundleSetReal4Attr
-        module procedure ESMF_BundleSetReal4ListAttr
-        module procedure ESMF_BundleSetReal8Attr
-        module procedure ESMF_BundleSetReal8ListAttr
-        module procedure ESMF_BundleSetLogicalAttr
-        module procedure ESMF_BundleSetLogicalListAttr
-        module procedure ESMF_BundleSetCharAttr
+        module procedure ESMF_BundleAttrSetInt4
+        module procedure ESMF_BundleAttrSetInt4List
+        module procedure ESMF_BundleAttrSetInt8
+        module procedure ESMF_BundleAttrSetInt8List
+        module procedure ESMF_BundleAttrSetReal4
+        module procedure ESMF_BundleAttrSetReal4List
+        module procedure ESMF_BundleAttrSetReal8
+        module procedure ESMF_BundleAttrSetReal8List
+        module procedure ESMF_BundleAttrSetLogical
+        module procedure ESMF_BundleAttrSetLogicalList
+        module procedure ESMF_BundleAttrSetChar
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that attach
@@ -370,20 +370,20 @@
 ! !IROUTINE: ESMF_BundleGetAttribute - Get a Bundle attribute
 !
 ! !INTERFACE:
-      interface ESMF_BundleGetAttribute 
+      interface ESMF_BundleAttributeGet 
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_BundleGetInt4Attr
-        module procedure ESMF_BundleGetInt4ListAttr
-        module procedure ESMF_BundleGetInt8Attr
-        module procedure ESMF_BundleGetInt8ListAttr
-        module procedure ESMF_BundleGetReal4Attr
-        module procedure ESMF_BundleGetReal4ListAttr
-        module procedure ESMF_BundleGetReal8Attr
-        module procedure ESMF_BundleGetReal8ListAttr
-        module procedure ESMF_BundleGetLogicalAttr
-        module procedure ESMF_BundleGetLogicalListAttr
-        module procedure ESMF_BundleGetCharAttr
+        module procedure ESMF_BundleAttrGetInt4
+        module procedure ESMF_BundleAttrGetInt4List
+        module procedure ESMF_BundleAttrGetInt8
+        module procedure ESMF_BundleAttrGetInt8List
+        module procedure ESMF_BundleAttrGetReal4
+        module procedure ESMF_BundleAttrGetReal4List
+        module procedure ESMF_BundleAttrGetReal8
+        module procedure ESMF_BundleAttrGetReal8List
+        module procedure ESMF_BundleAttrGetLogical
+        module procedure ESMF_BundleAttrGetLogicalList
+        module procedure ESMF_BundleAttrGetChar
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that retrieve
@@ -397,11 +397,11 @@
 ! !IROUTINE: ESMF_BundleGetAttributeInfo - Get type, count from a Bundle attribute
 !
 ! !INTERFACE:
-      interface ESMF_BundleGetAttributeInfo
+      interface ESMF_BundleAttributeGetInfo
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_BundleGetAttrInfoByName
-        module procedure ESMF_BundleGetAttrInfoByNum
+        module procedure ESMF_BundleAttrGetInfoByName
+        module procedure ESMF_BundleAttrGetInfoByNum
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that retrieve
@@ -591,9 +591,1748 @@ end function
 
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_BundleAddFieldList
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_BundleAttributeGet - Retrieve an attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_BundleAttributeGet(bundle, name, <value argument>, rc)
+!
+! !ARGUMENTS:
+!     type(ESMF_Bundle), intent(inout) :: bundle  
+!     character (len = *), intent(in) :: name
+!     <value argument>, see below for supported values
+!     integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Returns an attribute from the {\tt bundle}.
+!     Supported values for <value argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: value
+!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: valueList
+!     \item integer(ESMF\_KIND\_I8), intent(out) :: value
+!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: valueList
+!     \item real (ESMF\_KIND\_R4), intent(out) :: value
+!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: valueList
+!     \item real (ESMF\_KIND\_R8), intent(out) :: value
+!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: valueList
+!     \item type(ESMF\_Logical), intent(out) :: value
+!     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
+!     \item character (len = *), intent(out), value
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [<value argument>]
+!           The value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrGetInt4"
+!BOPI
+! !IROUTINE: ESMF_BundleAttributeGet - Retrieve a 4-byte integer attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeGet()
+      subroutine ESMF_BundleAttrGetInt4(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I4), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Returns a 4-byte integer attribute from the {\tt bundle}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The integer value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_I4, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrGetInt4
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrGetInt4List"
+!BOPI
+! !IROUTINE: ESMF_BundleAttributeGet - Retrieve a 4-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeGet()
+      subroutine ESMF_BundleAttrGetInt4List(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Returns an integer list attribute from the {\tt bundle}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the list.
+!     \item [valueList]
+!           The integer values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+      integer :: limit
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_I4, count, valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrGetInt4List
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrGetInt8"
+!BOPI
+! !IROUTINE: ESMF_BundleAttributeGet - Retrieve an 8-byte integer attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeGet()
+      subroutine ESMF_BundleAttrGetInt8(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I8), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Returns an 8-byte integer attribute from the {\tt bundle}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The integer value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_I8, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrGetInt8
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrGetInt8List"
+!BOPI
+! !IROUTINE: ESMF_BundleAttributeGet - Retrieve an 8-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeGet()
+      subroutine ESMF_BundleAttrGetInt8List(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Returns an 8-byte integer list attribute from the {\tt bundle}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the list.
+!     \item [valueList]
+!           The integer values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+      integer :: limit
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_I8, count, valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrGetInt8List
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrGetReal4"
+!BOPI
+! !IROUTINE: ESMF_BundleAttributeGet - Retrieve a 4-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeGet()
+      subroutine ESMF_BundleAttrGetReal4(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R4), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a 4-byte real attribute from the {\tt bundle}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The real value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_R4, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrGetReal4
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrGetReal4List"
+!BOPI
+! !IROUTINE: ESMF_BundleAttributeGet - Retrieve a 4-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeGet()
+      subroutine ESMF_BundleAttrGetReal4List(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Returns a 4-byte real list attribute from the {\tt bundle}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the list.
+!     \item [valueList]
+!           The real values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+      integer :: limit
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_R4, count, valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrGetReal4List
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrGetReal8"
+!BOPI
+! !IROUTINE: ESMF_BundleAttributeGet - Retrieve an 8-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeGet()
+      subroutine ESMF_BundleAttrGetReal8(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R8), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns an 8-byte real attribute from the {\tt bundle}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The real value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_R8, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrGetReal8
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrGetReal8List"
+!BOPI
+! !IROUTINE: ESMF_BundleAttributeGet - Retrieve an 8-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeGet()
+      subroutine ESMF_BundleAttrGetReal8List(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Returns an 8-byte real list attribute from the {\tt bundle}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the list.
+!     \item [valueList]
+!           The real values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+      integer :: limit
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_R8, count, valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrGetReal8List
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrGetLogical"
+!BOPI
+! !IROUTINE: ESMF_BundleAttributeGet - Retrieve a logical attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeGet()
+      subroutine ESMF_BundleAttrGetLogical(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      type(ESMF_Logical), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a logical attribute from the {\tt bundle}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The logical value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_LOGICAL, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrGetLogical
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrGetLogicalList"
+!BOPI
+! !IROUTINE: ESMF_BundleAttributeGet - Retrieve a logical list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeGet()
+      subroutine ESMF_BundleAttrGetLogicalList(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      type(ESMF_Logical), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a logical list attribute from the {\tt bundle}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the list.
+!     \item [valueList]
+!           The logical values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+      integer :: limit
+
+      ! Initialize return code; assume routine not implemented
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_LOGICAL, count, valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrGetLogicalList
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrGetChar"
+!BOPI
+! !IROUTINE: ESMF_BundleAttributeGet - Retrieve a character attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeGet()
+      subroutine ESMF_BundleAttrGetChar(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      character (len = *), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a character attribute from the {\tt bundle}.
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The character value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeGetChar(bundle%btypep%base, name, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrGetChar
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttributeGetCount"
+!BOP
+! !IROUTINE: ESMF_BundleAttributeGetCount - Query the number of attributes
+!
+! !INTERFACE:
+      subroutine ESMF_BundleAttributeGetCount(bundle, count, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      integer, intent(out) :: count   
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns the number of attributes associated with the given {\tt bundle}
+!      in the argument {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [count]
+!           The number of attributes associated with this object.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeGetCount(bundle%btypep%base, count, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttributeGetCount
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrGetInfoByName"
+!BOP
+! !IROUTINE: ESMF_BundleAttributeGetInfo - Query Bundle attributes by name
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeGetInfo()
+      subroutine ESMF_BundleAttrGetInfoByName(bundle, name, typekind, count, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character(len=*), intent(in) :: name
+      type(ESMF_TypeKind), intent(out), optional :: typekind
+      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns information associated with the named attribute, 
+!      including {\tt typekind} and item {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to query.
+!     \item [{[typekind]}]
+!           The typekind of the attribute.
+!     \item [{[count]}]
+!           The number of items in this attribute.  For character types,
+!           the length of the character string.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+
+      integer :: status                           ! Error status
+      type(ESMF_TypeKind) :: localTk
+      integer :: localCount
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeGetInfoName(bundle%btypep%base, name, &
+        localTk, localCount, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(typekind)) typekind = localTk
+      if (present(count)) count = localCount
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrGetInfoByName
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrGetInfoByNum"
+!BOP
+! !IROUTINE: ESMF_BundleAttributeGetInfo - Query Bundle attributes by index number
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeGetInfo()
+      subroutine ESMF_BundleAttrGetInfoByNum(bundle, attributeIndex, name, &
+        typekind, count, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      integer, intent(in) :: attributeIndex
+      character(len=*), intent(out), optional :: name
+      type(ESMF_TypeKind), intent(out), optional :: typekind
+      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns information associated with the indexed attribute, 
+!      including {\tt typekind} and item {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [attributeIndex]
+!           The index number of the attribute to query.
+!     \item [name]
+!           Returns the name of the attribute.
+!     \item [{[typekind]}]
+!           The typekind of the attribute.
+!     \item [{[count]}]
+!           Returns the number of items in this attribute.  For character types,
+!           the length of the character string.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+      character(len=ESMF_MAXSTR) :: localName
+      type(ESMF_TypeKind) :: localTk
+      integer :: localCount
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeGetInfoNum(bundle%btypep%base, attributeIndex, &
+        localName, localTk, localCount, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(name)) name = localName
+      if (present(typekind)) typekind = localTk
+      if (present(count)) count = localCount
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrGetInfoByNum
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_BundleAttributeSet - Set an attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_BundleAttributeSet(bundle, name, <value argument>, rc)
+!
+! !ARGUMENTS:
+!     type(ESMF_Bundle), intent(inout) :: bundle  
+!     character (len = *), intent(in) :: name
+!     <value argument>, see below for supported values
+!     integer, intent(out), optional :: rc   
+!
+!
+! !DESCRIPTION:
+!     Attaches an attribute to the {\tt bundle}.  
+!     The attribute has a {\tt name} and either a {\tt value} or a 
+!     {\tt valueList}.
+!     Supported values for the <value argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in) :: value
+!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(in) :: valueList
+!     \item integer(ESMF\_KIND\_I8), intent(in) :: value
+!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(in) :: valueList
+!     \item real (ESMF\_KIND\_R4), intent(in) :: value
+!     \item real (ESMF\_KIND\_R4), dimension(:), intent(in) :: valueList
+!     \item real (ESMF\_KIND\_R8), intent(in) :: value
+!     \item real (ESMF\_KIND\_R8), dimension(:), intent(in) :: valueList
+!     \item type(ESMF\_Logical), intent(in) :: value
+!     \item type(ESMF\_Logical), dimension(:), intent(in) :: valueList
+!     \item character (len = *), intent(in), value
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [<value argument>]
+!           The value of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrSetInt4"
+!BOPI
+! !IROUTINE: ESMF_BundleAttributeSet - Set a 4-byte integer attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeSet()
+      subroutine ESMF_BundleAttrSetInt4(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I4), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a 4-byte integer attribute to the {\tt bundle}.  
+!      The attribute has a {\tt name} and a {\tt value}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [value]
+!           The integer value of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_I4, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrSetInt4
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrSetInt4List"
+!BOPI
+! !IROUTINE: ESMF_BundleAttributeSet - Set a 4-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeSet()
+      subroutine ESMF_BundleAttrSetInt4List(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a 4-byte integer list attribute to the {\tt bundle}.  
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of integer items in the {\tt valueList} is given 
+!     by {\tt count}. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [count]
+!           The number of integers in the {\tt valueList}.
+!     \item [valueList]
+!           The integer values of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+      integer :: status 
+      integer :: limit
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_I4, count, valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrSetInt4List
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrSetInt8"
+!BOPI
+! !IROUTINE: ESMF_BundleAttributeSet - Set an 8-byte integer attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeSet()
+      subroutine ESMF_BundleAttrSetInt8(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I8), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an 8-byte integer attribute to the {\tt bundle}.  
+!      The attribute has a {\tt name} and a {\tt value}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [value]
+!           The integer value of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_I8, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrSetInt8
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrSetInt8List"
+!BOPI
+! !IROUTINE: ESMF_BundleAttributeSet - Set an 8-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeSet()
+      subroutine ESMF_BundleAttrSetInt8List(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a 8-byte integer list attribute to the {\tt bundle}.  
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of integer items in the {\tt valueList} is given 
+!     by {\tt count}. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [count]
+!           The number of integers in the {\tt valueList}.
+!     \item [valueList]
+!           The integer values of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+      integer :: status
+      integer :: limit
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_I8, count, valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrSetInt8List
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrSetReal4"
+!BOPI
+! !IROUTINE: ESMF_BundleAttributeSet - Set a 4-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeSet()
+      subroutine ESMF_BundleAttrSetReal4(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R4), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a 4-byte real attribute to the {\tt bundle}.  
+!      The attribute has a {\tt name} and a {\tt value}. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [value]
+!           The real value of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_R4, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrSetReal4
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrSetReal8"
+!BOPI
+! !IROUTINE: ESMF_BundleAttributeSet - Set an 8-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeSet()
+      subroutine ESMF_BundleAttrSetReal8(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R8), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an 8-byte real attribute to the {\tt bundle}.  
+!      The attribute has a {\tt name} and a {\tt value}. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [value]
+!           The real value of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_R8, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrSetReal8
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrSetReal4List"
+!BOPI
+! !IROUTINE: ESMF_BundleAttributeSet - Set a 4-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeSet()
+      subroutine ESMF_BundleAttrSetReal4List(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a 4-byte real list attribute to the {\tt bundle}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of real items in the {\tt valueList} is given 
+!     by {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [count]
+!           The number of reals in the {\tt valueList}.
+!     \item [value]
+!           The real values of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+      integer :: limit
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_R4, count, valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrSetReal4List
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrSetReal8List"
+!BOPI
+! !IROUTINE: ESMF_BundleAttributeSet - Set an 8-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeSet()
+      subroutine ESMF_BundleAttrSetReal8List(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches an 8-byte real list attribute to the {\tt bundle}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of real items in the {\tt valueList} is given 
+!     by {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [count]
+!           The number of reals in the {\tt valueList}.
+!     \item [value]
+!           The real values of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+      integer :: limit
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_R8, count, valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrSetReal8List
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrSetLogical"
+!BOPI
+! !IROUTINE: ESMF_BundleAttributeSet - Set a logical attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeSet()
+      subroutine ESMF_BundleAttrSetLogical(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      type(ESMF_Logical), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a logical attribute to the {\tt bundle}.
+!      The attribute has a {\tt name} and a {\tt value}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [value]
+!           The logical true/false value of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_LOGICAL, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrSetLogical
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrSetLogicalList"
+!BOPI
+! !IROUTINE: ESMF_BundleAttributeSet - Set a logical list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeSet()
+      subroutine ESMF_BundleAttrSetLogicalList(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      type(ESMF_Logical), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a logical list attribute to the {\tt bundle}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of logical items in the {\tt value} list is given 
+!     by {\tt count}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [count]
+!           The number of logicals in the {\tt valueList}.
+!     \item [valueList]
+!           The logical values of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+      integer :: limit
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_LOGICAL, count, valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrSetLogicalList
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrSetChar"
+!BOPI
+! !IROUTINE: ESMF_BundleAttributeSet - Set a character attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeSet()
+      subroutine ESMF_BundleAttrSetChar(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      character (len = *), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a character attribute to the {\tt bundle}.
+!      The attribute has a {\tt name} and a {\tt value}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [value]
+!           The character value of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetChar(bundle%btypep%base, name, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrSetChar
+
+!------------------------------------------------------------------------------
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleCreateNew"
 !BOP
@@ -1034,971 +2773,6 @@ end function
 
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_BundleGetAllFields
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an attribute
-!
-! !INTERFACE:
-!     subroutine ESMF_BundleGetAttribute(bundle, name, <value argument>, rc)
-!
-! !ARGUMENTS:
-!     type(ESMF_Bundle), intent(inout) :: bundle  
-!     character (len = *), intent(in) :: name
-!     <value argument>, see below for supported values
-!     integer, intent(out), optional :: rc   
-!
-! !DESCRIPTION:
-!     Returns an attribute from the {\tt bundle}.
-!     Supported values for <value argument> are:
-!     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(out) :: value
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: valueList
-!     \item integer(ESMF\_KIND\_I8), intent(out) :: value
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: valueList
-!     \item real (ESMF\_KIND\_R4), intent(out) :: value
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: valueList
-!     \item real (ESMF\_KIND\_R8), intent(out) :: value
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: valueList
-!     \item type(ESMF\_Logical), intent(out) :: value
-!     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
-!     \item character (len = *), intent(out), value
-!     \end{description}
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to retrieve.
-!     \item [<value argument>]
-!           The value of the named attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGetInt4Attr"
-!BOPI
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a 4-byte integer attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleGetAttribute()
-      subroutine ESMF_BundleGetInt4Attr(bundle, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
-      character (len = *), intent(in) :: name
-      integer(ESMF_KIND_I4), intent(out) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Returns a 4-byte integer attribute from the {\tt bundle}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to retrieve.
-!     \item [value]
-!           The integer value of the named attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: status                           ! Error status
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-        ESMF_TYPEKIND_I4, 1, value, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleGetInt4Attr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGetInt4ListAttr"
-!BOPI
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a 4-byte integer list attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleGetAttribute()
-      subroutine ESMF_BundleGetInt4ListAttr(bundle, name, count, valueList, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Returns an integer list attribute from the {\tt bundle}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to retrieve.
-!     \item [count]
-!           The number of values in the list.
-!     \item [valueList]
-!           The integer values of the named attribute.
-!           The list must be at least {\tt count} items long.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: status                           ! Error status
-      integer :: limit
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      limit = size(valueList)
-      if (count > limit) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than valueList", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-        ESMF_TYPEKIND_I4, count, valueList, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleGetInt4ListAttr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGetInt8Attr"
-!BOPI
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an 8-byte integer attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleGetAttribute()
-      subroutine ESMF_BundleGetInt8Attr(bundle, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
-      character (len = *), intent(in) :: name
-      integer(ESMF_KIND_I8), intent(out) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Returns an 8-byte integer attribute from the {\tt bundle}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to retrieve.
-!     \item [value]
-!           The integer value of the named attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: status                           ! Error status
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-        ESMF_TYPEKIND_I8, 1, value, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleGetInt8Attr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGetInt8ListAttr"
-!BOPI
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an 8-byte integer list attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleGetAttribute()
-      subroutine ESMF_BundleGetInt8ListAttr(bundle, name, count, valueList, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Returns an 8-byte integer list attribute from the {\tt bundle}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to retrieve.
-!     \item [count]
-!           The number of values in the list.
-!     \item [valueList]
-!           The integer values of the named attribute.
-!           The list must be at least {\tt count} items long.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: status                           ! Error status
-      integer :: limit
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      limit = size(valueList)
-      if (count > limit) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than valueList", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-        ESMF_TYPEKIND_I8, count, valueList, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleGetInt8ListAttr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGetReal4Attr"
-!BOPI
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a 4-byte real attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleGetAttribute()
-      subroutine ESMF_BundleGetReal4Attr(bundle, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
-      character (len = *), intent(in) :: name
-      real(ESMF_KIND_R4), intent(out) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Returns a 4-byte real attribute from the {\tt bundle}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to retrieve.
-!     \item [value]
-!           The real value of the named attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-
-      integer :: status                           ! Error status
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-        ESMF_TYPEKIND_R4, 1, value, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleGetReal4Attr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGetReal4ListAttr"
-!BOPI
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a 4-byte real list attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleGetAttribute()
-      subroutine ESMF_BundleGetReal4ListAttr(bundle, name, count, valueList, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Returns a 4-byte real list attribute from the {\tt bundle}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to retrieve.
-!     \item [count]
-!           The number of values in the list.
-!     \item [valueList]
-!           The real values of the named attribute.
-!           The list must be at least {\tt count} items long.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: status                           ! Error status
-      integer :: limit
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      limit = size(valueList)
-      if (count > limit) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than valueList", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-        ESMF_TYPEKIND_R4, count, valueList, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleGetReal4ListAttr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGetReal8Attr"
-!BOPI
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an 8-byte real attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleGetAttribute()
-      subroutine ESMF_BundleGetReal8Attr(bundle, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
-      character (len = *), intent(in) :: name
-      real(ESMF_KIND_R8), intent(out) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Returns an 8-byte real attribute from the {\tt bundle}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to retrieve.
-!     \item [value]
-!           The real value of the named attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-
-      integer :: status                           ! Error status
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-        ESMF_TYPEKIND_R8, 1, value, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleGetReal8Attr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGetReal8ListAttr"
-!BOPI
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an 8-byte real list attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleGetAttribute()
-      subroutine ESMF_BundleGetReal8ListAttr(bundle, name, count, valueList, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Returns an 8-byte real list attribute from the {\tt bundle}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to retrieve.
-!     \item [count]
-!           The number of values in the list.
-!     \item [valueList]
-!           The real values of the named attribute.
-!           The list must be at least {\tt count} items long.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: status                           ! Error status
-      integer :: limit
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      limit = size(valueList)
-      if (count > limit) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than valueList", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-        ESMF_TYPEKIND_R8, count, valueList, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleGetReal8ListAttr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGetLogicalAttr"
-!BOPI
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a logical attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleGetAttribute()
-      subroutine ESMF_BundleGetLogicalAttr(bundle, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
-      character (len = *), intent(in) :: name
-      type(ESMF_Logical), intent(out) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Returns a logical attribute from the {\tt bundle}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to retrieve.
-!     \item [value]
-!           The logical value of the named attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: status                           ! Error status
-
-      ! Initialize return code; assume routine not implemented
-      status = ESMF_RC_NOT_IMPL
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleGetLogicalAttr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGetLogicalListAttr"
-!BOPI
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a logical list attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleGetAttribute()
-      subroutine ESMF_BundleGetLogicalListAttr(bundle, name, count, valueList, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(out) :: valueList
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Returns a logical list attribute from the {\tt bundle}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to retrieve.
-!     \item [count]
-!           The number of values in the list.
-!     \item [valueList]
-!           The logical values of the named attribute.
-!           The list must be at least {\tt count} items long.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: status                           ! Error status
-      integer :: limit
-
-      ! Initialize return code; assume routine not implemented
-      status = ESMF_RC_NOT_IMPL
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      limit = size(valueList)
-      if (count > limit) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than valueList", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleGetLogicalListAttr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGetCharAttr"
-!BOPI
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a character attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleGetAttribute()
-      subroutine ESMF_BundleGetCharAttr(bundle, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
-      character (len = *), intent(in) :: name
-      character (len = *), intent(out) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Returns a character attribute from the {\tt bundle}.
-!
-!     The arguments are:
-!     \begin{description}
-!
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to retrieve.
-!     \item [value]
-!           The character value of the named attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-
-      integer :: status                           ! Error status
-
-      ! Initialize return code; assume routine not implemented
-      status = ESMF_RC_NOT_IMPL
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeGetChar(bundle%btypep%base, name, value, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleGetCharAttr
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGetAttributeCount"
-!BOP
-! !IROUTINE: ESMF_BundleGetAttributeCount - Query the number of attributes
-!
-! !INTERFACE:
-      subroutine ESMF_BundleGetAttributeCount(bundle, count, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
-      integer, intent(out) :: count   
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Returns the number of attributes associated with the given {\tt bundle}
-!      in the argument {\tt count}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [count]
-!           The number of attributes associated with this object.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-
-      integer :: status                           ! Error status
-
-      ! Initialize return code; assume routine not implemented
-      status = ESMF_RC_NOT_IMPL
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeGetCount(bundle%btypep%base, count, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleGetAttributeCount
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGetAttrInfoByName"
-!BOP
-! !IROUTINE: ESMF_BundleGetAttributeInfo - Query Bundle attributes by name
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleGetAttributeInfo()
-      subroutine ESMF_BundleGetAttrInfoByName(bundle, name, typekind, count, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle  
-      character(len=*), intent(in) :: name
-      type(ESMF_TypeKind), intent(out), optional :: typekind
-      integer, intent(out), optional :: count   
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Returns information associated with the named attribute, 
-!      including {\tt typekind} and item {\tt count}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to query.
-!     \item [{[typekind]}]
-!           The typekind of the attribute.
-!     \item [{[count]}]
-!           The number of items in this attribute.  For character types,
-!           the length of the character string.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-
-      integer :: status                           ! Error status
-      type(ESMF_TypeKind) :: localTk
-      integer :: localCount
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeGetAttrInfoName(bundle%btypep%base, name, &
-        localTk, localCount, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(typekind)) typekind = localTk
-      if (present(count)) count = localCount
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleGetAttrInfoByName
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGetAttrInfoByNum"
-!BOP
-! !IROUTINE: ESMF_BundleGetAttributeInfo - Query Bundle attributes by index number
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleGetAttributeInfo()
-      subroutine ESMF_BundleGetAttrInfoByNum(bundle, attributeIndex, name, &
-        typekind, count, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
-      integer, intent(in) :: attributeIndex
-      character(len=*), intent(out), optional :: name
-      type(ESMF_TypeKind), intent(out), optional :: typekind
-      integer, intent(out), optional :: count   
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Returns information associated with the indexed attribute, 
-!      including {\tt typekind} and item {\tt count}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [attributeIndex]
-!           The index number of the attribute to query.
-!     \item [name]
-!           Returns the name of the attribute.
-!     \item [{[typekind]}]
-!           The typekind of the attribute.
-!     \item [{[count]}]
-!           Returns the number of items in this attribute.  For character types,
-!           the length of the character string.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-
-      integer :: status                           ! Error status
-      character(len=ESMF_MAXSTR) :: localName
-      type(ESMF_TypeKind) :: localTk
-      integer :: localCount
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeGetAttrInfoNum(bundle%btypep%base, attributeIndex, &
-        localName, localTk, localCount, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(name)) name = localName
-      if (present(typekind)) typekind = localTk
-      if (present(count)) count = localCount
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleGetAttrInfoByNum
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleIsCongruent"
@@ -2633,785 +3407,6 @@ end function
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleRemoveField
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_BundleSetAttribute - Set an attribute
-!
-! !INTERFACE:
-!     subroutine ESMF_BundleSetAttribute(bundle, name, <value argument>, rc)
-!
-! !ARGUMENTS:
-!     type(ESMF_Bundle), intent(inout) :: bundle  
-!     character (len = *), intent(in) :: name
-!     <value argument>, see below for supported values
-!     integer, intent(out), optional :: rc   
-!
-!
-! !DESCRIPTION:
-!     Attaches an attribute to the {\tt bundle}.  
-!     The attribute has a {\tt name} and either a {\tt value} or a 
-!     {\tt valueList}.
-!     Supported values for the <value argument> are:
-!     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(in) :: value
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(in) :: valueList
-!     \item integer(ESMF\_KIND\_I8), intent(in) :: value
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(in) :: valueList
-!     \item real (ESMF\_KIND\_R4), intent(in) :: value
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(in) :: valueList
-!     \item real (ESMF\_KIND\_R8), intent(in) :: value
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(in) :: valueList
-!     \item type(ESMF\_Logical), intent(in) :: value
-!     \item type(ESMF\_Logical), dimension(:), intent(in) :: valueList
-!     \item character (len = *), intent(in), value
-!     \end{description}
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to set.
-!     \item [<value argument>]
-!           The value of the attribute to set.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleSetInt4Attr"
-!BOPI
-! !IROUTINE: ESMF_BundleSetAttribute - Set a 4-byte integer attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
-      subroutine ESMF_BundleSetInt4Attr(bundle, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
-      character (len = *), intent(in) :: name
-      integer(ESMF_KIND_I4), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches a 4-byte integer attribute to the {\tt bundle}.  
-!      The attribute has a {\tt name} and a {\tt value}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to set.
-!     \item [value]
-!           The integer value of the attribute to set.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: status                           ! Error status
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-        ESMF_TYPEKIND_I4, 1, value, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleSetInt4Attr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleSetInt4ListAttr"
-!BOPI
-! !IROUTINE: ESMF_BundleSetAttribute - Set a 4-byte integer list attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
-      subroutine ESMF_BundleSetInt4ListAttr(bundle, name, count, valueList, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Attaches a 4-byte integer list attribute to the {\tt bundle}.  
-!     The attribute has a {\tt name} and a {\tt valueList}.
-!     The number of integer items in the {\tt valueList} is given 
-!     by {\tt count}. 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to set.
-!     \item [count]
-!           The number of integers in the {\tt valueList}.
-!     \item [valueList]
-!           The integer values of the attribute to set.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-      integer :: status 
-      integer :: limit
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      limit = size(valueList)
-      if (count > limit) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than valueList", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-        ESMF_TYPEKIND_I4, count, valueList, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleSetInt4ListAttr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleSetInt8Attr"
-!BOPI
-! !IROUTINE: ESMF_BundleSetAttribute - Set an 8-byte integer attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
-      subroutine ESMF_BundleSetInt8Attr(bundle, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
-      character (len = *), intent(in) :: name
-      integer(ESMF_KIND_I8), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches an 8-byte integer attribute to the {\tt bundle}.  
-!      The attribute has a {\tt name} and a {\tt value}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to set.
-!     \item [value]
-!           The integer value of the attribute to set.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: status                           ! Error status
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-        ESMF_TYPEKIND_I8, 1, value, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleSetInt8Attr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleSetInt8ListAttr"
-!BOPI
-! !IROUTINE: ESMF_BundleSetAttribute - Set an 8-byte integer list attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
-      subroutine ESMF_BundleSetInt8ListAttr(bundle, name, count, valueList, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Attaches a 8-byte integer list attribute to the {\tt bundle}.  
-!     The attribute has a {\tt name} and a {\tt valueList}.
-!     The number of integer items in the {\tt valueList} is given 
-!     by {\tt count}. 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to set.
-!     \item [count]
-!           The number of integers in the {\tt valueList}.
-!     \item [valueList]
-!           The integer values of the attribute to set.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-      integer :: status
-      integer :: limit
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      limit = size(valueList)
-      if (count > limit) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than valueList", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-        ESMF_TYPEKIND_I8, count, valueList, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleSetInt8ListAttr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleSetReal4Attr"
-!BOPI
-! !IROUTINE: ESMF_BundleSetAttribute - Set a 4-byte real attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
-      subroutine ESMF_BundleSetReal4Attr(bundle, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
-      character (len = *), intent(in) :: name
-      real(ESMF_KIND_R4), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches a 4-byte real attribute to the {\tt bundle}.  
-!      The attribute has a {\tt name} and a {\tt value}. 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to set.
-!     \item [value]
-!           The real value of the attribute to set.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: status                           ! Error status
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-        ESMF_TYPEKIND_R4, 1, value, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleSetReal4Attr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleSetReal8Attr"
-!BOPI
-! !IROUTINE: ESMF_BundleSetAttribute - Set an 8-byte real attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
-      subroutine ESMF_BundleSetReal8Attr(bundle, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
-      character (len = *), intent(in) :: name
-      real(ESMF_KIND_R8), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches an 8-byte real attribute to the {\tt bundle}.  
-!      The attribute has a {\tt name} and a {\tt value}. 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to set.
-!     \item [value]
-!           The real value of the attribute to set.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: status                           ! Error status
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-        ESMF_TYPEKIND_R8, 1, value, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleSetReal8Attr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleSetReal4ListAttr"
-!BOPI
-! !IROUTINE: ESMF_BundleSetAttribute - Set a 4-byte real list attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
-      subroutine ESMF_BundleSetReal4ListAttr(bundle, name, count, valueList, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Attaches a 4-byte real list attribute to the {\tt bundle}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
-!     The number of real items in the {\tt valueList} is given 
-!     by {\tt count}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to set.
-!     \item [count]
-!           The number of reals in the {\tt valueList}.
-!     \item [value]
-!           The real values of the attribute to set.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-      integer :: limit
-      integer :: status                           ! Error status
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      limit = size(valueList)
-      if (count > limit) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than valueList", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-        ESMF_TYPEKIND_R4, count, valueList, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleSetReal4ListAttr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleSetReal8ListAttr"
-!BOPI
-! !IROUTINE: ESMF_BundleSetAttribute - Set an 8-byte real list attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
-      subroutine ESMF_BundleSetReal8ListAttr(bundle, name, count, valueList, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Attaches an 8-byte real list attribute to the {\tt bundle}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
-!     The number of real items in the {\tt valueList} is given 
-!     by {\tt count}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to set.
-!     \item [count]
-!           The number of reals in the {\tt valueList}.
-!     \item [value]
-!           The real values of the attribute to set.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-      integer :: limit
-      integer :: status                           ! Error status
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      limit = size(valueList)
-      if (count > limit) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than valueList", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-        ESMF_TYPEKIND_R8, count, valueList, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleSetReal8ListAttr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleSetLogicalAttr"
-!BOPI
-! !IROUTINE: ESMF_BundleSetAttribute - Set a logical attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
-      subroutine ESMF_BundleSetLogicalAttr(bundle, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
-      character (len = *), intent(in) :: name
-      type(ESMF_Logical), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches a logical attribute to the {\tt bundle}.
-!      The attribute has a {\tt name} and a {\tt value}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to set.
-!     \item [value]
-!           The logical true/false value of the attribute to set.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: status                           ! Error status
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleSetLogicalAttr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleSetLogicalListAttr"
-!BOPI
-! !IROUTINE: ESMF_BundleSetAttribute - Set a logical list attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
-      subroutine ESMF_BundleSetLogicalListAttr(bundle, name, count, valueList, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(in) :: valueList
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Attaches a logical list attribute to the {\tt bundle}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
-!     The number of logical items in the {\tt value} list is given 
-!     by {\tt count}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to set.
-!     \item [count]
-!           The number of logicals in the {\tt valueList}.
-!     \item [valueList]
-!           The logical values of the attribute to set.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-      integer :: limit
-      integer :: status                           ! Error status
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      limit = size(valueList)
-      if (count > limit) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than valueList", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleSetLogicalListAttr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleSetCharAttr"
-!BOPI
-! !IROUTINE: ESMF_BundleSetAttribute - Set a character attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_BundleSetAttribute()
-      subroutine ESMF_BundleSetCharAttr(bundle, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
-      character (len = *), intent(in) :: name
-      character (len = *), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches a character attribute to the {\tt bundle}.
-!      The attribute has a {\tt name} and a {\tt value}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           An {\tt ESMF\_Bundle} object.
-!     \item [name]
-!           The name of the attribute to set.
-!     \item [value]
-!           The character value of the attribute to set.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: status                           ! Error status
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeSetChar(bundle%btypep%base, name, value, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleSetCharAttr
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleSetDataValues"

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.32 2008/01/18 21:06:08 oehmke Exp $
+// $Id: ESMCI_Grid_F.C,v 1.33 2008/01/26 02:00:03 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -1618,11 +1618,11 @@ extern "C" {
 
   }  // end c_ESMC_AttributeGetChar
   
-  void FTN(c_esmc_gridgetattrinfoname)(ESMCI::Grid **grid, char *name, 
+  void FTN(c_esmc_gridattrgetinfoname)(ESMCI::Grid **grid, char *name, 
           ESMC_TypeKind *tk, int *count, int *rc, int nlen) {
 
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_gridattributegetattrinfoname()"
+#define ESMC_METHOD "c_esmc_gridattrgetinfoname()"
   
   char *cname;
 
@@ -1667,13 +1667,13 @@ extern "C" {
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
-  }  // end c_ESMC_AttributeGetAttrInfoName
+  }  // end c_ESMC_AttrGetInfoName
 
-  void FTN(c_esmc_gridgetattrinfonum)(ESMCI::Grid **grid, int *num,
+  void FTN(c_esmc_gridattrgetinfonum)(ESMCI::Grid **grid, int *num,
           char *name, ESMC_TypeKind *tk, int *count, int *rc, int nlen) {
           
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_gridattributegetattrinfonum()"          
+#define ESMC_METHOD "c_esmc_gridattrgetinfonum()"          
   
   char *cname;
 
@@ -1718,7 +1718,7 @@ extern "C" {
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
-  }  // end c_ESMC_AttributeGetAttrInfoNum
+  }  // end c_ESMC_AttrGetInfoNum
 
   void FTN(c_esmc_gridattributegetcount)(ESMCI::Grid **grid, int *count, int *rc) {
   
@@ -1748,11 +1748,11 @@ extern "C" {
 
   }  // end c_ESMC_AttributeGetCount
 
-void FTN(c_esmc_gridcreateattpack)(ESMCI::Grid **grid, char *name, char *convention,
+void FTN(c_esmc_gridattpackcreate)(ESMCI::Grid **grid, char *name, char *convention,
           char *purpose, char *object, int *rc, int nlen, int clen, int plen, int olen) {
           
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_gridcreateattpack()"          
+#define ESMC_METHOD "c_esmc_gridattpackcreate()"          
               
   int status;
   char *cname, *cconv, *cpurp, *cobj;
@@ -1834,7 +1834,7 @@ void FTN(c_esmc_gridcreateattpack)(ESMCI::Grid **grid, char *name, char *convent
   }
 
   // Set the attribute on the object.
-  *rc = (*grid)->ESMC_CreateAttPack(cname, cconv, cpurp, cobj);
+  *rc = (*grid)->ESMC_AttPackCreate(cname, cconv, cpurp, cobj);
 
   delete [] cname;
   delete [] cconv;
@@ -1844,14 +1844,14 @@ void FTN(c_esmc_gridcreateattpack)(ESMCI::Grid **grid, char *name, char *convent
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
-  }  // end c_ESMC_createattpack
+  }  // end c_ESMC_attpackcreate
 
-  void FTN(c_esmc_gridsetattpack)(ESMCI::Grid **grid, char *name, char *value,
+  void FTN(c_esmc_gridattpackset)(ESMCI::Grid **grid, char *name, char *value,
           char *convention, char *purpose,  char *object,
           int *rc, int nlen, int vlen, int clen, int plen, int olen) {
           
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_gridsetattpack()"          
+#define ESMC_METHOD "c_esmc_gridattpackset()"          
               
   int status;
   char *cname, *cvalue, *cconv, *cpurp, *cobj;
@@ -1947,7 +1947,7 @@ void FTN(c_esmc_gridcreateattpack)(ESMCI::Grid **grid, char *name, char *convent
   }
 
   // Set the attribute on the object.
-  *rc = (*grid)->ESMC_SetAttPack(cname, cvalue, cconv, cpurp, cobj);
+  *rc = (*grid)->ESMC_AttPackSet(cname, cvalue, cconv, cpurp, cobj);
 
   delete [] cname;
   delete [] cvalue;
@@ -1958,13 +1958,13 @@ void FTN(c_esmc_gridcreateattpack)(ESMCI::Grid **grid, char *name, char *convent
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
-  }  // end c_ESMC_setattpack
+  }  // end c_ESMC_attpackset
 
-  void FTN(c_esmc_gridwriteattpack)(ESMCI::Grid **grid, char *convention, char *purpose,
+  void FTN(c_esmc_gridattpackwrite)(ESMCI::Grid **grid, char *convention, char *purpose,
           char *object, int *rc, int clen, int plen, int olen) { 
           
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_gridwriteattpack()"
+#define ESMC_METHOD "c_esmc_gridattpackwrite()"
               
   int status;
   char *cconv, *cpurp, *cobj;
@@ -2029,7 +2029,7 @@ void FTN(c_esmc_gridcreateattpack)(ESMCI::Grid **grid, char *name, char *convent
   }
 
   // Set the attribute on the object.
-  *rc = (*grid)->ESMC_WriteAttPack(cconv, cpurp, cobj);
+  *rc = (*grid)->ESMC_AttPackWrite(cconv, cpurp, cobj);
 
   delete [] cconv;
   delete [] cpurp;
@@ -2038,7 +2038,7 @@ void FTN(c_esmc_gridcreateattpack)(ESMCI::Grid **grid, char *name, char *convent
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
-  }  // end c_ESMC_writeattpack
+  }  // end c_ESMC_attpackwrite
 
   ///////////////////////////////////////////////////////////////////////////////////
 

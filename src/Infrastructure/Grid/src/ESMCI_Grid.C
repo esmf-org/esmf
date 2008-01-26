@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.44 2008/01/18 21:06:08 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.45 2008/01/26 02:00:04 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.44 2008/01/18 21:06:08 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.45 2008/01/26 02:00:04 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -4023,12 +4023,12 @@ int Grid::attributeget(
 //-----------------------------------------------------------------------------
 
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Grid::createattpack()"
+#define ESMC_METHOD "ESMCI::Grid::attpackcreate()"
 //BOPI
-// !IROUTINE:  ESMCI::Grid::createattpack - Create a grid attribute package
+// !IROUTINE:  ESMCI::Grid::attpackcreate - Create a grid attribute package
 //
 // !INTERFACE:
-int Grid::createattpack(
+int Grid::attpackcreate(
 //
 // !RETURN VALUE:
 //    int return code
@@ -4048,7 +4048,7 @@ int Grid::createattpack(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  localrc = ESMC_Base::ESMC_CreateAttPack(name, convention, purpose, object);
+  localrc = ESMC_Base::ESMC_AttPackCreate(name, convention, purpose, object);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
@@ -4058,12 +4058,12 @@ int Grid::createattpack(
 //-----------------------------------------------------------------------------
 
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Grid::setattpack()"
+#define ESMC_METHOD "ESMCI::Grid::attpackset()"
 //BOPI
-// !IROUTINE:  ESMCI::Grid::setattpack - Set an attribute on a grid attribute package
+// !IROUTINE:  ESMCI::Grid::attpackset - Set an attribute on a grid attribute package
 //
 // !INTERFACE:
-int Grid::setattpack(
+int Grid::attpackset(
 //
 // !RETURN VALUE:
 //    int return code
@@ -4084,7 +4084,7 @@ int Grid::setattpack(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  localrc = ESMC_Base::ESMC_SetAttPack(name, value, convention, purpose, object);
+  localrc = ESMC_Base::ESMC_AttPackSet(name, value, convention, purpose, object);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
@@ -4094,12 +4094,12 @@ int Grid::setattpack(
 //-----------------------------------------------------------------------------
 
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Grid::writeattpack()"
+#define ESMC_METHOD "ESMCI::Grid::attpackwrite()"
 //BOPI
-// !IROUTINE:  ESMCI::Grid::writeattpack - Write out a grid attribute package
+// !IROUTINE:  ESMCI::Grid::attpackwrite - Write out a grid attribute package
 //
 // !INTERFACE:
-int Grid::writeattpack(
+int Grid::attpackwrite(
 //
 // !RETURN VALUE:
 //    int return code
@@ -4118,7 +4118,7 @@ int Grid::writeattpack(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  localrc = ESMC_Base::ESMC_WriteAttPack(convention, purpose, object);
+  localrc = ESMC_Base::ESMC_AttPackWrite(convention, purpose, object);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
