@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.89 2008/01/23 01:11:21 theurich Exp $
+// $Id: ESMC_Array.h,v 1.90 2008/01/26 01:57:48 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -216,11 +216,11 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     int attributeget(int num, char *name, ESMC_TypeKind *tk, int *count,
       void *value) const;
     int attributegetcount(void) const;
-    int createattpack(char *name, char *convention, char *purpose,
+    int attpackcreate(char *name, char *convention, char *purpose,
       char *object);
-    int setattpack(char *name, char *value, char *convention, char *purpose,
+    int attpackset(char *name, char *value, char *convention, char *purpose,
       char *object);
-    int writeattpack(char *convention, char *purpose, char *object) const;
+    int attpackwrite(char *convention, char *purpose, char *object) const;
     // comms
     int gather(void *array, ESMC_TypeKind typekind, int rank,
       int *counts, int *patch, int rootPet, VM *vm);

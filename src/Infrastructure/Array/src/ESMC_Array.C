@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.171 2008/01/23 01:11:21 theurich Exp $
+// $Id: ESMC_Array.C,v 1.172 2008/01/26 01:57:49 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.171 2008/01/23 01:11:21 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.172 2008/01/26 01:57:49 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -7876,12 +7876,12 @@ int Array::attributeget(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Array::createattpack()"
+#define ESMC_METHOD "ESMCI::Array::attpackcreate()"
 //BOPI
-// !IROUTINE:  ESMCI::Array::createattpack - Create a array attribute package
+// !IROUTINE:  ESMCI::Array::attpackcreate - Create a array attribute package
 //
 // !INTERFACE:
-int Array::createattpack(
+int Array::attpackcreate(
 //
 // !RETURN VALUE:
 //    int return code
@@ -7901,7 +7901,7 @@ int Array::createattpack(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  localrc = ESMC_Base::ESMC_CreateAttPack(name, convention, purpose, object);
+  localrc = ESMC_Base::ESMC_AttPackCreate(name, convention, purpose, object);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
@@ -7913,12 +7913,12 @@ int Array::createattpack(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Array::setattpack()"
+#define ESMC_METHOD "ESMCI::Array::attpackset()"
 //BOPI
-// !IROUTINE:  ESMCI::Array::setattpack - Set an attribute on a array attribute package
+// !IROUTINE:  ESMCI::Array::attpackset - Set an attribute on a array attribute package
 //
 // !INTERFACE:
-int Array::setattpack(
+int Array::attpackset(
 //
 // !RETURN VALUE:
 //    int return code
@@ -7939,7 +7939,7 @@ int Array::setattpack(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  localrc = ESMC_Base::ESMC_SetAttPack(name, value, convention, purpose,
+  localrc = ESMC_Base::ESMC_AttPackSet(name, value, convention, purpose,
     object);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
@@ -7952,12 +7952,12 @@ int Array::setattpack(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Array::writeattpack()"
+#define ESMC_METHOD "ESMCI::Array::attpackwrite()"
 //BOPI
-// !IROUTINE:  ESMCI::Array::writeattpack - Write out a array attribute package
+// !IROUTINE:  ESMCI::Array::attpackwrite - Write out a array attribute package
 //
 // !INTERFACE:
-int Array::writeattpack(
+int Array::attpackwrite(
 //
 // !RETURN VALUE:
 //    int return code
@@ -7976,7 +7976,7 @@ int Array::writeattpack(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  localrc = ESMC_Base::ESMC_WriteAttPack(convention, purpose, object);
+  localrc = ESMC_Base::ESMC_AttPackWrite(convention, purpose, object);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 

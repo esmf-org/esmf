@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.78 2008/01/23 01:11:21 theurich Exp $
+// $Id: ESMC_Array_F.C,v 1.79 2008/01/26 01:57:48 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -1076,11 +1076,11 @@ extern "C" {
 
   }  // end c_ESMC_AttributeGetChar
   
-  void FTN(c_esmc_arraygetattrinfoname)(ESMCI::Array **array, char *name, 
+  void FTN(c_esmc_arrayattrgetinfoname)(ESMCI::Array **array, char *name, 
           ESMC_TypeKind *tk, int *count, int *rc, int nlen) {
 
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arrayattributegetattrinfoname()"
+#define ESMC_METHOD "c_esmc_arrayattrgetinfoname()"
   
   char *cname;
 
@@ -1125,13 +1125,13 @@ extern "C" {
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
-  }  // end c_ESMC_AttributeGetAttrInfoName
+  }  // end c_ESMC_AttrGetInfoName
 
-  void FTN(c_esmc_arraygetattrinfonum)(ESMCI::Array **array, int *num,
+  void FTN(c_esmc_arrayattrgetinfonum)(ESMCI::Array **array, int *num,
           char *name, ESMC_TypeKind *tk, int *count, int *rc, int nlen) {
           
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arrayattributegetattrinfonum()"          
+#define ESMC_METHOD "c_esmc_arrayattrgetinfonum()"          
   
   char *cname;
 
@@ -1176,7 +1176,7 @@ extern "C" {
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
-  }  // end c_ESMC_AttributeGetAttrInfoNum
+  }  // end c_ESMC_AttrGetInfoNum
 
   void FTN(c_esmc_arrayattributegetcount)(ESMCI::Array **array, int *count, int *rc) {
   
@@ -1206,11 +1206,11 @@ extern "C" {
 
   }  // end c_ESMC_AttributeGetCount
 
-void FTN(c_esmc_arraycreateattpack)(ESMCI::Array **array, char *name, char *convention,
+void FTN(c_esmc_arrayattpackcreate)(ESMCI::Array **array, char *name, char *convention,
           char *purpose, char *object, int *rc, int nlen, int clen, int plen, int olen) {
           
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arraycreateattpack()"          
+#define ESMC_METHOD "c_esmc_arrayattpackcreate()"          
               
   int status;
   char *cname, *cconv, *cpurp, *cobj;
@@ -1292,7 +1292,7 @@ void FTN(c_esmc_arraycreateattpack)(ESMCI::Array **array, char *name, char *conv
   }
 
   // Set the attribute on the object.
-  *rc = (*array)->ESMC_CreateAttPack(cname, cconv, cpurp, cobj);
+  *rc = (*array)->ESMC_AttPackCreate(cname, cconv, cpurp, cobj);
 
   delete [] cname;
   delete [] cconv;
@@ -1302,14 +1302,14 @@ void FTN(c_esmc_arraycreateattpack)(ESMCI::Array **array, char *name, char *conv
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
-  }  // end c_ESMC_createattpack
+  }  // end c_ESMC_attpackcreate
 
-  void FTN(c_esmc_arraysetattpack)(ESMCI::Array **array, char *name, char *value,
+  void FTN(c_esmc_arrayattpackset)(ESMCI::Array **array, char *name, char *value,
           char *convention, char *purpose,  char *object,
           int *rc, int nlen, int vlen, int clen, int plen, int olen) {
           
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arraysetattpack()"          
+#define ESMC_METHOD "c_esmc_arrayattpackset()"          
               
   int status;
   char *cname, *cvalue, *cconv, *cpurp, *cobj;
@@ -1405,7 +1405,7 @@ void FTN(c_esmc_arraycreateattpack)(ESMCI::Array **array, char *name, char *conv
   }
 
   // Set the attribute on the object.
-  *rc = (*array)->ESMC_SetAttPack(cname, cvalue, cconv, cpurp, cobj);
+  *rc = (*array)->ESMC_AttPackSet(cname, cvalue, cconv, cpurp, cobj);
 
   delete [] cname;
   delete [] cvalue;
@@ -1416,13 +1416,13 @@ void FTN(c_esmc_arraycreateattpack)(ESMCI::Array **array, char *name, char *conv
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
-  }  // end c_ESMC_setattpack
+  }  // end c_ESMC_attpackset
 
-  void FTN(c_esmc_arraywriteattpack)(ESMCI::Array **array, char *convention, char *purpose,
+  void FTN(c_esmc_arrayattpackwrite)(ESMCI::Array **array, char *convention, char *purpose,
           char *object, int *rc, int clen, int plen, int olen) { 
           
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arraywriteattpack()"
+#define ESMC_METHOD "c_esmc_arrayattpackwrite()"
               
   int status;
   char *cconv, *cpurp, *cobj;
@@ -1487,7 +1487,7 @@ void FTN(c_esmc_arraycreateattpack)(ESMCI::Array **array, char *name, char *conv
   }
 
   // Set the attribute on the object.
-  *rc = (*array)->ESMC_WriteAttPack(cconv, cpurp, cobj);
+  *rc = (*array)->ESMC_AttPackWrite(cconv, cpurp, cobj);
 
   delete [] cconv;
   delete [] cpurp;
@@ -1496,7 +1496,7 @@ void FTN(c_esmc_arraycreateattpack)(ESMCI::Array **array, char *name, char *conv
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
-  }  // end c_ESMC_writeattpack
+  }  // end c_ESMC_attpackwrite
 
 #undef  ESMC_METHOD
 }
