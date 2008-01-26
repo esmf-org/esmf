@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.4 2008/01/26 01:54:22 rokuingh Exp $
+! $Id: user_coupler.F90,v 1.5 2008/01/26 02:10:15 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -80,8 +80,8 @@ module user_coupler
     forward_init=0
     backward_init=0
 
-    !call ESMF_StateGet(importState, itemcount=imp_items, rc=rc)
-    !call ESMF_StateGet(exportState, itemcount=exp_items, rc=rc)
+    call ESMF_StateGet(importState, itemcount=imp_items, rc=rc)
+    call ESMF_StateGet(exportState, itemcount=exp_items, rc=rc)
     !print  *, 'Import state has ', imp_items, ' items' 
     !print  *, 'Export state has ', exp_items, ' items' 
 
@@ -143,8 +143,8 @@ module user_coupler
     forward_run=0
     backward_run=0
 
-    !call ESMF_StateGet(importState, itemcount=imp_items, rc=rc)
-    !call ESMF_StateGet(exportState, itemcount=exp_items, rc=rc)
+    call ESMF_StateGet(importState, itemcount=imp_items, rc=rc)
+    call ESMF_StateGet(exportState, itemcount=exp_items, rc=rc)
     !print  *, 'Import state has ', imp_items, ' items' 
     !print  *, 'Export state has ', exp_items, ' items' 
 
