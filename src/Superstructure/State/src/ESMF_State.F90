@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.123 2008/01/26 02:01:53 rokuingh Exp $
+! $Id: ESMF_State.F90,v 1.124 2008/01/26 02:11:20 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@
       public ESMF_StateGetRouteHandle, ESMF_StateGetState
       public ESMF_StateGetItemInfo
 
-      public ESMF_StateAttrGet
+      public ESMF_StateGet
       public ESMF_StateSetNeeded, ESMF_StateGetNeeded
       public ESMF_StateIsNeeded
 
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.123 2008/01/26 02:01:53 rokuingh Exp $'
+      '$Id: ESMF_State.F90,v 1.124 2008/01/26 02:11:20 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -3313,12 +3313,12 @@ end interface
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateAttrGet"
+#define ESMF_METHOD "ESMF_StateGet"
 !BOP
-! !IROUTINE: ESMF_StateAttrGet - Get information about a State
+! !IROUTINE: ESMF_StateGet - Get information about a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StateAttrGet(state, name, statetype, itemCount, &
+      subroutine ESMF_StateGet(state, name, statetype, itemCount, &
                                itemNameList, stateitemtypeList, rc)
 !
 ! !ARGUMENTS:
@@ -3402,7 +3402,7 @@ end interface
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StateAttrGet
+      end subroutine ESMF_StateGet
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
