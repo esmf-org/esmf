@@ -172,12 +172,12 @@ program ESMF_AttributeSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
   
-  !call ESMF_StateSetAttPack(c1imp, name, value, convention=conv, purpose=purp, rc=rc)
+  !call ESMF_StateAttPackSet(c1imp, name, value, convention=conv, purpose=purp, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
   
-  !call ESMF_StateWriteAttPack(c1imp, convention=conv, purpose=purp, rc=rc)
+  !call ESMF_StateAttPackWrite(c1imp, convention=conv, purpose=purp, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -208,7 +208,7 @@ program ESMF_AttributeSTest
  
   ! note that the coupler's import is comp1's export state
   ! and coupler's export is comp2's import state
-  call ESMF_StateSetAttribute(c2imp, forward_init, f_i, rc=rc)
+  call ESMF_StateAttributeSet(c2imp, forward_init, f_i, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -216,7 +216,7 @@ program ESMF_AttributeSTest
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
- call ESMF_StateSetAttribute(c1imp, backward_init, b_i, rc=rc)
+ call ESMF_StateAttributeSet(c1imp, backward_init, b_i, rc=rc)
  if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -241,7 +241,7 @@ program ESMF_AttributeSTest
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
   !print  *, "Comp 1 Run 1 returned, rc =", rc
 
-  call ESMF_StateSetAttribute(c2imp, forward_run, f_r, rc=rc)
+  call ESMF_StateAttributeSet(c2imp, forward_run, f_r, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -257,7 +257,7 @@ program ESMF_AttributeSTest
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
   !print  *, "Comp 2 Run 1 returned, rc =", rc
 
-  call ESMF_StateSetAttribute(c1imp, backward_run, b_r, rc=rc)
+  call ESMF_StateAttributeSet(c1imp, backward_run, b_r, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)

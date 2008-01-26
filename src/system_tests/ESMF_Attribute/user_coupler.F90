@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.3 2008/01/23 17:15:44 rokuingh Exp $
+! $Id: user_coupler.F90,v 1.4 2008/01/26 01:54:22 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -80,8 +80,8 @@ module user_coupler
     forward_init=0
     backward_init=0
 
-    call ESMF_StateGet(importState, itemcount=imp_items, rc=rc)
-    call ESMF_StateGet(exportState, itemcount=exp_items, rc=rc)
+    !call ESMF_StateGet(importState, itemcount=imp_items, rc=rc)
+    !call ESMF_StateGet(exportState, itemcount=exp_items, rc=rc)
     !print  *, 'Import state has ', imp_items, ' items' 
     !print  *, 'Export state has ', exp_items, ' items' 
 
@@ -97,8 +97,8 @@ module user_coupler
     if (status .ne. ESMF_SUCCESS) goto 10
 
     ! Get the direction of coupling initialization
-    call ESMF_StateGetAttributeInfo(exportState, "forward_init", rc=forward_init)
-    call ESMF_StateGetAttributeInfo(exportState, "backward_init", rc=backward_init)
+    call ESMF_StateAttributeGetInfo(exportState, "forward_init", rc=forward_init)
+    call ESMF_StateAttributeGetInfo(exportState, "backward_init", rc=backward_init)
 
     ! Forward coupling initialization
     if (forward_init .eq. ESMF_SUCCESS) then
@@ -143,8 +143,8 @@ module user_coupler
     forward_run=0
     backward_run=0
 
-    call ESMF_StateGet(importState, itemcount=imp_items, rc=rc)
-    call ESMF_StateGet(exportState, itemcount=exp_items, rc=rc)
+    !call ESMF_StateGet(importState, itemcount=imp_items, rc=rc)
+    !call ESMF_StateGet(exportState, itemcount=exp_items, rc=rc)
     !print  *, 'Import state has ', imp_items, ' items' 
     !print  *, 'Export state has ', exp_items, ' items' 
 
@@ -159,8 +159,8 @@ module user_coupler
     if (status .ne. ESMF_SUCCESS) goto 20
 
     ! Get the direction from the exportState
-    call ESMF_StateGetAttributeInfo(exportState, "forward_run", rc=forward_run)
-    call ESMF_StateGetAttributeInfo(exportState, "backward_run", rc=backward_run)
+    call ESMF_StateAttributeGetInfo(exportState, "forward_run", rc=forward_run)
+    call ESMF_StateAttributeGetInfo(exportState, "backward_run", rc=backward_run)
 
     ! If this is forward coupling
     if (forward_run .eq. ESMF_SUCCESS) then

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.9 2008/01/23 17:15:44 rokuingh Exp $
+! $Id: user_model1.F90,v 1.10 2008/01/26 01:54:22 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -124,7 +124,7 @@ module user_model1
     if (status .ne. ESMF_SUCCESS) goto 20
 
     ! Get the direction of the run
-    call ESMF_StateGetAttributeInfo(importState, "backward_run", rc=backward_run)
+    call ESMF_StateAttributeGetInfo(importState, "backward_run", rc=backward_run)
     if (status .ne. ESMF_SUCCESS) goto 20
 
     ! if this is the forward interpolation
@@ -173,7 +173,7 @@ module user_model1
       grid = ESMF_GridCreateEmpty(rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
 
-      call ESMF_GridSetAttribute(grid, name, value, rc=status)
+      call ESMF_GridAttributeSet(grid, name, value, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       if (myPet .eq. 0) then
         print *, 'Set an attribute on the grid with:'
@@ -181,7 +181,7 @@ module user_model1
         print *, 'value: ', value
       endif
       
-      call ESMF_GridGetAttribute(grid, name, value, rc=status)
+      call ESMF_GridAttributeGet(grid, name, value, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       if (myPet .eq. 0) then
         print *, 'Get an attribute on the grid with:'
@@ -202,7 +202,7 @@ module user_model1
       array = ESMF_ArrayCreate(arrayspec, distgrid, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
 
-      call ESMF_ArraySetAttribute(array, name, value, rc=status)
+      call ESMF_ArrayAttributeSet(array, name, value, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       if (myPet .eq. 0) then
         print *, 'Set an attribute on the array with:'
@@ -210,7 +210,7 @@ module user_model1
         print *, 'value: ', value
       endif
       
-      call ESMF_ArrayGetAttribute(array, name, value, rc=status)
+      call ESMF_ArrayAttributeGet(array, name, value, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       if (myPet .eq. 0) then
         print *, 'Get an attribute on the array with:'
@@ -218,10 +218,10 @@ module user_model1
         print *, 'value: ', value
       endif
 
-      call ESMF_ArrayCreateAttPack(array, convention=fconv, purpose=fpurp, rc=status)
+      call ESMF_ArrayAttPackCreate(array, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       
-      call ESMF_ArraySetAttPack(array, name, value, convention=fconv, purpose=fpurp, rc=status)
+      call ESMF_ArrayAttPackSet(array, name, value, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
 
       if (myPet .eq. 0) then
@@ -241,7 +241,7 @@ module user_model1
         if (status .ne. ESMF_SUCCESS) goto 20
         
         print *, 'Write the Array Attpack from the second run of component 1.'
-        call ESMF_ArrayWriteAttPack(array, convention=fconv, purpose=fpurp, rc=rc)
+        call ESMF_ArrayAttPackWrite(array, convention=fconv, purpose=fpurp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
       endif
     endif
