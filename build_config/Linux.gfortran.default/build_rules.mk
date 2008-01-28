@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.5.2.3 2007/10/18 23:06:41 theurich Exp $
+# $Id: build_rules.mk,v 1.5.2.4 2008/01/28 17:33:47 theurich Exp $
 #
 # Linux.gfortran.default
 #
@@ -74,20 +74,40 @@ ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v --version
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 
 ############################################################
-# Fortran symbol convention must match other libraries used
+# Construct the ABISTRING
 #
-ESMF_F90COMPILEOPTS       += -fno-second-underscore
-ESMF_F90LINKOPTS          += -fno-second-underscore
+ifeq ($(ESMF_MACHINE),ia64)
+ifeq ($(ESMF_ABI),32)
+ESMF_ABISTRING := $(ESMF_MACHINE)_32
+endif
+ifeq ($(ESMF_ABI),64)
+ESMF_ABISTRING := $(ESMF_MACHINE)_64
+endif
+endif
+ifeq ($(ESMF_MACHINE),x86_64)
+ifeq ($(ESMF_ABI),32)
+ESMF_ABISTRING := $(ESMF_MACHINE)_32
+endif
+ifeq ($(ESMF_ABI),64)
+ESMF_ABISTRING := x86_64_small
+endif
+endif
 
 ############################################################
-# On IA64 set long and pointer types to 64-bit
+# Set memory model compiler flags according to ABISTRING
 #
-ifeq ($(ESMF_ABI),64)
+ifeq ($(ESMF_ABISTRING),x86_64_medium)
 ESMF_CXXCOMPILEOPTS       += -march=k8 -m64 -mcmodel=medium
 ESMF_CXXLINKOPTS          += -march=k8 -m64 -mcmodel=medium
 ESMF_F90COMPILEOPTS       += -march=k8 -m64 -mcmodel=medium
 ESMF_F90LINKOPTS          += -march=k8 -m64 -mcmodel=medium
 endif
+
+############################################################
+# Fortran symbol convention must match other libraries used
+#
+ESMF_F90COMPILEOPTS       += -fno-second-underscore
+ESMF_F90LINKOPTS          += -fno-second-underscore
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)
