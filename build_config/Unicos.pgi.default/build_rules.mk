@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.1.2.5 2006/10/20 18:26:45 theurich Exp $
+# $Id: build_rules.mk,v 1.1.2.6 2008/01/29 18:38:25 svasquez Exp $
 #
 # Unicos.pgi.default
 #
@@ -31,6 +31,9 @@ ifeq ($(ESMF_COMM),mpi)
 ESMF_F90LINKLIBS       += 
 ESMF_CXXLINKLIBS       += 
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.yod
+ifeq ($(ESMF_BATCH),xt3.batch)
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.xt3.batch
+endif
 ESMF_MPIMPMDRUNDEFAULT  =
 else
 ifeq ($(ESMF_COMM),user)
