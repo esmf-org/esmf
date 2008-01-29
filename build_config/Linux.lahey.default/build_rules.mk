@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.20.2.11 2006/09/19 06:01:26 theurich Exp $
+# $Id: build_rules.mk,v 1.20.2.12 2008/01/29 22:07:26 theurich Exp $
 #
 # Linux.lahey.default
 #
@@ -7,6 +7,7 @@
 # Default compiler setting.
 #
 ESMF_F90DEFAULT         = lf95
+ESMF_F90LINKERDEFAULT   = g++
 ESMF_CXXDEFAULT         = g++
 
 ############################################################
@@ -101,6 +102,11 @@ ESMF_F90LINKRPATHS += $(addprefix $(ESMF_RPATHPREFIXFIXED), $(shell $(ESMF_DIR)/
 # Link against libesmf.a using the C++ linker front-end
 #
 ESMF_CXXLINKLIBS += -lrt $(shell $(ESMF_DIR)/scripts/libs.lf95 $(ESMF_F90COMPILER))
+
+############################################################
+# Link against libesmf.a using the F90 linker front-end
+#
+ESMF_F90LINKLIBS += -lrt $(shell $(ESMF_DIR)/scripts/libs.lf95 $(ESMF_F90COMPILER)) $(shell $(ESMF_DIR)/scripts/libpath.lf95 $(ESMF_F90COMPILER))/fj90rt0.o
 
 ############################################################
 # Shared library options
