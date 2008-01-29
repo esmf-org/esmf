@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.5.2.6 2008/01/29 17:42:08 theurich Exp $
+# $Id: build_rules.mk,v 1.5.2.7 2008/01/29 18:41:50 theurich Exp $
 #
 # Linux.gfortran.default
 #
@@ -77,9 +77,7 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 # Construct the ABISTRING
 #
 ifeq ($(ESMF_MACHINE),ia64)
-ifeq ($(ESMF_ABI),32)
-ESMF_ABISTRING := $(ESMF_MACHINE)_32
-endif
+$(error Invalid ESMF_MACHINE / ESMF_ABI combination: $(ESMF_MACHINE) / $(ESMF_ABI))
 ifeq ($(ESMF_ABI),64)
 ESMF_ABISTRING := $(ESMF_MACHINE)_64
 endif
