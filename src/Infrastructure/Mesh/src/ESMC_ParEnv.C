@@ -39,16 +39,10 @@ int Par::psize = 0;
 bool Par::serial = false;
 ParLog *Par::log = NULL;
 
-void Par::Init(int &argc, char **&argv, const std::string &logfile, bool _serial) {
-  serial = _serial;
-  if (!serial) {
-    MPI_Init(&argc, &argv);
-    MPI_Comm_size(MPI_COMM_WORLD, &psize);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  } else {
-    psize = 1;
-    rank = 0;
-  }
+void Par::Init(const std::string &logfile) {
+  //  MPI_Init(&argc, &argv);  // already done by ESMF framework
+  MPI_Comm_size(MPI_COMM_WORLD, &psize);
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   log = ParLog::instance(logfile, rank);
 }
 

@@ -44,7 +44,7 @@ ParLog &operator=(const ParLog&);
 /// *********** Wrap MPI junk *************
 class Par {
 public:
-static void Init(int &argc, char **&argv, const std::string &logfile= "PARLOG", bool _serial=false);
+static void Init(const std::string &logfile= "PARLOG");
 static void Abort();
 static void End();
 static MPI_Comm Comm() { return MPI_COMM_WORLD;}

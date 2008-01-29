@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.4 2008/01/24 17:35:36 dneckels Exp $
+// $Id: ESMC_GridToMesh.C,v 1.5 2008/01/29 19:51:59 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -32,6 +32,7 @@
 #include "ESMC_Ptypes.h"
 #include <Mesh/include/ESMC_Mesh.h>
 #include <Mesh/include/ESMC_IOField.h>
+#include <Mesh/include/ESMC_ParEnv.h>
 
 #include <limits>
 #include <iostream>
@@ -67,10 +68,14 @@ namespace ESMCI {
 // and, maybe, for simple single patch grids with a periodic component,
 // the dual, which is not so bad.  This will put us equivalent with
 // SCRIP.  
-void GridToMesh(const Grid &grid, int staggerLoc, ESMC::Mesh &mesh) {
+void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
+
+  // Initialize the parallel environment for mesh (if not already done)
+  ESMC::Par::Init("MESHLOG");
+
+  Grid &grid = const_cast<Grid&>(grid_);
 
 
-#ifdef NOT
 
  try {
 
@@ -212,7 +217,7 @@ void GridToMesh(const Grid &grid, int staggerLoc, ESMC::Mesh &mesh) {
      gni->getCoord(c);
     } else { // set to Null value to be ghosted later
       for (int i=0; i<sdim; i++) {
-        c[i]=std::numeric_limits<double>:max();
+        c[i]=std::numeric_limits<double>::max();
       }
     }
 
@@ -223,7 +228,9 @@ void GridToMesh(const Grid &grid, int staggerLoc, ESMC::Mesh &mesh) {
    // ** That's it.  The mesh is now in the pre-commit phase, so other
    // fields can be registered, sides/faces can be turned on, etc, or one
    // can simply call mesh.Commit() and then proceed.
-   mesh.Print(std::cout);
+   char buf[512];
+   //std::sprintf(buf, "g2m.%05d.txt", )
+   mesh.Print(Par::Out());
 
  
 
@@ -239,7 +246,6 @@ void GridToMesh(const Grid &grid, int staggerLoc, ESMC::Mesh &mesh) {
 
  }
 
-#endif
 
 }
 
