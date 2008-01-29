@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.296 2008/01/26 01:56:09 rokuingh Exp $
+! $Id: ESMF_Field.F90,v 1.297 2008/01/29 18:15:56 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -204,7 +204,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.296 2008/01/26 01:56:09 rokuingh Exp $'
+      '$Id: ESMF_Field.F90,v 1.297 2008/01/29 18:15:56 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -287,7 +287,7 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_FieldSetAttribute  - Set Field attributes
+! !IROUTINE: ESMF_FieldAttributeSet  - Set Field attributes
 !
 ! !INTERFACE:
       interface ESMF_FieldAttributeSet 
@@ -314,7 +314,7 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_FieldGetAttribute  - Get Field attributes
+! !IROUTINE: ESMF_FieldAttributeGet  - Get Field attributes
 !
 ! !INTERFACE:
       interface ESMF_FieldAttributeGet
@@ -341,7 +341,7 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_FieldGetAttributeInfo - Get type, count from a Field attribute
+! !IROUTINE: ESMF_FieldAttributeGetInfo - Get type, count from a Field attribute
 !
 ! !INTERFACE:
       interface ESMF_FieldAttributeGetInfo

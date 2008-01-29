@@ -1,5 +1,5 @@
 
-! $Id: ESMF_Bundle.F90,v 1.120 2008/01/26 02:00:56 rokuingh Exp $
+! $Id: ESMF_Bundle.F90,v 1.121 2008/01/29 18:15:55 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -340,7 +340,7 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_BundleSetAttribute - Set a Bundle attribute
+! !IROUTINE: ESMF_BundleAttributeSet - Set a Bundle attribute
 !
 ! !INTERFACE:
       interface ESMF_BundleAttributeSet
@@ -367,7 +367,7 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_BundleGetAttribute - Get a Bundle attribute
+! !IROUTINE: ESMF_BundleAttributeGet - Get a Bundle attribute
 !
 ! !INTERFACE:
       interface ESMF_BundleAttributeGet 
@@ -394,7 +394,7 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_BundleGetAttributeInfo - Get type, count from a Bundle attribute
+! !IROUTINE: ESMF_BundleAttributeGetInfo - Get type, count from a Bundle attribute
 !
 ! !INTERFACE:
       interface ESMF_BundleAttributeGetInfo

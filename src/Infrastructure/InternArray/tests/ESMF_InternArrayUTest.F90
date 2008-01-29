@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayUTest.F90,v 1.15 2007/08/30 05:06:37 cdeluca Exp $
+! $Id: ESMF_InternArrayUTest.F90,v 1.16 2008/01/29 18:15:59 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InternArrayUTest.F90,v 1.15 2007/08/30 05:06:37 cdeluca Exp $'
+      '$Id: ESMF_InternArrayUTest.F90,v 1.16 2008/01/29 18:15:59 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -171,7 +171,7 @@
     !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED" 
     write(name, *) "Set an Attribute from a destroyed Array Test"
-    call ESMF_IArrayGetAttributeCount(array1, attribute, rc=rc)
+    call ESMF_IArrayAttributeGetCount(array1, attribute, rc=rc)
     call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -180,7 +180,7 @@
     !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED" 
     write(name, *) "Set an Attribute from a non-created Array Test"
-    call ESMF_IArrayGetAttributeCount(array2, attribute, rc=rc)
+    call ESMF_IArrayAttributeGetCount(array2, attribute, rc=rc)
     call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -189,7 +189,7 @@
     !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
     write(name, *) "Set an Attribute in a destroyed Array Test"
-    call ESMF_IArraySetAttribute(array1, "test_attribute", 123456789, rc=rc)
+    call ESMF_IArrayAttributeSet(array1, "test_attribute", 123456789, rc=rc)
     call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -198,7 +198,7 @@
     !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
     write(name, *) "Set an Attribute in a non-created Array Test"
-    call ESMF_IArraySetAttribute(array2, "test_attribute", 123456789, rc=rc)
+    call ESMF_IArrayAttributeSet(array2, "test_attribute", 123456789, rc=rc)
     call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -207,7 +207,7 @@
     !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED" 
     write(name, *) "Get Attribute Info from a deleted Array Test"
-    call ESMF_IArrayGetAttributeInfo(array1, "test_attribute", &
+    call ESMF_IArrayAttributeGetInfo(array1, "test_attribute", &
       typekind=att_typekind, count=att_count, rc=rc)
     call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
 
@@ -217,7 +217,7 @@
     !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED" 
     write(name, *) "Get Attribute Info from a non-created Array Test"
-    call ESMF_IArrayGetAttributeInfo(array2, "test_attribute", &
+    call ESMF_IArrayAttributeGetInfo(array2, "test_attribute", &
       typekind=att_typekind, count=att_count, rc=rc)
     call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
@@ -307,7 +307,7 @@
     !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Set an Attribute in an Array Test"
-    call ESMF_IArrayGetAttributeCount(array1, attribute, rc=rc)
+    call ESMF_IArrayAttributeGetCount(array1, attribute, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -324,7 +324,7 @@
     !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Set an Attribute in an Array Test"
-    call ESMF_IArraySetAttribute(array1, "test_attribute", 123456789, rc=rc)
+    call ESMF_IArrayAttributeSet(array1, "test_attribute", 123456789, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -333,7 +333,7 @@
     !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Set an Attribute in an Array Test"
-    call ESMF_IArraySetAttribute(array1, "test_attribute1", 0, rc=rc)
+    call ESMF_IArrayAttributeSet(array1, "test_attribute1", 0, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -342,7 +342,7 @@
     !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Set an Attribute in an Array Test"
-    call ESMF_IArraySetAttribute(array1, "test_attribute2", 0.0, rc=rc)
+    call ESMF_IArrayAttributeSet(array1, "test_attribute2", 0.0, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -351,7 +351,7 @@
     !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Set an Attribute in an Array Test"
-    call ESMF_IArraySetAttribute(array1, "test_attribute3", 6789, rc=rc)
+    call ESMF_IArrayAttributeSet(array1, "test_attribute3", 6789, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -360,7 +360,7 @@
     !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Set an Attribute in an Array Test"
-    call ESMF_IArraySetAttribute(array1, "test_attribute4", 5.87, rc=rc)
+    call ESMF_IArrayAttributeSet(array1, "test_attribute4", 5.87, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -369,7 +369,7 @@
     !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Get Attribute Count from an Array Test"
-    call ESMF_IArrayGetAttributeCount(array1, attribute, rc=rc)
+    call ESMF_IArrayAttributeGetCount(array1, attribute, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -386,7 +386,7 @@
     !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Get an Attribute from an Array Test"
-    call ESMF_IArrayGetAttribute(array1, "test_attribute", attribute, rc=rc)
+    call ESMF_IArrayAttributeGet(array1, "test_attribute", attribute, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -402,7 +402,7 @@
     !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Get Attribute Info from an Array Test"
-    call ESMF_IArrayGetAttributeInfo(array1, "test_attribute", &
+    call ESMF_IArrayAttributeGetInfo(array1, "test_attribute", &
       typekind=att_typekind, count=att_count, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -428,7 +428,7 @@
     !EX_removeUTest
     write(failMsg, *) "Should not return ESMF_SUCCESS" 
     write(name, *) "Get a Wrong typekind Attribute from an Array Test"
-    call ESMF_IArrayGetAttribute(array1, "test_attribute4", attribute, rc=rc)
+    call ESMF_IArrayAttributeGet(array1, "test_attribute4", attribute, rc=rc)
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -437,7 +437,7 @@
     !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Get an Attribute from an Array Test"
-    call ESMF_IArrayGetAttribute(array1, "test_attribute4", attribute4, rc=rc)
+    call ESMF_IArrayAttributeGet(array1, "test_attribute4", attribute4, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -455,7 +455,7 @@
     !EX_removeUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Get Attribute Info from an Array Test"
-    call ESMF_IArrayGetAttributeInfo(array1, "test_attribute4", &
+    call ESMF_IArrayAttributeGetInfo(array1, "test_attribute4", &
       typekind=att_typekind, count=att_count, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.79 2008/01/28 15:35:04 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.80 2008/01/29 18:15:54 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -138,7 +138,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.79 2008/01/28 15:35:04 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.80 2008/01/29 18:15:54 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -230,7 +230,7 @@ module ESMF_ArrayMod
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_ArraySetAttribute  - Set Array attributes
+! !IROUTINE: ESMF_ArrayAttributeSet  - Set Array attributes
 !
 ! !INTERFACE:
       interface ESMF_ArrayAttributeSet 
@@ -257,7 +257,7 @@ module ESMF_ArrayMod
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_ArrayGetAttribute  - Get Array attributes
+! !IROUTINE: ESMF_ArrayAttributeGet  - Get Array attributes
 !
 ! !INTERFACE:
       interface ESMF_ArrayAttributeGet 
@@ -284,7 +284,7 @@ module ESMF_ArrayMod
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_ArrayGetAttributeInfo - Get type, count from a Array attribute
+! !IROUTINE: ESMF_ArrayAttributeGetInfo - Get type, count from a Array attribute
 !
 ! !INTERFACE:
       interface ESMF_ArrayAttributeGetInfo

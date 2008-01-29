@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.31 2008/01/18 21:06:08 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.32 2008/01/29 18:15:57 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1599,7 +1599,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !removeEOE
 
 !removeBOC
-   call ESMF_GridSetAttribute(grid, "Size", 10, rc=rc)
+   call ESMF_GridAttributeSet(grid, "Size", 10, rc=rc)
 !removeEOC
 #endif
 

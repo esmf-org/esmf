@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.61 2007/12/13 21:36:58 feiliu Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.62 2008/01/29 18:15:55 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.61 2007/12/13 21:36:58 feiliu Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.62 2008/01/29 18:15:55 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -146,7 +146,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! Getting Attribute count from a deleted Bundle
-      call ESMF_BundleGetAttributeCount(bundle2, count, rc=rc)
+      call ESMF_BundleAttributeGetCount(bundle2, count, rc=rc)
       write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
       write(name, *) "Getting Attribute Count from a deleted Bundle Test"
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
@@ -154,7 +154,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! Getting Attribute count from a non-created Bundle
-      call ESMF_BundleGetAttributeCount(bundle1, count, rc=rc)
+      call ESMF_BundleAttributeGetCount(bundle1, count, rc=rc)
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "Getting Attribute Count from a non-created Bundle Test"
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
@@ -397,7 +397,7 @@
 
       !EX_UTest
       ! Getting Attribute count from a Bundle
-      call ESMF_BundleGetAttributeCount(bundle2, count, rc=rc)
+      call ESMF_BundleAttributeGetCount(bundle2, count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Attribute Count from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -545,7 +545,7 @@
 
       !EX_UTest
       ! Add an integer attribute to a Bundle Test
-      call ESMF_BundleSetAttribute(bundle1, name="Sides", value=65, rc=rc)
+      call ESMF_BundleAttributeSet(bundle1, name="Sides", value=65, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding an integer attribute to a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -555,7 +555,7 @@
 
       !EX_UTest
       ! Get an integer attribute from a Bundle Test
-      call ESMF_BundleGetAttribute(bundle1, name="Sides", value=number, rc=rc)
+      call ESMF_BundleAttributeGet(bundle1, name="Sides", value=number, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an integer attribute from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.65), &
@@ -564,7 +564,7 @@
 
       !EX_UTest
       ! Get an integer attribute from a Bundle Test
-      call ESMF_BundleGetAttributeInfo(bundle1, "Sides", count=number, rc=rc)
+      call ESMF_BundleAttributeGetInfo(bundle1, "Sides", count=number, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an attribute info from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.1), &
@@ -573,7 +573,7 @@
 
       !EX_UTest
       ! Getting Attribute count from a Bundle
-      call ESMF_BundleGetAttributeCount(bundle1, count, rc=rc)
+      call ESMF_BundleAttributeGetCount(bundle1, count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Attribute Count from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

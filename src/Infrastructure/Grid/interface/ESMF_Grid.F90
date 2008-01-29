@@ -162,7 +162,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.58 2008/01/26 02:00:03 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.59 2008/01/29 18:15:58 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -362,7 +362,7 @@ end interface
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_GridSetAttribute  - Set Grid attributes
+! !IROUTINE: ESMF_GridAttributeSet  - Set Grid attributes
 !
 ! !INTERFACE:
       interface ESMF_GridAttributeSet 
@@ -389,7 +389,7 @@ end interface
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_GridGetAttribute  - Get Grid attributes
+! !IROUTINE: ESMF_GridAttributeGet  - Get Grid attributes
 !
 ! !INTERFACE:
       interface ESMF_GridAttributeGet 
@@ -416,7 +416,7 @@ end interface
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_GridGetAttributeInfo - Get type, count from a Grid attribute
+! !IROUTINE: ESMF_GridAttributeGetInfo - Get type, count from a Grid attribute
 !
 ! !INTERFACE:
       interface ESMF_GridAttributeGetInfo
