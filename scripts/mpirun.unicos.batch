@@ -1,0 +1,59 @@
+#!/bin/ksh
+# $Id: mpirun.unicos.batch,v 1.5.4.2 2008/01/29 19:51:39 svasquez Exp $
+# This script provides an interface such that the simple command
+# mpirun -np #
+# runs # copies of the program in parallel.
+
+if [ "$1" != "-np" ]
+then
+        echo "Usage: mpirun -np #"
+        exit 1
+fi
+
+export num_procs=$2
+shift 2
+export prog=$*
+# Make the mppe value a  multiple of 4.
+remainder=`expr $num_procs % 4`
+if [[ $remainder != 0 ]]
+then
+        export mppe=`expr $num_procs + 4 - $remainder`
+else
+        export mppe=$num_procs
+fi
+
+export working_dir=`pwd`
+
+# Extract batch run script
+cat > $ESMF_DIR/scripts/esmf_script << THE_END_OF_BATCH_SCRIPT
+#PBS $ESMF_BATCHOPTIONS
+#PBS -j oe
+#PBS -l mppe=$mppe
+cd $working_dir
+aprun -n $num_procs $prog
+
+THE_END_OF_BATCH_SCRIPT
+
+chmod a+x $ESMF_DIR/scripts/esmf_script
+
+echo " qsub -V $ESMF_DIR/scripts/esmf_script"
+
+proc_id=`qsub -V $ESMF_DIR/scripts/esmf_script `
+
+# Since this is not an interactive shell, we must grep for the proc_id until 
+# it is gone, indicating the job is done or the walltime has expired.
+
+# Strip off name and keep the number for grepping.
+proc_id=`echo $proc_id | sed 's/\..*//'`
+
+while qstat | grep $proc_id
+do
+        sleep 30
+done
+
+# move job output file to stdout.
+mv -f *$proc_id*  $prog.stdout
+
+
+# Clean up
+#rm -f $ESMF_DIR/scripts/esmf_script
