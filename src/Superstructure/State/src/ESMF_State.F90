@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.124 2008/01/26 02:11:20 rokuingh Exp $
+! $Id: ESMF_State.F90,v 1.125 2008/01/29 18:13:15 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.124 2008/01/26 02:11:20 rokuingh Exp $'
+      '$Id: ESMF_State.F90,v 1.125 2008/01/29 18:13:15 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -271,7 +271,7 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_StateSetAttribute - Set a State attribute
+! !IROUTINE: ESMF_StateAttributeSet - Set a State attribute
 !
 ! !INTERFACE:
       interface ESMF_StateAttributeSet 
@@ -298,7 +298,7 @@ end interface
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_StateGetAttribute - Get a State attribute
+! !IROUTINE: ESMF_StateAttributeGet - Get a State attribute
 !
 ! !INTERFACE:
       interface ESMF_StateAttributeGet 
@@ -325,7 +325,7 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_StateGetAttributeInfo - Get type, count from a State attribute
+! !IROUTINE: ESMF_StateAttributeGetInfo - Get type, count from a State attribute
 !
 ! !INTERFACE:
       interface ESMF_StateAttributeGetInfo
@@ -2063,7 +2063,7 @@ end interface
 ! !IROUTINE: ESMF_StateAttributeGet - Retrieve a character attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldGetAttribute()
+      ! Private name; call using ESMF_FieldAttributeGet()
       subroutine ESMF_StateAttrGetChar(state, name, value, rc)
 !
 ! !ARGUMENTS:

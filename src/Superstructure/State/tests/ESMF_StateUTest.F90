@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.56 2008/01/23 16:58:48 feiliu Exp $
+! $Id: ESMF_StateUTest.F90,v 1.57 2008/01/29 18:13:16 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.56 2008/01/23 16:58:48 feiliu Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.57 2008/01/29 18:13:16 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -448,7 +448,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! Test getting Attribute Count from a state
-      call  ESMF_StateGetAttributeCount(state1, num, rc=rc)
+      call  ESMF_StateAttributeGetCount(state1, num, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or returned wrong value"
       write(name, *) "Getting an attribute count from a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(num.eq.0), &
@@ -458,7 +458,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! Test adding an Attribute to a state
-      call  ESMF_StateSetAttribute(state1, name="newAttribute", value=12345, rc=rc)
+      call  ESMF_StateAttributeSet(state1, name="newAttribute", value=12345, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding an attribute to a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -484,7 +484,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! Test getting an Attribute from a state
-      call  ESMF_StateGetAttribute(state1, name="newAttribute", value=num, rc=rc)
+      call  ESMF_StateAttributeGet(state1, name="newAttribute", value=num, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or returned wrong value"
       write(name, *) "Getting an attribute from a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(num.eq.12345), &
@@ -494,7 +494,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! Test getting Attribute Count from a state
-      call  ESMF_StateGetAttributeCount(state1, num, rc=rc)
+      call  ESMF_StateAttributeGetCount(state1, num, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or returned wrong value"
       write(name, *) "Getting an attribute count from a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(num.eq.1), &
@@ -504,7 +504,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! Test getting Attribute Info from a state
-      call  ESMF_StateGetAttributeInfo(state1, name="newAttribute", count=number, rc=rc)
+      call  ESMF_StateAttributeGetInfo(state1, name="newAttribute", count=number, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or returned wrong value"
       write(name, *) "Getting attribute Info from a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.1), &
