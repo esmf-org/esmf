@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.5.2.5 2008/01/29 06:55:39 theurich Exp $
+# $Id: build_rules.mk,v 1.5.2.6 2008/01/29 17:42:08 theurich Exp $
 #
 # Linux.gfortran.default
 #
@@ -130,9 +130,9 @@ ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
 ############################################################
 # Determine where gcc's libraries are located
 #
-ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.so)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS) -print-file-name=libstdc++.so)
 ifeq ($(ESMF_LIBSTDCXX),libstdc++.so)
-ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS) -print-file-name=libstdc++.a)
 endif
 ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
 ESMF_F90LINKRPATHS += -Wl,-rpath,$(dir $(ESMF_LIBSTDCXX))
@@ -140,9 +140,9 @@ ESMF_F90LINKRPATHS += -Wl,-rpath,$(dir $(ESMF_LIBSTDCXX))
 ############################################################
 # Determine where gfortran's libraries are located
 #
-ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.so)
+ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS) -print-file-name=libgfortran.so)
 ifeq ($(ESMF_LIBSTDCXX),libgfortran.so)
-ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.a)
+ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS) -print-file-name=libgfortran.a)
 endif
 ESMF_CXXLINKPATHS += -L$(dir $(ESMF_LIBGFORTRAN))
 ESMF_CXXLINKRPATHS += -Wl,-rpath,$(dir $(ESMF_LIBGFORTRAN))
