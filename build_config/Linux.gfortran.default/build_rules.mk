@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.6 2007/10/18 21:05:20 theurich Exp $
+# $Id: build_rules.mk,v 1.7 2008/01/30 00:42:15 theurich Exp $
 #
 # Linux.gfortran.default
 #
@@ -97,13 +97,44 @@ endif
 endif
 
 ############################################################
-# On IA64 set long and pointer types to 64-bit
+# Construct the ABISTRING
 #
+ifeq ($(ESMF_MACHINE),ia64)
 ifeq ($(ESMF_ABI),64)
-ESMF_CXXCOMPILEOPTS       += -march=k8 -m64 -mcmodel=medium
-ESMF_CXXLINKOPTS          += -march=k8 -m64 -mcmodel=medium
-ESMF_F90COMPILEOPTS       += -march=k8 -m64 -mcmodel=medium
-ESMF_F90LINKOPTS          += -march=k8 -m64 -mcmodel=medium
+ESMF_ABISTRING := $(ESMF_MACHINE)_64
+else
+$(error Invalid ESMF_MACHINE / ESMF_ABI combination: $(ESMF_MACHINE) / $(ESMF_ABI))
+endif
+endif
+ifeq ($(ESMF_MACHINE),x86_64)
+ifeq ($(ESMF_ABI),32)
+ESMF_ABISTRING := $(ESMF_MACHINE)_32
+endif
+ifeq ($(ESMF_ABI),64)
+ESMF_ABISTRING := x86_64_small
+endif
+endif
+
+############################################################
+# Set memory model compiler flags according to ABISTRING
+#
+ifeq ($(ESMF_ABISTRING),x86_64_32)
+ESMF_CXXCOMPILEOPTS       += -m32
+ESMF_CXXLINKOPTS          += -m32
+ESMF_F90COMPILEOPTS       += -m32
+ESMF_F90LINKOPTS          += -m32
+endif
+ifeq ($(ESMF_ABISTRING),x86_64_small)
+ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=small
+ESMF_CXXLINKOPTS          += -m64 -mcmodel=small
+ESMF_F90COMPILEOPTS       += -m64 -mcmodel=small
+ESMF_F90LINKOPTS          += -m64 -mcmodel=small
+endif
+ifeq ($(ESMF_ABISTRING),x86_64_medium)
+ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=medium
+ESMF_CXXLINKOPTS          += -m64 -mcmodel=medium
+ESMF_F90COMPILEOPTS       += -m64 -mcmodel=medium
+ESMF_F90LINKOPTS          += -m64 -mcmodel=medium
 endif
 
 ############################################################
@@ -115,9 +146,9 @@ ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
 ############################################################
 # Determine where gcc's libraries are located
 #
-ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.so)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS) -print-file-name=libstdc++.so)
 ifeq ($(ESMF_LIBSTDCXX),libstdc++.so)
-ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS) -print-file-name=libstdc++.a)
 endif
 ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
 ESMF_F90LINKRPATHS += -Wl,-rpath,$(dir $(ESMF_LIBSTDCXX))
@@ -125,9 +156,9 @@ ESMF_F90LINKRPATHS += -Wl,-rpath,$(dir $(ESMF_LIBSTDCXX))
 ############################################################
 # Determine where gfortran's libraries are located
 #
-ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.so)
+ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS) -print-file-name=libgfortran.so)
 ifeq ($(ESMF_LIBSTDCXX),libgfortran.so)
-ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.a)
+ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS) -print-file-name=libgfortran.a)
 endif
 ESMF_CXXLINKPATHS += -L$(dir $(ESMF_LIBGFORTRAN))
 ESMF_CXXLINKRPATHS += -Wl,-rpath,$(dir $(ESMF_LIBGFORTRAN))
