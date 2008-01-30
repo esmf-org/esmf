@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.30 2008/01/26 02:00:03 rokuingh Exp $
+// $Id: ESMCI_Grid.h,v 1.31 2008/01/30 20:12:09 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -410,6 +410,9 @@ int getComputationalUBound(
     int curDE; // current local DE
     int uBndDE; // end local DE on this PET (the lower bnd is 0)
 
+    int numDE; // the number of DE's on this PET
+
+
     bool done; // are we done yet?
 
     bool cellNodes; // include all the nodes attached to cells on this PET's Grid
@@ -428,13 +431,47 @@ int getComputationalUBound(
   int getGlobalID();
   int getLocalID();
   bool isLocal();
+  bool isShared();
 
   template <class TYPE> void getCoord(TYPE *coord);
   }; 
 
 
+  // class for iterating through the cells in a grid stagger location
+  class GridCellIter {
+  private:
+    Grid *grid;     // grid being iterated through
+    int staggerloc; // staggerloc in grid being iterated through
+    
+    int rank; // rank of grid and number of valid entires in the below
+    int curInd[ESMF_MAXDIM];  // current position in index space
 
+    int lBndInd[ESMF_MAXDIM]; // start position for allon this local DE  
+    int uBndInd[ESMF_MAXDIM]; // end position on this local DE  
 
+    int dimOff[ESMF_MAXDIM]; // Offset for each dimension for computing lid
+    int lOff;                // lower bound offset
+    
+    int curDE; // current local DE
+    int uBndDE; // end local DE on this PET (the lower bnd is 0)
+
+    int numDE; // the number of DE's on this PET
+
+    bool done; // are we done yet?
+
+    void setDEBnds(int localDE);
+
+  public:
+
+  const bool isDone(void) const {return done;}
+  GridCellIter(Grid *gridArg, int  staggerlocArg);
+  ~GridCellIter();
+  GridCellIter *toBeg();
+  GridCellIter *adv();
+  GridCellIter *moveToLocalID(int localID);
+  int getGlobalID();
+  int getLocalID();
+  }; 
 
 
  // Class for holding data set after grid empty creation, but before grid is finally created.

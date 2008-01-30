@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.45 2008/01/26 02:00:04 rokuingh Exp $
+// $Id: ESMCI_Grid.C,v 1.46 2008/01/30 20:12:10 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.45 2008/01/26 02:00:04 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.46 2008/01/30 20:12:10 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -4240,9 +4240,13 @@ GridIter::GridIter(
   }
   curDE=0;
   uBndDE=0;
+  numDE=0;
+
+  // set number of local DEs
+  numDE=grid->getDistGrid()->getDELayout()->getLocalDeCount();
 
   // set end of local DEs
-  uBndDE=grid->getDistGrid()->getDELayout()->getLocalDeCount();
+  uBndDE=numDE-1;
 
   // set to beginning (just in case)
   this->toBeg();
@@ -4349,7 +4353,7 @@ GridIter *GridIter::adv(
       printf("curDE=%d uBndDE=%d \n",curDE,uBndDE);
 
       ////// If we're past the top of the DEs then we're done
-      if (curDE > uBndDE-1) { // -1 because DE started at 0
+      if (curDE > uBndDE) { 
         done=true;
         return this;
       }
@@ -4388,12 +4392,17 @@ int GridIter::getGlobalID(
 //EOPI
 //-----------------------------------------------------------------------------
   int localrc;
+  int gid;
 
   // if done then leave
   if (done) return -1;
 
   // return sequence index
-  return grid->getDistGrid()->getSequenceIndexLocalDe(curDE,curInd,&localrc);
+  gid=grid->getDistGrid()->getSequenceIndexLocalDe(curDE,curInd,&localrc);
+
+  if (gid <0) printf("Gid=%d curDE=%d curInd=%d %d localrc=%d \n",gid,curDE,curInd[0],curInd[1],localrc);
+
+  return gid;
 
 }
 //-----------------------------------------------------------------------------
@@ -4444,6 +4453,51 @@ bool GridIter::isLocal(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridIter::isShared()"
+//BOPI
+// !IROUTINE:  isShared 
+//
+// !INTERFACE:
+bool GridIter::isShared(
+//
+// !RETURN VALUE:
+//    returns true if the current index MAY have a copy on another processor.  
+//    returne false otherwise
+//
+// !ARGUMENTS:
+//   none  
+ ){
+//
+// !DESCRIPTION:
+//    returns true if current index location MAY  have a ghost copy on another processor 
+// due to the overlap of cell nodes. Note, if the iterator is not through cell nodes then
+// there isn't an overlap.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int localrc;
+
+  // if done then leave
+  if (done) return false;
+
+  // if not cell then they're no shared nodes
+  if (!cellNodes) return false;
+
+  // check to see if we're on this proc
+  for (int i=0; i<rank; i++) {
+    if (!grid->isLBnd(curDE,i) && (curInd[i]<=lBndInd[i]+1)) return true;
+    if (!grid->isUBnd(curDE,i) && (curInd[i]>=uBndInd[i]-1)) return true;
+  }
+
+  // if we pass the above test then we're exclusive to the proc
+  return false;
+}
+//-----------------------------------------------------------------------------
+
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::GridIter::getLocalID()"
 //BOPI
 // !IROUTINE:  getLocalID
@@ -4477,7 +4531,7 @@ int GridIter::getLocalID(
   }
 
   // Add in DE number and output
-  return dePos*uBndDE+curDE;
+  return dePos*numDE+curDE;
 
 }
 //-----------------------------------------------------------------------------
@@ -4551,11 +4605,11 @@ GridIter *GridIter::moveToLocalID(
   int de,dePos,cnt;  
 
   // compute DE and the dePos
-  de=localID%uBndDE;
-  dePos=localID/uBndDE;
+  de=localID%numDE;
+  dePos=localID/numDE;
 
   // check for bad DE
-  if (de > uBndDE-1) return this;
+  if (de > uBndDE) return this;
 
   // set DE
   curDE=de;
@@ -4592,6 +4646,405 @@ GridIter *GridIter::moveToLocalID(
 //
 // !INTERFACE:
 GridIter::~GridIter(
+//
+// !RETURN VALUE:
+//    void
+//
+// !ARGUMENTS:
+//
+ void  
+) {
+//
+// !DESCRIPTION:
+
+//
+//EOPI
+//-----------------------------------------------------------------------------
+
+}
+//-----------------------------------------------------------------------------
+
+
+
+
+//-----------------------------------------------------------------------------
+//
+//  GridCellIter Routines
+//
+//-----------------------------------------------------------------------------
+
+/// STOPPED HERE - everything below is potetially wrong
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridCellIter::setDEBnds()"
+//BOPI
+// !IROUTINE:  setDEBnds
+//
+// !INTERFACE:
+void GridCellIter::setDEBnds(
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//  
+   int localDE
+ ){
+//
+// !DESCRIPTION:
+// Set the bounds in this iterator to the values corresponding to
+// this DE. 
+//
+//EOPI
+//-----------------------------------------------------------------------------
+
+  // Set Bounds of iteration on this proc
+  grid->getComputationalUBound(staggerloc, localDE, uBndInd);  
+  grid->getComputationalLBound(staggerloc, localDE, lBndInd);  
+
+  // if cell iterator then expand bounds
+  for (int i=0; i<rank; i++) {
+    //// Adjust to just do cell lower corners
+    if (grid->isUBnd(localDE,i)) uBndInd[i]--;
+  }
+
+
+  // Setup info for calculating the DE index tuple location quickly
+  // Needs to be done after bounds are set
+  int currOff=1;
+  lOff=0;
+  for (int i=0; i<rank; i++) {
+    dimOff[i]=currOff;
+    lOff +=currOff*lBndInd[i];
+
+    currOff *=(uBndInd[i]-lBndInd[i]+1);
+  }  
+
+  // Set to first index on DE
+  for (int i=0; i<rank; i++) {
+    curInd[i]=lBndInd[i];
+  }
+
+
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridCellIter()"
+//BOPI
+// !IROUTINE:  GridCellIter Construct
+//
+// !INTERFACE:
+GridCellIter::GridCellIter(
+//
+// !RETURN VALUE:
+//    Pointer to a new Grid Iterator
+//
+// !ARGUMENTS:
+//  
+ Grid *gridArg,
+ int  staggerlocArg
+ ){
+//
+// !DESCRIPTION:
+
+//
+//EOPI
+//-----------------------------------------------------------------------------
+
+  // Set parameters
+  grid=gridArg;
+  staggerloc=staggerlocArg;
+  rank=grid->getRank();
+
+  // initialize 
+  for (int i=0; i<ESMF_MAXDIM; i++) {
+    curInd[i]=0;
+    lBndInd[i]=0;
+    uBndInd[i]=0;
+  }
+  curDE=0;
+  uBndDE=0;
+  numDE=0;
+
+  // set number of local DEs
+  numDE=grid->getDistGrid()->getDELayout()->getLocalDeCount();
+
+  // set end of local DEs
+  uBndDE=numDE-1;
+
+  // set to beginning (just in case)
+  this->toBeg();
+
+
+}
+//-----------------------------------------------------------------------------
+
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridCellIter::toBeg()"
+//BOPI
+// !IROUTINE:  toBeg
+//
+// !INTERFACE:
+GridCellIter *GridCellIter::toBeg(
+//
+// !RETURN VALUE:
+//    GridCellIter object
+//
+// !ARGUMENTS:
+//  
+ ){
+//
+// !DESCRIPTION:
+// Move to beginning of iteration list
+//
+//EOPI
+//-----------------------------------------------------------------------------
+
+  // Set to beginning (localDE=0)
+  this->setDEBnds(0);
+
+  printf("B cur=[%d,%d] \n",curInd[0],curInd[1]);
+
+
+  // IF DE IS EMPTY NEED TO ADVANCE TO NEXT FULL DE HERE
+
+  // Set to first index
+  for (int i=0; i<rank; i++) {
+    curInd[i]=lBndInd[i];
+  }
+
+  // Set to first DE 
+  curDE=0; 
+
+  // Set to not done
+  done=false;
+
+  // return pointer to GridCellIter
+  return this;
+}
+//-----------------------------------------------------------------------------
+
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridCellIter::adv()"
+//BOPI
+// !IROUTINE:  GridCellIter advance
+//
+// !INTERFACE:
+GridCellIter *GridCellIter::adv(
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//  
+
+ ){
+//
+// !DESCRIPTION:
+// Move to next item in grid index list
+//
+//EOPI
+//-----------------------------------------------------------------------------
+
+  // if done then leave
+  if (done) return this;
+
+  printf("A cur=[%d,%d] \n",curInd[0],curInd[1]);
+
+  // advance first index
+  curInd[0]++;
+
+  // if greater than upper bound advance rest of indices
+  if (curInd[0] > uBndInd[0]) {
+
+    //// advance the rest of the indices
+    int i=1;
+    while (i<rank) {
+      curInd[i-1]=lBndInd[i-1]; 
+
+      curInd[i]++;
+
+      if (curInd[i] <= uBndInd[i]) break;               
+  
+      i++;
+    }
+
+    //// advance the DE if necessary 
+    if (i==rank) {
+      curDE++;
+
+      printf("curDE=%d uBndDE=%d \n",curDE,uBndDE);
+
+      ////// If we're past the top of the DEs then we're done
+      if (curDE > uBndDE) { 
+        done=true;
+        return this;
+      }
+
+      ////// Set the boundaries based on this DE
+      this->setDEBnds(curDE);
+      // IF DE IS EMPTY NEED TO ADVANCE TO NEXT FULL DE HERE
+    }
+  }
+
+  // return pointer to object
+  return this;
+}
+//-----------------------------------------------------------------------------
+
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridCellIter::getGlobalID()"
+//BOPI
+// !IROUTINE:  GridCellIter 
+//
+// !INTERFACE:
+int GridCellIter::getGlobalID(
+//
+// !RETURN VALUE:
+//    global id
+//
+// !ARGUMENTS:
+//   none  
+ ){
+//
+// !DESCRIPTION:
+// return the global identifier of this item
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int localrc;
+
+  // if done then leave
+  if (done) return -1;
+
+  // return sequence index
+  return grid->getDistGrid()->getSequenceIndexLocalDe(curDE,curInd,&localrc);
+
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridCellIter::getLocalID()"
+//BOPI
+// !IROUTINE:  getLocalID
+//
+// !INTERFACE:
+int GridCellIter::getLocalID(
+//
+// !RETURN VALUE:
+//  local id
+//
+// !ARGUMENTS:
+//   none  
+ ){
+//
+// !DESCRIPTION:
+//   returns a local ID (an id unique on this processor) for an iteration location. 
+//   Note that the range of local IDs is not necessarily continuous or contiguous
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int localrc;
+  int dePos;  
+
+  // if done then leave
+  if (done) return -1;
+
+  // compute position in DE
+  dePos=-lOff;
+  for (int i=0; i<rank; i++) {
+    dePos +=dimOff[i]*curInd[i];
+  }
+
+  // Add in DE number and output
+  return dePos*numDE+curDE;
+
+}
+//-----------------------------------------------------------------------------
+
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridCellIter::moveToLocalID()"
+//BOPI
+// !IROUTINE:  moveToLocalID
+//
+// !INTERFACE:
+GridCellIter *GridCellIter::moveToLocalID(
+//
+// !RETURN VALUE:
+//    returns the grid iterator
+//
+// !ARGUMENTS:
+//   
+ int localID){
+//
+// !DESCRIPTION:
+// Move to the position in the iteration list represented by local id
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int localrc;
+  int de,dePos,cnt;  
+
+  // compute DE and the dePos
+  de=localID%numDE;
+  dePos=localID/numDE;
+
+  // check for bad DE
+  if (de > uBndDE) return this;
+
+  // set DE
+  curDE=de;
+
+  // load DE bounds and other info
+  this->setDEBnds(curDE);  
+
+  // reset current index location using dePos 
+  dePos += lOff;
+  for (int i=0; i<rank-1; i++) {
+    cnt=uBndInd[i]-lBndInd[i]+1;
+    curInd[i] = dePos%cnt;
+    dePos /=cnt;
+  }
+  curInd[rank-1]=dePos;
+
+  // since we're now not done set done to false
+  done=false;
+
+  // Add in DE number and output
+  return this;
+
+}
+//-----------------------------------------------------------------------------
+
+
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::~GridCellIter()"
+//BOPI
+// !IROUTINE:  GridCellIter Destruct
+//
+// !INTERFACE:
+GridCellIter::~GridCellIter(
 //
 // !RETURN VALUE:
 //    void
