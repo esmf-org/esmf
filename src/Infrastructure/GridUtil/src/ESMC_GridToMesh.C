@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.5 2008/01/29 19:51:59 dneckels Exp $
+// $Id: ESMC_GridToMesh.C,v 1.6 2008/01/30 20:13:23 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -75,9 +75,10 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
 
   Grid &grid = const_cast<Grid&>(grid_);
 
-
-
  try {
+
+   // *** Grid error checking here ***
+
 
  
    // *** Set some meta-data ***
@@ -112,6 +113,8 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
 
    // loop through all nodes in the Grid owned by cells
    for(gni->toBeg(); !gni->isDone(); gni->adv()) {   
+
+     printf("GID=%d\n",gni->getGlobalID());
 
      // Different behavior if we're local...
      if (gni->isLocal()) {

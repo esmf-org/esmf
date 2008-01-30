@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2008/01/24 17:35:37 dneckels Exp $ 
+# $Id: makefile,v 1.3 2008/01/30 20:13:23 oehmke Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -26,7 +26,9 @@ TESTS_RUN     = RUN_ESMF_GridToMeshUTest
 TESTS_RUN_UNI = RUN_ESMF_GridToMeshUTestUNI
 
 
+UTEST_GridToMesh_OBJS = $(TESTS_OBJ)
 ESMF_GridToMeshUTest.o: $(TESTS_OBJ)
+
 
 include ${ESMF_DIR}/makefile
 
