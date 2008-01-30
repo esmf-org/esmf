@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.85 2008/01/26 01:55:21 rokuingh Exp $
+// $Id: ESMC_Base.h,v 1.86 2008/01/30 04:10:42 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -166,13 +166,6 @@ class ESMC_Base
     virtual int ESMC_Validate(const char *options=0) const;
     virtual int ESMC_Print(const char *options=0) const;
 
-    // attpack methods
-    int ESMC_AttPackCreate(char *name, char *convention, char *purpose, char *object);
-    int ESMC_AttPackSet(char *name, char *value, char *convention, char *purpose, char *object);
-    ESMC_Attribute **ESMC_AttPackGet(char *convention, char *purpose, char *object, int *attpackCount) const;
-    int ESMC_AttPackWrite(char *convention, char *purpose, char *object) const;
-    ESMC_Attribute *ESMC_AttributeGetFromAttPack(char *name, char *convention, char *purpose, char *object) const;
-
     // Attribute Methods
     
     // extend pointer list
@@ -195,12 +188,12 @@ class ESMC_Base
     int ESMC_AttributeGet(int num, char *name, ESMC_TypeKind *tk, int *count,
       void *value) const;
 
-    // count of attributes on an object
-    int ESMC_AttributeGetCount(void) const;
-
     // getting either by name or number directly return attribute ptr
     ESMC_Attribute *ESMC_AttributeGet(char *name) const; 
     ESMC_Attribute *ESMC_AttributeGet(int num) const;
+
+    // count of attributes on an object
+    int ESMC_AttributeGetCount(void) const;
 
     // setting when you have an attribute already assembled
     int ESMC_AttributeSet(ESMC_Attribute *attr);
@@ -218,6 +211,13 @@ class ESMC_Base
     int ESMC_AttributeSet(char *name, int count, ESMC_Logical *value);
     int ESMC_AttributeSet(char *name, char *value);
     int ESMC_AttributeSet(char *name, ESMC_TypeKind tk, int count, void *value);
+
+    // attpack methods
+    int ESMC_AttPackCreate(char *name, char *convention, char *purpose, char *object);
+    ESMC_Attribute **ESMC_AttPackGet(char *convention, char *purpose, char *object, int *attpackCount) const;
+    ESMC_Attribute *ESMC_AttPackGetAttribute(char *name, char *convention, char *purpose, char *object) const;
+    int ESMC_AttPackSet(char *name, char *value, char *convention, char *purpose, char *object);
+    int ESMC_AttPackWrite(char *convention, char *purpose, char *object) const;
 
     // not implemented yet
     int ESMC_AttributeGetNameList(int *count, char **namelist) const;

@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.93 2008/01/26 01:55:21 rokuingh Exp $
+// $Id: ESMC_Base.C,v 1.94 2008/01/30 04:10:42 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.93 2008/01/26 01:55:21 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.94 2008/01/30 04:10:42 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -49,788 +49,6 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // This section includes all the ESMC_Base routines
 //
 //
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_BaseGetClassName"
-//BOPI
-// !IROUTINE:  ESMC_BaseGetClassName - Get Base class name
-//
-// !INTERFACE:
-      char *ESMC_Base::ESMC_BaseGetClassName(
-//
-// !ARGUMENTS:
-      void)  const {
-// 
-// !RETURN VALUE:
-//    Character pointer to class name.
-// 
-// !DESCRIPTION:
-//    Accessor method for the class name of the object.
-//
-//EOPI
-
-  return (char * ) className;
-
-}  // end ESMC_BaseGetClassName
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_BaseGetF90ClassName"
-//BOPI
-// !IROUTINE:  ESMC_BaseGetF90ClassName - Get Base class name in Fortran format
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_BaseGetF90ClassName(
-// 
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-// 
-// !ARGUMENTS:
-     char *name,         // in - Location to copy name into
-     int nlen) const {   // in - Maximum length of string buffer
-// 
-// !DESCRIPTION:
-//     Return a separate copy of the base class name, in Fortran friendly
-//     format, which means not null terminated, and space filled.  
-//     Will not copy more than {\tt nlen} bytes into {\tt name} string.
-//
-//EOPI
-
-  // the (char *) cast is to try to make the compiler happy:
-  return ESMC_CtoF90string((char *)className, name, nlen);
-
-}  // end ESMC_BaseGetF90ClassName
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_BaseGetID"
-//BOPI
-// !IROUTINE:  ESMC_BaseGetID - Get Base class unique ID
-//  
-// !INTERFACE:
-      int ESMC_Base::ESMC_BaseGetID(
-// 
-// !ARGUMENTS:
-      void) const {
-//  
-// !RETURN VALUE:
-//    Unique object ID.
-//  
-// !DESCRIPTION:
-//    Returns the unique object ID.
-//  
-//EOPI
-
-  return ID;
-
-} // end ESMC_BaseGetID
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_BaseGetVMId"
-//BOPI
-// !IROUTINE:  ESMC_BaseGetVMId - Get Base class VMId
-//  
-// !INTERFACE:
-      ESMCI::VMId *ESMC_Base::ESMC_BaseGetVMId(
-// 
-// !ARGUMENTS:
-      void) const {
-//  
-// !RETURN VALUE:
-//    Unique VMId of the context in which this base object was created
-//  
-// !DESCRIPTION:
-//    Returns the object's VMId.
-//  
-//EOPI
-
-  return vmID;
-
-} // end ESMC_BaseGetVMId
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_BaseSetVMId"
-//BOPI
-// !IROUTINE:  ESMC_BaseSetVMId - Set Base class VMId
-//  
-// !INTERFACE:
-      void ESMC_Base::ESMC_BaseSetVMId(
-// 
-// !ARGUMENTS:
-      ESMCI::VMId *vmID) {
-//  
-//  
-// !DESCRIPTION:
-//    Set the unique VMId of the context in which this base object was created
-//  
-//EOPI
-  int localrc;
-  
-  this->vmID = new ESMCI::VMId;             // allocate space for this VMId
-  *(this->vmID) = ESMCI::VMIdCreate(&localrc);// allocate internal VMId memory
-  ESMCI::VMIdCopy(this->vmID, vmID);  // copy content of vmID to this->vmID.
-
-} // end ESMC_BaseSetVMId
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_BaseGetInstCount"
-//BOPI
-// !IROUTINE:  ESMC_BaseGetInstCount - Get number of Base class instances
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_BaseGetInstCount(
-// 
-// !ARGUMENTS:
-      void) const {
-//
-// !RETURN VALUE:
-//    Integer instance count.
-//
-// !DESCRIPTION:
-//    Return a count of how many instances of the {\tt ESMC_Base} class
-//    have been instantiated.
-//
-//EOPI
-
-  return globalCount;
-
-} // end ESMC_BaseGetInstCount
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_BaseGetName"
-//BOPI
-// !IROUTINE:  ESMC_BaseGetName - Get Base object name
-//
-// !INTERFACE:
-      char *ESMC_Base::ESMC_BaseGetName(
-// 
-// !ARGUMENTS:
-      void) const {
-// 
-// !RETURN VALUE:
-//    Character pointer to {\tt ESMC\_Base} name.
-// 
-// !DESCRIPTION:
-//    Accessor method for the {\tt ESMC\_Base} name.
-//
-//EOPI
-
-  return (char * )baseName;
-
-}  // end ESMC_BaseGetName
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_BaseGetF90Name"
-//BOPI
-// !IROUTINE:  ESMC_BaseGetF90Name - Get Base object name in Fortran format
-//
-// !INTERFACE:
-      char *ESMC_Base::ESMC_BaseGetF90Name(
-// 
-// !ARGUMENTS:
-      void) const {
-// 
-// !RETURN VALUE:
-//     Pointer to object name, not null terminated and space filled.
-// 
-// !DESCRIPTION:
-//     Accessor to base class name returned in Fortran friendly format, which
-//     means not null terminated, and space filled.
-//
-//EOPI
-
-  return (char * )baseNameF90;
-
-}  // end ESMC_BaseGetF90Name
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_BaseGetRefCount"
-//BOPI
-// !IROUTINE:  ESMC_BaseGetRefCount - Get Base class reference count
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_BaseGetRefCount(
-// 
-// !ARGUMENTS:
-      void) const {
-//
-// !RETURN VALUE:
-//    Integer reference count.
-//
-// !DESCRIPTION:
-//    Accessor method for base class reference count.
-//
-//EOPI
-
-  return refCount;
-} // end ESMC_BaseGetRefCount
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_BaseGetStatus"
-//BOPI
-// !IROUTINE:  ESMC_BaseGetStatus - Get Base class status
-//
-// !INTERFACE:
-      ESMC_Status ESMC_Base::ESMC_BaseGetStatus(
-// 
-// !ARGUMENTS:
-      void) const {
-// 
-// !RETURN VALUE:
-//    {\tt ESMC\_Status} object containing the {\tt ESMC\_Base} status.
-// 
-// !DESCRIPTION:
-//    Accessor method for base class status.
-//
-//EOPI
-
-  return baseStatus;
-
-}  // end ESMC_BaseGetStatus
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_BaseSetClassName"
-//BOPI
-// !IROUTINE:  ESMC_BaseSetClassName - Set Base class name
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_BaseSetClassName(
-// 
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-// 
-// !ARGUMENTS:
-      char *classname) {    // in - context in which name should be unique
-// 
-// !DESCRIPTION:
-//    Accessor method to set base class name.
-//
-//EOPI
-
-  int rc, len;
-  char msgbuf[ESMF_MAXSTR];
- 
-    // Initialize local return code; assume routine not implemented
-    rc = ESMC_RC_NOT_IMPL;
-
-  if (classname) {
-     len = strlen(classname);
-     if (len >= ESMF_MAXSTR) {
-       sprintf(msgbuf, "Error: object type %d bytes longer than limit of %d\n",
-                          len, ESMF_MAXSTR-1);
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
-       return rc;
-     }
-  }
-
-  strcpy(className, classname ? classname : "global");
-
-  return ESMF_SUCCESS;
-
-}  // end ESMC_BaseSetClassName
- 
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_BaseSetF90ClassName"
-//BOPI
-// !IROUTINE:  ESMC_BaseSetF90ClassName - Set Base class name
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_BaseSetF90ClassName(
-// 
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-// 
-// !ARGUMENTS:
-      char *name,      // in - contains name to set in fortran format
-      int nlen) {      // in - length of the input name buffer
-// 
-// !DESCRIPTION:
-//    Accessor method to set base class name.
-//
-//EOPI
-  int rc;
-  char msgbuf[ESMF_MAXSTR];
-
-    // Initialize local return code; assume routine not implemented
-    rc = ESMC_RC_NOT_IMPL;
-
-  if (nlen > ESMF_MAXSTR) {
-       sprintf(msgbuf, "string name %d bytes longer than limit of %d bytes\n",
-                       nlen, ESMF_MAXSTR);
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
-       return rc;
-  }
-
-  return ESMC_F90toCstring(name, nlen, className, ESMF_MAXSTR);
-
-}  // end ESMC_BaseSetF90ClassName
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_BaseSetID"
-//BOPI
-// !IROUTINE:  ESMC_BaseSetID - Set Base class unique ID
-//  
-// !INTERFACE:
-      void ESMC_Base::ESMC_BaseSetID(
-//  
-// !RETURN VALUE:
-//    none
-//  
-// !ARGUMENTS:
-      int id) {   // in - ID to set
-//  
-// !DESCRIPTION: 
-//     override default ID (see constructor)
-//  
-//EOPI
-
-  ID = id;
-
-}  // end ESMC_BaseSetID
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_BaseSetName"
-//BOPI
-// !IROUTINE:  ESMC_BaseSetName - Set Base class name
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_BaseSetName(
-// 
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-// 
-// !ARGUMENTS:
-      char *name,           // in - base name to set
-      char *classname) {    // in - context in which name should be unique
-// 
-// !DESCRIPTION:
-//     Accessor method for base class name.
-//
-//EOPI
-
-  int len, rc;
-  int defname, defclass;
-  char msgbuf[ESMF_MAXSTR];
- 
-    // Initialize local return code; assume routine not implemented
-    rc = ESMC_RC_NOT_IMPL;
-
-  // no name, no context:  generate a name "globalXXX" where xxx is a seq num
-  // no name, but a context: name is contextXXX with the seq num again
-  // name given: use it as is
-  defname = 1;
-  defclass = 1;
-
-  // simple error checks first
-  if (name && (name[0]!='\0')) { 
-     len = strlen(name);
-     if (len >= ESMF_MAXSTR) {
-       sprintf(msgbuf, "object name %d bytes longer than limit of %d bytes\n",
-                       len, ESMF_MAXSTR-1);
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
-       return rc;
-     }
-     defname = 0;
-  } 
-
-  if (classname && (classname[0]!='\0')) {
-     len = strlen(classname);
-     if (len >= ESMF_MAXSTR) {
-       sprintf(msgbuf, "object type %d bytes longer than limit of %d bytes\n",
-                       len, ESMF_MAXSTR-1);
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
-       return rc;
-     }
-     defclass = 0;
-  }
-
-  strcpy(className, defclass ? "global" : classname);
-  if (defname) 
-      sprintf(baseName, "%s%03d", className, ID); 
-  else
-      strcpy(baseName, name);
-
-  ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
-
-  return ESMF_SUCCESS;
-
-}  // end ESMC_BaseSetName
- 
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_BaseSetF90Name"
-//BOPI
-// !IROUTINE:  ESMC_BaseSetF90Name - Set Base class name
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_BaseSetF90Name(
-// 
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-// 
-// !ARGUMENTS:
-      char *name,     // in - class name to set, in fortran format
-      int nlen) {     // in - length of class name buffer
-// 
-// !DESCRIPTION:
-//     Accessor method to set base class name.
-//
-//EOPI
-  int rc;
-  char msgbuf[ESMF_MAXSTR];
-
-    // Initialize local return code; assume routine not implemented
-    rc = ESMC_RC_NOT_IMPL;
-
-  if (nlen > ESMF_MAXSTR) {
-       sprintf(msgbuf, "string name %d bytes longer than limit of %d bytes\n",
-                       nlen, ESMF_MAXSTR);
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
-       return rc;
-  }
-
-  memcpy(baseNameF90, name, nlen);
-  if (nlen < ESMF_MAXSTR) 
-      memset(baseNameF90 + nlen, (int)' ', ESMF_MAXSTR-nlen);
-
-  ESMC_F90toCstring(baseNameF90, ESMF_MAXSTR-1, baseName, ESMF_MAXSTR);
-  return ESMF_SUCCESS;
-
-}  // end ESMC_BaseSetF90Name
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_BaseSetRefCount"
-//BOPI
-// !IROUTINE:  ESMC_BaseSetRefCount - Set Base class reference count
-//
-// !INTERFACE:
-      void ESMC_Base::ESMC_BaseSetRefCount(
-// 
-// !RETURN VALUE:
-//    none
-// 
-// !ARGUMENTS:
-      int count) {
-// 
-// !DESCRIPTION:
-//     Accessor method for reference count.
-//
-//EOPI
-
-  refCount = count;
-
-} // end ESMC_BaseSetRefCount
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_BaseSetStatus"
-//BOPI
-// !IROUTINE:  ESMC_BaseSetStatus - Set Base class status
-//
-// !INTERFACE:
-      void ESMC_Base::ESMC_BaseSetStatus(
-// 
-// !RETURN VALUE:
-//    none
-// 
-// !ARGUMENTS:
-      ESMC_Status status) {   // in - base status to set
-// 
-// !DESCRIPTION:
-//     Accessor method for base class status.
-//
-//EOPI
-
-  baseStatus = status;
-
-}  // end ESMC_BaseSetStatus
- 
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_Deserialize"
-//BOPI
-// !IROUTINE:  ESMC_Deserialize - Turn a byte stream into an object
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_Deserialize(
-//
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-//
-// !ARGUMENTS:
-      char *buffer,          // in - byte stream to read
-      int *offset) {         // inout - original offset, updated to point 
-                             //  to first free byte after current obj info
-//
-// !DESCRIPTION:
-//    Turn a stream of bytes into an object.
-//
-//EOPI
-    
-    int *ip, i, nbytes;
-    ESMC_Status *sp;
-    char *cp;
-    int localrc;
-
-    // Initialize local return code; assume routine not implemented
-    localrc = ESMC_RC_NOT_IMPL;
-
-    ip = (int *)(buffer + *offset);
-    ID = *ip++;
-    refCount = *ip++;  
-    classID = *ip++;  
-    sp = (ESMC_Status *)ip;
-    baseStatus = *sp++;
-    cp = (char *)sp;
-    memcpy(baseName, cp, ESMF_MAXSTR);
-    cp += ESMF_MAXSTR;
-    memcpy(baseNameF90, cp, ESMF_MAXSTR);
-    cp += ESMF_MAXSTR;
-    memcpy(className, cp, ESMF_MAXSTR);
-    cp += ESMF_MAXSTR;
-    ip = (int *)cp;
-    attrCount = *ip++;
-    attrAlloc = *ip++;
-    cp = (char *)ip;
-
-    // update offset to point to past the current obj
-    *offset = (cp - buffer);
-
-    if (attrAlloc > 0) {
-         nbytes = attrAlloc * sizeof(ESMC_Attribute *);
-         attrList = (ESMC_Attribute **)malloc(nbytes);
-         for (i=0; i<attrCount; i++) {
-            attrList[i] = new ESMC_Attribute;
-            attrList[i]->ESMC_Attribute::ESMC_Deserialize(buffer, offset);
-            //attrList[i] = NULL;
-         }
-    }
-
-  return ESMF_SUCCESS;
-
- } // end ESMC_Deserialize
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_Print"
-//BOPI
-// !IROUTINE:  ESMC_Print - Print contents of a Base object
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_Print(
-//
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-//
-// !ARGUMENTS:
-      const char *options) const {     //  in - print options
-//
-// !DESCRIPTION:
-//    Print the contents of an {\tt ESMC\_Base} object.  Expected to be
-//    called internally from the object-specific print routines.
-//
-//EOPI
-
-  int i;
-  char msgbuf[ESMF_MAXSTR];
-  int localrc;
-
-    // Initialize local return code; assume routine not implemented
-    localrc = ESMC_RC_NOT_IMPL;
-
-    // PLI -- 10/4/2007 -- use this function to print attribute lists in various ESMF classes
-    // No need to print the base object ID, Name or Class because these information will be
-    // printed at the derived class
- 
-    //  sprintf(msgbuf,
-    //   "Base object ID: %d, Ref count: %d, Status=%s, Name=%s, Class=%s\n", 
-    //       ID, refCount, ESMC_StatusString(baseStatus), baseName, className);
-    // printf(msgbuf);
-    // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
-  
-
-  sprintf(msgbuf, "   Number of Attributes: %d\n", attrCount);
-  printf(msgbuf);
-    // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
-  for (i=0; i<attrCount; i++) {
-      sprintf(msgbuf, " Attr %d: ", i);
-      printf(msgbuf);
-        // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
-      attrList[i]->ESMC_Print();
-  }
-                         
-  return ESMF_SUCCESS;
-
- } // end ESMC_Print
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_Read"
-//BOPI
-// !IROUTINE:  ESMC_Read - Read in contents of a Base object
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_Read(
-//
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-//
-// !ARGUMENTS:
-      void) {
-//
-// !DESCRIPTION:
-//    Base class provides stubs for optional read/write methods.
-//
-//EOPI
-
-  return ESMC_RC_NOT_IMPL;
-
- } // end ESMC_Read
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_Serialize"
-//BOPI
-// !IROUTINE:  ESMC_Serialize - Turn the object information into a byte stream
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_Serialize(
-//
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-//
-// !ARGUMENTS:
-      char *buffer,          // inout - byte stream to fill
-      int *length,           // inout - buf length; realloc'd here if needed
-      int *offset) const {   // inout - original offset, updated to point 
-                             //  to first free byte after current obj info
-//
-// !DESCRIPTION:
-//    Turn info in base class into a stream of bytes.
-//
-//EOPI
-    int fixedpart;
-    int *ip, i, rc;
-    ESMC_Status *sp;
-    char *cp;
-
-    // Initialize local return code; assume routine not implemented
-    rc = ESMC_RC_NOT_IMPL;
-
-    fixedpart = sizeof(ESMC_Base);
-    if ((*length - *offset) < fixedpart) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
-                               "Buffer too short to add a Base object", &rc);
-        return ESMF_FAILURE; 
-        //buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
-        //*length += 2 * fixedpart;
-    }
-
-    ip = (int *)(buffer + *offset);
-    *ip++ = ID;
-    *ip++ = refCount;  
-    *ip++ = classID;  
-    sp = (ESMC_Status *)ip;
-    *sp++ = baseStatus;
-    cp = (char *)sp;
-    memcpy(cp, baseName, ESMF_MAXSTR);
-    cp += ESMF_MAXSTR;
-    memcpy(cp, baseNameF90, ESMF_MAXSTR);
-    cp += ESMF_MAXSTR;
-    memcpy(cp, className, ESMF_MAXSTR);
-    cp += ESMF_MAXSTR;
-    ip = (int *)cp;
-    *ip++ = attrCount;
-    *ip++ = attrAlloc;
-    cp = (char *)ip;
-
-    // update the offset before calling AttributeSerialize
-    *offset = (cp - buffer);
-
-    if (attrCount > 0) {
-         for (i=0; i<attrCount; i++)
-             attrList[i]->ESMC_Attribute::ESMC_Serialize(buffer, length, offset);
-    }
-
-  return ESMF_SUCCESS;
-
- } // end ESMC_Serialize
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_Validate"
-//BOPI
-// !IROUTINE:  ESMC_Validate - Internal consistency check for Base object
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_Validate(
-//
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-//
-// !ARGUMENTS:
-      const char *options) const {    // in - validate options
-//
-// !DESCRIPTION:
-//     Validation of the {\tt ESMC\_Base} object.  Expected to be called
-//     internally from the object-specific validation methods.
-//
-//EOPI
-
-  int localrc;
-
-   // Initialize local return code; assume routine not implemented
-   localrc = ESMC_RC_NOT_IMPL;
-
-  if (baseStatus != ESMF_STATUS_READY) 
-    return ESMF_FAILURE;
-
-  return ESMF_SUCCESS;
-
- } // end ESMC_Validate
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_Write"
-//BOP
-// !IROUTINE:  ESMC_Write - Write out contents of a Base object
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_Write(
-// 
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-// 
-// !ARGUMENTS:
-      void) const {
-// 
-// !DESCRIPTION:
-//    Base class provides stubs for optional read/write methods.
-//
-//EOP
-
-  return ESMC_RC_NOT_IMPL;
-
-} // end ESMC_Write
-
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -882,528 +100,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   return ESMF_SUCCESS;
 
 }  // end ESMC_AttributeAlloc
-
-
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
-//BOPI
-// !IROUTINE:  ESMC_AttributeSet - set attribute on an ESMF type
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
-//
-// !RETURN VALUE:
-//    int return code
-// 
-// !ARGUMENTS:
-      ESMC_Attribute *attr) {   // in - attribute name, type, value
-// 
-// !DESCRIPTION:
-//     Associate a (name,value) pair with any type in the system.
-//     This version of set is used when the caller has already allocated
-//     an attribute object and filled it, and the attribute is simply
-//     added to the list belonging to this object.  The caller must not
-//     delete the attribute.  Generally used internally - see below for
-//     individual attribute set routines for each supported type.
-//
-//EOPI
-
-  int i, rc;
-
-  // Initialize local return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
-
-  // simple sanity checks
-  if ((!attr) || (!attr->attrName) || (attr->attrName[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                  "bad attribute object", &rc);
-       return rc;
-  }
-
-  // first, see if you are replacing an existing attribute
-  for (i=0; i<attrCount; i++) {
-      if (strcmp(attr->attrName, attrList[i]->attrName))
-          continue;
-
-      // FIXME: we might want an explicit flag saying that this is what
-      // is wanted, instead of an error if a previous value not expected.
-
-      // if you get here, you found a match.  replace previous copy.
-
-      // delete old attribute, including possibly freeing a list
-      attrList[i]->~ESMC_Attribute();
-
-      attrList[i] = attr;
-      return ESMF_SUCCESS;
-  }   
-
-  // new attribute name, make sure there is space for it.
-  rc = ESMC_AttributeAlloc(1);
-  if (rc != ESMF_SUCCESS)
-      return rc;
-  
-  attrList[attrCount] = attr;   
-  attrCount++;
-  return ESMF_SUCCESS;
-
-}  // end ESMC_AttributeSet
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
-//BOPI
-// !IROUTINE:  ESMC_AttributeSet(int) - set attribute on an ESMF type
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
-//
-// !RETURN VALUE:
-//    int return code
-// 
-// !ARGUMENTS:
-      char *name,              // in - attribute name
-      ESMC_I4 value) {    // in - attribute value
-// 
-// !DESCRIPTION:
-//     Associate a (name,value) pair with any type in the system.
-//
-//EOPI
-
-  int rc;
-  ESMC_Attribute *attr;
-
-  // Initialize local return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
-
-  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_I4, 1, &value);  
-  if (!attr)
-    return ESMF_FAILURE;
- 
-  rc = ESMC_AttributeSet(attr);
-
-  return rc;
-
-}  // end ESMC_AttributeSet(int)
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
-//BOPI
-// !IROUTINE:  ESMC_AttributeSet(int *) - set attribute on an ESMF type
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
-//
-// !RETURN VALUE:
-//    int return code
-// 
-// !ARGUMENTS:
-      char *name,              // in - attribute name
-      int count,               // in - number of ints in list
-      ESMC_I4 *value) {   // in - attribute values
-// 
-// !DESCRIPTION:
-//     Associate a (name,value) pair with any type in the system.
-//
-//EOPI
-
-  int rc;
-  ESMC_Attribute *attr;
-
-  // Initialize local return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
-
-  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_I4, count, value);  
-  if (!attr)
-    return ESMF_FAILURE;
- 
-  rc = ESMC_AttributeSet(attr);
-
-  return rc;
-
-}  // end ESMC_AttributeSet(int *)
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
-//BOPI
-// !IROUTINE:  ESMC_AttributeSet(ESMC_I8) - set attribute on an ESMF type
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
-//
-// !RETURN VALUE:
-//    int return code
-// 
-// !ARGUMENTS:
-      char *name,              // in - attribute name
-      ESMC_I8 value) {    // in - attribute value
-// 
-// !DESCRIPTION:
-//     Associate a (name,value) pair with any type in the system.
-//
-//EOPI
-
-  int rc;
-  ESMC_Attribute *attr;
-
-  // Initialize local return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
-
-  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_I8, 1, &value);  
-  if (!attr)
-    return ESMF_FAILURE;
- 
-  rc = ESMC_AttributeSet(attr);
-
-  return rc;
-
-}  // end ESMC_AttributeSet(ESMC_I8)
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
-//BOPI
-// !IROUTINE:  ESMC_AttributeSet(ESMC_I8 *) - set attribute on an ESMF type
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
-//
-// !RETURN VALUE:
-//    int return code
-// 
-// !ARGUMENTS:
-      char *name,              // in - attribute name
-      int count,               // in - number of ints in list
-      ESMC_I8 *value) {   // in - attribute values
-// 
-// !DESCRIPTION:
-//     Associate a (name,value) pair with any type in the system.
-//
-//EOPI
-
-  int rc;
-  ESMC_Attribute *attr;
-
-  // Initialize local return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
-
-  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_I8, count, value);  
-  if (!attr)
-    return ESMF_FAILURE;
- 
-  rc = ESMC_AttributeSet(attr);
-
-  return rc;
-
-}  // end ESMC_AttributeSet(ESMC_I8 *)
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
-//BOP
-// !IROUTINE:  ESMC_AttributeSet(ESMC_R4) - set attribute on an ESMF type
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
-//
-// !RETURN VALUE:
-//    int return code
-// 
-// !ARGUMENTS:
-      char *name,              // in - attribute name
-      ESMC_R4 value) {    // in - attribute value
-// 
-// !DESCRIPTION:
-//     Associate a (name,value) pair with any type in the system.
-//
-//EOP
-
-  int rc;
-  ESMC_Attribute *attr;
-
-  // Initialize local return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
-
-  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_R4, 1, &value);  
-  if (!attr)
-    return ESMF_FAILURE;
- 
-  rc = ESMC_AttributeSet(attr);
-
-  return rc;
-
-}  // end ESMC_AttributeSet(ESMC_R4)
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
-//BOP
-// !IROUTINE:  ESMC_AttributeSet(ESMC_R4 *) - set attribute on an ESMF type
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
-//
-// !RETURN VALUE:
-//    int return code
-// 
-// !ARGUMENTS:
-      char *name,              // in - attribute name
-      int count,               // in - number of ESMC_R4s in list
-      ESMC_R4 *value) {   // in - attribute values
-// 
-// !DESCRIPTION:
-//     Associate a (name,value) pair with any type in the system.
-//
-//EOP
-
-  int rc;
-  ESMC_Attribute *attr;
-
-  // Initialize local return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
-
-  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_R4, count, value);  
-  if (!attr)
-    return ESMF_FAILURE;
- 
-  rc = ESMC_AttributeSet(attr);
-
-  return rc;
-
-}  // end ESMC_AttributeSet(ESMC_R4 *)
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
-//BOP
-// !IROUTINE:  ESMC_AttributeSet(ESMC_R8) - set attribute on an ESMF type
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
-//
-// !RETURN VALUE:
-//    int return code
-// 
-// !ARGUMENTS:
-      char *name,              // in - attribute name
-      ESMC_R8 value) {    // in - attribute value
-// 
-// !DESCRIPTION:
-//     Associate a (name,value) pair with any type in the system.
-//
-//EOP
-
-  int rc;
-  ESMC_Attribute *attr;
-
-  // Initialize local return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
-
-  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_R8, 1, &value);  
-  if (!attr)
-    return ESMF_FAILURE;
- 
-  rc = ESMC_AttributeSet(attr);
-
-  return rc;
-
-}  // end ESMC_AttributeSet(ESMC_R8)
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
-//BOP
-// !IROUTINE:  ESMC_AttributeSet(ESMC_R8 *) - set attribute on an ESMF type
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
-//
-// !RETURN VALUE:
-//    int return code
-// 
-// !ARGUMENTS:
-      char *name,              // in - attribute name
-      int count,               // in - number of ESMC_R8s in list
-      ESMC_R8 *value) {   // in - attribute values
-// 
-// !DESCRIPTION:
-//     Associate a (name,value) pair with any type in the system.
-//
-//EOP
-
-  int rc;
-  ESMC_Attribute *attr;
-
-  // Initialize local return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
-
-  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_R8, count, value);  
-  if (!attr)
-    return ESMF_FAILURE;
- 
-  rc = ESMC_AttributeSet(attr);
-
-  return rc;
-
-}  // end ESMC_AttributeSet(ESMC_R8 *)
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
-//BOP
-// !IROUTINE:  ESMC_AttributeSet(bool) - set attribute on an ESMF type
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
-//
-// !RETURN VALUE:
-//    int return code
-// 
-// !ARGUMENTS:
-      char *name,              // in - attribute name
-      ESMC_Logical value) {    // in - attribute value
-// 
-// !DESCRIPTION:
-//     Associate a (name,value) pair with any type in the system.
-//
-//EOP
-
-  int rc;
-  ESMC_Attribute *attr;
-
-  // Initialize local return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
-
-  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_LOGICAL, 1, &value);  
-  if (!attr)
-    return ESMF_FAILURE;
- 
-  rc = ESMC_AttributeSet(attr);
-
-  return rc;
-
-}  // end ESMC_AttributeSet(bool)
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
-//BOP
-// !IROUTINE:  ESMC_AttributeSet(bool *) - set attribute on an ESMF type
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
-//
-// !RETURN VALUE:
-//    int return code
-// 
-// !ARGUMENTS:
-      char *name,              // in - attribute name
-      int count,               // in - number of logicals in list
-      ESMC_Logical *value) {   // in - attribute values
-// 
-// !DESCRIPTION:
-//     Associate a (name,value) pair with any type in the system.
-//
-//EOP
-
-  int rc;
-  ESMC_Attribute *attr;
-
-  // Initialize local return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
-
-  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_LOGICAL, count, value);  
-  if (!attr)
-    return ESMF_FAILURE;
- 
-  rc = ESMC_AttributeSet(attr);
-
-  return rc;
-
-}  // end ESMC_AttributeSet(bool *)
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
-//BOP
-// !IROUTINE:  ESMC_AttributeSet(char) - set attribute on an ESMF type
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
-//
-// !RETURN VALUE:
-//    int return code
-// 
-// !ARGUMENTS:
-      char *name,       // in - attribute name
-      char *value) {    // in - attribute value
-// 
-// !DESCRIPTION:
-//     Associate a (name,value) pair with any type in the system.
-//
-//EOP
-
-  int rc;
-  ESMC_Attribute *attr;
-
-  // Initialize local return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
-
-  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_CHARACTER, 1, value);  
-  if (!attr)
-    return ESMF_FAILURE;
- 
-  rc = ESMC_AttributeSet(attr);
-
-  return rc;
-
-}  // end ESMC_AttributeSet(char)
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
-//BOP
-// !IROUTINE:  ESMC_AttributeSet - set attribute on an ESMF type
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
-//
-// !RETURN VALUE:
-//    int return code
-// 
-// !ARGUMENTS:
-      char *name,       // in - attribute name
-      ESMC_TypeKind tk, // in - typekind
-      int count,        // in - number of values
-      void *value) {    // in - attribute value
-// 
-// !DESCRIPTION:
-//     Associate a (name,value) pair with any type in the system.
-//
-//EOP
-
-  int rc;
-  ESMC_Attribute *attr;
-
-  // Initialize local return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
-
-  attr = new ESMC_Attribute(name, tk, count, value);  
-  if (!attr)
-    return ESMF_FAILURE;
- 
-  rc = ESMC_AttributeSet(attr);
-
-  return rc;
-
-}  // end ESMC_AttributeSet
-
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttributeGet"
-//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_AttributeGet(int) - get attribute from an ESMF type
@@ -2255,31 +954,6 @@ if (count) {
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGetCount"
-//BOP
-// !IROUTINE:  ESMC_AttributeGetCount - get an ESMF object's number of attributes
-// 
-// !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGetCount(
-// 
-// !RETURN VALUE:
-//    int attribute count
-// 
-// !ARGUMENTS:
-      void) const {  
-// 
-// !DESCRIPTION:
-//      Returns number of attributes present
-//
-//EOP
-
-  
-  return attrCount;
-
-} // end ESMC_AttributeGetCount
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet - get attribute from an ESMF type
@@ -2355,6 +1029,548 @@ if (count) {
 }  // end ESMC_AttributeGet
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeGetCount"
+//BOP
+// !IROUTINE:  ESMC_AttributeGetCount - get an ESMF object's number of attributes
+// 
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeGetCount(
+// 
+// !RETURN VALUE:
+//    int attribute count
+// 
+// !ARGUMENTS:
+      void) const {  
+// 
+// !DESCRIPTION:
+//      Returns number of attributes present
+//
+//EOP
+
+  
+  return attrCount;
+
+} // end ESMC_AttributeGetCount
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
+//BOPI
+// !IROUTINE:  ESMC_AttributeSet - set attribute on an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      ESMC_Attribute *attr) {   // in - attribute name, type, value
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//     This version of set is used when the caller has already allocated
+//     an attribute object and filled it, and the attribute is simply
+//     added to the list belonging to this object.  The caller must not
+//     delete the attribute.  Generally used internally - see below for
+//     individual attribute set routines for each supported type.
+//
+//EOPI
+
+  int i, rc;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
+  // simple sanity checks
+  if ((!attr) || (!attr->attrName) || (attr->attrName[0] == '\0')) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "bad attribute object", &rc);
+       return rc;
+  }
+
+  // first, see if you are replacing an existing attribute
+  for (i=0; i<attrCount; i++) {
+      if (strcmp(attr->attrName, attrList[i]->attrName))
+          continue;
+
+      // FIXME: we might want an explicit flag saying that this is what
+      // is wanted, instead of an error if a previous value not expected.
+
+      // if you get here, you found a match.  replace previous copy.
+
+      // delete old attribute, including possibly freeing a list
+      attrList[i]->~ESMC_Attribute();
+
+      attrList[i] = attr;
+      return ESMF_SUCCESS;
+  }   
+
+  // new attribute name, make sure there is space for it.
+  rc = ESMC_AttributeAlloc(1);
+  if (rc != ESMF_SUCCESS)
+      return rc;
+  
+  attrList[attrCount] = attr;   
+  attrCount++;
+  return ESMF_SUCCESS;
+
+}  // end ESMC_AttributeSet
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
+//BOPI
+// !IROUTINE:  ESMC_AttributeSet(int) - set attribute on an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,              // in - attribute name
+      ESMC_I4 value) {    // in - attribute value
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//
+//EOPI
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
+  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_I4, 1, &value);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_AttributeSet(int)
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
+//BOPI
+// !IROUTINE:  ESMC_AttributeSet(int *) - set attribute on an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,              // in - attribute name
+      int count,               // in - number of ints in list
+      ESMC_I4 *value) {   // in - attribute values
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//
+//EOPI
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
+  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_I4, count, value);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_AttributeSet(int *)
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
+//BOPI
+// !IROUTINE:  ESMC_AttributeSet(ESMC_I8) - set attribute on an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,              // in - attribute name
+      ESMC_I8 value) {    // in - attribute value
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//
+//EOPI
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
+  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_I8, 1, &value);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_AttributeSet(ESMC_I8)
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
+//BOPI
+// !IROUTINE:  ESMC_AttributeSet(ESMC_I8 *) - set attribute on an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,              // in - attribute name
+      int count,               // in - number of ints in list
+      ESMC_I8 *value) {   // in - attribute values
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//
+//EOPI
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
+  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_I8, count, value);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_AttributeSet(ESMC_I8 *)
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
+//BOP
+// !IROUTINE:  ESMC_AttributeSet(ESMC_R4) - set attribute on an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,              // in - attribute name
+      ESMC_R4 value) {    // in - attribute value
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//
+//EOP
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
+  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_R4, 1, &value);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_AttributeSet(ESMC_R4)
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
+//BOP
+// !IROUTINE:  ESMC_AttributeSet(ESMC_R4 *) - set attribute on an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,              // in - attribute name
+      int count,               // in - number of ESMC_R4s in list
+      ESMC_R4 *value) {   // in - attribute values
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//
+//EOP
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
+  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_R4, count, value);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_AttributeSet(ESMC_R4 *)
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
+//BOP
+// !IROUTINE:  ESMC_AttributeSet(ESMC_R8) - set attribute on an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,              // in - attribute name
+      ESMC_R8 value) {    // in - attribute value
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//
+//EOP
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
+  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_R8, 1, &value);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_AttributeSet(ESMC_R8)
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
+//BOP
+// !IROUTINE:  ESMC_AttributeSet(ESMC_R8 *) - set attribute on an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,              // in - attribute name
+      int count,               // in - number of ESMC_R8s in list
+      ESMC_R8 *value) {   // in - attribute values
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//
+//EOP
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
+  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_R8, count, value);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_AttributeSet(ESMC_R8 *)
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
+//BOP
+// !IROUTINE:  ESMC_AttributeSet(bool) - set attribute on an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,              // in - attribute name
+      ESMC_Logical value) {    // in - attribute value
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//
+//EOP
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
+  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_LOGICAL, 1, &value);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_AttributeSet(bool)
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
+//BOP
+// !IROUTINE:  ESMC_AttributeSet(bool *) - set attribute on an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,              // in - attribute name
+      int count,               // in - number of logicals in list
+      ESMC_Logical *value) {   // in - attribute values
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//
+//EOP
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
+  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_LOGICAL, count, value);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_AttributeSet(bool *)
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
+//BOP
+// !IROUTINE:  ESMC_AttributeSet(char) - set attribute on an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,       // in - attribute name
+      char *value) {    // in - attribute value
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//
+//EOP
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
+  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_CHARACTER, 1, value);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_AttributeSet(char)
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
+//BOP
+// !IROUTINE:  ESMC_AttributeSet - set attribute on an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,       // in - attribute name
+      ESMC_TypeKind tk, // in - typekind
+      int count,        // in - number of values
+      void *value) {    // in - attribute value
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//
+//EOP
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
+  attr = new ESMC_Attribute(name, tk, count, value);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_AttributeSet
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttPackCreate"
 //BOP
 // !IROUTINE:  ESMC_AttPackCreate() - setup the Attribute package
@@ -2391,53 +1607,6 @@ if (count) {
   return rc;
 
 }  // end ESMC_AttPackCreate()
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttPackSet"
-//BOP
-// !IROUTINE:  ESMC_AttPackSet() - set an attribute in an attpack
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_AttPackSet(
-//
-// !RETURN VALUE:
-//    int return code
-// 
-// !ARGUMENTS:
-      char *name,             // in - attribute name
-      char *value,            // in - attributte value
-      char *convention,       // in - attpack convention
-      char *purpose,          // in - attpack purpose
-      char *object) {         // in - attpack object type
-// 
-// !DESCRIPTION:
-//     set the value for name attribute belonging to attpack with convention, purpose,
-//     and object type
-//EOP
-
-  int rc;
-  char msgbuf[ESMF_MAXSTR];
-  ESMC_Attribute *attr;
-
-  // Initialize local return code; assume routine not implemented
-  rc = ESMC_RC_NOT_IMPL;
-
-  // Find the attpack attribute
-  attr = ESMC_AttributeGetFromAttPack(name, convention, purpose, object);
-  if (!attr) {
-       sprintf(msgbuf, "This attribute package does have an attribute named '%s'\n", name);
-       printf(msgbuf);
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
-                             msgbuf, &rc);
-       return rc;
-  }
-
-  // Set the attribute
-  rc = attr->ESMC_AttrModifyValue(ESMC_TYPEKIND_CHARACTER, 1, value);
-  if (rc != ESMF_SUCCESS) return ESMF_FAILURE;
-   
-  return rc;
-}  // end ESMC_AttPackSet()
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttPackGet"
@@ -2508,15 +1677,14 @@ if (count) {
   else return NULL;
 
 }  // end ESMC_AttPackGet
-
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGetFromAttPack"
+#define ESMC_METHOD "ESMC_AttPackGetAttribute"
 //BOP
-// !IROUTINE:  ESMC_AttributeGetFromList - get attribute from a the attpack
+// !IROUTINE:  ESMC_AttPackGetAttribute - get attribute from an attpack
 //
 // !INTERFACE:
-      ESMC_Attribute *ESMC_Base::ESMC_AttributeGetFromAttPack(
+      ESMC_Attribute *ESMC_Base::ESMC_AttPackGetAttribute(
 // 
 // !RETURN VALUE:
 //    pointer to requested attribute
@@ -2577,8 +1745,54 @@ if (count) {
   // bad news - you get here if no matches found
   return NULL;
 
-}  // end ESMC_AttributeGetFromAttPack
+}  // end ESMC_AttPackGetAttribute
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttPackSet"
+//BOP
+// !IROUTINE:  ESMC_AttPackSet() - set an attribute in an attpack
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttPackSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,             // in - attribute name
+      char *value,            // in - attributte value
+      char *convention,       // in - attpack convention
+      char *purpose,          // in - attpack purpose
+      char *object) {         // in - attpack object type
+// 
+// !DESCRIPTION:
+//     set the value for name attribute belonging to attpack with convention, purpose,
+//     and object type
+//EOP
 
+  int rc;
+  char msgbuf[ESMF_MAXSTR];
+  ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
+  // Find the attpack attribute
+  attr = ESMC_AttPackGetAttribute(name, convention, purpose, object);
+  if (!attr) {
+       sprintf(msgbuf, "This attribute package does have an attribute named '%s'\n", name);
+       printf(msgbuf);
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                             msgbuf, &rc);
+       return rc;
+  }
+
+  // Set the attribute
+  rc = attr->ESMC_AttrModifyValue(ESMC_TYPEKIND_CHARACTER, 1, value);
+  if (rc != ESMF_SUCCESS) return ESMF_FAILURE;
+   
+  return rc;
+}  // end ESMC_AttPackSet()
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttPackWrite"
@@ -2756,6 +1970,788 @@ if (count) {
 }  // end ESMC_AttributeCopyAll
 
 //-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseGetClassName"
+//BOPI
+// !IROUTINE:  ESMC_BaseGetClassName - Get Base class name
+//
+// !INTERFACE:
+      char *ESMC_Base::ESMC_BaseGetClassName(
+//
+// !ARGUMENTS:
+      void)  const {
+// 
+// !RETURN VALUE:
+//    Character pointer to class name.
+// 
+// !DESCRIPTION:
+//    Accessor method for the class name of the object.
+//
+//EOPI
+
+  return (char * ) className;
+
+}  // end ESMC_BaseGetClassName
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseGetF90ClassName"
+//BOPI
+// !IROUTINE:  ESMC_BaseGetF90ClassName - Get Base class name in Fortran format
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_BaseGetF90ClassName(
+// 
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+// 
+// !ARGUMENTS:
+     char *name,         // in - Location to copy name into
+     int nlen) const {   // in - Maximum length of string buffer
+// 
+// !DESCRIPTION:
+//     Return a separate copy of the base class name, in Fortran friendly
+//     format, which means not null terminated, and space filled.  
+//     Will not copy more than {\tt nlen} bytes into {\tt name} string.
+//
+//EOPI
+
+  // the (char *) cast is to try to make the compiler happy:
+  return ESMC_CtoF90string((char *)className, name, nlen);
+
+}  // end ESMC_BaseGetF90ClassName
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseGetID"
+//BOPI
+// !IROUTINE:  ESMC_BaseGetID - Get Base class unique ID
+//  
+// !INTERFACE:
+      int ESMC_Base::ESMC_BaseGetID(
+// 
+// !ARGUMENTS:
+      void) const {
+//  
+// !RETURN VALUE:
+//    Unique object ID.
+//  
+// !DESCRIPTION:
+//    Returns the unique object ID.
+//  
+//EOPI
+
+  return ID;
+
+} // end ESMC_BaseGetID
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseGetVMId"
+//BOPI
+// !IROUTINE:  ESMC_BaseGetVMId - Get Base class VMId
+//  
+// !INTERFACE:
+      ESMCI::VMId *ESMC_Base::ESMC_BaseGetVMId(
+// 
+// !ARGUMENTS:
+      void) const {
+//  
+// !RETURN VALUE:
+//    Unique VMId of the context in which this base object was created
+//  
+// !DESCRIPTION:
+//    Returns the object's VMId.
+//  
+//EOPI
+
+  return vmID;
+
+} // end ESMC_BaseGetVMId
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseSetVMId"
+//BOPI
+// !IROUTINE:  ESMC_BaseSetVMId - Set Base class VMId
+//  
+// !INTERFACE:
+      void ESMC_Base::ESMC_BaseSetVMId(
+// 
+// !ARGUMENTS:
+      ESMCI::VMId *vmID) {
+//  
+//  
+// !DESCRIPTION:
+//    Set the unique VMId of the context in which this base object was created
+//  
+//EOPI
+  int localrc;
+  
+  this->vmID = new ESMCI::VMId;             // allocate space for this VMId
+  *(this->vmID) = ESMCI::VMIdCreate(&localrc);// allocate internal VMId memory
+  ESMCI::VMIdCopy(this->vmID, vmID);  // copy content of vmID to this->vmID.
+
+} // end ESMC_BaseSetVMId
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseGetInstCount"
+//BOPI
+// !IROUTINE:  ESMC_BaseGetInstCount - Get number of Base class instances
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_BaseGetInstCount(
+// 
+// !ARGUMENTS:
+      void) const {
+//
+// !RETURN VALUE:
+//    Integer instance count.
+//
+// !DESCRIPTION:
+//    Return a count of how many instances of the {\tt ESMC_Base} class
+//    have been instantiated.
+//
+//EOPI
+
+  return globalCount;
+
+} // end ESMC_BaseGetInstCount
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseGetName"
+//BOPI
+// !IROUTINE:  ESMC_BaseGetName - Get Base object name
+//
+// !INTERFACE:
+      char *ESMC_Base::ESMC_BaseGetName(
+// 
+// !ARGUMENTS:
+      void) const {
+// 
+// !RETURN VALUE:
+//    Character pointer to {\tt ESMC\_Base} name.
+// 
+// !DESCRIPTION:
+//    Accessor method for the {\tt ESMC\_Base} name.
+//
+//EOPI
+
+  return (char * )baseName;
+
+}  // end ESMC_BaseGetName
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseGetF90Name"
+//BOPI
+// !IROUTINE:  ESMC_BaseGetF90Name - Get Base object name in Fortran format
+//
+// !INTERFACE:
+      char *ESMC_Base::ESMC_BaseGetF90Name(
+// 
+// !ARGUMENTS:
+      void) const {
+// 
+// !RETURN VALUE:
+//     Pointer to object name, not null terminated and space filled.
+// 
+// !DESCRIPTION:
+//     Accessor to base class name returned in Fortran friendly format, which
+//     means not null terminated, and space filled.
+//
+//EOPI
+
+  return (char * )baseNameF90;
+
+}  // end ESMC_BaseGetF90Name
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseGetRefCount"
+//BOPI
+// !IROUTINE:  ESMC_BaseGetRefCount - Get Base class reference count
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_BaseGetRefCount(
+// 
+// !ARGUMENTS:
+      void) const {
+//
+// !RETURN VALUE:
+//    Integer reference count.
+//
+// !DESCRIPTION:
+//    Accessor method for base class reference count.
+//
+//EOPI
+
+  return refCount;
+} // end ESMC_BaseGetRefCount
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseGetStatus"
+//BOPI
+// !IROUTINE:  ESMC_BaseGetStatus - Get Base class status
+//
+// !INTERFACE:
+      ESMC_Status ESMC_Base::ESMC_BaseGetStatus(
+// 
+// !ARGUMENTS:
+      void) const {
+// 
+// !RETURN VALUE:
+//    {\tt ESMC\_Status} object containing the {\tt ESMC\_Base} status.
+// 
+// !DESCRIPTION:
+//    Accessor method for base class status.
+//
+//EOPI
+
+  return baseStatus;
+
+}  // end ESMC_BaseGetStatus
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseSetClassName"
+//BOPI
+// !IROUTINE:  ESMC_BaseSetClassName - Set Base class name
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_BaseSetClassName(
+// 
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+// 
+// !ARGUMENTS:
+      char *classname) {    // in - context in which name should be unique
+// 
+// !DESCRIPTION:
+//    Accessor method to set base class name.
+//
+//EOPI
+
+  int rc, len;
+  char msgbuf[ESMF_MAXSTR];
+ 
+    // Initialize local return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
+  if (classname) {
+     len = strlen(classname);
+     if (len >= ESMF_MAXSTR) {
+       sprintf(msgbuf, "Error: object type %d bytes longer than limit of %d\n",
+                          len, ESMF_MAXSTR-1);
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       return rc;
+     }
+  }
+
+  strcpy(className, classname ? classname : "global");
+
+  return ESMF_SUCCESS;
+
+}  // end ESMC_BaseSetClassName
+ 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseSetF90ClassName"
+//BOPI
+// !IROUTINE:  ESMC_BaseSetF90ClassName - Set Base class name
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_BaseSetF90ClassName(
+// 
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+// 
+// !ARGUMENTS:
+      char *name,      // in - contains name to set in fortran format
+      int nlen) {      // in - length of the input name buffer
+// 
+// !DESCRIPTION:
+//    Accessor method to set base class name.
+//
+//EOPI
+  int rc;
+  char msgbuf[ESMF_MAXSTR];
+
+    // Initialize local return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
+  if (nlen > ESMF_MAXSTR) {
+       sprintf(msgbuf, "string name %d bytes longer than limit of %d bytes\n",
+                       nlen, ESMF_MAXSTR);
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       return rc;
+  }
+
+  return ESMC_F90toCstring(name, nlen, className, ESMF_MAXSTR);
+
+}  // end ESMC_BaseSetF90ClassName
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseSetID"
+//BOPI
+// !IROUTINE:  ESMC_BaseSetID - Set Base class unique ID
+//  
+// !INTERFACE:
+      void ESMC_Base::ESMC_BaseSetID(
+//  
+// !RETURN VALUE:
+//    none
+//  
+// !ARGUMENTS:
+      int id) {   // in - ID to set
+//  
+// !DESCRIPTION: 
+//     override default ID (see constructor)
+//  
+//EOPI
+
+  ID = id;
+
+}  // end ESMC_BaseSetID
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseSetName"
+//BOPI
+// !IROUTINE:  ESMC_BaseSetName - Set Base class name
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_BaseSetName(
+// 
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+// 
+// !ARGUMENTS:
+      char *name,           // in - base name to set
+      char *classname) {    // in - context in which name should be unique
+// 
+// !DESCRIPTION:
+//     Accessor method for base class name.
+//
+//EOPI
+
+  int len, rc;
+  int defname, defclass;
+  char msgbuf[ESMF_MAXSTR];
+ 
+    // Initialize local return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
+  // no name, no context:  generate a name "globalXXX" where xxx is a seq num
+  // no name, but a context: name is contextXXX with the seq num again
+  // name given: use it as is
+  defname = 1;
+  defclass = 1;
+
+  // simple error checks first
+  if (name && (name[0]!='\0')) { 
+     len = strlen(name);
+     if (len >= ESMF_MAXSTR) {
+       sprintf(msgbuf, "object name %d bytes longer than limit of %d bytes\n",
+                       len, ESMF_MAXSTR-1);
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       return rc;
+     }
+     defname = 0;
+  } 
+
+  if (classname && (classname[0]!='\0')) {
+     len = strlen(classname);
+     if (len >= ESMF_MAXSTR) {
+       sprintf(msgbuf, "object type %d bytes longer than limit of %d bytes\n",
+                       len, ESMF_MAXSTR-1);
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       return rc;
+     }
+     defclass = 0;
+  }
+
+  strcpy(className, defclass ? "global" : classname);
+  if (defname) 
+      sprintf(baseName, "%s%03d", className, ID); 
+  else
+      strcpy(baseName, name);
+
+  ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
+
+  return ESMF_SUCCESS;
+
+}  // end ESMC_BaseSetName
+ 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseSetF90Name"
+//BOPI
+// !IROUTINE:  ESMC_BaseSetF90Name - Set Base class name
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_BaseSetF90Name(
+// 
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+// 
+// !ARGUMENTS:
+      char *name,     // in - class name to set, in fortran format
+      int nlen) {     // in - length of class name buffer
+// 
+// !DESCRIPTION:
+//     Accessor method to set base class name.
+//
+//EOPI
+  int rc;
+  char msgbuf[ESMF_MAXSTR];
+
+    // Initialize local return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
+  if (nlen > ESMF_MAXSTR) {
+       sprintf(msgbuf, "string name %d bytes longer than limit of %d bytes\n",
+                       nlen, ESMF_MAXSTR);
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       return rc;
+  }
+
+  memcpy(baseNameF90, name, nlen);
+  if (nlen < ESMF_MAXSTR) 
+      memset(baseNameF90 + nlen, (int)' ', ESMF_MAXSTR-nlen);
+
+  ESMC_F90toCstring(baseNameF90, ESMF_MAXSTR-1, baseName, ESMF_MAXSTR);
+  return ESMF_SUCCESS;
+
+}  // end ESMC_BaseSetF90Name
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseSetRefCount"
+//BOPI
+// !IROUTINE:  ESMC_BaseSetRefCount - Set Base class reference count
+//
+// !INTERFACE:
+      void ESMC_Base::ESMC_BaseSetRefCount(
+// 
+// !RETURN VALUE:
+//    none
+// 
+// !ARGUMENTS:
+      int count) {
+// 
+// !DESCRIPTION:
+//     Accessor method for reference count.
+//
+//EOPI
+
+  refCount = count;
+
+} // end ESMC_BaseSetRefCount
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseSetStatus"
+//BOPI
+// !IROUTINE:  ESMC_BaseSetStatus - Set Base class status
+//
+// !INTERFACE:
+      void ESMC_Base::ESMC_BaseSetStatus(
+// 
+// !RETURN VALUE:
+//    none
+// 
+// !ARGUMENTS:
+      ESMC_Status status) {   // in - base status to set
+// 
+// !DESCRIPTION:
+//     Accessor method for base class status.
+//
+//EOPI
+
+  baseStatus = status;
+
+}  // end ESMC_BaseSetStatus
+ 
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Deserialize"
+//BOPI
+// !IROUTINE:  ESMC_Deserialize - Turn a byte stream into an object
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_Deserialize(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      char *buffer,          // in - byte stream to read
+      int *offset) {         // inout - original offset, updated to point 
+                             //  to first free byte after current obj info
+//
+// !DESCRIPTION:
+//    Turn a stream of bytes into an object.
+//
+//EOPI
+    
+    int *ip, i, nbytes;
+    ESMC_Status *sp;
+    char *cp;
+    int localrc;
+
+    // Initialize local return code; assume routine not implemented
+    localrc = ESMC_RC_NOT_IMPL;
+
+    ip = (int *)(buffer + *offset);
+    ID = *ip++;
+    refCount = *ip++;  
+    classID = *ip++;  
+    sp = (ESMC_Status *)ip;
+    baseStatus = *sp++;
+    cp = (char *)sp;
+    memcpy(baseName, cp, ESMF_MAXSTR);
+    cp += ESMF_MAXSTR;
+    memcpy(baseNameF90, cp, ESMF_MAXSTR);
+    cp += ESMF_MAXSTR;
+    memcpy(className, cp, ESMF_MAXSTR);
+    cp += ESMF_MAXSTR;
+    ip = (int *)cp;
+    attrCount = *ip++;
+    attrAlloc = *ip++;
+    cp = (char *)ip;
+
+    // update offset to point to past the current obj
+    *offset = (cp - buffer);
+
+    if (attrAlloc > 0) {
+         nbytes = attrAlloc * sizeof(ESMC_Attribute *);
+         attrList = (ESMC_Attribute **)malloc(nbytes);
+         for (i=0; i<attrCount; i++) {
+            attrList[i] = new ESMC_Attribute;
+            attrList[i]->ESMC_Attribute::ESMC_Deserialize(buffer, offset);
+            //attrList[i] = NULL;
+         }
+    }
+
+  return ESMF_SUCCESS;
+
+ } // end ESMC_Deserialize
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Print"
+//BOPI
+// !IROUTINE:  ESMC_Print - Print contents of a Base object
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_Print(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      const char *options) const {     //  in - print options
+//
+// !DESCRIPTION:
+//    Print the contents of an {\tt ESMC\_Base} object.  Expected to be
+//    called internally from the object-specific print routines.
+//
+//EOPI
+
+  int i;
+  char msgbuf[ESMF_MAXSTR];
+  int localrc;
+
+    // Initialize local return code; assume routine not implemented
+    localrc = ESMC_RC_NOT_IMPL;
+
+    // PLI -- 10/4/2007 -- use this function to print attribute lists in various ESMF classes
+    // No need to print the base object ID, Name or Class because these information will be
+    // printed at the derived class
+ 
+    //  sprintf(msgbuf,
+    //   "Base object ID: %d, Ref count: %d, Status=%s, Name=%s, Class=%s\n", 
+    //       ID, refCount, ESMC_StatusString(baseStatus), baseName, className);
+    // printf(msgbuf);
+    // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+  
+
+  sprintf(msgbuf, "   Number of Attributes: %d\n", attrCount);
+  printf(msgbuf);
+    // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+  for (i=0; i<attrCount; i++) {
+      sprintf(msgbuf, " Attr %d: ", i);
+      printf(msgbuf);
+        // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+      attrList[i]->ESMC_Print();
+  }
+                         
+  return ESMF_SUCCESS;
+
+ } // end ESMC_Print
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Read"
+//BOPI
+// !IROUTINE:  ESMC_Read - Read in contents of a Base object
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_Read(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      void) {
+//
+// !DESCRIPTION:
+//    Base class provides stubs for optional read/write methods.
+//
+//EOPI
+
+  return ESMC_RC_NOT_IMPL;
+
+ } // end ESMC_Read
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Serialize"
+//BOPI
+// !IROUTINE:  ESMC_Serialize - Turn the object information into a byte stream
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_Serialize(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      char *buffer,          // inout - byte stream to fill
+      int *length,           // inout - buf length; realloc'd here if needed
+      int *offset) const {   // inout - original offset, updated to point 
+                             //  to first free byte after current obj info
+//
+// !DESCRIPTION:
+//    Turn info in base class into a stream of bytes.
+//
+//EOPI
+    int fixedpart;
+    int *ip, i, rc;
+    ESMC_Status *sp;
+    char *cp;
+
+    // Initialize local return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
+    fixedpart = sizeof(ESMC_Base);
+    if ((*length - *offset) < fixedpart) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                               "Buffer too short to add a Base object", &rc);
+        return ESMF_FAILURE; 
+        //buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
+        //*length += 2 * fixedpart;
+    }
+
+    ip = (int *)(buffer + *offset);
+    *ip++ = ID;
+    *ip++ = refCount;  
+    *ip++ = classID;  
+    sp = (ESMC_Status *)ip;
+    *sp++ = baseStatus;
+    cp = (char *)sp;
+    memcpy(cp, baseName, ESMF_MAXSTR);
+    cp += ESMF_MAXSTR;
+    memcpy(cp, baseNameF90, ESMF_MAXSTR);
+    cp += ESMF_MAXSTR;
+    memcpy(cp, className, ESMF_MAXSTR);
+    cp += ESMF_MAXSTR;
+    ip = (int *)cp;
+    *ip++ = attrCount;
+    *ip++ = attrAlloc;
+    cp = (char *)ip;
+
+    // update the offset before calling AttributeSerialize
+    *offset = (cp - buffer);
+
+    if (attrCount > 0) {
+         for (i=0; i<attrCount; i++)
+             attrList[i]->ESMC_Attribute::ESMC_Serialize(buffer, length, offset);
+    }
+
+  return ESMF_SUCCESS;
+
+ } // end ESMC_Serialize
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Validate"
+//BOPI
+// !IROUTINE:  ESMC_Validate - Internal consistency check for Base object
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_Validate(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      const char *options) const {    // in - validate options
+//
+// !DESCRIPTION:
+//     Validation of the {\tt ESMC\_Base} object.  Expected to be called
+//     internally from the object-specific validation methods.
+//
+//EOPI
+
+  int localrc;
+
+   // Initialize local return code; assume routine not implemented
+   localrc = ESMC_RC_NOT_IMPL;
+
+  if (baseStatus != ESMF_STATUS_READY) 
+    return ESMF_FAILURE;
+
+  return ESMF_SUCCESS;
+
+ } // end ESMC_Validate
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Write"
+//BOP
+// !IROUTINE:  ESMC_Write - Write out contents of a Base object
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_Write(
+// 
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+// 
+// !ARGUMENTS:
+      void) const {
+// 
+// !DESCRIPTION:
+//    Base class provides stubs for optional read/write methods.
+//
+//EOP
+
+  return ESMC_RC_NOT_IMPL;
+
+} // end ESMC_Write
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_Serialize"
