@@ -1,0 +1,20 @@
+# grid_rectilinear.rc
+#
+# This file contains the grid specifications for the Test Harness.
+# Requirements:
+# See documentation for further details of the descriptor syntax.
+#################################################################################
+
+grid_type: RECTILINEAR
+
+# regular rectilinear Grid specification - Specify the A grid, other staggers are 
+# calculated from that.
+grid::
+#rank spacing  size  range (min/max)  units
+
+3   UNI_PERIODIC  120  -180      180      DEG_E   GAU_POLE  88  -88    88    DEG_N UNI  20  0  4000  M
+3   UNI_PERIODIC  120  -3.14159  3.14159  RADIANS   
+&   UNI_POLE  90  -1.57  1.57  RAD   
+&   UNI  20  0  4000  M
+3   UNI  220  -160      160      DEG_E   GAU  87  -87    87    DEG_N UNI  20  0  500  CM
+::
