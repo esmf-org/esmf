@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.6 2008/01/30 20:13:23 oehmke Exp $
+// $Id: ESMC_GridToMesh.C,v 1.7 2008/01/30 20:26:40 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -69,6 +69,9 @@ namespace ESMCI {
 // the dual, which is not so bad.  This will put us equivalent with
 // SCRIP.  
 void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
+
+#if NOT
+
 
   // Initialize the parallel environment for mesh (if not already done)
   ESMC::Par::Init("MESHLOG");
@@ -249,7 +252,7 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
 
  }
 
-
+#endif
 }
 
 } // namespace
