@@ -31,6 +31,7 @@
   use ESMF_TestMod  
   use ESMF_Mod
   use ESMF_TestHarnessMod
+  use ESMF_TestHarnessGridMod
   implicit none
 
   ! cumulative result: count failures; no failure equals "all pass"
@@ -50,6 +51,8 @@
   integer :: test_report_flag
   integer :: problem_descriptor_count
   integer :: ncount
+  integer :: k, n, kfile
+
   ! top level test harness config file
   character(ESMF_MAXSTR) :: test_harness_name = "test_harness.rc"
 
@@ -66,28 +69,43 @@
   call ESMF_VMGet(vm, localPet, petCount=petCount, rc=rc)
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-  !
-  print*,'Start read testharness config'
+  !---------------------------------------------------------------------------
+  ! read testharness configuration file, create the test harness record
+  ! variable "harness" and extract (1) the test class, (2) report type, (3)
+  ! number of records or problem descriptor files.
+  !---------------------------------------------------------------------------
   call read_testharness_config(rc)
-  print*,'End read testharness config'
-  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-  print*,'Start read descriptor file'
-  call read_descriptor_files(rc)
-  print*,'End read descriptor file'
-  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-  print*,'Start parse descriptor string'
-  call parse_descriptor_string(rc)
-  print*,'End parse descriptor string'
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-! do file=1,
-!    do k=1, 
-!       do n=1,harness%Record(file)%string(k)%gridfiles%size
-!          call read_grid_specification(                                       &
-!                   harness%Record(file)%string(k)%gridfiles%string(n)%name,rc)
-!       enddo
-!    enddo
-! enddo
+  !---------------------------------------------------------------------------
+  ! loops through the list of descriptor files and reads each problem
+  ! descriptor string and its associated specifer files for (1) class, (2)
+  ! distribution ensemble, and (3) grid ensemble.
+  !---------------------------------------------------------------------------
+  call read_descriptor_files(rc)
+  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+  !---------------------------------------------------------------------------
+  ! parse each of the problem descriptor strings and fill in the test harness
+  ! record variable.
+  !---------------------------------------------------------------------------
+  call parse_descriptor_string(rc)
+  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  print*,'Read specification'
+  do kfile=1, harness%numRecords
+     do k=1, harness%Record(kfile)%numStrings
+        do n=1,harness%Record(kfile)%string(k)%gridfiles%size
+           call read_grid_specification(                                       &
+                    harness%Record(kfile)%string(k)%gridfiles%string(n)%name,rc)
+           if (rc .ne. ESMF_SUCCESS) then 
+               print*,' read grid spec failed'
+               finalrc = ESMF_FAILURE
+               call ESMF_Finalize(terminationflag=ESMF_ABORT)
+           endif
+
+        enddo
+     enddo
+  enddo
   ! report results
 ! call TestHarnessReport(test_report_flag,rc)
 
@@ -494,6 +512,7 @@ contains
              " of file " // trim(lfilename), rcToReturn=localrc) 
     endif
 
+    harness%Record(file)%numStrings = npds
     !------------------------------------------------------------------------
     ! save the addresses of the non-continuation lines
     !------------------------------------------------------------------------
@@ -739,7 +758,7 @@ contains
 !  diagnostics
          !
          print*,'  Diagnositcs                     '
-      do k=1,npds
+      do k=1,harness%Record(file)%numStrings
          print*,'                                  '
          print*,k,trim( harness%Record(file)%string(k)%pds )
          print*,'Class Specifier files',   &

@@ -94,18 +94,6 @@
      integer, pointer :: rank(:)
   end type memory_record
 
-! type dist_record
-!    character(ESMF_MAXSTR) :: name
-!    integer :: topology           ! key (simple block, block-cyclic, arbitrary)
-!    integer :: rank               ! rank of distribution
-!    integer, pointer :: order(:)  ! axis number, zero for free.
-!    integer, pointer :: size(:)   ! number of DE for axis number, zero for free.
-!    integer, pointer :: period(:) ! period for block-cyclic, zero for simple block
-!    integer, pointer :: specifier(:,:)  ! 
-! end type dist_record
-
-
-
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC TYPES:
@@ -132,8 +120,8 @@
 
   type problem_descriptor_records
      character(ESMF_MAXSTR) :: filename   ! filename of problem descriptor record
-     integer :: numStrings                ! # of problem descriptor strings in recd
-     type(problem_descriptor_strings), pointer :: string(:)  ! problem descriptor  strings
+     integer :: numStrings                ! # of problem descriptor strings in record
+     type(problem_descriptor_strings), pointer :: string(:)  ! problem descriptor strings
   end type problem_descriptor_records
 
   type harness_descriptor
@@ -142,21 +130,6 @@
      integer :: numRecords                 ! number of problem descriptor records
      type(problem_descriptor_records), pointer :: record(:)  ! problem descriptor record  
   end type harness_descriptor
-
-!------------superceeded: to be removed
-  type problem_descriptor_record
-     character(ESMF_MAXSTR) :: string           ! problem descriptor string
-!    type(test_report), pointer :: report(:)    ! record of test result
-     type(process_record) :: process            ! method process
-     type(sized_char_array) :: distfiles        ! distribution specification files
-     type(sized_char_array) :: gridfiles        ! grid specification files
-     type(memory_record) :: src_memory          ! memory topology
-     type(memory_record) :: dst_memory          ! memory topology
-!    type(dist_record) :: src_dist  ! src distribution specification
-!    type(dist_record) :: dst_dist  ! dst distribution specification
-     type(grid_record) :: src_grid  !  src grid specification
-     type(grid_record) :: dst_grid  !  dst grid specification
-  end type problem_descriptor_record
 
 !
 !==============================================================================
