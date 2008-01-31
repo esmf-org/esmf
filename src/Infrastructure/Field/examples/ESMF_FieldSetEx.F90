@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGetEx.F90,v 1.2 2008/01/31 22:10:21 feiliu Exp $
+! $Id: ESMF_FieldSetEx.F90,v 1.1 2008/01/31 22:10:21 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -10,12 +10,12 @@
 !
 !==============================================================================
 !
-    program ESMF_FieldGetEx
+    program ESMF_FieldSetEx
 
 !------------------------------------------------------------------------------
 !ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
-! !PROGRAM: ESMF_FieldGetEx - Field Get Examples
+! !PROGRAM: ESMF_FieldSetEx - Field Set Examples
 !
 ! !DESCRIPTION:
 !
@@ -24,7 +24,7 @@
 
     ! ESMF Framework module
     use ESMF_Mod
-    use ESMF_FieldGetMod
+    use ESMF_FieldSetMod
     implicit none
     
     ! Local variables
@@ -38,14 +38,6 @@
     type(ESMF_Array)  :: array8, array
     integer           :: xdim, ydim, zdim
 
-    integer :: gridCompLBnd(ESMF_MAXDIM), gridCompUBnd(ESMF_MAXDIM)
-    integer :: gridExclLBnd(ESMF_MAXDIM), gridExclUBnd(ESMF_MAXDIM)
-    integer :: gridTotaLBnd(ESMF_MAXDIM), gridTotaUBnd(ESMF_MAXDIM)
-
-    integer :: comp_count(ESMF_MAXDIM)
-    integer :: excl_count(ESMF_MAXDIM)
-    integer :: total_count(ESMF_MAXDIM)
-
     integer :: finalrc       
 !   !Set finalrc to success
     finalrc = ESMF_SUCCESS
@@ -56,18 +48,16 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Get Fortran data pointer, Bounds, and Counts information from a Field}
+!\subsubsection{Set the Fortran data pointer in a Field}
 !
-!  User can get various bounds and counts information from a {\tt ESMF\_Field}
-!  through the ESMF_FieldGetDataPtr interface in addition to the intrinsic
+!  Through the {\tt ESMF\_FieldSetDataPtr} interface user can reset the intrinsic
 !  Fortran data pointer contained in the internal {\tt ESMF\_Array} object
 !  of a {\tt ESMF\_Field}
+!  {\tt ESMF\_FieldSetDataPtr} is an overloaded interface based on the type,
+!  kind, and rank of the input fortran pointer argument. In this example,
+!  a rank 3 ESMF_KIND_R8 fortran data pointer is used.
 !
 !EOE
-!-------------------------------------------------------------------------
-!   ! 
-!   ! User can get various bounds and counts information from a Field
-!   ! through the ESMF_FieldGetDataPtr interface.
     xdim = 12
     ydim = 22
     zdim = 31
@@ -77,6 +67,7 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     allocate(farray(xdim,ydim,zdim))
+    allocate(farray1(xdim,ydim,zdim))
     call ESMF_GridGet(grid8, distgrid=distgrid8, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -88,17 +79,8 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
   
 !BOC
-    call ESMF_FieldGetDataPtr(f8, farray1, rc=rc)
+    call ESMF_FieldSetDataPtr(f8, farray, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    call ESMF_FieldGetDataPtr (f8, localDE=0, &
-        computationalLBound=gridCompLBnd, computationalUBound=gridCompUBnd, &
-        exclusiveLBound=gridExclLBnd, exclusiveUBound=gridExclUBnd, &
-        totalLBound=gridTotaLBnd, totalUBound=gridTotaUBnd, &
-        computationalCount=comp_count, &
-        exclusiveCount=excl_count, &
-        totalCount=total_count, &
-        rc=rc)   
 !EOC
 
     call ESMF_FieldDestroy(f8, rc=rc)
@@ -108,7 +90,8 @@
     call ESMF_ArrayDestroy(array8, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(farray)
-    print *, "Field Get Data Pointer example returned"
+    deallocate(farray1)
+    print *, "Field Set Data Pointer example returned"
 !-------------------------------------------------------------------------
     call ESMF_Finalize(rc=rc)
 !-------------------------------------------------------------------------
@@ -116,8 +99,8 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     if (finalrc.EQ.ESMF_SUCCESS) then
-	print *, "PASS: ESMF_FieldGetEx.F90"
+	print *, "PASS: ESMF_FieldSetEx.F90"
     else
-	print *, "FAIL: ESMF_FieldGetEx.F90"
+	print *, "FAIL: ESMF_FieldSetEx.F90"
     end if
-end program ESMF_FieldGetEx
+end program ESMF_FieldSetEx

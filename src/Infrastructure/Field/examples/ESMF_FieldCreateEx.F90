@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.61 2008/01/31 20:43:05 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.62 2008/01/31 22:10:21 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -38,25 +38,13 @@
     type(ESMF_VM) :: vm
     !type(ESMF_RelLoc) :: relativelocation
     !type(ESMF_FieldDataMap) :: datamap
-    type(ESMF_Field) :: field1, field2, field3
+    type(ESMF_Field) :: field1, field2, field3, field4
     real (ESMF_KIND_R8), dimension(2) :: origin
     character (len = ESMF_MAXSTR) :: fname
 
-    real(ESMF_KIND_R8), dimension(:,:,:), pointer :: farray
-    real(ESMF_KIND_R8), dimension(:,:,:), pointer :: farray1
-    type(ESMF_Field)  :: f8
-    type(ESMF_Grid)   :: grid8
-    type(ESMF_DistGrid) :: distgrid8
-    type(ESMF_Array)  :: array8, array
+    real(ESMF_KIND_R8), dimension(:,:), pointer :: farray
+    real(ESMF_KIND_R8), dimension(:,:), pointer :: farray1
     integer           :: xdim, ydim, zdim
-
-    integer :: gridCompLBnd(ESMF_MAXDIM), gridCompUBnd(ESMF_MAXDIM)
-    integer :: gridExclLBnd(ESMF_MAXDIM), gridExclUBnd(ESMF_MAXDIM)
-    integer :: gridTotaLBnd(ESMF_MAXDIM), gridTotaUBnd(ESMF_MAXDIM)
-
-    integer :: comp_count(ESMF_MAXDIM)
-    integer :: excl_count(ESMF_MAXDIM)
-    integer :: total_count(ESMF_MAXDIM)
 
     integer :: finalrc       
 !   !Set finalrc to success
@@ -64,6 +52,9 @@
 
     call ESMF_Initialize(rc=rc)
 
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!-------------------------------- Example -----------------------------
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
 !\subsubsection{Field Create with Grid and Arrayspec}
 !  The user has already created an {\tt ESMF\_Grid} and an
@@ -99,6 +90,9 @@
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!-------------------------------- Example -----------------------------
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
 !\subsubsection{Empty Field Create}
 
@@ -131,6 +125,9 @@
 !  and replace the existing {\tt ESMF\_Array} of a {\tt ESMF\_Field}
 !EOE
 
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!-------------------------------- Example -----------------------------
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
 !\subsubsection{Use ESMF_ArrayCreateFromGrid to replace Field internal Array}
 !  User can replace the {\tt ESMF\_Array} inside an existing Field by construct a proper
@@ -156,11 +153,13 @@
 
     call ESMF_FieldSetArray(field1, array2, rc=rc)
 !EOC
-    print *, "Field replace Field internal array returned"
+    print *, "Field replace Field internal array through ArrayCreateFromGrid returned"
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!-------------------------------- Example -----------------------------
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
 !\subsubsection{Use ESMF_ArrayCreate to to replace Field internal Array}
 !  User can replace the {\tt ESMF\_Array} inside an existing Field by construct a proper
@@ -177,14 +176,65 @@
 !BOC
     array3 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, staggerLoc=0, &
             computationalEdgeLWidth=(/0,0/), computationalEdgeUWidth=(/-1,-1/), rc=rc)
-        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_FieldSetArray(field1, array3, rc=rc)
 !EOC
-    print *, "Field replace internal array returned"
+    print *, "Field replace internal array through ArrayCreate returned"
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!-------------------------------- Example -----------------------------
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!BOE
+!\subsubsection{Field Create from a Grid and a ESMF_Array}
+!  User can create a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a 
+!  {\tt ESMF\_Array}.
+!EOE
+
+!BOC
+    field4 = ESMF_FieldCreate(grid, array2, rc=rc)
+!EOC
+    print *, "Field Create from a Grid and a ESMF_Array returned"
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!-------------------------------- Example -----------------------------
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!BOE
+!\subsubsection{Field Create from a Grid and a Fortran data pointer}
+!  User can create a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a intrinsic 
+!  Fortran data pointer. This interface is overloaded for type, kind, rank of
+!  of the fortran data pointer. In this example, a 2d array is used.
+!EOE
+
+!BOC
+    allocate(farray(10, 20))
+    field2 = ESMF_FieldCreate(grid, farray, rc=rc)
+!EOC
+    print *, "Field Create from a Grid and a Fortran data pointer returned"
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!-------------------------------- Example -----------------------------
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!BOE
+!\subsubsection{Finish a Field created by ESMF_FieldCreateEmpty with FieldSetCommit}
+!  User can finalize a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a intrinsic 
+!  Fortran data pointer. This interface is overloaded for type, kind, rank of
+!  of the fortran data pointer. In this example, a 2d array is used.
+!EOE
+
+!BOC
+    call ESMF_FieldSetCommit(field3, grid, farray, rc=rc)
+!EOC
+    print *, "Finish a Field created by ESMF_FieldCreateEmpty returned"
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!-------------------------------- Example -----------------------------
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
 !\subsubsection{Destroy a Field}
 
@@ -196,14 +246,6 @@
 !  can be used in multiple {\tt ESMF\_Field}s.
 !EOE
 !-------------------------------------------------------------------------
-!   !
-!   ! Query a Field for number of local grid cells.
-!   COMMENT THIS TEST OUT FOR NOW BECAUSE THE SUBROUTINE
-!   IS UNIMPLEMENTED CAN TURN BACK ON WHEN INITMACROS ARE ON
-!     call ESMF_FieldGetLocalGridInfo(field3, ncell=mycell, rc=rc)
-!     print *, "Field example 5 returned"
-!
-!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
     call ESMF_FieldDestroy(field1, rc=rc)
@@ -211,9 +253,18 @@
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_FieldDestroy(field3,rc=rc)
-
+! Destroy objects
+    call ESMF_FieldDestroy(field4,rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_FieldDestroy(field3,rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_FieldDestroy(field2,rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_ArrayDestroy(array2, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_ArrayDestroy(array3, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    deallocate(farray)
 
 !-------------------------------------------------------------------------
      call ESMF_Finalize(rc=rc)
