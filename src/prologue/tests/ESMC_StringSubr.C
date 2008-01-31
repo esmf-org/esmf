@@ -1,4 +1,4 @@
-// $Id: ESMC_StringSubr.C,v 1.3.2.5 2008/01/19 03:58:34 theurich Exp $
+// $Id: ESMC_StringSubr.C,v 1.3.2.6 2008/01/31 20:20:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -19,22 +19,22 @@
 //
  #define ESMC_FILENAME "ESMC_StringSubr.C"
 
-#include <iostream>
-using namespace std;
-
+#include <stdio.h>
 #include <string.h>
 #include <ESMC_Macros.h>
 #include <ESMC_Conf.h>
 
 typedef void (*FUNC)(int *, int *, int *, int *, int *);
-typedef void (*FUNC2)(int *, int *, char *, int *, int *, int *, ESMCI_FortranStrLenArg);
-typedef void (*FUNC3)(int *, char *, int *, char *, int *, int *, int *, ESMCI_FortranStrLenArg, ESMCI_FortranStrLenArg);
+typedef void (*FUNC2)(int *, int *, char *, int *, int *, int *,
+  ESMCI_FortranStrLenArg);
+typedef void (*FUNC3)(int *, char *, int *, char *, int *, int *, int *,    
+  ESMCI_FortranStrLenArg, ESMCI_FortranStrLenArg);
 
 extern "C" {
 
 void FTN(c_strings)(FUNC f90cb, FUNC2 f90cb2, FUNC3 f90cb3, 
                     int *i1, int *i2, char *fstr,
-                    int *i3, int *i4, int *rc, ESMCI_FortranStrLenArg slen) {
+                    int *i3, int *i4, int *rc, int slen) {
 
       int ni1, ni2, ni3, ni4;
       int clen, clen2;
@@ -45,57 +45,57 @@ void FTN(c_strings)(FUNC f90cb, FUNC2 f90cb2, FUNC3 f90cb3,
       int local_rc;
 
 
-      cout << "\n\n-- entering c_strings" << endl;
+      printf("\n\n-- entering c_strings\n");
 
       strncpy(tbuf, fstr, slen);
       tbuf[slen] = '\0';
-      cout << *i1 << " " << *i2 << " " << *i3 << " " << *i4 << endl;
-      cout << " strlen = " << slen << ", str='" << tbuf << "'" << endl;
+      printf(" %d %d %d %d %d\n", *i1, *i2, *i3, *i4, slen);
+      printf(" strlen = %d, str='%s'\n", slen, tbuf);
 
       ni1 = 102;
       ni2 = 204;
       ni3 = 409;
       ni4 = 819;
   
-      cout << "\n\n-- ready to call f90int by callback with passed ints" << endl;
+      printf("\n\n-- ready to call f90int by callback with passed ints\n");
       (*f90cb)(i1, i2, i3, i4, &local_rc);
-      cout << "\n\n-- returned from call of f90int by callback with passed ints" << endl;
+      printf("\n\n-- returned from call of f90int by callback with passed ints\n");
       if (local_rc == ESMF_FAILURE) result = ESMF_FAILURE;
 
-      cout << "\n\n-- ready to call f90int by callback with local ints" << endl;
+      printf("\n\n-- ready to call f90int by callback with local ints\n");
       (*f90cb)(&ni1, &ni2, &ni3, &ni4, &local_rc);
-      cout << "\n\n-- returned from call of f90int by callback with local ints" << endl;
+      printf("\n\n-- returned from call of f90int by callback with local ints\n");
       if (local_rc == ESMF_FAILURE) result = ESMF_FAILURE;
 
       clen = 15;
 
-      cout << "\n\n-- ready to call f90string2 by callback, passing 15" << endl;
+      printf("\n\n-- ready to call f90string2 by callback, passing 15\n");
       (*f90cb2)(&ni1, &ni2, newstr, &ni3, &ni4, &local_rc, clen);
-      cout << "\n\n-- returned from call f90string2 by callback" << endl;
+      printf("\n\n-- returned from call f90string2 by callback\n");
 
       if (local_rc == ESMF_FAILURE) result = ESMF_FAILURE;
 
       clen = 25;
 
-      cout << "\n\n-- ready to call f90string2 by callback, passing 25" << endl;
+      printf("\n\n-- ready to call f90string2 by callback, passing 25\n");
       (*f90cb2)(&ni1, &ni2, newstr, &ni3, &ni4, &local_rc, clen);
-      cout << "\n\n-- returned from call f90string2 by callback" << endl;
+      printf("\n\n-- returned from call f90string2 by callback\n");
 
       if (local_rc == ESMF_FAILURE) result = ESMF_FAILURE;
 
       clen = 14;
       clen2 = 24;
 
-      cout << "\n\n-- ready to call f90string3 by callback, passing 14, 24" << endl;
+      printf("\n\n-- ready to call f90string3 by callback, passing 14, 24\n");
       (*f90cb3)(&ni1, newstr, &ni2, newstr2, &ni3, &ni4, &local_rc, clen, clen2);
-      cout << "\n\n-- returned from call f90string3 by callback" << endl;
+      printf("\n\n-- returned from call f90string3 by callback\n");
 
       if (local_rc == ESMF_FAILURE) result = ESMF_FAILURE;
 
       /* pass back final result */
       *rc = result;
 
-      cout << "\n\n-- leaving c_strings" << endl;
+      printf("\n\n-- leaving c_strings\n");
 
 }  // end of c_strings()
 
