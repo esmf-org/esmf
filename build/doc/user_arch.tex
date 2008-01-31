@@ -1,4 +1,4 @@
-% $Id: user_arch.tex,v 1.16.4.11 2008/01/16 23:03:06 theurich Exp $
+% $Id: user_arch.tex,v 1.16.4.12 2008/01/31 06:54:04 theurich Exp $
 
 % List of architectures supported.  This file is 
 % meant to be included in a user doc.
@@ -19,11 +19,10 @@ included in the build system.
 \begin{tabular}{lllllll}
   &{\bfseries\footnotesize ESMF\_OS} &{\bfseries\footnotesize ESMF\_COMPILER} & {\bfseries\footnotesize\it F90 compiler} & {\bfseries\footnotesize\it C++ compiler} & {\bfseries\footnotesize ESMF\_COMM} & {\bfseries\footnotesize ESMF\_ABI} \\
 
-Cray X1         &\tt Unicos &\tt default & ftn \footnotesize 5.6.0.3 & CC \footnotesize 5.6.0.3 &\tt mpi &\tt 64 \\
 Cray X1         &\tt Unicos &\tt default & ftn \footnotesize 5.5.0.9 & CC \footnotesize 5.5.0.9 &\tt mpi &\tt 64 \\
 Cray XT3/4      &\tt Unicos &\tt pgi     & ftn \footnotesize 7.0-6   & CC \footnotesize 7.0-6   &\tt mpi &\tt 64 \\
 HP ZX6000       &\tt Linux  &\tt intel   & ifort \footnotesize 8.1.021 & icpc \footnotesize 8.1.024 &\tt lam &\tt 64 \\
-IBM Bluegene    &\tt Linux  &\tt xlf     & mpxlf90 \footnotesize 10.1.0.4 & mpxlC \footnotesize 8.0.0.4 &\tt mpi &\tt 32 \\
+IBM Bluegene    &\tt Linux  &\tt default & mpxlf90 \footnotesize 10.1.0.4 & mpxlC \footnotesize 8.0.0.4 &\tt mpi &\tt 32 \\
 IBM Opteron     &\tt Linux  &\tt pathscale & pathf90 \footnotesize 2.4 & pathCC \footnotesize 2.4 &\tt mpich &\tt 64 \\
 IBM Opteron     &\tt Linux  &\tt pgi     & pgf90 \footnotesize 5.2-4 & pgCC \footnotesize 5.2-4 &\tt mpich   &\tt 64 \\
 IBM Opteron     &\tt Linux  &\tt pgi     & pgf90 \footnotesize 6.2-3 & pgCC \footnotesize 6.2-3 &\tt mpich   &\tt 64 \\
@@ -34,15 +33,15 @@ Mac G5          &\tt Darwin &\tt absoft  & f90 \footnotesize 8.2     & g++ \foot
 Mac G5          &\tt Darwin &\tt nag     & f95 \footnotesize 5.0(272)& g++ \footnotesize 3.3    &\tt lam,mpiuni &\tt 32 \\
 Mac G5          &\tt Darwin &\tt xlf     & xlf90\_r \footnotesize 8.1& xlC\_r \footnotesize 6.0 &\tt lam,mpiuni &\tt 32 \\
 Mac G5          &\tt Darwin &\tt xlfgcc  & xlf90\_r \footnotesize 8.1& g++ \footnotesize 3.3    &\tt lam,mpiuni &\tt 32 \\
-PC Pentium III  &\tt Linux  &\tt lahey   & lf95 \footnotesize L6.20d & g++ \footnotesize 3.2.3  &\tt mpiuni     &\tt 32 \\
-PC Pentium III  &\tt Linux  &\tt pgi     & pgf90 \footnotesize 5.0-2 & pgCC \footnotesize 5.0-2 &\tt mpiuni     &\tt 32 \\
-PC Pentium III  &\tt Linux  &\tt pgi     & pgf90 \footnotesize 7.0-6 & pgCC \footnotesize 7.0-6 &\tt mpiuni     &\tt 32 \\
-PC Pentium III  &\tt Linux  &\tt pgigcc  & pgf90 \footnotesize 5.0-2 & g++ \footnotesize 3.2.3  &\tt mpiuni     &\tt 32 \\
-PC Pentium III  &\tt Linux  &\tt pgigcc  & pgf90 \footnotesize 7.0-6 & g++ \footnotesize 3.2.3  &\tt mpiuni     &\tt 32 \\
-PC Xeon Cluster &\tt Linux  &\tt absoft  & f90 \footnotesize 9.0 r2  & g++ \footnotesize 3.2.3  &\tt mpich      &\tt 32 \\
-PC Xeon Cluster &\tt Linux  &\tt intel   & ifort \footnotesize 8.1   & icpc \footnotesize 8.1   &\tt mpich      &\tt 32 \\
-PC Xeon Cluster &\tt Linux  &\tt nag     & f95 \footnotesize 5.0(361)& icpc \footnotesize 8.1   &\tt mpich      &\tt 32 \\
-PC Xeon Cluster &\tt Linux  &\tt pgi     & pgf90 \footnotesize 5.2-4 & pgCC \footnotesize 5.2-4 &\tt mpich      &\tt 32 \\
+PC Pentium III  &\tt Linux  &\tt lahey   & lf95 \footnotesize L6.20d & g++ \footnotesize 4.1.2  &\tt mpiuni     &\tt 32 \\
+PC Pentium III  &\tt Linux  &\tt pgi     & pgf90 \footnotesize 7.1-3 & pgCC \footnotesize 7.1-3 &\tt mpiuni     &\tt 32 \\
+PC Pentium III  &\tt Linux  &\tt pgigcc  & pgf90 \footnotesize 7.1-3 & g++ \footnotesize 4.1.2  &\tt mpiuni     &\tt 32 \\
+PC Xeon(32) Cluster &\tt Linux  &\tt absoft  & f90 \footnotesize 9.0 r2  & g++ \footnotesize 3.2.3  &\tt mpich      &\tt 32 \\
+PC Xeon(32) Cluster &\tt Linux  &\tt intel   & ifort \footnotesize 8.1   & icpc \footnotesize 8.1   &\tt mpich      &\tt 32 \\
+PC Xeon(32) Cluster &\tt Linux  &\tt nag     & f95 \footnotesize 5.0(361)& icpc \footnotesize 8.1   &\tt mpich      &\tt 32 \\
+PC Xeon(32) Cluster &\tt Linux  &\tt pgi     & pgf90 \footnotesize 5.2-4 & pgCC \footnotesize 5.2-4 &\tt mpich      &\tt 32 \\
+PC Xeon(64) Cluster &\tt Linux  &\tt intel   & ifort \footnotesize 9.1.036 & icpc \footnotesize 9.1.042 &\tt mpich2 &\tt 64 \\
+PC Xeon(64) Cluster &\tt Linux  &\tt intel   & ifort \footnotesize 10.0.025 & icpc \footnotesize 10.0.025 &\tt scalimpi &\tt 64 \\
 SGI Altix       &\tt Linux  &\tt intel   & ifort \footnotesize 9.1.045 & icpc \footnotesize 9.1.049 &\tt mpi    &\tt 64 \\
 SGI Origin 3800 &\tt IRIX64 &\tt default & f90 \footnotesize 7.4.3m  & CC \footnotesize 7.4.3m  &\tt mpi        &\tt 32,64
 \end{tabular}
@@ -67,8 +66,8 @@ Darwin  &  xlf          &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
 Darwin  &  xlfgcc       &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
 IRIX64  &  default      &  {\bf mpi},mpiuni,user         &  32,{\bf 64}  \\
 Linux   &  absoft       &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32, 64 \\
-Linux   &  g95          &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
-Linux   &  gfortran     &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
+Linux   &  g95          &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32, 64 \\
+Linux   &  gfortran     &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32, 64 \\
 Linux   &  intel        &  {\bf mpiuni},mpi,mpich,mpich2,intelmpi,scalimpi,lam,openmpi,user  &  32, 64 \\
 Linux   &  intelgcc     &  {\bf mpiuni},mpi,mpich,mpich2,lam,openmpi,user  &  32, 64 \\
 Linux   &  lahey        &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
