@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.60 2008/01/25 21:37:07 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.61 2008/01/31 20:43:05 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -15,7 +15,6 @@
 !------------------------------------------------------------------------------
 !ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
-!BOC
 ! !PROGRAM: ESMF_FieldCreateEx - Field creation
 !
 ! !DESCRIPTION:
@@ -59,7 +58,6 @@
     integer :: excl_count(ESMF_MAXDIM)
     integer :: total_count(ESMF_MAXDIM)
 
-!EOC
     integer :: finalrc       
 !   !Set finalrc to success
     finalrc = ESMF_SUCCESS
@@ -73,7 +71,6 @@
 !  two objects.  
 !EOE
 !-------------------------------------------------------------------------
-!   ! Example 1:
 !   !
 !   !  We first create a Grid with a regular distribution that is
 !   !  10x20 DEs.  This version of create simply
@@ -98,17 +95,48 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_FieldGet(field1, name=fname, rc=rc)
-    print *, "Field example 1 returned, name = ", trim(fname)
+    print *, "Field creation from Grid and Arrayspec returned, name = ", trim(fname)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!\subsection{Replace the ESMF_Array inside a Field, first method}
-!  User can replace the {\tt ESMF\_Array} inside an existing Field by construct a proper
-!  shape {\tt ESMF\_Array}
+!\subsubsection{Empty Field Create}
+
+!  The user creates an empty {\tt ESMF\_Field} object.
+!  Then the user can add the Grid and data in later calls
 !EOE
 !-------------------------------------------------------------------------
-!   ! Example 2:
+!   !
+!   !  The user creates an empty Field, and adds the Grid and 
+!   !  data in later calls.
+
+!BOC
+     field3 = ESMF_FieldCreateEmpty("precip", rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!
+!    ! At some later time, associate a Grid with this Field
+     call ESMF_FieldSetGrid(field3, grid, rc)
+
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    print *, "Field Empty Field Creation example returned"
+
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOE
+!\subsubsection{Replace the ESMF_Array inside a Field}
+!  It's often necessary to replace the internal data array within a field.
+!  The following examples demonstrate different ways of creating {\tt ESMF\_Array}
+!  and replace the existing {\tt ESMF\_Array} of a {\tt ESMF\_Field}
+!EOE
+
+!BOE
+!\subsubsection{Use ESMF_ArrayCreateFromGrid to replace Field internal Array}
+!  User can replace the {\tt ESMF\_Array} inside an existing Field by construct a proper
+!  shape {\tt ESMF\_Array} by calling {\tt ESMF\_ArrayCreateFromGrid}
+!EOE
+!-------------------------------------------------------------------------
 !   !
 !   !  The user wishes to associate different data with the Field
 !   !  created in example 1.  The get data call returns the 
@@ -128,44 +156,17 @@
 
     call ESMF_FieldSetArray(field1, array2, rc=rc)
 !EOC
-    print *, "Field example 2 returned"
+    print *, "Field replace Field internal array returned"
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 
 !BOE
-!\subsubsection{Empty Field Create}
-
-!  The user creates an empty {\tt ESMF\_Field} object.
-!  Then the user can add the Grid and data in later calls
-!EOE
-!-------------------------------------------------------------------------
-!   ! Example 3:
-!   !
-!   !  The user creates an empty Field, and adds the Grid and 
-!   !  data in later calls.
-
-!BOC
-     field3 = ESMF_FieldCreateEmpty("precip", rc=rc)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!
-!    ! At some later time, associate a Grid with this Field
-     call ESMF_FieldSetGrid(field3, grid, rc)
-
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    print *, "Field example 3 returned"
-
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOE
-!\subsection{Replace the ESMF_Array inside a Field, second method}
+!\subsubsection{Use ESMF_ArrayCreate to to replace Field internal Array}
 !  User can replace the {\tt ESMF\_Array} inside an existing Field by construct a proper
 !  shape {\tt ESMF\_Array}
 !EOE
 !-------------------------------------------------------------------------
-!   ! Example 4:
 !   !
 !   !  The user can substitute another array created by ArrayCreate in field1.
 !   ! This example demonstrates some of the topology nature of a field
@@ -180,56 +181,9 @@
 
     call ESMF_FieldSetArray(field1, array3, rc=rc)
 !EOC
-    print *, "Field example 4 returned"
+    print *, "Field replace internal array returned"
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOE
-!\subsubsection{Get bounds and counts information from a Field}
-!
-!  User can get various bounds and counts information from a Field
-!  through the ESMF_FieldGetDataPtr interface.
-!
-!EOE
-!-------------------------------------------------------------------------
-!   ! Example 5:
-!   ! 
-!   ! User can get various bounds and counts information from a Field
-!   ! through the ESMF_FieldGetDataPtr interface.
-    xdim = 12
-    ydim = 22
-    zdim = 31
-
-    grid8 = ESMF_GridCreateShapeTile(minIndex=(/1,1,1/), maxIndex=(/4*xdim-1,ydim-1,zdim-1/), &
-                              regDecomp=(/4,1,1/), name="grid", rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    allocate(farray(xdim,ydim,zdim))
-    call ESMF_GridGet(grid8, distgrid=distgrid8, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    array8 = ESMF_ArrayCreate(farray, distgrid=distgrid8, &
-        staggerloc=0, computationalEdgeLWidth=(/0,0,0/), computationalEdgeUWidth=(/-1,-1,-1/), rc=rc) 
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    f8 = ESMF_FieldCreate(grid8, array8, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-  
-    call ESMF_FieldGetDataPtr(f8, farray1, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-    call ESMF_FieldGetDataPtr (f8, localDE=0, &
-        computationalLBound=gridCompLBnd, computationalUBound=gridCompUBnd, &
-        exclusiveLBound=gridExclLBnd, exclusiveUBound=gridExclUBnd, &
-        totalLBound=gridTotaLBnd, totalUBound=gridTotaUBnd, &
-        computationalCount=comp_count, &
-        exclusiveCount=excl_count, &
-        totalCount=total_count, &
-        rc=rc)   
-!EOC
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-    rc = finalrc
 
 !BOE
 !\subsubsection{Destroy a Field}
@@ -242,7 +196,6 @@
 !  can be used in multiple {\tt ESMF\_Field}s.
 !EOE
 !-------------------------------------------------------------------------
-!   ! Example 4:
 !   !
 !   ! Query a Field for number of local grid cells.
 !   COMMENT THIS TEST OUT FOR NOW BECAUSE THE SUBROUTINE
