@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.10 2008/01/26 01:54:22 rokuingh Exp $
+! $Id: user_model1.F90,v 1.11 2008/02/01 22:36:45 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -110,6 +110,7 @@ module user_model1
     type(ESMF_ArraySpec)        :: arrayspec
     type(ESMF_Array)            :: array
     type(ESMF_Field)            :: field
+    type(ESMF_Bundle)           :: bundle
     type(ESMF_Grid)             :: grid
     integer                     :: petCount, backward_run, status, myPet
     character(len=ESMF_MAXSTR)  :: name, value, conv, purp, fconv, fpurp   
@@ -167,6 +168,16 @@ module user_model1
       if (status .ne. ESMF_SUCCESS) goto 20
       
       call ESMF_FieldAttPackSet(field, name, value, convention=fconv, purpose=fpurp, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+
+      ! bundle stuff
+      bundle = ESMF_BundleCreate(name="bundle1", rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+      
+      call ESMF_BundleAttPackCreate(bundle, convention=fconv, purpose=fpurp, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+      
+      call ESMF_BundleAttPackSet(bundle, name, value, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
 
       ! grid stuff
@@ -236,6 +247,10 @@ module user_model1
         call ESMF_FieldAttPackWrite(field, convention=fconv, purpose=fpurp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
         
+        print *, 'Write the Bundle Attpack from the second run of component 1.'
+        call ESMF_BundleAttPackWrite(bundle, convention=fconv, purpose=fpurp, rc=rc)
+        if (status .ne. ESMF_SUCCESS) goto 20
+
         print *, 'Write the Grid Attpack from the second run of component 1.'
         call ESMF_GridAttPackWrite(grid, convention=fconv, purpose=fpurp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
@@ -248,6 +263,7 @@ module user_model1
 
     call ESMF_ArrayDestroy(array, rc=rc)
     call ESMF_DistGridDestroy(distgrid, rc=rc)
+    call ESMF_BundleDestroy(bundle, rc=rc)
     call ESMF_FieldDestroy(field, rc=rc)
     call ESMF_GridDestroy(grid, rc=rc)
 
