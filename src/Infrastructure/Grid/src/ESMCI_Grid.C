@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.46 2008/01/30 20:12:10 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.47 2008/02/01 22:29:18 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.46 2008/01/30 20:12:10 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.47 2008/02/01 22:29:18 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -4164,6 +4164,8 @@ void GridIter::setDEBnds(
   // Set Bounds of iteration on this proc
   grid->getComputationalUBound(staggerloc, localDE, uBndInd);  
   grid->getComputationalLBound(staggerloc, localDE, lBndInd);  
+  grid->getExclusiveLBound(localDE, exLBndInd);
+
 
   // if cell iterator then expand bounds
   if (cellNodes) {
@@ -4191,11 +4193,12 @@ void GridIter::setDEBnds(
     curInd[i]=lBndInd[i];
   }
 
-  printf(" rank=%d \n",rank);
-  printf(" lbnd=[%d,%d] \n",lBndInd[0],lBndInd[1]);
-  printf(" ubnd=[%d,%d] \n",uBndInd[0],uBndInd[1]);
-  printf(" cur=[%d,%d] \n",curInd[0],curInd[1]);
-
+  //  printf("new DE ------- \n");
+  //  printf(" rank=%d \n",rank);
+  //  printf(" lbnd=[%d,%d] \n",lBndInd[0],lBndInd[1]);
+  //  printf(" ubnd=[%d,%d] \n",uBndInd[0],uBndInd[1]);
+  //  printf(" cur=[%d,%d] \n",curInd[0],curInd[1]);
+  //  printf("new DE ------- \n");
 
 }
 //-----------------------------------------------------------------------------
@@ -4326,7 +4329,7 @@ GridIter *GridIter::adv(
   // if done then leave
   if (done) return this;
 
-  printf(" cur=[%d,%d] \n",curInd[0],curInd[1]);
+  //  printf("A cur=[%d,%d] \n",curInd[0],curInd[1]);
 
   // advance first index
   curInd[0]++;
@@ -4349,8 +4352,6 @@ GridIter *GridIter::adv(
     //// advance the DE if necessary 
     if (i==rank) {
       curDE++;
-
-      printf("curDE=%d uBndDE=%d \n",curDE,uBndDE);
 
       ////// If we're past the top of the DEs then we're done
       if (curDE > uBndDE) { 
@@ -4393,14 +4394,30 @@ int GridIter::getGlobalID(
 //-----------------------------------------------------------------------------
   int localrc;
   int gid;
+  int deBasedInd[ESMF_MAXDIM];
 
   // if done then leave
   if (done) return -1;
 
-  // return sequence index
-  gid=grid->getDistGrid()->getSequenceIndexLocalDe(curDE,curInd,&localrc);
 
-  if (gid <0) printf("Gid=%d curDE=%d curInd=%d %d localrc=%d \n",gid,curDE,curInd[0],curInd[1],localrc);
+#if 0 // Wait on Gerhards getSequenceIndexLocalDe Fix
+  // Convert to DE based
+  for (int i=0; i<rank; i++) {
+    deBasedInd[i]=curInd[i]-exLBndInd[i];
+  }
+
+  //   printf("curDE=%d Ind=%d %d \n",curDE,deBasedInd[0],deBasedInd[1]);
+
+  // return sequence index
+  gid=grid->getDistGrid()->getSequenceIndexLocalDe(curDE,deBasedInd,&localrc);
+
+  if (gid <0) printf("Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,deBasedInd[0],deBasedInd[1],localrc);
+#else
+  // NOTE THAT THIS ONLY WORKS FOR SINGLE PATCH GRIDS WITH GLOBAL INDEXING
+  gid=grid->getDistGrid()->getSequenceIndexPatch(1,curInd,&localrc);
+
+  if (gid <0) printf("Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,curInd[0],curInd[1],localrc);
+#endif
 
   return gid;
 
@@ -4702,6 +4719,7 @@ void GridCellIter::setDEBnds(
   // Set Bounds of iteration on this proc
   grid->getComputationalUBound(staggerloc, localDE, uBndInd);  
   grid->getComputationalLBound(staggerloc, localDE, lBndInd);  
+  grid->getExclusiveLBound(localDE, exLBndInd);
 
   // if cell iterator then expand bounds
   for (int i=0; i<rank; i++) {
@@ -4810,7 +4828,7 @@ GridCellIter *GridCellIter::toBeg(
   // Set to beginning (localDE=0)
   this->setDEBnds(0);
 
-  printf("B cur=[%d,%d] \n",curInd[0],curInd[1]);
+  //  printf("B cur=[%d,%d] \n",curInd[0],curInd[1]);
 
 
   // IF DE IS EMPTY NEED TO ADVANCE TO NEXT FULL DE HERE
@@ -4859,7 +4877,7 @@ GridCellIter *GridCellIter::adv(
   // if done then leave
   if (done) return this;
 
-  printf("A cur=[%d,%d] \n",curInd[0],curInd[1]);
+  //  printf("A cur=[%d,%d] \n",curInd[0],curInd[1]);
 
   // advance first index
   curInd[0]++;
@@ -4883,7 +4901,7 @@ GridCellIter *GridCellIter::adv(
     if (i==rank) {
       curDE++;
 
-      printf("curDE=%d uBndDE=%d \n",curDE,uBndDE);
+      //      printf("curDE=%d uBndDE=%d \n",curDE,uBndDE);
 
       ////// If we're past the top of the DEs then we're done
       if (curDE > uBndDE) { 
@@ -4926,12 +4944,33 @@ int GridCellIter::getGlobalID(
 //EOPI
 //-----------------------------------------------------------------------------
   int localrc;
+  int gid;
+  int deBasedInd[ESMF_MAXDIM];
 
   // if done then leave
   if (done) return -1;
 
+
+#if 0 // Wait on Gerhards getSequenceIndexLocalDe Fix
+  // Convert to DE based
+  for (int i=0; i<rank; i++) {
+    deBasedInd[i]=curInd[i]-exLBndInd[i];
+  }
+
   // return sequence index
-  return grid->getDistGrid()->getSequenceIndexLocalDe(curDE,curInd,&localrc);
+  gid=grid->getDistGrid()->getSequenceIndexLocalDe(curDE,deBasedInd,&localrc);
+
+  if (gid <0) printf("Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,deBasedInd[0],deBasedInd[1],localrc);
+#else
+  // NOTE THAT THIS ONLY WORKS FOR SINGLE PATCH GRIDS WITH GLOBAL INDEXING
+  gid=grid->getDistGrid()->getSequenceIndexPatch(1,curInd,&localrc);
+
+  if (gid <0) printf("Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,curInd[0],curInd[1],localrc);
+#endif
+
+
+  // return sequence index
+  return gid;
 
 }
 //-----------------------------------------------------------------------------
@@ -4973,6 +5012,120 @@ int GridCellIter::getLocalID(
 
   // Add in DE number and output
   return dePos*numDE+curDE;
+
+}
+//-----------------------------------------------------------------------------
+
+
+// This method must correspond to GridIter::setDEBnds(), so adjust accordingly
+void precomputeCellNodeLIDInfo(Grid *grid, int rank, int staggerloc, int localDE, 
+                               int *dimOffCN, int *lOffCN) {
+  int uBnd[ESMF_MAXDIM];
+  int lBnd[ESMF_MAXDIM];
+  int tmplOff;
+
+  // Set Bounds of iteration on this proc
+  grid->getComputationalUBound(staggerloc, localDE, uBnd);  
+  grid->getComputationalLBound(staggerloc, localDE, lBnd);  
+
+  // if cell iterator then expand bounds
+  for (int i=0; i<rank; i++) {
+      //// Expand to include all nodes touched by cells on this proc
+      if (!grid->isLBnd(localDE,i)) lBnd[i]--;
+      if (!grid->isUBnd(localDE,i)) uBnd[i]++;
+  }
+
+  // Setup info for calculating the DE index tuple location quickly
+  // Needs to be done after bounds are set
+  int currOff=1;
+  tmplOff=0;
+  for (int i=0; i<rank; i++) {
+    dimOffCN[i]=currOff;
+    tmplOff +=currOff*lBnd[i];
+
+    currOff *=(uBnd[i]-lBnd[i]+1);
+  }  
+  *lOffCN=tmplOff;
+}
+
+int getCellNodeLID(int *ind, int rank, int curDE, int numDE, int *dimOffCN, int lOffCN) {
+
+
+ // compute position in DE
+  int dePos=-lOffCN;
+  for (int i=0; i<rank; i++) {
+    dePos +=dimOffCN[i]*ind[i];
+  }
+
+  // Add in DE number and output
+  return dePos*numDE+curDE;
+}
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridCellIter::getCornersCellNodeLocalID()"
+//BOPI
+// !IROUTINE: getCornersCellNodeLocalID()"
+//
+// !INTERFACE:
+void GridCellIter::getCornersCellNodeLocalID(
+//
+// !RETURN VALUE:
+//  none
+//
+// !ARGUMENTS:
+                                             int *cnrCount,
+                                             int *cnrList
+ ){
+//
+// !DESCRIPTION:
+//   Returns the corners of the current Grid Cell. The corners
+// are identified by the localID that would be returned by
+// a grid cell node iterator on that corner. 
+//
+// NOTE: cnrList must at least be allocated to size 2^grid rank
+//       currently this only returns cubes, but may eventually
+//       return other shapes as more complex grids can be created
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int cnrNum;
+  int dimOffCN[ESMF_MAXDIM];
+  int lOffCN;
+  int cnrMap[4][8]={{0,0,0,0,0,0,0,0},
+                    {0,1,0,0,0,0,0,0},
+                    {0,1,3,2,0,0,0,0},
+                    {0,1,3,2,4,5,7,6}};
+
+  // if rank is bigger than supported exit
+  // ADD THROW HERE
+  if (rank >3) return;
+  
+  // Set number of corners
+  cnrNum=0x1<<rank;
+  
+  // Set number of corners output 
+  *cnrCount=cnrNum;
+
+  // Precompute info for calculating local IDs
+  precomputeCellNodeLIDInfo(grid, rank, staggerloc, curDE, dimOffCN, &lOffCN);
+
+  // Loop through setting corners
+  for (int i=0; i<cnrNum; i++) {
+    int ind[ESMF_MAXDIM];
+
+    // generate index value for corner
+    for (int j=0; j<rank; j++) {
+      ind[j]=curInd[j];
+      if (i & (0x1<<j)) {
+        ind[j]++;
+      }        
+    }
+
+    // compute Local IDs
+    cnrList[cnrMap[rank][i]]=getCellNodeLID(ind, rank, curDE, numDE, dimOffCN, lOffCN);
+  }
 
 }
 //-----------------------------------------------------------------------------
