@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.63 2008/02/01 00:50:00 theurich Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.64 2008/02/01 21:26:01 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -56,7 +56,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Field Create with Grid and Arrayspec}
+!\subsubsection{Create Field with Grid and Arrayspec}
 !  The user has already created an {\tt ESMF\_Grid} and an
 !  {\tt ESMF\_Arrayspec} with data.  This create associates the
 !  two objects.  
@@ -94,7 +94,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Empty Field Create}
+!\subsubsection{Create Empty Field}
 
 !  The user creates an empty {\tt ESMF\_Field} object.
 !  Then the user can add the Grid and data in later calls
@@ -105,12 +105,12 @@
 !   !  data in later calls.
 
 !BOC
-     field3 = ESMF_FieldCreateEmpty("precip", rc=rc)
-!EOC
+    field3 = ESMF_FieldCreateEmpty("precip", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!
-!    ! At some later time, associate a Grid with this Field
-     call ESMF_FieldSetGrid(field3, grid, rc)
+
+!   ! At some later time, associate a Grid with this Field
+    call ESMF_FieldSetGrid(field3, grid, rc)
+!EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -119,19 +119,19 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!\subsubsection{Replace the ESMF\_Array inside a Field}
-!  It's often necessary to replace the internal data array within a field.
+!\subsubsection{Reset the ESMF\_Array inside of a ESMF\_Field}
+!  It's often necessary to reset the internal data array within a field.
 !  The following examples demonstrate different ways of creating {\tt ESMF\_Array}
-!  and replace the existing {\tt ESMF\_Array} of a {\tt ESMF\_Field}
+!  and reset the existing {\tt ESMF\_Array} of a {\tt ESMF\_Field}.
 !EOE
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Use ESMF\_ArrayCreateFromGrid to replace Field internal Array}
-!  User can replace the {\tt ESMF\_Array} inside an existing Field by construct a proper
-!  shape {\tt ESMF\_Array} by calling {\tt ESMF\_ArrayCreateFromGrid}
+!\subsubsection{Use ESMF\_ArrayCreateFromGrid to reset Field internal Array}
+!  User can reset the {\tt ESMF\_Array} inside an existing Field by construct a proper
+!  shape {\tt ESMF\_Array} by calling {\tt ESMF\_ArrayCreateFromGrid}.
 !EOE
 !-------------------------------------------------------------------------
 !   !
@@ -153,7 +153,7 @@
 
     call ESMF_FieldSetArray(field1, array2, rc=rc)
 !EOC
-    print *, "Field replace Field internal array through ArrayCreateFromGrid returned"
+    print *, "Field reset Field internal array through ArrayCreateFromGrid returned"
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -161,8 +161,8 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Use ESMF\_ArrayCreate to replace Field internal Array}
-!  User can replace the {\tt ESMF\_Array} inside an existing Field by construct a proper
+!\subsubsection{Use ESMF\_ArrayCreate to reset Field internal Array}
+!  User can reset the {\tt ESMF\_Array} inside an existing Field by construct a proper
 !  shape {\tt ESMF\_Array}
 !EOE
 !-------------------------------------------------------------------------
@@ -180,7 +180,7 @@
 
     call ESMF_FieldSetArray(field1, array3, rc=rc)
 !EOC
-    print *, "Field replace internal array through ArrayCreate returned"
+    print *, "Field reset internal array through ArrayCreate returned"
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -188,7 +188,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Field Create from a Grid and a ESMF\_Array}
+!\subsubsection{Create Field with Grid and Array}
 !  User can create a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a 
 !  {\tt ESMF\_Array}.
 !EOE
@@ -203,7 +203,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Field Create from a Grid and a Fortran data pointer}
+!\subsubsection{Create Field with Grid and Fortran data pointer}
 !  User can create a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a intrinsic 
 !  Fortran data pointer. This interface is overloaded for type, kind, rank of
 !  of the fortran data pointer. In this example, a 2d array is used.

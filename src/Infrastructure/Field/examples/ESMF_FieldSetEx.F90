@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetEx.F90,v 1.2 2008/02/01 00:50:00 theurich Exp $
+! $Id: ESMF_FieldSetEx.F90,v 1.3 2008/02/01 21:26:01 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
     real(ESMF_KIND_R8), dimension(:,:,:), pointer :: farray
     real(ESMF_KIND_R8), dimension(:,:,:), pointer :: farray1
     type(ESMF_Field)  :: f8
-    type(ESMF_Grid)   :: grid8
+    type(ESMF_Grid)   :: grid8, grid
     type(ESMF_DistGrid) :: distgrid8
     type(ESMF_Array)  :: array8, array
     integer           :: xdim, ydim, zdim
@@ -52,10 +52,14 @@
 !
 !  Through the {\tt ESMF\_FieldSetDataPtr} interface user can reset the intrinsic
 !  Fortran data pointer contained in the internal {\tt ESMF\_Array} object
-!  of a {\tt ESMF\_Field}
+!  of a {\tt ESMF\_Field}.
 !  {\tt ESMF\_FieldSetDataPtr} is an overloaded interface based on the type,
 !  kind, and rank of the input fortran pointer argument. In this example,
 !  a rank 3 ESMF\_KIND\_R8 fortran data pointer is used.
+!  This method creates an internally referenced ESMF\_Array inside the
+!  field. The previous ESMF\_Array will be deleted if it was internally
+!  referenced by the field, otherwise it's replaced by the newly created
+!  array. 
 !
 !EOE
     xdim = 12
@@ -66,7 +70,9 @@
                               regDecomp=(/4,1,1/), name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOC
     allocate(farray(xdim,ydim,zdim))
+!EOC
     allocate(farray1(xdim,ydim,zdim))
     call ESMF_GridGet(grid8, distgrid=distgrid8, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -80,8 +86,30 @@
   
 !BOC
     call ESMF_FieldSetDataPtr(f8, farray, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    print *, "Field Set Data Pointer example returned"
+
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!-------------------------------- Example -----------------------------
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!BOE
+!\subsubsection{Reset the Grid in a Field}
+!
+!  User can reset the internal {\tt ESMF\_Grid} object of a {\tt ESMF\_Field}
+!  through ESMF\_FieldSetGrid interface. Invalid Grid will be rejected, check
+!  return code for status.
+!
+!EOE
+!BOC
+    grid = ESMF_GridCreateShapeTile(minIndex=(/1,1,1/), maxIndex=(/4*xdim-1,ydim-1,zdim-1/), &
+                              regDecomp=(/4,1,1/), name="grid", rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    
+    call ESMF_FieldSetGrid(f8, grid=grid, rc=rc)
+!EOC
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    print *, "Field Set Grid example returned"
 
     call ESMF_FieldDestroy(f8, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -91,7 +119,6 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(farray)
     deallocate(farray1)
-    print *, "Field Set Data Pointer example returned"
 !-------------------------------------------------------------------------
     call ESMF_Finalize(rc=rc)
 !-------------------------------------------------------------------------

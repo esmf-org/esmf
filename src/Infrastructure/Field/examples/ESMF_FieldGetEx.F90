@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGetEx.F90,v 1.3 2008/02/01 00:50:00 theurich Exp $
+! $Id: ESMF_FieldGetEx.F90,v 1.4 2008/02/01 21:26:01 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
     real(ESMF_KIND_R8), dimension(:,:,:), pointer :: farray
     real(ESMF_KIND_R8), dimension(:,:,:), pointer :: farray1
     type(ESMF_Field)  :: f8
-    type(ESMF_Grid)   :: grid8
+    type(ESMF_Grid)   :: grid8, grid
     type(ESMF_DistGrid) :: distgrid8
     type(ESMF_Array)  :: array8, array
     integer           :: xdim, ydim, zdim
@@ -45,6 +45,16 @@
     integer :: comp_count(ESMF_MAXDIM)
     integer :: excl_count(ESMF_MAXDIM)
     integer :: total_count(ESMF_MAXDIM)
+
+    type(ESMF_TypeKind)        :: typekind
+    integer                    :: rank
+    type(ESMF_StaggerLoc)      :: staggerloc 
+    integer                    :: gridToFieldMap(ESMF_MAXDIM)    
+    integer                    :: ungriddedLBound(ESMF_MAXDIM)
+    integer                    :: ungriddedUBound(ESMF_MAXDIM)
+    integer                    :: maxHaloLWidth(ESMF_MAXDIM)
+    integer                    :: maxHaloUWidth(ESMF_MAXDIM)
+    character(len=32)          :: name
 
     integer :: finalrc       
 !   !Set finalrc to success
@@ -100,6 +110,35 @@
         totalCount=total_count, &
         rc=rc)   
 !EOC
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    print *, "Field Get Data Pointer example returned"
+
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!-------------------------------- Example -----------------------------
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!BOE
+!\subsubsection{Get ESMF\_Grid and ESMF\_Array from a Field}
+!
+!  User can get the internal {\tt ESMF\_Grid} and {\tt ESMF\_Array} 
+!  from a {\tt ESMF\_Field}. User should not issue any destroy command
+!  on the retrieved grid or array object since they are referenced
+!  from the {\tt ESMF\_Field}. The retrieved objects should be used
+!  in a read-only fashion to query additional information not directly
+!  available through FieldGet interface.
+!
+!EOE
+
+!BOC
+    call ESMF_FieldGet(f8, grid=grid, array=array, &
+        typekind=typekind, rank=rank, staggerloc=staggerloc, &
+        gridToFieldMap=gridToFieldMap, &
+        ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
+        maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, & 
+        name=name, &
+        rc=rc)
+!EOC
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    print *, "Field Get Grid and Array example returned"
 
     call ESMF_FieldDestroy(f8, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -108,7 +147,6 @@
     call ESMF_ArrayDestroy(array8, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(farray)
-    print *, "Field Get Data Pointer example returned"
 !-------------------------------------------------------------------------
     call ESMF_Finalize(rc=rc)
 !-------------------------------------------------------------------------
