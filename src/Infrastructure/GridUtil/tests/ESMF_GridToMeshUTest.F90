@@ -1,4 +1,4 @@
-! $Id: ESMF_GridToMeshUTest.F90,v 1.4 2008/01/30 20:26:40 oehmke Exp $
+! $Id: ESMF_GridToMeshUTest.F90,v 1.5 2008/02/01 22:28:17 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridToMeshUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridToMeshUTest.F90,v 1.4 2008/01/30 20:26:40 oehmke Exp $'
+    '$Id: ESMF_GridToMeshUTest.F90,v 1.5 2008/02/01 22:28:17 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -81,13 +81,13 @@ program ESMF_GridToMeshUTest
      petMap2D(:,1,1)=(/0,1/)
      petMap2D(:,2,1)=(/2,3/)
 
-     grid2D=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/10,10/),regDecomp=(/2,2/), &
+     grid2D=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/10,10/),regDecomp=(/2,1/), &
                               gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               petMap=petMap2D, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   else
-     grid2D=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/10,10/),regDecomp=(/2,2/), &
+     grid2D=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/10,10/),regDecomp=(/2,1/), &
                               gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
@@ -112,7 +112,7 @@ program ESMF_GridToMeshUTest
                             computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptr2D, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
 
-!    write(*,*) lDE," ::",clbnd,":",cubnd
+    write(*,*) lDE," ::",clbnd,":",cubnd
 
      !! set coord 1  
      do i1=clbnd(1),cubnd(1)
