@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.31 2008/01/30 20:12:09 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.32 2008/02/01 23:09:28 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -403,6 +403,7 @@ int getComputationalUBound(
 
     int lBndInd[ESMF_MAXDIM]; // start position for allon this local DE  
     int uBndInd[ESMF_MAXDIM]; // end position on this local DE  
+    int exLBndInd[ESMF_MAXDIM]; // start position on exlusive region on this DE
 
     int dimOff[ESMF_MAXDIM]; // Offset for each dimension for computing lid
     int lOff;                // lower bound offset
@@ -448,6 +449,7 @@ int getComputationalUBound(
 
     int lBndInd[ESMF_MAXDIM]; // start position for allon this local DE  
     int uBndInd[ESMF_MAXDIM]; // end position on this local DE  
+    int exLBndInd[ESMF_MAXDIM]; // start position on exlusive region on this DE
 
     int dimOff[ESMF_MAXDIM]; // Offset for each dimension for computing lid
     int lOff;                // lower bound offset
@@ -471,6 +473,7 @@ int getComputationalUBound(
   GridCellIter *moveToLocalID(int localID);
   int getGlobalID();
   int getLocalID();
+  void getCornersCellNodeLocalID(int *cnrCount, int *cnrList);
   }; 
 
 
