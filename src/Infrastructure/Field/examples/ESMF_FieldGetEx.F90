@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGetEx.F90,v 1.2 2008/01/31 22:10:21 feiliu Exp $
+! $Id: ESMF_FieldGetEx.F90,v 1.3 2008/02/01 00:50:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !\subsubsection{Get Fortran data pointer, Bounds, and Counts information from a Field}
 !
 !  User can get various bounds and counts information from a {\tt ESMF\_Field}
-!  through the ESMF_FieldGetDataPtr interface in addition to the intrinsic
+!  through the ESMF\_FieldGetDataPtr interface in addition to the intrinsic
 !  Fortran data pointer contained in the internal {\tt ESMF\_Array} object
 !  of a {\tt ESMF\_Field}
 !

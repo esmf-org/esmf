@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetEx.F90,v 1.1 2008/01/31 22:10:21 feiliu Exp $
+! $Id: ESMF_FieldSetEx.F90,v 1.2 2008/02/01 00:50:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -55,7 +55,7 @@
 !  of a {\tt ESMF\_Field}
 !  {\tt ESMF\_FieldSetDataPtr} is an overloaded interface based on the type,
 !  kind, and rank of the input fortran pointer argument. In this example,
-!  a rank 3 ESMF_KIND_R8 fortran data pointer is used.
+!  a rank 3 ESMF\_KIND\_R8 fortran data pointer is used.
 !
 !EOE
     xdim = 12

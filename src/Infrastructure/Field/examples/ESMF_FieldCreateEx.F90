@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.62 2008/01/31 22:10:21 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.63 2008/02/01 00:50:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -119,7 +119,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!\subsubsection{Replace the ESMF_Array inside a Field}
+!\subsubsection{Replace the ESMF\_Array inside a Field}
 !  It's often necessary to replace the internal data array within a field.
 !  The following examples demonstrate different ways of creating {\tt ESMF\_Array}
 !  and replace the existing {\tt ESMF\_Array} of a {\tt ESMF\_Field}
@@ -129,7 +129,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Use ESMF_ArrayCreateFromGrid to replace Field internal Array}
+!\subsubsection{Use ESMF\_ArrayCreateFromGrid to replace Field internal Array}
 !  User can replace the {\tt ESMF\_Array} inside an existing Field by construct a proper
 !  shape {\tt ESMF\_Array} by calling {\tt ESMF\_ArrayCreateFromGrid}
 !EOE
@@ -161,7 +161,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Use ESMF_ArrayCreate to to replace Field internal Array}
+!\subsubsection{Use ESMF\_ArrayCreate to replace Field internal Array}
 !  User can replace the {\tt ESMF\_Array} inside an existing Field by construct a proper
 !  shape {\tt ESMF\_Array}
 !EOE
@@ -188,7 +188,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Field Create from a Grid and a ESMF_Array}
+!\subsubsection{Field Create from a Grid and a ESMF\_Array}
 !  User can create a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a 
 !  {\tt ESMF\_Array}.
 !EOE
@@ -220,7 +220,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Finish a Field created by ESMF_FieldCreateEmpty with FieldSetCommit}
+!\subsubsection{Finish a Field created by ESMF\_FieldCreateEmpty with FieldSetCommit}
 !  User can finalize a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a intrinsic 
 !  Fortran data pointer. This interface is overloaded for type, kind, rank of
 !  of the fortran data pointer. In this example, a 2d array is used.
