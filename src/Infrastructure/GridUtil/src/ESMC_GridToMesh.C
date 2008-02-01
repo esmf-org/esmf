@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.8 2008/01/31 00:07:33 oehmke Exp $
+// $Id: ESMC_GridToMesh.C,v 1.9 2008/02/01 22:25:23 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -70,8 +70,8 @@ namespace ESMCI {
 // SCRIP.  
 void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
 
-#ifdef NOT
 
+#ifdef NOT
 
   // Initialize the parallel environment for mesh (if not already done)
   ESMC::Par::Init("MESHLOG");
@@ -94,15 +94,14 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
    UInt sdim = grid.getRank();
    mesh.set_spatial_dimension(sdim);
   
-  
-#if 0 // WHEN WE DO CELLS 
-     // We save the nodes in a linear list so that we can access then as such
-     // for cell creation.
-   std::vector<MeshObj*> nodevect;
-#endif  
+
+   // We save the nodes in a linear list so that we can access then as such
+   // for cell creation.
+   //TODO: NEED MAX LID METHOD SOON ->Bob
+   std::vector<MeshObj*> nodevect(1000);
+
 
    // Set the id of this processor here (me)
-   // Does David use the same procs as VM?????????????????????????
    int localrc;
    int rc;
    int me = VM::getCurrent(&localrc)->getLocalPet();
@@ -116,14 +115,21 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
 
    // loop through all nodes in the Grid owned by cells
    for(gni->toBeg(); !gni->isDone(); gni->adv()) {   
+     MeshObj *node;
 
+     // get the global id of this Grid node
+     int gid=gni->getGlobalID(); 
+
+     // get the local id of this Grid node
+     int lid=gni->getLocalID(); 
+    
      printf("GID=%d\n",gni->getGlobalID());
 
      // Different behavior if we're local...
      if (gni->isLocal()) {
-       MeshObj *node = new MeshObj(MeshObj::NODE,     // node...
-                                   gni->getGlobalID(),   // unique global id
-                                   gni->getLocalID()     // local ID for boostrapping field data
+       node = new MeshObj(MeshObj::NODE,     // node...
+                                   gid,               // unique global id
+                                   lid                // local ID for boostrapping field data
                                    );
        
        node->set_owner(me);  // Set owner to this proc
@@ -131,78 +137,87 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
        UInt nodeset = 1;   // Do we need to partition the nodes in any sets?
        mesh.add_node(node, nodeset);
 
+       // TODO: Fill for DistDir here or in seperate loop -> David
+       // If Shared add to list to use DistDir on
+       if (gni->isShared()) {
+          
+         // Put gid in list
+       }
      } else { // ... or not
-
-       // get the global id of this Grid node
-       int gid=gni->getGlobalID(); 
 
        // If Grid node is not already in the mesh then add 
        Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::NODE, gid);
        if (mi == mesh.map_end(MeshObj::NODE)) {
-         MeshObj *node = new MeshObj(MeshObj::NODE,     // node...
-                                     gid,               // unique global id
-                                     gni->getLocalID()   // local ID for boostrapping field data
-                                     );
+         node = new MeshObj(MeshObj::NODE,    // node...
+                            gid,              // unique global id
+                            lid               // local ID for boostrapping field data
+                            );
          
          node->set_owner(std::numeric_limits<UInt>::max());  // Set owner to unknown (will have to ghost later)
        
          UInt nodeset = 1;   // Do we need to partition the nodes in any sets?
          mesh.add_node(node, nodeset);
        } else {
-         // Still need to add node to vector at appropriate place when doing cells
+         // TODO: NEED NODE POINTER HERE->David
+         //         node=*mi; // IS THIS CORRECT DAVID??????
        }
      }
+
+     // Put node into vector
+     nodevect[lid]=node;    
+
    } // gni
   
 
-#if 0
+   // Use DistDir to fill node owners for non-local nodes 
+   // TODO: Use nodes which are gni->isLocal() && gni->isShared() to get owners of
+   //       non-local nodes ->David
+
+
    // *** Create the Cells ***  
-     // Loop the cells
-   Grid::iterator ci = grid.cell_begin(), ce = grid.cell_end();
-  
-   for (; ci != ce; ++ci) {
-  
+
+   // Presumably, for a structured grid there is only the
+   // 'hypercube' topology, i.e. a quadrilateral for 2d
+   // and a hexahedron for 3d
+   const MeshObjTopo *ctopo = pdim == 2 ? GetTopo("QUAD") :
+                                         (pdim == 3 ? GetTopo("HEX") : 0);
+   if (!ctopo)
+     Throw() << "Could not get topology for pdim=" << pdim;
+
+   // Allocate vector to hold nodes for translation
+   std::vector<MeshObj*> nodes(ctopo->num_nodes);
+
+
+   // Loop Cells of the grid. 
+   ESMCI::GridCellIter *gci=new ESMCI::GridCellIter(&grid,staggerLoc);
+
+   for(gci->toBeg(); !gci->isDone(); gci->adv()) {   
      MeshObj *cell = new MeshObj(MeshObj::ELEMENT,     // Mesh equivalent of Cell
-                                 ci->get_global_id(),  // unique global id
-                                 i++                   // index for bootstrapping field data
+                                 gci->getGlobalID(),   // unique global id
+                                 gci->getLocalID()    // index for bootstrapping field data
                                  );
   
-     cell->set_owner(ci->get_owner());
-  
-       // Presumably, for a structured grid there is only the
-       // 'hypercube' topology, i.e. a quadrilateral for 2d
-       // and a hexahedron for 3d
-     const MeshObjTopo *ctopo = pdim == 2 ? GetTopo("QUAD") :
-                                         (pdim == 3 ? GetTopo("HEX") : 0);
-  
-     if (!ctopo)
-       Throw() << "Could not get topology for pdim=" << pdim;
+     // Set Owner
+     cell->set_owner(me);
+   
+     // Get Local Ids of Corners
+     int cnrCount;
+     int cnrList[16]; // ONLY WORKS FOR UP TO 4D
+     gci->getCornersCellNodeLocalID(&cnrCount, cnrList);
+     ThrowRequire(cnrCount == ctopo->num_nodes);
 
-     // We need to get the nodes which comprise the cell.  One way is to
-     // provide the indices that correspond to the declaration order of the
-     // nodes, above.  We assume this is the case.
-
-     const int *node_indices = ci->get_node_indices();
-
-     ThrowRequire(ci->get_num_nodes() == ctopo->num_nodes);
-
-     std::vector<MeshObj*> nodes(ctopo->num_nodes);
-
+     // Get Nodes via Local IDs
      for (UInt n = 0; n < ctopo->num_nodes; ++n) {
-
-       nodes[n] = nodevect[node_indices[n]];
-
+       nodes[n] = nodevect[cnrList[n]];
      } // n
 
-       // Who owns the cell ? Should be this proc
-     cell->set_owner(ci->get_owner());
 
      UInt block_id = 1;  // Any reason to use different sets for cells?
 
      mesh.add_element(cell, nodes, block_id, ctopo);
      
    } // ci
-#endif
+
 
      // Now set up the nodal coordinates
    IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", sdim);
