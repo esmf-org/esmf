@@ -1,5 +1,5 @@
 
-! $Id: ESMF_Bundle.F90,v 1.121 2008/01/29 18:15:55 rokuingh Exp $
+! $Id: ESMF_Bundle.F90,v 1.122 2008/02/01 22:39:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -217,12 +217,16 @@
        public ESMF_BundleGet          ! Get Bundle information
        public ESMF_BundleGetFieldNames
 
+       public ESMF_BundleAttPackCreate      ! Attribute packages
+       public ESMF_BundleAttPackSet         ! Attribute packages
+       public ESMF_BundleAttPackWrite       ! Attribute packages
+
        public ESMF_BundleAttributeSet       ! Set and Get attributes
        public ESMF_BundleAttributeGet       !   interface to Base class
 
        public ESMF_BundleAttributeGetCount  ! number of attribs
        public ESMF_BundleAttributeGetInfo   ! get type, length by name or number
-
+       
        public ESMF_BundleGetField      ! Get one or more Fields by name or number
        public ESMF_BundleAddField      ! Add one or more Fields 
 !      public ESMF_BundleRemoveField   ! Delete one or more Fields by name or number
@@ -592,6 +596,254 @@ end function
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_BundleAddFieldList
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttPackCreate"
+!BOPI
+! !IROUTINE: ESMF_BundleAttPackCreate - Setup the attribute package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttPackCreate()
+      subroutine ESMF_BundleAttPackCreate(bundle, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character (len = *), intent(in), optional :: convention
+      character (len = *), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Sets up the attribute package for the {\tt bundle}.
+!     The attribute package defines the convention, purpose, and object type of the three 
+!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!      An {\tt ESMF\_Bundle} object.
+!     \item [convention]
+!      The convention of the attribute package.
+!     \item [purpose]
+!      The purpose of the attribute package.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                           ! Error status
+      character(ESMF_MAXSTR) :: name1, name2, name3, name4
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      call ESMF_BundleValidate(bundle, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+
+      fobject = 'bundle'
+
+      name1 = 'longname'
+      name2 = 'shortname'
+      name3 = 'units'
+      name4 = 'coordinates'
+
+      call c_ESMC_AttPackCreate(bundle%btypep%base, name1, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackCreate(bundle%btypep%base, name2, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackCreate(bundle%btypep%base, name3, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackCreate(bundle%btypep%base, name4, fconvention, &
+        fpurpose, fobject, localrc)
+
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttPackCreate
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttPackSet"
+!BOPI
+! !IROUTINE: ESMF_BundleAttPackSet - Setup the attribute package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttPackSet()
+      subroutine ESMF_BundleAttPackSet(bundle, name, value, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character(ESMF_MAXSTR), intent(in) :: name
+      character(ESMF_MAXSTR), intent(in) :: value
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Sets an attribute the attribute package for the {\tt bundle}.
+!     The attribute package defines the convention, purpose, and object type of the three 
+!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!      An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!      The name of the attribute to be set.
+!     \item [value]
+!      The value of the attribute to be set.
+!     \item [convention]
+!      The convention of the attribute package.
+!     \item [purpose]
+!      The purpose of the attribute package.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                           ! Error status
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+
+      call ESMF_BundleValidate(bundle, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'bundle'
+
+      call c_ESMC_AttPackSet(bundle%btypep%base, name, value, fconvention, &
+        fpurpose, fobject, localrc)
+        
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttPackSet
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttPackWrite"
+!BOPI
+! !IROUTINE: ESMF_BundleAttPackWrite - Print the attribute package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttPackWrite()
+      subroutine ESMF_BundleAttPackWrite(bundle, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle  
+      character (len = *), intent(in), optional :: convention
+      character (len = *), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Print the attribute package for the {\tt bundle}.
+!     The attribute package defines the convention, purpose, and object type of the three 
+!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!      An {\tt ESMF\_Bundle} object.
+!     \item [convention]
+!      The convention of the attribute package.
+!     \item [purpose]
+!      The purpose of the attribute package.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                           ! Error status
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+
+      call ESMF_BundleValidate(bundle, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'bundle'
+
+      call c_ESMC_AttPackWrite(bundle%btypep%base, fconvention, &
+        fpurpose, fobject, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttPackWrite
+
+!------------------------------------------------------------------------------
+
 !BOP
 ! !IROUTINE: ESMF_BundleAttributeGet - Retrieve an attribute
 !
