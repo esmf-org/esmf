@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.10 2008/02/04 16:26:43 dneckels Exp $
+// $Id: ESMC_GridToMesh.C,v 1.11 2008/02/04 17:01:35 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -311,8 +311,9 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
 
  }
 
-}
 #endif
+}
+
 
 } // namespace
 
