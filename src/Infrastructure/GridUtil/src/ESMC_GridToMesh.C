@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.9 2008/02/01 22:25:23 oehmke Exp $
+// $Id: ESMC_GridToMesh.C,v 1.10 2008/02/04 16:26:43 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -33,6 +33,7 @@
 #include <Mesh/include/ESMC_Mesh.h>
 #include <Mesh/include/ESMC_IOField.h>
 #include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMC_DDir.h>
 
 #include <limits>
 #include <iostream>
@@ -69,9 +70,7 @@ namespace ESMCI {
 // the dual, which is not so bad.  This will put us equivalent with
 // SCRIP.  
 void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
-
-
-#ifdef NOT
+#ifdef NOWAYMAN
 
   // Initialize the parallel environment for mesh (if not already done)
   ESMC::Par::Init("MESHLOG");
@@ -108,6 +107,10 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
 //   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) // How should I handle ESMF LogError?
 //      return;
 
+   // Keep track of locally owned, shared and shared, not-locally-owned
+   std::vector<UInt> owned_shared;
+   std::vector<UInt> notowned_shared;
+
 
    // *** Create the Nodes ***
      // Loop nodes of the grid.  Here we loop all nodes, both owned and not.
@@ -142,8 +145,14 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
        if (gni->isShared()) {
           
          // Put gid in list
+         std::vector<UInt>::iterator lb =
+           std::lower_bound(owned_shared.begin(), owned_shared.end(), gid);    
+         
+         if (lb == owned_shared.end() || *lb != gid)
+           owned_shared.insert(lb, gid);
+
        }
-     } else { // ... or not
+     } else { // ... or not locally owned
 
        // If Grid node is not already in the mesh then add 
        Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::NODE, gid);
@@ -157,9 +166,17 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
        
          UInt nodeset = 1;   // Do we need to partition the nodes in any sets?
          mesh.add_node(node, nodeset);
+
+         // Node must be shared
+         std::vector<UInt>::iterator lb =
+           std::lower_bound(notowned_shared.begin(), notowned_shared.end(), gid);    
+         
+         if (lb == notowned_shared.end() || *lb != gid)
+           notowned_shared.insert(lb, gid);
+
+
        } else {
-         // TODO: NEED NODE POINTER HERE->David
-         //         node=*mi; // IS THIS CORRECT DAVID??????
+                  node=&*mi; 
        }
      }
 
@@ -244,6 +261,33 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
 
    } // ni
 
+   // Now go back and resolve the ownership for shared nodes.  We create a distdir
+   // from the owned, shared nodes, then look up the shared, not owned.
+   {
+     DDir<> dir;
+   
+     std::vector<UInt> lids(owned_shared.size(), 0);
+     dir.Create(owned_shared.size(), &owned_shared[0], &lids[0]);
+  
+     std::vector<DDir<>::dentry> lookups;
+     dir.RemoteGID(notowned_shared.size(), &notowned_shared[0], lookups);
+
+     // Loop through the results.  Do a map lookup to find nodes--since the shared 
+     // porition of the mesh is a hypersurface, this should be cheap enough to do.
+     std::vector<DDir<>::dentry>::iterator ri = lookups.begin(), re = lookups.end();
+     for (; ri != re; ++ri) {
+
+       DDir<>::dentry &dent = *ri;
+
+       Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::NODE, dent.gid);
+       ThrowRequire(mi != mesh.map_end(MeshObj::NODE));
+ 
+       mi->set_owner(dent.origin_proc);
+
+     } // ri
+
+   } // ddir lookup
+
 
 
    // ** That's it.  The mesh is now in the pre-commit phase, so other
@@ -267,8 +311,8 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
 
  }
 
-#endif
 }
+#endif
 
 } // namespace
 
