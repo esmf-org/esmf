@@ -224,7 +224,7 @@ void test_adapt_wave_exec(HAdapt &hadapt, Mesh &mesh) {
 int main(int argc, char *argv[]) {
 
   // Initialize mpi, logfiles
-  Par::Init(argc, argv, "REFOUT");
+  Par::Init("REFOUT");
 
   int rank = Par::Rank(), csize = Par::Size();
   Mesh srcmesh;

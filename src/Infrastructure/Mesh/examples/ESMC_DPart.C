@@ -50,7 +50,7 @@ using namespace ESMCI::MESH;
 
 int main(int argc, char *argv[]) {
 
-  Par::Init(argc, argv, "DPARTLOG", true);
+  Par::Init("DPARTLOG");
 
   Mesh srcmesh;
   UInt npart;

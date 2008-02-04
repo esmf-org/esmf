@@ -58,7 +58,7 @@ void usage(const std::string &pname) {
 int main(int argc, char *argv[]) {
 
 
-  Par::Init(argc, argv, "CATLOG", true);
+  Par::Init("CATLOG");
   std::cout << "size=" << Par::Size() << std::endl;
 
   Mesh catmesh;

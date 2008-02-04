@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
 
 
 
-  Par::Init(argc, argv, "RENDLOG");
+  Par::Init("RENDLOG");
   Par::Out() << "Rend, proc:" << Par::Rank() << ", starting..." << std::endl;
   
 
