@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.13 2007/10/18 21:05:20 theurich Exp $
+# $Id: build_rules.mk,v 1.14 2008/02/04 20:44:57 theurich Exp $
 #
 # Linux.g95.default
 #
@@ -100,11 +100,10 @@ endif
 # Construct the ABISTRING
 #
 ifeq ($(ESMF_MACHINE),ia64)
-ifeq ($(ESMF_ABI),32)
-ESMF_ABISTRING := $(ESMF_MACHINE)_32
-endif
 ifeq ($(ESMF_ABI),64)
 ESMF_ABISTRING := $(ESMF_MACHINE)_64
+else
+$(error Invalid ESMF_MACHINE / ESMF_ABI combination: $(ESMF_MACHINE) / $(ESMF_ABI))
 endif
 endif
 ifeq ($(ESMF_MACHINE),x86_64)
@@ -119,23 +118,23 @@ endif
 ############################################################
 # Set memory model compiler flags according to ABISTRING
 #
-ifeq ($(ESMF_ABISTRING),ia64_32)
-ESMF_CXXCOMPILEOPTS     += -m32
-ESMF_CXXLINKOPTS        += -m32
-ESMF_F90COMPILEOPTS     += -m32
-ESMF_F90LINKOPTS        += -m32
-endif
 ifeq ($(ESMF_ABISTRING),x86_64_32)
-ESMF_CXXCOMPILEOPTS     += -m32
-ESMF_CXXLINKOPTS        += -m32
-ESMF_F90COMPILEOPTS     += -m32
-ESMF_F90LINKOPTS        += -m32
+ESMF_CXXCOMPILEOPTS       += -m32
+ESMF_CXXLINKOPTS          += -m32
+ESMF_F90COMPILEOPTS       += -m32
+ESMF_F90LINKOPTS          += -m32
+endif
+ifeq ($(ESMF_ABISTRING),x86_64_small)
+ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=small
+ESMF_CXXLINKOPTS          += -m64 -mcmodel=small
+ESMF_F90COMPILEOPTS       += -m64 -mcmodel=small
+ESMF_F90LINKOPTS          += -m64 -mcmodel=small
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_medium)
-ESMF_CXXCOMPILEOPTS     += -mcmodel=medium
-ESMF_CXXLINKOPTS        += -mcmodel=medium
-ESMF_F90COMPILEOPTS     += -mcmodel=medium
-ESMF_F90LINKOPTS        += -mcmodel=medium
+ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=medium
+ESMF_CXXLINKOPTS          += -m64 -mcmodel=medium
+ESMF_F90COMPILEOPTS       += -m64 -mcmodel=medium
+ESMF_F90LINKOPTS          += -m64 -mcmodel=medium
 endif
 
 ############################################################
