@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.12 2008/02/05 16:47:43 oehmke Exp $
+// $Id: ESMC_GridToMesh.C,v 1.13 2008/02/05 22:54:48 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ namespace ESMCI {
 // the dual, which is not so bad.  This will put us equivalent with
 // SCRIP.  
 void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
-#ifdef NOWAYMAN
+#ifdef NOIDONTTHINKSO
 
   // Initialize the parallel environment for mesh (if not already done)
   ESMC::Par::Init("MESHLOG");
@@ -98,6 +98,9 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
    // for cell creation.
    //TODO: NEED MAX LID METHOD SOON ->Bob
    std::vector<MeshObj*> nodevect(1000);
+   std::vector<UInt> idx2lid(1000,0);
+
+   UInt local_node_num = 0;
 
 
    // Set the id of this processor here (me)
@@ -132,11 +135,17 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
        // get the local id of this Grid node
        int lid=gni->getLocalID(); 
 
+Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
+
        // Create new node in mesh object       
        node = new MeshObj(MeshObj::NODE,     // node...
                                    gid,               // unique global id
-                                   lid                // local ID for boostrapping field data
+                                   local_node_num
                                    );
+
+       idx2lid[local_node_num] = lid;
+       local_node_num++;
+       
        
        node->set_owner(me);  // Set owner to this proc
        
@@ -179,8 +188,11 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
        if (mi == mesh.map_end(MeshObj::NODE)) {
          node = new MeshObj(MeshObj::NODE,    // node...
                             gid,              // unique global id
-                            lid               // local ID for boostrapping field data
+                            local_node_num   // local ID for boostrapping field data
                             );
+
+         idx2lid[local_node_num] = lid;
+         local_node_num++;
          
          node->set_owner(std::numeric_limits<UInt>::max());  // Set owner to unknown (will have to ghost later)
          
@@ -263,17 +275,20 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
    for (; ni != ne; ++ni) {
      double *c = node_coord->data(*ni);
 
-     UInt idx = ni->get_data_index(); // we set this above when creating the node
+     UInt lid = idx2lid[ni->get_data_index()]; // we set this above when creating the node
+
+Par::Out() << "node:" << ni->get_id() << ", lid=" << lid;
 
      // Move to corresponding grid node
-    gni->moveToLocalID(idx);      
+    gni->moveToLocalID(lid);      
 
     // If local fill in coords
     if (gni->isLocal()) {
      gni->getCoord(c);
     } else { // set to Null value to be ghosted later
       for (int i=0; i<sdim; i++) {
-        c[i]=std::numeric_limits<double>::max();
+   //     c[i]=std::numeric_limits<double>::max();
+        c[i]=-10;
       }
     }
 
