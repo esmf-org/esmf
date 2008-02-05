@@ -169,8 +169,7 @@
 
 
   ! local variables
-  character(ESMF_MAXSTR) :: ltmp, lstagger
-  character(14) :: intstr
+  character(ESMF_MAXSTR) :: ltmp, lstagger, intstr
   integer :: k, kstring, rank, halo, ndelim
   integer :: iloc(1), mloc(1)
   integer :: hbeg, hmid, hend, sbeg, send, slen
@@ -238,9 +237,9 @@
               ! halo syntax is correct, now read in the halo values as characters 
               ! and convert then to integer values.
               !----------------------------------------------------------------
-              intstr = adjustL (lstring(kstring)%name(hmid-1:hbeg+20) )
+              intstr = adjustL( lstring(kstring)%name(hmid-1:hbeg+2) )
               read (intstr, *) HaloL(kstring)
-              intstr = adjustL (lstring(kstring)%name(hend-1:hmid+1) )
+              intstr = adjustL( lstring(kstring)%name(hend-1:hmid+1) )
               read (intstr, *) HaloR(kstring)
 
            else
@@ -311,7 +310,7 @@
            call pattern_locate( lstagger, ',', ndelim, sdelim)
 
            if(  sdelim(1)-1 >= 1) then
-	      intstr = adjustL (lstagger(1:sdelim(1)-1) )
+              intstr = adjustL( lstagger( 1:sdelim(1)-1 ) ) 
               read(intstr, *) staggerloc(1)
            else
            ! specification empty
@@ -322,8 +321,8 @@
         
            do k=2,ndelim
               if(  sdelim(k)-1 > sdelim(k-1) ) then
-		 intstr = adjustL (lstagger(sdelim(k-1)+1:sdelim(k)-1) )
-		 read (intstr, *) staggerloc(k)
+                 intstr = adjustL( lstagger( sdelim(k-1)+1:sdelim(k)-1) ) 
+                 read(intstr, *) staggerloc(k)
               else
               ! specification empty
                  call ESMF_LogMsgSetError( ESMF_FAILURE,                       &
@@ -334,8 +333,8 @@
 
            send = len( trim( adjustL( lstagger ) ) )
            if(  send-1 >= sdelim(ndelim) ) then
-	      intstr = adjustL (lstagger(send-1:sdelim(ndelim)+1) )
-	      read (intstr, *) staggerloc(ndelim+1)
+              intstr = adjustL( lstagger( send-1:sdelim(ndelim)+1 ) ) 
+              read(intstr, *) staggerloc(ndelim+1)
            else
            ! specification empty
               call ESMF_LogMsgSetError( ESMF_FAILURE,                          &
