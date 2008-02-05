@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.205 2008/01/24 17:36:08 dneckels Exp $
+#  $Id: common.mk,v 1.206 2008/02/05 21:41:09 peggyli Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -90,10 +90,6 @@ endif
 
 ifeq ($(origin ESMF_NO_IOCODE), environment)
 $(error Obsolete environment variable ESMF_NO_IOCODE detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
-endif
-
-ifeq ($(origin MPI_HOME), environment)
-$(warning Environment variable MPI_HOME detected. ESMF no longer uses this environment variable. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
 endif
 
 #-------------------------------------------------------------------------------
