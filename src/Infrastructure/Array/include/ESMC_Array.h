@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.90 2008/01/26 01:57:48 rokuingh Exp $
+// $Id: ESMC_Array.h,v 1.91 2008/02/05 22:34:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -227,7 +227,8 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     int scatter(void *array, ESMC_TypeKind typekind, int rank,
       int *counts, int *patch, int rootPet, VM *vm);
     static int redistStore(Array *srcArray, Array *dstArray,
-      ESMC_RouteHandle **routehandle, InterfaceInt *srcToDstTransposeMap);
+      ESMC_RouteHandle **routehandle, InterfaceInt *srcToDstTransposeMap,
+      ESMC_TypeKind typekindFactor = ESMF_NOKIND, void *factor = NULL);
     static int redist(Array *srcArray, Array *dstArray,
       ESMC_RouteHandle **routehandle, ESMC_Logical checkflag=ESMF_FALSE);
     static int redistRelease(ESMC_RouteHandle *routehandle);

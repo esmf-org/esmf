@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.173 2008/02/05 21:09:58 rokuingh Exp $
+// $Id: ESMC_Array.C,v 1.174 2008/02/05 22:34:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.173 2008/02/05 21:09:58 rokuingh Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.174 2008/02/05 22:34:25 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3071,7 +3071,9 @@ int Array::redistStore(
   Array *srcArray,                      // in    - source Array
   Array *dstArray,                      // in    - destination Array
   ESMC_RouteHandle **routehandle,       // inout - handle to precomputed comm
-  InterfaceInt *srcToDstTransposeMap    // in    - mapping src -> dst dims
+  InterfaceInt *srcToDstTransposeMap,   // in    - mapping src -> dst dims
+  ESMC_TypeKind typekindFactor,         // in    - typekind of factor
+  void *factor                          // in    - redist factor
   ){    
 //
 // !DESCRIPTION:
@@ -3109,11 +3111,115 @@ int Array::redistStore(
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
 
-  ESMC_TypeKind typekind = srcArray->getTypekind();
+  // determine consistent typekindFactor and factor across all PETs
+  if (factor != NULL){
+    // must define a valid typekind
+    if (typekindFactor == ESMF_NOKIND){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+        "- must specify valid typekindFactor on PETs that provide factor", &rc);
+      return rc;
+    }
+    if (typekindFactor != ESMC_TYPEKIND_I4
+      && typekindFactor != ESMC_TYPEKIND_I8
+      && typekindFactor != ESMC_TYPEKIND_R4
+      && typekindFactor != ESMC_TYPEKIND_R8){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+        "- method not implemented for specified typekindFactor", &rc);
+      return rc;
+    }
+  }else{
+    // set typekindFactor to ESMF_NOKIND 
+    // -> this Pet will not provide factor
+    typekindFactor = ESMF_NOKIND;
+  }
+  
+  // communicate typekindFactor across all Pets
+  ESMC_TypeKind *typekindList = new ESMC_TypeKind[petCount];
+  vm->vmk_allgather(&typekindFactor, typekindList, sizeof(ESMC_TypeKind));
+  // Check that all non-ESMF_NOKIND typekindList elements match,
+  // set local typekindFactor accordingly and keep track of Pets that have
+  // factors.
+  int *factorPetList = new int[petCount];
+  int factorPetCount = 0; // reset
+  typekindFactor = ESMF_NOKIND;  // initialize
+  for (int i=0; i<petCount; i++){
+    if (typekindList[i] != ESMF_NOKIND)
+      factorPetList[factorPetCount++] = i;
+    if (typekindFactor == ESMF_NOKIND){
+      typekindFactor = typekindList[i];  // set to 1st element not ESMF_NOKIND
+    }else{
+      // check following elements against the typekindFactors and tensorMixFlag
+      if (typekindList[i] != ESMF_NOKIND){
+        if (typekindFactor != typekindList[i]){
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+            "- TypeKind mismatch between PETs", &rc);
+          return rc;
+        }
+      }
+    }
+  }
+  delete [] typekindList;
+  // set typekindFactor default in case there were no factors provided
+  if (factorPetCount == 0)
+    typekindFactor = srcArray->getTypekind();
+  
+  // set factorLocal
+  void *factorLocal;
+  if (typekindFactor == ESMC_TYPEKIND_R4){
+    ESMC_R4 *factorLocalT = new ESMC_R4;
+    if (factor)
+      *factorLocalT = *(ESMC_R4 *)factor;
+    else
+      *factorLocalT = 1.;
+    factorLocal = (void *)factorLocalT;
+  }else if (typekindFactor == ESMC_TYPEKIND_R8){
+    ESMC_R8 *factorLocalT = new ESMC_R8;
+    if (factor)
+      *factorLocalT = *(ESMC_R8 *)factor;
+    else
+      *factorLocalT = 1.;
+    factorLocal = (void *)factorLocalT;
+  }else if (typekindFactor == ESMC_TYPEKIND_I4){
+    ESMC_I4 *factorLocalT = new ESMC_I4;
+    if (factor)
+      *factorLocalT = *(ESMC_I4 *)factor;
+    else
+      *factorLocalT = 1;
+    factorLocal = (void *)factorLocalT;
+  }else if (typekindFactor == ESMC_TYPEKIND_I8){
+    ESMC_I8 *factorLocalT = new ESMC_I8;
+    if (factor)
+      *factorLocalT = *(ESMC_I8 *)factor;
+    else
+      *factorLocalT = 1;
+    factorLocal = (void *)factorLocalT;
+  }
+  
+  if (factorPetCount > 0){
+    // communicate factorLocal variables and check for consistency
+    int factorSize = ESMC_TypeKindSize(typekindFactor);
+    char *factorLocalList = new char[petCount*factorSize];
+    vm->vmk_allgather(factorLocal, factorLocalList, factorSize);
+    // prime factorLocal with value from first Pet with factor
+    memcpy(factorLocal, factorLocalList + factorSize * factorPetList[0],
+      factorSize);
+    // check against all other factorLocal entries
+    for (int i=1; i<factorPetCount; i++){
+      char *factorPtr = factorLocalList + factorSize * factorPetList[i];
+      if (memcmp(factorLocal, factorPtr, factorSize) != 0){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+          "- Factor mismatch between PETs", &rc);
+        return rc;
+      }
+    }
+    delete [] factorLocalList;
+    delete [] factorPetList;
+  }
+  
+  // set up local factorList and factorIndexList
   int factorListCount;
-  void *factorList;
-  InterfaceInt *factorIndexList;
   int *factorIndexListAlloc;
+  InterfaceInt *factorIndexList;
   
   if (srcToDstTransposeMap == NULL){
     // srcToDstTransposeMap not specified -> default mode
@@ -3403,30 +3509,35 @@ printf("factorIndexListIndex=%d (%d, %d) (%d, %d, %d, %d)\n",
   }
   
   // load type specific factorList with "1"
-  if (typekind == ESMC_TYPEKIND_R4){
+  void *factorList;
+  if (typekindFactor == ESMC_TYPEKIND_R4){
     ESMC_R4 *factorListT = new ESMC_R4[factorListCount];
     for (int i=0; i<factorListCount; i++)
-      factorListT[i] = 1.;
+      factorListT[i] = *(ESMC_R4 *)factorLocal;
     factorList = (void *)factorListT;
-  }else if (typekind == ESMC_TYPEKIND_R8){
+    delete (ESMC_R4 *)factorLocal;
+  }else if (typekindFactor == ESMC_TYPEKIND_R8){
     ESMC_R8 *factorListT = new ESMC_R8[factorListCount];
     for (int i=0; i<factorListCount; i++)
-      factorListT[i] = 1.;
+      factorListT[i] = *(ESMC_R8 *)factorLocal;
     factorList = (void *)factorListT;
-  }else if (typekind == ESMC_TYPEKIND_I4){
+    delete (ESMC_R8 *)factorLocal;
+  }else if (typekindFactor == ESMC_TYPEKIND_I4){
     ESMC_I4 *factorListT = new ESMC_I4[factorListCount];
     for (int i=0; i<factorListCount; i++)
-      factorListT[i] = 1;
+      factorListT[i] = *(ESMC_I4 *)factorLocal;
     factorList = (void *)factorListT;
-  }else if (typekind == ESMC_TYPEKIND_I8){
+    delete (ESMC_I4 *)factorLocal;
+  }else if (typekindFactor == ESMC_TYPEKIND_I8){
     ESMC_I8 *factorListT = new ESMC_I8[factorListCount];
     for (int i=0; i<factorListCount; i++)
-      factorListT[i] = 1;
+      factorListT[i] = *(ESMC_I8 *)factorLocal;
     factorList = (void *)factorListT;
+    delete (ESMC_I4 *)factorLocal;
   }
   
   // precompute sparse matrix multiplication
-  localrc = sparseMatMulStore(srcArray, dstArray, routehandle, typekind,
+  localrc = sparseMatMulStore(srcArray, dstArray, routehandle, typekindFactor,
     factorList, factorListCount, factorIndexList);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
@@ -3434,16 +3545,16 @@ printf("factorIndexListIndex=%d (%d, %d) (%d, %d, %d, %d)\n",
   // garbage collection
   delete [] factorIndexListAlloc;
   delete factorIndexList;
-  if (typekind == ESMC_TYPEKIND_R4){
+  if (typekindFactor == ESMC_TYPEKIND_R4){
     ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
     delete [] factorListT;
-  }else if (typekind == ESMC_TYPEKIND_R8){
+  }else if (typekindFactor == ESMC_TYPEKIND_R8){
     ESMC_R8 *factorListT = (ESMC_R8 *)factorList;
     delete [] factorListT;
-  }else if (typekind == ESMC_TYPEKIND_I4){
+  }else if (typekindFactor == ESMC_TYPEKIND_I4){
     ESMC_I4 *factorListT = (ESMC_I4 *)factorList;
     delete [] factorListT;
-  }else if (typekind == ESMC_TYPEKIND_I8){
+  }else if (typekindFactor == ESMC_TYPEKIND_I8){
     ESMC_I8 *factorListT = (ESMC_I8 *)factorList;
     delete [] factorListT;
   }
