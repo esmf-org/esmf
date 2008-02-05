@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.54 2008/01/26 01:55:21 rokuingh Exp $
+// $Id: ESMC_Base_F.C,v 1.55 2008/02/05 21:08:08 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.54 2008/01/26 01:55:21 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.55 2008/02/05 21:08:08 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -670,7 +670,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  *rc = (*base)->ESMC_AttributeSet(cname, *tk, *count, value);
+  *rc = (**base).root.ESMC_AttributeSet(cname, *tk, *count, value);
 
   delete [] cname;
   return;
@@ -746,7 +746,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  *rc = (*base)->ESMC_AttributeSet(cname, cvalue);
+  *rc = (**base).root.ESMC_AttributeSet(cname, cvalue);
 
   delete [] cname;
   delete [] cvalue;
@@ -806,7 +806,7 @@ extern "C" {
       return;
   }
 
-  status = (*base)->ESMC_AttributeGet(cname, &attrTk, &attrCount, NULL);
+  status = (**base).root.ESMC_AttributeGet(cname, &attrTk, &attrCount, NULL);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status,
                          "failed getting attribute type and count", &status)) {
     //printf("ESMF_AttributeGetValue: failed getting attribute info\n");
@@ -834,7 +834,7 @@ extern "C" {
     return;
   }
 
-  status = (*base)->ESMC_AttributeGet(cname, NULL, NULL, value);
+  status = (**base).root.ESMC_AttributeGet(cname, NULL, NULL, value);
   ESMC_LogDefault.ESMC_LogMsgFoundError(status,
                          "failed getting attribute value", &status);
   delete [] cname;
@@ -895,7 +895,7 @@ extern "C" {
       return;
   }
 
-  *rc = (*base)->ESMC_AttributeGet(cname, &attrTypeKind, &slen, NULL);
+  *rc = (**base).root.ESMC_AttributeGet(cname, &attrTypeKind, &slen, NULL);
   if (*rc != ESMF_SUCCESS) {
     delete [] cname;
     return;
@@ -923,7 +923,7 @@ extern "C" {
 
   cvalue = new char[slen+1];
 
-  *rc = (*base)->ESMC_AttributeGet(cname, cvalue);
+  *rc = (**base).root.ESMC_AttributeGet(cname, cvalue);
   if (*rc != ESMF_SUCCESS) {
     delete [] cname;
     delete [] cvalue;
@@ -999,7 +999,7 @@ extern "C" {
       return;
   }
 
-  *rc = (*base)->ESMC_AttributeGet(cname, tk, count, NULL);
+  *rc = (**base).root.ESMC_AttributeGet(cname, tk, count, NULL);
 
   delete [] cname;
   return;
@@ -1061,7 +1061,7 @@ if (rc) *rc = ESMF_RC_NOT_IMPL;
 
   cname = new char[ESMF_MAXSTR];
 
-  *rc = (*base)->ESMC_AttributeGet((*num)-1, cname, tk, count, NULL);
+  *rc = (**base).root.ESMC_AttributeGet((*num)-1, cname, tk, count, NULL);
   if (*rc != ESMF_SUCCESS) {
       delete [] cname;
       return;
@@ -1112,7 +1112,7 @@ if (rc) *rc = ESMF_RC_NOT_IMPL;
       return;
   }
 
-  *count = (*base)->ESMC_AttributeGetCount();
+  *count = (**base).root.ESMC_AttributeGetCount();
 
   *rc = (count == 0) ? ESMF_FAILURE : ESMF_SUCCESS;
   return;
@@ -1226,7 +1226,7 @@ if (rc) *rc = ESMF_RC_NOT_IMPL;
   }
 
   // Set the attribute on the object.
-  *rc = (*base)->ESMC_AttPackCreate(cname, cconv, cpurp, cobj);
+  *rc = (**base).root.ESMC_AttPackCreate(cname, cconv, cpurp, cobj);
 
   delete [] cname;
   delete [] cconv;
@@ -1359,7 +1359,7 @@ if (rc) *rc = ESMF_RC_NOT_IMPL;
   }
 
   // Set the attribute on the object.
-  *rc = (*base)->ESMC_AttPackSet(cname, cvalue, cconv, cpurp, cobj);
+  *rc = (**base).root.ESMC_AttPackSet(cname, cvalue, cconv, cpurp, cobj);
 
   delete [] cname;
   delete [] cvalue;
@@ -1458,7 +1458,7 @@ if (rc) *rc = ESMF_RC_NOT_IMPL;
   }
 
   // Set the attribute on the object.
-  *rc = (*base)->ESMC_AttPackWrite(cconv, cpurp, cobj);
+  *rc = (**base).root.ESMC_AttPackWrite(cconv, cpurp, cobj);
 
   delete [] cconv;
   delete [] cpurp;

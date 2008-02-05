@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.94 2008/01/30 04:10:42 rokuingh Exp $
+// $Id: ESMC_Base.C,v 1.95 2008/02/05 21:08:08 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.94 2008/01/30 04:10:42 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.95 2008/02/05 21:08:08 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -63,7 +63,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !IROUTINE:  ESMC_AttributeAlloc - ensure the attribute list is long enough
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeAlloc(
+      int ESMC_Attribute::ESMC_AttributeAlloc(
 //
 // !RETURN VALUE:
 //    int return code
@@ -108,7 +108,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !IROUTINE:  ESMC_AttributeGet(int) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Attribute::ESMC_AttributeGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -164,7 +164,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !IROUTINE:  ESMC_AttributeGet(int *) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Attribute::ESMC_AttributeGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -225,7 +225,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !IROUTINE:  ESMC_AttributeGet(ESMC_I8) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Attribute::ESMC_AttributeGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -281,7 +281,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !IROUTINE:  ESMC_AttributeGet(ESMC_I8 *) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Attribute::ESMC_AttributeGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -342,7 +342,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !IROUTINE:  ESMC_AttributeGet(ESMC_R4) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Attribute::ESMC_AttributeGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -398,7 +398,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !IROUTINE:  ESMC_AttributeGet(ESMC_R4 *) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Attribute::ESMC_AttributeGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -459,7 +459,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !IROUTINE:  ESMC_AttributeGet(ESMC_R8) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Attribute::ESMC_AttributeGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -515,7 +515,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !IROUTINE:  ESMC_AttributeGet(ESMC_R8 *) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Attribute::ESMC_AttributeGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -576,7 +576,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !IROUTINE:  ESMC_AttributeGet(bool) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Attribute::ESMC_AttributeGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -634,7 +634,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !IROUTINE:  ESMC_AttributeGet(bool *) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Attribute::ESMC_AttributeGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -695,7 +695,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !IROUTINE:  ESMC_AttributeGet(char) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Attribute::ESMC_AttributeGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -757,7 +757,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !IROUTINE:  ESMC_AttributeGet(name) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Attribute::ESMC_AttributeGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -860,7 +860,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !IROUTINE:  ESMC_AttributeGet(num) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Attribute::ESMC_AttributeGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -959,7 +959,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttributeGet - get attribute from an ESMF type
 //
 // !INTERFACE:
-      ESMC_Attribute *ESMC_Base::ESMC_AttributeGet(
+      ESMC_Attribute *ESMC_Attribute::ESMC_AttributeGet(
 // 
 // !RETURN VALUE:
 //    pointer to requested attribute
@@ -1000,7 +1000,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttributeGet - get an ESMF object's attribute by number
 //
 // !INTERFACE:
-      ESMC_Attribute *ESMC_Base::ESMC_AttributeGet(
+      ESMC_Attribute *ESMC_Attribute::ESMC_AttributeGet(
 // 
 // !RETURN VALUE:
 //    int return code.
@@ -1034,7 +1034,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttributeGetCount - get an ESMF object's number of attributes
 // 
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGetCount(
+      int ESMC_Attribute::ESMC_AttributeGetCount(
 // 
 // !RETURN VALUE:
 //    int attribute count
@@ -1060,7 +1060,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttributeSet - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Attribute::ESMC_AttributeSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1125,7 +1125,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttributeSet(int) - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Attribute::ESMC_AttributeSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1162,7 +1162,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttributeSet(int *) - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Attribute::ESMC_AttributeSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1200,7 +1200,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttributeSet(ESMC_I8) - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Attribute::ESMC_AttributeSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1237,7 +1237,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttributeSet(ESMC_I8 *) - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Attribute::ESMC_AttributeSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1275,7 +1275,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttributeSet(ESMC_R4) - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Attribute::ESMC_AttributeSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1312,7 +1312,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttributeSet(ESMC_R4 *) - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Attribute::ESMC_AttributeSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1350,7 +1350,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttributeSet(ESMC_R8) - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Attribute::ESMC_AttributeSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1387,7 +1387,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttributeSet(ESMC_R8 *) - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Attribute::ESMC_AttributeSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1425,7 +1425,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttributeSet(bool) - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Attribute::ESMC_AttributeSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1462,7 +1462,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttributeSet(bool *) - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Attribute::ESMC_AttributeSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1500,7 +1500,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttributeSet(char) - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Attribute::ESMC_AttributeSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1538,7 +1538,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttributeSet - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Attribute::ESMC_AttributeSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1576,7 +1576,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttPackCreate() - setup the Attribute package
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttPackCreate(
+      int ESMC_Attribute::ESMC_AttPackCreate(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1614,7 +1614,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttPackGet - get a list attributes from an ESMF type
 //
 // !INTERFACE:
-      ESMC_Attribute **ESMC_Base::ESMC_AttPackGet(
+      ESMC_Attribute **ESMC_Attribute::ESMC_AttPackGet(
 // 
 // !RETURN VALUE:
 //    list of pointers to requested attributes
@@ -1684,7 +1684,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttPackGetAttribute - get attribute from an attpack
 //
 // !INTERFACE:
-      ESMC_Attribute *ESMC_Base::ESMC_AttPackGetAttribute(
+      ESMC_Attribute *ESMC_Attribute::ESMC_AttPackGetAttribute(
 // 
 // !RETURN VALUE:
 //    pointer to requested attribute
@@ -1753,7 +1753,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttPackSet() - set an attribute in an attpack
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttPackSet(
+      int ESMC_Attribute::ESMC_AttPackSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1800,7 +1800,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttPackWrite - Print contents of an attribute package
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttPackWrite(
+      int ESMC_Attribute::ESMC_AttPackWrite(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -1825,7 +1825,7 @@ if (count) {
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attpackList = ESMC_Base::ESMC_AttPackGet(convention, purpose, object, &attpackNum);
+  attpackList = ESMC_Attribute::ESMC_AttPackGet(convention, purpose, object, &attpackNum);
   if (attpackList == NULL) return ESMF_FAILURE;
 
   sprintf(msgbuf, " Attribute package contains %d attributes.\n", attpackNum);
@@ -1849,7 +1849,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttributeGetNameList - get the list of attribute names
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGetNameList(
+      int ESMC_Attribute::ESMC_AttributeGetNameList(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -1874,7 +1874,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttributeSetList - set multiple attributes at once
 // 
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSetList(
+      int ESMC_Attribute::ESMC_AttributeSetList(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -1899,7 +1899,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttributeGetList - get multiple attributes at once
 // 
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGetList(
+      int ESMC_Attribute::ESMC_AttributeGetList(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -1924,14 +1924,14 @@ if (count) {
 // !IROUTINE:  ESMC_AttributeCopy - copy an attribute between two objects
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeCopy(
+      int ESMC_Attribute::ESMC_AttributeCopy(
 // 
 // !RETURN VALUE:
 //    int return code
 // 
 // !ARGUMENTS:
       char *name,                 // in - attribute to copy
-      ESMC_Base *destination) {   // in - the destination object
+      ESMC_Attribute *destination) {   // in - the destination object
 // 
 // !DESCRIPTION:
 //     The specified attribute associated with the source object (this) is
@@ -1950,13 +1950,13 @@ if (count) {
 // !IROUTINE:  ESMC_AttributeCopyAll - copy attributes between two objects 
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeCopyAll(
+      int ESMC_Attribute::ESMC_AttributeCopyAll(
 // 
 // !RETURN VALUE:
 //    int return code
 // 
 // !ARGUMENTS:
-      ESMC_Base *source) {  // in - the source object
+      ESMC_Attribute *source) {  // in - the source object
 // 
 // !DESCRIPTION:
 //     All attributes associated with the source object are copied to the
@@ -2528,13 +2528,14 @@ if (count) {
     memcpy(className, cp, ESMF_MAXSTR);
     cp += ESMF_MAXSTR;
     ip = (int *)cp;
-    attrCount = *ip++;
-    attrAlloc = *ip++;
+    //attrCount = *ip++;
+    //attrAlloc = *ip++;
     cp = (char *)ip;
 
     // update offset to point to past the current obj
     *offset = (cp - buffer);
 
+/*
     if (attrAlloc > 0) {
          nbytes = attrAlloc * sizeof(ESMC_Attribute *);
          attrList = (ESMC_Attribute **)malloc(nbytes);
@@ -2544,7 +2545,7 @@ if (count) {
             //attrList[i] = NULL;
          }
     }
-
+*/
   return ESMF_SUCCESS;
 
  } // end ESMC_Deserialize
@@ -2587,7 +2588,7 @@ if (count) {
     // printf(msgbuf);
     // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   
-
+/*
   sprintf(msgbuf, "   Number of Attributes: %d\n", attrCount);
   printf(msgbuf);
     // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
@@ -2597,7 +2598,8 @@ if (count) {
         // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
       attrList[i]->ESMC_Print();
   }
-                         
+*/
+                                                
   return ESMF_SUCCESS;
 
  } // end ESMC_Print
@@ -2679,18 +2681,18 @@ if (count) {
     memcpy(cp, className, ESMF_MAXSTR);
     cp += ESMF_MAXSTR;
     ip = (int *)cp;
-    *ip++ = attrCount;
-    *ip++ = attrAlloc;
+    //*ip++ = attrCount;
+    //*ip++ = attrAlloc;
     cp = (char *)ip;
 
     // update the offset before calling AttributeSerialize
     *offset = (cp - buffer);
-
+/*
     if (attrCount > 0) {
          for (i=0; i<attrCount; i++)
              attrList[i]->ESMC_Attribute::ESMC_Serialize(buffer, length, offset);
     }
-
+*/
   return ESMF_SUCCESS;
 
  } // end ESMC_Serialize
@@ -3217,6 +3219,9 @@ if (count) {
 //
 //EOP
 
+  attrCount = 0;
+  attrAlloc = 0;
+  attrList = ESMC_NULL_POINTER;
   attrName[0] = '\0';
   items = 0;
   slen = 0;
@@ -3271,6 +3276,17 @@ if (count) {
   attrPurpose[0] = '\0';
   attrObject[0] = '\0';
 
+  attrCount = 0;
+  attrAlloc = 0;
+  attrList = ESMC_NULL_POINTER;
+  /*
+  if (nattrs > 0) {
+      if (ESMC_AttributeAlloc(nattrs) != ESMF_SUCCESS) {
+          //baseStatus = ESMF_STATUS_INVALID;   // can't return err, but can
+          return;                            // try to indicate unhappiness
+      }
+  }
+  */
   
   if (items == 0)
       voidp = NULL;
@@ -3434,6 +3450,12 @@ if (count) {
         else if (tk == ESMC_TYPEKIND_R8) delete [] vdp;  
         else if (tk == ESMC_TYPEKIND_LOGICAL) delete [] vbp;
   }
+  
+  // if attribute lists, delete them.
+  for (unsigned int i=0; i<attrCount; i++) 
+      delete attrList[i];
+                         
+  if (attrList) delete [] attrList;
 
  } // end ~ESMC_Attribute
 
@@ -3466,9 +3488,9 @@ if (count) {
   sprintf(baseName, "%s%3d", "unnamed", ID);
   ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
 
-  attrCount = 0;
-  attrAlloc = 0;
-  attrList = ESMC_NULL_POINTER;
+  //attrCount = 0;
+  //attrAlloc = 0;
+  //attrList = ESMC_NULL_POINTER;
 
   baseStatus = ESMF_STATUS_READY;
 
@@ -3509,6 +3531,7 @@ if (count) {
       sprintf(baseName, "%s%3d", className, ID);
   ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
 
+/*
   attrCount = 0;
   attrAlloc = 0;
   attrList = ESMC_NULL_POINTER;
@@ -3518,6 +3541,7 @@ if (count) {
           return;                            // try to indicate unhappiness
       }
   }
+*/
 
   baseStatus = ESMF_STATUS_READY;
 
@@ -3545,11 +3569,13 @@ if (count) {
 
   baseStatus = ESMF_STATUS_INVALID;
 
+/*
   // if attribute lists, delete them.
   for (i=0; i<attrCount; i++) 
       delete attrList[i];
                          
   if (attrList) delete [] attrList;
+*/
 
   // if we have to support reference counts someday,
   // test if (refCount > 0) and do something if true;
