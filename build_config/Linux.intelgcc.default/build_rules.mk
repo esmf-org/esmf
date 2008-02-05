@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.4 2008/01/24 17:36:48 dneckels Exp $
+# $Id: build_rules.mk,v 1.5 2008/02/05 23:04:57 dneckels Exp $
 #
 # Linux.intelgcc.default
 #
@@ -128,7 +128,7 @@ ESMF_CXXLINKRPATHS += \
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -limf -lm -lcxa -lunwind -lrt -ldl
+ESMF_F90LINKLIBS += -limf -lm -lrt -ldl
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
