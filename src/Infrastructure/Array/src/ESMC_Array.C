@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.172 2008/01/26 01:57:49 rokuingh Exp $
+// $Id: ESMC_Array.C,v 1.173 2008/02/05 21:09:58 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.172 2008/01/26 01:57:49 rokuingh Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.173 2008/02/05 21:09:58 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -7685,7 +7685,7 @@ int Array::attributeset(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  localrc = ESMC_Base::ESMC_AttributeSet(name, tk, count, value);
+  localrc = (*this).root.ESMC_Attribute::ESMC_AttributeSet(name, tk, count, value);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
@@ -7720,7 +7720,7 @@ int Array::attributeset(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  localrc = ESMC_Base::ESMC_AttributeSet(name, value);
+  localrc = (*this).root.ESMC_Attribute::ESMC_AttributeSet(name, value);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
@@ -7757,7 +7757,7 @@ int Array::attributeget(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  localrc = ESMC_Base::ESMC_AttributeGet(name, tk, count, value);
+  localrc = (*this).root.ESMC_Attribute::ESMC_AttributeGet(name, tk, count, value);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
@@ -7792,7 +7792,7 @@ int Array::attributeget(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  localrc = ESMC_Base::ESMC_AttributeGet(name, value);
+  localrc = (*this).root.ESMC_Attribute::ESMC_AttributeGet(name, value);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
@@ -7826,7 +7826,7 @@ int Array::attributegetcount(void) const {
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  localrc = ESMC_Base::ESMC_AttributeGetCount();
+  localrc = (*this).root.ESMC_Attribute::ESMC_AttributeGetCount();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
@@ -7864,7 +7864,7 @@ int Array::attributeget(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  localrc = ESMC_Base::ESMC_AttributeGet(num, name, tk, count, value);
+  localrc = (*this).root.ESMC_Attribute::ESMC_AttributeGet(num, name, tk, count, value);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
@@ -7901,7 +7901,7 @@ int Array::attpackcreate(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  localrc = ESMC_Base::ESMC_AttPackCreate(name, convention, purpose, object);
+  localrc = (*this).root.ESMC_Attribute::ESMC_AttPackCreate(name, convention, purpose, object);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
@@ -7939,7 +7939,7 @@ int Array::attpackset(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  localrc = ESMC_Base::ESMC_AttPackSet(name, value, convention, purpose,
+  localrc = (*this).root.ESMC_Attribute::ESMC_AttPackSet(name, value, convention, purpose,
     object);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
@@ -7976,7 +7976,7 @@ int Array::attpackwrite(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  localrc = ESMC_Base::ESMC_AttPackWrite(convention, purpose, object);
+  localrc = (*this).root.ESMC_Attribute::ESMC_AttPackWrite(convention, purpose, object);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 

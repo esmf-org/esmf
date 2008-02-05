@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.33 2008/01/26 02:00:03 rokuingh Exp $
+// $Id: ESMCI_Grid_F.C,v 1.34 2008/02/05 21:11:02 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -1457,7 +1457,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  *rc = (*grid)->ESMC_AttributeSet(cname, cvalue);
+  *rc = (*grid)->attributeset(cname, cvalue);
 
   delete [] cname;
   delete [] cvalue;
@@ -1501,7 +1501,7 @@ extern "C" {
       return;
   }
 
-  status = (*grid)->ESMC_AttributeGet(cname, &attrTk, &attrCount, NULL);
+  status = (*grid)->attributeget(cname, &attrTk, &attrCount, NULL);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status,
                          "failed getting attribute type and count", &status)) {
     //printf("ESMF_AttributeGetValue: failed getting attribute info\n");
@@ -1529,7 +1529,7 @@ extern "C" {
     return;
   }
 
-  status = (*grid)->ESMC_AttributeGet(cname, NULL, NULL, value);
+  status = (*grid)->attributeget(cname, NULL, NULL, value);
   ESMC_LogDefault.ESMC_LogMsgFoundError(status,
                          "failed getting attribute value", &status);
   delete [] cname;
@@ -1573,7 +1573,7 @@ extern "C" {
       return;
   }
 
-  *rc = (*grid)->ESMC_AttributeGet(cname, &attrTypeKind, &slen, NULL);
+  *rc = (*grid)->attributeget(cname, &attrTypeKind, &slen, NULL);
   if (*rc != ESMF_SUCCESS) {
     delete [] cname;
     return;
@@ -1601,7 +1601,7 @@ extern "C" {
 
   cvalue = new char[slen+1];
 
-  *rc = (*grid)->ESMC_AttributeGet(cname, cvalue);
+  *rc = (*grid)->attributeget(cname, cvalue);
   if (*rc != ESMF_SUCCESS) {
     delete [] cname;
     delete [] cvalue;
@@ -1660,7 +1660,7 @@ extern "C" {
       return;
   }
 
-  *rc = (*grid)->ESMC_AttributeGet(cname, tk, count, NULL);
+  *rc = (*grid)->attributeget(cname, tk, count, NULL);
 
   delete [] cname;
   
@@ -1705,7 +1705,7 @@ extern "C" {
 
   cname = new char[ESMF_MAXSTR];
 
-  *rc = (*grid)->ESMC_AttributeGet((*num)-1, cname, tk, count, NULL);
+  *rc = (*grid)->attributeget((*num)-1, cname, tk, count, NULL);
   if (*rc != ESMF_SUCCESS) {
       delete [] cname;
       return;
@@ -1742,7 +1742,7 @@ extern "C" {
       return;
   }
 
-  *count = (*grid)->ESMC_AttributeGetCount();
+  *count = (*grid)->attributegetcount();
 
   *rc = (count == 0) ? ESMF_FAILURE : ESMF_SUCCESS;
 
@@ -1834,7 +1834,7 @@ void FTN(c_esmc_gridattpackcreate)(ESMCI::Grid **grid, char *name, char *convent
   }
 
   // Set the attribute on the object.
-  *rc = (*grid)->ESMC_AttPackCreate(cname, cconv, cpurp, cobj);
+  *rc = (*grid)->attpackcreate(cname, cconv, cpurp, cobj);
 
   delete [] cname;
   delete [] cconv;
@@ -1947,7 +1947,7 @@ void FTN(c_esmc_gridattpackcreate)(ESMCI::Grid **grid, char *name, char *convent
   }
 
   // Set the attribute on the object.
-  *rc = (*grid)->ESMC_AttPackSet(cname, cvalue, cconv, cpurp, cobj);
+  *rc = (*grid)->attpackset(cname, cvalue, cconv, cpurp, cobj);
 
   delete [] cname;
   delete [] cvalue;
@@ -2029,7 +2029,7 @@ void FTN(c_esmc_gridattpackcreate)(ESMCI::Grid **grid, char *name, char *convent
   }
 
   // Set the attribute on the object.
-  *rc = (*grid)->ESMC_AttPackWrite(cconv, cpurp, cobj);
+  *rc = (*grid)->attpackwrite(cconv, cpurp, cobj);
 
   delete [] cconv;
   delete [] cpurp;

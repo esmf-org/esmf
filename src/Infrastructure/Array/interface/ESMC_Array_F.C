@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.79 2008/01/26 01:57:48 rokuingh Exp $
+// $Id: ESMC_Array_F.C,v 1.80 2008/02/05 21:09:58 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -915,7 +915,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  *rc = (*array)->ESMC_AttributeSet(cname, cvalue);
+  *rc = (*array)->attributeset(cname, cvalue);
 
   delete [] cname;
   delete [] cvalue;
@@ -959,7 +959,7 @@ extern "C" {
       return;
   }
 
-  status = (*array)->ESMC_AttributeGet(cname, &attrTk, &attrCount, NULL);
+  status = (*array)->attributeget(cname, &attrTk, &attrCount, NULL);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status,
                          "failed getting attribute type and count", &status)) {
     //printf("ESMF_AttributeGetValue: failed getting attribute info\n");
@@ -987,7 +987,7 @@ extern "C" {
     return;
   }
 
-  status = (*array)->ESMC_AttributeGet(cname, NULL, NULL, value);
+  status = (*array)->attributeget(cname, NULL, NULL, value);
   ESMC_LogDefault.ESMC_LogMsgFoundError(status,
                          "failed getting attribute value", &status);
   delete [] cname;
@@ -1031,7 +1031,7 @@ extern "C" {
       return;
   }
 
-  *rc = (*array)->ESMC_AttributeGet(cname, &attrTypeKind, &slen, NULL);
+  *rc = (*array)->attributeget(cname, &attrTypeKind, &slen, NULL);
   if (*rc != ESMF_SUCCESS) {
     delete [] cname;
     return;
@@ -1059,7 +1059,7 @@ extern "C" {
 
   cvalue = new char[slen+1];
 
-  *rc = (*array)->ESMC_AttributeGet(cname, cvalue);
+  *rc = (*array)->attributeget(cname, cvalue);
   if (*rc != ESMF_SUCCESS) {
     delete [] cname;
     delete [] cvalue;
@@ -1118,7 +1118,7 @@ extern "C" {
       return;
   }
 
-  *rc = (*array)->ESMC_AttributeGet(cname, tk, count, NULL);
+  *rc = (*array)->attributeget(cname, tk, count, NULL);
 
   delete [] cname;
   
@@ -1163,7 +1163,7 @@ extern "C" {
 
   cname = new char[ESMF_MAXSTR];
 
-  *rc = (*array)->ESMC_AttributeGet((*num)-1, cname, tk, count, NULL);
+  *rc = (*array)->attributeget((*num)-1, cname, tk, count, NULL);
   if (*rc != ESMF_SUCCESS) {
       delete [] cname;
       return;
@@ -1200,7 +1200,7 @@ extern "C" {
       return;
   }
 
-  *count = (*array)->ESMC_AttributeGetCount();
+  *count = (*array)->attributegetcount();
 
   *rc = (count == 0) ? ESMF_FAILURE : ESMF_SUCCESS;
 
@@ -1292,7 +1292,7 @@ void FTN(c_esmc_arrayattpackcreate)(ESMCI::Array **array, char *name, char *conv
   }
 
   // Set the attribute on the object.
-  *rc = (*array)->ESMC_AttPackCreate(cname, cconv, cpurp, cobj);
+  *rc = (*array)->attpackcreate(cname, cconv, cpurp, cobj);
 
   delete [] cname;
   delete [] cconv;
@@ -1405,7 +1405,7 @@ void FTN(c_esmc_arrayattpackcreate)(ESMCI::Array **array, char *name, char *conv
   }
 
   // Set the attribute on the object.
-  *rc = (*array)->ESMC_AttPackSet(cname, cvalue, cconv, cpurp, cobj);
+  *rc = (*array)->attpackset(cname, cvalue, cconv, cpurp, cobj);
 
   delete [] cname;
   delete [] cvalue;
@@ -1487,7 +1487,7 @@ void FTN(c_esmc_arrayattpackcreate)(ESMCI::Array **array, char *name, char *conv
   }
 
   // Set the attribute on the object.
-  *rc = (*array)->ESMC_AttPackWrite(cconv, cpurp, cobj);
+  *rc = (*array)->attpackwrite(cconv, cpurp, cobj);
 
   delete [] cconv;
   delete [] cpurp;
