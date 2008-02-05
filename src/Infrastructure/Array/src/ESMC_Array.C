@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.174 2008/02/05 22:34:25 theurich Exp $
+// $Id: ESMC_Array.C,v 1.175 2008/02/05 22:51:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.174 2008/02/05 22:34:25 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.175 2008/02/05 22:51:21 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3213,8 +3213,8 @@ int Array::redistStore(
       }
     }
     delete [] factorLocalList;
-    delete [] factorPetList;
   }
+  delete [] factorPetList;
   
   // set up local factorList and factorIndexList
   int factorListCount;
