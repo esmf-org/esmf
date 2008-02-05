@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.87 2008/01/23 01:11:50 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.88 2008/02/05 23:54:54 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.87 2008/01/23 01:11:50 theurich Exp $";
+static const char *const version = "$Id: ESMC_DELayout.C,v 1.88 2008/02/05 23:54:54 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -882,12 +882,14 @@ int DELayout::destruct(){
     delete [] vasLocalDeList;
     delete [] localServiceOfferCount;
     delete [] serviceMutexFlag;
-    vm->vmk_ipshmdeallocate(maxServiceOfferCount);
-    for (int i=0; i<vasLocalDeCount; i++)
-      vm->vmk_ipmutexdeallocate(serviceOfferMutex[i]);
+    if (vm!=NULL){
+      vm->vmk_ipshmdeallocate(maxServiceOfferCount);
+      for (int i=0; i<vasLocalDeCount; i++)
+        vm->vmk_ipmutexdeallocate(serviceOfferMutex[i]);
+      for (int i=0; i<vasLocalDeCount; i++)
+        vm->vmk_ipmutexdeallocate(serviceMutex[i]);
+    }
     delete [] serviceOfferMutex;
-    for (int i=0; i<vasLocalDeCount; i++)
-      vm->vmk_ipmutexdeallocate(serviceMutex[i]);
     delete [] serviceMutex;
   }
 
@@ -1555,7 +1557,7 @@ DELayout *DELayout::deserialize(
   cp = (char *)(buffer + *offset);
   
   vp = (VM **)cp;
-  a->vm = *vp++; 
+  a->vm = *vp++;  // this is a NULL that comes from the serialize side
 
   ip = (int *)vp;
   a->deCount = *ip++;
@@ -1598,7 +1600,11 @@ DELayout *DELayout::deserialize(
     a->deList[i] = -1;                         // indicate not a local DE
   a->vasLocalDeCount = 0;  // proxy objects don't have local DEs
   a->vasLocalDeList = new int[a->vasLocalDeCount];
-
+  a->localServiceOfferCount = new int[a->vasLocalDeCount];
+  a->serviceMutexFlag = new int[a->vasLocalDeCount];
+  a->serviceMutex = new vmk_ipmutex*[a->vasLocalDeCount];
+  a->serviceOfferMutex = new vmk_ipmutex*[a->vasLocalDeCount];
+  
   // decode flags first, because dims is not sent unless logRectFlag is true.
   lp = (ESMC_Logical *)ip;
   a->oneToOneFlag = *lp++;
