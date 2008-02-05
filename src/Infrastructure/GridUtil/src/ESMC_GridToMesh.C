@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.11 2008/02/04 17:01:35 oehmke Exp $
+// $Id: ESMC_GridToMesh.C,v 1.12 2008/02/05 16:47:43 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -116,20 +116,23 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
      // Loop nodes of the grid.  Here we loop all nodes, both owned and not.
    ESMCI::GridIter *gni=new ESMCI::GridIter(&grid,staggerLoc,true);
 
-   // loop through all nodes in the Grid owned by cells
+   // Put Local in first, so we don't have to search for duplicates for every interation, 
+   // after locals are in put in non-local
+
+   // loop through all LOCAL nodes in the Grid owned by cells
    for(gni->toBeg(); !gni->isDone(); gni->adv()) {   
-     MeshObj *node;
 
-     // get the global id of this Grid node
-     int gid=gni->getGlobalID(); 
-
-     // get the local id of this Grid node
-     int lid=gni->getLocalID(); 
-    
-     printf("GID=%d\n",gni->getGlobalID());
-
-     // Different behavior if we're local...
+     // Only operate on Local Nodes
      if (gni->isLocal()) {
+       MeshObj *node;
+       
+       // get the global id of this Grid node
+       int gid=gni->getGlobalID(); 
+       
+       // get the local id of this Grid node
+       int lid=gni->getLocalID(); 
+
+       // Create new node in mesh object       
        node = new MeshObj(MeshObj::NODE,     // node...
                                    gid,               // unique global id
                                    lid                // local ID for boostrapping field data
@@ -139,21 +142,38 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
        
        UInt nodeset = 1;   // Do we need to partition the nodes in any sets?
        mesh.add_node(node, nodeset);
-
-       // TODO: Fill for DistDir here or in seperate loop -> David
+       
        // If Shared add to list to use DistDir on
        if (gni->isShared()) {
-          
+         
          // Put gid in list
          std::vector<UInt>::iterator lb =
            std::lower_bound(owned_shared.begin(), owned_shared.end(), gid);    
          
          if (lb == owned_shared.end() || *lb != gid)
            owned_shared.insert(lb, gid);
-
        }
-     } else { // ... or not locally owned
+       
+       // Put node into vector
+       nodevect[lid]=node;    
+     }
+     
+   } // gni
 
+
+   // loop through all NON-LOCAL nodes in the Grid owned by cells
+   for(gni->toBeg(); !gni->isDone(); gni->adv()) {   
+
+     // Only operate on non-local nodes
+     if (!gni->isLocal()) {
+       MeshObj *node;
+       
+       // get the global id of this Grid node
+       int gid=gni->getGlobalID(); 
+       
+       // get the local id of this Grid node
+       int lid=gni->getLocalID(); 
+       
        // If Grid node is not already in the mesh then add 
        Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::NODE, gid);
        if (mi == mesh.map_end(MeshObj::NODE)) {
@@ -163,26 +183,24 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
                             );
          
          node->set_owner(std::numeric_limits<UInt>::max());  // Set owner to unknown (will have to ghost later)
-       
+         
          UInt nodeset = 1;   // Do we need to partition the nodes in any sets?
          mesh.add_node(node, nodeset);
-
+         
          // Node must be shared
          std::vector<UInt>::iterator lb =
            std::lower_bound(notowned_shared.begin(), notowned_shared.end(), gid);    
          
          if (lb == notowned_shared.end() || *lb != gid)
            notowned_shared.insert(lb, gid);
-
-
+         
        } else {
-                  node=&*mi; 
+         node=&*mi; 
        }
+       
+       // Put node into vector
+       nodevect[lid]=node;    
      }
-
-     // Put node into vector
-     nodevect[lid]=node;    
-
    } // gni
   
 
@@ -259,7 +277,10 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
       }
     }
 
+    printf("%d :: %f %f\n",gni->getGlobalID(),c[0],c[1]);
+
    } // ni
+
 
    // Now go back and resolve the ownership for shared nodes.  We create a distdir
    // from the owned, shared nodes, then look up the shared, not owned.
@@ -288,8 +309,6 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
 
    } // ddir lookup
 
-
-
    // ** That's it.  The mesh is now in the pre-commit phase, so other
    // fields can be registered, sides/faces can be turned on, etc, or one
    // can simply call mesh.Commit() and then proceed.
@@ -297,7 +316,6 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
    //std::sprintf(buf, "g2m.%05d.txt", )
    mesh.Print(Par::Out());
 
- 
 
  } // try catch block
   catch (std::exception &x) {

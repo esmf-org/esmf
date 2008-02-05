@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.47 2008/02/01 22:29:18 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.48 2008/02/05 16:47:14 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.47 2008/02/01 22:29:18 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.48 2008/02/05 16:47:14 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -4293,9 +4293,13 @@ GridIter *GridIter::toBeg(
   // Set to first DE 
   curDE=0; 
 
-  // Set to not done
-  done=false;
-
+  // set done status
+  if (curDE > uBndDE) { 
+    done=true;
+  } else {
+    done=false;
+  }
+  
   // return pointer to GridIter
   return this;
 }
@@ -4635,13 +4639,14 @@ GridIter *GridIter::moveToLocalID(
   this->setDEBnds(curDE);  
 
   // reset current index location using dePos 
-  dePos += lOff;
   for (int i=0; i<rank-1; i++) {
     cnt=uBndInd[i]-lBndInd[i]+1;
-    curInd[i] = dePos%cnt;
+    curInd[i] = dePos%cnt+lBndInd[i];
     dePos /=cnt;
   }
-  curInd[rank-1]=dePos;
+  curInd[rank-1]=dePos+lBndInd[rank-1];
+
+  //  printf("lid=%d  DE=%d Ind=%d %d\n",localID,de,curInd[0],curInd[1]);
 
   // since we're now not done set done to false
   done=false;
@@ -4841,8 +4846,12 @@ GridCellIter *GridCellIter::toBeg(
   // Set to first DE 
   curDE=0; 
 
-  // Set to not done
-  done=false;
+  // set done status
+  if (curDE > uBndDE) { 
+    done=true;
+  } else {
+    done=false;
+  }
 
   // return pointer to GridCellIter
   return this;
@@ -5170,13 +5179,12 @@ GridCellIter *GridCellIter::moveToLocalID(
   this->setDEBnds(curDE);  
 
   // reset current index location using dePos 
-  dePos += lOff;
   for (int i=0; i<rank-1; i++) {
     cnt=uBndInd[i]-lBndInd[i]+1;
-    curInd[i] = dePos%cnt;
+    curInd[i] = dePos%cnt+lBndInd[i];
     dePos /=cnt;
   }
-  curInd[rank-1]=dePos;
+  curInd[rank-1]=dePos+lBndInd[rank-1];
 
   // since we're now not done set done to false
   done=false;
