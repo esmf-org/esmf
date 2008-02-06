@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.13 2008/02/05 22:54:48 dneckels Exp $
+// $Id: ESMC_GridToMesh.C,v 1.14 2008/02/06 20:43:19 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -37,6 +37,10 @@
 
 #include <limits>
 #include <iostream>
+#include <vector>
+#include <map>
+
+#define G2M_DBG
 
 using namespace ESMC;
 
@@ -70,7 +74,8 @@ namespace ESMCI {
 // the dual, which is not so bad.  This will put us equivalent with
 // SCRIP.  
 void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
-#ifdef NOIDONTTHINKSO
+  Trace __trace("GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh)");
+#ifdef NOT
 
   // Initialize the parallel environment for mesh (if not already done)
   ESMC::Par::Init("MESHLOG");
@@ -97,8 +102,8 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
    // We save the nodes in a linear list so that we can access then as such
    // for cell creation.
    //TODO: NEED MAX LID METHOD SOON ->Bob
-   std::vector<MeshObj*> nodevect(1000);
-   std::vector<UInt> idx2lid(1000,0);
+   std::vector<MeshObj*> nodevect(100000);
+   std::map<UInt,UInt> ngid2lid;
 
    UInt local_node_num = 0;
 
@@ -135,7 +140,9 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
        // get the local id of this Grid node
        int lid=gni->getLocalID(); 
 
+#ifdef G2M_DBG
 Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
+#endif
 
        // Create new node in mesh object       
        node = new MeshObj(MeshObj::NODE,     // node...
@@ -143,7 +150,7 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
                                    local_node_num
                                    );
 
-       idx2lid[local_node_num] = lid;
+       ngid2lid[gid] = lid;
        local_node_num++;
        
        
@@ -191,7 +198,7 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
                             local_node_num   // local ID for boostrapping field data
                             );
 
-         idx2lid[local_node_num] = lid;
+         ngid2lid[gid] = lid;
          local_node_num++;
          
          node->set_owner(std::numeric_limits<UInt>::max());  // Set owner to unknown (will have to ghost later)
@@ -243,6 +250,10 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
                                  gci->getGlobalID(),   // unique global id
                                  gci->getLocalID()    // index for bootstrapping field data
                                  );
+
+#ifdef G2M_DBG
+Par::Out() << "Cell:" << cell->get_id() << " uses nodes:";
+#endif
   
      // Set Owner
      cell->set_owner(me);
@@ -256,7 +267,13 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
      // Get Nodes via Local IDs
      for (UInt n = 0; n < ctopo->num_nodes; ++n) {
        nodes[n] = nodevect[cnrList[n]];
+#ifdef G2M_DBG
+Par::Out() << nodes[n]->get_id() << " ";
+#endif
      } // n
+#ifdef G2M_DBG
+Par::Out() << std::endl;
+#endif
 
 
      UInt block_id = 1;  // Any reason to use different sets for cells?
@@ -265,6 +282,9 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
      
    } // ci
 
+    // Remove any superfluous nodes
+    mesh.remove_unused_nodes();
+    mesh.linearize_data_index();
 
      // Now set up the nodal coordinates
    IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", sdim);
@@ -275,9 +295,9 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
    for (; ni != ne; ++ni) {
      double *c = node_coord->data(*ni);
 
-     UInt lid = idx2lid[ni->get_data_index()]; // we set this above when creating the node
+     UInt lid = ngid2lid[ni->get_id()]; // we set this above when creating the node
 
-Par::Out() << "node:" << ni->get_id() << ", lid=" << lid;
+//Par::Out() << "node:" << ni->get_id() << ", lid=" << lid;
 
      // Move to corresponding grid node
     gni->moveToLocalID(lid);      
@@ -315,8 +335,19 @@ Par::Out() << "node:" << ni->get_id() << ", lid=" << lid;
 
        DDir<>::dentry &dent = *ri;
 
+#ifdef G2M_DBG
+Par::Out() << "Finding owner for gid" << dent.gid << " = " << dent.origin_proc << std::endl;
+#endif
+
        Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::NODE, dent.gid);
-       ThrowRequire(mi != mesh.map_end(MeshObj::NODE));
+     //  ThrowRequire(mi != mesh.map_end(MeshObj::NODE));
+       // May have been deleted as an unused node.  
+       if (mi == mesh.map_end(MeshObj::NODE)) {
+#ifdef G2M_DBG
+Par::Out() << "\tnot in mesh!!" << std::endl;
+#endif
+         continue;
+       }
  
        mi->set_owner(dent.origin_proc);
 
@@ -324,12 +355,26 @@ Par::Out() << "node:" << ni->get_id() << ", lid=" << lid;
 
    } // ddir lookup
 
+
+   // Can now build the communication pattern.
+   mesh.build_sym_comm_rel(MeshObj::NODE);
+
+
    // ** That's it.  The mesh is now in the pre-commit phase, so other
    // fields can be registered, sides/faces can be turned on, etc, or one
    // can simply call mesh.Commit() and then proceed.
    char buf[512];
    //std::sprintf(buf, "g2m.%05d.txt", )
+#ifdef G2M_DBG
    mesh.Print(Par::Out());
+#endif
+
+   mesh.Commit();
+
+   {
+     MEField<> *cptr = mesh.GetCoordField();
+     mesh.HaloFields(1, &cptr);
+   }
 
 
  } // try catch block
