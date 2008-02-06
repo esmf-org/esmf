@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.49 2008/02/05 21:11:02 rokuingh Exp $
+// $Id: ESMCI_Grid.C,v 1.50 2008/02/06 22:58:38 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.49 2008/02/05 21:11:02 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.50 2008/02/06 22:58:38 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -4139,6 +4139,50 @@ int Grid::attpackwrite(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridIter::getDEBnds()"
+//BOPI
+// !IROUTINE:  getDEBnds
+//
+// !INTERFACE:
+void GridIter::getDEBnds(
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//  
+                         int localDE,
+                         int *uBnd,
+                         int *lBnd
+ ){
+//
+// !DESCRIPTION:
+// Get the bounds for this iterator corresponding to the given localDE. 
+//
+//EOPI
+//-----------------------------------------------------------------------------
+
+  // Set Bounds of iteration on this proc
+  grid->getComputationalUBound(staggerloc, localDE, uBnd);  
+  grid->getComputationalLBound(staggerloc, localDE, lBnd);  
+
+
+  // if cell iterator then expand bounds
+  if (cellNodes) {
+    for (int i=0; i<rank; i++) {
+      //// Expand to include all nodes touched by cells on this proc
+      if (!grid->isLBnd(localDE,i)) lBnd[i]--;
+      if (!grid->isUBnd(localDE,i)) uBnd[i]++;
+    }
+  }
+
+}
+//-----------------------------------------------------------------------------
+
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::GridIter::setDEBnds()"
 //BOPI
 // !IROUTINE:  setDEBnds
@@ -4162,19 +4206,7 @@ void GridIter::setDEBnds(
 //-----------------------------------------------------------------------------
 
   // Set Bounds of iteration on this proc
-  grid->getComputationalUBound(staggerloc, localDE, uBndInd);  
-  grid->getComputationalLBound(staggerloc, localDE, lBndInd);  
-  grid->getExclusiveLBound(localDE, exLBndInd);
-
-
-  // if cell iterator then expand bounds
-  if (cellNodes) {
-    for (int i=0; i<rank; i++) {
-      //// Expand to include all nodes touched by cells on this proc
-      if (!grid->isLBnd(localDE,i)) lBndInd[i]--;
-      if (!grid->isUBnd(localDE,i)) uBndInd[i]++;
-    }
-  }
+  this->getDEBnds(localDE,uBndInd,lBndInd);
 
   // Setup info for calculating the DE index tuple location quickly
   // Needs to be done after bounds are set
@@ -4187,6 +4219,8 @@ void GridIter::setDEBnds(
     currOff *=(uBndInd[i]-lBndInd[i]+1);
   }  
 
+  // Exclusive Bounds
+  grid->getExclusiveLBound(localDE, exLBndInd);
 
   // Set to first index on DE
   for (int i=0; i<rank; i++) {
@@ -4428,6 +4462,90 @@ int GridIter::getGlobalID(
 }
 //-----------------------------------------------------------------------------
 
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridIter::getCount()"
+//BOPI
+// !IROUTINE:  GridIter::getCount
+//
+// !INTERFACE:
+int GridIter::getCount(
+//
+// !RETURN VALUE:
+//    the number of nodes in this iterator
+//
+// !ARGUMENTS:
+//   none  
+ ){
+//
+// !DESCRIPTION:
+// Return the number of nodes in this iterator. 
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int localrc;
+  int cnt, cntDE;
+  int lBnd[ESMF_MAXDIM];
+  int uBnd[ESMF_MAXDIM];
+
+  // Loop through DEs count nodes
+  cnt=0;
+  for (int d=0; d<numDE; d++) {
+    // Set Bounds of iteration on this proc
+    this->getDEBnds(d,uBnd,lBnd);
+
+    // For this DE get the number of nodes
+    cntDE=1;
+    for (int i=0; i<rank; i++) {
+      cntDE *= (uBnd[i]-lBnd[i]+1);
+    }
+
+    // Add the size of this DE to the rest
+    cnt +=cntDE;
+  }
+
+  // Output count
+  return cnt;
+
+}
+//-----------------------------------------------------------------------------
+
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridIter::getDE()"
+//BOPI
+// !IROUTINE:  GridIter::getDE
+//
+// !INTERFACE:
+int GridIter::getDE(
+//
+// !RETURN VALUE:
+//    the DE of the current position
+//
+// !ARGUMENTS:
+//   none  
+ ){
+//
+// !DESCRIPTION:
+// Return the DE of the current position
+//
+//EOPI
+//-----------------------------------------------------------------------------
+
+  // if we're done return -1
+  if (done) return -1;
+  
+  // Get some useful information
+  const int *localDeList = grid->getDistGrid()->getDELayout()->getLocalDeList();
+  
+  // Output DE
+  return localDeList[curDE];
+}
+//-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
@@ -4695,7 +4813,44 @@ GridIter::~GridIter(
 //
 //-----------------------------------------------------------------------------
 
-/// STOPPED HERE - everything below is potetially wrong
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridCellIter::getDEBnds()"
+//BOPI
+// !IROUTINE:  getDEBnds
+//
+// !INTERFACE:
+void GridCellIter::getDEBnds(
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//  
+                         int localDE,
+                         int *uBnd,
+                         int *lBnd
+ ){
+//
+// !DESCRIPTION:
+// Get the bounds for this iterator corresponding to the given localDE. 
+//
+//EOPI
+//-----------------------------------------------------------------------------
+
+  // Set Bounds of iteration on this proc
+  grid->getComputationalUBound(staggerloc, localDE, uBnd);  
+  grid->getComputationalLBound(staggerloc, localDE, lBnd);  
+
+  // if cell iterator then expand bounds
+  for (int i=0; i<rank; i++) {
+    //// Adjust to just do cell lower corners
+    if (grid->isUBnd(localDE,i)) uBnd[i]--;
+  }
+
+}
+//-----------------------------------------------------------------------------
+
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -4722,16 +4877,10 @@ void GridCellIter::setDEBnds(
 //-----------------------------------------------------------------------------
 
   // Set Bounds of iteration on this proc
-  grid->getComputationalUBound(staggerloc, localDE, uBndInd);  
-  grid->getComputationalLBound(staggerloc, localDE, lBndInd);  
+  this->getDEBnds(localDE, uBndInd, lBndInd);
+
+  // Get exclusive bounds
   grid->getExclusiveLBound(localDE, exLBndInd);
-
-  // if cell iterator then expand bounds
-  for (int i=0; i<rank; i++) {
-    //// Adjust to just do cell lower corners
-    if (grid->isUBnd(localDE,i)) uBndInd[i]--;
-  }
-
 
   // Setup info for calculating the DE index tuple location quickly
   // Needs to be done after bounds are set
@@ -4984,6 +5133,89 @@ int GridCellIter::getGlobalID(
 }
 //-----------------------------------------------------------------------------
 
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridCellIter::getDE()"
+//BOPI
+// !IROUTINE:  GridCellIter::getDE
+//
+// !INTERFACE:
+int GridCellIter::getDE(
+//
+// !RETURN VALUE:
+//    the DE of the current position
+//
+// !ARGUMENTS:
+//   none  
+ ){
+//
+// !DESCRIPTION:
+// Return the DE of the current position
+//
+//EOPI
+//-----------------------------------------------------------------------------
+
+  // if we're done return -1
+  if (done) return -1;
+  
+  // Get some useful information
+  const int *localDeList = grid->getDistGrid()->getDELayout()->getLocalDeList();
+  
+  // Output DE
+  return localDeList[curDE];
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridCellIter::getCount()"
+//BOPI
+// !IROUTINE:  GridCellIter::getCount
+//
+// !INTERFACE:
+int GridCellIter::getCount(
+//
+// !RETURN VALUE:
+//    the number of nodes in this iterator
+//
+// !ARGUMENTS:
+//   none  
+ ){
+//
+// !DESCRIPTION:
+// Return the number of nodes in this iterator. 
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int localrc;
+  int cnt, cntDE;
+  int lBnd[ESMF_MAXDIM];
+  int uBnd[ESMF_MAXDIM];
+
+  // Loop through DEs count nodes
+  cnt=0;
+  for (int d=0; d<numDE; d++) {
+    // Set Bounds of iteration on this proc
+    this->getDEBnds(d,uBnd,lBnd);
+
+    // For this DE get the number of nodes
+    cntDE=1;
+    for (int i=0; i<rank; i++) {
+      cntDE *= (uBnd[i]-lBnd[i]+1);
+    }
+
+    // Add the size of this DE to the rest
+    cnt +=cntDE;
+  }
+
+  // Output count
+  return cnt;
+
+}
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
