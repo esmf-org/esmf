@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.41 2007/10/31 04:53:41 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.42 2008/02/06 05:01:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.41 2007/10/31 04:53:41 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistGrid.C,v 1.42 2008/02/06 05:01:48 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2633,6 +2633,12 @@ DistGrid *DistGrid::deserialize(
     a->patchListPDe[i] = *ip++;
   }
   a->connectionCount = *ip++;
+  a->connectionList = new int*[a->connectionCount];
+  // reset all xxPLocalDe variables on proxy object
+  a->indexListPDimPLocalDe = new int*[0];
+  a->arbSeqIndexCountPLocalDe = new int[0];
+  a->arbSeqIndexListPLocalDe = new int*[0];
+  
   lp = (ESMC_Logical *)ip;
   a->regDecompFlag = *lp++;
 
