@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.32 2008/02/01 23:09:28 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.33 2008/02/06 22:58:02 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -420,6 +420,7 @@ int getComputationalUBound(
 
 
     void setDEBnds(int localDE);
+    void getDEBnds(int localDE,int *uBnd,int *lBnd);
 
   public:
 
@@ -433,6 +434,8 @@ int getComputationalUBound(
   int getLocalID();
   bool isLocal();
   bool isShared();
+  int getCount();
+  int getDE();
 
   template <class TYPE> void getCoord(TYPE *coord);
   }; 
@@ -462,6 +465,7 @@ int getComputationalUBound(
     bool done; // are we done yet?
 
     void setDEBnds(int localDE);
+    void getDEBnds(int localDE,int *uBnd,int *lBnd);
 
   public:
 
@@ -473,6 +477,8 @@ int getComputationalUBound(
   GridCellIter *moveToLocalID(int localID);
   int getGlobalID();
   int getLocalID();
+  int getCount();
+  int getDE();
   void getCornersCellNodeLocalID(int *cnrCount, int *cnrList);
   }; 
 
