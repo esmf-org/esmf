@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.95 2008/02/05 21:08:08 rokuingh Exp $
+// $Id: ESMC_Base.C,v 1.96 2008/02/06 23:44:35 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.95 2008/02/05 21:08:08 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.96 2008/02/06 23:44:35 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -3373,6 +3373,12 @@ if (count) {
   int len, rc;
   char msgbuf[ESMF_MAXSTR];
 
+  attrCount = 0;
+  attrAlloc = 0;
+  attrList = ESMC_NULL_POINTER;
+  items = 0;
+  slen = 0;
+
   if (!name)
       attrName[0] = '\0';
   else {
@@ -3452,8 +3458,10 @@ if (count) {
   }
   
   // if attribute lists, delete them.
-  for (unsigned int i=0; i<attrCount; i++) 
-      delete attrList[i];
+  for (unsigned int i=0; i<attrCount; i++) {
+    if((*attrList[i]).attrList == ESMC_NULL_POINTER) delete attrList[i];
+    else attrList[i] = ESMC_NULL_POINTER;
+  }
                          
   if (attrList) delete [] attrList;
 
@@ -3487,10 +3495,6 @@ if (count) {
   strcpy(className, "global");
   sprintf(baseName, "%s%3d", "unnamed", ID);
   ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
-
-  //attrCount = 0;
-  //attrAlloc = 0;
-  //attrList = ESMC_NULL_POINTER;
 
   baseStatus = ESMF_STATUS_READY;
 
@@ -3531,17 +3535,12 @@ if (count) {
       sprintf(baseName, "%s%3d", className, ID);
   ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
 
-/*
-  attrCount = 0;
-  attrAlloc = 0;
-  attrList = ESMC_NULL_POINTER;
   if (nattrs > 0) {
-      if (ESMC_AttributeAlloc(nattrs) != ESMF_SUCCESS) {
+      if (root.ESMC_AttributeAlloc(nattrs) != ESMF_SUCCESS) {
           baseStatus = ESMF_STATUS_INVALID;   // can't return err, but can
           return;                            // try to indicate unhappiness
       }
   }
-*/
 
   baseStatus = ESMF_STATUS_READY;
 
