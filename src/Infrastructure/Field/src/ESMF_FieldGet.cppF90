@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.1 2008/02/07 05:24:03 theurich Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.2 2008/02/07 22:44:24 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,6 +38,7 @@
       use ESMF_ArrayGetMod
       use ESMF_FieldMod
       use ESMF_GridMod
+      use ESMF_StaggerLocMod
       use ESMF_InitMacrosMod
       implicit none
 
@@ -53,7 +54,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGet.cppF90,v 1.2.2.1 2008/02/07 05:24:03 theurich Exp $'
+      '$Id: ESMF_FieldGet.cppF90,v 1.2.2.2 2008/02/07 22:44:24 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -299,7 +300,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
         ! get grid info 
         call ESMF_GridGet(field%ftypep%grid, localDE=localDE, & 
-                staggerloc=field%ftypep%staggerloc, & 
+                staggerloc=ESMF_STAGGERLOC_CENTER, & 
                 computationalLBound=gridCompLBnd, &
                 computationalUBound=gridCompUBnd, &
                 exclusiveLBound=gridExclLBnd, &
