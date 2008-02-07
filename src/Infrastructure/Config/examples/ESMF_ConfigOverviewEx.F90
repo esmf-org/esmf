@@ -117,8 +117,8 @@
 !----------------------------------------------------------------
 !BOE
 !\subsubsection{How to Retrieve a Label with a Single Value}
-! The first methodology for retrieving information from the 
-! Resource File is to take advantage of the <label,value> relationship
+! The first method for retrieving information from the 
+! Resource File takes advantage of the <label,value> relationship
 ! within the file and access the data in a dictionary-like manner. This is the
 ! simplest methodology, but it does imply the use of only one value per label
 ! in the Resource File.  
@@ -216,22 +216,23 @@
 ! Second Method of Retrieval
 !----------------------------------------------------------------
 !BOE
-!\subsubsection{How to Retrieve Data with Multiple Values}
-! When there are multi mixed-typed values associated with a label, the 
+!\subsubsection{How to Retrieve a Label with Multiple Values}
+! When there are multiple, mixed-typed values associated with a label, the 
 ! values can be retrieved in two steps:  1) Use ESMF\_ConfigFindLabel() 
-! to find the label in the Config class 2) use
+! to find the label in the Config class; 2) use
 ! ESMF\_ConfigGetAttribute() without the optional 'label' argument to 
-! retrieve the values one at a time. 
+! retrieve the values one at a time, reading from left to right in
+! the record. 
 !
 ! A second reminder that the order in which a particular label/value pair is 
 ! retrieved is not dependent upon the order which they exist within the 
-! Resource File. The pointer used in this method allows the user to skip to
+! Resource File. The label used in this method allows the user to skip to
 ! any point in the file. 
 !EOE
 
 !BOC
-      call ESMF_ConfigFindLabel(cf, 'constants:', rc=rc) ! Step a) set the pointer 
-                                                         ! to the constants label
+      call ESMF_ConfigFindLabel(cf, 'constants:', rc=rc) ! Step a) Find the 
+                                                         ! label 
 !EOC
 
       if (rc .ne. ESMF_SUCCESS) then
@@ -255,7 +256,7 @@
         finalrc = ESMF_FAILURE
         print*, "*****' call ESMF_ConfigGetAttribute' failed"
       else
-        print*, "Results from using the pointer method of data retrieval"
+        print*, "Results from retreiving multiple values:"
         print*, "The first constant was was retrieved from the Resource File"
         print*, "Its value is: ", param_1
         print*, "The second constant was was retrieved from the Resource File"
@@ -269,12 +270,11 @@
       endif
 
 !BOE
-! The pointer methodology also works with strings.
+! This methodology also works with strings.
 !EOE
 
 !BOC
-       call ESMF_ConfigFindLabel(cf, 'my_file_names:', rc=rc)  ! Step a) Set the pointer 
-                                                               ! to the right label
+       call ESMF_ConfigFindLabel(cf, 'my_file_names:', rc=rc)  !Step a) find the label
 !EOC
 
       if (rc .ne. ESMF_SUCCESS) then
@@ -292,7 +292,7 @@
         finalrc = ESMF_FAILURE
         print*, "*****' call ESMF_ConfigGetAttribute' for multiple file name retrieval failed"
       else
-        print*, "Results from using the pointer method of data retrieval of strings"
+        print*, "Results from retrieving multi-value strings:"
         print*, "The first file name was was retrieved from the Resource File"
         print*, "Its value is: ", fn1
         print*, "The second file name was was retrieved from the Resource File"
@@ -304,7 +304,7 @@
 
       if (fn1.ne.'jan87.dat' .or. fn2.ne.'jan88.dat' .or. fn3.ne.'jan89.dat') then
         finalrc = ESMF_FAILURE
-        print*, "*****The file names not retrieved correctly using the pointer method"
+        print*, "*****The file names not retrieved correctly using the multi-value method"
       endif
 
 !----------------------------------------------------------------
@@ -313,12 +313,11 @@
 !BOE
 !\subsubsection{How to Retrieve a Table}
 
-! To access tabular data, the user first must use the second methodology of 
-! retrieving data: the pointer method. 
+! To access tabular data, the user must use the multi-value method. 
 !EOE
 
 !BOC
-      call ESMF_ConfigFindLabel(cf, 'my_table_name::', rc=rc) ! Step a) Set the pointer 
+      call ESMF_ConfigFindLabel(cf, 'my_table_name::', rc=rc) ! Step a) Set the label location 
                                                               ! to the beginning of the 
                                                               ! table
 !EOC
@@ -329,7 +328,7 @@
       endif
 
 !BOE
-! Subsequently, {\tt call ESMF\_ConfigNextLine()} is used to move the pointer
+! Subsequently, {\tt call ESMF\_ConfigNextLine()} is used to move the location 
 ! to the next row of the table. The example table in the Resource File contains
 ! 7 rows and 3 columns (7,3).
 !EOE
@@ -348,7 +347,7 @@
         finalrc = ESMF_FAILURE
         print*, "*****' call ESMF_ConfigGetAttribute' for table retrieval failed"
       else
-        print*, "Results from using the pointer method to retrieve a table"
+        print*, "Results from retrieving a table"
         print*, "The (1,3) table value should be 263.0"
         print*, "Its retrieved value is: ", table(1,3)
         print*, "The (6,1) table value should be 400"
