@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.47 2007/12/22 23:33:07 rosalind Exp $
+! $Id: ESMF_Config.F90,v 1.48 2008/02/07 17:51:50 murphysj Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -473,7 +473,7 @@
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigCreate - Create a Config object
+! !IROUTINE: ESMF_ConfigCreate - Instantiate a Config object
 !
 ! !INTERFACE:
       type(ESMF_Config) function ESMF_ConfigCreate( rc )
@@ -482,7 +482,7 @@
      integer,intent(out), optional              :: rc 
 !
 ! !DESCRIPTION: 
-!   Creates an {\tt ESMF\_Config} for use in subsequent calls.
+!   Instantiates an {\tt ESMF\_Config} object for use in subsequent calls.
 !
 !   The arguments are:
 !   \begin{description}
@@ -622,13 +622,13 @@
       character(len=*), intent(in)     :: label
       integer, intent(out), optional   :: rc 
 
-! !DESCRIPTION: Finds the {\tt label} (key) in the {\tt config} file. 
+! !DESCRIPTION: Finds the {\tt label} (key) string in the {\tt config} object. 
 !
-!               Since the search is done by looking for a word in the 
-!               whole resource file, it is important to use special 
-!               conventions to distinguish labels from other words 
-!               in the resource files. The DAO convention is to finish 
-!               line labels by : and table labels by ::.
+!   Since the search is done by looking for a string, possibly multi-worded,
+!   in the whole {\tt Config} object, it is important to use special 
+!   conventions to distinguish {\tt labels} from other words. This is done 
+!   in the Resource File by using the DAO convention to finish 
+!   line labels with a (:) and table labels with a double colon (::).
 !
 !
 !   The arguments are:
@@ -699,16 +699,16 @@
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigGetAttribute - Get a value
+! !IROUTINE: ESMF_ConfigGetAttribute - Get a value 
 !
 !
 ! !INTERFACE:
-!      subroutine ESMF_ConfigGetAttribute( config, <value argument>, &
+!      subroutine ESMF_ConfigGetAttribute( config, <var\_name>, &
 !                                          label, default, rc )
 !
 ! !ARGUMENTS:
 !      type(ESMF_Config), intent(inout)       :: config     
-!      <value argument>, see below for supported values
+!      <var\_name argument>, see below for supported values
 !      character(len=*), intent(in), optional :: label 
 !      character(len=*), intent(in), optional :: default 
 !      integer, intent(out), optional         :: rc     
@@ -718,22 +718,22 @@
 !      value is a sequence of characters
 !      it will be terminated by the first white space.
 !      
-!      Supported values for <value argument> are:
+!      Supported values for <var\_name argument> are:
 !      \begin{description}
-!      \item character, intent(out)                 :: value
-!      \item character(len=*), intent(out)          :: value
-!      \item real(ESMF\_KIND\_R4), intent(out)      :: value    
-!      \item real(ESMF\_KIND\_R8), intent(out)      :: value
-!      \item integer(ESMF\_KIND\_I4), intent(out)   :: value
-!      \item integer(ESMF\_KIND\_I8), intent(out)   :: value
-!      \item logical, intent(out)                   :: value
+!      \item character, intent(out)                 :: var\_name
+!      \item character(len=*), intent(out)          :: var\_name
+!      \item real(ESMF\_KIND\_R4), intent(out)      :: var\_name    
+!      \item real(ESMF\_KIND\_R8), intent(out)      :: var\_name
+!      \item integer(ESMF\_KIND\_I4), intent(out)   :: var\_name
+!      \item integer(ESMF\_KIND\_I8), intent(out)   :: var\_name
+!      \item logical, intent(out)                   :: var\_name
 !      \end{description}
 !
 !   The arguments are:
 !   \begin{description}
 !   \item [config]
 !     Already created {\tt ESMF\_Config} object.
-!   \item [<value argument>]
+!   \item [<var\_name argument>]
 !     Returned value.
 !   \item [{[label]}]
 !     Identifing label. 
@@ -749,15 +749,15 @@
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of values
+! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of values 
 !
 ! !INTERFACE:
-!      subroutine ESMF_ConfigGetAttribute( config, <value list argument>, &
+!      subroutine ESMF_ConfigGetAttribute( config, <var\_list_names>, &
 !                                          count, label, default, rc )
 !
 ! !ARGUMENTS:
 !      type(ESMF_Config), intent(inout)       :: config     
-!      <value list argument>, see below for values      
+!      <var\_list_names argument>, see below for values      
 !      integer, intent(in)                    :: count
 !      character(len=*), intent(in), optional :: label 
 !      character(len=*), intent(in), optional :: default 
@@ -766,21 +766,23 @@
 ! !DESCRIPTION:
 !      Gets a list of values from the {\tt config} object.  
 !
-!      Supported values for <value list argument> are:
+!      Supported values for <var\_list_names argument> are:
 !      \begin{description}
-!      \item real(ESMF\_KIND\_R4), intent(inout)      :: valueList(:)
-!      \item real(ESMF\_KIND\_R8), intent(inout)      :: valueList(:) 
-!      \item integer(ESMF\_KIND\_I4), intent(inout)   :: valueList(:)  
-!      \item integer(ESMF\_KIND\_I8), intent(inout)   :: valueList(:)  
-!      \item logical, intent(inout)                   :: valueList(:)  
+!      \item real(ESMF\_KIND\_R4), intent(inout)      :: var\_list_names(:)
+!      \item real(ESMF\_KIND\_R8), intent(inout)      :: var\_list_names(:) 
+!      \item integer(ESMF\_KIND\_I4), intent(inout)   :: var\_list_names(:)  
+!      \item integer(ESMF\_KIND\_I8), intent(inout)   :: var\_list_names(:)  
+!      \item logical, intent(inout)                   :: var\_list_names(:)  
 !      \end{description}
 !
 !   The arguments are:
 !   \begin{description}
 !   \item [config]
 !     Already created {\tt ESMF\_Config} object.
-!   \item [<value list argument>]
-!     Returned value. 
+!   \item [<var\_list_names argument>]
+!     Returned value.
+!   \item [count]
+!     Number of returned values expected.  
 !   \item [{[label]}]
 !     Identifing label. 
 !   \item [{[default]}]
@@ -1637,7 +1639,7 @@
       subroutine ESMF_ConfigGetLogical( config, value, label, default, rc )
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)          :: config     
+      type(ESMF_Config), intent(inout)             :: config     
       logical, intent(out)                         :: value
       character(len=*), intent(in), optional       :: label 
       logical, intent(in), optional                :: default
