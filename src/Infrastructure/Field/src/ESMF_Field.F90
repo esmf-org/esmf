@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.275 2007/11/21 22:17:51 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.272.2.1 2008/02/07 05:24:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -57,7 +57,6 @@
       use ESMF_ArrayMod
       use ESMF_ArrayCreateMod
       use ESMF_ArrayGetMod
-      use ESMF_InternArrayDataMapMod
       use ESMF_TimeMod
       use ESMF_InitMacrosMod
 
@@ -113,11 +112,10 @@
         type (ESMF_Grid)              :: grid
         type (ESMF_IOSpec)            :: iospec           ! iospec values
         type (ESMF_Status)            :: iostatus         ! if unset, inherit from gcomp
-! TODO:FIELDINTEGRATION Reconcile the additions of arrayspec, array and localFlag with methods
-        type (ESMF_ArraySpec)         :: arrayspec
         type (ESMF_Array)             :: array
         type (ESMF_StaggerLoc)        :: staggerloc
-        logical                       :: localFlag        ! .true. if local data present
+        logical                       :: array_internal   ! .true. if field%array has 
+                                                          ! no external reference
         integer                       :: gridToFieldMap(ESMF_MAXDIM)
         integer                       :: ungriddedLBound(ESMF_MAXDIM)
         integer                       :: ungriddedUBound(ESMF_MAXDIM)
@@ -159,6 +157,7 @@
    public ESMF_FieldGetInit            ! For Standardized Initialization
 
    public ESMF_FieldCreateNoData       ! Create a new Field without data
+   public ESMF_FieldCreateEmpty        ! Create a new Field without grid or data
    public ESMF_FieldDestroy            ! Destroy a Field
 
    public ESMF_FieldGet                ! Generic Get() routine
@@ -201,7 +200,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.275 2007/11/21 22:17:51 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.272.2.1 2008/02/07 05:24:03 theurich Exp $'
 
 !==============================================================================
 !
@@ -218,9 +217,7 @@
    
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_FieldCreateNoDataPtr
-!        module procedure ESMF_FieldCreateNoArray
-        module procedure ESMF_FieldCreateNoGridArray  
-
+        module procedure ESMF_FieldCreateNoArray
 ! !DESCRIPTION:
 !     This interface provides an entry point for methods that create 
 !     an {\tt ESMF\_Field} without allocating or referencing any associated data.
@@ -229,6 +226,23 @@
  
 !EOPI
       end interface
+
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_FieldCreateEmpty - Create an empty Field without grid or data
+!
+! !INTERFACE:
+    interface ESMF_FieldCreateEmpty
+        module procedure ESMF_FieldCreateNoGridArray
+! !DESCRIPTION:
+!     This interface provides an entry point for methods that create 
+!     an {\tt ESMF\_Field} without allocating or referencing any associated data.
+!     It allows Field creation without specifying {\tt ESMF\_Grid} or 
+!     {\tt ESMF\_Array}.
+
+!EOPI
+    end interface
 !
 !------------------------------------------------------------------------------
 !BOPI
@@ -239,7 +253,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_FieldConstructIANew
-!        module procedure ESMF_FieldConstructIANewArray
+        module procedure ESMF_FieldConstructIANewArray
 
 ! !DESCRIPTION:
 !     This interface provides an entry point for methods that construct a
@@ -258,7 +272,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_FieldConstructNoDataPtr
 !        module procedure ESMF_FieldConstructNoArray
-!        module procedure ESMF_FieldConstructNoGridArray  
+        module procedure ESMF_FieldConstructNoGridArray  
 
 ! !DESCRIPTION:
 !     This interface provides an entry point for {\tt ESMF\_Field} construction 
@@ -369,7 +383,6 @@
 !
 !==============================================================================
 
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldAssign()"
@@ -403,13 +416,11 @@
 
  end subroutine
 
-
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldCreateNoDataPtr"
 
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no associated data buffer
 
 ! !INTERFACE:
@@ -481,7 +492,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 
       type(ESMF_FieldType), pointer :: ftype      ! Pointer to new field
       integer :: localrc                         
@@ -509,23 +520,28 @@
       ESMF_FieldCreateNoDataPtr%ftypep => ftype
 
       ESMF_INIT_SET_CREATED(ESMF_FieldCreateNoDataPtr)
+      
+      call ESMF_FieldValidate(ESMF_FieldCreateNoDataPtr, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_FieldCreateNoDataPtr
 
 !------------------------------------------------------------------------------
 ! TODO:FIELDINTEGRATION Decide if FieldCreateNoArray is still needed
-#if 0
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldCreateNoArray"
 
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no associated Array object
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreateNoData()
       function ESMF_FieldCreateNoArray(grid, staggerloc, &
-                                       datamap, name, iospec, rc)
+                                       name, iospec, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Field) :: ESMF_FieldCreateNoArray 
@@ -533,7 +549,6 @@
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid                 
       type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
-      type(ESMF_FieldDataMap), intent(inout), optional :: datamap              
       character (len=*), intent(in), optional :: name    
       type(ESMF_IOSpec), intent(in), optional :: iospec  
       integer, intent(out), optional :: rc               
@@ -552,11 +567,6 @@
 !           predefined values see Section \ref{sec:opt:staggerloc}.
 !           To create a custom stagger location see Section
 !           \ref{sec:usage:staggerloc:adv}.
-!           If a stagger location is specified both as an argument
-!           here as well as set in the {\tt datamap}, this takes priority.
-!     \item [{[datamap]}]
-!           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
-!           data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
 !           {\tt Field} name. 
 !     \item [{[iospec]}] 
@@ -565,7 +575,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
  
       type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
       integer :: localrc                    
@@ -576,16 +586,13 @@
       nullify(ftype)
       nullify(ESMF_FieldCreateNoArray%ftypep)
 
-      ! check variables
-      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit, ESMF_FieldDataMapInit,datamap)
-
       allocate(ftype, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Field information", &
                                        ESMF_CONTEXT, rc)) return
 
       ! Call field construction method
       call ESMF_FieldConstructNoArray(ftype, grid, staggerloc, &
-                                      datamap, name, &
+                                      name, &
                                       iospec, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -595,21 +602,25 @@
       ESMF_FieldCreateNoArray%ftypep => ftype
 
       ESMF_INIT_SET_CREATED(ESMF_FieldCreateNoArray)
+
+      call ESMF_FieldValidate(ESMF_FieldCreateNoArray, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_FieldCreateNoArray
-#endif
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldCreateNoGridArray"
 
-!BOPI
-! !IROUTINE: ESMF_FieldCreateNoGridArray - Create a Field with no Grid or Array
+!BOP
+! !IROUTINE: ESMF_FieldCreateEmpty - Create a Field with no Grid or Array
 
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldCreateNoData()
+      ! Private name; call using ESMF_FieldCreateEmpty()
       function ESMF_FieldCreateNoGridArray(name, iospec, rc)
 !
 ! !RETURN VALUE:
@@ -636,7 +647,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 
 
       type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
@@ -662,6 +673,12 @@
       ESMF_FieldCreateNoGridArray%ftypep => ftype
 
       ESMF_INIT_SET_CREATED(ESMF_FieldCreateNoGridArray)
+
+      call ESMF_FieldValidate(ESMF_FieldCreateNoGridArray, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_FieldCreateNoGridArray
@@ -1050,7 +1067,7 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldGetArray
-
+      
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_FieldGetAttribute  - Retrieve an attribute
@@ -1946,8 +1963,7 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldGetAttrInfoByNum
-
-
+      
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldPrint"
@@ -2049,9 +2065,6 @@
         !TODO: add code here to print more info
         if (fp%datastatus .eq. ESMF_STATUS_READY) then 
            call c_ESMC_ArrayPrint(fp%array, localrc)
-        endif
-        if (fp%datastatus .eq. ESMF_STATUS_READY) then
-            call ESMF_ArraySpecPrint(fp%arrayspec, localrc)
         endif
         call ESMF_StaggerLocPrint(fp%staggerloc, localrc)
 
@@ -2182,14 +2195,15 @@
  
       ftypep => field%ftypep
 
-      ! TODO: do we allow this?  if so, do we just destroy the old array?
-      !if (ftypep%datastatus .eq. ESMF_STATUS_READY) then
-      !   if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-      !                          "Data already associated with Field", &
-      !                           ESMF_CONTEXT, rc)) return
-      !endif
-
+      if( (ftypep%datastatus .eq. ESMF_STATUS_READY ) .and. &
+          ftypep%array_internal) then
+          call ESMF_ArrayDestroy(ftypep%array, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
       ftypep%array = array
+      ftypep%array_internal = .false.
       ftypep%datastatus = ESMF_STATUS_READY
    
       ! Now revalidate to be sure the grid and datamap, if they exist, are
@@ -3016,8 +3030,8 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldSetCharAttr
-
 !------------------------------------------------------------------------------
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldSetGrid"
 
@@ -3109,7 +3123,7 @@
       subroutine ESMF_FieldValidate(field, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field 
+      type(ESMF_Field), intent(inout) :: field 
       character (len = *), intent(in), optional :: options 
       integer, intent(out), optional :: rc   
 !
@@ -3142,8 +3156,8 @@
       type(ESMF_FieldType), pointer :: ftypep
       type(ESMF_StaggerLoc) :: staggerloc
       character(len=ESMF_MAXSTR) :: msgbuf
-      integer :: exclLBounds(ESMF_MAXGRIDDIM)  ! exclusive grid lower bounds
-      integer :: exclUBounds(ESMF_MAXGRIDDIM)  ! exclusive grid upper bounds
+      integer :: exclLBounds(ESMF_MAXDIM)  ! exclusive grid lower bounds
+      integer :: exclUBounds(ESMF_MAXDIM)  ! exclusive grid upper bounds
       integer :: maplist(ESMF_MAXDIM)          ! mapping between them
       integer :: otheraxes(ESMF_MAXDIM)        ! counts for non-grid dims
       integer :: gridrank, arrayrank
@@ -3164,8 +3178,8 @@
 
       if (.not.associated(field%ftypep)) then 
          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Field", &
-                                 ESMF_CONTEXT, rc)
+            "Uninitialized or already destroyed Field: ftypep unassociated", &
+             ESMF_CONTEXT, rc)
          return
       endif 
 
@@ -3175,8 +3189,8 @@
       ! make sure the field is ready before trying to look at contents
       if (ftypep%fieldstatus .ne. ESMF_STATUS_READY) then
          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Field", &
-                                 ESMF_CONTEXT, rc)
+            "Uninitialized or already destroyed Field: fieldstatus not ready", &
+             ESMF_CONTEXT, rc)
          return
       endif 
 
@@ -3197,18 +3211,24 @@
           ! get grid dim and extents for the local piece
           call ESMF_GridGet(ftypep%grid, rank=gridrank, &
                             distgrid=gridDistGrid, localDECount=localDECount, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
+          if (localrc .ne. ESMF_SUCCESS) then
+             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                "Cannot retrieve distgrid, gridrank, localDECount from ftypep%grid", &
+                 ESMF_CONTEXT, rc)
+             return
+          endif 
           ! Bounds only valid if there are local DE's
           do lDE=0, localDECount-1
              call ESMF_GridGet(ftypep%grid, localDE=lDE, staggerloc=staggerloc, &
                                exclusiveLBound=exclLBounds, &
                                exclusiveUBound=exclUBounds, &
                                rc=localrc)
-             if (ESMF_LogMsgFoundError(localrc, &
-                              ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rc)) return
+              if (localrc .ne. ESMF_SUCCESS) then
+                 call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                    "Cannot retrieve exclusive bounds from ftypep%grid", &
+                     ESMF_CONTEXT, rc)
+                 return
+              endif 
           enddo
           hasgrid = .TRUE.
       endif
@@ -3216,19 +3236,24 @@
       ! make sure there is data before asking it questions.
       if (ftypep%datastatus .eq. ESMF_STATUS_READY) then
           call ESMF_ArrayValidate(array=ftypep%array, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
+          if (localrc .ne. ESMF_SUCCESS) then
+             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                "Cannot validate ftypep%array", &
+                 ESMF_CONTEXT, rc)
+             return
+          endif 
           call ESMF_ArrayGet(ftypep%array, dimCount=dimCount, localDECount=localDECount, &
               distgrid=arrayDistGrid, rank=arrayrank, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
-
-          ! Verify that array rank is greater than or equal to grid rank
-          if (gridrank .gt. arrayrank) then
+          if (localrc .ne. ESMF_SUCCESS) then
+             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                "Cannot retrieve dimCount, localDECount, arrayDistGrid, arrayrank from ftypep%array", &
+                 ESMF_CONTEXT, rc)
+             return
+          endif 
+          ! Verify that array rank is greater than or equal to grid rank + ungridded bound rank
+          if ( arrayrank .lt. gridrank) then
               call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                 "grid DistGrid does not match array DistGrid", &
+                 "grid rank + ungridded Bound rank not equal to array rank", &
                   ESMF_CONTEXT, rc)
               return
           endif
@@ -3250,9 +3275,12 @@
           call ESMF_ArrayGet(ftypep%array, distgridToArrayMap=dimmap, &
               computationalLBound=arrayCompLBnd, &
               computationalUBound=arrayCompUBnd, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
+          if (localrc .ne. ESMF_SUCCESS) then
+             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                "Cannot retrieve computational bounds and dimmap from ftypep%array", &
+                 ESMF_CONTEXT, rc)
+             return
+          endif 
 
           hasarray = .TRUE.
           ! verify array computational bounds match grid computational bounds per localDE
@@ -3261,9 +3289,12 @@
               call ESMF_GridGet(ftypep%grid, staggerloc=staggerloc, localDE=lDE, &
                   computationalUBound=gridCompUBnd, computationalLBound=gridCompLBnd, &
                   rc=localrc)
-              if (ESMF_LogMsgFoundError(localrc, &
-                                        ESMF_ERR_PASSTHRU, &
-                                        ESMF_CONTEXT, rc)) return
+              if (localrc .ne. ESMF_SUCCESS) then
+                 call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                    "Cannot retrieve computational bounds from ftypep%grid on localDE", &
+                     ESMF_CONTEXT, rc)
+                 return
+              endif 
               do i=1, dimCount
                   if(gridCompLBnd(dimmap(i)) .ne. arrayCompLBnd(i, lDE)) then
                       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
@@ -3631,8 +3662,8 @@
 ! !ARGUMENTS:
       type(ESMF_FieldType), pointer :: ftype 
       type(ESMF_Grid) :: grid               
-      type(ESMF_ArraySpec), intent(inout) :: arrayspec
-      type(ESMF_AllocFlag), intent(in), optional :: allocflag
+      type(ESMF_ArraySpec), intent(inout)         :: arrayspec
+      type(ESMF_AllocFlag), intent(in), optional  :: allocflag
       type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
       integer, intent(in), optional :: gridToFieldMap(:)
       integer, intent(in), optional :: ungriddedLBound(:)
@@ -3667,8 +3698,6 @@
 !           predefined values see Section \ref{sec:opt:staggerloc}.
 !           To create a custom stagger location see Section
 !           \ref{sec:usage:staggerloc:adv}.
-!           If a stagger location is specified both as an argument
-!           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[gridToFieldMap]}]
 !           List that contains as many elements as is indicated by the {\tt grid}'s rank. 
 !           The list elements map each dimension of the Grid object to a dimension in the
@@ -3767,15 +3796,26 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! Default of gridToFieldMap should be {1,2,3...}
-!      if (.not. present(gridToFieldMap)) then
-!          do i = 1, ESMF_MAXDIM
-!            gridToFieldMap(i) = i
-!          enddo
-!      endif
+      if (.not. present(gridToFieldMap)) then
+          do i = 1, ESMF_MAXDIM
+            ftype%gridToFieldMap(i) = i
+          enddo
+      else
+         ftype%gridToFieldMap = gridToFieldMap
+      endif
+
+      if(present(ungriddedLBound)) &
+         ftype%ungriddedLBound = ungriddedLBound
+      if(present(ungriddedUBound)) &
+         ftype%ungriddedUBound = ungriddedUBound
+      if(present(maxHaloLWidth)) &
+         ftype%maxHaloLWidth = maxHaloLWidth
+      if(present(maxHaloUWidth)) &
+         ftype%maxHaloUWidth = maxHaloUWidth
 
       ftype%array = array
+      ftype%array_internal = .true.
       ftype%datastatus = ESMF_STATUS_READY
-      ftype%arrayspec = arrayspec
       ftype%grid  = grid
       ftype%gridstatus = ESMF_STATUS_READY
       ftype%fieldstatus = ESMF_STATUS_READY 
@@ -3784,8 +3824,6 @@
 
       end subroutine ESMF_FieldConstructIANew
 
-! TODO:FIELDINTEGRATION Restore the ConstructIANewArray method
-#if 0
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldConstructIANewArray"
@@ -3794,15 +3832,23 @@
 ! !IROUTINE: ESMF_FieldConstructIANewArray - Construct the internals of a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldConstructIANewArray(ftype, grid, array, staggerloc, &
-                                               datamap, name, iospec, rc)
+      subroutine ESMF_FieldConstructIANewArray(ftype, grid, array, &
+                                        copyflag, staggerloc, &
+                                        gridToFieldMap, ungriddedLBound, &
+                                        ungriddedUBound, maxHaloLWidth, &
+                                        maxHaloUWidth, name, iospec, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldType), pointer :: ftype 
       type(ESMF_Grid) :: grid               
       type(ESMF_Array), intent(in) :: array     
+      type(ESMF_CopyFlag), intent(in), optional :: copyflag
       type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
-      type(ESMF_FieldDataMap), intent(inout), optional :: datamap
+      integer, intent(in), optional :: gridToFieldMap(:)
+      integer, intent(in), optional :: ungriddedLBound(:)
+      integer, intent(in), optional :: ungriddedUBound(:)      
+      integer, intent(in), optional :: maxHaloLWidth(:)
+      integer, intent(in), optional :: maxHaloUWidth(:)
       character (len=*), intent(in), optional :: name
       type(ESMF_IOSpec), intent(in), optional :: iospec 
       integer, intent(out), optional :: rc              
@@ -3820,16 +3866,38 @@
 !           Pointer to an {\tt ESMF\_Grid} object. 
 !     \item [array]
 !           Data. 
+!   \item [copyflag]
+!           Whether to copy the existing data space or reference directly. Valid
+!           values are {\tt ESMF\_DATA\_COPY} or {\tt ESMF\_DATA\_REF} (default).
 !     \item [{[staggerloc]}] 
 !           Stagger location of data in grid cells.  For valid 
 !           predefined values see Section \ref{sec:opt:staggerloc}.
 !           To create a custom stagger location see Section
 !           \ref{sec:usage:staggerloc:adv}.
-!           If a stagger location is specified both as an argument
-!           here as well as set in the {\tt datamap}, this takes priority.
-!     \item [{[datamap]}]
-!           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
-!           data to the {\tt ESMF\_Grid}.
+!     \item [{[gridToFieldMap]}]
+!           List that contains as many elements as is indicated by the {\tt grid}'s rank. 
+!           The list elements map each dimension of the Grid object to a dimension in the
+!           Field's Array by specifying the appropriate Array dimension index. The default is to
+!           map all of the grid's dimensions against the lower dimensions of the Field's
+!           Array in sequence, i.e. gridDimmap = (/1, 2, .../). Unmapped dimensions are
+!           undistributed dimensions.  The total undistributed dimensions are the total 
+!           Array dimensions - the distributed dimensions in the Grid (distRank).  All
+!           gridToFieldMap entries must be greater than or equal to one and smaller than or equal
+!           to the Array rank. It is erroneous to specify the same entry multiple times
+!           unless it is zero.  If the Array rank is less than the Grid dimCount then
+!           the default gridToFieldMap will contain zeros for the dimCount.
+!           A zero entry in the dimmap indicates that the particular Grid dimension will
+!           be replicating the Array across the DEs along this direction.
+!     \item [{[ungriddedLBound]}]
+!           Lower bounds of the ungridded dimensions of the Field.
+!     \item [{[ungriddedUBound]}]
+!           Upper bounds of the ungridded dimensions of the Field.
+!     \item [{[maxHaloLWidth]}]
+!           Lower bound of halo region.  Halo widths should be in the same order as
+!           the DistGrid in {\tt grid}.  Defaults to 0.
+!     \item [{[maxHaloUWidth]}]
+!           Upper bound of halo region.  Halo widths should be in the same order as
+!           the DistGrid in {\tt grid}.  Defaults to 0.
 !     \item [{[name]}] 
 !           {\tt ESMF\_Field} name. 
 !     \item [{[iospec]}] 
@@ -3843,17 +3911,18 @@
 
       integer :: localrc 
       type(ESMF_Field) :: tfield                  ! temp field for error check
+      type(ESMF_ArraySpec) :: arrayspec
+      type(ESMF_Array)     :: newarray
+      type(ESMF_TypeKind)  :: typekind
+      integer              :: arrayrank, i
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      ! check variables
-      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
-
       ! this validates the grid already, no need to validate it first.
       call ESMF_FieldConstructNoArray(ftype, grid, staggerloc, &
-                                      datamap=datamap, name=name, &
+                                      name=name, &
                                       iospec=iospec, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -3864,10 +3933,56 @@
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+      call ESMF_ArrayGet(array, typekind=typekind, &
+          rank=arrayrank, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      call ESMF_ArraySpecSet(arrayspec, typekind=typekind, &
+          rank=arrayrank, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
+      ! Default of gridToFieldMap should be {1,2,3...}
+      if (.not. present(gridToFieldMap)) then
+          do i = 1, ESMF_MAXDIM
+            ftype%gridToFieldMap(i) = i
+          enddo
+      else
+         ftype%gridToFieldMap = gridToFieldMap
+      end if
 
-      ftype%array = array
+      if(present(ungriddedLBound)) &
+         ftype%ungriddedLBound = ungriddedLBound
+      if(present(ungriddedUBound)) &
+         ftype%ungriddedUBound = ungriddedUBound
+      if(present(maxHaloLWidth)) &
+         ftype%maxHaloLWidth = maxHaloLWidth
+      if(present(maxHaloUWidth)) &
+         ftype%maxHaloUWidth = maxHaloUWidth
+
+      ! default copyflag value is ESMF_DATA_REF
+      ftype%array_internal = .false.
+      if(.not. present(copyflag)) then
+          ftype%array = array
+      else
+          if(copyflag == ESMF_DATA_REF) then
+              ftype%array = array
+          else
+              newarray = ESMF_ArrayCreate(array, rc=localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+              ftype%array = newarray
+              ftype%array_internal = .true.
+          endif
+      endif
+          
       ftype%datastatus = ESMF_STATUS_READY
+      ftype%grid  = grid
+      ftype%gridstatus = ESMF_STATUS_READY
+      ftype%fieldstatus = ESMF_STATUS_READY 
 
       ! instead of adding error checking all over the place, call the
       ! validate routine to check sizes of array vs grid to be sure
@@ -3875,21 +3990,18 @@
       ! call the user level validate
       tfield%ftypep => ftype
       ESMF_INIT_SET_CREATED(tfield)
+
       call ESMF_FieldValidate(tfield, "", localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
-          ! rc is already set, we just need to mark that the array
-          ! is not valid.
-          ftype%datastatus = ESMF_STATUS_INVALID
+          ftype%fieldstatus = ESMF_STATUS_INVALID
           return
       endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldConstructIANewArray
-#endif
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -3981,9 +4093,6 @@
 
       !TODO:FIELDINTEGRATION Complete implementation of FieldConstructNoDataPtr
 #if 0
-      ! init local flag
-      ftype%localFlag=.true.
-
       ! Construct a default name if one is not given
       call ESMF_BaseCreate(ftype%base, "Field", name, 0, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -4030,7 +4139,6 @@
       end subroutine ESMF_FieldConstructNoDataPtr
 
 ! TODO:FIELDINTEGRATION Restore FieldConstructNoArray method
-#if 0
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldConstructNoArray"
@@ -4040,13 +4148,12 @@
 
 ! !INTERFACE:
       subroutine ESMF_FieldConstructNoArray(ftype, grid, staggerloc, &
-                                            datamap, name, iospec, rc)
+                                            name, iospec, rc)
 !
 ! !ARGUMENTS:     
       type(ESMF_FieldType), pointer :: ftype   
       type(ESMF_Grid), intent(inout) :: grid                 
       type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
-      type(ESMF_FieldDataMap), intent(inout), optional :: datamap              
       character (len=*), intent(in), optional :: name    
       type(ESMF_IOSpec), intent(in), optional :: iospec  
       integer, intent(out), optional :: rc               
@@ -4089,12 +4196,6 @@
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      ! check variables
-      ESMF_INIT_CHECK_SHALLOW(ESMF_FieldDataMapGetInit,ESMF_FieldDataMapInit,datamap)
-     
-      ! init local flag
-      ftype%localFlag=.true.
-
       ! Construct a default name if one is not given
       call ESMF_BaseCreate(ftype%base, "Field", name, 0, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -4110,40 +4211,12 @@
       ftype%gridstatus = ESMF_STATUS_READY
 
       call ESMF_GridGet(ftype%grid, distRank=gridRank, rc=localrc)
-      if (present(datamap)) then
-        ! this does a copy, datamap ok for user to delete now
-        ftype%mapping = datamap   
-
-        ! take care of override stagger locs.  if specified both in
-        ! the datamap and as explicit args, the arguments take priority.
-        call ESMF_FieldDataMapSet(ftype%mapping, staggerloc=staggerloc, &
-                             rc=localrc)
-      else
-        ! create default datamap with 1-for-1 correspondence to grid
-        if (gridRank .eq. 1) then
-          call ESMF_FieldDataMapSetDefault(ftype%mapping, ESMF_INDEX_I, &
-                                staggerloc=staggerloc, rc=localrc)
-        else if (gridRank .eq. 2) then
-          call ESMF_FieldDataMapSetDefault(ftype%mapping, ESMF_INDEX_IJ, &
-                                staggerloc=staggerloc, rc=localrc)
-        else if (gridRank .eq. 3) then
-          call ESMF_FieldDataMapSetDefault(ftype%mapping, ESMF_INDEX_IJK, &
-                                staggerloc=staggerloc, rc=localrc)
-        endif
-      endif
-      ftype%datamapstatus = ESMF_STATUS_READY
-
-!
-! add more code here
-!
      
       ftype%fieldstatus = ESMF_STATUS_READY
 
       if  (present(rc)) rc = ESMF_SUCCESS
       
       end subroutine ESMF_FieldConstructNoArray
-#endif
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -4197,9 +4270,6 @@
       ftypep%gridstatus = ESMF_STATUS_UNINIT
       ftypep%datastatus = ESMF_STATUS_UNINIT
 
-      ! Init Local flag 
-      ftypep%localFlag=.true.
-
       ftypep%fieldstatus = ESMF_STATUS_READY
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -4250,7 +4320,13 @@
 !
 ! TODO: more code goes here
 !
-
+      if(ftype%array_internal .and. &
+        ftype%datastatus .eq. ESMF_STATUS_READY) then
+          call ESMF_ArrayDestroy(ftype%array, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      endif
 
       if  (present(rc)) rc = ESMF_SUCCESS
 
@@ -4522,9 +4598,6 @@
                                      "space for new Field object", &
                                      ESMF_CONTEXT, rc)) return
 
-      ! Indicate that this local Field is a proxy object
-      fp%localFlag = .false.    
-
       call ESMF_BaseCreate(fp%base, "Field", "dummy", 0, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -4630,6 +4703,7 @@
         s%fieldstatus   = ESMF_STATUS_UNINIT
         s%gridstatus    = ESMF_STATUS_UNINIT
         s%datastatus    = ESMF_STATUS_UNINIT
+        s%array_internal = .false.
         ESMF_INIT_SET_DEFINED(s)
     end subroutine ESMF_FieldTypeInit
 

@@ -1,5 +1,5 @@
 
-! $Id: ESMF_Bundle.F90,v 1.118 2007/10/31 16:58:50 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.118.2.1 2008/02/07 05:24:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -1865,7 +1865,7 @@ end function
       subroutine ESMF_BundleGetAttrInfoByName(bundle, name, typekind, count, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle  
+      type(ESMF_Bundle), intent(in) :: bundle  
       character(len=*), intent(in) :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
       integer, intent(out), optional :: count   
@@ -3549,7 +3549,7 @@ end function
       subroutine ESMF_BundleValidate(bundle, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle
+      type(ESMF_Bundle), intent(in) :: bundle
       character (len=*), intent(in), optional :: options 
       integer, intent(out), optional :: rc
 !

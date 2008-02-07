@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGlobalEx.F90,v 1.13.2.1 2007/12/14 20:25:31 svasquez Exp $
+! $Id: ESMF_FieldGlobalEx.F90,v 1.13.2.2 2008/02/07 05:24:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,

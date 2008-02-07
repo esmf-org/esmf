@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2 2007/10/31 16:58:53 cdeluca Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.1 2008/02/07 05:24:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -34,9 +34,10 @@
       use ESMF_BaseMod
       use ESMF_LogErrMod
       use ESMF_LocalArrayMod
-      use ESMF_InternArrayMod
-      use ESMF_InternArrayGetMod
+      use ESMF_ArrayMod
+      use ESMF_ArrayGetMod
       use ESMF_FieldMod
+      use ESMF_GridMod
       use ESMF_InitMacrosMod
       implicit none
 
@@ -47,12 +48,12 @@
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_FieldGetDataPointer
+      public ESMF_FieldGetDataPtr
  
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGet.cppF90,v 1.2 2007/10/31 16:58:53 cdeluca Exp $'
+      '$Id: ESMF_FieldGet.cppF90,v 1.2.2.1 2008/02/07 05:24:03 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -64,19 +65,22 @@
 !------------------------------------------------------------------------------
 
 !BOPI
-! !IROUTINE: ESMF_FieldGetDataPointer -- Get a Fortran pointer to the data contents
+! !IROUTINE: ESMF_FieldGetDataPtr -- Get a Fortran pointer to the data contents
 
 ! !INTERFACE:
-     interface ESMF_FieldGetDataPointer
+    interface ESMF_FieldGetDataPtr
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
+        module procedure ESMF_FieldGetDataBounds
       ! < declarations of interfaces for each T/K/R >
-TypeKindRankInterfaceMacro(FieldGetDataPointer)
+TypeKindRankInterfaceMacro(FieldGetDataPtr)
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_FieldGetDataPointer} subroutines.   
+!  types of {\tt ESMF\_FieldGetDataPtr} subroutines.   
+! The T/K/R subroutines allows retrieval of data pointer and data bounds
+! FieldGetDataBound subroutine allows retrieval of modified grid bounds
 !  
 !EOPI 
 end interface
@@ -88,9 +92,261 @@ end interface
 !==============================================================================
 
 !------------------------------------------------------------------------------
+! < declarations of subroutines for each T/K/R >
+TypeKindRankDeclarationMacro(FieldGetDataPtr)
+
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetDataBounds"
+!BOP
+! !IROUTINE: ESMF_FieldGetDataBounds -  Get Field data bounds
 
-      ! < declarations of subroutines for each T/K/R >
-TypeKindRankDeclarationMacro(FieldGetDataPointer)
+! !INTERFACE:
+  ! Private name; call using ESMF_FieldGetDataPtr()
+    subroutine ESMF_FieldGetDataBounds( field, &
+          localDE, &
+          exclusiveLBound, exclusiveUBound, exclusiveCount, &
+          computationalLBound, computationalUBound, computationalCount, &
+          totalLBound, totalUBound, totalCount, &
+          rc)
 
-        end module ESMF_FieldGetMod
+! !ARGUMENTS:
+        type(ESMF_Field),       intent(in) :: field
+        integer,                intent(in) :: localDE
+        integer,                intent(out), optional :: exclusiveLBound(:)
+        integer,                intent(out), optional :: exclusiveUBound(:)
+        integer,                intent(out), optional :: exclusiveCount(:)
+        integer,                intent(out), optional :: computationalLBound(:)
+        integer,                intent(out), optional :: computationalUBound(:)
+        integer,                intent(out), optional :: computationalCount(:)
+        integer,                intent(out), optional :: totalLBound(:)
+        integer,                intent(out), optional :: totalUBound(:)
+        integer,                intent(out), optional :: totalCount(:)
+        integer,                intent(out), optional :: rc
+
+! !DESCRIPTION:
+!  This method returns the bounds information of a field that consists of a
+!  internal grid and a internal array. The exclusive and computational bounds
+!  are shared between the grid and the array but the total bounds are the array
+!  bounds plus the halo width. The count is the number of elements between each
+!  bound pair.
+!
+!The arguments are:
+!\begin{description}
+!\item[{field}]
+!    Field to get the information from.
+!\item[{[localDE]}]
+!     The local DE from which to get the information.  If not set, defaults to 
+!     the first DE on this processor. (localDE starts at 0)
+!\item[{staggerloc}]
+!     The stagger location to get the information for. 
+!     Please see Section~\ref{sec:opt:staggerloc} for a list 
+!     of predefined stagger locations. If not present, defaults to
+!     ESMF\_STAGGERLOC\_CENTER.
+!\item[{[exclusiveLBound]}]
+!     Upon return this holds the lower bounds of the exclusive region.
+!     {\tt exclusiveLBound} must be allocated to be of size equal to the field rank.
+!     Please see Section~\ref{sec:field:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
+!\item[{[exclusiveUBound]}]
+!     Upon return this holds the upper bounds of the exclusive region.
+!     {\tt exclusiveUBound} must be allocated to be of size equal to the field rank.
+!     Please see Section~\ref{sec:field:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
+!\item[{[exclusiveCount]}]
+!     Upon return this holds the number of items in the exclusive region per dimension
+!     (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
+!     be allocated to be of size equal to the field rank.
+!     Please see Section~\ref{sec:field:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
+!\item[{[computationalLBound]}]
+!     Upon return this holds the lower bounds of the stagger region.
+!     {\tt computationalLBound} must be allocated to be of size equal to the field rank.
+!     Please see Section~\ref{sec:field:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
+!\item[{[computationalUBound]}]
+!     Upon return this holds the upper bounds of the stagger region.
+!     {\tt computationalUBound} must be allocated to be of size equal to the field rank.
+!     Please see Section~\ref{sec:field:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
+!\item[{[computationalCount]}]
+!     Upon return this holds the number of items in the computational region per dimension
+!     (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
+!      must be allocated to be of size equal to the field rank.
+!     Please see Section~\ref{sec:field:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
+!\item[{[totalLBound]}]
+!     Upon return this holds the lower bounds of the total region.
+!     {\tt totalLBound} must be allocated to be of size equal to the field rank.
+!     Please see Section~\ref{sec:field:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
+!\item[{[totalUBound]}]
+!     Upon return this holds the upper bounds of the total region.
+!     {\tt totalUBound} must be allocated to be of size equal to the field rank.
+!     Please see Section~\ref{sec:field:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
+!\item[{[totalCount]}]
+!     Upon return this holds the number of items in the total region per dimension
+!     (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
+!      be allocated to be of size equal to the field rank.
+!     Please see Section~\ref{sec:field:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
+!\item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!\end{description}
+!
+!EOP
+
+        integer :: gridCompLBnd(ESMF_MAXDIM), gridCompUBnd(ESMF_MAXDIM)
+        integer :: gridExclLBnd(ESMF_MAXDIM), gridExclUBnd(ESMF_MAXDIM)
+        integer :: gridTotaLBnd(ESMF_MAXDIM), gridTotaUBnd(ESMF_MAXDIM)
+        integer :: gridrank, arrayrank, fieldrank, localrc
+        integer :: i, j
+        logical :: filled(ESMF_MAXDIM)
+
+        integer :: localDECount, dimCount
+        integer, allocatable :: arrayBnd(:, :)
+        integer, allocatable :: undistBnd(:)
+        integer, allocatable :: distgridToArrayMap(:)
+
+        if (present(rc)) then 
+          rc = ESMF_RC_NOT_IMPL 
+        endif 
+
+        ! check variables
+        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
+        call ESMF_GridGet(field%ftypep%grid, rank=gridrank, rc=localrc)
+        if (localrc .ne. ESMF_SUCCESS) then
+           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+              "Cannot retrieve gridrank from ftypep%grid", &
+               ESMF_CONTEXT, rc)
+           return
+        endif 
+        call ESMF_ArrayGet(field%ftypep%array, rank=arrayrank, rc=localrc)
+        if (localrc .ne. ESMF_SUCCESS) then
+           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+              "Cannot retrieve arrayrank from ftypep%array", &
+               ESMF_CONTEXT, rc)
+           return
+        endif 
+
+        fieldrank = arrayrank
+
+        if (present(totalLBound) .or. present(totalUBound)) then
+        
+            ! Get Size of Array info
+            call ESMF_ArrayGet(field%ftypep%array, localDeCount=localDECount, &
+                dimCount=dimCount, rc=localrc)
+      
+            ! Allocate storage for Array info
+            allocate(arrayBnd(dimCount, 0:localDECount-1))
+            allocate(undistBnd(fieldRank-dimCount))
+            allocate(distgridToArrayMap(dimCount))
+                  
+           ! get distributed dimension map
+           call ESMF_ArrayGet(field%ftypep%array, & 
+               distgridToArrayMap=distgridToArrayMap, rc=localrc)
+      
+            ! compute totalLBounds
+            if (present(totalLBound)) then
+                call ESMF_ArrayGet(field%ftypep%array, totalLBound=arrayBnd, & 
+                    undistLBound=undistBnd, rc=localrc)
+      
+                ! set distributed dimensions
+                filled=.false.
+                do i=1, dimCount
+                   totalLBound(distgridToArrayMap(i))=arrayBnd(i,localDE)
+                   filled(distgridToArrayMap(i))=.true.
+                enddo
+      
+                ! set undistributed dimensions
+                j=1
+                do i=1, fieldRank
+                   if (.not. filled(i)) then
+                       totalLBound(i)=undistBnd(j)
+                       j=j+1;
+                   endif
+                enddo
+            endif
+      
+            ! compute totalUBounds
+            if (present(totalUBound)) then
+                call ESMF_ArrayGet(field%ftypep%array, totalUBound=arrayBnd, & 
+                    undistUBound=undistBnd, rc=localrc)
+      
+                ! set distributed dimensions
+                filled=.false.
+                do i=1, dimCount
+                   totalUBound(distgridToArrayMap(i))=arrayBnd(i,localDE)
+                   filled(distgridToArrayMap(i))=.true.
+                enddo
+      
+                ! set undistributed dimensions
+                j=1
+                do i=1, fieldRank
+                   if (.not. filled(i)) then
+                       totalUBound(i)=undistBnd(j)
+                       j=j+1;
+                   endif
+               enddo
+            endif
+            ! deallocate data
+            deallocate(arrayBnd)
+            deallocate(undistBnd)
+            deallocate(distgridToArrayMap)
+        endif
+
+        ! get grid info 
+        call ESMF_GridGet(field%ftypep%grid, localDE=localDE, & 
+                staggerloc=field%ftypep%staggerloc, & 
+                computationalLBound=gridCompLBnd, &
+                computationalUBound=gridCompUBnd, &
+                exclusiveLBound=gridExclLBnd, &
+                exclusiveUBound=gridExclUBnd, &
+                rc=localrc) 
+ 
+        ! fill in Grid bounds 
+        filled=.false. 
+        do i=1, gridrank 
+            if(present(computationalLBound)) &
+               computationalLBound(field%ftypep%gridToFieldMap(i))=gridCompLBnd(i) 
+            if(present(computationalUBound)) &
+               computationalUBound(field%ftypep%gridToFieldMap(i))=gridCompUBnd(i) 
+            if(present(exclusiveLBound)) &
+               exclusiveLBound(field%ftypep%gridToFieldMap(i))=gridExclLBnd(i) 
+            if(present(exclusiveUBound)) &
+               exclusiveUBound(field%ftypep%gridToFieldMap(i))=gridExclUBnd(i) 
+           filled(field%ftypep%gridToFieldMap(i))=.true. 
+        enddo
+ 
+        ! fill in ungridded bounds
+        j=1
+        do i=1,fieldrank
+           if (.not. filled(i)) then
+            if(present(computationalLBound)) &
+                  computationalLBound(i)=field%ftypep%ungriddedLBound(j) 
+            if(present(computationalUBound)) &
+                  computationalUBound(i)=field%ftypep%ungriddedUBound(j) 
+            if(present(exclusiveLBound)) &
+                 exclusiveLBound(i)=field%ftypep%ungriddedLBound(j) 
+            if(present(exclusiveUBound)) &
+                  exclusiveUBound(i)=field%ftypep%ungriddedUBound(j) 
+              j=j+1
+           endif
+        enddo
+
+        do i = 1, fieldrank 
+            if(present(computationalCount)) &
+                computationalCount(i) = computationalUBound(i) - computationalLBound(i) + 1
+            if(present(exclusiveCount)) &
+                exclusiveCount(i) = exclusiveUBound(i) - exclusiveLBound(i) + 1
+            if(present(totalCount)) &
+                totalCount(i) = totalUBound(i) - totalLBound(i) + 1
+        end do
+
+        if (present(rc)) rc = localrc
+
+    end subroutine ESMF_FieldGetDataBounds
+
+end module ESMF_FieldGetMod
