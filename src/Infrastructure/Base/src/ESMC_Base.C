@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.96 2008/02/06 23:44:35 rokuingh Exp $
+// $Id: ESMC_Base.C,v 1.97 2008/02/07 01:59:32 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.96 2008/02/06 23:44:35 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.97 2008/02/07 01:59:32 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -3279,14 +3279,6 @@ if (count) {
   attrCount = 0;
   attrAlloc = 0;
   attrList = ESMC_NULL_POINTER;
-  /*
-  if (nattrs > 0) {
-      if (ESMC_AttributeAlloc(nattrs) != ESMF_SUCCESS) {
-          //baseStatus = ESMF_STATUS_INVALID;   // can't return err, but can
-          return;                            // try to indicate unhappiness
-      }
-  }
-  */
   
   if (items == 0)
       voidp = NULL;
@@ -3456,13 +3448,17 @@ if (count) {
         else if (tk == ESMC_TYPEKIND_R8) delete [] vdp;  
         else if (tk == ESMC_TYPEKIND_LOGICAL) delete [] vbp;
   }
-  
+ /* 
   // if attribute lists, delete them.
   for (unsigned int i=0; i<attrCount; i++) {
     if((*attrList[i]).attrList == ESMC_NULL_POINTER) delete attrList[i];
     else attrList[i] = ESMC_NULL_POINTER;
   }
-                         
+ */
+  // if attribute lists, delete them.
+  for (unsigned int i=0; i<attrCount; i++)
+    delete attrList[i];  
+                      
   if (attrList) delete [] attrList;
 
  } // end ~ESMC_Attribute
@@ -3535,13 +3531,6 @@ if (count) {
       sprintf(baseName, "%s%3d", className, ID);
   ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
 
-  if (nattrs > 0) {
-      if (root.ESMC_AttributeAlloc(nattrs) != ESMF_SUCCESS) {
-          baseStatus = ESMF_STATUS_INVALID;   // can't return err, but can
-          return;                            // try to indicate unhappiness
-      }
-  }
-
   baseStatus = ESMF_STATUS_READY;
 
  } // end ESMC_Base
@@ -3567,14 +3556,6 @@ if (count) {
   int i;
 
   baseStatus = ESMF_STATUS_INVALID;
-
-/*
-  // if attribute lists, delete them.
-  for (i=0; i<attrCount; i++) 
-      delete attrList[i];
-                         
-  if (attrList) delete [] attrList;
-*/
 
   // if we have to support reference counts someday,
   // test if (refCount > 0) and do something if true;
