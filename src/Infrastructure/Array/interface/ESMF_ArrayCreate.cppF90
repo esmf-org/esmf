@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.22.2.3 2008/01/16 00:08:42 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.22.2.4 2008/02/07 06:57:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -99,6 +99,7 @@ module ESMF_ArrayCreateMod
 ! - ESMF-internal methods:
   public ESMF_ArrayGetInit
   public ESMF_ArraySetInitCreated
+  public ESMF_ArraySetThisNull
 ! ESMF_ArrayCreateFromGrid - defined in ESMF_Grid.F90 due to circularity issues 
 
 !EOPI
@@ -107,7 +108,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.22.2.3 2008/01/16 00:08:42 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.22.2.4 2008/02/07 06:57:11 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1128,6 +1129,48 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
   end subroutine ESMF_ArraySetInitCreated
 !------------------------------------------------------------------------------
 
+
+! -------------------------- ESMF-public method -------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArraySetThisNull()"
+!BOPI
+! !IROUTINE: ESMF_ArraySetThisNull - Set Array this member to ESMF_NULL_POINTER
+
+! !INTERFACE:
+  subroutine ESMF_ArraySetThisNull(array, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array), intent(inout)           :: array
+    integer,          intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Set Array this member to ESMF_NULL_POINTER.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[array] 
+!          Specified {\tt ESMF\_Array} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+    
+    ! Set init code
+    array%this = ESMF_NULL_POINTER
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_ArraySetThisNull
+!------------------------------------------------------------------------------
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

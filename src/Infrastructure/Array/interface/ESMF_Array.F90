@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.73.2.2 2007/12/14 06:51:47 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.73.2.3 2008/02/07 06:57:10 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -128,7 +128,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.73.2.2 2007/12/14 06:51:47 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.73.2.3 2008/02/07 06:57:10 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -165,6 +165,25 @@ module ESMF_ArrayMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
     module procedure ESMF_ArrayHalo
+!EOPI
+
+  end interface
+
+      
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_ArrayRedistStore -- Generic interface
+
+! !INTERFACE:
+  interface ESMF_ArrayRedistStore
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+    module procedure ESMF_ArrayRedistStoreI4
+    module procedure ESMF_ArrayRedistStoreI8
+    module procedure ESMF_ArrayRedistStoreR4
+    module procedure ESMF_ArrayRedistStoreR8
+    module procedure ESMF_ArrayRedistStoreNF
 !EOPI
 
   end interface
@@ -217,7 +236,7 @@ module ESMF_ArrayMod
 !  types of {\tt ESMF\_ArrayReduce} functions.   
 !EOPI 
   end interface
-      
+
 
 
 #ifdef FIRSTNEWARRAYPROTOTYPE
@@ -488,13 +507,328 @@ contains
 
 
 !------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ArrayRedistStore - Precompute Array redistribution
+!
+! !INTERFACE:
+! ! Private name; call using ESMF_ArrayRedistStore()
+! subroutine ESMF_ArrayRedistStore<type><kind>(srcArray, dstArray, routehandle, &
+!   factor, srcToDstTransposeMap, rc)
+!
+! !ARGUMENTS:
+!   type(ESMF_Array),           intent(in)              :: srcArray
+!   type(ESMF_Array),           intent(inout)           :: dstArray
+!   type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+!   <type>(ESMF_KIND_<kind>),   intent(in)              :: factor
+!   integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
+!   integer,                    intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!   Store an Array redistribution operation from {\tt srcArray} to
+!   {\tt dstArray}. PETs that specify a {\tt factor} argument must use the
+!   <type><kind> overloaded interface. Other PETs call into the interface
+!   without {\tt factor} argument. If multiple PETs specify the {\tt factor}
+!   argument its type and kind as well as its value must match across all
+!   PETs. If none of the PETs specifies a {\tt factor} argument the default
+!   will be a factor of 1.
+!
+!   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
+!   vectors. The sequence is defined by the order of DistGrid dimensions and 
+!   the order of patches within the DistGrid or by user-supplied arbitrary
+!   sequence indices. See section \ref{Array:SparseMatMul} for details on the
+!   definition of {\em sequence indices}. Redistribution corresponds to an
+!   identity mapping of the source Array vector to the destination Array vector.
+!
+!   Source and destination Arrays may be of different <type><kind>. Further
+!   source and destination Arrays may differ in shape, however, the number
+!   of elements must match.
+!
+!   It is erroneous to specify the identical Array object for {\tt srcArray} and
+!   {\tt dstArray} arguments.
+!
+!   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
+!   {\tt ESMF\_ArrayRedist()} on any pair of Arrays that are congruent
+!   and typekind conform with the {\tt srcArray}, {\tt dstArray} pair. 
+!   Congruent Arrays possess matching DistGrids and the shape of the local
+!   array tiles matches between the Arrays for every DE.\newline
+!
+!   This call is {\em collective} across the current VM.
+!
+!   \begin{description}
+!   \item [srcArray]
+!     {\tt ESMF\_Array} with source data.
+!   \item [dstArray]
+!     {\tt ESMF\_Array} with destination data.
+!   \item [routehandle]
+!     Handle to the precomputed Route.
+!   \item [{[factor]}]
+!     Factor by which to multipy source data. Default is 1.
+!   \item [{[srcToDstTransposeMap]}]
+!     List with as many entries as there are dimensions in {\tt srcArray}. Each
+!     entry maps the corresponding {\tt srcArray} dimension against the 
+!     specified {\tt dstArray} dimension. Mixing of distributed and
+!     undistributed dimensions is supported.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayRedistStoreI4()"
+!BOPI
+! !IROUTINE: ESMF_ArrayRedistStore - Precompute Array redistribution
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_ArrayRedistStore()
+  subroutine ESMF_ArrayRedistStoreI4(srcArray, dstArray, routehandle, &
+    factor, srcToDstTransposeMap, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),           intent(in)              :: srcArray
+    type(ESMF_Array),           intent(inout)           :: dstArray
+    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+    integer(ESMF_KIND_I4),      intent(in)              :: factor
+    integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
+    integer,                    intent(out),  optional  :: rc
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg   ! index helper
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
+    
+    ! Deal with (optional) array arguments
+    srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayRedistStore(srcArray, dstArray, routehandle, &
+      srcToDstTransposeMapArg, ESMF_TYPEKIND_I4, factor, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Mark routehandle object as being created
+    call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! garbage collection
+    call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayRedistStoreI4
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayRedistStoreI8()"
+!BOPI
+! !IROUTINE: ESMF_ArrayRedistStore - Precompute Array redistribution
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_ArrayRedistStore()
+  subroutine ESMF_ArrayRedistStoreI8(srcArray, dstArray, routehandle, &
+    factor, srcToDstTransposeMap, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),           intent(in)              :: srcArray
+    type(ESMF_Array),           intent(inout)           :: dstArray
+    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+    integer(ESMF_KIND_I8),      intent(in)              :: factor
+    integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
+    integer,                    intent(out),  optional  :: rc
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg   ! index helper
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
+    
+    ! Deal with (optional) array arguments
+    srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayRedistStore(srcArray, dstArray, routehandle, &
+      srcToDstTransposeMapArg, ESMF_TYPEKIND_I8, factor, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Mark routehandle object as being created
+    call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! garbage collection
+    call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayRedistStoreI8
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayRedistStoreR4()"
+!BOPI
+! !IROUTINE: ESMF_ArrayRedistStore - Precompute Array redistribution
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_ArrayRedistStore()
+  subroutine ESMF_ArrayRedistStoreR4(srcArray, dstArray, routehandle, &
+    factor, srcToDstTransposeMap, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),           intent(in)              :: srcArray
+    type(ESMF_Array),           intent(inout)           :: dstArray
+    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+    real(ESMF_KIND_R4),         intent(in)              :: factor
+    integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
+    integer,                    intent(out),  optional  :: rc
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg   ! index helper
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
+    
+    ! Deal with (optional) array arguments
+    srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayRedistStore(srcArray, dstArray, routehandle, &
+      srcToDstTransposeMapArg, ESMF_TYPEKIND_R4, factor, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Mark routehandle object as being created
+    call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! garbage collection
+    call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayRedistStoreR4
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayRedistStoreR8()"
+!BOPI
+! !IROUTINE: ESMF_ArrayRedistStore - Precompute Array redistribution
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_ArrayRedistStore()
+  subroutine ESMF_ArrayRedistStoreR8(srcArray, dstArray, routehandle, &
+    factor, srcToDstTransposeMap, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),           intent(in)              :: srcArray
+    type(ESMF_Array),           intent(inout)           :: dstArray
+    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+    real(ESMF_KIND_R8),         intent(in)              :: factor
+    integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
+    integer,                    intent(out),  optional  :: rc
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg   ! index helper
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
+    
+    ! Deal with (optional) array arguments
+    srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayRedistStore(srcArray, dstArray, routehandle, &
+      srcToDstTransposeMapArg, ESMF_TYPEKIND_R8, factor, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Mark routehandle object as being created
+    call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! garbage collection
+    call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayRedistStoreR8
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayRedistStore()"
 !BOP
 ! !IROUTINE: ESMF_ArrayRedistStore - Precompute Array redistribution
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayRedistStore(srcArray, dstArray, routehandle, &
+  ! Private name; call using ESMF_ArrayRedistStore()
+  subroutine ESMF_ArrayRedistStoreNF(srcArray, dstArray, routehandle, &
     srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
@@ -506,7 +840,12 @@ contains
 !
 ! !DESCRIPTION:
 !   Store an Array redistribution operation from {\tt srcArray} to
-!   {\tt dstArray}.
+!   {\tt dstArray}. PETs that specify a {\tt factor} argument must use the
+!   <type><kind> overloaded interface. Other PETs call into the interface
+!   without {\tt factor} argument. If multiple PETs specify the {\tt factor}
+!   argument its type and kind as well as its value must match across all
+!   PETs. If none of the PETs specifies a {\tt factor} argument the default
+!   will be a factor of 1.
 !
 !   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
 !   vectors. The sequence is defined by the order of DistGrid dimensions and 
@@ -515,9 +854,9 @@ contains
 !   definition of {\em sequence indices}. Redistribution corresponds to an
 !   identity mapping of the source Array vector to the destination Array vector.
 !
-!   Source and destination Arrays must be of identical <type> and <kind>.
-!   Further the number of elements must match for source and destination Arrays,
-!   but the shape may differ.
+!   Source and destination Arrays may be of different <type><kind>. Further
+!   source and destination Arrays may differ in shape, however, the number
+!   of elements must match.
 !
 !   It is erroneous to specify the identical Array object for {\tt srcArray} and
 !   {\tt dstArray} arguments.
@@ -566,7 +905,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayRedistStore(srcArray, dstArray, routehandle, &
+    call c_ESMC_ArrayRedistStoreNF(srcArray, dstArray, routehandle, &
       srcToDstTransposeMapArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -584,7 +923,7 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArrayRedistStore
+  end subroutine ESMF_ArrayRedistStoreNF
 !------------------------------------------------------------------------------
 
 
@@ -598,8 +937,8 @@ contains
   subroutine ESMF_ArrayRedist(srcArray, dstArray, routehandle, checkflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),       intent(in)              :: srcArray
-    type(ESMF_Array),       intent(inout)           :: dstArray
+    type(ESMF_Array),       intent(in),   optional  :: srcArray
+    type(ESMF_Array),       intent(inout),optional  :: dstArray
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
     type(ESMF_Logical),     intent(in),   optional  :: checkflag
     integer,                intent(out),  optional  :: rc
@@ -621,9 +960,9 @@ contains
 !   This call is {\em collective} across the current VM.
 !
 !   \begin{description}
-!   \item [srcArray]
+!   \item [{[srcArray]}]
 !     {\tt ESMF\_Array} with source data.
-!   \item [dstArray]
+!   \item [{[dstArray]}]
 !     {\tt ESMF\_Array} with destination data.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
@@ -641,23 +980,39 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_Logical)      :: opt_checkflag! helper variable
+    type(ESMF_Array)        :: opt_srcArray ! helper variable
+    type(ESMF_Array)        :: opt_dstArray ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
+    ! Check init status of arguments, deal with optional Array args
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+    if (present(srcArray)) then
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
+      opt_srcArray = srcArray
+    else
+      call ESMF_ArraySetThisNull(opt_srcArray, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    if (present(dstArray)) then
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
+      opt_dstArray = dstArray
+    else
+      call ESMF_ArraySetThisNull(opt_dstArray, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
     
     ! Set default flags
     opt_checkflag = ESMF_FALSE
     if (present(checkflag)) opt_checkflag = checkflag
         
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayRedist(srcArray, dstArray, routehandle, opt_checkflag, &
-      localrc)
+    call c_ESMC_ArrayRedist(opt_srcArray, opt_dstArray, routehandle, &
+      opt_checkflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1007,10 +1362,9 @@ contains
 !   sequence indices. See section \ref{Array:SparseMatMul} for details on the
 !   definition of {\em sequence indices}.
 !
-!   Source and destination Arrays must be of identical <type> and <kind>, but 
-!   may differ in shape and number of elements. The <type> and <kind> of a 
-!   supplied {\tt factorList} argument must also match the <type> and <kind> 
-!   of the Array arguments.
+!   Source and destination Arrays, as well as the supplied {\tt factorList}
+!   argument, may be of different <type><kind>. Further source and
+!   destination Arrays may differ in shape and number of elements.
 !
 !   It is erroneous to specify the identical Array object for {\tt srcArray} and
 !   {\tt dstArray} arguments.
@@ -1369,10 +1723,9 @@ contains
 !   sequence indices. See section \ref{Array:SparseMatMul} for details on the
 !   definition of {\em sequence indices}.
 !
-!   Source and destination Arrays must be of identical <type> and <kind>, but 
-!   may differ in shape and number of elements. The <type> and <kind> of a
-!   supplied {\tt factorList} argument must also match the <type> and <kind>
-!   of the Array arguments.
+!   Source and destination Arrays, as well as the supplied {\tt factorList}
+!   argument, may be of different <type><kind>. Further source and
+!   destination Arrays may differ in shape and number of elements.
 !
 !   It is erroneous to specify the identical Array object for {\tt srcArray} and
 !   {\tt dstArray} arguments.
@@ -1442,8 +1795,8 @@ contains
     zeroflag, checkflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),       intent(in)              :: srcArray
-    type(ESMF_Array),       intent(inout)           :: dstArray
+    type(ESMF_Array),       intent(in),   optional  :: srcArray
+    type(ESMF_Array),       intent(inout),optional  :: dstArray
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
     type(ESMF_Logical),     intent(in),   optional  :: zeroflag
     type(ESMF_Logical),     intent(in),   optional  :: checkflag
@@ -1467,9 +1820,9 @@ contains
 !   This call is {\em collective} across the current VM.
 !
 !   \begin{description}
-!   \item [srcArray]
+!   \item [{[srcArray]}]
 !     {\tt ESMF\_Array} with source data.
-!   \item [dstArray]
+!   \item [{[dstArray]}]
 !     {\tt ESMF\_Array} with destination data.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
@@ -1495,15 +1848,31 @@ contains
     integer                 :: localrc      ! local return code
     type(ESMF_Logical)      :: opt_zeroflag ! helper variable
     type(ESMF_Logical)      :: opt_checkflag! helper variable
+    type(ESMF_Array)        :: opt_srcArray ! helper variable
+    type(ESMF_Array)        :: opt_dstArray ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
+    ! Check init status of arguments, deal with optional Array args
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+    if (present(srcArray)) then
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
+      opt_srcArray = srcArray
+    else
+      call ESMF_ArraySetThisNull(opt_srcArray, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    if (present(dstArray)) then
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
+      opt_dstArray = dstArray
+    else
+      call ESMF_ArraySetThisNull(opt_dstArray, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
     
     ! Set default flags
     opt_zeroflag = ESMF_TRUE
@@ -1512,7 +1881,7 @@ contains
     if (present(checkflag)) opt_checkflag = checkflag
         
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArraySparseMatMul(srcArray, dstArray, routehandle, &
+    call c_ESMC_ArraySparseMatMul(opt_srcArray, opt_dstArray, routehandle, &
       opt_zeroflag, opt_checkflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

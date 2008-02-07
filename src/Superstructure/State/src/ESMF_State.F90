@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.114 2007/10/31 01:04:01 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.114.2.1 2008/02/07 06:57:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,6 +43,7 @@
       use ESMF_ArrayGetMod
       use ESMF_FieldMod
       use ESMF_BundleMod
+      use ESMF_RHandleMod
       use ESMF_StateTypesMod
       use ESMF_InitMacrosMod
       implicit none
@@ -55,9 +56,10 @@
 
       public ESMF_StateAddNameOnly
       public ESMF_StateAddBundle, ESMF_StateAddField, ESMF_StateAddArray
-      public ESMF_StateAddState
+      public ESMF_StateAddRouteHandle, ESMF_StateAddState
       public ESMF_StateGetBundle, ESMF_StateGetField, ESMF_StateGetArray
-      public ESMF_StateGetState, ESMF_StateGetItemInfo
+      public ESMF_StateGetRouteHandle, ESMF_StateGetState
+      public ESMF_StateGetItemInfo
 
       public ESMF_StateGet
       public ESMF_StateSetNeeded, ESMF_StateGetNeeded
@@ -87,7 +89,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.114 2007/10/31 01:04:01 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.114.2.1 2008/02/07 06:57:13 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -121,6 +123,26 @@
 !  
 !EOPI 
 !!end interface
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_StateAddRouteHandle -- Add RouteHandles to a State
+
+! !INTERFACE:
+     interface ESMF_StateAddRouteHandle
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+        module procedure ESMF_StateAddOneRouteHandle
+        module procedure ESMF_StateAddRouteHandleList
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+! types of {\tt ESMF\_StateAddRouteHandle} functions.   
+!  
+!EOPI 
+end interface
+
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -321,6 +343,139 @@ end interface
       contains
 
 !==============================================================================
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAddOneRouteHandle"
+!BOP
+! !IROUTINE: ESMF_StateAddRouteHandle - Add an RouteHandle to a State
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAddRouteHandle()   
+      subroutine ESMF_StateAddOneRouteHandle(state, routehandle, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state
+      type(ESMF_RouteHandle), intent(in) :: routehandle
+      integer, intent(out), optional :: rc
+!     
+! !DESCRIPTION:
+!      Add a single RouteHandle reference to an existing 
+!      State.  The name of {\tt routehandle} must be unique 
+!      within the State.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[state]
+!      An {\tt ESMF\_State} object.
+!     \item[routehandle]
+!      The {\tt ESMF\_RouteHandle} to be added.  This is a reference only; when
+!      the {\tt ESMF\_State} is destroyed the objects contained in it will
+!      not be destroyed.   Also, the {\tt ESMF\_RouteHandle} cannot be safely 
+!      destroyed before the {\tt ESMF\_State} is destroyed.
+!      Since objects can be added to multiple containers, it remains
+!      the user's responsibility to manage the
+!      destruction of objects when they are no longer in use.
+!     \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+
+      type(ESMF_RouteHandle) :: temp_list(1)
+      integer :: localrc
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit,routehandle,rc)
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      temp_list(1) = routehandle
+
+      call ESMF_StateClassAddRHandleList(state%statep, 1, temp_list, &
+        rc=localrc)      
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+      end subroutine ESMF_StateAddOneRouteHandle
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAddRouteHandleList"
+!BOP
+! !IROUTINE: ESMF_StateAddRouteHandle - Add a list of RouteHandles to a State
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAddRouteHandle()   
+      subroutine ESMF_StateAddRouteHandleList(state, routehandleCount, &
+        routehandleList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state 
+      integer, intent(in) :: routehandleCount
+      type(ESMF_RouteHandle), dimension(:), intent(in) :: routehandleList
+      integer, intent(out), optional :: rc     
+!
+! !DESCRIPTION:
+!     Add multiple {\tt ESMF\_RouteHandle}s to an {\tt ESMF\_State}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[state]
+!      An {\tt ESMF\_State} object.
+!     \item[routehandleCount]
+!      The number of {\tt ESMF\_RouteHandle}s to be added.
+!     \item[routehandleList]
+!      The list (Fortran array) of {\tt ESMF\_RouteHandle}s to be added.
+!      This is a reference only; when
+!      the {\tt ESMF\_State} is destroyed the objects contained in it will
+!      not be destroyed.   Also, the {\tt ESMF\_RouteHandle}s cannot be safely 
+!      destroyed before the {\tt ESMF\_State} is destroyed.
+!      Since objects can be added to multiple containers, it remains
+!      the user's responsibility to manage the
+!      destruction of objects when they are no longer in use.
+!     \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+
+      integer :: localrc,i
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+      do i=1,routehandleCount
+         ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit,routehandleList(i),rc)
+      enddo
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      call ESMF_StateClassAddRHandleList(state%statep, routehandleCount, &
+        routehandleList, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+      end subroutine ESMF_StateAddRouteHandleList
 
 
 !------------------------------------------------------------------------------
@@ -1290,6 +1445,117 @@ end interface
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateGet
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateGetRouteHandle"
+!BOP
+! !IROUTINE: ESMF_StateGetRouteHandle - Retrieve an RouteHandle from a State
+!
+! !INTERFACE:
+      subroutine ESMF_StateGetRouteHandle(state, routehandleName, routehandle, &
+        nestedStateName, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State),  intent(in)            :: state
+      character (len=*), intent(in)            :: routehandleName
+      type(ESMF_RouteHandle),  intent(out)     :: routehandle
+      character (len=*), intent(in),  optional :: nestedStateName
+      integer,           intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!      Returns an {\tt ESMF\_RouteHandle} from an {\tt ESMF\_State} by name.  
+!      If the {\tt ESMF\_State} contains the object directly, only
+!      {\tt routehandleName} is required.
+!      If the {\tt state} contains multiple nested {\tt ESMF\_State}s
+!      and the object is one level down, this routine can return the object
+!      in a single call by specifing the proper {\tt nestedStateName}.
+!      {\tt ESMF\_State}s can be nested to any depth, but this routine 
+!      only searches in immediate descendents.  
+!      It is an error to specify a {\tt nestedStateName} if the
+!      {\tt state} contains no nested {\tt ESMF\_State}s.
+!
+!     The arguments are:
+!  \begin{description}     
+!  \item[state]
+!   State to query for an {\tt ESMF\_RouteHandle} named {\tt routehandleName}.
+!  \item[routehandleName]
+!    Name of {\tt ESMF\_RouteHandle} to be returned.
+!  \item[routehandle]
+!    Returned reference to the {\tt ESMF\_RouteHandle}.
+!  \item[{[nestedStateName]}]
+!    Optional.  An error if specified when the {\tt state} argument contains
+!    no nested {\tt ESMF\_State}s.  Required if the {\tt state} contains 
+!    multiple nested {\tt ESMF\_State}s and the object being requested is
+!    in one level down in one of the nested {\tt ESMF\_State}.
+!    {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
+!  \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \end{description}
+!
+!EOP
+
+      type(ESMF_StateItem), pointer :: dataitem
+      type(ESMF_State) :: top
+      logical :: exists
+      integer :: localrc
+      character(len=ESMF_MAXSTR) :: errmsg
+
+      localrc = ESMF_RC_NOT_IMPL
+   
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+    
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      ! Assume failure until we know we will succeed
+      if (present(rc)) rc=ESMF_RC_NOT_IMPL
+      ! TODO: do we need an empty (or invalid) routehandle to mark failure?
+
+      if (present(nestedStateName)) then
+          exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
+                                                          dataitem, rc=localrc)
+          if (.not. exists) then
+              write(errmsg, *) "no nested state found named ", trim(nestedStateName)
+              if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
+                                          ESMF_CONTEXT, rc)) return
+          endif
+    
+          if (dataitem%otype .ne. ESMF_STATEITEM_STATE) then
+              write(errmsg,*) trim(nestedStateName), " found but not type State"
+              if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
+                                          ESMF_CONTEXT, rc)) return
+          endif
+          
+          top%statep => dataitem%datap%spp
+      else
+          top%statep => state%statep
+      endif
+
+
+      exists = ESMF_StateClassFindData(top%statep, routehandleName, .true., &
+                                                          dataitem, rc=localrc)
+      if (.not. exists) then
+          write(errmsg, *) "no RouteHandle found named ", trim(routehandleName)
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
+                                      ESMF_CONTEXT, rc)) return
+      endif
+
+      if (dataitem%otype .ne. ESMF_STATEITEM_ROUTEHANDLE) then
+          write(errmsg, *) trim(routehandleName), " found but not type RouteHandle"
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
+                                      ESMF_CONTEXT, rc)) return
+      endif
+
+      routehandle = dataitem%datap%rp
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateGetRouteHandle
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -4428,6 +4694,200 @@ end interface
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateClassAddRHandleList"
+!BOPI
+! !IROUTINE: ESMF_StateClassAddRHandleList - Add a list of RouteHandles to a StateClass
+!
+! !INTERFACE:
+      subroutine ESMF_StateClassAddRHandleList(stypep, acount, routehandles, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_StateClass), pointer :: stypep
+      integer, intent(in) :: acount
+      type(ESMF_RouteHandle), dimension(:), intent(in) :: routehandles
+      integer, intent(out), optional :: rc     
+!
+! !DESCRIPTION:
+!      Add multiple routehandles to an {\tt ESMF\_State}.  Internal routine only.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[stypep]
+!       Pointer to {\tt ESMF\_StateClass}.
+!     \item[acount]
+!       The number of {\tt ESMF\_RouteHandle}s to be added.
+!     \item[routehandles]
+!       The array of {\tt ESMF\_RouteHandle}s to be added.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc                  ! local error status
+      type(ESMF_StateItem), pointer :: nextitem, dataitem
+      character(len=ESMF_MAXSTR) :: rhname
+      character(len=ESMF_MAXSTR) :: errmsg
+      integer, allocatable, dimension(:) :: atodo
+      integer :: i
+      integer :: newcount, aindex
+      logical :: exists
+
+      ! Initialize return code.  Assume failure until success assured.
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
+      do i=1,acount
+         ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit,routehandles(i),rc)
+      enddo
+
+
+      rhname = ""
+  
+      ! Return with error if list is empty.  
+      ! TODO: decide if this should *not* be an error.
+      if (acount .le. 0) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, "acount must be >= 0", &
+                                     ESMF_CONTEXT, rc)) return
+      endif
+      
+      ! Add the routehandles to the state, checking for name clashes
+      !  and name placeholders
+
+      ! TODO: check for existing name, if placeholder, replace it
+      !       if existing object - what?  replace it silently?
+
+      ! Allocate some flags to mark whether this is a new item which
+      !  needs to be added to the end of the list, or if it replaces an
+      !  existing entry or placeholder.  Set all entries to 0.  
+      ! How can this happen?  is atodo some sort of static?
+      if (allocated(atodo)) then
+        call ESMF_LogMsgSetError(ESMF_RC_INTNRL_INCONS, &
+                                         "atodo already allocated", &
+                                         ESMF_CONTEXT, rc)
+        deallocate(atodo, stat=localrc)
+        return
+      endif
+
+      allocate(atodo(acount), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, &
+                                     "adding RouteHandles to a State", &
+                                     ESMF_CONTEXT, rc)) return
+
+      atodo(1:acount) = 0
+
+      ! Initialize counters to 0, indices to 1
+      newcount = 0
+
+      ! This is the start of the first pass through the routehandle list.
+      ! For each routehandle...
+      do i=1, acount
+
+        !todo: remove comment-out when RouteHandleValidate available
+        !call ESMF_RouteHandleValidate(routehandles(i), rc=localrc)
+        !if (localrc .ne. ESMF_SUCCESS) then
+        !    write(errmsg, *) "item", i
+        !    call ESMF_LogMsgSetError(localrc, errmsg, &
+        !                                ESMF_CONTEXT, rc)
+        !    deallocate(atodo, stat=localrc)
+        !    return
+        !endif
+        call ESMF_RouteHandleGet(routehandles(i), name=rhname, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) then
+          deallocate(atodo, stat=localrc)
+          return
+        endif
+    
+        ! See if this name is already in the state
+        exists = ESMF_StateClassFindData(stypep, rhname, .false., &
+                                        dataitem, aindex, localrc)
+        if (ESMF_LogMsgFoundError(localrc, "looking for preexisting entry", &
+                                  ESMF_CONTEXT, rc)) then
+          deallocate(atodo, stat=localrc)
+          return
+        endif
+   
+        ! If not, in the second pass we will need to add it.
+        if (.not. exists) then
+            newcount = newcount + 1
+            aindex = -1
+            atodo(i) = 1
+        else
+            ! It does already exist.  
+            ! Check to see if this is a placeholder, and if so, replace it
+            if (dataitem%otype .ne. ESMF_STATEITEM_NAME) then
+                ! optionally warn here that an existing object is being
+                ! replaced...
+            endif
+
+            dataitem%otype = ESMF_STATEITEM_ROUTEHANDLE
+            dataitem%datap%rp = routehandles(i)
+        
+            ! don't update flags on existing entry
+            !dataitem%needed = ESMF_NEEDED
+            !dataitem%ready = ESMF_READYTOREAD
+            !dataitem%valid = ESMF_VALIDITYUNKNOWN
+        endif
+      enddo
+
+      ! If all things to be added are replacing existing entries, 
+      !  we are done now.  But this cannot be a simple return here;
+      !  we have to delete the temporary routehandles first.  Go to the subr end.
+      if (newcount .eq. 0) goto 10
+
+      ! We now know how many total new items need to be added
+      call ESMF_StateClassExtendList(stypep, newcount, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+
+      ! There is enough space now to add new routehandles to the list.
+      ! This is the start of the second pass through the routehandle list.
+      do i=1, acount
+
+        ! If routehandle wasn't already found in the list, we need to add it here.
+        if (atodo(i) .eq. 1) then
+            stypep%datacount = stypep%datacount + 1
+
+            nextitem => stypep%datalist(stypep%datacount)
+            nextitem%otype = ESMF_STATEITEM_ROUTEHANDLE
+
+            ! Add name
+            call ESMF_RouteHandleGet(routehandles(i), name=nextitem%namep, &
+              rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, "getting name from routehandle", &
+                                      ESMF_CONTEXT, rc)) return
+
+            nextitem%datap%rp = routehandles(i)
+ 
+            nextitem%needed = stypep%needed_default
+            nextitem%ready = stypep%ready_default
+            nextitem%valid = stypep%stvalid_default
+            nextitem%reqrestart = stypep%reqrestart_default
+ 
+        endif
+
+      enddo
+
+      ! We come here from above if there were no new entries that needed
+      ! to be added.  We can just clean up and exit.
+10    continue
+
+      ! Get rid of temp flag arrays
+      deallocate(atodo, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating internal list, 1c", &
+                                     ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateClassAddRHandleList
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateClassAddArrayList"
 !BOPI
 ! !IROUTINE: ESMF_StateClassAddArrayList - Add a list of Arrays to a StateClass
@@ -4606,8 +5066,6 @@ end interface
 
       enddo
 
-#if NOSKIP
-#endif
       ! We come here from above if there were no new entries that needed
       ! to be added.  We can just clean up and exit.
 10    continue

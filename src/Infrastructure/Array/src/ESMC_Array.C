@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.163.2.5 2008/01/15 18:58:14 theurich Exp $
+// $Id: ESMC_Array.C,v 1.163.2.6 2008/02/07 06:57:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.163.2.5 2008/01/15 18:58:14 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.163.2.6 2008/02/07 06:57:11 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3071,7 +3071,9 @@ int Array::redistStore(
   Array *srcArray,                      // in    - source Array
   Array *dstArray,                      // in    - destination Array
   ESMC_RouteHandle **routehandle,       // inout - handle to precomputed comm
-  InterfaceInt *srcToDstTransposeMap    // in    - mapping src -> dst dims
+  InterfaceInt *srcToDstTransposeMap,   // in    - mapping src -> dst dims
+  ESMC_TypeKind typekindFactor,         // in    - typekind of factor
+  void *factor                          // in    - redist factor
   ){    
 //
 // !DESCRIPTION:
@@ -3109,11 +3111,115 @@ int Array::redistStore(
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
 
-  ESMC_TypeKind typekind = srcArray->getTypekind();
+  // determine consistent typekindFactor and factor across all PETs
+  if (factor != NULL){
+    // must define a valid typekind
+    if (typekindFactor == ESMF_NOKIND){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+        "- must specify valid typekindFactor on PETs that provide factor", &rc);
+      return rc;
+    }
+    if (typekindFactor != ESMC_TYPEKIND_I4
+      && typekindFactor != ESMC_TYPEKIND_I8
+      && typekindFactor != ESMC_TYPEKIND_R4
+      && typekindFactor != ESMC_TYPEKIND_R8){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+        "- method not implemented for specified typekindFactor", &rc);
+      return rc;
+    }
+  }else{
+    // set typekindFactor to ESMF_NOKIND 
+    // -> this Pet will not provide factor
+    typekindFactor = ESMF_NOKIND;
+  }
+  
+  // communicate typekindFactor across all Pets
+  ESMC_TypeKind *typekindList = new ESMC_TypeKind[petCount];
+  vm->vmk_allgather(&typekindFactor, typekindList, sizeof(ESMC_TypeKind));
+  // Check that all non-ESMF_NOKIND typekindList elements match,
+  // set local typekindFactor accordingly and keep track of Pets that have
+  // factors.
+  int *factorPetList = new int[petCount];
+  int factorPetCount = 0; // reset
+  typekindFactor = ESMF_NOKIND;  // initialize
+  for (int i=0; i<petCount; i++){
+    if (typekindList[i] != ESMF_NOKIND)
+      factorPetList[factorPetCount++] = i;
+    if (typekindFactor == ESMF_NOKIND){
+      typekindFactor = typekindList[i];  // set to 1st element not ESMF_NOKIND
+    }else{
+      // check following elements against the typekindFactors and tensorMixFlag
+      if (typekindList[i] != ESMF_NOKIND){
+        if (typekindFactor != typekindList[i]){
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+            "- TypeKind mismatch between PETs", &rc);
+          return rc;
+        }
+      }
+    }
+  }
+  delete [] typekindList;
+  // set typekindFactor default in case there were no factors provided
+  if (factorPetCount == 0)
+    typekindFactor = srcArray->getTypekind();
+  
+  // set factorLocal
+  void *factorLocal;
+  if (typekindFactor == ESMC_TYPEKIND_R4){
+    ESMC_R4 *factorLocalT = new ESMC_R4;
+    if (factor)
+      *factorLocalT = *(ESMC_R4 *)factor;
+    else
+      *factorLocalT = 1.;
+    factorLocal = (void *)factorLocalT;
+  }else if (typekindFactor == ESMC_TYPEKIND_R8){
+    ESMC_R8 *factorLocalT = new ESMC_R8;
+    if (factor)
+      *factorLocalT = *(ESMC_R8 *)factor;
+    else
+      *factorLocalT = 1.;
+    factorLocal = (void *)factorLocalT;
+  }else if (typekindFactor == ESMC_TYPEKIND_I4){
+    ESMC_I4 *factorLocalT = new ESMC_I4;
+    if (factor)
+      *factorLocalT = *(ESMC_I4 *)factor;
+    else
+      *factorLocalT = 1;
+    factorLocal = (void *)factorLocalT;
+  }else if (typekindFactor == ESMC_TYPEKIND_I8){
+    ESMC_I8 *factorLocalT = new ESMC_I8;
+    if (factor)
+      *factorLocalT = *(ESMC_I8 *)factor;
+    else
+      *factorLocalT = 1;
+    factorLocal = (void *)factorLocalT;
+  }
+  
+  if (factorPetCount > 0){
+    // communicate factorLocal variables and check for consistency
+    int factorSize = ESMC_TypeKindSize(typekindFactor);
+    char *factorLocalList = new char[petCount*factorSize];
+    vm->vmk_allgather(factorLocal, factorLocalList, factorSize);
+    // prime factorLocal with value from first Pet with factor
+    memcpy(factorLocal, factorLocalList + factorSize * factorPetList[0],
+      factorSize);
+    // check against all other factorLocal entries
+    for (int i=1; i<factorPetCount; i++){
+      char *factorPtr = factorLocalList + factorSize * factorPetList[i];
+      if (memcmp(factorLocal, factorPtr, factorSize) != 0){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+          "- Factor mismatch between PETs", &rc);
+        return rc;
+      }
+    }
+    delete [] factorLocalList;
+  }
+  delete [] factorPetList;
+  
+  // set up local factorList and factorIndexList
   int factorListCount;
-  void *factorList;
-  InterfaceInt *factorIndexList;
   int *factorIndexListAlloc;
+  InterfaceInt *factorIndexList;
   
   if (srcToDstTransposeMap == NULL){
     // srcToDstTransposeMap not specified -> default mode
@@ -3403,30 +3509,35 @@ printf("factorIndexListIndex=%d (%d, %d) (%d, %d, %d, %d)\n",
   }
   
   // load type specific factorList with "1"
-  if (typekind == ESMC_TYPEKIND_R4){
+  void *factorList;
+  if (typekindFactor == ESMC_TYPEKIND_R4){
     ESMC_R4 *factorListT = new ESMC_R4[factorListCount];
     for (int i=0; i<factorListCount; i++)
-      factorListT[i] = 1.;
+      factorListT[i] = *(ESMC_R4 *)factorLocal;
     factorList = (void *)factorListT;
-  }else if (typekind == ESMC_TYPEKIND_R8){
+    delete (ESMC_R4 *)factorLocal;
+  }else if (typekindFactor == ESMC_TYPEKIND_R8){
     ESMC_R8 *factorListT = new ESMC_R8[factorListCount];
     for (int i=0; i<factorListCount; i++)
-      factorListT[i] = 1.;
+      factorListT[i] = *(ESMC_R8 *)factorLocal;
     factorList = (void *)factorListT;
-  }else if (typekind == ESMC_TYPEKIND_I4){
+    delete (ESMC_R8 *)factorLocal;
+  }else if (typekindFactor == ESMC_TYPEKIND_I4){
     ESMC_I4 *factorListT = new ESMC_I4[factorListCount];
     for (int i=0; i<factorListCount; i++)
-      factorListT[i] = 1;
+      factorListT[i] = *(ESMC_I4 *)factorLocal;
     factorList = (void *)factorListT;
-  }else if (typekind == ESMC_TYPEKIND_I8){
+    delete (ESMC_I4 *)factorLocal;
+  }else if (typekindFactor == ESMC_TYPEKIND_I8){
     ESMC_I8 *factorListT = new ESMC_I8[factorListCount];
     for (int i=0; i<factorListCount; i++)
-      factorListT[i] = 1;
+      factorListT[i] = *(ESMC_I8 *)factorLocal;
     factorList = (void *)factorListT;
+    delete (ESMC_I4 *)factorLocal;
   }
   
   // precompute sparse matrix multiplication
-  localrc = sparseMatMulStore(srcArray, dstArray, routehandle, typekind,
+  localrc = sparseMatMulStore(srcArray, dstArray, routehandle, typekindFactor,
     factorList, factorListCount, factorIndexList);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
@@ -3434,16 +3545,16 @@ printf("factorIndexListIndex=%d (%d, %d) (%d, %d, %d, %d)\n",
   // garbage collection
   delete [] factorIndexListAlloc;
   delete factorIndexList;
-  if (typekind == ESMC_TYPEKIND_R4){
+  if (typekindFactor == ESMC_TYPEKIND_R4){
     ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
     delete [] factorListT;
-  }else if (typekind == ESMC_TYPEKIND_R8){
+  }else if (typekindFactor == ESMC_TYPEKIND_R8){
     ESMC_R8 *factorListT = (ESMC_R8 *)factorList;
     delete [] factorListT;
-  }else if (typekind == ESMC_TYPEKIND_I4){
+  }else if (typekindFactor == ESMC_TYPEKIND_I4){
     ESMC_I4 *factorListT = (ESMC_I4 *)factorList;
     delete [] factorListT;
-  }else if (typekind == ESMC_TYPEKIND_I8){
+  }else if (typekindFactor == ESMC_TYPEKIND_I8){
     ESMC_I8 *factorListT = (ESMC_I8 *)factorList;
     delete [] factorListT;
   }
@@ -4034,7 +4145,7 @@ int Array::sparseMatMulStore(
   Array *srcArray,                      // in    - source Array
   Array *dstArray,                      // in    - destination Array
   ESMC_RouteHandle **routehandle,       // inout - handle to precomputed comm
-  ESMC_TypeKind typekindArg,            // in    - typekind of factors
+  ESMC_TypeKind typekindFactors,        // in    - typekind of factors
   void *factorList,                     // in    - sparse matrix factors
   int factorListCount,                  // in    - number of sparse mat. indices
   InterfaceInt *factorIndexList         // in    - sparse matrix indices
@@ -4136,51 +4247,53 @@ int Array::sparseMatMulStore(
       return rc;
     }
     // must define a valid typekind
-    if (typekindArg == ESMF_NOKIND){
+    if (typekindFactors == ESMF_NOKIND){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-        "- must specify valid typekindArg on PETs that provide factorList",
+        "- must specify valid typekindFactors on PETs that provide factorList",
         &rc);
       return rc;
     }
-    if (typekindArg != ESMC_TYPEKIND_I4 && typekindArg != ESMC_TYPEKIND_I8
-      && typekindArg != ESMC_TYPEKIND_R4 && typekindArg != ESMC_TYPEKIND_R8){
+    if (typekindFactors != ESMC_TYPEKIND_I4
+      && typekindFactors != ESMC_TYPEKIND_I8
+      && typekindFactors != ESMC_TYPEKIND_R4
+      && typekindFactors != ESMC_TYPEKIND_R8){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
-        "- method not implemented for specified typekindArg", &rc);
+        "- method not implemented for specified typekindFactors", &rc);
       return rc;
     }
     // check if tensorMixFlag must be set
     if (factorIndexList->extent[0] == 4)
       tensorMixFlag = true;
   }else{
-    // set typekindArg to ESMF_NOKIND 
+    // set typekindFactors to ESMF_NOKIND 
     // -> this Pet will not be entered into the factorPetList and thus will
     // not act as rootPet when factors are being distributed
-    typekindArg = ESMF_NOKIND;
+    typekindFactors = ESMF_NOKIND;
   }
 
-  // communicate typekindArg across all Pets
+  // communicate typekindFactors across all Pets
   ESMC_TypeKind *typekindList = new ESMC_TypeKind[petCount];
-  vm->vmk_allgather(&typekindArg, typekindList, sizeof(ESMC_TypeKind));
+  vm->vmk_allgather(&typekindFactors, typekindList, sizeof(ESMC_TypeKind));
   // communicate tensorMixFlag across all Pets
   bool *tensorMixFlagList = new bool[petCount];
   vm->vmk_allgather(&tensorMixFlag, tensorMixFlagList, sizeof(bool));
   // Check that all non-ESMF_NOKIND typekindList elements match,
-  // set local typekindArg accordingly and keep track of Pets that have factors.
-  // At the same time check that tensorMixFlag matches across Pets that provide
-  // factors.
+  // set local typekindFactors accordingly and keep track of Pets that have
+  // factors. At the same time check that tensorMixFlag matches across Pets
+  // that provide factors.
   int *factorPetList = new int[petCount];
   int factorPetCount = 0; // reset
-  typekindArg = ESMF_NOKIND;  // initialize
+  typekindFactors = ESMF_NOKIND;  // initialize
   for (int i=0; i<petCount; i++){
     if (typekindList[i] != ESMF_NOKIND)
       factorPetList[factorPetCount++] = i;
-    if (typekindArg == ESMF_NOKIND){
-      typekindArg = typekindList[i];  // set to first element not ESMF_NOKIND
+    if (typekindFactors == ESMF_NOKIND){
+      typekindFactors = typekindList[i];  // set to 1st element not ESMF_NOKIND
       tensorMixFlag = tensorMixFlagList[i];
     }else{
-      // check consequent elements against the set typekindArg and tensorMixFlag
+      // check following elements against the typekindFactors and tensorMixFlag
       if (typekindList[i] != ESMF_NOKIND){
-        if (typekindArg != typekindList[i]){
+        if (typekindFactors != typekindList[i]){
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
             "- TypeKind mismatch between PETs", &rc);
           return rc;
@@ -4204,22 +4317,17 @@ int Array::sparseMatMulStore(
     return rc;
   }
   
-  // check that the typekindArg matches srcArray typekind
-  if (typekindArg != srcArray->getTypekind()){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
-      "- TypeKind mismatch between srcArray argument and factorList", &rc);
-    return rc;
-  }
-  // check that the typekindArg matches dstArray typekind
-  if (typekindArg != dstArray->getTypekind()){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
-      "- TypeKind mismatch between dstArray argument and factorList", &rc);
-    return rc;
-  }
-
-  // size in bytes of each piece of data
-  int dataSize = ESMC_TypeKindSize(typekindArg);
+  // set dataSize for factors
+  int dataSizeFactors = ESMC_TypeKindSize(typekindFactors);
   
+  // obtain typekindSrc and set dataSizeSrc
+  ESMC_TypeKind typekindSrc = srcArray->getTypekind();
+  int dataSizeSrc = ESMC_TypeKindSize(typekindSrc);
+  
+  // obtain typekindDst and set dataSizeDst
+  ESMC_TypeKind typekindDst = dstArray->getTypekind();
+  int dataSizeDst = ESMC_TypeKindSize(typekindDst);
+
   // check that if tensorMixFlag is not set that the tensorElementCount matches
   if (!tensorMixFlag){
     if (srcArray->getTensorElementCount() != dstArray->getTensorElementCount()){
@@ -4229,19 +4337,6 @@ int Array::sparseMatMulStore(
       return rc;
     }
   }
-  
-  //TODO: maybe I will need these VMs to support exec() in model components?
-#if 0   
-  // get the srcArray VM and VM releated information
-  VM *srcVm = srcArray->delayout->getVM();
-  int srcLocalPet = srcVm->getLocalPet();
-  int srcPetCount = srcVm->getPetCount();
-  
-  // get the dstArray VM and VM releated information
-  VM *dstVm = dstArray->delayout->getVM();
-  int dstLocalPet = dstVm->getLocalPet();
-  int dstPetCount = dstVm->getPetCount();
-#endif  
   
   // prepare for relative run-time addressing (RRA)
   // this is to support xxe->exec() during sparseMatMulStore()
@@ -4756,7 +4851,7 @@ int Array::sparseMatMulStore(
             }
           }
           // fill srcSeqIndexFactorLookup[]
-          if (typekindArg == ESMC_TYPEKIND_R4){
+          if (typekindFactors == ESMC_TYPEKIND_R4){
             for (int jj=0; jj<srcSeqIntervFactorListCount[i]; jj++){
               // loop over factorList entries in this Pet's srcSeqIndex interv
               int j = srcSeqIntervFactorListIndex[i][jj];
@@ -4789,7 +4884,7 @@ int Array::sparseMatMulStore(
               *((ESMC_R4 *)srcSeqIndexFactorLookup[k].factorList[kk].factor) =
                 ((ESMC_R4 *)factorList)[j];
             }
-          }else if (typekindArg == ESMC_TYPEKIND_R8){
+          }else if (typekindFactors == ESMC_TYPEKIND_R8){
             for (int jj=0; jj<srcSeqIntervFactorListCount[i]; jj++){
               // loop over factorList entries in this Pet's srcSeqIndex interv
               int j = srcSeqIntervFactorListIndex[i][jj];
@@ -4825,7 +4920,7 @@ int Array::sparseMatMulStore(
 printf("srcArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n", factorListCount, srcSeqIndex, factorIndexList->array[j*2+1], ((ESMC_R8 *)factorList)[j]);   
 #endif              
             }
-          }else if (typekindArg == ESMC_TYPEKIND_I4){
+          }else if (typekindFactors == ESMC_TYPEKIND_I4){
             for (int jj=0; jj<srcSeqIntervFactorListCount[i]; jj++){
               // loop over factorList entries in this Pet's srcSeqIndex interv
               int j = srcSeqIntervFactorListIndex[i][jj];
@@ -4858,7 +4953,7 @@ printf("srcArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
               *((ESMC_I4 *)srcSeqIndexFactorLookup[k].factorList[kk].factor) =
                 ((ESMC_I4 *)factorList)[j];
             }
-          }else if (typekindArg == ESMC_TYPEKIND_I8){
+          }else if (typekindFactors == ESMC_TYPEKIND_I8){
             for (int jj=0; jj<srcSeqIntervFactorListCount[i]; jj++){
               // loop over factorList entries in this Pet's srcSeqIndex interv
               int j = srcSeqIntervFactorListIndex[i][jj];
@@ -4891,7 +4986,7 @@ printf("srcArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
               *((ESMC_I8 *)srcSeqIndexFactorLookup[k].factorList[kk].factor) =
                 ((ESMC_I8 *)factorList)[j];
             }
-          } // if - typekindArg
+          } // if - typekindFactors
           
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t4c2);   //gjt - profile
@@ -4938,10 +5033,11 @@ printf("srcArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
   
           // prepare to send remaining information to Pet "i" in one long stream
           int thisPetTotalFactorCount = thisPetFactorCountList[totalCountIndex];
-          int byteCount = thisPetTotalFactorCount * (4*sizeof(int) + dataSize);
+          int byteCount = thisPetTotalFactorCount
+            * (4*sizeof(int) + dataSizeFactors);
           char *stream = new char[byteCount];
           int *intStream;
-          if (typekindArg == ESMC_TYPEKIND_R4){
+          if (typekindFactors == ESMC_TYPEKIND_R4){
             ESMC_R4 *factorStream = (ESMC_R4 *)stream;
             for (int jj=0; jj<srcSeqIntervFactorListCount[i]; jj++){
               // loop over factorList entries in this Pet's srcSeqIndex interv
@@ -4970,7 +5066,7 @@ printf("srcArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
               factorStream = (ESMC_R4 *)intStream;
               *factorStream++ = ((ESMC_R4 *)factorList)[j];
             }
-          }else if (typekindArg == ESMC_TYPEKIND_R8){
+          }else if (typekindFactors == ESMC_TYPEKIND_R8){
             ESMC_R8 *factorStream = (ESMC_R8 *)stream;
             for (int jj=0; jj<srcSeqIntervFactorListCount[i]; jj++){
               // loop over factorList entries in this Pet's srcSeqIndex interv
@@ -5002,7 +5098,7 @@ printf("srcArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
 printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\n", factorListCount, srcSeqIndex, factorIndexList->array[j*2+1], ((ESMC_R8 *)factorList)[j]);   
 #endif              
             }
-          }else if (typekindArg == ESMC_TYPEKIND_I4){
+          }else if (typekindFactors == ESMC_TYPEKIND_I4){
             ESMC_I4 *factorStream = (ESMC_I4 *)stream;
             for (int jj=0; jj<srcSeqIntervFactorListCount[i]; jj++){
               // loop over factorList entries in this Pet's srcSeqIndex interv
@@ -5031,7 +5127,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
               factorStream = (ESMC_I4 *)intStream;
               *factorStream++ = ((ESMC_I4 *)factorList)[j];
             }
-          }else if (typekindArg == ESMC_TYPEKIND_I8){
+          }else if (typekindFactors == ESMC_TYPEKIND_I8){
             ESMC_I8 *factorStream = (ESMC_I8 *)stream;
             for (int jj=0; jj<srcSeqIntervFactorListCount[i]; jj++){
               // loop over factorList entries in this Pet's srcSeqIndex interv
@@ -5119,12 +5215,13 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
       }
       delete [] localPetFactorCountList;
       // receive remaining information from rootPet in one long stream
-      int byteCount = localPetTotalFactorCount * (4*sizeof(int) + dataSize);
+      int byteCount = localPetTotalFactorCount
+        * (4*sizeof(int) + dataSizeFactors);
       char *stream = new char[byteCount];
       vm->vmk_recv(stream, byteCount, rootPet);
       // process stream and set srcSeqIndexFactorLookup[] content
       int *intStream;
-      if (typekindArg == ESMC_TYPEKIND_R4){
+      if (typekindFactors == ESMC_TYPEKIND_R4){
         ESMC_R4 *factorStream = (ESMC_R4 *)stream;
         for (int i=0; i<localPetTotalFactorCount; i++){
           intStream = (int *)factorStream;
@@ -5139,7 +5236,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
           *((ESMC_R4 *)srcSeqIndexFactorLookup[j].factorList[k].factor) =
             *factorStream++;
         }
-      }else if (typekindArg == ESMC_TYPEKIND_R8){
+      }else if (typekindFactors == ESMC_TYPEKIND_R8){
         ESMC_R8 *factorStream = (ESMC_R8 *)stream;
         for (int i=0; i<localPetTotalFactorCount; i++){
           intStream = (int *)factorStream;
@@ -5154,7 +5251,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
           *((ESMC_R8 *)srcSeqIndexFactorLookup[j].factorList[k].factor) =
             *factorStream++;
         }
-      }else if (typekindArg == ESMC_TYPEKIND_I4){
+      }else if (typekindFactors == ESMC_TYPEKIND_I4){
         ESMC_I4 *factorStream = (ESMC_I4 *)stream;
         for (int i=0; i<localPetTotalFactorCount; i++){
           intStream = (int *)factorStream;
@@ -5169,7 +5266,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
           *((ESMC_I4 *)srcSeqIndexFactorLookup[j].factorList[k].factor) =
             *factorStream++;
         }
-      }else if (typekindArg == ESMC_TYPEKIND_I8){
+      }else if (typekindFactors == ESMC_TYPEKIND_I8){
         ESMC_I8 *factorStream = (ESMC_I8 *)stream;
         for (int i=0; i<localPetTotalFactorCount; i++){
           intStream = (int *)factorStream;
@@ -5504,7 +5601,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
             }
           }
           // fill dstSeqIndexFactorLookup[]
-          if (typekindArg == ESMC_TYPEKIND_R4){
+          if (typekindFactors == ESMC_TYPEKIND_R4){
             for (int jj=0; jj<dstSeqIntervFactorListCount[i]; jj++){
               // loop over factorList entries in this Pet's dstSeqIndex interv
               int j = dstSeqIntervFactorListIndex[i][jj];
@@ -5537,7 +5634,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
               *((ESMC_R4 *)dstSeqIndexFactorLookup[k].factorList[kk].factor) =
                 ((ESMC_R4 *)factorList)[j];
             }
-          }else if (typekindArg == ESMC_TYPEKIND_R8){
+          }else if (typekindFactors == ESMC_TYPEKIND_R8){
             for (int jj=0; jj<dstSeqIntervFactorListCount[i]; jj++){
               // loop over factorList entries in this Pet's dstSeqIndex interv
               int j = dstSeqIntervFactorListIndex[i][jj];
@@ -5573,7 +5670,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
 printf("dstArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n", factorListCount, dstSeqIndex, factorIndexList->array[j*2], ((ESMC_R8 *)factorList)[j]);
 #endif        
             }
-          }else if (typekindArg == ESMC_TYPEKIND_I4){
+          }else if (typekindFactors == ESMC_TYPEKIND_I4){
             for (int jj=0; jj<dstSeqIntervFactorListCount[i]; jj++){
               // loop over factorList entries in this Pet's dstSeqIndex interv
               int j = dstSeqIntervFactorListIndex[i][jj];
@@ -5606,7 +5703,7 @@ printf("dstArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
               *((ESMC_I4 *)dstSeqIndexFactorLookup[k].factorList[kk].factor) =
                 ((ESMC_I4 *)factorList)[j];
             }
-          }else if (typekindArg == ESMC_TYPEKIND_I8){
+          }else if (typekindFactors == ESMC_TYPEKIND_I8){
             for (int jj=0; jj<dstSeqIntervFactorListCount[i]; jj++){
               // loop over factorList entries in this Pet's dstSeqIndex interv
               int j = dstSeqIntervFactorListIndex[i][jj];
@@ -5639,7 +5736,7 @@ printf("dstArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
               *((ESMC_I8 *)dstSeqIndexFactorLookup[k].factorList[kk].factor) =
                 ((ESMC_I8 *)factorList)[j];
             }
-          } // if - typekindArg
+          } // if - typekindFactors
         }else{
           // rootPet -> not rootPet communication
           int totalCountIndex = dstSeqIndexInterval[i].countEff; // last element
@@ -5666,10 +5763,11 @@ printf("dstArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
             (dstSeqIndexInterval[i].countEff + 1) * sizeof(int), i);
           // prepare to send remaining information to Pet "i" in one long stream
           int thisPetTotalFactorCount = thisPetFactorCountList[totalCountIndex];
-          int byteCount = thisPetTotalFactorCount * (4*sizeof(int) + dataSize);
+          int byteCount = thisPetTotalFactorCount
+            * (4*sizeof(int) + dataSizeFactors);
           char *stream = new char[byteCount];
           int *intStream;
-          if (typekindArg == ESMC_TYPEKIND_R4){
+          if (typekindFactors == ESMC_TYPEKIND_R4){
             ESMC_R4 *factorStream = (ESMC_R4 *)stream;
             for (int jj=0; jj<dstSeqIntervFactorListCount[i]; jj++){
               // loop over factorList entries in this Pet's dstSeqIndex interv
@@ -5698,7 +5796,7 @@ printf("dstArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
               factorStream = (ESMC_R4 *)intStream;
               *factorStream++ = ((ESMC_R4 *)factorList)[j];
             }
-          }else if (typekindArg == ESMC_TYPEKIND_R8){
+          }else if (typekindFactors == ESMC_TYPEKIND_R8){
             ESMC_R8 *factorStream = (ESMC_R8 *)stream;
             for (int jj=0; jj<dstSeqIntervFactorListCount[i]; jj++){
               // loop over factorList entries in this Pet's dstSeqIndex interv
@@ -5730,7 +5828,7 @@ printf("dstArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
 printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\n", factorListCount, dstSeqIndex, factorIndexList->array[j*2], ((ESMC_R8 *)factorList)[j]);
 #endif
             }
-          }else if (typekindArg == ESMC_TYPEKIND_I4){
+          }else if (typekindFactors == ESMC_TYPEKIND_I4){
             ESMC_I4 *factorStream = (ESMC_I4 *)stream;
             for (int jj=0; jj<dstSeqIntervFactorListCount[i]; jj++){
               // loop over factorList entries in this Pet's dstSeqIndex interv
@@ -5759,7 +5857,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
               factorStream = (ESMC_I4 *)intStream;
               *factorStream++ = ((ESMC_I4 *)factorList)[j];
             }
-          }else if (typekindArg == ESMC_TYPEKIND_I8){
+          }else if (typekindFactors == ESMC_TYPEKIND_I8){
             ESMC_I8 *factorStream = (ESMC_I8 *)stream;
             for (int jj=0; jj<dstSeqIntervFactorListCount[i]; jj++){
               // loop over factorList entries in this Pet's dstSeqIndex interv
@@ -5829,12 +5927,13 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
       }
       delete [] localPetFactorCountList;
       // receive remaining information from rootPet in one long stream
-      int byteCount = localPetTotalFactorCount * (4*sizeof(int) + dataSize);
+      int byteCount = localPetTotalFactorCount
+        * (4*sizeof(int) + dataSizeFactors);
       char *stream = new char[byteCount];
       vm->vmk_recv(stream, byteCount, rootPet);
       // process stream and set dstSeqIndexFactorLookup[] content
       int *intStream;
-      if (typekindArg == ESMC_TYPEKIND_R4){
+      if (typekindFactors == ESMC_TYPEKIND_R4){
         ESMC_R4 *factorStream = (ESMC_R4 *)stream;
         for (int i=0; i<localPetTotalFactorCount; i++){
           intStream = (int *)factorStream;
@@ -5849,7 +5948,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
           *((ESMC_R4 *)dstSeqIndexFactorLookup[j].factorList[k].factor) =
             *factorStream++;
         }
-      }else if (typekindArg == ESMC_TYPEKIND_R8){
+      }else if (typekindFactors == ESMC_TYPEKIND_R8){
         ESMC_R8 *factorStream = (ESMC_R8 *)stream;
         for (int i=0; i<localPetTotalFactorCount; i++){
           intStream = (int *)factorStream;
@@ -5864,7 +5963,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
           *((ESMC_R8 *)dstSeqIndexFactorLookup[j].factorList[k].factor) =
             *factorStream++;
         }
-      }else if (typekindArg == ESMC_TYPEKIND_I4){
+      }else if (typekindFactors == ESMC_TYPEKIND_I4){
         ESMC_I4 *factorStream = (ESMC_I4 *)stream;
         for (int i=0; i<localPetTotalFactorCount; i++){
           intStream = (int *)factorStream;
@@ -5879,7 +5978,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
           *((ESMC_I4 *)dstSeqIndexFactorLookup[j].factorList[k].factor) =
             *factorStream++;
         }
-      }else if (typekindArg == ESMC_TYPEKIND_I8){
+      }else if (typekindFactors == ESMC_TYPEKIND_I8){
         ESMC_I8 *factorStream = (ESMC_I8 *)stream;
         for (int i=0; i<localPetTotalFactorCount; i++){
           intStream = (int *)factorStream;
@@ -6211,7 +6310,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   // allocate XXE and attach to RouteHandle
   XXE *xxe;
   try{
-    xxe = new XXE(1000, 10000, 1000);
+    xxe = new XXE(vm, 1000, 10000, 1000);
   }catch (...){
     ESMC_LogDefault.ESMC_LogAllocError(&rc);
     return rc;
@@ -6219,8 +6318,10 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   localrc = (*routehandle)->ESMC_RouteHandleSetStorage(xxe);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
-  // set typekind in xxe
-  xxe->typekind[0] = typekindArg;
+  // set typekind in xxe which is used to check Arrays before ASMM execution 
+  xxe->typekind[0] = typekindFactors;
+  xxe->typekind[1] = typekindSrc;
+  xxe->typekind[2] = typekindDst;
   // prepare XXE related helper variables
   void *xxeElement;
   XXE::SendnbInfo *xxeSendnbInfo;
@@ -6343,7 +6444,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     // at the same time determine linIndexTermCount and linIndexTermFactorCount
     dstInfoTable[j] = new DstInfo*[diffPartnerDeCount[j]];
     int *dstInfoTableInit = new int[diffPartnerDeCount[j]];
-    localDeFactorList[j] = new char[localDeFactorCount * dataSize];
+    localDeFactorList[j] = new char[localDeFactorCount * dataSizeFactors];
     xxe->storage[xxe->storageCount] = localDeFactorList[j]; // xxe garb. coll.
     localrc = xxe->incStorageCount();
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
@@ -6371,9 +6472,9 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
           .tensorSeqIndex
           = dstInfoTable[j][partnerDeListIndex][index2].seqIndex.tensorSeqIndex;
       }      
-      memcpy(localDeFactorList[j] + i*dataSize,
+      memcpy(localDeFactorList[j] + i*dataSizeFactors,
         dstLinSeqList[j][index2Ref2[i]].factorList[factorIndexRef[i]]
-        .factor, dataSize);
+        .factor, dataSizeFactors);
       dstInfoTable[j][partnerDeListIndex][index2].localDeFactorListIndex = i;
     }
 #ifdef ASMMSTORETIMING
@@ -6426,7 +6527,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     for (int i=0; i<diffPartnerDeCount[j]; i++){
       // fill in XXE StreamElements for dstArray side
       // large contiguous 1st level receive buffer
-      buffer[j][i] = new char[partnerDeCount[j][i] * dataSize];
+      buffer[j][i] = new char[partnerDeCount[j][i] * dataSizeSrc];
       xxe->storage[xxe->storageCount] = buffer[j][i]; // xxe garbage collection
       localrc = xxe->incStorageCount();
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
@@ -6442,7 +6543,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       xxeElement = &(xxe->stream[xxe->count]);
       xxeRecvnbInfo = (XXE::RecvnbInfo *)xxeElement;
       xxeRecvnbInfo->buffer = buffer[j][i];
-      xxeRecvnbInfo->size = partnerDeCount[j][i] * dataSize;
+      xxeRecvnbInfo->size = partnerDeCount[j][i] * dataSizeSrc;
       xxeRecvnbInfo->srcPet = srcPet;
       xxeRecvnbInfo->commhandle = new vmk_commhandle*;
       *(xxeRecvnbInfo->commhandle) = new vmk_commhandle;
@@ -6653,8 +6754,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         xxeElement = &(xxe->stream[xxe->count]);
         xxeSendnbRRAInfo = (XXE::SendnbRRAInfo *)xxeElement;
         xxeSendnbRRAInfo->rraOffset =
-          linIndexContigBlockList[0].linIndex * dataSize;
-        xxeSendnbRRAInfo->size = partnerDeCount[i] * dataSize;
+          linIndexContigBlockList[0].linIndex * dataSizeSrc;
+        xxeSendnbRRAInfo->size = partnerDeCount[i] * dataSizeSrc;
         xxeSendnbRRAInfo->dstPet = dstPet;
         xxeSendnbRRAInfo->rraIndex = j; // localDe index into srcArray
       }else{
@@ -6662,22 +6763,24 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         printf("gjt: non-contiguous linIndex in srcArray -> need buffer \n");
 #endif
         // need intermediate buffer and memCpySrcRRAs
-        char *buffer = new char[partnerDeCount[i] * dataSize];
+        char *buffer = new char[partnerDeCount[i] * dataSizeSrc];
         xxe->storage[xxe->storageCount] = buffer; // for xxe garbage collection
         localrc = xxe->incStorageCount();
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
           ESMF_ERR_PASSTHRU, &rc)) return rc;
+#define USEmemCpySrcRRA___disable
 #ifdef USEmemCpySrcRRA
         char *bufferPointer = buffer;
         for (int k=0; k<count; k++){
-          int byteCount = linIndexContigBlockList[k].linIndexCount * dataSize;
+          int byteCount = linIndexContigBlockList[k].linIndexCount
+            * dataSizeSrc;
           // memCpySrcRRA pieces into intermediate buffer
           xxe->stream[xxe->count].opId = XXE::memCpySrcRRA;
           xxeElement = &(xxe->stream[xxe->count]);
           xxeMemCpySrcRRAInfo = (XXE::MemCpySrcRRAInfo *)xxeElement;
           xxeMemCpySrcRRAInfo->dstMem = bufferPointer;
           xxeMemCpySrcRRAInfo->rraOffset =
-            (linIndexContigBlockList[k].linIndex * dataSize);
+            (linIndexContigBlockList[k].linIndex * dataSizeSrc);
           xxeMemCpySrcRRAInfo->size = byteCount;
           xxeMemCpySrcRRAInfo->rraIndex = j; // localDe index into srcArray
           localrc = xxe->incCount();
@@ -6712,16 +6815,24 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
           ESMF_ERR_PASSTHRU, &rc)) return rc;
         // try typekind specific memGatherSrcRRA
-        if (typekindArg == ESMC_TYPEKIND_R4)
-          xxe->stream[xxeIndex].opSubId = XXE::R4;
-        else if (typekindArg == ESMC_TYPEKIND_R8)
-          xxe->stream[xxeIndex].opSubId = XXE::R8;
-        else if (typekindArg == ESMC_TYPEKIND_I4)
-          xxe->stream[xxeIndex].opSubId = XXE::I4;
-        else if (typekindArg == ESMC_TYPEKIND_I8)
-          xxe->stream[xxeIndex].opSubId = XXE::I8;
+        switch (typekindSrc){
+        case ESMC_TYPEKIND_R4:
+          xxeMemGatherSrcRRAInfo->dstBaseTK = XXE::R4;
+          break;
+        case ESMC_TYPEKIND_R8:
+          xxeMemGatherSrcRRAInfo->dstBaseTK = XXE::R8;
+          break;
+        case ESMC_TYPEKIND_I4:
+          xxeMemGatherSrcRRAInfo->dstBaseTK = XXE::I4;
+          break;
+        case ESMC_TYPEKIND_I8:
+          xxeMemGatherSrcRRAInfo->dstBaseTK = XXE::I8;
+          break;
+        default:
+          break;
+        }
         for (int k=0; k<count; k++){
-          rraOffsetList[k] = linIndexContigBlockList[k].linIndex * dataSize;
+          rraOffsetList[k] = linIndexContigBlockList[k].linIndex * dataSizeSrc;
           countList[k] = linIndexContigBlockList[k].linIndexCount;
         }
         double dt_tk;
@@ -6729,10 +6840,10 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
         // try byte option for memGatherSrcRRA
-        xxe->stream[xxeIndex].opSubId = XXE::BYTE;
+        xxeMemGatherSrcRRAInfo->dstBaseTK = XXE::BYTE;
         for (int k=0; k<count; k++){
-          rraOffsetList[k] = linIndexContigBlockList[k].linIndex * dataSize;
-          countList[k] = linIndexContigBlockList[k].linIndexCount * dataSize;
+          rraOffsetList[k] = linIndexContigBlockList[k].linIndex * dataSizeSrc;
+          countList[k] = linIndexContigBlockList[k].linIndexCount * dataSizeSrc;
         }
         double dt_byte;
         localrc = xxe->exec(rraCount, rraList, &dt_byte, xxeIndex, xxeIndex);
@@ -6745,23 +6856,34 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
         // decide for the fastest option
         if (dt_byte < dt_tk){
           // use byte option for memGatherSrcRRA
-          xxe->stream[xxeIndex].opSubId = XXE::BYTE;
+          xxeMemGatherSrcRRAInfo->dstBaseTK = XXE::BYTE;
           for (int k=0; k<count; k++){
-            rraOffsetList[k] = linIndexContigBlockList[k].linIndex * dataSize;
-            countList[k] = linIndexContigBlockList[k].linIndexCount * dataSize;
+            rraOffsetList[k] = linIndexContigBlockList[k].linIndex
+              * dataSizeSrc;
+            countList[k] = linIndexContigBlockList[k].linIndexCount
+              * dataSizeSrc;
           }
         }else{
           // use typekind specific memGatherSrcRRA
-          if (typekindArg == ESMC_TYPEKIND_R4)
-            xxe->stream[xxeIndex].opSubId = XXE::R4;
-          else if (typekindArg == ESMC_TYPEKIND_R8)
-            xxe->stream[xxeIndex].opSubId = XXE::R8;
-          else if (typekindArg == ESMC_TYPEKIND_I4)
-            xxe->stream[xxeIndex].opSubId = XXE::I4;
-          else if (typekindArg == ESMC_TYPEKIND_I8)
-            xxe->stream[xxeIndex].opSubId = XXE::I8;
+          switch (typekindSrc){
+          case ESMC_TYPEKIND_R4:
+            xxeMemGatherSrcRRAInfo->dstBaseTK = XXE::R4;
+            break;
+          case ESMC_TYPEKIND_R8:
+            xxeMemGatherSrcRRAInfo->dstBaseTK = XXE::R8;
+            break;
+          case ESMC_TYPEKIND_I4:
+            xxeMemGatherSrcRRAInfo->dstBaseTK = XXE::I4;
+            break;
+          case ESMC_TYPEKIND_I8:
+            xxeMemGatherSrcRRAInfo->dstBaseTK = XXE::I8;
+            break;
+          default:
+            break;
+          }
           for (int k=0; k<count; k++){
-            rraOffsetList[k] = linIndexContigBlockList[k].linIndex * dataSize;
+            rraOffsetList[k] = linIndexContigBlockList[k].linIndex
+              * dataSizeSrc;
             countList[k] = linIndexContigBlockList[k].linIndexCount;
           }
         }
@@ -6771,7 +6893,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
         xxeElement = &(xxe->stream[xxe->count]);
         xxeSendnbInfo = (XXE::SendnbInfo *)xxeElement;
         xxeSendnbInfo->buffer = buffer;
-        xxeSendnbInfo->size = partnerDeCount[i] * dataSize;
+        xxeSendnbInfo->size = partnerDeCount[i] * dataSizeSrc;
         xxeSendnbInfo->dstPet = dstPet;
       }
       // add commhandle to last xxe element (sendnbRRA or sendnb) and keep track
@@ -6886,7 +7008,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       xxeWaitOnAnyIndexSubInfo->index[k] = recvnbIndex[j][k];
       
       // allocate sub XXE stream and attach to xxeWaitOnAnyIndexSubInfo
-      xxeWaitOnAnyIndexSubInfo->xxe[k] = new XXE(1000, 1000, 1000);
+      xxeWaitOnAnyIndexSubInfo->xxe[k] = new XXE(vm, 1000, 1000, 1000);
       XXE *xxeSub = xxeWaitOnAnyIndexSubInfo->xxe[k];
       xxe->xxeSubList[xxe->xxeSubCount] = xxeSub; // xxe garbage collection
       localrc = xxe->incXxeSubCount();
@@ -6937,28 +7059,69 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       // </XXE profiling element>
 #endif
       
+#define USEproductSumScalarRRA___disable
 #ifdef USEproductSumScalarRRA
       for (int kk=0; kk<partnerDeCount[j][k]; kk++){
         DstInfo *dstInfo = &(dstInfoTable[j][k][kk]);
         int linIndex = dstInfo->linIndex;
         // enter scalar "+=*" operation into XXE stream
         xxeSub->stream[xxeSub->count].opId = XXE::productSumScalarRRA;
-        // todo: replace the following with using ESMC_TypeKind in XXE!
-        if (typekindArg == ESMC_TYPEKIND_R4)
-          xxeSub->stream[xxeSub->count].opSubId = XXE::R4;
-        else if (typekindArg == ESMC_TYPEKIND_R8)
-          xxeSub->stream[xxeSub->count].opSubId = XXE::R8;
-        else if (typekindArg == ESMC_TYPEKIND_I4)
-          xxeSub->stream[xxeSub->count].opSubId = XXE::I4;
-        else if (typekindArg == ESMC_TYPEKIND_I8)
-          xxeSub->stream[xxeSub->count].opSubId = XXE::I8;
         xxeElement = &(xxeSub->stream[xxeSub->count]);
         xxeProductSumScalarRRAInfo = (XXE::ProductSumScalarRRAInfo *)xxeElement;
-        xxeProductSumScalarRRAInfo->rraOffset = linIndex * dataSize;
+        switch (typekindDst){
+        case ESMC_TYPEKIND_R4:
+          xxeProductSumScalarRRAInfo->elementTK = XXE::R4;
+          break;
+        case ESMC_TYPEKIND_R8:
+          xxeProductSumScalarRRAInfo->elementTK = XXE::R8;
+          break;
+        case ESMC_TYPEKIND_I4:
+          xxeProductSumScalarRRAInfo->elementTK = XXE::I4;
+          break;
+        case ESMC_TYPEKIND_I8:
+          xxeProductSumScalarRRAInfo->elementTK = XXE::I8;
+          break;
+        default:
+          break;
+        }
+        switch (typekindSrc){
+        case ESMC_TYPEKIND_R4:
+          xxeProductSumScalarRRAInfo->valueTK = XXE::R4;
+          break;
+        case ESMC_TYPEKIND_R8:
+          xxeProductSumScalarRRAInfo->valueTK = XXE::R8;
+          break;
+        case ESMC_TYPEKIND_I4:
+          xxeProductSumScalarRRAInfo->valueTK = XXE::I4;
+          break;
+        case ESMC_TYPEKIND_I8:
+          xxeProductSumScalarRRAInfo->valueTK = XXE::I8;
+          break;
+        default:
+          break;
+        }
+        switch (typekindFactors){
+        case ESMC_TYPEKIND_R4:
+          xxeProductSumScalarRRAInfo->factorTK = XXE::R4;
+          break;
+        case ESMC_TYPEKIND_R8:
+          xxeProductSumScalarRRAInfo->factorTK = XXE::R8;
+          break;
+        case ESMC_TYPEKIND_I4:
+          xxeProductSumScalarRRAInfo->factorTK = XXE::I4;
+          break;
+        case ESMC_TYPEKIND_I8:
+          xxeProductSumScalarRRAInfo->factorTK = XXE::I8;
+          break;
+        default:
+          break;
+        }
+        xxeProductSumScalarRRAInfo->rraOffset = linIndex * dataSizeDst;
         xxeProductSumScalarRRAInfo->factor = (void *)
-          (localDeFactorList[j] + (dstInfo->localDeFactorListIndex) * dataSize);
+          (localDeFactorList[j] + (dstInfo->localDeFactorListIndex)
+          * dataSizeFactors);
         xxeProductSumScalarRRAInfo->value = (void *)
-          (buffer[j][k] + kk*dataSize);
+          (buffer[j][k] + kk * dataSizeSrc);
         xxeProductSumScalarRRAInfo->rraIndex = srcLocalDeCount
           + j; // localDe index into dstArray shifted by srcArray localDeCount
         localrc = xxeSub->incCount();
@@ -6973,18 +7136,57 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
 
       // try super-scalar "+=*" operation in XXE stream
       xxeSub->stream[xxeIndex].opId = XXE::productSumSuperScalarRRA;
-      // todo: replace the following with using ESMC_TypeKind in XXE!
-      if (typekindArg == ESMC_TYPEKIND_R4)
-        xxeSub->stream[xxeIndex].opSubId = XXE::R4;
-      else if (typekindArg == ESMC_TYPEKIND_R8)
-        xxeSub->stream[xxeIndex].opSubId = XXE::R8;
-      else if (typekindArg == ESMC_TYPEKIND_I4)
-        xxeSub->stream[xxeIndex].opSubId = XXE::I4;
-      else if (typekindArg == ESMC_TYPEKIND_I8)
-        xxeSub->stream[xxeIndex].opSubId = XXE::I8;
       xxeElement = &(xxeSub->stream[xxeIndex]);
       xxeProductSumSuperScalarRRAInfo =
         (XXE::ProductSumSuperScalarRRAInfo *)xxeElement;
+      switch (typekindDst){
+      case ESMC_TYPEKIND_R4:
+        xxeProductSumSuperScalarRRAInfo->elementTK = XXE::R4;
+        break;
+      case ESMC_TYPEKIND_R8:
+        xxeProductSumSuperScalarRRAInfo->elementTK = XXE::R8;
+        break;
+      case ESMC_TYPEKIND_I4:
+        xxeProductSumSuperScalarRRAInfo->elementTK = XXE::I4;
+        break;
+      case ESMC_TYPEKIND_I8:
+        xxeProductSumSuperScalarRRAInfo->elementTK = XXE::I8;
+        break;
+      default:
+        break;
+      }
+      switch (typekindSrc){
+      case ESMC_TYPEKIND_R4:
+        xxeProductSumSuperScalarRRAInfo->valueTK = XXE::R4;
+        break;
+      case ESMC_TYPEKIND_R8:
+        xxeProductSumSuperScalarRRAInfo->valueTK = XXE::R8;
+        break;
+      case ESMC_TYPEKIND_I4:
+        xxeProductSumSuperScalarRRAInfo->valueTK = XXE::I4;
+        break;
+      case ESMC_TYPEKIND_I8:
+        xxeProductSumSuperScalarRRAInfo->valueTK = XXE::I8;
+        break;
+      default:
+        break;
+      }
+      switch (typekindFactors){
+      case ESMC_TYPEKIND_R4:
+        xxeProductSumSuperScalarRRAInfo->factorTK = XXE::R4;
+        break;
+      case ESMC_TYPEKIND_R8:
+        xxeProductSumSuperScalarRRAInfo->factorTK = XXE::R8;
+        break;
+      case ESMC_TYPEKIND_I4:
+        xxeProductSumSuperScalarRRAInfo->factorTK = XXE::I4;
+        break;
+      case ESMC_TYPEKIND_I8:
+        xxeProductSumSuperScalarRRAInfo->factorTK = XXE::I8;
+        break;
+      default:
+        break;
+      }
       xxeProductSumSuperScalarRRAInfo->rraIndex = srcLocalDeCount
         + j; // localDe index into dstArray shifted by srcArray localDeCount
       int termCount = partnerDeCount[j][k];
@@ -7009,32 +7211,57 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       for (int kk=0; kk<termCount; kk++){
         DstInfo *dstInfo = &(dstInfoTable[j][k][kk]);
         int linIndex = dstInfo->linIndex;
-        rraOffsetList[kk] = linIndex * dataSize;
+        rraOffsetList[kk] = linIndex * dataSizeDst;
         factorList[kk] = (void *)
-          (localDeFactorList[j] + (dstInfo->localDeFactorListIndex) * dataSize);
-        valueList[kk] = (void *)(buffer[j][k] + kk*dataSize);
+          (localDeFactorList[j] + (dstInfo->localDeFactorListIndex)
+          * dataSizeFactors);
+        valueList[kk] = (void *)(buffer[j][k] + kk * dataSizeSrc);
       } // for kk - termCount
       // need to fill in sensible values or else timing will be bogus
-      if (typekindArg == ESMC_TYPEKIND_R4)
-        for (int kk=0; kk<termCount; kk++){
-          *(ESMC_R4 *)(rraList[srcLocalDeCount]+rraOffsetList[kk]) = 0.; //elemt
-          *(ESMC_R4 *)valueList[kk] = 0.01; // value
-        }
-      else if (typekindArg == ESMC_TYPEKIND_R8)
-        for (int kk=0; kk<termCount; kk++){
-          *(ESMC_R8 *)(rraList[srcLocalDeCount]+rraOffsetList[kk]) = 0.; //elemt
-          *(ESMC_R8 *)valueList[kk] = 0.01; // value
-        }
-      else if (typekindArg == ESMC_TYPEKIND_I4)
-        for (int kk=0; kk<termCount; kk++){
-          *(ESMC_I4 *)(rraList[srcLocalDeCount]+rraOffsetList[kk]) = 0; //elemt
-          *(ESMC_I4 *)valueList[kk] = 1; // value
-        }
-      else if (typekindArg == ESMC_TYPEKIND_I8)
-        for (int kk=0; kk<termCount; kk++){
-          *(ESMC_I8 *)(rraList[srcLocalDeCount]+rraOffsetList[kk]) = 0; //elemt
-          *(ESMC_I8 *)valueList[kk] = 1; // value
-        }
+      switch (typekindDst){
+      case ESMC_TYPEKIND_R4:
+        for (int kk=0; kk<termCount; kk++)
+          *(ESMC_R4 *)(rraList[srcLocalDeCount]+rraOffsetList[kk]) =
+            (ESMC_R4)0.; //element
+        break;
+      case ESMC_TYPEKIND_R8:
+        for (int kk=0; kk<termCount; kk++)
+          *(ESMC_R8 *)(rraList[srcLocalDeCount]+rraOffsetList[kk]) =
+            (ESMC_R8)0.; //element
+        break;
+      case ESMC_TYPEKIND_I4:
+        for (int kk=0; kk<termCount; kk++)
+          *(ESMC_I4 *)(rraList[srcLocalDeCount]+rraOffsetList[kk]) =
+            (ESMC_I4)0; //element
+        break;
+      case ESMC_TYPEKIND_I8:
+        for (int kk=0; kk<termCount; kk++)
+          *(ESMC_I8 *)(rraList[srcLocalDeCount]+rraOffsetList[kk]) =
+            (ESMC_I8)0; //element
+        break;
+      default:
+        break;
+      }
+      switch (typekindSrc){
+      case ESMC_TYPEKIND_R4:
+        for (int kk=0; kk<termCount; kk++)
+          *(ESMC_R4 *)valueList[kk] = (ESMC_R4)0.01; // value
+        break;
+      case ESMC_TYPEKIND_R8:
+        for (int kk=0; kk<termCount; kk++)
+          *(ESMC_R4 *)valueList[kk] = (ESMC_R8)0.01; // value
+        break;
+      case ESMC_TYPEKIND_I4:
+        for (int kk=0; kk<termCount; kk++)
+          *(ESMC_R4 *)valueList[kk] = (ESMC_I4)0.01; // value
+        break;
+      case ESMC_TYPEKIND_I8:
+        for (int kk=0; kk<termCount; kk++)
+          *(ESMC_R4 *)valueList[kk] = (ESMC_I8)0.01; // value
+        break;
+      default:
+        break;
+      }
       xxeSub->optimizeElement(xxeIndex);
       double dt_sScalar;
       localrc = xxeSub->exec(rraCount, rraList, &dt_sScalar, xxeIndex,
@@ -7340,23 +7567,19 @@ int Array::sparseMatMul(
   VMK::wtime(&t0);      //gjt - profile
 #endif
 
-  // basic error checking for input
-  if (srcArray == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to srcArray", &rc);
-    return rc;
-  }
-  if (dstArray == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to dstArray", &rc);
-    return rc;
-  }
+  // basic input checking
+  bool srcArrayFlag = false;
+  if (srcArray != ESMC_NULL_POINTER) srcArrayFlag = true;
+  bool dstArrayFlag = false;
+  if (dstArray != ESMC_NULL_POINTER) dstArrayFlag = true;
   
   // srcArray and dstArray may not point to the identical Array object
-  if (srcArray == dstArray){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-      "- srcArray and dstArray must not be identical", &rc);
-    return rc;
+  if (srcArrayFlag && dstArrayFlag){
+    if (srcArray == dstArray){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+        "- srcArray and dstArray must not be identical", &rc);
+      return rc;
+    }
   }
   
 #ifdef ASMMTIMING
@@ -7368,22 +7591,22 @@ int Array::sparseMatMul(
 
   // conditionally perform full input checks
   if (checkflag==ESMF_TRUE){
-    // check that XXE's typekind matches srcArray typekind
-    if (xxe->typekind[0] != srcArray->getTypekind()){
+    // check that srcArray's typekind matches
+    if (srcArrayFlag && (xxe->typekind[1] != srcArray->getTypekind())){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- TypeKind mismatch between srcArray argument and precomputed XXE",
         &rc);
       return rc;
     }
-    // check that XXE's typekind matches dstArray typekind
-    if (xxe->typekind[0] != dstArray->getTypekind()){
+    // check that dstArray's typekind matches
+    if (dstArrayFlag && (xxe->typekind[2] != dstArray->getTypekind())){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- TypeKind mismatch between dstArray argument and precomputed XXE",
         &rc);
       return rc;
     }
-    // todo: need to check DistGrid-conformance and congruence of local tiles
-    //       between argument Array pair and Array pair used during XXE precomp.
+    //TODO: need to check DistGrid-conformance and congruence of local tiles
+    //      between argument Array pair and Array pair used during XXE precomp.
   }
   
 #ifdef ASMMTIMING
@@ -7391,7 +7614,7 @@ int Array::sparseMatMul(
 #endif
   
   // conditionally zero out total regions of the dstArray for all localDEs
-  if (zeroflag==ESMF_TRUE){
+  if (dstArrayFlag && (zeroflag==ESMF_TRUE)){
     for (int i=0; i<dstArray->delayout->getLocalDeCount(); i++){
       char *start = (char *)(dstArray->larrayBaseAddrList[i]);
       int elementCount =
@@ -7421,22 +7644,31 @@ int Array::sparseMatMul(
 #endif
   
   // prepare for relative run-time addressing (RRA)
-  int rraCount = srcArray->delayout->getLocalDeCount();
-  rraCount += dstArray->delayout->getLocalDeCount();
+  int rraCount = 0; // init
+  if (srcArrayFlag)
+    rraCount += srcArray->delayout->getLocalDeCount();
+  if (dstArrayFlag)
+    rraCount += dstArray->delayout->getLocalDeCount();
   char **rraList = new char*[rraCount];
-  memcpy((char *)rraList, srcArray->larrayBaseAddrList,
-    srcArray->delayout->getLocalDeCount() * sizeof(char *));
-  memcpy((char *)rraList
-    + srcArray->delayout->getLocalDeCount() * sizeof(char *),
-    dstArray->larrayBaseAddrList,
-    dstArray->delayout->getLocalDeCount() * sizeof(char *));
+  char **rraListPtr = rraList;
+  if (srcArrayFlag){
+    memcpy((char *)rraListPtr, srcArray->larrayBaseAddrList,
+      srcArray->delayout->getLocalDeCount() * sizeof(char *));
+    rraListPtr += srcArray->delayout->getLocalDeCount();
+  }
+  if (dstArrayFlag)
+    memcpy((char *)rraListPtr, dstArray->larrayBaseAddrList,
+      dstArray->delayout->getLocalDeCount() * sizeof(char *));
 
 #ifdef ASMMTIMING
   VMK::wtime(&t4);      //gjt - profile
 #endif
   
+  //TODO: determine XXE predicate flag for XXE exec(),
+  // considering src vs. dst, DE, phase of nb-call...
+  
   // execute XXE stream
-  localrc = xxe->exec(rraCount, rraList);
+  localrc = xxe->exec(rraCount, rraList); //TODO: specify predicate flag
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
