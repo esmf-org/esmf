@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.97 2008/02/07 01:59:32 rokuingh Exp $
+// $Id: ESMC_Base.C,v 1.98 2008/02/07 22:20:59 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.97 2008/02/07 01:59:32 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.98 2008/02/07 22:20:59 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -1592,17 +1592,29 @@ if (count) {
 //
 //EOP
 
-  int rc;
+  int rc, localrc;
   ESMC_Attribute *attr;
+  ESMC_Attribute *attpack;
 
   // Initialize local return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
 
+  // Search for the attpack, make it if not found
+  attpack = ESMC_AttPackGet(convention, purpose, object);
+  if(!attpack) {
+    attpack = new ESMC_Attribute(name, convention, purpose, object);
+    if (!attpack)
+      return ESMF_FAILURE;
+    localrc = ESMC_AttributeSet(attpack);
+    if (localrc != ESMF_SUCCESS)
+      return ESMF_FAILURE;
+  }
+  
   attr = new ESMC_Attribute(name, convention, purpose, object);  
   if (!attr)
     return ESMF_FAILURE;
  
-  rc = ESMC_AttributeSet(attr);
+  rc = attpack->ESMC_AttributeSet(attr);
 
   return rc;
 
@@ -1614,7 +1626,7 @@ if (count) {
 // !IROUTINE:  ESMC_AttPackGet - get a list attributes from an ESMF type
 //
 // !INTERFACE:
-      ESMC_Attribute **ESMC_Attribute::ESMC_AttPackGet(
+      ESMC_Attribute *ESMC_Attribute::ESMC_AttPackGet(
 // 
 // !RETURN VALUE:
 //    list of pointers to requested attributes
@@ -1622,15 +1634,10 @@ if (count) {
 // !ARGUMENTS:
       char *convention,             // in - attr convention to retrieve
       char *purpose,                // in - attr purpose to retrieve
-      char *object,                 // in - attr object type to retrieve
-      int *attpackCount) const {    // in - number of attributes in the return list
-// 
+      char *object) const {         // in - attr object type to retrieve
 // !DESCRIPTION:
 //
 //EOP
-
-  int i, attNum = 0;
-  ESMC_Attribute **attpackList;
 
   // simple sanity checks
   if ((!purpose) || (purpose[0] == '\0')) {
@@ -1653,28 +1660,15 @@ if (count) {
        return NULL;
   }
 
-  attpackList = (ESMC_Attribute **)malloc(sizeof(ESMC_Attribute *));
-  
-  for (i=0; i<attrCount; i++) {
+  for (int i=0; i<attrCount; i++) {
       if (strcmp(convention, attrList[i]->attrConvention) == 0 && 
           strcmp(purpose, attrList[i]->attrPurpose) == 0 &&
-          strcmp(object, attrList[i]->attrObject) == 0) {
-          //allocate new attribute in attpackList
-          attpackList = (ESMC_Attribute **)realloc((void *)attpackList, 
-                           (attNum + 1) * sizeof(ESMC_Attribute *));
-          //check allocation
-          if (attpackList == NULL) 
-            return NULL;
-          //set new attribute
-          attpackList[attNum] = attrList[i];
-          attNum++;
-          }
-  }   
-
-  *attpackCount = attNum;
-
-  if(attNum != 0) return attpackList;
-  else return NULL;
+          strcmp(object, attrList[i]->attrObject) == 0)
+          return attrList[i];
+  }
+ 
+  // if you got here, you did not find the attpack
+  return NULL;
 
 }  // end ESMC_AttPackGet
 //-----------------------------------------------------------------------------
@@ -1773,12 +1767,23 @@ if (count) {
   int rc;
   char msgbuf[ESMF_MAXSTR];
   ESMC_Attribute *attr;
+  ESMC_Attribute *attpack;
 
   // Initialize local return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
 
   // Find the attpack attribute
-  attr = ESMC_AttPackGetAttribute(name, convention, purpose, object);
+  attpack = ESMC_AttPackGet(convention, purpose, object);
+  if(!attpack) {
+       sprintf(msgbuf, "Cannot find an attribute package with:\nconvention = '%s'\npurpose = '%s'\nobject = '%s'\n",
+                      convention, purpose, object);
+       printf(msgbuf);
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                             msgbuf, &rc);
+       return rc;
+  }
+  
+  attr = attpack->ESMC_AttPackGetAttribute(name, convention, purpose, object);
   if (!attr) {
        sprintf(msgbuf, "This attribute package does have an attribute named '%s'\n", name);
        printf(msgbuf);
@@ -1816,26 +1821,31 @@ if (count) {
 //
 //EOPI
 
-  int i;
   char msgbuf[ESMF_MAXSTR];
   int localrc;
-  int attpackNum=0;
-  ESMC_Attribute **attpackList;
+  ESMC_Attribute *attpack;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attpackList = ESMC_Attribute::ESMC_AttPackGet(convention, purpose, object, &attpackNum);
-  if (attpackList == NULL) return ESMF_FAILURE;
+  attpack = ESMC_AttPackGet(convention, purpose, object);
+  if (!attpack) {
+       sprintf(msgbuf, "Cannot find an attribute package with:\nconvention = '%s'\npurpose = '%s'\nobject = '%s'\n",
+                      convention, purpose, object);
+       printf(msgbuf);
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                             msgbuf, &localrc);
+       return localrc;
+  }
 
-  sprintf(msgbuf, " Attribute package contains %d attributes.\n", attpackNum);
+  sprintf(msgbuf, " Attribute package contains %d attributes.\n", attpack->attrCount);
   printf(msgbuf);
   ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
-  for (i=0; i<attpackNum; i++) {
+  for (int i=0; i<attpack->attrCount; i++) {
       sprintf(msgbuf, " Attr %d: ", i);
       printf(msgbuf);
       ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
-      attpackList[i]->ESMC_Print();
+      attpack->attrList[i]->ESMC_Print();
   }
   
   return ESMF_SUCCESS;
@@ -2571,7 +2581,6 @@ if (count) {
 //
 //EOPI
 
-  int i;
   char msgbuf[ESMF_MAXSTR];
   int localrc;
 
@@ -2592,14 +2601,10 @@ if (count) {
   sprintf(msgbuf, "   Number of Attributes: %d\n", attrCount);
   printf(msgbuf);
     // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
-  for (i=0; i<attrCount; i++) {
-      sprintf(msgbuf, " Attr %d: ", i);
-      printf(msgbuf);
-        // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
-      attrList[i]->ESMC_Print();
-  }
-*/
-                                                
+  */
+  
+  root.ESMC_Print();
+
   return ESMF_SUCCESS;
 
  } // end ESMC_Print
@@ -2956,6 +2961,16 @@ if (count) {
   sprintf(msgbuf, "         object: %s\n",  attrObject);
   printf(msgbuf);
   ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+
+  sprintf(msgbuf, "   Number of Attributes: %d\n", attrCount);
+  printf(msgbuf);
+    // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+  for (int i=0; i<attrCount; i++) {
+      sprintf(msgbuf, " Attr %d: ", i);
+      printf(msgbuf);
+        // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+      attrList[i]->ESMC_Print();
+  }
 
   return ESMF_SUCCESS;
 
