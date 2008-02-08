@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.201 2007/10/29 18:01:39 svasquez Exp $
+#  $Id: common.mk,v 1.201.2.1 2008/02/08 23:05:35 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2088,13 +2088,12 @@ doc:  chkdir_doc
 	@echo "doc rule from common.mk"
 	@echo "=========================================" 
 	@if [ ! -d $(ESMF_DIR)/src/doc ] ; then \
-	  echo "This distribution does not include documentation." ;\
-	  echo "See the User's Guide for more information." ;\
-	else \
-	  cd $(ESMF_DIR)/src/doc ;\
-	  $(MAKE) dvi html pdf ;\
-	  echo "Build documentation completed." ;\
-	fi
+          echo "*** This version of the ESMF source tree does not contain documentation files. Please see http://www.esmf.ucar.edu/ for ESMF documentation." ; \
+          $(MAKE) err; \
+        fi;
+	cd $(ESMF_DIR)/src/doc ;\
+	$(MAKE) dvi html pdf
+	@echo "Build doc completed."
 
 # 'doc' and 'alldoc' do identical things now.
 alldoc: doc
