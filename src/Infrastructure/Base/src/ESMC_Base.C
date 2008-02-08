@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.98 2008/02/07 22:20:59 rokuingh Exp $
+// $Id: ESMC_Base.C,v 1.99 2008/02/08 18:58:05 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.98 2008/02/07 22:20:59 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.99 2008/02/08 18:58:05 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -3209,11 +3209,21 @@ if (count) {
              voidp = NULL;
   }
 
+  // if attribute list, copy it.
+  if(source.attrList != ESMC_NULL_POINTER) {
+    for (i=0; i<attrCount; i++) {
+      if(source.attrList[i]->attrList == ESMC_NULL_POINTER) {
+        attrList[i] = new ESMC_Attribute();
+        attrList[i] = source.attrList[i];
+      }
+      else attrList[i] = source.attrList[i];
+    }
+  }
+
   return (*this);
 
  } // end ESMC_Attribute::operator=
 
-//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_Attribute()"
@@ -3385,6 +3395,7 @@ if (count) {
   attrList = ESMC_NULL_POINTER;
   items = 0;
   slen = 0;
+  voidp = NULL;
 
   if (!name)
       attrName[0] = '\0';
@@ -3463,18 +3474,14 @@ if (count) {
         else if (tk == ESMC_TYPEKIND_R8) delete [] vdp;  
         else if (tk == ESMC_TYPEKIND_LOGICAL) delete [] vbp;
   }
- /* 
+
   // if attribute lists, delete them.
-  for (unsigned int i=0; i<attrCount; i++) {
-    if((*attrList[i]).attrList == ESMC_NULL_POINTER) delete attrList[i];
+  for (int i=0; i<attrCount; i++) {
+    if(attrList[i]->attrList == ESMC_NULL_POINTER) delete attrList[i];
     else attrList[i] = ESMC_NULL_POINTER;
   }
- */
-  // if attribute lists, delete them.
-  for (unsigned int i=0; i<attrCount; i++)
-    delete attrList[i];  
-                      
-  if (attrList) delete [] attrList;
+
+  if(attrList) delete [] attrList;
 
  } // end ~ESMC_Attribute
 
@@ -3545,6 +3552,13 @@ if (count) {
   else
       sprintf(baseName, "%s%3d", className, ID);
   ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
+
+  if (nattrs > 0) {
+      if (root.ESMC_AttributeAlloc(nattrs) != ESMF_SUCCESS) {
+          baseStatus = ESMF_STATUS_INVALID;   // can't return err, but can
+          return;                            // try to indicate unhappiness
+      }
+  }
 
   baseStatus = ESMF_STATUS_READY;
 
