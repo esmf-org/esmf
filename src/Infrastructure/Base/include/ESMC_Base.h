@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.88 2008/02/07 22:20:58 rokuingh Exp $
+// $Id: ESMC_Base.h,v 1.89 2008/02/09 21:00:08 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -83,8 +83,18 @@ class ESMC_Attribute
       // ESMC_Array  *ap;       // pointer to an ESMC_Array object (someday?)
     };
 
+    // prevent accidental copying
+    //ESMC_Attribute& operator=(const ESMC_Attribute&);
+    ESMC_Attribute(const ESMC_Attribute&);
+
  public:
-    // Attribute Methods
+    // attpack methods
+    int ESMC_AttPackCreate(char *name, char *convention, char *purpose, char *object);
+    ESMC_Attribute *ESMC_AttPackGet(char *convention, char *purpose, char *object) const;
+    ESMC_Attribute *ESMC_AttPackGetAttribute(char *name, char *convention, char *purpose, char *object) const;
+    int ESMC_AttPackSet(char *name, char *value, char *convention, char *purpose, char *object);
+    int ESMC_AttPackWrite(char *convention, char *purpose, char *object) const;
+
     
     // extend pointer list
     int ESMC_AttributeAlloc(int adding);
@@ -130,38 +140,26 @@ class ESMC_Attribute
     int ESMC_AttributeSet(char *name, char *value);
     int ESMC_AttributeSet(char *name, ESMC_TypeKind tk, int count, void *value);
 
-    // attpack methods
-    int ESMC_AttPackCreate(char *name, char *convention, char *purpose, char *object);
-    ESMC_Attribute *ESMC_AttPackGet(char *convention, char *purpose, char *object) const;
-    ESMC_Attribute *ESMC_AttPackGetAttribute(char *name, char *convention, char *purpose, char *object) const;
-    int ESMC_AttPackSet(char *name, char *value, char *convention, char *purpose, char *object);
-    int ESMC_AttPackWrite(char *convention, char *purpose, char *object) const;
-
     // not implemented yet
-    int ESMC_AttributeGetNameList(int *count, char **namelist) const;
-    int ESMC_AttributeSetList(int count, ESMC_Attribute *valuelist);
-    int ESMC_AttributeGetList(char **namelist, ESMC_Attribute *valuelist) const;
     int ESMC_AttributeCopy(char *name, ESMC_Attribute *destination);
     int ESMC_AttributeCopyAll(ESMC_Attribute *destination);
-
+    int ESMC_AttributeGetList(char **namelist, ESMC_Attribute *valuelist) const;
+    int ESMC_AttributeGetNameList(int *count, char **namelist) const;
+    int ESMC_AttributeSetList(int count, ESMC_Attribute *valuelist);
     
-    int ESMC_Print(void) const;
-    int ESMC_Serialize(char *buffer, int *length, int *offset) const;
-    int ESMC_Deserialize(char *buffer, int *offset);
-    int ESMC_AttrModifyValue(ESMC_TypeKind typekind,int numitems,void *datap);
-    ESMC_Attribute& operator=(const ESMC_Attribute &);
+    // Modifiers, Constructors, Destructors, Serializers, Print
     ESMC_Attribute(void);
     ESMC_Attribute(char *name, ESMC_TypeKind tk, int numitems, void *datap);
     ESMC_Attribute(char *name, char *conv, char *purp, char *obj);
     ~ESMC_Attribute(void);
+    int ESMC_AttrModifyValue(ESMC_TypeKind typekind,int numitems,void *datap);
+    int ESMC_Deserialize(char *buffer, int *offset);
+    int ESMC_Serialize(char *buffer, int *length, int *offset) const;
+    int ESMC_Print(void) const;
 
-
-  //friend class ESMC_Base;
-
+    // temporary copy constructor
+    ESMC_Attribute& operator=(const ESMC_Attribute& source);
 };
-
-
-// !PRIVATE TYPES:
 
  // class declaration type.
 class ESMC_Base
@@ -178,8 +176,10 @@ class ESMC_Base
 
   private:
     
-
-// !PUBLIC MEMBER FUNCTIONS:
+  
+    // prevent accidental copying
+    //ESMC_Base& operator=(const ESMC_Base&);
+    ESMC_Base(const ESMC_Base&);
   
   public:
     ESMC_Attribute root;  // public for now
