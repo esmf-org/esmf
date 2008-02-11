@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.42 2007/10/31 01:04:02 cdeluca Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.42.2.1 2008/02/11 05:07:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -112,7 +112,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.42 2007/10/31 01:04:02 cdeluca Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.42.2.1 2008/02/11 05:07:25 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -754,7 +754,8 @@
                     bundle = ESMF_BundleDeserialize(vm, bptr, offset, localrc)
 !!DEBUG "created bundle, ready to set id and add to local state"
                     call c_ESMC_SetVMId(bundle%btypep, si%vmidrecv(k), localrc)
-                    call ESMF_StateAddBundle(state, bundle, rc=localrc)
+                    call ESMF_StateAddBundle(state, bundle, proxyflag=.true., &
+                      rc=localrc)
 !!DEBUG "bundle added to state"
 
                    case (ESMF_ID_FIELD%objectID)
@@ -763,7 +764,8 @@
                     field = ESMF_FieldDeserialize(vm, bptr, offset, localrc)
 !!DEBUG "created field, ready to set id and add to local state"
                     call c_ESMC_SetVMId(field%ftypep, si%vmidrecv(k), localrc)
-                    call ESMF_StateAddField(state, field, rc=localrc)
+                    call ESMF_StateAddField(state, field, proxyflag=.true., &
+                      rc=localrc)
 !!DEBUG "field added to state"
 
                    case (ESMF_ID_ARRAY%objectID)
@@ -774,7 +776,8 @@
                     call ESMF_ArraySetInitCreated(array, rc=localrc)
 !!DEBUG "created array, ready to set id and add to local state"
                     call c_ESMC_SetVMId(array, si%vmidrecv(k), localrc)
-                    call ESMF_StateAddArray(state, array, rc=localrc)
+                    call ESMF_StateAddArray(state, array, proxyflag=.true., &
+                      rc=localrc)
 !!DEBUG "array added to state"
 
                    case (ESMF_ID_STATE%objectID)
@@ -783,7 +786,8 @@
                     substate = ESMF_StateDeserialize(vm, bptr, offset, localrc)
 !!DEBUG "created substate, ready to set id and add to local state"
                     call c_ESMC_SetVMId(substate%statep, si%vmidrecv(k), localrc)
-                    call ESMF_StateAddState(state, substate, rc=localrc)
+                    call ESMF_StateAddState(state, substate, proxyflag=.true., &
+                      rc=localrc)
 !!DEBUG "substate added to state"
 
                    case (ESMF_STATEITEM_NAME%ot)
