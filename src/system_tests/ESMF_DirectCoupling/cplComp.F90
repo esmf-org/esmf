@@ -1,4 +1,4 @@
-! $Id: cplComp.F90,v 1.1.2.1 2008/02/11 05:10:47 theurich Exp $
+! $Id: cplComp.F90,v 1.1.2.2 2008/02/11 18:19:33 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -74,7 +74,7 @@ module cplCompMod
     ! Get access to src and dst Arrays in States
     call ESMF_StateGetArray(importState, "ioComp.arraySrc", arraySrc, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateGetArray(exportState, "modelAComp.array", arrayDst, rc=rc)
+    call ESMF_StateGetArray(exportState, "modelA.array", arrayDst, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Precompute and store ArrayRedist: arraySrc -> arrayDst
@@ -119,7 +119,7 @@ module cplCompMod
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! Get access to src and dst Arrays in States
-    call ESMF_StateGetArray(importState, "modelBComp.array", arraySrc, rc=rc)
+    call ESMF_StateGetArray(importState, "modelB.array", arraySrc, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_StateGetArray(exportState, "ioComp.arrayDst", arrayDst, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out

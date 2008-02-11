@@ -1,4 +1,4 @@
-! $Id: ioComp.F90,v 1.1.2.1 2008/02/11 05:10:47 theurich Exp $
+! $Id: ioComp.F90,v 1.1.2.2 2008/02/11 18:19:35 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -152,8 +152,6 @@ module ioCompMod
     ! Main Run Loop - with direct coupling to modelAComp and modelBComp
     do n=1, 3
     
-      !TODO: need to feed something n-specific into arraySrc
-      
       ! ArrayRedist() "send" to modelAComp
       call ESMF_ArrayRedist(srcArray=arraySrc, routehandle=io2modelRedist, &
         rc=rc)

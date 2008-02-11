@@ -1,4 +1,4 @@
-! $Id: modelBComp.F90,v 1.1.2.1 2008/02/11 05:10:48 theurich Exp $
+! $Id: modelBComp.F90,v 1.1.2.2 2008/02/11 18:19:36 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -79,7 +79,7 @@ module modelBCompMod
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-      indexflag=ESMF_INDEX_GLOBAL, name="modelBComp.array", rc=rc)
+      indexflag=ESMF_INDEX_GLOBAL, name="modelB.array", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_StateAddArray(importState, array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -105,7 +105,7 @@ module modelBCompMod
     rc = ESMF_SUCCESS
 
     ! Get the Array from the import State
-    call ESMF_StateGetArray(importState, "modelBComp.array", array, rc=rc)
+    call ESMF_StateGetArray(importState, "modelB.array", array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to RouteHandles for direct coupling to modelAComp and ioComp
@@ -123,7 +123,7 @@ module modelBCompMod
       call ESMF_ArrayRedist(dstArray=array, routehandle=modelA2BRedist, rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
       
-      !TODO: do something with array here
+      ! -> Do something with array here
       
       ! ArrayRedist() "send" to ioComp
       call ESMF_ArrayRedist(srcArray=array, routehandle=model2ioRedist, rc=rc)
@@ -149,7 +149,7 @@ module modelBCompMod
     rc = ESMF_SUCCESS
     
     ! Garbage collection of objects explicitly created in this component
-    call ESMF_StateGetArray(importState, "modelBComp.array", array, rc=rc)
+    call ESMF_StateGetArray(importState, "modelB.array", array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayGet(array, distgrid=distgrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out

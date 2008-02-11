@@ -1,4 +1,4 @@
-! $Id: modelComp.F90,v 1.1.2.1 2008/02/11 05:10:49 theurich Exp $
+! $Id: modelComp.F90,v 1.1.2.2 2008/02/11 18:19:37 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -123,9 +123,9 @@ module modelCompMod
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get access to src and dst Arrays in States
-    call ESMF_StateGetArray(modelAExp, "modelAComp.array", arraySrc, rc=rc)
+    call ESMF_StateGetArray(modelAExp, "modelA.array", arraySrc, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateGetArray(modelBImp, "modelBComp.array", arrayDst, rc=rc)
+    call ESMF_StateGetArray(modelBImp, "modelB.array", arrayDst, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Precompute and store ArrayRedist: arraySrc -> arrayDst
