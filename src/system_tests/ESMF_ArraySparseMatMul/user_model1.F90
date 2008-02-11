@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.12.2.1 2008/02/11 06:13:46 theurich Exp $
+! $Id: user_model1.F90,v 1.12.2.2 2008/02/11 06:37:13 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -181,9 +181,9 @@ module user_model1
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayGet(array, distgrid=distgrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_DistGridDestroy(distgrid, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayDestroy(array, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_DistGridDestroy(distgrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     print *, "User Comp1 Final returning"
