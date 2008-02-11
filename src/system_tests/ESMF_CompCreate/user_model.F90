@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.10.2.1 2008/02/07 05:24:05 theurich Exp $
+! $Id: user_model.F90,v 1.10.2.2 2008/02/11 05:08:19 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -139,7 +139,7 @@
 
         ! Add an empty "humidity" field to the export state.
         humidity = ESMF_FieldCreateEmpty(name="humidity", rc=rc)
-        call ESMF_StateAddField(exportState, humidity, rc)
+        call ESMF_StateAddField(exportState, humidity, rc=rc)
         call ESMF_StatePrint(exportState, rc=rc)
 
         print *, "User Comp Init returning"
