@@ -1,19 +1,9 @@
-# $Id: makefile,v 1.1.2.1 2008/02/11 05:10:48 theurich Exp $ 
+# $Id: makefile,v 1.1.2.2 2008/02/11 05:19:42 theurich Exp $ 
 
-ALL: tree_build_system_tests
+ALL:      tree_build_system_tests
+run:      tree_run_system_tests
+run_uni:  tree_run_system_tests_uni
 
-run: tree_run_system_tests
-
-CFLAGS    = 
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/system_tests/ESMF_DirectCoupling
 
 
