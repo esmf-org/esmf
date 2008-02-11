@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.1 2007/10/16 21:53:19 theurich Exp $
+! $Id: user_model1.F90,v 1.1.2.1 2008/02/11 05:37:40 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -169,10 +169,23 @@ module user_model1
     type(ESMF_Clock), intent(in) :: clock
     integer, intent(out) :: rc
 
+    ! Local variables
+    type(ESMF_DistGrid) :: distgrid
+    type(ESMF_Array) :: array
+    
     ! Initialize return code
     rc = ESMF_SUCCESS
 
     print *, "User Comp1 Final starting"
+
+    call ESMF_StateGetArray(exportState, "array data", array, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_ArrayGet(array, distgrid=distgrid, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_DistGridDestroy(distgrid, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_ArrayDestroy(array, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
     print *, "User Comp1 Final returning"
 
