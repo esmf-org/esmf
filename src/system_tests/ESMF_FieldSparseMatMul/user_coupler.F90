@@ -1,11 +1,10 @@
-! $Id: user_coupler.F90,v 1.4 2007/11/16 04:34:55 oehmke Exp $
+! $Id: user_coupler.F90,v 1.4.2.1 2008/02/11 06:33:39 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-!BOP
 !
 ! !DESCRIPTION:
 !  User-supplied Coupler
@@ -111,7 +110,6 @@ module user_coupler
     call ESMF_StateGetField(exportState, "field data", dstField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-#if 1
     ! Get Array out of srcField
     call ESMF_FieldGet(srcField, array=srcArray, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -161,7 +159,6 @@ module user_coupler
       if (rc/=ESMF_SUCCESS) return ! bail out
     endif
     
-#endif
     print *, "User Coupler Init returning"
    
   end subroutine user_init

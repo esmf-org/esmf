@@ -1,11 +1,10 @@
-! $Id: ESMF_FieldSparseMatMulSTest.F90,v 1.4.2.1 2007/12/14 19:45:17 svasquez Exp $
+! $Id: ESMF_FieldSparseMatMulSTest.F90,v 1.4.2.2 2008/02/11 06:33:39 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !-------------------------------------------------------------------------
-!BOP
 !
 ! !DESCRIPTION:
 ! System test FieldSparseMatMul.  
@@ -220,6 +219,12 @@ program ESMF_FieldSparseMatMulSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
+  call ESMF_CplCompFinalize(cpl, c1exp, c2imp, rc=localrc)
+  print *, "Coupler Finalize finished, rc =", localrc
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+
   call ESMF_GridCompFinalize(comp1, exportState=c1exp, rc=localrc)
   print *, "Comp 1 Finalize finished, rc =", localrc
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -232,26 +237,11 @@ program ESMF_FieldSparseMatMulSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  call ESMF_CplCompFinalize(cpl, c1exp, c2imp, rc=localrc)
-  print *, "Coupler Finalize finished, rc =", localrc
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 ! Destroy section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-
-  call ESMF_StateDestroy(c1exp, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  call ESMF_StateDestroy(c2imp, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   call ESMF_GridCompDestroy(comp1, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -262,6 +252,15 @@ program ESMF_FieldSparseMatMulSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
   call ESMF_CplCompDestroy(cpl, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+
+  call ESMF_StateDestroy(c1exp, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  call ESMF_StateDestroy(c2imp, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -277,12 +276,12 @@ program ESMF_FieldSparseMatMulSTest
   ! Normal ESMF Test output
   print *, testname, " complete."
 
+  ! IMPORTANT: TestGlobal() prints the PASS: string that the scripts grep for.
   call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), testname, failMsg, testresult, &
     ESMF_SRCLINE)
 
   if ((localPet .eq. 0) .and. (rc .eq. ESMF_SUCCESS)) then
     ! Separate message to console, for quick confirmation of success/failure
-    ! IMPORTANT: test scripts grep for "SUCCESS:" to determine success or fail.
     write(finalMsg, *) "SUCCESS: ",trim(testname)," finished correctly."
     write(0, *) ""
     write(0, *) trim(testname)
