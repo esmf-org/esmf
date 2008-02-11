@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherSTest.F90,v 1.2.2.3 2008/02/11 06:03:20 theurich Exp $
+! $Id: ESMF_ArrayScatterGatherSTest.F90,v 1.2.2.4 2008/02/11 06:18:26 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -306,12 +306,12 @@ program ESMF_ArrayScatterGatherSTest
   ! Normal ESMF Test output
   print *, trim(testname), " complete."
 
+  ! IMPORTANT: TestGlobal() prints the PASS: string that the scripts grep for.
   call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), testname, failMsg, testresult, &
     ESMF_SRCLINE)
 
   if ((localPet .eq. 0) .and. (rc .eq. ESMF_SUCCESS)) then
     ! Separate message to console, for quick confirmation of success/failure
-    ! IMPORTANT: test scripts grep for "SUCCESS:" to determine success or fail.
     write(finalMsg, *) "SUCCESS: ",trim(testname)," finished correctly."
     write(0, *) ""
     write(0, *) trim(testname)
