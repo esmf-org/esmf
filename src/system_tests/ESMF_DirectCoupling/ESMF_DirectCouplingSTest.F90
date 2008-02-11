@@ -1,11 +1,10 @@
-! $Id: ESMF_DirectCouplingSTest.F90,v 1.1.2.1 2008/02/11 05:10:46 theurich Exp $
+! $Id: ESMF_DirectCouplingSTest.F90,v 1.1.2.2 2008/02/11 05:28:30 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !-------------------------------------------------------------------------
-!BOP
 !
 ! !DESCRIPTION:
 ! System test DirectCoupling.  

@@ -1,11 +1,10 @@
-! $Id: ESMF_ArrayRedistSTest.F90,v 1.19.2.1 2007/12/14 19:45:13 svasquez Exp $
+! $Id: ESMF_ArrayRedistSTest.F90,v 1.19.2.2 2008/02/11 05:28:30 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !-------------------------------------------------------------------------
-!BOP
 !
 ! !DESCRIPTION:
 ! System test ArrayRedist.  
