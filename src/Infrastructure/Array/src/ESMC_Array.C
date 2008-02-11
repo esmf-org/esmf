@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.163.2.7 2008/02/11 05:06:23 theurich Exp $
+// $Id: ESMC_Array.C,v 1.163.2.8 2008/02/11 06:02:44 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.163.2.7 2008/02/11 05:06:23 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.163.2.8 2008/02/11 06:02:44 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2619,8 +2619,14 @@ int Array::gather(
   }
   
   // garbage collection
-  if (localPet == rootPet)
+  if (localPet == rootPet){
+    for (int i=0; i<deCount; i++){
+      int de = i;
+      if (patchListPDe[de] == patch)
+        delete [] recvBuffer[de];
+    }    
     delete [] recvBuffer;
+  }
   for (int i=0; i<localDeCount; i++){
     int de = localDeList[i];
     if (patchListPDe[de] != patch) continue; // skip to next local DE
