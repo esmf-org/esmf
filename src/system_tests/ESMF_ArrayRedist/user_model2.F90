@@ -1,11 +1,10 @@
-! $Id: user_model2.F90,v 1.1.2.1 2008/02/11 05:37:40 theurich Exp $
+! $Id: user_model2.F90,v 1.1.2.2 2008/02/11 05:44:06 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
 !--------------------------------------------------------------------------------
 !--------------------------------------------------------------------------------
 
-!BOP
 !
 ! !DESCRIPTION:
 !  User-supplied Component
