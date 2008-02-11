@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.59.2.1 2008/02/07 05:24:01 theurich Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.59.2.2 2008/02/11 04:35:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.59.2.1 2008/02/07 05:24:01 theurich Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.59.2.2 2008/02/11 04:35:59 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -564,7 +564,7 @@
 
       !EX_UTest
       ! Get an integer attribute from a Bundle Test
-      call ESMF_BundleGetAttributeInfo(bundle1, "Sides", count=number, rc=rc)
+      call ESMF_BundleGetAttributeInfo(bundle1, name="Sides", count=number, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an attribute info from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.1), &
