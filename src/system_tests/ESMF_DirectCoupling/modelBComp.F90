@@ -1,4 +1,4 @@
-! $Id: modelBComp.F90,v 1.1.2.2 2008/02/11 18:19:36 theurich Exp $
+! $Id: modelBComp.F90,v 1.1.2.3 2008/02/11 18:20:56 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -116,7 +116,7 @@ module modelBCompMod
       routehandle=model2ioRedist, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
-    ! Main Run Loop - with direct coupling to ioComp and modelBComp
+    ! Main Run Loop - with direct coupling to modelAComp and  ioComp
     do n=1, 3
       
       ! ArrayRedist() "receive" from modelAComp
