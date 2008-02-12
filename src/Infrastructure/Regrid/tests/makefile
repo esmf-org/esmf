@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.42 2008/02/11 17:16:48 dneckels Exp $
+# $Id: makefile,v 1.43 2008/02/12 21:37:15 dneckels Exp $
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -15,7 +15,7 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/Regrid/tests
 
-TESTS_OBJ = regrid_test.o
+TESTS_OBJ = 
 
 ESMF_NewRegridUTest.o:$(TESTS_OBJ)
 
