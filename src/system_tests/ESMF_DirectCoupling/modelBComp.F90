@@ -1,4 +1,4 @@
-! $Id: modelBComp.F90,v 1.1.2.3 2008/02/11 18:20:56 theurich Exp $
+! $Id: modelBComp.F90,v 1.1.2.4 2008/02/12 00:26:33 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -123,7 +123,7 @@ module modelBCompMod
       call ESMF_ArrayRedist(dstArray=array, routehandle=modelA2BRedist, rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
       
-      ! -> Do something with array here
+      ! -> do something with array here
       
       ! ArrayRedist() "send" to ioComp
       call ESMF_ArrayRedist(srcArray=array, routehandle=model2ioRedist, rc=rc)
