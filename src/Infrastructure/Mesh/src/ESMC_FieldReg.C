@@ -106,7 +106,7 @@ _field *FieldReg::Registerfield(const std::string &name,
     fd = new _field(name, attr, _ftype, dim);
     _fmap.insert(fi, std::make_pair(fd->name(), fd));
   } else
-    Throw() << "_field:" << name << " already registered!";
+    return fi->second;
 
   return fd;
 }

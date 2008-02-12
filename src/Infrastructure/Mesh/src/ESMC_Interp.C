@@ -204,9 +204,11 @@ void IWeights::ChangeCoords(const IWeights &src_uv, const IWeights &dst_uv) {
   
 }
 
-void IWeights::Prune(const Mesh &mesh, const MEField<> &mask) {
+void IWeights::Prune(const Mesh &mesh, const MEField<> *mask) {
 
   WeightMap::iterator wi = begin_row(), we = end_row(), wn;
+
+  double my_mask = 1.0;
   
   for (; wi != we;) {
     
@@ -217,7 +219,7 @@ void IWeights::Prune(const Mesh &mesh, const MEField<> &mask) {
     
     ThrowRequire(mi != mesh.map_end(MeshObj::NODE));
     
-    double *mval = mask.data(*mi);
+    double *mval = mask ? (double*) mask->data(*mi) : &my_mask;
     
     if (*mval < 0.5 || !GetMeshObjContext(*mi).is_set(Attr::OWNED_ID))
       weights.erase(wi);
@@ -743,9 +745,9 @@ dstmesh(dest)
     srcF.push_back(fpairs[i].first);
     dstF.push_back(fpairs[i].second);
     
-    ThrowRequire(fpairs[i].second->GetInterp());
+    ThrowRequire(fpairs[i].second->is_nodal() || fpairs[i].second->GetInterp());
     
-    dstf.push_back(fpairs[i].second->GetInterp());
+    dstf.push_back(fpairs[i].second->is_nodal() ? fpairs[i].second->GetNodalfield() : fpairs[i].second->GetInterp());
     iflag.push_back(fpairs[i].idata);
   }
   

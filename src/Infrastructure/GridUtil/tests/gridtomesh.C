@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// $Id: gridtomesh.C,v 1.2 2008/02/02 00:42:12 dneckels Exp $
+// $Id: gridtomesh.C,v 1.3 2008/02/12 21:40:24 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -19,11 +19,13 @@
 #include "ESMF_LogMacros.inc"
 #include <Mesh/include/ESMC_Mesh.h>
 #include <Mesh/include/ESMC_MeshRead.h>
+#include <Mesh/include/ESMC_Exception.h>
 
 #include <iostream>
 
 
 extern "C" void FTN(gridtomesh_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int *staggerLoc, int*rc) {
+  ESMC::Trace __trace("FTN(gridtomesh_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int *staggerLoc, int*rc)");
   ESMCI::VM *vm = *vmpp;
   ESMCI::Grid &grid = **gridpp;
 
@@ -35,14 +37,17 @@ extern "C" void FTN(gridtomesh_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int
   try {
 
     ESMCI::GridToMesh(grid, *staggerLoc, mesh);
- 
-    mesh.Commit();
 
     WriteMesh(mesh, "bobs_grid");
 
   }
   catch(std::exception &x) {
     std::cout << "Error!!! Exception, P:" << localPet << ", <" << x.what() << ">" << std::endl;
+    *rc = ESMF_FAILURE;
+    return;
+  }
+  catch(...) {
+    std::cout << "Error, unknown exception" << std::endl;
     *rc = ESMF_FAILURE;
     return;
   }

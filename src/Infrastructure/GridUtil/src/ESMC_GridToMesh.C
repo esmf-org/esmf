@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.14 2008/02/06 20:43:19 dneckels Exp $
+// $Id: ESMC_GridToMesh.C,v 1.15 2008/02/12 21:40:24 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 #include <vector>
 #include <map>
 
-#define G2M_DBG
+//#define G2M_DBG
 
 using namespace ESMC;
 
@@ -75,7 +75,6 @@ namespace ESMCI {
 // SCRIP.  
 void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
   Trace __trace("GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh)");
-#ifdef NOT
 
   // Initialize the parallel environment for mesh (if not already done)
   ESMC::Par::Init("MESHLOG");
@@ -105,7 +104,7 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
    std::vector<MeshObj*> nodevect(100000);
    std::map<UInt,UInt> ngid2lid;
 
-   UInt local_node_num = 0;
+   UInt local_node_num = 0, local_elem_num = 0;
 
 
    // Set the id of this processor here (me)
@@ -248,7 +247,7 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
    for(gci->toBeg(); !gci->isDone(); gci->adv()) {   
      MeshObj *cell = new MeshObj(MeshObj::ELEMENT,     // Mesh equivalent of Cell
                                  gci->getGlobalID(),   // unique global id
-                                 gci->getLocalID()    // index for bootstrapping field data
+                                 local_elem_num++
                                  );
 
 #ifdef G2M_DBG
@@ -288,6 +287,10 @@ Par::Out() << std::endl;
 
      // Now set up the nodal coordinates
    IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", sdim);
+
+#ifdef G2M_DBG
+   IOField<ElementField> *de = mesh.RegisterElementField(mesh, "DE", 1);
+#endif
 
    // Loop through Mesh nodes setting up coordinates
    MeshDB::iterator ni = mesh.node_begin(), ne = mesh.node_end();
@@ -389,7 +392,6 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
 
  }
 
-#endif
 }
 
 

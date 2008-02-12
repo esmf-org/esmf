@@ -610,7 +610,7 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF)
       dst_rend_Fields.push_back(dstmesh_rend.RegisterField(fptr->name(), fptr->GetMEFamily(),
                    fptr->ObjType(), fptr->GetContext(), fptr->dim(), true, false, fptr->FType()));
     } else {
-      _field *ifptr = fptr->GetInterp();
+      _field *ifptr = fptr->is_nodal() ? fptr->GetNodalfield() : fptr->GetInterp();
       ThrowRequire(ifptr);
       dst_rend_fields.push_back(dstmesh_rend.Registerfield(ifptr->name(), ifptr->GetAttr(), fptr->FType(), fptr->dim()));
     }

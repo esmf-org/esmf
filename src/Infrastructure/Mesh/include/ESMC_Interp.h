@@ -66,10 +66,10 @@ public:
   void ChangeCoords(const IWeights &src_uv, const IWeights &dst_uc);
   
   /*
-   * Remove any rows that have a mask value < 1.  Also remove any rows assigned to
+   * Remove any rows that have a mask value < 1 (if present).  Also remove any rows assigned to
    * a node that is not locally owned.
    */
-  void Prune(const Mesh &mesh, const MEField<> &mask);
+  void Prune(const Mesh &mesh, const MEField<> *mask=0);
 
 };
 
