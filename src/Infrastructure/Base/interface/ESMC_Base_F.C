@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.55 2008/02/05 21:08:08 rokuingh Exp $
+// $Id: ESMC_Base_F.C,v 1.56 2008/02/12 21:25:37 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.55 2008/02/05 21:08:08 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.56 2008/02/12 21:25:37 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -753,6 +753,48 @@ extern "C" {
   return;
 
 }  // end c_ESMC_AttributeSetChar
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttributeSetLink - Set a link in an Attribute hierarchy
+//
+// !INTERFACE:
+      void FTN(c_esmc_attributesetlink)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **source,       // in/out - base object
+      ESMC_Base **destination,  // in/out - base destination object
+      int *rc) {                // in/out - return value 
+// 
+// !DESCRIPTION:
+//     Set a link in an attribute hierarchy.
+//
+//EOP
+
+  int i, status;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!source) {
+    if (rc) *rc = ESMF_FAILURE;    
+    return;
+  }
+  
+  if (!destination) {
+    if (rc) *rc = ESMF_FAILURE;    
+    return;
+  }
+
+  // Set the attribute link on the object.
+  *rc = (**source).root.ESMC_AttributeSetLink(*destination);
+  
+  return;
+
+}  // end c_ESMC_AttributeSetLink
 
 //-----------------------------------------------------------------------------
 //BOP

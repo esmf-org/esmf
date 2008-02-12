@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.100 2008/02/09 21:00:09 rokuingh Exp $
+// $Id: ESMC_Base.C,v 1.101 2008/02/12 21:25:38 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.100 2008/02/09 21:00:09 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.101 2008/02/12 21:25:38 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -96,6 +96,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //EOPI
 
 }  // end ESMC_Attribute
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
@@ -1866,6 +1867,48 @@ if (count) {
   return rc;
 
 }  // end ESMC_AttributeSet
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSetLink"
+//BOP
+// !IROUTINE:  ESMC_AttributeSetLink - set a link in an Attribute hierarchy
+//
+// !INTERFACE:
+      int ESMC_Attribute::ESMC_AttributeSetLink(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      ESMC_Base *destination) {  // in/out destination attribute to be linked
+// !DESCRIPTION:
+//     Set a link in an attribute hierarchy.
+//
+//EOP
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
+  attr = new ESMC_Attribute("link", ESMF_NOKIND, 0, NULL);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+  if (rc != ESMF_SUCCESS)
+    return ESMF_FAILURE;
+  
+  rc = attr->ESMC_AttributeAlloc(1);
+  if (rc != ESMF_SUCCESS)
+    return ESMF_FAILURE;
+    
+  attr->attrList[0] = &(destination->root);
+
+  return rc;
+
+}  // end ESMC_AttributeSetLink
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //

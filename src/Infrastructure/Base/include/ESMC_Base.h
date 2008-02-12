@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.89 2008/02/09 21:00:08 rokuingh Exp $
+// $Id: ESMC_Base.h,v 1.90 2008/02/12 21:25:37 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -140,6 +140,9 @@ class ESMC_Attribute
     int ESMC_AttributeSet(char *name, char *value);
     int ESMC_AttributeSet(char *name, ESMC_TypeKind tk, int count, void *value);
 
+    // attribute set a link in hierarchy
+    int ESMC_AttributeSetLink(ESMC_Base *destination);
+
     // not implemented yet
     int ESMC_AttributeCopy(char *name, ESMC_Attribute *destination);
     int ESMC_AttributeCopyAll(ESMC_Attribute *destination);
@@ -265,6 +268,7 @@ extern "C" {
   void FTN(c_esmc_attributesetvalue)(ESMC_Base **base, char *name, 
                                     ESMC_TypeKind *tk,
                                     int *count, void *value, int *rc, int nlen);
+  void FTN(c_esmc_attributesetlink)(ESMC_Base **source, ESMC_Base **destination, int *rc);
   void FTN(c_esmc_basecreate)(ESMC_Base **base, char *superclass, char *name,
                               int *nattrs, int *rc, int sclen, int nlen);
   void FTN(c_esmc_basedestroy)(ESMC_Base **base, int *rc);
