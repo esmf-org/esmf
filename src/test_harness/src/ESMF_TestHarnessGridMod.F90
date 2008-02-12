@@ -209,7 +209,7 @@
 
   ! arguments
   character(ESMF_MAXSTR), intent(in   ) :: lfilename
-  type(rectilinear_grid_record), pointer, intent(inout) :: grid(:)
+  type(rectilinear_grid_record), pointer :: grid(:)
   integer, intent(  out) :: ngrids
   integer, intent(inout) :: rc
 
