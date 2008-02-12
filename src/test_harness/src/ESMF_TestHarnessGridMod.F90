@@ -777,7 +777,8 @@
 
   ! arguments
   character(ESMF_MAXSTR), intent(in   ) :: lfilename
-  type(curvilinear_grid_record), pointer, intent(inout) :: grid(:)
+! type(curvilinear_grid_record), pointer, intent(inout) :: grid(:)
+  type(curvilinear_grid_record) :: grid(:)
   integer, intent(  out) :: localrc
 
   ! local ESMF types
@@ -839,7 +840,8 @@
 
   ! arguments
   integer, intent(  out) :: localrc
-  type(rectilinear_grid_record), pointer, intent(inout) :: grid(:)
+! type(rectilinear_grid_record), pointer, intent(inout) :: grid(:)
+  type(rectilinear_grid_record) :: grid(:)
 
   ! local ESMF types
 
