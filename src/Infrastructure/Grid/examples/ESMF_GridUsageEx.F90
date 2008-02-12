@@ -1,4 +1,3 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.32 2008/01/29 18:15:57 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -552,14 +551,15 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    ! poles will be defined at each end of the latitude dimension, 
    ! and the depth dimension will remain aperiodic.
    !-------------------------------------------------------------------
-   grid3D=ESMF_GridCreateShapeTile(                &
-              countsPerDEDim1=(/45,45,45,45/), &
-              countsPerDEDim2=(/30,30,30/),    &
-              countsPerDEDim3=(/40/),          &
-              coordDep1=(/1/),                 &
-              coordDep2=(/2/),                 &
-              coordDep3=(/3/),                 &
-              indexflag=ESMF_INDEX_GLOBAL,     & ! Use global indices
+   grid3D=ESMF_GridCreateShapeTile(               &
+              countsPerDEDim1=(/45,75,40,20/),    &
+              countsPerDEDim2=(/30,40,20/),       &
+              countsPerDEDim3=(/40/),             &
+              coordDep1=(/1/),                    &
+              coordDep2=(/2/),                    &
+              coordDep3=(/3/),                    &
+              distDim=(/.true.,.true.,.false./),  & 
+              indexflag=ESMF_INDEX_GLOBAL,        & ! Use global indices
               rc=rc)
 
    !-------------------------------------------------------------------
@@ -683,11 +683,10 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! a Grid. Next, a series of {\tt ESMF\_GridSet()} calls are used to fill
 ! in the details of the grid. Here we use a convenient {\tt ESMF\_GridSetCommitShapeTile()}
 ! call that fills in the Grid via an interface much like the
-! {\tt ESMF\_GridCreateShapeTile()} call. When using
-! {\tt ESMF\_GridSet} the user must explicitly call {\tt ESMF\_GridCommit}
-! afterwards to make the Grid usable. {\tt ESMF\_GridSetCommitShapeTile()}
-! contains this commit internally, so it doesn't need to be 
-! done separately. For consistency's sake the initial {\tt ESMF\_GridCreateEmpty}
+! {\tt ESMF\_GridCreateShapeTile()} call. When using {\tt ESMF\_GridSet} the
+! user must explicity call {\tt ESMF\_GridCommit} afterwards to make the Grid usable.
+! {\tt ESMF\_GridSetCommitShapeTile()} contains this commit internally, so it doesn't
+! need to done separately. For consistency's sake the initial {\tt ESMF\_GridCreateEmpty}
 ! call must occur on the same or a superset of the processors as the
 ! {\tt ESMF\_GridSet()} calls. The following example uses the incremental
 ! technique to create a rectangular 10x20 grid with coordinates at the
@@ -709,10 +708,9 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! Set the grid topology.  Here we define an irregularly distributed 
 ! rectangular Grid.
 !---------------------------------------------------------------------------
-
-   call ESMF_GridSetCommitShapeTile(grid2D,                    &
-                          countsPerDEDim1=(/5,5/),   &
-                          countsPerDEDim2=(/7,7,6/), rc=rc)
+   call ESMF_GridSetCommitShapeTile(grid2D,             &
+                          countsPerDEDim1=(/6,4/),      &
+                          countsPerDEDim2=(/10,3,7/), rc=rc)
 
 !---------------------------------------------------------------------------
 ! Set Grid coordinates at the cell center location.
@@ -889,8 +887,8 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !EOE
 
 !BOC
-   grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/5,5/), &
-          countsPerDEDim2=(/7,7,6/), countsPerDEDim3=(/30/), &
+   grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/6,4/), &
+          countsPerDEDim2=(/10,7,3/), countsPerDEDim3=(/30/), &
           coordDep1=(/1,2/), coordDep2=(/1,2/), &
           coordDep3=(/3/), rc=rc)   
 !EOC 
@@ -908,8 +906,8 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !EOE
 
 !BOC
-   grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/5,5/), &
-           countsPerDEDim2=(/7,7,6/), indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
+   grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/6,4/), &
+           countsPerDEDim2=(/10,7,3/), indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
