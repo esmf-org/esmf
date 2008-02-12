@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.11 2008/02/01 22:36:45 rokuingh Exp $
+! $Id: user_model1.F90,v 1.12 2008/02/12 21:27:29 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -152,7 +152,10 @@ module user_model1
       purp = 'general'
       name = 'discipline'
       value = 'Sir, Yes! Sir.'
-      call ESMF_StateAttPackSet(importState, name, value, convention=conv, purpose=purp, rc=rc)
+      call ESMF_StateAttPackSet(importState, name, value, convention=conv, purpose=purp, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+      
+      call ESMF_StateAttPackCreate(exportState, convention=conv, purpose=purp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       
       ! field stuff
@@ -233,6 +236,16 @@ module user_model1
       if (status .ne. ESMF_SUCCESS) goto 20
       
       call ESMF_ArrayAttPackSet(array, name, value, convention=fconv, purpose=fpurp, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+
+      ! connect the field attribute hierarchy to the state attribute hierarchy
+      call ESMF_StateAttributeSetLink(importState, bundle, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+
+      call ESMF_StateAttributeSetLink(importState, field, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+
+      call ESMF_StateAttributeSetLink(importState, exportState, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
 
       if (myPet .eq. 0) then
