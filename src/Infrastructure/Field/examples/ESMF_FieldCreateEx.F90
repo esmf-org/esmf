@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.2 2008/02/07 05:24:01 theurich Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.3 2008/02/12 22:59:11 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
     type(ESMF_Grid) :: grid
     type(ESMF_DistGrid) :: distgrid
     type(ESMF_ArraySpec) :: arrayspec
-    type(ESMF_Array) :: array1, array2, array3
+    type(ESMF_Array) :: array1, array2
     type(ESMF_DELayout) :: layout
     type(ESMF_VM) :: vm
     !type(ESMF_RelLoc) :: relativelocation
@@ -45,6 +45,8 @@
     real(ESMF_KIND_R8), dimension(:,:), pointer :: farray
     real(ESMF_KIND_R8), dimension(:,:), pointer :: farray1
     integer           :: xdim, ydim, zdim
+    integer, dimension(2) :: compEdgeLWdith
+    integer, dimension(2) :: compEdgeUWdith
 
     integer :: finalrc       
 !   !Set finalrc to success
@@ -79,13 +81,13 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     field1 = ESMF_FieldCreate(grid, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="pressure", rc=rc)
-!EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!EOC
 
-    call ESMF_FieldGet(field1, name=fname, rc=rc)
     print *, "Field creation from Grid and Arrayspec returned, name = ", trim(fname)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -94,67 +96,23 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create Empty Field}
+!\subsubsection{Create Empty Field and Finish an empty Field 
+!  with FieldSetCommit}
 
 !  The user creates an empty {\tt ESMF\_Field} object.
-!  Then the user can add the Grid and data in later calls
+!  Then the user can finalize a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a intrinsic 
+!  Fortran data pointer. This interface is overloaded for type, kind, rank of
+!  of the fortran data pointer.
 !EOE
-!-------------------------------------------------------------------------
-!   !
-!   !  The user creates an empty Field, and adds the Grid and 
-!   !  data in later calls.
 
 !BOC
     field3 = ESMF_FieldCreateEmpty("precip", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-!   ! At some later time, associate a Grid with this Field
-    call ESMF_FieldSetGrid(field3, grid, rc)
+    allocate(farray(10, 20))
+    call ESMF_FieldSetCommit(field3, grid, farray, rc=rc)
 !EOC
-
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    print *, "Field Empty Field Creation example returned"
-
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOE
-!\subsubsection{Reset the ESMF\_Array inside of a ESMF\_Field}
-!  It's often necessary to reset the internal data array within a field.
-!  The following examples demonstrate different ways of creating {\tt ESMF\_Array}
-!  and reset the existing {\tt ESMF\_Array} of a {\tt ESMF\_Field}.
-!EOE
-
-!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
-!-------------------------------- Example -----------------------------
-!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
-!BOE
-!\subsubsection{Use ESMF\_ArrayCreateFromGrid to reset Field internal Array}
-!  User can reset the {\tt ESMF\_Array} inside an existing Field by construct a proper
-!  shape {\tt ESMF\_Array} by calling {\tt ESMF\_ArrayCreateFromGrid}.
-!EOE
-!-------------------------------------------------------------------------
-!   !
-!   !  The user wishes to associate different data with the Field
-!   !  created in example 1.  The get data call returns the 
-!   !  pointer to the old data array; the set call passes in the 
-!   !  pointer to the new array.
-
-    call ESMF_FieldGetArray(field1, array=array1, rc=rc)
-
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    ! The size of the data in the array still has to line up with the Grid
-    ! and its decomposition.
-!BOC
-    array2 = ESMF_ArrayCreateFromGrid(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-        rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    call ESMF_FieldSetArray(field1, array2, rc=rc)
-!EOC
-    print *, "Field reset Field internal array through ArrayCreateFromGrid returned"
-
+    print *, "Finish a Field created by ESMF_FieldCreateEmpty returned"
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
@@ -162,8 +120,12 @@
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
 !\subsubsection{Use ESMF\_ArrayCreate to reset Field internal Array}
+!  It's often necessary to reset the data array contained within a field.
+!  The following examples demonstrate different ways of creating {\tt ESMF\_Array}
+!  and reset the existing {\tt ESMF\_Array} of a {\tt ESMF\_Field}.
 !  User can reset the {\tt ESMF\_Array} inside an existing Field by construct a proper
-!  shape {\tt ESMF\_Array}
+!  shape {\tt ESMF\_Array} 
+!  arrayspec, distgrid are objects created from previous examples.
 !EOE
 !-------------------------------------------------------------------------
 !   !
@@ -174,11 +136,17 @@
 !   ! makes it clear that field1's array has a computational region smaller
 !   ! than its exclusive region.
 !BOC
-    array3 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, staggerLoc=0, &
-            computationalEdgeLWidth=(/0,0/), computationalEdgeUWidth=(/-1,-1/), rc=rc)
+    call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+        computationalEdgeLWidth=compEdgeLWdith, &
+        computationalEdgeUWidth=compEdgeUWdith, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    array2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, staggerLoc=0, &
+            computationalEdgeLWidth=compEdgeLWdith, &
+            computationalEdgeUWidth=compEdgeUWdith, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_FieldSetArray(field1, array3, rc=rc)
+    call ESMF_FieldSetArray(field1, array2, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
     print *, "Field reset internal array through ArrayCreate returned"
 
@@ -190,11 +158,12 @@
 !BOE
 !\subsubsection{Create Field with Grid and Array}
 !  User can create a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a 
-!  {\tt ESMF\_Array}.
+!  {\tt ESMF\_Array}. grid and array2 are objects created in previous examples.
 !EOE
 
 !BOC
     field4 = ESMF_FieldCreate(grid, array2, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
     print *, "Field Create from a Grid and a ESMF_Array returned"
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -206,30 +175,14 @@
 !\subsubsection{Create Field with Grid and Fortran data pointer}
 !  User can create a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a intrinsic 
 !  Fortran data pointer. This interface is overloaded for type, kind, rank of
-!  of the fortran data pointer. In this example, a 2d array is used.
+!  of the fortran data pointer. grid and farray are created in previous examples.
 !EOE
 
 !BOC
-    allocate(farray(10, 20))
     field2 = ESMF_FieldCreate(grid, farray, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
     print *, "Field Create from a Grid and a Fortran data pointer returned"
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
-!-------------------------------- Example -----------------------------
-!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
-!BOE
-!\subsubsection{Finish a Field created by ESMF\_FieldCreateEmpty with FieldSetCommit}
-!  User can finalize a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a intrinsic 
-!  Fortran data pointer. This interface is overloaded for type, kind, rank of
-!  of the fortran data pointer. In this example, a 2d array is used.
-!EOE
-
-!BOC
-    call ESMF_FieldSetCommit(field3, grid, farray, rc=rc)
-!EOC
-    print *, "Finish a Field created by ESMF_FieldCreateEmpty returned"
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
@@ -262,8 +215,6 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_ArrayDestroy(array2, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-    call ESMF_ArrayDestroy(array3, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(farray)
 
 !-------------------------------------------------------------------------
@@ -278,4 +229,3 @@
 	print *, "FAIL: ESMF_FieldCreateEx.F90"
     end if
 end program ESMF_FieldCreateEx
-    

@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.272.2.1 2008/02/07 05:24:03 theurich Exp $
+! $Id: ESMF_Field.F90,v 1.272.2.2 2008/02/12 22:59:11 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -26,7 +26,7 @@
 
 !------------------------------------------------------------------------------
 !
-!BOPI
+!BOP
 ! !MODULE: ESMF_FieldMod - Combine physical field metadata, data and grid
 !
 ! !DESCRIPTION:
@@ -34,12 +34,14 @@
 ! represents a single scalar or vector field.  {\tt ESMF\_Field}s associate
 ! a metadata description expressed as a set of {\tt ESMF\_Attributes} with
 ! a data {\tt ESMF\_Array}, {\tt ESMF\_Grid}, and I/O specification, or
-! {\tt ESMF\_IOSpec} (NOT IMPLEMENTED).  
+! {\tt ESMF\_IOSpec} (NOT IMPLEMENTED). Note that {\tt ESMF\_Attributes} are
+! allowed to be set on empty Field object.
+! 
 ! A gridToFieldMap describes the relationship of the {\tt ESMF\_Array} to
 ! the {\tt ESMF\_Grid}.  
 !
 ! This type is implemented in Fortran 90.
-!
+!EOP
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_UtilTypesMod
@@ -200,7 +202,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.272.2.1 2008/02/07 05:24:03 theurich Exp $'
+      '$Id: ESMF_Field.F90,v 1.272.2.2 2008/02/12 22:59:11 feiliu Exp $'
 
 !==============================================================================
 !
@@ -635,7 +637,7 @@
 !     An interface function to {\tt ESMF\_FieldCreateNoData()}.
 !     This version of {\tt ESMF\_FieldCreate} builds an empty {\tt ESMF\_Field} 
 !     and depends on later calls to add an {\tt ESMF\_Grid} and {\tt ESMF\_Array} to 
-!     it.  
+!     it. Attributes can be added to empty field Object. 
 !
 !     The arguments are:
 !     \begin{description}
