@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.50 2008/02/06 22:58:38 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.51 2008/02/12 20:55:58 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.50 2008/02/06 22:58:38 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.51 2008/02/12 20:55:58 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -4717,6 +4717,57 @@ template void GridIter::getCoord(ESMC_R8 *data);
 template void GridIter::getCoord(ESMC_R4 *data);
 template void GridIter::getCoord(ESMC_I4 *data);
 //-----------------------------------------------------------------------------
+
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridIter::getArrayData()"
+//BOPI
+// !IROUTINE:  getArrayData
+//
+// !INTERFACE:
+template <class TYPE>
+void GridIter::getArrayData(
+//
+// !RETURN VALUE:
+//  void
+//
+// !ARGUMENTS:
+//   Data output
+// 
+                            Array *array,
+                            TYPE *data // (out) input array needs to be at
+                                       // least of size grid rank    
+ ){
+//
+// !DESCRIPTION:
+// Get data from a passed in Array
+// TODO: Need to come up with a way to handle Arrays with more dimensions than the Grid
+// TODO: Need error checking!!!!!
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int localrc;
+  ESMC_LocalArray *localArray;
+  
+  // if done then leave
+  if (done) return;
+  
+  //// Get LocalArray cooresponding to staggerloc, coord and localDE
+  localArray=array->getLocalarrayList()[curDE];
+  
+  //// Get pointer to LocalArray data
+  localArray->getDataInternal(curInd, data);
+  
+}
+
+// Add more types here if necessary
+template void GridIter::getArrayData(Array *array, ESMC_R8 *data);
+template void GridIter::getArrayData(Array *array, ESMC_R4 *data);
+template void GridIter::getArrayData(Array *array, ESMC_I4 *data);
+//-----------------------------------------------------------------------------
+
 
 
 //-----------------------------------------------------------------------------
