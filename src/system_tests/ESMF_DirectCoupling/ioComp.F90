@@ -1,4 +1,4 @@
-! $Id: ioComp.F90,v 1.1.2.2 2008/02/11 18:19:35 theurich Exp $
+! $Id: ioComp.F90,v 1.1.2.3 2008/02/12 00:33:22 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -163,7 +163,7 @@ module ioCompMod
       if (rc/=ESMF_SUCCESS) return ! bail out
       
       ! Copy received data into the source array for next iteration
-      arraySrc = arrayDst
+      farraySrcPtr = farrayDstPtr
       
     enddo
  
