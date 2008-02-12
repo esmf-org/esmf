@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.125 2008/01/29 18:13:15 rokuingh Exp $
+! $Id: ESMF_State.F90,v 1.126 2008/02/12 21:26:51 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -81,6 +81,8 @@
       public ESMF_StateAttributeGetCount  ! number of Attributes
       public ESMF_StateAttributeGetInfo   ! get type, length by name or number
 
+      public ESMF_StateAttributeSetLink   ! link an attribute hierarchy
+
       public ESMF_StateWriteRestart
       public ESMF_StateReadRestart
 
@@ -93,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.125 2008/01/29 18:13:15 rokuingh Exp $'
+      '$Id: ESMF_State.F90,v 1.126 2008/02/12 21:26:51 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -337,6 +339,24 @@ end interface
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that retrieve
 !     information about attributes from an {\tt ESMF\_State}.
+ 
+!EOPI
+      end interface
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_StateAttributeSet - Set a State attribute
+!
+! !INTERFACE:
+      interface ESMF_StateAttributeSetLink
+   
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_StateAttrSetLinkBundle
+        module procedure ESMF_StateAttrSetLinkField
+        module procedure ESMF_StateAttrSetLinkState
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that attach
+!     attributes to an {\tt ESMF\_State}.
  
 !EOPI
       end interface
@@ -3082,6 +3102,168 @@ end interface
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateAttrSetChar
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAttrSetLinkBundle"
+!BOPI
+! !IROUTINE: ESMF_StateAttrSetLinkBundle - Link a State to a Bundle in an attribute hierarchy
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAttributeSetLink()
+      subroutine ESMF_StateAttrSetLinkBundle(state, bundle, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state
+      type(ESMF_Bundle), intent(inout)  :: bundle
+      integer, intent(out), optional  :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a state to a Bundle in an attribute hierarchy
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!      An {\tt ESMF\_State} object.
+!     \item [bundle]
+!      An {\tt ESMF\_Bundle} derived object.
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetLink(state%statep%base, bundle%btypep%base, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateAttrSetLinkBundle
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAttrSetLinkField"
+!BOPI
+! !IROUTINE: ESMF_StateAttrSetLinkField - Link a State to a Field in an attribute hierarchy
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAttributeSetLink()
+      subroutine ESMF_StateAttrSetLinkField(state, field, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state
+      type(ESMF_Field), intent(inout)  :: field
+      integer, intent(out), optional  :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a State to a Field in an attribute hierarchy
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!      An {\tt ESMF\_State} object.
+!     \item [field]
+!      An {\tt ESMF\_Field} derived object.
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetLink(state%statep%base, field%ftypep%base, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateAttrSetLinkField
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAttrSetLinkState"
+!BOPI
+! !IROUTINE: ESMF_StateAttrSetLinkState - Link a State to a State in an attribute hierarchy
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAttributeSetLink()
+      subroutine ESMF_StateAttrSetLinkState(state1, state2, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state1
+      type(ESMF_State), intent(inout)  :: state2
+      integer, intent(out), optional  :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a State to a State in an attribute hierarchy
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [state1]
+!      An {\tt ESMF\_State} object.
+!     \item [state2]
+!      An {\tt ESMF\_State} derived object.
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state1,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state2,rc)
+
+      call ESMF_StateValidate(state1, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+                                  
+      call ESMF_StateValidate(state2, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetLink(state1%statep%base, state2%statep%base, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateAttrSetLinkState
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateCreate"
