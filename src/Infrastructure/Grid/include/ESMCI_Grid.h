@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.33 2008/02/06 22:58:02 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.34 2008/02/12 20:56:20 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -436,8 +436,8 @@ int getComputationalUBound(
   bool isShared();
   int getCount();
   int getDE();
-
   template <class TYPE> void getCoord(TYPE *coord);
+  template <class TYPE> void getArrayData(Array *array, TYPE *data);
   }; 
 
 
