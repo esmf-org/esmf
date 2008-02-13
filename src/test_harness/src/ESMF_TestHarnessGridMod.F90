@@ -42,28 +42,28 @@
   private
 
   type rectilinear_grid_record
-     integer :: rank                    ! rank of the grid
-     type(character_array), pointer :: type(:)  ! type of grid spacing
-     type(character_array), pointer :: units(:) ! physical grid units
-     integer, pointer :: size(:)        ! number of grid elements along axis
-     real(ESMF_KIND_R8), pointer :: range(:,:)     ! physical range of axes
+     integer :: grank                    ! rank of the grid
+     type(character_array), pointer :: gtype(:)  ! type of grid spacing
+     type(character_array), pointer :: gunits(:) ! physical grid units
+     integer, pointer :: gsize(:)        ! number of grid elements along axis
+     real(ESMF_KIND_R8), pointer :: grange(:,:)     ! physical range of axes
   end type rectilinear_grid_record
 
   type curvilinear_grid_record
      integer :: rank                    ! rank of the grid
-     type(character_array), pointer :: units(:) ! physical grid units
-     integer, pointer :: size(:)        ! number of grid elements along axis
+     type(character_array), pointer :: gunits(:) ! physical grid units
+     integer, pointer :: gsize(:)        ! number of grid elements along axis
   end type curvilinear_grid_record
 
 !-------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
 
   type grid_record
-     character(ESMF_MAXSTR) :: name
+     character(ESMF_MAXSTR) :: gname
      integer :: topology                ! key representing the geometry of the grid
      integer :: rank                    ! rank of the grid
      integer, pointer :: order(:)       ! axis number, zero for free.
-     integer, pointer :: size(:)        ! number of grid elements along axis
+     integer, pointer :: gsize(:)        ! number of grid elements along axis
      integer, pointer :: stagger(:,:)   ! stagger location (axis,rank)
      logical, pointer :: periodicity(:) ! (rank) periodicity along axis
      logical, pointer :: halo(:)        ! (rank) periodicity along axis
@@ -120,24 +120,24 @@
   ! open the grid file
   !-----------------------------------------------------------------------------
   localcf = ESMF_ConfigCreate(localrc)
-  if( ESMF_LogMsgFoundError(localrc, "cannot create config object",           &
+  if( ESMF_LogMsgFoundError(localrc, "cannot create config object",            &
                             rcToReturn=rc) ) return
 
   print*,'Opening Grid specifier file  ',trim( lfilename )
   call ESMF_ConfigLoadFile(localcf, trim( lfilename ), rc=localrc )
-  if( ESMF_LogMsgFoundError(localrc,                                          &
-         "cannot load config file " // trim( lfilename ),                     &
+  if( ESMF_LogMsgFoundError(localrc,                                           &
+         "cannot load config file " // trim( lfilename ),                      &
          rcToReturn=rc) ) return
 
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ! Search and extract the grid type specifier
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   call ESMF_ConfigFindLabel(localcf, 'grid_type:', rc=localrc )
-  if( ESMF_LogMsgFoundError(localrc,                                          &
+  if( ESMF_LogMsgFoundError(localrc,                                           &
          "cannot find config label grid_type:", rcToReturn=rc) ) return  
 
   call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
-  if( ESMF_LogMsgFoundError(localrc,                                          &
+  if( ESMF_LogMsgFoundError(localrc,                                           &
          "cannot read config label grid_type:" , rcToReturn=rc) ) return
   print*,'reading grid type:',trim(adjustL(ltmp))
   !-----------------------------------------------------------------------------
@@ -241,83 +241,83 @@
   localrc = ESMF_RC_NOT_IMPL
   rc = ESMF_RC_NOT_IMPL
 
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ! open the grid file
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   localcf = ESMF_ConfigCreate(localrc)
-  if( ESMF_LogMsgFoundError(localrc, "cannot create config object",           &
+  if( ESMF_LogMsgFoundError(localrc, "cannot create config object",            &
                             rcToReturn=rc) ) return
 
   call ESMF_ConfigLoadFile(localcf, trim( lfilename ), rc=localrc )
-  if( ESMF_LogMsgFoundError(localrc,                                          &
-         "cannot load config file " // trim( lfilename ),                     &
+  if( ESMF_LogMsgFoundError(localrc,                                           &
+         "cannot load config file " // trim( lfilename ),                      &
          rcToReturn=rc) ) return
-  !----------------------------------------------------------------------------
+  !----------------------------------------------------------------------------- 
   ! extract the grid type specifier as sanity check
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   call ESMF_ConfigFindLabel(localcf, 'grid_type:', rc=localrc )
-  if( ESMF_LogMsgFoundError(localrc,                                          &
+  if( ESMF_LogMsgFoundError(localrc,                                           &
          "cannot find config label grid_type", rcToReturn=rc) ) return  
 
   call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
-  if( ESMF_LogMsgFoundError(localrc,                                          &
-         "cannot find config label grid_type:",                               &
+  if( ESMF_LogMsgFoundError(localrc,                                           &
+         "cannot find config label grid_type:",                                &
          rcToReturn=rc) ) return
 
-  if( trim(adjustL( ltmp )) /= 'RECTILINEAR' ) call ESMF_LogMsgSetError(      &
-            ESMF_FAILURE, "Wrong grid type in file "// trim( lfilename ),     &
+  if( trim(adjustL( ltmp )) /= 'RECTILINEAR' ) call ESMF_LogMsgSetError(       &
+            ESMF_FAILURE, "Wrong grid type in file "// trim( lfilename ),      &
             rcToReturn=rc)
 
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ! search for the grid specifier table
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   call ESMF_ConfigFindLabel(localcf, trim(descriptor_label), rc=localrc )
   if (localrc .ne. ESMF_SUCCESS) print*,' find descriptor label failed'
-  if( ESMF_LogMsgFoundError(localrc,                                          &
-         "cannot find config label " // trim(descriptor_label),               &
+  if( ESMF_LogMsgFoundError(localrc,                                           &
+         "cannot find config label " // trim(descriptor_label),                &
          rcToReturn=rc) ) return
 
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ! determine the total number of table rows, continue only if not empty
   ! NOTE: the number of table rows >= number of grid entries due to the
   ! possibility of continued lines.
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   call ESMF_ConfigGetDim(localcf, nrows, ntmp, trim(descriptor_label),         &
                          rc=localrc)
-  if( ESMF_LogMsgFoundError(localrc,                                          &
-         "cannot get descriptor table size in file " // trim(lfilename),      &
+  if( ESMF_LogMsgFoundError(localrc,                                           &
+         "cannot get descriptor table size in file " // trim(lfilename),       &
          rcToReturn=rc) ) return
 
   if( nrows .le. 0 ) then
-     call ESMF_LogMsgSetError( ESMF_FAILURE,                                  &
-             "grid specifier table is empty in file " //trim(lfilename),      &
+     call ESMF_LogMsgSetError( ESMF_FAILURE,                                   &
+             "grid specifier table is empty in file " //trim(lfilename),       &
              rcToReturn=rc)
      return
   endif
 
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ! extract the table column lengths of this file
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   call ESMF_ConfigFindLabel(localcf, trim(descriptor_label), rc=localrc )
-  if( ESMF_LogMsgFoundError(localrc,                                          &
-         "cannot find config label " // trim(descriptor_label),               &
+  if( ESMF_LogMsgFoundError(localrc,                                           &
+         "cannot find config label " // trim(descriptor_label),                &
          rcToReturn=rc) ) return
 
   allocate( ncolumns(nrows) )
 
   do krow=1,nrows
      call ESMF_ConfigNextLine(localcf, flag , rc=localrc)
-     if( ESMF_LogMsgFoundError(localrc,                                       &
-             "cannot advance to next line of table " //                       &
-              trim(descriptor_label) // " in file " // trim(lfilename),       &
+     if( ESMF_LogMsgFoundError(localrc,                                        &
+             "cannot advance to next line of table " //                        &
+              trim(descriptor_label) // " in file " // trim(lfilename),        &
               rcToReturn=rc) ) return
 
 
       ncolumns(krow) = ESMF_ConfigGetLen(localcf, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS .or. ncolumns(krow) .lt. 6 ) then
         write(lchar,"(i5)") krow
-        call ESMF_LogMsgSetError( ESMF_FAILURE,                               &
-                 "problem reading line " // trim(adjustl(lchar)) //           &
+        call ESMF_LogMsgSetError( ESMF_FAILURE,                                &
+                 "problem reading line " // trim(adjustl(lchar)) //            &
                  " of table in file " // trim(lfilename), rcToReturn=rc)
         return
       endif
@@ -330,7 +330,7 @@
   enddo
 ! drs debug
 
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ! determine the actual number of grids specified in the file by counting 
   ! lines not starting with the continuation symbol '&'. The number of actual
   ! grids in the table is less than or equal to 'nrows' the number of rows in
@@ -338,16 +338,16 @@
   ! is nonzero. The value zero indicates that that row is a continiued line,
   ! otherwise a nonzero value indicates the number of the current grid being 
   ! read.
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   call ESMF_ConfigFindLabel(localcf, trim(descriptor_label), rc=localrc )
-  if( ESMF_LogMsgFoundError(localrc,                                          &
-         "cannot find config label " // trim(descriptor_label),               &
+  if( ESMF_LogMsgFoundError(localrc,                                           &
+         "cannot find config label " // trim(descriptor_label),                &
          rcToReturn=rc) ) return
   allocate( new_row(nrows) )
 
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ! count the number of actual grids (less than or equal to number of table rows)
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ngrid = 0
   do krow=1,nrows
      call ESMF_ConfigNextLine(localcf, flag , rc=localrc)
@@ -371,7 +371,7 @@
   enddo
 ! drs debug
 
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ! Read the grid specifications from the table:
   ! (1) start at the top of the table.
   ! (2) read the row elements until the end of the row is reached.
@@ -379,16 +379,16 @@
   !     (a) if not advance to the next line and continue to read elements until
   !         the end of the line is reached - repeat (3)
   !     (b) if all the elements read, skip to next row and repeat (2)
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   call ESMF_ConfigFindLabel(localcf, trim(descriptor_label), rc=localrc )
-  if( ESMF_LogMsgFoundError(localrc,                                          &
-         "cannot find config label " // trim(descriptor_label),               &
+  if( ESMF_LogMsgFoundError(localrc,                                           &
+         "cannot find config label " // trim(descriptor_label),                &
          rcToReturn=rc) ) return
 
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ! move to the next line in the table and confirm that (1) the line doesn't
   ! start with a continuation symbol, and (2) that the line isn't empty.
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   igrid= 0
   do krow=1,nrows
 
@@ -404,16 +404,16 @@
         irow = krow   
         igrid = igrid +1 ! new grid description
         if( igrid > ngrid ) then
-           call ESMF_LogMsgSetError( ESMF_FAILURE,                            &
-                 "attempting to access a higher index grid than exists.",     &
+           call ESMF_LogMsgSetError( ESMF_FAILURE,                             &
+                 "attempting to access a higher index grid than exists.",      &
                  rcToReturn=rc)
         endif
         ! allocate workspace
-        grid(igrid)%rank = grank
-        allocate( grid(igrid)%type(grank) )
-        allocate( grid(igrid)%units(grank) )
-        allocate( grid(igrid)%size(grank) )
-        allocate( grid(igrid)%range(grank,2) )
+        grid(igrid)%grank = grank
+        allocate( grid(igrid)%gtype(grank) )
+        allocate( grid(igrid)%gunits(grank) )
+        allocate( grid(igrid)%gsize(grank) )
+        allocate( grid(igrid)%grange(grank,2) )
 
         print*,'irow',irow
         ! read row elements until grid rank is reached
@@ -424,13 +424,13 @@
               call ESMF_ConfigGetAttribute(localcf, gtype, rc=localrc)
               ! if error
               write(lchar,"(i5)") krow
-              if( ESMF_LogMsgFoundError(localrc,                              &
-                "cannot read row " // trim(adjustL(lchar)) // " of table " // &
-                trim(descriptor_label) // "in file " // trim(lfilename),      &
+              if( ESMF_LogMsgFoundError(localrc,                               &
+                "cannot read row " // trim(adjustL(lchar)) // " of table " //  &
+                trim(descriptor_label) // "in file " // trim(lfilename),       &
                 rcToReturn=rc) ) return
 
               kelements = kelements + 1
-              grid(igrid)%type(irank)%name = gtype 
+              grid(igrid)%gtype(irank)%string = gtype 
               !drs debug
           print*,igrid,' kelements/ncolumns:',kelements-1,'/', ncolumns(irow), gtype
               !drs debug
@@ -446,29 +446,29 @@
                  call ESMF_ConfigNextLine(localcf, flag, rc=localrc )
                  ! if error
                  write(lchar,"(i5)") irow
-                 if( ESMF_LogMsgFoundError(localrc,                           &
-                   "cannot read row " // trim(adjustL(lchar)) //              &
-                   " of table " //trim(descriptor_label) // "in file " //     &
+                 if( ESMF_LogMsgFoundError(localrc,                            &
+                   "cannot read row " // trim(adjustL(lchar)) //               &
+                   " of table " //trim(descriptor_label) // "in file " //      &
                    trim(lfilename), rcToReturn=rc) ) return
 
                  ! read and discard continuation symbol
                  call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
-                 if( ESMF_LogMsgFoundError(localrc,                           &
-                   "cannot read row " // trim(adjustL(lchar)) //              &
-                   " of table " //trim(descriptor_label) // "in file " //     &
+                 if( ESMF_LogMsgFoundError(localrc,                            &
+                   "cannot read row " // trim(adjustL(lchar)) //               &
+                   " of table " //trim(descriptor_label) // "in file " //      &
                    trim(lfilename), rcToReturn=rc) ) return
 
                ! kelements = kelements + 1
 
                  ! read grid type
                  call ESMF_ConfigGetAttribute(localcf, gtype, rc=localrc)
-                 if( ESMF_LogMsgFoundError(localrc,                           &
-                   "cannot read row " // trim(adjustL(lchar)) //              &
-                   " of table " //trim(descriptor_label) // "in file " //     &
+                 if( ESMF_LogMsgFoundError(localrc,                            &
+                   "cannot read row " // trim(adjustL(lchar)) //               &
+                   " of table " //trim(descriptor_label) // "in file " //      &
                    trim(lfilename), rcToReturn=rc) ) return
 
                  kelements = kelements + 1
-                 grid(igrid)%type(irank)%name = gtype 
+                 grid(igrid)%gtype(irank)%string = gtype 
               !drs debug
           print*,igrid,' kelements/ncolumns:',kelements-1,'/', ncolumns(irow), gtype
               !drs debug
@@ -476,29 +476,29 @@
               else
                  ! error continuation line missing, but grid not finished
                  write(lchar,"(i5)") irow
-                 call ESMF_LogMsgSetError( ESMF_FAILURE,                      &
-                   "cannot read row " // trim(adjustL(lchar)) //              &
-                   " of table " //trim(descriptor_label) // "in file " //     &
+                 call ESMF_LogMsgSetError( ESMF_FAILURE,                       &
+                   "cannot read row " // trim(adjustL(lchar)) //               &
+                   " of table " //trim(descriptor_label) // "in file " //      &
                    trim(lfilename), rcToReturn=rc)
 
               endif     ! new line
            endif     ! read grid type
 
-           !-------------------------------------------------------------------
+           !--------------------------------------------------------------------
            ! read grid size
-           !-------------------------------------------------------------------
+           !--------------------------------------------------------------------
            if( kelements < ncolumns(irow) ) then
            ! read grid type
               call ESMF_ConfigGetAttribute(localcf, gsize, rc=localrc)
               ! if error
               write(lchar,"(i5)") krow
-              if( ESMF_LogMsgFoundError(localrc,                              &
-                "cannot read row " // trim(adjustL(lchar)) // " of table " // &
-                trim(descriptor_label) // "in file " // trim(lfilename),      &
+              if( ESMF_LogMsgFoundError(localrc,                               &
+                "cannot read row " // trim(adjustL(lchar)) // " of table " //  &
+                trim(descriptor_label) // "in file " // trim(lfilename),       &
                 rcToReturn=localrc) ) return
 
               kelements = kelements + 1
-              grid(igrid)%size(irank) = gsize 
+              grid(igrid)%gsize(irank) = gsize 
               !drs debug
          print*,igrid,' kelements/ncolumns:',kelements-1,'/', ncolumns(irow),gsize
               !drs debug
@@ -513,28 +513,28 @@
                  ! if error
                  write(lchar,"(i5)") irow
                  call ESMF_ConfigNextLine(localcf, flag, rc=localrc)
-                 if( ESMF_LogMsgFoundError(localrc,                           &
-                   "cannot read row " // trim(adjustL(lchar)) //              &
-                   " of table " //trim(descriptor_label) // "in file " //     &
+                 if( ESMF_LogMsgFoundError(localrc,                            &
+                   "cannot read row " // trim(adjustL(lchar)) //               &
+                   " of table " //trim(descriptor_label) // "in file " //      &
                    trim(lfilename), rcToReturn=rc) ) return
 
                  ! read and discard continuation symbol
                  call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
-                 if( ESMF_LogMsgFoundError(localrc,                           &
-                   "cannot read row " // trim(adjustL(lchar)) //              &
-                   " of table " //trim(descriptor_label) // "in file " //     &
+                 if( ESMF_LogMsgFoundError(localrc,                            &
+                   "cannot read row " // trim(adjustL(lchar)) //               &
+                   " of table " //trim(descriptor_label) // "in file " //      &
                    trim(lfilename), rcToReturn=rc) ) return
                ! kelements = kelements + 1
 
                  ! read grid size
                  call ESMF_ConfigGetAttribute(localcf, gsize, rc=localrc)
-                 if( ESMF_LogMsgFoundError(localrc,                           &
-                   "cannot read row " // trim(adjustL(lchar)) //              &
-                   " of table " //trim(descriptor_label) // "in file " //     &
+                 if( ESMF_LogMsgFoundError(localrc,                            &
+                   "cannot read row " // trim(adjustL(lchar)) //               &
+                   " of table " //trim(descriptor_label) // "in file " //      &
                    trim(lfilename), rcToReturn=rc) ) return
 
                  kelements = kelements + 1
-                 grid(igrid)%size(irank) = gsize 
+                 grid(igrid)%gsize(irank) = gsize 
               !drs debug
           print*,igrid,' kelements/ncolumns:',kelements-1,'/', ncolumns(irow),gsize
               !drs debug
@@ -542,29 +542,29 @@
               else
                  ! error continuation line missing
                  write(lchar,"(i5)") irow
-                 call ESMF_LogMsgSetError( ESMF_FAILURE,                      &
-                   "cannot read row " // trim(adjustL(lchar)) //              &
-                   " of table " //trim(descriptor_label) // "in file " //     &
+                 call ESMF_LogMsgSetError( ESMF_FAILURE,                       &
+                   "cannot read row " // trim(adjustL(lchar)) //               &
+                   " of table " //trim(descriptor_label) // "in file " //      &
                    trim(lfilename), rcToReturn=rc)
 
               endif    ! new line
            endif    ! read grid size
 
-           !-------------------------------------------------------------------
+           !--------------------------------------------------------------------
            ! read minimum grid range
-           !-------------------------------------------------------------------
+           !--------------------------------------------------------------------
            if( kelements < ncolumns(irow) ) then
            ! read grid type
               call ESMF_ConfigGetAttribute(localcf, gmin, rc=localrc)
               ! if error
               write(lchar,"(i5)") krow
-              if( ESMF_LogMsgFoundError(localrc,                              &
-                "cannot read row " // trim(adjustL(lchar)) // " of table " // &
-                trim(descriptor_label) // "in file " // trim(lfilename),      &
+              if( ESMF_LogMsgFoundError(localrc,                               &
+                "cannot read row " // trim(adjustL(lchar)) // " of table " //  &
+                trim(descriptor_label) // "in file " // trim(lfilename),       &
                 rcToReturn=localrc) ) return
 
               kelements = kelements + 1
-              grid(igrid)%range(irank,1) = gmin 
+              grid(igrid)%grange(irank,1) = gmin 
               !drs debug
            print*,igrid,' kelements/ncolumns:',kelements-1,'/', ncolumns(irow),gmin
               !drs debug
@@ -579,29 +579,29 @@
                  ! if error
                  call ESMF_ConfigNextLine(localcf, flag, rc=localrc)
                  write(lchar,"(i5)") irow
-                 if( ESMF_LogMsgFoundError(localrc,                           &
-                   "cannot read row " // trim(adjustL(lchar)) //              &
-                   " of table " //trim(descriptor_label) // "in file " //     &
+                 if( ESMF_LogMsgFoundError(localrc,                            &
+                   "cannot read row " // trim(adjustL(lchar)) //               &
+                   " of table " //trim(descriptor_label) // "in file " //      &
                    trim(lfilename), rcToReturn=rc) ) return
 
                  ! read and discard continuation symbol
                  call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
-                 if( ESMF_LogMsgFoundError(localrc,                           &
-                   "cannot read row " // trim(adjustL(lchar)) //              &
-                   " of table " //trim(descriptor_label) // "in file " //     &
+                 if( ESMF_LogMsgFoundError(localrc,                            &
+                   "cannot read row " // trim(adjustL(lchar)) //               &
+                   " of table " //trim(descriptor_label) // "in file " //      &
                    trim(lfilename), rcToReturn=rc) ) return
 
             !    kelements = kelements + 1
 
                  ! read minimum grid range
                  call ESMF_ConfigGetAttribute(localcf, gmin, rc=localrc)
-                 if( ESMF_LogMsgFoundError(localrc,                           &
-                   "cannot read row " // trim(adjustL(lchar)) //              &
-                   " of table " //trim(descriptor_label) // "in file " //     &
+                 if( ESMF_LogMsgFoundError(localrc,                            &
+                   "cannot read row " // trim(adjustL(lchar)) //               &
+                   " of table " //trim(descriptor_label) // "in file " //      &
                    trim(lfilename), rcToReturn=rc) ) return
 
                  kelements = kelements + 1
-                 grid(igrid)%range(irank,1) = gmin 
+                 grid(igrid)%grange(irank,1) = gmin 
               !drs debug
           print*,igrid,' kelements/ncolumns:',kelements-1,'/', ncolumns(irow),gmin
               !drs debug
@@ -609,28 +609,28 @@
               else
                  ! error continuation line missing, but grid not finished
                  write(lchar,"(i5)") irow
-                 call ESMF_LogMsgSetError( ESMF_FAILURE,                      &
-                   "cannot read row " // trim(adjustL(lchar)) //              &
-                   " of table " //trim(descriptor_label) // "in file " //     &
+                 call ESMF_LogMsgSetError( ESMF_FAILURE,                       &
+                   "cannot read row " // trim(adjustL(lchar)) //               &
+                   " of table " //trim(descriptor_label) // "in file " //      &
                    trim(lfilename), rcToReturn=rc)
               endif     ! new line
            endif    ! read grid range
 
-           !-------------------------------------------------------------------
+           !--------------------------------------------------------------------
            ! read maximum grid range
-           !-------------------------------------------------------------------
+           !--------------------------------------------------------------------
            if( kelements < ncolumns(irow) ) then
            ! read grid type
               call ESMF_ConfigGetAttribute(localcf, gmax, rc=localrc)
               ! if error
               write(lchar,"(i5)") irow
-              if( ESMF_LogMsgFoundError(localrc,                              &
-                "cannot read row " // trim(adjustL(lchar)) //                 &
-                " of table " //trim(descriptor_label) // "in file " //        &
+              if( ESMF_LogMsgFoundError(localrc,                               &
+                "cannot read row " // trim(adjustL(lchar)) //                  &
+                " of table " //trim(descriptor_label) // "in file " //         &
                 trim(lfilename), rcToReturn=rc) ) return
 
               kelements = kelements + 1
-              grid(igrid)%range(irank,2) = gmax 
+              grid(igrid)%grange(irank,2) = gmax 
               !drs debug
           print*,igrid,' kelements/ncolumns:',kelements-1,'/', ncolumns(irow),gmax
               !drs debug
@@ -645,29 +645,29 @@
                  ! if error
                  call ESMF_ConfigNextLine(localcf, flag, rc=localrc)
                  write(lchar,"(i5)") irow
-                 if( ESMF_LogMsgFoundError(localrc,                           &
-                   "cannot read row " // trim(adjustL(lchar)) //              &
-                   " of table " //trim(descriptor_label) // "in file " //     &
+                 if( ESMF_LogMsgFoundError(localrc,                            &
+                   "cannot read row " // trim(adjustL(lchar)) //               &
+                   " of table " //trim(descriptor_label) // "in file " //      &
                    trim(lfilename), rcToReturn=rc) ) return
 
                  ! read and discard continuation symbol
                  call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
-                 if( ESMF_LogMsgFoundError(localrc,                           &
-                   "cannot read row " // trim(adjustL(lchar)) //              &
-                   " of table " //trim(descriptor_label) // "in file " //     &
+                 if( ESMF_LogMsgFoundError(localrc,                            &
+                   "cannot read row " // trim(adjustL(lchar)) //               &
+                   " of table " //trim(descriptor_label) // "in file " //      &
                    trim(lfilename), rcToReturn=rc) ) return
 
            !     kelements = kelements + 1
 
                  ! read maximum grid range
                  call ESMF_ConfigGetAttribute(localcf, gmax, rc=localrc)
-                 if( ESMF_LogMsgFoundError(localrc,                           &
-                   "cannot read row " // trim(adjustL(lchar)) //              &
-                   " of table " //trim(descriptor_label) // "in file " //     &
+                 if( ESMF_LogMsgFoundError(localrc,                            &
+                   "cannot read row " // trim(adjustL(lchar)) //               &
+                   " of table " //trim(descriptor_label) // "in file " //      &
                    trim(lfilename), rcToReturn=rc) ) return
 
                  kelements = kelements + 1
-                 grid(igrid)%range(irank,2) = gmax 
+                 grid(igrid)%grange(irank,2) = gmax 
               !drs debug
           print*,igrid,' kelements/ncolumns:',kelements-1,'/', ncolumns(irow),gmax
               !drs debug
@@ -675,28 +675,28 @@
               else
                  ! error continuation line missing, but grid not finished
                  write(lchar,"(i5)") irow
-                 call ESMF_LogMsgSetError( ESMF_FAILURE,                      &
-                   "cannot read row " // trim(adjustL(lchar)) //              &
-                   " of table " //trim(descriptor_label) // "in file " //     &
+                 call ESMF_LogMsgSetError( ESMF_FAILURE,                       &
+                   "cannot read row " // trim(adjustL(lchar)) //               &
+                   " of table " //trim(descriptor_label) // "in file " //      &
                    trim(lfilename), rcToReturn=rc)
 
               endif    ! new line
            endif    ! read grid range
 
-           !-------------------------------------------------------------------
+           !--------------------------------------------------------------------
            ! read grid units
-           !-------------------------------------------------------------------
+           !--------------------------------------------------------------------
            if( kelements < ncolumns(irow) ) then
               call ESMF_ConfigGetAttribute(localcf, gunits, rc=localrc)
               ! if error
               write(lchar,"(i5)") irow
-              if( ESMF_LogMsgFoundError(localrc,                              &
-                "cannot read row " // trim(adjustL(lchar)) //                 &
-                " of table " //trim(descriptor_label) // "in file " //        &
+              if( ESMF_LogMsgFoundError(localrc,                               &
+                "cannot read row " // trim(adjustL(lchar)) //                  &
+                " of table " //trim(descriptor_label) // "in file " //         &
                 trim(lfilename), rcToReturn=rc) ) return
 
               kelements = kelements + 1
-              grid(igrid)%units(irank)%name = gunits
+              grid(igrid)%gunits(irank)%string = gunits
               !drs debug
          print*,igrid,' kelements/ncolumns:',kelements-1,'/', ncolumns(irow),gunits
               !drs debug
@@ -711,29 +711,29 @@
                  ! if error
                  call ESMF_ConfigNextLine(localcf, flag, rc=localrc)
                  write(lchar,"(i5)") irow
-                 if( ESMF_LogMsgFoundError(localrc,                           &
-                   "cannot read row " // trim(adjustL(lchar)) //              &
-                   " of table " //trim(descriptor_label) // "in file " //     &
+                 if( ESMF_LogMsgFoundError(localrc,                            &
+                   "cannot read row " // trim(adjustL(lchar)) //               &
+                   " of table " //trim(descriptor_label) // "in file " //      &
                    trim(lfilename), rcToReturn=rc) ) return
 
                  ! read and discard continuation symbol
                  call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
-                 if( ESMF_LogMsgFoundError(localrc,                           &
-                   "cannot read row " // trim(adjustL(lchar)) //              &
-                   " of table " //trim(descriptor_label) // "in file " //     &
+                 if( ESMF_LogMsgFoundError(localrc,                            &
+                   "cannot read row " // trim(adjustL(lchar)) //               &
+                   " of table " //trim(descriptor_label) // "in file " //      &
                    trim(lfilename), rcToReturn=rc) ) return
 
            !     kelements = kelements + 1
 
                  ! read grid units
                  call ESMF_ConfigGetAttribute(localcf, gunits, rc=localrc)
-                 if( ESMF_LogMsgFoundError(localrc,                           &
-                   "cannot read row " // trim(adjustL(lchar)) //              &
-                   " of table " //trim(descriptor_label) // "in file " //     &
+                 if( ESMF_LogMsgFoundError(localrc,                            &
+                   "cannot read row " // trim(adjustL(lchar)) //               &
+                   " of table " //trim(descriptor_label) // "in file " //      &
                    trim(lfilename), rcToReturn=rc) ) return
 
                  kelements = kelements + 1
-                 grid(igrid)%units(irank)%name = gunits
+                 grid(igrid)%gunits(irank)%string = gunits
               !drs debug
          print*,igrid,' kelements/ncolumns:',kelements-1,'/', ncolumns(irow),gunits
               !drs debug
@@ -741,9 +741,9 @@
               else
                  ! error continuation line missing, but grid not finished
                  write(lchar,"(i5)") irow
-                 call ESMF_LogMsgSetError( ESMF_FAILURE,                      &
-                   "cannot read row " // trim(adjustL(lchar)) //              &
-                   " of table " //trim(descriptor_label) // "in file " //     &
+                 call ESMF_LogMsgSetError( ESMF_FAILURE,                       &
+                   "cannot read row " // trim(adjustL(lchar)) //               &
+                   " of table " //trim(descriptor_label) // "in file " //      &
                    trim(lfilename), rcToReturn=rc)
 
 
@@ -759,13 +759,13 @@
 
   deallocate( ncolumns )
 
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   rc = ESMF_SUCCESS     
   !-----------------------------------------------------------------------------
 
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   end subroutine read_rectilinear_grid
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
   subroutine read_curvilinear_grid(lfilename, grid, localrc)
@@ -778,7 +778,7 @@
   ! arguments
   character(ESMF_MAXSTR), intent(in   ) :: lfilename
 ! type(curvilinear_grid_record), pointer, intent(inout) :: grid(:)
-  type(curvilinear_grid_record) :: grid(:)
+  type(curvilinear_grid_record), pointer :: grid(:)
   integer, intent(  out) :: localrc
 
   ! local ESMF types
@@ -794,35 +794,35 @@
   ! open the grid file
   !-----------------------------------------------------------------------------
   localcf = ESMF_ConfigCreate(localrc)
-  if( ESMF_LogMsgFoundError(localrc, "cannot create config object",           &
+  if( ESMF_LogMsgFoundError(localrc, "cannot create config object",            &
                             rcToReturn=localrc) ) return
 
   print*,'Opening Grid specifier file  ',trim( lfilename )
   call ESMF_ConfigLoadFile(localcf, trim( lfilename ), rc=localrc )
-  if( ESMF_LogMsgFoundError(localrc,                                          &
-         "cannot load config file " // trim( lfilename ),                     &
+  if( ESMF_LogMsgFoundError(localrc,                                           &
+         "cannot load config file " // trim( lfilename ),                      &
          rcToReturn=localrc) ) return
 
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ! Search and extract the grid type specifier
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   call ESMF_ConfigFindLabel(localcf, 'grid_type:', rc=localrc )
-  if( ESMF_LogMsgFoundError(localrc,                                          &
+  if( ESMF_LogMsgFoundError(localrc,                                           &
          "cannot find config label grid_type", rcToReturn=localrc) ) return  
 
   call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
-  if( ESMF_LogMsgFoundError(localrc,                                          &
-         "cannot find config label grid_type:",                               &
+  if( ESMF_LogMsgFoundError(localrc,                                           &
+         "cannot find config label grid_type:",                                &
          rcToReturn=localrc) ) return
 
-  if( trim(adjustL( ltmp )) /= 'CURVILINEAR' ) call ESMF_LogMsgSetError(      &
-            ESMF_FAILURE, "Wrong grid typew in file "// trim( lfilename ),    &
+  if( trim(adjustL( ltmp )) /= 'CURVILINEAR' ) call ESMF_LogMsgSetError(       &
+            ESMF_FAILURE, "Wrong grid typew in file "// trim( lfilename ),     &
             rcToReturn=localrc)
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ! CURRENTLY NOT SUPPORTED
-  !----------------------------------------------------------------------------
-  call ESMF_LogMsgSetError( ESMF_FAILURE,                                     &
-           "Curvilinear grids not currently supported "// trim( lfilename ),  &
+  !-----------------------------------------------------------------------------
+  call ESMF_LogMsgSetError( ESMF_FAILURE,                                      &
+           "Curvilinear grids not currently supported "// trim( lfilename ),   &
             rcToReturn=localrc)
   !-----------------------------------------------------------------------------
   localrc = ESMF_SUCCESS     
@@ -841,7 +841,7 @@
   ! arguments
   integer, intent(  out) :: localrc
 ! type(rectilinear_grid_record), pointer, intent(inout) :: grid(:)
-  type(rectilinear_grid_record) :: grid(:)
+  type(rectilinear_grid_record), pointer :: grid(:)
 
   ! local ESMF types
 
