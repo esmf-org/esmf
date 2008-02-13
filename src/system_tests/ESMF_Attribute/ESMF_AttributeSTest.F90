@@ -29,7 +29,7 @@ program ESMF_AttributeSTest
   integer :: localPet, petCount, rc
   character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
   type(ESMF_VM):: vm
-  type(ESMF_State) :: c1imp, c1exp, c2imp, c2exp
+  type(ESMF_State) :: c1imp, c1exp, c2imp, c2exp, MyState, physics
   type(ESMF_GridComp) :: comp1, comp2
   type(ESMF_CplComp) :: cpl
   character(len=ESMF_MAXSTR) :: name, value, conv, purp
@@ -168,16 +168,6 @@ program ESMF_AttributeSTest
   purp = 'general'
 
   call ESMF_StateAttPackCreate(c1imp, convention=conv, purpose=purp, rc=rc)
-  if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  
-  !call ESMF_StateAttPackSet(c1imp, name, value, convention=conv, purpose=purp, rc=rc)
-  if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  
-  !call ESMF_StateAttPackWrite(c1imp, convention=conv, purpose=purp, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)

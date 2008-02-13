@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.5 2008/01/26 02:10:15 rokuingh Exp $
+! $Id: user_coupler.F90,v 1.6 2008/02/13 01:49:42 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -175,16 +175,6 @@ module user_coupler
       value = 'NCAR'
       call ESMF_StateAttPackSet(exportState, name, value, convention=conv, purpose=purp, rc=rc)
       if (status .ne. ESMF_SUCCESS) goto 20
-      
-      if (myPet .eq. 0) then
-        conv = 'ESG-CDP'
-        purp = 'general'
-      
-        print *, 'Write the Attpack from the second run of the coupler.'
-    
-        call ESMF_StateAttPackWrite(exportState, convention=conv, purpose=purp, rc=rc)
-        if (status .ne. ESMF_SUCCESS) goto 20
-      endif
     endif
 
     rc = ESMF_SUCCESS
