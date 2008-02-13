@@ -94,9 +94,9 @@
   print*,'Read specification'
   do kfile=1, harness%numRecords
      do k=1, harness%Record(kfile)%numStrings
-        do n=1,harness%Record(kfile)%string(k)%gridfiles%size
+        do n=1,harness%Record(kfile)%string(k)%gridfiles%charsize
            call read_grid_specification(                                       &
-                    harness%Record(kfile)%string(k)%gridfiles%string(n)%name,rc)
+                  harness%Record(kfile)%string(k)%gridfiles%tag(n)%string,rc)
            if (rc .ne. ESMF_SUCCESS) then 
                print*,' read grid spec failed'
                finalrc = ESMF_FAILURE
@@ -451,8 +451,8 @@ contains
       !----------------------------------------------------------------------
       ! allocate tempory storage so that the file needs to be read only once
       !----------------------------------------------------------------------
-      allocate ( ltmpstring(string)%string( ncolumns(string) ) )
-      ltmpstring(string)%size = ncolumns(string)
+      allocate ( ltmpstring(string)%tag( ncolumns(string) ) )
+      ltmpstring(string)%charsize = ncolumns(string)
     enddo    ! end string
 
     !------------------------------------------------------------------------
@@ -481,7 +481,7 @@ contains
               "cannot get table entry from line "//trim(adjustl(lchar)) //  &
               " column " // char(col)  // "of file " // trim(lfilename),    &
               rcToReturn=localrc) ) return
-         ltmpstring(string)%string(col)%name = trim( ltmp )
+         ltmpstring(string)%tag(col)%string = trim( ltmp )
       enddo     ! end col
     enddo       ! end string
 
@@ -492,7 +492,7 @@ contains
     npds = 0
     allocate( pds_flag(nstrings(file)) )
     do string=1,nstrings(file)
-       if( trim( ltmpstring(string)%string(1)%name ) /= "&") then
+       if( trim( ltmpstring(string)%tag(1)%string ) /= "&") then
          pds_flag(string) = 1         
          npds = npds + 1
        else
@@ -545,7 +545,7 @@ contains
     !------------------------------------------------------------------------
     allocate( count(npds) )
     do k=1,npds
-      if( trim( ltmpstring( pds_loc(k) )%string(1)%name ) == "&") then
+      if( trim( ltmpstring( pds_loc(k) )%tag(1)%string ) == "&") then
         write(lchar,"(i5)")   pds_loc(k)
         call ESMF_LogMsgSetError( ESMF_FAILURE,                             &
                  "no problem descriptor string on line " //                 &
@@ -564,7 +564,7 @@ contains
           ! if find a continuation line add additional elements (minus the
           ! continuation symbol "&")
           !------------------------------------------------------------------
-          if( trim( ltmpstring(pstring)%string(1)%name ) == "&" ) then 
+          if( trim( ltmpstring(pstring)%tag(1)%string ) == "&" ) then 
             count(k) = count(k) + ncolumns(pstring) -1
             goto 21
           endif
@@ -577,10 +577,10 @@ contains
     !------------------------------------------------------------------------
     allocate ( lstring(npds) )    
     do k=1, npds
-      allocate ( lstring(k)%string(count(k)) )    
+      allocate ( lstring(k)%tag(count(k)) )    
       do n=1,ncolumns(pds_loc(k))
-        lstring(k)%string(n)%name = &
-                               trim( ltmpstring(pds_loc(k))%string(n)%name )
+        lstring(k)%tag(n)%string = &
+                              trim( ltmpstring(pds_loc(k))%tag(n)%string )
       enddo     ! n
         
       pstring =  pds_loc(k)
@@ -595,10 +595,10 @@ contains
         ! if find a continuation line, and add to the line length (minus the 
         ! continuation symbol)
         !--------------------------------------------------------------------
-        if( trim( ltmpstring(pstring)%string(1)%name ) == "&" ) then
+        if( trim( ltmpstring(pstring)%tag(1)%string ) == "&" ) then
           do n=2,ncolumns(pstring)
-            lstring(k)%string(nn)%name = &
-                                   trim(ltmpstring(pstring)%string(n)%name )
+            lstring(k)%tag(nn)%string = &
+                                   trim(ltmpstring(pstring)%tag(n)%string )
             nn = nn + 1
           enddo     ! n
           goto 22
@@ -610,7 +610,7 @@ contains
     !------------------------------------------------------------------------
     allocate( harness%Record(file)%string(npds) )
     do k=1,npds
-       harness%Record(file)%string(k)%pds = trim( lstring(k)%string(1)%name )
+       harness%Record(file)%string(k)%pds = trim( lstring(k)%tag(1)%string )
     enddo     ! k
     !------------------------------------------------------------------------
     ! mine the table entries for the names of the specifier files
@@ -625,7 +625,7 @@ contains
       ! loop through the specifiers for each of the problem desriptor strings
       !----------------------------------------------------------------------
       do while(endflag)
-      ltmp = trim( lstring(k)%string(pos)%name )
+      ltmp = trim( lstring(k)%tag(pos)%string )
 
         select case ( trim(ltmp) )
 
@@ -648,7 +648,7 @@ contains
          ! if not at the end of the row, then check next element
          if( pos < count(k) ) then
            pos = pos + 1
-           ltmp =  trim( lstring(k)%string(pos)%name )
+           ltmp =  trim( lstring(k)%tag(pos)%string )
            ! if not a flag, repeat until a flag
            if( ltmp(1:1) /= '-' ) goto 11
            csize = pos-1-cpos
@@ -658,24 +658,24 @@ contains
            endflag = .false.
          endif
 
-         allocate( harness%Record(file)%string(k)%classfile%string(csize) )
-         harness%Record(file)%string(k)%classfile%size = csize
+         allocate( harness%Record(file)%string(k)%classfile%tag(csize) )
+         harness%Record(file)%string(k)%classfile%charsize = csize
          do n=1,csize
-           harness%Record(file)%string(k)%classfile%string(n)%name =        &
-                                      trim( lstring(k)%string(cpos+n)%name )
+           harness%Record(file)%string(k)%classfile%tag(n)%string =            &
+                                      trim( lstring(k)%tag(cpos+n)%string )
          enddo      ! n
          cflag = .true.
 
-         !-------------------------------------------------------------------
+         !----------------------------------------------------------------------
          ! distribution descriptor file
-         !-------------------------------------------------------------------
+         !----------------------------------------------------------------------
          case('-d')
          if( dflag ) then
            write(lchar,"(i5)") k
-           call ESMF_LogMsgSetError( ESMF_FAILURE, "the -d specifier flag"  &
-                    // " is used more than once on the " //                 &
-                   trim(adjustl(lchar))//"th string of the problem " //     &
-                   "descriptor table in file" // trim(lfilename),           &
+           call ESMF_LogMsgSetError( ESMF_FAILURE, "the -d specifier flag"     &
+                    // " is used more than once on the " //                    &
+                   trim(adjustl(lchar))//"th string of the problem " //        &
+                   "descriptor table in file" // trim(lfilename),              &
                    rcToReturn=localrc)
            return
          endif
@@ -686,7 +686,7 @@ contains
          ! if not at the end of the row, then check next element
          if( pos < count(k) ) then
            pos = pos + 1
-           ltmp =  trim( lstring(k)%string(pos)%name )
+           ltmp =  trim( lstring(k)%tag(pos)%string )
            ! if not a flag, repeat until a flag
            if( ltmp(1:1) /= '-' ) goto 12
            dsize = pos-1-dpos
@@ -696,11 +696,11 @@ contains
            endflag =.false. 
          endif
 
-         allocate( harness%Record(file)%string(k)%distfiles%string(dsize) )
-         harness%Record(file)%string(k)%distfiles%size = dsize
+         allocate( harness%Record(file)%string(k)%distfiles%tag(dsize) )
+         harness%Record(file)%string(k)%distfiles%charsize = dsize
          do n=1,dsize
-           harness%Record(file)%string(k)%distfiles%string(n)%name =        & 
-                                      trim( lstring(k)%string(dpos+n)%name )
+           harness%Record(file)%string(k)%distfiles%tag(n)%string =            &
+                                      trim( lstring(k)%tag(dpos+n)%string )
          enddo      ! n
          dflag = .true.
 
@@ -724,7 +724,7 @@ contains
          ! if not at the end of the row, then check next element
          if( pos < count(k) ) then
            pos = pos + 1
-           ltmp =  trim( lstring(k)%string(pos)%name )
+           ltmp =  trim( lstring(k)%tag(pos)%string )
            ! if not a flag, repeat until a flag
            if( ltmp(1:1) /= '-' ) goto 13
            gsize = pos-1-gpos
@@ -734,21 +734,21 @@ contains
            endflag = .false.
          endif  
 
-         allocate( harness%Record(file)%string(k)%gridfiles%string(gsize) )
-         harness%Record(file)%string(k)%gridfiles%size = gsize
+         allocate( harness%Record(file)%string(k)%gridfiles%tag(gsize) )
+         harness%Record(file)%string(k)%gridfiles%charsize = gsize
          do n=1,gsize
-           harness%Record(file)%string(k)%gridfiles%string(n)%name =        &
-                                     trim( lstring(k)%string(gpos+n)%name )
+           harness%Record(file)%string(k)%gridfiles%tag(n)%string =            &
+                                     trim( lstring(k)%tag(gpos+n)%string )
          enddo     ! n
          gflag = .true.
 
-         !-------------------------------------------------------------------
+         !----------------------------------------------------------------------
          ! syntax error - entry after pds should be a flag
-         !-------------------------------------------------------------------
+         !----------------------------------------------------------------------
          case default
          write(lchar,"(i5)")  pds_loc(k)
-         call ESMF_LogMsgSetError( ESMF_FAILURE,                            &
-               "no specifier flag on line " // trim(adjustl(lchar)) //      &
+         call ESMF_LogMsgSetError( ESMF_FAILURE,                               &
+               "no specifier flag on line " // trim(adjustl(lchar)) //         &
                " of file " //trim(lfilename), rcToReturn=localrc)
 
         end select  ! specifier flag type
@@ -762,62 +762,62 @@ contains
          print*,'                                  '
          print*,k,trim( harness%Record(file)%string(k)%pds )
          print*,'Class Specifier files',   &
-                                 harness%Record(file)%string(k)%classfile%size
-         do n=1,harness%Record(file)%string(k)%classfile%size
+                                 harness%Record(file)%string(k)%classfile%charsize
+         do n=1,harness%Record(file)%string(k)%classfile%charsize
            print*,n, &
-               trim( harness%Record(file)%string(k)%classfile%string(n)%name )
+               trim( harness%Record(file)%string(k)%classfile%tag(n)%string )
          enddo   ! n
          print*,'Distribution Specifier files', &
-                                 harness%Record(file)%string(k)%distfiles%size
-         do n=1,harness%Record(file)%string(k)%distfiles%size
+                                 harness%Record(file)%string(k)%distfiles%charsize
+         do n=1,harness%Record(file)%string(k)%distfiles%charsize
            print*,n,   &
-               trim( harness%Record(file)%string(k)%distfiles%string(n)%name )
+               trim( harness%Record(file)%string(k)%distfiles%tag(n)%string )
          enddo     ! n
          print*,'Grid Specifier files',   &
-                                 harness%Record(file)%string(k)%gridfiles%size
-         do n=1,harness%Record(file)%string(k)%gridfiles%size
+                                 harness%Record(file)%string(k)%gridfiles%charsize
+         do n=1,harness%Record(file)%string(k)%gridfiles%charsize
            print*,n,   &
-               trim( harness%Record(file)%string(k)%gridfiles%string(n)%name )
+               trim( harness%Record(file)%string(k)%gridfiles%tag(n)%string )
          enddo     ! n
       enddo      ! k
          !
 !  diagnostics
 
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     ! finish cleaning up workspace before opening new file
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     deallocate( ncolumns, count )
     deallocate( ltmpstring, lstring )
     deallocate( pds_loc, pds_flag )
 
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     ! clean up CF
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     call ESMF_ConfigDestroy(localcf, localrc)
-    if( ESMF_LogMsgFoundError(localrc,                                      &
-            "cannot destroy config file " // trim(lfilename),               &
+    if( ESMF_LogMsgFoundError(localrc,                                         &
+            "cannot destroy config file " // trim(lfilename),                  &
             rcToReturn=localrc) ) return
 
   enddo  ! file
 
-  !--------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ! final deallocation
-  !--------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   deallocate( nstrings )
 
-  !--------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ! if I've gotten this far without an error, then the routine has succeeded.
-  !--------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   localrc = ESMF_SUCCESS
 
-  !--------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   end subroutine read_descriptor_files
-  !--------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
 
 !2345678901234567890123456789012345678901234567890123456789012345678901234567890
 
-!--------------------------------------------------------------------------
-!--------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 ! !IROUTINE: parse_descriptor_string
 
 ! !INTERFACE:
@@ -872,26 +872,26 @@ contains
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
 
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ! parse each problem descriptor string
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   nfiles = harness%numRecords
   allocate( nstrings(nfiles) )
 
-  !----------------------------------------------------------------------------
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   do kfile=1,nfiles
      do string=1,nstrings(kfile)
         lstring = trim( harness%Record(kfile)%string(string)%pds )
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ! find the test operation (address of strings)
   ! 1. search for "->" or "=>" - tip of symbol provides ending address
   ! 2. back up until reach white space - provides begining address
   ! 3. src_beg = 1, src_end = operation_beg-1
   !    dst_beg = operation_end+1, dst_end = length(trim(string)
-  !----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
         call process_query(lstring, lname, tag, location, localrc)  
-        harness%Record(kfile)%string(string)%process%name = lname
+        harness%Record(kfile)%string(string)%process%string = lname
         harness%Record(kfile)%string(string)%process%tag = tag
 
         call memory_topology(lstring, location, srcMulti, srcBlock,            &
@@ -909,31 +909,31 @@ contains
               src_end = location(1)
               dst_beg = location(2)
               dst_end = len( trim(lstring) )
-              !----------------------------------------------------------------
+              !-----------------------------------------------------------------
               ! separate string into source and destination strings
-              !----------------------------------------------------------------
+              !-----------------------------------------------------------------
               src_string = adjustL( lstring(src_beg:src_end) )
               dst_string = adjustL( lstring(dst_beg:dst_end) )
 
-              !----------------------------------------------------------------
+              !-----------------------------------------------------------------
               ! check that the source and destination ranks are not empty and
               ! the sizes agree
-              !----------------------------------------------------------------
+              !-----------------------------------------------------------------
               src_mem_rank = pattern_query(src_string,';') + 1
               dst_mem_rank = pattern_query(dst_string,';') + 1
 
-              if( (src_mem_rank == 0).or.(dst_mem_rank == 0).or.              &
+              if( (src_mem_rank == 0).or.(dst_mem_rank == 0).or.               &
                   (src_mem_rank /= dst_mem_rank) )  then
                   localrc = ESMF_FAILURE
-                  call ESMF_LogMsgSetError(ESMF_FAILURE,                      &
-                                       "symbols not properly paired",         &
+                  call ESMF_LogMsgSetError(ESMF_FAILURE,                       &
+                                       "symbols not properly paired",          &
                                         rcToReturn=localrc)
 
               endif
 
-              !----------------------------------------------------------------
+              !-----------------------------------------------------------------
               ! create work space for parsing the source descriptor string
-              !----------------------------------------------------------------
+              !-----------------------------------------------------------------
               allocate( lsrc(src_mem_rank+1) )
               allocate( src_grid_order(src_mem_rank) )
               allocate( src_grid_type(src_mem_rank) )
@@ -943,45 +943,45 @@ contains
               allocate( src_dist_order(src_mem_rank) )      
               allocate( src_dist_type(src_mem_rank) )      
 
-              !----------------------------------------------------------------
+              !-----------------------------------------------------------------
               ! partition the source descriptor string into separate parts which
               ! correspond to memory locations and parse the substrings for 
               ! grid and distribution descriptions.
-              !----------------------------------------------------------------
+              !-----------------------------------------------------------------
               call memory_separate( src_string, src_mem_rank, lsrc, localrc) 
 
-              call interpret_descriptor_string( lsrc, src_mem_rank,           & 
-                        src_grid_rank, src_grid_order, src_grid_type,         &
-                        src_grid_HaloL, src_grid_HaloR, src_grid_StaggerLoc,  &  
-                        src_dist_rank, src_dist_order, src_dist_type,         &
+              call interpret_descriptor_string( lsrc, src_mem_rank,            & 
+                        src_grid_rank, src_grid_order, src_grid_type,          &
+                        src_grid_HaloL, src_grid_HaloR, src_grid_StaggerLoc,   &  
+                        src_dist_rank, src_dist_order, src_dist_type,          &
                         localrc)
 
               print*,'Parse source'
               print*,'--------',trim(src_string)
               do k=1,src_mem_rank
-                 print*,lsrc(k)%name
+                 print*,lsrc(k)%string
               enddo
               print*,'Memory Rank ',src_mem_rank
               print*,'Grid Rank ',src_grid_rank
               print*,'Dist Rank ',src_dist_rank
               do k=1,src_mem_rank
-                  print*,k, 'Grid type:',trim(src_grid_type(k)%name), &
-                      src_grid_order(k),                              &
-                      '  Dist type:',trim(src_dist_type(k)%name),':', &
+                  print*,k, 'Grid type:',trim(src_grid_type(k)%string),        &
+                      src_grid_order(k),                                       &
+                      '  Dist type:',trim(src_dist_type(k)%string),':',        &
                       src_dist_order(k)
               enddo
               print*,'Stagger Location',src_grid_StaggerLoc(1:src_grid_rank)
               print*,' grid layout '
               do k=1,src_mem_rank
                  if( src_grid_order(k) > 0 ) then
-                     print*,k,trim(src_grid_type(k)%name),src_grid_order(k) , &
+                     print*,k,trim(src_grid_type(k)%string),src_grid_order(k), &
                        'H{',src_grid_HaloL(k), src_grid_HaloR(k),'}'
                  endif
               enddo
               print*,' Dist layout '
               do k=1,src_mem_rank
                  if( src_dist_order(k) > 0 ) then
-                     print*,k,trim(src_dist_type(k)%name),src_dist_order(k)
+                     print*,k,trim(src_dist_type(k)%string),src_dist_order(k)
                  endif
               enddo
               print*,'----------------------'
@@ -994,9 +994,9 @@ contains
 
               print*,'deallocate source arrays'
 
-              !----------------------------------------------------------------
+              !-----------------------------------------------------------------
               ! create work space for parsing the destination descriptor string
-              !----------------------------------------------------------------
+              !-----------------------------------------------------------------
               allocate( ldst(dst_mem_rank+1) )
               allocate( dst_grid_order(dst_mem_rank) )
               allocate( dst_grid_type(dst_mem_rank) )
@@ -1008,48 +1008,48 @@ contains
 
               print*,'allocate destination arrays'
 
-              !----------------------------------------------------------------
+              !-----------------------------------------------------------------
               ! partition the destination descriptor string into separate parts
               ! which correspond to memory locations and parse the substrings 
               ! for grid and distribution descriptions.
-              !----------------------------------------------------------------
+              !-----------------------------------------------------------------
               call memory_separate( dst_string, dst_mem_rank, ldst, localrc) 
 
               print*,'finish memory separate destination'
 
-              call interpret_descriptor_string( ldst, dst_mem_rank,           & 
-                        dst_grid_rank, dst_grid_order, dst_grid_type,         &
-                        dst_grid_HaloL, dst_grid_HaloR, dst_grid_StaggerLoc,  &  
-                        dst_dist_rank, dst_dist_order, dst_dist_type,         &
+              call interpret_descriptor_string( ldst, dst_mem_rank,            & 
+                        dst_grid_rank, dst_grid_order, dst_grid_type,          &
+                        dst_grid_HaloL, dst_grid_HaloR, dst_grid_StaggerLoc,   &  
+                        dst_dist_rank, dst_dist_order, dst_dist_type,          &
                         localrc)
 
 
               print*,'Parse Destination'
               print*,'--------',trim(dst_string)
               do k=1,dst_mem_rank
-                 print*,ldst(k)%name
+                 print*,ldst(k)%string
               enddo
               print*,'Memory Rank ',dst_mem_rank
               print*,'Grid Rank ',dst_grid_rank
               print*,'Dist Rank ',dst_dist_rank
               do k=1,dst_mem_rank
-                  print*,k, 'Grid type:',trim(dst_grid_type(k)%name), &
-                      dst_grid_order(k),                              &
-                      '  Dist type:',trim(dst_dist_type(k)%name),':', &
+                  print*,k, 'Grid type:',trim(dst_grid_type(k)%string),        &
+                      dst_grid_order(k),                                       &
+                      '  Dist type:',trim(dst_dist_type(k)%string),':',        &
                       dst_dist_order(k)
               enddo
               print*,'Stagger Location',dst_grid_StaggerLoc(1:dst_grid_rank)
               print*,' grid layout '
               do k=1,dst_mem_rank
                  if( dst_grid_order(k) > 0 ) then
-                     print*,k,trim(dst_grid_type(k)%name),dst_grid_order(k) , &
+                     print*,k,trim(dst_grid_type(k)%string),dst_grid_order(k), &
                        'H{',dst_grid_HaloL(k), dst_grid_HaloR(k),'}'
                  endif
               enddo
               print*,' Dist layout '
               do k=1,dst_mem_rank
                  if( dst_dist_order(k) > 0 ) then
-                     print*,k,trim(dst_dist_type(k)%name),dst_dist_order(k)
+                     print*,k,trim(dst_dist_type(k)%string),dst_dist_order(k)
                  endif
               enddo
               print*,'----------------------'
@@ -1071,8 +1071,8 @@ contains
 
 
 
-        !----------------------------------------------------------------------
-        !----------------------------------------------------------------------
+        !-----------------------------------------------------------------------
+        !-----------------------------------------------------------------------
     ! print*,' TEST '
     ! print*,src_beg, src_end, dst_beg,dst_end 
     ! print*,'123456789012345678901234567890'
@@ -1080,26 +1080,26 @@ contains
     ! print*,'process ', harness%Record(kfile)%string(string)%process%name
     ! print*,'src',trim( src_string )
     ! print*,'dst',trim( dst_string ) 
-  !--------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ! find rank of source and destination strings ( plus addresses of dividers ";")
   ! break into substrings, one for each dimension. Increment through, searching 
   ! for key flags, when found set flags.
-  !--------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
     enddo    ! string
   enddo    ! file
-  !--------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ! if I've gotten this far without an error, then the routine has succeeded.
-  !--------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   localrc = ESMF_SUCCESS
 
-  !--------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   end subroutine parse_descriptor_string
-  !--------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
 
 !2345678901234567890123456789012345678901234567890123456789012345678901234567890
 
-!--------------------------------------------------------------------------
-!--------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 ! !IROUTINE: TestHarnessReport
 
 ! !INTERFACE:
@@ -1113,22 +1113,22 @@ contains
 ! !DESCRIPTION:
 ! This routine provides an additional reporting capability of the test results
 ! in a more human readable form.
-!--------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 ! Action associated to test report flag value.
 !    -2 = debug report
 !    -1 = report test failures
 !     0 = no output
 !     1 = report successful tests
 !     2 = report both successes and failures.
-!--------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
    ! local variables
 
    ! initialize local rc
    localrc = ESMF_SUCCESS
 
-!--------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 ! begin 
-!--------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
   select case (report_flag)
      case(-2)
      ! debug report
@@ -1160,8 +1160,8 @@ contains
 
   end subroutine TestHarnessReport
 
-!--------------------------------------------------------------------------
-!--------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 ! !IROUTINE: ReportSuccess
 
 ! !INTERFACE:
@@ -1173,7 +1173,7 @@ contains
 !
 ! !DESCRIPTION:
 ! This routine produces a human readable report of the successful test results.
-!--------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
   ! initialize local rc
   localrc = ESMF_SUCCESS
 
@@ -1181,8 +1181,8 @@ contains
 
   end subroutine ReportSuccess
 
-!--------------------------------------------------------------------------
-!--------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 ! !IROUTINE: ReportFailure
 
 ! !INTERFACE: 
@@ -1194,7 +1194,7 @@ contains
 !
 ! !DESCRIPTION:
 ! This routine produces a human readable report of the failed test results.
-!--------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
   ! initialize local rc
   localrc = ESMF_SUCCESS
 
@@ -1202,8 +1202,8 @@ contains
 
   end subroutine ReportFailure
 
-!--------------------------------------------------------------------------
-!--------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 
 
   end program ESMF_Test_Harness
