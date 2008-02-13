@@ -1,4 +1,4 @@
-! $Id: ESMF_NewRegridUTest.F90,v 1.2 2008/02/12 21:37:15 dneckels Exp $
+! $Id: ESMF_NewRegridUTest.F90,v 1.3 2008/02/13 00:28:48 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_NewRegridUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_NewRegridUTest.F90,v 1.2 2008/02/12 21:37:15 dneckels Exp $'
+    '$Id: ESMF_NewRegridUTest.F90,v 1.3 2008/02/13 00:28:48 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -69,6 +69,7 @@ program ESMF_NewRegridUTest
   real(ESMF_KIND_R8) :: coord(2)
   character(len=ESMF_MAXSTR) :: string
   integer src_nx, src_ny, dst_nx, dst_ny
+  integer num_arrays
 
   real(ESMF_KIND_R8) :: src_dx, src_dy
   real(ESMF_KIND_R8) :: dst_dx, dst_dy
@@ -97,11 +98,11 @@ program ESMF_NewRegridUTest
   rc=ESMF_SUCCESS
 
   ! Establish the resolution of the grids
-  src_nx = 10;
-  src_ny = 10;
+  src_nx = 100;
+  src_ny = 100;
 
-  dst_nx = 7;
-  dst_ny = 5;
+  dst_nx = 75;
+  dst_ny = 50;
 
   ! Source mesh covers [0,1]x[0,2]
   src_dx = 1. / (REAL(src_nx)+1.)
@@ -268,13 +269,6 @@ program ESMF_NewRegridUTest
   enddo    ! lDE
 
 
-  print *, 'dstArray'
-  call ESMF_ArrayPrint(dstArray)
-
-  print *, 'srcArray'
-  call ESMF_ArrayPrint(srcArray)
-
-
   call ESMF_RegridCreate(srcField, dstField, routeHandle, localrc)
   write(failMsg, *) "RegridCreate"
   call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -287,29 +281,37 @@ program ESMF_NewRegridUTest
 
    ! Check the results
   ! Get number of local DEs
-  call ESMF_GridGet(gridDst, localDECount=localDECount, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!  call ESMF_GridGet(gridDst, localDECount=localDECount, rc=localrc)
+  !if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Get memory and set coords for dst
-  do lDE=0,localDECount-1
-    call ESMF_FieldGetDataPtr(dstField, fptr, lDE, computationalLBound=fclbnd, &
-                              computationalUBound=fcubnd,  rc=localrc)
-    write(failMsg, *) "ESMF_FieldGetDataPtr"
-    call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-    if (localrc .ne. ESMF_SUCCESS) goto 10
- 
-    do i1=fclbnd(1),fcubnd(1)
-    do i2=fclbnd(2),fcubnd(2)
-       x = REAL((i1-1)*dst_dx)
-       y = REAL((i2-1)*dst_dy)
-       print *, i1, i2, ':', fptr(i1,i2)
-    enddo
-    enddo
- 
-  enddo ! lDe
+  !do lDE=0,localDECount-1
+    !call ESMF_FieldGetDataPtr(dstField, fptr, lDE, computationalLBound=fclbnd, &
+                              !computationalUBound=fcubnd,  rc=localrc)
+    !write(failMsg, *) "ESMF_FieldGetDataPtr"
+    !call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !if (localrc .ne. ESMF_SUCCESS) goto 10
+ !
+    !do i1=fclbnd(1),fcubnd(1)
+    !do i2=fclbnd(2),fcubnd(2)
+       !x = REAL((i1-1)*dst_dx)
+       !y = REAL((i2-1)*dst_dy)
+       !print *, i1, i2, ':', fptr(i1,i2)
+    !enddo
+    !enddo
+ !
+  !enddo ! lDe
 
-  print *, 'dstArray at end'
-  call ESMF_ArrayPrint(dstArray)
+  ! Write results to a mesh
+  num_arrays = 1
+  write(name, *) "srcmesh"
+  call c_ESMC_MeshIO(vm, GridSrc, ESMF_STAGGERLOC_CENTER, &
+               num_arrays, name, localrc, &
+               srcArray)
+  write(name, *) "dstmesh"
+  call c_ESMC_MeshIO(vm, Griddst, ESMF_STAGGERLOC_CENTER, &
+               num_arrays, name, localrc, &
+               dstArray)
 
 
   call ESMF_GridDestroy(gridSrc, rc=localrc)

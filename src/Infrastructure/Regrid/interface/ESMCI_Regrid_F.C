@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.1 2008/02/12 21:37:15 dneckels Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.2 2008/02/13 00:28:47 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -71,8 +71,8 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp, ESMCI::Grid **gridsr
 
   try {
 
-    ESMCI::GridToMesh(srcgrid, *srcstaggerLoc, srcmesh);
-    ESMCI::GridToMesh(dstgrid, *dststaggerLoc, dstmesh);
+    ESMCI::GridToMesh(srcgrid, *srcstaggerLoc, srcmesh, std::vector<ESMCI::Array*>());
+    ESMCI::GridToMesh(dstgrid, *dststaggerLoc, dstmesh, std::vector<ESMCI::Array*>());
 
     WriteMesh(srcmesh, "src_grid");
     WriteMesh(dstmesh, "dst_grid");

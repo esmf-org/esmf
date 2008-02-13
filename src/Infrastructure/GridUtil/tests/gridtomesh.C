@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// $Id: gridtomesh.C,v 1.3 2008/02/12 21:40:24 dneckels Exp $
+// $Id: gridtomesh.C,v 1.4 2008/02/13 00:28:47 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@ extern "C" void FTN(gridtomesh_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int
 
   try {
 
-    ESMCI::GridToMesh(grid, *staggerLoc, mesh);
+    ESMCI::GridToMesh(grid, *staggerLoc, mesh, std::vector<ESMCI::Array*>());
 
     WriteMesh(mesh, "bobs_grid");
 

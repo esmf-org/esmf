@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.15 2008/02/12 21:40:24 dneckels Exp $
+// $Id: ESMC_GridToMesh.C,v 1.16 2008/02/13 00:28:47 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ namespace ESMCI {
 // and, maybe, for simple single patch grids with a periodic component,
 // the dual, which is not so bad.  This will put us equivalent with
 // SCRIP.  
-void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh) {
+void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh, const std::vector<ESMCI::Array*> &arrays) {
   Trace __trace("GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh)");
 
   // Initialize the parallel environment for mesh (if not already done)
@@ -288,8 +288,20 @@ Par::Out() << std::endl;
      // Now set up the nodal coordinates
    IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", sdim);
 
+   // Create whatever fields the user wants
+   std::vector<IOField<NodalField>*> nfields;
+   for (UInt i = 0; i < arrays.size(); ++i) {
+     char buf[512];
+     std::sprintf(buf, "array_%03d", i);
+     nfields.push_back(
+             mesh.RegisterNodalField(mesh, buf, 1)
+                      );
+     nfields.back()->set_output_status(true);
+   }
+
 #ifdef G2M_DBG
-   IOField<ElementField> *de = mesh.RegisterElementField(mesh, "DE", 1);
+   IOField<NodalField> *de_field = mesh.RegisterNodalField(mesh, "de", 1);
+     de_field->set_output_status(true);
 #endif
 
    // Loop through Mesh nodes setting up coordinates
@@ -297,6 +309,8 @@ Par::Out() << std::endl;
 
    for (; ni != ne; ++ni) {
      double *c = node_coord->data(*ni);
+
+     double fdata;
 
      UInt lid = ngid2lid[ni->get_id()]; // we set this above when creating the node
 
@@ -315,7 +329,23 @@ Par::Out() << std::endl;
       }
     }
 
-    printf("%d :: %f %f\n",gni->getGlobalID(),c[0],c[1]);
+    // Other arrays
+    for (UInt i = 0; i < arrays.size(); ++i) {
+      gni->getArrayData(arrays[i], &fdata);
+      double *data = nfields[i]->data(*ni);
+      ThrowRequire(data);
+      data[0] = fdata;
+    }
+
+#ifdef G2M_DBG
+    // De field
+    double *data = de_field->data(*ni);
+
+    ThrowRequire(data);
+    data[0] = gni->getDE();
+#endif
+
+    //printf("%d :: %f %f\n",gni->getGlobalID(),c[0],c[1]);
 
    } // ni
 
