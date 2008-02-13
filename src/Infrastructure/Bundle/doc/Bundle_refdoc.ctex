@@ -1,4 +1,4 @@
-% $Id: Bundle_refdoc.ctex,v 1.22 2007/11/21 00:06:38 cdeluca Exp $
+% $Id: Bundle_refdoc.ctex,v 1.22.2.1 2008/02/13 03:54:33 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -86,12 +86,13 @@
 \input{../Infrastructure/Bundle/doc/ESMF_Bundle_fapi}
 #endif
 
-#\subsection{Class API: Bundle Overloads for Fortran Arrays}
-#ifdef STANDALONE
-\input{ESMF_BundleGet_fapi}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Bundle/doc/ESMF_BundleGet_fapi}
-#endif
+%TODO:FIELDINTEGRATION Restore BundleGet methods
+%\subsection{Class API: Bundle Overloads for Fortran Arrays}
+%#ifdef STANDALONE
+%\input{ESMF_BundleGet_fapi}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Bundle/doc/ESMF_BundleGet_fapi}
+%#endif
 
 #\subsection{Class API: Bundle Communications}
 #ifdef STANDALONE
