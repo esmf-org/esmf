@@ -1,5 +1,5 @@
 
-! $Id: ESMF_Bundle.F90,v 1.122 2008/02/01 22:39:06 rokuingh Exp $
+! $Id: ESMF_Bundle.F90,v 1.123 2008/02/13 01:51:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -227,6 +227,8 @@
        public ESMF_BundleAttributeGetCount  ! number of attribs
        public ESMF_BundleAttributeGetInfo   ! get type, length by name or number
        
+       public ESMF_BundleAttributeSetLink   ! Link bundle attributes with other objects attributes
+       
        public ESMF_BundleGetField      ! Get one or more Fields by name or number
        public ESMF_BundleAddField      ! Add one or more Fields 
 !      public ESMF_BundleRemoveField   ! Delete one or more Fields by name or number
@@ -412,6 +414,23 @@
 !     information about attributes from an {\tt ESMF\_Bundle}.
  
 !EOPI
+      end interface
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_BundleAttributeSet - Link a Bundle attribute hierarchy to a Field hierarchy
+!
+! !INTERFACE:
+      interface ESMF_BundleAttributeSetLink
+   
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_BundleAttrSetLinkField
+        
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that attach
+!     attributes from a {\tt ESMF\_Bundle} to another object .
+ 
+!EOP
       end interface
 
 !------------------------------------------------------------------------------
@@ -2584,6 +2603,58 @@ end function
       end subroutine ESMF_BundleAttrSetChar
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleAttrSetLinkField"
+!BOPI
+! !IROUTINE: ESMF_BundleAttrSetLinkField - Link a Bundle to a Field in an attribute hierarchy
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAttributeSetLink()
+      subroutine ESMF_BundleAttrSetLinkField(bundle, field, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle
+      type(ESMF_Field), intent(inout)  :: field
+      integer, intent(out), optional  :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a Bundle to a Field in an attribute hierarchy
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!      An {\tt ESMF\_Bundle} object.
+!     \item [field]
+!      An {\tt ESMF\_Field} derived object.
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+
+      call ESMF_BundleValidate(bundle, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetLink(bundle%btypep%base, field%ftypep%base, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleAttrSetLinkField
+!------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleCreateNew"
@@ -3050,7 +3121,7 @@ end function
 !      data is not congruent.   A {\tt ESMF\_Bundle} with no data, or on error
 !      this routine returns {\tt .FALSE.}.
 !
-!      This routine also resets the internal bundle flag to a known state
+!      This routine also resets the internal bundle flag to a known bundle
 !      before returning.
 !
 !     The arguments are:
