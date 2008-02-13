@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.30.2.1 2008/01/16 00:08:43 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.30.2.2 2008/02/13 22:02:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.30.2.1 2008/01/16 00:08:43 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.30.2.2 2008/02/13 22:02:39 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -810,7 +810,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in)            :: array
-    type(ESMF_RouteHandle), intent(in), optional  :: routehandlelist(:)
+    type(ESMF_RouteHandle), intent(in)            :: routehandlelist(:)
     integer,                intent(in)            :: localDe
     integer,                intent(out)           :: totalElementMask(:)
     integer,                intent(out), optional :: rc  
@@ -848,7 +848,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in)            :: array
-    type(ESMF_RouteHandle), intent(in), optional  :: routehandlelist(:)
+    type(ESMF_RouteHandle), intent(in)            :: routehandlelist(:)
     integer,                intent(in)            :: localDe
     integer,                intent(out)           :: totalElementMask(:,:)
     integer,                intent(out), optional :: rc  
@@ -886,7 +886,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in)            :: array
-    type(ESMF_RouteHandle), intent(in), optional  :: routehandlelist(:)
+    type(ESMF_RouteHandle), intent(in)            :: routehandlelist(:)
     integer,                intent(in)            :: localDe
     integer,                intent(out)           :: totalElementMask(:,:,:)
     integer,                intent(out), optional :: rc  
