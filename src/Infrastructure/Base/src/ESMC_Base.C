@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.101 2008/02/12 21:25:38 rokuingh Exp $
+// $Id: ESMC_Base.C,v 1.102 2008/02/13 01:52:40 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.101 2008/02/12 21:25:38 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.102 2008/02/13 01:52:40 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -1887,12 +1887,15 @@ if (count) {
 //EOP
 
   int rc;
+  char msgbuf[ESMF_MAXSTR];
   ESMC_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
 
-  attr = new ESMC_Attribute("link", ESMF_NOKIND, 0, NULL);  
+  sprintf(msgbuf, "link%d", attrCount);
+
+  attr = new ESMC_Attribute(msgbuf, ESMF_NOKIND, 0, NULL);  
   if (!attr)
     return ESMF_FAILURE;
  
@@ -1905,6 +1908,7 @@ if (count) {
     return ESMF_FAILURE;
     
   attr->attrList[0] = &(destination->root);
+  attr->attrCount++;
 
   return rc;
 
