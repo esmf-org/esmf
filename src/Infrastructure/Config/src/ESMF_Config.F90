@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.44 2007/09/27 06:07:07 theurich Exp $
+! $Id: ESMF_Config.F90,v 1.44.2.1 2008/02/13 05:16:18 cdeluca Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -699,7 +699,6 @@
 !      
 !      Supported values for <value argument> are:
 !      \begin{description}
-!      \item character, intent(out)                 :: value
 !      \item character(len=*), intent(out)          :: value
 !      \item real(ESMF\_KIND\_R4), intent(out)      :: value    
 !      \item real(ESMF\_KIND\_R8), intent(out)      :: value
@@ -1808,7 +1807,7 @@
 #define ESMF_METHOD "ESMF_ConfigGetChar"
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
-!BOPI -------------------------------------------------------------------
+!BOP -------------------------------------------------------------------
 !
 ! !IROUTINE: ESMF_ConfigGetChar - Get a character
 !
@@ -1840,7 +1839,7 @@
 !   \end{description}
 !
 !
-!EOPI -------------------------------------------------------------------
+!EOP -------------------------------------------------------------------
       character(len=LSZ) :: string
       integer :: iret
 
