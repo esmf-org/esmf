@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.3 2008/02/12 22:59:11 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.4 2008/02/13 04:02:49 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -130,9 +130,7 @@
 !-------------------------------------------------------------------------
 !   !
 !   !  The user can substitute another array created by ArrayCreate in field1.
-!   ! This example demonstrates some of the topology nature of a field
-!   ! default created through FieldCreate which internally calls
-!   ! ArrayCreateFromGrid which is done in example 2. This example
+!   ! This example
 !   ! makes it clear that field1's array has a computational region smaller
 !   ! than its exclusive region.
 !BOC
