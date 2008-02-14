@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetEx.F90,v 1.3.2.2 2008/02/07 05:24:02 theurich Exp $
+! $Id: ESMF_FieldSetEx.F90,v 1.3.2.3 2008/02/14 15:41:33 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
     program ESMF_FieldSetEx
 
 !------------------------------------------------------------------------------
-!ESMF_EXAMPLE        String used by test script to count examples.
+!ESMF_removeEXAMPLE        String used by test script to count examples.
 !==============================================================================
 ! !PROGRAM: ESMF_FieldSetEx - Field Set Examples
 !
