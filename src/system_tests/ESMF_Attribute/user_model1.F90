@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.13 2008/02/13 01:49:42 rokuingh Exp $
+! $Id: user_model1.F90,v 1.14 2008/02/14 18:07:46 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -139,9 +139,9 @@ module user_model1
       if (status .ne. ESMF_SUCCESS) goto 20
       
       if (myPet .eq. 0) then
-        print *, 'Write the Attpack from the first run of component 1.'
+        !print *, 'Write the Attpack from the first run of component 1.'
     
-        call ESMF_StateAttPackWrite(importState, convention=conv, purpose=purp, rc=rc)
+        !call ESMF_StateAttPackWrite(importState, convention=conv, purpose=purp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
       endif
     endif
@@ -245,6 +245,7 @@ module user_model1
       if (status .ne. ESMF_SUCCESS) goto 20
  
       if (myPet .eq. 0) then
+        print *, 'State Pretty Print example.'
         call ESMF_StatePrint(MyState, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 20
       endif
@@ -283,19 +284,19 @@ module user_model1
         conv = 'ESG-CDP'
         purp = 'general'
       
-        print *, 'Write the State Attpack from the second run of component 1.'
+        !print *, 'Write the State Attpack from the second run of component 1.'
         !call ESMF_StateAttPackWrite(importState, convention=conv, purpose=purp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
 
-        print *, 'Write the Bundle Attpack from the second run of component 1.'
+        !print *, 'Write the Bundle Attpack from the second run of component 1.'
         !call ESMF_BundleAttPackWrite(bundle, convention=fconv, purpose=fpurp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
 
-        print *, 'Write the Grid Attpack from the second run of component 1.'
+        !print *, 'Write the Grid Attpack from the second run of component 1.'
         !call ESMF_GridAttPackWrite(grid, convention=fconv, purpose=fpurp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
         
-        print *, 'Write the Array Attpack from the second run of component 1.'
+        !print *, 'Write the Array Attpack from the second run of component 1.'
         !call ESMF_ArrayAttPackWrite(array, convention=fconv, purpose=fpurp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
       endif
