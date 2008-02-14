@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.5 2008/02/05 23:04:57 dneckels Exp $
+# $Id: build_rules.mk,v 1.6 2008/02/14 05:36:54 theurich Exp $
 #
 # Linux.intelgcc.default
 #
@@ -89,18 +89,39 @@ ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 
 ############################################################
-# On IA64 set long and pointer types to 64-bit
+# Construct the ABISTRING
 #
+ifeq ($(ESMF_MACHINE),ia64)
 ifeq ($(ESMF_ABI),64)
-ESMF_F90COMPILEOPTS       += -size_lp64
-ESMF_F90LINKOPTS          += -size_lp64
+ESMF_ABISTRING := $(ESMF_MACHINE)_64
+else
+$(error Invalid ESMF_MACHINE / ESMF_ABI combination: $(ESMF_MACHINE) / $(ESMF_ABI))
+endif
+endif
+ifeq ($(ESMF_MACHINE),x86_64)
+ifeq ($(ESMF_ABI),32)
+ESMF_ABISTRING := $(ESMF_MACHINE)_32
+endif
+ifeq ($(ESMF_ABI),64)
+ESMF_ABISTRING := x86_64_small
+endif
 endif
 
 ############################################################
-# Link against GCC's stdc++ library (because g++ is used)
+# Set memory model compiler flags according to ABISTRING
 #
-ESMF_F90LINKPATHS += -L$(dir $(shell gcc -print-file-name=libstdc++.so))
-ESMF_F90LINKLIBS  += -lstdc++
+ifeq ($(ESMF_ABISTRING),x86_64_medium)
+ESMF_F90COMPILEOPTS     += -mcmodel=medium
+ESMF_F90LINKOPTS        += -mcmodel=medium
+ESMF_CXXCOMPILEOPTS     += -mcmodel=medium
+ESMF_CXXLINKOPTS        += -mcmodel=medium
+endif
+ifeq ($(ESMF_ABISTRING),ia64_64)
+ESMF_CXXCOMPILEOPTS       += -size_lp64
+ESMF_CXXLINKOPTS          += -size_lp64
+ESMF_F90COMPILEOPTS       += -size_lp64
+ESMF_F90LINKOPTS          += -size_lp64
+endif
 
 ############################################################
 # Conditionally add pthread compiler and linker flags
@@ -126,6 +147,12 @@ ESMF_CXXLINKRPATHS += \
   $(ESMF_RPATHPREFIX)$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
 
 ############################################################
+# Link against GCC's stdc++ library (because g++ is used)
+#
+ESMF_F90LINKPATHS += -L$(dir $(shell gcc -print-file-name=libstdc++.so))
+ESMF_F90LINKLIBS  += -lstdc++
+
+############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
 ESMF_F90LINKLIBS += -limf -lm -lrt -ldl
@@ -133,10 +160,7 @@ ESMF_F90LINKLIBS += -limf -lm -lrt -ldl
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lifcoremt -lrt -ldl
-ifeq ($(ESMF_ABI),64)
-ESMF_CXXLINKLIBS += -lipr
-endif
+ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)") -lrt -ldl
 
 ############################################################
 # Blank out shared library options
