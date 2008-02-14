@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.49 2008/02/13 05:25:23 cdeluca Exp $
+! $Id: ESMF_Config.F90,v 1.50 2008/02/14 18:45:46 murphysj Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -703,12 +703,12 @@
 !
 !
 ! !INTERFACE:
-!      subroutine ESMF_ConfigGetAttribute( config, <var\_name>, &
+!      subroutine ESMF_ConfigGetAttribute( config, <value>, &
 !                                          label, default, rc )
 !
 ! !ARGUMENTS:
 !      type(ESMF_Config), intent(inout)       :: config     
-!      <var\_name argument>, see below for supported values
+!      <value argument>, see below for supported values
 !      character(len=*), intent(in), optional :: label 
 !      character(len=*), intent(in), optional :: default 
 !      integer, intent(out), optional         :: rc     
@@ -718,21 +718,21 @@
 !      value is a sequence of characters
 !      it will be terminated by the first white space.
 !      
-!      Supported values for <var\_name argument> are:
+!      Supported values for <value argument> are:
 !      \begin{description}
-!      \item character(len=*), intent(out)          :: var\_name
-!      \item real(ESMF\_KIND\_R4), intent(out)      :: var\_name    
-!      \item real(ESMF\_KIND\_R8), intent(out)      :: var\_name
-!      \item integer(ESMF\_KIND\_I4), intent(out)   :: var\_name
-!      \item integer(ESMF\_KIND\_I8), intent(out)   :: var\_name
-!      \item logical, intent(out)                   :: var\_name
+!      \item character(len=*), intent(out)          :: value
+!      \item real(ESMF\_KIND\_R4), intent(out)      :: value    
+!      \item real(ESMF\_KIND\_R8), intent(out)      :: value
+!      \item integer(ESMF\_KIND\_I4), intent(out)   :: value
+!      \item integer(ESMF\_KIND\_I8), intent(out)   :: value
+!      \item logical, intent(out)                   :: value
 !      \end{description}
 !
 !   The arguments are:
 !   \begin{description}
 !   \item [config]
 !     Already created {\tt ESMF\_Config} object.
-!   \item [<var\_name argument>]
+!   \item [<value argument>]
 !     Returned value.
 !   \item [{[label]}]
 !     Identifing label. 
@@ -751,12 +751,12 @@
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of values 
 !
 ! !INTERFACE:
-!      subroutine ESMF_ConfigGetAttribute( config, <var\_list_names>, &
+!      subroutine ESMF_ConfigGetAttribute( config, <value list argument>, &
 !                                          count, label, default, rc )
 !
 ! !ARGUMENTS:
 !      type(ESMF_Config), intent(inout)       :: config     
-!      <var\_list_names argument>, see below for values      
+!      <value list argument>, see below for values      
 !      integer, intent(in)                    :: count
 !      character(len=*), intent(in), optional :: label 
 !      character(len=*), intent(in), optional :: default 
@@ -765,20 +765,20 @@
 ! !DESCRIPTION:
 !      Gets a list of values from the {\tt config} object.  
 !
-!      Supported values for <var\_list_names argument> are:
+!      Supported values for <value list argument> are:
 !      \begin{description}
-!      \item real(ESMF\_KIND\_R4), intent(inout)      :: var\_list_names(:)
-!      \item real(ESMF\_KIND\_R8), intent(inout)      :: var\_list_names(:) 
-!      \item integer(ESMF\_KIND\_I4), intent(inout)   :: var\_list_names(:)  
-!      \item integer(ESMF\_KIND\_I8), intent(inout)   :: var\_list_names(:)  
-!      \item logical, intent(inout)                   :: var\_list_names(:)  
+!      \item real(ESMF\_KIND\_R4), intent(inout)      :: valueList(:)
+!      \item real(ESMF\_KIND\_R8), intent(inout)      :: valueList(:)
+!      \item integer(ESMF\_KIND\_I4), intent(inout)   :: valueList(:)
+!      \item integer(ESMF\_KIND\_I8), intent(inout)   :: valueList(:)
+!      \item logical, intent(inout)                   :: valueList(:)
 !      \end{description}
 !
 !   The arguments are:
 !   \begin{description}
 !   \item [config]
 !     Already created {\tt ESMF\_Config} object.
-!   \item [<var\_list_names argument>]
+!   \item [<value list argument>]
 !     Returned value.
 !   \item [count]
 !     Number of returned values expected.  
