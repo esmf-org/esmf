@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldSetMacros.h,v 1.19.2.2 2008/02/14 02:51:56 cdeluca Exp $
+! $Id: ESMF_FieldSetMacros.h,v 1.19.2.3 2008/02/14 04:29:16 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -117,7 +117,6 @@
           rc = ESMF_RC_NOT_IMPL @\
         endif @\
  @\
-#if 0
         ! check variables @\
         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
  @\
@@ -183,8 +182,6 @@
           ESMF_CONTEXT, rc)) return @\
  @\
         field%ftypep%datastatus = ESMF_STATUS_READY @\
- @\
-#endif
         if (rcpresent) rc = localrc @\
  @\
         end subroutine ESMF_FieldSetDataPtr##mrank##D##mtypekind  @\

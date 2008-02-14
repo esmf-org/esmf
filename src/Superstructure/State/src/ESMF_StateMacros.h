@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_StateMacros.h,v 1.18.2.1 2008/02/14 02:51:56 cdeluca Exp $
+! $Id: ESMF_StateMacros.h,v 1.18.2.2 2008/02/14 04:29:16 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -121,10 +121,9 @@
           rc = ESMF_RC_NOT_IMPL @\
         endif @\
  @\
-#if 0
         ! set temporary true val to work around Cray preprocessor problem@\
         trueval = .TRUE.@\
-@\
+ @\
         ! check input variables @\
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc) @\
  @\
@@ -220,7 +219,6 @@
                                           ESMF_CONTEXT, rc)) return              @\
         endif @\
  @\
-#endif
         if (rcpresent) rc = status @\
  @\
         end subroutine ESMF_StateGetDataPointer##mrank##D##mtypekind   @\

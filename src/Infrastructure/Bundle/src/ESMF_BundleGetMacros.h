@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_BundleGetMacros.h,v 1.12.2.2 2008/02/14 02:51:54 cdeluca Exp $
+! $Id: ESMF_BundleGetMacros.h,v 1.12.2.3 2008/02/14 04:29:14 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -111,7 +111,6 @@
           rc = ESMF_RC_NOT_IMPL @\
         endif @\
  @\
-#if 0
         ! Test to see if array already allocated, and fail if so. @\
         if (associated(dataPointer)) then @\
            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
@@ -134,7 +133,6 @@
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
  @\
-#endif
         if (rcpresent) rc = status @\
  @\
         end subroutine ESMF_BundleGetDataPointer##mrank##D##mtypekind   @\
