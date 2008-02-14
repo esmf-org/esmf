@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldSetMacros.h,v 1.19.2.1 2008/02/07 05:24:04 theurich Exp $
+! $Id: ESMF_FieldSetMacros.h,v 1.19.2.2 2008/02/14 02:51:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -27,7 +27,7 @@
 #define FieldSetDataPtrDoc() \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
-!BOP @\
+!BOPI @\
 ! !IROUTINE: ESMF_FieldSetDataPtr - Add data to a field directly by Fortran pointer @\
 ! @\
 ! !INTERFACE: @\
@@ -76,7 +76,7 @@
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\
 ! @\
-!EOP @\
+!EOPI @\
 
 #if 0
 !------------------------------------------------------------------------------
@@ -117,6 +117,7 @@
           rc = ESMF_RC_NOT_IMPL @\
         endif @\
  @\
+#if 0
         ! check variables @\
         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
  @\
@@ -183,6 +184,7 @@
  @\
         field%ftypep%datastatus = ESMF_STATUS_READY @\
  @\
+#endif
         if (rcpresent) rc = localrc @\
  @\
         end subroutine ESMF_FieldSetDataPtr##mrank##D##mtypekind  @\

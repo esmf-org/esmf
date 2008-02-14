@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.272.2.4 2008/02/13 15:54:20 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.272.2.5 2008/02/14 02:51:55 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -157,7 +157,7 @@
 
    public ESMF_FieldGetInit            ! For Standardized Initialization
 
-   public ESMF_FieldCreateNoData       ! Create a new Field without data
+!   public ESMF_FieldCreateNoData       ! Create a new Field without data
    public ESMF_FieldCreateEmpty        ! Create a new Field without grid or data
    public ESMF_FieldDestroy            ! Destroy a Field
 
@@ -202,7 +202,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.272.2.4 2008/02/13 15:54:20 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.272.2.5 2008/02/14 02:51:55 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -422,7 +422,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldCreateNoDataPtr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no associated data buffer
 
 ! !INTERFACE:
@@ -494,7 +494,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       type(ESMF_FieldType), pointer :: ftype      ! Pointer to new field
       integer :: localrc                         
@@ -505,6 +505,7 @@
       nullify(ftype)
       nullify(ESMF_FieldCreateNoDataPtr%ftypep)
 
+#if 0 
       allocate(ftype, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Field information", &
                                        ESMF_CONTEXT, rc)) return
@@ -533,6 +534,7 @@
                                   ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
+#endif
 
       end function ESMF_FieldCreateNoDataPtr
 
@@ -541,7 +543,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldCreateNoArray"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no associated Array object
 
 ! !INTERFACE:
@@ -581,7 +583,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
  
       type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
       integer :: localrc                    
@@ -592,6 +594,7 @@
       nullify(ftype)
       nullify(ESMF_FieldCreateNoArray%ftypep)
 
+#if 0
       allocate(ftype, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Field information", &
                                        ESMF_CONTEXT, rc)) return
@@ -618,6 +621,7 @@
                                   ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
+#endif
 
       end function ESMF_FieldCreateNoArray
 
