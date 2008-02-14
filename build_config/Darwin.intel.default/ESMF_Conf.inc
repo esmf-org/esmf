@@ -1,7 +1,5 @@
-<<<<<<< ESMF_Conf.inc
-=======
 #if 0
-$Id: ESMF_Conf.inc,v 1.1.2.2 2008/02/14 06:08:12 theurich Exp $
+$Id: ESMF_Conf.inc,v 1.1.2.3 2008/02/14 06:10:08 theurich Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -40,4 +38,3 @@ reactivated.
 #endif
 
 
->>>>>>> 1.3
