@@ -1,4 +1,4 @@
-! $Id: ESMF.F90,v 1.48 2007/10/31 16:59:03 cdeluca Exp $
+! $Id: ESMF.F90,v 1.48.2.1 2008/02/14 05:03:44 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -76,7 +76,7 @@ module ESMF_Mod
 
     use ESMF_StateTypesMod
     use ESMF_StateMod
-    use ESMF_StateGetMod
+!    use ESMF_StateGetMod
     use ESMF_StateReconcileMod
     use ESMF_CompMod
     use ESMF_GridCompMod
