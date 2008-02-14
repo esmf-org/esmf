@@ -1,11 +1,10 @@
-! $Id: user_model1.F90,v 1.1 2007/10/08 23:17:02 theurich Exp $
+! $Id: user_model1.F90,v 1.2 2008/02/14 04:14:57 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-!BOP
 !
 ! !DESCRIPTION:
 !  User-supplied Component, most recent interface revision.
@@ -202,10 +201,32 @@ module user_model1
     type(ESMF_Clock), intent(in) :: clock
     integer, intent(out) :: rc
 
+    ! Local variables
+    type(ESMF_DistGrid) :: distgrid
+    type(ESMF_Array) :: array
+
     ! Initialize return code
     rc = ESMF_SUCCESS
 
     print *, "User Comp1 Final starting"
+
+    call ESMF_StateGetArray(exportState, "srcArray1", array, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_ArrayGet(array, distgrid=distgrid, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_ArrayDestroy(array, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_DistGridDestroy(distgrid, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    call ESMF_StateGetArray(importState, "dstArray1", array, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_ArrayGet(array, distgrid=distgrid, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_ArrayDestroy(array, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_DistGridDestroy(distgrid, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
     print *, "User Comp1 Final returning"
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.42 2008/02/06 05:01:48 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.43 2008/02/14 04:14:54 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.42 2008/02/06 05:01:48 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistGrid.C,v 1.43 2008/02/14 04:14:54 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -171,6 +171,7 @@ DistGrid *DistGrid::create(
     // regDecomp was not provided -> set deCount = petCount for default
     deCount = petCount;
   }
+  bool delayoutCreator = true; // default assume delayout will be created here
   if (delayout == ESMC_NULL_POINTER){
     // delayout was not provided -> create default DELayout with deCount DEs
     delayout = DELayout::create(&deCount, NULL, NULL, NULL, vm, &localrc);
@@ -180,8 +181,9 @@ DistGrid *DistGrid::create(
       return ESMC_NULL_POINTER;
     }
   }else{
-    // delayout was provided -> check deCount
+    // delayout was provided -> get deCount
     deCount = delayout->getDeCount();
+    delayoutCreator = false;  // indicate that delayout was not created here
   }
   int *dummy;
   int regDecompDeleteFlag = 0;  // reset
@@ -396,7 +398,7 @@ DistGrid *DistGrid::create(
   localrc = distgrid->construct(dimCount, 1, patchListPDe,
     minIndex->array, maxIndex->array, minIndexPDimPDe, maxIndexPDimPDe,
     contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe, ESMF_TRUE,
-    connectionList, delayout, vm);
+    connectionList, delayout, delayoutCreator, vm);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
@@ -552,6 +554,7 @@ DistGrid *DistGrid::create(
     return ESMC_NULL_POINTER;
   }
   int deCount = deBlockList->extent[2]; // the 3rd dimension runs through DEs
+  bool delayoutCreator = true; // default assume delayout will be created here
   if (delayout == ESMC_NULL_POINTER){
     // delayout was not provided -> create default DELayout with deCount DEs
     delayout = DELayout::create(&deCount, NULL, NULL, NULL, vm, &localrc);
@@ -561,8 +564,9 @@ DistGrid *DistGrid::create(
       return ESMC_NULL_POINTER;
     }
   }else{
-    // delayout was provided -> check deCount
+    // delayout was provided -> get deCount
     deCount = delayout->getDeCount();
+    delayoutCreator = false;  // indicate that delayout was not created here
   }
   int *dummy;
   int deLabelListDeleteFlag = 0;  // reset
@@ -642,7 +646,7 @@ DistGrid *DistGrid::create(
   localrc = distgrid->construct(dimCount, 1, patchListPDe, 
     minIndex->array, maxIndex->array, minIndexPDimPDe, maxIndexPDimPDe,
     contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe, ESMF_FALSE,
-    connectionList, delayout, vm);
+    connectionList, delayout, delayoutCreator, vm);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
@@ -870,6 +874,7 @@ DistGrid *DistGrid::create(
       deCountPPatch[i] = 1;
     deCount = patchCount;
   }
+  bool delayoutCreator = true; // default assume delayout will be created here
   if (delayout == ESMC_NULL_POINTER){
     // delayout was not provided -> create default DELayout with deCount DEs
     delayout = DELayout::create(&deCount, NULL, NULL, NULL, vm, &localrc);
@@ -879,8 +884,9 @@ DistGrid *DistGrid::create(
       return ESMC_NULL_POINTER;
     }
   }else{
-    // delayout was provided -> check deCount
+    // delayout was provided -> get deCount
     deCount = delayout->getDeCount();
+    delayoutCreator = false;  // indicate that delayout was not created here
   }
   int *dummy, dummyLen[2];
   int regDecompDeleteFlag = 0;  // reset
@@ -1129,7 +1135,7 @@ DistGrid *DistGrid::create(
   localrc = distgrid->construct(dimCount, patchCount, patchListPDe,
     minIndex->array, maxIndex->array, minIndexPDimPDe, maxIndexPDimPDe,
     contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe, ESMF_TRUE,
-    connectionList, delayout, vm);
+    connectionList, delayout, delayoutCreator, vm);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
@@ -1243,6 +1249,7 @@ int DistGrid::construct(
   ESMC_Logical regDecompFlagArg,        // (in)
   InterfaceInt *connectionListArg,      // (in)
   DELayout *delayoutArg,                // (in) DELayout
+  bool delayoutCreatorArg,              // (in)
   VM *vmArg                             // (in) VM context
   ){
 //
@@ -1287,6 +1294,7 @@ int DistGrid::construct(
     connectionList = NULL;
   }
   delayout = delayoutArg;
+  delayoutCreator = delayoutCreatorArg;
   vm = vmArg;
   // fill in the rest
   minIndexPDimPPatch = new int[dimCount*patchCount];
@@ -1392,6 +1400,12 @@ int DistGrid::destruct(void){
     if (arbSeqIndexListPLocalDe[i])
       delete [] arbSeqIndexListPLocalDe[i];
   delete [] arbSeqIndexListPLocalDe;
+  
+  if (delayoutCreator){
+    localrc = DELayout::destroy(&delayout); 
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      return rc;
+  }
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -2601,6 +2615,8 @@ DistGrid *DistGrid::deserialize(
     return NULL;
   // Deserialize the DELayout
   a->delayout = DELayout::deserialize(buffer, offset);
+  a->delayoutCreator = true;  // deserialize creates a local object
+  // VM is a special case
   a->vm = NULL; // VM must be reset
   // Deserialize DistGrid meta data
   ip = (int *)(buffer + *offset);

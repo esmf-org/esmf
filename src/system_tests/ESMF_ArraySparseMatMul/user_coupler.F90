@@ -1,11 +1,10 @@
-! $Id: user_coupler.F90,v 1.4 2007/10/08 18:16:19 theurich Exp $
+! $Id: user_coupler.F90,v 1.5 2008/02/14 04:14:58 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-!BOP
 !
 ! !DESCRIPTION:
 !  User-supplied Coupler

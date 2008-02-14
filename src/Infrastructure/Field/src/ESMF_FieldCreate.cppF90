@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.13 2008/01/25 21:37:07 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.14 2008/02/14 04:14:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cppF90,v 1.13 2008/01/25 21:37:07 feiliu Exp $'
+      '$Id: ESMF_FieldCreate.cppF90,v 1.14 2008/02/14 04:14:55 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -218,6 +218,9 @@
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+      call ESMF_FieldInitialize(ftype, rc=localrc) 
+      if (ESMF_LogMsgFoundAllocError(localrc, "Default initialize Field", &
+                                       ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize field internals.
       call ESMF_FieldConstructIA(ftype, grid, arrayspec, allocflag, &
@@ -338,6 +341,9 @@
 
       allocate(ftype, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Field information", &
+                                       ESMF_CONTEXT, rc)) return
+      call ESMF_FieldInitialize(ftype, rc=localrc) 
+      if (ESMF_LogMsgFoundAllocError(localrc, "Default initialize Field", &
                                        ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize field internals.

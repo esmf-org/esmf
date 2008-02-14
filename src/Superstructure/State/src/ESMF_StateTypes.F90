@@ -1,4 +1,4 @@
-! $Id: ESMF_StateTypes.F90,v 1.23 2008/01/25 17:06:49 theurich Exp $
+! $Id: ESMF_StateTypes.F90,v 1.24 2008/02/14 04:14:56 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -188,6 +188,7 @@
         type(ESMF_ReadyFlag) :: ready
         type(ESMF_ValidFlag) :: valid
         type(ESMF_ReqForRestartFlag) :: reqrestart
+        logical :: proxyFlag
         integer :: indirect_index
         character(len=ESMF_MAXSTR) :: namep
          ESMF_INIT_DECLARE
@@ -282,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateTypes.F90,v 1.23 2008/01/25 17:06:49 theurich Exp $'
+      '$Id: ESMF_StateTypes.F90,v 1.24 2008/02/14 04:14:56 theurich Exp $'
 
 !==============================================================================
 ! 

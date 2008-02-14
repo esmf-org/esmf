@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.297 2008/01/29 18:15:56 rokuingh Exp $
+! $Id: ESMF_Field.F90,v 1.298 2008/02/14 04:14:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -34,7 +34,8 @@
 ! represents a single scalar or vector field.  {\tt ESMF\_Field}s associate
 ! a metadata description expressed as a set of {\tt ESMF\_Attributes} with
 ! a data {\tt ESMF\_Array}, {\tt ESMF\_Grid}, and I/O specification, or
-! {\tt ESMF\_IOSpec} (NOT IMPLEMENTED).  
+! {\tt ESMF\_IOSpec} (NOT IMPLEMENTED). 
+! 
 ! A gridToFieldMap describes the relationship of the {\tt ESMF\_Array} to
 ! the {\tt ESMF\_Grid}.  
 !
@@ -186,6 +187,7 @@
    public ESMF_FieldConstructIA        ! Only public for internal use
    public ESMF_FieldSerialize
    public ESMF_FieldDeserialize
+   public ESMF_FieldInitialize         ! Default initiailze field member variables
 
    public assignment(=)
 
@@ -204,7 +206,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.297 2008/01/29 18:15:56 rokuingh Exp $'
+      '$Id: ESMF_Field.F90,v 1.298 2008/02/14 04:14:55 theurich Exp $'
 
 !==============================================================================
 !
@@ -271,19 +273,19 @@
 ! !IROUTINE: ESMF_FieldConstructNoData - Construct the internals of a new empty Field
 !
 ! !INTERFACE:
-      interface ESMF_FieldConstructNoData
+!      interface ESMF_FieldConstructNoData
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_FieldConstructNoDataPtr
+!        module procedure ESMF_FieldConstructNoDataPtr
 !        module procedure ESMF_FieldConstructNoArray
-        module procedure ESMF_FieldConstructNoGridArray  
+!        module procedure ESMF_FieldConstructNoGridArray  
 
 ! !DESCRIPTION:
 !     This interface provides an entry point for {\tt ESMF\_Field} construction 
 !     methods that do not allocate or reference any associated data.
  
 !EOPI
-      end interface
+!      end interface
 !
 !------------------------------------------------------------------------------
 !BOPI
@@ -2380,6 +2382,10 @@
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Field information", &
                                        ESMF_CONTEXT, rc)) return
 
+      call ESMF_FieldInitialize(ftype, rc=localrc) 
+      if (ESMF_LogMsgFoundAllocError(localrc, "Default initialize Field", &
+                                       ESMF_CONTEXT, rc)) return
+
       ! Call construction method to build field internals.
       call ESMF_FieldConstructNoDataPtr(ftype, grid, arrayspec, staggerloc, &
                                        gridToFieldMap, ungriddedLBound, &
@@ -2393,7 +2399,7 @@
       ESMF_FieldCreateNoDataPtr%ftypep => ftype
 
       ESMF_INIT_SET_CREATED(ESMF_FieldCreateNoDataPtr)
-      
+        
       call ESMF_FieldValidate(ESMF_FieldCreateNoDataPtr, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -2462,6 +2468,9 @@
       allocate(ftype, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Field information", &
                                        ESMF_CONTEXT, rc)) return
+      call ESMF_FieldInitialize(ftype, rc=localrc) 
+      if (ESMF_LogMsgFoundAllocError(localrc, "Default initialize Field", &
+                                       ESMF_CONTEXT, rc)) return
 
       ! Call field construction method
       call ESMF_FieldConstructNoArray(ftype, grid, staggerloc, &
@@ -2487,7 +2496,7 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldCreateNoGridArray"
+#define ESMF_METHOD "ESMF_FieldCreateEmpty"
 
 !BOP
 ! !IROUTINE: ESMF_FieldCreateEmpty - Create a Field with no Grid or Array
@@ -2508,7 +2517,7 @@
 !     An interface function to {\tt ESMF\_FieldCreateNoData()}.
 !     This version of {\tt ESMF\_FieldCreate} builds an empty {\tt ESMF\_Field} 
 !     and depends on later calls to add an {\tt ESMF\_Grid} and {\tt ESMF\_Array} to 
-!     it.  
+!     it. Attributes can be added to empty Field object. 
 !
 !     The arguments are:
 !     \begin{description}
@@ -2534,6 +2543,9 @@
 
       allocate(ftype, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Field information", &
+                                       ESMF_CONTEXT, rc)) return
+      call ESMF_FieldInitialize(ftype, rc=localrc) 
+      if (ESMF_LogMsgFoundAllocError(localrc, "Default initialize Field", &
                                        ESMF_CONTEXT, rc)) return
 
       ! Call field construction method
@@ -4194,6 +4206,12 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
+      if (present(staggerloc)) then
+          ftype%staggerloc = staggerloc
+      else
+          ftype%staggerloc = ESMF_STAGGERLOC_CENTER
+      endif
+
       ! Default of gridToFieldMap should be {1,2,3...}
       if (.not. present(gridToFieldMap)) then
           do i = 1, ESMF_MAXDIM
@@ -4343,6 +4361,30 @@
 
       !TODO:FIELDINTEGRATION Complete implementation of FieldConstructNoDataPtr
 #if 0
+      if (present(staggerloc)) then
+          ftype%staggerloc = staggerloc
+      else
+          ftype%staggerloc = ESMF_STAGGERLOC_CENTER
+      endif
+
+      ! Default of gridToFieldMap should be {1,2,3...}
+      if (.not. present(gridToFieldMap)) then
+          do i = 1, ESMF_MAXDIM
+            ftype%gridToFieldMap(i) = i
+          enddo
+      else
+         ftype%gridToFieldMap = gridToFieldMap
+      end if
+
+      if(present(ungriddedLBound)) &
+         ftype%ungriddedLBound = ungriddedLBound
+      if(present(ungriddedUBound)) &
+         ftype%ungriddedUBound = ungriddedUBound
+      if(present(maxHaloLWidth)) &
+         ftype%maxHaloLWidth = maxHaloLWidth
+      if(present(maxHaloUWidth)) &
+         ftype%maxHaloUWidth = maxHaloUWidth
+
       ! Construct a default name if one is not given
       call ESMF_BaseCreate(ftype%base, "Field", name, 0, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -4445,6 +4487,12 @@
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      if (present(staggerloc)) then
+          ftype%staggerloc = staggerloc
+      else
+          ftype%staggerloc = ESMF_STAGGERLOC_CENTER
+      endif
 
       ! Construct a default name if one is not given
       call ESMF_BaseCreate(ftype%base, "Field", name, 0, localrc)
@@ -4705,7 +4753,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldSerialize"
 
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldSerialize - Serialize field info into a byte stream
 !
 ! !INTERFACE:
@@ -4742,7 +4790,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 
       integer :: localrc
       type(ESMF_FieldType), pointer :: fp    ! field type
@@ -4794,7 +4842,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldDeserialize"
 
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldDeserialize - Deserialize a byte stream into a Field
 !
 ! !INTERFACE:
@@ -4830,7 +4878,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 
       integer :: localrc
       type(ESMF_FieldType), pointer :: fp    ! field type
@@ -5026,6 +5074,54 @@
 
     end function ESMF_FieldGetInit
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldInitialize"
+
+!BOPI
+! !IROUTINE: ESMF_FieldInitialize - Default initialize field member variables
+!
+! !INTERFACE:
+      subroutine ESMF_FieldInitialize(ftypep, rc) 
+!
+! !ARGUMENTS:
+      type(ESMF_FieldType), intent(inout), pointer :: ftypep 
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Takes an {\tt ESMF\_Field} object and default initialize its
+!      auxiliary data members. Only to be used by other Field Create methods.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [ftypep]
+!           {\tt ESMF\_FieldType} object to be default initialized.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+        integer :: i
+
+        ftypep%fieldstatus = ESMF_STATUS_UNINIT
+        ftypep%gridstatus  = ESMF_STATUS_UNINIT
+        ftypep%datastatus  = ESMF_STATUS_UNINIT
+        ftypep%iostatus    = ESMF_STATUS_UNINIT
+       
+        ftypep%staggerloc = ESMF_STAGGERLOC_CENTER
+
+        ftypep%array_internal = .false. 
+        do i = 1, ESMF_MAXDIM
+            ftypep%gridToFieldMap(i) = i
+        end do
+        ftypep%ungriddedLBound = 0
+        ftypep%ungriddedUBound = 0
+        ftypep%maxHaloLWidth   = 0
+        ftypep%maxHaloUWidth   = 0
+
+        if(present(rc)) rc = ESMF_SUCCESS
+
+    end subroutine ESMF_FieldInitialize
 
 !------------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.114 2008/01/29 18:15:57 rokuingh Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.115 2008/02/14 04:14:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.114 2008/01/29 18:15:57 rokuingh Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.115 2008/02/14 04:14:55 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -104,7 +104,7 @@
 
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_UTest_Multi_Proc_Only
       ! Test Requirement FLD1.1.3 Creation without data 
       ! Fields may be created as in FLD1.1.1 without allocating data or 
       ! specifying an associated data array. In this case specifying the 
@@ -116,7 +116,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_UTest_Multi_Proc_Only
       ! Verifing that a Field with no data can be destroyed
       call ESMF_FieldDestroy(f1, rc=rc)
       write(failMsg, *) ""
@@ -126,7 +126,7 @@
 #ifdef ESMF_EXHAUSTIVE
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Verifing that a Field that has not been created doesn't
       ! crash when it is destroyed 
       call ESMF_FieldDestroy(f2, rc=rc)
@@ -135,7 +135,7 @@
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Get a name from a deleted created Field
       call ESMF_FieldGet(f1, name=fname, rc=rc)
       write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED "
@@ -143,7 +143,7 @@
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Get a name from a non-created Field
       call ESMF_FieldGet(f2, name=fname, rc=rc)
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
@@ -151,14 +151,14 @@
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       f1 = ESMF_FieldCreateEmpty(rc=rc) 
       write(failMsg, *) ""
       write(name, *) "Creating a Field with no data Test Req. FLD1.1.3"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_disable_UTest_Multi_Proc_Only
       ! Verifing that an initialized Field can be printed
       call ESMF_FieldPrint(f1, rc=rc)
 !      write(failMsg, *) ""
@@ -166,7 +166,7 @@
 !      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Verifing that the Field name can be queried from a no data Field
       call ESMF_FieldGet(f1, name=fname, rc=rc)
       write(failMsg, *) "default name not generated"
@@ -174,7 +174,7 @@
       call ESMF_Test((fname.ne.""), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Getting Attribute count from a Field
       call ESMF_FieldAttributeGetCount(f1, count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -182,14 +182,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Verify attribute count test
       write(failMsg, *) "Incorrect count"
       write(name, *) "Verify Attribute count from a Field "
       call ESMF_Test((count.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! default names unique
       f2 = ESMF_FieldCreateEmpty(rc=rc)
       call ESMF_FieldGet(f1, name=fname1, rc=rc)
@@ -201,7 +201,7 @@
       call ESMF_Test((fname1.ne.fname2), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Verifing that a Field with no data can be destroyed
       call ESMF_FieldDestroy(f2, rc=rc)
       write(failMsg, *) ""
@@ -210,7 +210,7 @@
       call ESMF_FieldPrint(f2)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Test Requirement  
       ! Fields may be deleted.
       call ESMF_FieldDestroy(f1, rc=rc)
@@ -219,7 +219,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_disable_UTest_Multi_Proc_Only
       ! Verifing that printing an uninitialized Field is handled properly.
 !      call ESMF_FieldPrint(f6, rc=rc)
 !      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
@@ -227,7 +227,7 @@
 !      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! verify that querying the name of a destroyed Field is handled properly.
       call ESMF_FieldGet(f1, name=fname, rc=rc)
       write(failMsg, *) ""
@@ -235,7 +235,7 @@
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_disable_UTest_Multi_Proc_Only
       ! Verifing that printing a destroyed Field is handled properly.
 !      call ESMF_FieldPrint(f1, rc=rc)
 !      write(failMsg, *) ""
@@ -243,7 +243,7 @@
 !      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Verifing that a Field can be created with a name
       f2 = ESMF_FieldCreateEmpty("pressure", rc=rc)
       write(failMsg, *) ""
@@ -252,7 +252,7 @@
       call ESMF_FieldPrint(f2)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Verifing that the Field name can be queried.
       Call ESMF_FieldGet(f2, name=fname, rc=rc)
       write(failMsg, *) ""
@@ -261,7 +261,7 @@
       call ESMF_FieldPrint(f2)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Verifing that recreating a Field is allowed.
       f2 = ESMF_FieldCreateEmpty("temperature", rc=rc)
       write(failMsg, *) ""
@@ -270,7 +270,7 @@
       call ESMF_FieldPrint(f2)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Verifing that a Field can be created after it has been destroyed
       call ESMF_FieldDestroy(f2)
       f2 = ESMF_FieldCreateEmpty("precipitation", rc=rc)
@@ -280,7 +280,7 @@
       call ESMF_FieldPrint(f2)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Verifing that a Grid can be created
       grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
                                   regDecomp=(/2,2/), name="landgrid", rc=rc)
@@ -289,7 +289,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Test requirement Default name attribute 
       ! The only default attribute of a field will be a name. A unique 
       ! name will be generated if not supplied by the user.
@@ -314,14 +314,14 @@
       call ESMF_FieldDestroy(f2)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       f4 = ESMF_FieldCreateEmpty(rc=rc) 
       write(failMsg, *) ""
       write(name, *) "Creating a Field with no data"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Setting a Grid associated with Field
       call ESMF_FieldSetGrid(f4, grid, rc=rc) 
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -329,14 +329,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       call ESMF_FieldValidate(f4, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Testing to see if Field is Valid"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Verifing that a Field with a Grid and Array can be destroyed
       call ESMF_FieldDestroy(f4, rc=rc)
       write(failMsg, *) ""
@@ -344,7 +344,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Fields may be created by specifying attributes, a grid, data array 
       ! dimensions and descriptors, optional masks (e.g. for active cells), 
       ! and an optional I/O specification. In this case a field will 
@@ -355,7 +355,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       f2 = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, &
                                           name="rh", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -363,7 +363,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
+      call ESMF_FieldGet(f2, staggerloc=staggerloc8, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Retrieving staggerloc from a created field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
       ! Verifing that a destroying a destroyed  Field is handled properly.
       call ESMF_FieldDestroy(f2, rc=rc)  ! should succeed, f2 exists
       call ESMF_FieldDestroy(f2, rc=rc)  ! should fail
@@ -372,7 +379,7 @@
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! verify we can create a 3d data on a 2d grid
       call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R4, rc=rc)
       f2 = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, &
@@ -382,7 +389,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Creation with external data 
       ! Fields may be created as in FLD1.1.1 with a data array passed into 
       ! the argument list. The data array is referenced and not copied.
@@ -397,7 +404,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       call ESMF_FieldValidate(f3, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Testing to see if Field is Valid"
@@ -405,7 +412,7 @@
       call ESMF_FieldDestroy(f3)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_disable_UTest_Multi_Proc_Only
       ! Create a different size Grid for testing with an incompatible Array
 !      igrid4 =  ESMF_IGridCreateHorzXYUni((/ 100, 20 /), minCoord, &
 !                                     name="biglandigrid", rc=rc)
@@ -460,7 +467,7 @@
      !!call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Verifing that destroying the Field did not destroy the Grid
        call ESMF_GridValidate(grid, rc=rc)
        write(failMsg, *) ""
@@ -468,7 +475,7 @@
        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Verifing that a Field cannot be created with an uninitialized Grid 
       ! and Array.  f6 is *not* created here and should be invalid.
       grid2 = ESMF_GridCreateEmpty(rc=rc)
@@ -482,7 +489,7 @@
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Verify that a Grid cannot be gotten from a Field created with no data
       f5 = ESMF_FieldCreateEmpty(rc=rc)
       call ESMF_FieldGet(f5, grid=grid3, rc=rc)
@@ -492,7 +499,7 @@
       call ESMF_FieldDestroy(f5, rc=rc)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Return grid 
       ! A field shall be able to return a reference to its grid.
       ! f3 gets created here and used thru the rest of the tests.
@@ -509,7 +516,7 @@
       print *, "Grid (grid3) name = ", trim(gname3)
       call ESMF_Test((gname.eq.gname3), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_disable_UTest_Multi_Proc_Only
       ! Req. xxx - getting a data pointer directly from a field
       ! f3 exists and is valid at this point.
       !nullify(f90ptr2)
@@ -526,7 +533,7 @@
       !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_disable_UTest_Multi_Proc_Only
       ! Create a 3D igrid for testing
 !      igrid5 =  ESMF_IGridCreateHorzXYUni((/ 10, 20 /), minCoord, &
 !                                     name="landigrid", rc=rc)
@@ -549,7 +556,7 @@
       !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_disable_UTest_Multi_Proc_Only
       ! Create a Field with 3D igrid and 3D data array, cell centered
 !      call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R4, rc=rc)
 !      f7 = ESMF_FieldCreate(igrid5, arrayspec, ESMF_ALLOC, ESMF_STAGGERLOC_CENTER, &
@@ -572,7 +579,7 @@
 !      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest 
+      !EX_UTest_Multi_Proc_Only 
       ! Call FieldSetCommit on a field created from FieldCreateEmpty
       ! The data ptr size must match the grid size and only works when np=decomp
       f8 = ESMF_FieldCreateEmpty("pressure", rc=rc)
@@ -584,7 +591,7 @@
       call ESMF_FieldDestroy(f8)
 
       !------------------------------------------------------------------------
-      !EX_UTest 
+      !EX_UTest_Multi_Proc_Only 
       ! FieldCreateFromDataPtr creates a field from a fortran data ptr
       f8 = ESMF_FieldCreate(grid, farray, rc=rc)
       write(failMsg, *) ""
@@ -593,7 +600,7 @@
       call ESMF_FieldDestroy(f8)
       
       !------------------------------------------------------------------------
-      !EX_UTest 
+      !EX_UTest_Multi_Proc_Only 
       ! FieldCreateFromDataPtr creates a field from a fortran data ptr
       ! This test focus on copy behavior
       f8 = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, rc=rc)
@@ -603,7 +610,7 @@
       call ESMF_FieldDestroy(f8)
 
       !------------------------------------------------------------------------
-      !EX_UTest 
+      !EX_UTest_Multi_Proc_Only 
       ! ESMF_ArraySpecPrint test ArraySpecPrint public interface
       call ESMF_ArraySpecSet(arrayspec8, 2, ESMF_TYPEKIND_R8, rc=rc)
       call ESMF_ArraySpecPrint(arrayspec8, rc=rc)
@@ -612,7 +619,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest 
+      !EX_UTest_Multi_Proc_Only 
       ! ESMF_StaggerLocPrint test StaggerLoc public interface
       call ESMF_StaggerLocPrint(staggerloc8, rc=rc)
       write(failMsg, *) ""
@@ -620,7 +627,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest 
+      !EX_UTest_Multi_Proc_Only 
       ! FieldCreateFromArray creates a field from a ESMF_Array
       call ESMF_GridGet(grid, distgrid=distgrid, rc=rc)
 
@@ -632,7 +639,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest 
+      !EX_UTest_Multi_Proc_Only 
       ! FieldCreateFromArray creates a field from a ESMF_Array
       ! This test focus on copy behavior
       call ESMF_GridGet(grid, distgrid=distgrid, rc=rc)
@@ -646,14 +653,14 @@
       call ESMF_FieldDestroy(f9)
 
       !------------------------------------------------------------------------
-      !EX_UTest 
+      !EX_UTest_Multi_Proc_Only 
       ! FieldGetDataPtr gets the fortran data ptr from a ESMF_Field
       ! This test uses f8 created from previous test
       call ESMF_FieldGetDataPtr(f8, farray1, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Retrieves the fortran data ptr from a ESMF_Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       write(failMsg, *) ""
       write(name, *) "Verify the data ptr size is correct"
       if(size(farray1, 1) .ne. 10 .or. size(farray1, 2) .ne. 20) &
@@ -662,7 +669,7 @@
 
       call ESMF_ArrayDestroy(array8)
       !------------------------------------------------------------------------
-      !EX_UTest 
+      !EX_UTest_Multi_Proc_Only 
       ! FieldSetDataPtr sets the fortran data ptr in a ESMF_Field
       ! This test uses f8 created from previous test
       allocate(farray2(size(farray1,1), size(farray1,2)))
@@ -671,7 +678,7 @@
       write(name, *) "Sets the fortran data ptr in a ESMF_Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest 
+      !EX_UTest_Multi_Proc_Only 
       ! FieldSetDataPtr sets the fortran data ptr in a ESMF_Field
       ! This test uses f8 created from previous test
       ! This test test the copy behavior of setptr
@@ -685,7 +692,7 @@
       call ESMF_FieldDestroy(f8)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_disable_UTest_Multi_Proc_Only
       ! Setting a (bad) data pointer directly in an empty Field
 !      nullify(f90ptr4)
 !      call ESMF_FieldSetDataPointer(f2, f90ptr4, rc=rc)
@@ -694,7 +701,7 @@
 !      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_disable_UTest_Multi_Proc_Only
       ! Setting a (good) data pointer directly in an empty Field
 !      allocate(f90ptr4(4,4))
 !      f90ptr4(:,:) = 3.14159
@@ -704,7 +711,7 @@
 !      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_disable_UTest_Multi_Proc_Only
       ! Getting the data pointer back from a Field
 !      call ESMF_FieldGetDataPointer(f2, f90ptr4, rc=rc)
 !      print *, "data = ", f90ptr4(1,1)
@@ -713,7 +720,7 @@
 !      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_disable_UTest_Multi_Proc_Only
       ! Verify the pointers are equal
 !      call ESMF_FieldGetDataPointer(f2, f90ptr5, rc=rc)
 !      print *, "data = ", f90ptr5(1,1)
@@ -722,7 +729,7 @@
 !      call ESMF_Test((associated(f90ptr4,f90ptr5)), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Adding Attributes to a Field
       ! f3 exists and is valid at this point.
       call ESMF_FieldAttributeSet(f3, "Scale Factor", 4, rc)
@@ -731,7 +738,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Getting Attribute count from a Field
       call ESMF_FieldAttributeGetCount(f3, count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -739,14 +746,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Verify Attribute Count Test
       write(failMsg, *) "Incorrect count"
       write(name, *) "Verify Attribute count from a Field "
       call ESMF_Test((count.eq.1), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Getting Attrubute Info from a Field
       call ESMF_FieldAttributeGetInfo(f3, "Scale Factor", count=count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -754,14 +761,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Verify Attribute Count Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Verify Attribute count from a Field "
       call ESMF_Test((count.eq.1), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Get Field Attribute Test
       intattr = 0
       call ESMF_FieldAttributeGet(f3, "Scale Factor", intattr, rc)
@@ -770,7 +777,7 @@
       call ESMF_Test((intattr.eq.4), name, failMsg, result, ESMF_SRCLINE)
  
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! test setting a second attribute
       call ESMF_FieldAttributeSet(f3, "Invalid Data Tag", -999, rc)
       call ESMF_FieldPrint(f3, rc=rc)
@@ -782,7 +789,7 @@
       call ESMF_Test((intattr2.eq.-999), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! getting a non-existent attribute
       print *, "ready to call no attr"
       call ESMF_FieldAttributeGet(f3, "No such attribute", intattr, rc)
@@ -793,7 +800,7 @@
       print *, "done with test"
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! getting a non-existent attribute
       ! setting an integer list
       call ESMF_FieldAttributeSet(f3, "Multiple Scale Factors", 4, (/4,3,2,1/), rc)
@@ -807,7 +814,7 @@
       call ESMF_Test((intattrlist(1).eq.4), name, failMsg, result, ESMF_SRCLINE)
  
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! test setting a real attribute
       rattr = 3.14159
       call ESMF_FieldAttributeSet(f3, "Pi", 3.14159_ESMF_KIND_R8, rc)
@@ -820,7 +827,7 @@
       call ESMF_Test((rattr-3.14159.lt.0.00001), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! test setting a real list
       rattrlist = (/ 1.1, 2.2 /)
       call ESMF_FieldAttributeSet(f3, "Vertices", 2, rattrlist, rc)
@@ -835,7 +842,7 @@
       call ESMF_Test((rattrlist(1).eq.1.1), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! test setting a logical attribute
       call ESMF_FieldAttributeSet(f3, "Sky is Blue", ESMF_TRUE, rc)
       call ESMF_FieldPrint(f3, rc=rc)
@@ -848,7 +855,7 @@
       call ESMF_Test((lattr.eq.ESMF_TRUE), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! test setting a logical list
       call ESMF_FieldAttributeSet(f3, "FlipFlop", 3, (/ESMF_TRUE,ESMF_FALSE,ESMF_TRUE/), rc)
       call ESMF_FieldPrint(f3, rc=rc)
@@ -866,7 +873,7 @@
       call ESMF_Test((lattrlist(1).eq.ESMF_TRUE), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! test setting a character attribute
       cattr = "It was a dark and stormy night"
       call ESMF_FieldAttributeSet(f3, "Book", cattr, rc)
@@ -882,7 +889,6 @@
       ! It shall be possible to specify whether the field data is row major 
       ! or column major at field creation and to rearrange it (assumes 
       ! local copy).
-      !EX_removeUTest
 
       ! Requirement 1.3 Index Order
       ! It shall be possible to specify the index order of field data and 
@@ -941,7 +947,7 @@
        call ESMF_IGridGetDELocalInfo(igrid, ESMF_STAGGERLOC_CENTER,          &
                  Vertrelloc=ESMF_CELL_TOPFACE,                       &
                  localCellCountPerDim=cellCounts, rc=rc)
-      !EX_removeUTest
+      !EX_disable_UTest_Multi_Proc_Only
        write(failMsg, *) ""
        write(name, *) "Getting cell counts for each DE"
        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -954,7 +960,7 @@
                  vertRelloc=ESMF_CELL_TOPFACE,                       &
                  name="field", rc=rc)
        print*,'field create',rc
-      !EX_removeUTest
+      !EX_disable_UTest_Multi_Proc_Only
        write(failMsg, *) ""
        write(name, *) "Create Field with vertical axis longer than igrid"
        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -962,7 +968,7 @@
       ! validate field
        call ESMF_FieldValidate(f1, rc=rc)
        print*,'field create',rc,ESMF_SUCCESS
-      !EX_removeUTest
+      !EX_disable_UTest_Multi_Proc_Only
        write(failMsg, *) ""
        write(name, *) "Field Validated "
        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

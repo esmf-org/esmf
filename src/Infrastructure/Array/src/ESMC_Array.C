@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.175 2008/02/05 22:51:21 theurich Exp $
+// $Id: ESMC_Array.C,v 1.176 2008/02/14 04:14:54 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.175 2008/02/05 22:51:21 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.176 2008/02/14 04:14:54 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -77,6 +77,7 @@ Array::Array(
   int rankArg,                            // (in)
   ESMC_LocalArray **larrayListArg,        // (in)
   DistGrid *distgridArg,                  // (in)
+  bool distgridCreatorArg,                // (in)
   int *exclusiveLBoundArg,                // (in)
   int *exclusiveUBoundArg,                // (in)
   int *computationalLBoundArg,            // (in)
@@ -113,6 +114,7 @@ Array::Array(
   typekind = typekindArg;
   rank = rankArg;
   distgrid = distgridArg;
+  distgridCreator = distgridCreatorArg;
   delayout = distgrid->getDELayout();
   // copy the PET-local LocalArray pointers
   int localDeCount = delayout->getLocalDeCount();
@@ -285,6 +287,8 @@ Array::~Array(){
     delete [] exclusiveElementCountPDe;
   if (totalElementCountPLocalDe != NULL)
     delete [] totalElementCountPLocalDe;
+  if (distgridCreator)
+    DistGrid::destroy(&distgrid); 
 }
 //-----------------------------------------------------------------------------
 
@@ -833,11 +837,12 @@ Array *Array::create(
   
   // call class constructor
   try{
-    array = new Array(typekind, rank, larrayList, distgrid, exclusiveLBound,
-      exclusiveUBound, computationalLBound, computationalUBound,
-      totalLBound, totalUBound, tensorCount, tensorElementCount,
-      undistLBoundArray, undistUBoundArray, staggerLoc, vectorDim,
-      distgridToArrayMapArray, arrayToDistGridMapArray, indexflag, &localrc);
+    array = new Array(typekind, rank, larrayList, distgrid, false,
+      exclusiveLBound, exclusiveUBound, computationalLBound,
+      computationalUBound, totalLBound, totalUBound, tensorCount,
+      tensorElementCount, undistLBoundArray, undistUBoundArray, staggerLoc,
+      vectorDim, distgridToArrayMapArray, arrayToDistGridMapArray, indexflag,
+      &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }catch(...){
@@ -1319,11 +1324,12 @@ Array *Array::create(
   
   // call class constructor
   try{
-    array = new Array(typekind, rank, larrayList, distgrid, exclusiveLBound,
-      exclusiveUBound, computationalLBound, computationalUBound,
-      totalLBound, totalUBound, tensorCount, tensorElementCount,
-      undistLBoundArray, undistUBoundArray, staggerLoc, vectorDim,
-      distgridToArrayMapArray, arrayToDistGridMapArray, indexflag, &localrc);
+    array = new Array(typekind, rank, larrayList, distgrid, false,
+      exclusiveLBound, exclusiveUBound, computationalLBound,
+      computationalUBound, totalLBound, totalUBound, tensorCount,
+      tensorElementCount, undistLBoundArray, undistUBoundArray, staggerLoc,
+      vectorDim, distgridToArrayMapArray, arrayToDistGridMapArray, indexflag,
+      &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }catch(...){
@@ -1405,6 +1411,7 @@ Array *Array::create(
     int tensorElementCount = 
       arrayOut->tensorElementCount = arrayIn->tensorElementCount;
     arrayOut->distgrid = arrayIn->distgrid; // copy reference
+    arrayOut->distgridCreator = false;      // not a locally created object
     arrayOut->delayout = arrayIn->delayout; // copy reference
     // deep copy of members with allocations
     // copy the PET-local LocalArray pointers
@@ -2157,6 +2164,7 @@ int Array::deserialize(
     return rc;
   // Deserialize the DistGrid
   distgrid = DistGrid::deserialize(buffer, offset);
+  distgridCreator = true;  // deserialize creates a local object
   // Pull DELayout out of DistGrid
   delayout = distgrid->getDELayout();
   // Deserialize Array meta data
@@ -2611,8 +2619,14 @@ int Array::gather(
   }
   
   // garbage collection
-  if (localPet == rootPet)
+  if (localPet == rootPet){
+    for (int i=0; i<deCount; i++){
+      int de = i;
+      if (patchListPDe[de] == patch)
+        delete [] recvBuffer[de];
+    }    
     delete [] recvBuffer;
+  }
   for (int i=0; i<localDeCount; i++){
     int de = localDeList[i];
     if (patchListPDe[de] != patch) continue; // skip to next local DE

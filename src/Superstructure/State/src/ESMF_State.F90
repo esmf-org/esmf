@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.126 2008/02/12 21:26:51 rokuingh Exp $
+! $Id: ESMF_State.F90,v 1.127 2008/02/14 04:14:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.126 2008/02/12 21:26:51 rokuingh Exp $'
+      '$Id: ESMF_State.F90,v 1.127 2008/02/14 04:14:55 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -510,11 +510,12 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddArray()   
-      subroutine ESMF_StateAddOneArray(state, array, rc)
+      subroutine ESMF_StateAddOneArray(state, array, proxyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state
       type(ESMF_Array), intent(in) :: array
+      logical, optional :: proxyflag
       integer, intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
@@ -559,7 +560,8 @@ end interface
 
       temp_list(1) = array
 
-      call ESMF_StateClassAddArrayList(state%statep, 1, temp_list, rc=localrc)      
+      call ESMF_StateClassAddArrayList(state%statep, 1, temp_list, &
+        proxyflag=proxyflag, rc=localrc)      
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -624,7 +626,8 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_StateClassAddArrayList(state%statep, arrayCount, arrayList, rc=localrc)
+      call ESMF_StateClassAddArrayList(state%statep, arrayCount, arrayList, &
+        rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -639,11 +642,12 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddBundle()   
-      subroutine ESMF_StateAddOneBundle(state, bundle, rc)
+      subroutine ESMF_StateAddOneBundle(state, bundle, proxyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state
       type(ESMF_Bundle), intent(in) :: bundle
+      logical, optional :: proxyflag
       integer, intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
@@ -688,7 +692,8 @@ end interface
 
       temp_list(1) = bundle
 
-      call ESMF_StateClassAddBundleList(state%statep, 1, temp_list, rc=localrc)      
+      call ESMF_StateClassAddBundleList(state%statep, 1, temp_list, &
+        proxyflag=proxyflag, rc=localrc)      
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -768,11 +773,12 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddField()   
-      subroutine ESMF_StateAddOneField(state, field, rc)
+      subroutine ESMF_StateAddOneField(state, field, proxyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state
       type(ESMF_Field), intent(in) :: field
+      logical, optional :: proxyflag
       integer, intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
@@ -817,7 +823,8 @@ end interface
 
       temp_list(1) = field
 
-      call ESMF_StateClassAddFieldList(state%statep, 1, temp_list, rc=localrc)      
+      call ESMF_StateClassAddFieldList(state%statep, 1, temp_list, &
+        proxyflag=proxyflag, rc=localrc)      
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -1023,11 +1030,12 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddState()   
-      subroutine ESMF_StateAddOneState(state, nestedState, rc)
+      subroutine ESMF_StateAddOneState(state, nestedState, proxyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state
       type(ESMF_State), intent(in) :: nestedState
+      logical, optional :: proxyflag
       integer, intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
@@ -1074,7 +1082,8 @@ end interface
 
       temp_list(1) = nestedState
 
-      call ESMF_StateClassAddStateList(state%statep, 1, temp_list, rc=localrc)      
+      call ESMF_StateClassAddStateList(state%statep, 1, temp_list, &
+        proxyflag=proxyflag, rc=localrc)      
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -3438,14 +3447,11 @@ end interface
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Releases all resources associated with this {\tt ESMF\_State}.
-!     {\tt ESMF\_State}s contain references only to other objects;
-!     when the {\tt ESMF\_State} is destroyed objects contained in it will
-!     not be destroyed.  Objects inside a {\tt ESMF\_State} cannot be
-!     destroyed before the container {\tt ESMF\_State} is destroyed.
-!     Since objects can be added to multiple containers, it remains
-!     the user's responsibility to manage the
-!     destruction of objects when they are no longer in use.
+!     Releases all resources associated with this {\tt ESMF\_State}. Actual
+!     objects added to {\tt ESMF\_State}s will not be destroyed, it
+!     remains the user's responsibility to destroy these objects in the correct
+!     context. However, proxy objects automatically created during
+!     {\tt ESMF\_StateReconcile()} are destroyed when the State is destroyed.
 !
 !     The arguments are:
 !     \begin{description}
@@ -4933,7 +4939,8 @@ end interface
         if (present(bundles)) then
           count = size(bundles)
           if (count .gt. 0) then
-            call ESMF_StateClassAddBundleList(stypep, count, bundles, localrc)
+            call ESMF_StateClassAddBundleList(stypep, count, bundles, &
+              rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -4943,7 +4950,8 @@ end interface
         if (present(fields)) then
           count = size(fields)
           if (count .gt. 0) then
-            call ESMF_StateClassAddFieldList(stypep, count, fields, localrc)
+            call ESMF_StateClassAddFieldList(stypep, count, fields, &
+              rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -4953,7 +4961,8 @@ end interface
         if (present(arrays)) then
           count = size(arrays)
           if (count .gt. 0) then
-            call ESMF_StateClassAddArrayList(stypep, count, arrays, localrc)
+            call ESMF_StateClassAddArrayList(stypep, count, arrays, &
+              rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -4963,7 +4972,8 @@ end interface
         if (present(states)) then
           count = size(states)
           if (count .gt. 0) then
-            call ESMF_StateClassAddStateList(stypep, count, states, localrc)
+            call ESMF_StateClassAddStateList(stypep, count, states, &
+              rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -4973,7 +4983,8 @@ end interface
         if (present(names)) then
           count = size(names)
           if (count .gt. 0) then
-            call ESMF_StateClassAddDataNameList(stypep, count, names, localrc)
+            call ESMF_StateClassAddDataNameList(stypep, count, names, &
+              rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -5066,7 +5077,8 @@ end interface
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Releases all resources associated with this {\tt State}.
+!     Releases all resources associated with this {\tt State}. In particular
+!     all associated proxy objects are destroyed.
 !
 !     The arguments are:
 !     \begin{description}
@@ -5080,12 +5092,42 @@ end interface
 
         ! Local vars
         integer :: localrc
+        type(ESMF_StateItem), pointer::stateItem
+        integer :: i
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variable
         ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
+        
+        ! loop over all items and destroy proxy objects
+        do i=1, stypep%datacount
+          stateItem => stypep%datalist(i)
+          if (stateItem%proxyFlag) then
+            select case(stateItem%otype%ot)
+            case (ESMF_STATEITEM_BUNDLE%ot)
+              call ESMF_BundleDestroy(stateItem%datap%bp, rc=localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+              continue
+            case (ESMF_STATEITEM_FIELD%ot)
+              call ESMF_FieldDestroy(stateItem%datap%fp, rc=localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+              continue
+            case (ESMF_STATEITEM_ARRAY%ot)
+              call ESMF_ArrayDestroy(stateItem%datap%ap, rc=localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+              continue
+            case default
+            end select
+          endif
+        enddo
 
         ! mark object invalid, and free each of the blocks associated
         ! with each entry.  note that we are not freeing the objects
@@ -5125,12 +5167,14 @@ end interface
 ! !IROUTINE: ESMF_StateClassAddRHandleList - Add a list of RouteHandles to a StateClass
 !
 ! !INTERFACE:
-      subroutine ESMF_StateClassAddRHandleList(stypep, acount, routehandles, rc)
+      subroutine ESMF_StateClassAddRHandleList(stypep, acount, routehandles, &
+        proxyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_StateClass), pointer :: stypep
       integer, intent(in) :: acount
       type(ESMF_RouteHandle), dimension(:), intent(in) :: routehandles
+      logical, optional :: proxyflag
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -5281,6 +5325,8 @@ end interface
 
             nextitem => stypep%datalist(stypep%datacount)
             nextitem%otype = ESMF_STATEITEM_ROUTEHANDLE
+            nextitem%proxyFlag = .false.  ! default not a proxy
+            if (present(proxyflag)) nextitem%proxyFlag = proxyflag
 
             ! Add name
             call ESMF_RouteHandleGet(routehandles(i), name=nextitem%namep, &
@@ -5319,12 +5365,14 @@ end interface
 ! !IROUTINE: ESMF_StateClassAddArrayList - Add a list of Arrays to a StateClass
 !
 ! !INTERFACE:
-      subroutine ESMF_StateClassAddArrayList(stypep, acount, arrays, rc)
+      subroutine ESMF_StateClassAddArrayList(stypep, acount, arrays, &
+        proxyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_StateClass), pointer :: stypep
       integer, intent(in) :: acount
       type(ESMF_Array), dimension(:), intent(in) :: arrays
+      logical, optional :: proxyflag
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -5475,6 +5523,8 @@ end interface
 
             nextitem => stypep%datalist(stypep%datacount)
             nextitem%otype = ESMF_STATEITEM_ARRAY
+            nextitem%proxyFlag = .false.  ! default not a proxy
+            if (present(proxyflag)) nextitem%proxyFlag = proxyflag
 
             ! Add name
             call ESMF_ArrayGet(arrays(i), name=nextitem%namep, rc=localrc)
@@ -5512,12 +5562,14 @@ end interface
 ! !IROUTINE: ESMF_StateClassAddFieldList - Add a list of Fields to a StateClass
 !
 ! !INTERFACE:
-      subroutine ESMF_StateClassAddFieldList(stypep, fcount, fields, rc)
+      subroutine ESMF_StateClassAddFieldList(stypep, fcount, fields, &
+        proxyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_StateClass), pointer :: stypep
       integer, intent(in) :: fcount
       type(ESMF_Field), dimension(:), intent(inout) :: fields
+      logical, optional :: proxyflag
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -5674,6 +5726,8 @@ end interface
 
             nextitem => stypep%datalist(stypep%datacount)
             nextitem%otype = ESMF_STATEITEM_FIELD
+            nextitem%proxyFlag = .false.  ! default not a proxy
+            if (present(proxyflag)) nextitem%proxyFlag = proxyflag
 
             ! Add name
             call ESMF_FieldGet(fields(i), name=nextitem%namep, rc=localrc)
@@ -5713,12 +5767,14 @@ end interface
 ! !IROUTINE: ESMF_StateClassAddBundleList - Add a list of Bundles to a StateClass
 !
 ! !INTERFACE:
-      subroutine ESMF_StateClassAddBundleList(stypep, bcount, bundles, rc)
+      subroutine ESMF_StateClassAddBundleList(stypep, bcount, bundles, &
+        proxyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_StateClass), pointer :: stypep
       integer, intent(in) :: bcount
       type(ESMF_Bundle), dimension(:), intent(inout) :: bundles
+      logical, optional :: proxyflag
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -5938,6 +5994,8 @@ end interface
 
             nextitem => stypep%datalist(stypep%datacount)
             nextitem%otype = ESMF_STATEITEM_BUNDLE
+            nextitem%proxyFlag = .false.  ! default not a proxy
+            if (present(proxyflag)) nextitem%proxyFlag = proxyflag
 
             ! Add name
             call ESMF_BundleGet(bundles(i), name=nextitem%namep, rc=localrc)
@@ -5977,6 +6035,8 @@ end interface
 
             nextitem => stypep%datalist(stypep%datacount)
             nextitem%otype = ESMF_STATEITEM_INDIRECT
+            nextitem%proxyFlag = .false.  ! default not a proxy
+            if (present(proxyflag)) nextitem%proxyFlag = proxyflag
     
             ! get next field and query name
             call ESMF_BundleGetField(bundles(i), j, field, localrc)
@@ -6065,12 +6125,14 @@ end interface
 ! !IROUTINE: ESMF_StateClassAddStateList - Add a list of States to a StateClass
 !
 ! !INTERFACE:
-      subroutine ESMF_StateClassAddStateList(stypep, scount, states, rc)
+      subroutine ESMF_StateClassAddStateList(stypep, scount, states, &
+        proxyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_StateClass), pointer :: stypep
       integer, intent(in) :: scount
       type(ESMF_State), dimension(:), intent(in) :: states
+      logical, optional :: proxyflag
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -6225,6 +6287,8 @@ end interface
 
             nextitem => stypep%datalist(stypep%datacount)
             nextitem%otype = ESMF_STATEITEM_STATE
+            nextitem%proxyFlag = .false.  ! default not a proxy
+            if (present(proxyflag)) nextitem%proxyFlag = proxyflag
 
             ! Add name
             call c_ESMC_GetName(states(i)%statep%base, nextitem%namep, status)
@@ -6366,12 +6430,14 @@ end interface
 ! !IROUTINE: ESMF_StateClassAddDataNameList - internal routine
 !
 ! !INTERFACE:
-      subroutine ESMF_StateClassAddDataNameList(stypep, ncount, namelist, rc)
+      subroutine ESMF_StateClassAddDataNameList(stypep, ncount, namelist, &
+        proxyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_StateClass), pointer :: stypep
       integer, intent(in) :: ncount
       character (len=*), intent(in) :: namelist(:)
+      logical, optional :: proxyflag
       integer, intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
@@ -6492,6 +6558,8 @@ end interface
 
             nextitem => stypep%datalist(stypep%datacount)
             nextitem%otype = ESMF_STATEITEM_NAME
+            nextitem%proxyFlag = .false.  ! default not a proxy
+            if (present(proxyflag)) nextitem%proxyFlag = proxyflag
 
             ! Add name
             nextitem%namep = namelist(i)

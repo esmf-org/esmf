@@ -1,4 +1,4 @@
-% $Id: State_refdoc.ctex,v 1.12 2008/02/13 05:23:21 cdeluca Exp $
+% $Id: State_refdoc.ctex,v 1.13 2008/02/14 04:14:55 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@
 \input{../Superstructure/State/doc/ESMF_State_fapi}
 #endif
 
-%TODO:FIELDINTEGRATION Restore StateGet
+%TODO:FIELDINTEGRATION Restore StateGet methods
 %\subsection{Class API: State Overloads for Fortran Arrays}
 %#ifdef STANDALONE
 %\input{ESMF_StateGet_fapi}

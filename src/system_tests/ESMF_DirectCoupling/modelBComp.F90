@@ -1,55 +1,40 @@
-! $Id: user_model1.F90,v 1.13 2008/02/14 04:14:58 theurich Exp $
+! $Id: modelBComp.F90,v 1.2 2008/02/14 04:14:59 theurich Exp $
 !
-! Example/test code which shows User Component calls.
-
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-!
-! !DESCRIPTION:
-!  User-supplied Component, most recent interface revision.
-!
-!
-!\begin{verbatim}
-
-module user_model1
+module modelBCompMod
 
   ! ESMF Framework module
   use ESMF_Mod
 
   implicit none
     
-  public userm1_register
+  public modelBCompReg
         
+!-------------------------------------------------------------------------
+
   contains
 
 !-------------------------------------------------------------------------
-!   !  The Register routine sets the subroutines to be called
-!   !   as the init, run, and finalize routines.  Note that these are
-!   !   private to the module.
- 
-  subroutine userm1_register(comp, rc)
+
+  subroutine modelBCompReg(comp, rc)
     type(ESMF_GridComp), intent(inout) :: comp
     integer, intent(out) :: rc
 
-    ! Initialize return code
+    ! Initialize
     rc = ESMF_SUCCESS
 
-    print *, "User Comp1 Register starting"
-
-    ! Register the callback routines.
-
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, user_init, &
+    ! Register Init, Run, Finalize
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, compInit, &
       ESMF_SINGLEPHASE, rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, user_run, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, compRun, &
       ESMF_SINGLEPHASE, rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, user_final, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, compFinal, &
       ESMF_SINGLEPHASE, rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-
-    print *, "Registered Initialize, Run, and Finalize routines"
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
@@ -61,16 +46,11 @@ module user_model1
     if (rc/=ESMF_SUCCESS) return ! bail out
 #endif
 
-    print *, "User Comp1 Register returning"
-    
   end subroutine
 
 !-------------------------------------------------------------------------
-!   !  User Comp Component created by higher level calls, here is the
-!   !   Initialization routine.
- 
     
-  subroutine user_init(comp, importState, exportState, clock, rc)
+  subroutine compInit(comp, importState, exportState, clock, rc)
     type(ESMF_GridComp), intent(inout) :: comp
     type(ESMF_State), intent(inout) :: importState, exportState
     type(ESMF_Clock), intent(in) :: clock
@@ -83,10 +63,8 @@ module user_model1
     type(ESMF_VM)         :: vm
     integer               :: petCount
     
-    ! Initialize return code
+    ! Initialize
     rc = ESMF_SUCCESS
-
-    print *, "User Comp1 Init starting"
 
     ! Determine petCount
     call ESMF_GridCompGet(comp, vm=vm, rc=rc)
@@ -94,90 +72,84 @@ module user_model1
     call ESMF_VMGet(vm, petCount=petCount, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
-    ! Create the source Array and add it to the export State
+    ! Create the Array and add it to the import and export State
     call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/100,150/), &
-      regDecomp=(/petCount,1/), rc=rc)
+      rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-      indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+      indexflag=ESMF_INDEX_GLOBAL, name="modelB.array", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_ArraySet(array, name="array data", rc=rc)
+    call ESMF_StateAddArray(importState, array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_StateAddArray(exportState, array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-   
-    print *, "User Comp1 Init returning"
-
-  end subroutine user_init
-
+      
+  end subroutine
 
 !-------------------------------------------------------------------------
-!   !  The Run routine where data is computed.
-!   !
  
-  subroutine user_run(comp, importState, exportState, clock, rc)
+  subroutine compRun(comp, importState, exportState, clock, rc)
     type(ESMF_GridComp), intent(inout) :: comp
     type(ESMF_State), intent(inout) :: importState, exportState
     type(ESMF_Clock), intent(in) :: clock
     integer, intent(out) :: rc
 
     ! Local variables
-    real(ESMF_KIND_R8)    :: pi
-    type(ESMF_Array)      :: array
-    real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
-    integer               :: i, j
+    type(ESMF_Array)        :: array
+    type(ESMF_RouteHandle)  :: modelA2BRedist, model2ioRedist
+    integer                 :: n
     
-    ! Initialize return code
+    ! Initialize
     rc = ESMF_SUCCESS
 
-    print *, "User Comp1 Run starting"
-
-    pi = 3.14159d0
-
-    ! Get the source Array from the export State
-    call ESMF_StateGetArray(exportState, "array data", array, rc=rc)
+    ! Get the Array from the import State
+    call ESMF_StateGetArray(importState, "modelB.array", array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    ! Gain access to actual data via F90 array pointer
-    call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
+    ! Gain access to RouteHandles for direct coupling to modelAComp and ioComp
+    call ESMF_StateGetRouteHandle(importState, "modelA2BRedist", &
+      routehandle=modelA2BRedist, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-
-    ! Fill source Array with data
-    do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
-      do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
-        farrayPtr(i,j) = 10.0d0 &
-          + 5.0d0 * sin(real(i,ESMF_KIND_R8)/100.d0*pi) &
-          + 2.0d0 * sin(real(j,ESMF_KIND_R8)/150.d0*pi)
-      enddo
+    call ESMF_StateGetRouteHandle(exportState, "model2ioRedist", &
+      routehandle=model2ioRedist, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    
+    ! Main Run Loop - with direct coupling to modelAComp and  ioComp
+    do n=1, 3
+      
+      ! ArrayRedist() "receive" from modelAComp
+      call ESMF_ArrayRedist(dstArray=array, routehandle=modelA2BRedist, rc=rc)
+      if (rc/=ESMF_SUCCESS) return ! bail out
+      
+      ! -> do something with array here
+      
+      ! ArrayRedist() "send" to ioComp
+      call ESMF_ArrayRedist(srcArray=array, routehandle=model2ioRedist, rc=rc)
+      if (rc/=ESMF_SUCCESS) return ! bail out
+      
     enddo
  
-    print *, "User Comp1 Run returning"
-
-  end subroutine user_run
-
+  end subroutine
 
 !-------------------------------------------------------------------------
-!   !  The Finalization routine where things are deleted and cleaned up.
-!   !
  
-  subroutine user_final(comp, importState, exportState, clock, rc)
+  subroutine compFinal(comp, importState, exportState, clock, rc)
     type(ESMF_GridComp), intent(inout) :: comp
     type(ESMF_State), intent(inout) :: importState, exportState
     type(ESMF_Clock), intent(in) :: clock
     integer, intent(out) :: rc
 
     ! Local variables
-    type(ESMF_DistGrid) :: distgrid
-    type(ESMF_Array) :: array
-    
-    ! Initialize return code
+    type(ESMF_DistGrid)   :: distgrid
+    type(ESMF_Array)      :: array
+
+    ! Initialize
     rc = ESMF_SUCCESS
-
-    print *, "User Comp1 Final starting"
-
-    call ESMF_StateGetArray(exportState, "array data", array, rc=rc)
+    
+    ! Garbage collection of objects explicitly created in this component
+    call ESMF_StateGetArray(importState, "modelB.array", array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayGet(array, distgrid=distgrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -186,11 +158,9 @@ module user_model1
     call ESMF_DistGridDestroy(distgrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    print *, "User Comp1 Final returning"
+  end subroutine
 
-  end subroutine user_final
-
-
-end module user_model1
+!-------------------------------------------------------------------------
+ 
+end module modelBCompMod
     
-!\end{verbatim}

@@ -1,11 +1,10 @@
-! $Id: user_model2.F90,v 1.3 2007/11/16 04:34:55 oehmke Exp $
+! $Id: user_model2.F90,v 1.4 2008/02/14 04:15:00 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
 !--------------------------------------------------------------------------------
 !--------------------------------------------------------------------------------
 
-!BOP
 !
 ! !DESCRIPTION:
 !  User-supplied Component
@@ -185,10 +184,23 @@ module user_model2
     type(ESMF_Clock), intent(in) :: clock
     integer, intent(out) :: rc
 
+    ! Local variables
+    type(ESMF_Grid)  :: grid
+    type(ESMF_Field) :: field
+    
     ! Initialize return code
     rc = ESMF_SUCCESS
 
     print *, "User Comp2 Final starting"
+
+    call ESMF_StateGetField(importState, "field data", field, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_FieldGet(field, grid=grid, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_FieldDestroy(field, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_GridDestroy(grid, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
     print *, "User Comp2 Final returning"
 

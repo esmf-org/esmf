@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.91 2008/02/05 22:34:23 theurich Exp $
+// $Id: ESMC_Array.h,v 1.92 2008/02/14 04:14:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -97,6 +97,7 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
                                       // Array region.
     // lower level object references
     DistGrid *distgrid;
+    bool distgridCreator;
     DELayout *delayout;
     
   public:
@@ -127,11 +128,11 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     }
   private:
     Array(ESMC_TypeKind typekind, int rank, ESMC_LocalArray **larrayList,
-      DistGrid *distgrid, int *exclusiveLBound, int *exclusiveUBound, 
-      int *computationalLBound, int *computationalUBound, int *totalLBound,
-      int *totalUBound, int tensorCount, int tensorElementCount,
-      int *undistLBoundArray, int *undistUBoundArray, int *staggerLoc,
-      int *vectorDim, int *distgridToArrayMapArray,
+      DistGrid *distgrid, bool distgridCreator, int *exclusiveLBound,
+      int *exclusiveUBound, int *computationalLBound, int *computationalUBound,
+      int *totalLBound, int *totalUBound, int tensorCount,
+      int tensorElementCount, int *undistLBoundArray, int *undistUBoundArray,
+      int *staggerLoc, int *vectorDim, int *distgridToArrayMapArray,
       int *arrayToDistGridMapArray, ESMC_IndexFlag indexflagArg, int *rc);
   public:
     ~Array();

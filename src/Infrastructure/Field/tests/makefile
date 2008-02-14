@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.43 2007/12/10 21:20:23 feiliu Exp $ 
+# $Id: makefile,v 1.44 2008/02/14 04:14:55 theurich Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -27,7 +27,7 @@ TESTS_RUN     = RUN_ESMF_FieldUTest
 #               RUN_ESMF_FieldHarness2UTest \
 #		RUN_ESMF_FieldHarness4UTest
 
-TESTS_RUN_UNI = RUN_ESMF_FieldUTestUNI 
+#TESTS_RUN_UNI = RUN_ESMF_FieldUTestUNI 
 #		RUN_ESMF_FRoute4UTestUNI \
 #		RUN_ESMF_FRoute8UTestUNI
 
@@ -45,10 +45,6 @@ ESMF_FRoute8UTest.F90:  ESMF_FRoute4UTest.F90
 #
 RUN_ESMF_FieldUTest:
 	$(MAKE) TNAME=Field NP=4 ftest
-
-#RUN_ESMF_FieldUTestUNI:
-#	$(MAKE) TNAME=Field NP=1 ftest
-
 
 #
 # Field Route function
@@ -71,14 +67,6 @@ RUN_ESMF_FRoute4UTest:
 RUN_ESMF_FRoute8UTest:
 	$(MAKE) TNAME=FRoute8 NP=8 ftest
 
-
-RUN_ESMF_FRoute4UTestUNI:
-	echo "PASS: ESMF_FRoute4UTest not set up to run on one processor." > $(ESMC_TESTDIR)/ESMF_FRoute4UTest.stdout
-
-RUN_ESMF_FRoute8UTestUNI:
-	echo "PASS: ESMF_FRoute8UTest not set up to run on one processor." > $(ESMC_TESTDIR)/ESMF_FRoute8UTest.stdout
-        
-        
 RUN_ESMF_FieldHarness2UTest:
 	cp -f test_harness.rc $(ESMF_TESTDIR)
 	cp -f harness_config/*.rc $(ESMF_TESTDIR)

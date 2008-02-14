@@ -1,11 +1,10 @@
-! $Id: ESMF_ArrayScatterGatherSTest.F90,v 1.4 2008/01/25 17:41:06 theurich Exp $
+! $Id: ESMF_ArrayScatterGatherSTest.F90,v 1.5 2008/02/14 04:14:57 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !-------------------------------------------------------------------------
-!BOP
 !
 ! !DESCRIPTION:
 ! System test ArrayScatterGather.  
@@ -248,6 +247,13 @@ program ESMF_ArrayScatterGatherSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
+  call ESMF_CplCompFinalize(cpl, importState=importState, &
+    exportState=exportState, rc=localrc)
+  print *, "Coupler Finalize finished, rc =", localrc
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+
   call ESMF_GridCompFinalize(comp1, importState=exportState, &
     exportState=importState, rc=localrc)
   print *, "Comp 1 Finalize finished, rc =", localrc
@@ -255,16 +261,9 @@ program ESMF_ArrayScatterGatherSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  call ESMF_GridCompFinalize(comp2, importState=importState, &
+  call ESMF_GridCompFinalize(comp2, importState=exportState, &
     exportState=exportState, rc=localrc)
   print *, "Comp 2 Finalize finished, rc =", localrc
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-
-  call ESMF_CplCompFinalize(cpl, importState=importState, &
-    exportState=exportState, rc=localrc)
-  print *, "Coupler Finalize finished, rc =", localrc
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -275,15 +274,6 @@ program ESMF_ArrayScatterGatherSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  call ESMF_StateDestroy(importState, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  call ESMF_StateDestroy(exportState, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-
   call ESMF_GridCompDestroy(comp1, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -293,6 +283,15 @@ program ESMF_ArrayScatterGatherSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
   call ESMF_CplCompDestroy(cpl, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+
+  call ESMF_StateDestroy(importState, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  call ESMF_StateDestroy(exportState, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)

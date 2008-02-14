@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.33 2007/10/31 04:53:40 theurich Exp $
+// $Id: ESMC_DistGrid.h,v 1.34 2008/02/14 04:14:54 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -75,6 +75,7 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     ESMC_Logical regDecompFlag;   // flag indicating regular decomposition
     // lower level object references
     DELayout *delayout;
+    bool delayoutCreator;
     VM *vm;    
         
   private:
@@ -83,7 +84,7 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
       int *minIndex, int *maxIndex, int *minIndexPDimPDe, int *maxIndexPDimPDe,
       int *contigFlagPDimPDe, int *indexCountPDimPDe, int **indexList,
       ESMC_Logical regDecompFlagArg, InterfaceInt *connectionList,
-      DELayout *delayout, VM *vm);
+      DELayout *delayout, bool delayoutCreator, VM *vm);
     int destruct();
   public:
     // create() and destroy()
