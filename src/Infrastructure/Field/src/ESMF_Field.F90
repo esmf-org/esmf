@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.272.2.5 2008/02/14 02:51:55 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.272.2.6 2008/02/14 03:01:00 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -202,7 +202,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.272.2.5 2008/02/14 02:51:55 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.272.2.6 2008/02/14 03:01:00 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -232,22 +232,6 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_FieldCreateEmpty - Create an empty Field without grid or data
-!
-! !INTERFACE:
-    interface ESMF_FieldCreateEmpty
-        module procedure ESMF_FieldCreateNoGridArray
-! !DESCRIPTION:
-!     This interface provides an entry point for methods that create 
-!     an {\tt ESMF\_Field} without allocating or referencing any associated data.
-!     It allows Field creation without specifying {\tt ESMF\_Grid} or 
-!     {\tt ESMF\_Array}.
-
-!EOPI
-    end interface
-!
-!------------------------------------------------------------------------------
-!BOPI
 ! !IROUTINE: ESMF_FieldConstructIA - Construct the internals of a new Field
 !
 ! !INTERFACE:
@@ -266,7 +250,7 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_FieldConstructNoData - Construct the internals of a new empty Field
+! !IROUTINE: ESMF_FieldConstructNoData - Partially construct a Field
 !
 ! !INTERFACE:
 !      interface ESMF_FieldConstructNoData
@@ -274,7 +258,6 @@
 ! !PRIVATE MEMBER FUNCTIONS:
 !        module procedure ESMF_FieldConstructNoDataPtr
 !        module procedure ESMF_FieldConstructNoArray
-!        module procedure ESMF_FieldConstructNoGridArray  
 
 ! !DESCRIPTION:
 !     This interface provides an entry point for {\tt ESMF\_Field} construction 
@@ -633,11 +616,10 @@
 ! !IROUTINE: ESMF_FieldCreateEmpty - Create a Field with no Grid or Array
 
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldCreateEmpty()
-      function ESMF_FieldCreateNoGridArray(name, iospec, rc)
+      function ESMF_FieldCreateEmpty(name, iospec, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Field) :: ESMF_FieldCreateNoGridArray 
+      type(ESMF_Field) :: ESMF_FieldCreateEmpty 
 !
 ! !ARGUMENTS:
       character (len = *), intent(in), optional :: name  
@@ -645,10 +627,9 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     An interface function to {\tt ESMF\_FieldCreateNoData()}.
 !     This version of {\tt ESMF\_FieldCreate} builds an empty {\tt ESMF\_Field} 
 !     and depends on later calls to add an {\tt ESMF\_Grid} and {\tt ESMF\_Array} to 
-!     it. Attributes can be added to empty Field object. 
+!     it. Attributes can be added to an empty Field object. 
 !
 !     The arguments are:
 !     \begin{description}
@@ -670,7 +651,7 @@
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       nullify(ftype)
-      nullify(ESMF_FieldCreateNoGridArray%ftypep)
+      nullify(ESMF_FieldCreateEmpty%ftypep)
 
       allocate(ftype, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Field information", &
@@ -680,24 +661,24 @@
                                        ESMF_CONTEXT, rc)) return
 
       ! Call field construction method
-      call ESMF_FieldConstructNoGridArray(ftype, name, iospec, localrc)
+      call ESMF_FieldConstructEmpty(ftype, name, iospec, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
       ! Set return values.
-      ESMF_FieldCreateNoGridArray%ftypep => ftype
+      ESMF_FieldCreateEmpty%ftypep => ftype
 
-      ESMF_INIT_SET_CREATED(ESMF_FieldCreateNoGridArray)
+      ESMF_INIT_SET_CREATED(ESMF_FieldCreateEmpty)
 
-      call ESMF_FieldValidate(ESMF_FieldCreateNoGridArray, rc=localrc)
+      call ESMF_FieldValidate(ESMF_FieldCreateEmpty, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_FieldCreateNoGridArray
+      end function ESMF_FieldCreateEmpty
 
 
 !------------------------------------------------------------------------------
@@ -4272,13 +4253,13 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldConstructNoGridArray"
+#define ESMF_METHOD "ESMF_FieldConstructEmpty"
 
 !BOPI
-! !IROUTINE: ESMF_FieldConstructNoGridArray - Construct a Field with no Grid or Array
+! !IROUTINE: ESMF_FieldConstructEmpty - Construct a Field with no Grid or Array
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldConstructNoGridArray(ftypep, name, iospec, rc)
+      subroutine ESMF_FieldConstructEmpty(ftypep, name, iospec, rc)
 !
 ! !ARGUMENTS:     
       type(ESMF_FieldType), pointer :: ftypep
@@ -4326,7 +4307,7 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
       
-      end subroutine ESMF_FieldConstructNoGridArray
+      end subroutine ESMF_FieldConstructEmpty
 
 
 !------------------------------------------------------------------------------
