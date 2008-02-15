@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldGetMacros.h,v 1.15.2.1 2008/02/07 05:24:04 theurich Exp $
+! $Id: ESMF_FieldGetMacros.h,v 1.15.2.2 2008/02/15 20:47:49 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -21,7 +21,7 @@
 #define FieldGetDataPtrDoc() \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
-!BOP @\
+!BOPI @\
 ! !IROUTINE: ESMF_FieldGetDataPtr - Get the Fortran data pointer from a Field @\
 ! @\
 ! !INTERFACE: @\
@@ -107,7 +107,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
 ! @\
-!EOP @\
+!EOPI @\
 
 #if 0
 !------------------------------------------------------------------------------

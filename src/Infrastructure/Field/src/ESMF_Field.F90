@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.272.2.7 2008/02/14 04:29:15 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.272.2.8 2008/02/15 20:47:49 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -202,7 +202,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.272.2.7 2008/02/14 04:29:15 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.272.2.8 2008/02/15 20:47:49 feiliu Exp $'
 
 !==============================================================================
 !
@@ -4846,13 +4846,11 @@
         ftypep%staggerloc = ESMF_STAGGERLOC_CENTER
 
         ftypep%array_internal = .false. 
-        do i = 1, ESMF_MAXDIM
-            ftypep%gridToFieldMap(i) = i
-        end do
-        ftypep%ungriddedLBound = 0
-        ftypep%ungriddedUBound = 0
-        ftypep%maxHaloLWidth   = 0
-        ftypep%maxHaloUWidth   = 0
+        ftypep%gridToFieldMap = -1
+        ftypep%ungriddedLBound = -1
+        ftypep%ungriddedUBound = -1
+        ftypep%maxHaloLWidth   = -1
+        ftypep%maxHaloUWidth   = -1
 
         if(present(rc)) rc = ESMF_SUCCESS
 
