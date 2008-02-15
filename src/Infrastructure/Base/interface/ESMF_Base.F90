@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.134 2007/09/20 17:44:20 cdeluca Exp $
+! $Id: ESMF_Base.F90,v 1.135 2008/02/15 19:37:25 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -148,7 +148,7 @@ module ESMF_BaseMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.134 2007/09/20 17:44:20 cdeluca Exp $'
+               '$Id: ESMF_Base.F90,v 1.135 2008/02/15 19:37:25 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -280,6 +280,292 @@ module ESMF_BaseMod
 
 
 !-------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_SetName"
+!BOPI
+! !IROUTINE:  ESMF_SetName - set the name of this object
+!
+! !INTERFACE:
+  subroutine ESMF_SetName(base, name, namespace, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Base) :: base                 
+      character (len = *), intent(in), optional :: name   
+      character (len = *), intent(in), optional :: namespace
+      integer, intent(out), optional :: rc     
+
+!
+! !DESCRIPTION:
+!     Associate a name with any object in the system.
+!
+!     \begin{description}
+!     \item [base]
+!           In the Fortran interface this must be an {\tt ESMF\_Base}
+!           derived type object.  It is expected that all specialized 
+!           derived types will include a {\tt ESMF\_Base} object as the 
+!           first entry.
+!     \item [{[name]}]
+!           Object name.  An error will be returned if a duplicate name 
+!           is specified.  If a name is not given a unique name will be
+!           generated and can be queried by the {\tt ESMF\_GetName} routine.
+!     \item [{[namespace]}]
+!           Object namespace (e.g. "Application", "Component", "IGrid", etc).
+!           If given, the name will be checked that it is unique within
+!           this namespace.  If not given, the generated name will be 
+!           unique within this namespace.  If namespace is not specified,
+!           a default "global" namespace will be assumed and the same rules
+!           for names will be followed.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! 
+!EOPI
+      logical :: rcpresent                          ! Return code present   
+      integer :: status
+
+      ! Initialize return code; assume routine not implemented
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_RC_NOT_IMPL
+      endif
+      status = ESMF_RC_NOT_IMPL
+
+      ! TODO: remove this once everyone is initializing their Base objects.
+      ! cheat for old code for now.
+      if (base%isInit .ne. ESMF_INIT_CREATED) then 
+          call ESMF_BaseCreate(base, namespace, name, 0, status)
+          if (rcpresent) rc = status
+          return
+      endif
+      ! end cheat
+
+      call c_ESMC_SetName(base , namespace, name, status)
+
+      if (rcpresent) rc = status
+
+  end subroutine ESMF_SetName
+
+!-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GetName"
+!BOPI
+! !IROUTINE:  ESMF_GetName - get the name of this object
+!
+! !INTERFACE:
+  subroutine ESMF_GetName(base, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Base), intent(in) :: base
+      character (len = *), intent(out) :: name
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     Return the name of any type in the system.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[base]
+!       Any ESMF type.
+!     \item[name]
+!       The name of the ESMF type.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+      integer :: status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      call c_ESMC_GetName(base , name, status)
+      if (present(rc)) rc = status
+
+  end subroutine ESMF_GetName
+
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!  Print routine
+!-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BasePrint"
+!BOPI
+! !IROUTINE:  ESMF_BasePrint - Call into C++ code to print base object
+!
+! !INTERFACE:
+  subroutine ESMF_BasePrint(base, options, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Base),  intent(in)              :: base
+    character(len=*), intent(in),   optional  :: options
+    integer,          intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!  Interface to call through to C++ and print base object values.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[base]
+!       Any ESMF type.
+!     \item[options]
+!       Print options.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+    integer                     :: localrc
+    character(len=ESMF_MAXSTR)  :: opts
+
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, base, rc)
+
+    if (present(options)) then
+        opts = options
+    else
+        opts = ''
+    endif
+
+    call c_ESMC_BasePrint(base , opts, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_BasePrint
+
+!-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BaseValidate"
+!BOPI
+! !IROUTINE:  ESMF_BaseValidate - Call into C++ code to print base object
+!
+! !INTERFACE:
+  subroutine ESMF_BaseValidate(base, options, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Base),  intent(in)              :: base
+    character(len=*), intent(in),   optional  :: options
+    integer,          intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!  Interface to call through to C++ and validate base object values.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[base]
+!       Any ESMF type.
+!     \item[options]
+!       Validate options.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+    integer                     :: localrc
+    character(len=ESMF_MAXSTR)  :: opts
+
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, base, rc)
+
+    if (present(options)) then
+        opts = options
+    else
+        opts = ''
+    endif
+
+    call c_ESMC_BaseValidate(base , opts, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_BaseValidate
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BaseGetInit"
+!BOPI
+! !IROUTINE: ESMF_BaseGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+  function ESMF_BaseGetInit(base) 
+!
+! !RETURN VALUE:
+    ESMF_INIT_TYPE :: ESMF_BaseGetInit   
+!
+! !ARGUMENTS:
+    type(ESMF_Base), intent(in), optional :: base
+!
+! !DESCRIPTION:
+!      Access deep object init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [base]
+!           Base object.
+!     \end{description}
+!
+!EOPI
+
+    if (present(base)) then
+      ESMF_BaseGetInit = ESMF_INIT_GET(base)
+    else
+      ESMF_BaseGetInit = ESMF_INIT_CREATED
+    endif
+
+  end function ESMF_BaseGetInit
+!------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeSet"
 !BOPI
@@ -762,260 +1048,5 @@ module ESMF_BaseMod
   end subroutine ESMF_AttributeCopyAll
 
 !-------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_SetName"
-!BOPI
-! !IROUTINE:  ESMF_SetName - set the name of this object
-!
-! !INTERFACE:
-  subroutine ESMF_SetName(base, name, namespace, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Base) :: base                 
-      character (len = *), intent(in), optional :: name   
-      character (len = *), intent(in), optional :: namespace
-      integer, intent(out), optional :: rc     
-
-!
-! !DESCRIPTION:
-!     Associate a name with any object in the system.
-!
-!     \begin{description}
-!     \item [base]
-!           In the Fortran interface this must be an {\tt ESMF\_Base}
-!           derived type object.  It is expected that all specialized 
-!           derived types will include a {\tt ESMF\_Base} object as the 
-!           first entry.
-!     \item [{[name]}]
-!           Object name.  An error will be returned if a duplicate name 
-!           is specified.  If a name is not given a unique name will be
-!           generated and can be queried by the {\tt ESMF\_GetName} routine.
-!     \item [{[namespace]}]
-!           Object namespace (e.g. "Application", "Component", "IGrid", etc).
-!           If given, the name will be checked that it is unique within
-!           this namespace.  If not given, the generated name will be 
-!           unique within this namespace.  If namespace is not specified,
-!           a default "global" namespace will be assumed and the same rules
-!           for names will be followed.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! 
-!EOPI
-      logical :: rcpresent                          ! Return code present   
-      integer :: status
-
-      ! Initialize return code; assume routine not implemented
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_RC_NOT_IMPL
-      endif
-      status = ESMF_RC_NOT_IMPL
-
-      ! TODO: remove this once everyone is initializing their Base objects.
-      ! cheat for old code for now.
-      if (base%isInit .ne. ESMF_INIT_CREATED) then 
-          call ESMF_BaseCreate(base, namespace, name, 0, status)
-          if (rcpresent) rc = status
-          return
-      endif
-      ! end cheat
-
-      call c_ESMC_SetName(base , namespace, name, status)
-
-      if (rcpresent) rc = status
-
-  end subroutine ESMF_SetName
-
-!-------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GetName"
-!BOPI
-! !IROUTINE:  ESMF_GetName - get the name of this object
-!
-! !INTERFACE:
-  subroutine ESMF_GetName(base, name, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Base), intent(in) :: base
-      character (len = *), intent(out) :: name
-      integer, intent(out), optional :: rc
-
-!
-! !DESCRIPTION:
-!     Return the name of any type in the system.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[base]
-!       Any ESMF type.
-!     \item[name]
-!       The name of the ESMF type.
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-      integer :: status
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
-
-      call c_ESMC_GetName(base , name, status)
-      if (present(rc)) rc = status
-
-  end subroutine ESMF_GetName
-
-
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
-!  Print routine
-!-------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BasePrint"
-!BOPI
-! !IROUTINE:  ESMF_BasePrint - Call into C++ code to print base object
-!
-! !INTERFACE:
-  subroutine ESMF_BasePrint(base, options, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Base),  intent(in)              :: base
-    character(len=*), intent(in),   optional  :: options
-    integer,          intent(out),  optional  :: rc
-!
-! !DESCRIPTION:
-!  Interface to call through to C++ and print base object values.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[base]
-!       Any ESMF type.
-!     \item[options]
-!       Print options.
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-    integer                     :: localrc
-    character(len=ESMF_MAXSTR)  :: opts
-
-    ! Initialize return code; assume routine not implemented
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    localrc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, base, rc)
-
-    if (present(options)) then
-        opts = options
-    else
-        opts = ''
-    endif
-
-    call c_ESMC_BasePrint(base , opts, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-  end subroutine ESMF_BasePrint
-
-!-------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BaseValidate"
-!BOPI
-! !IROUTINE:  ESMF_BaseValidate - Call into C++ code to print base object
-!
-! !INTERFACE:
-  subroutine ESMF_BaseValidate(base, options, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Base),  intent(in)              :: base
-    character(len=*), intent(in),   optional  :: options
-    integer,          intent(out),  optional  :: rc
-!
-! !DESCRIPTION:
-!  Interface to call through to C++ and validate base object values.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[base]
-!       Any ESMF type.
-!     \item[options]
-!       Validate options.
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-    integer                     :: localrc
-    character(len=ESMF_MAXSTR)  :: opts
-
-    ! Initialize return code; assume routine not implemented
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    localrc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, base, rc)
-
-    if (present(options)) then
-        opts = options
-    else
-        opts = ''
-    endif
-
-    call c_ESMC_BaseValidate(base , opts, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_BaseValidate
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-internal method -----------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BaseGetInit"
-!BOPI
-! !IROUTINE: ESMF_BaseGetInit - Internal access routine for init code
-!
-! !INTERFACE:
-  function ESMF_BaseGetInit(base) 
-!
-! !RETURN VALUE:
-    ESMF_INIT_TYPE :: ESMF_BaseGetInit   
-!
-! !ARGUMENTS:
-    type(ESMF_Base), intent(in), optional :: base
-!
-! !DESCRIPTION:
-!      Access deep object init code.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [base]
-!           Base object.
-!     \end{description}
-!
-!EOPI
-
-    if (present(base)) then
-      ESMF_BaseGetInit = ESMF_INIT_GET(base)
-    else
-      ESMF_BaseGetInit = ESMF_INIT_CREATED
-    endif
-
-  end function ESMF_BaseGetInit
-!------------------------------------------------------------------------------
 
 end module ESMF_BaseMod
