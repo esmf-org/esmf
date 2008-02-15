@@ -154,7 +154,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47.2.2 2008/02/15 16:48:47 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47.2.3 2008/02/15 17:30:15 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -709,6 +709,26 @@ end interface
        localStaggerLoc=ESMF_STAGGERLOC_CENTER
     endif
 
+
+    ! Both the bounds need to be present if either is.
+    if ((present(ungriddedLBound) .or. present(ungriddedUBound)) .and. &
+        .not. (present(ungriddedLBound) .and. present(ungriddedUBound))) then
+       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+               "- if either ungriddedBound is present both need to be", & 
+                      ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    ! The bounds need to be the same size
+    if (present(ungriddedLBound) .and. present(ungriddedUBound)) then
+       if (size(ungriddedLBound) .ne. size(ungriddedUBound)) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+                "- ungriddedLBound and ungriddedUBound must be the same size ", & 
+                  ESMF_CONTEXT, rc) 
+          return 
+       endif
+    endif
+
    ! Get the ungridded rank
    ungriddedRank=0
    if (present(ungriddedUBound)) then
@@ -750,12 +770,15 @@ end interface
     endif
 
 
-    ! allocate distgridToArrayMap
-    allocate(distgridToArrayMap(distRank) , stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToArrayMap", &
-                                     ESMF_CONTEXT, rc)) return   
 
-    ! allocated computationalEdgeWidths
+   ! construct ArraySpec
+   call ESMF_ArraySpecSet(arrayspec,rank=arrayRank,typekind=localTypeKind, rc=localrc)
+   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+
+    ! allocate computationalEdgeWidths
     allocate(compELWidth(distRank) , stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating compELWidth", &
                                      ESMF_CONTEXT, rc)) return   
@@ -764,18 +787,19 @@ end interface
                                      ESMF_CONTEXT, rc)) return   
 
 
-   ! construct ArraySpec
-   call ESMF_ArraySpecSet(arrayspec,rank=arrayRank,typekind=localTypeKind, rc=localrc)
-   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-       ESMF_CONTEXT, rcToReturn=rc)) return
+    ! Get computationalEdgeWidths
+    call ESMF_GridGet(grid, localStaggerLoc, &
+           computationalEdgeLWidth=compELWidth, computationalEdgeUWidth=compEUWidth, &
+           rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
-   ! Get info about computational Bounds
-   call ESMF_GridGetPSloc(grid, localStaggerLoc, &
-          computationalEdgeLWidth=compELWidth, computationalEdgeUWidth=compEUWidth, &
-          rc=localrc)
-   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
 
+
+    ! allocate distgridToArrayMap
+    allocate(distgridToArrayMap(distRank) , stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToArrayMap", &
+                                     ESMF_CONTEXT, rc)) return   
 
 
    ! construct array based on the presence of distributed dimensions
