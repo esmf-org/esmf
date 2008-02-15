@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2007/09/18 22:21:21 cdeluca Exp $
+# $Id: makefile,v 1.14 2008/02/15 23:36:08 theurich Exp $
 
 # Leave alone.
 ALL: build_here 
@@ -9,7 +9,9 @@ ALL: build_here
 CFLAGS    += ${MPI_INCLUDE}
 FFLAGS    =
 
-AUTOGEN   = ESMF_StateGet.F90
+AUTOGEN   = 
+# ESMF_StateGet.F90
+#TODO:FIELDINTEGRATION Restore StateGet
 
 SOURCEC	  = 
 SOURCEF	  = ESMF_StateTypes.F90 ESMF_State.F90 ESMF_StateReconcile.F90 $(AUTOGEN)

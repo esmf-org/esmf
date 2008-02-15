@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.3 2007/06/23 04:00:45 cdeluca Exp $
+// $Id: ESMCI_Util.h,v 1.4 2008/02/15 23:36:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -56,7 +56,8 @@ enum ESMC_Status { ESMF_STATUS_UNINIT=1,
                    ESMF_STATUS_UNALLOCATED,
                    ESMF_STATUS_ALLOCATED,
                    ESMF_STATUS_BUSY,
-                   ESMF_STATUS_INVALID };
+                   ESMF_STATUS_INVALID,
+                   ESMF_STATUS_NOT_READY };
 
 #define ESMC_NULL_POINTER (0)
 #define ESMC_BAD_POINTER (-1)

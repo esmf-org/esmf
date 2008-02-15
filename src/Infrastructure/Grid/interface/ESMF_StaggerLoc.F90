@@ -1,4 +1,4 @@
-! $Id: ESMF_StaggerLoc.F90,v 1.13 2007/11/24 21:54:07 oehmke Exp $
+! $Id: ESMF_StaggerLoc.F90,v 1.14 2008/02/15 23:36:04 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -75,6 +75,11 @@
 !
 !!!!!
 
+   !! Invalid stagger locations
+   type (ESMF_StaggerLoc), parameter, public ::            &
+      ESMF_STAGGERLOC_INVALID       = ESMF_StaggerLoc(-2), &  
+      ESMF_STAGGERLOC_UNINIT        = ESMF_StaggerLoc(-1)   
+
    !! 2D predefined stagger locations
    type (ESMF_StaggerLoc), parameter, public ::            &
       ESMF_STAGGERLOC_CENTER        = ESMF_StaggerLoc( 0), &     
@@ -98,7 +103,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StaggerLoc.F90,v 1.13 2007/11/24 21:54:07 oehmke Exp $'
+      '$Id: ESMF_StaggerLoc.F90,v 1.14 2008/02/15 23:36:04 theurich Exp $'
 
 
 !==============================================================================

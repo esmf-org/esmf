@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.57 2007/11/30 17:07:31 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.58 2008/02/15 23:36:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -86,7 +86,7 @@
 !    ! General object status, useful for any object
 
 !     ! WARNING: 
-!     !  constants MUST match corresponding values in ../include/ESMC_Util.h
+!     !  constants MUST match corresponding values in ../include/ESMCI_Util.h
 
       type ESMF_Status
       sequence
@@ -99,7 +99,8 @@
                                       ESMF_STATUS_UNALLOCATED = ESMF_Status(3), &
                                       ESMF_STATUS_ALLOCATED = ESMF_Status(4), &
                                       ESMF_STATUS_BUSY = ESMF_Status(5), &
-                                      ESMF_STATUS_INVALID = ESMF_Status(6)
+                                      ESMF_STATUS_INVALID = ESMF_Status(6), &
+                                      ESMF_STATUS_NOT_READY = ESMF_Status(7)
  
 !------------------------------------------------------------------------------
 !

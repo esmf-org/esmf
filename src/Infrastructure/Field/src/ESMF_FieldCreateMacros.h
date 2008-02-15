@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.36 2008/01/25 21:37:07 feiliu Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.37 2008/02/15 23:36:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 ! !ARGUMENTS: @\
 !      type(ESMF_Field) :: field @\
 !      type(ESMF_Grid) :: grid                  @\
-!      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: farray @\
+!      <type> (ESMF_KIND_<kind>), dimension(<rank>), target :: farray @\
 !      type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
 !      type(ESMF_StaggerLoc), intent(in), optional ::staggerloc  @\
 !      integer, intent(in), optional :: gridToFieldMap(:)     @\
@@ -58,11 +58,11 @@
 !     The arguments are: @\
 !     \begin{description} @\
 !     \item [field]  @\
-!           Pointer to an {\tt ESMF\_Field} object.  @\
+!           Points to an {\tt ESMF\_Field} object.  @\
 !     \item [grid]  @\
 !           Pointer to an {\tt ESMF\_Grid} object.  @\
 !     \item [farray] @\
-!           Native fortran data pointer to be copied/referenced in Field @\
+!           Native fortran data array to be copied/referenced in Field @\
 !     \item [copyflag] @\
 !           Whether to copy the existing data space or reference directly. Valid @\
 !           values are {\tt ESMF\_DATA\_COPY} or {\tt ESMF\_DATA\_REF} (default). @\
@@ -119,7 +119,7 @@
 ! input arguments @\
         type(ESMF_Field) :: field @\
         type(ESMF_Grid) :: grid                  @\
-        mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farray @\
+        mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
         type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
         type(ESMF_StaggerLoc), intent(in), optional ::staggerloc  @\
         integer, intent(in), optional :: gridToFieldMap(:)     @\
@@ -156,7 +156,6 @@
             ESMF_ERR_PASSTHRU, & @\
             ESMF_CONTEXT, rc)) return @\
  @\
-        ! Make sure localStaggerloc has a value before Array create call @\
         if (present(staggerloc)) then @\
             field%ftypep%staggerloc = staggerloc @\
         else @\
@@ -233,7 +232,7 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOP @\
-! !IROUTINE: ESMF_FieldCreateFromDataPtr - Creates a Field from Fortran data pointer @\
+! !IROUTINE: ESMF_FieldCreateFromDataPtr - Creates a Field from Fortran data array @\
 ! @\
 ! !INTERFACE: @\
 !   ! Private name; call using ESMF_FieldCreateFromDataPtr() @\
@@ -248,7 +247,7 @@
 ! @\
 ! !ARGUMENTS: @\
 !      type(ESMF_Grid) :: grid                  @\
-!      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: farray @\
+!      <type> (ESMF_KIND_<kind>), dimension(<rank>), target :: farray @\
 !      type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
 !      type(ESMF_StaggerLoc), intent(in), optional ::staggerloc  @\
 !      integer, intent(in), optional :: gridToFieldMap(:)     @\
@@ -262,14 +261,14 @@
 ! @\
 ! !DESCRIPTION: @\
 !     An interface function to {\tt ESMF\_FieldCreateFromDataPtr()}. @\
-!     Creates a {\tt ESMF\_Field} from a fortran data pointer and grid. @\
+!     Creates a {\tt ESMF\_Field} from a fortran data array and grid. @\
 ! @\
 !     The arguments are: @\
 !     \begin{description} @\
 !     \item [grid]  @\
 !           Pointer to an {\tt ESMF\_Grid} object.  @\
 !     \item [farray] @\
-!           Native fortran data pointer to be copied/referenced in Field @\
+!           Native fortran data array to be copied/referenced in Field @\
 !   \item [copyflag] @\
 !           Whether to copy the existing data space or reference directly. Valid @\
 !           values are {\tt ESMF\_DATA\_COPY} or {\tt ESMF\_DATA\_REF} (default). @\
@@ -312,7 +311,7 @@
 
 #if 0
 !------------------------------------------------------------------------------
-! Create a field from fortran data pointer
+! Create a field from fortran data array
 !------------------------------------------------------------------------------
 #endif
 
@@ -332,7 +331,7 @@
  @\
 ! input arguments @\
       type(ESMF_Grid) :: grid                  @\
-      mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farray @\
+      mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
       type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
       type(ESMF_StaggerLoc), intent(in), optional ::staggerloc  @\
       integer, intent(in), optional :: gridToFieldMap(:)     @\
@@ -374,7 +373,6 @@
           ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rc)) return @\
  @\
-      ESMF_INIT_SET_CREATED(ESMF_FieldCreateFromDataPtr##mrank##D##mtypekind) @\
       if (present(rc)) rc = localrc @\
     end function ESMF_FieldCreateFromDataPtr##mrank##D##mtypekind  @\
  @\
