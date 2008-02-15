@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.83.2.5 2008/02/11 05:06:23 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.1.2.2 2008/02/15 21:05:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -15,8 +15,8 @@
 // these lines prevent this file from being read more than once if it
 // ends up being included multiple times
 
-#ifndef ESMC_Array_H
-#define ESMC_Array_H
+#ifndef ESMCI_Array_H
+#define ESMCI_Array_H
 
 //-------------------------------------------------------------------------
 //BOPI
@@ -403,4 +403,4 @@ int ESMC_newArrayDestroy(ESMC_newArray **array);
 #endif
 
 
-#endif  // ESMC_Array_H
+#endif  // ESMCI_Array_H

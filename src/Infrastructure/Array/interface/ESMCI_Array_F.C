@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.74.2.3 2008/02/07 06:57:10 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.1.2.2 2008/02/15 21:05:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMC_FILENAME "ESMC_Array_F.C"
+#define ESMC_FILENAME "ESMCI_Array_F.C"
 //==============================================================================
 //
 // This file contains the Fortran interface code to link F90 and C++.
@@ -26,7 +26,7 @@
 #include "ESMC_ArraySpec.h"
 #include "ESMC_RHandle.h"
 
-#include "ESMC_Array.h"
+#include "ESMCI_Array.h"
 
 #include "ESMC_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"             // for LogErr
