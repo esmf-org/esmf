@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseUTest.F90,v 1.24 2007/03/31 05:50:51 cdeluca Exp $
+! $Id: ESMF_BaseUTest.F90,v 1.25 2008/02/15 18:22:02 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BaseUTest.F90,v 1.24 2007/03/31 05:50:51 cdeluca Exp $'
+      '$Id: ESMF_BaseUTest.F90,v 1.25 2008/02/15 18:22:02 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -128,17 +128,6 @@
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
-
-
-      !EX_UTest
-      ! test setting of ESMF Base attribute values of deleted Base
-      call ESMF_AttributeSet(base, name, data_value, rc)
-      write(name, *) "ESMF_AttributeSet of deleted Base"
-      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
-      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-
 
       !EX_UTest
       ! test setting of ESMF_Base members values of uncreated Base

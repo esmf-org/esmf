@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.103 2008/02/14 18:08:27 rokuingh Exp $
+// $Id: ESMC_Base.C,v 1.104 2008/02/15 18:22:02 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -28,6 +28,7 @@
  // associated class definition file and others
 #include <string.h>
 #include <stdlib.h>
+#include "ESMC_Attribute.h"
 #include "ESMC_Base.h"
 #include "ESMC_LogErr.h"
 #include "ESMC_VM.h"
@@ -35,12 +36,12 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.103 2008/02/14 18:08:27 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.104 2008/02/15 18:22:02 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
 static int globalCount = 0;   //TODO: this should be a counter per VM context
-
+/*
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
@@ -53,7 +54,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-/*
+
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_Attribute_operator="
 //BOPI
@@ -75,7 +76,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
 }  // end ESMC_Attribute_operator=
 //-----------------------------------------------------------------------------
-*/
+
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_Attribute"
 //BOPI
@@ -2759,7 +2760,7 @@ if (count) {
 
 }  // end ESMC_AttributeSetObjectList
 //-----------------------------------------------------------------------------
-
+*/
 
 
 

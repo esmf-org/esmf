@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.90 2008/02/12 21:25:37 rokuingh Exp $
+// $Id: ESMC_Base.h,v 1.91 2008/02/15 18:22:02 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -25,6 +25,7 @@
 
 #include "stdio.h"
 
+#include "ESMC_Attribute.h"
 #include "ESMCI_Util.h"
 #include "ESMC_VM.h"
 
@@ -42,7 +43,7 @@
 
 // !PUBLIC TYPES:
  class ESMC_Base;
- class ESMC_Attribute;
+ /*class ESMC_Attribute;
 
 
 // Single Attribute, (name, value) pair which can contain:
@@ -163,7 +164,7 @@ class ESMC_Attribute
     // temporary copy constructor
     ESMC_Attribute& operator=(const ESMC_Attribute& source);
 };
-
+*/
  // class declaration type.
 class ESMC_Base
 {
@@ -243,7 +244,7 @@ class ESMC_Base
 
 // fortran interface functions to base objects
 extern "C" {
-  void FTN(c_esmc_attpackcreate)(ESMC_Base **base, char *name, char *convention, char *purpose, 
+ /* void FTN(c_esmc_attpackcreate)(ESMC_Base **base, char *name, char *convention, char *purpose, 
                                  char *object, int *rc, int nlen, int clen, int plen, int olen);
   void FTN(c_esmc_attpackset)(ESMC_Base ** base, char *name, char *value, char *convention, 
                               char *purpose, char *object, int *rc, int nlen, int vlen, 
@@ -269,6 +270,7 @@ extern "C" {
                                     ESMC_TypeKind *tk,
                                     int *count, void *value, int *rc, int nlen);
   void FTN(c_esmc_attributesetlink)(ESMC_Base **source, ESMC_Base **destination, int *rc);
+  */
   void FTN(c_esmc_basecreate)(ESMC_Base **base, char *superclass, char *name,
                               int *nattrs, int *rc, int sclen, int nlen);
   void FTN(c_esmc_basedestroy)(ESMC_Base **base, int *rc);
@@ -288,7 +290,7 @@ extern "C" {
 
 // class utility functions, not methods, since they operate on
 //  multiple objects
-int ESMC_AttributeSetObjectList(ESMC_Base *anytypelist, ESMC_Attribute *valuelist);
-int ESMC_AttributeGetObjectList(ESMC_Base *anytypelist, ESMC_Attribute *valuelist);
+//int ESMC_AttributeSetObjectList(ESMC_Base *anytypelist, ESMC_Attribute *valuelist);
+//int ESMC_AttributeGetObjectList(ESMC_Base *anytypelist, ESMC_Attribute *valuelist);
 
 #endif  // ESMC_BASE_H
