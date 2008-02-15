@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.92 2008/02/14 04:14:53 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.1 2008/02/15 20:12:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -15,8 +15,8 @@
 // these lines prevent this file from being read more than once if it
 // ends up being included multiple times
 
-#ifndef ESMC_Array_H
-#define ESMC_Array_H
+#ifndef ESMCI_Array_H
+#define ESMCI_Array_H
 
 //-------------------------------------------------------------------------
 //BOPI
@@ -25,7 +25,7 @@
 // !DESCRIPTION:
 //
 // The code in this file defines the C++ {\tt Array} members and method
-// signatures (prototypes).  The companion file {\tt ESMC\_Array.C}
+// signatures (prototypes).  The companion file {\tt ESMCI\_Array.C}
 // contains the full code (bodies) for the {\tt Array} methods.
 //
 //EOPI
@@ -417,4 +417,4 @@ int ESMC_newArrayDestroy(ESMC_newArray **array);
 #endif
 
 
-#endif  // ESMC_Array_H
+#endif  // ESMCI_Array_H

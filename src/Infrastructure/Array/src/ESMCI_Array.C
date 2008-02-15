@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.176 2008/02/14 04:14:54 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1 2008/02/15 20:12:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMC_FILENAME "ESMC_Array.C"
+#define ESMC_FILENAME "ESMCI_Array.C"
 //==============================================================================
 //
 // ESMC Array method implementation (body) file
@@ -19,12 +19,12 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the C++ Array methods declared
-// in the companion file ESMC_Array.h
+// in the companion file ESMCI_Array.h
 //
 //-----------------------------------------------------------------------------
 
 // include associated header file
-#include "ESMC_Array.h"
+#include "ESMCI_Array.h"
 
 // include higher level, 3rd party or system headers
 #include <stdio.h>
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.176 2008/02/14 04:14:54 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1 2008/02/15 20:12:51 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
