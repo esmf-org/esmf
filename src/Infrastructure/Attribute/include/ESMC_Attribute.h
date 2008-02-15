@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.h,v 1.1 2008/02/15 18:19:58 rokuingh Exp $
+// $Id: ESMC_Attribute.h,v 1.2 2008/02/15 19:36:25 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -21,7 +21,7 @@
 #include "stdio.h"
 
 #include "ESMCI_Util.h"
-#include "ESMC_Base.h"
+//#include "ESMC_Base.h"
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -37,6 +37,7 @@
 
 // !PUBLIC TYPES:
   class ESMC_Attribute;
+  class ESMC_Base;
 
 
 // Single Attribute, (name, value) pair which can contain:
