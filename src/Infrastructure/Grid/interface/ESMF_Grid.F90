@@ -132,6 +132,8 @@ public  ESMF_DefaultFlag
   public ESMF_GridGet
   public ESMF_GridGetCoord
 
+  public ESMF_GridGetIndCoord ! HOPEFULLY TEMPORARY SEPARATE INTERFACE
+
   public ESMF_GridSet
   public ESMF_GridSetCoord
 
@@ -154,6 +156,7 @@ public  ESMF_DefaultFlag
   public ESMF_GridAttributeGetCount  ! number of attribs
   public ESMF_GridAttributeGetInfo   ! get type, length by name or number
 
+
 ! - ESMF-internal methods:
   public ESMF_GridGetInit  
 
@@ -162,7 +165,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.59 2008/01/29 18:15:58 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.60 2008/02/15 21:40:21 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -266,11 +269,29 @@ interface ESMF_GridGetCoord
       module procedure ESMF_GridGetCoord3DR8
       module procedure ESMF_GridGetCoordBounds
       module procedure ESMF_GridGetCoordIntoArray
-      module procedure ESMF_GridGetCoordR8
+!     module procedure ESMF_GridGetCoordR8
       
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 ! types of {\tt ESMF\_GridGetCoord} functions.   
+!EOPI 
+end interface
+
+! -------------------------- ESMF-public method -------------------------------
+!TODO: Temporary until I work out the proper overloading
+!BOPI
+! !IROUTINE: ESMF_GridGetIndCoord -- Generic interface
+
+! !INTERFACE:
+interface ESMF_GridGetIndCoord
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_GridGetCoordR8
+      
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+! types of {\tt ESMF\_GridGetIndCoord} functions.   
 !EOPI 
 end interface
 
@@ -8138,8 +8159,8 @@ endif
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in)                 :: grid
-      integer, intent(in),optional                :: localDE
       type (ESMF_StaggerLoc), intent(in),optional :: staggerloc
+      integer, intent(in),optional                :: localDE
       integer, intent(in)                         :: index(:)
       real(ESMF_KIND_R8)                          :: coord(:)
       integer, intent(out), optional              :: rc
