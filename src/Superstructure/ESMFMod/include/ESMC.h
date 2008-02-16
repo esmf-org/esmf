@@ -1,4 +1,4 @@
-// $Id: ESMC.h,v 1.14 2007/12/24 17:23:26 rosalind Exp $
+// $Id: ESMC.h,v 1.15 2008/02/16 06:04:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -20,10 +20,11 @@
 // optional arguments in ESMC interfaces
 #include "ESMC_Arg.h"
 
-// config
+// Infrastructure headears
 #include "ESMC_Config.h"
+#include "ESMC_Array.h"
 
-// state
+// Superstructure headers
 #include "ESMC_State.h"
 
 // framework-wide initialization and finalization

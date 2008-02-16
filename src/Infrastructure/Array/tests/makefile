@@ -1,36 +1,28 @@
-# $Id: makefile,v 1.17 2007/10/16 20:46:19 theurich Exp $ 
+# $Id: makefile,v 1.18 2008/02/16 06:04:38 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
 run_uni:  run_unit_tests_uni
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/Infrastructure/Array/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayCreateGetUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayDataUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayScatterUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayArbIdxSMMUTest \
-                $(ESMF_TESTDIR)/ESMF_ArrayRedistUTest
+                $(ESMF_TESTDIR)/ESMF_ArrayRedistUTest \
+                $(ESMF_TESTDIR)/ESMC_ArrayUTest
 
 
 TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
                 RUN_ESMF_ArrayDataUTest \
                 RUN_ESMF_ArrayScatterUTest \
                 RUN_ESMF_ArrayArbIdxSMMUTest \
-                RUN_ESMF_ArrayRedistUTest
+                RUN_ESMF_ArrayRedistUTest \
+                RUN_ESMC_ArrayUTest
 
-TESTS_RUN_UNI = RUN_ESMF_ArrayDataUTestUNI
+TESTS_RUN_UNI = RUN_ESMF_ArrayDataUTestUNI \
+                RUN_ESMC_ArrayUTestUNI
 
 
 include ${ESMF_DIR}/makefile
@@ -69,3 +61,11 @@ RUN_ESMF_ArrayArbIdxSMMUTest:
 
 RUN_ESMF_ArrayRedistUTest:
 	$(MAKE) TNAME=ArrayRedist NP=6 ftest
+
+# ---
+
+RUN_ESMC_ArrayUTest:
+	$(MAKE) TNAME=Array NP=4 ctest
+
+RUN_ESMC_ArrayUTestUNI:
+	$(MAKE) TNAME=Array NP=1 ctest
