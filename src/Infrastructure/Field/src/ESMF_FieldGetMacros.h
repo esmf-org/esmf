@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldGetMacros.h,v 1.15.2.3 2008/02/18 04:42:23 cdeluca Exp $
+! $Id: ESMF_FieldGetMacros.h,v 1.15.2.4 2008/02/18 05:09:49 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -178,7 +178,7 @@
           ESMF_CONTEXT, rc)) return @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
-
+ @\
     end subroutine ESMF_FieldGetDataPtr##mrank##D##mtypekind  @\
  @\
 ! < end macro - do not edit directly >  @\
