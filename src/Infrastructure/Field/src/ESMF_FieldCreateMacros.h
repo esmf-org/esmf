@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.25.2.1 2008/02/18 01:55:29 cdeluca Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.25.2.2 2008/02/18 04:42:23 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -90,9 +90,9 @@
 !     \item [{[ungriddedUBound]}] @\
 !           Upper bounds of the ungridded dimensions of the Field. @\
 !     \item [{[maxHaloLWidth]}] @\
-!           Lower bound of halo region.  Defaults to 0. @\
+!           Lower bound of halo region.  Defaults to 0. ! NOT IMPLEMENTED @\
 !     \item [{[maxHaloUWidth]}] @\
-!           Upper bound of halo region.  Defaults to 0. @\
+!           Upper bound of halo region.  Defaults to 0. ! NOT IMPLEMENTED @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -136,6 +136,7 @@
         integer, dimension(mrank)      :: comp_edge_u_width @\
  @\
         if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+        localrc = ESMF_RC_NOT_IMPL @\
  @\
         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
  @\
@@ -216,7 +217,7 @@
           ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rc)) return @\
  @\
-        if (present(rc)) rc = localrc @\
+        if (present(rc)) rc = ESMF_SUCCESS @\
     end subroutine ESMF_FieldSetCommit##mrank##D##mtypekind  @\
  @\
 ! < end macro - do not edit directly >  @\
@@ -253,10 +254,10 @@
 !      integer, intent(in), optional :: gridToFieldMap(:)     @\
 !      integer, intent(in), optional :: ungriddedLBound(:) @\
 !      integer, intent(in), optional :: ungriddedUBound(:) @\
-!      integer, intent(in), optional :: maxHaloLWidth(:) ! NOT IMPLEMENTED @\
-!      integer, intent(in), optional :: maxHaloUWidth(:) ! NOT IMPLEMENTED @\
+!      integer, intent(in), optional :: maxHaloLWidth(:) @\
+!      integer, intent(in), optional :: maxHaloUWidth(:) @\
 !      character (len=*), intent(in), optional :: name  @\
-!      type(ESMF_IOSpec), intent(in), optional :: iospec ! NOT IMPLEMENTED @\
+!      type(ESMF_IOSpec), intent(in), optional :: iospec @\
 !      integer, intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
@@ -296,9 +297,9 @@
 !     \item [{[ungriddedUBound]}] @\
 !           Upper bounds of the ungridded dimensions of the Field. @\
 !     \item [{[maxHaloLWidth]}] @\
-!           Lower bound of halo region.  Defaults to 0. @\
+!           Lower bound of halo region.  Defaults to 0. ! NOT IMPLEMENTED @\
 !     \item [{[maxHaloUWidth]}] @\
-!           Upper bound of halo region.  Defaults to 0. @\
+!           Upper bound of halo region.  Defaults to 0. ! NOT IMPLEMENTED @\
 !     \item [{[name]}]  @\
 !           {\tt Field} name.  @\
 !     \item [{[iospec]}]  @\
@@ -347,6 +348,7 @@
       integer          :: localrc @\
  @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+      localrc = ESMF_RC_NOT_IMPL @\ 
  @\
       ESMF_FieldCreateFromDataPtr##mrank##D##mtypekind = & @\
           ESMF_FieldCreateEmpty(name, iospec, rc=localrc) @\
@@ -373,7 +375,7 @@
           ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rc)) return @\
  @\
-      if (present(rc)) rc = localrc @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
     end function ESMF_FieldCreateFromDataPtr##mrank##D##mtypekind  @\
  @\
 ! < end macro - do not edit directly >  @\

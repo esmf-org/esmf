@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.1 2008/02/18 01:55:29 cdeluca Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.2 2008/02/18 04:42:23 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.1 2008/02/18 01:55:29 cdeluca Exp $'
+      '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.2 2008/02/18 04:42:23 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -183,13 +183,13 @@
 !     \item [{[ungriddedUBound]}]
 !           Upper bounds of the ungridded dimensions of the Field.
 !     \item [{[maxHaloLWidth]}]
-!           Lower bound of halo region.  Defaults to 0.
+!           Lower bound of halo region.  Defaults to 0. ! NOT IMPLEMENTED
 !     \item [{[maxHaloUWidth]}]
-!           Upper bound of halo region.  Defaults to 0.
+!           Upper bound of halo region.  Defaults to 0. ! NOT IMPLEMENTED
 !     \item [{[name]}] 
 !           {\tt Field} name. 
 !     \item [{[iospec]}] 
-!           I/O specification. 
+!           I/O specification. ! NOT IMPLEMENTED
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -310,13 +310,13 @@
 !     \item [{[ungriddedUBound]}]
 !           Upper bounds of the ungridded dimensions of the Field.
 !     \item [{[maxHaloLWidth]}]
-!           Lower bound of halo region.  Defaults to 0.
+!           Lower bound of halo region.  Defaults to 0. ! NOT IMPLEMENTED
 !     \item [{[maxHaloUWidth]}]
-!           Upper bound of halo region.  Defaults to 0.
+!           Upper bound of halo region.  Defaults to 0. ! NOT IMPLEMENTED
 !     \item [{[name]}] 
 !           {\tt Field} name. 
 !     \item [{[iospec]}] 
-!           I/O specification. 
+!           I/O specification. ! NOT IMPLEMENTED
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.4 2008/02/15 20:47:49 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.5 2008/02/18 04:42:23 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -54,7 +54,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGet.cppF90,v 1.2.2.4 2008/02/15 20:47:49 feiliu Exp $'
+      '$Id: ESMF_FieldGet.cppF90,v 1.2.2.5 2008/02/18 04:42:23 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -210,9 +210,8 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         integer, allocatable :: undistBnd(:)
         integer, allocatable :: distgridToArrayMap(:)
 
-        if (present(rc)) then 
-          rc = ESMF_RC_NOT_IMPL 
-        endif 
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL 
+        localrc = ESMF_RC_NOT_IMPL
 
         ! check variables
         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
@@ -346,7 +345,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
                 totalCount(i) = totalUBound(i) - totalLBound(i) + 1
         end do
 
-        if (present(rc)) rc = localrc
+        if (present(rc)) rc = ESMF_SUCCESS
 
     end subroutine ESMF_FieldGetDataBounds
 

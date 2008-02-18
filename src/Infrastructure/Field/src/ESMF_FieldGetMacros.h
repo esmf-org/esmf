@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldGetMacros.h,v 1.15.2.2 2008/02/15 20:47:49 feiliu Exp $
+! $Id: ESMF_FieldGetMacros.h,v 1.15.2.3 2008/02/18 04:42:23 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -144,9 +144,8 @@
 ! local variables @\
       integer          :: localrc, lde @\
  @\
-      if (present(rc)) then @\
-        rc = ESMF_RC_NOT_IMPL @\
-      endif @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+      localrc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
@@ -177,7 +176,9 @@
       if (ESMF_LogMsgFoundError(localrc, & @\
           ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rc)) return @\
-      if (present(rc)) rc = localrc @\
+ @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+
     end subroutine ESMF_FieldGetDataPtr##mrank##D##mtypekind  @\
  @\
 ! < end macro - do not edit directly >  @\
