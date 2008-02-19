@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.42 2007/10/02 04:26:58 cdeluca Exp $ 
+# $Id: makefile,v 1.42.2.1 2008/02/19 18:26:52 theurich Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -8,7 +8,7 @@ CFLAGS    =
 FFLAGS    =
 SOURCEC	  = 
 SOURCEF	  =
-CPFILES   = ESMF_FRoute8UTest.F90
+CPFILES   =
 
 SOURCEH	  = 
 OBJSC	  =  
@@ -27,7 +27,7 @@ TESTS_RUN     = RUN_ESMF_FieldUTest
 #               RUN_ESMF_FieldHarness2UTest \
 #		RUN_ESMF_FieldHarness4UTest
 
-TESTS_RUN_UNI = RUN_ESMF_FieldUTestUNI 
+#TESTS_RUN_UNI = RUN_ESMF_FieldUTestUNI 
 #		RUN_ESMF_FRoute4UTestUNI \
 #		RUN_ESMF_FRoute8UTestUNI
 
