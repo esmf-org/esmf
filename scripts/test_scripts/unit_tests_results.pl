@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: unit_tests_results.pl,v 1.9.2.1 2008/02/19 20:23:10 svasquez Exp $
+# $Id: unit_tests_results.pl,v 1.9.2.2 2008/02/19 21:01:59 svasquez Exp $
 # This script runs at the end of the "run_unit_tests", "run_unit_tests_uni" and "check_results" targets.
 # The purpose is to give the user the results of running the unit tests.
 # The results are either complete results or a summary.
@@ -308,7 +308,7 @@ use File::Find
        	if ( $regrid_test_count == 0) {
        		foreach $file (@crashed_list){
                         # if in crashed list delete it
-                        if (grep (/ESMF_RegridToolUTest/, @crashed_list) == 0) {
+                        if (grep (/ESMF_RegridToolUTest/, $file) == 0) {
                                 push (new_crashed_list, $file);
                         }
 		}
