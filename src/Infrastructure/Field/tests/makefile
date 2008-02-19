@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.45 2008/02/15 23:36:03 theurich Exp $ 
+# $Id: makefile,v 1.46 2008/02/19 18:33:49 theurich Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -8,7 +8,7 @@ CFLAGS    =
 FFLAGS    =
 SOURCEC	  = 
 SOURCEF	  =
-CPFILES   = 
+CPFILES   =
 
 SOURCEH	  = 
 OBJSC	  =  
@@ -18,11 +18,18 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/Field/tests
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_FieldUTest  \
-		$(ESMF_TESTDIR)/ESMF_FieldCreateGetUTest
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_FieldUTest 
+#		$(ESMF_TESTDIR)/ESMF_FRoute4UTest \
+#		$(ESMF_TESTDIR)/ESMF_FRoute8UTest 
 
-TESTS_RUN     = RUN_ESMF_FieldUTest \
-		RUN_ESMF_FieldCreateGetUTest
+TESTS_RUN     = RUN_ESMF_FieldUTest 
+#	 	RUN_ESMF_FRouteUTest \
+#               RUN_ESMF_FieldHarness2UTest \
+#		RUN_ESMF_FieldHarness4UTest
+
+#TESTS_RUN_UNI = RUN_ESMF_FieldUTestUNI 
+#		RUN_ESMF_FRoute4UTestUNI \
+#		RUN_ESMF_FRoute8UTestUNI
 
 include ${ESMF_DIR}/makefile
 
