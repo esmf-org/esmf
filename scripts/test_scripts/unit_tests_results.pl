@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: unit_tests_results.pl,v 1.9 2007/08/27 16:56:30 svasquez Exp $
+# $Id: unit_tests_results.pl,v 1.10 2008/02/19 22:50:14 svasquez Exp $
 # This script runs at the end of the "run_unit_tests", "run_unit_tests_uni" and "check_results" targets.
 # The purpose is to give the user the results of running the unit tests.
 # The results are either complete results or a summary.
@@ -225,6 +225,8 @@ use File::Find
         }
 	# Special code for handling the new Regrid test scheme.
 	# If running Exhaustive unit tests
+	# Set test count to zero
+	$regrid_test_count = 0;
 	if ($exhaustive == 1) {
 		# Determine if ESMF_RegridToolUTest is in the unit test list
 		$regrid_test_found=grep ( /ESMF_RegridToolUTest/, @ut_files);
@@ -275,6 +277,7 @@ use File::Find
                                	$pass_count=grep( /PASS/, @file_lines);
                                	$pass_count = int $pass_count/$pet_count;
 				if ($regrid_test_count == 0) {
+					
 					goto DONE;
 				}
 				if ($pass_count == $regrid_test_count){
@@ -302,10 +305,19 @@ use File::Find
 		
 	}
 	DONE: $total_fail_count = $total_test_count - $total_pass_count;
+       	if ( $regrid_test_count == 0) {
+       		foreach $file (@crashed_list){
+                        # if in crashed list delete it
+                        if (grep (/ESMF_RegridToolUTest/, $file) == 0) {
+                                push (new_crashed_list, $file);
+                        }
+		}
+         }
+
 
 	# sort all lists
 	@pass_list=sort(@pass_list);
-	@crashed_list=sort(@crashed_list);
+	@crashed_list=sort(@new_crashed_list);
 	@fail_list=sort(@fail_list);
 
 	# Delete ./ from all lists
