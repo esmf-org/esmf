@@ -1,51 +1,48 @@
-# $Id: makefile,v 1.4 2008/02/20 21:54:33 svasquez Exp $ 
+# $Id: makefile,v 
 
-ALL: build_system_tests
+ALL: tree_build_system_tests
 
-LOCDIR   = src/system_tests
+run: tree_run_system_tests
+
+CFLAGS    = 
+FFLAGS    =
+SOURCEC	  = 
+SOURCEF	  =
+
+SOURCEH	  = 
+OBJSC	  =  
+OBJSF	  = 
+MANSEC	  = 
+LIBBASE	  = 
+LOCDIR	  = src/system_tests/ESMF_SeqEnsemEx
+
+
+SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_SeqEnsemExSTest
+
+# Object files other than SysTest%.o that the
+# system tests executable will depend on.
+# List objects files in the order that they
+# are to be compiled/created.
+SYSTEM_TESTS_OBJ      = user_modelA.o user_modelB.o user_modelC.o user_modelD.o user_coupler.o
+
+SYSTEM_TESTS_RUN      = RUN_ESMF_SeqEnsemEx
+
+SYSTEM_TESTS_RUN_UNI  = RUN_ESMF_SeqEnsemExUNI
+
+
+ESMF_SeqEnsemExSTest.o : $(SYSTEM_TESTS_OBJ)
 
 include $(ESMF_DIR)/makefile
 
-# arranged roughly in order of complexity
-DIRS      = ESMF_CompCreate \
-            ESMF_Attribute \
-	    ESMF_SeqEnsemEx \
-            ESMF_ArrayScatterGather \
-            ESMF_ArraySparseMatMul \
-            ESMF_ArrayRedist \
-            ESMF_DirectCoupling \
-            ESMF_DistDir \
-            ESMF_FieldSparseMatMul
-
-# Tests not yet ready
-#           ESMF_RowReduce \        gjt: currently the code depends on DELayout comms, but it should be covered/converted to newArray
-#           ESMF_MergeCoupling \
-#           ESMF_CplOnExclDEs \
-# Removed for new Regrid construction. cmd 8/07.
-#           ESMF_FieldRegrid \
-#           ESMF_FieldRegridConserv \
-#           ESMF_FieldRegridMulti \
-#           ESMF_FieldRegridOrder \
-#           ESMF_FieldExcl \
-# TODO:FIELDINTEGRATION Restore when Field and Bundle comms are restored. 
-#           ESMF_FlowWithCoupling \
-#           ESMF_FlowComp \
-#           ESMF_FieldRedist \
-#           ESMF_FieldHalo \
-#           ESMF_FieldHaloPer \
-#           ESMF_BundleRedistArb2Arb \
-#           ESMF_BundleRedistBlk2Arb \
-#	    ESMF_BundleRedistBlk2Blk \
-#           ESMF_FieldRedistArb2Arb \
-#           ESMF_FieldRedistBlk2Arb \
-#           ESMF_FieldRedistBlk2Blk \
-#           ESMF_SimpleCoupling \
-
-
-
+DIRS = 
 
 CLEANDIRS   =
-CLEANFILES  =
+CLEANFILES  = $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
-# DO NOT DELETE
+
+RUN_ESMF_SeqEnsemEx:
+	$(MAKE) TNAME=SeqEnsemEx NP=6 stest
+
+RUN_ESMF_SeqEnsemExUNI:
+	$(MAKE) TNAME=SeqEnsemEx NP=1 stest
