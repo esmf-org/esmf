@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.43 2008/02/14 04:14:54 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.44 2008/02/20 00:24:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.43 2008/02/14 04:14:54 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistGrid.C,v 1.44 2008/02/20 00:24:11 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1880,25 +1880,24 @@ bool DistGrid::isLocalDeOnEdgeL(
   }
   
   // determine which patch localDe is located on
-  const int *localDeList = delayout->getLocalDeList();
-  int de = localDeList[localDe];
-  int patch = patchListPDe[de];   // patches are basis 1 !!!!
+  int de = delayout->getLocalDeList()[localDe];
   bool onEdge = false;            // assume local De is _not_ on edge
   if (elementCountPDe[de]){
     // local De is associated with elements
-    // prepare patch relative index tuple of neighbor index to check
-    int *patchIndexTuple = new int[dimCount];
+    // prepare localDe relative index tuple of neighbor index to check
+    int *localDeIndexTuple = new int[dimCount];
     for (int i=0; i<dimCount; i++){
       if (i==(dim-1))
-        patchIndexTuple[i] = indexListPDimPLocalDe[localDe*dimCount+i][0] - 1;
+        localDeIndexTuple[i] = -1;
       else
-        patchIndexTuple[i] = indexListPDimPLocalDe[localDe*dimCount+i][0];
+        localDeIndexTuple[i] = 0;
     }
-    // get sequence index providing patch relative index tuple
-    int seqindex = getSequenceIndexPatch(patch, patchIndexTuple, &localrc);
+    // get sequence index providing localDe relative index tuple
+    int seqindex =
+      getSequenceIndexLocalDe(localDe, localDeIndexTuple, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return false;
-    delete [] patchIndexTuple;
+    delete [] localDeIndexTuple;
     // determine if seqindex indicates edge or not
     if (seqindex == -1){
       // invalid seqindex indicates edge was crossed
@@ -1955,26 +1954,24 @@ bool DistGrid::isLocalDeOnEdgeU(
   }
   
   // determine which patch localDe is located on
-  const int *localDeList = delayout->getLocalDeList();
-  int de = localDeList[localDe];
-  int patch = patchListPDe[de];   // patches are basis 1 !!!!
+  int de = delayout->getLocalDeList()[localDe];
   bool onEdge = false;            // assume local De is _not_ on edge
   if (elementCountPDe[de]){
     // local De is associated with elements
-    // prepare patch relative index tuple of neighbor index to check
-    int *patchIndexTuple = new int[dimCount];
+    // prepare localDe relative index tuple of neighbor index to check
+    int *localDeIndexTuple = new int[dimCount];
     for (int i=0; i<dimCount; i++){
-      int max = indexCountPDimPDe[de*dimCount+i] - 1;
       if (i==(dim-1))
-        patchIndexTuple[i] = indexListPDimPLocalDe[localDe*dimCount+i][max] + 1;
+        localDeIndexTuple[i] = indexCountPDimPDe[de*dimCount+i];
       else
-        patchIndexTuple[i] = indexListPDimPLocalDe[localDe*dimCount+i][max];
+        localDeIndexTuple[i] = indexCountPDimPDe[de*dimCount+i] - 1;
     }
-    // get sequence index providing patch relative index tuple
-    int seqindex = getSequenceIndexPatch(patch, patchIndexTuple, &localrc);
+    // get sequence index providing localDe relative index tuple
+    int seqindex =
+      getSequenceIndexLocalDe(localDe, localDeIndexTuple, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return false;
-    delete [] patchIndexTuple;
+    delete [] localDeIndexTuple;
     // determine if seqindex indicates edge or not
     if (seqindex == -1){
       // invalid seqindex indicates edge was crossed
@@ -2099,14 +2096,20 @@ int DistGrid::getSequenceIndexLocalDe(
 // !ARGUMENTS:
 //
   int localDe,                      // in  - local DE = {0, ..., localDeCount-1}
-  int *index,                       // in  - DE-local index tuple in exclusive
-                                    //       region basis 0
+  int *index,                       // in  - DE-local index tuple in or 
+                                    //       relative to exclusive region
+                                    //       basis 0
   int *rc                           // out - return code
   )const{
 //
 // !DESCRIPTION:
-//    Get sequential index provided the index tuple into the exclusive
-//    region of a local DE.
+//    Get sequential index provided the index tuple in terms of the exclusive
+//    region of a local DE starting at basis 0. DistGrid dimensions that have
+//    contiguous indices support the specified index to lay outside of the
+//    localDe exclusive region unless arbitrary sequence indices have been
+//    specified during DistGrid creation. DistGrids with arbitrary sequence
+//    indices and/or along dimensions with non-contiguous indices require
+//    the specified index to be within [0..indexCountPDimPDe[dim,localDe]-1].
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -2121,13 +2124,24 @@ int DistGrid::getSequenceIndexLocalDe(
       "- Specified local DE out of bounds", rc);
     return -1;
   }
+  int de = delayout->getLocalDeList()[localDe];
+  for (int i=0; i<dimCount; i++){
+    if (arbSeqIndexCountPLocalDe[localDe] || !contigFlagPDimPDe[de*dimCount+i]){
+      if (index[i] < 0 || index[i] >= indexCountPDimPDe[de*dimCount+i]){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+          "- Specified index out of bounds", rc);
+        return -1;
+      }
+    }
+  }
   
+  // determine seqindex
   int seqindex;
   if (arbSeqIndexCountPLocalDe[localDe]){
     // determine the sequentialized index by arbSeqIndexListPLocalDe look-up
     int linExclusiveIndex = index[dimCount-1];  // initialize
     for (int i=dimCount-2; i>=0; i--){
-      linExclusiveIndex *= indexCountPDimPDe[localDe*dimCount + i];
+      linExclusiveIndex *= indexCountPDimPDe[de*dimCount + i];
       linExclusiveIndex += index[i];
     }
     seqindex = arbSeqIndexListPLocalDe[localDe][linExclusiveIndex];
@@ -2137,8 +2151,13 @@ int DistGrid::getSequenceIndexLocalDe(
     int patch = patchListPDe[localDeList[localDe]];  // patches are basis 1 !!!!
     // prepare patch relative index tuple
     int *patchIndexTuple = new int[dimCount];
-    for (int i=0; i<dimCount; i++)
-      patchIndexTuple[i] = indexListPDimPLocalDe[localDe*dimCount+i][index[i]];
+    for (int i=0; i<dimCount; i++){
+      if (contigFlagPDimPDe[de*dimCount+i])
+        patchIndexTuple[i] = minIndexPDimPDe[de*dimCount+i] + index[i];
+      else
+        patchIndexTuple[i] =
+          indexListPDimPLocalDe[localDe*dimCount+i][index[i]];
+    }
     // get sequence index providing patch relative index tuple
     seqindex = getSequenceIndexPatch(patch, patchIndexTuple, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
