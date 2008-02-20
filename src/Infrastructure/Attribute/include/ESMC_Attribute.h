@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.h,v 1.2 2008/02/15 19:36:25 rokuingh Exp $
+// $Id: ESMC_Attribute.h,v 1.3 2008/02/20 16:20:52 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -21,7 +21,6 @@
 #include "stdio.h"
 
 #include "ESMCI_Util.h"
-//#include "ESMC_Base.h"
 
 //-----------------------------------------------------------------------------
 //BOP
