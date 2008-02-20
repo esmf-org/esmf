@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.2 2008/02/20 22:52:41 svasquez Exp $
+! $Id: user_coupler.F90,v 1.3 2008/02/20 22:54:42 svasquez Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -22,9 +22,6 @@ module user_coupler
    
   public usercpl_register
         
-  ! global data
-  type(ESMF_RouteHandle), save :: routehandle
-
   contains
 
 !-------------------------------------------------------------------------
