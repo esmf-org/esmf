@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2008/02/20 22:13:05 svasquez Exp $
+# $Id: makefile,v 1.7 2008/02/20 22:32:03 svasquez Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -14,23 +14,23 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
-LOCDIR	  = src/system_tests/ESMF_SeqEnsemEx
+LOCDIR	  = src/system_tests/ESMF_ArraySparseMatMul
 
 
-SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_SeqEnsemExSTest
+SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_ArraySparseMatMulSTest
 
 # Object files other than SysTest%.o that the
 # system tests executable will depend on.
 # List objects files in the order that they
 # are to be compiled/created.
-SYSTEM_TESTS_OBJ      = user_modelA.o user_modelB.o user_modelC.o user_modelD.o user_coupler.o
+SYSTEM_TESTS_OBJ      = user_model1.o user_model2.o user_coupler.o
 
-SYSTEM_TESTS_RUN      = RUN_ESMF_SeqEnsemEx
+SYSTEM_TESTS_RUN      = RUN_ArraySparseMatMul
 
-SYSTEM_TESTS_RUN_UNI  = RUN_ESMF_SeqEnsemExUNI
+SYSTEM_TESTS_RUN_UNI  = RUN_ArraySparseMatMulUNI
 
 
-ESMF_SeqEnsemExSTest.o : $(SYSTEM_TESTS_OBJ)
+ESMF_ArraySparseMatMulSTest.o : $(SYSTEM_TESTS_OBJ)
 
 include $(ESMF_DIR)/makefile
 
@@ -41,8 +41,8 @@ CLEANFILES  = $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
 
-RUN_ESMF_SeqEnsemEx:
-	$(MAKE) TNAME=SeqEnsemEx NP=6 stest
+RUN_ArraySparseMatMul:
+	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=ArraySparseMatMul NP=6 stest
 
-RUN_ESMF_SeqEnsemExUNI:
-	$(MAKE) TNAME=SeqEnsemEx NP=1 stest
+RUN_ArraySparseMatMulUNI:
+	$(MAKE) TNAME=ArraySparseMatMul NP=1 stest
