@@ -1,48 +1,51 @@
-# $Id: makefile,v 1.3 2007/03/14 17:11:35 theurich Exp $ 
+# $Id: makefile,v 1.4 2008/02/20 21:54:33 svasquez Exp $ 
 
-ALL: tree_build_system_tests
+ALL: build_system_tests
 
-run: tree_run_system_tests
-
-CFLAGS    = 
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
-LOCDIR	  = src/system_tests/ESMF_ArraySparseMatMul
-
-
-SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_ArraySparseMatMulSTest
-
-# Object files other than SysTest%.o that the
-# system tests executable will depend on.
-# List objects files in the order that they
-# are to be compiled/created.
-SYSTEM_TESTS_OBJ      = user_model1.o user_model2.o user_coupler.o
-
-SYSTEM_TESTS_RUN      = RUN_ArraySparseMatMul
-
-SYSTEM_TESTS_RUN_UNI  = RUN_ArraySparseMatMulUNI
-
-
-ESMF_ArraySparseMatMulSTest.o : $(SYSTEM_TESTS_OBJ)
+LOCDIR   = src/system_tests
 
 include $(ESMF_DIR)/makefile
 
-DIRS = 
+# arranged roughly in order of complexity
+DIRS      = ESMF_CompCreate \
+            ESMF_Attribute \
+	    ESMF_SeqEnsemEx \
+            ESMF_ArrayScatterGather \
+            ESMF_ArraySparseMatMul \
+            ESMF_ArrayRedist \
+            ESMF_DirectCoupling \
+            ESMF_DistDir \
+            ESMF_FieldSparseMatMul
+
+# Tests not yet ready
+#           ESMF_RowReduce \        gjt: currently the code depends on DELayout comms, but it should be covered/converted to newArray
+#           ESMF_MergeCoupling \
+#           ESMF_CplOnExclDEs \
+# Removed for new Regrid construction. cmd 8/07.
+#           ESMF_FieldRegrid \
+#           ESMF_FieldRegridConserv \
+#           ESMF_FieldRegridMulti \
+#           ESMF_FieldRegridOrder \
+#           ESMF_FieldExcl \
+# TODO:FIELDINTEGRATION Restore when Field and Bundle comms are restored. 
+#           ESMF_FlowWithCoupling \
+#           ESMF_FlowComp \
+#           ESMF_FieldRedist \
+#           ESMF_FieldHalo \
+#           ESMF_FieldHaloPer \
+#           ESMF_BundleRedistArb2Arb \
+#           ESMF_BundleRedistBlk2Arb \
+#	    ESMF_BundleRedistBlk2Blk \
+#           ESMF_FieldRedistArb2Arb \
+#           ESMF_FieldRedistBlk2Arb \
+#           ESMF_FieldRedistBlk2Blk \
+#           ESMF_SimpleCoupling \
+
+
+
 
 CLEANDIRS   =
-CLEANFILES  = $(SYSTEM_TESTS_BUILD)
+CLEANFILES  =
 CLOBBERDIRS =
 
-
-RUN_ArraySparseMatMul:
-	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=ArraySparseMatMul NP=6 stest
-
-RUN_ArraySparseMatMulUNI:
-	$(MAKE) TNAME=ArraySparseMatMul NP=1 stest
+# DO NOT DELETE
