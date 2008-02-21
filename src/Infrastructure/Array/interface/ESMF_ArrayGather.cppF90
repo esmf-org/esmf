@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGather.cppF90,v 1.8.2.2 2008/02/21 00:40:30 theurich Exp $
+! $Id: ESMF_ArrayGather.cppF90,v 1.8.2.3 2008/02/21 00:45:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_ArrayGatherMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGather.cppF90,v 1.8.2.2 2008/02/21 00:40:30 theurich Exp $'
+    '$Id: ESMF_ArrayGather.cppF90,v 1.8.2.3 2008/02/21 00:45:24 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -211,7 +211,7 @@ contains
     call ESMF_VMGet(vm_opt, localPet=localPet, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
-@ \
+@\
     if (localPet==rootPet) then @\
       ! rootPet -> prepare counts vector @\
       fptr => farray ! need pointer in case farray is not allocated @\
