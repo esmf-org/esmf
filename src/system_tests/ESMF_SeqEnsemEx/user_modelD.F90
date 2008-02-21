@@ -1,4 +1,4 @@
-! $Id: user_modelD.F90,v 1.1 2008/02/20 22:57:28 svasquez Exp $
+! $Id: user_modelD.F90,v 1.2 2008/02/21 05:02:08 svasquez Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -104,7 +104,7 @@ module user_modelD
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Calculate average of the 3 conditions
-    average = ((ConditionA + ConditionB, + ConditionC) / 3.0 )
+    average = ((ConditionA + ConditionB + ConditionC) / 3.0 )
     print *, "ConditionA = ", ConditionA
     print *, "ConditionB = ", ConditionB
     print *, "ConditionC = ", ConditionC
