@@ -1,4 +1,4 @@
-! $Id: ioComp.F90,v 1.2 2008/02/14 04:14:59 theurich Exp $
+! $Id: ioComp.F90,v 1.3 2008/02/21 05:55:57 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -173,9 +173,9 @@ module ioCompMod
         result = real(-8. * (10.0d0 &
           + 5.0d0 * sin(real(i,ESMF_KIND_R4)/100.d0*pi) &
           + 2.0d0 * sin(real(j,ESMF_KIND_R4)/150.d0*pi)), ESMF_KIND_R4)
-        if (result /= farrayDstPtr(i,j)) then
+        if (abs(result-farrayDstPtr(i,j))>real(1.d-5,ESMF_KIND_R4)) then
           print *, "Mismatch in results detected: ", i, j, result, &
-            farrayDstPtr(i,j)
+            farrayDstPtr(i,j), result-farrayDstPtr(i,j)
           rc = ESMF_FAILURE
         endif
       enddo
