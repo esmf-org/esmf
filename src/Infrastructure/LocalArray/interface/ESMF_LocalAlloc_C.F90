@@ -22,7 +22,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_LocalAlloc_C.F90,v 1.12.2.1 2008/01/15 18:54:15 theurich Exp $'
+!      '$Id: ESMF_LocalAlloc_C.F90,v 1.12.2.2 2008/02/21 01:33:28 theurich Exp $'
 !==============================================================================
 subroutine f_esmf_localarrayf90allocate(array, rank, kind, counts, &
   lbounds, ubounds, rc)
@@ -94,14 +94,14 @@ subroutine f_esmf_localarraycopyf90ptr(arrayInArg, arrayOutArg, rc)
   ! This means that there is no memory for what the F90 INITMACROS are using
   ! at that location! In order to deal with this C<->F90 difference local
   ! F90 variables are necessary to work on the F90 side and this glue code will
-  ! copy the this member in the derived type which is the part that actually
+  ! copy the "this" member in the derived type which is the part that actually
   ! needs to be passed between C and F90.
   
-  arrayIn = arrayInArg    ! this copies the content with a bogus init code
+  arrayIn%this = arrayInArg%this    ! only access "this" member
   ! need to set the valid init code 
   ESMF_INIT_SET_CREATED(arrayIn)
   
-  arrayOut = arrayOutArg  ! this copies the content with a bogus init code
+  arrayOut%this = arrayOutArg%this  ! only access "this" member
 
   ! do the actual copy, allocating the required memory
   call ESMF_LocalArrayCopyF90Ptr(arrayIn, arrayOut, rc=rc)
