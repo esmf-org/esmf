@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.46.2.4 2008/01/15 18:52:38 theurich Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.46.2.5 2008/02/21 19:47:07 theurich Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -214,6 +214,7 @@
     !NEX_UTest
     write(name, *) "Creating a LocalArray from unassociated Fortran pointer with docpy argument"
     write(failMsg, *) "Did return ESMF_SUCCESS"
+    nullify(real3dptr) ! make sure real3dptr is unassociated
     array1 = ESMF_LocalArrayCreate(real3dptr, ESMF_DATA_COPY, rc=rc)
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
    
