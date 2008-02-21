@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.81 2008/02/05 22:34:24 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.82 2008/02/21 19:23:19 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -138,7 +138,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.81 2008/02/05 22:34:24 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.82 2008/02/21 19:23:19 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -3052,7 +3052,7 @@ contains
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayAttPackCreate"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_ArrayAttPackCreate - Setup the attribute package
 !
 ! !INTERFACE:
@@ -3084,7 +3084,7 @@ contains
 !     \end{description}
 !
 !
-!EOPI
+!EOP
 
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: name1, name2, name3, name4
@@ -3141,7 +3141,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayAttPackSet"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_ArrayAttPackSet - Setup the attribute package
 !
 ! !INTERFACE:
@@ -3179,7 +3179,7 @@ contains
 !     \end{description}
 !
 !
-!EOPI
+!EOP
 
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
@@ -3224,7 +3224,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayAttPackWrite"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_ArrayAttPackWrite - Print the attribute package
 !
 ! !INTERFACE:
@@ -3256,7 +3256,7 @@ contains
 !     \end{description}
 !
 !
-!EOPI
+!EOP
 
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject

@@ -165,7 +165,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.60 2008/02/15 21:40:21 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.61 2008/02/21 19:23:19 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -609,7 +609,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAttPackCreate"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_GridAttPackCreate - Setup the attribute package
 !
 ! !INTERFACE:
@@ -641,7 +641,7 @@ end interface
 !     \end{description}
 !
 !
-!EOPI
+!EOP
 
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: name1, name2, name3, name4
@@ -698,7 +698,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAttPackSet"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_GridAttPackSet - Setup the attribute package
 !
 ! !INTERFACE:
@@ -736,7 +736,7 @@ end interface
 !     \end{description}
 !
 !
-!EOPI
+!EOP
 
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
@@ -781,7 +781,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAttPackWrite"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_GridAttPackWrite - Print the attribute package
 !
 ! !INTERFACE:
@@ -813,7 +813,7 @@ end interface
 !     \end{description}
 !
 !
-!EOPI
+!EOP
 
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject

@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.127 2008/02/14 04:14:55 theurich Exp $
+! $Id: ESMF_State.F90,v 1.128 2008/02/21 19:23:20 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.127 2008/02/14 04:14:55 theurich Exp $'
+      '$Id: ESMF_State.F90,v 1.128 2008/02/21 19:23:20 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -1159,7 +1159,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAttPackCreate"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_StateAttPackCreate - Setup the attribute package
 !
 ! !INTERFACE:
@@ -1191,7 +1191,7 @@ end interface
 !     \end{description}
 !
 !
-!EOPI
+!EOP
 
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: name1, name2, name3
@@ -1245,7 +1245,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAttPackSet"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_StateAttPackSet - Setup the attribute package
 !
 ! !INTERFACE:
@@ -1283,7 +1283,7 @@ end interface
 !     \end{description}
 !
 !
-!EOPI
+!EOP
 
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
@@ -1328,7 +1328,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAttPackWrite"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_StateAttPackWrite - Print the attribute package
 !
 ! !INTERFACE:
@@ -1360,7 +1360,7 @@ end interface
 !     \end{description}
 !
 !
-!EOPI
+!EOP
 
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
@@ -3112,6 +3112,44 @@ end interface
 
       end subroutine ESMF_StateAttrSetChar
 !------------------------------------------------------------------------------
+
+!BOP
+! !IROUTINE: ESMF_StateAttributeSetLink - Line a state attribute hierarchy with the
+!                                         hierarchy of bundle, field, or state
+!
+! !INTERFACE:
+!      subroutine ESMF_StateAttributeSet(state, name, <value argument>, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF\_State), intent(inout) :: state  
+!      <value argument>, see below for supported values
+!      integer, intent(out), optional :: rc   
+!
+!
+! !DESCRIPTION:
+!     Attaches a {\tt state} attribute hierarchy to the hierarchy of
+!     a {\tt bundle}, {\tt field}, or another {\tt state},. 
+!     Supported values for the <value argument> are:
+!     \begin{description}
+!     \item type(ESMF\_Bundle), intent(inout) :: bundle
+!     \item type(ESMF\_Field), intent(inout) :: field
+!     \item type(ESMF\_State), intent(inout) :: state
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!       An {\tt ESMF\_State} object.
+!     \item [<value argument>]
+!       The object with which to link hierarchies.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAttrSetLinkBundle"
 !BOPI

@@ -1,5 +1,5 @@
 
-! $Id: ESMF_Bundle.F90,v 1.123 2008/02/13 01:51:47 rokuingh Exp $
+! $Id: ESMF_Bundle.F90,v 1.124 2008/02/21 19:23:19 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -617,7 +617,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleAttPackCreate"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_BundleAttPackCreate - Setup the attribute package
 !
 ! !INTERFACE:
@@ -649,7 +649,7 @@ end function
 !     \end{description}
 !
 !
-!EOPI
+!EOP
 
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: name1, name2, name3, name4
@@ -705,7 +705,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleAttPackSet"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_BundleAttPackSet - Setup the attribute package
 !
 ! !INTERFACE:
@@ -743,7 +743,7 @@ end function
 !     \end{description}
 !
 !
-!EOPI
+!EOP
 
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
@@ -788,7 +788,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleAttPackWrite"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_BundleAttPackWrite - Print the attribute package
 !
 ! !INTERFACE:
@@ -820,7 +820,7 @@ end function
 !     \end{description}
 !
 !
-!EOPI
+!EOP
 
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
@@ -2605,7 +2605,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleAttrSetLinkField"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_BundleAttrSetLinkField - Link a Bundle to a Field in an attribute hierarchy
 !
 ! !INTERFACE:
@@ -2631,7 +2631,7 @@ end function
 !     \end{description}
 !
 !
-!EOPI
+!EOP
 
       integer :: localrc                           ! Error status
 
