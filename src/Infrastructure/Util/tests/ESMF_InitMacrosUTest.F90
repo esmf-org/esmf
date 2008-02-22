@@ -1,4 +1,4 @@
-! $Id: ESMF_InitMacrosUTest.F90,v 1.5.2.1 2008/02/21 23:27:47 svasquez Exp $
+! $Id: ESMF_InitMacrosUTest.F90,v 1.5.2.2 2008/02/22 00:30:09 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InitMacrosUTest.F90,v 1.5.2.1 2008/02/21 23:27:47 svasquez Exp $'
+      '$Id: ESMF_InitMacrosUTest.F90,v 1.5.2.2 2008/02/22 00:30:09 oehmke Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -130,8 +130,15 @@
          subroutine DeepTest(d,rc)
            type(ESMF_Deep), intent(in) :: d
            integer, intent(inout) :: rc
+            
+            ! init return code
+            rc=ESMF_RC_NOT_IMPL
 
+            ! check status
             ESMF_INIT_CHECK_DEEP(ESMF_DeepGetInitVal,d,rc)
+            
+            ! if we pass status check then return success
+            rc=ESMF_SUCCESS
    
          end subroutine DeepTest
  
