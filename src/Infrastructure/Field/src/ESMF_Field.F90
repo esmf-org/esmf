@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.272.2.9 2008/02/18 04:42:23 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.272.2.10 2008/02/22 04:07:18 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -202,7 +202,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.272.2.9 2008/02/18 04:42:23 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.272.2.10 2008/02/22 04:07:18 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -612,7 +612,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldCreateEmpty"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldCreateEmpty - Create a Field with no Grid or Array
 
 ! !INTERFACE:
@@ -641,7 +641,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
 
       type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
@@ -4484,7 +4484,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldSerialize"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldSerialize - Serialize field info into a byte stream
 !
 ! !INTERFACE:
@@ -4521,7 +4521,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       integer :: localrc
       type(ESMF_FieldType), pointer :: fp    ! field type
@@ -4573,7 +4573,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldDeserialize"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldDeserialize - Deserialize a byte stream into a Field
 !
 ! !INTERFACE:
@@ -4609,7 +4609,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       integer :: localrc
       type(ESMF_FieldType), pointer :: fp    ! field type
