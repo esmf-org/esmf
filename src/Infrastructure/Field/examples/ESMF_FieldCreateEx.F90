@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.4 2008/02/13 04:02:49 cdeluca Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.5 2008/02/22 14:03:53 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -95,7 +95,7 @@
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
-!BOE
+!BremoveOE
 !\subsubsection{Create Empty Field and Finish an empty Field 
 !  with FieldSetCommit}
 
@@ -103,15 +103,15 @@
 !  Then the user can finalize a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a intrinsic 
 !  Fortran data pointer. This interface is overloaded for type, kind, rank of
 !  of the fortran data pointer.
-!EOE
+!EremoveOE
 
-!BOC
+!BremoveOC
     field3 = ESMF_FieldCreateEmpty("precip", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     allocate(farray(10, 20))
     call ESMF_FieldSetCommit(field3, grid, farray, rc=rc)
-!EOC
+!EremoveOC
     print *, "Finish a Field created by ESMF_FieldCreateEmpty returned"
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -153,33 +153,33 @@
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
-!BOE
+!BremoveOE
 !\subsubsection{Create Field with Grid and Array}
 !  User can create a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a 
 !  {\tt ESMF\_Array}. grid and array2 are objects created in previous examples.
-!EOE
+!EremoveOE
 
-!BOC
+!BremoveOC
     field4 = ESMF_FieldCreate(grid, array2, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!EOC
+!EremoveOC
     print *, "Field Create from a Grid and a ESMF_Array returned"
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
-!BOE
+!BremoveOE
 !\subsubsection{Create Field with Grid and Fortran data pointer}
 !  User can create a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a intrinsic 
 !  Fortran data pointer. This interface is overloaded for type, kind, rank of
 !  of the fortran data pointer. grid and farray are created in previous examples.
-!EOE
+!EremoveOE
 
-!BOC
+!BremoveOC
     field2 = ESMF_FieldCreate(grid, farray, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!EOC
+!EremoveOC
     print *, "Field Create from a Grid and a Fortran data pointer returned"
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
