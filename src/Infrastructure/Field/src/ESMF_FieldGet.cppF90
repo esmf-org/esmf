@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.5 2008/02/18 04:42:23 cdeluca Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.6 2008/02/24 06:37:28 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -54,7 +54,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGet.cppF90,v 1.2.2.5 2008/02/18 04:42:23 cdeluca Exp $'
+      '$Id: ESMF_FieldGet.cppF90,v 1.2.2.6 2008/02/24 06:37:28 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -216,7 +216,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         ! check variables
         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-        call ESMF_GridGet(field%ftypep%grid, rank=gridrank, rc=localrc)
+        call ESMF_GridGet(field%ftypep%grid, dimCount=gridrank, rc=localrc)
         if (localrc .ne. ESMF_SUCCESS) then
            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
               "Cannot retrieve gridrank from ftypep%grid", &
