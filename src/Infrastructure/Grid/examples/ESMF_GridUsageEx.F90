@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.28.2.2 2008/02/05 19:27:36 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.28.2.3 2008/02/24 05:45:52 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -71,7 +71,7 @@ program ESMF_GridCreateEx
 ! for building single tile logically rectangular Grids up to 
 ! three dimensions.
 ! It is partially implemented.  The user can specify Grid
-! size, rank and distribution, but cannot specify tile edge
+! size, dimension and distribution, but cannot specify tile edge
 ! connectivities yet.  The default is that Grid edges are
 ! not connected.  Once completed, this method will enable users
 ! to create many common grid shapes, including
@@ -99,7 +99,7 @@ program ESMF_GridCreateEx
 ! grid cells in the first dimension (e.g. NPx1x1...1) as evenly 
 ! as possible by  the number of processors NP.
 ! The remaining dimensions are not partitioned.
-! The rank of the Grid is the size of {\tt maxIndex}. To create
+! The dimension of the Grid is the size of {\tt maxIndex}. To create
 ! an undistributed dimension set that entry in {\tt regDecomp}
 ! to 1, and set the corresponding entry in distDim to .false.. 
 ! The following is an example of creating a 10x20x30 3D grid
@@ -127,7 +127,7 @@ program ESMF_GridCreateEx
 ! containing size(countsPerDEDim1) by size(countsPerDEDim2) by
 ! size(countsPerDEDim3) DEs. The entries in each of these arrays
 ! specify the number of grid cells per DE in that dimension.
-! The rank of the grid is determined by the presence of
+! The dimension of the grid is determined by the presence of
 ! {\tt countsPerDEDim3}.  If it's present the Grid
 ! will be 3D. If just {\tt countsPerDEDim1} and 
 ! {\tt countsPerDEDim2} are specified the Grid 
@@ -173,13 +173,31 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 
 
 !BOE 
-! Alternatively, if the third dimension were to be undistributed, then 
-! {\tt countsPerDEDim3} in the call would have only a single term.
+! To make a third dimension distributed across only 1 DE, then 
+! {\tt countsPerDEDim3} in the call should only have a single term.
 !EOE
 
 !BOC
-   grid3D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/3,7/), &
+   grid3D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/3,7/),  &
           countsPerDEDim2=(/11,2,7/), countsPerDEDim3=(/30/), rc=rc)   
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE 
+! Alternatively, to make the third dimension undistributed, then 
+! {\tt countsPerDEDim3} in the call should only have a single term and
+! the third term of {\tt distDim} should be set to false. This makes
+! the third dimension not a part of the DistGrid. Note that its
+! an error to make undistributed a dimension that has been
+! specified with more than 1 element in a {\tt countsPerDEDim}
+! argument. By default {\tt distDim} is set to all false (e.g. 
+! all dimensions are undistributed).
+!EOE
+
+!BOC
+   grid3D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/3,7/),  &
+          countsPerDEDim2=(/11,2,7/), countsPerDEDim3=(/30/), &
+          distDim=(/.true.,.true.,.false./), rc=rc)   
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -243,14 +261,14 @@ endif
 ! The design is that the user specifies the global minimum and maximum
 ! ranges of the index space with the
 ! arguments {\tt minIndex} and {\tt maxIndex}, and through a {\tt localIndices}
-! argument specifies the set of index space locations residing on the local DE.
+! argument specifies the set of index space locations residing on the local PET.
 ! Again, if {\tt minIndex} is  not specified, then the bottom of the 
 ! index range is assumed to be (1,1,...). 
-! The rank of the Grid is equal to the size of {\tt maxIndex}. 
+! The dimension of the Grid is equal to the size of {\tt maxIndex}. 
 !
 ! The following example creates a 2D Grid of dimensions 5x5, and places
 ! the diagonal elements (i.e. indices (i,i) where i goes from 1 to 5)
-! on the local DE. The remaining DEs would individually declare
+! on the local PET. The remaining PETs would individually declare
 ! the remainder of the Grid locations. 
 !EOE
 
@@ -456,7 +474,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! The grid is partitioned using an irregular distribution. The first dimension
 ! is divided into two pieces, the first with 3 grid cells per
 ! DE and the second with 7 grid cells per DE. In the second dimension,
-! the Grid is divided into 3 pieces, with 5, 9, and 6 cells per DE respectively.
+! the Grid is divided into 3 pieces, with 11, 2, and 7 cells per DE respectively.
 ! The Grid is created with global indices. After grid creation the
 ! local bounds and native Fortran arrays are retrieved and the
 ! coordinates are set by the user. 
@@ -662,7 +680,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    !-------------------------------------------------------------------
    ! Calculate and set the vertical coordinates
    ! Note that the centerZ array needs to be 3D because currently
-   ! all coordinate arrays must each have the same rank as the grid, but 
+   ! all coordinate arrays must each have the same dimension as the grid, but 
    ! because the coordinate is rectilinear we only need to store a 1D array.
    !-------------------------------------------------------------------
    do k=lbnd(1),ubnd(1)
@@ -830,7 +848,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! adds coordinate storage to the corner stagger location in {\tt grid}, plus sets
 ! the associated coordinate data. Note, the input coordinate arrays (CoordX, CoordY)
 ! may be either F90 or ESMF Array's (The F90 arrays are restricted to single DE to
-! PET mappings). They also need to be of the proper size and rank to coorespond to the Grid. 
+! PET mappings). They also need to be of the proper size and dimension to correspond to the Grid. 
 !EOEI
 
 !BOCI 
@@ -855,7 +873,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! the first dimension of coordinate 1 maps to index
 ! dimension 1 and the second maps to index dimension 2. If
 ! the {\tt coordDep} arrays are not specified, 
-! then {\tt coordDep1} defaults to {/1,2..,gridrank/}.  This default
+! then {\tt coordDep1} defaults to {/1,2..,gridDimCount/}.  This default
 ! thus specifies a curvilinear grid.  
 !
 !
@@ -1068,12 +1086,123 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! Grid's padding (Please see Section~\ref{sec:usage:staggerpadding:adv} for
 ! further discussion of customizing the stagger padding).
 !
-! The Grid computational region is a subset of the the Grid exclusive
+!\begin{center}
+!\begin{figure}
+!%\scalebox{1.0}{\includegraphics{exclusive}}
+!\caption{An example of a Grid's exclusive region.}
+!\label{fig:gridexreg}
+!\end{figure}
+!\end{center}
+!
+! Figure~\ref{fig:gridexreg} shows an example of a Grid exclusive region (with default
+! stagger padding). This exclusive region would be for a Grid generated by either of the
+! following calls:
+!EOE
+
+!BOC
+  grid2D=ESMF_GridCreateShapeTile(regDecomp=(/2,4/), maxIndex=(/5,15/), &
+           indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   !-------------------------------------------------------------------
+   ! Clean up to prepare for the next example.
+   !-------------------------------------------------------------------
+  call ESMF_GridDestroy(grid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOC
+  grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/4,4,4,3/), &
+           countsPerDEDim2=(/3,2/), indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   !-------------------------------------------------------------------
+   ! Clean up to prepare for the next example.
+   !-------------------------------------------------------------------
+  call ESMF_GridDestroy(grid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+
+!BOE
+! Each rectangle in this diagram represents a DE and the numbers along the sides
+! are the index values of the locations in the DE. Note that the exclusive region 
+! has one extra index location in each dimension than the number of cells
+! because of the padding for the larger stagger locations (e.g. corner). 
+!
+! The Grid computational region is a subset of the Grid exclusive
 ! region.  The computational region indicates which index locations in 
 ! the Grid are active for a particular stagger. The computational region
 ! is typically the region that a user would compute over (e.g.
 ! would iterate over setting values for).
 ! 
+!\begin{center}
+!\begin{figure}
+!%\scalebox{1.0}{\includegraphics{comp_center}}
+!\caption{An example of a Grid's computational region for the center stagger location.}
+!\label{fig:gridcompcntrreg}
+!\end{figure}
+!\end{center}
+!
+! Figure~\ref{fig:gridcompcntrreg} shows an example of a Grid computational region.
+! This example is for the same Grid used for the exclusive region figure above (Figure~\ref{fig:gridexreg}).
+! The computational region is the interior blue area. This example is 
+! for the center stagger location. This would be the computational region
+! for a stagger location allocated by the following call:
+!EOE
+
+   !-------------------------------------------------------------------
+   ! Setup for the to prepare for the example.
+   !-------------------------------------------------------------------
+  grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/2,5/), countsPerDEDim1=(/2,5/), &
+           indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
+
+!BOC
+  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+   !-------------------------------------------------------------------
+   ! Clean up to prepare for the next example.
+   !-------------------------------------------------------------------
+  call ESMF_GridDestroy(grid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+!\begin{center}
+!\begin{figure}
+!%\scalebox{1.0}{\includegraphics{comp_edge}}
+!\caption{An example of a Grid's computational region for the edge1 stagger location.}
+!\label{fig:gridcompedgereg}
+!\end{figure}
+!\end{center}
+!
+! Figure~\ref{fig:gridcompedgereg} shows another example of a Grid computational region.
+! This example is for the same Grid used for the exclusive region figure above (Figure~\ref{fig:gridexreg}).
+! The computational region is the interior blue area. This example is
+! for the edge1 stagger location. This would be the computational region
+! for a stagger location allocated by the following call:
+!EOE
+
+   !-------------------------------------------------------------------
+   ! Setup for the to prepare for the example.
+   !-------------------------------------------------------------------
+  grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/2,5/), countsPerDEDim1=(/2,5/), &
+           indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
+
+!BOC
+  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_EDGE1, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+   !-------------------------------------------------------------------
+   ! Clean up to prepare for the next example.
+   !-------------------------------------------------------------------
+  call ESMF_GridDestroy(grid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! Again each rectangle in these diagrams represents a DE and the numbers along the sides
+! are the index values of the locations in the DE.
+!
 ! The total region is the outermost boundary of the memory allocated 
 ! on each DE to hold the data for the Grid on that DE. This region 
 ! can be as small as the computational region, but may be larger to 
@@ -1083,6 +1212,79 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! Grid. The total region is a property of an underlying Array and
 ! so information about it is only retrievable when an Array has
 ! been set or allocated. 
+! 
+!\begin{center}
+!\begin{figure}
+!%\scalebox{1.0}{\includegraphics{total_center}}
+!\caption{An example of a Grid's total region for the center stagger location.}
+!\label{fig:gridtotcntrreg}
+!\end{figure}
+!\end{center}
+!
+! Figure~\ref{fig:gridtotcntrreg} shows an example of a Grid total region.
+! This example is for the same Grid used for the exclusive region figure above (Figure~\ref{fig:gridexreg}).
+! The total region is the outer red area. This region is 
+! for the center stagger location. TotalWidth adjustment of a stagger location allocation 
+! is not currently implement, but when it is, this would be the total region
+! for a stagger location allocated by the following call:
+!EOE
+
+   !-------------------------------------------------------------------
+   ! Setup for the to prepare for the example.
+   !-------------------------------------------------------------------
+  grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/2,5/), countsPerDEDim1=(/2,5/), &
+           indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
+
+!BOC
+  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER, &
+!        totalLWidth=(/1,1/), totalUWidth=(/1,1/), rc=rc) ! NOT YET IMPLEMENTED
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+   !-------------------------------------------------------------------
+   ! Clean up to prepare for the next example.
+   !-------------------------------------------------------------------
+  call ESMF_GridDestroy(grid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+!\begin{center}
+!\begin{figure}
+!%\scalebox{1.0}{\includegraphics{total_edge}}
+!\caption{An example of a Grid's total region for the edge1 stagger location.}
+!\label{fig:gridtotedgereg}
+!\end{figure}
+!\end{center}
+!
+! Figure~\ref{fig:gridtotedgereg} shows an example of a Grid total region.
+! This example is for the same Grid used for the exclusive region figure above (Figure~\ref{fig:gridexreg}).
+! The total region is the outer red area. This region is 
+! for the edge1 stagger location. TotalWidth adjustment of a stagger location allocation 
+! is not currently implement, but when it is, this would be the total region
+! for a stagger location allocated by the following call:
+!EOE
+
+   !-------------------------------------------------------------------
+   ! Setup for the to prepare for the example.
+   !-------------------------------------------------------------------
+  grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/2,5/), countsPerDEDim1=(/2,5/), &
+           indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
+
+!BOC
+  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_EDGE1, &
+!        totalLWidth=(/1,1/), totalUWidth=(/1,1/), rc=rc) ! NOT YET IMPLEMENTED
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+   !-------------------------------------------------------------------
+   ! Clean up to prepare for the next example.
+   !-------------------------------------------------------------------
+  call ESMF_GridDestroy(grid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! Again each rectangle in these diagrams represents a DE and the numbers along the sides
+! are the index values of the locations in the DE.
 !
 ! The user can retrieve a set of bounds for each index space region 
 ! described above: exclusive bounds, computational bounds, 
@@ -1880,20 +2082,20 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! by the fact that the component arrays don't need to be the same dimension as
 ! each other or as the Grid. For example, for the 3D case, all 3 ESMF
 ! Arrays could be 1D, or x and y could be 2D while z is 1D.
-! The parameters {\tt coordRank} and {\tt coordDimMap}
+! The parameters {\tt coordDimCount} and {\tt coordDimMap}
 ! can be used to specify the factorization of the coordinate arrays. 
 !
 ! The default Grid has coordinate arrays the same rank as the Grid.
-! To alter this, the {\tt coordRank} parameter can be used
+! To alter this, the {\tt coordDimCount} parameter can be used
 ! to set the rank of the coordinate arrays.  The size of the parameter  
-! is the rank of the Grid. Each entry of {\tt coordRank}  is the rank of 
+! is the dimension of the Grid. Each entry of {\tt coordDimCount}  is the rank of 
 ! the associated coordinate array. The following creates a 10x20
 ! 2D Grid where both the x and y coordinates are stored in 1D arrays. 
 !EOEI
 
 !BOCI 
    Grid2D=ESMF_GridCreate(maxIndex=(/10,20/), &
-            coordRank=(/1,1/) , rc=rc)
+            coordDimCount=(/1,1/) , rc=rc)
 !EOCI  
 
 !BOEI
@@ -1901,8 +2103,8 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! mapped in order to the Grid dimensions (e.g. dimension 1 of the coordinate
 ! arrays corresponds to dimension 1 of the Grid.). If the coordinate arrays
 ! have a smaller rank than the Grid, then the default depends on the 
-! rank of the grid and the rank of the individual coordinate Arrays. For a 2D Grid,
-! if each Array has rank 1, each 1D  Array is mapped to the Grid dimension
+! dimension of the grid and the dimension of the individual coordinate Arrays. For a 2D Grid,
+! if each Array has dimension 1, each 1D  Array is mapped to the Grid dimension
 ! corresponding to its component number (e.g. component Array 1 is mapped
 ! to grid dimension 1, and so on). For a 3D Grid with 1D Arrays, the same
 ! is true. For a 3D grid with one 1D and two 2D arrays, the 2D arrays are 
@@ -1911,7 +2113,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! the component arrays are just mapped in order starting from the first Grid dimension. 
 !
 ! To alter the default mapping, the {\tt coordDimMap} argument can be used. 
-! The parameter is a 2D array where each dimension is the rank of the Grid.
+! The parameter is a 2D array where each dimension is the dimension of the Grid.
 ! The first dimension indicates the component (e.g. x=1). The second dimension
 ! is an entry for each dimension of the coordinate array.  Each entry of 
 ! {\tt coordDimMap}  tells which Grid dimension the corresponding
@@ -1924,7 +2126,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !BOCI 
    coordDimMap(1,1)=2      ! Map X (i.e. 1) to second Grid dimension 
    coordDimMap(2,1)=1      ! Map Y (i.e. 2) to first Grid dimension 
-   Grid2D=ESMF_GridCreate(maxIndex=(/10,20/), coordRank=(/1,1/) , &
+   Grid2D=ESMF_GridCreate(maxIndex=(/10,20/), coordDimCount=(/1,1/) , &
                coordDimMap=coordDimMap, rc=rc)
 !EOCI  
 #endif
@@ -2106,7 +2308,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !
 ! The {\tt gridEdgeLWidth} and 
 ! {\tt gridEdgeUWidth} arguments are both 1D arrays of the
-! same size as the Grid rank. The entries in the arrays
+! same size as the Grid dimension. The entries in the arrays
 ! give the extra offset from the outer boundary of
 ! the grid cell index space to the exclusive region of the
 ! Grid. The following example shows the creation of 
@@ -2195,7 +2397,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! 
 ! The {\tt staggerEdgeLWidth} and 
 ! {\tt staggerEdgeUWidth} arguments are both 1D arrays of the
-! same size as the Grid rank. The entries in the arrays
+! same size as the Grid dimension. The entries in the arrays
 ! give the extra offset from the Grid cell index space
 ! for a stagger location. The following example shows the
 ! addition of two stagger locations. The
