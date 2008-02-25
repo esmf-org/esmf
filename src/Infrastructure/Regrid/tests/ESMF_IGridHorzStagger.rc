@@ -1,7 +1,0 @@
-&igridHStagger index = "A", igrid = 1, relloc = 1, igridStaggerString = "ESMF_IGRID_HORZ_STAGGER_A  ESMF_CELL_CENTER" /
-&igridHStagger index = "B", igrid = 10, relloc = 4, igridStaggerString = "ESMF_IGRID_HORZ_STAGGER_D_NE  ESMF_CELL_EFACE" /
-&igridHStagger index = "C", igrid = 2, relloc = 6, igridStaggerString = "ESMF_IGRID_HORZ_STAGGER_B_NE ESMF_CELL_NECORNER" /
-&igridHStagger index = "D", igrid = 6, relloc = 2, igridStaggerString = "ESMF_IGRID_HORZ_STAGGER_C_NE ESMF_CELL_NFACE" /
-! $Id: ESMF_IGridHorzStagger.rc,v 1.3 2007/06/25 17:46:52 cdeluca Exp $
-
-This file provides the Horozontal Stagger pairs.

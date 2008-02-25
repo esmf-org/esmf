@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridUTest.F90,v 1.24 2007/08/17 18:29:03 cdeluca Exp $
+! $Id: ESMF_RegridUTest.F90,v 1.25 2008/02/25 21:33:53 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -10,244 +10,321 @@
 !
 !==============================================================================
 !
-      program ESMF_RegridTest
+program ESMF_RegridUTest
 
 !------------------------------------------------------------------------------
-! INCLUDES
-#include <ESMF.h>
-!
+
+#include <ESMF_Macros.inc>
+
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_RegridTest - One line general statement about this test
+! !PROGRAM: ESMF_RegridUTest - Test the regrid
 !
 ! !DESCRIPTION:
 !
-! The code in this file drives F90 Regrid unit tests.
-! The companion file ESMF\_Regrid.F90 contains the definitions for the
-! Regrid methods.
 !
 !-----------------------------------------------------------------------------
 ! !USES:
-      use ESMF_TestMod    ! test methods
-      use ESMF_Mod
-      implicit none
+  use ESMF_TestMod     ! test methods
+  use ESMF_Mod
+  use ESMF_RegridMod
+
+  use ESMF_FieldGetMod
+
+  implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter :: version = &
-      '$Id: ESMF_RegridUTest.F90,v 1.24 2007/08/17 18:29:03 cdeluca Exp $'
+  character(*), parameter :: version = &
+    '$Id: ESMF_RegridUTest.F90,v 1.25 2008/02/25 21:33:53 dneckels Exp $'
 !------------------------------------------------------------------------------
-      type(ESMF_VM):: vm
-
-      ! cumulative result: count failures; no failures equals "all pass"
-      integer :: result = 0
-
-      ! individual test result code
-      integer :: rc
-
-      ! individual test failure message
-      character(ESMF_MAXSTR) :: failMsg
-      character(ESMF_MAXSTR) :: name
-
-      !character(ESMF_MAXSTR) :: validate_options
-      !character(ESMF_MAXSTR) :: print_options
-
-      ! Local variables
-      type(ESMF_Field) :: humidity1, humidity2
-      type(ESMF_DELayout) :: delayout
-      type(ESMF_ArraySpec) :: arrayspec
-      type(ESMF_IGrid) :: igrid1, igrid2
-      real(ESMF_KIND_R8) :: min(2), max(2)
-      integer :: counts(ESMF_MAXIGRIDDIM)
-      integer :: npets, countsPerDE1(4), countsPerDE2(2)
-      real(ESMF_KIND_R8) :: delta1(40), delta2(50)
-      type(ESMF_IGridHorzStagger) :: horz_stagger
-      type(ESMF_RouteHandle) :: routehandle
-
-
-      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
-
-      if (.not. ESMF_TestMinPETs(8, ESMF_SRCLINE)) goto 10
-
-
-      ! Query for Global VM and create a layout with the right breakdown
-      
-      !------------------------------------------------------------------------
-      !NEX_removeUTest_Multi_Proc_Only
-      call ESMF_VMGetGlobal(vm, rc=rc)
-      call ESMF_VMGet(vm, petCount=npets, rc=rc)
-      delayout = ESMF_DELayoutCreate(vm, (/ npets/2, 2 /), rc=rc)
-      write(failMsg, *) "creating a delayout rc =", rc
-      write(name, *) "Creating a DELayout"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !NEX_removeUTest_Multi_Proc_Only
-      ! Set up a 2D real arrayspec
-      call ESMF_ArraySpecSet(arrayspec, rank=2, &
-                             typekind=ESMF_TYPEKIND_R8)
-      write(failMsg, *) "setting an arrayspec rc =", rc
-      write(name, *) "Initializing an ArraySpec"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !NEX_removeUTest_Multi_Proc_Only
-      ! Add a "humidity" field to the export state.
-      countsPerDE1 = (/ 15, 15, 15, 15 /)
-      countsPerDE2 = (/ 40, 0 /)
-
-      counts(1) = 60
-      counts(2) = 40
-      min(1) = 0.0
-      max(1) = 60.0
-      min(2) = 0.0
-      max(2) = 50.0
-      horz_stagger = ESMF_IGRID_HORZ_STAGGER_A
-
-      igrid1 = ESMF_IGridCreateHorzXYUni(counts=counts, &
-                                  minGlobalCoordPerDim=min, &
-                                  maxGlobalCoordPerDim=max, &
-                                  horzStagger=horz_stagger, &
-                                  name="source igrid", rc=rc)
-      write(failMsg, *) "igrid create rc =", rc 
-      write(name, *) "Creating an XY Uniform IGrid"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      
-      !------------------------------------------------------------------------
-      !NEX_removeUTest_Multi_Proc_Only
-      call ESMF_IGridDistribute(igrid1, delayout=delayout, &
-                                 countsPerDEDim1=countsPerDE1, &
-                                 countsPerDEDim2=countsPerDE2, &
-                                 rc=rc)
-      write(failMsg, *) "igrid distribute rc =", rc
-      write(name, *) "Distributing the IGrid"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !NEX_removeUTest_Multi_Proc_Only
-      ! Create the field and have it create the array internally
-      humidity1 = ESMF_FieldCreate(igrid1, arrayspec, &
-                                   horzRelloc=ESMF_CELL_CENTER, &
-                                   haloWidth=0, name="humidity1", rc=rc)
-      write(failMsg, *) "field create rc =", rc
-      write(name, *) "field create rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-
-      !------------------------------------------------------------------------
-      !NEX_removeUTest_Multi_Proc_Only
-      ! Add a "humidity" field to the import state.
-      countsPerDE1 = (/ 10, 6, 12, 12 /)
-      countsPerDE2 = (/ 0, 50 /)
-      min(1) = 0.0
-      delta1 = (/ 1.0, 1.0, 1.0, 1.1, 1.1, 1.1, 1.2, 1.2, 1.3, 1.4, &
-                    1.4, 1.5, 1.6, 1.6, 1.6, 1.8, 1.8, 1.7, 1.7, 1.6, &
-                    1.6, 1.6, 1.8, 1.8, 2.0, 2.0, 2.2, 2.2, 2.2, 2.2, &
-                    2.0, 1.7, 1.5, 1.3, 1.2, 1.1, 1.0, 1.0, 1.0, 0.9 /)
-      min(2) = 0.0
-      delta2 = (/ 0.8, 0.8, 0.8, 0.8, 0.8, 0.7, 0.7, 0.6, 0.7, 0.8, &
-                    0.9, 0.9, 0.9, 0.9, 1.0, 1.0, 1.0, 1.0, 0.9, 1.0, &
-                    1.0, 1.0, 1.0, 1.1, 1.2, 1.3, 1.3, 1.3, 1.4, 1.4, &
-                    1.4, 1.4, 1.4, 1.4, 1.4, 1.3, 1.3, 1.3, 1.2, 1.2, &
-                    1.1, 1.0, 1.0, 0.9, 0.8, 0.7, 0.6, 0.6, 0.5, 0.5 /)
-      min(1) = 0.0
-      min(2) = 0.0
-      horz_stagger = ESMF_IGRID_HORZ_STAGGER_D_NE
-
-      igrid2 = ESMF_IGridCreateHorzXY(minGlobalCoordPerDim=min, &
-                                      delta1=delta1, delta2=delta2, &
-                                      horzStagger=horz_stagger, &
-                                      name="source igrid", rc=rc)
-      write(failMsg, *) "igrid create rc =", rc
-      write(name, *) "igrid create rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      
-      !------------------------------------------------------------------------
-      !NEX_removeUTest_Multi_Proc_Only
-      call ESMF_IGridDistribute(igrid2, delayout=delayout, &
-                                 countsPerDEDim1=countsPerDE1, &
-                                 countsPerDEDim2=countsPerDE2, &
-                                 rc=rc)
-      write(failMsg, *) "igrid distribute rc =", rc
-      write(name, *) "igrid distribute rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      
-
-      !------------------------------------------------------------------------
-      !NEX_removeUTest_Multi_Proc_Only
-      ! Create the field and have it create the array internally
-      humidity2 = ESMF_FieldCreate(igrid2, arrayspec, &
-                                     horzRelloc=ESMF_CELL_NFACE, &
-                                     haloWidth=0, name="humidity2", rc=rc)
-      write(failMsg, *) "field create rc =", rc
-      write(name, *) "field create rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
-
-      !call ESMF_FieldPrint(humidity1, rc=rc)
-      !call ESMF_FieldPrint(humidity2, rc=rc)
-      !------------------------------------------------------------------------
-      ! Up to here the tests are all part of the set up.  From here on,
-      ! the tests are really regrid tests.
-      !------------------------------------------------------------------------
-      
-      !------------------------------------------------------------------------
-      ! These are fields on different IGrids - call RegridStore to set
-      ! up the Regrid structure
-
-      !------------------------------------------------------------------------
-      !NEX_removeUTest_Multi_Proc_Only
-      print *, "ready to call regrid store"
-      call ESMF_FieldRegridStore(humidity1, humidity2, vm, &
-                                 routehandle, &
-                                 regridmethod=ESMF_REGRID_METHOD_BILINEAR, &
-                                 rc=rc)
-      print *, "back from regrid store"
-      write(failMsg, *) "regrid store rc =", rc
-      write(name, *) "regrid store rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !NEX_removeUTest_Multi_Proc_Only
-      print *, "ready to call regrid run"
-      call ESMF_FieldRegrid(humidity1, humidity2, routehandle, rc=rc)
-      print *, "back from regrid run"
-      write(failMsg, *) "regrid run rc =", rc
-      write(name, *) "regrid run rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !call ESMF_FieldPrint(humidity1, rc=rc)
-      !call ESMF_FieldPrint(humidity2, rc=rc)
-      !------------------------------------------------------------------------
-      !NEX_removeUTest_Multi_Proc_Only
-      print *, "ready to call regrid release"
-      call ESMF_FieldRegridRelease(routehandle, rc=rc)
-      print *, "back from regrid release"
-      write(failMsg, *) "regrid release rc =", rc
-      write(name, *) "regrid release rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     
-#ifdef ESMF_EXHAUSTIVE
-      ! add more tests here.
+  ! cumulative result: count failures; no failures equals "all pass"
+  integer :: result = 0
 
-      !------------------------------------------------------------------------
-      !EX_removeUTest_Multi_Proc_Only
-      call ESMF_FieldRegridStore(humidity1, humidity2, vm, &
-                                 routehandle, &
-                                 regridmethod=ESMF_REGRID_METHOD_NEAR_NBR, &
-                                 rc=rc)
-      write(failMsg, *) "regrid store, bad method rc =", rc
-      write(name, *) "regrid store, bad method rc =", rc
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! individual test result code
+  integer :: localrc, rc, petCount,localPet
 
-#endif
+  ! individual test failure message
+  character(ESMF_MAXSTR) :: name, failMsg
 
-10    continue
+  logical :: correct
+  type(ESMF_Grid) :: gridSrc
+  type(ESMF_Grid) :: gridDst
+  type(ESMF_Field) :: srcField
+  type(ESMF_Field) :: dstField
+  type(ESMF_Array) :: dstArray
+  type(ESMF_Array) :: srcArray
+  type(ESMF_RouteHandle) :: routeHandle
+  type(ESMF_ArraySpec) :: arrayspec
+  type(ESMF_VM) :: vm
+  real(ESMF_KIND_R8), pointer :: fptrXC(:,:)
+  real(ESMF_KIND_R8), pointer :: fptrYC(:,:)
+  real(ESMF_KIND_R8), pointer :: fptr(:,:)
+  integer :: petMap2D(2,2,1)
+  integer :: clbnd(2),cubnd(2)
+  integer :: fclbnd(2),fcubnd(2)
+  integer :: i1,i2, index(2)
+  integer :: lDE, localDECount
+  real(ESMF_KIND_R8) :: coord(2)
+  character(len=ESMF_MAXSTR) :: string
+  integer src_nx, src_ny, dst_nx, dst_ny
+  integer num_arrays
 
-      ! TODO: we would like to set the program return value for use by
-      ! the makefile, but is there no way to do this in F90?
-      ! return number of failures to environment; 0 = success (all pass)
+  real(ESMF_KIND_R8) :: src_dx, src_dy
+  real(ESMF_KIND_R8) :: dst_dx, dst_dy
+  real(ESMF_KIND_R8) :: ctheta, stheta
+  real(ESMF_KIND_R8) :: theta, d2rad, xtmp, x, y
 
-      call ESMF_TestEnd(result, ESMF_SRCLINE)
-  
-      end program ESMF_RegridTest
+  integer, pointer :: larrayList(:)
+
+  !-----------------------------------------------------------------------------
+  call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+  !-----------------------------------------------------------------------------
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test GridToMesh"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! init success flag
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! Establish the resolution of the grids
+  src_nx = 100;
+  src_ny = 100;
+
+  dst_nx = 75;
+  dst_ny = 50;
+
+  ! Source mesh covers [0,1]x[0,2]
+  src_dx = 1. / (REAL(src_nx)+1.)
+  src_dy = 1. / (REAL(src_ny)+1.)
+
+  dst_dx = 0.5 / (REAL(dst_nx)+1.)
+  dst_dy = 0.5 / (REAL(dst_ny)+1.)
+
+  ! if petCount >1, setup petMap
+  gridSrc=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/src_nx,src_ny/),regDecomp=(/petCount,1/), &
+                              gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+                              indexflag=ESMF_INDEX_GLOBAL, &
+                              rc=localrc)
+  write(failMsg, *) "ESMF_GridCreateShapeTile fail"
+  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  if (localrc .ne. ESMF_SUCCESS) goto 10
+
+  gridDst=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/),regDecomp=(/1,petCount/), &
+                              gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+                              indexflag=ESMF_INDEX_GLOBAL, &
+                              rc=localrc)
+  write(failMsg, *) "ESMF_GridCreateShapeTile fail"
+  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  if (localrc .ne. ESMF_SUCCESS) goto 10
+
+  ! Create source/destination fields
+  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc)
+
+   srcField = ESMF_FieldCreate(gridSrc, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=rc)
+  write(failMsg, *) "ESMF_FieldCreate"
+  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  if (localrc .ne. ESMF_SUCCESS) goto 10
+
+   dstField = ESMF_FieldCreate(gridDst, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=rc)
+  write(failMsg, *) "ESMF_FieldCreate"
+  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  if (localrc .ne. ESMF_SUCCESS) goto 10
+
+  ! Allocate coordinates
+  call ESMF_GridAllocCoord(gridSrc, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridAllocCoord(gridDst, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get number of local DEs
+  call ESMF_GridGet(gridSrc, localDECount=localDECount, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get arrays
+  ! dstArray
+  call ESMF_FieldGet(dstField, array=dstArray, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
+  write(failMsg, *) "ESMF_FieldGet"
+  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  if (localrc .ne. ESMF_SUCCESS) goto 10
+
+  ! srcArray
+  call ESMF_FieldGet(srcField, array=srcArray, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
+  write(failMsg, *) "ESMF_FieldGet"
+  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  if (localrc .ne. ESMF_SUCCESS) goto 10
+
+
+
+
+  ! Get memory and set coords for src
+  do lDE=0,localDECount-1
+ 
+     !! get coord 1
+     call ESMF_GridGetCoord(gridSrc, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrXC, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
+     call ESMF_GridGetCoord(gridSrc, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrYC, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
+
+      call ESMF_FieldGetDataPtr(srcField, fptr, lDE, computationalLBound=fclbnd, &
+                             computationalUBound=fcubnd,  rc=localrc)
+      write(failMsg, *) "ESMF_FieldGetDataPtr"
+      call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      if (localrc .ne. ESMF_SUCCESS) goto 10
+
+    write(*,*) lDE," ::",clbnd,":",cubnd
+    write(*,*) lDE," ::",fclbnd,":",fcubnd
+
+    if (clbnd(1) .ne. fclbnd(1)) print *, 'Error clbnd != fclbnd'
+    if (clbnd(2) .ne. fclbnd(2)) print *, 'Error clbnd != fclbnd'
+    if (cubnd(1) .ne. fcubnd(1)) print *, 'Error cubnd != fcubnd'
+    if (cubnd(2) .ne. fcubnd(2)) print *, 'Error cubnd != fcubnd'
+
+     !! set coords, interpolated function
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+        fptrXC(i1,i2) = REAL((i1-1)*src_dx)
+        fptrYC(i1,i2) = REAL((i2-1)*src_dx)
+        x = fptrXC(i1, i2)
+        y = fptrYC(i1,i2)
+     
+       ! Function
+        fptr(i1, i2) = sin(x*10*3.145)+cos(y*4*3.145)
+     enddo
+     enddo
+
+  enddo    ! lDE
+
+  ! Get number of local DEs
+  call ESMF_GridGet(gridDst, localDECount=localDECount, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Get memory and set coords for dst
+  do lDE=0,localDECount-1
+ 
+     !! get coord 1
+     call ESMF_GridGetCoord(gridDst, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrXC, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
+     call ESMF_GridGetCoord(gridDst, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrYC, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
+
+     call ESMF_FieldGetDataPtr(dstField, fptr, lDE, computationalLBound=fclbnd, &
+                             computationalUBound=fcubnd,  rc=localrc)
+     write(failMsg, *) "ESMF_FieldGetDataPtr"
+     call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+     if (localrc .ne. ESMF_SUCCESS) goto 10
+
+    write(*,*) lDE," ::",clbnd,":",cubnd
+    write(*,*) lDE," ::",fclbnd,":",fcubnd
+
+    if (clbnd(1) .ne. fclbnd(1)) print *, 'Error clbnd != fclbnd'
+    if (clbnd(2) .ne. fclbnd(2)) print *, 'Error clbnd != fclbnd'
+    if (cubnd(1) .ne. fcubnd(1)) print *, 'Error cubnd != fcubnd'
+    if (cubnd(2) .ne. fcubnd(2)) print *, 'Error cubnd != fcubnd'
+
+     !! set coords 
+     d2rad = 0.01745329251994329547
+     theta = 45.
+
+     ctheta = cos(theta*d2rad)
+     stheta = sin(theta*d2rad)
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+        x = REAL((i1-1)*dst_dx)
+        y = REAL((i2-1)*dst_dy)
+        fptrXC(i1,i2) = x-0.25
+        !fptrYC(i1,i2) = REAL((i2-1)*dst_dy)-0.1*cos(fptrYC(i1,i2)*2.*3.145/0.5)*cos(fptrXC(i1,i2)*2*3.145/0.5)-0.25
+        fptrYC(i1,i2) = y-0.03*cos(y*3.145/0.5)*cos(x*2*3.145/0.5)-0.25
+
+        !! Now apply the transformation
+        xtmp = fptrXC(i1,i2)
+        fptrXC(i1,i2) = ctheta*fptrXC(i1,i2)-stheta*fptrYC(i1,i2)+0.5
+        fptrYC(i1,i2) = stheta*xtmp+ctheta*fptrYC(i1,i2)+0.5
+        fptr(i1,i2) = 0.    ! set destination field to zero
+     enddo
+     enddo
+
+     ! Set field values
+
+  enddo    ! lDE
+
+
+  call ESMF_RegridCreate(srcField, dstField, routeHandle, localrc)
+  write(failMsg, *) "RegridCreate"
+  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  if (localrc .ne. ESMF_SUCCESS) goto 10
+
+  ! Test the sparse matrix multiply
+  call ESMF_ArraySparseMatMul(srcArray=srcArray, dstArray=dstArray, &
+      routehandle=routeHandle, rc=rc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
+
+   ! Check the results
+  ! Get number of local DEs
+!  call ESMF_GridGet(gridDst, localDECount=localDECount, rc=localrc)
+  !if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get memory and set coords for dst
+  !do lDE=0,localDECount-1
+    !call ESMF_FieldGetDataPtr(dstField, fptr, lDE, computationalLBound=fclbnd, &
+                              !computationalUBound=fcubnd,  rc=localrc)
+    !write(failMsg, *) "ESMF_FieldGetDataPtr"
+    !call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !if (localrc .ne. ESMF_SUCCESS) goto 10
+ !
+    !do i1=fclbnd(1),fcubnd(1)
+    !do i2=fclbnd(2),fcubnd(2)
+       !x = REAL((i1-1)*dst_dx)
+       !y = REAL((i2-1)*dst_dy)
+       !print *, i1, i2, ':', fptr(i1,i2)
+    !enddo
+    !enddo
+ !
+  !enddo ! lDe
+
+  ! Write results to a mesh
+  num_arrays = 1
+  write(name, *) "srcmesh"
+  call c_ESMC_MeshIO(vm, GridSrc, ESMF_STAGGERLOC_CENTER, &
+               num_arrays, name, localrc, &
+               srcArray)
+  write(name, *) "dstmesh"
+  call c_ESMC_MeshIO(vm, Griddst, ESMF_STAGGERLOC_CENTER, &
+               num_arrays, name, localrc, &
+               dstArray)
+
+
+  call ESMF_GridDestroy(gridSrc, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
+
+  call ESMF_GridDestroy(gridDst, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
+
+
+10   continue
+
+
+  !-----------------------------------------------------------------------------
+  call ESMF_TestEnd(result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+end program ESMF_RegridUTest
