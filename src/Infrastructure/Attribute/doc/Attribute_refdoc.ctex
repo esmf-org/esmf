@@ -1,4 +1,4 @@
-% $Id: Attribute_refdoc.ctex,v 1.1 2008/02/15 18:19:25 rokuingh Exp $ 
+% $Id: Attribute_refdoc.ctex,v 1.2 2008/02/26 03:29:23 rokuingh Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,7 +9,7 @@
 % Licensed under the University of Illinois-NCSA License.
 
 #ifdef STANDALONE
-\documentclass[]{article}
+\documentclass{article}
 
 \usepackage{epsf}
 \usepackage{html}
@@ -21,8 +21,8 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{<Title>}
-\newcommand{\myauthors}{<Authors>}
+\newcommand{\mytitle}{\bf Attribute Design}
+\newcommand{\myauthors}{Ryan O'Kuinghttons}
 #endif
 
 #ifdef STANDALONE
@@ -43,94 +43,53 @@
 
 %\section{Synopsis}
 % #ifdef STANDALONE
-% \input{Base_syn}
+% \input{Attribute_syn}
 % #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Base/doc/Base_syn}
+% \input{../Infrastructure/Attribute/doc/Attribute_syn}
 % #endif
 
-%\section{Installation and General Usage}
-%See the \htmladdnormallink{ESMF User Guide}
-%{http://www.esmf.ucar.edu/esmf_docs/ESMF_usrdoc/} for installation instructions and a discussion of overall 
-%usage of the ESMF libraries.
-
-%\section{Architecture}
+%\section{Object Model}
 % #ifdef STANDALONE
-% \input{Base_arch}
+% \input{Attribute_obj}
 % #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Base/doc/Base_arch}
+% \input{../Infrastructure/Attribute/doc/Attribute_obj}
 % #endif
+\section{Attribute Class}
 
-%\newpage
-%\section{<Name1> Class}
+\subsection{Description}
+#ifdef STANDALONE
+\input{Attribute_desc}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Attribute/doc/Attribute_desc}
+#endif
 
-% \subsection{Description}
-% #ifdef STANDALONE
-% \input{class_desc}
-% #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Base/doc/class_desc}
-% #endif
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{Attribute_usage} 
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Attribute/doc/Attribute_ex} 
+#endif
 
-% \subsection{Restrictions}
-% #ifdef STANDALONE
-% \input{class_rest}
-% #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Base/doc/class_rest}
-% #endif
+\subsection{Restrictions and Future Work}
+#ifdef STANDALONE
+\input{Atribute_rest}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Attribute/doc/Attribute_rest}
+#endif
 
-% \subsection{Use and Examples}
-% #ifdef STANDALONE
-% %\input{class_ex} 
-% #elif defined(CONSTITUENT)
-% %\input{../Infrastructure/Base/doc/class_ex} 
-% #endif
+\subsection{Design and Implementation Notes}
+#ifdef STANDALONE
+\input{Attribute_implnotes}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Attribute/doc/Attribute_implnotes}
+#endif
 
-%\newpage
-%\section{<Name2> Class} ...
-
-%#ifdef STANDALONE
-%\section{Glossary}
-%\input{Base_glos}
-
+#ifdef STANDALONE
 %\section{Bibliography}
-%\bibliography{Base} 
+%\bibliography{Attribute} 
 %\bibliographystyle{plain}
 %\addcontentsline{toc}{section}{Bibliography}
-
-%\newpage
-%\setcounter{section}{1}
-%\renewcommand{\thesection}{\Alph{section}}
-%\renewcommand{\thesubsection}{\thesection\arabic{subsection}}
-
-%\section*{Appendix A:  Fortran Interface}
-%\addcontentsline{toc}{section}{Appendix A:  Fortran Interface}
-
-%\input{<Name1>}
-
-%\newpage
-%\setcounter{section}{2}
-%\renewcommand{\thesection}{\Alph{section}}
-%\renewcommand{\thesubsection}{\thesection\arabic{subsection}}
-
-%\section*{Appendix B:  Class Implementations}
-%\addcontentsline{toc}{section}{Appendix B:  Class Implementations}
-
-%\subsection{Public Classes}
-%#endif
-
-%
-%  There is no ESMF_Base.F90 to make 
-%  EMSF_Base_fapi.tex
-%
-%#ifdef STANDALONE
-%\input{ESMF_Base_fapi}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Base/doc/ESMF_Base_fapi}
-%#endif
-
-%\subsection{Private Classes}
-
-%\input{<Name2>}
-%#endif
+#endif
 
 #ifdef STANDALONE
 \end{document}
