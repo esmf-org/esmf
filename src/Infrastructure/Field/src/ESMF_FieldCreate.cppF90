@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.14 2008/02/14 04:14:55 theurich Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.15 2008/02/27 22:25:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cppF90,v 1.14 2008/02/14 04:14:55 theurich Exp $'
+      '$Id: ESMF_FieldCreate.cppF90,v 1.15 2008/02/27 22:25:51 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -242,7 +242,7 @@
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldCreateFromArray"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldCreate - Create a Field from Grid and Array
 
 ! !INTERFACE:
@@ -321,7 +321,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
       integer :: localrc                       !  Local error code

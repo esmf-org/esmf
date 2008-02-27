@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGather.cppF90,v 1.9 2008/01/16 21:25:09 theurich Exp $
+! $Id: ESMF_ArrayGather.cppF90,v 1.10 2008/02/27 22:25:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_ArrayGatherMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGather.cppF90,v 1.9 2008/01/16 21:25:09 theurich Exp $'
+    '$Id: ESMF_ArrayGather.cppF90,v 1.10 2008/02/27 22:25:50 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -186,8 +186,11 @@ contains
     integer                       :: localrc        ! local return code @\
     integer                       :: counts(mrank)  ! counts vector @\
     integer                       :: lb(mrank)      ! lb vector @\
-    integer                       :: i, rank @\
+    integer                       :: i, rank, localPet, count @\
     type(ESMF_TypeKind)           :: typekind @\
+    type(ESMF_VM)                 :: vm_opt @\
+    mtype (ESMF_KIND_##mtypekind),dimension(mdim),pointer :: fptr @\
+    mtype (ESMF_KIND_##mtypekind),dimension(mdim),allocatable :: farray_dummy @\
 @\
     ! Initialize return code @\
     localrc = ESMF_RC_NOT_IMPL @\
@@ -197,40 +200,54 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc) @\
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc) @\
 @\
-    ! Check consistency @\
-    call ESMF_ArrayGet(array, typekind=typekind, rank=rank, rc=localrc) @\
+    ! Obtain localPet @\
+    if (present(vm)) then @\
+      vm_opt = vm @\
+    else @\
+      call ESMF_VMGetCurrent(vm_opt, rc=localrc) @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
+    endif @\
+    call ESMF_VMGet(vm_opt, localPet=localPet, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
-    ! Require farray typekind to match Array typekind @\
-    if (typekind /= ESMF_TYPEKIND_##mtypekind) then @\
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
-        "- farrayPtr typekind does not match Array typekind", & @\
-        ESMF_CONTEXT, rc) @\
-      return @\
+@\
+    if (localPet==rootPet) then @\
+      ! rootPet -> prepare counts vector @\
+      fptr => farray ! need pointer in case farray is not allocated @\
+      count = 1 ! initialize @\
+      do i=1, mrank @\
+        counts(i) = size(fptr, i) @\
+        count = count * counts(i) @\
+      enddo @\
+      ! Since farray is an assumed shape dummy array the lower bounds in all @\
+      ! dimensions will start at 1 following the Fortran 90 standard. @\
+      lb = 1 ! @\
+      ! Call into the C++ interface, which will sort out optional arguments @\
+      if (count > 0) then @\
+        ! it is safe to use dummy argument farray @\
+        call c_ESMC_ArrayGather(array, farray(mloc), & @\
+          ESMF_TYPEKIND_##mtypekind, mrank, counts, patch, rootPet, vm, & @\
+          localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
+      else @\
+        ! it is unsafe to use dummy argument farray @\
+        allocate(farray_dummy(mloc))  ! allocate a single element @\
+        call c_ESMC_ArrayGather(array, farray_dummy(mloc), & @\
+          ESMF_TYPEKIND_##mtypekind, mrank, counts, patch, rootPet, vm, & @\
+          localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
+        deallocate(farray_dummy) @\
+      endif @\
+    else @\
+      ! not rootPet -> call through notRoot interface @\
+      call ESMF_ArrayGather(array=array, patch=patch, rootPet=rootPet, & @\
+        vm=vm, rc=localrc) @\
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
     endif @\
-    ! Require farray rank to match Array rank @\
-    if (rank /= mrank) then @\
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
-        "- farrayPtr rank does not match Array rank", & @\
-        ESMF_CONTEXT, rc) @\
-      return @\
-    endif @\
-@\
-    ! Prepare counts vector @\
-    do i=1, mrank @\
-      counts(i) = size(farray, i) @\
-    enddo @\
-@\
-    ! Prepare counts vector @\
-    ! Since farray is an assumed shape dummy array the lower bounds in all @\
-    ! dimensions will start at 1 following the Fortran 90 standard. @\
-    lb = 1 ! @\
-@\
-    ! Call into the C++ interface, which will sort out optional arguments @\
-    call c_ESMC_ArrayGather(array, farray(mloc), & @\
-      ESMF_TYPEKIND_##mtypekind, mrank, counts, patch, rootPet, vm, localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-      ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     ! Return successfully @\
     if (present(rc)) rc = ESMF_SUCCESS @\

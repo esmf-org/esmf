@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGetEx.F90,v 1.4 2008/02/01 21:26:01 feiliu Exp $
+! $Id: ESMF_FieldGetEx.F90,v 1.5 2008/02/27 22:25:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
     program ESMF_FieldGetEx
 
 !------------------------------------------------------------------------------
-!ESMF_EXAMPLE        String used by test script to count examples.
+!ESMF_removeEXAMPLE        String used by test script to count examples.
 !==============================================================================
 ! !PROGRAM: ESMF_FieldGetEx - Field Get Examples
 !
@@ -65,7 +65,7 @@
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
-!BOE
+!BremoveOE
 !\subsubsection{Get Fortran data pointer, Bounds, and Counts information from a Field}
 !
 !  User can get various bounds and counts information from a {\tt ESMF\_Field}
@@ -73,7 +73,7 @@
 !  Fortran data pointer contained in the internal {\tt ESMF\_Array} object
 !  of a {\tt ESMF\_Field}
 !
-!EOE
+!EremoveOE
 !-------------------------------------------------------------------------
 !   ! 
 !   ! User can get various bounds and counts information from a Field
@@ -97,7 +97,7 @@
     f8 = ESMF_FieldCreate(grid8, array8, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
   
-!BOC
+!BremoveOC
     call ESMF_FieldGetDataPtr(f8, farray1, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -109,14 +109,14 @@
         exclusiveCount=excl_count, &
         totalCount=total_count, &
         rc=rc)   
-!EOC
+!EremoveOC
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     print *, "Field Get Data Pointer example returned"
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
-!BOE
+!BremoveOE
 !\subsubsection{Get ESMF\_Grid and ESMF\_Array from a Field}
 !
 !  User can get the internal {\tt ESMF\_Grid} and {\tt ESMF\_Array} 
@@ -126,9 +126,9 @@
 !  in a read-only fashion to query additional information not directly
 !  available through FieldGet interface.
 !
-!EOE
+!EremoveOE
 
-!BOC
+!BremoveOC
     call ESMF_FieldGet(f8, grid=grid, array=array, &
         typekind=typekind, rank=rank, staggerloc=staggerloc, &
         gridToFieldMap=gridToFieldMap, &
@@ -136,7 +136,7 @@
         maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, & 
         name=name, &
         rc=rc)
-!EOC
+!EremoveOC
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     print *, "Field Get Grid and Array example returned"
 

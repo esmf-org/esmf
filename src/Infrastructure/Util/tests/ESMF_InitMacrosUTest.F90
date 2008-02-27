@@ -1,4 +1,4 @@
-! $Id: ESMF_InitMacrosUTest.F90,v 1.5 2006/11/28 17:51:57 oehmke Exp $
+! $Id: ESMF_InitMacrosUTest.F90,v 1.6 2008/02/27 22:25:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InitMacrosUTest.F90,v 1.5 2006/11/28 17:51:57 oehmke Exp $'
+      '$Id: ESMF_InitMacrosUTest.F90,v 1.6 2008/02/27 22:25:53 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -80,6 +80,7 @@
       ! add tests here
 
 #ifdef ESMF_INITMACROS_ON
+      !NEX_UTest
       ! Shallow type test
       ESMF_INIT_CHECK_SHALLOW(ESMF_ShallowGetInitVal,ESMF_ShallowInit,s)
       write(name,*) "Testing ESMF_INIT_CHECK_SHALLOW"
@@ -87,7 +88,7 @@
       call ESMF_Test((s%num .eq. 4), name, failMsg, result, ESMF_SRCLINE)
 
 
-
+      !NEX_UTest
       ! Deep type tests     
       !! Test Undefined Check
       call DeepTest(d,rc)
@@ -96,6 +97,7 @@
       call ESMF_Test((rc .eq. ESMF_RC_OBJ_NOT_CREATED),name,failMsg, &
                  result,ESMF_SRCLINE)
 
+      !NEX_UTest
       !! Test Created Check
       d=ESMF_DeepCreate()
       call DeepTest(d,rc)
@@ -104,6 +106,7 @@
       call ESMF_Test((rc .eq. ESMF_SUCCESS),name,failMsg, &
                      result,ESMF_SRCLINE)         
 
+      !NEX_UTest
       !! Test Deleted Check
       call ESMF_DeepDestroy(d)
       call DeepTest(d,rc)
@@ -127,8 +130,15 @@
          subroutine DeepTest(d,rc)
            type(ESMF_Deep), intent(in) :: d
            integer, intent(inout) :: rc
+            
+            ! init return code
+            rc=ESMF_RC_NOT_IMPL
 
+            ! check status
             ESMF_INIT_CHECK_DEEP(ESMF_DeepGetInitVal,d,rc)
+            
+            ! if we pass status check then return success
+            rc=ESMF_SUCCESS
    
          end subroutine DeepTest
  

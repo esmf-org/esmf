@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.118 2008/02/27 00:56:53 rokuingh Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.119 2008/02/27 22:25:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.118 2008/02/27 00:56:53 rokuingh Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.119 2008/02/27 22:25:52 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -103,24 +103,24 @@
 
 
       !------------------------------------------------------------------------
-      !NEX_UTest_Multi_Proc_Only
+      !NEX_remove_UTest_Multi_Proc_Only
       ! Test Requirement FLD1.1.3 Creation without data 
       ! Fields may be created as in FLD1.1.1 without allocating data or 
       ! specifying an associated data array. In this case specifying the 
       ! grid parameters and data array dimensions may be deferred until 
       ! data is attached.
-      f1 = ESMF_FieldCreateEmpty(rc=rc) 
-      write(failMsg, *) ""
-      write(name, *) "Creating a Field with no data"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      f1 = ESMF_FieldCreateEmpty(rc=rc) 
+!      write(failMsg, *) ""
+!      write(name, *) "Creating a Field with no data"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest_Multi_Proc_Only
+      !NEX_remove_UTest_Multi_Proc_Only
       ! Verifying that a Field with no data can be destroyed
-      call ESMF_FieldDestroy(f1, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Destroying a Field with no data Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_FieldDestroy(f1, rc=rc)
+!      write(failMsg, *) ""
+!      write(name, *) "Destroying a Field with no data Test"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
 
@@ -134,12 +134,12 @@
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_remove_UTest_Multi_Proc_Only
       ! Get a name from a deleted created Field
-      call ESMF_FieldGet(f1, name=fname, rc=rc)
-      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED "
-      write(name, *) "Getting name of deleted Field"
-      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_FieldGet(f1, name=fname, rc=rc)
+!      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED "
+!      write(name, *) "Getting name of deleted Field"
+!      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
@@ -150,11 +150,11 @@
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      f1 = ESMF_FieldCreateEmpty(rc=rc) 
-      write(failMsg, *) ""
-      write(name, *) "Creating a Field with no data Test Req. FLD1.1.3"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !EX_remove_UTest_Multi_Proc_Only
+!      f1 = ESMF_FieldCreateEmpty(rc=rc) 
+!      write(failMsg, *) ""
+!      write(name, *) "Creating a Field with no data Test Req. FLD1.1.3"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_remove_UTest_Multi_Proc_Only
@@ -165,15 +165,15 @@
 !      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_remove_UTest_Multi_Proc_Only
       ! Verifying that the Field name can be queried from a no data Field
-      call ESMF_FieldGet(f1, name=fname, rc=rc)
-      write(failMsg, *) "default name not generated"
-      write(name, *) "Getting name of Field with no data Test"
-      call ESMF_Test((fname.ne.""), name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_FieldGet(f1, name=fname, rc=rc)
+!      write(failMsg, *) "default name not generated"
+!      write(name, *) "Getting name of Field with no data Test"
+!      call ESMF_Test((fname.ne.""), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_remove_UTest_Multi_Proc_Only
       ! Getting Attribute count from a Field
       call ESMF_FieldAttributeGetCount(f1, count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -181,40 +181,40 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_remove_UTest_Multi_Proc_Only
       ! Verify attribute count test
-      write(failMsg, *) "Incorrect count"
-      write(name, *) "Verify Attribute count from a Field "
-      call ESMF_Test((count.eq.0), name, failMsg, result, ESMF_SRCLINE)
+!      write(failMsg, *) "Incorrect count"
+!      write(name, *) "Verify Attribute count from a Field "
+!      call ESMF_Test((count.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_remove_UTest_Multi_Proc_Only
       ! default names unique
-      f2 = ESMF_FieldCreateEmpty(rc=rc)
-      call ESMF_FieldGet(f1, name=fname1, rc=rc)
-      call ESMF_FieldGet(f2, name=fname2, rc=rc)
-      call ESMF_FieldPrint(f1)
-      call ESMF_FieldPrint(f2)
-      write(failMsg, *) "default name not unique"
-      write(name, *) "Verifying uniqueness of fields created default name"
-      call ESMF_Test((fname1.ne.fname2), name, failMsg, result, ESMF_SRCLINE)
+!      f2 = ESMF_FieldCreateEmpty(rc=rc)
+!      call ESMF_FieldGet(f1, name=fname1, rc=rc)
+!      call ESMF_FieldGet(f2, name=fname2, rc=rc)
+!      call ESMF_FieldPrint(f1)
+!      call ESMF_FieldPrint(f2)
+!      write(failMsg, *) "default name not unique"
+!      write(name, *) "Verifying uniqueness of fields created default name"
+!      call ESMF_Test((fname1.ne.fname2), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_remove_UTest_Multi_Proc_Only
       ! Verifying that a Field with no data can be destroyed
-      call ESMF_FieldDestroy(f2, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Destroying a Field with no data Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_FieldDestroy(f2, rc=rc)
+!      write(failMsg, *) ""
+!      write(name, *) "Destroying a Field with no data Test"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_remove_UTest_Multi_Proc_Only
       ! Test Requirement  
       ! Fields may be deleted.
-      call ESMF_FieldDestroy(f1, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Destroying initialized Field Test Req. FLD1.4"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_FieldDestroy(f1, rc=rc)
+!      write(failMsg, *) ""
+!      write(name, *) "Destroying initialized Field Test Req. FLD1.4"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_remove_UTest_Multi_Proc_Only
@@ -225,12 +225,12 @@
 !      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_remove_UTest_Multi_Proc_Only
       ! verify that querying the name of a destroyed Field is handled properly.
-      call ESMF_FieldGet(f1, name=fname, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Getting name of a destroyed Field Test"
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_FieldGet(f1, name=fname, rc=rc)
+!      write(failMsg, *) ""
+!      write(name, *) "Getting name of a destroyed Field Test"
+!      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_remove_UTest_Multi_Proc_Only
@@ -241,40 +241,41 @@
 !      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_remove_UTest_Multi_Proc_Only
       ! Verifying that a Field can be created with a name
-      f2 = ESMF_FieldCreateEmpty("pressure", rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Creating Field with name Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      f2 = ESMF_FieldCreateEmpty("pressure", rc=rc)
+!      write(failMsg, *) ""
+!      write(name, *) "Creating Field with name Test"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_remove_UTest_Multi_Proc_Only
       ! Verifying that the Field name can be queried.
-      Call ESMF_FieldGet(f2, name=fname, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Getting a Field name Test"
-      call ESMF_Test((fname.eq."pressure"), name, failMsg, result, ESMF_SRCLINE)
+!      Call ESMF_FieldGet(f2, name=fname, rc=rc)
+!      write(failMsg, *) ""
+!      write(name, *) "Getting a Field name Test"
+!      call ESMF_Test((fname.eq."pressure"), name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_FieldPrint(f2)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_remove_UTest_Multi_Proc_Only
       ! Verifying that recreating a Field is allowed.
-      f2 = ESMF_FieldCreateEmpty("temperature", rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Recreate a created Field Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_FieldPrint(f2)
+!      f2 = ESMF_FieldCreateEmpty("temperature", rc=rc)
+!      write(failMsg, *) ""
+!      write(name, *) "Recreate a created Field Test"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_FieldPrint(f2)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_remove_UTest_Multi_Proc_Only
       ! Verifying that a Field can be created after it has been destroyed
-      call ESMF_FieldDestroy(f2)
-      f2 = ESMF_FieldCreateEmpty("precipitation", rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Recreate a destroyed Field Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_FieldPrint(f2)
-      call ESMF_FieldDestroy(f2)
+!      call ESMF_FieldDestroy(f2)
+!      f2 = ESMF_FieldCreateEmpty("precipitation", rc=rc)
+!      write(failMsg, *) ""
+!      write(name, *) "Recreate a destroyed Field Test"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_FieldPrint(f2)
+!      call ESMF_FieldDestroy(f2)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
@@ -286,7 +287,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_remove_UTest_Multi_Proc_Only
       ! Test requirement Default name attribute 
       ! The only default attribute of a field will be a name. A unique 
       ! name will be generated if not supplied by the user.
@@ -296,49 +297,49 @@
       ! Field names must be unique within an address 
       ! space and it shall be possible to check this.
       ! Bug 705087 "Default Field names not unique"
-      f1 = ESMF_FieldCreateEmpty(rc=rc)
-      f2 = ESMF_FieldCreateEmpty(rc=rc)
-      call ESMF_FieldGet(f1, name=fname1, rc=rc)
-      call ESMF_FieldGet(f2, name=fname2, rc=rc)
-      write(failMsg, *) "Field names not unique"
-      write(name, *) "Unique default Field names Test, FLD1.5.1 & 1.7.1"
-      call ESMF_Test((fname1.ne.fname2), name, failMsg, result, ESMF_SRCLINE)
-      !print *, "Field (f1) name = ", trim(fname1)
-      print *, "Field (f2) name = ", trim(fname2)
-      call ESMF_FieldPrint(f1)
-      call ESMF_FieldPrint(f2)
-      call ESMF_FieldDestroy(f1)
-      call ESMF_FieldDestroy(f2)
+!      f1 = ESMF_FieldCreateEmpty(rc=rc)
+!      f2 = ESMF_FieldCreateEmpty(rc=rc)
+!      call ESMF_FieldGet(f1, name=fname1, rc=rc)
+!      call ESMF_FieldGet(f2, name=fname2, rc=rc)
+!      write(failMsg, *) "Field names not unique"
+!      write(name, *) "Unique default Field names Test, FLD1.5.1 & 1.7.1"
+!      call ESMF_Test((fname1.ne.fname2), name, failMsg, result, ESMF_SRCLINE)
+!      !print *, "Field (f1) name = ", trim(fname1)
+!      print *, "Field (f2) name = ", trim(fname2)
+!      call ESMF_FieldPrint(f1)
+!      call ESMF_FieldPrint(f2)
+!      call ESMF_FieldDestroy(f1)
+!      call ESMF_FieldDestroy(f2)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      f4 = ESMF_FieldCreateEmpty(rc=rc) 
-      write(failMsg, *) ""
-      write(name, *) "Creating a Field with no data"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !EX_remove_UTest_Multi_Proc_Only
+!      f4 = ESMF_FieldCreateEmpty(rc=rc) 
+!      write(failMsg, *) ""
+!      write(name, *) "Creating a Field with no data"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_remove_UTest_Multi_Proc_Only
       ! Setting a Grid associated with Field
-      call ESMF_FieldSetGrid(f4, grid, rc=rc) 
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting a Grid associated with Field Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_FieldSetGrid(f4, grid, rc=rc) 
+!      write(failMsg, *) "Did not return ESMF_SUCCESS"
+!      write(name, *) "Setting a Grid associated with Field Test"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      call ESMF_FieldValidate(f4, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Testing to see if Field is Valid"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !EX_remove_UTest_Multi_Proc_Only
+!      call ESMF_FieldValidate(f4, rc=rc)
+!      write(failMsg, *) "Did not return ESMF_SUCCESS"
+!      write(name, *) "Testing to see if Field is Valid"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_remove_UTest_Multi_Proc_Only
       ! Verifying that a Field with a Grid and Array can be destroyed
-      call ESMF_FieldDestroy(f4, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Destroying a Field with a Grid and Array Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_FieldDestroy(f4, rc=rc)
+!      write(failMsg, *) ""
+!      write(name, *) "Destroying a Field with a Grid and Array Test"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
@@ -468,14 +469,14 @@
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_remove_UTest_Multi_Proc_Only
       ! Verify that a Grid cannot be gotten from a Field created with no data
-      f5 = ESMF_FieldCreateEmpty(rc=rc)
-      call ESMF_FieldGet(f5, grid=grid3, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Getting a Grid from a Field created with no data Test"
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_FieldDestroy(f5, rc=rc)
+!      f5 = ESMF_FieldCreateEmpty(rc=rc)
+!      call ESMF_FieldGet(f5, grid=grid3, rc=rc)
+!      write(failMsg, *) ""
+!      write(name, *) "Getting a Grid from a Field created with no data Test"
+!      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_FieldDestroy(f5, rc=rc)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
@@ -559,35 +560,35 @@
 !      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only 
+      !EX_remove_UTest_Multi_Proc_Only 
       ! Call FieldSetCommit on a field created from FieldCreateEmpty
       ! The data ptr size must match the grid size and only works when np=decomp
-      f8 = ESMF_FieldCreateEmpty("pressure", rc=rc)
-      allocate(farray(10,20))
-      call ESMF_FieldSetCommit(f8, grid, farray, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "SetCommit on an empty field"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_FieldDestroy(f8)
+!      f8 = ESMF_FieldCreateEmpty("pressure", rc=rc)
+!      allocate(farray(10,20))
+!      call ESMF_FieldSetCommit(f8, grid, farray, rc=rc)
+!      write(failMsg, *) ""
+!      write(name, *) "SetCommit on an empty field"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_FieldDestroy(f8)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only 
+      !EX_remove_UTest_Multi_Proc_Only 
       ! FieldCreateFromDataPtr creates a field from a fortran data ptr
-      f8 = ESMF_FieldCreate(grid, farray, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Creates a field from a fortran data ptr"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_FieldDestroy(f8)
+!      f8 = ESMF_FieldCreate(grid, farray, rc=rc)
+!      write(failMsg, *) ""
+!      write(name, *) "Creates a field from a fortran data ptr"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_FieldDestroy(f8)
       
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only 
+      !EX_remove_UTest_Multi_Proc_Only 
       ! FieldCreateFromDataPtr creates a field from a fortran data ptr
       ! This test focuses on copy behavior
-      f8 = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Creates a field from a fortran data ptr (copy)"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_FieldDestroy(f8)
+!      f8 = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, rc=rc)
+!      write(failMsg, *) ""
+!      write(name, *) "Creates a field from a fortran data ptr (copy)"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_FieldDestroy(f8)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only 
@@ -599,39 +600,39 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only 
+      !EX_remove_UTest_Multi_Proc_Only 
       ! ESMF_StaggerLocPrint test StaggerLoc public interface
-      call ESMF_StaggerLocPrint(staggerloc8, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Test ESMF_StaggerLocPrint public interface"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_StaggerLocPrint(staggerloc8, rc=rc)
+!      write(failMsg, *) ""
+!      write(name, *) "Test ESMF_StaggerLocPrint public interface"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
+      !EX_remove_UTest_Multi_Proc_Only
       ! FieldCreateFromArray creates a field from a ESMF_Array
-      call ESMF_GridGet(grid, distgrid=distgrid, rc=rc)
+!      call ESMF_GridGet(grid, distgrid=distgrid, rc=rc)
 
-      array8 = ESMF_ArrayCreate(farray, distgrid=distgrid, &
-          staggerloc=0, computationalEdgeUWidth=(/-1,-1/), rc=rc) 
-      f8 = ESMF_FieldCreate(grid, array8, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Creates a field from a ESMF_Array"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_FieldDestroy(f8)
+!      array8 = ESMF_ArrayCreate(farray, distgrid=distgrid, &
+!          staggerloc=0, computationalEdgeUWidth=(/-1,-1/), rc=rc) 
+!      f8 = ESMF_FieldCreate(grid, array8, rc=rc)
+!      write(failMsg, *) ""
+!      write(name, *) "Creates a field from a ESMF_Array"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_FieldDestroy(f8)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only 
+      !EX_remove_UTest_Multi_Proc_Only 
       ! FieldCreateFromArray creates a field from a ESMF_Array
       ! This test focus on copy behavior
-      call ESMF_GridGet(grid, distgrid=distgrid, rc=rc)
+!      call ESMF_GridGet(grid, distgrid=distgrid, rc=rc)
 
-      array8 = ESMF_ArrayCreate(farray, distgrid=distgrid, &
-          staggerloc=0, computationalEdgeUWidth=(/-1,-1/), rc=rc) 
-      f9 = ESMF_FieldCreate(grid, array8, copyflag=ESMF_DATA_COPY, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Creates a field from a ESMF_Array (copy)"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_FieldDestroy(f9)
+!      array8 = ESMF_ArrayCreate(farray, distgrid=distgrid, &
+!          staggerloc=0, computationalEdgeUWidth=(/-1,-1/), rc=rc) 
+!      f9 = ESMF_FieldCreate(grid, array8, copyflag=ESMF_DATA_COPY, rc=rc)
+!      write(failMsg, *) ""
+!      write(name, *) "Creates a field from a ESMF_Array (copy)"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      call ESMF_FieldDestroy(f9)
 
       !------------------------------------------------------------------------
       !EX_remove_UTest_Multi_Proc_Only 
@@ -737,8 +738,8 @@
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
-      ! Getting Attrubute Info from a Field
-      call ESMF_FieldAttributeGetInfo(f3, "Scale Factor", count=count, rc=rc)
+      ! Getting Attribute Info from a Field
+      call ESMF_FieldAttributeGetInfo(f3, name="Scale Factor", count=count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Attribute info from a Field "
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

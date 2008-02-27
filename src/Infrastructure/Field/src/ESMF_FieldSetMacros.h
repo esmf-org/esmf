@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldSetMacros.h,v 1.26 2008/02/15 23:36:01 theurich Exp $
+! $Id: ESMF_FieldSetMacros.h,v 1.27 2008/02/27 22:25:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -182,7 +182,7 @@
           ESMF_CONTEXT, rc)) return @\
  @\
         field%ftypep%datastatus = ESMF_STATUS_READY @\
-        if (rcpresent) rc = localrc @\
+        if (rcpresent) rc = ESMF_SUCCESS @\
  @\
         end subroutine ESMF_FieldSetDataPtr##mrank##D##mtypekind  @\
  @\

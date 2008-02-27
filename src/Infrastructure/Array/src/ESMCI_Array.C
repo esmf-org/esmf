@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.3 2008/02/27 15:16:19 rokuingh Exp $
+// $Id: ESMCI_Array.C,v 1.4 2008/02/27 22:25:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.3 2008/02/27 15:16:19 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.4 2008/02/27 22:25:50 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2297,17 +2297,19 @@ int Array::gather(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
-  // only on rootPet
+  // only rootPet checks for consistency of input, others listen
   if (localPet == rootPet){
     // check consistency of input information: shape = (typekind, rank, extents)
     if (typekindArg != typekind){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- TypeKind mismatch between array argument and Array object", &rc);
+      vm->vmk_broadcast(&rc, sizeof(int), rootPet);
       return rc;
     }
     if (rankArg != rank){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- Type mismatch between array argument and Array object", &rc);
+      vm->vmk_broadcast(&rc, sizeof(int), rootPet);
       return rc;
     }
     int tensorIndex=0;  // reset
@@ -2319,6 +2321,7 @@ int Array::gather(
         if (counts[i] != maxIndexPDim[j] - minIndexPDim[j] + 1){
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
             "- Extent mismatch between array argument and Array object", &rc);
+          vm->vmk_broadcast(&rc, sizeof(int), rootPet);
           return rc;
         }
       }else{
@@ -2327,11 +2330,19 @@ int Array::gather(
           + 1){
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
             "- Extent mismatch between array argument and Array object", &rc);
+          vm->vmk_broadcast(&rc, sizeof(int), rootPet);
           return rc;
         }
         ++tensorIndex;
       }
     }
+    int success = ESMF_SUCCESS;
+    vm->vmk_broadcast(&success, sizeof(int), rootPet);
+  }else{
+    // not rootPet receive status from rootPet
+    vm->vmk_broadcast(&localrc, sizeof(int), rootPet);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      "- rootPet exited with error", &rc)) return rc;
   }
 
   // size in bytes of each piece of data
@@ -2722,17 +2733,19 @@ int Array::scatter(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
-  // only on rootPet
+  // only rootPet checks for consistency of input, others listen
   if (localPet == rootPet){
     // check consistency of input information: shape = (typekind, rank, extents)
     if (typekindArg != typekind){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- TypeKind mismatch between array argument and Array object", &rc);
+      vm->vmk_broadcast(&rc, sizeof(int), rootPet);
       return rc;
     }
     if (rankArg != rank){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- Type mismatch between array argument and Array object", &rc);
+      vm->vmk_broadcast(&rc, sizeof(int), rootPet);
       return rc;
     }
     int tensorIndex=0;  // reset
@@ -2744,6 +2757,7 @@ int Array::scatter(
         if (counts[i] != maxIndexPDim[j] - minIndexPDim[j] + 1){
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
             "- Extent mismatch between array argument and Array object", &rc);
+          vm->vmk_broadcast(&rc, sizeof(int), rootPet);
           return rc;
         }
       }else{
@@ -2752,11 +2766,19 @@ int Array::scatter(
           + 1){
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
             "- Extent mismatch between array argument and Array object", &rc);
+          vm->vmk_broadcast(&rc, sizeof(int), rootPet);
           return rc;
         }
         ++tensorIndex;
       }
     }
+    int success = ESMF_SUCCESS;
+    vm->vmk_broadcast(&success, sizeof(int), rootPet);
+  }else{
+    // not rootPet receive status from rootPet
+    vm->vmk_broadcast(&localrc, sizeof(int), rootPet);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      "- rootPet exited with error", &rc)) return rc;
   }
 
   // size in bytes of each piece of data

@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldGetMacros.h,v 1.20 2008/01/25 21:37:07 feiliu Exp $
+! $Id: ESMF_FieldGetMacros.h,v 1.21 2008/02/27 22:25:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -21,7 +21,7 @@
 #define FieldGetDataPtrDoc() \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
-!BOP @\
+!BOPI @\
 ! !IROUTINE: ESMF_FieldGetDataPtr - Get the Fortran data pointer from a Field @\
 ! @\
 ! !INTERFACE: @\
@@ -107,7 +107,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
 ! @\
-!EOP @\
+!EOPI @\
 
 #if 0
 !------------------------------------------------------------------------------
@@ -144,9 +144,8 @@
 ! local variables @\
       integer          :: localrc, lde @\
  @\
-      if (present(rc)) then @\
-        rc = ESMF_RC_NOT_IMPL @\
-      endif @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+      localrc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
@@ -177,7 +176,9 @@
       if (ESMF_LogMsgFoundError(localrc, & @\
           ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rc)) return @\
-      if (present(rc)) rc = localrc @\
+ @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
     end subroutine ESMF_FieldGetDataPtr##mrank##D##mtypekind  @\
  @\
 ! < end macro - do not edit directly >  @\

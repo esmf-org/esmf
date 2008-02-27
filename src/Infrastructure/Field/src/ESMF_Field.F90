@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.303 2008/02/27 18:29:49 rokuingh Exp $
+! $Id: ESMF_Field.F90,v 1.304 2008/02/27 22:25:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -206,7 +206,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.303 2008/02/27 18:29:49 rokuingh Exp $'
+      '$Id: ESMF_Field.F90,v 1.304 2008/02/27 22:25:51 theurich Exp $'
 
 !==============================================================================
 !
@@ -2262,6 +2262,7 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldAttrSetChar
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldCreateNoDataPtr"
@@ -2473,7 +2474,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldCreateEmpty"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldCreateEmpty - Create a Field with no Grid or Array
 
 ! !INTERFACE:
@@ -2502,7 +2503,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
 
       type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
@@ -2676,9 +2677,9 @@
 !     \item [{[ungriddedUBound]}]
 !           Upper bounds of the ungridded dimensions of the Field.
 !     \item [{[maxHaloLWidth]}]
-!           Lower bound of halo region.  Defaults to 0.
+!           Lower bound of halo region.  Defaults to 0. ! NOT IMPLEMENTED
 !     \item [{[maxHaloUWidth]}]
-!           Upper bound of halo region.  Defaults to 0.
+!           Upper bound of halo region.  Defaults to 0. ! NOT IMPLEMENTED
 !     \item [{[name]}]
 !           Name of queried item.
 !     \item [{[iospec]}]
@@ -3608,17 +3609,16 @@
         type(ESMF_Time) :: ts
         character (19) Date
       
-        ! call ESMF_Log(?, 'entry into ESMF_FieldWrite');
-
         ! Initialize
         localrc = ESMF_RC_NOT_IMPL
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+#if 0           
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
 ! TODO:FIELDINTEGRATION Restore the ESMF_FieldWrite() method.
-#if 0           
+
         ! Get filename out of IOSpec, if specified.  Otherwise use the
         ! name of the Field.
         if (present(IOSpec)) then
@@ -3751,16 +3751,13 @@
         character(len=ESMF_MAXSTR) :: filename
         character(len=ESMF_MAXSTR) :: name
 
-
 ! TODO:FIELDINTEGRATION Restore the ESMF_FieldWriteFileASCII() method.
-#if 0 
-
-        ! call ESMF_Log(?, 'entry into ESMF_FieldWrite');
 
         ! Initialize
         localrc = ESMF_RC_NOT_IMPL 
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+#if 0 
         ! check variables
         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
            
@@ -3821,8 +3818,8 @@
                                       ESMF_CONTEXT, rc)) return
         endif
 
-#endif
       if (present(rc)) rc = ESMF_SUCCESS
+#endif
 
       end subroutine ESMF_FieldWriteFileASCII
         
@@ -3953,10 +3950,10 @@
 !           Upper bounds of the ungridded dimensions of the Field.
 !     \item [{[maxHaloLWidth]}]
 !           Lower bound of halo region.  Halo widths should be in the same order as
-!           the DistGrid in {\tt grid}.  Defaults to 0.
+!           the DistGrid in {\tt grid}.  Defaults to 0. ! NOT IMPLEMENTED
 !     \item [{[maxHaloUWidth]}]
 !           Upper bound of halo region.  Halo widths should be in the same order as
-!           the DistGrid in {\tt grid}.  Defaults to 0.
+!           the DistGrid in {\tt grid}.  Defaults to 0. ! NOT IMPLEMENTED
 !     \item [{[name]}] 
 !           {\tt ESMF\_Field} name. 
 !     \item [{[iospec]}] 
@@ -4129,10 +4126,10 @@
 !           Upper bounds of the ungridded dimensions of the Field.
 !     \item [{[maxHaloLWidth]}]
 !           Lower bound of halo region.  Halo widths should be in the same order as
-!           the DistGrid in {\tt grid}.  Defaults to 0.
+!           the DistGrid in {\tt grid}.  Defaults to 0. ! NOT IMPLEMENTED
 !     \item [{[maxHaloUWidth]}]
 !           Upper bound of halo region.  Halo widths should be in the same order as
-!           the DistGrid in {\tt grid}.  Defaults to 0.
+!           the DistGrid in {\tt grid}.  Defaults to 0. ! NOT IMPLEMENTED
 !     \item [{[name]}] 
 !           {\tt ESMF\_Field} name. 
 !     \item [{[iospec]}] 
@@ -4311,9 +4308,9 @@
 !     \item [{[ungriddedUBound]}]
 !           Upper bounds of the ungridded dimensions of the Field.
 !     \item [{[maxHaloLWidth]}]
-!           Lower bound of halo region.  Defaults to 0.
+!           Lower bound of halo region.  Defaults to 0. ! NOT IMPLEMENTED
 !     \item [{[maxHaloUWidth]}]
-!           Upper bound of halo region.  Defaults to 0.
+!           Upper bound of halo region.  Defaults to 0. ! NOT IMPLEMENTED
 !     \item [{[name]}] 
 !           {\tt ESMF\_Field} name. 
 !     \item [{[iospec]}] 
@@ -4516,7 +4513,7 @@
 !     \item [{[name]}]
 !           {\tt ESMF\_Field} name.
 !     \item [{[iospec]}]
-!           {\tt ESMF\_Field} I/O specification.
+!           {\tt ESMF\_Field} I/O specification. ! NOT IMPLEMENTED
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4726,7 +4723,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldSerialize"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldSerialize - Serialize field info into a byte stream
 !
 ! !INTERFACE:
@@ -4763,7 +4760,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       integer :: localrc
       type(ESMF_FieldType), pointer :: fp    ! field type
@@ -4815,7 +4812,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldDeserialize"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldDeserialize - Deserialize a byte stream into a Field
 !
 ! !INTERFACE:
@@ -4851,7 +4848,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       integer :: localrc
       type(ESMF_FieldType), pointer :: fp    ! field type
@@ -5084,13 +5081,11 @@
         ftypep%staggerloc = ESMF_STAGGERLOC_CENTER
 
         ftypep%array_internal = .false. 
-        do i = 1, ESMF_MAXDIM
-            ftypep%gridToFieldMap(i) = i
-        end do
-        ftypep%ungriddedLBound = 0
-        ftypep%ungriddedUBound = 0
-        ftypep%maxHaloLWidth   = 0
-        ftypep%maxHaloUWidth   = 0
+        ftypep%gridToFieldMap = -1
+        ftypep%ungriddedLBound = -1
+        ftypep%ungriddedUBound = -1
+        ftypep%maxHaloLWidth   = -1
+        ftypep%maxHaloUWidth   = -1
 
         if(present(rc)) rc = ESMF_SUCCESS
 
