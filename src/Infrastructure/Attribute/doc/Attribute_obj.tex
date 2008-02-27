@@ -1,4 +1,4 @@
-% $Id: Attribute_obj.tex,v 1.1 2008/02/26 03:29:22 rokuingh Exp $
+% $Id: Attribute_obj.tex,v 1.2 2008/02/27 00:57:30 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -19,5 +19,20 @@ meaning.
 %\includegraphics{Grid_obj}   
 %\end{center}
 
-Each Attribute contains a name value pair in which the value can be any of several numeric, character, and logical types.  All Attributes also contain character strings specifying the convention, type, and object of the Attribute for the purpose of keeping track of attribute packages.  All Attributes contain a pointer to a list of pointers to other Attributes, which is initialized as ESMF_NULL until specified otherwise.
+Each Attribute contains a name value pair in which the value can be any of several numeric, character, and logical types.  The allowable ESMF Attribute value types include:
 
+\begin{itemize}
+\item {\tt ESMF_TYPEKIND_I4}
+\item {\tt ESMF_TYPEKIND_I4} list
+\item {\tt ESMF_TYPEKIND_I8}
+\item {\tt ESMF_TYPEKIND_I8} list
+\item {\tt ESMF_TYPEKIND_R4}
+\item {\tt ESMF_TYPEKIND_R4} list
+\item {\tt ESMF_TYPEKIND_R8}
+\item {\tt ESMF_TYPEKIND_R8} list
+\item {\tt ESMF_TYPEKIND_Logical}
+\item {\tt ESMF_TYPEKIND_Logical} list
+\item {\tt EMSF_TYPEKIND_Character}
+\end{itemize}
+
+All Attributes also contain character strings specifying the convention, type, and object of the Attribute for the purpose of keeping track of attribute packages.  All Attributes contain a pointer to a list of pointers to other Attributes, which is initialized as {\tt ESMF_NULL} until specified otherwise.
