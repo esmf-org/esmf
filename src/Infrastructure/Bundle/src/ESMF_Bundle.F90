@@ -1,5 +1,5 @@
 
-! $Id: ESMF_Bundle.F90,v 1.124 2008/02/21 19:23:19 rokuingh Exp $
+! $Id: ESMF_Bundle.F90,v 1.125 2008/02/27 15:16:19 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -618,7 +618,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleAttPackCreate"
 !BOP
-! !IROUTINE: ESMF_BundleAttPackCreate - Setup the attribute package
+! !IROUTINE: ESMF_BundleAttPackCreate - Create the attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleAttPackCreate()
@@ -706,7 +706,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleAttPackSet"
 !BOP
-! !IROUTINE: ESMF_BundleAttPackSet - Setup the attribute package
+! !IROUTINE: ESMF_BundleAttPackSet - Set an attribute on the attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleAttPackSet()

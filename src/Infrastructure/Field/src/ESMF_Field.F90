@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.301 2008/02/21 19:23:19 rokuingh Exp $
+! $Id: ESMF_Field.F90,v 1.302 2008/02/27 15:16:20 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -206,7 +206,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.301 2008/02/21 19:23:19 rokuingh Exp $'
+      '$Id: ESMF_Field.F90,v 1.302 2008/02/27 15:16:20 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -409,7 +409,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldAttPackCreate"
 !BOP
-! !IROUTINE: ESMF_FieldAttPackCreate - Setup the attribute package
+! !IROUTINE: ESMF_FieldAttPackCreate - Create the attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAttPackCreate()
@@ -497,7 +497,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldAttPackSet"
 !BOP
-! !IROUTINE: ESMF_FieldAttPackSet - Setup the attribute package
+! !IROUTINE: ESMF_FieldAttPackSet - Set and attribute in the attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAttPackSet()

@@ -165,7 +165,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.61 2008/02/21 19:23:19 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.62 2008/02/27 15:16:21 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -610,7 +610,7 @@ end interface
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAttPackCreate"
 !BOP
-! !IROUTINE: ESMF_GridAttPackCreate - Setup the attribute package
+! !IROUTINE: ESMF_GridAttPackCreate - Create the attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_GridAttPackCreate()
@@ -699,7 +699,7 @@ end interface
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAttPackSet"
 !BOP
-! !IROUTINE: ESMF_GridAttPackSet - Setup the attribute package
+! !IROUTINE: ESMF_GridAttPackSet - Set an attribute in the attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_GridAttPackSet()

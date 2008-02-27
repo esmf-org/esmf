@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.2 2008/02/20 00:26:40 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.3 2008/02/27 15:16:19 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.2 2008/02/20 00:26:40 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.3 2008/02/27 15:16:19 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -7795,7 +7795,7 @@ int Array::sparseMatMulRelease(
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::attributeset()"
 //BOPI
-// !IROUTINE:  ESMCI::Array::attributeset - Set a array number value attribute
+// !IROUTINE:  ESMCI::Array::attributeset - Set an array number value attribute
 //
 // !INTERFACE:
 int Array::attributeset(
@@ -7832,7 +7832,7 @@ int Array::attributeset(
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::attributeset()"
 //BOPI
-// !IROUTINE:  ESMCI::Array::attributeset - Set a array character string attribute
+// !IROUTINE:  ESMCI::Array::attributeset - Set an array character string attribute
 //
 // !INTERFACE:
 int Array::attributeset(
@@ -7867,7 +7867,7 @@ int Array::attributeset(
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::attributeget()"
 //BOPI
-// !IROUTINE:  ESMCI::Array::attributeget - Get a array number value attribute
+// !IROUTINE:  ESMCI::Array::attributeget - Get an array number value attribute
 //
 // !INTERFACE:
 int Array::attributeget(
@@ -7904,7 +7904,7 @@ int Array::attributeget(
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::attributeget()"
 //BOPI
-// !IROUTINE:  ESMCI::Array::attributeget - Get a array character string attribute
+// !IROUTINE:  ESMCI::Array::attributeget - Get an array character string attribute
 //
 // !INTERFACE:
 int Array::attributeget(
@@ -7939,7 +7939,7 @@ int Array::attributeget(
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::attributegetcount()"
 //BOPI
-// !IROUTINE:  ESMCI::Array::attributegetcount - Get a array attribute count
+// !IROUTINE:  ESMCI::Array::attributegetcount - Get an array attribute count
 //
 // !INTERFACE:
 int Array::attributegetcount(void) const {
@@ -7973,7 +7973,7 @@ int Array::attributegetcount(void) const {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::attributeget()"
 //BOPI
-// !IROUTINE:  ESMCI::Array::attributeget - Get a array character string attribute
+// !IROUTINE:  ESMCI::Array::attributeget - Get an array character string attribute
 //
 // !INTERFACE:
 int Array::attributeget(
@@ -8011,7 +8011,7 @@ int Array::attributeget(
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::attpackcreate()"
 //BOPI
-// !IROUTINE:  ESMCI::Array::attpackcreate - Create a array attribute package
+// !IROUTINE:  ESMCI::Array::attpackcreate - Create an array attribute package
 //
 // !INTERFACE:
 int Array::attpackcreate(
@@ -8048,7 +8048,7 @@ int Array::attpackcreate(
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::attpackset()"
 //BOPI
-// !IROUTINE:  ESMCI::Array::attpackset - Set an attribute on a array attribute package
+// !IROUTINE:  ESMCI::Array::attpackset - Set an attribute on an array attribute package
 //
 // !INTERFACE:
 int Array::attpackset(
@@ -8087,7 +8087,7 @@ int Array::attpackset(
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::attpackwrite()"
 //BOPI
-// !IROUTINE:  ESMCI::Array::attpackwrite - Write out a array attribute package
+// !IROUTINE:  ESMCI::Array::attpackwrite - Print out an array attribute package
 //
 // !INTERFACE:
 int Array::attpackwrite(

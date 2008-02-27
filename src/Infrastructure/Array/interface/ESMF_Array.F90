@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.82 2008/02/21 19:23:19 rokuingh Exp $
+! $Id: ESMF_Array.F90,v 1.83 2008/02/27 15:16:18 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -138,7 +138,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.82 2008/02/21 19:23:19 rokuingh Exp $'
+    '$Id: ESMF_Array.F90,v 1.83 2008/02/27 15:16:18 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -3053,7 +3053,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayAttPackCreate"
 !BOP
-! !IROUTINE: ESMF_ArrayAttPackCreate - Setup the attribute package
+! !IROUTINE: ESMF_ArrayAttPackCreate - Create the attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayAttPackCreate()
@@ -3142,7 +3142,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayAttPackSet"
 !BOP
-! !IROUTINE: ESMF_ArrayAttPackSet - Setup the attribute package
+! !IROUTINE: ESMF_ArrayAttPackSet - Set an attribute in the attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayAttPackSet()
