@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.83 2008/02/27 15:16:18 rokuingh Exp $
+! $Id: ESMF_Array.F90,v 1.84 2008/02/27 18:28:43 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -138,7 +138,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.83 2008/02/27 15:16:18 rokuingh Exp $'
+    '$Id: ESMF_Array.F90,v 1.84 2008/02/27 18:28:43 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -3095,12 +3095,7 @@ contains
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
       ! check input variables
-      !ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
-
-      !call ESMF_ArrayValidate(array, rc=localrc)
-      !if (ESMF_LogMsgFoundError(localrc, &
-      !                            ESMF_ERR_PASSTHRU, &
-      !                            ESMF_CONTEXT, rc)) return
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
 
       if (present(convention))  then
         fconvention = convention
@@ -3189,12 +3184,7 @@ contains
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
       ! check input variables
-      !ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
-
-      !call ESMF_ArrayValidate(array, rc=localrc)
-      !if (ESMF_LogMsgFoundError(localrc, &
-      !                            ESMF_ERR_PASSTHRU, &
-      !                            ESMF_CONTEXT, rc)) return
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
 
       if (present(convention))  then
         fconvention = convention
@@ -3266,13 +3256,8 @@ contains
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
       ! check input variables
-      !ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
        
-      !call ESMF_ArrayValidate(array, rc=localrc)
-      !if (ESMF_LogMsgFoundError(localrc, &
-      !                            ESMF_ERR_PASSTHRU, &
-      !                            ESMF_CONTEXT, rc)) return
-
       if (present(convention))  then
         fconvention = convention
       else 

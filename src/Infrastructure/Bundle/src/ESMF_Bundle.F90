@@ -1,5 +1,5 @@
 
-! $Id: ESMF_Bundle.F90,v 1.125 2008/02/27 15:16:19 rokuingh Exp $
+! $Id: ESMF_Bundle.F90,v 1.126 2008/02/27 18:29:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -661,11 +661,6 @@ end function
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
-      call ESMF_BundleValidate(bundle, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
       if (present(convention))  then
         fconvention = convention
       else 
@@ -751,14 +746,8 @@ end function
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-        ! check input variables
-        ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-
-      call ESMF_BundleValidate(bundle, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
       if (present(convention))  then
         fconvention = convention
@@ -828,14 +817,8 @@ end function
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-        ! check input variables
-        ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-
-      call ESMF_BundleValidate(bundle, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
       if (present(convention))  then
         fconvention = convention
@@ -951,12 +934,6 @@ end function
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
         ESMF_TYPEKIND_I4, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -1023,12 +1000,6 @@ end function
                                  ESMF_CONTEXT, rc)) return
       endif
 
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
         ESMF_TYPEKIND_I4, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -1082,12 +1053,6 @@ end function
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
         ESMF_TYPEKIND_I8, 1, value, status)
@@ -1155,12 +1120,6 @@ end function
                                  ESMF_CONTEXT, rc)) return
       endif
 
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
         ESMF_TYPEKIND_I8, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -1213,12 +1172,6 @@ end function
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
         ESMF_TYPEKIND_R4, 1, value, status)
@@ -1286,12 +1239,6 @@ end function
                                  ESMF_CONTEXT, rc)) return
       endif
 
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
         ESMF_TYPEKIND_R4, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -1344,12 +1291,6 @@ end function
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
         ESMF_TYPEKIND_R8, 1, value, status)
@@ -1417,12 +1358,6 @@ end function
                                  ESMF_CONTEXT, rc)) return
       endif
 
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
         ESMF_TYPEKIND_R8, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -1476,12 +1411,6 @@ end function
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
         ESMF_TYPEKIND_LOGICAL, 1, value, status)
@@ -1549,12 +1478,6 @@ end function
                                  ESMF_CONTEXT, rc)) return
       endif
 
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
         ESMF_TYPEKIND_LOGICAL, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -1609,12 +1532,6 @@ end function
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
       call c_ESMC_AttributeGetChar(bundle%btypep%base, name, value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1664,12 +1581,6 @@ end function
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetCount(bundle%btypep%base, count, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -1729,12 +1640,6 @@ end function
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetInfoName(bundle%btypep%base, name, &
         localTk, localCount, status)
@@ -1804,12 +1709,6 @@ end function
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetInfoNum(bundle%btypep%base, attributeIndex, &
         localName, localTk, localCount, status)
@@ -1917,12 +1816,6 @@ end function
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
         ESMF_TYPEKIND_I4, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -1990,12 +1883,6 @@ end function
                                  ESMF_CONTEXT, rc)) return
       endif
 
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
         ESMF_TYPEKIND_I4, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -2050,12 +1937,6 @@ end function
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
         ESMF_TYPEKIND_I8, 1, value, status)
@@ -2124,12 +2005,6 @@ end function
                                  ESMF_CONTEXT, rc)) return
       endif
 
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
         ESMF_TYPEKIND_I8, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -2185,12 +2060,6 @@ end function
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
         ESMF_TYPEKIND_R4, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -2245,12 +2114,6 @@ end function
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
         ESMF_TYPEKIND_R8, 1, value, status)
@@ -2319,12 +2182,6 @@ end function
                                  ESMF_CONTEXT, rc)) return
       endif
 
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
         ESMF_TYPEKIND_R4, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -2392,12 +2249,6 @@ end function
                                  ESMF_CONTEXT, rc)) return
       endif
 
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
         ESMF_TYPEKIND_R8, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -2452,12 +2303,6 @@ end function
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
         ESMF_TYPEKIND_LOGICAL, 1, value, status)
@@ -2526,12 +2371,6 @@ end function
                                  ESMF_CONTEXT, rc)) return
       endif
 
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
         ESMF_TYPEKIND_LOGICAL, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -2587,12 +2426,6 @@ end function
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
 
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
       call c_ESMC_AttributeSetChar(bundle%btypep%base, name, value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -2640,11 +2473,6 @@ end function
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
-
-      call ESMF_BundleValidate(bundle, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeSetLink(bundle%btypep%base, field%ftypep%base, localrc)
       if (ESMF_LogMsgFoundError(localrc, &

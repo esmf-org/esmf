@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.302 2008/02/27 15:16:20 rokuingh Exp $
+! $Id: ESMF_Field.F90,v 1.303 2008/02/27 18:29:49 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -206,7 +206,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.302 2008/02/27 15:16:20 rokuingh Exp $'
+      '$Id: ESMF_Field.F90,v 1.303 2008/02/27 18:29:49 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -452,11 +452,6 @@
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      call ESMF_FieldValidate(field, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
       if (present(convention))  then
         fconvention = convention
       else 
@@ -542,14 +537,8 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-        ! check input variables
-        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
-
-
-      call ESMF_FieldValidate(field, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       if (present(convention))  then
         fconvention = convention
@@ -619,9 +608,8 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-        ! check input variables
-        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
-
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       call ESMF_FieldValidate(field, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &

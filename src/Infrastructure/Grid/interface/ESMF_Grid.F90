@@ -165,7 +165,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.62 2008/02/27 15:16:21 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.63 2008/02/27 18:30:35 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -654,11 +654,6 @@ end interface
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
-      !call ESMF_GridValidate(grid, rc=localrc)
-      !if (ESMF_LogMsgFoundError(localrc, &
-      !                            ESMF_ERR_PASSTHRU, &
-      !                            ESMF_CONTEXT, rc)) return
-
       if (present(convention))  then
         fconvention = convention
       else 
@@ -748,11 +743,6 @@ end interface
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
-      !call ESMF_GridValidate(grid, rc=localrc)
-      !if (ESMF_LogMsgFoundError(localrc, &
-      !                            ESMF_ERR_PASSTHRU, &
-      !                            ESMF_CONTEXT, rc)) return
-
       if (present(convention))  then
         fconvention = convention
       else 
@@ -824,11 +814,6 @@ end interface
     
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-
-      !call ESMF_GridValidate(grid, rc=localrc)
-      !if (ESMF_LogMsgFoundError(localrc, &
-      !                            ESMF_ERR_PASSTHRU, &
-      !                            ESMF_CONTEXT, rc)) return
 
       if (present(convention))  then
         fconvention = convention
