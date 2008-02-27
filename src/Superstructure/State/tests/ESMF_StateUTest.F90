@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.57 2008/01/29 18:13:16 rokuingh Exp $
+! $Id: ESMF_StateUTest.F90,v 1.58 2008/02/27 00:58:05 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.57 2008/01/29 18:13:16 rokuingh Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.58 2008/02/27 00:58:05 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -510,6 +510,43 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.1), &
                       name, failMsg, result, ESMF_SRCLINE)
       print *, "Attribute count =", number
+
+      !------------------------------------------------------------------------
+      !EX_removeUTest
+      ! Test adding an Attribute to a state
+      call  ESMF_StateAttPackCreate(state1, convention="c", purpose="p", rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Creating an Attpack on a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_removeUTest
+      ! Test adding an Attribute to a state
+      call  ESMF_StateAttPackSet(state1, name="longname", value="long", &
+       convention="c", purpose="p", rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Setting an Attribute in an Attpack from a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_removeUTest
+      ! Test adding an Attribute to a state
+      call  ESMF_StateAttPackWrite(state1, convention="c", purpose="p", rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Writing an Attpack from a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_removeUTest
+      ! Test adding an Attribute to a state
+      call  ESMF_StateAttrSetLink(state1, field1, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Linking a State attribute hierarch to a Field attribute hierarchy Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------

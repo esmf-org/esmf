@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.117 2008/02/19 18:33:49 theurich Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.118 2008/02/27 00:56:53 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.117 2008/02/19 18:33:49 theurich Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.118 2008/02/27 00:56:53 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -759,6 +759,31 @@
       write(name, *) "Getting an Integer Attribute back from a Field"
       call ESMF_Test((intattr.eq.4), name, failMsg, result, ESMF_SRCLINE)
  
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      ! Get Field Attribute Test
+      call ESMF_FieldAttPackCreate(f3, convention="c", purpose="p", rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Creating an Attpack on a Field Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      ! Get Field Attribute Test
+      call ESMF_FieldAttPackSet(f3, name="longname", value="long", &
+       convention="c", purpose="p", rc=rc)      
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Setting an Attribute in an Attpack from a Field Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      ! Get Field Attribute Test
+      call ESMF_FieldAttPackWrite(f3, convention="c", purpose="p", rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Writing an Attpack from a Field Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       ! test setting a second attribute

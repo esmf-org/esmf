@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.63 2008/02/14 04:14:54 theurich Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.64 2008/02/27 00:56:23 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.63 2008/02/14 04:14:54 theurich Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.64 2008/02/27 00:56:23 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -569,6 +569,39 @@
       write(name, *) "Getting an attribute info from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.1), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get an integer attribute from a Bundle Test
+      call ESMF_BundleAttPackCreate(bundle1, convention="c", purpose="p", rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Creating an Attpack on a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get an integer attribute from a Bundle Test
+      call ESMF_BundleAttPackSet(bundle1, name="longname", value="long", &
+       convention="c", purpose="p", rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Setting an Attribute in an Attpack from a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get an integer attribute from a Bundle Test
+      call ESMF_BundleAttPackWrite(bundle1, convention="c", purpose="p", rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Writing an Attpack from a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get an integer attribute from a Bundle Test
+      call ESMF_BundleAttrSetLinkField(bundle1, simplefield, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Linking a Bundle hierarchy to a Field hierarchy Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
