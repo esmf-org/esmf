@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.79 2007/11/19 23:03:04 svasquez Exp $
+% $Id: ESMF_refdoc.ctex,v 1.80 2008/02/27 17:45:34 rokuingh Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -39,7 +39,7 @@
 \newcommand{\longname}{ESMF }
 \newcommand{\funcname}{ESMF }
 \newcommand{\shortname}{REF}
-\newcommand{\myauthors}{ESMF Joint Specification Team:  V. Balaji, Byron Boville, Samson Cheung, Nancy Collins, Tony Craig, Carlos Cruz, Arlindo da Silva, Cecelia DeLuca, Rosalinda de Fainchtein, Brian Eaton, Bob Hallberg, Tom Henderson, Chris Hill, Mark Iredell, Rob Jacob, Phil Jones, Erik Kluzek, Brian Kauffman, Jay Larson, Peggy Li, John Michalakes, Sylvia Murphy, David Neckels, Bob Oehmke, Chuck Panaccione, Jim Rosinski, Will Sawyer, Earl Schwab, Shepard Smithline, Don Stark, Max Suarez, Spencer Swift, Gerhard Theurich, Silverio Vasquez, Jon Wolfe, Weiyu Yang, Mike Young, Leonid Zaslavsky}
+\newcommand{\myauthors}{ESMF Joint Specification Team:  V. Balaji, Byron Boville, Samson Cheung, Nancy Collins, Tony Craig, Carlos Cruz, Arlindo da Silva, Cecelia DeLuca, Rosalinda de Fainchtein, Brian Eaton, Bob Hallberg, Tom Henderson, Chris Hill, Mark Iredell, Rob Jacob, Phil Jones, Erik Kluzek, Brian Kauffman, Jay Larson, Peggy Li, John Michalakes, Sylvia Murphy, David Neckels, Bob Oehmke, Ryan O'Kuinghttons, Chuck Panaccione, Jim Rosinski, Will Sawyer, Earl Schwab, Shepard Smithline, Don Stark, Max Suarez, Spencer Swift, Gerhard Theurich, Silverio Vasquez, Jon Wolfe, Weiyu Yang, Mike Young, Leonid Zaslavsky}
 %===============================================================================
 \setlength{\textwidth}{6.5truein}
 \setlength{\textheight}{8.5truein}
@@ -172,6 +172,8 @@
 \input{ESMF_infrautiloverview}
 
 \newpage
+
+#include "../Infrastructure/Attribute/doc/Attribute_refdoc.ctex"
 
 #include "../Infrastructure/TimeMgr/doc/TimeMgr_refdoc.ctex"
 
