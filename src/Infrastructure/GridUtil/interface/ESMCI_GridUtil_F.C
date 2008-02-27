@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridUtil_F.C,v 1.2 2008/02/27 23:32:53 dneckels Exp $
+// $Id: ESMCI_GridUtil_F.C,v 1.3 2008/02/27 23:43:33 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -85,12 +85,13 @@ extern "C" void FTN(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int *
 
     ESMCI::GridToMesh(grid, *staggerLoc, mesh, arrays);
 
-    // This has to be the biggest hack I have ever pulled.
+/*
     long nlen = (reinterpret_cast<long>(ar[*num_arrays]));
 
     char *meshname = ESMC_F90toCstring(name, nlen);
 
     WriteMesh(mesh, meshname);
+*/
 
   }
   catch(std::exception &x) {
