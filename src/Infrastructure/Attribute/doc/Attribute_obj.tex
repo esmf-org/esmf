@@ -1,4 +1,4 @@
-% $Id: Attribute_obj.tex,v 1.2 2008/02/27 00:57:30 rokuingh Exp $
+% $Id: Attribute_obj.tex,v 1.3 2008/02/27 17:46:37 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -8,7 +8,6 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-\subsection{Object Model}
 
 The following is a simplified UML diagram showing the structure of the
 Attribute class.  See Appendix A, {\it A Brief Introduction to UML},
@@ -22,17 +21,17 @@ meaning.
 Each Attribute contains a name value pair in which the value can be any of several numeric, character, and logical types.  The allowable ESMF Attribute value types include:
 
 \begin{itemize}
-\item {\tt ESMF_TYPEKIND_I4}
-\item {\tt ESMF_TYPEKIND_I4} list
-\item {\tt ESMF_TYPEKIND_I8}
-\item {\tt ESMF_TYPEKIND_I8} list
-\item {\tt ESMF_TYPEKIND_R4}
-\item {\tt ESMF_TYPEKIND_R4} list
-\item {\tt ESMF_TYPEKIND_R8}
-\item {\tt ESMF_TYPEKIND_R8} list
-\item {\tt ESMF_TYPEKIND_Logical}
-\item {\tt ESMF_TYPEKIND_Logical} list
-\item {\tt EMSF_TYPEKIND_Character}
+\item {\tt ESMF\_TYPEKIND\_I4}
+\item {\tt ESMF\_TYPEKIND\_I4} list
+\item {\tt ESMF\_TYPEKIND\_I8}
+\item {\tt ESMF\_TYPEKIND\_I8} list
+\item {\tt ESMF\_TYPEKIND\_R4}
+\item {\tt ESMF\_TYPEKIND\_R4} list
+\item {\tt ESMF\_TYPEKIND\_R8}
+\item {\tt ESMF\_TYPEKIND\_R8} list
+\item {\tt ESMF\_TYPEKIND\_Logical}
+\item {\tt ESMF\_TYPEKIND\_Logical} list
+\item {\tt EMSF\_TYPEKIND\_Character}
 \end{itemize}
 
-All Attributes also contain character strings specifying the convention, type, and object of the Attribute for the purpose of keeping track of attribute packages.  All Attributes contain a pointer to a list of pointers to other Attributes, which is initialized as {\tt ESMF_NULL} until specified otherwise.
+All Attributes also contain character strings specifying the convention, type, and object of the Attribute for the purpose of keeping track of attribute packages.  All Attributes contain a pointer to a list of pointers to other Attributes, which is initialized as {\tt ESMF\_NULL} until specified otherwise.
