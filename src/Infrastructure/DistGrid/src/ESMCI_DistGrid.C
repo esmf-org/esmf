@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.41.2.2 2008/02/11 05:06:24 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.1.2.1 2008/02/28 21:25:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMC_FILENAME "ESMC_DistGrid.C"
+#define ESMC_FILENAME "ESMCI_DistGrid.C"
 //==============================================================================
 //
 // ESMC DistGrid method implementation (body) file
@@ -19,12 +19,12 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the C++ DistGrid methods declared
-// in the companion file ESMC_DistGrid.h
+// in the companion file ESMCI_DistGrid.h
 //
 //-----------------------------------------------------------------------------
 
 // include associated header file
-#include "ESMC_DistGrid.h"
+#include "ESMCI_DistGrid.h"
 
 // include higher level, 3rd party or system headers
 #include <stdio.h>
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.41.2.2 2008/02/11 05:06:24 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.1.2.1 2008/02/28 21:25:09 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1718,7 +1718,7 @@ int DistGrid::print()const{
     return rc;
   }
 
-  // print info about the ESMC_DistGrid object
+  // print info about the DistGrid object
   printf("--- ESMCI::DistGrid::print start ---\n");
   printf("dimCount = %d\n", dimCount);
   printf("patchCount = %d\n", patchCount);

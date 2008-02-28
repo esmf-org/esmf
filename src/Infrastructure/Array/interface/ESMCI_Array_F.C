@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.1.2.2 2008/02/15 21:05:56 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.1.2.3 2008/02/28 21:25:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -22,7 +22,7 @@
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
 #include "ESMC_VM.h"
-#include "ESMC_DistGrid.h"
+#include "ESMCI_DistGrid.h"
 #include "ESMC_ArraySpec.h"
 #include "ESMC_RHandle.h"
 
