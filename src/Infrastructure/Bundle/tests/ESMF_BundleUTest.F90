@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.64 2008/02/27 00:56:23 rokuingh Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.65 2008/02/28 18:56:42 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.64 2008/02/27 00:56:23 rokuingh Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.65 2008/02/28 18:56:42 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -540,85 +540,6 @@
       write(failMsg, *) ""
       write(name, *) "Getting a non-existent Field from a Bundle Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-
-      !EX_UTest
-      ! Add an integer attribute to a Bundle Test
-      call ESMF_BundleAttributeSet(bundle1, name="Sides", value=65, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Adding an integer attribute to a Bundle Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-
-
-      !EX_UTest
-      ! Get an integer attribute from a Bundle Test
-      call ESMF_BundleAttributeGet(bundle1, name="Sides", value=number, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting an integer attribute from a Bundle Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.65), &
-                      name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Get an integer attribute from a Bundle Test
-      call ESMF_BundleAttributeGetInfo(bundle1, name="Sides", count=number, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting an attribute info from a Bundle Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.1), &
-                      name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Get an integer attribute from a Bundle Test
-      call ESMF_BundleAttPackCreate(bundle1, convention="c", purpose="p", rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Creating an Attpack on a Bundle Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Get an integer attribute from a Bundle Test
-      call ESMF_BundleAttPackSet(bundle1, name="longname", value="long", &
-       convention="c", purpose="p", rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting an Attribute in an Attpack from a Bundle Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Get an integer attribute from a Bundle Test
-      call ESMF_BundleAttPackWrite(bundle1, convention="c", purpose="p", rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Writing an Attpack from a Bundle Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Get an integer attribute from a Bundle Test
-      call ESMF_BundleAttrSetLinkField(bundle1, simplefield, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Linking a Bundle hierarchy to a Field hierarchy Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Getting Attribute count from a Bundle
-      call ESMF_BundleAttributeGetCount(bundle1, count, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Getting Attribute Count from a Bundle Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      
-      !------------------------------------------------------------------------
-      
-      !EX_UTest
-      ! Verify Attribute count Test
-      write(failMsg, *) "Incorrect count"
-      write(name, *) "Verify Attribute count from a Bundle "
-      call ESMF_Test((count.eq.1), name, failMsg, result, ESMF_SRCLINE)
-      
       !------------------------------------------------------------------------
 
       !EX_UTest
