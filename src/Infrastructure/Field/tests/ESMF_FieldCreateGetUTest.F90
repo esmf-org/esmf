@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.2 2008/02/15 23:36:02 theurich Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.3 2008/02/28 01:17:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -66,11 +66,12 @@
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
  
 #ifdef ESMF_EXHAUSTIVE
+#if 0
         grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
                                   regDecomp=(/2,2/), name="testgrid", rc=rc)
 
         !------------------------------------------------------------------------
-        !NEX_UTest_Multi_Proc_Only
+        !EX_removeUTest_Multi_Proc_Only
         ! Create an empty field
         field = ESMF_FieldCreateEmpty(rc=rc) 
         write(failMsg, *) ""
@@ -78,7 +79,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
         !------------------------------------------------------------------------
-        !NEX_UTest_Multi_Proc_Only
+        !EX_removeUTest_Multi_Proc_Only
         ! Get info associated with the empty field
         call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
             rank=rank, staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, &
@@ -91,7 +92,7 @@
         call ESMF_FieldDestroy(field, rc=rc)
   
         !------------------------------------------------------------------------
-        !NEX_UTest_Multi_Proc_Only
+        !EX_removeUTest_Multi_Proc_Only
         ! Create a field from an fortran array
         field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
@@ -103,7 +104,7 @@
 
         call ESMF_FieldPrint(field, rc=rc)
         !------------------------------------------------------------------------
-        !NEX_UTest_Multi_Proc_Only
+        !EX_removeUTest_Multi_Proc_Only
         ! Get info associated with the field created from fortran array
         call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
             rank=rank, staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, &
@@ -116,7 +117,7 @@
         call ESMF_FieldDestroy(field, rc=rc)
 
         !------------------------------------------------------------------------
-        !NEX_UTest_Multi_Proc_Only
+        !EX_removeUTest_Multi_Proc_Only
         ! Create a field from an fortran pointer
         allocate(fptr(10, 20))
         field = ESMF_FieldCreate(grid, fptr, copyflag=ESMF_DATA_COPY, &
@@ -128,7 +129,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !NEX_UTest_Multi_Proc_Only
+        !EX_removeUTest_Multi_Proc_Only
         ! Get info associated with the field created from fortran pointer
         call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
             rank=rank, staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, &
@@ -143,6 +144,7 @@
         call ESMF_FieldDestroy(field, rc=rc)
 
         call ESMF_GridDestroy(grid, rc=rc)
+#endif
 #endif
     call ESMF_TestEnd(result, ESMF_SRCLINE)
 
