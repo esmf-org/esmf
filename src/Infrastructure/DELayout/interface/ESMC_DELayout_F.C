@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.34 2007/08/03 20:57:45 theurich Exp $
+// $Id: ESMC_DELayout_F.C,v 1.34.2.1 2008/02/28 22:46:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 #include "ESMC_Base.h"
 #include "ESMC_VM.h"
 
-#include "ESMC_DELayout.h"
+#include "ESMCI_DELayout.h"
 
 #include "ESMC_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"             // for LogErr

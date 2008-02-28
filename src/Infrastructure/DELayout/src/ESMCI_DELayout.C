@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.85.2.1 2008/02/07 06:57:12 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.1.2.1 2008/02/28 22:46:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMC_FILENAME "ESMC_DELayout.C"
+#define ESMC_FILENAME "ESMCI_DELayout.C"
 //==============================================================================
 //
 // ESMC DELayout method implementation (body) file
@@ -19,12 +19,12 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the C++ DELayout methods declared
-// in the companion file ESMC_DELayout.h
+// in the companion file ESMCI_DELayout.h
 //
 //-----------------------------------------------------------------------------
 
 // include associated header file
-#include "ESMC_DELayout.h"
+#include "ESMCI_DELayout.h"
 
 // include higher level, 3rd party or system headers
 #include <stdio.h>
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DELayout.C,v 1.85.2.1 2008/02/07 06:57:12 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.1.2.1 2008/02/28 22:46:24 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1286,8 +1286,8 @@ int DELayout::print()const{
       " - 'this' pointer is NULL.", &rc);
     return rc;
   }
-  // print info about the ESMC_DELayout object
-  printf("--- ESMC_DELayoutPrint start ---\n");
+  // print info about the DELayout object
+  printf("--- ESMCI::DELayout::print() start ---\n");
   if (oldstyle){
     printf("This is an OLDSTYLE DELayout!\n");
     printf("--- global DELayout section ---\n");
@@ -1348,7 +1348,7 @@ int DELayout::print()const{
     for (int i=0; i<vasLocalDeCount; i++)
       printf("  vasLocalDeList[%d]=%d\n", i, vasLocalDeList[i]);
   }
-  printf("--- ESMC_DELayoutPrint end ---\n");
+  printf("--- ESMCI::DELayout::print() end ---\n");
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -1650,7 +1650,7 @@ DELayoutServiceReply DELayout::serviceOffer(
   int *rc){                 // out - optional return code
 //
 // !DESCRIPTION:
-//    Calling PET offers service for {\tt de} in {\tt ESMC_DELayout}. The 
+//    Calling PET offers service for {\tt de} in DELayout. The 
 //    offer is either accepted or denied.
 //
 //EOPI

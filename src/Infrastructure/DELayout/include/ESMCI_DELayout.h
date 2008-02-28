@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.48.2.1 2008/02/07 06:57:12 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.1.2.1 2008/02/28 22:46:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -15,8 +15,8 @@
 // these lines prevent this file from being read more than once if it
 // ends up being included multiple times
 
-#ifndef ESMC_DELayout_H
-#define ESMC_DELayout_H
+#ifndef ESMCI_DELayout_H
+#define ESMCI_DELayout_H
 
 //-------------------------------------------------------------------------
 //BOPI
@@ -51,7 +51,7 @@ class DELayout;
 class XXE;
 
 
-// DE type used internally in the ESMC_DELayout class
+// DE type used internally in the DELayout class
 typedef struct{
   int de;           // DE id number (in case not base zero)
   int pet;          // PET associated with this DE
@@ -528,5 +528,5 @@ class XXE{
 
 } // namespace ESMCI
 
-#endif  // ESMC_DELayout_H
+#endif  // ESMCI_DELayout_H
 

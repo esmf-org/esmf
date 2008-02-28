@@ -1,16 +1,16 @@
-# $Id: makefile,v 1.7.6.2 2008/02/26 04:19:11 theurich Exp $
+# $Id: makefile,v 1.7.6.3 2008/02/28 22:46:25 theurich Exp $
 
 # leave alone.
 ALL: build_here 
 
 # If you have C files in this directory, list them all on the line below.
-SOURCEC	  = ESMC_DELayout.C
+SOURCEC	  = ESMCI_DELayout.C
 # If you have F90 files in this directory, list them all on the line below.
 SOURCEF	  = 
 # If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 # List all .h files which should be copied to common include dir
-STOREH	  = ESMC_DELayout.h
+STOREH	  = ESMCI_DELayout.h
 
 # Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Init.h,v 1.1.2.1 2008/01/18 23:52:53 theurich Exp $
+// $Id: ESMCI_Init.h,v 1.1.2.2 2008/02/28 22:46:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -28,7 +28,6 @@
 // !USES:
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"  // all classes inherit from the ESMC Base class.
-#include "ESMC_DELayout.h"
 #include "ESMC_Calendar.h"
 
 // public globals, filled in by ESMC_Initialize()
