@@ -40,8 +40,8 @@ BBox::BBox(const BBox &rhs) {
 
 BBox &BBox::operator=(const BBox &rhs) {
   if (this == &rhs) return *this;
-  std::copy(&rhs.max[0], &rhs.max[3], &max[0]);
-  std::copy(&rhs.min[0], &rhs.min[3], &min[0]);
+  std::copy(&rhs.max[0], &rhs.max[0]+3, &max[0]);
+  std::copy(&rhs.min[0], &rhs.min[0]+3, &min[0]);
   dim = rhs.dim;
   isempty = rhs.isempty;
 
