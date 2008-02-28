@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// $Id: cdistdir_test.C,v 1.8 2007/12/28 22:07:34 dneckels Exp $
+// $Id: cdistdir_test.C,v 1.9 2008/02/28 00:42:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -14,6 +14,8 @@
 // (all lines below between the !BOP and !EOP markers will be included in 
 //  the automated document processing.)
 //-----------------------------------------------------------------------------
+#include <iostream>
+
 #include "ESMC_VM.h"
 
 #include "ESMC_LogErr.h"                  // for LogErr
@@ -23,7 +25,6 @@
 #include <GridUtil/include/ESMC_DistDir.h>
 #include <GridUtil/include/ESMC_Exception.h>
 
-#include <iostream>
 
 
 using ESMC::UInt;

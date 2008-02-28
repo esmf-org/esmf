@@ -166,7 +166,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.64 2008/02/27 22:25:52 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.65 2008/02/28 00:42:23 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -503,13 +503,13 @@ end interface
 !      The stagger location to add. Please see Section~\ref{sec:opt:staggerloc} for a list 
 !      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 ! \item[{[staggerEdgeLWidth]}] 
-!      This array should be the same rank as the grid. It specifies the lower corner of the stagger
+!      This array should be the same dimCount as the grid. It specifies the lower corner of the stagger
 !      region with respect to the lower corner of the exclusive region.
 ! \item[{[staggerEdgeUWidth]}] 
-!      This array should be the same rank as the grid. It specifies the upper corner of the stagger
+!      This array should be the same dimCount as the grid. It specifies the upper corner of the stagger
 !      region with respect to the upper corner of the exclusive region.
 ! \item[{[staggerAlign]}] 
-!      This array is of size  grid rank.
+!      This array is of size  grid dimCount.
 !      For this stagger location, it specifies which element
 !      has the same index value as the center. For example, 
 !      for a 2D cell with corner stagger it specifies which 
@@ -2480,7 +2480,7 @@ end interface
 !    This call is used to complete the {\tt grid} so that it is usable at
 !    the level indicated by the {\tt status} flag.  For example, once committed
 !    with a {\tt status} value of {\tt ESMF\_GRIDSTATUS\_SHAPE\_READY}, the 
-!    {\tt grid} will have sufficient size, rank, and distribution information to be
+!    {\tt grid} will have sufficient size, dimCount, and distribution information to be
 !    used as the basis for allocating Field data. (The integration of 
 !    Field and Grid classes has't yet happened, so you can't currently 
 !    allocate Fields based on Grids no matter what the status.)
@@ -2609,7 +2609,7 @@ end interface
 !     If not specified then the type/kind will be 8 byte reals.  
 !\item[{[gridToArrayMap]}]
 !     Indicates where each grid dimension goes in the newly created Array.
-!     {\tt The array gridToArrayMap} should be at least of size equal to the grid's rank.
+!     {\tt The array gridToArrayMap} should be at least of size equal to the grid's dimCount.
 !     If not set defaults to (1,2,3,....).
 !\item[{[ungriddedLBound]}]
 !     The lower bounds of the non-grid Array dimensions.
@@ -2635,15 +2635,15 @@ end interface
     type(ESMF_IndexFlag) :: indexflag    
     type(ESMF_TypeKind) :: localTypeKind
     type(ESMF_StaggerLoc) :: localStaggerLoc
-    integer, pointer :: compEUWidth(:),compELWidth(:)
+    integer          :: compEUWidth(ESMF_MAXDIM),compELWidth(ESMF_MAXDIM)
     integer, pointer :: gridLBound(:),gridUBound(:)
     integer, pointer :: arrayLBound(:),arrayUBound(:)
     integer, pointer :: arrayDimType(:),gridDimType(:)
     integer, pointer :: arrayDimInd(:)
     integer, pointer :: distgridToGridMap(:)
     integer, pointer :: distgridToArrayMap(:)
-    integer :: rank,distRank,undistRank
-    integer :: i,ungriddedRank, arrayRank, undistArrayRank, bndpos
+    integer :: dimCount,distDimCount,undistDimCount
+    integer :: i,ungriddedDimCount, arrayDimCount, undistArrayDimCount, bndpos
    
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -2686,29 +2686,29 @@ end interface
        endif
     endif
 
-   ! Get the ungridded rank
-   ungriddedRank=0
+   ! Get the ungridded dimCount
+   ungriddedDimCount=0
    if (present(ungriddedUBound)) then
-      ungriddedRank=size(ungriddedUBound)
+      ungriddedDimCount=size(ungriddedUBound)
    endif
 
     ! Get info from Grid
-    call ESMF_GridGet(grid, distgrid=distgrid, rank=rank, distRank=distRank, &
-                      undistRank=undistRank, indexflag=indexflag, rc=localrc)
+    call ESMF_GridGet(grid, distgrid=distgrid, dimCount=dimCount, distDimCount=distDimCount, &
+                      undistDimCount=undistDimCount, indexflag=indexflag, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! calc full Array Rank
-    arrayRank=ungriddedRank+rank
+    ! calc full Array DimCount
+    arrayDimCount=ungriddedDimCount+dimCount
 
-    ! calc undist Array Rank
-    undistArrayRank=ungriddedRank+undistRank
+    ! calc undist Array DimCount
+    undistArrayDimCount=ungriddedDimCount+undistDimCount
 
     ! Make sure gridToArrayMap is correct size
     if (present(gridToArrayMap)) then
-       if (size(gridToArrayMap) < rank) then
+       if (size(gridToArrayMap) < dimCount) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-               "- gridToArrayMap needs to at least be of the Grid's rank", & 
+               "- gridToArrayMap needs to at least be of the Grid's dimCount", & 
                       ESMF_CONTEXT, rc) 
           return 
        endif
@@ -2716,8 +2716,8 @@ end interface
 
     ! Make sure gridToArrayMap is correct size
     if (present(gridToArrayMap)) then
-       do i=1,distRank
-          if ((gridToArrayMap(i) <1) .or. (gridToArrayMap(i) > arrayRank)) then
+       do i=1,distDimCount
+          if ((gridToArrayMap(i) <1) .or. (gridToArrayMap(i) > arrayDimCount)) then
               call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
                    "- gridToArrayMap value is outside range", & 
                           ESMF_CONTEXT, rc) 
@@ -2728,20 +2728,12 @@ end interface
 
 
 
+
    ! construct ArraySpec
-   call ESMF_ArraySpecSet(arrayspec,rank=arrayRank,typekind=localTypeKind, rc=localrc)
+   call ESMF_ArraySpecSet(arrayspec,rank=arrayDimCount,typekind=localTypeKind, rc=localrc)
    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
-
-
-    ! allocate computationalEdgeWidths
-    allocate(compELWidth(distRank) , stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating compELWidth", &
-                                     ESMF_CONTEXT, rc)) return   
-    allocate(compEUWidth(distRank) , stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating compEUWidth", &
-                                     ESMF_CONTEXT, rc)) return   
 
 
     ! Get computationalEdgeWidths
@@ -2754,20 +2746,20 @@ end interface
 
 
     ! allocate distgridToArrayMap
-    allocate(distgridToArrayMap(distRank) , stat=localrc)
+    allocate(distgridToArrayMap(distDimCount) , stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToArrayMap", &
                                      ESMF_CONTEXT, rc)) return   
 
 
    ! construct array based on the presence of distributed dimensions
    ! if there are undistributed dimensions ...
-   if (undistArrayRank .gt. 0) then      
+   if (undistArrayDimCount .gt. 0) then      
 
       !! allocate undistributed Bounds
-      allocate(arrayLBound(undistArrayRank) , stat=localrc)
+      allocate(arrayLBound(undistArrayDimCount) , stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridLBound", &
                                      ESMF_CONTEXT, rc)) return   
-      allocate(arrayUBound(undistArrayRank) , stat=localrc)
+      allocate(arrayUBound(undistArrayDimCount) , stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridUBound", &
                                      ESMF_CONTEXT, rc)) return   
 
@@ -2784,7 +2776,8 @@ end interface
       !! create Array
       array=ESMF_ArrayCreate(arrayspec=arrayspec, &
               distgrid=distgrid, distgridToArrayMap=distgridToArrayMap, &
-              computationalEdgeLWidth=compELWidth, computationalEdgeUWidth=compEUWidth, &
+              computationalEdgeLWidth=compELWidth(1:distDimCount), &
+              computationalEdgeUWidth=compEUWidth(1:distDimCount), &
               totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
               indexflag=indexflag, staggerLoc=localStaggerLoc%staggerloc, &
               undistLBound=arrayLBound, undistUBound=arrayUBound, name=name, &
@@ -2805,10 +2798,11 @@ end interface
       !! create Array
       array=ESMF_ArrayCreate(arrayspec=arrayspec, &
              distgrid=distgrid, distgridToArrayMap=distgridToArrayMap, &
-            computationalEdgeLWidth=compELWidth, computationalEdgeUWidth=compEUWidth, &
-            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
-            indexflag=indexflag, staggerLoc=localStaggerLoc%staggerloc, &
-            name=name, rc=localrc)
+             computationalEdgeLWidth=compELWidth(1:distDimCount), &
+             computationalEdgeUWidth=compEUWidth(1:distDimCount), &
+             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
+             indexflag=indexflag, staggerLoc=localStaggerLoc%staggerloc, &
+             name=name, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2820,8 +2814,6 @@ end interface
 
     ! cleanup
     deallocate(distgridToArrayMap)
-    deallocate(compELWidth)
-    deallocate(compEUWidth)
  
 
     ! Return successfully
@@ -2875,7 +2867,7 @@ end interface
 !      ESMF\_STAGGERLOC\_CENTER.
 !\item[{[gridToArrayMap]}]
 !     Indicates where each grid dimension goes in the newly created Array.
-!     {\tt The array gridToArrayMap} should be at least of size equal to the grid's rank.
+!     {\tt The array gridToArrayMap} should be at least of size equal to the grid's dimCount.
 !     If not set defaults to (1,2,3,....).
 !\item[{[ungriddedLBound]}]
 !     The lower bounds of the non-grid Array dimensions.
@@ -2885,9 +2877,9 @@ end interface
 !     The distgrid to Array dimension map (must be allocated to at least
 !     the number of dimensions of the distGrid).
 !\item[{undistLBound}]
-!     Undistributed lower bounds (must be of size grid undistRank+size(ungriddedUBound))
+!     Undistributed lower bounds (must be of size grid undistDimCount+size(ungriddedUBound))
 !\item[{undistUBound}]
-!     Undistributed upper bounds (must be of size grid undistRank+size(ungriddedUBound))
+!     Undistributed upper bounds (must be of size grid undistDimCount+size(ungriddedUBound))
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -2900,8 +2892,8 @@ end interface
     integer, pointer :: arrayDimType(:),gridDimType(:)
     integer, pointer :: arrayDimInd(:)
     integer, pointer :: distgridToGridMap(:)
-    integer :: rank,distRank,undistRank, arrayRank
-    integer :: i,ungriddedRank, undistArrayRank, bndpos
+    integer :: dimCount,distDimCount,undistDimCount, arrayDimCount
+    integer :: i,ungriddedDimCount, undistArrayDimCount, bndpos
    
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -2937,29 +2929,29 @@ end interface
        endif
     endif
 
-   ! Get the ungridded rank
-   ungriddedRank=0
+   ! Get the ungridded dimCount
+   ungriddedDimCount=0
    if (present(ungriddedUBound)) then
-      ungriddedRank=size(ungriddedUBound)
+      ungriddedDimCount=size(ungriddedUBound)
    endif
 
     ! Get info from Grid
-    call ESMF_GridGet(grid, distgrid=distgrid, rank=rank, distRank=distRank, &
-                      undistRank=undistRank, rc=localrc)
+    call ESMF_GridGet(grid, distgrid=distgrid, dimCount=dimCount, distDimCount=distDimCount, &
+                      undistDimCount=undistDimCount, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! calc full Array Rank
-    arrayRank=ungriddedRank+rank
+    ! calc full Array DimCount
+    arrayDimCount=ungriddedDimCount+dimCount
 
-    ! calc undist Array Rank
-    undistArrayRank=ungriddedRank+undistRank
+    ! calc undist Array DimCount
+    undistArrayDimCount=ungriddedDimCount+undistDimCount
 
     ! Make sure gridToArrayMap is correct size
     if (present(gridToArrayMap)) then
-       if (size(gridToArrayMap) < rank) then
+       if (size(gridToArrayMap) < dimCount) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-               "- gridToArrayMap needs to at least be of the Grid's rank", & 
+               "- gridToArrayMap needs to at least be of the Grid's dimCount", & 
                       ESMF_CONTEXT, rc) 
           return 
        endif
@@ -2967,8 +2959,8 @@ end interface
 
     ! Make sure gridToArrayMap is correct size
     if (present(gridToArrayMap)) then
-       do i=1,distRank
-          if ((gridToArrayMap(i) <1) .or. (gridToArrayMap(i) > arrayRank)) then
+       do i=1,distDimCount
+          if ((gridToArrayMap(i) <1) .or. (gridToArrayMap(i) > arrayDimCount)) then
               call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
                    "- gridToArrayMap value is outside range", & 
                           ESMF_CONTEXT, rc) 
@@ -2978,7 +2970,7 @@ end interface
     endif
 
     ! Check distgridToArrayMap
-    if (size(distgridToArrayMap) < distRank) then
+    if (size(distgridToArrayMap) < distDimCount) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
                    "- distgridToArrayMap is too small", & 
                           ESMF_CONTEXT, rc) 
@@ -2987,7 +2979,7 @@ end interface
 
 
     ! allocate distgridToGridMap
-    allocate(distgridToGridMap(distRank) , stat=localrc)
+    allocate(distgridToGridMap(distDimCount) , stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToGridMap", &
                                      ESMF_CONTEXT, rc)) return   
 
@@ -2999,7 +2991,7 @@ end interface
 
    ! construct distgridToArrayMap
    if (present(gridToArrayMap)) then
-      do i=1,distRank
+      do i=1,distDimCount
         distgridToArrayMap(i)=gridToArrayMap(distgridToGridMap(i))
       enddo
    else
@@ -3008,39 +3000,39 @@ end interface
 
    ! construct array based on the presence of distributed dimensions
    ! if there are undistributed dimensions ...
-   if (undistArrayRank .gt. 0) then      
+   if (undistArrayDimCount .gt. 0) then      
 
       !! allocate array dim. info arrays
-      allocate(arrayDimType(arrayRank) , stat=localrc)
+      allocate(arrayDimType(arrayDimCount) , stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridUBound", &
                                      ESMF_CONTEXT, rc)) return   
-      allocate(arrayDimInd(arrayRank) , stat=localrc)
+      allocate(arrayDimInd(arrayDimCount) , stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridUBound", &
                                      ESMF_CONTEXT, rc)) return   
 
       !! set which dimensions are used by the distgrid
       arrayDimType(:)=0 ! initialize to no type
-      do i=1,distRank
+      do i=1,distDimCount
          arrayDimType(distGridToArrayMap(i))=1 ! set to distributed
       enddo
 
       !! add in grid undistributed dimensions
-      if (undistRank .gt. 0) then
+      if (undistDimCount .gt. 0) then
          !!! Allocate Grid Dimension Type array
-         allocate(gridDimType(rank) , stat=localrc)
+         allocate(gridDimType(dimCount) , stat=localrc)
          if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridUBound", &
                                         ESMF_CONTEXT, rc)) return   
 
          !!! set which dimensions are used by the distgrid
          gridDimType(:)=0
-         do i=1,distRank
+         do i=1,distDimCount
             gridDimType(distGridToGridMap(i))=1 ! Set to distributed
          enddo
 
         !!! put record Grid bound info depending if gridToArrayMap exists
         if (present(gridToArrayMap)) then
            bndpos=1
-           do i=1,rank
+           do i=1,dimCount
               if (gridDimType(i) .eq. 0) then
                  arrayDimInd(gridToArrayMap(i))=bndpos
                  arrayDimType(gridToArrayMap(i))=2 ! set to undistributed Grid
@@ -3049,7 +3041,7 @@ end interface
            enddo
         else
            bndpos=1
-           do i=1,rank
+           do i=1,dimCount
               if (gridDimType(i) .eq. 0) then
                  arrayDimInd(i)=bndpos
                  arrayDimType(i)=2 ! set to undistributed Grid
@@ -3064,7 +3056,7 @@ end interface
 
       !! Fill in ungridded bound info
       bndpos=1
-      do i=1,arrayRank
+      do i=1,arrayDimCount
          if (arrayDimType(i) .eq. 0) then
             arrayDimInd(i)=bndpos
             arrayDimType(i)=3 ! set to undistributed Grid
@@ -3074,12 +3066,12 @@ end interface
 
       !! Finally setup new Array bounds based on info in arrayDimType and arrayDimInd
       !! Do this depending if there are grid undistributed bounds or not
-      if (undistRank .gt. 0) then
+      if (undistDimCount .gt. 0) then
          !!! allocate tensor bounds
-         allocate(gridLBound(undistRank) , stat=localrc)
+         allocate(gridLBound(undistDimCount) , stat=localrc)
          if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridLBound", &
                                         ESMF_CONTEXT, rc)) return   
-         allocate(gridUBound(undistRank) , stat=localrc)
+         allocate(gridUBound(undistDimCount) , stat=localrc)
          if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridUBound", &
                                         ESMF_CONTEXT, rc)) return   
 
@@ -3089,7 +3081,7 @@ end interface
 
          !!! Fill new array undistributed bounds
          bndpos=1
-         do i=1,arrayRank
+         do i=1,arrayDimCount
             if (arrayDimType(i) .eq. 2) then
                undistLBound(bndpos)=gridLBound(arrayDimInd(i))
                undistUBound(bndpos)=gridUBound(arrayDimInd(i))
@@ -3107,7 +3099,7 @@ end interface
       else
          !!! Fill new array undistributed bounds
          bndpos=1
-         do i=1,arrayRank
+         do i=1,arrayDimCount
             if (arrayDimType(i) .eq. 3) then
                undistLBound(bndpos)=ungriddedLBound(arrayDimInd(i))
                undistUBound(bndpos)=ungriddedUBound(arrayDimInd(i))
@@ -3141,7 +3133,7 @@ end interface
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
       function ESMF_GridCreateFromDistGrid(name,coordTypeKind,distgrid, &
-                         distgridToGridMap, undistLBound, undistUBound, coordRank, coordDimMap, &
+                         distgridToGridMap, undistLBound, undistUBound, coordDimCount, coordDimMap, &
                          gridEdgeLWidth, gridEdgeUWidth, gridAlign, indexflag, rc)
 !
 ! !RETURN VALUE:
@@ -3154,7 +3146,7 @@ end interface
        integer,               intent(in),   optional  :: distgridToGridMap(:)
        integer,               intent(in),   optional  :: undistLBound(:)
        integer,               intent(in),   optional  :: undistUBound(:)
-       integer,               intent(in),   optional  :: coordRank(:)
+       integer,               intent(in),   optional  :: coordDimCount(:)
        integer,               intent(in),   optional  :: coordDimMap(:,:)
        integer,               intent(in),   optional  :: gridEdgeLWidth(:)
        integer,               intent(in),   optional  :: gridEdgeUWidth(:)
@@ -3169,7 +3161,7 @@ end interface
 ! of the resulting {\tt distgrid}.  Optional {\tt lbound} and {\tt ubound}
 ! arguments can be used to specify extra undistributed dimensions. The {\tt distgridToGridMap} argument
 ! specifies how the distributed (from {\tt distgrid}) and undistributed (from {\tt bounds})
-! dimensions are intermixed. The {\tt coordRank} and {\tt coordDimMap} arguments
+! dimensions are intermixed. The {\tt coordDimCount} and {\tt coordDimMap} arguments
 ! allow the user to specify how the coordinate arrays should map to the grid
 ! dimensions. (Note, though, that creating a grid does not allocate coordinate
 ! storage. A method such as {\tt ESMF\_GridAllocCoord()} must be called
@@ -3185,30 +3177,30 @@ end interface
 ! \item[distgrid]
 !      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal
-!      to the grid rank, otherwise a runtime ESMF error will be
+!      to the grid dimCount, otherwise a runtime ESMF error will be
 !      raised.
 ! \item[{[distgridToGridMap]}] 
 !      List that has as many elements as indicated by distgrid's dimCount value.
 !      The elements map each dimension of distgrid to a dimension in the grid.
-!       (i.e. the values should range from 1 to gridrank). If not specified, the default
+!       (i.e. the values should range from 1 to griddimCount). If not specified, the default
 !       is to map all of distgrid's dimensions against the lower dimensions of the
 !       grid in sequence. 
 ! \item[{[undistLBound]}] 
 !      Lower bounds for undistributed array dimensions. Must be the same size as {\tt undistUBound}.
 ! \item[{[undistUBound]}] 
 !      Upper bounds for undistributed array dimensions. Must be the same size as {\tt undistLBound}.
-! \item[{[coordRank]}]
-!      List that has as many elements as the grid rank .
+! \item[{[coordDimCount]}]
+!      List that has as many elements as the grid dimCount .
 !      Gives the dimension of each component (e.g. x) array. This is 
 !      to allow factorization of the coordinate arrays. If not specified
 !      all arrays are the same size as the grid. [NOTE FACTORIZATION HAS
 !      NOT CURRENTLY BEEN IMPLEMENTED].
 ! \item[{[coordDimMap]}]
-!      2D list of size grid rank x grid rank. This array describes the
+!      2D list of size grid dimCount x grid dimCount. This array describes the
 !      map of each component array's dimensions onto the grids
 !      dimensions. Each entry {\tt coordDimMap(i,j)} tells which
 !      grid dimension component i's, jth dimension maps to. 
-!      Note that if j is bigger than {\tt coordRank(i)} than its ignored.        
+!      Note that if j is bigger than {\tt coordDimCount(i)} than its ignored.        
 ! \item[{[gridEdgeLWidth]}] 
 !      The padding around the lower edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
@@ -3244,7 +3236,7 @@ end interface
     type(ESMF_InterfaceInt) :: distgridToGridMapArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: undistLBoundArg ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: undistUBoundArg ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: coordRankArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: coordDimCountArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
 
     ! Initialize return code; assume failure until success is certain
@@ -3289,7 +3281,7 @@ end interface
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! Description of array factorization
-    coordRankArg = ESMF_InterfaceIntCreate(coordRank, rc=localrc)
+    coordDimCountArg = ESMF_InterfaceIntCreate(coordDimCount, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     coordDimMapArg = ESMF_InterfaceIntCreate(farray2D=coordDimMap, rc=localrc)
@@ -3302,7 +3294,7 @@ end interface
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridcreatefromdistgrid(grid%this, nameLen, name, &
       coordTypeKind, distgrid, distgridToGridMapArg, &
-      undistLBoundArg, undistUBoundArg, coordRankArg, coordDimMapArg, &
+      undistLBoundArg, undistUBoundArg, coordDimCountArg, coordDimMapArg, &
       gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, &
       indexflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3327,7 +3319,7 @@ end interface
     call ESMF_InterfaceIntDestroy(undistUBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(coordRankArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(coordDimCountArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
@@ -3458,7 +3450,7 @@ end interface
 ! using the countsPerDEDim1, countsPerDEDim2, countsPerDEDim3 arguments.
 ! The index of each array element corresponds to a DE number.  The 
 ! array value at the index is the number of grid cells on the DE in 
-! that dimension.  The rank of the grid is equal to the number of 
+! that dimension.  The dimCount of the grid is equal to the number of 
 ! countsPerDEDim<> arrays that are specified. 
 !
 ! To specify an undistributed dimension, the array in that dimension
@@ -3609,7 +3601,7 @@ end interface
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
 ! \item[{[distDim]}]
-!       Array of the same rank as the Grid. It specifies if each
+!       Array of the same dimCount as the Grid. It specifies if each
 !       dimensions should be distributed. If not
 !       specified, defaults to all true. Only dimensions
 !       with size(countsPerDeDim)=1 may be made undistributed. 
@@ -3628,10 +3620,10 @@ end interface
     integer, pointer     :: petList(:)
     integer, pointer     :: undistLBound(:)
     integer, pointer     :: undistUBound(:)
-    integer, pointer     :: coordRank(:)
+    integer, pointer     :: coordDimCount(:)
     integer, pointer     :: coordDimMap(:,:)
     integer              :: localrc
-    integer              :: rank,i,distRank,undistRank,maxSizeDEDim
+    integer              :: dimCount,i,distDimCount,undistDimCount,maxSizeDEDim
     integer, pointer     :: minIndexDG(:),maxIndexDG(:)
     integer, pointer     :: distgridToGridMap(:), deDimCount(:)
     integer, pointer     :: minIndexLocal(:)
@@ -3655,19 +3647,19 @@ end interface
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! Compute the Grid Rank and Derivatives ---------------------------------------------------
-    ! rank
+    ! Compute the Grid DimCount and Derivatives ---------------------------------------------------
+    ! dimCount
     if (present(countsPerDEDim3)) then
-	rank=3
+	dimCount=3
     else
-	rank=2
+	dimCount=2
     endif
 
     ! check distribution info
     if (present(distDim)) then
-       if (size(distDim) .ne. rank) then
+       if (size(distDim) .ne. dimCount) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                 "- distDim must be same rank as Grid", & 
+                 "- distDim must be same dimCount as Grid", & 
                  ESMF_CONTEXT, rc) 
             return 
        endif
@@ -3675,30 +3667,30 @@ end interface
     
     ! initialize isDimDist
     if (present(distDim)) then
-       isDimDist(1:rank)=distDim(1:rank)
+       isDimDist(1:dimCount)=distDim(1:dimCount)
     else
        isDimDist(:)=.true.
     endif
 
-    ! rank of distributed part
-    distRank=0 
+    ! dimCount of distributed part
+    distDimCount=0 
 
     if (isDimDist(1)) then
-       distRank=distRank+1
+       distDimCount=distDimCount+1
     endif
 
     if (isDimDist(2)) then
-       distRank=distRank+1
+       distDimCount=distDimCount+1
     endif
 
-    if (rank .gt. 2) then
+    if (dimCount .gt. 2) then
        if (isDimDist(3)) then
-           distRank=distRank+1
+           distDimCount=distDimCount+1
         endif
     endif
 
-    ! ranks of the undistributed part of the grid
-    undistRank=rank-distRank
+    ! dimCounts of the undistributed part of the grid
+    undistDimCount=dimCount-distDimCount
 
     ! Argument Consistency Checking --------------------------------------------------------------
     if (size(countsPerDEDim1) .lt. 1) then
@@ -3738,7 +3730,7 @@ end interface
        return 
     endif
 
-    if (rank .gt. 2) then
+    if (dimCount .gt. 2) then
        if (.not. isDimDist(3) .and. size(countsPerDEDim3) .gt. 1) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
             "- can't have undist dim 3 with size(countsPerDEDim3) > 1", & 
@@ -3748,66 +3740,66 @@ end interface
     endif
 
 
-    if ((rank .lt. 3) .and. present(connDim3)) then
+    if ((dimCount .lt. 3) .and. present(connDim3)) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-                 "- connDim3 not allowed when grid is less than rank 3", & 
+                 "- connDim3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
-    if ((rank .lt. 3) .and. present(poleStaggerLoc3)) then
+    if ((dimCount .lt. 3) .and. present(poleStaggerLoc3)) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-                 "- poleStaggerLoc3 not allowed when grid is less than rank 3", & 
+                 "- poleStaggerLoc3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
-    if ((rank .lt. 3) .and. present(bipolePos3)) then
+    if ((dimCount .lt. 3) .and. present(bipolePos3)) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-                 "- bipolePos3 not allowed when grid is less than rank 3", & 
+                 "- bipolePos3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
 
-    if ((rank .lt. 3) .and. present(coordDep3)) then
+    if ((dimCount .lt. 3) .and. present(coordDep3)) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-                 "- coordDep3 not allowed when grid is less than rank 3", & 
+                 "- coordDep3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
     if (present(coordDep1)) then
-       if ((size(coordDep1) < 1) .or. (size(coordDep1)>rank)) then
+       if ((size(coordDep1) < 1) .or. (size(coordDep1)>dimCount)) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-               "- coordDep1 size incompatible with grid rank", & 
+               "- coordDep1 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
        endif
     endif
 
     if (present(coordDep2)) then
-       if ((size(coordDep2) < 1) .or. (size(coordDep2)>rank)) then
+       if ((size(coordDep2) < 1) .or. (size(coordDep2)>dimCount)) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-               "- coordDep2 size incompatible with grid rank", & 
+               "- coordDep2 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
        endif
     endif
 
     if (present(coordDep3)) then
-       if ((size(coordDep3) < 1) .or. (size(coordDep3)>rank)) then
+       if ((size(coordDep3) < 1) .or. (size(coordDep3)>dimCount)) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-               "- coordDep3 size incompatible with grid rank", & 
+               "- coordDep3 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
        endif
     endif
 
     if (present(minIndex)) then
-       if (size(minIndex) .ne. rank) then
+       if (size(minIndex) .ne. dimCount) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-               "- minIndex size must equal grid rank", & 
+               "- minIndex size must equal grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
        endif
@@ -3815,7 +3807,7 @@ end interface
 
 
     if (present(petMap)) then
-       if (rank .gt. 2) then
+       if (dimCount .gt. 2) then
           if ((size(petMap,1) .ne. size(countsPerDEDim1)) .or. &
               (size(petMap,2) .ne. size(countsPerDEDim2)) .or. &
               (size(petMap,3) .ne. size(countsPerDEDim3))) then
@@ -3838,29 +3830,29 @@ end interface
 
 
 
-    ! Check Rank of gridWidths and Aligns
+    ! Check DimCount of gridWidths and Aligns
     if (present(gridEdgeLWidth)) then
-        if (size(gridEdgeLWidth) .ne. rank) then
+        if (size(gridEdgeLWidth) .ne. dimCount) then
            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                     "- gridEdgeLWidth must be of size equal to Grid rank", & 
+                     "- gridEdgeLWidth must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
               return
         endif 
     endif
 
     if (present(gridEdgeUWidth)) then
-        if (size(gridEdgeUWidth) .ne. rank) then
+        if (size(gridEdgeUWidth) .ne. dimCount) then
            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                     "- gridEdgeUWidth must be of size equal to Grid rank", & 
+                     "- gridEdgeUWidth must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
               return
         endif 
     endif
 
     if (present(gridAlign)) then
-        if (size(gridAlign) .ne. rank) then
+        if (size(gridAlign) .ne. dimCount) then
            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                     "- gridAlign must be of size equal to Grid rank", & 
+                     "- gridAlign must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
               return
         endif 
@@ -3996,7 +3988,7 @@ end interface
    ! Check for non-valid connection types here
 
     ! can't have all undistributed dimensions
-    if (distRank .eq. 0) then
+    if (distDimCount .eq. 0) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
                  "- Need to have at least one distributed dimension", & 
                  ESMF_CONTEXT, rc) 
@@ -4019,7 +4011,7 @@ end interface
                                      ESMF_CONTEXT, rc)) return
     countsPerDEDim2Local=countsPerDEDim2
 
-    if (rank .gt. 2) then
+    if (dimCount .gt. 2) then
        allocate(countsPerDEDim3Local(size(countsPerDEDim3)), stat=localrc)
        if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
                                       ESMF_CONTEXT, rc)) return
@@ -4030,14 +4022,14 @@ end interface
     ! Set Defaults -------------------------------------------------------------
 
     ! Set default for minIndex 
-    allocate(minIndexLocal(rank), stat=localrc)
+    allocate(minIndexLocal(dimCount), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
                                      ESMF_CONTEXT, rc)) return
 
     if (present(minIndex)) then
        minIndexLocal(:)=minIndex(:)
     else
-       do i=1,rank
+       do i=1,dimCount
           minIndexLocal(i)=1
        enddo
     endif
@@ -4112,17 +4104,17 @@ end interface
 
 
    ! Make alterations to size due to GridEdgeWidths ----------------------------
-    allocate(gridEdgeLWidthLocal(rank), stat=localrc)
+    allocate(gridEdgeLWidthLocal(dimCount), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeLWidthLocal", &
                                      ESMF_CONTEXT, rc)) return
-    allocate(gridEdgeUWidthLocal(rank), stat=localrc)
+    allocate(gridEdgeUWidthLocal(dimCount), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeUWidthLocal", &
                                      ESMF_CONTEXT, rc)) return
-    allocate(gridAlignLocal(rank), stat=localrc)
+    allocate(gridAlignLocal(dimCount), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridAlignLocal", &
                                      ESMF_CONTEXT, rc)) return
 
-    call ESMF_GridLUADefault(rank, &
+    call ESMF_GridLUADefault(dimCount, &
                              gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
                              gridEdgeLWidthLocal, gridEdgeUWidthLocal, gridAlignLocal, &
                              rc=localrc)
@@ -4130,7 +4122,7 @@ end interface
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Modify lower bound
-    do i=1,rank
+    do i=1,dimCount
        minIndexLocal(i)=minIndexLocal(i)-gridEdgeLWidthLocal(i)
     enddo
 
@@ -4140,7 +4132,7 @@ end interface
 
     countsPerDEDim2Local(1)=countsPerDEDim2Local(1)+gridEdgeLWidthLocal(2)
   
-    if (rank .gt. 2) then
+    if (dimCount .gt. 2) then
        countsPerDEDim3Local(1)=countsPerDEDim3Local(1)+gridEdgeLWidthLocal(3)
     endif
 
@@ -4152,20 +4144,20 @@ end interface
     top=size(countsPerDEDim2Local)
     countsPerDEDim2Local(top)=countsPerDEDim2Local(top)+gridEdgeUWidthLocal(2)
   
-    if (rank .gt. 2) then
+    if (dimCount .gt. 2) then
        top=size(countsPerDEDim3Local)
        countsPerDEDim3Local(top)=countsPerDEDim3Local(top)+gridEdgeUWidthLocal(3)
     endif
 
 
    ! Calc minIndex,maxIndex,distgridToGridMap for DistGrid -----------------------------------
-   allocate(minIndexDG(distRank), stat=localrc)
+   allocate(minIndexDG(distDimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexDG", &
                ESMF_CONTEXT, rc)) return
-   allocate(maxIndexDG(distRank), stat=localrc)
+   allocate(maxIndexDG(distDimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexDG", &
                ESMF_CONTEXT, rc)) return
-   allocate(distgridToGridMap(distRank), stat=localrc)
+   allocate(distgridToGridMap(distDimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToGridMap", &
                ESMF_CONTEXT, rc)) return
           
@@ -4186,7 +4178,7 @@ end interface
       d=d+1
    endif
 
-   if (rank .gt. 2) then
+   if (dimCount .gt. 2) then
       if (isDimDist(3)) then
          minIndexDG(d)=minIndexLocal(3)
          maxIndexDG(d)=sum(countsPerDEDim3Local)+minIndexDG(d)-1
@@ -4201,7 +4193,7 @@ end interface
   deCount=1
   deCount=deCount*size(countsPerDEDim1Local) 
   deCount=deCount*size(countsPerDEDim2Local)
-  if (rank .gt. 2) then
+  if (dimCount .gt. 2) then
      deCount=deCount*size(countsPerDEDim3Local)
   endif 
  
@@ -4213,7 +4205,7 @@ end interface
   if (size(countsPerDEDim2Local) .gt. maxSizeDEDim) then
       maxSizeDEDim=size(countsPerDEDim2Local)
   endif
-  if (rank .gt. 2) then
+  if (dimCount .gt. 2) then
       if (size(countsPerDEDim3Local) .gt. maxSizeDEDim) then
          maxSizeDEDim=size(countsPerDEDim3Local)
       endif
@@ -4221,13 +4213,13 @@ end interface
   
 
   ! generate deblocklist
-  allocate(maxPerDEDim(distRank,maxSizeDEDim), stat=localrc)
+  allocate(maxPerDEDim(distDimCount,maxSizeDEDim), stat=localrc)
   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating maxPerDEDim", &
               ESMF_CONTEXT, rc)) return
-  allocate(minPerDEDim(distRank,maxSizeDEDim), stat=localrc)
+  allocate(minPerDEDim(distDimCount,maxSizeDEDim), stat=localrc)
   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minPerDEDim", &
               ESMF_CONTEXT, rc)) return
- allocate(deDimCount(distRank), stat=localrc)
+ allocate(deDimCount(distDimCount), stat=localrc)
   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating maxPerDEDim", &
               ESMF_CONTEXT, rc)) return
 
@@ -4256,7 +4248,7 @@ end interface
       d=d+1  ! advance to next distgrid dimension
   endif
 
-  if (rank .gt. 2) then
+  if (dimCount .gt. 2) then
   if (isDimDist(3)) then
       deDimCount(d)=size(countsPerDEDim3Local)
       minPerDeDim(d,1)=minIndexLocal(3)
@@ -4271,19 +4263,19 @@ end interface
 
 
   ! allocate deblocklist
-  allocate(deBlockList(distRank,2,deCount), stat=localrc)
+  allocate(deBlockList(distDimCount,2,deCount), stat=localrc)
   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating deBlockList", &
               ESMF_CONTEXT, rc)) return
 
   ! Fill in DeBlockList
-  if (distRank .eq. 1) then
+  if (distDimCount .eq. 1) then
      k=1
      do i1=1,deDimCount(1)
         deBlockList(1,1,k)=minPerDEDim(1,i1)
         deBlockList(1,2,k)=maxPerDEDim(1,i1)
         k=k+1
      enddo
-  else if (distRank .eq. 2) then
+  else if (distDimCount .eq. 2) then
      k=1
      do i2=1,deDimCount(2)
      do i1=1,deDimCount(1)
@@ -4294,7 +4286,7 @@ end interface
         k=k+1
      enddo
      enddo
-  else if (distRank .eq. 3) then
+  else if (distDimCount .eq. 3) then
      k=1
      do i3=1,deDimCount(3)
      do i2=1,deDimCount(2)
@@ -4332,7 +4324,7 @@ end interface
 
 
       !! copy petMap to petList
-      if (rank .gt. 2) then
+      if (dimCount .gt. 2) then
 	 k=1
      	 do i3=1,size(countsPerDEDim3Local)
          do i2=1,size(countsPerDEDim2Local)
@@ -4379,11 +4371,11 @@ end interface
 
 
    ! Calc undistLBound, undistUBound for Grid -----------------------------------------------
-   if (undistRank .gt. 0) then
-      allocate(undistLBound(undistRank), stat=localrc)
+   if (undistDimCount .gt. 0) then
+      allocate(undistLBound(undistDimCount), stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating undistLBound", &
               ESMF_CONTEXT, rc)) return
-      allocate(undistUBound(undistRank), stat=localrc)
+      allocate(undistUBound(undistDimCount), stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating undistUBound", &
               ESMF_CONTEXT, rc)) return     
 
@@ -4401,7 +4393,7 @@ end interface
          d=d+1
       endif
 
-      if (rank .gt. 2) then
+      if (dimCount .gt. 2) then
          if (.not. isDimDist(3)) then
             undistLBound(d)=minIndexLocal(3)
             undistUBound(d)=countsPerDEDim3Local(1)+undistLBound(d)-1
@@ -4411,50 +4403,50 @@ end interface
    endif
 
 
-   ! Convert coordDeps to coordRank and coordDimMap -------------------------------
-   allocate(coordRank(rank), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordRank", &
+   ! Convert coordDeps to coordDimCount and coordDimMap -------------------------------
+   allocate(coordDimCount(dimCount), stat=localrc)
+   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordDimCount", &
               ESMF_CONTEXT, rc)) return
-   allocate(coordDimMap(rank,rank), stat=localrc)
+   allocate(coordDimMap(dimCount,dimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordDimMap", &
               ESMF_CONTEXT, rc)) return
 
    if (present(coordDep1)) then
-      coordRank(1)=size(coordDep1)
+      coordDimCount(1)=size(coordDep1)
       coordDimMap(1,:)=0
       do i=1,size(coordDep1)
          coordDimMap(1,i)=coordDep1(i)
       enddo
    else 
-      coordRank(1)=rank
-      do i=1,rank
+      coordDimCount(1)=dimCount
+      do i=1,dimCount
          coordDimMap(1,i)=i      
       enddo
    endif
 
    if (present(coordDep2)) then
-      coordRank(2)=size(coordDep2)
+      coordDimCount(2)=size(coordDep2)
       coordDimMap(2,:)=0
       do i=1,size(coordDep2)
          coordDimMap(2,i)=coordDep2(i)
       enddo
    else 
-      coordRank(2)=rank
-      do i=1,rank
+      coordDimCount(2)=dimCount
+      do i=1,dimCount
          coordDimMap(2,i)=i      
       enddo
    endif
 
-   if (rank .gt. 2) then
+   if (dimCount .gt. 2) then
       if (present(coordDep3)) then 
-         coordRank(3)=size(coordDep3)
+         coordDimCount(3)=size(coordDep3)
           coordDimMap(3,:)=0
           do i=1,size(coordDep3)
              coordDimMap(3,i)=coordDep3(i)
           enddo
       else 
-        coordRank(3)=rank
-        do i=1,rank
+        coordDimCount(3)=dimCount
+        do i=1,dimCount
 	   coordDimMap(3,i)=i      
         enddo
       endif
@@ -4462,11 +4454,11 @@ end interface
 
   
    ! Create Grid from specification -----------------------------------------------
-   if (undistRank .gt. 0) then
+   if (undistDimCount .gt. 0) then
        ESMF_GridCreateShapeTileIrreg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
                                     distgrid, distgridToGridMap=distgridToGridMap, &
                                     undistLBound=undistLBound, undistUBound=undistUBound, &
-                                    coordRank=coordRank, coordDimMap=coordDimMap, &
+                                    coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
@@ -4474,7 +4466,7 @@ end interface
     else
        ESMF_GridCreateShapeTileIrreg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
                                     distgrid=distgrid, distgridToGridMap=distgridToGridMap, &
-                                    coordRank=coordRank, coordDimMap=coordDimMap, &
+                                    coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
@@ -4487,7 +4479,7 @@ end interface
 
 
     ! Clean up memory
-    deallocate(coordRank)
+    deallocate(coordDimCount)
     deallocate(coordDimMap)
     deallocate(minIndexDG)
     deallocate(maxIndexDG)
@@ -4496,7 +4488,7 @@ end interface
     deallocate(minPerDEDim)
     deallocate(deDimCount)
     deallocate(deBlockList)
-    if (undistRank .gt. 0) then
+    if (undistDimCount .gt. 0) then
        deallocate(undistLBound)
        deallocate(undistUBound)
     endif
@@ -4505,7 +4497,7 @@ end interface
     deallocate(gridAlignLocal)
     deallocate(countsPerDEDim1Local) 
     deallocate(countsPerDEDim2Local) 
-    if (rank .gt. 2) then
+    if (dimCount .gt. 2) then
        deallocate(countsPerDEDim3Local) 
     endif
 
@@ -4712,7 +4704,7 @@ end interface
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
 ! \item[{[distDim]}]
-!       Array of the same rank as the Grid. It specifies if each
+!       Array of the same dimCount as the Grid. It specifies if each
 !       dimensions should be distributed. If not
 !       specified, defaults to all true. Only dimensions
 !       with regDecomp()=1 may be made undistributed. 
@@ -4733,10 +4725,10 @@ end interface
     integer, pointer     :: petList(:)
     integer, pointer     :: undistLBound(:)
     integer, pointer     :: undistUBound(:)
-    integer, pointer     :: coordRank(:)
+    integer, pointer     :: coordDimCount(:)
     integer, pointer     :: coordDimMap(:,:)
     integer              :: localrc
-    integer              :: rank,i,distRank,undistRank,maxSizeDEDim
+    integer              :: dimCount,i,distDimCount,undistDimCount,maxSizeDEDim
     integer, pointer     :: minIndexDG(:),maxIndexDG(:)
     integer, pointer     :: regDecompDG(:)
     type(ESMF_DecompFlag), pointer :: decompflagDG(:)
@@ -4760,21 +4752,21 @@ end interface
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! Compute the Grid Rank and Derivatives ---------------------------------------------------
-    ! rank
-    rank=size(maxIndex)
-    if ((rank < 2) .or. (rank > 3)) then
+    ! Compute the Grid DimCount and Derivatives ---------------------------------------------------
+    ! dimCount
+    dimCount=size(maxIndex)
+    if ((dimCount < 2) .or. (dimCount > 3)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-               "- maxIndex size and thus Grid rank must be either 2 or 3 when using create shape ", & 
+               "- maxIndex size and thus Grid dimCount must be either 2 or 3 when using create shape ", & 
                ESMF_CONTEXT, rc) 
          return 
     endif
 
     ! check distribution info
     if (present(distDim)) then
-       if (size(distDim) .ne. rank) then
+       if (size(distDim) .ne. dimCount) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                 "- distDim must be same rank as Grid", & 
+                 "- distDim must be same dimCount as Grid", & 
                  ESMF_CONTEXT, rc) 
             return 
        endif
@@ -4782,111 +4774,111 @@ end interface
 
     ! initialize isDimDist
     if (present(distDim)) then
-       isDimDist(1:rank)=distDim(1:rank)
+       isDimDist(1:dimCount)=distDim(1:dimCount)
     else
        isDimDist(:)=.true.
     endif
 
-    ! rank of distributed part
-    distRank=0 
+    ! dimCount of distributed part
+    distDimCount=0 
 
     if (isDimDist(1)) then
-       distRank=distRank+1
+       distDimCount=distDimCount+1
     endif
 
     if (isDimDist(2)) then
-       distRank=distRank+1
+       distDimCount=distDimCount+1
     endif
 
-    if (rank .gt. 2) then
+    if (dimCount .gt. 2) then
        if (isDimDist(3)) then
-           distRank=distRank+1
+           distDimCount=distDimCount+1
         endif
     endif
 
-    ! ranks of the undistributed part of the grid
-    undistRank=rank-distRank
+    ! dimCounts of the undistributed part of the grid
+    undistDimCount=dimCount-distDimCount
 
     ! Argument Consistency Checking --------------------------------------------------------------
     if (present(regDecomp)) then
-        if (size(regDecomp) .lt. rank) then
+        if (size(regDecomp) .lt. dimCount) then
             call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                    "- regDecomp size doesn't match Grid rank ", & 
+                    "- regDecomp size doesn't match Grid dimCount ", & 
                     ESMF_CONTEXT, rc) 
             return 
         endif
     endif
 
     if (present(decompFlag)) then
-        if (size(decompFlag) .lt. rank) then
+        if (size(decompFlag) .lt. dimCount) then
             call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                    "- decompFlag size doesn't match Grid rank ", & 
+                    "- decompFlag size doesn't match Grid dimCount ", & 
                     ESMF_CONTEXT, rc) 
             return 
         endif
     endif
 
 
-    if ((rank .lt. 3) .and. present(connDim3)) then
+    if ((dimCount .lt. 3) .and. present(connDim3)) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-                 "- connDim3 not allowed when grid is less than rank 3", & 
+                 "- connDim3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
-    if ((rank .lt. 3) .and. present(poleStaggerLoc3)) then
+    if ((dimCount .lt. 3) .and. present(poleStaggerLoc3)) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-                 "- poleStaggerLoc3 not allowed when grid is less than rank 3", & 
+                 "- poleStaggerLoc3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
-    if ((rank .lt. 3) .and. present(bipolePos3)) then
+    if ((dimCount .lt. 3) .and. present(bipolePos3)) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-                 "- bipolePos3 not allowed when grid is less than rank 3", & 
+                 "- bipolePos3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
 
-    if ((rank .lt. 3) .and. present(coordDep3)) then
+    if ((dimCount .lt. 3) .and. present(coordDep3)) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-                 "- coordDep3 not allowed when grid is less than rank 3", & 
+                 "- coordDep3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
     if (present(coordDep1)) then
-       if ((size(coordDep1) < 1) .or. (size(coordDep1)>rank)) then
+       if ((size(coordDep1) < 1) .or. (size(coordDep1)>dimCount)) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-               "- coordDep1 size incompatible with grid rank", & 
+               "- coordDep1 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
        endif
     endif
 
     if (present(coordDep2)) then
-       if ((size(coordDep2) < 1) .or. (size(coordDep2)>rank)) then
+       if ((size(coordDep2) < 1) .or. (size(coordDep2)>dimCount)) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-               "- coordDep2 size incompatible with grid rank", & 
+               "- coordDep2 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
        endif
     endif
 
     if (present(coordDep3)) then
-       if ((size(coordDep3) < 1) .or. (size(coordDep3)>rank)) then
+       if ((size(coordDep3) < 1) .or. (size(coordDep3)>dimCount)) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-               "- coordDep3 size incompatible with grid rank", & 
+               "- coordDep3 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
        endif
     endif
 
     if (present(minIndex)) then
-       if (size(minIndex) .ne. rank) then
+       if (size(minIndex) .ne. dimCount) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-               "- minIndex size must equal grid rank", & 
+               "- minIndex size must equal grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
        endif
@@ -4894,29 +4886,29 @@ end interface
 
 
 
-    ! Check Rank of gridWidths and Aligns
+    ! Check DimCount of gridWidths and Aligns
     if (present(gridEdgeLWidth)) then
-        if (size(gridEdgeLWidth) .ne. rank) then
+        if (size(gridEdgeLWidth) .ne. dimCount) then
            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                     "- gridEdgeLWidth must be of size equal to Grid rank", & 
+                     "- gridEdgeLWidth must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
               return
         endif 
     endif
 
     if (present(gridEdgeUWidth)) then
-        if (size(gridEdgeUWidth) .ne. rank) then
+        if (size(gridEdgeUWidth) .ne. dimCount) then
            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                     "- gridEdgeUWidth must be of size equal to Grid rank", & 
+                     "- gridEdgeUWidth must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
               return
         endif 
     endif
 
     if (present(gridAlign)) then
-        if (size(gridAlign) .ne. rank) then
+        if (size(gridAlign) .ne. dimCount) then
            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                     "- gridAlign must be of size equal to Grid rank", & 
+                     "- gridAlign must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
               return
         endif 
@@ -5056,7 +5048,7 @@ end interface
    ! TODO: can you create an array without a distgrid??? What if everything they specify is undistributed?
    !       for now make a totally undistributed grid an error. Work on handling it later.
    !       Perhaps don't use undistLBound, undistUBound
-    if (distRank .eq. 0) then
+    if (distDimCount .eq. 0) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
                  "- Need to have at least one distributed dimension", & 
                  ESMF_CONTEXT, rc) 
@@ -5071,28 +5063,28 @@ end interface
     ! Set Defaults ------------------------------------------------------------------
 
     ! Set default for minIndex
-    allocate(minIndexLocal(rank), stat=localrc)
+    allocate(minIndexLocal(dimCount), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
                                      ESMF_CONTEXT, rc)) return
 
     if (present(minIndex)) then
        minIndexLocal(:)=minIndex(:)
     else
-       do i=1,rank
+       do i=1,dimCount
           minIndexLocal(i)=1
        enddo
     endif
 
 
     ! Set default for minIndex
-    allocate(maxIndexLocal(rank), stat=localrc)
+    allocate(maxIndexLocal(dimCount), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating maxIndexLocal", &
                                      ESMF_CONTEXT, rc)) return
     maxIndexLocal(:)=maxIndex(:)
 
 
     ! Set default for regDecomp 
-    allocate(regDecompLocal(rank), stat=localrc)
+    allocate(regDecompLocal(dimCount), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating regDecompLocal", &
                                      ESMF_CONTEXT, rc)) return
 
@@ -5106,13 +5098,13 @@ end interface
        call ESMF_VMGet(vm,petCount=regDecompLocal(1),rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-       do i=2,rank
+       do i=2,dimCount
           regDecompLocal(i)=1
        enddo
     endif
 
     ! Set default for decompFlag 
-    allocate(decompFlagLocal(rank), stat=localrc)
+    allocate(decompFlagLocal(dimCount), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating decompFlagLocal", &
                                      ESMF_CONTEXT, rc)) return
 
@@ -5208,7 +5200,7 @@ end interface
        return 
     endif
 
-    if (rank .gt. 2) then
+    if (dimCount .gt. 2) then
        if (.not. isDimDist(3) .and. regDecompLocal(3) .gt. 1) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
             "- can't have undist dim 3 with regDecomp(3) > 1", & 
@@ -5219,7 +5211,7 @@ end interface
 
 
   if (present(petMap)) then
-     if (rank .gt. 2) then
+     if (dimCount .gt. 2) then
           if ((size(petMap,1) .ne. regDecompLocal(1)) .or. &
               (size(petMap,2) .ne. regDecompLocal(2)) .or. &
               (size(petMap,3) .ne. regDecompLocal(3))) then
@@ -5242,17 +5234,17 @@ end interface
 
    ! Modify Bounds by GridEdgeUWidth and GridEdgeLWidth  -------------------------
    ! setup maxIndexLocal to hold modified bounds
-    allocate(gridEdgeLWidthLocal(rank), stat=localrc)
+    allocate(gridEdgeLWidthLocal(dimCount), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeLWidthLocal", &
                                      ESMF_CONTEXT, rc)) return
-    allocate(gridEdgeUWidthLocal(rank), stat=localrc)
+    allocate(gridEdgeUWidthLocal(dimCount), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeUWidthLocal", &
                                      ESMF_CONTEXT, rc)) return
-    allocate(gridAlignLocal(rank), stat=localrc)
+    allocate(gridAlignLocal(dimCount), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridAlignLocal", &
                                      ESMF_CONTEXT, rc)) return
 
-    call ESMF_GridLUADefault(rank, &
+    call ESMF_GridLUADefault(dimCount, &
                              gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
                              gridEdgeLWidthLocal, gridEdgeUWidthLocal, gridAlignLocal, &
                              rc=localrc)
@@ -5260,36 +5252,36 @@ end interface
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Modify lower bound
-    do i=1,rank
+    do i=1,dimCount
        minIndexLocal(i)=minIndexLocal(i)-gridEdgeLWidthLocal(i)
     enddo
 
     ! Modify upper bound
-    do i=1,rank
+    do i=1,dimCount
        maxIndexLocal(i)=maxIndexLocal(i)+gridEdgeUWidthLocal(i)
     enddo
 
 
    ! Calc minIndex,maxIndex,distgridToGridMap for DistGrid -----------------------------------
-   allocate(minIndexDG(distRank), stat=localrc)
+   allocate(minIndexDG(distDimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexDG", &
                ESMF_CONTEXT, rc)) return
-   allocate(maxIndexDG(distRank), stat=localrc)
+   allocate(maxIndexDG(distDimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexDG", &
                ESMF_CONTEXT, rc)) return
-   allocate(distgridToGridMap(distRank), stat=localrc)
+   allocate(distgridToGridMap(distDimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToGridMap", &
                ESMF_CONTEXT, rc)) return          
-   allocate(regDecompDG(distRank), stat=localrc)
+   allocate(regDecompDG(distDimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating dimMap", &
                ESMF_CONTEXT, rc)) return
-   allocate(decompFlagDG(distRank), stat=localrc)
+   allocate(decompFlagDG(distDimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating dimMap", &
                ESMF_CONTEXT, rc)) return
-   allocate(undistLBound(undistRank), stat=localrc)
+   allocate(undistLBound(undistDimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating undistLBound", &
               ESMF_CONTEXT, rc)) return
-   allocate(undistUBound(undistRank), stat=localrc)
+   allocate(undistUBound(undistDimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating undistUBound", &
               ESMF_CONTEXT, rc)) return     
 
@@ -5322,7 +5314,7 @@ end interface
      ud=ud+1
    endif
 
-   if (rank .gt. 2) then
+   if (dimCount .gt. 2) then
       if (isDimDist(3)) then
          minIndexDG(d)=minIndexLocal(3)
          maxIndexDG(d)=maxIndexLocal(3)
@@ -5347,7 +5339,7 @@ end interface
    ! Process PetMap --------------------------------------------------------------
    !! Calculate deCount
    deCount=1
-   do i=1,rank
+   do i=1,dimCount
       deCount=deCount*regDecompLocal(i)
    enddo
 
@@ -5360,7 +5352,7 @@ end interface
 
 
       !! copy petMap to petList
-      if (rank .gt. 2) then
+      if (dimCount .gt. 2) then
 	 k=1
      	 do i3=1,regDecompLocal(3)
          do i2=1,regDecompLocal(2)
@@ -5406,50 +5398,50 @@ end interface
 
 
 
-   ! Convert coordDeps to coordRank and coordDimMap -------------------------------
-   allocate(coordRank(rank), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordRank", &
+   ! Convert coordDeps to coordDimCount and coordDimMap -------------------------------
+   allocate(coordDimCount(dimCount), stat=localrc)
+   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordDimCount", &
               ESMF_CONTEXT, rc)) return
-   allocate(coordDimMap(rank,rank), stat=localrc)
+   allocate(coordDimMap(dimCount,dimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordDimMap", &
               ESMF_CONTEXT, rc)) return
 
    if (present(coordDep1)) then
-      coordRank(1)=size(coordDep1)
+      coordDimCount(1)=size(coordDep1)
       coordDimMap(1,:)=0
       do i=1,size(coordDep1)
          coordDimMap(1,i)=coordDep1(i)
       enddo
    else 
-      coordRank(1)=rank
-      do i=1,rank
+      coordDimCount(1)=dimCount
+      do i=1,dimCount
          coordDimMap(1,i)=i      
       enddo
    endif
 
    if (present(coordDep2)) then
-      coordRank(2)=size(coordDep2)
+      coordDimCount(2)=size(coordDep2)
       coordDimMap(2,:)=0
       do i=1,size(coordDep2)
          coordDimMap(2,i)=coordDep2(i)
       enddo
    else 
-      coordRank(2)=rank
-      do i=1,rank
+      coordDimCount(2)=dimCount
+      do i=1,dimCount
          coordDimMap(2,i)=i      
       enddo
    endif
 
-   if (rank .gt. 2) then
+   if (dimCount .gt. 2) then
       if (present(coordDep3)) then 
-         coordRank(3)=size(coordDep3)
+         coordDimCount(3)=size(coordDep3)
           coordDimMap(3,:)=0
           do i=1,size(coordDep3)
              coordDimMap(3,i)=coordDep3(i)
           enddo
       else 
-        coordRank(3)=rank
-        do i=1,rank
+        coordDimCount(3)=dimCount
+        do i=1,dimCount
 	   coordDimMap(3,i)=i      
         enddo
       endif
@@ -5457,11 +5449,11 @@ end interface
 
   
    ! Create Grid from specification -----------------------------------------------
-   if (undistRank .gt. 0) then
+   if (undistDimCount .gt. 0) then
        ESMF_GridCreateShapeTileReg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
                                     distgrid=distgrid, distgridToGridMap=distgridToGridMap, &
                                     undistLBound=undistLBound, undistUBound=undistUBound, &
-                                    coordRank=coordRank, coordDimMap=coordDimMap, &
+                                    coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
@@ -5469,7 +5461,7 @@ end interface
     else
        ESMF_GridCreateShapeTileReg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
                                     distgrid=distgrid, distgridToGridMap=distgridToGridMap, &
-                                    coordRank=coordRank, coordDimMap=coordDimMap, &
+                                    coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
@@ -5485,7 +5477,7 @@ end interface
     deallocate(decompFlagLocal)
     deallocate(regDecompDG)
     deallocate(decompFlagDG)
-    deallocate(coordRank)
+    deallocate(coordDimCount)
     deallocate(coordDimMap)
     deallocate(minIndexDG)
     deallocate(maxIndexDG)
@@ -5564,9 +5556,9 @@ end interface
 
 ! !INTERFACE:
       subroutine ESMF_GridGet(grid, name, coordTypeKind, &
-          rank, distRank, undistRank,  &
+          dimCount, distDimCount, undistDimCount,  &
           tileCount, staggerlocsCount, localDECount, distgrid, &
-          distgridToGridMap, undistLBound, undistUBound, coordRank, coordDimMap, &
+          distgridToGridMap, undistLBound, undistUBound, coordDimCount, coordDimMap, &
           gridEdgeLWidth, gridEdgeUWidth, gridAlign,  &
           indexFlag, rc)
 !
@@ -5574,9 +5566,9 @@ end interface
       type(ESMF_Grid),       intent(in)            :: grid
       character (len=*),     intent(out), optional :: name
       type(ESMF_TypeKind),   intent(out), optional :: coordTypeKind
-      integer,               intent(out), optional :: rank
-      integer,               intent(out), optional :: distRank
-      integer,               intent(out), optional :: undistRank
+      integer,               intent(out), optional :: dimCount
+      integer,               intent(out), optional :: distDimCount
+      integer,               intent(out), optional :: undistDimCount
       integer,               intent(out), optional :: tileCount
       integer,               intent(out), optional :: staggerlocsCount
       integer,               intent(out), optional :: localDECount
@@ -5584,7 +5576,7 @@ end interface
       integer,               intent(out), optional :: distgridToGridMap(:)
       integer,               intent(out), optional :: undistLBound(:)
       integer,               intent(out), optional :: undistUBound(:)
-      integer,               intent(out), optional :: coordRank(:)
+      integer,               intent(out), optional :: coordDimCount(:)
       integer,               intent(out), optional :: coordDimMap(:,:)
       integer,               intent(out), optional :: gridEdgeLWidth(:)
       integer,               intent(out), optional :: gridEdgeUWidth(:)
@@ -5604,13 +5596,13 @@ end interface
 !\item[{[coordTypeKind]}] 
 !   The type/kind of the grid coordinate data. 
 !   If not specified then the type/kind will be 8 byte reals.  
-!\item[{[rank]}]
-!   Rank of the Grid object.
-!\item[{[distRank]}]
-!   The rank of the distributed part of the grid. Should be equal to the distgrid's
+!\item[{[dimCount]}]
+!   DimCount of the Grid object.
+!\item[{[distDimCount]}]
+!   The dimCount of the distributed part of the grid. Should be equal to the distgrid's
 !   dimCount. 
-!\item[{[undistRank]}]
-!   The rank of the undistributed part of the grid.
+!\item[{[undistDimCount]}]
+!   The dimCount of the undistributed part of the grid.
 !\item[{[tileCount]}]
 !   The number of logically rectangular tiles in the grid. 
 !\item[{[staggerlocsCount]}]
@@ -5620,30 +5612,30 @@ end interface
 !\item[{[distgrid]}]
 !   The structure describing the distribution of the grid. 
 !\item[{[distgridToGridMap]}]
-!   List that has as many elements as the distgrid rank. This array describes
+!   List that has as many elements as the distgrid dimCount. This array describes
 !   mapping between the grids dimensions and the distgrid.
 !\item[{[undistLBound]}] 
 !   Lower bounds for undistributed array dimensions.
 !\item[{[undistUBound]}] 
 !   Upper bounds for undistributed array dimensions. 
-! \item[{[coordRank]}]
-!   List that has as many elements as the grid rank (from arrayspec).
+! \item[{[coordDimCount]}]
+!   List that has as many elements as the grid dimCount (from arrayspec).
 !   Gives the dimension of each component (e.g. x) array. This is 
 !   to allow factorization of the coordinate arrays. If not specified
 !   all arrays are the same size as the grid. 
 !\item[{[coordDimMap]}]
-!   2D list of size grid rank x grid rank. This array describes the
+!   2D list of size grid dimCount x grid dimCount. This array describes the
 !   map of each component array's dimensions onto the grids
 !   dimensions. 
 ! \item[{[gridEdgeLWidth]}] 
 !   The padding around the lower edges of the grid. The array should
-!   be of size greater or equal to the Grid rank.
+!   be of size greater or equal to the Grid dimCount.
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. The array should
-!   be of size greater or equal to the Grid rank. 
+!   be of size greater or equal to the Grid dimCount. 
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
-!     index space. The array should be of size greater or equal to the Grid rank. 
+!     index space. The array should be of size greater or equal to the Grid dimCount. 
 ! \item[{[indexflag]}]
 !    Flag that indicates how the DE-local indices are to be defined.
 !\item[{[rc]}]
@@ -5655,7 +5647,7 @@ end interface
     type(ESMF_InterfaceInt) :: distgridToGridMapArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: undistLBoundArg ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: undistUBoundArg ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: coordRankArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: coordDimCountArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: gridEdgeLWidthArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: gridEdgeUWidthArg  ! Language Interface Helper Var
@@ -5692,7 +5684,7 @@ end interface
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! Description of array factorization
-    coordRankArg = ESMF_InterfaceIntCreate(coordRank, rc=localrc)
+    coordDimCountArg = ESMF_InterfaceIntCreate(coordDimCount, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     coordDimMapArg = ESMF_InterfaceIntCreate(farray2D=coordDimMap, rc=localrc)
@@ -5714,10 +5706,10 @@ end interface
 
     ! Call C++ Subroutine to do the get
     call c_ESMC_gridget(grid%this, &
-      coordTypeKind, rank, tileCount, distgrid,  staggerlocsCount, &
-      distgridToGridMapArg, undistLBoundArg, undistUBoundArg, coordRankArg, coordDimMapArg, &
+      coordTypeKind, dimCount, tileCount, distgrid,  staggerlocsCount, &
+      distgridToGridMapArg, undistLBoundArg, undistUBoundArg, coordDimCountArg, coordDimMapArg, &
       gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, &
-      indexflag, localDECount, distRank, undistRank, localrc)
+      indexflag, localDECount, distDimCount, undistDimCount, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5731,7 +5723,7 @@ end interface
     call ESMF_InterfaceIntDestroy(undistUBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(coordRankArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(coordDimCountArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
@@ -5814,34 +5806,34 @@ end subroutine ESMF_GridGet
 !     of predefined stagger locations.
 !\item[{[exclusiveLBound]}]
 !     Upon return this holds the lower bounds of the exclusive region.
-!     {\tt exclusiveLBound} must be allocated to be of size equal to the Grid rank.
+!     {\tt exclusiveLBound} must be allocated to be of size equal to the Grid dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 !\item[{[exclusiveUBound]}]
 !     Upon return this holds the upper bounds of the exclusive region.
-!     {\tt exclusiveUBound} must be allocated to be of size equal to the Grid rank.
+!     {\tt exclusiveUBound} must be allocated to be of size equal to the Grid dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 !\item[{[exclusiveCount]}]
 !     Upon return this holds the number of items in the exclusive region per dimension
 !     (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
-!      be allocated to be of size equal to the Grid rank.
+!      be allocated to be of size equal to the Grid dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 !\item[{[computationalLBound]}]
 !     Upon return this holds the lower bounds of the computational region.
-!     {\tt computationalLBound} must be allocated to be of size equal to the Grid rank.
+!     {\tt computationalLBound} must be allocated to be of size equal to the Grid dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 !\item[{[computationalUBound]}]
 !     Upon return this holds the upper bounds of the computational region.
-!     {\tt computationalUBound} must be allocated to be of size equal to the Grid rank.
+!     {\tt computationalUBound} must be allocated to be of size equal to the Grid dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 !\item[{[computationalCount]}]
 !     Upon return this holds the number of items in the computational region per dimension.
 !     (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount} must
-!      be allocated to be of size equal to the Grid rank.
+!      be allocated to be of size equal to the Grid dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 !\item[{[rc]}]
@@ -5961,24 +5953,24 @@ end subroutine ESMF_GridGet
 !     Upon return this holds the global lower width of the stagger region.
 !     The width returned is only for the distGrid dimensions and is
 !     mapped to correspond to those dimensions. 
-!     {\tt computationalEdgeLWidth} must be allocated to be of size equal to the grid distRank
+!     {\tt computationalEdgeLWidth} must be allocated to be of size equal to the grid distDimCount
 !     (i.e. the grid's distgrid's dimCount).
 !\item[{[computationalEdgeUWidth]}]
 !     Upon return this holds the global upper width of the stagger region.
 !     The width returned is only for the distGrid dimensions and is
 !     mapped to correspond to those dimensions. 
-!     {\tt computationalEdgeUWidth} must be allocated to be of size equal to the grid distRank
+!     {\tt computationalEdgeUWidth} must be allocated to be of size equal to the grid distDimCount
 !     (i.e. the grid's distgrid's dimCount).
 !\item[{[undistLBound]}]
 !     Upon return this holds the lower bound of the stagger region.
 !     This bound is the lower bound used to create the grid modified by
 !     the appropriate staggerEdgeLWidths.  
-!     {\tt undistLBound} must be allocated to be of size equal to the grid undistRank.
+!     {\tt undistLBound} must be allocated to be of size equal to the grid undistDimCount.
 !\item[{[undistUBound]}]
 !     Upon return this holds the upper bound of the stagger region.
 !     This bound is the upper bound used to create the grid modified by
 !     the appropriate staggerEdgeUWidths.  
-!     {\tt undistUBound} must be allocated to be of size equal to the grid undistRank.
+!     {\tt undistUBound} must be allocated to be of size equal to the grid undistDimCount.
 !\item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -6107,46 +6099,46 @@ end subroutine ESMF_GridGet
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
-!          {\tt exclusiveLBound} must be allocated to be of size equal to the coord rank.
+!          {\tt exclusiveLBound} must be allocated to be of size equal to the coord dimCount.
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
-!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord dimCount.
 !     \item[{[exclusiveCount]}]
 !          Upon return this holds the number of items in the exclusive region per dimension
 !          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
-!          be allocated to be of size equal to the coord rank.
+!          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[computationalLBound]}]
 !          Upon return this holds the lower bounds of the stagger region.
-!          {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
+!          {\tt computationalLBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[computationalUBound]}]
 !          Upon return this holds the upper bounds of the stagger region.
-!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[computationalCount]}]
 !          Upon return this holds the number of items in the computational region per dimension
 !          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
-!          must be allocated to be of size equal to the coord rank.
+!          must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[totalLBound]}]
 !          Upon return this holds the lower bounds of the total region.
-!          {\tt totalLBound} must be allocated to be of size equal to the coord rank.
+!          {\tt totalLBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[totalUBound]}]
 !          Upon return this holds the upper bounds of the total region.
-!          {\tt totalUBound} must be allocated to be of size equal to the coord rank.
+!          {\tt totalUBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[totalCount]}]
 !          Upon return this holds the number of items in the total region per dimension
 !          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
-!          be allocated to be of size equal to the coord rank.
+!          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{fptr}]
@@ -6215,50 +6207,50 @@ end subroutine ESMF_GridGet
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
-!          {\tt exclusiveLBound} must be allocated to be of size equal to the coord rank.
+!          {\tt exclusiveLBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
-!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[exclusiveCount]}]
 !          Upon return this holds the number of items in the exclusive region per dimension
 !          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
-!          be allocated to be of size equal to the coord rank.
+!          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[computationalLBound]}]
 !          Upon return this holds the lower bounds of the stagger region.
-!          {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
+!          {\tt computationalLBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[computationalUBound]}]
 !          Upon return this holds the upper bounds of the stagger region.
-!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[computationalCount]}]
 !          Upon return this holds the number of items in the computational region per dimension
 !          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
-!          must be allocated to be of size equal to the coord rank.
+!          must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[totalLBound]}]
 !          Upon return this holds the lower bounds of the total region.
-!          {\tt totalLBound} must be allocated to be of size equal to the coord rank.
+!          {\tt totalLBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[totalUBound]}]
 !          Upon return this holds the upper bounds of the total region.
-!          {\tt totalUBound} must be allocated to be of size equal to the coord rank.
+!          {\tt totalUBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[totalCount]}]
 !          Upon return this holds the number of items in the total region per dimension
 !          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
-!          be allocated to be of size equal to the coord rank.
+!          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{fptr}]
@@ -6277,12 +6269,12 @@ end subroutine ESMF_GridGet
     ! Local variables 
     type(ESMF_Array) :: array 
     integer :: localrc ! local error status 
-    integer :: localDeCount, rank 
+    integer :: localDeCount, dimCount 
     type(ESMF_TypeKind) :: typekind 
     type(ESMF_LocalArray), allocatable :: larrayList(:) 
     type(ESMF_CopyFlag) :: docopyInt
     integer :: lDE
-    integer :: coordRank(ESMF_MAXDIM)
+    integer :: coordDimCount(ESMF_MAXDIM)
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
@@ -6302,7 +6294,7 @@ end subroutine ESMF_GridGet
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
 
     ! Check consistency 
-    call ESMF_GridGet(grid, coordTypeKind=typekind, rank=rank, coordRank=coordRank, &
+    call ESMF_GridGet(grid, coordTypeKind=typekind, dimCount=dimCount, coordDimCount=coordDimCount, &
                       localDECount=localDECount, rc=localrc) 
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6316,17 +6308,17 @@ end subroutine ESMF_GridGet
     endif 
 
     ! make sure coord is legitimate
-    if ((coordDim .lt. 1) .or. (coordDim .gt. rank)) then
+    if ((coordDim .lt. 1) .or. (coordDim .gt. dimCount)) then
       call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
         "- coordinate dimension outside of range specified for this Grid", & 
         ESMF_CONTEXT, rc) 
       return 
     endif 
 
-    ! Require farrayPtr rank to match coordinate rank 
-    if (coordRank(coordDim) .ne. 1) then 
+    ! Require farrayPtr dimCount to match coordinate dimCount 
+    if (coordDimCount(coordDim) .ne. 1) then 
       call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
-        "- farrayPtr rank does not match requested coordinate rank", & 
+        "- farrayPtr dimCount does not match requested coordinate dimCount", & 
         ESMF_CONTEXT, rc) 
       return 
     endif 
@@ -6524,50 +6516,50 @@ end subroutine ESMF_GridGet
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
-!          {\tt exclusiveLBound} must be allocated to be of size equal to the coord rank.
+!          {\tt exclusiveLBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
-!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[exclusiveCount]}]
 !          Upon return this holds the number of items in the exclusive region per dimension
 !          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
-!          be allocated to be of size equal to the coord rank.
+!          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[computationalLBound]}]
 !          Upon return this holds the lower bounds of the stagger region.
-!          {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
+!          {\tt computationalLBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[computationalUBound]}]
 !          Upon return this holds the upper bounds of the stagger region.
-!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[computationalCount]}]
 !          Upon return this holds the number of items in the computational region per dimension
 !          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
-!          must be allocated to be of size equal to the coord rank.
+!          must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[totalLBound]}]
 !          Upon return this holds the lower bounds of the total region.
-!          {\tt totalLBound} must be allocated to be of size equal to the coord rank.
+!          {\tt totalLBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[totalUBound]}]
 !          Upon return this holds the upper bounds of the total region.
-!          {\tt totalUBound} must be allocated to be of size equal to the coord rank.
+!          {\tt totalUBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[totalCount]}]
 !          Upon return this holds the number of items in the total region per dimension
 !          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
-!          be allocated to be of size equal to the coord rank.
+!          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{fptr}]
@@ -6587,12 +6579,12 @@ end subroutine ESMF_GridGet
     ! Local variables 
     type(ESMF_Array) :: array 
     integer :: localrc ! local error status 
-    integer :: localDeCount, rank 
+    integer :: localDeCount, dimCount 
     type(ESMF_TypeKind) :: typekind 
     type(ESMF_LocalArray), allocatable :: larrayList(:) 
     type(ESMF_CopyFlag) :: docopyInt
     integer :: lDE
-    integer :: coordRank(ESMF_MAXDIM)
+    integer :: coordDimCount(ESMF_MAXDIM)
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
@@ -6612,7 +6604,7 @@ end subroutine ESMF_GridGet
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
 
     ! Check consistency 
-    call ESMF_GridGet(grid, coordTypeKind=typekind, rank=rank, coordRank=coordRank, &
+    call ESMF_GridGet(grid, coordTypeKind=typekind, dimCount=dimCount, coordDimCount=coordDimCount, &
                       localDECount=localDECount, rc=localrc) 
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6626,17 +6618,17 @@ end subroutine ESMF_GridGet
     endif 
 
     ! make sure coord is legitimate
-    if ((coordDim .lt. 1) .or. (coordDim .gt. rank)) then
+    if ((coordDim .lt. 1) .or. (coordDim .gt. dimCount)) then
       call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
         "- coordinate dimension outside of range specified for this Grid", & 
         ESMF_CONTEXT, rc) 
       return 
     endif 
 
-    ! Require farrayPtr rank to match coordinate rank 
-    if (coordRank(coordDim) .ne. 2) then 
+    ! Require farrayPtr dimCount to match coordinate dimCount 
+    if (coordDimCount(coordDim) .ne. 2) then 
     call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
-      "- farrayPtr rank does not match requested coordinate rank", & 
+      "- farrayPtr dimCount does not match requested coordinate dimCount", & 
       ESMF_CONTEXT, rc) 
     return 
     endif 
@@ -6836,50 +6828,50 @@ end subroutine ESMF_GridGet
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
-!          {\tt exclusiveLBound} must be allocated to be of size equal to the coord rank.
+!          {\tt exclusiveLBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
-!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[exclusiveCount]}]
 !          Upon return this holds the number of items in the exclusive region per dimension
 !          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
-!          be allocated to be of size equal to the coord rank.
+!          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[computationalLBound]}]
 !          Upon return this holds the lower bounds of the stagger region.
-!          {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
+!          {\tt computationalLBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[computationalUBound]}]
 !          Upon return this holds the upper bounds of the stagger region.
-!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[computationalCount]}]
 !          Upon return this holds the number of items in the computational region per dimension
 !          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
-!          must be allocated to be of size equal to the coord rank.
+!          must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[totalLBound]}]
 !          Upon return this holds the lower bounds of the total region.
-!          {\tt totalLBound} must be allocated to be of size equal to the coord rank.
+!          {\tt totalLBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[totalUBound]}]
 !          Upon return this holds the upper bounds of the total region.
-!          {\tt totalUBound} must be allocated to be of size equal to the coord rank.
+!          {\tt totalUBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[totalCount]}]
 !          Upon return this holds the number of items in the total region per dimension
 !          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
-!          be allocated to be of size equal to the coord rank.
+!          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{fptr}]
@@ -6899,12 +6891,12 @@ end subroutine ESMF_GridGet
  ! Local variables 
  type(ESMF_Array) :: array 
  integer :: localrc ! local error status 
- integer :: localDeCount, rank 
+ integer :: localDeCount, dimCount 
  type(ESMF_TypeKind) :: typekind 
  type(ESMF_LocalArray), allocatable :: larrayList(:) 
  type(ESMF_CopyFlag) :: docopyInt
  integer :: lDE
- integer :: coordRank(ESMF_MAXDIM)
+ integer :: coordDimCount(ESMF_MAXDIM)
  type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
@@ -6924,7 +6916,7 @@ end subroutine ESMF_GridGet
  ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
 
  ! Check consistency 
- call ESMF_GridGet(grid, coordTypeKind=typekind, rank=rank, coordRank=coordRank, &
+ call ESMF_GridGet(grid, coordTypeKind=typekind, dimCount=dimCount, coordDimCount=coordDimCount, &
                    localDECount=localDECount, rc=localrc) 
  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6938,17 +6930,17 @@ end subroutine ESMF_GridGet
  endif 
 
 ! make sure coord is legitimate
-if ((coordDim .lt. 1) .or. (coordDim .gt. rank)) then
+if ((coordDim .lt. 1) .or. (coordDim .gt. dimCount)) then
  call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
  "- coordinate dimension outside of range specified for this Grid", & 
  ESMF_CONTEXT, rc) 
  return 
  endif 
 
- ! Require farrayPtr rank to match coordinate rank 
- if (coordRank(coordDim) .ne. 3) then 
+ ! Require farrayPtr dimCount to match coordinate dimCount 
+ if (coordDimCount(coordDim) .ne. 3) then 
  call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
- "- farrayPtr rank does not match requested coordinate rank", & 
+ "- farrayPtr dimCount does not match requested coordinate dimCount", & 
  ESMF_CONTEXT, rc) 
  return 
  endif 
@@ -7151,50 +7143,50 @@ endif
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
-!          {\tt exclusiveLBound} must be allocated to be of size equal to the coord rank.
+!          {\tt exclusiveLBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
-!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[exclusiveCount]}]
 !          Upon return this holds the number of items in the exclusive region per dimension
 !          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
-!          be allocated to be of size equal to the coord rank.
+!          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[computationalLBound]}]
 !          Upon return this holds the lower bounds of the stagger region.
-!          {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
+!          {\tt computationalLBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[computationalUBound]}]
 !          Upon return this holds the upper bounds of the stagger region.
-!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[computationalCount]}]
 !          Upon return this holds the number of items in the computational region per dimension
 !          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
-!          must be allocated to be of size equal to the coord rank.
+!          must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[totalLBound]}]
 !          Upon return this holds the lower bounds of the total region.
-!          {\tt totalLBound} must be allocated to be of size equal to the coord rank.
+!          {\tt totalLBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[totalUBound]}]
 !          Upon return this holds the upper bounds of the total region.
-!          {\tt totalUBound} must be allocated to be of size equal to the coord rank.
+!          {\tt totalUBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[totalCount]}]
 !          Upon return this holds the number of items in the total region per dimension
 !          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
-!          be allocated to be of size equal to the coord rank.
+!          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{fptr}]
@@ -7214,12 +7206,12 @@ endif
  ! Local variables 
  type(ESMF_Array) :: array 
  integer :: localrc ! local error status 
- integer :: localDeCount, rank 
+ integer :: localDeCount, dimCount 
  type(ESMF_TypeKind) :: typekind 
  type(ESMF_LocalArray), allocatable :: larrayList(:) 
  type(ESMF_CopyFlag) :: docopyInt
  integer :: lDE
- integer :: coordRank(ESMF_MAXDIM)
+ integer :: coordDimCount(ESMF_MAXDIM)
  type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
@@ -7239,7 +7231,7 @@ endif
  ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
 
  ! Check consistency 
- call ESMF_GridGet(grid, coordTypeKind=typekind, rank=rank, coordRank=coordRank, &
+ call ESMF_GridGet(grid, coordTypeKind=typekind, dimCount=dimCount, coordDimCount=coordDimCount, &
                    localDECount=localDECount, rc=localrc) 
  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7253,17 +7245,17 @@ endif
  endif 
 
 ! make sure coord is legitimate
-if ((coordDim .lt. 1) .or. (coordDim .gt. rank)) then
+if ((coordDim .lt. 1) .or. (coordDim .gt. dimCount)) then
  call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
  "- coordinate dimension outside of range specified for this Grid", & 
  ESMF_CONTEXT, rc) 
  return 
  endif 
 
- ! Require farrayPtr rank to match coordinate rank 
- if (coordRank(coordDim) .ne. 1) then 
+ ! Require farrayPtr dimCount to match coordinate dimCount 
+ if (coordDimCount(coordDim) .ne. 1) then 
  call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
- "- farrayPtr rank does not match requested coordinate rank", & 
+ "- farrayPtr dimCount does not match requested coordinate dimCount", & 
  ESMF_CONTEXT, rc) 
  return 
  endif 
@@ -7465,50 +7457,50 @@ endif
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
-!          {\tt exclusiveLBound} must be allocated to be of size equal to the coord rank.
+!          {\tt exclusiveLBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
-!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[exclusiveCount]}]
 !          Upon return this holds the number of items in the exclusive region per dimension
 !          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
-!          be allocated to be of size equal to the coord rank.
+!          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[computationalLBound]}]
 !          Upon return this holds the lower bounds of the stagger region.
-!          {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
+!          {\tt computationalLBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[computationalUBound]}]
 !          Upon return this holds the upper bounds of the stagger region.
-!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[computationalCount]}]
 !          Upon return this holds the number of items in the computational region per dimension
 !          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
-!          must be allocated to be of size equal to the coord rank.
+!          must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[totalLBound]}]
 !          Upon return this holds the lower bounds of the total region.
-!          {\tt totalLBound} must be allocated to be of size equal to the coord rank.
+!          {\tt totalLBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[totalUBound]}]
 !          Upon return this holds the upper bounds of the total region.
-!          {\tt totalUBound} must be allocated to be of size equal to the coord rank.
+!          {\tt totalUBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[totalCount]}]
 !          Upon return this holds the number of items in the total region per dimension
 !          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
-!          be allocated to be of size equal to the coord rank.
+!          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{fptr}]
@@ -7528,12 +7520,12 @@ endif
  ! Local variables 
  type(ESMF_Array) :: array 
  integer :: localrc ! local error status 
- integer :: localDeCount, rank 
+ integer :: localDeCount, dimCount 
  type(ESMF_TypeKind) :: typekind 
  type(ESMF_LocalArray), allocatable :: larrayList(:) 
  type(ESMF_CopyFlag) :: docopyInt
  integer :: lDE
- integer :: coordRank(ESMF_MAXDIM)
+ integer :: coordDimCount(ESMF_MAXDIM)
  type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
@@ -7553,7 +7545,7 @@ endif
  ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
 
  ! Check consistency 
- call ESMF_GridGet(grid, coordTypeKind=typekind, rank=rank, coordRank=coordRank, &
+ call ESMF_GridGet(grid, coordTypeKind=typekind, dimCount=dimCount, coordDimCount=coordDimCount, &
                    localDECount=localDECount, rc=localrc) 
  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7567,17 +7559,17 @@ endif
  endif 
 
 ! make sure coord is legitimate
-if ((coordDim .lt. 1) .or. (coordDim .gt. rank)) then
+if ((coordDim .lt. 1) .or. (coordDim .gt. dimCount)) then
  call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
  "- coordinate dimension outside of range specified for this Grid", & 
  ESMF_CONTEXT, rc) 
  return 
  endif 
 
- ! Require farrayPtr rank to match coordinate rank 
- if (coordRank(coordDim) .ne. 2) then 
+ ! Require farrayPtr dimCount to match coordinate dimCount 
+ if (coordDimCount(coordDim) .ne. 2) then 
  call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
- "- farrayPtr rank does not match requested coordinate rank", & 
+ "- farrayPtr dimCount does not match requested coordinate dimCount", & 
  ESMF_CONTEXT, rc) 
  return 
  endif 
@@ -7778,50 +7770,50 @@ endif
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
-!          {\tt exclusiveLBound} must be allocated to be of size equal to the coord rank.
+!          {\tt exclusiveLBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
-!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[exclusiveCount]}]
 !          Upon return this holds the number of items in the exclusive region per dimension
 !          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
-!          be allocated to be of size equal to the coord rank.
+!          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[computationalLBound]}]
 !          Upon return this holds the lower bounds of the stagger region.
-!          {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
+!          {\tt computationalLBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[computationalUBound]}]
 !          Upon return this holds the upper bounds of the stagger region.
-!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[computationalCount]}]
 !          Upon return this holds the number of items in the computational region per dimension
 !          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
-!          must be allocated to be of size equal to the coord rank.
+!          must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[totalLBound]}]
 !          Upon return this holds the lower bounds of the total region.
-!          {\tt totalLBound} must be allocated to be of size equal to the coord rank.
+!          {\tt totalLBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[totalUBound]}]
 !          Upon return this holds the upper bounds of the total region.
-!          {\tt totalUBound} must be allocated to be of size equal to the coord rank.
+!          {\tt totalUBound} must be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[totalCount]}]
 !          Upon return this holds the number of items in the total region per dimension
 !          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
-!          be allocated to be of size equal to the coord rank.
+!          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{fptr}]
@@ -7841,12 +7833,12 @@ endif
  ! Local variables 
  type(ESMF_Array) :: array 
  integer :: localrc ! local error status 
- integer :: localDeCount, rank 
+ integer :: localDeCount, dimCount 
  type(ESMF_TypeKind) :: typekind 
  type(ESMF_LocalArray), allocatable :: larrayList(:) 
  type(ESMF_CopyFlag) :: docopyInt
  integer :: lDE
- integer :: coordRank(ESMF_MAXDIM)
+ integer :: coordDimCount(ESMF_MAXDIM)
  type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
@@ -7866,7 +7858,7 @@ endif
  ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
 
  ! Check consistency 
- call ESMF_GridGet(grid, coordTypeKind=typekind, rank=rank, coordRank=coordRank, &
+ call ESMF_GridGet(grid, coordTypeKind=typekind, dimCount=dimCount, coordDimCount=coordDimCount, &
                    localDECount=localDECount, rc=localrc) 
  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7880,17 +7872,17 @@ endif
  endif 
 
 ! make sure coord is legitimate
-if ((coordDim .lt. 1) .or. (coordDim .gt. rank)) then
+if ((coordDim .lt. 1) .or. (coordDim .gt. dimCount)) then
  call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
  "- coordinate dimension outside of range specified for this Grid", & 
  ESMF_CONTEXT, rc) 
  return 
  endif 
 
- ! Require farrayPtr rank to match coordinate rank 
- if (coordRank(coordDim) .ne. 3) then 
+ ! Require farrayPtr dimCount to match coordinate dimCount 
+ if (coordDimCount(coordDim) .ne. 3) then 
  call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
- "- farrayPtr rank does not match requested coordinate rank", & 
+ "- farrayPtr dimCount does not match requested coordinate dimCount", & 
  ESMF_CONTEXT, rc) 
  return 
  endif 
@@ -8091,50 +8083,50 @@ endif
 !     ESMF\_STAGGERLOC\_CENTER.
 !\item[{[exclusiveLBound]}]
 !     Upon return this holds the lower bounds of the exclusive region.
-!     {\tt exclusiveLBound} must be allocated to be of size equal to the coord rank.
+!     {\tt exclusiveLBound} must be allocated to be of size equal to the coord dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 !\item[{[exclusiveUBound]}]
 !     Upon return this holds the upper bounds of the exclusive region.
-!     {\tt exclusiveUBound} must be allocated to be of size equal to the coord rank.
+!     {\tt exclusiveUBound} must be allocated to be of size equal to the coord dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 !\item[{[exclusiveCount]}]
 !     Upon return this holds the number of items in the exclusive region per dimension
 !     (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
-!     be allocated to be of size equal to the coord rank.
+!     be allocated to be of size equal to the coord dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 !\item[{[computationalLBound]}]
 !     Upon return this holds the lower bounds of the stagger region.
-!     {\tt computationalLBound} must be allocated to be of size equal to the coord rank.
+!     {\tt computationalLBound} must be allocated to be of size equal to the coord dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 !\item[{[computationalUBound]}]
 !     Upon return this holds the upper bounds of the stagger region.
-!     {\tt computationalUBound} must be allocated to be of size equal to the coord rank.
+!     {\tt computationalUBound} must be allocated to be of size equal to the coord dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 !\item[{[computationalCount]}]
 !     Upon return this holds the number of items in the computational region per dimension
 !     (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
-!      must be allocated to be of size equal to the coord rank.
+!      must be allocated to be of size equal to the coord dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 !\item[{[totalLBound]}]
 !     Upon return this holds the lower bounds of the total region.
-!     {\tt totalLBound} must be allocated to be of size equal to the coord rank.
+!     {\tt totalLBound} must be allocated to be of size equal to the coord dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 !\item[{[totalUBound]}]
 !     Upon return this holds the upper bounds of the total region.
-!     {\tt totalUBound} must be allocated to be of size equal to the coord rank.
+!     {\tt totalUBound} must be allocated to be of size equal to the coord dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 !\item[{[totalCount]}]
 !     Upon return this holds the number of items in the total region per dimension
 !     (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
-!      be allocated to be of size equal to the coord rank.
+!      be allocated to be of size equal to the coord dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 !\item[{[rc]}]
@@ -8551,7 +8543,7 @@ endif
 ! !INTERFACE:
   ! Private name; call using ESMF_GridSet()
     subroutine ESMF_GridSetFromDistGrid(grid, name, coordTypeKind, distgrid, & 
-                 distgridToGridMap, undistLBound, undistUBound, coordRank, coordDimMap,           &
+                 distgridToGridMap, undistLBound, undistUBound, coordDimCount, coordDimMap,           &
                  gridEdgeLWidth, gridEdgeUWidth, gridAlign,                  &
                  indexflag, rc)
 !
@@ -8566,7 +8558,7 @@ endif
        integer,               intent(in),   optional  :: distgridToGridMap(:)
        integer,               intent(in),   optional  :: undistLBound(:)
        integer,               intent(in),   optional  :: undistUBound(:)
-       integer,               intent(in),   optional  :: coordRank(:)
+       integer,               intent(in),   optional  :: coordDimCount(:)
        integer,               intent(in),   optional  :: coordDimMap(:,:)
        integer,               intent(in),   optional  :: gridEdgeLWidth(:)
        integer,               intent(in),   optional  :: gridEdgeUWidth(:)
@@ -8592,12 +8584,12 @@ endif
 ! \item[distgrid]
 !      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal
-!      to the grid rank, otherwise a runtime ESMF error will be
+!      to the grid dimCount, otherwise a runtime ESMF error will be
 !      raised.
 ! \item[{[distgridToGridMap]}] 
 !      List that has as many elements as indicated by distgrid's dimCount value.
 !      The elements map each dimension of distgrid to a dimension in the grid.
-!       (i.e. the values should range from 1 to gridrank). If not specified, the default
+!       (i.e. the values should range from 1 to griddimCount). If not specified, the default
 !       is to map all of distgrid's dimensions against the lower dimensions of the
 !       grid in sequence. 
 ! \item[{[undistLBound]}] 
@@ -8636,7 +8628,7 @@ endif
     type(ESMF_InterfaceInt) :: distgridToGridMapArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: undistLBoundArg ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: undistUBoundArg ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: coordRankArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: coordDimCountArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
 
 
@@ -8683,7 +8675,7 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! Description of array factorization
-    coordRankArg = ESMF_InterfaceIntCreate(coordRank, rc=localrc)
+    coordDimCountArg = ESMF_InterfaceIntCreate(coordDimCount, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     coordDimMapArg = ESMF_InterfaceIntCreate(farray2D=coordDimMap, rc=localrc)
@@ -8693,7 +8685,7 @@ endif
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridsetfromdistgrid(grid%this, nameLen, name, &
       coordTypeKind, distgrid, &
-      distgridToGridMapArg, undistLBoundArg, undistUBoundArg, coordRankArg, coordDimMapArg, &
+      distgridToGridMapArg, undistLBoundArg, undistUBoundArg, coordDimCountArg, coordDimMapArg, &
       gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, &
       indexflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -8718,7 +8710,7 @@ endif
     call ESMF_InterfaceIntDestroy(undistUBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(coordRankArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(coordDimCountArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
@@ -8860,7 +8852,7 @@ endif
 ! using the countsPerDEDim1, countsPerDEDim2, countsPerDEDim3 arguments.
 ! The index of each array element corresponds to a DE number.  The 
 ! array value at the index is the number of grid cells on the DE in 
-! that dimension.  The rank of the grid is equal to the number of 
+! that dimension.  The dimCount of the grid is equal to the number of 
 ! countsPerDEDim<> arrays that are specified. 
 !
 ! To specify an undistributed dimension, the array in that dimension
@@ -9017,7 +9009,7 @@ endif
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
 ! \item[{[distDim]}]
-!       Array of the same rank as the Grid. It specifies if each
+!       Array of the same dimCount as the Grid. It specifies if each
 !       dimensions should be distributed. If not
 !       specified, defaults to all true. Only dimensions
 !       with size(countsPerDeDim)=1 may be made undistributed. 
@@ -9036,10 +9028,10 @@ endif
     integer, pointer     :: petList(:)
     integer, pointer     :: undistLBound(:)
     integer, pointer     :: undistUBound(:)
-    integer, pointer     :: coordRank(:)
+    integer, pointer     :: coordDimCount(:)
     integer, pointer     :: coordDimMap(:,:)
     integer              :: localrc
-    integer              :: rank,i,distRank,undistRank,maxSizeDEDim
+    integer              :: dimCount,i,distDimCount,undistDimCount,maxSizeDEDim
     integer, pointer     :: minIndexDG(:),maxIndexDG(:)
     integer, pointer     :: distgridToGridMap(:), deDimCount(:)
     integer, pointer     :: minIndexLocal(:)
@@ -9063,19 +9055,19 @@ endif
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! Compute the Grid Rank and Derivatives ---------------------------------------------------
-    ! rank
+    ! Compute the Grid DimCount and Derivatives ---------------------------------------------------
+    ! dimCount
     if (present(countsPerDEDim3)) then
-	rank=3
+	dimCount=3
     else
-	rank=2
+	dimCount=2
     endif
 
     ! check distribution info
     if (present(distDim)) then
-       if (size(distDim) .ne. rank) then
+       if (size(distDim) .ne. dimCount) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                 "- distDim must be same rank as Grid", & 
+                 "- distDim must be same dimCount as Grid", & 
                  ESMF_CONTEXT, rc) 
             return 
        endif
@@ -9083,30 +9075,30 @@ endif
     
     ! initialize isDimDist
     if (present(distDim)) then
-       isDimDist(1:rank)=distDim(1:rank)
+       isDimDist(1:dimCount)=distDim(1:dimCount)
     else
        isDimDist(:)=.true.
     endif
 
-    ! rank of distributed part
-    distRank=0 
+    ! dimCount of distributed part
+    distDimCount=0 
 
     if (isDimDist(1)) then
-       distRank=distRank+1
+       distDimCount=distDimCount+1
     endif
 
     if (isDimDist(2)) then
-       distRank=distRank+1
+       distDimCount=distDimCount+1
     endif
 
-    if (rank .gt. 2) then
+    if (dimCount .gt. 2) then
        if (isDimDist(3)) then
-           distRank=distRank+1
+           distDimCount=distDimCount+1
         endif
     endif
 
-    ! ranks of the undistributed part of the grid
-    undistRank=rank-distRank
+    ! dimCounts of the undistributed part of the grid
+    undistDimCount=dimCount-distDimCount
 
     ! Argument Consistency Checking --------------------------------------------------------------
     if (size(countsPerDEDim1) .lt. 1) then
@@ -9146,7 +9138,7 @@ endif
        return 
     endif
 
-    if (rank .gt. 2) then
+    if (dimCount .gt. 2) then
        if (.not. isDimDist(3) .and. size(countsPerDEDim3) .gt. 1) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
             "- can't have undist dim 3 with size(countsPerDEDim3) > 1", & 
@@ -9155,66 +9147,66 @@ endif
        endif
     endif
 
-    if ((rank .lt. 3) .and. present(connDim3)) then
+    if ((dimCount .lt. 3) .and. present(connDim3)) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-                 "- connDim3 not allowed when grid is less than rank 3", & 
+                 "- connDim3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
-    if ((rank .lt. 3) .and. present(poleStaggerLoc3)) then
+    if ((dimCount .lt. 3) .and. present(poleStaggerLoc3)) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-                 "- poleStaggerLoc3 not allowed when grid is less than rank 3", & 
+                 "- poleStaggerLoc3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
-    if ((rank .lt. 3) .and. present(bipolePos3)) then
+    if ((dimCount .lt. 3) .and. present(bipolePos3)) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-                 "- bipolePos3 not allowed when grid is less than rank 3", & 
+                 "- bipolePos3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
 
-    if ((rank .lt. 3) .and. present(coordDep3)) then
+    if ((dimCount .lt. 3) .and. present(coordDep3)) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-                 "- coordDep3 not allowed when grid is less than rank 3", & 
+                 "- coordDep3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
     if (present(coordDep1)) then
-       if ((size(coordDep1) < 1) .or. (size(coordDep1)>rank)) then
+       if ((size(coordDep1) < 1) .or. (size(coordDep1)>dimCount)) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-               "- coordDep1 size incompatible with grid rank", & 
+               "- coordDep1 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
        endif
     endif
 
     if (present(coordDep2)) then
-       if ((size(coordDep2) < 1) .or. (size(coordDep2)>rank)) then
+       if ((size(coordDep2) < 1) .or. (size(coordDep2)>dimCount)) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-               "- coordDep2 size incompatible with grid rank", & 
+               "- coordDep2 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
        endif
     endif
 
     if (present(coordDep3)) then
-       if ((size(coordDep3) < 1) .or. (size(coordDep3)>rank)) then
+       if ((size(coordDep3) < 1) .or. (size(coordDep3)>dimCount)) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-               "- coordDep3 size incompatible with grid rank", & 
+               "- coordDep3 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
        endif
     endif
 
     if (present(minIndex)) then
-       if (size(minIndex) .ne. rank) then
+       if (size(minIndex) .ne. dimCount) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-               "- minIndex size must equal grid rank", & 
+               "- minIndex size must equal grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
        endif
@@ -9222,7 +9214,7 @@ endif
 
 
     if (present(petMap)) then
-       if (rank .gt. 2) then
+       if (dimCount .gt. 2) then
           if ((size(petMap,1) .ne. size(countsPerDEDim1)) .or. &
               (size(petMap,2) .ne. size(countsPerDEDim2)) .or. &
               (size(petMap,3) .ne. size(countsPerDEDim3))) then
@@ -9245,29 +9237,29 @@ endif
 
 
 
-    ! Check Rank of gridWidths and Aligns
+    ! Check DimCount of gridWidths and Aligns
     if (present(gridEdgeLWidth)) then
-        if (size(gridEdgeLWidth) .ne. rank) then
+        if (size(gridEdgeLWidth) .ne. dimCount) then
            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                     "- gridEdgeLWidth must be of size equal to Grid rank", & 
+                     "- gridEdgeLWidth must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
               return
         endif 
     endif
 
     if (present(gridEdgeUWidth)) then
-        if (size(gridEdgeUWidth) .ne. rank) then
+        if (size(gridEdgeUWidth) .ne. dimCount) then
            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                     "- gridEdgeUWidth must be of size equal to Grid rank", & 
+                     "- gridEdgeUWidth must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
               return
         endif 
     endif
 
     if (present(gridAlign)) then
-        if (size(gridAlign) .ne. rank) then
+        if (size(gridAlign) .ne. dimCount) then
            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                     "- gridAlign must be of size equal to Grid rank", & 
+                     "- gridAlign must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
               return
         endif 
@@ -9407,7 +9399,7 @@ endif
    ! TODO: can you create an array without a distgrid??? What if everything they specify is undistributed?
    !       for now make a totally undistributed grid an error. Work on handling it later.
    !       Perhaps don't use undistLBound, undistUBound
-    if (distRank .eq. 0) then
+    if (distDimCount .eq. 0) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
                  "- Need to have at least one distributed dimension", & 
                  ESMF_CONTEXT, rc) 
@@ -9430,7 +9422,7 @@ endif
                                      ESMF_CONTEXT, rc)) return
     countsPerDEDim2Local=countsPerDEDim2
 
-    if (rank .gt. 2) then
+    if (dimCount .gt. 2) then
        allocate(countsPerDEDim3Local(size(countsPerDEDim3)), stat=localrc)
        if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
                                       ESMF_CONTEXT, rc)) return
@@ -9441,14 +9433,14 @@ endif
     ! Set Defaults -------------------------------------------------------------
 
     ! Set default for minIndex 
-    allocate(minIndexLocal(rank), stat=localrc)
+    allocate(minIndexLocal(dimCount), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
                                      ESMF_CONTEXT, rc)) return
 
     if (present(minIndex)) then
        minIndexLocal(:)=minIndex(:)
     else
-       do i=1,rank
+       do i=1,dimCount
           minIndexLocal(i)=1
        enddo
     endif
@@ -9527,17 +9519,17 @@ endif
 
 
    ! Make alterations to size due to GridEdgeWidths ----------------------------
-    allocate(gridEdgeLWidthLocal(rank), stat=localrc)
+    allocate(gridEdgeLWidthLocal(dimCount), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeLWidthLocal", &
                                      ESMF_CONTEXT, rc)) return
-    allocate(gridEdgeUWidthLocal(rank), stat=localrc)
+    allocate(gridEdgeUWidthLocal(dimCount), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeUWidthLocal", &
                                      ESMF_CONTEXT, rc)) return
-    allocate(gridAlignLocal(rank), stat=localrc)
+    allocate(gridAlignLocal(dimCount), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridAlignLocal", &
                                      ESMF_CONTEXT, rc)) return
 
-    call ESMF_GridLUADefault(rank, &
+    call ESMF_GridLUADefault(dimCount, &
                              gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
                              gridEdgeLWidthLocal, gridEdgeUWidthLocal, gridAlignLocal, &
                              rc=localrc)
@@ -9545,7 +9537,7 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Modify lower bound
-    do i=1,rank
+    do i=1,dimCount
        minIndexLocal(i)=minIndexLocal(i)-gridEdgeLWidthLocal(i)
     enddo
 
@@ -9555,7 +9547,7 @@ endif
 
     countsPerDEDim2Local(1)=countsPerDEDim2Local(1)+gridEdgeLWidthLocal(2)
   
-    if (rank .gt. 2) then
+    if (dimCount .gt. 2) then
        countsPerDEDim3Local(1)=countsPerDEDim3Local(1)+gridEdgeLWidthLocal(3)
     endif
 
@@ -9567,20 +9559,20 @@ endif
     top=size(countsPerDEDim2Local)
     countsPerDEDim2Local(top)=countsPerDEDim2Local(top)+gridEdgeUWidthLocal(2)
   
-    if (rank .gt. 2) then
+    if (dimCount .gt. 2) then
        top=size(countsPerDEDim3Local)
        countsPerDEDim3Local(top)=countsPerDEDim3Local(top)+gridEdgeUWidthLocal(3)
     endif
 
 
    ! Calc minIndex,maxIndex,distgridToGridMap for DistGrid -----------------------------------
-   allocate(minIndexDG(distRank), stat=localrc)
+   allocate(minIndexDG(distDimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexDG", &
                ESMF_CONTEXT, rc)) return
-   allocate(maxIndexDG(distRank), stat=localrc)
+   allocate(maxIndexDG(distDimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexDG", &
                ESMF_CONTEXT, rc)) return
-   allocate(distgridToGridMap(distRank), stat=localrc)
+   allocate(distgridToGridMap(distDimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToGridMap", &
                ESMF_CONTEXT, rc)) return
           
@@ -9601,7 +9593,7 @@ endif
       d=d+1
    endif
 
-   if (rank .gt. 2) then
+   if (dimCount .gt. 2) then
       if (isDimDist(3)) then
          minIndexDG(d)=minIndexLocal(3)
          maxIndexDG(d)=sum(countsPerDEDim3Local)+minIndexDG(d)-1
@@ -9616,7 +9608,7 @@ endif
   deCount=1
   deCount=deCount*size(countsPerDEDim1Local) 
   deCount=deCount*size(countsPerDEDim2Local)
-  if (rank .gt. 2) then
+  if (dimCount .gt. 2) then
      deCount=deCount*size(countsPerDEDim3Local)
   endif 
  
@@ -9628,7 +9620,7 @@ endif
   if (size(countsPerDEDim2Local) .gt. maxSizeDEDim) then
       maxSizeDEDim=size(countsPerDEDim2Local)
   endif
-  if (rank .gt. 2) then
+  if (dimCount .gt. 2) then
       if (size(countsPerDEDim3Local) .gt. maxSizeDEDim) then
          maxSizeDEDim=size(countsPerDEDim3Local)
       endif
@@ -9636,13 +9628,13 @@ endif
   
 
   ! generate deblocklist
-  allocate(maxPerDEDim(distRank,maxSizeDEDim), stat=localrc)
+  allocate(maxPerDEDim(distDimCount,maxSizeDEDim), stat=localrc)
   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating maxPerDEDim", &
               ESMF_CONTEXT, rc)) return
-  allocate(minPerDEDim(distRank,maxSizeDEDim), stat=localrc)
+  allocate(minPerDEDim(distDimCount,maxSizeDEDim), stat=localrc)
   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minPerDEDim", &
               ESMF_CONTEXT, rc)) return
- allocate(deDimCount(distRank), stat=localrc)
+ allocate(deDimCount(distDimCount), stat=localrc)
   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating maxPerDEDim", &
               ESMF_CONTEXT, rc)) return
 
@@ -9671,7 +9663,7 @@ endif
       d=d+1  ! advance to next distgrid dimension
   endif
 
-  if (rank .gt. 2) then
+  if (dimCount .gt. 2) then
   if (isDimDist(3)) then
       deDimCount(d)=size(countsPerDEDim3Local)
       minPerDeDim(d,1)=minIndexLocal(3)
@@ -9686,19 +9678,19 @@ endif
 
 
   ! allocate deblocklist
-  allocate(deBlockList(distRank,2,deCount), stat=localrc)
+  allocate(deBlockList(distDimCount,2,deCount), stat=localrc)
   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating deBlockList", &
               ESMF_CONTEXT, rc)) return
 
   ! Fill in DeBlockList
-  if (distRank .eq. 1) then
+  if (distDimCount .eq. 1) then
      k=1
      do i1=1,deDimCount(1)
         deBlockList(1,1,k)=minPerDEDim(1,i1)
         deBlockList(1,2,k)=maxPerDEDim(1,i1)
         k=k+1
      enddo
-  else if (distRank .eq. 2) then
+  else if (distDimCount .eq. 2) then
      k=1
      do i2=1,deDimCount(2)
      do i1=1,deDimCount(1)
@@ -9709,7 +9701,7 @@ endif
         k=k+1
      enddo
      enddo
-  else if (distRank .eq. 3) then
+  else if (distDimCount .eq. 3) then
      k=1
      do i3=1,deDimCount(3)
      do i2=1,deDimCount(2)
@@ -9747,7 +9739,7 @@ endif
 
 
       !! copy petMap to petList
-      if (rank .gt. 2) then
+      if (dimCount .gt. 2) then
 	 k=1
      	 do i3=1,size(countsPerDEDim3Local)
          do i2=1,size(countsPerDEDim2Local)
@@ -9794,11 +9786,11 @@ endif
 
 
    ! Calc undistLBound, undistUBound for Grid -----------------------------------------------
-   if (undistRank .gt. 0) then
-      allocate(undistLBound(undistRank), stat=localrc)
+   if (undistDimCount .gt. 0) then
+      allocate(undistLBound(undistDimCount), stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating undistLBound", &
               ESMF_CONTEXT, rc)) return
-      allocate(undistUBound(undistRank), stat=localrc)
+      allocate(undistUBound(undistDimCount), stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating undistUBound", &
               ESMF_CONTEXT, rc)) return     
 
@@ -9816,7 +9808,7 @@ endif
          d=d+1
       endif
 
-      if (rank .gt. 2) then
+      if (dimCount .gt. 2) then
          if (.not. isDimDist(3)) then
             undistLBound(d)=minIndexLocal(3)
             undistUBound(d)=countsPerDEDim3Local(1)+undistLBound(d)-1
@@ -9826,50 +9818,50 @@ endif
    endif
 
 
-   ! Convert coordDeps to coordRank and coordDimMap -------------------------------
-   allocate(coordRank(rank), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordRank", &
+   ! Convert coordDeps to coordDimCount and coordDimMap -------------------------------
+   allocate(coordDimCount(dimCount), stat=localrc)
+   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordDimCount", &
               ESMF_CONTEXT, rc)) return
-   allocate(coordDimMap(rank,rank), stat=localrc)
+   allocate(coordDimMap(dimCount,dimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordDimMap", &
               ESMF_CONTEXT, rc)) return
 
    if (present(coordDep1)) then
-      coordRank(1)=size(coordDep1)
+      coordDimCount(1)=size(coordDep1)
       coordDimMap(1,:)=0
       do i=1,size(coordDep1)
          coordDimMap(1,i)=coordDep1(i)
       enddo
    else 
-      coordRank(1)=rank
-      do i=1,rank
+      coordDimCount(1)=dimCount
+      do i=1,dimCount
          coordDimMap(1,i)=i      
       enddo
    endif
 
    if (present(coordDep2)) then
-      coordRank(2)=size(coordDep2)
+      coordDimCount(2)=size(coordDep2)
       coordDimMap(2,:)=0
       do i=1,size(coordDep2)
          coordDimMap(2,i)=coordDep2(i)
       enddo
    else 
-      coordRank(2)=rank
-      do i=1,rank
+      coordDimCount(2)=dimCount
+      do i=1,dimCount
          coordDimMap(2,i)=i      
       enddo
    endif
 
-   if (rank .gt. 2) then
+   if (dimCount .gt. 2) then
       if (present(coordDep3)) then 
-         coordRank(3)=size(coordDep3)
+         coordDimCount(3)=size(coordDep3)
           coordDimMap(3,:)=0
           do i=1,size(coordDep3)
              coordDimMap(3,i)=coordDep3(i)
           enddo
       else 
-        coordRank(3)=rank
-        do i=1,rank
+        coordDimCount(3)=dimCount
+        do i=1,dimCount
 	   coordDimMap(3,i)=i      
         enddo
       endif
@@ -9877,11 +9869,11 @@ endif
 
   
    ! Create Grid from specification -----------------------------------------------
-   if (undistRank .gt. 0) then
+   if (undistDimCount .gt. 0) then
        call ESMF_GridSetFromDistGrid(grid, name, coordTypeKind, &
                                     distgrid, distgridToGridMap=distgridToGridMap, &
                                     undistLBound=undistLBound, undistUBound=undistUBound, &
-                                    coordRank=coordRank, coordDimMap=coordDimMap, &
+                                    coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
@@ -9889,7 +9881,7 @@ endif
     else
        call ESMF_GridSetFromDistGrid(grid, name, coordTypeKind, &
                                     distgrid=distgrid, distgridToGridMap=distgridToGridMap, &
-                                    coordRank=coordRank, coordDimMap=coordDimMap, &
+                                    coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
@@ -9907,7 +9899,7 @@ endif
 
 
     ! Clean up memory
-    deallocate(coordRank)
+    deallocate(coordDimCount)
     deallocate(coordDimMap)
     deallocate(minIndexDG)
     deallocate(maxIndexDG)
@@ -9916,7 +9908,7 @@ endif
     deallocate(minPerDEDim)
     deallocate(deDimCount)
     deallocate(deBlockList)
-    if (undistRank .gt. 0) then
+    if (undistDimCount .gt. 0) then
        deallocate(undistLBound)
        deallocate(undistUBound)
     endif
@@ -9925,7 +9917,7 @@ endif
     deallocate(gridAlignLocal)
     deallocate(countsPerDEDim1Local) 
     deallocate(countsPerDEDim2Local) 
-    if (rank .gt. 2) then
+    if (dimCount .gt. 2) then
        deallocate(countsPerDEDim3Local) 
     endif
 
@@ -10133,7 +10125,7 @@ endif
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
 ! \item[{[distDim]}]
-!       Array of the same rank as the Grid. It specifies if each
+!       Array of the same dimCount as the Grid. It specifies if each
 !       dimensions should be distributed. If not
 !       specified, defaults to all true. Only dimensions
 !       with regDecomp()=1 may be made undistributed. 
@@ -10154,10 +10146,10 @@ endif
     integer, pointer     :: petList(:)
     integer, pointer     :: undistLBound(:)
     integer, pointer     :: undistUBound(:)
-    integer, pointer     :: coordRank(:)
+    integer, pointer     :: coordDimCount(:)
     integer, pointer     :: coordDimMap(:,:)
     integer              :: localrc
-    integer              :: rank,i,distRank,undistRank,maxSizeDEDim
+    integer              :: dimCount,i,distDimCount,undistDimCount,maxSizeDEDim
     integer, pointer     :: minIndexDG(:),maxIndexDG(:)
     integer, pointer     :: regDecompDG(:)
     type(ESMF_DecompFlag), pointer :: decompflagDG(:)
@@ -10181,21 +10173,21 @@ endif
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! Compute the Grid Rank and Derivatives ---------------------------------------------------
-    ! rank
-    rank=size(maxIndex)
-    if ((rank < 2) .or. (rank > 3)) then
+    ! Compute the Grid DimCount and Derivatives ---------------------------------------------------
+    ! dimCount
+    dimCount=size(maxIndex)
+    if ((dimCount < 2) .or. (dimCount > 3)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-               "- maxIndex size and thus Grid rank must be either 2 or 3 when using create shape ", & 
+               "- maxIndex size and thus Grid dimCount must be either 2 or 3 when using create shape ", & 
                ESMF_CONTEXT, rc) 
          return 
     endif
 
     ! check distribution info
     if (present(distDim)) then
-       if (size(distDim) .ne. rank) then
+       if (size(distDim) .ne. dimCount) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                 "- distDim must be same rank as Grid", & 
+                 "- distDim must be same dimCount as Grid", & 
                  ESMF_CONTEXT, rc) 
             return 
        endif
@@ -10203,110 +10195,110 @@ endif
 
     ! initialize isDimDist
     if (present(distDim)) then
-       isDimDist(1:rank)=distDim(1:rank)
+       isDimDist(1:dimCount)=distDim(1:dimCount)
     else
        isDimDist(:)=.true.
     endif
 
-    ! rank of distributed part
-    distRank=0 
+    ! dimCount of distributed part
+    distDimCount=0 
 
     if (isDimDist(1)) then
-       distRank=distRank+1
+       distDimCount=distDimCount+1
     endif
 
     if (isDimDist(2)) then
-       distRank=distRank+1
+       distDimCount=distDimCount+1
     endif
 
-    if (rank .gt. 2) then
+    if (dimCount .gt. 2) then
        if (isDimDist(3)) then
-           distRank=distRank+1
+           distDimCount=distDimCount+1
         endif
     endif
 
-    ! ranks of the undistributed part of the grid
-    undistRank=rank-distRank
+    ! dimCounts of the undistributed part of the grid
+    undistDimCount=dimCount-distDimCount
 
     ! Argument Consistency Checking --------------------------------------------------------------
     if (present(regDecomp)) then
-        if (size(regDecomp) .lt. rank) then
+        if (size(regDecomp) .lt. dimCount) then
             call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                    "- regDecomp size doesn't match Grid rank ", & 
+                    "- regDecomp size doesn't match Grid dimCount ", & 
                     ESMF_CONTEXT, rc) 
             return 
         endif
     endif
 
     if (present(decompFlag)) then
-        if (size(decompFlag) .lt. rank) then
+        if (size(decompFlag) .lt. dimCount) then
             call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                    "- decompFlag size doesn't match Grid rank ", & 
+                    "- decompFlag size doesn't match Grid dimCount ", & 
                     ESMF_CONTEXT, rc) 
             return 
         endif
     endif
 
-    if ((rank .lt. 3) .and. present(connDim3)) then
+    if ((dimCount .lt. 3) .and. present(connDim3)) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-                 "- connDim3 not allowed when grid is less than rank 3", & 
+                 "- connDim3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
-    if ((rank .lt. 3) .and. present(poleStaggerLoc3)) then
+    if ((dimCount .lt. 3) .and. present(poleStaggerLoc3)) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-                 "- poleStaggerLoc3 not allowed when grid is less than rank 3", & 
+                 "- poleStaggerLoc3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
-    if ((rank .lt. 3) .and. present(bipolePos3)) then
+    if ((dimCount .lt. 3) .and. present(bipolePos3)) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-                 "- bipolePos3 not allowed when grid is less than rank 3", & 
+                 "- bipolePos3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
 
-    if ((rank .lt. 3) .and. present(coordDep3)) then
+    if ((dimCount .lt. 3) .and. present(coordDep3)) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-                 "- coordDep3 not allowed when grid is less than rank 3", & 
+                 "- coordDep3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
     if (present(coordDep1)) then
-       if ((size(coordDep1) < 1) .or. (size(coordDep1)>rank)) then
+       if ((size(coordDep1) < 1) .or. (size(coordDep1)>dimCount)) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-               "- coordDep1 size incompatible with grid rank", & 
+               "- coordDep1 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
        endif
     endif
 
     if (present(coordDep2)) then
-       if ((size(coordDep2) < 1) .or. (size(coordDep2)>rank)) then
+       if ((size(coordDep2) < 1) .or. (size(coordDep2)>dimCount)) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-               "- coordDep2 size incompatible with grid rank", & 
+               "- coordDep2 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
        endif
     endif
 
     if (present(coordDep3)) then
-       if ((size(coordDep3) < 1) .or. (size(coordDep3)>rank)) then
+       if ((size(coordDep3) < 1) .or. (size(coordDep3)>dimCount)) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-               "- coordDep3 size incompatible with grid rank", & 
+               "- coordDep3 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
        endif
     endif
 
     if (present(minIndex)) then
-       if (size(minIndex) .ne. rank) then
+       if (size(minIndex) .ne. dimCount) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-               "- minIndex size must equal grid rank", & 
+               "- minIndex size must equal grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
        endif
@@ -10314,29 +10306,29 @@ endif
 
 
 
-    ! Check Rank of gridWidths and Aligns
+    ! Check DimCount of gridWidths and Aligns
     if (present(gridEdgeLWidth)) then
-        if (size(gridEdgeLWidth) .ne. rank) then
+        if (size(gridEdgeLWidth) .ne. dimCount) then
            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                     "- gridEdgeLWidth must be of size equal to Grid rank", & 
+                     "- gridEdgeLWidth must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
               return
         endif 
     endif
 
     if (present(gridEdgeUWidth)) then
-        if (size(gridEdgeUWidth) .ne. rank) then
+        if (size(gridEdgeUWidth) .ne. dimCount) then
            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                     "- gridEdgeUWidth must be of size equal to Grid rank", & 
+                     "- gridEdgeUWidth must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
               return
         endif 
     endif
 
     if (present(gridAlign)) then
-        if (size(gridAlign) .ne. rank) then
+        if (size(gridAlign) .ne. dimCount) then
            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
-                     "- gridAlign must be of size equal to Grid rank", & 
+                     "- gridAlign must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
               return
         endif 
@@ -10476,7 +10468,7 @@ endif
    ! TODO: can you create an array without a distgrid??? What if everything they specify is undistributed?
    !       for now make a totally undistributed grid an error. Work on handling it later.
    !       Perhaps don't use undistLBound, undistUBound
-    if (distRank .eq. 0) then
+    if (distDimCount .eq. 0) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
                  "- Need to have at least one distributed dimension", & 
                  ESMF_CONTEXT, rc) 
@@ -10491,28 +10483,28 @@ endif
     ! Set Defaults ------------------------------------------------------------------
 
     ! Set default for minIndex
-    allocate(minIndexLocal(rank), stat=localrc)
+    allocate(minIndexLocal(dimCount), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
                                      ESMF_CONTEXT, rc)) return
 
     if (present(minIndex)) then
        minIndexLocal(:)=minIndex(:)
     else
-       do i=1,rank
+       do i=1,dimCount
           minIndexLocal(i)=1
        enddo
     endif
 
 
     ! Set default for minIndex
-    allocate(maxIndexLocal(rank), stat=localrc)
+    allocate(maxIndexLocal(dimCount), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating maxIndexLocal", &
                                      ESMF_CONTEXT, rc)) return
     maxIndexLocal(:)=maxIndex(:)
 
 
     ! Set default for regDecomp 
-    allocate(regDecompLocal(rank), stat=localrc)
+    allocate(regDecompLocal(dimCount), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating regDecompLocal", &
                                      ESMF_CONTEXT, rc)) return
 
@@ -10526,13 +10518,13 @@ endif
        call ESMF_VMGet(vm,petCount=regDecompLocal(1),rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-       do i=2,rank
+       do i=2,dimCount
           regDecompLocal(i)=1
        enddo
     endif
 
     ! Set default for decompFlag 
-    allocate(decompFlagLocal(rank), stat=localrc)
+    allocate(decompFlagLocal(dimCount), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating decompFlagLocal", &
                                      ESMF_CONTEXT, rc)) return
 
@@ -10630,7 +10622,7 @@ endif
        return 
     endif
 
-    if (rank .gt. 2) then
+    if (dimCount .gt. 2) then
        if (.not. isDimDist(3) .and. regDecompLocal(3) .gt. 1) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
             "- can't have undist dim 3 with regDecomp(3) > 1", & 
@@ -10640,7 +10632,7 @@ endif
     endif
 
   if (present(petMap)) then
-     if (rank .gt. 2) then
+     if (dimCount .gt. 2) then
           if ((size(petMap,1) .ne. regDecompLocal(1)) .or. &
               (size(petMap,2) .ne. regDecompLocal(2)) .or. &
               (size(petMap,3) .ne. regDecompLocal(3))) then
@@ -10663,17 +10655,17 @@ endif
 
    ! Modify Bounds by GridEdgeUWidth and GridEdgeLWidth  -------------------------
    ! setup maxIndexLocal to hold modified bounds
-    allocate(gridEdgeLWidthLocal(rank), stat=localrc)
+    allocate(gridEdgeLWidthLocal(dimCount), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeLWidthLocal", &
                                      ESMF_CONTEXT, rc)) return
-    allocate(gridEdgeUWidthLocal(rank), stat=localrc)
+    allocate(gridEdgeUWidthLocal(dimCount), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeUWidthLocal", &
                                      ESMF_CONTEXT, rc)) return
-    allocate(gridAlignLocal(rank), stat=localrc)
+    allocate(gridAlignLocal(dimCount), stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridAlignLocal", &
                                      ESMF_CONTEXT, rc)) return
 
-    call ESMF_GridLUADefault(rank, &
+    call ESMF_GridLUADefault(dimCount, &
                              gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
                              gridEdgeLWidthLocal, gridEdgeUWidthLocal, gridAlignLocal, &
                              rc=localrc)
@@ -10681,36 +10673,36 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Modify lower bound
-    do i=1,rank
+    do i=1,dimCount
        minIndexLocal(i)=minIndexLocal(i)-gridEdgeLWidthLocal(i)
     enddo
 
     ! Modify upper bound
-    do i=1,rank
+    do i=1,dimCount
        maxIndexLocal(i)=maxIndexLocal(i)+gridEdgeUWidthLocal(i)
     enddo
 
 
    ! Calc minIndex,maxIndex,distgridToGridMap for DistGrid -----------------------------------
-   allocate(minIndexDG(distRank), stat=localrc)
+   allocate(minIndexDG(distDimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexDG", &
                ESMF_CONTEXT, rc)) return
-   allocate(maxIndexDG(distRank), stat=localrc)
+   allocate(maxIndexDG(distDimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexDG", &
                ESMF_CONTEXT, rc)) return
-   allocate(distgridToGridMap(distRank), stat=localrc)
+   allocate(distgridToGridMap(distDimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToGridMap", &
                ESMF_CONTEXT, rc)) return          
-   allocate(regDecompDG(distRank), stat=localrc)
+   allocate(regDecompDG(distDimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating dimMap", &
                ESMF_CONTEXT, rc)) return
-   allocate(decompFlagDG(distRank), stat=localrc)
+   allocate(decompFlagDG(distDimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating dimMap", &
                ESMF_CONTEXT, rc)) return
-   allocate(undistLBound(undistRank), stat=localrc)
+   allocate(undistLBound(undistDimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating undistLBound", &
               ESMF_CONTEXT, rc)) return
-   allocate(undistUBound(undistRank), stat=localrc)
+   allocate(undistUBound(undistDimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating undistUBound", &
               ESMF_CONTEXT, rc)) return     
 
@@ -10743,7 +10735,7 @@ endif
      ud=ud+1
    endif
 
-   if (rank .gt. 2) then
+   if (dimCount .gt. 2) then
       if (isDimDist(3)) then
          minIndexDG(d)=minIndexLocal(3)
          maxIndexDG(d)=maxIndexLocal(3)
@@ -10768,7 +10760,7 @@ endif
    ! Process PetMap --------------------------------------------------------------
    !! Calculate deCount
    deCount=1
-   do i=1,rank
+   do i=1,dimCount
       deCount=deCount*regDecompLocal(i)
    enddo
 
@@ -10781,7 +10773,7 @@ endif
 
 
       !! copy petMap to petList
-      if (rank .gt. 2) then
+      if (dimCount .gt. 2) then
 	 k=1
      	 do i3=1,regDecompLocal(3)
          do i2=1,regDecompLocal(2)
@@ -10827,50 +10819,50 @@ endif
 
 
 
-   ! Convert coordDeps to coordRank and coordDimMap -------------------------------
-   allocate(coordRank(rank), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordRank", &
+   ! Convert coordDeps to coordDimCount and coordDimMap -------------------------------
+   allocate(coordDimCount(dimCount), stat=localrc)
+   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordDimCount", &
               ESMF_CONTEXT, rc)) return
-   allocate(coordDimMap(rank,rank), stat=localrc)
+   allocate(coordDimMap(dimCount,dimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordDimMap", &
               ESMF_CONTEXT, rc)) return
 
    if (present(coordDep1)) then
-      coordRank(1)=size(coordDep1)
+      coordDimCount(1)=size(coordDep1)
       coordDimMap(1,:)=0
       do i=1,size(coordDep1)
          coordDimMap(1,i)=coordDep1(i)
       enddo
    else 
-      coordRank(1)=rank
-      do i=1,rank
+      coordDimCount(1)=dimCount
+      do i=1,dimCount
          coordDimMap(1,i)=i      
       enddo
    endif
 
    if (present(coordDep2)) then
-      coordRank(2)=size(coordDep2)
+      coordDimCount(2)=size(coordDep2)
       coordDimMap(2,:)=0
       do i=1,size(coordDep2)
          coordDimMap(2,i)=coordDep2(i)
       enddo
    else 
-      coordRank(2)=rank
-      do i=1,rank
+      coordDimCount(2)=dimCount
+      do i=1,dimCount
          coordDimMap(2,i)=i      
       enddo
    endif
 
-   if (rank .gt. 2) then
+   if (dimCount .gt. 2) then
       if (present(coordDep3)) then 
-         coordRank(3)=size(coordDep3)
+         coordDimCount(3)=size(coordDep3)
           coordDimMap(3,:)=0
           do i=1,size(coordDep3)
              coordDimMap(3,i)=coordDep3(i)
           enddo
       else 
-        coordRank(3)=rank
-        do i=1,rank
+        coordDimCount(3)=dimCount
+        do i=1,dimCount
 	   coordDimMap(3,i)=i      
         enddo
       endif
@@ -10878,11 +10870,11 @@ endif
 
   
    ! Create Grid from specification -----------------------------------------------
-   if (undistRank .gt. 0) then
+   if (undistDimCount .gt. 0) then
        call ESMF_GridSetFromDistGrid(grid, name=name, coordTypeKind=coordTypeKind, &
                                     distgrid=distgrid, distgridToGridMap=distgridToGridMap, &
                                     undistLBound=undistLBound, undistUBound=undistUBound, &
-                                    coordRank=coordRank, coordDimMap=coordDimMap, &
+                                    coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
@@ -10890,7 +10882,7 @@ endif
     else
        call ESMF_GridSetFromDistGrid(grid, name=name, coordTypeKind=coordTypeKind, &
                                     distgrid=distgrid, distgridToGridMap=distgridToGridMap, &
-                                    coordRank=coordRank, coordDimMap=coordDimMap, &
+                                    coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
@@ -10912,7 +10904,7 @@ endif
     deallocate(decompFlagLocal)
     deallocate(regDecompDG)
     deallocate(decompFlagDG)
-    deallocate(coordRank)
+    deallocate(coordDimCount)
     deallocate(coordDimMap)
     deallocate(minIndexDG)
     deallocate(maxIndexDG)
@@ -11105,13 +11097,13 @@ endif
 ! !IROUTINE: ESMF_GridLUADefault
 
 ! !INTERFACE:
-      subroutine ESMF_GridLUADefault(rank, &
+      subroutine ESMF_GridLUADefault(dimCount, &
                                      lWidthIn, uWidthIn, alignIn, &
                                      lWidthOut, uWidthOut, alignOut, &
                                      rc)
 !
 ! !ARGUMENTS:
-       integer,               intent(in)              :: rank
+       integer,               intent(in)              :: dimCount
        integer,               intent(in),   optional  :: lWidthIn(:)
        integer,               intent(in),   optional  :: uWidthIn(:)
        integer,               intent(in),   optional  :: alignIn(:)
@@ -11177,7 +11169,7 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call C++ Subroutine for the default
-    call c_ESMC_gridluadefault(rank, &
+    call c_ESMC_gridluadefault(dimCount, &
                                lWidthInArg, uWidthInArg, alignInArg, &
                                lWidthOutArg, uWidthOutArg, alignOutArg, &
                                localrc)

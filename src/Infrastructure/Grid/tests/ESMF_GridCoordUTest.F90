@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.24 2008/02/15 21:40:22 oehmke Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.25 2008/02/28 00:42:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.24 2008/02/15 21:40:22 oehmke Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.25 2008/02/28 00:42:24 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -51,7 +51,7 @@ program ESMF_GridCoordUTest
   type(ESMF_Grid) :: grid2D,grid2Dp1,grid3D
   type(ESMF_VM) :: vm
   type(ESMF_DistGrid) :: distgrid2D, distgrid3D,tmpDistgrid
-  integer :: rank
+  integer :: dimCount
   type(ESMF_Array) :: array, array2D, array2, array1D
   type(ESMF_ArraySpec) :: arrayspec2D,arrayspec1D
   type(ESMF_StaggerLoc) :: customStagger
@@ -60,7 +60,7 @@ program ESMF_GridCoordUTest
   integer :: petMap2D(2,2,1)
   integer :: petMapReg2D(2,1,2)
   integer :: compELWidth(2),compEUWidth(2)
-  integer :: lbnds(1),ubnds(1),clbnd(3),cubnd(3)
+  integer :: lbnds(1),ubnds(1),rank,clbnd(3),cubnd(3)
   integer :: i,i1,i2,i3, index(3)
   integer :: lDE, localDECount
   real(ESMF_KIND_R8) :: coord(3)

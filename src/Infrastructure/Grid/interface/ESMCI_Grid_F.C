@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.34 2008/02/05 21:11:02 rokuingh Exp $
+// $Id: ESMCI_Grid_F.C,v 1.35 2008/02/28 00:42:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -156,9 +156,9 @@ extern "C" {
     // it makes things less convoluted to do it this way. 
 
     // get some useful info
-    distRank=grid->getDistRank();
-    undistRank=grid->getUndistRank();
-    rank = grid->getRank();
+    distRank=grid->getDistDimCount();
+    undistRank=grid->getUndistDimCount();
+    rank = grid->getDimCount();
 
 
     // coordTypeKind
@@ -267,7 +267,7 @@ extern "C" {
         return;
       }
       // fill in coordRank
-      memcpy((*_coordRank)->array, grid->getCoordRank(), sizeof(int) * rank);
+      memcpy((*_coordRank)->array, grid->getCoordDimCount(), sizeof(int) * rank);
     }
 
     // get coordDimMap
@@ -516,9 +516,9 @@ extern "C" {
     }
     
     // get some useful info
-   rank=grid->getRank();
-   distRank=grid->getDistRank();
-   coordRank=grid->getCoordRank();
+   rank=grid->getDimCount();
+   distRank=grid->getDistDimCount();
+   coordRank=grid->getCoordDimCount();
    coordDimMap=grid->getCoordDimMap();
    coordIsDist=grid->getCoordIsDist();
    coordMapDim=grid->getCoordMapDim();
@@ -916,7 +916,7 @@ extern "C" {
     }
 
    // Get Grid Rank
-   rank=grid->getRank();
+   rank=grid->getDimCount();
 
     // fill exclusiveLBound
     if (*_exclusiveLBound != NULL){
@@ -1119,9 +1119,9 @@ extern "C" {
     }
 
     // get some useful info
-    rank = grid->getRank();
-    distRank = grid->getDistRank();
-    undistRank = grid->getUndistRank();
+    rank = grid->getDimCount();
+    distRank = grid->getDistDimCount();
+    undistRank = grid->getUndistDimCount();
     gridIsDist=grid->getGridIsDist();
     gridMapDim=grid->getGridMapDim();
     gridUndistLBound=grid->getUndistLBound();

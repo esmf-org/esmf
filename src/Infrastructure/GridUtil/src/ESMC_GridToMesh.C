@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.16 2008/02/13 00:28:47 dneckels Exp $
+// $Id: ESMC_GridToMesh.C,v 1.17 2008/02/28 00:42:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -89,12 +89,12 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh, const std::
  
    // *** Set some meta-data ***
      // We set the topological dimension of the mesh (quad = 2, hex = 3, etc...)
-   UInt pdim = grid.getRank();
+   UInt pdim = grid.getDimCount();
    mesh.set_parametric_dimension(pdim);
   
      // In what dimension is the grid embedded?? (sphere = 3, simple rectangle = 2, etc...)
    // At this point the topological and spatial dim of the Grid is the same this should change soon
-   UInt sdim = grid.getRank();
+   UInt sdim = grid.getDimCount();
    mesh.set_spatial_dimension(sdim);
   
 

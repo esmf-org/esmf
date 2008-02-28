@@ -1,13 +1,7 @@
-# $Id: makefile,v 1.7 2005/03/01 21:00:38 nscollins Exp $
+# $Id: makefile,v 1.8 2008/02/28 00:42:22 theurich Exp $
 
 # leave alone.
 ALL: build_here 
-
-# Don't set these unless absolutely necessary - they've got to be
-# architecture and compiler independent and should be inherited
-# from the upper level makefile if possible.
-CFLAGS    =
-FFLAGS    =
 
 # If you have C files in this directory, list them all on the line below.
 SOURCEC	  = ESMC_DELayout.C
@@ -38,18 +32,11 @@ include ${ESMF_DIR}/makefile
 # Leave the following line blank.
 DIRS	  = 
 
-
-
-# If you have class files which need to be compiled in a particular
-# order, list the dependencies below, with no rules following.
-#
-# e.g.:
-#
-# ESMF_Field.o:   ESMF_DataArray.o
-#
-# ESMF_Bundle.o:  ESMF_Field.o
-#
-
-
-
-
+# XLC++ on BGL systems has trouble with templates of recursive funcs in -O mode
+# -> this seems to be a compiler bug and we may be able to take this out once
+# IBM has it fixed.
+ifeq ($(ESMF_OS),Linux)
+ifeq ($(ESMF_COMPILER),xlf)
+ESMF_OPTLEVEL = 0
+endif
+endif

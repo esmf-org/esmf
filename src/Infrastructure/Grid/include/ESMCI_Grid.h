@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.35 2008/02/15 20:12:52 theurich Exp $
+// $Id: ESMCI_Grid.h,v 1.36 2008/02/28 00:42:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -64,39 +64,39 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   // global information
   ESMC_TypeKind typekind;
   
-  int distRank;
+  int distDimCount;
 
-  int *distgridToGridMap;    // size of distgridToGridMap = distRank, entries are 0-based
+  int *distgridToGridMap;    // size of distgridToGridMap = distDimCount, entries are 0-based
 
-  int undistRank;
-  int *undistLBound; // size of undistLBound = undistRank
-  int *undistUBound; // size of undistUBound = undistRank
+  int undistDimCount;
+  int *undistLBound; // size of undistLBound = undistDimCount
+  int *undistUBound; // size of undistUBound = undistDimCount
   
-  int rank;
+  int dimCount;
   
   // information about edge widths of the Grid
-  int *gridEdgeLWidth; // size of grid rank
-  int *gridEdgeUWidth; // size of grid rank
-  int *gridAlign; // size of grid rank
+  int *gridEdgeLWidth; // size of grid dimCount
+  int *gridEdgeUWidth; // size of grid dimCount
+  int *gridAlign; // size of grid dimCount
 
-  // User info about coord ranks and distgridToGridMap
-  int *coordRank; // size of coordRank = rank
-  int **coordDimMap; // size of coordDimMap = rankxrank  [coord][dim of coord array], 0-based
+  // User info about coord dimCounts and distgridToGridMap
+  int *coordDimCount; // size of coordDimCount = dimCount
+  int **coordDimMap; // size of coordDimMap = dimCountxdimCount  [coord][dim of coord array], 0-based
 
   int staggerLocCount;
-  Array ***coordArrayList; // size of coordArrayList = staggerLocCountxrank [staggerLoc][coord]
+  Array ***coordArrayList; // size of coordArrayList = staggerLocCountxdimCount [staggerLoc][coord]
   int   **staggerAlignList;     // hold alignment info [staggerloc][dim]
   int   **staggerEdgeLWidthList;     // hold LWidth info [staggerloc][dim]
   int   **staggerEdgeUWidthList;     // hold UWidth info [staggerloc][dim]
   bool  **didIAllocList;        // if true, I allocated this Array [staggerloc][coord]
 
   // map grid dim to distgrid dim and grid bounds dim
-  bool *gridIsDist;  // size=rank [grid-dim]
-  int *gridMapDim;   // size=rank [grid-dim]
+  bool *gridIsDist;  // size=dimCount [grid-dim]
+  int *gridMapDim;   // size=dimCount [grid-dim]
 
   // map coord dim to distgrid dim and coord array bounds dim
-  bool **coordIsDist; // size=rankxrank [coord][coord-dim]
-  int **coordMapDim; // size=rankxrank [coord][coord-dim]
+  bool **coordIsDist; // size=dimCountxdimCount [coord][coord-dim]
+  int **coordMapDim; // size=dimCountxdimCount [coord][coord-dim]
 
   // if bit d in isDELBnd[localde] is 1, then localde is on the
   // lower boundary of dimension d
@@ -135,16 +135,16 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
        char *name,                            // (in)
        ESMC_TypeKind typekindArg,              // (in)
        DistGrid *distgridArg,                  // (in)
-       int distRankArg,                        // (in)
+       int distDimCountArg,                        // (in)
        int *distgridToGridMapArg,                         // (in)
-       int undistRankArg,                      // (in)
+       int undistDimCountArg,                      // (in)
        int *undistLBoundArg,                        // (in)
        int *undistUBoundArg,                        // (in)
-       int rankArg,                            // (in)
+       int dimCountArg,                            // (in)
        int *gridEdgeLWidth,
        int *gridEdgeUWidth,
        int *gridAlign,
-       int *coordRankArg,                     // (in)
+       int *coordDimCountArg,                     // (in)
        int **coordDimMapArg,                   // (in)
        ESMC_IndexFlag indexflagArg             // (in)
        );
@@ -164,9 +164,9 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   // NOTE: For efficiencies sake the following functions don't error check
   //       so be sure to error check the grid or any input before using.  
   const ESMC_GridStatus getStatus(void) const {return status;}
-  const int getRank(void) const {return rank;}
-  const int getDistRank(void) const {return distRank;}
-  const int getUndistRank(void) const {return undistRank;}
+  const int getDimCount(void) const {return dimCount;}
+  const int getDistDimCount(void) const {return distDimCount;}
+  const int getUndistDimCount(void) const {return undistDimCount;}
   const int getTileCount(void) const {return distgrid->getPatchCount();}
   const int getStaggerLocCount(void) const {return staggerLocCount;}
   const ESMC_IndexFlag getIndexFlag(void) const {return indexflag;}
@@ -175,7 +175,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   const int *getDistgridToGridMap(void) const {return distgridToGridMap;}
   const int *getUndistLBound(void) const {return undistLBound;}
   const int *getUndistUBound(void) const {return undistUBound;}
-  const int *getCoordRank(void) const {return coordRank;}
+  const int *getCoordDimCount(void) const {return coordDimCount;}
   const int *getGridEdgeLWidth(void) const {return gridEdgeLWidth;}
   const int *getGridEdgeUWidth(void)  const {return gridEdgeUWidth;}
   const int *getGridAlign(void) const {return gridAlign;}
@@ -208,7 +208,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 	  InterfaceInt *_distgridToGridMap,                  // (in)
 	  InterfaceInt *_undistLBound,                 // (in)
 	  InterfaceInt *_undistUBound,                 // (in)
-	  InterfaceInt *_coordRank,              // (in)
+	  InterfaceInt *_coordDimCount,              // (in)
 	  InterfaceInt *_coordDimMap,             // (in)
 	  ESMC_IndexFlag *_indexflag                  // (in)
 	  );
@@ -246,7 +246,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 	       InterfaceInt *distgridToGridMap,                  // (in)
 	       InterfaceInt *undistLBound,                 // (in)
 	       InterfaceInt *undistUBound,                 // (in)
-	       InterfaceInt *coordRank,              // (in)
+	       InterfaceInt *coordDimCount,              // (in)
 	       InterfaceInt *coordDimMap,             // (in)
 	       ESMC_IndexFlag *indexflag,                  // (in)
 	       int *rc                                     // (out) return code
@@ -273,14 +273,14 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   int getLDEStaggerUOffset(
 		       int _staggerloc,
 		       int _localDE, 
-		       int *_UWidth // should be size>=grid rank
+		       int *_UWidth // should be size>=grid dimCount
 		       );
 
   // get upper stagger offset for a particular localDe and staggerloc
   int getLDEStaggerLOffset(
 		     int _staggerloc,
 		     int _localDE, 
-		     int *_LWidth // should be size>=grid rank
+		     int *_LWidth // should be size>=grid dimCount
 		     );
 
 
@@ -373,7 +373,7 @@ int getComputationalUBound(
 		      InterfaceInt *_distgridToGridMap,   
 		      InterfaceInt *_undistLBound,  
 		      InterfaceInt *_undistUBound,  
-		      InterfaceInt *_coordRank,
+		      InterfaceInt *_coordDimCount,
 		      InterfaceInt *_coordDimMap,
 		      ESMC_IndexFlag *_indexflag 
 		      );
@@ -382,7 +382,7 @@ int getComputationalUBound(
 
   // set defaults for LWidth, UWidth, and Align based on user input
   int setGridDefaultsLUA(
-                       int rank,                // Size of the input arrays
+                       int dimCount,                // Size of the input arrays
                        InterfaceInt *gridEdgeLWidthIn,  // (in) optional
                        InterfaceInt *gridEdgeUWidthIn,  // (in) optional
                        InterfaceInt *gridAlignIn,   // (in) optional
@@ -496,7 +496,7 @@ class ProtoGrid {
   InterfaceInt *distgridToGridMap;   
   InterfaceInt *undistLBound;  
   InterfaceInt *undistUBound;  
-  InterfaceInt *coordRank;  
+  InterfaceInt *coordDimCount;  
   InterfaceInt *coordDimMap; 
   ESMC_IndexFlag *indexflag; 
 
