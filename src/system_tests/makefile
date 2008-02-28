@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.36.2.1 2008/02/11 05:28:30 theurich Exp $ 
+# $Id: makefile,v 1.36.2.2 2008/02/28 01:42:02 theurich Exp $ 
 
 ALL: build_system_tests
 
@@ -8,6 +8,7 @@ include $(ESMF_DIR)/makefile
 
 # arranged roughly in order of complexity
 DIRS      = ESMF_CompCreate \
+            ESMF_RecursiveComponent \
             ESMF_ArrayScatterGather \
             ESMF_ArraySparseMatMul \
             ESMF_ArrayRedist \
