@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.46 2008/02/19 18:33:49 theurich Exp $ 
+# $Id: makefile,v 1.47 2008/02/29 22:03:39 dneckels Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -18,7 +18,9 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/Field/tests
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_FieldUTest 
+TESTS_BUILD   = \
+                $(ESMF_TESTDIR)/ESMF_FieldRegridUTest 
+#		$(ESMF_TESTDIR)/ESMF_FieldUTest 
 #		$(ESMF_TESTDIR)/ESMF_FRoute4UTest \
 #		$(ESMF_TESTDIR)/ESMF_FRoute8UTest 
 
