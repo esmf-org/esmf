@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.28.2.4 2008/02/28 22:35:26 theurich Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.28.2.5 2008/02/29 18:19:16 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1152,8 +1152,8 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    !-------------------------------------------------------------------
    ! Setup for the to prepare for the example.
    !-------------------------------------------------------------------
-!  grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/2,5/), countsPerDEDim1=(/2,5/), &
-!           indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
+  grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/4,4,4,3/), countsPerDEDim2=(/3,2/), &
+           indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
 
 !BOC
   call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
@@ -1185,8 +1185,8 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    !-------------------------------------------------------------------
    ! Setup for the to prepare for the example.
    !-------------------------------------------------------------------
-!  grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/2,5/), countsPerDEDim1=(/2,5/), &
-!           indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
+  grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/4,4,4,3/), countsPerDEDim2=(/3,2/), &
+           indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
 
 !BOC
   call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_EDGE1, rc=rc)
@@ -1232,12 +1232,13 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    !-------------------------------------------------------------------
    ! Setup for the to prepare for the example.
    !-------------------------------------------------------------------
-!  grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/2,5/), countsPerDEDim1=(/2,5/), &
-!           indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
+  grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/4,4,4,3/), countsPerDEDim2=(/3,2/), &
+           indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
 
 !BOC
-!  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER, &
-!        totalLWidth=(/1,1/), totalUWidth=(/1,1/), rc=rc) ! NOT YET IMPLEMENTED
+  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER, &
+!        totalLWidth=(/1,1/), totalUWidth=(/1,1/), & ! NOT YET IMPLEMENTED
+         rc=rc) 
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -1267,12 +1268,13 @@ call ESMF_GridDestroy(grid2D,rc=rc)
    !-------------------------------------------------------------------
    ! Setup for the to prepare for the example.
    !-------------------------------------------------------------------
-!  grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/2,5/), countsPerDEDim1=(/2,5/), &
-!           indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
+  grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/4,4,4,3/), countsPerDEDim2=(/3,2/), &
+           indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
 
 !BOC
-!  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_EDGE1, &
-!        totalLWidth=(/1,1/), totalUWidth=(/1,1/), rc=rc) ! NOT YET IMPLEMENTED
+  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER, &
+!        totalLWidth=(/1,1/), totalUWidth=(/1,1/), & ! NOT YET IMPLEMENTED
+         rc=rc) 
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
