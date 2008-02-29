@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridUtil_F.C,v 1.3 2008/02/27 23:43:33 dneckels Exp $
+// $Id: ESMCI_GridUtil_F.C,v 1.4 2008/02/29 18:25:24 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -86,7 +86,7 @@ extern "C" void FTN(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int *
     ESMCI::GridToMesh(grid, *staggerLoc, mesh, arrays);
 
 /*
-    long nlen = (reinterpret_cast<long>(ar[*num_arrays]));
+    int nlen = (reinterpret_cast<long>(ar[*num_arrays]));
 
     char *meshname = ESMC_F90toCstring(name, nlen);
 

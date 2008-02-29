@@ -23,8 +23,11 @@
  // insert any higher level, 3rd party or system includes here
 #include "ESMCI_Util.h"
 #include "ESMCI_State.h"
+#include "ESMC_Array.h"
 #include "ESMC_Start.h"
 #include "ESMC_LogErr.h"
+#include "ESMC_ArraySpec.h"
+
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -38,7 +41,7 @@
 
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_State.C,v 1.12 2007/12/23 20:57:10 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_State.C,v 1.13 2008/02/29 18:25:24 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -103,6 +106,44 @@
     return state;
 
  } // end ESMC_StateCreate
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_StateAddArray - Add an array to this state
+//
+// !INTERFACE:
+      int ESMC_StateAddArray(
+//
+// !RETURN VALUE:
+//     return code rc.
+//
+// !ARGUMENTS:
+      ESMC_State *state,    // in - state
+      ESMC_Array array){       // in - array being added
+//
+// !DESCRIPTION:
+//      Add an array to an existing state
+//
+//EOP
+      //local variables
+      int rc;
+      int localrc;
+
+      //Initialize return code
+      rc = ESMF_RC_NOT_IMPL;
+      localrc = ESMF_RC_NOT_IMPL;
+//
+      printf("In ESMC_StateAddArray, before calling the glue \n");
+      
+      FTN(f_esmf_stateaddarray)(state, array, &rc);
+                           //   static_cast<ESMCI::Array *>(array.cppthis), 
+                           //   &rc);
+
+      printf("In ESMC_StateAddArray, after  calling the glue \n");
+
+      return rc;
+
+   } // end ESMC_StateAddArray
 
 //-----------------------------------------------------------------------------
 //BOP

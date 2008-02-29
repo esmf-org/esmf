@@ -1,4 +1,4 @@
-// $Id: ESMC_StateUTest.C,v 1.1 2007/12/23 20:57:11 rosalind Exp $
+// $Id: ESMC_StateUTest.C,v 1.2 2008/02/29 18:25:25 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -13,6 +13,10 @@
 #include <string.h>
 #include "ESMCI.h"
 #include "ESMC_Test.h"
+#include "ESMC_Start.h"
+#include "ESMC_DistGrid.h"
+#include "ESMC_ArraySpec.h"
+#include "ESMC_State.h"
 
 //==============================================================================
 //BOP
@@ -29,12 +33,14 @@
 
 int main(void){
 
-  ESMC_State* st;              // ESMC_Config object
+  ESMC_State* st;              // ESMC_State object
+  ESMC_Array testArray;
   char* StateName = "stateName";                   // state name
   char name[80];
   char failMsg[80];
   int result = 0;
   int rc = 0;
+  int localrc;
 
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
@@ -50,8 +56,6 @@ int main(void){
   ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
- //----------------------------------------------------------------------------
-
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Destroy a state object -- cf
