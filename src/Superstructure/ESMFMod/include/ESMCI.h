@@ -1,4 +1,4 @@
-// $Id: ESMCI.h,v 1.8.2.1 2008/02/28 22:46:30 theurich Exp $
+// $Id: ESMCI.h,v 1.8.2.2 2008/02/29 23:20:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 #include "ESMC_Clock.h"
 
 // local array, datamap
-#include "ESMC_ArraySpec.h"
+#include "ESMCI_ArraySpec.h"
 #include "ESMC_LocalArray.h"
 #include "ESMC_InternArrayDataMap.h"
 

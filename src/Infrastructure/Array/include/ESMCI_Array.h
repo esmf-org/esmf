@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.1.2.4 2008/02/28 22:46:23 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.1.2.5 2008/02/29 23:20:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 #include "ESMC_VM.h"
 #include "ESMCI_DELayout.h"
 #include "ESMCI_DistGrid.h"
-#include "ESMC_ArraySpec.h"
+#include "ESMCI_ArraySpec.h"
 #include "ESMC_LocalArray.h"
 #include "ESMC_RHandle.h"
 
@@ -146,7 +146,7 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
       InterfaceInt *totalLWidthArg, InterfaceInt *totalUWidthArg,
       ESMC_IndexFlag *indexflag, int *staggerLoc, int *vectorDim,
       InterfaceInt *undistLBoundArg, InterfaceInt *undistUBoundArg, int *rc);
-    static Array *create(ESMC_ArraySpec *arrayspec, DistGrid *distgrid,
+    static Array *create(ESMCI_ArraySpec *arrayspec, DistGrid *distgrid,
       InterfaceInt *distgridToArrayMap,
       InterfaceInt *computationalEdgeLWidthArg,
       InterfaceInt *computationalEdgeUWidthArg,

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.4 2008/02/29 18:22:41 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.5 2008/02/29 23:20:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.4 2008/02/29 18:22:41 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.5 2008/02/29 23:20:35 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -893,7 +893,7 @@ Array *Array::create(
 //
 // !ARGUMENTS:
 //
-  ESMC_ArraySpec *arrayspec,                  // (in)
+  ESMCI_ArraySpec *arrayspec,                 // (in)
   DistGrid *distgrid,                         // (in)
   InterfaceInt *distgridToArrayMap,           // (in)
   InterfaceInt *computationalEdgeLWidthArg,   // (in)
@@ -928,8 +928,8 @@ Array *Array::create(
       "- Not a valid pointer to arrayspec", rc);
     return ESMC_NULL_POINTER;
   }
-  ESMC_TypeKind typekind = arrayspec->ESMC_ArraySpecGetTypeKind();
-  int rank = arrayspec->ESMC_ArraySpecGetRank();
+  ESMC_TypeKind typekind = arrayspec->ESMCI_ArraySpecGetTypeKind();
+  int rank = arrayspec->ESMCI_ArraySpecGetRank();
   // distgrid -> delayout, dimCount
   if (distgrid == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,

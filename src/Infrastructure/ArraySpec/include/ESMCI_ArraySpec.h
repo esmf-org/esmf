@@ -1,4 +1,4 @@
-// $Id: ESMC_ArraySpec.h,v 1.7 2007/04/03 16:36:22 cdeluca Exp $
+// $Id: ESMCI_ArraySpec.h,v 1.1.2.2 2008/02/29 23:20:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -13,8 +13,8 @@
 //-----------------------------------------------------------------------------
 //
 
- #ifndef ESMC_ArraySpec_H
- #define ESMC_ArraySpec_H
+ #ifndef ESMCI_ArraySpec_H
+ #define ESMCI_ArraySpec_H
 
 //-----------------------------------------------------------------------------
 
@@ -23,7 +23,7 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !CLASS:  ESMC_ArraySpec - uniform access to arrays from F90 and C++
+// !CLASS:  ESMCI_ArraySpec - uniform access to arrays from F90 and C++
 //
 // !DESCRIPTION:
 //
@@ -39,10 +39,10 @@
 #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
 
 // !PUBLIC TYPES:
- class ESMC_ArraySpec;
+ class ESMCI_ArraySpec;
 
 // THIS MUST MATCH F90 DECLARATION in ../interface file
-class ESMC_ArraySpec {   // NOT inherited from Base class
+class ESMCI_ArraySpec {   // NOT inherited from Base class
  private:
     int rank;
     ESMC_TypeKind typekind;    
@@ -51,15 +51,17 @@ class ESMC_ArraySpec {   // NOT inherited from Base class
 //
   public:
   
+    ESMCI_ArraySpec(){}
+    ESMCI_ArraySpec(int itsRank, ESMC_TypeKind itsTypeKind);
  // get/set methods for internal data
-    int ESMC_ArraySpecSetRank(int rank) { this->rank = rank; return ESMF_SUCCESS;}
-    int ESMC_ArraySpecGetRank(void) { return this->rank; }
+    int ESMCI_ArraySpecSetRank(int rank) { this->rank = rank; return ESMF_SUCCESS;}
+    int ESMCI_ArraySpecGetRank(void) { return this->rank; }
 
-    int ESMC_ArraySpecSetTypeKind(ESMC_TypeKind typekind) { this->typekind = typekind; 
+    int ESMCI_ArraySpecSetTypeKind(ESMC_TypeKind typekind) { this->typekind = typekind; 
                                                      return ESMF_SUCCESS;}
-    ESMC_TypeKind ESMC_ArraySpecGetTypeKind(void) { return this->typekind; }
+    ESMC_TypeKind ESMCI_ArraySpecGetTypeKind(void) { return this->typekind; }
 
-    int ESMC_ArraySpecSetRank(int rank, ESMC_TypeKind typekind)
+    int ESMCI_ArraySpecSetRank(int rank, ESMC_TypeKind typekind)
     { if ((rank >= 1) && (rank <= 7)) 
           this->rank = rank; 
       else {
@@ -69,7 +71,7 @@ class ESMC_ArraySpec {   // NOT inherited from Base class
       this->typekind = typekind;
       return ESMF_SUCCESS; 
     }
-    int ESMC_ArraySpecGetRank(int *rank, ESMC_TypeKind *typekind)
+    int ESMCI_ArraySpecGetRank(int *rank, ESMC_TypeKind *typekind)
     { if (rank) *rank = this->rank;
       if (typekind) *typekind = this->typekind;
       return ESMF_SUCCESS;  
@@ -84,7 +86,7 @@ class ESMC_ArraySpec {   // NOT inherited from Base class
 //EOP
 //-----------------------------------------------------------------------------
 
- };   // end class ESMC_ArraySpec
+ };   // end class ESMCI_ArraySpec
 
 
- #endif  // ESMC_ArraySpec_H
+ #endif  // ESMCI_ArraySpec_H
