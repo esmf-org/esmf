@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2008/02/16 06:04:38 theurich Exp $ 
+# $Id: makefile,v 1.19 2008/02/29 17:47:00 rokuingh Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -11,7 +11,8 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayCreateGetUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayScatterUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayArbIdxSMMUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayRedistUTest \
-                $(ESMF_TESTDIR)/ESMC_ArrayUTest
+		$(ESMF_TESTDIR)/ESMF_ArrayAttrUTest \
+                $(ESMF_TESTDIR)/ESMC_ArrayUTest 
 
 
 TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
@@ -19,9 +20,11 @@ TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
                 RUN_ESMF_ArrayScatterUTest \
                 RUN_ESMF_ArrayArbIdxSMMUTest \
                 RUN_ESMF_ArrayRedistUTest \
-                RUN_ESMC_ArrayUTest
+                RUN_ESMF_ArrayAttrUTest \
+                RUN_ESMC_ArrayUTest 
 
 TESTS_RUN_UNI = RUN_ESMF_ArrayDataUTestUNI \
+                RUN_ESMF_ArrayAttrUTestUNI \
                 RUN_ESMC_ArrayUTestUNI
 
 
@@ -61,6 +64,14 @@ RUN_ESMF_ArrayArbIdxSMMUTest:
 
 RUN_ESMF_ArrayRedistUTest:
 	$(MAKE) TNAME=ArrayRedist NP=6 ftest
+
+# ---
+
+RUN_ESMF_ArrayAttrUTest:
+	$(MAKE) TNAME=ArrayAttr NP=4 ftest
+
+RUN_ESMF_ArrayAttrUTestUNI:
+	$(MAKE) TNAME=ArrayAttr NP=1 ftest
 
 # ---
 
