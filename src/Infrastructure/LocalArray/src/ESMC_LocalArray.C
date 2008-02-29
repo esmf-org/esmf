@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.C,v 1.27.2.2 2008/01/16 00:08:43 theurich Exp $
+// $Id: ESMC_LocalArray.C,v 1.27.2.3 2008/02/29 18:27:03 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -39,12 +39,13 @@
 // ESMF headers
 #include "ESMC_Start.h"
 #include "ESMC_LogErr.h"
+#include "ESMF_LogMacros.inc"             // for LogErr
 
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_LocalArray.C,v 1.27.2.2 2008/01/16 00:08:43 theurich Exp $";
+static const char *const version = "$Id: ESMC_LocalArray.C,v 1.27.2.3 2008/02/29 18:27:03 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // prototypes for Fortran calls
@@ -639,7 +640,7 @@ int ESMC_LocalArray::ESMC_LocalArrayConstruct(
 
   // adjust the lbound and ubound members while checking counts
   for (int i=0; i<rank; i++){
-    if (larray->counts[i] != ubounds[i] - lbounds[i] + 1){
+    if (larray->counts[i] < ubounds[i] - lbounds[i] + 1){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_VALID,
         "- Mismatch of lbounds, ubounds and counts", rc);
       return NULL;
