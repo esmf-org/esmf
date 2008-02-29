@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2004/03/17 18:23:28 nscollins Exp $
+# $Id: makefile,v 1.2 2008/02/29 17:44:02 rosalind Exp $
 
 # leave alone.
 ALL: build_here
@@ -6,11 +6,12 @@ ALL: build_here
 # if you have C files in this directory, list them all on the line below.
 SOURCEC	  = ESMC_ArraySpec.C
 # if you have F90 files in this directory, list them all on the line below.
-SOURCEF	  =  
+SOURCEF	  =  ESMF_ArraySpec_C.F90
+#SOURCEF	  = 
 # if you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 # include files which go into the public src dir
-STOREH	  =  ESMC_ArraySpec.h
+STOREH	  =  ESMCI_ArraySpec.h ESMC_ArraySpec.h
 
 # leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
