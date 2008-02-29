@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.121 2008/02/25 21:33:50 dneckels Exp $
+! $Id: ESMF_Regrid.F90,v 1.122 2008/02/29 22:07:59 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -41,7 +41,6 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-      use ESMF_FieldMod
       use ESMF_GridMod
       use ESMF_StaggerLocMod
       use ESMF_VmMod
@@ -60,32 +59,89 @@
       private
 
 !------------------------------------------------------------------------------
+      type ESMF_RegridMethod
+      sequence
+!  private
+         integer :: regridmethod
+      end type
+
+
+      type(ESMF_RegridMethod), parameter :: &
+           ESMF_REGRID_METHOD_BILINEAR    = ESMF_RegridMethod(0), &
+           ESMF_REGRID_METHOD_PATCH       = ESMF_RegridMethod(1), &
+           ESMF_REGRID_METHOD_CONSERV1    = ESMF_RegridMethod(2)
+
+      integer, parameter :: ESMF_REGRID_SCHEME_FULL3D = 0, &
+                            ESMF_REGRID_SCHEME_NATIVE = 1                            
+
+!------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
 !
 !------------------------------------------------------------------------------
+
+       public ESMF_RegridMethod,  ESMF_REGRID_METHOD_BILINEAR, &
+                                  ESMF_REGRID_METHOD_PATCH, &
+                                  ESMF_REGRID_METHOD_CONSERV1
+
+       public ESMF_REGRID_SCHEME_FULL3D, &
+              ESMF_REGRID_SCHEME_NATIVE
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
 
-    ! These are wrapper routines which call RegridCreate to do the
+    ! These are wrapper routines which call RegridStore to do the
     !  actual work.  Since all our routines are data centric methods
     !  and we are not exposing an externally visible "regrid" object, 
     !  these routines must exist to be consistent with the other interfaces.  
     ! 
-    public ESMF_RegridCreate
+    public ESMF_RegridStore
 
 !
 !EOPI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.121 2008/02/25 21:33:50 dneckels Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.122 2008/02/29 22:07:59 dneckels Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
+!==============================================================================
+!BOPI
+! !INTERFACE:
+      interface operator (.eq.)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_RegridMethodEqual
+
+! !DESCRIPTION:
+!     This interface overloads the equality operator for the specific
+!     ESMF RegridMethod.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (.ne.)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_RegridMethodNotEqual
+
+! !DESCRIPTION:
+!     This interface overloads the inequality operator for the specific
+!     ESMF RegridMethod.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+
 
 !==============================================================================
 
@@ -97,31 +153,64 @@
 ! 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_RegridCreate"
+#define ESMF_METHOD "ESMF_RegridStore"
 !BOPI
-! !IROUTINE: ESMF_RegridCreate - Precomputes Regrid data
+! !IROUTINE: ESMF_RegridStore - Precomputes Regrid data
 
 ! !INTERFACE:
-      subroutine ESMF_RegridCreate(srcField, dstField, routeHandle, rc)
+      subroutine ESMF_RegridStore(srcGrid, srcArray, &
+                 dstGrid, dstArray, &
+                 regridMethod, regridScheme, &
+                 routehandle, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(inout)        :: srcField
-      type(ESMF_Field), intent(inout)        :: dstField
+      type(ESMF_Grid), intent(inout)         :: srcGrid
+      type(ESMF_Array), intent(inout)        :: srcArray
+      type(ESMF_Grid), intent(inout)         :: dstGrid
+      type(ESMF_Array), intent(inout)        :: dstArray
+      type(ESMF_RegridMethod), intent(in)    :: regridMethod
+      integer, intent(in)                    :: regridScheme
       type(ESMF_RouteHandle),  intent(inout) :: routehandle
       integer,                  intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
+!     The arguments are:
+!     \begin{description}
+!     \item[srcGrid]
+!          The source grid.
+!     \item[srcArray]
+!          The source grid array.
+!     \item[dstGrid]
+!          The destination grid.
+!     \item[dstArray]
+!          The destination array.
+!     \item[regridMethod]
+!          The interpolation method to use.
+!     \item[regridScheme]
+!          Whether to use 3d or native coordinates
+!     \item[routeHandle]
+!          Handle to store the resulting sparseMatrix
+!     \item[{rc}]
+!          Return code.
+!     \end{description}
 !EOPI
-     integer :: localrc
-     type(ESMF_Grid)      :: srcGrid
-     type(ESMF_Grid)      :: dstGrid
-     type(ESMF_Array)     :: srcArray
-     type(ESMF_Array)     :: dstArray
-     type(ESMF_VM)        :: vm
+       integer :: localrc
+       type(ESMF_StaggerLoc) :: staggerLoc
+       type(ESMF_VM)        :: vm
 
        ! Initialize return code; assume failure until success is certain
        localrc = ESMF_RC_NOT_IMPL
        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+       ! For the moment only support bilinear
+       if (regridMethod .ne. ESMF_REGRID_METHOD_BILINEAR) then
+         localrc = ESMF_RC_NOT_IMPL
+       else
+         localrc = ESMF_SUCCESS
+       endif
+
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
 
        ! global vm for now
@@ -129,25 +218,120 @@
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
-       ! Now we go through the painful process of extracting the data members
-       ! that we need.
-       call ESMF_FieldGet(srcField, grid=srcGrid, array=srcArray, rc=localrc)
+       ! Initialize return code; assume failure until success is certain
+       localrc = ESMF_RC_NOT_IMPL
+       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+       ! For the moment only support bilinear
+       if (regridMethod .ne. ESMF_REGRID_METHOD_BILINEAR) then
+         localrc = ESMF_RC_NOT_IMPL
+       else
+         localrc = ESMF_SUCCESS
+       endif
+
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
-       call ESMF_FieldGet(dstField, grid=dstGrid, array=dstArray, rc=localrc)
+       ! global vm for now
+       call ESMF_VMGetGlobal(vm, rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Choose the stagger.  Perhaps eventually this can be more configurable,
+       ! but for now, conserve = node, bilinear = center
+       if (regridMethod .eq. ESMF_REGRID_METHOD_BILINEAR) then
+         staggerLoc = ESMF_STAGGERLOC_CENTER
+       elseif (regridMethod .eq. ESMF_REGRID_METHOD_PATCH) then
+         staggerLoc = ESMF_STAGGERLOC_CENTER
+       else
+         staggerLoc = ESMF_STAGGERLOC_CENTER
+       endif
 
        ! Call through to the C++ object that does the work
-       call c_ESMC_regrid_create(vm, srcGrid, srcArray, ESMF_STAGGERLOC_CENTER,  &
-                   dstGrid, dstArray, ESMF_STAGGERLOC_CENTER, routehandle, localrc)
+       call c_ESMC_regrid_create(vm, srcGrid, srcArray, staggerLoc,  &
+                   dstGrid, dstArray, staggerLoc%staggerloc, &
+                   regridMethod, regridScheme, &
+                   routehandle, localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Mark route handle created
        call ESMF_RouteHandleSetInitCreated(routeHandle, rc)
 
-      end subroutine ESMF_RegridCreate
+      end subroutine ESMF_RegridStore
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridMethodEqual"
+!BOPI
+! !IROUTINE: ESMF_RegridMethodEqual - Equality of RegridMethods
+!
+! !INTERFACE:
+      function ESMF_RegridMethodEqual(RegridMethod1, RegridMethod2)
+
+! !RETURN VALUE:
+      logical :: ESMF_RegridMethodEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_RegridMethod), intent(in) :: &
+         RegridMethod1,      &! Two igrid statuses to compare for
+         RegridMethod2        ! equality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF RegridMethod statuses to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[RegridMethod1, RegridMethod2]
+!          Two igrid statuses to compare for equality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_RegridMethodEqual = (RegridMethod1%regridmethod == &
+                              RegridMethod2%regridmethod)
+
+      end function ESMF_RegridMethodEqual
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridMethodNotEqual"
+!BOPI
+! !IROUTINE: ESMF_RegridMethodNotEqual - Non-equality of RegridMethods
+!
+! !INTERFACE:
+      function ESMF_RegridMethodNotEqual(RegridMethod1, RegridMethod2)
+
+! !RETURN VALUE:
+      logical :: ESMF_RegridMethodNotEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_RegridMethod), intent(in) :: &
+         RegridMethod1,      &! Two RegridMethod Statuses to compare for
+         RegridMethod2        ! inequality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF RegridMethod statuses to see if
+!     they are unequal.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[RegridMethod1, RegridMethod2]
+!          Two statuses of RegridMethods to compare for inequality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_RegridMethodNotEqual = (RegridMethod1%regridmethod /= &
+                                 RegridMethod2%regridmethod)
+
+      end function ESMF_RegridMethodNotEqual
+
+
+!------------------------------------------------------------------------------
+
+
 
    end module ESMF_RegridMod

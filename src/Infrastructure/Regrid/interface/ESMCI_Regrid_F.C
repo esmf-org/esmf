@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.3 2008/02/15 20:12:52 theurich Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.4 2008/02/29 22:07:59 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -53,8 +53,11 @@ extern "C" void FTN(c_esmc_arraysparsematmulstore)(ESMCI::Array **srcArray,
     ESMC_TypeKind *typekind, void *factorList, int *factorListCount,
     ESMCI::InterfaceInt **factorIndexList, int *rc);
 
-extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp, ESMCI::Grid **gridsrcpp, ESMCI::Array **arraysrcpp, int *srcstaggerLoc,
-                             ESMCI::Grid **griddstpp, ESMCI::Array **arraydstpp, int *dststaggerLoc, ESMC_RouteHandle **rh,
+extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
+                   ESMCI::Grid **gridsrcpp, ESMCI::Array **arraysrcpp, int *srcstaggerLoc,
+                   ESMCI::Grid **griddstpp, ESMCI::Array **arraydstpp, int *dststaggerLoc,
+                   int *regridMethod, int *regridScheme,
+                   ESMC_RouteHandle **rh,
                              int*rc) {
   Trace __trace(" FTN(regrid_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridsrcpp, int *srcstaggerLoc, ESMCI::Grid **griddstcpp, int *dststaggerLoc, int*rc");
   ESMCI::VM *vm = *vmpp;
@@ -74,8 +77,10 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp, ESMCI::Grid **gridsr
     ESMCI::GridToMesh(srcgrid, *srcstaggerLoc, srcmesh, std::vector<ESMCI::Array*>());
     ESMCI::GridToMesh(dstgrid, *dststaggerLoc, dstmesh, std::vector<ESMCI::Array*>());
 
+/*
     WriteMesh(srcmesh, "src_grid");
     WriteMesh(dstmesh, "dst_grid");
+*/
 
     // Now we have the meshes, so go ahead and calc bilinear weights.
     // Since bilin needs a field, just do coords.
