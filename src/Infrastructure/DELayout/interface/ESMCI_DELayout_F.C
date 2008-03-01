@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.34.2.1 2008/02/28 22:46:24 theurich Exp $
+// $Id: ESMCI_DELayout_F.C,v 1.1.2.2 2008/03/01 01:30:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMC_FILENAME "ESMC_DELayout_F.C"
+#define ESMC_FILENAME "ESMCI_DELayout_F.C"
 //==============================================================================
 //
 // This file contains the Fortran interface code to link F90 and C++.
