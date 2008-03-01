@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTest.F90,v 1.22 2008/02/14 04:14:56 theurich Exp $
+! $Id: ESMF_ArrayRedistSTest.F90,v 1.23 2008/03/01 01:06:34 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -69,7 +69,7 @@ program ESMF_ArrayRedistSTest
 !-------------------------------------------------------------------------
 
   write(failMsg, *) "System Test failure"
-  write(testname, *) "System Test ESMF_ArrayRedistMatMulSTest"
+  write(testname, *) "System Test ESMF_ArrayRedistSTest"
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
