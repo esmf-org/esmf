@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.1.2.4 2008/02/29 23:20:35 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.1.2.5 2008/03/01 04:12:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@ extern "C" {
   }
   
   void FTN(c_esmc_arraycreateallocate)(ESMCI::Array **ptr, 
-    ESMCI_ArraySpec *arrayspec, ESMCI::DistGrid **distgrid,
+    ESMCI::ArraySpec *arrayspec, ESMCI::DistGrid **distgrid,
     ESMCI::InterfaceInt **distgridToArrayMap,
     ESMCI::InterfaceInt **computationalEdgeLWidthArg,
     ESMCI::InterfaceInt **computationalEdgeUWidthArg,
