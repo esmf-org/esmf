@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid_F.C,v 1.30 2008/03/01 00:37:00 theurich Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.1 2008/03/01 01:21:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMC_FILENAME "ESMC_DistGrid_F.C"
+#define ESMC_FILENAME "ESMCI_DistGrid_F.C"
 //==============================================================================
 //
 // This file contains the Fortran interface code to link F90 and C++.
