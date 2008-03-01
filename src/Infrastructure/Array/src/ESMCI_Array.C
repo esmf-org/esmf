@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.6 2008/03/01 02:55:52 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.7 2008/03/01 04:24:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.6 2008/03/01 02:55:52 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.7 2008/03/01 04:24:09 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -763,8 +763,8 @@ Array *Array::create(
   // allocate LocalArray list that holds all PET-local DEs and adjust elements
   ESMC_LocalArray **larrayList = new ESMC_LocalArray*[localDeCount];
   int *temp_counts = new int[rank];
-  int *temp_undistLBound = new int[rank];
-  int *temp_undistUBound = new int[rank];
+  int *temp_larrayLBound = new int[rank];
+  int *temp_larrayUBound = new int[rank];
   for (int i=0; i<localDeCount; i++){
     larrayListArg[i]->ESMC_LocalArrayGetCounts(rank, temp_counts);
     int jjj=0;  // reset
@@ -781,22 +781,22 @@ Array *Array::create(
         // move the total bounds according to input info
         if (totalLBoundFlag){
           // totalLBound fixed
-          temp_undistLBound[jj] = totalLBound[i*dimCount+j];
+          temp_larrayLBound[jj] = totalLBound[i*dimCount+j];
           if (totalUBoundFlag){
             // totalUBound fixed
             // this case allows total allocation to be larger than total region!
-            temp_undistUBound[jj] = totalUBound[i*dimCount+j];
+            temp_larrayUBound[jj] = totalUBound[i*dimCount+j];
           }else{
             // totalUBound not fixed
-            temp_undistUBound[jj] = temp_counts[jj] + totalLBound[i*dimCount+j]
+            temp_larrayUBound[jj] = temp_counts[jj] + totalLBound[i*dimCount+j]
             - 1;
           }
         }else{
           // totalLBound not fixed
           if (totalUBoundFlag){
             // totalUBound fixed
-            temp_undistUBound[jj] = totalUBound[i*dimCount+j];
-            temp_undistLBound[jj] = totalUBound[i*dimCount+j] - temp_counts[jj]
+            temp_larrayUBound[jj] = totalUBound[i*dimCount+j];
+            temp_larrayLBound[jj] = totalUBound[i*dimCount+j] - temp_counts[jj]
               + 1;
           }else{
             // totalLBound and totalUBound not fixed
@@ -807,13 +807,13 @@ Array *Array::create(
             int uBound = computationalUBound[i*dimCount+j];
             if (exclusiveUBound[i*dimCount+j]>computationalUBound[i*dimCount+j])
               uBound = exclusiveUBound[i*dimCount+j];
-            temp_undistLBound[jj] = lBound
+            temp_larrayLBound[jj] = lBound
                - (int)(0.5 * (temp_counts[jj] - 1 + lBound - uBound));
-            temp_undistUBound[jj] = temp_counts[jj] + temp_undistLBound[jj] - 1;
+            temp_larrayUBound[jj] = temp_counts[jj] + temp_larrayLBound[jj] - 1;
           }
         }
-        totalLBound[i*dimCount+j] = temp_undistLBound[jj]; // write back
-        totalUBound[i*dimCount+j] = temp_undistUBound[jj]; // write back
+        totalLBound[i*dimCount+j] = temp_larrayLBound[jj]; // write back
+        totalUBound[i*dimCount+j] = temp_larrayUBound[jj]; // write back
       }else{
         // non-distributed dimension
         if (temp_counts[jj] < 
@@ -822,8 +822,8 @@ Array *Array::create(
             "- LocalArray does not accommodate requested element count", rc);
           return ESMC_NULL_POINTER;
         }
-        temp_undistLBound[jj] = undistLBoundArray[jjj];
-        temp_undistUBound[jj] = undistUBoundArray[jjj];
+        temp_larrayLBound[jj] = undistLBoundArray[jjj];
+        temp_larrayUBound[jj] = undistUBoundArray[jjj];
         ++jjj;
       }
     }
@@ -831,13 +831,13 @@ Array *Array::create(
     // This will allocate memory for a _new_ LocalArray object for each element,
     // however, the original memory used for data storage will be referenced!
     larrayList[i] = larrayListArg[i]->
-      ESMC_LocalArrayAdjust(temp_undistLBound, temp_undistUBound, &localrc);
+      ESMC_LocalArrayAdjust(temp_larrayLBound, temp_larrayUBound, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }
   delete [] temp_counts;
-  delete [] temp_undistLBound;
-  delete [] temp_undistUBound;
+  delete [] temp_larrayLBound;
+  delete [] temp_larrayUBound;
   
   // call class constructor
   try{
@@ -1299,8 +1299,8 @@ Array *Array::create(
   // allocate LocalArray list that holds all PET-local DEs
   ESMC_LocalArray **larrayList = new ESMC_LocalArray*[localDeCount];
   int *temp_counts = new int[rank];
-  int *temp_undistLBound = new int[rank];
-  int *temp_undistUBound = new int[rank];
+  int *temp_larrayLBound = new int[rank];
+  int *temp_larrayUBound = new int[rank];
   for (int i=0; i<localDeCount; i++){
     int jjj=0;  // reset
     for (int jj=0; jj<rank; jj++){
@@ -1309,26 +1309,26 @@ Array *Array::create(
         int j = arrayToDistGridMapArray[jj] - 1; // shift to basis 0
         temp_counts[jj] =
           totalUBound[i*dimCount+j] - totalLBound[i*dimCount+j] + 1;
-        temp_undistLBound[jj] = totalLBound[i*dimCount+j];
-        temp_undistUBound[jj] = totalUBound[i*dimCount+j];
+        temp_larrayLBound[jj] = totalLBound[i*dimCount+j];
+        temp_larrayUBound[jj] = totalUBound[i*dimCount+j];
       }else{
         // non-distributed dimension
         temp_counts[jj] = undistUBoundArray[jjj] - undistLBoundArray[jjj] + 1;
-        temp_undistLBound[jj] = undistLBoundArray[jjj];
-        temp_undistUBound[jj] = undistUBoundArray[jjj];
+        temp_larrayLBound[jj] = undistLBoundArray[jjj];
+        temp_larrayUBound[jj] = undistUBoundArray[jjj];
         ++jjj;
       }
     }
     // allocate LocalArray object with specific undistLBound and undistUBound
     larrayList[i] = ESMC_LocalArray::ESMC_LocalArrayCreate(rank, typekind,
-      temp_counts, temp_undistLBound, temp_undistUBound, NULL, ESMC_DATA_REF,
+      temp_counts, temp_larrayLBound, temp_larrayUBound, NULL, ESMC_DATA_REF,
       NULL, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }
   delete [] temp_counts;
-  delete [] temp_undistLBound;
-  delete [] temp_undistUBound;
+  delete [] temp_larrayLBound;
+  delete [] temp_larrayUBound;
   
   // call class constructor
   try{
