@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.47 2007/06/20 01:29:23 theurich Exp $
+// $Id: ESMC_Route_F.C,v 1.48 2008/03/01 00:37:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -26,7 +26,7 @@
 #include "ESMC_Base.h"
 #include "ESMC_LogErr.h"
 #include "ESMF_LogMacros.inc"
-#include "ESMC_DELayout.h"
+#include "ESMCI_DELayout.h"
 #include "ESMC_LocalArray.h"
 #include "ESMC_Route.h"
 //------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArray.h,v 1.9 2007/06/23 04:00:29 cdeluca Exp $
+// $Id: ESMC_InternArray.h,v 1.10 2008/03/01 00:37:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 // 
 // !USES:
 #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
-#include <ESMC_DELayout.h>    // communications code
+#include <ESMCI_DELayout.h>    // communications code
 #include <ESMC_LocalArray.h>  // functions to interoperate F90/C++ arrays
 
 // !PUBLIC TYPES:
