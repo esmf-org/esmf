@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.1.2.5 2008/02/29 23:20:35 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.1.2.6 2008/03/01 00:05:45 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@
 // !DESCRIPTION:
 //
 // The code in this file defines the C++ {\tt Array} members and method
-// signatures (prototypes).  The companion file {\tt ESMC\_Array.C}
+// signatures (prototypes).  The companion file {\tt ESMCI\_Array.C}
 // contains the full code (bodies) for the {\tt Array} methods.
 //
 //EOPI
@@ -103,7 +103,7 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
   public:
     // constructor and destructor
     Array(){
-      typekind = ESMF_NOKIND; 
+      typekind = ESMF_NOKIND;
       rank = 0;
       indexflag = ESMF_INDEX_DELOCAL;
       larrayList = NULL;
