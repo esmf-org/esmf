@@ -21,6 +21,7 @@
 //-----------------------------------------------------------------------------
 //
  // insert any higher level, 3rd party or system includes here
+#include <string.h>         // strlen()
 #include "ESMCI_Util.h"
 #include "ESMCI_State.h"
 #include "ESMC_Array.h"
@@ -41,7 +42,7 @@
 
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_State.C,v 1.13 2008/02/29 18:25:24 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_State.C,v 1.14 2008/03/02 04:49:53 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec_C.F90,v 1.1 2008/02/29 17:44:02 rosalind Exp $
+! $Id: ESMF_ArraySpec_C.F90,v 1.2 2008/03/02 04:49:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_ArraySpec_C.F90,v 1.1 2008/02/29 17:44:02 rosalind Exp $'
+!      '$Id: ESMF_ArraySpec_C.F90,v 1.2 2008/03/02 04:49:53 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -42,34 +42,69 @@
 
   subroutine f_esmf_arrayspecset(arrayspec, rank, typekind, rc)
 
-  use ESMF_ArraySpecMod
-  use ESMF_UtilTypesMod
+    use ESMF_ArraySpecMod
+    use ESMF_UtilTypesMod
 
+    type(ESMF_ArraySpec) :: arrayspec
+    integer :: rank
+    type(ESMF_TypeKind) :: typekind
+    integer :: rc
 
-  type(ESMF_ArraySpec) :: arrayspec
-  integer :: rank
-  type(ESMF_TypeKind) :: typekind
-  integer :: rc
+    call ESMF_ArraySpecSet(arrayspec=arrayspec, rank=rank, typekind=typekind, &
+      rc=rc)
+    !TODO: LogErr handling
 
-  call ESMF_ArraySpecSet(arrayspec, rank, typekind, rc)
-
-  return
-  end
+    return
+  end subroutine f_esmf_arrayspecset
 
 !---------------------------------------------------------------
 
   subroutine f_esmf_arrayspecget(arrayspec, rank, typekind, rc)
 
-  use ESMF_ArraySpecMod
-  use ESMF_UtilTypesMod
+    use ESMF_ArraySpecMod
+    use ESMF_UtilTypesMod
 
+    type(ESMF_ArraySpec) :: arrayspec
+    integer :: rank
+    type(ESMF_TypeKind) :: typekind
+    integer :: rc
 
-  type(ESMF_ArraySpec) :: arrayspec
-  integer :: rank
-  type(ESMF_TypeKind) :: typekind
-  integer :: rc
+    call ESMF_ArraySpecGet(arrayspec=arrayspec, rank=rank, typekind=typekind, &
+      rc=rc)
+    !TODO: LogErr handling
 
-  call ESMF_ArraySpecGet(arrayspec, rank, typekind, rc)
+    return
+  end subroutine f_esmf_arrayspecget
 
-  return
-  end
+!---------------------------------------------------------------
+
+  subroutine f_esmf_arrayspecgetrank(arrayspec, rank, rc)
+
+    use ESMF_ArraySpecMod
+
+    type(ESMF_ArraySpec) :: arrayspec
+    integer :: rank
+    integer :: rc
+
+    call ESMF_ArraySpecGet(arrayspec=arrayspec, rank=rank, rc=rc)
+    !TODO: LogErr handling
+
+    return
+  end subroutine f_esmf_arrayspecgetrank
+
+!---------------------------------------------------------------
+
+  subroutine f_esmf_arrayspecgettypekind(arrayspec, typekind, rc)
+
+    use ESMF_ArraySpecMod
+    use ESMF_UtilTypesMod
+
+    type(ESMF_ArraySpec) :: arrayspec
+    type(ESMF_TypeKind) :: typekind
+    integer :: rc
+
+    call ESMF_ArraySpecGet(arrayspec=arrayspec, typekind=typekind, rc=rc)
+    !TODO: LogErr handling
+
+    return
+  end subroutine f_esmf_arrayspecgettypekind

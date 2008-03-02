@@ -1,10 +1,10 @@
-# $Id: makefile,v 1.2 2008/02/29 17:44:02 rosalind Exp $
+# $Id: makefile,v 1.3 2008/03/02 04:49:53 theurich Exp $
 
 # leave alone.
 ALL: build_here
 
 # if you have C files in this directory, list them all on the line below.
-SOURCEC	  = ESMC_ArraySpec.C
+SOURCEC	  = ESMCI_ArraySpec.C ESMC_ArraySpec.C
 # if you have F90 files in this directory, list them all on the line below.
 SOURCEF	  =  ESMF_ArraySpec_C.F90
 #SOURCEF	  = 
