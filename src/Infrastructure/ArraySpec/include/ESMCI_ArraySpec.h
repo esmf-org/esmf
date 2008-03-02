@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArraySpec.h,v 1.1.2.3 2008/03/01 04:12:50 theurich Exp $
+// $Id: ESMCI_ArraySpec.h,v 1.1.2.4 2008/03/02 05:03:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -20,58 +20,37 @@
 
 //-----------------------------------------------------------------------------
 //BOPI
-// !CLASS:  ESMCI::ArraySpec - uniform access to arrays from F90 and C++
+// !CLASS:  ESMCI::ArraySpec - rank and typekind of an array
 //
 // !DESCRIPTION:
+//
+// The code in this file defines the internal C++ {\tt ArraySpec} class.
+// The companion file {\tt ESMCI\_ArraySpec.C} contains the full code (bodies)
+// for the {\tt ArraySpec} methods.
 //
 //EOPI
 //-----------------------------------------------------------------------------
 
+#include "ESMC_Util.h"
+
 namespace ESMCI {
 
 // classes and structs
-
 class ArraySpec;
 
-// THIS MUST MATCH F90 DECLARATION in ../interface file
-// TODO: this is bad bad code -> must be replaced!!!!
-
+// class definition
 class ArraySpec {   // NOT inherited from Base class
- private:
-    int rank;
-    ESMC_TypeKind typekind;    
+  private:
+    // Allocate enough memory to store members in the Fortran side.
+    // Adjust if members are added, rounding up to multiples of 64)
+    char shallowMem[192];
 
-// !PUBLIC MEMBER FUNCTIONS:
-//
   public:
-  
-    ArraySpec(){}
-    ArraySpec(int itsRank, ESMC_TypeKind itsTypeKind);
- // get/set methods for internal data
-    int setRank(int rank) { this->rank = rank; return ESMF_SUCCESS;}
-    int getRank(void) { return this->rank; }
+    int set(int rank, ESMC_TypeKind typekind);
+    int getRank();
+    ESMC_TypeKind getTypeKind();
 
-    int setTypeKind(ESMC_TypeKind typekind) { this->typekind = typekind; 
-                                                     return ESMF_SUCCESS;}
-    ESMC_TypeKind getTypeKind(void) { return this->typekind; }
-
-    int setRank(int rank, ESMC_TypeKind typekind)
-    { if ((rank >= 1) && (rank <= 7)) 
-          this->rank = rank; 
-      else {
-         printf("bad rank %d, must be between 1 and 7\n", rank);
-         return ESMF_FAILURE;
-      }
-      this->typekind = typekind;
-      return ESMF_SUCCESS; 
-    }
-    int getRank(int *rank, ESMC_TypeKind *typekind)
-    { if (rank) *rank = this->rank;
-      if (typekind) *typekind = this->typekind;
-      return ESMF_SUCCESS;  
-    }
-
-};  //  class ArraySpec
+};
 
 } // namespace ESMCI
 

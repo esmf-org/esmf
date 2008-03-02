@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.36.2.3 2008/03/01 04:12:51 theurich Exp $
+// $Id: ESMCI_Grid.C,v 1.36.2.4 2008/03/02 05:03:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.36.2.3 2008/03/01 04:12:51 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.36.2.4 2008/03/02 05:03:37 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -274,8 +274,7 @@ int Grid::allocCoordArray(
   for (coord=0; coord<dimCount; coord++) {
     
     // fill in ArraySpec with information describing coordinate
-    arrayspec->setRank(coordDimCount[coord]);
-    arrayspec->setTypeKind(typekind);
+    arrayspec->set(coordDimCount[coord], typekind);
     
     //// Initialize distgridToArrayMap array to 0 to make all unspecified dimensions
     //// replicated
