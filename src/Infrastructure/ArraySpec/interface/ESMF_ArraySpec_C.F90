@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec_C.F90,v 1.2 2008/03/02 04:49:53 theurich Exp $
+! $Id: ESMF_ArraySpec_C.F90,v 1.3 2008/03/03 18:38:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_ArraySpec_C.F90,v 1.2 2008/03/02 04:49:53 theurich Exp $'
+!      '$Id: ESMF_ArraySpec_C.F90,v 1.3 2008/03/03 18:38:37 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -41,70 +41,114 @@
 !------------------------------------------------------------------------------
 
   subroutine f_esmf_arrayspecset(arrayspec, rank, typekind, rc)
-
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_arrayspecset()"
     use ESMF_ArraySpecMod
     use ESMF_UtilTypesMod
+    use ESMF_LogErrMod
 
     type(ESMF_ArraySpec) :: arrayspec
     integer :: rank
     type(ESMF_TypeKind) :: typekind
     integer :: rc
 
-    call ESMF_ArraySpecSet(arrayspec=arrayspec, rank=rank, typekind=typekind, &
-      rc=rc)
-    !TODO: LogErr handling
+    integer                 :: localrc      ! local return code
 
-    return
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    rc = ESMF_RC_NOT_IMPL
+
+    call ESMF_ArraySpecSet(arrayspec=arrayspec, rank=rank, typekind=typekind, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! return successfully
+    rc = ESMF_SUCCESS
+
   end subroutine f_esmf_arrayspecset
 
 !---------------------------------------------------------------
 
   subroutine f_esmf_arrayspecget(arrayspec, rank, typekind, rc)
-
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_arrayspecget()"
     use ESMF_ArraySpecMod
     use ESMF_UtilTypesMod
+    use ESMF_LogErrMod
 
     type(ESMF_ArraySpec) :: arrayspec
     integer :: rank
     type(ESMF_TypeKind) :: typekind
     integer :: rc
 
-    call ESMF_ArraySpecGet(arrayspec=arrayspec, rank=rank, typekind=typekind, &
-      rc=rc)
-    !TODO: LogErr handling
+    integer                 :: localrc      ! local return code
 
-    return
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    rc = ESMF_RC_NOT_IMPL
+
+    call ESMF_ArraySpecGet(arrayspec=arrayspec, rank=rank, typekind=typekind, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    rc = ESMF_SUCCESS
+
   end subroutine f_esmf_arrayspecget
 
 !---------------------------------------------------------------
 
   subroutine f_esmf_arrayspecgetrank(arrayspec, rank, rc)
-
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_arrayspecgetrank()"
     use ESMF_ArraySpecMod
+    use ESMF_LogErrMod
 
     type(ESMF_ArraySpec) :: arrayspec
     integer :: rank
     integer :: rc
 
-    call ESMF_ArraySpecGet(arrayspec=arrayspec, rank=rank, rc=rc)
-    !TODO: LogErr handling
+    integer                 :: localrc      ! local return code
 
-    return
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    rc = ESMF_RC_NOT_IMPL
+
+    call ESMF_ArraySpecGet(arrayspec=arrayspec, rank=rank, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    rc = ESMF_SUCCESS
+
   end subroutine f_esmf_arrayspecgetrank
 
 !---------------------------------------------------------------
 
   subroutine f_esmf_arrayspecgettypekind(arrayspec, typekind, rc)
-
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_arrayspecgettypekind()"
     use ESMF_ArraySpecMod
     use ESMF_UtilTypesMod
+    use ESMF_LogErrMod
 
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_TypeKind) :: typekind
     integer :: rc
 
-    call ESMF_ArraySpecGet(arrayspec=arrayspec, typekind=typekind, rc=rc)
-    !TODO: LogErr handling
+    integer                 :: localrc      ! local return code
 
-    return
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    rc = ESMF_RC_NOT_IMPL
+
+    call ESMF_ArraySpecGet(arrayspec=arrayspec, typekind=typekind, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    rc = ESMF_SUCCESS
+
   end subroutine f_esmf_arrayspecgettypekind
