@@ -2059,6 +2059,96 @@ void FTN(c_esmc_gridattpackcreate)(ESMCI::Grid **grid, char *name, char *convent
         return;
     }
 
+#if 0
+  
+   ESMCI::Grid *grid;
+
+   // Get grid
+   grid=*_grid;
+
+   // turn on sphere
+   grid->setSphere();
+
+#if 0
+   // Grid Node Iterator
+   ESMCI::GridIter *iter=new ESMCI::GridIter(grid,0,true);
+   ESMCI::GridIter *iter2=new ESMCI::GridIter(grid,0,false);
+
+   printf("----------- \n");
+   int i=0;
+   for(iter->toBeg(); !iter->isDone(); iter->adv()) {
+
+#if 0
+     ESMC_R8 coord[2];
+
+       iter->getCoord(coord);
+
+       printf("%d :: GID=%d LID=%d local=%d  shared=%d (%f,%f) \n",i,iter->getGlobalID(),iter->getLocalID(),iter->isLocal(),iter->isShared(),coord[0],coord[1]);
+#endif
+
+       printf("%d :: GID=%d poleID=%d \n",i,iter->getGlobalID(),iter->getPoleID());
+
+
+
+#if 0 
+     int lid;
+
+     lid=iter->getLocalID();
+
+    if (iter2->moveToLocalID(lid)->getLocalID() != lid) {
+       printf("ERROR :: %d \n",lid);      
+     } else {
+        printf("%d :: %d == %d \n",i,lid,iter2->moveToLocalID(lid)->getLocalID());      
+     }
+       printf(">>>> %d :: %d == %d \n",i,lid,iter2->moveToLocalID(lid)->getLocalID());      
+#endif
+
+
+     i++;
+   }
+   printf("%d ----------- \n",i);
+#endif
+
+#if 1
+   // Grid Cell Iterator
+   ESMCI::GridIter *ni=new ESMCI::GridIter(grid,0,true);
+
+   ESMCI::GridCellIter *iter=new ESMCI::GridCellIter(grid,0);
+   ESMCI::GridCellIter *iter2=new ESMCI::GridCellIter(grid,0);
+
+   printf("Grid Cells ----------- \n");
+   int i=0;
+   for(iter->toBeg(); !iter->isDone(); iter->adv()) {
+
+     int num, cnr[4], ngid[4];
+
+     iter->getCornersCellNodeLocalID(&num, cnr);
+     for (int i=0; i<4; i++) {
+       ngid[i]=ni->moveToLocalID(cnr[i])->getGlobalID();
+     }
+   
+
+     printf("%d :: GID=%d >>  %d %d %d %d \n",i,iter->getGlobalID(),ngid[0],ngid[1],ngid[2],ngid[3]);
+
+#if 0
+     int lid;
+
+     lid=iter->getLocalID();
+
+    if (iter2->moveToLocalID(lid)->getLocalID() != lid) {
+       printf("ERROR :: %d \n",lid);      
+     } else {
+        printf("%d :: %d == %d \n",i,lid,iter2->moveToLocalID(lid)->getLocalID());      
+     }
+       printf(">>>> %d :: %d == %d \n",i,lid,iter2->moveToLocalID(lid)->getLocalID());      
+#endif
+
+
+     i++;
+   }
+   printf("%d ----------- \n",i);
+#endif
+#endif
 
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;

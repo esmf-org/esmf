@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.37 2008/03/01 00:37:01 theurich Exp $
+// $Id: ESMCI_Grid.h,v 1.38 2008/03/03 21:08:24 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,6 +44,10 @@ enum ESMC_GridStatus {ESMC_GRIDSTATUS_NOT_READY=1,
 		      ESMC_GRIDSTATUS_SHAPE_READY
 };
 
+enum  ESMC_GridConn {ESMC_GRIDCONN_NONE=0,
+                     ESMC_GRIDCONN_PERIODIC,
+                     ESMC_GRIDCONN_POLE,
+                     ESMF_GRIDCONN_BIPOLE};
 
 // Start name space
 namespace ESMCI {  
@@ -61,7 +65,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   // Grid Status
   ESMC_GridStatus status;
 
-  // global information
+  // type information
   ESMC_TypeKind typekind;
   
   int distDimCount;
@@ -73,6 +77,10 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   int *undistUBound; // size of undistUBound = undistDimCount
   
   int dimCount;
+
+  // Topology information
+  ESMC_GridConn *connL;  // size of Grid rank
+  ESMC_GridConn *connU;  // size of Grid rank
   
   // information about edge widths of the Grid
   int *gridEdgeLWidth; // size of grid dimCount
@@ -164,6 +172,9 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   // NOTE: For efficiencies sake the following functions don't error check
   //       so be sure to error check the grid or any input before using.  
   const ESMC_GridStatus getStatus(void) const {return status;}
+
+  const ESMC_GridConn *getConnL(void) const {return connL;}
+  const ESMC_GridConn *getConnU(void) const {return connU;} 
   const int getDimCount(void) const {return dimCount;}
   const int getDistDimCount(void) const {return distDimCount;}
   const int getUndistDimCount(void) const {return undistDimCount;}
@@ -189,8 +200,20 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   const int   *getStaggerEdgeLWidth(int staggerloc) const {return staggerEdgeLWidthList[staggerloc];}
   const int   *getStaggerEdgeUWidth(int staggerloc) const {return staggerEdgeUWidthList[staggerloc];}
 
-  bool isLBnd(int localDE, int dim) {return (isDELBnd[localDE] & (0x1 << dim))?true:false;}
-  bool isUBnd(int localDE, int dim) {return (isDEUBnd[localDE] & (0x1 << dim))?true:false;}
+  // Use these when DistGrid topology stuff is in place
+  // bool isLBnd(int localDE, int dim) {return (isDELBnd[localDE] & (0x1 << dim))?true:false;}
+  // bool isUBnd(int localDE, int dim) {return (isDEUBnd[localDE] & (0x1 << dim))?true:false;}
+
+  // Temporary and will go away soon
+  bool isLBndNT(int localDE, int dim) {return (isDELBnd[localDE] & (0x1 << dim))?true:false;}
+  bool isUBndNT(int localDE, int dim) {return (isDEUBnd[localDE] & (0x1 << dim))?true:false;}
+
+  bool isLBnd(int localDE, int dim) {return ((connL[dim]!=ESMC_GRIDCONN_PERIODIC)&&(isDELBnd[localDE] & (0x1 << dim)))?true:false;}
+  bool isUBnd(int localDE, int dim) {return ((connU[dim]!=ESMC_GRIDCONN_PERIODIC)&&(isDEUBnd[localDE] & (0x1 << dim)))?true:false;}
+
+
+  // Temporary create sphere until I have topology setting worked out 
+  void setSphere() {connL[0]=ESMC_GRIDCONN_PERIODIC; connU[0]=ESMC_GRIDCONN_PERIODIC; connL[1]=ESMC_GRIDCONN_POLE; connU[1]=ESMC_GRIDCONN_POLE;}
 
 
   // detect if a given staggerloc is present in the Grid
@@ -397,6 +420,9 @@ int getComputationalUBound(
   private:
     Grid *grid;     // grid being iterated through
     int staggerloc; // staggerloc in grid being iterated through
+
+    const ESMC_GridConn *connL;
+    const ESMC_GridConn *connU;
     
     int rank; // rank of grid and number of valid entires in the below
     int curInd[ESMF_MAXDIM];  // current position in index space
@@ -418,6 +444,10 @@ int getComputationalUBound(
 
     bool cellNodes; // include all the nodes attached to cells on this PET's Grid
 
+    // Temporary and will go away soon
+    int minInd[ESMF_MAXDIM];  // minimum of patch
+    int maxInd[ESMF_MAXDIM];  // maximum of patch
+
 
     void setDEBnds(int localDE);
     void getDEBnds(int localDE,int *uBnd,int *lBnd);
@@ -436,6 +466,7 @@ int getComputationalUBound(
   bool isShared();
   int getCount();
   int getDE();
+  int getPoleID();
   template <class TYPE> void getCoord(TYPE *coord);
   template <class TYPE> void getArrayData(Array *array, TYPE *data);
   }; 
@@ -446,6 +477,9 @@ int getComputationalUBound(
   private:
     Grid *grid;     // grid being iterated through
     int staggerloc; // staggerloc in grid being iterated through
+
+    const ESMC_GridConn *connL;
+    const ESMC_GridConn *connU;
     
     int rank; // rank of grid and number of valid entires in the below
     int curInd[ESMF_MAXDIM];  // current position in index space
@@ -466,6 +500,10 @@ int getComputationalUBound(
 
     void setDEBnds(int localDE);
     void getDEBnds(int localDE,int *uBnd,int *lBnd);
+
+    // Temporary and will go away soon
+    int minInd[ESMF_MAXDIM];  // minimum of patch
+    int maxInd[ESMF_MAXDIM];  // maximum of patch
 
   public:
 

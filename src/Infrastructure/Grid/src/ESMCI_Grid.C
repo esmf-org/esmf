@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.55 2008/03/02 04:49:53 theurich Exp $
+// $Id: ESMCI_Grid.C,v 1.56 2008/03/03 21:08:26 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.55 2008/03/02 04:49:53 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.56 2008/03/03 21:08:26 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -2090,6 +2090,19 @@ int Grid::constructInternal(
 
   // if there are any dimensions 
   if (dimCount) {
+
+    //// record connL
+    connL = new ESMC_GridConn[dimCount];
+   
+    //// record connU
+    connU = new ESMC_GridConn[dimCount];
+
+    //// temporarily default these to no connection
+    for(int i=0; i<dimCount; i++) {
+      connL[i]=ESMC_GRIDCONN_NONE;
+      connU[i]=ESMC_GRIDCONN_NONE;
+    }
+
     //// record gridEdgeLWidth
     gridEdgeLWidth = new int[dimCount];
     memcpy(gridEdgeLWidth, gridEdgeLWidthArg, dimCount * sizeof(int));
@@ -2367,6 +2380,10 @@ Grid::Grid(
   undistUBound = ESMC_NULL_POINTER; 
   
   dimCount=0;
+
+  connL = ESMC_NULL_POINTER; 
+  connU = ESMC_NULL_POINTER; 
+
   gridEdgeLWidth = ESMC_NULL_POINTER; 
   gridEdgeUWidth = ESMC_NULL_POINTER; 
   gridAlign = ESMC_NULL_POINTER; 
@@ -2443,6 +2460,8 @@ Grid::Grid(
 
    // delete all dimension stuff
    if (dimCount) {
+     if (connL !=ESMC_NULL_POINTER) delete [] connL;
+     if (connU !=ESMC_NULL_POINTER) delete [] connU;
      if (gridEdgeLWidth !=ESMC_NULL_POINTER) delete [] gridEdgeLWidth;
      if (gridEdgeUWidth !=ESMC_NULL_POINTER) delete [] gridEdgeUWidth;
      if (gridAlign !=ESMC_NULL_POINTER) delete [] gridAlign;
@@ -4225,12 +4244,29 @@ void GridIter::setDEBnds(
     curInd[i]=lBndInd[i];
   }
 
-  //  printf("new DE ------- \n");
-  //  printf(" rank=%d \n",rank);
-  //  printf(" lbnd=[%d,%d] \n",lBndInd[0],lBndInd[1]);
-  //  printf(" ubnd=[%d,%d] \n",uBndInd[0],uBndInd[1]);
-  //  printf(" cur=[%d,%d] \n",curInd[0],curInd[1]);
-  //  printf("new DE ------- \n");
+
+  // Temporarily set min/max
+  int localrc;
+  const int *localDEList= grid->getDistGrid()->getDELayout()->getLocalDeList();
+  const int *DEPatchList = grid->getDistGrid()->getPatchListPDe();
+  int patch=DEPatchList[localDEList[localDE]];
+
+  const int *patchMin=grid->getDistGrid()->getMinIndexPDimPPatch(patch, &localrc);
+  const int *patchMax=grid->getDistGrid()->getMaxIndexPDimPPatch(patch, &localrc);
+    
+   for (int i=0; i<rank; i++) {
+    minInd[i]=patchMin[i];
+    maxInd[i]=patchMax[i];
+  }
+
+#if 0
+   printf("new DE ------- \n");
+   printf(" rank=%d \n",rank);
+   printf(" lbnd=[%d,%d] \n",lBndInd[0],lBndInd[1]);
+   printf(" ubnd=[%d,%d] \n",uBndInd[0],uBndInd[1]);
+   printf(" cur=[%d,%d] \n",curInd[0],curInd[1]);
+   printf("new DE ------- \n");
+#endif
 
 }
 //-----------------------------------------------------------------------------
@@ -4266,6 +4302,8 @@ GridIter::GridIter(
   staggerloc=staggerlocArg;
   rank=grid->getDimCount();
   cellNodes=cellNodesArg;
+  connL=grid->getConnL();
+  connU=grid->getConnU();
 
   // initialize 
   for (int i=0; i<ESMF_MAXDIM; i++) {
@@ -4442,21 +4480,82 @@ int GridIter::getGlobalID(
     deBasedInd[i]=curInd[i]-exLBndInd[i];
   }
 
-  //   printf("curDE=%d Ind=%d %d \n",curDE,deBasedInd[0],deBasedInd[1]);
+  //  printf("curDE=%d Ind=%d %d \n",curDE,deBasedInd[0],deBasedInd[1]);
 
   // return sequence index
   gid=grid->getDistGrid()->getSequenceIndexLocalDe(curDE,deBasedInd,&localrc);
 
   if (gid <0) printf("Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,deBasedInd[0],deBasedInd[1],localrc);
 #else
+
+  // Temporarily handle periodicity until GT's permenant solution
+  for (int i=0; i<rank; i++) {
+    deBasedInd[i]=curInd[i];
+
+    if ((curInd[i]==lBndInd[i]) &&
+        (connL[i]==ESMC_GRIDCONN_PERIODIC) && 
+         grid->isLBndNT(curDE,i)) {
+
+      deBasedInd[i]=maxInd[i];
+    } 
+
+    if ((curInd[i]==uBndInd[i]) &&
+        (connU[i]==ESMC_GRIDCONN_PERIODIC) && 
+         grid->isUBndNT(curDE,i)) {
+
+      deBasedInd[i]=minInd[i];
+    } 
+
+  }
+
+
   // NOTE THAT THIS ONLY WORKS FOR SINGLE PATCH GRIDS WITH GLOBAL INDEXING
-  gid=grid->getDistGrid()->getSequenceIndexPatch(1,curInd,&localrc);
+  gid=grid->getDistGrid()->getSequenceIndexPatch(1,deBasedInd,&localrc);
 
   if (gid <0) printf("Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,curInd[0],curInd[1],localrc);
 #endif
 
   return gid;
 
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridIter::getPoleID()"
+//BOPI
+// !IROUTINE:  GridIter 
+//
+// !INTERFACE:
+int GridIter::getPoleID(
+//
+// !RETURN VALUE:
+//    if this node is next to a pole then return the pole id, otherwise 
+//  return 0.
+//
+// !ARGUMENTS:
+//   none  
+ ){
+//
+// !DESCRIPTION:
+//    if this node is next to a pole then return the pole id, otherwise 
+//  return 0.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+
+  // if done then leave
+  if (done) return 0;
+
+  // check to see if we're on this proc
+  for (int i=0; i<rank; i++) {
+    if ((curInd[i]==lBndInd[i]) && grid->isLBnd(curDE,i) && (connL[i]==ESMC_GRIDCONN_POLE)) return 2*(i+1);
+    if ((curInd[i]==uBndInd[i]) && grid->isUBnd(curDE,i) && (connU[i]==ESMC_GRIDCONN_POLE)) return 2*(i+1)+1;
+  }
+
+  // if we pass the above test then we're not next to a pole node
+  return 0;
 }
 //-----------------------------------------------------------------------------
 
@@ -4567,7 +4666,6 @@ bool GridIter::isLocal(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  int localrc;
 
   // if done then leave
   if (done) return false;
@@ -4947,6 +5045,20 @@ void GridCellIter::setDEBnds(
     curInd[i]=lBndInd[i];
   }
 
+  // Temporarily set min/max
+  int localrc;
+  const int *localDEList= grid->getDistGrid()->getDELayout()->getLocalDeList();
+  const int *DEPatchList = grid->getDistGrid()->getPatchListPDe();
+  int patch=DEPatchList[localDEList[localDE]];
+
+  const int *patchMin=grid->getDistGrid()->getMinIndexPDimPPatch(patch, &localrc);
+  const int *patchMax=grid->getDistGrid()->getMaxIndexPDimPPatch(patch, &localrc);
+    
+   for (int i=0; i<rank; i++) {
+    minInd[i]=patchMin[i];
+    maxInd[i]=patchMax[i];
+  }
+
 
 }
 //-----------------------------------------------------------------------------
@@ -4979,7 +5091,10 @@ GridCellIter::GridCellIter(
   // Set parameters
   grid=gridArg;
   staggerloc=staggerlocArg;
+
   rank=grid->getDimCount();
+  connL=grid->getConnL();
+  connU=grid->getConnU();
 
   // initialize 
   for (int i=0; i<ESMF_MAXDIM; i++) {
@@ -5169,6 +5284,8 @@ int GridCellIter::getGlobalID(
 
   if (gid <0) printf("Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,deBasedInd[0],deBasedInd[1],localrc);
 #else
+
+
   // NOTE THAT THIS ONLY WORKS FOR SINGLE PATCH GRIDS WITH GLOBAL INDEXING
   gid=grid->getDistGrid()->getSequenceIndexPatch(1,curInd,&localrc);
 

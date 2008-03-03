@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.72 2008/02/28 00:42:24 theurich Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.73 2008/03/03 21:08:26 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.72 2008/02/28 00:42:24 theurich Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.73 2008/03/03 21:08:26 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -62,7 +62,8 @@ program ESMF_GridCreateUTest
   integer :: exlbnd(3),exubnd(3)
   integer :: clbnd(3),cubnd(3)
   integer(ESMF_KIND_I4), pointer :: buf(:)
-  integer :: bufCount, offset, localDECount
+  real(ESMF_KIND_R8), pointer :: fptr2D(:,:)
+  integer :: bufCount, offset, localDECount, i1,i2,lDE
   type(ESMF_StaggerLoc)          :: staggerloc8
 
   !-----------------------------------------------------------------------------
@@ -100,7 +101,7 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   !! Check that validate returns true
-  call ESMF_GridValidate(grid,rc=localrc)
+!  call ESMF_GridValidate(grid,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) correct=.false.
   
   call ESMF_GridDestroy(grid,rc=localrc)
@@ -1132,6 +1133,75 @@ program ESMF_GridCreateUTest
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+
+
+#if 0
+  ! Get rid of the below
+  !-----------------------------------------------------------------------------
+  !
+  write(name, *) "Creating a 2D  Grid with non-default minIndex and non-default 2D regDecomp with CreateShapeTileReg"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! create grid with nondefault parameter
+  rc=ESMF_SUCCESS
+  grid=ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,10/), regDecomp=(/2,1/), &
+       gridEdgeUWidth=(/0,0/),gridEdgeLWidth=(/0,0/), indexflag=ESMF_INDEX_GLOBAL, &
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Allocate Center Coords
+  call ESMF_GridAllocCoord(grid, &
+               staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+ 
+  ! Get number of local DEs
+  call ESMF_GridGet(grid, localDECount=localDECount, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+! XXX
+  ! Get memory and set coords
+  do lDE=0,localDECount-1
+ 
+     !! get coord 1
+     call ESMF_GridGetCoord(grid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptr2D, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
+
+     !! set coord 1  
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+        fptr2D(i1,i2)=REAL(i1,ESMF_KIND_R8)
+     enddo
+     enddo
+
+     !! get coord 2
+     call ESMF_GridGetCoord(grid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptr2D, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
+
+     !! set coord 2  
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+        fptr2D(i1,i2)=REAL(i2,ESMF_KIND_R8)
+     enddo
+     enddo
+  enddo    
+
+
+  !! Check that validate returns true
+  call ESMF_GridValidate(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) correct=.false.
+  
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+#endif
 
 
   !-----------------------------------------------------------------------------
