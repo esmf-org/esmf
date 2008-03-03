@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArraySpec.C,v 1.2 2008/03/03 18:38:37 theurich Exp $
+// $Id: ESMCI_ArraySpec.C,v 1.3 2008/03/03 18:46:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ void FTN(f_esmf_arrayspecgettypekind)(ESMCI::ArraySpec *arrayspec,
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArraySpec.C,v 1.2 2008/03/03 18:38:37 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArraySpec.C,v 1.3 2008/03/03 18:46:41 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -73,6 +73,8 @@ int ArraySpec::getRank(int *rc){
   FTN(f_esmf_arrayspecgetrank)(this, &rank, &localrc);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
     return -1;  // bail out with invalid rank
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
   return rank;
 }
 
@@ -86,6 +88,8 @@ ESMC_TypeKind ArraySpec::getTypeKind(int *rc){
   FTN(f_esmf_arrayspecgettypekind)(this, &typekind, &localrc);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
     return ESMF_NOKIND;  // bail out with invalid typekind
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
   return typekind;
 }
   
