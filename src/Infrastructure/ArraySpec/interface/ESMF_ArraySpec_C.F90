@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec_C.F90,v 1.2.2.3 2008/03/03 18:55:00 theurich Exp $
+! $Id: ESMF_ArraySpec_C.F90,v 1.2.2.4 2008/03/03 23:13:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_ArraySpec_C.F90,v 1.2.2.3 2008/03/03 18:55:00 theurich Exp $'
+!      '$Id: ESMF_ArraySpec_C.F90,v 1.2.2.4 2008/03/03 23:13:18 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -61,7 +61,8 @@
     call ESMF_ArraySpecSet(arrayspec=arrayspec, rank=rank, typekind=typekind, &
       rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, &
+      rcToReturn=rc)) return
       
     ! return successfully
     rc = ESMF_SUCCESS
@@ -91,7 +92,8 @@
     call ESMF_ArraySpecGet(arrayspec=arrayspec, rank=rank, typekind=typekind, &
       rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, &
+      rcToReturn=rc)) return
 
     ! return successfully
     rc = ESMF_SUCCESS
@@ -118,7 +120,8 @@
 
     call ESMF_ArraySpecGet(arrayspec=arrayspec, rank=rank, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, &
+      rcToReturn=rc)) return
 
     ! return successfully
     rc = ESMF_SUCCESS
@@ -146,7 +149,8 @@
 
     call ESMF_ArraySpecGet(arrayspec=arrayspec, typekind=typekind, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, &
+      rcToReturn=rc)) return
 
     ! return successfully
     rc = ESMF_SUCCESS
