@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArraySpec.h,v 1.1.2.4 2008/03/02 05:03:37 theurich Exp $
+// $Id: ESMCI_ArraySpec.h,v 1.1.2.5 2008/03/03 18:55:00 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -31,6 +31,7 @@
 //EOPI
 //-----------------------------------------------------------------------------
 
+#include <cstdlib>
 #include "ESMC_Util.h"
 
 namespace ESMCI {
@@ -47,8 +48,8 @@ class ArraySpec {   // NOT inherited from Base class
 
   public:
     int set(int rank, ESMC_TypeKind typekind);
-    int getRank();
-    ESMC_TypeKind getTypeKind();
+    int getRank(int *rc=NULL);
+    ESMC_TypeKind getTypeKind(int *rc=NULL);
 
 };
 
