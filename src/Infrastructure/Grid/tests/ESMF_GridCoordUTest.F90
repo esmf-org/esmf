@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.20.2.1 2008/02/24 05:45:54 oehmke Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.20.2.2 2008/03/04 22:50:47 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.20.2.1 2008/02/24 05:45:54 oehmke Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.20.2.2 2008/03/04 22:50:47 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -2483,6 +2483,57 @@ program ESMF_GridCoordUTest
            ielbnd1=(/3,2,3/),ieubnd1=(/3,4,6/),iloff1=(/0,0,0/),iuoff1=(/0,0,0/), &
            ielbnd2=(/1,2,7/),ieubnd2=(/2,4,9/),iloff2=(/0,0,0/),iuoff2=(/0,0,0/), &
            ielbnd3=(/3,2,7/),ieubnd3=(/3,4,9/),iloff3=(/0,0,0/),iuoff3=(/0,0,0/), &
+           correct=correct, rc=rc) 
+
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!! Test 2D Plus 1 Default Bounds For CreateShapeTileReg !!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test 2D plus 1 GridCreateShapeTileReg Bounds with even cell division"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! Init correct flag
+  correct=.true.
+
+  ! if petCount >1, setup petMap
+  if (petCount .gt. 1) then
+     petMapReg2D(:,1,1)=(/0,1/)
+     petMapReg2D(:,1,2)=(/2,3/)
+     grid2D=ESMF_GridCreateShapeTile(minIndex=(/1,1,1/),maxIndex=(/4,6,10/), &
+                              regDecomp=(/2,1,2/), &
+                              indexflag=ESMF_INDEX_GLOBAL, &
+                              petMap=petMapReg2D, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  else
+     grid2D=ESMF_GridCreateShapeTile(minIndex=(/1,1,1/),maxIndex=(/4,6,10/), &
+                              regDecomp=(/2,1,2/), &
+                              indexflag=ESMF_INDEX_GLOBAL, &
+                              rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  endif
+
+  ! Allocate Staggers
+  call ESMF_GridAllocCoord(grid2D, &
+               staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! check coord 1
+  call check2DP1Bnds2x2(grid2D, coordDim=1, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
+           localPet=localPet, petCount=petCount,                          &
+           ielbnd0=(/1,1,1/),ieubnd0=(/2,6,5/),iloff0=(/0,0,0/),iuoff0=(/0,0,0/), &
+           ielbnd1=(/3,1,1/),ieubnd1=(/4,6,5/),iloff1=(/0,0,0/),iuoff1=(/0,0,0/), &
+           ielbnd2=(/1,1,6/),ieubnd2=(/2,6,10/),iloff2=(/0,0,0/),iuoff2=(/0,0,0/), &
+           ielbnd3=(/3,1,6/),ieubnd3=(/4,6,10/),iloff3=(/0,0,0/),iuoff3=(/0,0,0/), &
            correct=correct, rc=rc) 
 
 

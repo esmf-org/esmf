@@ -154,7 +154,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47.2.4 2008/02/24 05:45:52 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47.2.5 2008/03/04 22:50:47 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -3146,17 +3146,6 @@ end interface
        enddo
     endif
 
-    ! Set default for decompFlag 
-    allocate(decompFlagLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating decompFlagLocal", &
-                                     ESMF_CONTEXT, rc)) return
-
-    if (present(decompFlag)) then
-       decompFlagLocal=decompFlag
-    else
-       decompFlagLocal=ESMF_DECOMP_HOMOGEN
-    endif
-
 
     ! Set Default for connections (although they don't work yet in distgrid/array, so they aren't really used anywhere yet.)
     if (present(connDim1)) then
@@ -3303,6 +3292,30 @@ end interface
     do i=1,dimCount
        maxIndexLocal(i)=maxIndexLocal(i)+gridEdgeUWidthLocal(i)
     enddo
+
+
+   ! Set default for decomp flag based on gridEdgeWidths -----------------------------------
+   ! NOTE: This is a temporary fix until we have something better implemented in distGrid
+
+    ! Set default for decompFlag 
+    allocate(decompFlagLocal(dimCount), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating decompFlagLocal", &
+                                     ESMF_CONTEXT, rc)) return
+
+    if (present(decompFlag)) then
+        decompFlagLocal(:)=decompFlag(:)
+    else
+      do i=1, dimCount
+         ! set flag based on where the padding is
+         if (gridEdgeLWidthLocal(i) > gridEdgeUWidthLocal(i)) then
+            decompFlagLocal(i)=ESMF_DECOMP_RESTFIRST
+         else if (gridEdgeLWidthLocal(i) < gridEdgeUWidthLocal(i)) then
+            decompFlagLocal(i)=ESMF_DECOMP_RESTLAST
+         else 
+            decompFlagLocal(i)=ESMF_DECOMP_HOMOGEN
+         endif 
+      enddo
+    endif
 
 
    ! Calc minIndex,maxIndex,distgridToGridMap for DistGrid -----------------------------------
@@ -8477,17 +8490,6 @@ endif
        enddo
     endif
 
-    ! Set default for decompFlag 
-    allocate(decompFlagLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating decompFlagLocal", &
-                                     ESMF_CONTEXT, rc)) return
-
-    if (present(decompFlag)) then
-       decompFlagLocal=decompFlag
-    else
-       decompFlagLocal=ESMF_DECOMP_HOMOGEN
-    endif
-
 
     ! Set Default for connections (although they don't work yet in distgrid/array, so they aren't really used anywhere yet.)
     if (present(connDim1)) then
@@ -8635,6 +8637,29 @@ endif
     do i=1,dimCount
        maxIndexLocal(i)=maxIndexLocal(i)+gridEdgeUWidthLocal(i)
     enddo
+
+   ! Set default for decomp flag based on gridEdgeWidths -----------------------------------
+   ! NOTE: This is a temporary fix until we have something better implemented in distGrid
+
+    ! Set default for decompFlag 
+    allocate(decompFlagLocal(dimCount), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating decompFlagLocal", &
+                                     ESMF_CONTEXT, rc)) return
+
+    if (present(decompFlag)) then
+        decompFlagLocal(:)=decompFlag(:)
+    else
+      do i=1, dimCount
+         ! set flag based on where the padding is
+         if (gridEdgeLWidthLocal(i) > gridEdgeUWidthLocal(i)) then
+            decompFlagLocal(i)=ESMF_DECOMP_RESTFIRST
+         else if (gridEdgeLWidthLocal(i) < gridEdgeUWidthLocal(i)) then
+            decompFlagLocal(i)=ESMF_DECOMP_RESTLAST
+         else 
+            decompFlagLocal(i)=ESMF_DECOMP_HOMOGEN
+         endif 
+      enddo
+    endif
 
 
    ! Calc minIndex,maxIndex,distgridToGridMap for DistGrid -----------------------------------
