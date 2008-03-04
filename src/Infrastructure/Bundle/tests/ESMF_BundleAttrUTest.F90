@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleAttrUTest.F90,v 1.1 2008/02/28 18:56:42 rokuingh Exp $
+! $Id: ESMF_BundleAttrUTest.F90,v 1.2 2008/03/04 03:51:19 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-      program ESMF_BundleAttrUTest
+program ESMF_BundleAttrUTest
 
 !------------------------------------------------------------------------------
 !
@@ -36,22 +36,23 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleAttrUTest.F90,v 1.1 2008/02/28 18:56:42 rokuingh Exp $'
+      '$Id: ESMF_BundleAttrUTest.F90,v 1.2 2008/03/04 03:51:19 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
-!     ! Local variables
-      integer :: rc, count, number
-      type(ESMF_Field) :: simplefield
-      type(ESMF_Bundle) :: bundle1
-      character(ESMF_MAXSTR) :: conv, purp
-
-      ! cumulative result: count failures; no failures equals "all pass"
-      integer :: result = 0
+!-------------------------------------------------------------------------
+!=========================================================================
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
 
+      type(ESMF_Field) :: simplefield
+      type(ESMF_Bundle) :: bundle1
+      character(ESMF_MAXSTR) :: conv, purp, attrname, attrvalue
+      integer :: rc, count, number
+
+      ! cumulative result: count failures; no failures equals "all pass"
+      integer :: result = 0
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -62,25 +63,17 @@
 ! added to allow a script to count the number and types of unit tests.
 !-------------------------------------------------------------------------------
 
-      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+  !-----------------------------------------------------------------------------
+  call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+  !-----------------------------------------------------------------------------
 
 #ifdef ESMF_EXHAUSTIVE
 
-      !  Verify that an empty Bundle can be created
-      !EX_UTest
+      !------------------------------------------------------------------------
+      ! preparations
       bundle1 = ESMF_BundleCreate(name="bundle 1", rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Creating Empty Bundle Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !  Create an empty field
-      !EX_UTest
       simplefield = ESMF_FieldCreateEmpty(name="field 1", rc=rc)
-      write(failMsg, *) "Creating Empty Field Test"
-      write(name, *) "Creating Empty Field Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
+      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
       !EX_UTest
       ! Add an integer attribute to a Bundle Test
@@ -120,9 +113,12 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      attrname = "units"
+      attrvalue = "m/s"
+
       !EX_UTest
       ! Set an attribute in an attribute package on a Bundle Test
-      call ESMF_BundleAttPackSet(bundle1, name="units", value="m", &
+      call ESMF_BundleAttPackSet(bundle1, name=attrname, value=attrvalue, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an Attribute in an Attpack from a Bundle Test"
@@ -154,24 +150,16 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
-      !EX_UTest
-      ! Destroying bundle
+      !------------------------------------------------------------------------
+      ! clean up
       call ESMF_BundleDestroy(bundle1, rc=rc)
-      write(failMsg, *) "Destroying a Bundle"
-      write(name, *) "Destroying a Bundle"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Destroying field
       call ESMF_FieldDestroy(simplefield, rc=rc)
-      write(failMsg, *) "Destroying a Field"
-      write(name, *) "Destroying a Field"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
+      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 #endif
 
-      call ESMF_TestEnd(result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  call ESMF_TestEnd(result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
 
-      end program ESMF_BundleAttrUTest
+end program ESMF_BundleAttrUTest
