@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.21 2007/10/06 02:57:31 oehmke Exp $ 
+# $Id: makefile,v 1.22 2008/03/04 03:43:30 rokuingh Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -18,16 +18,18 @@ DIRS	  =
 LOCDIR	  = src/Infrastructure/Array/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_GridCreateUTest \
-	        $(ESMF_TESTDIR)/ESMF_GridCoordUTest
+	        $(ESMF_TESTDIR)/ESMF_GridCoordUTest \
+		$(ESMF_TESTDIR)/ESMF_GridAttrUTest
 
 
 
 TESTS_RUN     = RUN_ESMF_GridCreateUTest \
-	        RUN_ESMF_GridCoordUTest 
+	        RUN_ESMF_GridCoordUTest \
+		RUN_ESMF_GridAttrUTest
 
 TESTS_RUN_UNI = RUN_ESMF_GridCreateUTestUNI \
-	        RUN_ESMF_GridCoordUTestUNI 
-
+	        RUN_ESMF_GridCoordUTestUNI \
+		RUN_ESMF_GridAttrUTestUNI
 
 
 include ${ESMF_DIR}/makefile
@@ -57,4 +59,12 @@ RUN_ESMF_GridCoordUTest:
 
 RUN_ESMF_GridCoordUTestUNI:
 	$(MAKE) TNAME=GridCoord NP=1 ftest 
+
+# --- Grid Attributes
+
+RUN_ESMF_GridAttrUTest:
+	$(MAKE) TNAME=GridAttr NP=4 ftest
+
+RUN_ESMF_GridAttrUTestUNI:
+	$(MAKE) TNAME=GridAttr NP=1 ftest 
 
