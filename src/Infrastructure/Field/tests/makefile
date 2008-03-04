@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.48 2008/03/04 17:40:38 rokuingh Exp $ 
+# $Id: makefile,v 1.49 2008/03/04 22:38:00 dneckels Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -19,7 +19,6 @@ DIRS	  =
 LOCDIR	  = src/Infrastructure/Field/tests
 
 TESTS_BUILD   = \
-                $(ESMF_TESTDIR)/ESMF_FieldRegridUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldAttrUTest
 #		$(ESMF_TESTDIR)/ESMF_FieldUTest 
 #		$(ESMF_TESTDIR)/ESMF_FRoute4UTest \
