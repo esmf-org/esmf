@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.47 2008/02/29 22:03:39 dneckels Exp $ 
+# $Id: makefile,v 1.48 2008/03/04 17:40:38 rokuingh Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -19,17 +19,20 @@ DIRS	  =
 LOCDIR	  = src/Infrastructure/Field/tests
 
 TESTS_BUILD   = \
-                $(ESMF_TESTDIR)/ESMF_FieldRegridUTest 
+                $(ESMF_TESTDIR)/ESMF_FieldRegridUTest \
+		$(ESMF_TESTDIR)/ESMF_FieldAttrUTest
 #		$(ESMF_TESTDIR)/ESMF_FieldUTest 
 #		$(ESMF_TESTDIR)/ESMF_FRoute4UTest \
 #		$(ESMF_TESTDIR)/ESMF_FRoute8UTest 
 
-TESTS_RUN     = RUN_ESMF_FieldUTest 
+TESTS_RUN     = RUN_ESMF_FieldUTest \
+		RUN_ESMF_FieldAttrUTest 
 #	 	RUN_ESMF_FRouteUTest \
 #               RUN_ESMF_FieldHarness2UTest \
 #		RUN_ESMF_FieldHarness4UTest
 
-#TESTS_RUN_UNI = RUN_ESMF_FieldUTestUNI 
+#TESTS_RUN_UNI = RUN_ESMF_FieldUTestUNI \
+#		RUN_ESMF_FieldAttrUTestUNI
 #		RUN_ESMF_FRoute4UTestUNI \
 #		RUN_ESMF_FRoute8UTestUNI
 
@@ -42,8 +45,19 @@ CLOBBERDIRS =
 #
 # Field
 #
+
 RUN_ESMF_FieldUTest:
 	$(MAKE) TNAME=Field NP=4 ftest
 
 RUN_ESMF_FieldCreateGetUTest:
 	$(MAKE) TNAME=FieldCreateGet NP=4 ftest
+
+#
+# Field Attributes
+#
+
+RUN_ESMF_FieldAttrUTest:
+	$(MAKE) TNAME=FieldAttr NP=4 ftest
+
+RUN_ESMF_FieldAttrUTestUNI:
+	$(MAKE) TNAME=FieldAttr NP=1 ftest

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.119 2008/02/27 22:25:52 theurich Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.120 2008/03/04 17:40:38 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.119 2008/02/27 22:25:52 theurich Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.120 2008/03/04 17:40:38 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -171,21 +171,6 @@
 !      write(failMsg, *) "default name not generated"
 !      write(name, *) "Getting name of Field with no data Test"
 !      call ESMF_Test((fname.ne.""), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_remove_UTest_Multi_Proc_Only
-      ! Getting Attribute count from a Field
-      call ESMF_FieldAttributeGetCount(f1, count, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Getting Attribute count from a Field "
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_remove_UTest_Multi_Proc_Only
-      ! Verify attribute count test
-!      write(failMsg, *) "Incorrect count"
-!      write(name, *) "Verify Attribute count from a Field "
-!      call ESMF_Test((count.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_remove_UTest_Multi_Proc_Only
@@ -712,186 +697,6 @@
 !      write(name, *) "Compare F90 pointers Test"
 !      call ESMF_Test((associated(f90ptr4,f90ptr5)), name, failMsg, result, ESMF_SRCLINE)
 
-      !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      ! Adding Attributes to a Field
-      ! f3 exists and is valid at this point.
-      call ESMF_FieldAttributeSet(f3, "Scale Factor", 4, rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Adding Attribute to a Field "
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      ! Getting Attribute count from a Field
-      call ESMF_FieldAttributeGetCount(f3, count, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Getting Attribute count from a Field "
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      ! Verify Attribute Count Test
-      write(failMsg, *) "Incorrect count"
-      write(name, *) "Verify Attribute count from a Field "
-      call ESMF_Test((count.eq.1), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      ! Getting Attribute Info from a Field
-      call ESMF_FieldAttributeGetInfo(f3, name="Scale Factor", count=count, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Getting Attribute info from a Field "
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      ! Verify Attribute Count Test
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Verify Attribute count from a Field "
-      call ESMF_Test((count.eq.1), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      ! Get Field Attribute Test
-      intattr = 0
-      call ESMF_FieldAttributeGet(f3, "Scale Factor", intattr, rc)
-      write(failMsg, *) ""
-      write(name, *) "Getting an Integer Attribute back from a Field"
-      call ESMF_Test((intattr.eq.4), name, failMsg, result, ESMF_SRCLINE)
- 
-      !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      ! Get Field Attribute Test
-      call ESMF_FieldAttPackCreate(f3, convention="c", purpose="p", rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Creating an Attpack on a Field Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      ! Get Field Attribute Test
-      call ESMF_FieldAttPackSet(f3, name="longname", value="long", &
-       convention="c", purpose="p", rc=rc)      
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting an Attribute in an Attpack from a Field Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      ! Get Field Attribute Test
-      call ESMF_FieldAttPackWrite(f3, convention="c", purpose="p", rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Writing an Attpack from a Field Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      ! test setting a second attribute
-      call ESMF_FieldAttributeSet(f3, "Invalid Data Tag", -999, rc)
-      call ESMF_FieldPrint(f3, rc=rc)
-      intattr2 = 0
-      call ESMF_FieldAttributeGet(f3, "Invalid Data Tag", intattr2, rc)
-      print *, "Invalid Data Tag should be -999, is: ", intattr2
-      write(failMsg, *) ""
-      write(name, *) "Getting a second Integer Attribute back from a Field"
-      call ESMF_Test((intattr2.eq.-999), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      ! getting a non-existent attribute
-      print *, "ready to call no attr"
-      call ESMF_FieldAttributeGet(f3, "No such attribute", intattr, rc)
-      print *, "back from no attr"
-      write(failMsg, *) ""
-      write(name, *) "Getting an non-existant Integer Attribute from a Field"
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      print *, "done with test"
-
-      !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      ! getting a non-existent attribute
-      ! setting an integer list
-      call ESMF_FieldAttributeSet(f3, "Multiple Scale Factors", 4, (/4,3,2,1/), rc)
-      call ESMF_FieldPrint(f3, rc=rc)
-      intattr = 0
-      count = 4   ! expected number of values
-      call ESMF_FieldAttributeGet(f3, "Multiple Scale Factors", count, intattrlist, rc)
-      print *, count, "attributes found in list"
-      write(failMsg, *) ""
-      write(name, *) "Getting an Integer List Attribute back from a Field"
-      call ESMF_Test((intattrlist(1).eq.4), name, failMsg, result, ESMF_SRCLINE)
- 
-      !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      ! test setting a real attribute
-      rattr = 3.14159
-      call ESMF_FieldAttributeSet(f3, "Pi", 3.14159_ESMF_KIND_R8, rc)
-      call ESMF_FieldPrint(f3, rc=rc)
-      rattr = 0.0
-      call ESMF_FieldAttributeGet(f3, "Pi", rattr, rc)
-      print *, "Pi should be 3.14159, is: ", rattr
-      write(failMsg, *) ""
-      write(name, *) "Getting a real Attribute back from a Field"
-      call ESMF_Test((rattr-3.14159.lt.0.00001), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      ! test setting a real list
-      rattrlist = (/ 1.1, 2.2 /)
-      call ESMF_FieldAttributeSet(f3, "Vertices", 2, rattrlist, rc)
-      call ESMF_FieldPrint(f3, rc=rc)
-      rattr = 0.0
-      count = 2   ! expected count
-      call ESMF_FieldAttributeGet(f3, "Vertices", count, rattrlist, rc)
-      print *, count, "attributes found in list"
-      print *, "Vertices should be 1.1 and 2.2, are: ", rattrlist
-      write(failMsg, *) ""
-      write(name, *) "Getting a real list Attribute back from a Field"
-      call ESMF_Test((rattrlist(1).eq.1.1), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      ! test setting a logical attribute
-      call ESMF_FieldAttributeSet(f3, "Sky is Blue", ESMF_TRUE, rc)
-      call ESMF_FieldPrint(f3, rc=rc)
-      lattr = ESMF_FALSE
-      call ESMF_FieldAttributeGet(f3, "Sky is Blue", lattr, rc)
-      call ESMF_LogicalString(lattr, lattrstr, rc)
-      print *, "Sky is Blue  should be true, is: ", lattrstr
-      write(failMsg, *) ""
-      write(name, *) "Getting a logical Attribute back from a Field"
-      call ESMF_Test((lattr.eq.ESMF_TRUE), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      ! test setting a logical list
-      call ESMF_FieldAttributeSet(f3, "FlipFlop", 3, (/ESMF_TRUE,ESMF_FALSE,ESMF_TRUE/), rc)
-      call ESMF_FieldPrint(f3, rc=rc)
-      lattr = ESMF_FALSE
-      count = 3   ! expected count
-      call ESMF_FieldAttributeGet(f3, "FlipFlop", count, lattrlist, rc)
-      print *, count, "attributes found in list"
-      print *, "FlipFlop should be alternate, are: " 
-      do i=1, 3
-        call ESMF_LogicalString(lattrlist(i), lattrstr, rc)
-        print *, i, lattrstr
-      enddo
-      write(failMsg, *) ""
-      write(name, *) "Getting a logical Attribute back from a Field"
-      call ESMF_Test((lattrlist(1).eq.ESMF_TRUE), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      ! test setting a character attribute
-      cattr = "It was a dark and stormy night"
-      call ESMF_FieldAttributeSet(f3, "Book", cattr, rc)
-      call ESMF_FieldPrint(f3, rc=rc)
-      call ESMF_FieldAttributeGet(f3, "Book", cattr2, rc)
-      print *, "Book  should be drivel, is: ", trim(cattr2)
-      write(failMsg, *) ""
-      write(name, *) "Getting a character Attribute back from a Field"
-      call ESMF_Test((cattr.eq.cattr2), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldDestroy(f3)
 
       !------------------------------------------------------------------------
