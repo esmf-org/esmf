@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.306 2008/02/29 22:03:38 dneckels Exp $
+! $Id: ESMF_Field.F90,v 1.307 2008/03/04 22:04:52 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -210,7 +210,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.306 2008/02/29 22:03:38 dneckels Exp $'
+      '$Id: ESMF_Field.F90,v 1.307 2008/03/04 22:04:52 dneckels Exp $'
 
 !==============================================================================
 !
@@ -5240,6 +5240,42 @@
         if(present(rc)) rc = ESMF_SUCCESS
 
     end subroutine ESMF_FieldRegridRun
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldRegridDestroy"
+
+!BOPI
+! !IROUTINE: ESMF_FieldRegridDestroy - Free resources used by regrid object
+!
+! !INTERFACE:
+      subroutine ESMF_FieldRegridDestroy(routeHandle, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_RouteHandle), intent(inout)  :: routeHandle
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!     Free resources used by regrid objec
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [routeHandle]
+!           Handle carrying the sparse matrix
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+        integer :: localrc
+
+        call ESMF_RouteHandleRelease(routehandle=routeHandle, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if(present(rc)) rc = ESMF_SUCCESS
+
+    end subroutine ESMF_FieldRegridDestroy
 
 !------------------------------------------------------------------------------
 
