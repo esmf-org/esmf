@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.201.2.1 2008/02/08 23:05:35 theurich Exp $
+#  $Id: common.mk,v 1.201.2.2 2008/03/04 00:32:45 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -191,9 +191,22 @@ export ESMF_MACHINE := $(shell uname -m)
 endif
 endif
 
+ifeq ($(ESMF_OS),Darwin)
+# set ESMF_MACHINE for Darwin
+ifeq ($(ESMF_MACHINE),default)
+export ESMF_MACHINE := $(shell uname -m)
+# uname -m on Darwin (at least up to 8.11.1) is seriously broken and will
+# always return i386 on any Intel system (it's hardcoded!)
+ifeq ($(shell sysctl -n hw.optional.x86_64),1)
+export ESMF_MACHINE = x86_64
+endif
+endif
+endif
+
 ifeq ($(ESMF_ABI),default)
 # start with 64-bit default for all architectures
 export ESMF_ABI = 64
+
 ifeq ($(ESMF_OS),Linux)
 # default on Linux is 32-bit
 export ESMF_ABI = 32
@@ -202,14 +215,20 @@ ifeq ($(ESMF_MACHINE),ia64)
 export ESMF_ABI = 64
 endif
 ifeq ($(ESMF_MACHINE),x86_64)
-#and x86_64
+# and x86_64
 export ESMF_ABI = 64
 endif
 endif
+
 ifeq ($(ESMF_OS),Darwin)
 # default on Darwin is 32-bit
 export ESMF_ABI = 32
+ifeq ($(ESMF_MACHINE),x86_64)
+# except x86_64
+export ESMF_ABI = 64
 endif
+endif
+
 ifeq ($(ESMF_OS),Cygwin)
 # default on Cygwin is 32-bit
 export ESMF_ABI = 32
@@ -218,10 +237,11 @@ ifeq ($(ESMF_MACHINE),ia64)
 export ESMF_ABI = 64
 endif
 ifeq ($(ESMF_MACHINE),x86_64)
-#and x86_64
+# and x86_64
 export ESMF_ABI = 64
 endif
 endif
+
 endif
 
 # by default ABISTRING is simply ABI
@@ -230,6 +250,12 @@ ESMF_ABISTRING = $(ESMF_ABI)
 ifeq ($(ESMF_COMPILER),default)
 ifeq ($(ESMF_OS),Darwin)
 export ESMF_COMPILER = absoft
+ifeq ($(ESMF_MACHINE),i386)
+export ESMF_COMPILER = intel
+endif
+ifeq ($(ESMF_MACHINE),x86_64)
+export ESMF_COMPILER = intel
+endif
 endif
 ifeq ($(ESMF_OS),Linux)
 export ESMF_COMPILER = intel
