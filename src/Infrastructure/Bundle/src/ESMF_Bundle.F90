@@ -1,5 +1,5 @@
 
-! $Id: ESMF_Bundle.F90,v 1.126 2008/02/27 18:29:17 rokuingh Exp $
+! $Id: ESMF_Bundle.F90,v 1.127 2008/03/04 22:25:49 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -414,23 +414,6 @@
 !     information about attributes from an {\tt ESMF\_Bundle}.
  
 !EOPI
-      end interface
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_BundleAttributeSet - Link a Bundle attribute hierarchy to a Field hierarchy
-!
-! !INTERFACE:
-      interface ESMF_BundleAttributeSetLink
-   
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_BundleAttrSetLinkField
-        
-! !DESCRIPTION:
-!     This interface provides a single entry point for methods that attach
-!     attributes from a {\tt ESMF\_Bundle} to another object .
- 
-!EOP
       end interface
 
 !------------------------------------------------------------------------------
@@ -2437,13 +2420,13 @@ end function
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleAttrSetLinkField"
+#define ESMF_METHOD "ESMF_BundleAttributeSetLink"
 !BOP
-! !IROUTINE: ESMF_BundleAttrSetLinkField - Link a Bundle to a Field in an attribute hierarchy
+! !IROUTINE: ESMF_BundleAttributeSetLink - Link a Bundle to a Field in an attribute hierarchy
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleAttributeSetLink()
-      subroutine ESMF_BundleAttrSetLinkField(bundle, field, rc)
+      subroutine ESMF_BundleAttributeSetLink(bundle, field, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(inout) :: bundle
@@ -2481,7 +2464,7 @@ end function
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_BundleAttrSetLinkField
+      end subroutine ESMF_BundleAttributeSetLink
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
