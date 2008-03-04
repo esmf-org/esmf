@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.14 2008/02/14 18:07:46 rokuingh Exp $
+! $Id: user_model1.F90,v 1.15 2008/03/04 20:08:39 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -110,11 +110,11 @@ module user_model1
     type(ESMF_DistGrid)         :: distgrid
     type(ESMF_ArraySpec)        :: arrayspec
     type(ESMF_Array)            :: array
-    type(ESMF_Field)            :: uwind, ozone, co, tke, wt
+    type(ESMF_Field)            :: uwind, ozone, co, tke, wt, field
     type(ESMF_Bundle)           :: bundle, tracers, turbulence
     type(ESMF_Grid)             :: grid
     integer                     :: petCount, backward_run, status, myPet
-    character(len=ESMF_MAXSTR)  :: name, value, conv, purp, fconv, fpurp, sname, svalue
+    character(len=ESMF_MAXSTR)  :: name, value, conv, purp, fconv, fpurp, sname, svalue, outvalue
     
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -129,7 +129,7 @@ module user_model1
     call ESMF_StateAttributeGetInfo(importState, "backward_run", rc=backward_run)
     if (status .ne. ESMF_SUCCESS) goto 20
 
-    ! if this is the forward interpolation
+    ! if this is the forward run
     if (backward_run .ne. ESMF_SUCCESS) then
       conv = 'ESG-CDP'  
       purp = 'general'
@@ -137,16 +137,9 @@ module user_model1
       value = 'State attribute package'
       call ESMF_StateAttPackSet(importState, name, value, convention=conv, purpose=purp, rc=rc)
       if (status .ne. ESMF_SUCCESS) goto 20
-      
-      if (myPet .eq. 0) then
-        !print *, 'Write the Attpack from the first run of component 1.'
-    
-        !call ESMF_StateAttPackWrite(importState, convention=conv, purpose=purp, rc=rc)
-        if (status .ne. ESMF_SUCCESS) goto 20
-      endif
     endif
 
-    ! if this is the backward interpolation check error
+    ! if this is the backward run
     if (backward_run .eq. ESMF_SUCCESS) then
       ! state stuff
       conv = 'ESG-CDP'  
@@ -159,6 +152,12 @@ module user_model1
   !!! Arlindo's State Pretty Print example
   !!!
   !!!
+      if (myPet .eq. 0) then
+        print *, "--------------------------------------- "
+        print *, 'End of State Pretty Print example'
+        print *, "--------------------------------------- "
+      endif
+      
       sname = 'name'
       svalue = 'My Nice State'
  
@@ -245,30 +244,16 @@ module user_model1
       if (status .ne. ESMF_SUCCESS) goto 20
  
       if (myPet .eq. 0) then
-        print *, 'State Pretty Print example.'
         call ESMF_StatePrint(MyState, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 20
+        print *, "--------------------------------------- "
+        print *, 'End of State Pretty Print example'
+        print *, "--------------------------------------- "
       endif
   !!!
   !!!
   !!! Arlindo's State Pretty Print example
       
-      ! bundle stuff
-      bundle = ESMF_BundleCreate(name="bundle1", rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_BundleAttPackCreate(bundle, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_BundleAttPackSet(bundle, name, value, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-
-      ! grid stuff
-      grid = ESMF_GridCreateEmpty(rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_GridAttPackCreate(grid, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_GridAttPackSet(grid, name, value, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-
       ! array stuff
       call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
       distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
@@ -279,25 +264,65 @@ module user_model1
       if (status .ne. ESMF_SUCCESS) goto 20
       call ESMF_ArrayAttPackSet(array, name, value, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
+      name = 'retrievable'
+      value = 'retrieved' 
+      call ESMF_ArrayAttributeSet(array, name, value, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+      call ESMF_ArrayAttributeGet(array, name, outvalue, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+      if (myPet .eq. 0) then
+        print *, 'An attribute was retrieved from the array with name = ', name, ' and value = ', outvalue
+      endif
+      
+      name = 'longname'
+      value = 'longattributename'
+      
+      ! bundle stuff
+      bundle = ESMF_BundleCreate(name="bundle1", rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+      call ESMF_BundleAttPackCreate(bundle, convention=fconv, purpose=fpurp, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+      call ESMF_BundleAttPackSet(bundle, name, value, convention=fconv, purpose=fpurp, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+
+      ! field stuff
+      field = ESMF_FieldCreateEmpty(rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+      call ESMF_FieldAttPackCreate(field, convention=fconv, purpose=fpurp, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+      call ESMF_FieldAttPackSet(field, name, value, convention=fconv, purpose=fpurp, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+
+      ! grid stuff
+      grid = ESMF_GridCreateEmpty(rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+      call ESMF_GridAttPackCreate(grid, convention=fconv, purpose=fpurp, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
+      call ESMF_GridAttPackSet(grid, name, value, convention=fconv, purpose=fpurp, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 20
 
       if (myPet .eq. 0) then
         conv = 'ESG-CDP'
         purp = 'general'
       
-        !print *, 'Write the State Attpack from the second run of component 1.'
-        !call ESMF_StateAttPackWrite(importState, convention=conv, purpose=purp, rc=rc)
+        print *, 'Write the Array Attpack from the second run of component 1.'
+        call ESMF_ArrayAttPackWrite(array, convention=fconv, purpose=fpurp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
 
-        !print *, 'Write the Bundle Attpack from the second run of component 1.'
-        !call ESMF_BundleAttPackWrite(bundle, convention=fconv, purpose=fpurp, rc=rc)
+        print *, 'Write the Bundle Attpack from the second run of component 1.'
+        call ESMF_BundleAttPackWrite(bundle, convention=fconv, purpose=fpurp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
 
-        !print *, 'Write the Grid Attpack from the second run of component 1.'
-        !call ESMF_GridAttPackWrite(grid, convention=fconv, purpose=fpurp, rc=rc)
+        print *, 'Write the Field Attpack from the second run of component 1.'
+        call ESMF_FieldAttPackWrite(field, convention=fconv, purpose=fpurp, rc=rc)
+        if (status .ne. ESMF_SUCCESS) goto 20
+
+        print *, 'Write the Grid Attpack from the second run of component 1.'
+        call ESMF_GridAttPackWrite(grid, convention=fconv, purpose=fpurp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
         
-        !print *, 'Write the Array Attpack from the second run of component 1.'
-        !call ESMF_ArrayAttPackWrite(array, convention=fconv, purpose=fpurp, rc=rc)
+        print *, 'Write the State Attpack from the second run of component 1.'
+        call ESMF_StateAttPackWrite(importState, convention=conv, purpose=purp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
       endif
     endif
@@ -315,6 +340,7 @@ module user_model1
     call ESMF_ArrayDestroy(array, rc=rc)
     call ESMF_DistGridDestroy(distgrid, rc=rc)
     call ESMF_BundleDestroy(bundle, rc=rc)
+    call ESMF_FieldDestroy(field, rc=rc)
     call ESMF_GridDestroy(grid, rc=rc)
 
     rc = ESMF_SUCCESS
