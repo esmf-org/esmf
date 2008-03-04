@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 2008/02/29 22:09:27 theurich Exp $ 
+# $Id: makefile,v 1.21 2008/03/04 18:07:52 rokuingh Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -6,20 +6,23 @@ run_uni: run_unit_tests_uni
 
 LOCDIR	  = src/Superstructure/State/tests
 
-TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMC_StateUTest
+TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMC_StateUTest \
+		$(ESMF_TESTDIR)/ESMF_StateAttrUTest
 # TODO:FIELDINTEGRATION Restore State reconcile and other tests.
 #               $(ESMF_TESTDIR)/ESMF_StateCreateUTest \
 #		$(ESMF_TESTDIR)/ESMF_StateUTest
 #		$(ESMF_TESTDIR)/ESMF_StateReconcileUTest \
 #		$(ESMF_TESTDIR)/ESMF_StateLimitUTest \
 
-TESTS_RUN     =	RUN_ESMC_StateUTest
+TESTS_RUN     =	RUN_ESMC_StateUTest \
+		RUN_ESMF_StateAttrUTest
 #         	RUN_ESMF_StateCreateUTest \
 #		RUN_ESMF_StateUTest
 #		RUN_ESMF_StateReconcileUTest \
 #		RUN_ESMF_StateLimitUTest \
 
-TESTS_RUN_UNI =	RUN_ESMC_StateUTestUNI
+TESTS_RUN_UNI =	RUN_ESMC_StateUTestUNI \
+		RUN_ESMF_StateAttrUTestUNI
 #               RUN_ESMF_StateCreateUTestUNI \
 #		RUN_ESMF_StateUTestUNI
 #		RUN_ESMF_StateReconcileUTestUNI \
@@ -54,6 +57,18 @@ RUN_ESMF_StateUTest:
 
 RUN_ESMF_StateUTestUNI:
 	$(MAKE) TNAME=State NP=1 ftest
+
+
+
+#       
+# State Attr Unit Test
+#
+
+RUN_ESMF_StateAttrUTest:
+	$(MAKE) TNAME=StateAttr NP=4 ftest
+
+RUN_ESMF_StateAttrUTestUNI:
+	$(MAKE) TNAME=StateAttr NP=1 ftest
 
 
 

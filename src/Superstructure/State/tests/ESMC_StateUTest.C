@@ -1,4 +1,4 @@
-// $Id: ESMC_StateUTest.C,v 1.2 2008/02/29 18:25:25 rosalind Exp $
+// $Id: ESMC_StateUTest.C,v 1.3 2008/03/04 18:07:52 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -14,7 +14,7 @@
 #include "ESMCI.h"
 #include "ESMC_Test.h"
 #include "ESMC_Start.h"
-#include "ESMC_DistGrid.h"
+//#include "ESMC_DistGrid.h"
 #include "ESMC_ArraySpec.h"
 #include "ESMC_State.h"
 

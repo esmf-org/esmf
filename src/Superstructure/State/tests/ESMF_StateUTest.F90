@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.58 2008/02/27 00:58:05 rokuingh Exp $
+! $Id: ESMF_StateUTest.F90,v 1.59 2008/03/04 18:07:52 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.58 2008/02/27 00:58:05 rokuingh Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.59 2008/03/04 18:07:52 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -441,115 +441,6 @@
       write(name, *) "Printing of a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !------------------------------------------------------------------------
-
-      !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! Test getting Attribute Count from a state
-      call  ESMF_StateAttributeGetCount(state1, num, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS or returned wrong value"
-      write(name, *) "Getting an attribute count from a State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(num.eq.0), &
-                      name, failMsg, result, ESMF_SRCLINE)
-      print *, "Attribute count =", num
-
-      !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! Test adding an Attribute to a state
-      call  ESMF_StateAttributeSet(state1, name="newAttribute", value=12345, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Adding an attribute to a State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! Test Get Attribute Item Info from State
-      call ESMF_StateGetItemInfo(state1, name="newAttribute", stateitemtype=stateItemType, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Getting unknown item info from State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), & 
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! Test Verifying Attribute Item Info from a State
-      write(failMsg, *) "Item info incorrect"
-      write(name, *) "Verifying attribute item info from a State Test"
-      call ESMF_Test((stateItemType.eq.ESMF_STATEITEM_NOTFOUND), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! Test getting an Attribute from a state
-      call  ESMF_StateAttributeGet(state1, name="newAttribute", value=num, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS or returned wrong value"
-      write(name, *) "Getting an attribute from a State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(num.eq.12345), &
-                      name, failMsg, result, ESMF_SRCLINE)
-      print *, "Attribute num =", num
-
-      !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! Test getting Attribute Count from a state
-      call  ESMF_StateAttributeGetCount(state1, num, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS or returned wrong value"
-      write(name, *) "Getting an attribute count from a State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(num.eq.1), &
-                      name, failMsg, result, ESMF_SRCLINE)
-      print *, "Attribute count =", num
-
-      !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! Test getting Attribute Info from a state
-      call  ESMF_StateAttributeGetInfo(state1, name="newAttribute", count=number, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS or returned wrong value"
-      write(name, *) "Getting attribute Info from a State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.1), &
-                      name, failMsg, result, ESMF_SRCLINE)
-      print *, "Attribute count =", number
-
-      !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! Test adding an Attribute to a state
-      call  ESMF_StateAttPackCreate(state1, convention="c", purpose="p", rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Creating an Attpack on a State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! Test adding an Attribute to a state
-      call  ESMF_StateAttPackSet(state1, name="longname", value="long", &
-       convention="c", purpose="p", rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting an Attribute in an Attpack from a State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! Test adding an Attribute to a state
-      call  ESMF_StateAttPackWrite(state1, convention="c", purpose="p", rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Writing an Attpack from a State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! Test adding an Attribute to a state
-      call  ESMF_StateAttrSetLink(state1, field1, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Linking a State attribute hierarch to a Field attribute hierarchy Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
       !EX_removeUTest
