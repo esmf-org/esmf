@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayAttrUTest.F90,v 1.1 2008/02/29 17:47:00 rokuingh Exp $
+! $Id: ESMF_ArrayAttrUTest.F90,v 1.2 2008/03/04 03:45:23 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -33,13 +33,11 @@ program ESMF_ArrayAttrUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayAttrUTest.F90,v 1.1 2008/02/29 17:47:00 rokuingh Exp $'
+    '$Id: ESMF_ArrayAttrUTest.F90,v 1.2 2008/03/04 03:45:23 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
 !=========================================================================
-
-
 
   ! individual test failure message
   character(ESMF_MAXSTR) :: failMsg
@@ -50,7 +48,7 @@ program ESMF_ArrayAttrUTest
   type(ESMF_DistGrid)    :: distgrid
   type(ESMF_Array)       :: array
   type(ESMF_ArraySpec)   :: arrayspec
-  character(ESMF_MAXSTR) :: conv, purp
+  character(ESMF_MAXSTR) :: conv, purp, attrname, attrvalue
   integer                :: rc, count, number
   
   ! cumulative result: count failures; no failures equals "all pass"
@@ -118,9 +116,12 @@ program ESMF_ArrayAttrUTest
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      attrname = "units"
+      attrvalue = "m/s"
+      
       !EX_UTest
       ! Set an attribute in an attribute package on a Array Test
-      call ESMF_ArrayAttPackSet(array, name="units", value="m", &
+      call ESMF_ArrayAttPackSet(array, name=attrname, value=attrvalue, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an Attribute in an Attpack from a Array Test"
@@ -144,21 +145,11 @@ program ESMF_ArrayAttrUTest
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
-      !EX_UTest
-      ! Destroy Array
-      write(name, *) "Array Destroy Test"
-      write(failMsg, *) "Did not return ESMF_SUCCESS" 
+      !------------------------------------------------------------------------
+      ! clean up
       call ESMF_ArrayDestroy(array, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Destroy Distgrid
-      write(name, *) "Distgrid Destroy Test"
-      write(failMsg, *) "Did not return ESMF_SUCCESS" 
       call ESMF_DistGridDestroy(distGrid, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
+      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 #endif
 
