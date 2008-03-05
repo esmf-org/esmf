@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.25.2.5 2008/03/05 15:35:43 feiliu Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.25.2.6 2008/03/05 18:33:40 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -162,7 +162,8 @@
 @\
        ! Get number of grid dimensions, number @\
        ! of distributed grid dimensions, distgrid, @\
-          ! number of ungridded Field dimensions, and number of undistributed Field Dimensions @\
+       ! number of ungridded Field dimensions, @\
+       ! and number of undistributed Field Dimensions @\
        call ESMF_GridGet(grid, dimCount=gridDimCount, distDimCount=gridDistDimCount, & @\
                             distgrid=distgrid, rc=localrc) @\
        if (ESMF_LogMsgFoundError(localrc, & @\
@@ -175,8 +176,7 @@
           if (present(gridToFieldMap)) then  @\
                if (size(gridToFieldMap) < gridDimCount) then @\
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
-                "- gridToFieldMap must at least be of the same size & @\
-                     as the Grid's dimension ", & @\
+                "- gridToFieldMap size must equal to grid_rank", & @\
                   ESMF_CONTEXT, rc)  @\
           return @\
                endif @\
@@ -185,8 +185,7 @@
           if (present(ungriddedLBound)) then  @\
                if (size(ungriddedLBound) < fieldUngriddedDimCount) then @\
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
-                "- ungriddedLBound must have size greater than or equal to & @\
-                    size(farray) - the Grid's dimension ", & @\
+                "- ungriddedLBound size must equal to array_rank-grid_rank", & @\
                   ESMF_CONTEXT, rc)  @\
           return @\
                endif @\
@@ -195,8 +194,7 @@
           if (present(ungriddedUBound)) then  @\
                if (size(ungriddedUBound) < fieldUngriddedDimCount) then @\
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
-                "- ungriddedUBound must have size greater than or equal to & @\
-                    size(farray) - the Grid's dimension ", & @\
+                "- ungriddedUBound size must equal to array_rank-grid_rank", & @\
                   ESMF_CONTEXT, rc)  @\
           return @\
                endif @\
@@ -205,8 +203,7 @@
           if (present(maxHaloLWidth)) then  @\
                if (size(maxHaloLWidth) < gridDistDimCount) then @\
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
-                "- maxHaloLWidth must have size greater than or equal to & @\
-                    the Grid's distributed dimension ", & @\
+                "- maxHaloLWidth must equal to distgrid_rank", & @\
                   ESMF_CONTEXT, rc)  @\
           return @\
                endif @\
@@ -215,8 +212,7 @@
           if (present(maxHaloUWidth)) then  @\
                if (size(maxHaloUWidth) < gridDistDimCount) then @\
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
-                "- maxHaloUWidth must have size greater than or equal to & @\
-                    the Grid's distributed dimension ", & @\
+                "- maxHaloUWidth must equal to distgrid_rank", & @\
                   ESMF_CONTEXT, rc)  @\
           return @\
                endif @\
@@ -230,7 +226,8 @@
        endif @\
 @\
        if (present(gridToFieldMap)) then @\
-         localGridToFieldMap(1:gridDimCount) = gridToFieldMap (1:gridDimCount) @\
+         localGridToFieldMap(1:gridDimCount) = & @\
+            gridToFieldMap (1:gridDimCount) @\
        else @\
          do i = 1, gridDimCount @\
            localGridToFieldMap(i) = i @\
@@ -238,7 +235,8 @@
        endif @\
 @\
        if(present(maxHaloLWidth)) then @\
-         localMaxHaloLWidth(1:gridDistDimCount) = maxHaloLWidth (1:gridDistDimCount) @\
+         localMaxHaloLWidth(1:gridDistDimCount) = & @\
+            maxHaloLWidth (1:gridDistDimCount) @\
        else @\
          do i = 1, gridDistDimCount @\
                        localMaxHaloLWidth(i) = 0 @\
@@ -246,7 +244,8 @@
        endif @\
 @\
        if(present(maxHaloUWidth)) then @\
-         localMaxHaloUWidth(1:gridDistDimCount) = maxHaloUWidth (1:gridDistDimCount) @\
+         localMaxHaloUWidth(1:gridDistDimCount) = & @\
+            maxHaloUWidth (1:gridDistDimCount) @\
        else @\
          do i = 1, gridDistDimCount @\
            localMaxHaloUWidth(i) = 0 @\
@@ -282,22 +281,28 @@
        if (present(ungriddedLBound)) then @\
           if(present(ungriddedUBound)) then @\
             ! Both present so copy @\
-            localUngriddedLBound(1:fieldUngriddedDimCount) = ungriddedLBound(1:fieldUngriddedDimCount) @\
-            localUngriddedUBound(1:fieldUngriddedDimCount) = ungriddedUBound(1:fieldUngriddedDimCount) @\
+            localUngriddedLBound(1:fieldUngriddedDimCount) = & @\
+                 ungriddedLBound(1:fieldUngriddedDimCount) @\
+            localUngriddedUBound(1:fieldUngriddedDimCount) = & @\
+                ungriddedUBound(1:fieldUngriddedDimCount) @\
           else  @\
             ! Copy lower bound and make upper bound high enough to fit @\
-            localUngriddedLBound(1:fieldUngriddedDimCount) = ungriddedLBound(1:fieldUngriddedDimCount) @\
+            localUngriddedLBound(1:fieldUngriddedDimCount) = & @\
+                ungriddedLBound(1:fieldUngriddedDimCount) @\
             do i=1, fieldUngriddedDimCount        @\
-              localUngriddedUBound(i) = ungriddedLBound(i)+size (farray,ungriddedIndex(i))-1 @\
+              localUngriddedUBound(i) = ungriddedLBound(i)+ & @\
+                size (farray,ungriddedIndex(i))-1 @\
             enddo   @\
           endif @\
         else  @\
           if(present(ungriddedUBound)) then @\
             ! Copy upper bound and make lower bound low enough to fit @\
             do i=1, fieldUngriddedDimCount        @\
-              localUngriddedLBound(i) = ungriddedUBound(i)-size (farray,ungriddedIndex(i))+1 @\
+              localUngriddedLBound(i) = ungriddedUBound(i)- & @\
+                size (farray,ungriddedIndex(i))+1 @\
             enddo   @\
-            localUngriddedUBound(1:fieldUngriddedDimCount) = ungriddedUBound(1:fieldUngriddedDimCount) @\
+            localUngriddedUBound(1:fieldUngriddedDimCount) = & @\
+                ungriddedUBound(1:fieldUngriddedDimCount) @\
           else  @\
             ! No user info copy array bounds @\
             ! Note: because of 'target' attribute bounds will be 1...size @\
@@ -310,9 +315,10 @@
 @\
        ! Get computationalEdgeWidths                                        @\
        call ESMF_GridGet(grid, staggerloc=localStaggerloc, & @\
-             computationalEdgeLWidth=compELWidth, computationalEdgeUWidth=compEUWidth, & @\
+             computationalEdgeLWidth=compELWidth, & @\
+             computationalEdgeUWidth=compEUWidth, & @\
              rc=localrc)                                                   @\
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &              @\
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &          @\
              ESMF_CONTEXT, rcToReturn=rc)) return                          @\
 @\
        ! The undistributed info from the Grid needs to be @\
@@ -333,7 +339,7 @@
        ! Change the order of haloWidth wrt the order of distgridToArrayMap @\
        ! let user supplied maxHaloWidth be mhw(i, i=1...distgridRank) @\
        ! let user supplied fortran array be fa(j, j=1...arrayRank) @\
-       ! Then: localRemapMaxHaloWidth[distgridToArrayMap(i)] = localMaxHaloWidth(i) @\
+       ! Then: localRemapMaxHaloWidth[j=distgridToArrayMap(i)] = localMaxHaloWidth(i) @\
        localRemapMaxHaloLWidth = 0 @\
        localRemapMaxHaloUWidth = 0 @\
        do i = 1, gridDistDimCount @\
@@ -341,7 +347,7 @@
            localRemapMaxHaloUWidth(distgridToArrayMap(i)) = localMaxHaloUWidth(i)  @\
        enddo @\
 @\
-       ! Create Array with undistributed dimensions                                    @\
+       ! Create Array with undistributed dimensions                                @\
        array = ESMF_ArrayCreate(farray, distgrid=distgrid, & @\
                distgridToArrayMap=distgridToArrayMap (1:gridDistDimCount), & @\
                undistLBound=undistLBound(1:fieldUndistDimCount), & @\
@@ -378,14 +384,20 @@
          endif @\
      endif @\
 @\
-     ! Should call a common FieldSetCommitConstructor here instead of just setting things up ourselves @\
+     ! Should call a common FieldSetCommitConstructor here instead @\
+     ! of just setting things up ourselves @\
      ! (The field Sets were all moved here in preparation for this) @\
      field%ftypep%staggerloc = localStaggerLoc @\
-     field%ftypep%gridToFieldMap(1:gridDimCount) = localGridToFieldMap(1:gridDimCount) @\
-     field%ftypep%maxHaloLWidth(1:gridDistDimCount) = localMaxHaloLWidth (1:gridDistDimCount) @\
-     field%ftypep%maxHaloUWidth(1:gridDistDimCount) = localMaxHaloUWidth (1:gridDistDimCount) @\
-     field%ftypep%ungriddedLBound(1:fieldUngriddedDimCount) =localUngriddedLBound(1:fieldUngriddedDimCount) @\
-     field%ftypep%ungriddedUBound(1:fieldUngriddedDimCount) =localUngriddedUBound(1:fieldUngriddedDimCount) @\
+     field%ftypep%gridToFieldMap(1:gridDimCount) = & @\
+        localGridToFieldMap(1:gridDimCount) @\
+     field%ftypep%maxHaloLWidth(1:gridDistDimCount) = & @\
+        localMaxHaloLWidth (1:gridDistDimCount) @\
+     field%ftypep%maxHaloUWidth(1:gridDistDimCount) = & @\
+        localMaxHaloUWidth (1:gridDistDimCount) @\
+     field%ftypep%ungriddedLBound(1:fieldUngriddedDimCount) = & @\
+        localUngriddedLBound(1:fieldUngriddedDimCount) @\
+     field%ftypep%ungriddedUBound(1:fieldUngriddedDimCount) = & @\
+        localUngriddedUBound(1:fieldUngriddedDimCount) @\
      field%ftypep%datastatus = ESMF_STATUS_READY @\
      field%ftypep%grid  = grid @\
      field%ftypep%gridstatus = ESMF_STATUS_READY @\
