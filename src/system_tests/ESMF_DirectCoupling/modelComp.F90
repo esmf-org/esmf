@@ -1,4 +1,4 @@
-! $Id: modelComp.F90,v 1.2 2008/02/14 04:14:59 theurich Exp $
+! $Id: modelComp.F90,v 1.3 2008/03/05 21:43:25 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -153,11 +153,6 @@ module modelCompMod
     type(ESMF_Clock), intent(in) :: clock
     integer, intent(out) :: rc
 
-    ! Local variables
-    type(ESMF_Array)      :: arraySrc, arrayDst
-    real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
-    integer               :: i, j
-    
     ! Initialize
     rc = ESMF_SUCCESS
  
@@ -180,7 +175,6 @@ module modelCompMod
     integer, intent(out) :: rc
 
     ! Local variables
-    type(ESMF_Array)        :: arraySrc, arrayDst
     type(ESMF_RouteHandle)  :: routehandle
 
     ! Initialize
