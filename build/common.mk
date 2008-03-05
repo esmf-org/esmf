@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.208 2008/03/04 00:38:31 theurich Exp $
+#  $Id: common.mk,v 1.209 2008/03/05 21:40:50 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -193,7 +193,7 @@ ifeq ($(ESMF_MACHINE),default)
 export ESMF_MACHINE := $(shell uname -m)
 # uname -m on Darwin (at least up to 8.11.1) is seriously broken and will
 # always return i386 on any Intel system (it's hardcoded!)
-ifeq ($(shell sysctl -n hw.optional.x86_64),1)
+ifeq ($(shell sysctl -n hw.optional.x86_64 2>&1),1)
 export ESMF_MACHINE = x86_64
 endif
 endif
