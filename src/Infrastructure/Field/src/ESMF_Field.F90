@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.307 2008/03/04 22:04:52 dneckels Exp $
+! $Id: ESMF_Field.F90,v 1.308 2008/03/05 00:29:11 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -192,6 +192,7 @@
 
    public ESMF_FieldRegridStore        ! Store a regrid matrix
    public ESMF_FieldRegridRun          ! apply a regrid operator
+   public ESMF_FieldRegridDestroy      ! apply a regrid operator
 
    public assignment(=)
 
@@ -210,7 +211,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.307 2008/03/04 22:04:52 dneckels Exp $'
+      '$Id: ESMF_Field.F90,v 1.308 2008/03/05 00:29:11 dneckels Exp $'
 
 !==============================================================================
 !
