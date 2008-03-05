@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec_C.F90,v 1.2.2.6 2008/03/04 23:01:29 theurich Exp $
+! $Id: ESMF_ArraySpec_C.F90,v 1.2.2.7 2008/03/05 04:08:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -8,6 +8,8 @@
 ! NASA Goddard Space Flight Center.
 ! Licensed under the University of Illinois-NCSA License.
 !
+!==============================================================================
+#define ESMF_FILENAME "ESMF_ArraySpec_C.F90"
 !==============================================================================
 !
 ! F77 interface files for C layer calling into F90 implementation layer.
@@ -23,7 +25,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_ArraySpec_C.F90,v 1.2.2.6 2008/03/04 23:01:29 theurich Exp $'
+!      '$Id: ESMF_ArraySpec_C.F90,v 1.2.2.7 2008/03/05 04:08:37 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -42,7 +44,7 @@
 
   subroutine f_esmf_arrayspecset(arrayspec, rank, typekind, rc)
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_ASset"
+#define ESMF_METHOD "f_esmf_arrayspecset()"
     use ESMF_ArraySpecMod
     use ESMF_UtilTypesMod
     use ESMF_LogErrMod
@@ -73,7 +75,7 @@
 
   subroutine f_esmf_arrayspecget(arrayspec, rank, typekind, rc)
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_ASget"
+#define ESMF_METHOD "f_esmf_arrayspecget()"
     use ESMF_ArraySpecMod
     use ESMF_UtilTypesMod
     use ESMF_LogErrMod
@@ -104,7 +106,7 @@
 
   subroutine f_esmf_arrayspecgetrank(arrayspec, rank, rc)
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_ASgetR"
+#define ESMF_METHOD "f_esmf_arrayspecgetrank()"
     use ESMF_ArraySpecMod
     use ESMF_LogErrMod
 
@@ -132,7 +134,7 @@
 
   subroutine f_esmf_arrayspecgettypekind(arrayspec, typekind, rc)
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_ASgetTK"
+#define ESMF_METHOD "f_esmf_arrayspecgettypekind()"
     use ESMF_ArraySpecMod
     use ESMF_UtilTypesMod
     use ESMF_LogErrMod
