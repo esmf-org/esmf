@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.7 2008/03/03 19:04:04 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.8 2008/03/05 21:35:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.7 2008/03/03 19:04:04 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.8 2008/03/05 21:35:30 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -780,7 +780,9 @@ Array *Array::create(
           temp_larrayLBound[jj] = totalLBound[i*dimCount+j];
           if (totalUBoundFlag){
             // totalUBound fixed
-            // this case allows total allocation to be larger than total region!
+            // this case allows total allocation to be larger than total region,
+            // but LocalArrayAdjust() method will ultimately prevent this by
+            // returning an error if counts are not equal to ubounds-lbounds+1.
             temp_larrayUBound[jj] = totalUBound[i*dimCount+j];
           }else{
             // totalUBound not fixed
