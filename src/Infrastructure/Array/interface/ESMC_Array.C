@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.2 2008/02/16 06:04:37 theurich Exp $
+// $Id: ESMC_Array.C,v 1.3 2008/03/05 06:23:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -29,25 +29,38 @@
 // include ESMF headers
 #include "ESMCI_Arg.h"
 #include "ESMC_LogErr.h"
+#include "ESMF_LogMacros.inc"             // for LogErr
 #include "ESMCI_Array.h"
-
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.2 2008/02/16 06:04:37 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.3 2008/03/05 06:23:07 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
 
-ESMC_Array ESMC_ArrayCreate(int *rc){
+ESMC_Array ESMC_ArrayCreate(ESMC_ArraySpec arrayspec, ESMC_DistGrid distgrid,
+  int *rc){ //TODO: complete this API
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArrayCreate()"
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   ESMC_Array array;
   
-  array.ptr = NULL;  // this dummy prototype returns invalidated ESMC_Array
+  // call into ESMCI interface
+  array.ptr = (void *)
+    ESMCI::Array::create((ESMCI::ArraySpec *)&arrayspec,
+    (ESMCI::DistGrid *)(distgrid.ptr),
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    &localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
+    array.ptr = NULL;
+    return array;  // bail out
+  }
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -55,6 +68,9 @@ ESMC_Array ESMC_ArrayCreate(int *rc){
 }
 
 int ESMC_ArrayPrint(ESMC_Array array){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArrayPrint()"
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -65,6 +81,30 @@ int ESMC_ArrayPrint(ESMC_Array array){
   localrc = ap->print();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;  // bail out
+    
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}  
+
+int ESMC_ArrayDestroy(ESMC_Array *array){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArrayDestroy()"
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // typecast into ESMCI type
+  ESMCI::Array *ap = (ESMCI::Array *)(array->ptr);
+
+  // call into ESMCI method  
+  localrc = ESMCI::Array::destroy(&ap);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;  // bail out
+  
+  // invalidate pointer
+  array->ptr = NULL;
     
   // return successfully
   rc = ESMF_SUCCESS;
