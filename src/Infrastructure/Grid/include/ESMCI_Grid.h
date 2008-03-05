@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.21.2.3 2008/02/28 21:25:09 theurich Exp $
+// $Id: ESMCI_Grid.h,v 1.21.2.4 2008/03/05 20:47:04 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -279,12 +279,24 @@ int getDistExclusiveUBound(
                            );
 
  // Set Array for holding coordinates
+// This needs to make sure the Coord has already been allocated
  int setCoordArray(
                    int *_staggerloc,
                    int *_coord,
                    Array *_array,
                    ESMC_DataCopy *_docopy
                    );
+
+ int allocCoordFromArrayList(
+                       int *staggerlocArg,        // (in) optional
+                       int arrayCount,             // (in) 
+                       Array **arrayList,           // (in)
+                       ESMC_DataCopy *docopyArg,   // (in) optional
+                       InterfaceInt *_staggerEdgeLWidthArg,
+                       InterfaceInt *_staggerEdgeUWidthArg,
+                       InterfaceInt *_staggerAlign
+                       );
+
 
  // Allocate coordinate Arrays for every coord in a staggerloc
  int allocCoordArray(

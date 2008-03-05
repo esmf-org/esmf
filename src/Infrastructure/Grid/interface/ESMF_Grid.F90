@@ -154,7 +154,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47.2.5 2008/03/04 22:50:47 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47.2.6 2008/03/05 20:47:04 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -769,14 +769,10 @@ end interface
        enddo
     endif
 
-
-
-
    ! construct ArraySpec
    call ESMF_ArraySpecSet(arrayspec,rank=arrayDimCount,typekind=localTypeKind, rc=localrc)
    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
-
 
 
     ! Get computationalEdgeWidths
@@ -787,37 +783,30 @@ end interface
            ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-
     ! allocate distgridToArrayMap
     allocate(distgridToArrayMap(distDimCount) , stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToArrayMap", &
                                      ESMF_CONTEXT, rc)) return   
 
-
-   ! construct array based on the presence of distributed dimensions
-   ! if there are undistributed dimensions ...
-   if (undistArrayDimCount .gt. 0) then      
-
-      !! allocate undistributed Bounds
-      allocate(arrayLBound(undistArrayDimCount) , stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridLBound", &
+    ! allocate undistributed Bounds
+    allocate(arrayLBound(undistArrayDimCount) , stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridLBound", &
                                      ESMF_CONTEXT, rc)) return   
-      allocate(arrayUBound(undistArrayDimCount) , stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridUBound", &
+    allocate(arrayUBound(undistArrayDimCount) , stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridUBound", &
                                      ESMF_CONTEXT, rc)) return   
 
-
-      !! Get dimmap and undistibuted bounds
-      call ESMF_GridGetArrayUndistInfo(grid, localstaggerloc,               &
+    ! Get dimmap and undistibuted bounds
+    call ESMF_GridGetArrayUndistInfo(grid, localstaggerloc,               &
                             gridToArrayMap, ungriddedLBound, ungriddedUBound, &
                             distgridToArrayMap, arrayLBound, arrayUBound,   &
                             rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-      !! create Array
-      array=ESMF_ArrayCreate(arrayspec=arrayspec, &
+    ! create Array
+    array=ESMF_ArrayCreate(arrayspec=arrayspec, &
               distgrid=distgrid, distgridToArrayMap=distgridToArrayMap, &
               computationalEdgeLWidth=compELWidth(1:distDimCount), &
               computationalEdgeUWidth=compEUWidth(1:distDimCount), &
@@ -825,46 +814,23 @@ end interface
               indexflag=indexflag, staggerLoc=localStaggerLoc%staggerloc, &
               undistLBound=arrayLBound, undistUBound=arrayUBound, name=name, &
               rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-
-      !! cleanup
-      deallocate(arrayLBound)
-      deallocate(arrayUBound)
-    else
-
-      !! Get info from Grid
-      call ESMF_GridGet(grid, distgridToGridMap=distgridToArrayMap, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-      !! create Array
-      array=ESMF_ArrayCreate(arrayspec=arrayspec, &
-             distgrid=distgrid, distgridToArrayMap=distgridToArrayMap, &
-             computationalEdgeLWidth=compELWidth(1:distDimCount), &
-             computationalEdgeUWidth=compEUWidth(1:distDimCount), &
-             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
-             indexflag=indexflag, staggerLoc=localStaggerLoc%staggerloc, &
-             name=name, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-    endif
 
 
     ! Set return value
     ESMF_ArrayCreateFromGrid = array
 
+
     ! cleanup
     deallocate(distgridToArrayMap)
- 
+    deallocate(arrayLBound)
+    deallocate(arrayUBound)
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
     end function ESMF_ArrayCreateFromGrid
-
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
