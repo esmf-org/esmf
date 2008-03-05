@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.38 2008/03/03 21:08:24 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.39 2008/03/05 20:33:39 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -205,6 +205,8 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   // bool isUBnd(int localDE, int dim) {return (isDEUBnd[localDE] & (0x1 << dim))?true:false;}
 
   // Temporary and will go away soon
+  bool isSphere() { return connL[0]==ESMC_GRIDCONN_PERIODIC && connU[0]==ESMC_GRIDCONN_PERIODIC &&
+                           connL[1]==ESMC_GRIDCONN_POLE && connU[1]==ESMC_GRIDCONN_POLE; }
   bool isLBndNT(int localDE, int dim) {return (isDELBnd[localDE] & (0x1 << dim))?true:false;}
   bool isUBndNT(int localDE, int dim) {return (isDEUBnd[localDE] & (0x1 << dim))?true:false;}
 
