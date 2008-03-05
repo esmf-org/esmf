@@ -1,4 +1,4 @@
-// $Id: ESMC_ArraySpecUTest.C,v 1.1 2008/02/29 17:44:02 rosalind Exp $
+// $Id: ESMC_ArraySpecUTest.C,v 1.2 2008/03/05 06:14:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -11,10 +11,12 @@
 //==============================================================================
 
 #include <string.h>
+
+// ESMF header
 #include "ESMC.h"
+
+// ESMF Test header
 #include "ESMC_Test.h"
-#include "ESMC_Start.h"
-#include "ESMC_ArraySpec.h"
 
 //==============================================================================
 //BOP
