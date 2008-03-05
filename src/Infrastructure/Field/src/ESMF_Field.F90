@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.272.2.11 2008/02/24 05:48:09 oehmke Exp $
+! $Id: ESMF_Field.F90,v 1.272.2.12 2008/03/05 15:35:43 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -202,7 +202,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.272.2.11 2008/02/24 05:48:09 oehmke Exp $'
+      '$Id: ESMF_Field.F90,v 1.272.2.12 2008/03/05 15:35:43 feiliu Exp $'
 
 !==============================================================================
 !
@@ -3200,10 +3200,10 @@
 
       ! make sure there is a grid before asking it questions.
       if (ftypep%gridstatus .eq. ESMF_STATUS_READY) then
-          !call ESMF_GridValidate(grid=ftypep%grid, rc=localrc)
-          !if (ESMF_LogMsgFoundError(localrc, &
-          !                          ESMF_ERR_PASSTHRU, &
-          !                          ESMF_CONTEXT, rc)) return
+          call ESMF_GridValidate(grid=ftypep%grid, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
 
           ! get grid dim and extents for the local piece
           call ESMF_GridGet(ftypep%grid, dimCount=gridrank, &

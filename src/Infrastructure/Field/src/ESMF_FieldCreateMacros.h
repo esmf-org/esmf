@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.25.2.4 2008/03/03 20:46:35 feiliu Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.25.2.5 2008/03/05 15:35:43 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -141,6 +141,8 @@
        integer                        :: localGridToFieldMap (ESMF_MAXDIM) @\
        integer                        :: localMaxHaloLWidth (ESMF_MAXDIM) @\
        integer                        :: localMaxHaloUWidth (ESMF_MAXDIM) @\
+       integer                        :: localRemapMaxHaloLWidth (ESMF_MAXDIM) @\
+       integer                        :: localRemapMaxHaloUWidth (ESMF_MAXDIM) @\
        logical                        :: isGridded(ESMF_MAXDIM) @\
        logical                        :: flag @\
        type(ESMF_Array)               :: array, newarray @\
@@ -156,7 +158,7 @@
        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
 @\
        ! Check the size of the native array. @\
-       fieldDimCount = size(shape(farray)) @\
+       fieldDimCount = mrank @\
 @\
        ! Get number of grid dimensions, number @\
        ! of distributed grid dimensions, distgrid, @\
@@ -227,6 +229,14 @@
          localStaggerLoc = ESMF_STAGGERLOC_CENTER @\
        endif @\
 @\
+       if (present(gridToFieldMap)) then @\
+         localGridToFieldMap(1:gridDimCount) = gridToFieldMap (1:gridDimCount) @\
+       else @\
+         do i = 1, gridDimCount @\
+           localGridToFieldMap(i) = i @\
+         enddo @\
+       endif @\
+@\
        if(present(maxHaloLWidth)) then @\
          localMaxHaloLWidth(1:gridDistDimCount) = maxHaloLWidth (1:gridDistDimCount) @\
        else @\
@@ -240,14 +250,6 @@
        else @\
          do i = 1, gridDistDimCount @\
            localMaxHaloUWidth(i) = 0 @\
-         enddo @\
-       endif @\
-@\
-       if (present(gridToFieldMap)) then @\
-         localGridToFieldMap(1:gridDimCount) = gridToFieldMap (1:gridDimCount) @\
-       else @\
-         do i = 1, gridDimCount @\
-           localGridToFieldMap(i) = i @\
          enddo @\
        endif @\
 @\
@@ -313,58 +315,45 @@
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &              @\
              ESMF_CONTEXT, rcToReturn=rc)) return                          @\
 @\
+       ! The undistributed info from the Grid needs to be @\
+       ! combined with the ungridded info from the Field in order @\
+       ! to create the Array for the Field. @\
+       call ESMF_GridGetArrayUndistInfo(grid, & @\
+            staggerloc=localStaggerLoc, & @\
+            gridToArrayMap=localGridToFieldMap, & @\
+            ungriddedLBound=localUngriddedLBound (1:fieldUngriddedDimCount), & @\
+            ungriddedUBound=localUngriddedUBound (1:fieldUngriddedDimCount), & @\
+            distgridToArrayMap=distgridToArrayMap, & @\
+            undistLBound=undistLBound, undistUBound=undistUBound, & @\
+            rc=localrc) @\
+       if (ESMF_LogMsgFoundError(localrc, & @\
+           ESMF_ERR_PASSTHRU, & @\
+           ESMF_CONTEXT, rc)) return @\
 @\
-       ! if there are undistributed dimensions then get that info @\
-       if (fieldUndistDimCount>0) then @\
-          ! The undistributed info from the Grid needs to be @\
-          ! combined with the ungridded info from the Field in order @\
-          ! to create the Array for the Field. @\
-          call ESMF_GridGetArrayUndistInfo(grid, & @\
-               staggerloc=localStaggerLoc, & @\
-               gridToArrayMap=gridToFieldMap, & @\
-               ungriddedLBound=localUngriddedLBound (1:fieldUngriddedDimCount), & @\
-               ungriddedUBound=localUngriddedUBound (1:fieldUngriddedDimCount), & @\
-               distgridToArrayMap=distgridToArrayMap, & @\
-               undistLBound=undistLBound, undistUBound=undistUBound, & @\
-               rc=localrc) @\
-          if (ESMF_LogMsgFoundError(localrc, & @\
-              ESMF_ERR_PASSTHRU, & @\
-              ESMF_CONTEXT, rc)) return @\
+       ! Change the order of haloWidth wrt the order of distgridToArrayMap @\
+       ! let user supplied maxHaloWidth be mhw(i, i=1...distgridRank) @\
+       ! let user supplied fortran array be fa(j, j=1...arrayRank) @\
+       ! Then: localRemapMaxHaloWidth[distgridToArrayMap(i)] = localMaxHaloWidth(i) @\
+       localRemapMaxHaloLWidth = 0 @\
+       localRemapMaxHaloUWidth = 0 @\
+       do i = 1, gridDistDimCount @\
+           localRemapMaxHaloLWidth(distgridToArrayMap(i)) = localMaxHaloLWidth(i)  @\
+           localRemapMaxHaloUWidth(distgridToArrayMap(i)) = localMaxHaloUWidth(i)  @\
+       enddo @\
 @\
-          ! Create Array with undistributed dimensions                                    @\
-          array = ESMF_ArrayCreate(farray, distgrid=distgrid, & @\
-                  distgridToArrayMap=distgridToArrayMap (1:gridDistDimCount), & @\
-                  undistLBound=undistLBound(1:fieldUndistDimCount), & @\
-                  undistUBound=undistUBound(1:fieldUndistDimCount), & @\
-                  computationalEdgeLWidth=compELWidth(1:gridDistDimCount), & @\
-                  computationalEdgeUWidth=compEUWidth(1:gridDistDimCount), & @\
-                  totalLWidth=localMaxHaloLWidth(1:gridDistDimCount), & @\
-                  totalUWidth=localMaxHaloUWidth(1:gridDistDimCount), & @\
-                  staggerloc=localStaggerLoc%staggerloc, rc=localrc) @\
-                  if (ESMF_LogMsgFoundError(localrc, & @\
-                         ESMF_ERR_PASSTHRU, & @\
-                         ESMF_CONTEXT, rc)) return @\
-@\
-        else ! else just use distributed map from grid @\
-          ! Get map between distributed dimensions                                   @\
-          call ESMF_GridGet(grid, distgridToGridMap=distgridToArrayMap, rc=localrc) @\
-                 if (ESMF_LogMsgFoundError(localrc, & @\
-                     ESMF_ERR_PASSTHRU, & @\
-                     ESMF_CONTEXT, rc)) return @\
-@\
-          ! Create Array with only distributed dimensions                                    @\
-          array = ESMF_ArrayCreate(farray, distgrid=distgrid, & @\
-                  distgridToArrayMap=distgridToArrayMap (1:gridDistDimCount), & @\
-                  computationalEdgeLWidth=compELWidth(1:gridDistDimCount), & @\
-                  computationalEdgeUWidth=compEUWidth(1:gridDistDimCount), & @\
-                  totalLWidth=localMaxHaloLWidth(1:gridDistDimCount), & @\
-                  totalUWidth=localMaxHaloUWidth(1:gridDistDimCount), & @\
-                  staggerloc=localStaggerLoc%staggerloc, rc=localrc) @\
-                 if (ESMF_LogMsgFoundError(localrc, & @\
-                         ESMF_ERR_PASSTHRU, & @\
-                         ESMF_CONTEXT, rc)) return @\
-@\
-     endif @\
+       ! Create Array with undistributed dimensions                                    @\
+       array = ESMF_ArrayCreate(farray, distgrid=distgrid, & @\
+               distgridToArrayMap=distgridToArrayMap (1:gridDistDimCount), & @\
+               undistLBound=undistLBound(1:fieldUndistDimCount), & @\
+               undistUBound=undistUBound(1:fieldUndistDimCount), & @\
+               computationalEdgeLWidth=compELWidth(1:gridDistDimCount), & @\
+               computationalEdgeUWidth=compEUWidth(1:gridDistDimCount), & @\
+               totalLWidth=localRemapMaxHaloLWidth(1:gridDistDimCount), & @\
+               totalUWidth=localRemapMaxHaloUWidth(1:gridDistDimCount), & @\
+               staggerloc=localStaggerLoc%staggerloc, rc=localrc) @\
+               if (ESMF_LogMsgFoundError(localrc, & @\
+                      ESMF_ERR_PASSTHRU, & @\
+                      ESMF_CONTEXT, rc)) return @\
 @\
      ! Set Values in Field structure @\
 @\
