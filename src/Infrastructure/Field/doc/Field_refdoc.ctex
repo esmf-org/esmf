@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.36 2008/02/26 22:21:30 rokuingh Exp $
+% $Id: Field_refdoc.ctex,v 1.37 2008/03/05 17:39:49 dneckels Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -48,11 +48,13 @@
 \input{ESMF_FieldCreateEx_fapi}
 \input{ESMF_FieldGetEx_fapi}
 \input{ESMF_FieldSetEx_fapi}
+\input{ESMF_FieldRegridEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Field/doc/Field_usage}
 \input{../Infrastructure/Field/doc/ESMF_FieldCreateEx_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldGetEx_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldSetEx_fapi}
+\input{../Infrastructure/Field/doc/ESMF_FieldRegridEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
