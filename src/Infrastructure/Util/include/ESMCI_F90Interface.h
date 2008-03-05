@@ -1,4 +1,4 @@
-// $Id: ESMCI_F90Interface.h,v 1.3 2007/06/20 23:37:59 theurich Exp $
+// $Id: ESMCI_F90Interface.h,v 1.4 2008/03/05 05:49:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -42,6 +42,7 @@ class InterfaceInt{
     int extent[7];    // size 7 reflects the Fortran limit
   public:
     InterfaceInt(void);                                   // native constructor
+    InterfaceInt(int *arrayArg, int lenArg);              // native constructor
     InterfaceInt(int *arrayArg, int dimArg, const int *lenArg); //n. constructor
     ~InterfaceInt(void);                                  // native destructor
 };
