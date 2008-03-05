@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUTest.F90,v 1.2 2008/02/15 22:35:38 oehmke Exp $
+! $Id: ESMF_AttributeUTest.F90,v 1.3 2008/03/05 17:21:16 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-      program ESMF_AttributeUTest
+program ESMF_AttributeUTest
 
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -18,11 +18,13 @@
 !
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_AttributeUTest - One line general statement about this test
+! !PROGRAM: ESMF_AttributeUTest - Attribute Unit Tests
 !
 ! !DESCRIPTION:
 !
 ! The code in this file drives F90 Attribute unit tests.
+! The companion file ESMF\_Attribute.F90 contains the definitions for the
+! Attribute methods.
 !
 !-----------------------------------------------------------------------------
 ! !USES:
@@ -33,27 +35,26 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeUTest.F90,v 1.2 2008/02/15 22:35:38 oehmke Exp $'
+      '$Id: ESMF_AttributeUTest.F90,v 1.3 2008/03/05 17:21:16 rokuingh Exp $'
 !------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------
+!=========================================================================
+
+      ! individual test failure message
+      character(ESMF_MAXSTR) :: failMsg
+      character(ESMF_MAXSTR) :: name
+
+      ! local variables needed to pass into function/subroutine calls
+!      character(ESMF_MAXSTR) :: name_set, name_get, value_set, value_get
+      type(ESMF_DataValue) :: data_value
+      type(ESMF_Base) :: base
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
       integer :: rc
-
-      ! individual test name
-      character(ESMF_MAXSTR) :: name
-
-      ! individual test failure messages
-      character(ESMF_MAXSTR*2) :: failMsg
-
-      ! local variables needed to pass into function/subroutine calls
-      type(ESMF_DataValue) :: data_value
-      character(ESMF_MAXSTR) :: name_set, name_get
-
-      ! instantiate a Base 
-      type(ESMF_Base) :: base
 
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -64,42 +65,33 @@
 !  added to allow a script to count the number and types of unit tests.
 !-------------------------------------------------------------------------------
 
-      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+  !-----------------------------------------------------------------------------
+  call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+  !-----------------------------------------------------------------------------
 
-
-      !NEX_UTest
-      ! test creation of base objects
-      call ESMF_BaseCreate(base, "Base", "test object", 0, rc)
-      write(name, *) "ESMF_BaseCreate"
-      write(failMsg, *) "rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
- 
 #ifdef ESMF_EXHAUSTIVE
 
+      !------------------------------------------------------------------------
+      ! preparations
+      call ESMF_BaseCreate(base, "Base", "test object", 0, rc)
+      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
       !EX_UTest
-      ! test setting of ESMF Base attribute values of deleted Base
+      ! test setting of ESMF Base attribute values
       call ESMF_AttributeSet(base, name, data_value, rc)
-      write(name, *) "ESMF_AttributeSet of deleted Base"
-      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
-      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      write(name, *) "Testing non-implemented Attribute Set"
+      write(failMsg, *) "Did not return ESMF_RC_NOT_IMPL"
+      call ESMF_Test((rc.eq.ESMF_RC_NOT_IMPL), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! clean up
+      call ESMF_BaseDestroy(base, rc)
+      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+                  
 #endif
 
-                           
-      !NEX_UTest
-      ! destroy base object
-      call ESMF_BaseDestroy(base, rc)
-      write(name, *) "ESMF_Destroy"
-      write(failMsg, *) "rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-      
-
-      ! This calls finalize before returning, so it must be the last
-      ! ESMF-related thing the test does.
-      call ESMF_TestEnd(result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  call ESMF_TestEnd(result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
   
-      end program ESMF_AttributeUTest
+end program ESMF_AttributeUTest

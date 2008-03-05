@@ -1,15 +1,15 @@
-# $Id: makefile,v 1.1 2008/02/15 18:20:29 rokuingh Exp $ 
+# $Id: makefile,v 1.2 2008/03/05 17:21:15 rokuingh Exp $ 
 
 ALL: build_here 
 
 SOURCEC	  = ESMC_Attribute_F.C
-SOURCEF	  =  
+SOURCEF	  = ESMF_Attribute.F90
 SOURCEH	  = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
-MANSEC	  = Baseobj
+MANSEC	  = Attrobj
 LIBBASE	  = libesmf
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/Attribute/interface
