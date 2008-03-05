@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2007/07/18 05:36:52 theurich Exp $ 
+# $Id: makefile,v 1.2 2008/03/05 05:52:35 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -17,11 +17,14 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/DistGrid/tests
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_DistGridCreateGetUTest
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_DistGridCreateGetUTest \
+                $(ESMF_TESTDIR)/ESMC_DistGridUTest
 
-TESTS_RUN     = RUN_ESMF_DistGridCreateGetUTest
+TESTS_RUN     = RUN_ESMF_DistGridCreateGetUTest \
+                RUN_ESMC_DistGridUTest
 
-TESTS_RUN_UNI = RUN_ESMF_DistGridCreateGetUTestUNI
+TESTS_RUN_UNI = RUN_ESMF_DistGridCreateGetUTestUNI \
+                RUN_ESMC_DistGridUTestUNI
 
 
 include ${ESMF_DIR}/makefile
@@ -41,3 +44,10 @@ RUN_ESMF_DistGridCreateGetUTest:
 RUN_ESMF_DistGridCreateGetUTestUNI:
 	$(MAKE) TNAME=DistGridCreateGet NP=1 ftest
 
+# ---
+
+RUN_ESMC_DistGridUTest:
+	$(MAKE) TNAME=DistGrid NP=4 ctest
+
+RUN_ESMC_DistGridUTestUNI:
+	$(MAKE) TNAME=DistGrid NP=1 ctest
