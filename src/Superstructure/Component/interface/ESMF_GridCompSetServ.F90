@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompSetServ.F90,v 1.7 2008/03/05 14:48:09 w6ws Exp $
+! $Id: ESMF_GridCompSetServ.F90,v 1.8 2008/03/06 01:46:44 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -74,11 +74,11 @@
 ! !IROUTINE: ESMF_GridCompSetEntryPoint - Set name of GridComp subroutines
 !
 ! !INTERFACE:
-!      subroutine ESMF_GridCompSetEntryPoint(gridcomp, subroutineType, &
+!      subroutine ESMF_GridCompSetEntryPoint(comp, subroutineType, &
 !                                            subroutineName, phase, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF_GridComp), intent(inout) :: gridcomp
+!      type(ESMF_GridComp), intent(inout) :: comp
 !      character(len=*), intent(in) :: subroutineType
 !      subroutine, intent(in) :: subroutineName
 !      integer, intent(in) :: phase
@@ -99,7 +99,7 @@
 !    
 !  The arguments are:
 !  \begin{description}
-!   \item[gridcomp]
+!   \item[comp]
 !    An {\tt ESMF\_GridComp} object.
 !   \item[subroutineType]
 !    One of a set of predefined subroutine types - e.g. {\tt ESMF\_SETINIT}, 
@@ -182,10 +182,10 @@
 ! !IROUTINE: ESMF_GridCompSetServices - Register GridComp interface routines
 !
 ! !INTERFACE:
-!      subroutine ESMF_GridCompSetServices(gridcomp, subroutineName, rc)
+!      subroutine ESMF_GridCompSetServices(comp, subroutineName, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF_GridComp) :: gridcomp
+!      type(ESMF_GridComp) :: comp
 !      subroutine :: subroutineName
 !      integer, intent(out) :: rc
 !

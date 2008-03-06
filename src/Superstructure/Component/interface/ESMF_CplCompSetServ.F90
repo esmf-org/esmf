@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompSetServ.F90,v 1.8 2008/03/05 14:48:08 w6ws Exp $
+! $Id: ESMF_CplCompSetServ.F90,v 1.9 2008/03/06 01:46:44 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -73,11 +73,11 @@
 ! !IROUTINE: ESMF_CplCompSetEntryPoint - Set name of CplComp subroutines
 !
 ! !INTERFACE:
-!      subroutine ESMF_CplCompSetEntryPoint(cplcomp, subroutineType, &
+!      subroutine ESMF_CplCompSetEntryPoint(comp, subroutineType, &
 !                                            subroutineName, phase, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF_CplComp), intent(inout) :: cplcomp
+!      type(ESMF_CplComp), intent(inout) :: comp
 !      character(len=*), intent(in) :: subroutineType
 !      subroutine, intent(in) :: subroutineName
 !      integer, intent(in) :: phase
@@ -98,7 +98,7 @@
 !    
 !  The arguments are:
 !  \begin{description}
-!   \item[cplcomp]
+!   \item[comp]
 !    An {\tt ESMF\_CplComp} object.
 !   \item[subroutineType]
 !    One of a set of predefined subroutine types - e.g. {\tt ESMF\_SETINIT}, 
@@ -182,10 +182,10 @@
 ! !IROUTINE: ESMF_CplCompSetServices - Register CplComp interface routines
 !
 ! !INTERFACE:
-!      subroutine ESMF_CplCompSetServices(cplcomp, subroutineName, rc)
+!      subroutine ESMF_CplCompSetServices(comp, subroutineName, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF_CplComp), intent(inout) :: cplcomp
+!      type(ESMF_CplComp), intent(inout) :: comp
 !      subroutine, intent(in) :: subroutineName
 !      integer, intent(out) :: rc
 !
