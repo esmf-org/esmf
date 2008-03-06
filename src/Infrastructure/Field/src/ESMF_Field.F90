@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.308 2008/03/05 00:29:11 dneckels Exp $
+! $Id: ESMF_Field.F90,v 1.309 2008/03/06 18:30:29 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -211,7 +211,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.308 2008/03/05 00:29:11 dneckels Exp $'
+      '$Id: ESMF_Field.F90,v 1.309 2008/03/06 18:30:29 dneckels Exp $'
 
 !==============================================================================
 !
@@ -5100,7 +5100,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldRegridStore"
 
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldRegridStore - Store the regrid
 !
 ! !INTERFACE:
@@ -5130,7 +5130,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
         integer :: localrc
         type(ESMF_RouteHandle) :: lrouteHandle
         integer              :: regridScheme
@@ -5184,7 +5184,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldRegridRun"
 
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldRegridRun - Apply the regrid operator
 !
 ! !INTERFACE:
@@ -5212,7 +5212,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
         integer :: localrc
         type(ESMF_Array)     :: srcArray
         type(ESMF_Array)     :: dstArray
@@ -5246,7 +5246,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldRegridDestroy"
 
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldRegridDestroy - Free resources used by regrid object
 !
 ! !INTERFACE:
@@ -5267,7 +5267,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
         integer :: localrc
 
         call ESMF_RouteHandleRelease(routehandle=routeHandle, rc=localrc)
