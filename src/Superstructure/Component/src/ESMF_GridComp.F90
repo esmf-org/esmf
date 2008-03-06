@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.95 2008/02/22 18:07:08 w6ws Exp $
+! $Id: ESMF_GridComp.F90,v 1.96 2008/03/06 01:44:53 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.95 2008/02/22 18:07:08 w6ws Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.96 2008/03/06 01:44:53 w6ws Exp $'
 
 !==============================================================================
 !
@@ -142,15 +142,15 @@
 ! !IROUTINE: ESMF_GridCompSetEntryPoint
 !
 ! !INTERFACE:
-        subroutine ESMF_GridCompSetEntryPoint (comp, tname, func, phase, status)
+        subroutine ESMF_GridCompSetEntryPoint (comp, subroutineType, subroutineName, phase, status)
 
 ! !ARGUMENTS:
 	  use ESMF_CompMod
 	  implicit none
 	  type(ESMF_GridComp) :: comp
-	  character(*), intent(in) :: tname
+	  character(*), intent(in) :: subroutineType
 	  interface
-            subroutine func (comp, importState, exportState, clock, rc)
+            subroutine subroutineName (comp, importState, exportState, clock, rc)
         	use ESMF_CompMod
         	use ESMF_StateMod
         	use ESMF_ClockMod
@@ -176,14 +176,14 @@
 ! !IROUTINE: ESMF_GridCompSetServices
 !
 ! !INTERFACE:
-        subroutine ESMF_GridCompSetServices (gridcomp, sub, rc)
+        subroutine ESMF_GridCompSetServices (comp, subroutineName, rc)
 
 ! !ARGUMENTS:
           use ESMF_CompMod
           implicit none
-          type(ESMF_GridComp), intent(inout) :: gridcomp
+          type(ESMF_GridComp), intent(inout) :: comp
           interface
-            subroutine sub (comp, rc)
+            subroutine subroutineName (comp, rc)
               use ESMF_CompMod
               implicit none
               type(ESMF_GridComp) :: comp
