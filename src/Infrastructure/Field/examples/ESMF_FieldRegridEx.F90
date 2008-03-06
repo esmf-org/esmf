@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.3 2008/03/06 16:33:24 dneckels Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.4 2008/03/06 19:20:48 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.3 2008/03/06 16:33:24 dneckels Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.4 2008/03/06 19:20:48 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -274,7 +274,7 @@ program ESMF_FieldRegridEx
 !\subsubsection{Creating a Regrid Operator from two Fields}
 ! To create the sparse matrix regrid operator we call the
 ! {\tt ESMF\_FieldRegridStore()} routine.  In this example we
-! choose the {\tt ESMF_REGRID_METHOD_BILIONEAR} regridding method.  Other
+! choose the {\tt ESMF\_REGRID\_METHOD\_BILINEAR} regridding method.  Other
 ! methods are available and more we will be added in the future.
 ! This method creates two meshes, and a Rendezvous decomposition of these
 ! meshes is computed.  An octree search is performed, followed by a determination
