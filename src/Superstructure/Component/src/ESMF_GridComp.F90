@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.96 2008/03/06 01:44:53 w6ws Exp $
+! $Id: ESMF_GridComp.F90,v 1.97 2008/03/06 02:23:22 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.96 2008/03/06 01:44:53 w6ws Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.97 2008/03/06 02:23:22 w6ws Exp $'
 
 !==============================================================================
 !
@@ -142,7 +142,7 @@
 ! !IROUTINE: ESMF_GridCompSetEntryPoint
 !
 ! !INTERFACE:
-        subroutine ESMF_GridCompSetEntryPoint (comp, subroutineType, subroutineName, phase, status)
+        subroutine ESMF_GridCompSetEntryPoint (comp, subroutineType, subroutineName, phase, rc)
 
 ! !ARGUMENTS:
 	  use ESMF_CompMod
@@ -162,7 +162,7 @@
             end subroutine
 	  end interface
 	  integer, intent(in) :: phase
-	  integer, intent(in) :: status
+	  integer, intent(out) :: rc
 
 ! !DESCRIPTION:
 !     Registers a user-supplied initialization, run, or finalize call-back
