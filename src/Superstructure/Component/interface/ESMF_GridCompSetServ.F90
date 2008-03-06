@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompSetServ.F90,v 1.8 2008/03/06 01:46:44 w6ws Exp $
+! $Id: ESMF_GridCompSetServ.F90,v 1.9 2008/03/06 19:04:25 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -220,7 +220,7 @@
 !
 !      interface
 !        subroutine subroutineName (comp, rc)
-!          type(ESMF_GridComp) :: comp
+!          type(ESMF\_GridComp) :: comp
 !          integer, intent(out) :: rc
 !        end subroutine
 !      end interface
