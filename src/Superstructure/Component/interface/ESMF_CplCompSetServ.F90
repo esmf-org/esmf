@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompSetServ.F90,v 1.10 2008/03/06 18:49:17 svasquez Exp $
+! $Id: ESMF_CplCompSetServ.F90,v 1.11 2008/03/06 20:10:04 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -126,9 +126,9 @@
 !
 !      interface
 !        subroutine subroutineName (comp, importState, exportState, clock, rc)
-!          type(ESMF_CplComp) :: comp
-!          type(ESMF_State) :: importState, exportState
-!          type(ESMF_Clock) :: clock
+!          type(ESMF\_CplComp) :: comp
+!          type(ESMF\_State) :: importState, exportState
+!          type(ESMF\_Clock) :: clock
 !          integer, intent(out) :: rc
 !        end subroutine
 !      end interface
