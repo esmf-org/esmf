@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.7 2007/11/02 23:13:08 theurich Exp $
+! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.7.2.1 2008/03/07 23:59:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayArbIdxSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.7 2007/11/02 23:13:08 theurich Exp $'
+    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.7.2.1 2008/03/07 23:59:30 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -599,7 +599,7 @@ program ESMF_ArrayArbIdxSMMUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "routehandle3 Release Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_RouteHandleRelease(routehandle=routehandle3, rc=rc)
+  call ESMF_ArraySparseMatMulRelease(routehandle=routehandle3, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
@@ -615,7 +615,7 @@ program ESMF_ArrayArbIdxSMMUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "routehandle3 Release (delete routehandle) Test"
   write(failMsg, *) "Did return ESMF_SUCCESS" 
-  call ESMF_RouteHandleRelease(routehandle=routehandle3, rc=rc)
+  call ESMF_ArraySparseMatMulRelease(routehandle=routehandle3, rc=rc)
   call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
@@ -709,7 +709,7 @@ program ESMF_ArrayArbIdxSMMUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "routehandle3 Release Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_RouteHandleRelease(routehandle=routehandle3, rc=rc)
+  call ESMF_ArraySparseMatMulRelease(routehandle=routehandle3, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
@@ -837,7 +837,7 @@ call ESMF_ArrayPrint(dstArray3)
   !EX_UTest_Multi_Proc_Only
   write(name, *) "routehandle3 Release Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_RouteHandleRelease(routehandle=routehandle3, rc=rc)
+  call ESMF_ArraySparseMatMulRelease(routehandle=routehandle3, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
@@ -913,7 +913,7 @@ call ESMF_ArrayPrint(dstArray3)
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "routehandle Release Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_RouteHandleRelease(routehandle=routehandle, rc=rc)
+  call ESMF_ArraySparseMatMulRelease(routehandle=routehandle, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
