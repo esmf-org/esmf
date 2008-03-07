@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.C,v 1.1 2008/02/15 18:20:57 rokuingh Exp $
+// $Id: ESMC_Attribute.C,v 1.2 2008/03/07 19:01:30 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute.C,v 1.1 2008/02/15 18:20:57 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute.C,v 1.2 2008/03/07 19:01:30 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -1911,6 +1911,38 @@ if (count) {
 
 }  // end ESMC_AttributeSetLink
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeCopyAll"
+//BOP
+// !IROUTINE:  ESMC_AttributeCopyAll - copy attributes between two objects 
+//
+// !INTERFACE:
+      int ESMC_Attribute::ESMC_AttributeCopyAll(
+// 
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      ESMC_Base *source) {  // in - the source object
+// 
+// !DESCRIPTION:
+//     All attributes associated with the source object are copied to the
+//     destination object (this).  Some attributes might have to be considered
+//     {\tt read only} and won't be updated by this call. 
+
+//EOP
+
+  int rc;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+  
+  *this = source->root;
+  
+  return ESMF_SUCCESS;
+
+}  // end ESMC_AttributeCopyAll
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
 // NOT IMPLEMENTED:
@@ -1941,31 +1973,6 @@ if (count) {
   return ESMC_RC_NOT_IMPL;
 
 }  // end ESMC_AttributeCopy
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeCopyAll"
-//BOP
-// !IROUTINE:  ESMC_AttributeCopyAll - copy attributes between two objects 
-//
-// !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeCopyAll(
-// 
-// !RETURN VALUE:
-//    int return code
-// 
-// !ARGUMENTS:
-      ESMC_Attribute *source) {  // in - the source object
-// 
-// !DESCRIPTION:
-//     All attributes associated with the source object are copied to the
-//     destination object (this).  Some attributes might have to be considered
-//     {\tt read only} and won't be updated by this call. 
-
-//EOP
-
-  return ESMC_RC_NOT_IMPL;
-
-}  // end ESMC_AttributeCopyAll
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttributeGetList"
