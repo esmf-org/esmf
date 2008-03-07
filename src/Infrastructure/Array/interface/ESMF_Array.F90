@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.73.2.3 2008/02/07 06:57:10 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.73.2.4 2008/03/07 23:59:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -94,10 +94,12 @@ module ESMF_ArrayMod
   public ESMF_ArrayHalo
   public ESMF_ArrayHaloStore
   public ESMF_ArrayHaloRun
-  public ESMF_ArrayRedistStore
   public ESMF_ArrayRedist
-  public ESMF_ArraySparseMatMulStore
+  public ESMF_ArrayRedistRelease
+  public ESMF_ArrayRedistStore
   public ESMF_ArraySparseMatMul
+  public ESMF_ArraySparseMatMulRelease
+  public ESMF_ArraySparseMatMulStore
 #ifdef FIRSTNEWARRAYPROTOTYPE
   public ESMF_ArrayWait
 #endif
@@ -128,7 +130,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.73.2.3 2008/02/07 06:57:10 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.73.2.4 2008/03/07 23:59:08 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -503,6 +505,149 @@ contains
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
   end subroutine ESMF_ArrayHaloRun
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayRedist()"
+!BOP
+! !IROUTINE: ESMF_ArrayRedist - Execute an Array redistribution
+!
+! !INTERFACE:
+  subroutine ESMF_ArrayRedist(srcArray, dstArray, routehandle, checkflag, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),       intent(in),   optional  :: srcArray
+    type(ESMF_Array),       intent(inout),optional  :: dstArray
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_Logical),     intent(in),   optional  :: checkflag
+    integer,                intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!   Execute a precomputed Array redistribution from {\tt srcArray} to
+!   {\tt dstArray}. Both {\tt srcArray} and {\tt dstArray} must be
+!   congruent and typekind conform with the respective Arrays used during 
+!   {\tt ESMF\_ArrayRedistStore()}. Congruent Arrays possess
+!   matching DistGrids and the shape of the local array tiles matches between
+!   the Arrays for every DE.
+!
+!   It is erroneous to specify the identical Array object for {\tt srcArray} and
+!   {\tt dstArray} arguments.
+!
+!   See {\tt ESMF\_ArrayRedistStore()} on how to precompute 
+!   {\tt routehandle}.
+!
+!   This call is {\em collective} across the current VM.
+!
+!   \begin{description}
+!   \item [{[srcArray]}]
+!     {\tt ESMF\_Array} with source data.
+!   \item [{[dstArray]}]
+!     {\tt ESMF\_Array} with destination data.
+!   \item [routehandle]
+!     Handle to the precomputed Route.
+!   \item [{[checkflag]}]
+!     If set to {\tt ESMF\_TRUE} the input Array pair will be checked for
+!     consistency with the precomputed operation provided by {\tt routehandle}.
+!     If set to {\tt ESMF\_FALSE} {\em (default)} only a very basic input check
+!     will be performed, leaving many inconsistencies undetected. Set
+!     {\tt checkflag} to {\tt ESMF\_FALSE} to achieve highest performance.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_Logical)      :: opt_checkflag! helper variable
+    type(ESMF_Array)        :: opt_srcArray ! helper variable
+    type(ESMF_Array)        :: opt_dstArray ! helper variable
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments, deal with optional Array args
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+    if (present(srcArray)) then
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
+      opt_srcArray = srcArray
+    else
+      call ESMF_ArraySetThisNull(opt_srcArray, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    if (present(dstArray)) then
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
+      opt_dstArray = dstArray
+    else
+      call ESMF_ArraySetThisNull(opt_dstArray, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
+    ! Set default flags
+    opt_checkflag = ESMF_FALSE
+    if (present(checkflag)) opt_checkflag = checkflag
+        
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayRedist(opt_srcArray, opt_dstArray, routehandle, &
+      opt_checkflag, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayRedist
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayRedistRelease()"
+!BOP
+! !IROUTINE: ESMF_ArrayRedistRelease - Release resources associated with Array redistribution
+!
+! !INTERFACE:
+  subroutine ESMF_ArrayRedistRelease(routehandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    integer,                intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!   Release resouces associated with an Array redistribution. After this call
+!   {\tt routehandle} becomes invalid.
+!
+!   \begin{description}
+!   \item [routehandle]
+!     Handle to the precomputed Route.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments, deal with optional Array args
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+        
+    ! Call into the RouteHandle code
+    call ESMF_RouteHandleRelease(routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayRedistRelease
 !------------------------------------------------------------------------------
 
 
@@ -929,102 +1074,6 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayRedist()"
-!BOP
-! !IROUTINE: ESMF_ArrayRedist - Execute an Array redistribution
-!
-! !INTERFACE:
-  subroutine ESMF_ArrayRedist(srcArray, dstArray, routehandle, checkflag, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Array),       intent(in),   optional  :: srcArray
-    type(ESMF_Array),       intent(inout),optional  :: dstArray
-    type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    type(ESMF_Logical),     intent(in),   optional  :: checkflag
-    integer,                intent(out),  optional  :: rc
-!
-! !DESCRIPTION:
-!   Execute a precomputed Array redistribution from {\tt srcArray} to
-!   {\tt dstArray}. Both {\tt srcArray} and {\tt dstArray} must be
-!   congruent and typekind conform with the respective Arrays used during 
-!   {\tt ESMF\_ArrayRedistStore()}. Congruent Arrays possess
-!   matching DistGrids and the shape of the local array tiles matches between
-!   the Arrays for every DE.
-!
-!   It is erroneous to specify the identical Array object for {\tt srcArray} and
-!   {\tt dstArray} arguments.
-!
-!   See {\tt ESMF\_ArrayRedistStore()} on how to precompute 
-!   {\tt routehandle}.
-!
-!   This call is {\em collective} across the current VM.
-!
-!   \begin{description}
-!   \item [{[srcArray]}]
-!     {\tt ESMF\_Array} with source data.
-!   \item [{[dstArray]}]
-!     {\tt ESMF\_Array} with destination data.
-!   \item [routehandle]
-!     Handle to the precomputed Route.
-!   \item [{[checkflag]}]
-!     If set to {\tt ESMF\_TRUE} the input Array pair will be checked for
-!     consistency with the precomputed operation provided by {\tt routehandle}.
-!     If set to {\tt ESMF\_FALSE} {\em (default)} only a very basic input check
-!     will be performed, leaving many inconsistencies undetected. Set
-!     {\tt checkflag} to {\tt ESMF\_FALSE} to achieve highest performance.
-!   \item [{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_Logical)      :: opt_checkflag! helper variable
-    type(ESMF_Array)        :: opt_srcArray ! helper variable
-    type(ESMF_Array)        :: opt_dstArray ! helper variable
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments, deal with optional Array args
-    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
-    if (present(srcArray)) then
-      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
-      opt_srcArray = srcArray
-    else
-      call ESMF_ArraySetThisNull(opt_srcArray, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-    if (present(dstArray)) then
-      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
-      opt_dstArray = dstArray
-    else
-      call ESMF_ArraySetThisNull(opt_dstArray, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-    
-    ! Set default flags
-    opt_checkflag = ESMF_FALSE
-    if (present(checkflag)) opt_checkflag = checkflag
-        
-    ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayRedist(opt_srcArray, opt_dstArray, routehandle, &
-      opt_checkflag, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_ArrayRedist
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayReduce()"
 !BOPI
 ! !IROUTINE: ESMF_ArrayReduce
@@ -1325,6 +1374,162 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySetTensor
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySparseMatMul()"
+!BOP
+! !IROUTINE: ESMF_ArraySparseMatMul - Execute an Array sparse matrix multiplication
+!
+! !INTERFACE:
+  subroutine ESMF_ArraySparseMatMul(srcArray, dstArray, routehandle, &
+    zeroflag, checkflag, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),       intent(in),   optional  :: srcArray
+    type(ESMF_Array),       intent(inout),optional  :: dstArray
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_Logical),     intent(in),   optional  :: zeroflag
+    type(ESMF_Logical),     intent(in),   optional  :: checkflag
+    integer,                intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!   Execute a precomputed Array sparse matrix multiplication from {\tt srcArray}
+!   to {\tt dstArray}. Both {\tt srcArray} and {\tt dstArray} must be
+!   congruent and typekind conform with the respective Arrays used during 
+!   {\tt ESMF\_ArraySparseMatMulStore()}. Congruent Arrays possess
+!   matching DistGrids and the shape of the local array tiles matches between
+!   the Arrays for every DE.
+!
+!   It is erroneous to specify the identical Array object for {\tt srcArray} and
+!   {\tt dstArray} arguments.
+!
+!   See {\tt ESMF\_ArraySparseMatMulStore()} on how to precompute 
+!   {\tt routehandle}. See section \ref{Array:SparseMatMul} for details on the
+!   operation {\tt ESMF\_ArraySparseMatMul()} performs.
+!
+!   This call is {\em collective} across the current VM.
+!
+!   \begin{description}
+!   \item [{[srcArray]}]
+!     {\tt ESMF\_Array} with source data.
+!   \item [{[dstArray]}]
+!     {\tt ESMF\_Array} with destination data.
+!   \item [routehandle]
+!     Handle to the precomputed Route.
+!   \item [{[zeroflag]}]
+!     If set to {\tt ESMF\_TRUE} {\em (default)} the total regions of all 
+!     DEs in {\tt dstArray} will be initialized to zero before updating the 
+!     elements with the results of the sparse matrix multiplication. If set to
+!     {\tt ESMF\_FALSE} the elements in {\tt dstArray} will not be modified
+!     prior to the sparse matrix multiplication and results will be added
+!     to the incoming element values.
+!   \item [{[checkflag]}]
+!     If set to {\tt ESMF\_TRUE} the input Array pair will be checked for
+!     consistency with the precomputed operation provided by {\tt routehandle}.
+!     If set to {\tt ESMF\_FALSE} {\em (default)} only a very basic input check
+!     will be performed, leaving many inconsistencies undetected. Set
+!     {\tt checkflag} to {\tt ESMF\_FALSE} to achieve highest performance.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_Logical)      :: opt_zeroflag ! helper variable
+    type(ESMF_Logical)      :: opt_checkflag! helper variable
+    type(ESMF_Array)        :: opt_srcArray ! helper variable
+    type(ESMF_Array)        :: opt_dstArray ! helper variable
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments, deal with optional Array args
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+    if (present(srcArray)) then
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
+      opt_srcArray = srcArray
+    else
+      call ESMF_ArraySetThisNull(opt_srcArray, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    if (present(dstArray)) then
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
+      opt_dstArray = dstArray
+    else
+      call ESMF_ArraySetThisNull(opt_dstArray, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
+    ! Set default flags
+    opt_zeroflag = ESMF_TRUE
+    if (present(zeroflag)) opt_zeroflag = zeroflag
+    opt_checkflag = ESMF_FALSE
+    if (present(checkflag)) opt_checkflag = checkflag
+        
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArraySparseMatMul(opt_srcArray, opt_dstArray, routehandle, &
+      opt_zeroflag, opt_checkflag, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArraySparseMatMul
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySparseMatMulRelease()"
+!BOP
+! !IROUTINE: ESMF_ArraySparseMatMulRelease - Release resources associated with Array sparse matrix multiplication
+!
+! !INTERFACE:
+  subroutine ESMF_ArraySparseMatMulRelease(routehandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    integer,                intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!   Release resouces associated with an Array sparse matrix multiplication. 
+!   After this call {\tt routehandle} becomes invalid.
+!
+!   \begin{description}
+!   \item [routehandle]
+!     Handle to the precomputed Route.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments, deal with optional Array args
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+        
+    ! Call into the RouteHandle code
+    call ESMF_RouteHandleRelease(routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArraySparseMatMulRelease
 !------------------------------------------------------------------------------
 
 
@@ -1781,115 +1986,6 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySparseMatMulStoreNF
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArraySparseMatMul()"
-!BOP
-! !IROUTINE: ESMF_ArraySparseMatMul - Execute an Array sparse matrix multiplication
-!
-! !INTERFACE:
-  subroutine ESMF_ArraySparseMatMul(srcArray, dstArray, routehandle, &
-    zeroflag, checkflag, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Array),       intent(in),   optional  :: srcArray
-    type(ESMF_Array),       intent(inout),optional  :: dstArray
-    type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    type(ESMF_Logical),     intent(in),   optional  :: zeroflag
-    type(ESMF_Logical),     intent(in),   optional  :: checkflag
-    integer,                intent(out),  optional  :: rc
-!
-! !DESCRIPTION:
-!   Execute a precomputed Array sparse matrix multiplication from {\tt srcArray}
-!   to {\tt dstArray}. Both {\tt srcArray} and {\tt dstArray} must be
-!   congruent and typekind conform with the respective Arrays used during 
-!   {\tt ESMF\_ArraySparseMatMulStore()}. Congruent Arrays possess
-!   matching DistGrids and the shape of the local array tiles matches between
-!   the Arrays for every DE.
-!
-!   It is erroneous to specify the identical Array object for {\tt srcArray} and
-!   {\tt dstArray} arguments.
-!
-!   See {\tt ESMF\_ArraySparseMatMulStore()} on how to precompute 
-!   {\tt routehandle}. See section \ref{Array:SparseMatMul} for details on the
-!   operation {\tt ESMF\_ArraySparseMatMul()} performs.
-!
-!   This call is {\em collective} across the current VM.
-!
-!   \begin{description}
-!   \item [{[srcArray]}]
-!     {\tt ESMF\_Array} with source data.
-!   \item [{[dstArray]}]
-!     {\tt ESMF\_Array} with destination data.
-!   \item [routehandle]
-!     Handle to the precomputed Route.
-!   \item [{[zeroflag]}]
-!     If set to {\tt ESMF\_TRUE} {\em (default)} the total regions of all 
-!     DEs in {\tt dstArray} will be initialized to zero before updating the 
-!     elements with the results of the sparse matrix multiplication. If set to
-!     {\tt ESMF\_FALSE} the elements in {\tt dstArray} will not be modified
-!     prior to the sparse matrix multiplication and results will be added
-!     to the incoming element values.
-!   \item [{[checkflag]}]
-!     If set to {\tt ESMF\_TRUE} the input Array pair will be checked for
-!     consistency with the precomputed operation provided by {\tt routehandle}.
-!     If set to {\tt ESMF\_FALSE} {\em (default)} only a very basic input check
-!     will be performed, leaving many inconsistencies undetected. Set
-!     {\tt checkflag} to {\tt ESMF\_FALSE} to achieve highest performance.
-!   \item [{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_Logical)      :: opt_zeroflag ! helper variable
-    type(ESMF_Logical)      :: opt_checkflag! helper variable
-    type(ESMF_Array)        :: opt_srcArray ! helper variable
-    type(ESMF_Array)        :: opt_dstArray ! helper variable
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments, deal with optional Array args
-    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
-    if (present(srcArray)) then
-      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
-      opt_srcArray = srcArray
-    else
-      call ESMF_ArraySetThisNull(opt_srcArray, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-    if (present(dstArray)) then
-      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
-      opt_dstArray = dstArray
-    else
-      call ESMF_ArraySetThisNull(opt_dstArray, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-    
-    ! Set default flags
-    opt_zeroflag = ESMF_TRUE
-    if (present(zeroflag)) opt_zeroflag = zeroflag
-    opt_checkflag = ESMF_FALSE
-    if (present(checkflag)) opt_checkflag = checkflag
-        
-    ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArraySparseMatMul(opt_srcArray, opt_dstArray, routehandle, &
-      opt_zeroflag, opt_checkflag, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_ArraySparseMatMul
 !------------------------------------------------------------------------------
 
 
