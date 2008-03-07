@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.5 2008/02/22 14:03:53 cdeluca Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.6 2008/03/07 16:39:23 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -28,31 +28,33 @@
     implicit none
     
     ! Local variables
-    integer :: rc
-    integer :: mycell
+    integer :: rc, localPet, petCount
     type(ESMF_Grid) :: grid
     type(ESMF_DistGrid) :: distgrid
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: array1, array2
     type(ESMF_DELayout) :: layout
     type(ESMF_VM) :: vm
-    !type(ESMF_RelLoc) :: relativelocation
-    !type(ESMF_FieldDataMap) :: datamap
+
     type(ESMF_Field) :: field1, field2, field3, field4
     real (ESMF_KIND_R8), dimension(2) :: origin
     character (len = ESMF_MAXSTR) :: fname
 
     real(ESMF_KIND_R8), dimension(:,:), pointer :: farray
     real(ESMF_KIND_R8), dimension(:,:), pointer :: farray1
-    integer           :: xdim, ydim, zdim
+    integer               :: xdim, ydim, zdim
     integer, dimension(2) :: compEdgeLWdith
     integer, dimension(2) :: compEdgeUWdith
+    integer, dimension(ESMF_MAXDIM) :: gcc, gec
 
     integer :: finalrc       
 !   !Set finalrc to success
     finalrc = ESMF_SUCCESS
 
-    call ESMF_Initialize(rc=rc)
+    call ESMF_Initialize(vm=vm, rc=rc)
+    call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
@@ -109,7 +111,10 @@
     field3 = ESMF_FieldCreateEmpty("precip", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    allocate(farray(10, 20))
+    call ESMF_GridGet(grid, localDE=0, staggerloc=ESMF_STAGGERLOC_CENTER, &
+        computationalCount=gcc, exclusiveCount=gec, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    allocate(farray(max(gec(1), gcc(1)), max(gec(2), gcc(2))) )
     call ESMF_FieldSetCommit(field3, grid, farray, rc=rc)
 !EremoveOC
     print *, "Finish a Field created by ESMF_FieldCreateEmpty returned"
