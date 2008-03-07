@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.131 2008/02/29 22:14:57 theurich Exp $
+! $Id: ESMF_State.F90,v 1.132 2008/03/07 18:55:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -83,6 +83,8 @@
 
       public ESMF_StateAttributeSetLink   ! link an attribute hierarchy
 
+      public ESMF_StateAttributeCopyAll   ! copy an attribute hierarchy
+      
       public ESMF_StateWriteRestart
       public ESMF_StateReadRestart
 
@@ -95,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.131 2008/02/29 22:14:57 theurich Exp $'
+      '$Id: ESMF_State.F90,v 1.132 2008/03/07 18:55:47 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -1400,6 +1402,69 @@ end interface
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateAttPackWrite
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAttributeCopyAll"
+!BOP
+! !IROUTINE: ESMF_StateAttributeCopyAll - Copy an attribute hierarchy between states
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAttPackWrite()
+      subroutine ESMF_StateAttributeCopyAll(state1, state2, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state1  
+      type(ESMF_State), intent(inout) :: state2 
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Copy all attributes in one {\tt state} hierarchy to another.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [state1]
+!      An {\tt ESMF\_State} object.
+!     \item [state2]
+!      An {\tt ESMF\_State} object.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: localrc                           ! Error status
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state1,rc)
+      
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state2,rc)
+
+      call ESMF_StateValidate(state1, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      
+      call ESMF_StateValidate(state2, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return                                                    
+
+      call c_ESMC_AttributeCopyAll(state1%statep%base, state2%statep%base, &
+        localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateAttributeCopyAll
 
 !------------------------------------------------------------------------------
 !BOP
