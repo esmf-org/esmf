@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.C,v 1.2 2008/03/07 19:01:30 rokuingh Exp $
+// $Id: ESMC_Attribute.C,v 1.3 2008/03/07 21:13:01 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute.C,v 1.2 2008/03/07 19:01:30 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute.C,v 1.3 2008/03/07 21:13:01 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -1904,7 +1904,7 @@ if (count) {
   if (rc != ESMF_SUCCESS)
     return ESMF_FAILURE;
     
-  attr->attrList[0] = &(destination->root);
+  *attr = destination->root;
   attr->attrCount++;
 
   return rc;
@@ -2300,10 +2300,8 @@ if (count) {
   }
 
   // if attribute lists, delete them.
-  for (int i=0; i<attrCount; i++) {
-    if(attrList[i]->attrList == ESMC_NULL_POINTER) delete attrList[i];
-    else attrList[i] = ESMC_NULL_POINTER;
-  }
+  for (int i=0; i<attrCount; i++)
+    delete attrList[i];
 
   if(attrList) delete [] attrList;
 
