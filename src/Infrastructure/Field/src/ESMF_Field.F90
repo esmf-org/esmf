@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.272.2.12 2008/03/05 15:35:43 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.272.2.13 2008/03/07 01:09:19 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -202,7 +202,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.272.2.12 2008/03/05 15:35:43 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.272.2.13 2008/03/07 01:09:19 feiliu Exp $'
 
 !==============================================================================
 !
@@ -3293,13 +3293,15 @@
                  return
               endif 
               do i=1, dimCount
-                  if(gridCompLBnd(dimmap(i)) .ne. arrayCompLBnd(i, lDE)) then
+!                  if(gridCompLBnd(dimmap(i)) .ne. arrayCompLBnd(ftypep%gridToFieldMap(i), lDE)) then
+                  if(gridCompLBnd(i) .ne. arrayCompLBnd(i, lDE)) then
                       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
                          "grid computationalLBound does not match array computationalLBound", &
                           ESMF_CONTEXT, rc)
                       return
                   endif
-                  if(gridCompUBnd(dimmap(i)) .ne. arrayCompUBnd(i, lDE)) then
+!                  if(gridCompUBnd(dimmap(i)) .ne. arrayCompUBnd(ftypep%gridToFieldMap(i), lDE)) then
+                  if(gridCompUBnd(i) .ne. arrayCompUBnd(i, lDE)) then
                       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
                          "grid computationalUBound does not match array computationalUBound", &
                           ESMF_CONTEXT, rc)
