@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.272.2.13 2008/03/07 01:09:19 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.272.2.14 2008/03/07 23:13:07 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -202,7 +202,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.272.2.13 2008/03/07 01:09:19 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.272.2.14 2008/03/07 23:13:07 feiliu Exp $'
 
 !==============================================================================
 !
@@ -3161,7 +3161,7 @@
       logical :: hasgrid, hasarray             ! decide what we can validate
       integer :: i, lDE                        ! helper variables to verify bounds
       integer :: localDECount, dimCount        ! and distgrid
-      integer, allocatable :: dimmap(:)
+      integer, allocatable :: distgridToGridMap(:)
       integer, allocatable :: arrayCompUBnd(:, :), arrayCompLBnd(:, :)
       integer, allocatable :: gridCompUBnd(:), gridCompLBnd(:)
       type(ESMF_DistGrid)  :: arrayDistGrid, gridDistGrid
@@ -3265,16 +3265,23 @@
 
           ! Verify that the computational bounds of array and grid contained
           ! in the field match.
-          allocate(dimmap(dimCount))
+          allocate(distgridToGridMap(dimCount))
           allocate(arrayCompLBnd(dimCount, 0:localDECount-1))
           allocate(arrayCompUBnd(dimCount, 0:localDECount-1))
 
-          call ESMF_ArrayGet(ftypep%array, distgridToArrayMap=dimmap, &
+          call ESMF_GridGet(ftypep%grid, distgridToGridMap=distgridToGridMap, rc=localrc)
+          if (localrc .ne. ESMF_SUCCESS) then
+             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                "Cannot retrieve distgridToGridMap from ftypep%grid", &
+                 ESMF_CONTEXT, rc)
+             return
+          endif 
+          call ESMF_ArrayGet(ftypep%array, &
               computationalLBound=arrayCompLBnd, &
               computationalUBound=arrayCompUBnd, rc=localrc)
           if (localrc .ne. ESMF_SUCCESS) then
              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                "Cannot retrieve computational bounds and dimmap from ftypep%array", &
+                "Cannot retrieve computational bounds from ftypep%array", &
                  ESMF_CONTEXT, rc)
              return
           endif 
@@ -3293,15 +3300,13 @@
                  return
               endif 
               do i=1, dimCount
-!                  if(gridCompLBnd(dimmap(i)) .ne. arrayCompLBnd(ftypep%gridToFieldMap(i), lDE)) then
-                  if(gridCompLBnd(i) .ne. arrayCompLBnd(i, lDE)) then
+                  if(gridCompLBnd(distgridToGridMap(i)) .ne. arrayCompLBnd(i, lDE)) then
                       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
                          "grid computationalLBound does not match array computationalLBound", &
                           ESMF_CONTEXT, rc)
                       return
                   endif
-!                  if(gridCompUBnd(dimmap(i)) .ne. arrayCompUBnd(ftypep%gridToFieldMap(i), lDE)) then
-                  if(gridCompUBnd(i) .ne. arrayCompUBnd(i, lDE)) then
+                  if(gridCompUBnd(distgridToGridMap(i)) .ne. arrayCompUBnd(i, lDE)) then
                       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
                          "grid computationalUBound does not match array computationalUBound", &
                           ESMF_CONTEXT, rc)
@@ -3310,7 +3315,7 @@
               enddo
               deallocate(gridCompUBnd, gridCompLBnd)
           enddo
-          deallocate(dimmap, arrayCompUBnd, arrayCompLBnd)
+          deallocate(distgridToGridMap, arrayCompUBnd, arrayCompLBnd)
       endif
 
       if (present(rc)) rc = ESMF_SUCCESS
