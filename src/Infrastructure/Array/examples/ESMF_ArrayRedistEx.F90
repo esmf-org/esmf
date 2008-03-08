@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistEx.F90,v 1.1.2.4 2007/12/14 20:25:29 svasquez Exp $
+! $Id: ESMF_ArrayRedistEx.F90,v 1.1.2.5 2008/03/08 00:17:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -116,7 +116,7 @@ program ESMF_ArrayRedistEx
 ! code before the handle becomes inaccessible.
 !EOE
 !BOC
-  call ESMF_RouteHandleRelease(routehandle=redistHandle, rc=rc)
+  call ESMF_ArrayRedistRelease(routehandle=redistHandle, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
@@ -180,7 +180,7 @@ program ESMF_ArrayRedistEx
 
 !  call ESMF_ArrayPrint(dstArray)
 
-  call ESMF_RouteHandleRelease(routehandle=redistHandle, rc=rc)
+  call ESMF_ArrayRedistRelease(routehandle=redistHandle, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
   call ESMF_ArrayDestroy(srcArray, rc=rc) ! destroy the Array object
@@ -256,7 +256,7 @@ program ESMF_ArrayRedistEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_RouteHandleRelease(routehandle=redistHandle, rc=rc)
+  call ESMF_ArrayRedistRelease(routehandle=redistHandle, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
   call ESMF_ArrayDestroy(dstArray, rc=rc) ! destroy the Array object
@@ -295,7 +295,7 @@ program ESMF_ArrayRedistEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_RouteHandleRelease(routehandle=redistHandle, rc=rc)
+  call ESMF_ArrayRedistRelease(routehandle=redistHandle, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
   call ESMF_ArrayDestroy(dstArray, rc=rc) ! destroy the Array object
@@ -339,7 +339,7 @@ program ESMF_ArrayRedistEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_RouteHandleRelease(routehandle=redistHandle, rc=rc)
+  call ESMF_ArrayRedistRelease(routehandle=redistHandle, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !-------------------------
@@ -421,7 +421,7 @@ program ESMF_ArrayRedistEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_RouteHandleRelease(routehandle=redistHandle, rc=rc)
+  call ESMF_ArrayRedistRelease(routehandle=redistHandle, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_ArrayDestroy(dstArray, rc=rc) ! destroy the Array object
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -463,7 +463,7 @@ program ESMF_ArrayRedistEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_RouteHandleRelease(routehandle=redistHandle, rc=rc)
+  call ESMF_ArrayRedistRelease(routehandle=redistHandle, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

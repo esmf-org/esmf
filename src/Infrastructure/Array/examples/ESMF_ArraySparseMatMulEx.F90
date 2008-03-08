@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.1.2.4 2007/12/14 20:25:29 svasquez Exp $
+! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.1.2.5 2008/03/08 00:17:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -297,7 +297,7 @@ program ESMF_ArraySparseMatMulEx
 ! user code before the handle becomes inaccessible.
 !EOE
 !BOC
-  call ESMF_RouteHandleRelease(routehandle=sparseMatMulHandle, rc=rc)
+  call ESMF_ArraySparseMatMulRelease(routehandle=sparseMatMulHandle, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
@@ -435,7 +435,7 @@ program ESMF_ArraySparseMatMulEx
 !call ESMF_ArrayPrint(srcArray, rc=rc)
 !call ESMF_ArrayPrint(dstArray, rc=rc)
 
-  call ESMF_RouteHandleRelease(routehandle=sparseMatMulHandle, rc=rc)
+  call ESMF_ArraySparseMatMulRelease(routehandle=sparseMatMulHandle, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
  
 !BOE
@@ -566,7 +566,7 @@ program ESMF_ArraySparseMatMulEx
 !call ESMF_ArrayPrint(srcArray, rc=rc)
 !call ESMF_ArrayPrint(dstArray, rc=rc)
 
-  call ESMF_RouteHandleRelease(routehandle=sparseMatMulHandle, rc=rc)
+  call ESMF_ArraySparseMatMulRelease(routehandle=sparseMatMulHandle, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
  
   call ESMF_ArrayDestroy(srcArray, rc=rc) ! destroy the Array object
