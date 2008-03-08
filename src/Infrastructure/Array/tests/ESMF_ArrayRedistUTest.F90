@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistUTest.F90,v 1.4 2008/01/23 01:10:32 theurich Exp $
+! $Id: ESMF_ArrayRedistUTest.F90,v 1.5 2008/03/08 00:19:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ArrayRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayRedistUTest.F90,v 1.4 2008/01/23 01:10:32 theurich Exp $'
+    '$Id: ESMF_ArrayRedistUTest.F90,v 1.5 2008/03/08 00:19:42 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -423,7 +423,7 @@ call ESMF_ArrayPrint(dstArray5)
   !EX_UTest_Multi_Proc_Only
   write(name, *) "routehandle45 Release Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_RouteHandleRelease(routehandle=routehandle45, rc=rc)
+  call ESMF_ArrayRedistRelease(routehandle=routehandle45, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
@@ -894,7 +894,7 @@ call ESMF_ArrayPrint(dstArray5)
   !EX_UTest_Multi_Proc_Only
   write(name, *) "routehandle3 Release Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_RouteHandleRelease(routehandle=routehandle3, rc=rc)
+  call ESMF_ArrayRedistRelease(routehandle=routehandle3, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
@@ -909,7 +909,7 @@ call ESMF_ArrayPrint(dstArray5)
   !EX_UTest_Multi_Proc_Only
   write(name, *) "routehandle3 Release (delete routehandle) Test"
   write(failMsg, *) "Did return ESMF_SUCCESS" 
-  call ESMF_RouteHandleRelease(routehandle=routehandle3, rc=rc)
+  call ESMF_ArrayRedistRelease(routehandle=routehandle3, rc=rc)
   call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
@@ -985,7 +985,7 @@ call ESMF_ArrayPrint(dstArray5)
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "routehandle Release Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_RouteHandleRelease(routehandle=routehandle, rc=rc)
+  call ESMF_ArrayRedistRelease(routehandle=routehandle, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
