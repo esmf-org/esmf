@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.25.2.7 2008/03/07 01:09:19 feiliu Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.25.2.8 2008/03/10 22:29:02 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -120,6 +120,7 @@
        type(ESMF_Field) :: field @\
        type(ESMF_Grid) :: grid                  @\
        mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
+       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fpointer @\
        type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
        type(ESMF_StaggerLoc), intent(in), optional ::staggerloc  @\
        integer, intent(in), optional :: gridToFieldMap(:)     @\
@@ -143,12 +144,17 @@
        integer                        :: localMaxHaloUWidth (ESMF_MAXDIM) @\
        integer                        :: localRemapMaxHaloLWidth (ESMF_MAXDIM) @\
        integer                        :: localRemapMaxHaloUWidth (ESMF_MAXDIM) @\
+       integer                        :: localTempMaxHaloLWidth (ESMF_MAXDIM) @\
+       integer                        :: localTempMaxHaloUWidth (ESMF_MAXDIM) @\
        logical                        :: isGridded(ESMF_MAXDIM) @\
-       logical                        :: flag @\
+       integer                        :: distgridToGridMap(ESMF_MAXDIM) @\
+       integer                        :: indexGrid, indexMap @\
+       logical                        :: isDistributed(ESMF_MAXDIM) @\
        type(ESMF_Array)               :: array, newarray @\
        type(ESMF_DistGrid)            :: distgrid @\
        integer                        :: compEUWidth(ESMF_MAXDIM), compELWidth(ESMF_MAXDIM) @\
        integer                        :: fieldUndistDimCount                         @\
+       logical                        :: flipflop(ESMF_MAXDIM) @\
 @\
        if (present(rc)) then @\
          rc = ESMF_RC_NOT_IMPL @\
@@ -156,6 +162,21 @@
        localrc = ESMF_RC_NOT_IMPL @\
 @\
        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
+       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc) @\
+       fpointer => farray @\
+       if(.not. associated(fpointer,farray)) then @\
+         call ESMF_LogMsgSetError(ESMF_RC_OBJ_INIT, &  @\
+           "- farray is not associated with memory allocation)", & @\
+           ESMF_CONTEXT, rc)  @\
+         return @\
+       endif @\
+@\   
+       if (size(fpointer)==0) then @\
+         call ESMF_LogMsgSetError(ESMF_RC_OBJ_INIT, &  @\
+           "- farray is not associated with memory allocation)", & @\
+           ESMF_CONTEXT, rc)  @\
+         return @\
+       endif @\
 @\
        ! Check the size of the native array. @\
        fieldDimCount = mrank @\
@@ -165,16 +186,24 @@
        ! number of ungridded Field dimensions, @\
        ! and number of undistributed Field Dimensions @\
        call ESMF_GridGet(grid, dimCount=gridDimCount, distDimCount=gridDistDimCount, & @\
-                            distgrid=distgrid, rc=localrc) @\
+             distgridToGridMap=distgridToGridMap, & @\
+             distgrid=distgrid, rc=localrc) @\
        if (ESMF_LogMsgFoundError(localrc, & @\
            ESMF_ERR_PASSTHRU, & @\
            ESMF_CONTEXT, rc)) return @\
+@\
+       if(fieldDimCount .lt. gridDimCount) then @\
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
+                "- farray rank must be greater than or equal to grid rank", & @\
+                  ESMF_CONTEXT, rc)  @\
+       endif @\
+@\
        fieldUngriddedDimCount = fieldDimCount-gridDimCount @\
        fieldUndistDimCount = fieldDimCount-gridDistDimCount @\
 @\
        ! Error Check Input @\
           if (present(gridToFieldMap)) then  @\
-               if (size(gridToFieldMap) < gridDimCount) then @\
+               if (size(gridToFieldMap) .ne. gridDimCount) then @\
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
                 "- gridToFieldMap size must equal to grid_rank", & @\
                   ESMF_CONTEXT, rc)  @\
@@ -183,7 +212,7 @@
           endif @\
 @\
           if (present(ungriddedLBound)) then  @\
-               if (size(ungriddedLBound) < fieldUngriddedDimCount) then @\
+               if (size(ungriddedLBound) .ne. fieldUngriddedDimCount) then @\
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
                 "- ungriddedLBound size must equal to array_rank-grid_rank", & @\
                   ESMF_CONTEXT, rc)  @\
@@ -192,7 +221,7 @@
           endif @\
 @\
           if (present(ungriddedUBound)) then  @\
-               if (size(ungriddedUBound) < fieldUngriddedDimCount) then @\
+               if (size(ungriddedUBound) .ne. fieldUngriddedDimCount) then @\
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
                 "- ungriddedUBound size must equal to array_rank-grid_rank", & @\
                   ESMF_CONTEXT, rc)  @\
@@ -201,7 +230,7 @@
           endif @\
 @\
           if (present(maxHaloLWidth)) then  @\
-               if (size(maxHaloLWidth) < gridDistDimCount) then @\
+               if (size(maxHaloLWidth) .ne. gridDistDimCount) then @\
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
                 "- maxHaloLWidth must equal to distgrid_rank", & @\
                   ESMF_CONTEXT, rc)  @\
@@ -210,7 +239,7 @@
           endif @\
 @\
           if (present(maxHaloUWidth)) then  @\
-               if (size(maxHaloUWidth) < gridDistDimCount) then @\
+               if (size(maxHaloUWidth) .ne. gridDistDimCount) then @\
           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
                 "- maxHaloUWidth must equal to distgrid_rank", & @\
                   ESMF_CONTEXT, rc)  @\
@@ -233,23 +262,41 @@
            localGridToFieldMap(i) = i @\
          enddo @\
        endif @\
+       ! gridToFieldMap elements must be in range 1...fieldRank and unique @\
+       ! algorithm to check element uniqueness: @\
+       !   run time: O(ESMF_MAXDIM) @\
+       !   memory:   O(2*ESMF_MAXDIM) @\
+       !          or O(ESMF_MAXDIM+ESMF_MAXDIM/sizeof(integer)) with bitvector @\
+       flipflop = .false. @\
+       do i = 1, gridDimCount @\
+          if(localGridToFieldMap(i) .lt. 1 .and. & @\
+            localGridToFieldMap(i) .gt. fieldDimCount) then @\
+              call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &  @\
+                    "- gridToFieldMap element must be within range 1...array rank", & @\
+                      ESMF_CONTEXT, rc)  @\
+              return @\
+          endif @\
+          if(flipflop(localGridToFieldMap(i))) then @\
+              call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &  @\
+                    "- gridToFieldMap element must be unique", & @\
+                      ESMF_CONTEXT, rc)  @\
+              return @\
+          endif @\
+          flipflop(localGridToFieldMap(i)) = .true. @\
+       enddo @\
 @\
        if(present(maxHaloLWidth)) then @\
          localMaxHaloLWidth(1:gridDistDimCount) = & @\
             maxHaloLWidth (1:gridDistDimCount) @\
        else @\
-         do i = 1, gridDistDimCount @\
-                       localMaxHaloLWidth(i) = 0 @\
-         enddo @\
+            localMaxHaloLWidth = 0 @\
        endif @\
 @\
        if(present(maxHaloUWidth)) then @\
          localMaxHaloUWidth(1:gridDistDimCount) = & @\
             maxHaloUWidth (1:gridDistDimCount) @\
        else @\
-         do i = 1, gridDistDimCount @\
-           localMaxHaloUWidth(i) = 0 @\
-         enddo @\
+            localMaxHaloUWidth = 0 @\
        endif @\
 @\
        ! Here we get the lbounds and ubounds for ungridded @\
@@ -336,49 +383,49 @@
            ESMF_ERR_PASSTHRU, & @\
            ESMF_CONTEXT, rc)) return @\
 @\
-       ! Change the order of haloWidth wrt the order of distgridToArrayMap @\
-       ! let user supplied maxHaloWidth be mhw(i, i=1...distgridRank) @\
-       ! let user supplied fortran array be fa(j, j=1...arrayRank) @\
-       ! Then: localRemapMaxHaloWidth[j=distgridToArrayMap(i)] = localMaxHaloWidth(i) @\
-       localRemapMaxHaloLWidth = -1 @\
-       localRemapMaxHaloUWidth = -1 @\
-       do i = 1, gridDistDimCount @\
-           localRemapMaxHaloLWidth(distgridToArrayMap(i)) = localMaxHaloLWidth(i)  @\
-           localRemapMaxHaloUWidth(distgridToArrayMap(i)) = localMaxHaloUWidth(i)  @\
-       enddo @\
-       ! pack these, people might do crazy mapping like (2,4,1) (1,5,3) etc... @\
-       ! complexity of the following loop (linear time packing) is: @\
-       !    run time: O(ESMF_MAXDIM) = sum(delta(i)*delta(count(i))) @\
-       !    memory: O(ESMF_MAXDIM) @\
-       ! algorithm correctness can be proven by induction @\
-       ! do we allow negative halo width? @\
-       ! if not, we will have to use another logic array to mark holes @\
-       count = 1 @\
-       do i = 1, gridDistDimCount @\
-            count = max(i, count) @\
-            if(localRemapMaxHaloLWidth(i) .eq. -1) then @\
-                do while(localRemapMaxHaloLWidth(count) .eq. -1 .and. & @\
-                    count .le. ESMF_MAXDIM) @\
-                    count = count + 1 @\
-                enddo @\
-                if(count .ge. (ESMF_MAXDIM+1)) exit @\
-                localRemapMaxHaloLWidth(i) = localRemapMaxHaloLWidth(count) @\
-                localRemapMaxHaloLWidth(count) = -1 @\
-            endif @\
-        enddo @\
-       count = 1 @\
-       do i = 1, gridDistDimCount @\
-            count = max(i, count) @\
-            if(localRemapMaxHaloUWidth(i) .eq. -1) then @\
-                do while(localRemapMaxHaloUWidth(count) .eq. -1 .and. & @\
-                    count .lt. ESMF_MAXDIM) @\
-                    count = count + 1 @\
-                enddo @\
-                if(count .ge. (ESMF_MAXDIM+1)) exit @\
-                localRemapMaxHaloUWidth(i) = localRemapMaxHaloUWidth(count) @\
-                localRemapMaxHaloUWidth(count) = -1 @\
-            endif @\
-        enddo @\
+!       ! Change the order of haloWidth wrt the order of distgridToArrayMap @\
+!       ! let user supplied maxHaloWidth be mhw(i, i=1...distgridRank) @\
+!       ! let user supplied fortran array be fa(j, j=1...arrayRank) @\
+!       ! Then: localRemapMaxHaloWidth[j=distgridToArrayMap(i)] = localMaxHaloWidth(i) @\
+!       localRemapMaxHaloLWidth = -1 @\
+!       localRemapMaxHaloUWidth = -1 @\
+!       do i = 1, gridDistDimCount @\
+!           localRemapMaxHaloLWidth(distgridToArrayMap(i)) = localMaxHaloLWidth(i)  @\
+!           localRemapMaxHaloUWidth(distgridToArrayMap(i)) = localMaxHaloUWidth(i)  @\
+!       enddo @\
+!       ! pack these, people might do crazy mapping like (2,4,1) (1,5,3) etc... @\
+!       ! complexity of the following loop (linear time packing) is: @\
+!       !    run time: O(ESMF_MAXDIM) = sum(delta(i)*delta(count(i))) @\
+!       !    memory: O(ESMF_MAXDIM) @\
+!       ! algorithm correctness can be proven by induction @\
+!       ! do we allow negative halo width? @\
+!       ! if not, we will have to use another logic array to mark holes @\
+!       count = 1 @\
+!       do i = 1, gridDistDimCount @\
+!            count = max(i, count) @\
+!            if(localRemapMaxHaloLWidth(i) .eq. -1) then @\
+!                do while(localRemapMaxHaloLWidth(count) .eq. -1 .and. & @\
+!                    count .le. ESMF_MAXDIM) @\
+!                    count = count + 1 @\
+!                enddo @\
+!                if(count .ge. (ESMF_MAXDIM+1)) exit @\
+!                localRemapMaxHaloLWidth(i) = localRemapMaxHaloLWidth(count) @\
+!                localRemapMaxHaloLWidth(count) = -1 @\
+!            endif @\
+!        enddo @\
+!       count = 1 @\
+!       do i = 1, gridDistDimCount @\
+!            count = max(i, count) @\
+!            if(localRemapMaxHaloUWidth(i) .eq. -1) then @\
+!                do while(localRemapMaxHaloUWidth(count) .eq. -1 .and. & @\
+!                    count .lt. ESMF_MAXDIM) @\
+!                    count = count + 1 @\
+!                enddo @\
+!                if(count .ge. (ESMF_MAXDIM+1)) exit @\
+!                localRemapMaxHaloUWidth(i) = localRemapMaxHaloUWidth(count) @\
+!                localRemapMaxHaloUWidth(count) = -1 @\
+!            endif @\
+!        enddo @\
 @\
        ! Create Array with undistributed dimensions                                @\
        array = ESMF_ArrayCreate(farray, distgrid=distgrid, & @\
@@ -387,8 +434,8 @@
                undistUBound=undistUBound(1:fieldUndistDimCount), & @\
                computationalEdgeLWidth=compELWidth(1:gridDistDimCount), & @\
                computationalEdgeUWidth=compEUWidth(1:gridDistDimCount), & @\
-               totalLWidth=localRemapMaxHaloLWidth(1:gridDistDimCount), & @\
-               totalUWidth=localRemapMaxHaloUWidth(1:gridDistDimCount), & @\
+               totalLWidth=localMaxHaloLWidth(1:gridDistDimCount), & @\
+               totalUWidth=localMaxHaloUWidth(1:gridDistDimCount), & @\
                staggerloc=localStaggerLoc%staggerloc, rc=localrc) @\
                if (ESMF_LogMsgFoundError(localrc, & @\
                       ESMF_ERR_PASSTHRU, & @\
