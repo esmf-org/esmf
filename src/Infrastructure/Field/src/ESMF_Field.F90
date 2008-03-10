@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.272.2.14 2008/03/07 23:13:07 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.272.2.15 2008/03/10 18:46:06 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -202,7 +202,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.272.2.14 2008/03/07 23:13:07 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.272.2.15 2008/03/10 18:46:06 feiliu Exp $'
 
 !==============================================================================
 !
@@ -3196,7 +3196,7 @@
       hasgrid = .FALSE.
       hasarray = .FALSE.
 
-      staggerloc = ESMF_STAGGERLOC_CENTER
+      staggerloc = ftypep%staggerloc
 
       ! make sure there is a grid before asking it questions.
       if (ftypep%gridstatus .eq. ESMF_STATUS_READY) then
