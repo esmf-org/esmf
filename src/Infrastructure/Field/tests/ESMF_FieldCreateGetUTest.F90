@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.2 2008/03/10 22:29:15 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.3 2008/03/11 19:50:22 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -313,18 +313,18 @@
 !            "with extra padding and halo, 1,2 dimension swapped"
 !        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-        !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
-        ! Create a field from an fortran 2d array
-        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/17,21/), &
-            regDecomp=(/2,2/), &
-            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/1,1/), &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
-        write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
-            "neither dimension divisible, " // &
-            "with extra padding and halo, non unique gridToFieldMap"
-        call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!        !------------------------------------------------------------------------
+!        !EX_UTest_Multi_Proc_Only
+!        ! Create a field from an fortran 2d array
+!        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/17,21/), &
+!            regDecomp=(/2,2/), &
+!            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/1,1/), &
+!            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+!        write(failMsg, *) ""
+!        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+!            "neither dimension divisible, " // &
+!            "with extra padding and halo, non unique gridToFieldMap"
+!        call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
@@ -693,20 +693,20 @@
 !            "with extra padding and halo, 1,2 dimension swapped"
 !        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-        !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
-        ! Create a field from an fortran 3d array
-        call test3d_generic(rc, minindex=(/1,1,1/), maxindex=(/16,20,32/), &
-            gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
-            regDecomp=(/2,2,1/), &
-            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/1,1,2/), &
-            fieldget=.true., &
-            maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
-        write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 3d all dims distributed, " // &
-            "neither dimension divisible, " // &
-            "with extra padding and halo, non unique gridToFieldMap"
-        call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!        !------------------------------------------------------------------------
+!        !EX_UTest_Multi_Proc_Only
+!        ! Create a field from an fortran 3d array
+!        call test3d_generic(rc, minindex=(/1,1,1/), maxindex=(/16,20,32/), &
+!            gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
+!            regDecomp=(/2,2,1/), &
+!            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/1,1,2/), &
+!            fieldget=.true., &
+!            maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
+!        write(failMsg, *) ""
+!        write(name, *) "Creating an Field from a fortran array 3d all dims distributed, " // &
+!            "neither dimension divisible, " // &
+!            "with extra padding and halo, non unique gridToFieldMap"
+!        call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
     call ESMF_TestEnd(result, ESMF_SRCLINE)
 
