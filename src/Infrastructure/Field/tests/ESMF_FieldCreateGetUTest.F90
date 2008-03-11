@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.3 2008/03/11 19:50:22 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.4 2008/03/11 19:52:26 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -314,8 +314,8 @@
 !        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !        !------------------------------------------------------------------------
-!        !EX_UTest_Multi_Proc_Only
-!        ! Create a field from an fortran 2d array
+!        !E-X_UTest_Multi_Proc_Only
+!        ! Create a field from an fortran 2d array, xlf compiler
 !        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/17,21/), &
 !            regDecomp=(/2,2/), &
 !            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/1,1/), &
@@ -694,8 +694,8 @@
 !        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !        !------------------------------------------------------------------------
-!        !EX_UTest_Multi_Proc_Only
-!        ! Create a field from an fortran 3d array
+!        !E-X_UTest_Multi_Proc_Only
+!        ! Create a field from an fortran 3d array, xlf compiler
 !        call test3d_generic(rc, minindex=(/1,1,1/), maxindex=(/16,20,32/), &
 !            gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
 !            regDecomp=(/2,2,1/), &
