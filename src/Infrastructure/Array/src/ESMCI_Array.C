@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.9 2008/03/12 13:25:52 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.10 2008/03/12 17:59:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.9 2008/03/12 13:25:52 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.10 2008/03/12 17:59:51 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -92,6 +92,7 @@ Array::Array(
   int *vectorDimArray,                    // (in)
   int *distgridToArrayMapArray,           // (in)
   int *arrayToDistGridMapArray,           // (in)
+  int *distgridToPackedArrayMapArray,     // (in)
   ESMC_IndexFlag indexflagArg,            // (in)
   int *rc                                 // (out)
   ){
@@ -156,11 +157,14 @@ Array::Array(
   memcpy(staggerLoc, staggerLocArray, tensorElementCount * sizeof(int));
   vectorDim = new int[tensorElementCount];
   memcpy(vectorDim, vectorDimArray, tensorElementCount * sizeof(int));
-  // distgridToArrayMap and arrayToDistGridMap
+  // distgridToArrayMap, arrayToDistGridMap and distgridToPackedArrayMap
   distgridToArrayMap = new int[dimCount];
   memcpy(distgridToArrayMap, distgridToArrayMapArray, dimCount * sizeof(int));
   arrayToDistGridMap = new int[rank];
   memcpy(arrayToDistGridMap, arrayToDistGridMapArray, rank * sizeof(int));
+  distgridToPackedArrayMap = new int[dimCount];
+  memcpy(distgridToPackedArrayMap, distgridToPackedArrayMapArray,
+    dimCount * sizeof(int));
   // indexflag
   indexflag = indexflagArg;
   // contiguous flag
@@ -281,6 +285,8 @@ Array::~Array(){
     delete [] distgridToArrayMap;
   if (arrayToDistGridMap != NULL)
     delete [] arrayToDistGridMap;
+  if (distgridToPackedArrayMap != NULL)
+    delete [] distgridToPackedArrayMap;
   if (contiguousFlag != NULL)
     delete [] contiguousFlag;
   if (exclusiveElementCountPDe != NULL)
@@ -899,8 +905,8 @@ fprintf(stderr, "gjt bail out: %d: %d, %d: %d, %d, %d, %d, %d, %d -- %d, %d, %d\
       exclusiveLBound, exclusiveUBound, computationalLBound,
       computationalUBound, totalLBound, totalUBound, tensorCount,
       tensorElementCount, undistLBoundArray, undistUBoundArray, staggerLoc,
-      vectorDim, distgridToArrayMapArray, arrayToDistGridMapArray, indexflag,
-      &localrc);
+      vectorDim, distgridToArrayMapArray, arrayToDistGridMapArray,
+      distgridToPackedArrayMap, indexflag, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }catch(...){
@@ -1439,8 +1445,8 @@ Array *Array::create(
       exclusiveLBound, exclusiveUBound, computationalLBound,
       computationalUBound, totalLBound, totalUBound, tensorCount,
       tensorElementCount, undistLBoundArray, undistUBoundArray, staggerLoc,
-      vectorDim, distgridToArrayMapArray, arrayToDistGridMapArray, indexflag,
-      &localrc);
+      vectorDim, distgridToArrayMapArray, arrayToDistGridMapArray,
+      distgridToPackedArrayMap, indexflag, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }catch(...){
@@ -1577,13 +1583,16 @@ Array *Array::create(
     arrayOut->vectorDim = new int[tensorElementCount];
     memcpy(arrayOut->vectorDim, arrayIn->vectorDim,
       tensorElementCount * sizeof(int));
-    // distgridToArrayMap and arrayToDistGridMap
+    // distgridToArrayMap, arrayToDistGridMap and distgridToPackedArrayMap
     arrayOut->distgridToArrayMap = new int[dimCount];
     memcpy(arrayOut->distgridToArrayMap, arrayIn->distgridToArrayMap,
       dimCount * sizeof(int));
     arrayOut->arrayToDistGridMap = new int[rank];
     memcpy(arrayOut->arrayToDistGridMap, arrayIn->arrayToDistGridMap,
       rank * sizeof(int));
+    arrayOut->distgridToPackedArrayMap = new int[dimCount];
+    memcpy(arrayOut->distgridToPackedArrayMap,
+      arrayIn->distgridToPackedArrayMap, dimCount * sizeof(int));
     // contiguous flag
     arrayOut->contiguousFlag = new int[localDeCount];
     memcpy(arrayOut->contiguousFlag, arrayIn->contiguousFlag,
@@ -2225,6 +2234,8 @@ int Array::serialize(
     *ip++ = distgridToArrayMap[i];
   for (int i=0; i<rank; i++)
     *ip++ = arrayToDistGridMap[i];
+  for (int i=0; i<distgrid->getDimCount(); i++)
+    *ip++ = distgridToPackedArrayMap[i];
   *ip++ = tensorElementCount;
   for (int i=0; i<delayout->getDeCount(); i++)
     *ip++ = exclusiveElementCountPDe[i];
@@ -2305,6 +2316,9 @@ int Array::deserialize(
   arrayToDistGridMap = new int[rank];
   for (int i=0; i<rank; i++)
     arrayToDistGridMap[i] = *ip++;
+  distgridToPackedArrayMap = new int[distgrid->getDimCount()];
+  for (int i=0; i<distgrid->getDimCount(); i++)
+    distgridToPackedArrayMap[i] = *ip++;
   tensorElementCount = *ip++;
   exclusiveElementCountPDe = new int[delayout->getDeCount()];
   for (int i=0; i<delayout->getDeCount(); i++)

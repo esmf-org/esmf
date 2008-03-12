@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.1.2.8 2008/03/12 13:22:06 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.1.2.9 2008/03/12 17:59:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -79,7 +79,11 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     int *staggerLoc;                  // [tensorElementCount]
     int *vectorDim;                   // [tensorElementCount]
     int *distgridToArrayMap;          // [dimCount] - entries are basis 1
+                                      // entry of 0 indicates replicated dim
     int *arrayToDistGridMap;          // [rank]     - entries are basis 1
+                                      // entry of 0 indicates undistributed dim
+    int *distgridToPackedArrayMap;    // [dimCount] - entries are basis 1
+                                      // entry of 0 indicates replicated dim
     int *contiguousFlag;              // [localDeCount]
     int *exclusiveElementCountPDe;    // [deCount] number of elements in
                                       // exclusive region only considering
@@ -121,6 +125,7 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
       vectorDim = NULL;
       distgridToArrayMap = NULL;
       arrayToDistGridMap = NULL;
+      distgridToPackedArrayMap = NULL;
       contiguousFlag = NULL;
       tensorElementCount = 0;
       exclusiveElementCountPDe = NULL;
@@ -133,7 +138,8 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
       int *totalLBound, int *totalUBound, int tensorCount,
       int tensorElementCount, int *undistLBoundArray, int *undistUBoundArray,
       int *staggerLoc, int *vectorDim, int *distgridToArrayMapArray,
-      int *arrayToDistGridMapArray, ESMC_IndexFlag indexflagArg, int *rc);
+      int *arrayToDistGridMapArray, int *distgridToPackedArrayMapArray,
+      ESMC_IndexFlag indexflagArg, int *rc);
   public:
     ~Array();
     // create() and destroy()
@@ -180,6 +186,8 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     int getTensorElementCount()             const {return tensorElementCount;}
     const int *getDistGridToArrayMap()      const {return distgridToArrayMap;}
     const int *getArrayToDistGridMap()      const {return arrayToDistGridMap;}
+    const int *getDistGridToPackedArrayMap()const
+      {return distgridToPackedArrayMap;}
     DistGrid *getDistGrid()                 const {return distgrid;}
     DELayout *getDELayout()                 const {return delayout;}
     int getLinearIndexExclusive(int localDe, int *index, int *rc=NULL) const;
