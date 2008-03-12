@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.36.2.5 2008/03/05 20:47:05 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.36.2.6 2008/03/12 23:20:12 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.36.2.5 2008/03/05 20:47:05 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.36.2.6 2008/03/12 23:20:12 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -338,14 +338,15 @@ int Grid::allocCoordArray(
     
     //// Expand the boundaries of the computational region of the Array 
     //// (distributed and undistributed) to hold the stagger padding
+    int j=0;
     for (int i=0; i<coordDimCount[coord]; i++) {
       int gi=coordDimMap[coord][i];
       int offsetU=gridEdgeUWidth[gi]-staggerEdgeUWidth[gi];
       int offsetL=gridEdgeLWidth[gi]-staggerEdgeLWidth[gi];
       if (coordIsDist[coord][i]) {
-        compUWidthIntIntArray[coordMapDim[coord][i]] = -offsetU;
-        compLWidthIntIntArray[coordMapDim[coord][i]] = -offsetL;
-        
+        compUWidthIntIntArray[j] = -offsetU;
+        compLWidthIntIntArray[j] = -offsetL;
+        j++;
       } else {
         undistUBoundIntIntArray[coordMapDim[coord][i]] -= offsetU;
         undistLBoundIntIntArray[coordMapDim[coord][i]] += offsetL;

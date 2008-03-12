@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.28.2.5 2008/02/29 18:19:16 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.28.2.6 2008/03/12 23:20:10 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1088,7 +1088,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !
 !\begin{center}
 !\begin{figure}
-!%\scalebox{1.0}{\includegraphics{exclusive}}
+!%\scalebox{1.0}{\includegraphics{ExclusiveReg}}
 !\caption{An example of a Grid's exclusive region.}
 !\label{fig:gridexreg}
 !\end{figure}

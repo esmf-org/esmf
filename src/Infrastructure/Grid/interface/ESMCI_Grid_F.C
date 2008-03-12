@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.23.2.4 2008/03/04 23:25:15 oehmke Exp $
+// $Id: ESMCI_Grid_F.C,v 1.23.2.5 2008/03/12 23:20:10 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -803,10 +803,12 @@ extern "C" {
 
       // now that we have the array get the total bounds of the localDE
       arrayLBnd=array->getTotalLBound()+localDE*distDimCount;
-
+  
+      int j=0;
       for (int i=0; i<coordDimCount[coord]; i++) {
 	if (coordIsDist[coord][i]) {
-	  (*_totalLBound)->array[i]=arrayLBnd[coordMapDim[coord][i]];
+	  (*_totalLBound)->array[i]=arrayLBnd[j];
+          j++;
 	} else {
 	  (*_totalLBound)->array[i]=arrayUndistLBound[coordMapDim[coord][i]];
 	}
@@ -830,9 +832,11 @@ extern "C" {
       // now that we have the array get the total bounds of the localDE
       arrayUBnd=array->getTotalUBound()+localDE*distDimCount;
 
+      int j=0;
       for (int i=0; i<coordDimCount[coord]; i++) {
 	if (coordIsDist[coord][i]) {
-	  (*_totalUBound)->array[i]=arrayUBnd[coordMapDim[coord][i]];
+	  (*_totalUBound)->array[i]=arrayUBnd[j];
+          j++;
 	} else {
 	  (*_totalUBound)->array[i]=arrayUndistUBound[coordMapDim[coord][i]];
 	}
@@ -859,9 +863,11 @@ extern "C" {
       // now that we have the array get the total bounds of the localDE
       arrayUBnd=array->getTotalUBound()+localDE*distDimCount;
 
+      int j=0;
       for (int i=0; i<coordDimCount[coord]; i++) {
 	if (coordIsDist[coord][i]) {
-	  (*_totalCount)->array[i]=arrayUBnd[coordMapDim[coord][i]]-arrayLBnd[coordMapDim[coord][i]]+1;
+	  (*_totalCount)->array[i]=arrayUBnd[j]-arrayLBnd[j]+1;
+          j++;
 	} else {
 	  (*_totalCount)->array[i]=arrayUndistUBound[coordMapDim[coord][i]]-arrayUndistLBound[coordMapDim[coord][i]]+1;
 	}
@@ -1247,11 +1253,13 @@ extern "C" {
 
       // Fill in the output array
       // NOTE: - is because of direction of computationalEdgeWidth in Array
-      for (int i=0; i<dimCount; i++) {
-	if (gridIsDist[i]) {
-	  (*_computationalEdgeLWidth)->array[gridMapDim[i]]=-(gridEdgeLWidth[i]-staggerEdgeLWidth[i]);
-	}
-      }
+     int j=0;
+     for (int i=0; i<dimCount; i++) {
+       if (gridIsDist[i]) {
+	  (*_computationalEdgeLWidth)->array[j]=-(gridEdgeLWidth[i]-staggerEdgeLWidth[i]);
+          j++;
+       }
+     }
     }
 
 
@@ -1274,9 +1282,11 @@ extern "C" {
 
       // Fill in the output array
       // NOTE: - is because of direction of computationalEdgeWidth in Array
+     int j=0;
       for (int i=0; i<dimCount; i++) {
 	if (gridIsDist[i]) {
-	  (*_computationalEdgeUWidth)->array[gridMapDim[i]]=-(gridEdgeUWidth[i]-staggerEdgeUWidth[i]);
+	  (*_computationalEdgeUWidth)->array[j]=-(gridEdgeUWidth[i]-staggerEdgeUWidth[i]);
+          j++;
 	}
       }
     }
