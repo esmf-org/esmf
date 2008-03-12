@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.39 2008/02/27 22:25:52 theurich Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.40 2008/03/12 23:04:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -348,7 +348,7 @@
       integer          :: localrc @\
  @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
-      localrc = ESMF_RC_NOT_IMPL @\ 
+      localrc = ESMF_RC_NOT_IMPL @\
  @\
       ESMF_FieldCreateFromDataPtr##mrank##D##mtypekind = & @\
           ESMF_FieldCreateEmpty(name, iospec, rc=localrc) @\
