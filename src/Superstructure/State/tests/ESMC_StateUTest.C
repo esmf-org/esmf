@@ -1,4 +1,4 @@
-// $Id: ESMC_StateUTest.C,v 1.3 2008/03/04 18:07:52 rokuingh Exp $
+// $Id: ESMC_StateUTest.C,v 1.4 2008/03/12 15:20:40 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -11,7 +11,7 @@
 //==============================================================================
 
 #include <string.h>
-#include "ESMCI.h"
+#include "ESMC.h"
 #include "ESMC_Test.h"
 #include "ESMC_Start.h"
 //#include "ESMC_DistGrid.h"
@@ -33,7 +33,7 @@
 
 int main(void){
 
-  ESMC_State* st;              // ESMC_State object
+  ESMC_State st;              // ESMC_State object
   ESMC_Array testArray;
   char* StateName = "stateName";                   // state name
   char name[80];

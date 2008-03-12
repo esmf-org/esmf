@@ -1,4 +1,4 @@
-// $Id: ESMC_State.h,v 1.15 2008/02/29 22:29:44 theurich Exp $
+// $Id: ESMC_State.h,v 1.16 2008/03/12 15:20:38 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -35,8 +35,6 @@
 //-----------------------------------------------------------------------------
 // 
 // !USES:
-#include "ESMCI_Util.h"
-#include "ESMC_F90Interface.h"
 #include "ESMC_Base.h"  // all classes inherit from the ESMC Base class.
 #include "ESMC_Array.h"
 #include "ESMC_Field.h"
@@ -48,8 +46,8 @@ extern "C" {
 // class declaration type
 typedef struct {
 
-    // pointer to fortran derived type
-    ESMC_F90ClassHolder* f90this;
+    // pointer 
+    void* ptr;
 
 
 //
@@ -77,9 +75,9 @@ typedef struct {
 
 
 
- ESMC_State* ESMC_StateCreate(char *name, int *rc);
+ ESMC_State ESMC_StateCreate(char *name, int *rc);
 
- int ESMC_StateDestroy(ESMC_State *state);
+ int ESMC_StateDestroy(ESMC_State state);
 
  int ESMC_StateAddArray(ESMC_State *state, ESMC_Array array);
 

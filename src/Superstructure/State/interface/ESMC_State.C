@@ -22,7 +22,7 @@
 //
  // insert any higher level, 3rd party or system includes here
 #include <string.h>         // strlen()
-#include "ESMCI_Util.h"
+#include "ESMC_State.h"
 #include "ESMCI_State.h"
 #include "ESMC_Array.h"
 #include "ESMC_Start.h"
@@ -42,7 +42,7 @@
 
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_State.C,v 1.14 2008/03/02 04:49:53 theurich Exp $";
+ static const char *const version = "$Id: ESMC_State.C,v 1.15 2008/03/12 15:20:38 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -57,8 +57,10 @@
 //BOP
 // !IROUTINE:  ESMC_StateCreate - Create a new State
 //
+
+extern "C" {
 // !INTERFACE:
-      ESMC_State *ESMC_StateCreate(
+      ESMC_State ESMC_StateCreate(
 //
 // !RETURN VALUE:
 //     pointer to newly allocated ESMC_State
@@ -70,44 +72,29 @@
 // !DESCRIPTION:
 //      Create a new State.
 //
-//      Note: this is a class helper function, not a class method
-//      (see declaration in ESMC\_State.h)
-//
 //EOP
    //Local variables
     int localrc;
     int nlen;
-    char* fName = NULL;
+    ESMC_State state;
 
     // Initialize return code. Assume routine not implemented
     if (rc) *rc = ESMF_RC_NOT_IMPL;
     localrc = ESMF_RC_NOT_IMPL;
 
-    // allocate the nuew State object
-    ESMC_State* state;
-    try{
-      state = new ESMC_State;
-    }catch(...){
-      // allocation error
-      ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMC_State.", rc);
-      return ESMC_NULL_POINTER;
-    }
-
-    // convert file name to fortran string
-    nlen = strlen(name);
-    fName = new char[nlen];
-    localrc = ESMC_CtoF90string(name, fName, nlen);
+    // Invoque the C++ interface
+    state.ptr = (void*) ESMCI::State::create(name, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) {
-      delete[] fName;
-      return ESMC_NULL_POINTER;
+      state.ptr = NULL;
+      return state;
     }
 
-    FTN(f_esmf_statecreate)(state, fName, rc, nlen);
-
+    rc = &localrc;
     return state;
 
  } // end ESMC_StateCreate
 
+}; // extern "C"
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_StateAddArray - Add an array to this state
@@ -157,7 +144,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_State *state) {    // in - state object to destroy
+      ESMC_State state) {    // in - state object to destroy
 //
 // !DESCRIPTION:
 //      ESMF routine which destroys a State object previously allocated
@@ -169,16 +156,24 @@
 //EOP
 // !REQUIREMENTS:  
 
-    int rc;
+    int rc, localrc;
+    
    
     // Initialize return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
+    localrc = ESMC_RC_NOT_IMPL;
 
-    FTN(f_esmf_statedestroy)(state, &rc);
+    // Invoque the C++ interface
+    localrc = ((ESMCI::State*)&state)->destroy( (ESMCI::State*)state.ptr );
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+      return localrc;
+    }
 
-    return rc;
+//  FTN(f_esmf_statedestroy)(state, &rc);
 
- } // end ESMC_StateDestroy
+    return rc=localrc;
+
+ }  // end ESMC_StateDestroy
 
 //-----------------------------------------------------------------------------
 //BOP

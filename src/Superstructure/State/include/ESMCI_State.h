@@ -1,4 +1,4 @@
-// $Id: ESMCI_State.h,v 1.3 2008/02/29 18:25:24 rosalind Exp $
+// $Id: ESMCI_State.h,v 1.4 2008/03/12 15:20:37 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -32,11 +32,30 @@
 //
 // 
 //
+
 //-----------------------------------------------------------------------------
 // 
 // !USES:
 #include "ESMC_State.h"
 
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// C++ State class declaration
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+   namespace ESMCI{
+   class State{
+
+     // pointer to fortran derived type
+     ESMC_F90ClassHolder* f90this;
+
+     public:
+     static State* create(char* name, int *rc);
+     int destroy(State* state);
+   }; // class State
+   };// namespace ESMCI
+
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
@@ -46,12 +65,12 @@
 //-----------------------------------------------------------------------------
 extern "C" {
 
-  void FTN(f_esmf_statecreate)(ESMC_State* state, char* statename, int* rc,
+  void FTN(f_esmf_statecreate)(ESMCI::State* state, char* statename, int* rc,
 				ESMCI_FortranStrLenArg nlen);
 
   void FTN(f_esmf_stateaddarray)(ESMC_State* state, ESMC_Array array, int* rc);
 
-  void FTN(f_esmf_statedestroy)(ESMC_State* state, int* rc);
+  void FTN(f_esmf_statedestroy)(ESMCI::State* state, int* rc);
 
 #if 0
       TODO: finish these prototypes
