@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.1.2.7 2008/03/01 04:12:50 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.1.2.8 2008/03/12 13:22:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -78,8 +78,8 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     int *undistUBound;                // [tensorCount]
     int *staggerLoc;                  // [tensorElementCount]
     int *vectorDim;                   // [tensorElementCount]
-    int *distgridToArrayMap;          // [dimCount]
-    int *arrayToDistGridMap;          // [rank]
+    int *distgridToArrayMap;          // [dimCount] - entries are basis 1
+    int *arrayToDistGridMap;          // [rank]     - entries are basis 1
     int *contiguousFlag;              // [localDeCount]
     int *exclusiveElementCountPDe;    // [deCount] number of elements in
                                       // exclusive region only considering
