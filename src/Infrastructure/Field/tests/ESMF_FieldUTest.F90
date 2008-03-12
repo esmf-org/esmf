@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.106.2.4 2008/02/22 14:03:54 cdeluca Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.106.2.5 2008/03/12 18:37:46 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.106.2.4 2008/02/22 14:03:54 cdeluca Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.106.2.5 2008/03/12 18:37:46 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -416,7 +416,7 @@
       !------------------------------------------------------------------------
       !EX_remove_UTest_Multi_Proc_Only
       ! Try to create a Field with a IGrid and ArraySpec of the wrong sizes
-      ! try rank 1,2,3 :-)
+      ! try dimCount 1,2,3 :-)
       !TODO: with the removal of the old Array class (now called InternArray)
       !TODO: this test really does not work. 
       ! call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R4, rc=rc)
