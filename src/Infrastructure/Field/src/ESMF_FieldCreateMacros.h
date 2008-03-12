@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.25.2.10 2008/03/12 09:05:32 feiliu Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.25.2.11 2008/03/12 23:02:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -206,7 +206,7 @@
        ! compilers to cooperate. For some compilers the associated() test @\
        ! will return .false. for farray of size 0. Some of those compilers @\
        ! will produce a run-time error in size(fptr). Other compilers will @\
-       ! return .true. for the associated() test but return 0 in size(). @\  
+       ! return .true. for the associated() test but return 0 in size(). @\
        fpointer => farray @\
        if(.not. associated(fpointer,farray)) then @\
          call ESMF_LogMsgSetError(ESMF_RC_OBJ_INIT, &  @\
@@ -214,7 +214,7 @@
            ESMF_CONTEXT, rc)  @\
          return @\
        endif @\
-@\   
+@\
        if (size(fpointer)==0) then @\
          call ESMF_LogMsgSetError(ESMF_RC_OBJ_INIT, &  @\
            "- farray is not associated with memory allocation)", & @\
@@ -711,7 +711,7 @@
       integer          :: localrc @\
  @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
-      localrc = ESMF_RC_NOT_IMPL @\ 
+      localrc = ESMF_RC_NOT_IMPL @\
  @\
       ESMF_FieldCreateFromDataPtr##mrank##D##mtypekind = & @\
           ESMF_FieldCreateEmpty(name, iospec, rc=localrc) @\
