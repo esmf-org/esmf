@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.272.2.15 2008/03/10 18:46:06 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.272.2.16 2008/03/12 00:47:39 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -202,7 +202,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.272.2.15 2008/03/10 18:46:06 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.272.2.16 2008/03/12 00:47:39 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -612,7 +612,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldCreateEmpty"
 
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldCreateEmpty - Create a Field with no Grid or Array
 
 ! !INTERFACE:
@@ -641,7 +641,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 
 
       type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
@@ -752,7 +752,7 @@
 !
 ! !INTERFACE:
       subroutine ESMF_FieldGet(field, grid, array, &
-                               typekind, rank, staggerloc, &
+                               typekind, dimCount, staggerloc, &
                                gridToFieldMap, ungriddedLBound, &
                                ungriddedUBound, maxHaloLWidth, &
                                maxHaloUWidth, name, iospec, rc) 
@@ -763,7 +763,7 @@
       type(ESMF_Grid), intent(out), optional :: grid     
       type(ESMF_Array), intent(out), optional :: array     
       type(ESMF_TypeKind), intent(out), optional :: typekind
-      integer, intent(out), optional :: rank
+      integer, intent(out), optional :: dimCount
       type(ESMF_StaggerLoc), intent(out), optional :: staggerloc 
       integer, intent(out), optional :: gridToFieldMap(:)    
       integer, intent(out), optional :: ungriddedLBound(:)
@@ -776,52 +776,96 @@
 !
 ! !DESCRIPTION:
 !      Query an {\tt ESMF\_Field} for various things.  All arguments after
-!      the {\tt Field} are optional.  To select individual items use the
+!      the {\tt field} are optional.  To select individual items use the
 !      named\_argument=value syntax.
 !
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [ftype]
-!           Pointer to an {\tt ESMF\_Field} object.
+!     \item [field]
+!           {\tt ESMF\_Field} object to query.
 !     \item [{[grid]}]
 !           {\tt ESMF\_Grid}.
 !     \item [{[array]}]
 !           {\tt ESMF\_Array}.
 !     \item [{[typekind]}]
 !           TypeKind specifier for Field.
-!     \item [{[rank]}]
-!           Rank of Field data.
+!     \item [{[dimCount]}]
+!           Number of dimensions in {\tt field} data.
 !     \item [{[staggerloc]}]
-!           Stagger location of data in grid cells.  For valid values 
-!           and interpretation
-!           of results see Section \ref{sec:opt:staggerloc}.
+!           Stagger location of data in grid cells.  For valid
+!           predefined values and interpretation of results see
+!           Section \ref{sec:opt:staggerloc}.
 !     \item [{[gridToFieldMap]}]
-!           List that contains as many elements as is indicated by the {\tt grid}'s rank. 
-!           The list elements map each dimension of the Grid object to a dimension in the
-!           Field's Array by specifying the appropriate Array dimension index. The default is to
-!           map all of the grid's dimensions against the lower dimensions of the Field's
-!           Array in sequence, i.e. gridDimmap = (/1, 2, .../). Unmapped dimensions are
-!           undistributed dimensions.  The total undistributed dimensions are the total 
-!           Array dimensions - the distributed dimensions in the Grid (distRank).  All
-!           gridToFieldMap entries must be greater than or equal to one and smaller than or equal
-!           to the Array rank. It is erroneous to specify the same entry multiple times
-!           unless it is zero.  If the Array rank is less than the Grid dimCount then
-!           the default gridToFieldMap will contain zeros for the dimCount.
-!           A zero entry in the dimmap indicates that the particular Grid dimension will
-!           be replicating the Array across the DEs along this direction.
+!           List with number of elements equal to the 
+!           {\tt grid}'s dimCount.  The list elements map each dimension 
+!           of the {\tt grid} to a dimension in the {\tt farray} by 
+!           specifying the appropriate {\tt farray} dimension index. The default is to 
+!           map all of the {\tt grid}'s dimensions against the lowest dimensions of 
+!           the {\tt farray} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). 
+!           The values of all {\tt gridToFieldMap} entries must be greater than or equal 
+!           to one and smaller than or equal to the {\tt farray} rank. 
+!           It is erroneous to specify the same {\tt gridToFieldMap} entry 
+!           multiple times. The total ungridded dimensions in the {\tt field}
+!           are the total {\tt farray} dimensions less
+!           the total (distributed + undistributed) dimensions in
+!           the {\tt grid}.  Ungridded dimensions must be in the same order they are
+!           stored in the {\t farray}.  Permutations of the order of
+!           dimensions are handled via individual communication methods.  For example,
+!           an undistributed dimension can be remapped to a distributed dimension
+!           as part of the ESMF\_ ArrayRedist() operation.
 !     \item [{[ungriddedLBound]}]
-!           Lower bounds of the ungridded dimensions of the Field.
+!           Lower bounds of the ungridded dimensions of the {\tt field}.
+!           The number of elements in the {\tt ungriddedLBound} is equal to the number of
+!           ungridded dimensions in the {\tt field}.  All ungridded dimensions of the
+!           {\tt field} are also undistributed. If neither ungriddedLBounds or
+!           ungriddedUBounds are specified, the ungriddedLBound defaults to 1,
+!           and the ungriddedUBound defaults to the size of the dimension.
+!           If either ungriddedLBounds OR ungriddedUBounds are specified, the
+!           other will be calculated.  If BOTH are specified the values are checked
+!           for consistency.  Note that the the ordering of
+!           these ungridded dimensions is the same as their order in the {\tt farray}.
+!           Note also that the bounds for undistributed dimensions included in the
+!           {\tt grid} are set in the {\tt grid}.
 !     \item [{[ungriddedUBound]}]
-!           Upper bounds of the ungridded dimensions of the Field.
+!           Upper bounds of the ungridded dimensions of the {\tt field}.
+!           The number of elements in the {\tt ungriddedUBound} is equal to the number of
+!           ungridded dimensions in the {\tt field}.  All ungridded dimensions of the
+!           {\tt field} are also undistributed. If neither ungriddedLBounds or
+!           ungriddedUBounds are specified, the ungriddedLBound defaults to 1,
+!           and the ungriddedUBound defaults to the size of the dimension.
+!           If either ungriddedLBounds OR ungriddedUBounds are specified, the
+!           other will be calculated.  If BOTH are specified the values are checked
+!           for consistency.  Note that the the ordering of
+!           these ungridded dimensions is the same as their order in the {\tt farray}.
+!           Note also that the bounds for undistributed dimensions included in the
+!           {\tt grid} are set in the {\tt grid}.
 !     \item [{[maxHaloLWidth]}]
-!           Lower bound of halo region.  Defaults to 0. ! NOT IMPLEMENTED
+!           Lower bounds of halo region.  The size of this array is the number
+!           of distributed dimensions in the {\tt grid}.  However, ordering of the elements
+!           needs to be the same as they appear in the {\tt farray}.  Values default
+!           to 0.  If values for maxHaloLWidth are specified they must be reflected in
+!           the size of the {\tt farray}.  That is, for each distributed dimension the
+!           {\tt farray} size should be {\tt maxHaloLWidth} + {\tt maxHaloUWidth} 
+!           + {\tt computationalCount}. Although the halo operation is not
+!           implemented, the {\tt minHaloLWidth} is checked for validity and stored
+!           in preparation for the implementation of the halo method.
+!           HALO OPERATION NOT IMPLEMENTED
 !     \item [{[maxHaloUWidth]}]
-!           Upper bound of halo region.  Defaults to 0. ! NOT IMPLEMENTED
+!           Upper bounds of halo region.  The size of this array is the number
+!           of distributed dimensions in the {\tt grid}.  However, ordering of the elements
+!           needs to be the same as they appear in the {\tt farray}.  Values default
+!           to 0.  If values for maxHaloUWidth are specified they must be reflected in
+!           the size of the {\tt farray}.  That is, for each distributed dimension the
+!           {\tt farray} size should {\tt maxHaloLWidth} + {\tt maxHaloUWidth}
+!           + {\tt computationalCount}.  Although the halo operation is not
+!           implemented, the {\tt maxHaloUWidth} is checked for validity and stored
+!           in preparation for the implementation of the halo method.
+!           HALO OPERATION NOT IMPLEMENTED
 !     \item [{[name]}]
 !           Name of queried item.
 !     \item [{[iospec]}]
-!           {\tt ESMF\_IOSpec} object which contains settings for options ! NOT IMPLEMENTED
+!           {\tt ESMF\_IOSpec} object which contains settings for options. NOT IMPLEMENTED
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -901,14 +945,14 @@
                                       ESMF_CONTEXT, rc)) return
         endif
 
-        if (present(rank)) then
+        if (present(dimCount)) then
             if (ftype%datastatus .ne. ESMF_STATUS_READY) then
                 if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                 "Cannot return rank because no data attached to Field", &
+                 "Cannot return dimCount because no data attached to Field", &
                                  ESMF_CONTEXT, rc)) return
             endif
             call ESMF_ArrayGet(ftype%array, &
-                               rank=rank, rc=rc)
+                               rank=dimCount, rc=rc)
             if (ESMF_LogMsgFoundError(rc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
@@ -2992,7 +3036,7 @@
 
 !
 ! !DESCRIPTION:
-!      Attaches a character attribute to the {\tt field}.
+!     Attaches a character attribute to the {\tt field}.
 !     The attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:

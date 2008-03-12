@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.4 2008/03/11 19:52:26 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.5 2008/03/12 00:47:39 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -56,7 +56,7 @@
     type(ESMF_Grid)         :: grid, grid1
     type(ESMF_Array)        :: array
     type(ESMF_TypeKind)     :: typekind
-    integer                 :: rank
+    integer                 :: dimCount
     type(ESMF_StaggerLoc)   :: staggerloc
     integer, dimension(ESMF_MAXDIM) :: gridToFieldMap
     integer, dimension(ESMF_MAXDIM) :: ungriddedLBound 
@@ -737,7 +737,7 @@ contains
         type(ESMF_Grid)         :: grid1
         type(ESMF_Array)        :: array
         type(ESMF_TypeKind)     :: typekind
-        integer                 :: rank
+        integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: staggerloc
         integer, dimension(ESMF_MAXDIM) :: gridToFieldMap
         integer, dimension(ESMF_MAXDIM) :: ungriddedLBound 
@@ -750,7 +750,7 @@ contains
         field = ESMF_FieldCreateEmpty(rc=localrc) 
         if(localrc /= ESMF_SUCCESS) rc = ESMF_FAILURE
         call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
-            rank=rank, staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, &
+            dimCount=dimCount, staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
             rc=localrc)
@@ -1063,7 +1063,7 @@ contains
         type(ESMF_Grid)         :: grid1
         type(ESMF_Array)        :: array
         type(ESMF_TypeKind)     :: typekind
-        integer                 :: rank
+        integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
         integer, dimension(ESMF_MAXDIM) :: lgridToFieldMap
         integer, dimension(ESMF_MAXDIM) :: lungriddedLBound 
@@ -1158,7 +1158,7 @@ contains
         if(present(fieldget)) then
           if(fieldget) then
             call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
-                rank=rank, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
+                dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
                 ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
                 maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
                 rc=localrc)
@@ -1448,7 +1448,7 @@ contains
         type(ESMF_Grid)         :: grid1
         type(ESMF_Array)        :: array
         type(ESMF_TypeKind)     :: typekind
-        integer                 :: rank
+        integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
         integer, dimension(ESMF_MAXDIM) :: lgridToFieldMap
         integer, dimension(ESMF_MAXDIM) :: lungriddedLBound 
@@ -1525,7 +1525,7 @@ contains
         if(present(fieldget)) then
           if(fieldget) then
             call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
-                rank=rank, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
+                dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
                 ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
                 maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
                 rc=localrc)
@@ -2043,7 +2043,7 @@ contains
         type(ESMF_Grid)         :: grid1
         type(ESMF_Array)        :: array
         type(ESMF_TypeKind)     :: typekind
-        integer                 :: rank
+        integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
         integer, dimension(ESMF_MAXDIM) :: lgridToFieldMap
         integer, dimension(ESMF_MAXDIM) :: lungriddedLBound 
@@ -2140,7 +2140,7 @@ contains
         if(present(fieldget)) then
           if(fieldget) then
             call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
-                rank=rank, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
+                dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
                 ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
                 maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
                 rc=localrc)
