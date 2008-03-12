@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.4 2008/03/12 00:47:39 cdeluca Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.5 2008/03/12 23:19:04 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.4 2008/03/12 00:47:39 cdeluca Exp $'
+      '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.5 2008/03/12 23:19:04 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -241,6 +241,15 @@
       type(ESMF_FieldType), pointer :: ftype      ! Pointer to new field
       integer :: localrc                          !  Local error code
       logical :: rcpresent                        ! Return code present
+      integer :: fieldDimCount, fieldUngriddedDimCount 
+      integer :: gridDimCount, gridDistDimCount
+      integer :: fieldUndistDimCount 
+      integer :: i,j
+      integer :: localGridToFieldMap(ESMF_MAXDIM)
+      integer :: localMaxHaloLWidth (ESMF_MAXDIM)
+      integer :: localMaxHaloUWidth (ESMF_MAXDIM)
+      logical :: flipflop(ESMF_MAXDIM)
+      type(ESMF_StaggerLoc)  :: localStaggerLoc
 
       ! Initialize pointers
       localrc = ESMF_RC_NOT_IMPL
@@ -254,21 +263,152 @@
         rc = ESMF_RC_NOT_IMPL
       endif
 
+      ! check init status of input parameters
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit, arrayspec)
+
+      ! Get rank of proposed Field.  
+      call ESMF_ArraySpecGet(arrayspec, rank=fieldDimCount, rc=localrc) 
+      if (ESMF_LogMsgFoundError(localrc, &  
+           ESMF_ERR_PASSTHRU, &  
+           ESMF_CONTEXT, rc)) return   
+
+
+      ! Get number of grid dimensions, number  
+      ! of distributed grid dimensions, distgrid,  
+      ! number of ungridded Field dimensions,  
+      ! and number of undistributed Field Dimensions  
+      call ESMF_GridGet(grid, dimCount=gridDimCount, distDimCount=gridDistDimCount, &  
+            rc=localrc)  
+      if (ESMF_LogMsgFoundError(localrc, &  
+          ESMF_ERR_PASSTHRU, &  
+          ESMF_CONTEXT, rc)) return  
+ 
+      if(fieldDimCount .lt. gridDimCount) then  
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
+               "- farray rank must be greater than or equal to grid rank", &  
+                 ESMF_CONTEXT, rc)   
+      endif  
+ 
+      fieldUngriddedDimCount = fieldDimCount-gridDimCount  
+      fieldUndistDimCount = fieldDimCount-gridDistDimCount  
+ 
+      ! Error Check Input  
+      if (present(gridToFieldMap)) then   
+          if (size(gridToFieldMap) .ne. gridDimCount) then  
+              call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
+                "- gridToFieldMap size must equal to grid_rank", &  
+                  ESMF_CONTEXT, rc)   
+              return  
+          endif  
+      endif  
+ 
+      if (present(ungriddedLBound)) then   
+         if (size(ungriddedLBound) .ne. fieldUngriddedDimCount) then  
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
+                 "- ungriddedLBound size must equal to array_rank-grid_rank", &  
+                 ESMF_CONTEXT, rc)   
+            return  
+         endif  
+      endif  
+ 
+      if (present(ungriddedUBound)) then   
+         if (size(ungriddedUBound) .ne. fieldUngriddedDimCount) then  
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
+                   "- ungriddedUBound size must equal to array_rank-grid_rank", &  
+                   ESMF_CONTEXT, rc)   
+            return  
+         endif  
+      endif  
+ 
+      if (present(maxHaloLWidth)) then   
+          if (size(maxHaloLWidth) .ne. gridDistDimCount) then  
+              call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
+                "- maxHaloLWidth must equal to distgrid_rank", &  
+                  ESMF_CONTEXT, rc)   
+              return  
+          endif  
+      endif  
+ 
+      if (present(maxHaloUWidth)) then   
+         if (size(maxHaloUWidth) .ne. gridDistDimCount) then  
+             call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
+                "- maxHaloUWidth must equal to distgrid_rank", &  
+                  ESMF_CONTEXT, rc)   
+             return  
+         endif  
+      endif  
+ 
+      ! Set default values.  
+      if (present(staggerloc)) then  
+         localStaggerloc = staggerloc  
+      else  
+         localStaggerLoc = ESMF_STAGGERLOC_CENTER  
+      endif  
+ 
+      ! Set default gridToFieldMap
+       if (present(gridToFieldMap)) then  
+         localGridToFieldMap(1:gridDimCount) = &  
+            gridToFieldMap (1:gridDimCount)  
+       else  
+         do i = 1, gridDimCount  
+           localGridToFieldMap(i) = i  
+         enddo  
+       endif  
+
+       ! gridToFieldMap elements must be in range 1...fieldRank and unique  
+       ! algorithm to check element uniqueness:  
+       !   run time: O(ESMF_MAXDIM)  
+       !   memory:   O(2*ESMF_MAXDIM)  
+       !          or O(ESMF_MAXDIM+ESMF_MAXDIM/sizeof(integer)) with bitvector  
+       flipflop = .false.  
+       do i = 1, gridDimCount  
+          if(localGridToFieldMap(i) .lt. 1 .and. &  
+            localGridToFieldMap(i) .gt. fieldDimCount) then  
+              call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &   
+                    "- gridToFieldMap element must be within range 1...array rank", &  
+                      ESMF_CONTEXT, rc)   
+              return  
+          endif  
+          if(flipflop(localGridToFieldMap(i))) then  
+              call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &   
+                    "- gridToFieldMap element must be unique", &  
+                      ESMF_CONTEXT, rc)   
+              return  
+          endif  
+          flipflop(localGridToFieldMap(i)) = .true.  
+       enddo  
+ 
+       if(present(maxHaloLWidth)) then  
+         localMaxHaloLWidth(1:gridDistDimCount) = &  
+            maxHaloLWidth (1:gridDistDimCount)  
+       else  
+            localMaxHaloLWidth = 0  
+       endif  
+ 
+       if(present(maxHaloUWidth)) then  
+         localMaxHaloUWidth(1:gridDistDimCount) = &  
+            maxHaloUWidth (1:gridDistDimCount)  
+       else  
+            localMaxHaloUWidth = 0  
+       endif  
+ 
+
+      ! allocate Fieldtype
       allocate(ftype, stat=localrc)
-      ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogMsgFoundAllocError(localrc, &
+                                  "Allocating Field Type", &
                                   ESMF_CONTEXT, rc)) return
+
       call ESMF_FieldInitialize(ftype, rc=localrc) 
-      if (ESMF_LogMsgFoundAllocError(localrc, "Default initialize Field", &
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                        ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize field internals.
       call ESMF_FieldConstructIA(ftype, grid, arrayspec, allocflag, &
-                                  staggerloc, gridToFieldMap, ungriddedLBound, &
-                                  ungriddedUBound, maxHaloLWidth, &
-                                  maxHaloUWidth, name, iospec, localrc)
+                                  localStaggerloc, localGridToFieldMap(1:gridDimCount), ungriddedLBound, &
+                                  ungriddedUBound, localMaxHaloLWidth(1:gridDistDimCount), &
+                                  localMaxHaloUWidth(1:gridDistDimCount), name, iospec, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -425,6 +565,18 @@
         rcpresent = .TRUE. 
         rc = ESMF_RC_NOT_IMPL
       endif     
+
+
+      ! check init status of input parameters
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+     !
+     !
+     ! TODO: need to add input checking and default setting like
+     !       in FieldCreateNew above
+     !
+     !
 
       allocate(ftype, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Field information", &

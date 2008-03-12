@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.25.2.11 2008/03/12 23:02:35 theurich Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.25.2.12 2008/03/12 23:19:05 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -403,24 +403,19 @@
          endif @\
        endif @\
 @\
-       ! Get computationalEdgeWidths                                        @\
-       call ESMF_GridGet(grid, staggerloc=localStaggerloc, & @\
-             computationalEdgeLWidth=compELWidth, & @\
-             computationalEdgeUWidth=compEUWidth, & @\
-             rc=localrc)                                                   @\
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &          @\
-             ESMF_CONTEXT, rcToReturn=rc)) return                          @\
 @\
        ! The undistributed info from the Grid needs to be @\
        ! combined with the ungridded info from the Field in order @\
        ! to create the Array for the Field. @\
-       call ESMF_GridGetArrayUndistInfo(grid, & @\
+       call ESMF_GridGetArrayInfo(grid, & @\
             staggerloc=localStaggerLoc, & @\
             gridToArrayMap=localGridToFieldMap, & @\
             ungriddedLBound=localUngriddedLBound (1:fieldUngriddedDimCount), & @\
             ungriddedUBound=localUngriddedUBound (1:fieldUngriddedDimCount), & @\
             distgridToArrayMap=distgridToArrayMap, & @\
             undistLBound=undistLBound, undistUBound=undistUBound, & @\
+             computationalEdgeLWidth=compELWidth, & @\
+             computationalEdgeUWidth=compEUWidth, & @\
             rc=localrc) @\
        if (ESMF_LogMsgFoundError(localrc, & @\
            ESMF_ERR_PASSTHRU, & @\
