@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.5 2008/03/12 00:47:39 cdeluca Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.6 2008/03/12 09:05:32 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -2011,7 +2011,7 @@ contains
 
     end subroutine test3g
 
-    ! test3d_generic provides an generic interface to test fieldCreateFromDataPtr
+    ! test3d_generic provides a generic interface to test fieldCreateFromDataPtr
     ! on 3d grid and 3d arrays
     subroutine test3d_generic(rc, minindex, maxindex, &
         gridEdgeLWidth, gridEdgeUWidth, &

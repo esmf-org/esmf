@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.25.2.9 2008/03/12 00:47:39 cdeluca Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.25.2.10 2008/03/12 09:05:32 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -158,7 +158,6 @@
        type(ESMF_Field) :: field @\
        type(ESMF_Grid) :: grid                  @\
        mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
-       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fpointer @\
        type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
        type(ESMF_StaggerLoc), intent(in), optional ::staggerloc  @\
        integer, intent(in), optional :: gridToFieldMap(:)     @\
@@ -168,6 +167,7 @@
        integer, intent(in), optional :: maxHaloUWidth(:) @\
        integer, intent(out), optional :: rc                @\
 ! local variables @\
+       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fpointer @\
        type(ESMF_StaggerLoc)          :: localStaggerLoc  @\
        integer                        :: localrc, i, j, count @\
        integer                        :: fieldDimCount, fieldUngriddedDimCount @\
@@ -199,8 +199,14 @@
        endif @\
        localrc = ESMF_RC_NOT_IMPL @\
 @\
+       ! make sure field, grid, farray are properly initialized @\
        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
        ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc) @\
+       ! The following use of fptr is a bit of trickery to get all F90 @\
+       ! compilers to cooperate. For some compilers the associated() test @\
+       ! will return .false. for farray of size 0. Some of those compilers @\
+       ! will produce a run-time error in size(fptr). Other compilers will @\
+       ! return .true. for the associated() test but return 0 in size(). @\  
        fpointer => farray @\
        if(.not. associated(fpointer,farray)) then @\
          call ESMF_LogMsgSetError(ESMF_RC_OBJ_INIT, &  @\
@@ -307,7 +313,7 @@
        !          or O(ESMF_MAXDIM+ESMF_MAXDIM/sizeof(integer)) with bitvector @\
        flipflop = .false. @\
        do i = 1, gridDimCount @\
-          if(localGridToFieldMap(i) .lt. 1 .and. & @\
+          if(localGridToFieldMap(i) .lt. 1 .or. & @\
             localGridToFieldMap(i) .gt. fieldDimCount) then @\
               call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &  @\
                     "- gridToFieldMap element must be within range 1...array rank", & @\
@@ -361,7 +367,6 @@
          endif                        @\
        enddo                          @\
 @\
-@\
        ! set Array ungridded bounds depending on what user provides@\
        if (present(ungriddedLBound)) then @\
           if(present(ungriddedUBound)) then @\
@@ -390,7 +395,7 @@
                 ungriddedUBound(1:fieldUngriddedDimCount) @\
           else  @\
             ! No user info copy array bounds @\
-            ! Note: because of 'target' attribute bounds will be 1...size @\
+            ! Note: assumed shape bounds will be 1...size @\
             do i=1, fieldUngriddedDimCount        @\
                localUngriddedLBound(i) = lbound(farray,ungriddedIndex(i)) @\
                localUngriddedUBound(i) = ubound(farray,ungriddedIndex(i)) @\
