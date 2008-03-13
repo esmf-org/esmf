@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldGetMacros.h,v 1.15.2.4 2008/02/18 05:09:49 cdeluca Exp $
+! $Id: ESMF_FieldGetMacros.h,v 1.15.2.5 2008/03/13 23:18:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -149,12 +149,6 @@
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
- @\
-      call ESMF_FieldValidate(field, rc=localrc) @\
- @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-          ESMF_ERR_PASSTHRU, & @\
-          ESMF_CONTEXT, rc)) return @\
  @\
       call ESMF_ArrayGet(field%ftypep%array, farrayPtr=farray, rc=localrc) @\
  @\
