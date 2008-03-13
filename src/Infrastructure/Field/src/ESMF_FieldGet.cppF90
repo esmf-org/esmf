@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.7 2008/03/13 23:20:03 theurich Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.8 2008/03/13 23:36:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -54,7 +54,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGet.cppF90,v 1.2.2.7 2008/03/13 23:20:03 theurich Exp $'
+      '$Id: ESMF_FieldGet.cppF90,v 1.2.2.8 2008/03/13 23:36:13 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -208,6 +208,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         integer :: localDECount, dimCount
         integer, allocatable :: arrayBnd(:, :)
         integer, allocatable :: undistBnd(:)
+        integer, allocatable :: distgridToArrayMap(:)
         integer, allocatable :: distgridToPackedArrayMap(:)
 
         if (present(rc)) rc = ESMF_RC_NOT_IMPL 
@@ -241,10 +242,12 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
             allocate(arrayBnd(dimCount, 0:localDECount-1))
             allocate(undistBnd(fieldRank-dimCount))
             allocate(distgridToPackedArrayMap(dimCount))
+            allocate(distgridToArrayMap(dimCount))
                   
            ! get distributed dimension map
            call ESMF_ArrayGet(field%ftypep%array, & 
-               distgridToPackedArrayMap=distgridToPackedArrayMap, rc=localrc)
+             distgridToPackedArrayMap=distgridToPackedArrayMap, &
+             distgridToArrayMap=distgridToArrayMap, rc=localrc)
       
             ! fill totalLBounds
             if (present(totalLBound)) then
@@ -254,7 +257,8 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
                 ! set distributed dimensions
                 filled=.false.
                 do i=1, dimCount
-                   totalLBound(distgridToPackedArrayMap(i))=arrayBnd(i,localDE)
+                   totalLBound(distgridToPackedArrayMap(i))=&
+                    arrayBnd(distgridToArrayMap(i),localDE)
                    filled(distgridToPackedArrayMap(i))=.true.
                 enddo
       
@@ -276,7 +280,8 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
                 ! set distributed dimensions
                 filled=.false.
                 do i=1, dimCount
-                   totalUBound(distgridToPackedArrayMap(i))=arrayBnd(i,localDE)
+                   totalUBound(distgridToPackedArrayMap(i))=&
+                    arrayBnd(distgridToArrayMap(i),localDE)
                    filled(distgridToPackedArrayMap(i))=.true.
                 enddo
       
@@ -293,6 +298,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
             deallocate(arrayBnd)
             deallocate(undistBnd)
             deallocate(distgridToPackedArrayMap)
+            deallocate(distgridToArrayMap)
         endif
 
         ! get grid info 
