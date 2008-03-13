@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute_F.C,v 1.2 2008/03/07 19:01:30 rokuingh Exp $
+// $Id: ESMC_Attribute_F.C,v 1.3 2008/03/13 05:36:02 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.2 2008/03/07 19:01:30 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.3 2008/03/13 05:36:02 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -48,6 +48,550 @@ extern "C" {
 //  Attribute object methods
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttributeSetValue - Set Attribute on an ESMF type
+//
+// !INTERFACE:
+      void FTN(c_esmc_attributesetvalue)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      char *name,               // in - F90, non-null terminated string
+      ESMC_TypeKind *tk,        // in - typekind
+      int *count,               // in - number of value(s)
+      void *value,              // in - any value or list of values
+      int *rc,                  // in - return code
+      int nlen) {               // hidden/in - strlen count for name
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any object type in the system.
+//     Any type or list of types can be passed except character strings
+//     since they come with an additional hidden length argument.
+//
+//EOP
+
+  int status;
+  char *cname;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    if (rc) *rc = ESMF_FAILURE;
+    return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cname = ESMC_F90toCstring(name, nlen);
+  if (!cname) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // Set the attribute on the object.
+  *rc = (**base).root.ESMC_AttributeSet(cname, *tk, *count, value);
+
+  delete [] cname;
+  return;
+
+}  // end c_ESMC_AttributeSetValue
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttributeSetChar - Set String Attribute on an ESMF type
+//
+// !INTERFACE:
+      void FTN(c_esmc_attributesetchar)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      char *name,               // in - F90, non-null terminated string
+      char *value,              // in - char string
+      int *rc,                  // in - return code
+      int nlen,                 // hidden/in - strlen count for name
+      int vlen) {               // hidden/in - strlen count for value
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any object type in the system.
+//     Character strings have this special version since they come in
+//     with an additional hidden length argument.
+//
+//EOP
+
+  int i, status;
+  char *cname, *cvalue;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    if (rc) *rc = ESMF_FAILURE;    
+    return;
+  }
+
+  // simple sanity checks before doing any more work
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name", &status);
+      //printf("ESMF_AttributeSet: bad attribute name\n");
+      if (rc) *rc = status;
+      return;
+  }
+
+  if ((!value) || (vlen <= 0) || (value[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute value", &status);
+      //printf("ESMF_AttributeSet: bad attribute value\n");
+      if (rc) *rc = status;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cname = ESMC_F90toCstring(name, nlen);
+  if (!cname) {
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cvalue = ESMC_F90toCstring(value, vlen);
+  if (!cvalue) {
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  // Set the attribute on the object.
+  *rc = (**base).root.ESMC_AttributeSet(cname, cvalue);
+
+  delete [] cname;
+  delete [] cvalue;
+  return;
+
+}  // end c_ESMC_AttributeSetChar
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttributeSetLink - Set a link in an Attribute hierarchy
+//
+// !INTERFACE:
+      void FTN(c_esmc_attributesetlink)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **source,       // in/out - base object
+      ESMC_Base **destination,  // in/out - base destination object
+      int *rc) {                // in/out - return value 
+// 
+// !DESCRIPTION:
+//     Set a link in an attribute hierarchy.
+//
+//EOP
+
+  int i, status;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!source) {
+    if (rc) *rc = ESMF_FAILURE;    
+    return;
+  }
+  
+  if (!destination) {
+    if (rc) *rc = ESMF_FAILURE;    
+    return;
+  }
+
+  // Set the attribute link on the object.
+  *rc = (**source).root.ESMC_AttributeSetLink(*destination);
+  
+  return;
+
+}  // end c_ESMC_AttributeSetLink
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttributeGetValue - get attribute from an ESMF type
+//
+// !INTERFACE:
+      void FTN(c_esmc_attributegetvalue)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      char *name,               // in - F90, non-null terminated string
+      ESMC_TypeKind *tk,        // in - typekind
+      int *count,               // in - must match actual length
+      void *value,              // out - value
+      int *rc,                  // in - return code
+      int nlen) {               // hidden/in - strlen count for name
+// 
+// !DESCRIPTION:
+//     Return the (name,value) pair from any object type in the system.
+//
+//EOP
+
+  int status, attrCount;
+  ESMC_TypeKind attrTk;
+  char *cname;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    *rc = ESMF_FAILURE;    
+    return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name", &status);
+      //printf("ESMF_AttributeSet: bad attribute name\n");
+      if (rc) *rc = status;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cname = ESMC_F90toCstring(name, nlen);
+  if (!cname) {
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  status = (**base).root.ESMC_AttributeGet(cname, &attrTk, &attrCount, NULL);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status,
+                         "failed getting attribute type and count", &status)) {
+    //printf("ESMF_AttributeGetValue: failed getting attribute info\n");
+    delete [] cname;
+    if (rc) *rc = status;
+    return;
+  }
+
+  if (attrTk != *tk) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_INCOMP,
+                         "attribute value not expected kind", &status);
+    //printf("attribute %s not expected kind %s, actually kind %d\n", 
+    //       name, ESMC_TypeKindString(*tk), ESMC_TypeKindString(attrTk));
+    delete [] cname;
+    if (rc) *rc = status;
+    return;
+  }
+  if (attrCount != *count) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_INCOMP,
+                         "attribute value not expected count", &status);
+    //printf("expected count %d does not match actual count %d\n", 
+    //           *count, attrCount);
+    delete [] cname;
+    if (rc) *rc = status;
+    return;
+  }
+
+  status = (**base).root.ESMC_AttributeGet(cname, NULL, NULL, value);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status,
+                         "failed getting attribute value", &status);
+  delete [] cname;
+  if (rc) *rc = status;
+
+  return;
+
+}  // end c_ESMC_AttributeGetValue
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttributeGetChar - get attribute from an ESMF type
+//
+// !INTERFACE:
+      void FTN(c_esmc_attributegetchar)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      char *name,               // in - F90, non-null terminated string
+      char *value,              // out - character value
+      int *rc,                  // in - return code
+      int nlen,                 // hidden/in - strlen count for name
+      int vlen) {               // hidden/in - strlen count for value
+// 
+// !DESCRIPTION:
+//     Retrieve a (name,value) pair from any object type in the system.
+//
+//EOP
+
+  int i;
+  ESMC_TypeKind attrTypeKind;
+  char *cname, *cvalue;
+  int slen;              // actual attribute string length
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    *rc = ESMF_FAILURE;
+    return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
+      printf("ESMF_AttributeGet: bad attribute name\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cname = ESMC_F90toCstring(name, nlen);
+  if (!cname) {
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  *rc = (**base).root.ESMC_AttributeGet(cname, &attrTypeKind, &slen, NULL);
+  if (*rc != ESMF_SUCCESS) {
+    delete [] cname;
+    return;
+  }
+
+// TODO: re-enable the following error checking when ESMF_TYPEKIND_CHARACTER
+// becomes available
+  
+//  if (attrTypeKind != ESMF_TYPEKIND_CHARACTER) {
+      // TODO: this needs to sprintf into a buffer to format up the error msg
+//      printf("ESMF_AttributeGet: attribute %s not type character\n", name);
+//      delete [] cname;
+//      *rc = ESMF_FAILURE;
+//      return; 
+//  }
+
+  // make sure destination will be long enough
+  if (slen > vlen) {
+    printf("ESMF_AttributeGet: attribute %s is %d bytes long, buffer length "
+      "%d is too short", name, slen, vlen);
+    delete [] cname;
+    *rc = ESMF_FAILURE;
+    return; 
+  }
+
+  cvalue = new char[slen+1];
+
+  *rc = (**base).root.ESMC_AttributeGet(cname, cvalue);
+  if (*rc != ESMF_SUCCESS) {
+    delete [] cname;
+    delete [] cvalue;
+    return;
+  }
+
+  *rc = ESMC_CtoF90string(cvalue, value, vlen);
+
+  delete [] cname;
+  delete [] cvalue;
+  return;
+
+}  // end c_ESMC_AttributeGetChar
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttributeGetInfoName - get type and number of items in an attr
+//
+// !INTERFACE:
+      void FTN(c_esmc_attributegetinfoname)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      char *name,               // in - F90, non-null terminated string
+      ESMC_TypeKind *tk,        // out - typekind
+      int *count,               // out - item count
+      int *rc,                  // in - return code
+      int nlen) {               // hidden/in - strlen count for name
+// 
+// !DESCRIPTION:
+//   Return the typekind, count of items in the (name,value) pair from any 
+//   object type in the system.
+//
+//EOP
+
+  char *cname;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    *rc = ESMF_FAILURE;    
+    return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
+      printf("ESMF_AttributeGetValue: bad attribute name\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  if (!tk) {
+      printf("ESMF_AttributeGetValue: bad attribute typekind argument\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  if (!count) {
+      printf("ESMF_AttributeGetValue: bad attribute count argument\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cname = ESMC_F90toCstring(name, nlen);
+  if (!cname) {
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  *rc = (**base).root.ESMC_AttributeGet(cname, tk, count, NULL);
+
+  delete [] cname;
+  return;
+
+}  // end c_ESMC_AttributeGetInfoName
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttributeGetInfoNum - get type and number of items in an attr
+//
+// !INTERFACE:
+      void FTN(c_esmc_attributegetinfonum)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      int *num,                 // in - attr number
+      char *name,               // out - F90, non-null terminated string
+      ESMC_TypeKind *tk,        // out - typekind
+      int *count,               // out - item count
+      int *rc,                  // in - return code
+      int nlen) {               // hidden/in - strlen count for name
+// 
+// !DESCRIPTION:
+//   Return the name, type, count of items in the (name,value) pair from any 
+//   object type in the system.
+//
+//EOP
+
+  char *cname;
+
+// Initialize return code; assume routine not implemented
+if (rc) *rc = ESMF_RC_NOT_IMPL;
+
+  if (!base) {
+    *rc = ESMF_FAILURE;
+    return;
+  }
+
+  if (!name) {
+      printf("ESMF_AttributeGetValue: bad attribute name argument\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  if (!tk) {
+      printf("ESMF_AttributeGetValue: bad attribute typekind argument\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  if (!count) {
+      printf("ESMF_AttributeGetValue: bad attribute count argument\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  cname = new char[ESMF_MAXSTR];
+
+  *rc = (**base).root.ESMC_AttributeGet((*num)-1, cname, tk, count, NULL);
+  if (*rc != ESMF_SUCCESS) {
+      delete [] cname;
+      return;
+  }
+
+  *rc = ESMC_CtoF90string(cname, name, nlen);
+  
+  delete [] cname;
+  return;
+
+}  // end c_ESMC_AttributeGetInfoNum
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttributeGetCount - get number of attrs
+//
+// !INTERFACE:
+      void FTN(c_esmc_attributegetcount)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      int *count,               // out - attribute count
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//   Return the count of attributes for any object type in the system.
+//
+//EOP
+
+  int i, status;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+  status = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    *rc = ESMF_FAILURE;
+    return;
+  }
+
+  if (!count) {
+      printf("ESMF_AttributeGetValue: bad attribute count argument\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  *count = (**base).root.ESMC_AttributeGetCount();
+
+  *rc = (count == 0) ? ESMF_FAILURE : ESMF_SUCCESS;
+  return;
+
+}  // end c_ESMC_AttributeGetCount
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -396,591 +940,5 @@ extern "C" {
   return;
 
 }  // end c_ESMC_attpackwrite
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_ESMC_AttributeGetValue - get attribute from an ESMF type
-//
-// !INTERFACE:
-      void FTN(c_esmc_attributegetvalue)(
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **base,         // in/out - base object
-      char *name,               // in - F90, non-null terminated string
-      ESMC_TypeKind *tk,        // in - typekind
-      int *count,               // in - must match actual length
-      void *value,              // out - value
-      int *rc,                  // in - return code
-      int nlen) {               // hidden/in - strlen count for name
-// 
-// !DESCRIPTION:
-//     Return the (name,value) pair from any object type in the system.
-//
-//EOP
-
-  int status, attrCount;
-  ESMC_TypeKind attrTk;
-  char *cname;
-
-  // Initialize return code; assume routine not implemented
-  if (rc) *rc = ESMC_RC_NOT_IMPL;
-
-  if (!base) {
-    *rc = ESMF_FAILURE;    
-    return;
-  }
-
-  // simple sanity check before doing any more work
-  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name", &status);
-      //printf("ESMF_AttributeSet: bad attribute name\n");
-      if (rc) *rc = status;
-      return;
-  }
-
-  // copy and convert F90 string to null terminated one
-  cname = ESMC_F90toCstring(name, nlen);
-  if (!cname) {
-      *rc = ESMF_FAILURE;
-      return;
-  }
-
-  status = (**base).root.ESMC_AttributeGet(cname, &attrTk, &attrCount, NULL);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status,
-                         "failed getting attribute type and count", &status)) {
-    //printf("ESMF_AttributeGetValue: failed getting attribute info\n");
-    delete [] cname;
-    if (rc) *rc = status;
-    return;
-  }
-
-  if (attrTk != *tk) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_INCOMP,
-                         "attribute value not expected kind", &status);
-    //printf("attribute %s not expected kind %s, actually kind %d\n", 
-    //       name, ESMC_TypeKindString(*tk), ESMC_TypeKindString(attrTk));
-    delete [] cname;
-    if (rc) *rc = status;
-    return;
-  }
-  if (attrCount != *count) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_INCOMP,
-                         "attribute value not expected count", &status);
-    //printf("expected count %d does not match actual count %d\n", 
-    //           *count, attrCount);
-    delete [] cname;
-    if (rc) *rc = status;
-    return;
-  }
-
-  status = (**base).root.ESMC_AttributeGet(cname, NULL, NULL, value);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status,
-                         "failed getting attribute value", &status);
-  delete [] cname;
-  if (rc) *rc = status;
-
-  return;
-
-}  // end c_ESMC_AttributeGetValue
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_ESMC_AttributeGetChar - get attribute from an ESMF type
-//
-// !INTERFACE:
-      void FTN(c_esmc_attributegetchar)(
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **base,         // in/out - base object
-      char *name,               // in - F90, non-null terminated string
-      char *value,              // out - character value
-      int *rc,                  // in - return code
-      int nlen,                 // hidden/in - strlen count for name
-      int vlen) {               // hidden/in - strlen count for value
-// 
-// !DESCRIPTION:
-//     Retrieve a (name,value) pair from any object type in the system.
-//
-//EOP
-
-  int i;
-  ESMC_TypeKind attrTypeKind;
-  char *cname, *cvalue;
-  int slen;              // actual attribute string length
-
-  // Initialize return code; assume routine not implemented
-  if (rc) *rc = ESMC_RC_NOT_IMPL;
-
-  if (!base) {
-    *rc = ESMF_FAILURE;
-    return;
-  }
-
-  // simple sanity check before doing any more work
-  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      printf("ESMF_AttributeGet: bad attribute name\n");
-      *rc = ESMF_FAILURE;
-      return;
-  }
-
-  // copy and convert F90 string to null terminated one
-  cname = ESMC_F90toCstring(name, nlen);
-  if (!cname) {
-      *rc = ESMF_FAILURE;
-      return;
-  }
-
-  *rc = (**base).root.ESMC_AttributeGet(cname, &attrTypeKind, &slen, NULL);
-  if (*rc != ESMF_SUCCESS) {
-    delete [] cname;
-    return;
-  }
-
-// TODO: re-enable the following error checking when ESMF_TYPEKIND_CHARACTER
-// becomes available
-  
-//  if (attrTypeKind != ESMF_TYPEKIND_CHARACTER) {
-      // TODO: this needs to sprintf into a buffer to format up the error msg
-//      printf("ESMF_AttributeGet: attribute %s not type character\n", name);
-//      delete [] cname;
-//      *rc = ESMF_FAILURE;
-//      return; 
-//  }
-
-  // make sure destination will be long enough
-  if (slen > vlen) {
-    printf("ESMF_AttributeGet: attribute %s is %d bytes long, buffer length "
-      "%d is too short", name, slen, vlen);
-    delete [] cname;
-    *rc = ESMF_FAILURE;
-    return; 
-  }
-
-  cvalue = new char[slen+1];
-
-  *rc = (**base).root.ESMC_AttributeGet(cname, cvalue);
-  if (*rc != ESMF_SUCCESS) {
-    delete [] cname;
-    delete [] cvalue;
-    return;
-  }
-
-  *rc = ESMC_CtoF90string(cvalue, value, vlen);
-
-  delete [] cname;
-  delete [] cvalue;
-  return;
-
-}  // end c_ESMC_AttributeGetChar
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_ESMC_AttributeGetInfoName - get type and number of items in an attr
-//
-// !INTERFACE:
-      void FTN(c_esmc_attributegetinfoname)(
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **base,         // in/out - base object
-      char *name,               // in - F90, non-null terminated string
-      ESMC_TypeKind *tk,        // out - typekind
-      int *count,               // out - item count
-      int *rc,                  // in - return code
-      int nlen) {               // hidden/in - strlen count for name
-// 
-// !DESCRIPTION:
-//   Return the typekind, count of items in the (name,value) pair from any 
-//   object type in the system.
-//
-//EOP
-
-  char *cname;
-
-  // Initialize return code; assume routine not implemented
-  if (rc) *rc = ESMC_RC_NOT_IMPL;
-
-  if (!base) {
-    *rc = ESMF_FAILURE;    
-    return;
-  }
-
-  // simple sanity check before doing any more work
-  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      printf("ESMF_AttributeGetValue: bad attribute name\n");
-      *rc = ESMF_FAILURE;
-      return;
-  }
-
-  if (!tk) {
-      printf("ESMF_AttributeGetValue: bad attribute typekind argument\n");
-      *rc = ESMF_FAILURE;
-      return;
-  }
-
-  if (!count) {
-      printf("ESMF_AttributeGetValue: bad attribute count argument\n");
-      *rc = ESMF_FAILURE;
-      return;
-  }
-
-  // copy and convert F90 string to null terminated one
-  cname = ESMC_F90toCstring(name, nlen);
-  if (!cname) {
-      *rc = ESMF_FAILURE;
-      return;
-  }
-
-  *rc = (**base).root.ESMC_AttributeGet(cname, tk, count, NULL);
-
-  delete [] cname;
-  return;
-
-}  // end c_ESMC_AttributeGetInfoName
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_ESMC_AttributeGetInfoNum - get type and number of items in an attr
-//
-// !INTERFACE:
-      void FTN(c_esmc_attributegetinfonum)(
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **base,         // in/out - base object
-      int *num,                 // in - attr number
-      char *name,               // out - F90, non-null terminated string
-      ESMC_TypeKind *tk,        // out - typekind
-      int *count,               // out - item count
-      int *rc,                  // in - return code
-      int nlen) {               // hidden/in - strlen count for name
-// 
-// !DESCRIPTION:
-//   Return the name, type, count of items in the (name,value) pair from any 
-//   object type in the system.
-//
-//EOP
-
-  char *cname;
-
-// Initialize return code; assume routine not implemented
-if (rc) *rc = ESMF_RC_NOT_IMPL;
-
-  if (!base) {
-    *rc = ESMF_FAILURE;
-    return;
-  }
-
-  if (!name) {
-      printf("ESMF_AttributeGetValue: bad attribute name argument\n");
-      *rc = ESMF_FAILURE;
-      return;
-  }
-
-  if (!tk) {
-      printf("ESMF_AttributeGetValue: bad attribute typekind argument\n");
-      *rc = ESMF_FAILURE;
-      return;
-  }
-
-  if (!count) {
-      printf("ESMF_AttributeGetValue: bad attribute count argument\n");
-      *rc = ESMF_FAILURE;
-      return;
-  }
-
-  cname = new char[ESMF_MAXSTR];
-
-  *rc = (**base).root.ESMC_AttributeGet((*num)-1, cname, tk, count, NULL);
-  if (*rc != ESMF_SUCCESS) {
-      delete [] cname;
-      return;
-  }
-
-  *rc = ESMC_CtoF90string(cname, name, nlen);
-  
-  delete [] cname;
-  return;
-
-}  // end c_ESMC_AttributeGetInfoNum
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_ESMC_AttributeGetCount - get number of attrs
-//
-// !INTERFACE:
-      void FTN(c_esmc_attributegetcount)(
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **base,         // in/out - base object
-      int *count,               // out - attribute count
-      int *rc) {                // out - return code
-// 
-// !DESCRIPTION:
-//   Return the count of attributes for any object type in the system.
-//
-//EOP
-
-  int i, status;
-
-  // Initialize return code; assume routine not implemented
-  if (rc) *rc = ESMC_RC_NOT_IMPL;
-  status = ESMC_RC_NOT_IMPL;
-
-  if (!base) {
-    *rc = ESMF_FAILURE;
-    return;
-  }
-
-  if (!count) {
-      printf("ESMF_AttributeGetValue: bad attribute count argument\n");
-      *rc = ESMF_FAILURE;
-      return;
-  }
-
-  *count = (**base).root.ESMC_AttributeGetCount();
-
-  *rc = (count == 0) ? ESMF_FAILURE : ESMF_SUCCESS;
-  return;
-
-}  // end c_ESMC_AttributeGetCount
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_ESMC_AttributeSetValue - Set Attribute on an ESMF type
-//
-// !INTERFACE:
-      void FTN(c_esmc_attributesetvalue)(
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **base,         // in/out - base object
-      char *name,               // in - F90, non-null terminated string
-      ESMC_TypeKind *tk,        // in - typekind
-      int *count,               // in - number of value(s)
-      void *value,              // in - any value or list of values
-      int *rc,                  // in - return code
-      int nlen) {               // hidden/in - strlen count for name
-// 
-// !DESCRIPTION:
-//     Associate a (name,value) pair with any object type in the system.
-//     Any type or list of types can be passed except character strings
-//     since they come with an additional hidden length argument.
-//
-//EOP
-
-  int status;
-  char *cname;
-
-  // Initialize return code; assume routine not implemented
-  if (rc) *rc = ESMC_RC_NOT_IMPL;
-
-  if (!base) {
-    if (rc) *rc = ESMF_FAILURE;
-    return;
-  }
-
-  // simple sanity check before doing any more work
-  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name", &status);
-      if (rc) *rc = status;
-      return;
-  }
-
-  // copy and convert F90 string to null terminated one
-  cname = ESMC_F90toCstring(name, nlen);
-  if (!cname) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name", &status);
-      if (rc) *rc = status;
-      return;
-  }
-
-  // Set the attribute on the object.
-  *rc = (**base).root.ESMC_AttributeSet(cname, *tk, *count, value);
-
-  delete [] cname;
-  return;
-
-}  // end c_ESMC_AttributeSetValue
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_ESMC_AttributeSetChar - Set String Attribute on an ESMF type
-//
-// !INTERFACE:
-      void FTN(c_esmc_attributesetchar)(
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **base,         // in/out - base object
-      char *name,               // in - F90, non-null terminated string
-      char *value,              // in - char string
-      int *rc,                  // in - return code
-      int nlen,                 // hidden/in - strlen count for name
-      int vlen) {               // hidden/in - strlen count for value
-// 
-// !DESCRIPTION:
-//     Associate a (name,value) pair with any object type in the system.
-//     Character strings have this special version since they come in
-//     with an additional hidden length argument.
-//
-//EOP
-
-  int i, status;
-  char *cname, *cvalue;
-
-  // Initialize return code; assume routine not implemented
-  if (rc) *rc = ESMC_RC_NOT_IMPL;
-
-  if (!base) {
-    if (rc) *rc = ESMF_FAILURE;    
-    return;
-  }
-
-  // simple sanity checks before doing any more work
-  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name", &status);
-      //printf("ESMF_AttributeSet: bad attribute name\n");
-      if (rc) *rc = status;
-      return;
-  }
-
-  if ((!value) || (vlen <= 0) || (value[0] == '\0')) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute value", &status);
-      //printf("ESMF_AttributeSet: bad attribute value\n");
-      if (rc) *rc = status;
-      return;
-  }
-
-  // copy and convert F90 string to null terminated one
-  cname = ESMC_F90toCstring(name, nlen);
-  if (!cname) {
-      *rc = ESMF_FAILURE;
-      return;
-  }
-
-  // copy and convert F90 string to null terminated one
-  cvalue = ESMC_F90toCstring(value, vlen);
-  if (!cvalue) {
-      *rc = ESMF_FAILURE;
-      return;
-  }
-
-  // Set the attribute on the object.
-  *rc = (**base).root.ESMC_AttributeSet(cname, cvalue);
-
-  delete [] cname;
-  delete [] cvalue;
-  return;
-
-}  // end c_ESMC_AttributeSetChar
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_ESMC_AttributeSetLink - Set a link in an Attribute hierarchy
-//
-// !INTERFACE:
-      void FTN(c_esmc_attributesetlink)(
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **source,       // in/out - base object
-      ESMC_Base **destination,  // in/out - base destination object
-      int *rc) {                // in/out - return value 
-// 
-// !DESCRIPTION:
-//     Set a link in an attribute hierarchy.
-//
-//EOP
-
-  int i, status;
-
-  // Initialize return code; assume routine not implemented
-  if (rc) *rc = ESMC_RC_NOT_IMPL;
-
-  if (!source) {
-    if (rc) *rc = ESMF_FAILURE;    
-    return;
-  }
-  
-  if (!destination) {
-    if (rc) *rc = ESMF_FAILURE;    
-    return;
-  }
-
-  // Set the attribute link on the object.
-  *rc = (**source).root.ESMC_AttributeSetLink(*destination);
-  
-  return;
-
-}  // end c_ESMC_AttributeSetLink
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_ESMC_AttributeCopyAll - copy an attribute hierarchy between objects
-//
-// !INTERFACE:
-      void FTN(c_esmc_attributecopyall)(
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **source,              // in/out - base object
-      ESMC_Base **destination,         // in/out - base object
-      int *rc) {                       // in/out - return code
-// 
-// !DESCRIPTION:
-//     Copy the Attribute hierarchy from Base1 to Base2
-//
-//EOP
-
-  ESMC_Attribute *temp;
-  
-  // Initialize return code; assume routine not implemented
-  if (rc) *rc = ESMC_RC_NOT_IMPL;
-
-  if (!source) {
-    if (rc) *rc = ESMF_FAILURE;    
-    return;
-  }
-  
-  if (!destination) {
-    if (rc) *rc = ESMF_FAILURE;    
-    return;
-  }
-
-  *rc = (**destination).root.ESMC_AttributeCopyAll(*source);
-    
-  return;
-
-}  // end c_ESMC_AttributeCopyAll
 
 } // extern "C"
