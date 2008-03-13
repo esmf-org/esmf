@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.C,v 1.4 2008/03/13 05:36:02 rokuingh Exp $
+// $Id: ESMC_Attribute.C,v 1.5 2008/03/13 14:31:58 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute.C,v 1.4 2008/03/13 05:36:02 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute.C,v 1.5 2008/03/13 14:31:58 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -124,6 +124,7 @@
 //EOP
 
   int rc, localrc;
+  char attpackname[ESMF_MAXSTR];
   ESMC_Attribute *attr;
   ESMC_Attribute *attpack;
 
@@ -133,7 +134,8 @@
   // Search for the attpack, make it if not found
   attpack = ESMC_AttPackGet(convention, purpose, object);
   if(!attpack) {
-    attpack = new ESMC_Attribute(name, convention, purpose, object);
+    sprintf(attpackname,"Attribute Package");
+    attpack = new ESMC_Attribute(attpackname, convention, purpose, object);
     if (!attpack)
       return ESMF_FAILURE;
     localrc = ESMC_AttributeSet(attpack);
@@ -361,7 +363,7 @@
 
   attpack = ESMC_AttPackGet(convention, purpose, object);
   if (!attpack) {
-       sprintf(msgbuf, "Cannot find an attribute package with:\nconvention = '%s'\npurpose = '%s'\nobject = '%s'\n",
+       sprintf(msgbuf, "  Cannot find an attribute package with:\nconvention = '%s'\npurpose = '%s'\nobject = '%s'\n",
                       convention, purpose, object);
        printf(msgbuf);
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
@@ -369,11 +371,11 @@
        return localrc;
   }
 
-  sprintf(msgbuf, " Attribute package contains %d attributes.\n", attpack->attrCount);
+  sprintf(msgbuf, "  Attribute package contains %d attributes.\n", attpack->attrCount);
   printf(msgbuf);
   ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   for (int i=0; i<attpack->attrCount; i++) {
-      sprintf(msgbuf, " Attr %d: ", i);
+      sprintf(msgbuf, "   Attr %d:\n", i);
       printf(msgbuf);
       ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
       attpack->attrList[i]->ESMC_Print();
@@ -1884,28 +1886,20 @@ if (count) {
 //EOP
 
   int rc;
-  char msgbuf[ESMF_MAXSTR];
-  ESMC_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
-
-  sprintf(msgbuf, "link%sto%s%d", this->attrObject, destination->root.attrObject, attrCount);
-
-  attr = new ESMC_Attribute(msgbuf, ESMF_NOKIND, 0, NULL);  
-  if (!attr)
-    return ESMF_FAILURE;
- 
-  rc = ESMC_AttributeSet(attr);
-  if (rc != ESMF_SUCCESS)
-    return ESMF_FAILURE;
   
-  rc = attr->ESMC_AttributeAlloc(1);
-  if (rc != ESMF_SUCCESS)
-    return ESMF_FAILURE;
+  if(this->attrAlloc < (this->attrCount + 1)) {
+    rc = this->ESMC_AttributeAlloc(1);
+    if (rc != ESMF_SUCCESS)
+      return ESMF_FAILURE;
+  }
     
-  attr->attrList[0] = &(destination->root);
-  attr->attrCount++;
+  this->attrList[attrCount] = &(destination->root);
+  (this->attrCount)++;
+  
+  rc = ESMF_SUCCESS;
 
   return rc;
 
@@ -2518,19 +2512,21 @@ if (count) {
   rc = ESMC_RC_NOT_IMPL;
 
   // print name
-  sprintf(msgbuf, "name: %s\n",  attrName);
+  sprintf(msgbuf, "        name: %s\n",  attrName);
   printf(msgbuf);
   ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   
   // print items if there are any
   if (items <= 0) {
-      printf("         value: \n");
-      ESMC_LogDefault.ESMC_LogWrite("         value: \n", ESMC_LOG_INFO);
+      sprintf(msgbuf, "        value: \n");
+      printf(msgbuf);
+      ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   }
 
   if (items == 1) {
-      printf("         value: ");
-      ESMC_LogDefault.ESMC_LogWrite(", value: ", ESMC_LOG_INFO);
+      sprintf(msgbuf, "        value: ");
+      printf(msgbuf);
+      ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
              if (tk == ESMC_TYPEKIND_I4)
                  sprintf(msgbuf, "%d\n", vi); 
              else if (tk == ESMC_TYPEKIND_I8)
@@ -2553,53 +2549,53 @@ if (count) {
   }
 
   if (items > 1) { 
-      sprintf(msgbuf, "         %d items, values:\n", items);
+      sprintf(msgbuf, "        %d items, values:\n", items);
       printf(msgbuf);
       ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
       for (int i=0; i<items; i++) {
                 if (tk == ESMC_TYPEKIND_I4) {
-                    sprintf(msgbuf, "           \t item %d: %d\n", i, vip[i]); 
+                    sprintf(msgbuf, "          \t item %d: %d\n", i, vip[i]); 
                 } else if (tk == ESMC_TYPEKIND_I8) {
-                    sprintf(msgbuf, "           \t item %d: %ld\n", i, vlp[i]); 
+                    sprintf(msgbuf, "          \t item %d: %ld\n", i, vlp[i]); 
                 } else if (tk == ESMC_TYPEKIND_R4) {
-                    sprintf(msgbuf, "           \t item %d: %f\n", i, vfp[i]); 
+                    sprintf(msgbuf, "          \t item %d: %f\n", i, vfp[i]); 
                 } else if (tk == ESMC_TYPEKIND_R8) {
-                    sprintf(msgbuf, "           \t item %d: %g\n", i, vdp[i]); 
+                    sprintf(msgbuf, "          \t item %d: %g\n", i, vdp[i]); 
                 } else if (tk == ESMC_TYPEKIND_LOGICAL) {
-                    sprintf(msgbuf, "           \t item %d: %s\n", i,
+                    sprintf(msgbuf, "          \t item %d: %s\n", i,
                       ESMC_LogicalString(vbp[i]));
                 } else{
                     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
-                             "           \t unknown value", &rc);
+                             "          \t unknown value", &rc);
                     return rc;
                 }
-		printf(msgbuf);
+      printf(msgbuf);
       }
       ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   }
 
   // print convention
-  sprintf(msgbuf, "         convention: %s\n",  attrConvention);
+  sprintf(msgbuf, "        convention: %s\n",  attrConvention);
   printf(msgbuf);
   ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   
   // print purpose
-  sprintf(msgbuf, "         purpose: %s\n",  attrPurpose);
+  sprintf(msgbuf, "        purpose: %s\n",  attrPurpose);
   printf(msgbuf);
   ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   
   // print object
-  sprintf(msgbuf, "         object: %s\n",  attrObject);
+  sprintf(msgbuf, "        object: %s\n",  attrObject);
   printf(msgbuf);
   ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
 
-  sprintf(msgbuf, "   Number of Attributes: %d\n", attrCount);
+  sprintf(msgbuf, "        attrCount: %d\n", attrCount);
   printf(msgbuf);
-    // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+  ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   for (int i=0; i<attrCount; i++) {
-      sprintf(msgbuf, " Attr %d: ", i);
+      sprintf(msgbuf, "   Attr %d:\n", i);
       printf(msgbuf);
-        // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+      ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
       attrList[i]->ESMC_Print();
   }
 
