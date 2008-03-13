@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.25.2.13 2008/03/13 00:05:33 feiliu Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.25.2.14 2008/03/13 21:04:12 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -347,9 +347,9 @@
        ! if ungridded bounds are present @\
        @\
        ! Figure out which dims are ungridded @\
-       isGridded=.false. @\
+       isGridded = .false. @\
        do i=1, gridDimCount @\
-          isGridded(localGridToFieldMap(i))=.true. @\
+          isGridded(localGridToFieldMap(i)) = .true. @\
        enddo @\
 @\
        ! Use ungridded info to figure out the map from ungridded to field dims @\
