@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.106.2.6 2008/03/12 19:35:19 cdeluca Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.106.2.7 2008/03/13 00:05:34 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.106.2.6 2008/03/12 19:35:19 cdeluca Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.106.2.7 2008/03/13 00:05:34 feiliu Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -156,13 +156,13 @@
       write(name, *) "Creating a Field with no data Test Req. FLD1.1.3"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      ! Verifying that an initialized Field can be printed
-      call ESMF_FieldPrint(f1, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Printing an initialized Field with no data Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      !------------------------------------------------------------------------
+!      !E-X_UTest_Multi_Proc_Only
+!      ! Verifying that an initialized Field can be printed
+!      call ESMF_FieldPrint(f1, rc=rc)
+!      write(failMsg, *) ""
+!      write(name, *) "Printing an initialized Field with no data Test"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only

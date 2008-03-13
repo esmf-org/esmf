@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.6 2008/03/12 09:05:32 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.7 2008/03/13 00:05:33 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -171,32 +171,88 @@
             "with halo width, fieldget checked"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-!        !------------------------------------------------------------------------
-!        !E-X_UTest_Multi_Proc_Only
-!        ! Create a field from an fortran 2d array
-!        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
-!            gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
-!            regDecomp=(/4,1/), &
-!            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
-!            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
-!        write(failMsg, *) ""
-!        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
-!            "1,2 dimension swapped"
-!        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 2d array
+        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
+            regDecomp=(/4,1/), &
+            staggerloc=ESMF_STAGGERLOC_EDGE1, &
+            fieldget=.true., &
+            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+        write(failMsg, *) ""
+        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+            "with halo width, using ESMF_STAGGERLOC_EDGE1, fieldget checked"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-!        !------------------------------------------------------------------------
-!        !E-X_UTest_Multi_Proc_Only
-!        ! Create a field from an fortran 2d array
-!        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
-!            gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
-!            regDecomp=(/4,1/), &
-!            fieldget=.true., &
-!            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
-!            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
-!        write(failMsg, *) ""
-!        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
-!            "1,2 dimension swapped, fieldget checked"
-!        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 2d array
+        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
+            gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+            regDecomp=(/4,1/), &
+            staggerloc=ESMF_STAGGERLOC_EDGE1, &
+            fieldget=.true., &
+            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+        write(failMsg, *) ""
+        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+            "with halo width, no distgrid padding, using ESMF_STAGGERLOC_EDGE1, fieldget checked"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 2d array
+        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
+            gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+            regDecomp=(/4,1/), &
+            staggerloc=ESMF_STAGGERLOC_EDGE1, &
+            gridToFieldMap = (/2,1/), &
+            fieldget=.true., &
+            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+        write(failMsg, *) ""
+        write(name, *) "Creating an Field from a fortran array 2d both dims distributed and remapped, " // &
+            "with halo width, no distgrid padding, using ESMF_STAGGERLOC_EDGE1, fieldget checked"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 2d array
+        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
+            regDecomp=(/4,1/), &
+            staggerloc=ESMF_STAGGERLOC_EDGE1, &
+            gridToFieldMap = (/2,1/), &
+            fieldget=.true., &
+            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+        write(failMsg, *) ""
+        write(name, *) "Creating an Field from a fortran array 2d both dims distributed and remapped, " // &
+            "with halo width, distgrid padding, using ESMF_STAGGERLOC_EDGE1, fieldget checked"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 2d array
+        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
+            gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+            regDecomp=(/4,1/), &
+            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
+            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+        write(failMsg, *) ""
+        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+            "1,2 dimension swapped"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 2d array
+        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
+            gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+            regDecomp=(/4,1/), &
+            fieldget=.true., &
+            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
+            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+        write(failMsg, *) ""
+        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+            "1,2 dimension swapped, fieldget checked"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
@@ -276,55 +332,55 @@
             "with extra padding and halo, corner stagger, get test, grid without padding"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-!        !------------------------------------------------------------------------
-!        !E-X_UTest_Multi_Proc_Only
-!        ! Create a field from an fortran 2d array
-!        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
-!            regDecomp=(/4,1/), &
-!            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
-!            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
-!        write(failMsg, *) ""
-!        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
-!            "with extra padding and halo, 1,2 dimension swapped"
-!        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 2d array
+        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
+            regDecomp=(/4,1/), &
+            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
+            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+        write(failMsg, *) ""
+        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+            "with extra padding and halo, 1,2 dimension swapped"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-!        !------------------------------------------------------------------------
-!        !E-X_UTest_Multi_Proc_Only
-!        ! Create a field from an fortran 2d array
-!        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
-!            regDecomp=(/2,2/), &
-!            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
-!            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
-!        write(failMsg, *) ""
-!        write(name, *) "Creating an Field from a fortran array 2d both dims distributed and divisible, " // &
-!            "with extra padding and halo, 1,2 dimension swapped"
-!        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 2d array
+        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
+            regDecomp=(/2,2/), &
+            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
+            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+        write(failMsg, *) ""
+        write(name, *) "Creating an Field from a fortran array 2d both dims distributed and divisible, " // &
+            "with extra padding and halo, 1,2 dimension swapped"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-!        !------------------------------------------------------------------------
-!        !E-X_UTest_Multi_Proc_Only
-!        ! Create a field from an fortran 2d array
-!        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/17,21/), &
-!            regDecomp=(/2,2/), &
-!            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
-!            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
-!        write(failMsg, *) ""
-!        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
-!            "neither dimension divisible, " // &
-!            "with extra padding and halo, 1,2 dimension swapped"
-!        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 2d array
+        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/17,21/), &
+            regDecomp=(/2,2/), &
+            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
+            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+        write(failMsg, *) ""
+        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+            "neither dimension divisible, " // &
+            "with extra padding and halo, 1,2 dimension swapped"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-!        !------------------------------------------------------------------------
-!        !E-X_UTest_Multi_Proc_Only
-!        ! Create a field from an fortran 2d array, xlf compiler
-!        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/17,21/), &
-!            regDecomp=(/2,2/), &
-!            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/1,1/), &
-!            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
-!        write(failMsg, *) ""
-!        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
-!            "neither dimension divisible, " // &
-!            "with extra padding and halo, non unique gridToFieldMap"
-!        call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 2d array, xlf compiler
+        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/17,21/), &
+            regDecomp=(/2,2/), &
+            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/1,1/), &
+            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+        write(failMsg, *) ""
+        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+            "neither dimension divisible, " // &
+            "with extra padding and halo, non unique gridToFieldMap"
+        call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
@@ -417,38 +473,34 @@
             "grid has no extra padding, corner stagger"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-!        !------------------------------------------------------------------------
-!        !E-X_UTest_Multi_Proc_Only
-!        ! Create a field from an fortran array 2d 1st dimension distributed
-!!        allocate(fptr(20, 10, 12))
-!        call test2e_generic(rc, minindex=(/1,1/), maxindex=(/10,20/), &
-!            gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
-!            regDecomp=(/2,2/), &
-!            staggerloc=ESMF_STAGGERLOC_CENTER, &
-!            gridToFieldMap=(/3,1/), &
-!            ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
-!            maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/))
-!!        deallocate(fptr)
-!        write(failMsg, *) ""
-!        write(name, *) "Creating an Field from a fortran array 3d 1,3 dim distributed, " // &
-!            "2nd dimension undistributed, 1,3 dimension swapped"
-!        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-!
-!        !------------------------------------------------------------------------
-!        !E-X_UTest_Multi_Proc_Only
-!        ! Create a field from an fortran array 2d 1st dimension distributed
-!!        allocate(fptr(10, 20, 12))
-!        call test2e_generic(rc, minindex=(/1,1/), maxindex=(/10,20/), &
-!            gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
-!            regDecomp=(/2,2/), &
-!            staggerloc=ESMF_STAGGERLOC_CENTER, &
-!            gridToFieldMap=(/3,2/), &
-!            maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/))
-!!        deallocate(fptr)
-!        write(failMsg, *) ""
-!        write(name, *) "Creating an Field from a fortran array 3d 2,3 dim distributed, " // &
-!            "1st dimension undistributed, 2,3 dimension swapped"
-!        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran array 2d 1st dimension distributed
+        call test2e_generic(rc, minindex=(/1,1/), maxindex=(/10,20/), &
+            gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+            regDecomp=(/2,2/), &
+            staggerloc=ESMF_STAGGERLOC_CENTER, &
+            gridToFieldMap=(/3,1/), &
+            ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
+            maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/))
+        write(failMsg, *) ""
+        write(name, *) "Creating an Field from a fortran array 3d 1,3 dim distributed, " // &
+            "2nd dimension undistributed, 1,3 dimension swapped"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran array 2d 1st dimension distributed
+        call test2e_generic(rc, minindex=(/1,1/), maxindex=(/10,20/), &
+            gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+            regDecomp=(/2,2/), &
+            staggerloc=ESMF_STAGGERLOC_CENTER, &
+            gridToFieldMap=(/3,2/), &
+            maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/))
+        write(failMsg, *) ""
+        write(name, *) "Creating an Field from a fortran array 3d 2,3 dim distributed, " // &
+            "1st dimension undistributed, 2,3 dimension swapped"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
@@ -477,14 +529,14 @@
             "with halo width, gridToFieldMap has dimensions swapped"
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-!        !------------------------------------------------------------------------
-!        !E-X_UTest_Multi_Proc_Only
-!        ! Create a field from an fortran array 2d both dimensions distributed
-!        call test3c(rc)
-!        write(failMsg, *) ""
-!        write(name, *) "Creating an Field from a fortran array, 2d, both dimensions distributed, " // &
-!            "with halo width and gridToFieldMap"
-!        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran array 2d both dimensions distributed
+        call test3c(rc)
+        write(failMsg, *) ""
+        write(name, *) "Creating an Field from a fortran array, 2d, both dimensions distributed, " // &
+            "with halo width and gridToFieldMap"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
@@ -495,15 +547,15 @@
             "with halo width"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-!        !------------------------------------------------------------------------
-!        !E-X_UTest_Multi_Proc_Only
-!        ! Create a field from an fortran array 2d both dimensions distributed
-!        call test3e(rc)
-!        write(failMsg, *) ""
-!        write(name, *) "Creating an Field from a fortran array, 3d, 1,2 dimensions distributed, " // &
-!            "with halo width and gridToFieldMap /2,1/"
-!        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-!
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran array 2d both dimensions distributed
+        call test3e(rc)
+        write(failMsg, *) ""
+        write(name, *) "Creating an Field from a fortran array, 3d, 1,2 dimensions distributed, " // &
+            "with halo width and gridToFieldMap /2,1/"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a field from an fortran array 2d both dimensions distributed
@@ -514,15 +566,15 @@
             "with halo width and gridToFieldMap /1,3/"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-!        !------------------------------------------------------------------------
-!        !E-X_UTest_Multi_Proc_Only
-!        ! Create a field from an fortran array 2d both dimensions distributed
-!        ! Need to update FieldValidate code, dimCount is count of distgrid dims 
-!        call test3g(rc)
-!        write(failMsg, *) ""
-!        write(name, *) "Creating an Field from a fortran array, 3d, 1,3 dimensions distributed, " // &
-!            "with halo width and gridToFieldMap /3,1/"
-!        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran array 2d both dimensions distributed
+        ! Need to update FieldValidate code, dimCount is count of distgrid dims 
+        call test3g(rc)
+        write(failMsg, *) ""
+        write(name, *) "Creating an Field from a fortran array, 3d, 1,3 dimensions distributed, " // &
+            "with halo width and gridToFieldMap /3,1/"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
@@ -551,32 +603,32 @@
             "with halo width, fieldget checked"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-!        !------------------------------------------------------------------------
-!        !E-X_UTest_Multi_Proc_Only
-!        ! Create a field from an fortran 2d array
-!        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
-!            gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
-!            regDecomp=(/4,1/), &
-!            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
-!            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
-!        write(failMsg, *) ""
-!        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
-!            "1,2 dimension swapped"
-!        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 2d array
+        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
+            gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+            regDecomp=(/4,1/), &
+            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
+            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+        write(failMsg, *) ""
+        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+            "1,2 dimension swapped"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-!        !------------------------------------------------------------------------
-!        !E-X_UTest_Multi_Proc_Only
-!        ! Create a field from an fortran 2d array
-!        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
-!            gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
-!            regDecomp=(/4,1/), &
-!            fieldget=.true., &
-!            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
-!            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
-!        write(failMsg, *) ""
-!        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
-!            "1,2 dimension swapped, fieldget checked"
-!        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 2d array
+        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
+            gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+            regDecomp=(/4,1/), &
+            fieldget=.true., &
+            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
+            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+        write(failMsg, *) ""
+        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+            "1,2 dimension swapped, fieldget checked"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
@@ -656,57 +708,57 @@
             "with extra padding and halo, corner stagger, get test, grid without padding"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-!        !------------------------------------------------------------------------
-!        !E-X_UTest_Multi_Proc_Only
-!        ! Create a field from an fortran 2d array
-!        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
-!            regDecomp=(/4,1/), &
-!            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
-!            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
-!        write(failMsg, *) ""
-!        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
-!            "with extra padding and halo, 1,2 dimension swapped"
-!        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 2d array
+        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
+            regDecomp=(/4,1/), &
+            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
+            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+        write(failMsg, *) ""
+        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+            "with extra padding and halo, 1,2 dimension swapped"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-!        !------------------------------------------------------------------------
-!        !E-X_UTest_Multi_Proc_Only
-!        ! Create a field from an fortran 2d array
-!        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
-!            regDecomp=(/2,2/), &
-!            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
-!            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
-!        write(failMsg, *) ""
-!        write(name, *) "Creating an Field from a fortran array 2d both dims distributed and divisible, " // &
-!            "with extra padding and halo, 1,2 dimension swapped"
-!        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 2d array
+        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
+            regDecomp=(/2,2/), &
+            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
+            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+        write(failMsg, *) ""
+        write(name, *) "Creating an Field from a fortran array 2d both dims distributed and divisible, " // &
+            "with extra padding and halo, 1,2 dimension swapped"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-!        !------------------------------------------------------------------------
-!        !E-X_UTest_Multi_Proc_Only
-!        ! Create a field from an fortran 2d array
-!        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/17,21/), &
-!            regDecomp=(/2,2/), &
-!            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
-!            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
-!        write(failMsg, *) ""
-!        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
-!            "neither dimension divisible, " // &
-!            "with extra padding and halo, 1,2 dimension swapped"
-!        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 2d array
+        call test2d_generic(rc, minindex=(/1,1/), maxindex=(/17,21/), &
+            regDecomp=(/2,2/), &
+            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
+            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+        write(failMsg, *) ""
+        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+            "neither dimension divisible, " // &
+            "with extra padding and halo, 1,2 dimension swapped"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-!        !------------------------------------------------------------------------
-!        !E-X_UTest_Multi_Proc_Only
-!        ! Create a field from an fortran 3d array, xlf compiler
-!        call test3d_generic(rc, minindex=(/1,1,1/), maxindex=(/16,20,32/), &
-!            gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
-!            regDecomp=(/2,2,1/), &
-!            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/1,1,2/), &
-!            fieldget=.true., &
-!            maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
-!        write(failMsg, *) ""
-!        write(name, *) "Creating an Field from a fortran array 3d all dims distributed, " // &
-!            "neither dimension divisible, " // &
-!            "with extra padding and halo, non unique gridToFieldMap"
-!        call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 3d array, xlf compiler
+        call test3d_generic(rc, minindex=(/1,1,1/), maxindex=(/16,20,32/), &
+            gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
+            regDecomp=(/2,2,1/), &
+            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/1,1,2/), &
+            fieldget=.true., &
+            maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
+        write(failMsg, *) ""
+        write(name, *) "Creating an Field from a fortran array 3d all dims distributed, " // &
+            "neither dimension divisible, " // &
+            "with extra padding and halo, non unique gridToFieldMap"
+        call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
     call ESMF_TestEnd(result, ESMF_SRCLINE)
 
@@ -1076,7 +1128,7 @@ contains
         type(ESMF_VM)                               :: vm
         integer                                     :: lpe
 
-        integer, dimension(ESMF_MAXDIM)             :: ec, cc, g2fm, mhlw, mhuw
+        integer, dimension(ESMF_MAXDIM)             :: ec, cc, g2fm, mhlw, mhuw, dg2fm
         integer, dimension(ESMF_MAXDIM)             :: gelb, geub, gclb, gcub
         integer, dimension(ESMF_MAXDIM)             :: fsize
         integer, dimension(ESMF_MAXDIM)             :: felb, feub, fclb, fcub, ftlb, ftub
@@ -1122,7 +1174,9 @@ contains
         fsize=0
         do i = 1, 2
             !fsize(i) = max(cc(g2fm(i))+mhlw(i)+mhuw(i), ec(g2fm(i)))
-            fsize(g2fm(i)) = max(cc(i)+mhlw(g2fm(i))+mhuw(g2fm(i)), ec(i))
+            !fsize(g2fm(i)) = max(cc(i)+mhlw(g2fm(i))+mhuw(g2fm(i)), ec(i))
+            ! now halowidth is in array dimension order
+            fsize(i) = max(cc(g2fm(i))+mhlw(i)+mhuw(i), ec(g2fm(i)))
         enddo
 
         call ESMF_VMGetGlobal(vm, rc=localrc)
@@ -1133,8 +1187,8 @@ contains
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        !write(*, "(A5, 22I3)") 'MZZ: ', lpe, ec, cc, fsize
-        !write(*, "(A5, 22I3)") 'MZZ: ', lpe, mhlw, mhuw
+!        write(*, "(A5, 13I3)") 'MZZ: ', lpe, ec(1:2), cc(1:2), fsize(1:2),&
+!             mhlw(1:2), mhuw(1:2), g2fm(1:2)
 
         allocate(farray(fsize(1), fsize(2)))
         if(present(fieldget)) then
@@ -1165,6 +1219,10 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
+            call ESMF_ArrayGet(array, distgridToArrayMap=dg2fm, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
             call ESMF_FieldGetDataPtr(field, farray=farray1, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
@@ -1173,10 +1231,10 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            !write(*, "(42I3)") felb, feub, fclb, fcub, ftlb, ftub
-            do i = ftlb(1), ftub(1)
-                do j = ftlb(2), ftub(2)
-                    if(farray1(i, j) .ne. ((i-ftlb(1)+1)+(j-ftlb(2)+1)*2) ) localrc = ESMF_FAILURE
+            !write(*, "(A5, 42I3)") 'MZY: ', felb, feub, fclb, fcub, ftlb, ftub
+            do i = ftlb(dg2fm(1)), ftub(dg2fm(1))
+                do j = ftlb(dg2fm(2)), ftub(dg2fm(2))
+                    if(farray1(i, j) .ne. ((i-ftlb(dg2fm(1))+1)+(j-ftlb(dg2fm(2))+1)*2) ) localrc = ESMF_FAILURE
                 enddo
             enddo
             if (ESMF_LogMsgFoundError(localrc, &
@@ -1460,9 +1518,10 @@ contains
         type(ESMF_VM)                          :: vm
         integer                                :: lpe
 
-        integer, dimension(ESMF_MAXDIM)        :: ec, cc, g2fm, mhlw, mhuw
+        integer, dimension(ESMF_MAXDIM)        :: ec, cc, g2fm, mhlw, mhuw, dg2fm, f2dgm, dg2gm
         integer, dimension(ESMF_MAXDIM)        :: gelb, geub, gclb, gcub
         integer, dimension(ESMF_MAXDIM)        :: fsize
+        integer                                :: gridDistDimCount, forderIndex
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
@@ -1474,12 +1533,24 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
+        call ESMF_GridGet(grid, distDimCount=gridDistDimCount, distgridToGridMap=dg2gm, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
         call ESMF_GridGet(grid, localDe=0, staggerloc=staggerloc, &
            exclusiveLBound=gelb, exclusiveUBound=geub, exclusiveCount=ec,  &
            computationalLBound=gclb, computationalUBound=gcub, computationalCount=cc, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
+!        call ESMF_GridGetArrayUndistInfo(grid, &
+!             staggerloc=staggerloc, & 
+!             gridToArrayMap=g2fm, &
+!             distgridToArrayMap=dg2fm, &
+!             rc=localrc)
+!        if (ESMF_LogMsgFoundError(localrc, &
+!            ESMF_ERR_PASSTHRU, &
+!            ESMF_CONTEXT, rc)) return
 
         if(present(gridToFieldMap)) then
             g2fm = gridToFieldMap
@@ -1488,19 +1559,30 @@ contains
                 g2fm(i) = i
             enddo
         endif
+        mhlw = 0
         if(present(maxHaloLWidth)) then
-            mhlw = maxHaloLWidth
-        else
-            mhlw = 0
+            mhlw(1:gridDistDimCount) = maxHaloLWidth(1:gridDistDimCount)
         endif
+        mhuw = 0
         if(present(maxHaloUWidth)) then
-            mhuw = maxHaloUWidth
-        else
-            mhuw = 0
+            mhuw(1:gridDistDimCount) = maxHaloUWidth(1:gridDistDimCount)
         endif
         fsize = 10
+        ! create a couple of mappings following index mapping lemma 1 and lemma 7
+        do i = 1, gridDistDimCount
+            dg2fm(i) = g2fm(dg2gm(i))
+        enddo
+        f2dgm = 0
+        do i = 1, gridDistDimCount
+            f2dgm(dg2fm(i)) = i
+        enddo
+        forderIndex = 1
         do i = 1, 3
-            fsize(g2fm(i)) = max(cc(i)+mhlw(g2fm(i))+mhuw(g2fm(i)), ec(i))
+            !fsize(g2fm(i)) = max(cc(i)+mhlw(g2fm(i))+mhuw(g2fm(i)), ec(i))
+            if(f2dgm(i) .gt. 0) then
+                fsize(i) = max(cc(f2dgm(i))+mhlw(forderIndex)+mhuw(forderIndex), ec(f2dgm(i)))
+                forderIndex = forderIndex + 1
+            endif
         enddo
         call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -1510,7 +1592,8 @@ contains
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        !write(*, "(A7, 22I3)") 'MZS: ', lpe, ec, cc, fsize
+        write(*, "(A7, 17I3)") 'MZS: ', lpe, ec(1:3), cc(1:3), fsize(1:3), &
+            dg2fm(1:3), f2dgm(1:3), gridDistDimCount
 
         allocate(farray(fsize(1), fsize(2), fsize(3)))
 

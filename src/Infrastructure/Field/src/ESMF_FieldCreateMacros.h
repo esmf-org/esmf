@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.25.2.12 2008/03/12 23:19:05 oehmke Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.25.2.13 2008/03/13 00:05:33 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -180,14 +180,8 @@
        integer                        :: localGridToFieldMap (ESMF_MAXDIM) @\
        integer                        :: localMaxHaloLWidth (ESMF_MAXDIM) @\
        integer                        :: localMaxHaloUWidth (ESMF_MAXDIM) @\
-       integer                        :: localRemapMaxHaloLWidth (ESMF_MAXDIM) @\
-       integer                        :: localRemapMaxHaloUWidth (ESMF_MAXDIM) @\
-       integer                        :: localTempMaxHaloLWidth (ESMF_MAXDIM) @\
-       integer                        :: localTempMaxHaloUWidth (ESMF_MAXDIM) @\
        logical                        :: isGridded(ESMF_MAXDIM) @\
        integer                        :: distgridToGridMap(ESMF_MAXDIM) @\
-       integer                        :: indexGrid, indexMap @\
-       logical                        :: isDistributed(ESMF_MAXDIM) @\
        type(ESMF_Array)               :: array, newarray @\
        type(ESMF_DistGrid)            :: distgrid @\
        integer                        :: compEUWidth(ESMF_MAXDIM), compELWidth(ESMF_MAXDIM) @\
@@ -403,7 +397,6 @@
          endif @\
        endif @\
 @\
-@\
        ! The undistributed info from the Grid needs to be @\
        ! combined with the ungridded info from the Field in order @\
        ! to create the Array for the Field. @\
@@ -420,50 +413,6 @@
        if (ESMF_LogMsgFoundError(localrc, & @\
            ESMF_ERR_PASSTHRU, & @\
            ESMF_CONTEXT, rc)) return @\
-@\
-!       ! Change the order of haloWidth wrt the order of distgridToArrayMap @\
-!       ! let user supplied maxHaloWidth be mhw(i, i=1...distgridRank) @\
-!       ! let user supplied fortran array be fa(j, j=1...arrayRank) @\
-!       ! Then: localRemapMaxHaloWidth[j=distgridToArrayMap(i)] = localMaxHaloWidth(i) @\
-!       localRemapMaxHaloLWidth = -1 @\
-!       localRemapMaxHaloUWidth = -1 @\
-!       do i = 1, gridDistDimCount @\
-!           localRemapMaxHaloLWidth(distgridToArrayMap(i)) = localMaxHaloLWidth(i)  @\
-!           localRemapMaxHaloUWidth(distgridToArrayMap(i)) = localMaxHaloUWidth(i)  @\
-!       enddo @\
-!       ! pack these, people might do crazy mapping like (2,4,1) (1,5,3) etc... @\
-!       ! complexity of the following loop (linear time packing) is: @\
-!       !    run time: O(ESMF_MAXDIM) = sum(delta(i)*delta(count(i))) @\
-!       !    memory: O(ESMF_MAXDIM) @\
-!       ! algorithm correctness can be proven by induction @\
-!       ! do we allow negative halo width? @\
-!       ! if not, we will have to use another logic array to mark holes @\
-!       count = 1 @\
-!       do i = 1, gridDistDimCount @\
-!            count = max(i, count) @\
-!            if(localRemapMaxHaloLWidth(i) .eq. -1) then @\
-!                do while(localRemapMaxHaloLWidth(count) .eq. -1 .and. & @\
-!                    count .le. ESMF_MAXDIM) @\
-!                    count = count + 1 @\
-!                enddo @\
-!                if(count .ge. (ESMF_MAXDIM+1)) exit @\
-!                localRemapMaxHaloLWidth(i) = localRemapMaxHaloLWidth(count) @\
-!                localRemapMaxHaloLWidth(count) = -1 @\
-!            endif @\
-!        enddo @\
-!       count = 1 @\
-!       do i = 1, gridDistDimCount @\
-!            count = max(i, count) @\
-!            if(localRemapMaxHaloUWidth(i) .eq. -1) then @\
-!                do while(localRemapMaxHaloUWidth(count) .eq. -1 .and. & @\
-!                    count .lt. ESMF_MAXDIM) @\
-!                    count = count + 1 @\
-!                enddo @\
-!                if(count .ge. (ESMF_MAXDIM+1)) exit @\
-!                localRemapMaxHaloUWidth(i) = localRemapMaxHaloUWidth(count) @\
-!                localRemapMaxHaloUWidth(count) = -1 @\
-!            endif @\
-!        enddo @\
 @\
        ! Create Array with undistributed dimensions                                @\
        array = ESMF_ArrayCreate(farray, distgrid=distgrid, & @\

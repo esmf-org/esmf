@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.272.2.16 2008/03/12 00:47:39 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.272.2.17 2008/03/13 00:05:32 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -202,7 +202,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.272.2.16 2008/03/12 00:47:39 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.272.2.17 2008/03/13 00:05:32 feiliu Exp $'
 
 !==============================================================================
 !
@@ -3206,6 +3206,7 @@
       integer :: i, lDE                        ! helper variables to verify bounds
       integer :: localDECount, dimCount        ! and distgrid
       integer, allocatable :: distgridToGridMap(:)
+      integer, allocatable :: distgridToPackedArrayMap(:)
       integer, allocatable :: arrayCompUBnd(:, :), arrayCompLBnd(:, :)
       integer, allocatable :: gridCompUBnd(:), gridCompLBnd(:)
       type(ESMF_DistGrid)  :: arrayDistGrid, gridDistGrid
@@ -3310,6 +3311,7 @@
           ! Verify that the computational bounds of array and grid contained
           ! in the field match.
           allocate(distgridToGridMap(dimCount))
+          allocate(distgridToPackedArrayMap(dimCount))
           allocate(arrayCompLBnd(dimCount, 0:localDECount-1))
           allocate(arrayCompUBnd(dimCount, 0:localDECount-1))
 
@@ -3321,6 +3323,7 @@
              return
           endif 
           call ESMF_ArrayGet(ftypep%array, &
+              distgridToPackedArrayMap=distgridToPackedArrayMap, &
               computationalLBound=arrayCompLBnd, &
               computationalUBound=arrayCompUBnd, rc=localrc)
           if (localrc .ne. ESMF_SUCCESS) then
@@ -3344,13 +3347,13 @@
                  return
               endif 
               do i=1, dimCount
-                  if(gridCompLBnd(distgridToGridMap(i)) .ne. arrayCompLBnd(i, lDE)) then
+                  if(gridCompLBnd(distgridToGridMap(i)) .ne. arrayCompLBnd(distgridToPackedArrayMap(i), lDE)) then
                       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
                          "grid computationalLBound does not match array computationalLBound", &
                           ESMF_CONTEXT, rc)
                       return
                   endif
-                  if(gridCompUBnd(distgridToGridMap(i)) .ne. arrayCompUBnd(i, lDE)) then
+                  if(gridCompUBnd(distgridToGridMap(i)) .ne. arrayCompUBnd(distgridToPackedArrayMap(i), lDE)) then
                       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
                          "grid computationalUBound does not match array computationalUBound", &
                           ESMF_CONTEXT, rc)
