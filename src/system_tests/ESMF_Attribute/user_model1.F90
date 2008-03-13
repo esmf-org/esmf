@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.15 2008/03/04 20:08:39 rokuingh Exp $
+! $Id: user_model1.F90,v 1.16 2008/03/13 14:32:53 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -134,7 +134,7 @@ module user_model1
       conv = 'ESG-CDP'  
       purp = 'general'
       name = 'name'
-      value = 'State attribute package'
+      value = 'changed attpack attribute name in user model 1 run 1'
       call ESMF_StateAttPackSet(importState, name, value, convention=conv, purpose=purp, rc=rc)
       if (status .ne. ESMF_SUCCESS) goto 20
     endif
@@ -145,7 +145,7 @@ module user_model1
       conv = 'ESG-CDP'  
       purp = 'general'
       name = 'discipline'
-      value = 'Sir, Yes! Sir.'
+      value = 'changed attpack attribute discipline in user model 1 run 2'
       call ESMF_StateAttPackSet(importState, name, value, convention=conv, purpose=purp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       
@@ -154,7 +154,7 @@ module user_model1
   !!!
       if (myPet .eq. 0) then
         print *, "--------------------------------------- "
-        print *, 'End of State Pretty Print example'
+        print *, 'Start of State Pretty Print example'
         print *, "--------------------------------------- "
       endif
       

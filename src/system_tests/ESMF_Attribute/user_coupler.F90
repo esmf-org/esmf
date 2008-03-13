@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.6 2008/02/13 01:49:42 rokuingh Exp $
+! $Id: user_coupler.F90,v 1.7 2008/03/13 14:32:53 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -172,7 +172,7 @@ module user_coupler
       conv = 'ESG-CDP'  
       purp = 'general'
       name = 'organization'
-      value = 'NCAR'
+      value = 'changed attpack attribute organization in user coupler run 2'
       call ESMF_StateAttPackSet(exportState, name, value, convention=conv, purpose=purp, rc=rc)
       if (status .ne. ESMF_SUCCESS) goto 20
     endif
