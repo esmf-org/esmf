@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldGetMacros.h,v 1.15.2.6 2008/03/14 04:05:19 theurich Exp $
+! $Id: ESMF_FieldGetMacros.h,v 1.15.2.7 2008/03/14 04:14:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -62,50 +62,50 @@
 !       the first DE on this PET. (localDE starts at 0 for each PET) @\
 !     \item[{[exclusiveLBound]}] @\
 !       Upon return this holds the lower bounds of the exclusive region. @\
-!       {\tt exclusiveLBound} must be allocated to be of size equal to {\tt field}'s {\tt dimCount}. @\
+!       {\tt exclusiveLBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
 !       See section \ref{sec:field:usage:bounds} for a description @\
 !       of the regions and their associated bounds and counts.  @\
 !     \item[{[exclusiveUBound]}] @\
 !       Upon return this holds the upper bounds of the exclusive region. @\
-!       {\tt exclusiveUBound} must be allocated to be of size equal to {\tt field}'s {\tt dimCount}. @\
+!       {\tt exclusiveUBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
 !       See section \ref{sec:field:usage:bounds} for a description @\
 !       of the regions and their associated bounds and counts.  @\
 !     \item[{[exclusiveCount]}] @\
 !       Upon return this holds the number of items in the exclusive region per dimension @\
 !       (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must @\
-!       be allocated to be of size equal to {\tt field}'s {\tt dimCount}. @\
+!       be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
 !       See section \ref{sec:field:usage:bounds} for a description @\
 !       of the regions and their associated bounds and counts.  @\
 !     \item[{[computationalLBound]}] @\
 !       Upon return this holds the lower bounds of the computational region. @\
-!       {\tt computationalLBound} must be allocated to be of size equal to {\tt field}'s {\tt dimCount}. @\
+!       {\tt computationalLBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
 !       See section \ref{sec:field:usage:bounds} for a description @\
 !       of the regions and their associated bounds and counts.  @\
 !     \item[{[computationalUBound]}] @\
 !       Upon return this holds the lower bounds of the computational region. @\
-!       {\tt computationalLBound} must be allocated to be of size equal to {\tt field}'s {\tt dimCount}. @\
+!       {\tt computationalLBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
 !       See section \ref{sec:field:usage:bounds} for a description @\
 !       of the regions and their associated bounds and counts.  @\
 !     \item[{[computationalCount]}] @\
 !       Upon return this holds the number of items in the computational region per dimension @\
 !       (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount} must @\
-!       be allocated to be of size equal to {\tt field}'s {\tt dimCount}. @\
+!       be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
 !       See section \ref{sec:field:usage:bounds} for a description @\
 !       of the regions and their associated bounds and counts.  @\
 !     \item[{[totalLBound]}] @\
 !       Upon return this holds the lower bounds of the total region. @\
-!       {\tt totalLBound} must be allocated to be of size equal to {\tt field}'s {\tt dimCount}. @\
+!       {\tt totalLBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
 !       See section \ref{sec:field:usage:bounds} for a description @\
 !       of the regions and their associated bounds and counts.  @\
 !     \item[{[totalUBound]}] @\
 !       Upon return this holds the lower bounds of the total region. @\
-!       {\tt totalUBound} must be allocated to be of size equal to {\tt field}'s {\tt dimCount}. @\
+!       {\tt totalUBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
 !       See section \ref{sec:field:usage:bounds} for a description @\
 !       of the regions and their associated bounds and counts.  @\
 !     \item[{[totalCount]}] @\
 !       Upon return this holds the number of items in the total region per dimension @\
 !       (i.e. {\tt totalUBound-totalLBound+1}). {\tt computationalCount} must @\
-!       be allocated to be of size equal to {\tt field}'s {\tt dimCount}. @\
+!       be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
 !       See section \ref{sec:field:usage:bounds} for a description @\
 !       of the regions and their associated bounds and counts.  @\
 !     \item [{[rc]}]  @\
