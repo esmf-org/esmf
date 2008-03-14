@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.9 2008/03/14 03:16:57 theurich Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.10 2008/03/14 14:22:07 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -88,8 +88,17 @@
         ! Create a field from an fortran 2d array
         call test2a(rc)
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d 1st dim distributed"
+        write(name, *) "Creating an Field from a fortran array 2d"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 2d array
+        call test2a_get(rc)
+        write(failMsg, *) ""
+        write(name, *) "Creating an Field from a fortran array 2d, " // &
+            "get fails with smaller totalCount. "
+        call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
@@ -878,6 +887,76 @@ contains
         deallocate(farray)
     end subroutine test2a
 
+    subroutine test2a_get(rc)
+        integer, intent(inout)  :: rc
+        integer                 :: localrc
+        type(ESMF_Field)        :: field
+        type(ESMF_Grid)         :: grid
+        type(ESMF_DistGrid)     :: distgrid
+        real, dimension(:,:), allocatable   :: farray
+        real, dimension(:,:), pointer       :: farray1
+
+        type(ESMF_VM)                               :: vm
+        integer                                     :: lpe
+        integer, dimension(ESMF_MAXDIM)             :: ec, cc
+        integer, dimension(ESMF_MAXDIM)             :: gelb, geub, gclb, gcub
+        type(ESMF_StaggerLoc)                       :: sloc
+
+        integer                                     :: totalCount(1:1)
+
+        rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
+
+        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/16,20/), &
+                                  regDecomp=(/4,1/), name="testgrid", rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_VMGetGlobal(vm, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_VMGet(vm, localPet=lpe, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+!        print *, 'localPet = ', lpe
+        sloc = ESMF_STAGGERLOC_CENTER
+        call ESMF_GridGet(grid, localDe=0, staggerloc=sloc, &
+           exclusiveLBound=gelb, exclusiveUBound=geub, exclusiveCount=ec,  &
+           computationalLBound=gclb, computationalUBound=gcub, computationalCount=cc, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        allocate(farray(ec(1), ec(2)))
+
+        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+            staggerloc=sloc, &
+            rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldGetDataPtr(field, farray1, totalCount=totalCount, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldDestroy(field, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+        deallocate(farray)
+    end subroutine test2a_get
+
     subroutine test2a_bigarray(rc)
         integer, intent(inout)  :: rc
         integer                 :: localrc
@@ -1131,8 +1210,8 @@ contains
         integer, dimension(ESMF_MAXDIM)             :: ec, cc, g2fm, mhlw, mhuw
         integer, dimension(ESMF_MAXDIM)             :: gelb, geub, gclb, gcub
         integer, dimension(ESMF_MAXDIM)             :: fsize
-        integer, dimension(ESMF_MAXDIM)             :: felb, feub, fclb, fcub, ftlb, ftub
-        integer, dimension(ESMF_MAXDIM)             :: fec, fcc, ftc
+        integer, dimension(2)                       :: felb, feub, fclb, fcub, ftlb, ftub
+        integer, dimension(2)                       :: fec, fcc, ftc
         integer                                     :: gridDistDimCount
 
         rc = ESMF_SUCCESS
@@ -2028,8 +2107,8 @@ contains
         integer, dimension(ESMF_MAXDIM)             :: gelb, geub, gclb, gcub
         type(ESMF_StaggerLoc)                       :: sloc
 
-        integer, dimension(ESMF_MAXDIM)             :: felb, feub, fclb, fcub, ftlb, ftub
-        integer, dimension(ESMF_MAXDIM)             :: fec, fcc, ftc
+        integer, dimension(3)                       :: felb, feub, fclb, fcub, ftlb, ftub
+        integer, dimension(3)                       :: fec, fcc, ftc
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
@@ -2138,8 +2217,8 @@ contains
         integer, dimension(ESMF_MAXDIM)             :: ec, cc, g2fm, mhlw, mhuw
         integer, dimension(ESMF_MAXDIM)             :: gelb, geub, gclb, gcub
         integer, dimension(ESMF_MAXDIM)             :: fsize
-        integer, dimension(ESMF_MAXDIM)             :: felb, feub, fclb, fcub, ftlb, ftub
-        integer, dimension(ESMF_MAXDIM)             :: fec, fcc, ftc
+        integer, dimension(3)                       :: felb, feub, fclb, fcub, ftlb, ftub
+        integer, dimension(3)                       :: fec, fcc, ftc
         integer                                     :: gridDistDimCount
 
         rc = ESMF_SUCCESS

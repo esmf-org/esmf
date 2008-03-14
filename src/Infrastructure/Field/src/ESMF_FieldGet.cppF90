@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.9 2008/03/14 03:14:35 theurich Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.10 2008/03/14 14:22:06 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -54,7 +54,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGet.cppF90,v 1.2.2.9 2008/03/14 03:14:35 theurich Exp $'
+      '$Id: ESMF_FieldGet.cppF90,v 1.2.2.10 2008/03/14 14:22:06 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -231,6 +231,79 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
                ESMF_CONTEXT, rc)
            return
         endif 
+
+        if(present(exclusiveLBound)) then
+            if(size(exclusiveLBound) .ne. fieldrank) then
+               call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                  "the size of exclusiveLBound must equal to the field rank", &
+                   ESMF_CONTEXT, rc)
+               return
+            endif 
+        endif
+        if(present(exclusiveUBound)) then
+            if(size(exclusiveUBound) .ne. fieldrank) then
+               call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                  "the size of exclusiveUBound must equal to the field rank", &
+                   ESMF_CONTEXT, rc)
+               return
+            endif 
+        endif
+        if(present(exclusiveCount)) then
+            if(size(exclusiveCount) .ne. fieldrank) then
+               call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                  "the size of exclusiveCount must equal to the field rank", &
+                   ESMF_CONTEXT, rc)
+               return
+            endif 
+        endif
+        if(present(computationalLBound)) then
+            if(size(computationalLBound) .ne. fieldrank) then
+               call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                  "the size of computationalLBound must equal to the field rank", &
+                   ESMF_CONTEXT, rc)
+               return
+            endif 
+        endif
+        if(present(computationalUBound)) then
+            if(size(computationalUBound) .ne. fieldrank) then
+               call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                  "the size of computationalUBound must equal to the field rank", &
+                   ESMF_CONTEXT, rc)
+               return
+            endif 
+        endif
+        if(present(computationalCount)) then
+            if(size(computationalCount) .ne. fieldrank) then
+               call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                  "the size of computationalCount must equal to the field rank", &
+                   ESMF_CONTEXT, rc)
+               return
+            endif 
+        endif
+        if(present(totalLBound)) then
+            if(size(totalLBound) .ne. fieldrank) then
+               call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                  "the size of totalLBound must equal to the field rank", &
+                   ESMF_CONTEXT, rc)
+               return
+            endif 
+        endif
+        if(present(totalUBound)) then
+            if(size(totalUBound) .ne. fieldrank) then
+               call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                  "the size of totalUBound must equal to the field rank", &
+                   ESMF_CONTEXT, rc)
+               return
+            endif 
+        endif
+        if(present(totalCount)) then
+            if(size(totalCount) .ne. fieldrank) then
+               call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                  "the size of totalCount must equal to the field rank", &
+                   ESMF_CONTEXT, rc)
+               return
+            endif 
+        endif
 
         if (present(totalLBound) .or. present(totalUBound)) then
         
