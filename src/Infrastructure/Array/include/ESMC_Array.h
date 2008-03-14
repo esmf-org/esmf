@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.96 2008/03/05 06:23:07 theurich Exp $
+// $Id: ESMC_Array.h,v 1.97 2008/03/14 21:42:22 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -40,6 +40,7 @@ extern "C" {
 // Class declaration type
 typedef struct{
   void *ptr;
+  long isInit;
 }ESMC_Array;
 
 // Class API
