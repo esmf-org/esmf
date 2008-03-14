@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.8 2008/03/13 23:36:13 theurich Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.9 2008/03/14 03:14:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -54,7 +54,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGet.cppF90,v 1.2.2.8 2008/03/13 23:36:13 theurich Exp $'
+      '$Id: ESMF_FieldGet.cppF90,v 1.2.2.9 2008/03/14 03:14:35 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -257,9 +257,9 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
                 ! set distributed dimensions
                 filled=.false.
                 do i=1, dimCount
-                   totalLBound(distgridToPackedArrayMap(i))=&
-                    arrayBnd(distgridToArrayMap(i),localDE)
-                   filled(distgridToPackedArrayMap(i))=.true.
+                   totalLBound(distgridToArrayMap(i))=&
+                    arrayBnd(distgridToPackedArrayMap(i),localDE)
+                   filled(distgridToArrayMap(i))=.true.
                 enddo
       
                 ! set undistributed dimensions
@@ -280,9 +280,9 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
                 ! set distributed dimensions
                 filled=.false.
                 do i=1, dimCount
-                   totalUBound(distgridToPackedArrayMap(i))=&
-                    arrayBnd(distgridToArrayMap(i),localDE)
-                   filled(distgridToPackedArrayMap(i))=.true.
+                   totalUBound(distgridToArrayMap(i))=&
+                    arrayBnd(distgridToPackedArrayMap(i),localDE)
+                   filled(distgridToArrayMap(i))=.true.
                 enddo
       
                 ! set undistributed dimensions
