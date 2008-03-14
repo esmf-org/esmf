@@ -1,4 +1,4 @@
-// $Id: ESMC_StateUTest.C,v 1.4 2008/03/12 15:20:40 rosalind Exp $
+// $Id: ESMC_StateUTest.C,v 1.5 2008/03/14 21:50:14 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -10,11 +10,12 @@
 //
 //==============================================================================
 
+#include <stdlib.h>
 #include <string.h>
 #include "ESMC.h"
 #include "ESMC_Test.h"
 #include "ESMC_Start.h"
-//#include "ESMC_DistGrid.h"
+#include "ESMC_DistGrid.h"
 #include "ESMC_ArraySpec.h"
 #include "ESMC_State.h"
 
@@ -42,6 +43,12 @@ int main(void){
   int rc = 0;
   int localrc;
 
+  ESMC_ArraySpec arrayspec;
+  int *minIndexValues, *maxIndexValues;
+  ESMC_InterfaceInt minIndex, maxIndex;
+  ESMC_DistGrid distgrid;
+  ESMC_Array array;
+
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -56,6 +63,103 @@ int main(void){
   ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Set the arrayspec
+  strcpy(name, "ArraySpecSet\0");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS \0");
+  rc = ESMC_ArraySpecSet(&arrayspec, 2, ESMC_TYPEKIND_I4);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+    
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Set up minIndex\0");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  minIndexValues = (int *)malloc(2*sizeof(int));
+  minIndexValues[0] = minIndexValues[1] = 1;
+  minIndex = ESMC_InterfaceIntCreate(minIndexValues, 2, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Set up maxIndex\0");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  maxIndexValues = (int *)malloc(2*sizeof(int));
+  maxIndexValues[0] = 5;
+  maxIndexValues[1] = 10;
+  maxIndex = ESMC_InterfaceIntCreate(maxIndexValues, 2, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Create 5 x 10 ESMC_DistGrid object\0");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  distgrid = ESMC_DistGridCreate(minIndex, maxIndex, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Clean up minIndex\0");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  free(minIndexValues);
+  rc = ESMC_InterfaceIntDestroy(&minIndex);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Clean up maxIndex\0");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  free(maxIndexValues);
+  rc = ESMC_InterfaceIntDestroy(&maxIndex);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Create ESMC_Array object\0");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  array = ESMC_ArrayCreate(arrayspec, distgrid, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Print ESMC_Array object\0");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  rc = ESMC_ArrayPrint(array);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //NEX_UTest
+  strcpy(name, "Add an Array to a State object\0");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  rc = ESMC_StateAddArray(st,array);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Destroy ESMC_DistGrid object\0");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  rc = ESMC_DistGridDestroy(&distgrid);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Destroy ESMC_Array object\0");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  rc = ESMC_ArrayDestroy(&array);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Destroy a state object -- cf

@@ -42,7 +42,7 @@
 
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_State.C,v 1.1 2008/03/12 16:32:37 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_State.C,v 1.2 2008/03/14 21:50:13 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -56,7 +56,7 @@
 namespace ESMCI {
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_StateCreate - Create a new State
+// !IROUTINE:  ESMCI::State::create - Create a new State
 //
 // !INTERFACE:
       ESMCI::State *ESMCI::State::create(
@@ -120,41 +120,76 @@ namespace ESMCI {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_StateAddArray - Add an array to this state
+// !IROUTINE:  ESMCI::State::addArray - Add an array to this state
 //
 // !INTERFACE:
-//    int ESMC_StateAddArray(
+      int ESMCI::State::addArray(
 //
 // !RETURN VALUE:
 //     return code rc.
 //
 // !ARGUMENTS:
-//    ESMC_State *state,    // in - state
-//    ESMC_Array array){       // in - array being added
+      ESMCI::State *state,    // inout - state
+      ESMCI::Array *array){       // in - array being added
 //
 // !DESCRIPTION:
 //      Add an array to an existing state
 //
 //EOP
       //local variables
-//    int rc;
-//    int localrc;
+      int rc;
+      int localrc;
 
       //Initialize return code
-//    rc = ESMF_RC_NOT_IMPL;
-//    localrc = ESMF_RC_NOT_IMPL;
-//
-//    printf("In ESMC_StateAddArray, before calling the glue \n");
+      rc = ESMF_RC_NOT_IMPL;
+      localrc = ESMF_RC_NOT_IMPL;
+  
       
-//    FTN(f_esmf_stateaddarray)(state, array, &rc);
+      FTN(f_esmf_stateaddarray)(state, array, &rc);
                            //   static_cast<ESMCI::Array *>(array.cppthis), 
                            //   &rc);
 
-//    printf("In ESMC_StateAddArray, after  calling the glue \n");
 
-//    return rc;
+      return rc;
 
-// } // end ESMC_StateAddArray
+   } // end ESMC_StateAddArray
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMCI::State::getArray - Get an array from this state
+//
+// !INTERFACE:
+      int ESMCI::State::getArray(
+//
+// !RETURN VALUE:
+//     return code rc.
+//
+// !ARGUMENTS:
+      ESMCI::State *state,        // in - state
+      char         *name,         // in - array name
+      ESMCI::Array *array){       // out - array being geted
+//
+// !DESCRIPTION:
+//      Add an array to an existing state
+//
+//EOP
+      //local variables
+      int rc;
+      int localrc;
+
+      //Initialize return code
+      rc = ESMF_RC_NOT_IMPL;
+      localrc = ESMF_RC_NOT_IMPL;
+
+      printf("In ESMCI::State::getArray, before calling the glue \n");
+
+      FTN(f_esmf_stategetarray)(state, name, array, &rc);
+
+      printf("In ESMC_StateGetArray, after  calling the glue \n");
+
+      return rc;
+
+   } // end ESMC_StateGetArray
 
 //-----------------------------------------------------------------------------
 //BOP

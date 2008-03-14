@@ -42,7 +42,7 @@
 
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_State.C,v 1.15 2008/03/12 15:20:38 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_State.C,v 1.16 2008/03/14 21:50:13 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -106,7 +106,7 @@ extern "C" {
 //     return code rc.
 //
 // !ARGUMENTS:
-      ESMC_State *state,    // in - state
+      ESMC_State state,    // in - state
       ESMC_Array array){       // in - array being added
 //
 // !DESCRIPTION:
@@ -120,15 +120,15 @@ extern "C" {
       //Initialize return code
       rc = ESMF_RC_NOT_IMPL;
       localrc = ESMF_RC_NOT_IMPL;
-//
-      printf("In ESMC_StateAddArray, before calling the glue \n");
+
       
-      FTN(f_esmf_stateaddarray)(state, array, &rc);
-                           //   static_cast<ESMCI::Array *>(array.cppthis), 
-                           //   &rc);
+      localrc = ((ESMCI::State*)&state)->addArray( (ESMCI::State*)state.ptr,
+                                       (ESMCI::Array*)&array.ptr );
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+      return localrc;
+    }
 
-      printf("In ESMC_StateAddArray, after  calling the glue \n");
-
+      rc = localrc;
       return rc;
 
    } // end ESMC_StateAddArray

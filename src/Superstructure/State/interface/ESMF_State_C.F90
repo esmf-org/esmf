@@ -1,4 +1,4 @@
-! $Id: ESMF_State_C.F90,v 1.10 2008/03/12 15:20:39 rosalind Exp $
+! $Id: ESMF_State_C.F90,v 1.11 2008/03/14 21:50:14 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_State_C.F90,v 1.10 2008/03/12 15:20:39 rosalind Exp $'
+!      '$Id: ESMF_State_C.F90,v 1.11 2008/03/14 21:50:14 rosalind Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -81,6 +81,30 @@
    end subroutine f_esmf_stateaddarray
 
 !------------------------------------------------------------------------------
+   subroutine f_esmf_stategetarray(state, arrayName, array, rc)
+
+       use ESMF_UtilTypesMod
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_StateMod
+
+       type(ESMF_State) :: state        !in
+       character(len=*), intent(in) :: arrayName
+       type(ESMF_Array) :: array        !out
+      integer, intent(out) :: rc        !out
+
+       print*,'In f_esmf_stategetarray, before call to ESMF_StateGetArray'
+
+       ! Initialize return code; assume routine not implemented
+       rc = ESMF_RC_NOT_IMPL
+
+       call ESMF_StateGetArray(state=state, arrayName=arrayName, array=array, rc=rc)
+
+       print*,'In f_esmf_stategetarray, after  call to ESMF_StateGetArray'
+
+   end subroutine f_esmf_stategetarray
+
+!------------------------------------------------------------------------------
+
    subroutine f_esmf_statedestroy(state, rc)
        use ESMF_UtilTypesMod
        use ESMF_BaseMod    ! ESMF base class
