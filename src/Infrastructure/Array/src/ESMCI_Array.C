@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.10 2008/03/12 17:59:51 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.11 2008/03/14 04:08:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.10 2008/03/12 17:59:51 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.11 2008/03/14 04:08:43 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -560,15 +560,9 @@ Array *Array::create(
   // DistGrid
   for (int i=0; i<localDeCount; i++){
     int de = localDeList[i];
-#define NEWMAPPING
-#ifdef NEWMAPPING
     for (int j=0; j<dimCount; j++)
       if (int k=distgridToPackedArrayMap[j])
         exclusiveUBound[i*dimCount+k-1] = indexCountPDimPDe[de*dimCount+j];
-#else
-    memcpy(&(exclusiveUBound[i*dimCount]), &(indexCountPDimPDe[de*dimCount]),
-      dimCount*sizeof(int));
-#endif
   }
   // optionally shift origin of exclusive region to pseudo global index space
   if (indexflag == ESMF_INDEX_GLOBAL){
@@ -591,18 +585,12 @@ Array *Array::create(
         // shift bounds of exclusive region to match indexList[0]
         if (indexCountPDimPDe[de*dimCount+j]){
           // only shift if there are indices associated
-#ifdef NEWMAPPING
           if (int k=distgridToPackedArrayMap[j]){
             // only shift if this isn't a replicated dim
             int shift = indexList[0] - exclusiveLBound[i*dimCount+k-1];
             exclusiveLBound[i*dimCount+k-1] += shift;
             exclusiveUBound[i*dimCount+k-1] += shift;
           }
-#else
-          int shift = indexList[0] - exclusiveLBound[i*dimCount+j];
-          exclusiveLBound[i*dimCount+j] += shift;
-          exclusiveUBound[i*dimCount+j] += shift;
-#endif
         }
       } // j
     } // i
@@ -817,20 +805,8 @@ Array *Array::create(
     for (int jj=0; jj<rank; jj++){
       if (arrayToDistGridMapArray[jj]){
         // distributed dimension
-#ifdef NEWMAPPING
-#else
-        int j = arrayToDistGridMapArray[jj] - 1; // shift to basis 0
-#endif
         if (temp_counts[jj] < 
           totalUBound[i*dimCount+j] - totalLBound[i*dimCount+j] + 1){
-fprintf(stderr, "gjt bail out: %d: %d, %d: %d, %d, %d, %d, %d, %d -- %d, %d, %d\n",
-  jj, temp_counts[jj],
-  j, totalUBound[i*dimCount+j], totalLBound[i*dimCount+j],
-  computationalUBound[i*dimCount+j], computationalLBound[i*dimCount+j],
-  exclusiveUBound[i*dimCount+j], exclusiveLBound[i*dimCount+j],
-  distgridToPackedArrayMap[0], distgridToPackedArrayMap[1], 
-  distgridToPackedArrayMap[2]);
-  
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
             "- LocalArray does not accommodate requested element count", rc);
           return ESMC_NULL_POINTER;
@@ -1159,15 +1135,9 @@ Array *Array::create(
   // DistGrid
   for (int i=0; i<localDeCount; i++){
     int de = localDeList[i];
-#define NEWMAPPING
-#ifdef NEWMAPPING
     for (int j=0; j<dimCount; j++)
       if (int k=distgridToPackedArrayMap[j])
         exclusiveUBound[i*dimCount+k-1] = indexCountPDimPDe[de*dimCount+j];
-#else
-    memcpy(&(exclusiveUBound[i*dimCount]), &(indexCountPDimPDe[de*dimCount]),
-      dimCount*sizeof(int));
-#endif
   }
   // optionally shift origin of exclusive region to pseudo global index space
   if (indexflag == ESMF_INDEX_GLOBAL){
@@ -1190,18 +1160,12 @@ Array *Array::create(
         // shift bounds of exclusive region to match indexList[0]
         if (indexCountPDimPDe[de*dimCount+j]){
           // only shift if there are indices associated
-#ifdef NEWMAPPING
           if (int k=distgridToPackedArrayMap[j]){
             // only shift if this isn't a replicated dim
             int shift = indexList[0] - exclusiveLBound[i*dimCount+k-1];
             exclusiveLBound[i*dimCount+k-1] += shift;
             exclusiveUBound[i*dimCount+k-1] += shift;
           }
-#else
-          int shift = indexList[0] - exclusiveLBound[i*dimCount+j];
-          exclusiveLBound[i*dimCount+j] += shift;
-          exclusiveUBound[i*dimCount+j] += shift;
-#endif
         }
       } // j
     } // i
@@ -1411,10 +1375,6 @@ Array *Array::create(
     for (int jj=0; jj<rank; jj++){
       if (arrayToDistGridMapArray[jj]){
         // distributed dimension
-#ifdef NEWMAPPING
-#else
-        int j = arrayToDistGridMapArray[jj] - 1; // shift to basis 0
-#endif
         temp_counts[jj] =
           totalUBound[i*dimCount+j] - totalLBound[i*dimCount+j] + 1;
         temp_larrayLBound[jj] = totalLBound[i*dimCount+j];
