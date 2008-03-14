@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.10 2008/03/14 14:22:07 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.11 2008/03/14 15:00:35 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -88,7 +88,7 @@
         ! Create a field from an fortran 2d array
         call test2a(rc)
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d"
+        write(name, *) "Creating a Field from a fortran array 2d"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
@@ -96,7 +96,7 @@
         ! Create a field from an fortran 2d array
         call test2a_get(rc)
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d, " // &
+        write(name, *) "Creating a Field from a fortran array 2d, " // &
             "get fails with smaller totalCount. "
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -105,7 +105,7 @@
         ! Create a field from an fortran 2d array
         call test2a_bigarray(rc)
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d 1st dim distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 2d, " // &
             "array size is bigger than Array total bounds"
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -114,7 +114,7 @@
         ! Create a field from an fortran 2d array
         call test2a_fail(rc)
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d 1st dim distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 2d, " // &
             "with bad array size"
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -123,7 +123,7 @@
         ! Create a field from an fortran 2d array
         call test2b(rc)
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d 1st dim distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 2d, " // &
             "distgrid size equal to index space size"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -132,7 +132,7 @@
         ! Create a field from an fortran 2d array
         call test2c(rc)
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d 1st dim distributed with halowidth"
+        write(name, *) "Creating a Field from a fortran array 2d with halowidth"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
@@ -140,7 +140,7 @@
         ! Create a field from an fortran 2d array
         call test2d(rc)
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d 1st dim distributed with halowidth, " // &
+        write(name, *) "Creating a Field from a fortran array 2d with halowidth, " // &
             "distgrid size equal to index space size"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -149,7 +149,7 @@
         ! Create a field from an fortran 2d array
         call test2d_fail(rc)
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d 1st dim distributed with halowidth, " // &
+        write(name, *) "Creating a Field from a fortran array 2d with halowidth, " // &
             "distgrid size equal to index space size, bad array size"
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -162,7 +162,7 @@
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "with halo width"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -176,7 +176,7 @@
             fieldget=.true., &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "with halo width, fieldget checked"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -189,7 +189,7 @@
             fieldget=.true., &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "with halo width, using ESMF_STAGGERLOC_EDGE1, fieldget checked"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -203,7 +203,7 @@
             fieldget=.true., &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "with halo width, no distgrid padding, using ESMF_STAGGERLOC_EDGE1, fieldget checked"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -218,7 +218,7 @@
             fieldget=.true., &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d both dims distributed and remapped, " // &
+        write(name, *) "Creating a Field from a fortran array 2d both dims distributed and remapped, " // &
             "with halo width, no distgrid padding, using ESMF_STAGGERLOC_EDGE1, fieldget checked"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -232,7 +232,7 @@
             fieldget=.true., &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d both dims distributed and remapped, " // &
+        write(name, *) "Creating a Field from a fortran array 2d both dims distributed and remapped, " // &
             "with halo width, distgrid padding, using ESMF_STAGGERLOC_EDGE1, fieldget checked"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -245,7 +245,7 @@
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "1,2 dimension swapped"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -259,7 +259,7 @@
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "1,2 dimension swapped, fieldget checked"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -271,7 +271,7 @@
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "with extra padding and halo"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -283,7 +283,7 @@
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "with extra padding and halo, corner stagger"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -296,7 +296,7 @@
             fieldget=.true., &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "with extra padding and halo, corner stagger, get test"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -310,7 +310,7 @@
 !            distdim=(/.true., .false./), &
 !            maxHaloLWidth=(/6/), maxHaloUWidth=(/8/))
 !        write(failMsg, *) ""
-!        write(name, *) "Creating an Field from a fortran array 2d 1st dim distributed, " // &
+!        write(name, *) "Creating a Field from a fortran array 2d 1st dim distributed, " // &
 !            "with extra padding and halo, center stagger, get test"
 !        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -323,7 +323,7 @@
             fieldget=.true., &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "with extra padding and halo, corner stagger, get test"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -337,7 +337,7 @@
             fieldget=.true., &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "with extra padding and halo, corner stagger, get test, grid without padding"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -349,7 +349,7 @@
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "with extra padding and halo, 1,2 dimension swapped"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -361,7 +361,7 @@
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d both dims distributed and divisible, " // &
+        write(name, *) "Creating a Field from a fortran array 2d both dims distributed and divisible, " // &
             "with extra padding and halo, 1,2 dimension swapped"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -373,20 +373,20 @@
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "neither dimension divisible, " // &
             "with extra padding and halo, 1,2 dimension swapped"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
-        ! Create a field from an fortran 2d array, xlf compiler
+        ! Create a field from an fortran 2d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/17,21/), &
             regDecomp=(/2,2/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/1,1/), &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "neither dimension divisible, " // &
             "with extra padding and halo, non unique gridToFieldMap"
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -396,7 +396,7 @@
         ! Create a field from an fortran 3d array
         call test2e(rc)
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 3d 1st dim distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 3d grid 2d distgrid 2d, " // &
             "2nd dimension undistributed, 3rd dimension ungridded"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -405,7 +405,7 @@
         ! Create a field from an fortran 3d array
         call test2e_ugb(rc)
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 3d 1st dim distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 3d grid 2d distgrid 2d, " // &
             "2nd dimension undistributed, 3rd dimension ungridded with specified ungriddedbounds"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -414,7 +414,7 @@
         ! Create a field from an fortran 3d array
         call test2e_ugb_bigarray(rc)
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 3d 1st dim distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 3d grid 2d distgrid 2d, " // &
             "2nd dimension undistributed, 3rd dimension ungridded with smaller pecified ungriddedbounds"
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -423,7 +423,7 @@
         ! Create a field from an fortran 3d array
         call test2e_ugb_fail(rc)
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 3d 1st dim distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 3d grid 2d distgrid 2d, " // &
           "2nd dimension undistributed, 3rd dimension ungridded with bigger specified ungriddedbounds"
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -432,7 +432,7 @@
         ! Create a field from an fortran 3d array
         call test2e_fail(rc)
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 3d 2st dim distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 3d grid 2d distgrid 2d, " // &
             "1nd dimension undistributed, 3rd dimension ungridded"
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -443,7 +443,7 @@
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             regDecomp=(/4,1,1/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 3d all dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 3d grid 2d distgrid 2d, " // &
             "grid has extra padding"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -455,7 +455,7 @@
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             regDecomp=(/4,1,1/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 3d all dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 3d grid 2d distgrid 2d, " // &
             "grid has no extra padding"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -466,7 +466,7 @@
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             regDecomp=(/4,1,1/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 3d all dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 3d grid 2d distgrid 2d, " // &
             "grid has extra padding, cornor stagger"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -478,7 +478,7 @@
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             regDecomp=(/4,1,1/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 3d all dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 3d grid 2d distgrid 2d, " // &
             "grid has no extra padding, corner stagger"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -493,7 +493,7 @@
             ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
             maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 3d 1,3 dim distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 3d 1,3 dim distributed, " // &
             "2nd dimension undistributed, 1,3 dimension swapped"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -507,7 +507,7 @@
             gridToFieldMap=(/3,2/), &
             maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 3d 2,3 dim distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 3d 2,3 dim distributed, " // &
             "1st dimension undistributed, 2,3 dimension swapped"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -516,7 +516,7 @@
         ! Create a field from an fortran array 2d both dimensions distributed
         call test3a(rc)
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array, 2d, both dimensions distributed"
+        write(name, *) "Creating a Field from a fortran array, 2d, both dimensions distributed"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
@@ -524,7 +524,7 @@
         ! Create a field from an fortran array 2d both dimensions distributed
         call test3b(rc)
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array, 2d, both dimensions distributed, " // &
+        write(name, *) "Creating a Field from a fortran array, 2d, both dimensions distributed, " // &
             "with halo width"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -534,7 +534,7 @@
         ! Need to add test in case where grid and array have same size dimensions distributed
         call test3b_fail(rc)
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array, 2d, both dimensions distributed, " // &
+        write(name, *) "Creating a Field from a fortran array, 2d, both dimensions distributed, " // &
             "with halo width, gridToFieldMap has dimensions swapped"
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -543,45 +543,43 @@
         ! Create a field from an fortran array 2d both dimensions distributed
         call test3c(rc)
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array, 2d, both dimensions distributed, " // &
+        write(name, *) "Creating a Field from a fortran array, 2d, both dimensions distributed, " // &
             "with halo width and gridToFieldMap"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
-        ! Create a field from an fortran array 2d both dimensions distributed
+        ! Create a field from an fortran array 3d
         call test3d(rc)
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array, 3d, 1,2 dimensions distributed, " // &
+        write(name, *) "Creating a Field from a fortran array, 3d, 1,2 dimensions distributed, " // &
             "with halo width"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
-        ! Create a field from an fortran array 2d both dimensions distributed
+        ! Create a field from an fortran array 3d
         call test3e(rc)
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array, 3d, 1,2 dimensions distributed, " // &
+        write(name, *) "Creating a Field from a fortran array, 3d, 1,2 dimensions distributed, " // &
             "with halo width and gridToFieldMap /2,1/"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
-        ! Create a field from an fortran array 2d both dimensions distributed
-        ! Need to update FieldValidate code, dimCount is count of distgrid dims 
+        ! Create a field from an fortran array 3d
         call test3f(rc)
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array, 3d, 1,3 dimensions distributed, " // &
+        write(name, *) "Creating a Field from a fortran array, 3d, 1,3 dimensions distributed, " // &
             "with halo width and gridToFieldMap /1,3/"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
-        ! Create a field from an fortran array 2d both dimensions distributed
-        ! Need to update FieldValidate code, dimCount is count of distgrid dims 
+        ! Create a field from an fortran array 3d
         call test3g(rc)
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array, 3d, 1,3 dimensions distributed, " // &
+        write(name, *) "Creating a Field from a fortran array, 3d, 1,3 dimensions distributed, " // &
             "with halo width and gridToFieldMap /3,1/"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -594,7 +592,7 @@
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 3d all dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 3d all dims distributed, " // &
             "with halo width"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -608,20 +606,20 @@
             fieldget=.true., &
             maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 3d all dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 3d all dims distributed, " // &
             "with halo width, fieldget checked"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
-        ! Create a field from an fortran 2d array
+        ! Create a field from an fortran 3d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
             regDecomp=(/4,1/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 3d grid 2d distgrid 2d, " // &
             "1,2 dimension swapped"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -635,7 +633,7 @@
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 3d grid 2d distgrid 2d, " // &
             "1,2 dimension swapped, fieldget checked"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -647,7 +645,7 @@
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 3d all dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 3d grid 2d distgrid 2d, " // &
             "with extra padding and halo"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -659,7 +657,7 @@
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 3d all dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 3d all dims distributed, " // &
             "with extra padding and halo, corner stagger"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -672,7 +670,7 @@
             fieldget=.true., &
             maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 3d all dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 3d all dims distributed, " // &
             "with extra padding and halo, corner stagger, get test"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -686,7 +684,7 @@
 !            distdim=(/.true., .false., .false./), &
 !            maxHaloLWidth=(/6/), maxHaloUWidth=(/8/))
 !        write(failMsg, *) ""
-!        write(name, *) "Creating an Field from a fortran array 3d 1st dim distributed, " // &
+!        write(name, *) "Creating a Field from a fortran array 3d 1st dim distributed, " // &
 !            "with extra padding and halo, center stagger, get test"
 !        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -699,7 +697,7 @@
             fieldget=.true., &
             maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 3d all dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 3d all dims distributed, " // &
             "with extra padding and halo, corner stagger, get test"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -713,8 +711,8 @@
             fieldget=.true., &
             maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 3d all dims distributed, " // &
-            "with extra padding and halo, corner stagger, get test, grid without padding"
+        write(name, *) "Creating a Field from a fortran array 3d all dims distributed, " // &
+            "with halo, corner stagger, get test, grid without padding"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
@@ -725,7 +723,7 @@
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "with extra padding and halo, 1,2 dimension swapped"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -737,7 +735,7 @@
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d both dims distributed and divisible, " // &
+        write(name, *) "Creating a Field from a fortran array 2d both dims distributed and divisible, " // &
             "with extra padding and halo, 1,2 dimension swapped"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -749,14 +747,14 @@
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 2d both dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "neither dimension divisible, " // &
             "with extra padding and halo, 1,2 dimension swapped"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
-        ! Create a field from an fortran 3d array, xlf compiler
+        ! Create a field from an fortran 3d array
         call test3d_generic(rc, minindex=(/1,1,1/), maxindex=(/16,20,32/), &
             gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
             regDecomp=(/2,2,1/), &
@@ -764,10 +762,39 @@
             fieldget=.true., &
             maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
         write(failMsg, *) ""
-        write(name, *) "Creating an Field from a fortran array 3d all dims distributed, " // &
+        write(name, *) "Creating a Field from a fortran array 3d all dims distributed, " // &
             "neither dimension divisible, " // &
-            "with extra padding and halo, non unique gridToFieldMap"
+            "with halo, non unique gridToFieldMap"
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 3d array
+        call test3d_generic(rc, minindex=(/1,1,1/), maxindex=(/17,20,33/), &
+            gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
+            regDecomp=(/2,1,2/), &
+            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/1,3,2/), &
+            fieldget=.true., &
+            maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
+        write(failMsg, *) ""
+        write(name, *) "Creating a Field from a fortran array 3d all dims distributed, " // &
+            "neither dimension divisible, " // &
+            "with halo"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 3d array
+        call test3d_generic(rc, minindex=(/1,1,1/), maxindex=(/17,20,33/), &
+            regDecomp=(/2,1,2/), &
+            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/1,3,2/), &
+            fieldget=.true., &
+            maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
+        write(failMsg, *) ""
+        write(name, *) "Creating a Field from a fortran array 3d all dims distributed, " // &
+            "neither dimension divisible, " // &
+            "with extra padding and halo"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
     call ESMF_TestEnd(result, ESMF_SRCLINE)
 
