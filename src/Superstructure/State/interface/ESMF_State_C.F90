@@ -1,4 +1,4 @@
-! $Id: ESMF_State_C.F90,v 1.11 2008/03/14 21:50:14 rosalind Exp $
+! $Id: ESMF_State_C.F90,v 1.12 2008/03/14 22:11:20 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_State_C.F90,v 1.11 2008/03/14 21:50:14 rosalind Exp $'
+!      '$Id: ESMF_State_C.F90,v 1.12 2008/03/14 22:11:20 rosalind Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -69,14 +69,12 @@
        type(ESMF_Array) :: array        !in
       integer, intent(out) :: rc        !out
 
-       print*,'In f_esmf_stateaddarray, before call to ESMF_StateAddArray'
 
        ! Initialize return code; assume routine not implemented
        rc = ESMF_RC_NOT_IMPL
 
        call ESMF_StateAddArray(state=state, array=array, rc=rc)
 
-       print*,'In f_esmf_stateaddarray, after  call to ESMF_StateAddArray'
 
    end subroutine f_esmf_stateaddarray
 
