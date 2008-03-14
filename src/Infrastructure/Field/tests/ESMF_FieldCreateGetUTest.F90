@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.8 2008/03/14 02:51:54 theurich Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.9 2008/03/14 03:16:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -1157,7 +1157,7 @@ contains
             ESMF_CONTEXT, rc)) return
 
         if(present(gridToFieldMap)) then
-            g2fm = gridToFieldMap
+            g2fm(1:size(gridToFieldMap)) = gridToFieldMap
         else
             do i = 1, ESMF_MAXDIM
                 g2fm(i) = i
@@ -1549,7 +1549,7 @@ contains
 !            ESMF_CONTEXT, rc)) return
 
         if(present(gridToFieldMap)) then
-            g2fm = gridToFieldMap
+            g2fm(1:size(gridToFieldMap)) = gridToFieldMap
         else
             do i = 1, ESMF_MAXDIM
                 g2fm(i) = i
@@ -2164,7 +2164,7 @@ contains
             ESMF_CONTEXT, rc)) return
 
         if(present(gridToFieldMap)) then
-            g2fm = gridToFieldMap
+            g2fm(1:size(gridToFieldMap)) = gridToFieldMap
         else
             do i = 1, ESMF_MAXDIM
                 g2fm(i) = i
