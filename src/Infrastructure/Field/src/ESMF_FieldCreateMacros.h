@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.25.2.14 2008/03/13 21:04:12 svasquez Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.25.2.15 2008/03/14 04:20:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -27,7 +27,7 @@
 #define FieldSetCommitDoc() \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
-!BOP @\
+!BOPI @\
 ! !IROUTINE: ESMF_FieldSetCommit - Finishes creating Field started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
@@ -135,7 +135,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
 ! @\
-!EOP @\
+!EOPI @\
 
 #if 0
 !------------------------------------------------------------------------------
