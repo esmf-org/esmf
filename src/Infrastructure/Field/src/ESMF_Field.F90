@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.272.2.17 2008/03/13 00:05:32 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.272.2.18 2008/03/14 01:46:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -202,7 +202,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.272.2.17 2008/03/13 00:05:32 feiliu Exp $'
+      '$Id: ESMF_Field.F90,v 1.272.2.18 2008/03/14 01:46:40 theurich Exp $'
 
 !==============================================================================
 !
@@ -3848,17 +3848,17 @@
             ftype%gridToFieldMap(i) = i
           enddo
       else
-         ftype%gridToFieldMap = gridToFieldMap
+         ftype%gridToFieldMap(1:size(gridToFieldMap)) = gridToFieldMap
       endif
 
       if(present(ungriddedLBound)) &
-         ftype%ungriddedLBound = ungriddedLBound
+         ftype%ungriddedLBound(1:size(ungriddedLBound)) = ungriddedLBound
       if(present(ungriddedUBound)) &
-         ftype%ungriddedUBound = ungriddedUBound
+         ftype%ungriddedUBound(1:size(ungriddedUBound)) = ungriddedUBound
       if(present(maxHaloLWidth)) &
-         ftype%maxHaloLWidth = maxHaloLWidth
+         ftype%maxHaloLWidth(1:size(maxHaloLWidth)) = maxHaloLWidth
       if(present(maxHaloUWidth)) &
-         ftype%maxHaloUWidth = maxHaloUWidth
+         ftype%maxHaloUWidth(1:size(maxHaloUWidth)) = maxHaloUWidth
 
       ftype%array = array
       ftype%array_internal = .true.
