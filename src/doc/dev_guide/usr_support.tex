@@ -3,86 +3,110 @@
 
 \subsubsection{Roles}
 The {\bf Advocate} is the staff person assigned to a particular code e.g. GEOS-5. See section ~\ref{core} for a full definition and list of responsibilities. 
-The {\bf Handler} is the staff person who actually solves the request. The Advocate and the Handler may be the same person or they may be different. See section ~\ref{core} for complete definition and list of responsibilities.
+The {\bf Handler} is the staff person assigned to solve a support ticket. The Advocate and the Handler may be the same person or they may be different. See section ~\ref{core} for complete definition and list of responsibilities.
 
 \subsubsection{Support Categories}
 {\bf New} is a request that has not been replied to.
 {\bf Closed} is a request that has been fixed to the user's satisfaction.
 {\bf Pending} is a request that has been fixed to the Handler's satisfaction but has not yet been approved by the user.
 
-\subsubsection{Work Flow}
+\subsubsection{Summary Work Flow}
 \begin{enumerate}
 \item Message received.
 \item The Integrator or in his absence the Support Lead, generates a SourceForge Bug, Feature, or Support Request ticket.
-\item If the request contains more than one topic, then Integrator will open multiple tickets, one per topic. This can been done.
-initially if obvious, or later if more research indicates it is necessary. 
-
-\begin{itemize}
-\item The top line of the entry should be WHO: <Requestor Name>.
-\item Indicate the institution and model if known
-\item Keep title of initial email and the title of the SF ticket the
-same or close enough to be able to determine they are one and the same
-\item Assign the ticket to the Advocate of that component. 
-\end{itemize}
+\item If the request contains more than one topic, then Integrator will open multiple tickets, one per topic. This can been done initially if obvious, or later if more research indicates it is necessary. 
+   \begin{itemize}
+   \item The top line of the entry should be WHO: <Requestor Name>.
+   \item Indicate the institution and model if known.
+   \item Keep title of initial email and the title of the SF ticket the
+same or close enough to be able to determine they are one and the same.
+   \item Assign the ticket to the staff person best able to solve the ticket's issue. 
+   \end{itemize}
 
 \item Initial contact is made by:
 
 \begin{itemize}
-\item The Advocate or
-\item A Handler assigned by the Advocate
-\item The Support Lead if the Advocate is unavailable
+\item The Handler assigned by the Integrator in the ticket. 
+\item The Support Lead if the Handler will be unavailble for more than a week. 
 \end{itemize}
 
-\item The Handler, which may be the Advocate or another developer assigned by the 
-Advocate, works on the issue keeping the requester informed. Once the work has been 
-completed to the Handlers satisfaction, the ticket can be coded on SourceForge as 
-pending by the Handler.  The mail folder on the IMAP server is moved to pending by 
-the Handler.
+\item The Handler works to solve the tickets issues. He or she will communicate 
+periodically with the ticket's orginator and will keep the rest of the Core team 
+informed on the tickets progress at the monthly ticket review meetings.  Once the 
+issue has been solved, the ticket will be marked pending by the Handler.  
 
-\item The Handler contacts the customer to gauge their satisfaction in the solution. 
-If the customer is satisfied, the ticket may be closed by the Advocate, and the mail 
-folder on the IMAP server moved from open to closed by the Advocate.  If the customer
-does not respond, an attempt at contact will be made every two weeks for one month. 
-After one month with no contact, a pending ticket may be closed.  The Advocate can 
-choose to hand off this part of the process to the Support Lead if desired.  The 
-customer is always notified when any ticket is closed. 
+\item At this point, the Handler contacts the originator to gauge their satisfaction with
+the solution. If the originator is satisfied, the ticket may be closed, and the mail 
+folder on the IMAP server moved from Open to Closed by the Support Lead.  If the customer
+does not respond, an attempt at contact will be made once a month for two months. 
+If after this period, the orginator still does not reply, a pending ticket may be closed
+with final notification to the orgininator.   
 \end{enumerate}
 
 \subsubsection{General Guidelines for Handling Tickets}
 \begin{itemize}
 \item Include title and ticket number on all correspondence.
-\item Make initial contact within 48 hours even if just to say message received
-\item Copy esmf\_support on all replies.
+\item Make initial contact within 48 hours even if just to say message received.
+\item The email address for ticket originators can be found in either freeCRM or the mail archive. Do not hesitate to contact the Support Lead if a required email address can not be found. 
+\item Copy esmf\_support@ucar.edu on all replies.
 \item Bugs that are fixed should be marked Closed, and Fixed. They should never be deleted. 
 \item Bugs that are duplicates should be marked Deleted, and Duplicate. 
 \item If the main issue in a Bug, Feature Request, or Support Request has not been implemented it should stay Open.
-\item The Handler is the person responsible for marking a ticket Pending and moving the mail folder from Open to Pending.
-\item The Advocate is the person responsible for marking a ticket Closed and moving the mail folder to Closed.
+\item Users are always notified via email when their ticket is being closed even if they have been unresponsive.  
+\item If the solution to a ticket involves a test code, this should be incorporated into the code body as standard test. It should not be sent to the user as an unofficial code fragment. 
+\item If the solution to a ticket involved changes to the code, the user should be given a stable beta snapshot. The user should not be directed to the HEAD, which is inheritently unstable.  
+\item If a ticket involves an older version of the code and a computing environoment that the current distribution runs on, the ticket should be considered for closure when there is no means of testing or fixing the older code. 
+\item The Handler is responsible for changing the status of tickets assigned to them.  
 \end{itemize}
 
-\subsubsection{IMAP mail archives}
-\begin{enumerate}
-\item Folders are labeled by component and consolidated as necessary.
-\item The Integrator will create a folder labeled with the request number. 
-\item The Integrator will then copy each related email message to the appropriate 
-numbered folder. 
-\item The number folders will be filed under Open, Closed, or Pending folders 
-corresponding to status of the request on the SourceForge system.
+\subsubsection{esmf\_support@ucar.edu Mail Archives}
+The Support Lead manages the archive of esmf\_support@ucar.edu email traffic and is responsible for the creation of ticket folders, component folders, and the proper placement of mail messages. The archive is located on the main CISL IMAP server and can be accessed by any Core member.  Contact the Support Lead if you wish your local mail client enabled to view the archive.  The IMAP archive will have the following appearence:
+\begin{itemize}
+\item{Component Name}
+  \begin{itemize}
+    \item{Open}
+      \begin{itemize}
+        \item{Numbered Ticket Folder}
+        \item{Numbered Ticket Folder}
+        \item{Numbered Ticket Folder}
+      \end{itemize}
+    \item{Closed}
+      \begin{itemize}
+        \item{Numbered Ticket Folder}
+        \item{Numbered Ticket Folder}
+        \item{Numbered Ticket Folder}
+      \end{itemize}
+    \end{itemize}
+\item{Component Name}
+\end{itemize}
 
-\item When a ticket has been marked pending, the Handler will move the numbered folder from the Open folder to the Pending folder.
-\item When a ticket has been closed, the Advocate will move the numbered folder from the Open folder to the Closed folder.
-\item There will be only one New folder to which all unresponded requests will be placed. Once a request has been responded to, the Integrator will move the folder to the appropriate institution. Advocates may also move mail folders around.
-\end{enumerate}
+The following rules apply to the above:
+
+\begin{itemize}
+\item Email messages will be filed by component and number. 
+\item A folder labeled with the request number will be created. 
+\item This folder will then be placed in the components Open folder until closed.  
+\item The Support Lead will copy each related email message to its numbered folder. 
+\item When a ticket has been closed, the Support Lead will move the numbered folder from the components Open folder to its Closed folder.
+\item There will be only one New folder to which highly active tickets may be placed 
+for easier filing at the discretion of the Support Lead. 
+\end{itemize}
 
 \subsubsection{INFO:Code (subject) mail messages}
 \label{infomail}
 
-Advocates need to share the information they have received from their codes with the rest of the Core team. This will be done by sending an email to esmf\_support with a subject line labeled INFO:Code e.g. INFO:CCSM, INFO:GEOS-5, followed by a subject line e.g. status of support requests or new code contact.  These messages will be filed on the IMAP server (see above section) under the code referenced. All information about a code that is general and not related to a specific support request will be archived in this manner. 
+Advocates need to share the information they have received from their codes with the rest 
+of the Core team. This will be done by sending an email to esmf\_support@ucar.edu with a 
+subject line labeled INFO: Code e.g. INFO: CCSM, INFO: GEOS-5. These messages will be 
+filed on the IMAP server (see above section) under the code referenced. All information 
+about a code that is general and not related to a specific support request will be archived 
+in this manner. 
 
 \subsubsection{freeCRM}
 A client relationship management tool (freeCRM http://www.freecrm.com) is being used 
-to archive codes, their affiliated contacts and applicable funding information. The 
-following is a list of roles and responsibilities associated with this software:
+to archive codes, their affiliated contacts, degree of componentization, issues, and 
+applicable funding information if known. The following is a list of roles and 
+responsibilities associated with this software:
 \begin{itemize}
 \item Advocates are responsible for the accuracy and completeness of all information 
 associated with codes to which they are assigned.  This information includes a pull 
@@ -94,9 +118,6 @@ information will be reviewed on a semi-annual basis.
 monthly basis.
 \item The Core Team Manager is responsible for the accuracy and completness of all 
 funding related information.
-\item Codes are classified as normal or critical. This label is controlled by a pull 
-down menu. The Core Team Manager is responsible for determining this classification 
-and for assigning codes to Advocates.
 \item The Support Lead is responsible for creating code 'companies' and informing 
 the Integrator of any additions so that the back up scripts can be modified. He or 
 she is additionally responsible for conducting semi-annual quality control checks of 
@@ -104,6 +125,32 @@ all information in the system.
 \item All team members are responsible for updating and adding to the list of 
 contacts. 
 \end{itemize} 
+
+\subsubsection{Annual Code Contact}
+Once a year all codes in the freeCRM data base will be contacted in order to gauge 
+their development progress, and to update our component metrics. This process will 
+contain the following steps:
+\begin{itemize}
+\item Advocates will logon into freeCRM and get a list of all their codes. 
+This list will be emailed to esmf\_core@ucar.edu.
+\item Advocates will review their list and determine which codes on the list need to be
+contacted. Contact is not needed if sufficient knowledge is already known about a 
+code.
+\item Advocates will review all the information contained in freeCRM concerning their 
+assigned codes AND review all the esmf\_support traffic for the last year.  
+\item Advocates will draft the contact email and send it to esmf\_core@ucar.edu to be 
+reviewed by the Core Team Manager.  Once corrected, the Advocates may send their email. Since 
+this is a group level effort, the email message may be signed ``The ESMF Team'' if 
+desired. 
+\item The Support Lead will track the draft and completed emails as well as the 
+responses and will provide a report to the Core Team Manager at the end of the 
+process.  
+\item As responses come in, the Advocates are responsible for updating the 
+information in freeCRM.  
+\item The Support Lead will tally the results and update the components page on the
+ESMF Web site and will also update the components metric chart.  
+\end{itemize}
+
 
 
  
