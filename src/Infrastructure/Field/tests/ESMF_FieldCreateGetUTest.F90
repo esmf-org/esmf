@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.7 2008/03/13 00:05:33 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.8 2008/03/14 02:51:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -1128,7 +1128,7 @@ contains
         type(ESMF_VM)                               :: vm
         integer                                     :: lpe
 
-        integer, dimension(ESMF_MAXDIM)             :: ec, cc, g2fm, mhlw, mhuw, dg2fm
+        integer, dimension(ESMF_MAXDIM)             :: ec, cc, g2fm, mhlw, mhuw
         integer, dimension(ESMF_MAXDIM)             :: gelb, geub, gclb, gcub
         integer, dimension(ESMF_MAXDIM)             :: fsize
         integer, dimension(ESMF_MAXDIM)             :: felb, feub, fclb, fcub, ftlb, ftub
@@ -1219,10 +1219,6 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_ArrayGet(array, distgridToArrayMap=dg2fm, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
             call ESMF_FieldGetDataPtr(field, farray=farray1, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
@@ -1232,9 +1228,9 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             !write(*, "(A5, 42I3)") 'MZY: ', felb, feub, fclb, fcub, ftlb, ftub
-            do i = ftlb(dg2fm(1)), ftub(dg2fm(1))
-                do j = ftlb(dg2fm(2)), ftub(dg2fm(2))
-                    if(farray1(i, j) .ne. ((i-ftlb(dg2fm(1))+1)+(j-ftlb(dg2fm(2))+1)*2) ) localrc = ESMF_FAILURE
+            do i = ftlb(1), ftub(1)
+                do j = ftlb(2), ftub(2)
+                    if(farray1(i, j) .ne. ((i-ftlb(1)+1)+(j-ftlb(2)+1)*2) ) localrc = ESMF_FAILURE
                 enddo
             enddo
             if (ESMF_LogMsgFoundError(localrc, &
