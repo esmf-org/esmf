@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.6 2008/03/07 16:39:23 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.7 2008/03/14 01:47:14 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -38,7 +38,6 @@
 
     type(ESMF_Field) :: field1, field2, field3, field4
     real (ESMF_KIND_R8), dimension(2) :: origin
-    character (len = ESMF_MAXSTR) :: fname
 
     real(ESMF_KIND_R8), dimension(:,:), pointer :: farray
     real(ESMF_KIND_R8), dimension(:,:), pointer :: farray1
@@ -90,7 +89,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
 
-    print *, "Field creation from Grid and Arrayspec returned, name = ", trim(fname)
+    print *, "Field creation from Grid and Arrayspec returned"
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
