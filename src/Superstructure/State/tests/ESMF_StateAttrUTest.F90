@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAttrUTest.F90,v 1.3 2008/03/13 14:30:49 rokuingh Exp $
+! $Id: ESMF_StateAttrUTest.F90,v 1.4 2008/03/17 18:07:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_StateAttrUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateAttrUTest.F90,v 1.3 2008/03/13 14:30:49 rokuingh Exp $'
+      '$Id: ESMF_StateAttrUTest.F90,v 1.4 2008/03/17 18:07:44 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -46,7 +46,7 @@ program ESMF_StateAttrUTest
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
 
-			type(ESMF_State) :: state
+			type(ESMF_State) :: state, state2
       type(ESMF_Bundle) :: bundle
 			type(ESMF_Field) :: field
       character(ESMF_MAXSTR) :: conv, purp, attrname, attrvalue
@@ -73,6 +73,7 @@ program ESMF_StateAttrUTest
       !------------------------------------------------------------------------
       ! preparations
       state = ESMF_StateCreate("state 1", ESMF_STATE_IMPORT, rc=rc)
+      state2 = ESMF_StateCreate("state 2", ESMF_STATE_EXPORT, rc=rc)
       bundle = ESMF_BundleCreate(name="bundle 1", rc=rc)
       field = ESMF_FieldCreateEmpty(name="field 1", rc=rc)
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -160,9 +161,18 @@ program ESMF_StateAttrUTest
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
+      !EX_UTest
+      ! Copy an attribute hierarchy from state1 to state2
+      call ESMF_StateAttributeCopyAll(state, state2, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Copy an attribute hierarchy from state1 to state2"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
       !------------------------------------------------------------------------
       ! clean up
       call ESMF_StateDestroy(state, rc=rc)
+      call ESMF_StateDestroy(state2, rc=rc)
 			call ESMF_BundleDestroy(bundle, rc=rc)
       call ESMF_FieldDestroy(field, rc=rc)
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
