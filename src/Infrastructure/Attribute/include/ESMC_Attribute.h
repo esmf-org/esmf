@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.h,v 1.5 2008/03/13 05:36:02 rokuingh Exp $
+// $Id: ESMC_Attribute.h,v 1.6 2008/03/17 18:06:57 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -134,12 +134,14 @@ class ESMC_Attribute
     int ESMC_AttributeSet(char *name, char *value);
     int ESMC_AttributeSet(char *name, ESMC_TypeKind tk, int count, void *value);
 
+    // copy and attribute hierarchy
+    int ESMC_AttributeCopyAll(ESMC_Base *source);
+
     // attribute set a link in hierarchy
     int ESMC_AttributeSetLink(ESMC_Base *destination);
 
     // not implemented yet
     int ESMC_AttributeCopy(char *name, ESMC_Attribute *destination);
-    int ESMC_AttributeCopyAll(ESMC_Attribute *destination);
     int ESMC_AttributeGetList(char **namelist, ESMC_Attribute *valuelist) const;
     int ESMC_AttributeGetNameList(int *count, char **namelist) const;
     int ESMC_AttributeSetList(int count, ESMC_Attribute *valuelist);
@@ -167,6 +169,7 @@ extern "C" {
                               int clen, int plen, int olen);
   void FTN(c_esmc_attpackwrite)(ESMC_Base ** base, char *convention, char *purpose,
                                 char *object, int *rc, int clen, int plen, int olen);
+  void FTN(c_esmc_attributecopyall)(ESMC_Base **source, ESMC_Base **destination, int *rc);
   void FTN(c_esmc_attributegetchar)(ESMC_Base **base, char *name, char *value, 
                                     int *rc, int nlen, int vlen);
   void FTN(c_esmc_attributegetcount)(ESMC_Base **base, int *count, int *rc);

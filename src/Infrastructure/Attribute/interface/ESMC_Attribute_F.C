@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute_F.C,v 1.3 2008/03/13 05:36:02 rokuingh Exp $
+// $Id: ESMC_Attribute_F.C,v 1.4 2008/03/17 18:06:57 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.3 2008/03/13 05:36:02 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.4 2008/03/17 18:06:57 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -940,5 +940,46 @@ if (rc) *rc = ESMF_RC_NOT_IMPL;
   return;
 
 }  // end c_ESMC_attpackwrite
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttributeCopyAll - copy an attribute hierarchy between objects
+//
+// !INTERFACE:
+      void FTN(c_esmc_attributecopyall)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **source,              // in/out - base object
+      ESMC_Base **destination,         // in/out - base object
+      int *rc) {                       // in/out - return code
+// 
+// !DESCRIPTION:
+//     Copy the Attribute hierarchy from Base1 to Base2
+//
+//EOP
+
+  ESMC_Attribute *temp;
+  
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!source) {
+    if (rc) *rc = ESMF_FAILURE;    
+    return;
+  }
+  
+  if (!destination) {
+    if (rc) *rc = ESMF_FAILURE;    
+    return;
+  }
+
+  *rc = (**destination).root.ESMC_AttributeCopyAll(*source);
+    
+  return;
+
+}  // end c_ESMC_AttributeCopyAll
 
 } // extern "C"
