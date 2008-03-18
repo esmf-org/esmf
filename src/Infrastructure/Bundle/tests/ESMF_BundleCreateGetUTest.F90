@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateGetUTest.F90,v 1.1.2.2 2008/03/18 20:07:33 feiliu Exp $
+! $Id: ESMF_BundleCreateGetUTest.F90,v 1.1.2.3 2008/03/18 20:47:09 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -82,6 +82,7 @@ contains
         integer             :: rc, localrc
 
         rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
 
         grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
                                 gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
@@ -122,6 +123,7 @@ contains
         integer           :: i, j, localrc
 
         rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
 
         call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -176,6 +178,7 @@ contains
         integer           :: fc, i, j, localrc
 
         rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
 
         call ESMF_BundleGetField(bundle, 'field1', f1, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -199,10 +202,13 @@ contains
 
         do i = 1, 5
             do j = 1, 10
-                if( farray1(i, j) .ne. i + j * 2) rc = ESMF_FAILURE
-                if( farray2(i, j) .ne. i + j * 3) rc = ESMF_FAILURE
+                if( farray1(i, j) .ne. i + j * 2) localrc = ESMF_FAILURE
+                if( farray2(i, j) .ne. i + j * 3) localrc = ESMF_FAILURE
             enddo
         enddo
+        if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
 
         call ESMF_BundleGet(bundle, fieldcount=fc, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -217,6 +223,7 @@ contains
         integer             :: rc, localrc
 
         rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
 
         grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
                                 gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
@@ -257,6 +264,7 @@ contains
         integer           :: i, j, localrc
 
         rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
 
         call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -321,6 +329,7 @@ contains
         integer           :: fc, i, j, localrc
 
         rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
 
         call ESMF_BundleGetField(bundle, 'field1', f1, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
