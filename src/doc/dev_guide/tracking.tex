@@ -1,4 +1,4 @@
-     % $Id: tracking.tex,v 1.16 2007/09/18 21:38:18 cdeluca Exp $
+     % $Id: tracking.tex,v 1.17 2008/03/19 22:01:49 murphysj Exp $
 
 \section{Tracking and Metrics}
 
@@ -20,8 +20,8 @@ on the Task List.  The Task List is browsable by anyone and is located at
 \label{tracking_tools}
 
 SourceForge provides the development team with a set of trackers.  Current trackers are
-Support Requests, Bugs, Feature Requests, and Operations.  These are described in more 
-detail in section ~\ref{sec:trackertypes}.  
+Support Requests, Bugs, Feature Requests, Application Issues, and Operations.  These are 
+described in more detail in section ~\ref{sec:trackertypes}.  
 
 An item entered into a tracker is called a {\bf ticket}. Tickets are assigned a unique
 number and can move from tracker to tracker. Tickets may be opened in response to a customer
@@ -29,7 +29,7 @@ request or as a result of some finding or need of the development team.
 
 The process for handling customer requests is located in Section ~\ref{sec:usr_support}.
 
-All trackers categorize requests similiarly. Pull down menus can assign various criteria
+All trackers categorize requests similarly. Pull down menus can assign various criteria
 including Assignee, Status (Open, Closed, etc.), Category (Array, Regrid, etc.), and Group
 (Bug, Feature Request, etc.)  Tickets can be sorted and viewed based on these criteria and
 can be moved from one tracker to another. For example a ticket may start out as a support
@@ -40,20 +40,20 @@ the type using the type pull down menu.
 
 The SourceForge trackers allow the user to set the priority of a ticket. Priority nine is used
 to label tickets that are associated with a task scheduled for release on the Task List.
-These are the only tickets
-that should be labeled at this level. Priority levels one through five can be used by individual
-developers to prioritize tickets that are not associated with any upcoming release.
+These are the only tickets that should be labeled at this level. Priority levels one through 
+five can be used by individual developers to prioritize tickets that are not associated with 
+any upcoming release.
 
 \subsubsection{Labeling Tickets Longer than 2 Weeks}
 \label{sec:longticket}
-The CRB only manages tickets that will take longer than two calender weeks.
-All tickets that are estimated to be two calender weeks or longer should
+The CRB only manages tickets that will take longer than two calendar weeks.
+All tickets that are estimated to be two calendar weeks or longer should
 be labeled with {\bf LONG:} prepended to the title of the ticket. 
 
 \vspace{2mm}
 Examples:
 \begin{itemize}
-\item  {\bf LONG:} wants one-sided communications options (2/3) 
+\item  {\bf LONG:} wants one-sided communications options (2) 
 \item  {\bf LONG:} typekind vs type and kind (4)
 \end{itemize}
 
@@ -67,19 +67,17 @@ The following guidelines should be used when determining ticket completion times
 time for ticket items is allocated at 3 weeks per month.
 \item Estimates do not include integration and release preparation.
 \item Estimates do include any research time that's part of the developer's position. Calendar weeks are not corrected for this.
+\item Estimates include design time. 
 \item Design estimates do include looking at other packages, design, design documentation, time for iterating on telecons, design reviews, feedback, and prototyping.
-\item Implementation estimates do include implementation, code reivews, testing, and documentation. As a rule of thumb, documentation time and testing time are at least equal to coding time. Also include any peripheral capabilities that will be needed to support the main item.
+\item Implementation estimates do include implementation, code reviews, testing, and documentation. As a rule of thumb, documentation time and testing time are at least equal to coding time. Also include any peripheral capabilities that will be needed to support the main item.
 \item Use the past as a guide and estimate long.
 \end {itemize}
 
 \subsubsection{Labeling Tickets with Time Estimates}
 
 An estimated time to completion should be placed at the end of any ticket title labeled with
-the {\bf LONG:} key. If the time includes a design phase, this should be listed first
-e.g. (3/4) equals 3 weeks design plus 4 additional weeks for completion.  For example,
-for the examples in section ~\ref{sec:longticket}, the first item is estimated to take two weeks
-to design and 3 additional weeks to complete. The second item has no design phase and
-will take 4 weeks to complete. 
+the {\bf LONG:} key. If the time includes a design phase, this should be included in the
+total estimate e.g. (7) equals 3 weeks design plus 4 additional weeks for completion.  
 
 \subsubsection{Cross-Referencing the Task List and Trackers}
 
@@ -87,7 +85,7 @@ The tasks in the Task List are usually associated with
 one or more items in the Feature Request, Bug, and Support Request 
 trackers.  In order to cross-reference items, developers should label
 both the item on the Task List and tracker tickets with a 
-unique key. The key should describe the task, be unique, and be follwed by a
+unique key. The key should describe the task, be unique, and be followed by a
 colon. Careful placement of keys will allow the CRB to quickly visualize
 through the search mechanism all tasks necessary for a new release. The key
 is highlighted in the example below:
@@ -97,8 +95,8 @@ There are multiple steps to properly identifying tickets. The preceding sections
 cover these steps, which are summarized here:
 \begin{enumerate}
 \item Use key words to link tracker tickets with items in the Task List
-\item Label all tickets with {\bf LONG:} that will take longer than two calender weeks
-\item Put the completion time estimate after the title (DESIGN/COMPLETION)
+\item Label all tickets with {\bf LONG:} that will take longer than two calendar weeks
+\item Put the completion time estimate after the title (DESIGN + COMPLETION)
 \item Label tickets scheduled for release on the Task List with a priority nine.
 \item Prioritize other tickets using levels one through five.
 \end {enumerate}
@@ -117,32 +115,36 @@ In Bug Tracker:
 
 \subsubsection{Types of Trackers}
 \label{sec:trackertypes}
-{\bf Support Requests}\\
-
-Support requests are monitored on the Support Request tracker on SourceForge. 
+\begin{itemize}
+\item {\bf Support Requests:} Support requests are monitored on the Support Request tracker on SourceForge. 
 (See \htmladdnormallink{Support Requests Tracker}{http://sourceforge.net/tracker/?group_id=38089\&atid=421186}). 
 
-{\bf Bugs}\\
+\item {\bf Bugs:} Bugs are tracked using the \htmladdnormallink{{Bug Tracker}}{http://sourceforge.net/tracker/?group\_id=38089\&atid=421185}. Bugs are issues with capabilities that already exist e.g. optimization, documentation, and tests. Bugs can be of short or long duration.  
+Bugs may be identified independently, or they may originate as a support request. If the bug originated independently, the Integrator will create the initial entry. If it originated as a support request, then the {\bf Handler or Advocate} (see section ~\ref{core} for definitions) will transfer the support request to the bug tracker. When a bug is opened, provide as much detail as possible to help the Handler reproduce the problem. Indicate where the bug was found e.g. trunk, branch, or both. A bug that exists on both the trunk and a branch will generally be fixed only on the trunk. If the bug is fixed on both the trunk and branch, the ticket must  state this explicitly. When the bug is fixed, the Handler adds a note to the ticket and changes the status to Pending. Once the customer who originated the bug or initial support request has confirmed the fix, the ticket can be closed.
 
-Bugs are tracked using the \htmladdnormallink{{Bug Tracker}}{http://sourceforge.net/tracker/?group_id=38089\&atid=421185}. Bugs are issues with capabilities that already exist e.g. optimization, documentation, and tests. Bugs can be of short or long duration.  
+\item {\bf Feature Requests:} Features are various requests that involve creating new functionality. Features are tracked using the 
+\htmladdnormallink{{Feature Requests Tracker}}{http://sourceforge.net/tracker/?group\_id=38089\&atid=421188}
 
-Bugs may be identified independently, or they may originate as a support request. If the bug originated independently, the Integrator will create the initial entry. If it originated as a support request, then the {\bf Handler or Advocate} (see section ~\ref{core} for definitions) will transfer the support request to the bug tracker. 
+\item{\bf Applications Issues:} The Applications Issues tracker exists to segregate tickets that
+involve ESMF code that is embedded in third-party applications and which it is believed the problem
+lies with the application and not ESMF. This category includes issues with ESMF code that
+has been modified by a third party, code that has ESMF interface names but was not developed by
+the Core Team, and and implimentation issues with the Application itself. This segregation is
+necessary because such tickets can remain open for extended periods of time, which would have
+a negative impact on our support metrics. This tracker is located at
+\htmladdnormallink{{Applications Issues Tracker}}{http://sourceforge.net/tracker/?group\_id=38089\&atid=421189}  
 
-When a bug is opened, provide as much detail as possible to help the Handler reproduce the problem. Indicate where the bug was found e.g. trunk, branch, or both. A bug that exists on both the trunk and a branch will generally be fixed only on the trunk. If the bug is fixed on both the trunk and branch, the ticket must  state this explicitly. When the bug is fixed, the Handler adds a note to the ticket and changes the status to Pending. Once the customer who originated the bug or initial support request has confirmed the fix, the ticket can be closed.\\ 
+\item {\bf Operations:} Current infrastructure related items are recorded using the
+\htmladdnormallink{{Operations Tracker}}{http://sourceforge.net/tracker/?group\_id=38089\&atid=1037999}
+\end{itemize}
 
-{\bf Feature Requests}\\
 
-Features are various requests that involve creating new functionality. Features are tracked using the 
-\htmladdnormallink{{Feature Requests Tracker}}{http://sourceforge.net/tracker/?group_id=38089\&atid=421188}
-
-{\bf Operations}
-Current infrastructure related items are tracked using the
-\htmladdnormallink{{Operations Tracker}}{http://sourceforge.net/tracker/?group_id=38089\&atid=421187}
 
 \subsection{Metrics}
 
 The Integrator is responsible for tracking various aspects of the
 ESMF project to measure the implementation and testing progress.
+
 \subsubsection{Unit and System Tests Coverage}
 Throughout the ESMF software development process, the software is constantly
 being unit and system tested. It is essential to know the percentage of the
@@ -150,14 +152,17 @@ code that has been fully or partially tested. A script has been written that
 lists all the public interface subprograms (functions and subroutines) and 
 determines which of these have been unit and/or system tested. From this script
 output, the tested percentage can be calculated.
+
 \subsubsection{ESMF Requirements Coverage}
 An Excel spreadsheet is maintained listing the requirements as described in the
-ESMF Requirements Document. A hardcopy of the spreadsheet has been posted in a
+ESMF Requirements Document. A hard copy of the spreadsheet has been posted in a
 convenient place for the core team. Using color coding the core team indicates
 which requirements have been implemented and of these which have been tested.
+
 \subsubsection{Source Lines of Code, SLOC}
 The ESMF SLOC information is provided in an internal ESMF web page. The
 SLOC data is presented in graph form with the following columns:
+
 \begin{enumerate}
 \item[Fortran] 
 \item[C++] 

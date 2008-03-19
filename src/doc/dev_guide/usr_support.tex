@@ -16,7 +16,7 @@ The {\bf Handler} is the staff person assigned to solve a support ticket. The Ad
 \item The Integrator or in his absence the Support Lead, generates a SourceForge Bug, Feature, or Support Request ticket.
 \item If the request contains more than one topic, then Integrator will open multiple tickets, one per topic. This can been done initially if obvious, or later if more research indicates it is necessary. 
    \begin{itemize}
-   \item The top line of the entry should be WHO: <Requestor Name>.
+   \item The top line of the entry should be WHO: <Requester Name>.
    \item Indicate the institution and model if known.
    \item Keep title of initial email and the title of the SF ticket the
 same or close enough to be able to determine they are one and the same.
@@ -27,11 +27,11 @@ same or close enough to be able to determine they are one and the same.
 
 \begin{itemize}
 \item The Handler assigned by the Integrator in the ticket. 
-\item The Support Lead if the Handler will be unavailble for more than a week. 
+\item The Support Lead if the Handler will be unavailable for more than a week. 
 \end{itemize}
 
 \item The Handler works to solve the tickets issues. He or she will communicate 
-periodically with the ticket's orginator and will keep the rest of the Core team 
+periodically with the ticket's originator and will keep the rest of the Core team 
 informed on the tickets progress at the monthly ticket review meetings.  Once the 
 issue has been solved, the ticket will be marked pending by the Handler.  
 
@@ -39,8 +39,8 @@ issue has been solved, the ticket will be marked pending by the Handler.
 the solution. If the originator is satisfied, the ticket may be closed, and the mail 
 folder on the IMAP server moved from Open to Closed by the Support Lead.  If the customer
 does not respond, an attempt at contact will be made once a month for two months. 
-If after this period, the orginator still does not reply, a pending ticket may be closed
-with final notification to the orgininator.   
+If after this period, the originator still does not reply, a pending ticket may be closed
+with final notification to the originator.   
 \end{enumerate}
 
 \subsubsection{General Guidelines for Handling Tickets}
@@ -55,12 +55,12 @@ with final notification to the orgininator.
 \item Users are always notified via email when their ticket is being closed even if they have been unresponsive.  
 \item If the solution to a ticket involves a test code, this should be incorporated into the code body as standard test. It should not be sent to the user as an unofficial code fragment. 
 \item If the solution to a ticket involved changes to the code, the user should be given a stable beta snapshot. The user should not be directed to the HEAD, which is inheritently unstable.  
-\item If a ticket involves an older version of the code and a computing environoment that the current distribution runs on, the ticket should be considered for closure when there is no means of testing or fixing the older code. 
+\item If a ticket involves an older version of the code and a computing environment that the current distribution runs on, the ticket should be considered for closure when there is no means of testing or fixing the older code. 
 \item The Handler is responsible for changing the status of tickets assigned to them.  
 \end{itemize}
 
 \subsubsection{esmf\_support@ucar.edu Mail Archives}
-The Support Lead manages the archive of esmf\_support@ucar.edu email traffic and is responsible for the creation of ticket folders, component folders, and the proper placement of mail messages. The archive is located on the main CISL IMAP server and can be accessed by any Core member.  Contact the Support Lead if you wish your local mail client enabled to view the archive.  The IMAP archive will have the following appearence:
+The Support Lead manages the archive of esmf\_support@ucar.edu email traffic and is responsible for the creation of ticket folders, component folders, and the proper placement of mail messages. The archive is located on the main CISL IMAP server and can be accessed by any Core member.  Contact the Support Lead if you wish your local mail client enabled to view the archive.  The IMAP archive will have the following appearance:
 \begin{itemize}
 \item{Component Name}
   \begin{itemize}
@@ -116,7 +116,7 @@ her codes. Other information includes type of code, parent agency etc. This
 information will be reviewed on a semi-annual basis. 
 \item The Integrator is responsible for creating a back up of all freeCRM data on a 
 monthly basis.
-\item The Core Team Manager is responsible for the accuracy and completness of all 
+\item The Core Team Manager is responsible for the accuracy and completeness of all 
 funding related information.
 \item The Support Lead is responsible for creating code 'companies' and informing 
 the Integrator of any additions so that the back up scripts can be modified. He or 
@@ -131,7 +131,7 @@ Once a year all codes in the freeCRM data base will be contacted in order to gau
 their development progress, and to update our component metrics. This process will 
 contain the following steps:
 \begin{itemize}
-\item Advocates will logon into freeCRM and get a list of all their codes. 
+\item Advocates will login into freeCRM and get a list of all their codes. 
 This list will be emailed to esmf\_core@ucar.edu.
 \item Advocates will review their list and determine which codes on the list need to be
 contacted. Contact is not needed if sufficient knowledge is already known about a 
@@ -152,5 +152,45 @@ ESMF Web site and will also update the components metric chart.
 \end{itemize}
 
 
+\subsubsection{Dealing with Applications that use ESMF}
+More and more applications are being distributed with embedded ESMF interfaces. It may 
+difficult to determine if a reported problem with one of these applications is related 
+to an incorrect ESMF implementation, a true ESMF bug, or an issue within the parent model.
+The following are several definitions:
+\begin{itemize}
+\item End User: A person who downloads or otherwise receives an application that contains 
+ESMF code.  While they may be trying to modify this application, they were not the person 
+or persons who originally inserted ESMF into the application. Most likely, they will be 
+entirely unfamiliar with ESMF.
+\item Application Developer: The person or persons who took a model, inserted ESMF code, 
+and made the resulting application available to others.
+\end{itemize} 
+The following are some guidelines for dealing with such Applications that use ESMF:
+\begin{itemize}
+\item For support requests related to applications that include ESMF,  our primary contact 
+for resolving the request should be the developers of the distributed application and not 
+the End User.  As such, every effort should be made to identify and contact the developers 
+of the distributed application in order to make them aware of the reported issue and to get 
+them actively engaged in resolution of the problem. Additionally, they should be cc'ed on 
+all correspondence with the End User.
+\item During the resolution of the issue, it will be necessary to cc all email traffic to the 
+End User.  In dealings with the End User emphasize that the ESMF group is committed to any user 
+of ESMF regardless of source. That commitment is predicated, however, on participation of the 
+application developers.
+\item The Handler should establish which version of ESMF the application is using.   
+\item The Handler should try and determine whether the ESMF code in question was modified in any 
+way by the Application Developers. 
+\item The Handler should try and determine whether the code in question has ESMF interface names 
+but is not ESMF code. The time manager in WRF falls into this category. It has ESMF interfaces 
+but was not developed by us.  
+\item It will be solely the Core Team's discretion whether or not to support older versions of ESMF, 
+ESMF code that has been modified by others, or code that uses ESMF interface names but was developed 
+entirely separate from ESMF.
+\item In no way should the Handler try running the End User's code.
+\item In the event that the developers of the distributed application are 
+unknown, unreachable, or uncooperative, the End User must be politely informed that the group 
+can not troubleshoot code belonging to another group. This will have to been handled with a 
+degree of sensitivity because it is likely that the end user has already tried to contact the 
+application developers without success. 
+\end{itemize}
 
- 
