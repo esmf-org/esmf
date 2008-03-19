@@ -1,4 +1,4 @@
-// $Id: ESMC_StateUTest.C,v 1.6 2008/03/19 02:37:53 rosalind Exp $
+// $Id: ESMC_StateUTest.C,v 1.7 2008/03/19 21:18:46 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@ int main(void){
 
   ESMC_State st;              // ESMC_State object
   char* StateName = "stateName";                   // state name
-  char* arrayName = "array1";
+  char* arrayName = "array1 \0";
   char name[80];
   char failMsg[80];
   int result = 0;
@@ -152,7 +152,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
  //----------------------------------------------------------------------------
-  //NEX_UTest
+  //NEX_removeUTest
   strcpy(name, "Compare array stored into and array retrieved from a state\0");
   strcpy(failMsg, "Discrepancy on array pointers\0");
   ESMC_Test((array.ptr==retrievedArray.ptr), name, failMsg, &result, __FILE__, 

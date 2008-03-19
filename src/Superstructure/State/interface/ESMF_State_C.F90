@@ -1,4 +1,4 @@
-! $Id: ESMF_State_C.F90,v 1.12 2008/03/14 22:11:20 rosalind Exp $
+! $Id: ESMF_State_C.F90,v 1.13 2008/03/19 21:18:46 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_State_C.F90,v 1.12 2008/03/14 22:11:20 rosalind Exp $'
+!      '$Id: ESMF_State_C.F90,v 1.13 2008/03/19 21:18:46 rosalind Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -62,18 +62,26 @@
    subroutine f_esmf_stateaddarray(state, array, rc)
 
        use ESMF_UtilTypesMod
-       use ESMF_BaseMod    ! ESMF base class
+      !use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
+       use ESMF_ArrayCreateMod
 
        type(ESMF_State) :: state        !inout
        type(ESMF_Array) :: array        !in
       integer, intent(out) :: rc        !out
 
+       ! local variable
+       type(ESMF_Array) :: farray
 
        ! Initialize return code; assume routine not implemented
        rc = ESMF_RC_NOT_IMPL
 
-       call ESMF_StateAddArray(state=state, array=array, rc=rc)
+       farray%this = array%this
+
+       !  set the valid init code
+       ESMF_INIT_SET_CREATED(farray)
+
+       call ESMF_StateAddArray(state=state, array=farray, rc=rc)
 
 
    end subroutine f_esmf_stateaddarray
@@ -84,18 +92,26 @@
        use ESMF_UtilTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
+       use ESMF_ArrayCreateMod
 
        type(ESMF_State) :: state        !in
        character(len=*), intent(in) :: arrayName
        type(ESMF_Array) :: array        !out
       integer, intent(out) :: rc        !out
 
+       ! local variable
+       type(ESMF_Array) :: farray
+
        print*,'In f_esmf_stategetarray, before call to ESMF_StateGetArray'
 
        ! Initialize return code; assume routine not implemented
        rc = ESMF_RC_NOT_IMPL
 
-       call ESMF_StateGetArray(state=state, arrayName=arrayName, array=array, rc=rc)
+       call ESMF_StateGetArray(state=state, arrayName=arrayName, array=farray, rc=rc)
+
+       ! the array object returned to the C interface must consist only of the
+       ! this pointer. It must not contain the isInit member.
+       array%this = farray%this
 
        print*,'In f_esmf_stategetarray, after  call to ESMF_StateGetArray'
 
@@ -118,6 +134,39 @@
     
    end subroutine f_esmf_statedestroy
 
+!------------------------------------------------------------------------------
+
+ !  type(ESMF_Array) function arrayCtoF90(carray)
+ !  subroutine arrayCtoF90(carray, farray, rc)
+ !     use ESMF_UtilTypesMod
+ !     use ESMF_BaseMod    ! ESMF base class
+ !     use ESMF_ArrayCreateMod
+
+  ! Very important: the pointers passed from C and used as references for
+  ! arrayInArg and arrayOutArg are simple pointers to pointers from the C side.
+  ! This means that there is no memory for what the F90 INITMACROS are using
+  ! at that location! In order to deal with this C<->F90 difference local
+  ! F90 variables are necessary to work on the F90 side and this glue code will
+  ! copy the "this" member in the derived type which is the part that actually
+  ! needs to be passed between C and F90.
+
+ !     type(ESMF_Array) :: carray 
+ !     type(ESMF_Array) :: farray 
+      
+       !  local variable
+       !type(ESMF_Array) :: farray
+
+ !     farray%this = carray%this
+
+       !  set the valid init code
+ !     ESMF_INIT_SET_CREATED(farray)
+
+
+ !     rc = ESMF_SUCCESS
+
+ !  end subroutine arrayCtoF90
+
+!------------------------------------------------------------------------------
    subroutine f_esmf_stateadddata(statep, name, func, rc)
        use ESMF_UtilTypesMod
        use ESMF_BaseMod    ! ESMF base class
