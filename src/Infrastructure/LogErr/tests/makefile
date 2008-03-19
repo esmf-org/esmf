@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2007/10/31 16:59:03 cdeluca Exp $ 
+# $Id: makefile,v 1.17 2008/03/19 21:02:16 svasquez Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -40,9 +40,13 @@ CLOBBERDIRS =
 # LogErr
 #
 RUN_ESMF_LogErrUTest:
+	# remove log files of previous test runs
+	rm -f $(ESMF_TESTDIR)/*Log_Test_File* $(ESMF_TESTDIR)/Single_Log_File
 	$(MAKE) TNAME=LogErr NP=4 ftest
 
 RUN_ESMF_LogErrUTestUNI:
+	# remove log files of previous test runs
+	rm -f $(ESMF_TESTDIR)/*Log_Test_File* $(ESMF_TESTDIR)/Single_Log_File
 	$(MAKE) TNAME=LogErr NP=1 ftest
 
 
