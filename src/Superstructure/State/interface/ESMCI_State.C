@@ -42,7 +42,7 @@
 
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_State.C,v 1.2 2008/03/14 21:50:13 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_State.C,v 1.3 2008/03/19 02:37:53 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -129,28 +129,31 @@ namespace ESMCI {
 //     return code rc.
 //
 // !ARGUMENTS:
-      ESMCI::State *state,    // inout - state
-      ESMCI::Array *array){       // in - array being added
+     ESMCI::State *state,    // inout - state
+     ESMCI::Array *array){       // in - array being added
 //
 // !DESCRIPTION:
 //      Add an array to an existing state
 //
 //EOP
-      //local variables
-      int rc;
-      int localrc;
+     //local variables
+     int rc;
+     int localrc;
 
-      //Initialize return code
-      rc = ESMF_RC_NOT_IMPL;
-      localrc = ESMF_RC_NOT_IMPL;
+     //Initialize return code
+     rc = ESMF_RC_NOT_IMPL;
+     localrc = ESMF_RC_NOT_IMPL;
   
       
-      FTN(f_esmf_stateaddarray)(state, array, &rc);
-                           //   static_cast<ESMCI::Array *>(array.cppthis), 
-                           //   &rc);
+    // Invoque the fortran interface through the F90-C++ "glue" code
+     FTN(f_esmf_stateaddarray)(state, array, &localrc);
+     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+       return localrc;
+     }
 
+     rc = localrc;
 
-      return rc;
+     return rc;
 
    } // end ESMC_StateAddArray
 
@@ -170,23 +173,41 @@ namespace ESMCI {
       ESMCI::Array *array){       // out - array being geted
 //
 // !DESCRIPTION:
-//      Add an array to an existing state
+//      Get an array from an existing state
 //
 //EOP
       //local variables
       int rc;
       int localrc;
+      int nlen;
+      char* fName;
 
       //Initialize return code
       rc = ESMF_RC_NOT_IMPL;
       localrc = ESMF_RC_NOT_IMPL;
 
-      printf("In ESMCI::State::getArray, before calling the glue \n");
+    // convert file name to fortran string
+    nlen = strlen(name);
+    fName = new char[nlen];
+    localrc = ESMC_CtoF90string(name, fName, nlen);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+      delete[] fName;
+      return localrc;
+    }
 
-      FTN(f_esmf_stategetarray)(state, name, array, &rc);
+    printf("In ESMCI::State::getArray, before calling the glue \n");
+
+    // Invoque the fortran interface through the F90-C++ "glue" code
+    FTN(f_esmf_stategetarray)(state, fName, array, &localrc, nlen);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+      delete[] fName;
+      return localrc;
+    }
+
 
       printf("In ESMC_StateGetArray, after  calling the glue \n");
 
+      rc = localrc;
       return rc;
 
    } // end ESMC_StateGetArray
@@ -215,12 +236,20 @@ namespace ESMCI {
 // !REQUIREMENTS:  
 
     int rc;
+    int localrc;
    
     // Initialize return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
+    localrc = ESMC_RC_NOT_IMPL;
 
-    FTN(f_esmf_statedestroy)(state, &rc);
+    // Invoque the fortran interface through the F90-C++ "glue" code
+    FTN(f_esmf_statedestroy)(state, &localrc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+      return localrc;
+    }
 
+
+    rc = localrc;
     return rc;
 
  } // end ESMCI::State::destroy

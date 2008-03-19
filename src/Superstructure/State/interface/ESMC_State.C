@@ -42,7 +42,7 @@
 
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_State.C,v 1.16 2008/03/14 21:50:13 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_State.C,v 1.17 2008/03/19 02:37:53 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -94,7 +94,6 @@ extern "C" {
 
  } // end ESMC_StateCreate
 
-}; // extern "C"
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_StateAddArray - Add an array to this state
@@ -124,6 +123,46 @@ extern "C" {
       
       localrc = ((ESMCI::State*)&state)->addArray( (ESMCI::State*)state.ptr,
                                        (ESMCI::Array*)&array.ptr );
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+      return localrc;
+    }
+
+      rc = localrc;
+      return rc;
+
+   } // end ESMC_StateAddArray
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_StateGetArray - Get an array to this state
+//
+// !INTERFACE:
+      int ESMC_StateGetArray(
+//
+// !RETURN VALUE:
+//     return code rc.
+//
+// !ARGUMENTS:
+      ESMC_State state,    // in - state
+      char* arrayName,     // in - name of Array to get
+      ESMC_Array array){       // out - array to get
+//
+// !DESCRIPTION:
+//      Get an array to an existing state
+//
+//EOP
+      //local variables
+      int rc;
+      int localrc;
+
+      //Initialize return code
+      rc = ESMF_RC_NOT_IMPL;
+      localrc = ESMF_RC_NOT_IMPL;
+
+
+      localrc = ((ESMCI::State*)&state)->getArray( (ESMCI::State*)state.ptr,
+                                         arrayName,
+                                         (ESMCI::Array*)&array.ptr );
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
       return localrc;
     }
@@ -175,6 +214,7 @@ extern "C" {
 
  }  // end ESMC_StateDestroy
 
+}; // extern "C"
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_StateConstruct - fill in an already allocated State
