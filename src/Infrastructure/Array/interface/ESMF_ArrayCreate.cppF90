@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.26 2008/01/16 21:25:09 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.27 2008/03/19 18:57:10 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -64,7 +64,7 @@ module ESMF_ArrayCreateMod
   ! F90 class type to hold pointer to C++ object
   type ESMF_Array
   sequence
-  private
+!  private
     type(ESMF_Pointer) :: this
     ESMF_INIT_DECLARE
   end type
@@ -108,7 +108,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.26 2008/01/16 21:25:09 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.27 2008/03/19 18:57:10 theurich Exp $'
 
 !==============================================================================
 ! 
