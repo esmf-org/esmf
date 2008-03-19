@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.45 2007/10/19 20:03:16 svasquez Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.45.2.1 2008/03/19 20:38:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.45 2007/10/19 20:03:16 svasquez Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.45.2.1 2008/03/19 20:38:38 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -90,7 +90,7 @@
       !NEX_UTest
       ! Test Log Open
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      call ESMF_LogOpen(log1, "Log Test File", rc=rc)
+      call ESMF_LogOpen(log1, "Log_Test_File", rc=rc)
       write(name, *) "Open Log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
@@ -346,7 +346,7 @@
       !EX_UTest
       ! Test Log Open
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      call ESMF_LogOpen(log2, "Log Test File 2", rc=rc)
+      call ESMF_LogOpen(log2, "Log_Test_File_2", rc=rc)
       write(name, *) "Open Log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
@@ -439,7 +439,7 @@
       !EX_UTest
       write(name, *) "Open Log file with Fortran IO Test"
       write(failMsg, *) "open() returned failure"
-      filename = my_pet_char // ".Log Test File 2"
+      filename = my_pet_char // ".Log_Test_File_2"
       open (unit=1, file = filename, action = "read", &
             form = "formatted", iostat = input_status)
       call ESMF_Test((input_status.eq.0), name, failMsg, result, ESMF_SRCLINE)
