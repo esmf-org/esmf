@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.27 2008/03/19 18:57:10 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.28 2008/03/19 20:36:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -64,7 +64,7 @@ module ESMF_ArrayCreateMod
   ! F90 class type to hold pointer to C++ object
   type ESMF_Array
   sequence
-!  private
+  private
     type(ESMF_Pointer) :: this
     ESMF_INIT_DECLARE
   end type
@@ -100,6 +100,7 @@ module ESMF_ArrayCreateMod
   public ESMF_ArrayGetInit
   public ESMF_ArraySetInitCreated
   public ESMF_ArraySetThisNull
+  public ESMF_ArrayCopyThis
 ! ESMF_ArrayCreateFromGrid - defined in ESMF_Grid.F90 due to circularity issues 
 
 !EOPI
@@ -108,7 +109,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.27 2008/03/19 18:57:10 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.28 2008/03/19 20:36:52 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1163,13 +1164,59 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
     
-    ! Set init code
+    ! Set this member to NULL
     array%this = ESMF_NULL_POINTER
 
     ! Return success
     if (present(rc)) rc = ESMF_SUCCESS
     
   end subroutine ESMF_ArraySetThisNull
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayCopyThis()"
+!BOPI
+! !IROUTINE: ESMF_ArrayCopyThis - Copy Array this member
+
+! !INTERFACE:
+  subroutine ESMF_ArrayCopyThis(arrayIn, arrayOut, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array), intent(in)              :: arrayIn
+    type(ESMF_Array), intent(inout)           :: arrayOut
+    integer,          intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Copy Array this member. Do not set init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[arrayIn] 
+!          Input {\tt ESMF\_Array} object.
+!     \item[arrayOut] 
+!          Output {\tt ESMF\_Array} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+    
+    ! Copy this member
+    arrayOut%this = arrayIn%this
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_ArrayCopyThis
 !------------------------------------------------------------------------------
 
 
