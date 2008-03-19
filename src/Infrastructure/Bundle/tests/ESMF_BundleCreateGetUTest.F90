@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateGetUTest.F90,v 1.1.2.3 2008/03/18 20:47:09 feiliu Exp $
+! $Id: ESMF_BundleCreateGetUTest.F90,v 1.1.2.4 2008/03/19 16:30:37 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -303,7 +303,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
 
-        f3 = ESMF_FieldCreate(grid, farray3(3:7, 4:13), name='field3', rc=localrc)
+        f3 = ESMF_FieldCreate(grid, farray3(1:5, 1:10), name='field3', rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
