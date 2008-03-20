@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateGetUTest.F90,v 1.1.2.4 2008/03/19 16:30:37 feiliu Exp $
+! $Id: ESMF_BundleCreateGetUTest.F90,v 1.1.2.5 2008/03/20 02:50:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -47,27 +47,26 @@
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
-    character(512) :: name
+    character(ESMF_MAXSTR) :: name
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
  
 #ifdef ESMF_EXHAUSTIVE
-        !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
-        ! Create a bundle, add some fields and then retrieve the data pointers from the bundle
-        call bundle_test1(rc)
-        write(failMsg, *) ""
-        write(name, *) "Creating a bundle, add some fields and then retrieve the data pointers from the bundle"
-        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+    !EX_UTest_Multi_Proc_Only
+    ! Create a bundle, add some fields and then retrieve the data pointers from the bundle
+    call bundle_test1(rc)
+    write(failMsg, *) ""
+    write(name, *) "Creating Bundle, Add Fields, Retrieve the data pointers"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-        !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
-        ! Create a bundle, add some fields and then retrieve the data pointers from the bundle
-        call bundle_test2(rc)
-        write(failMsg, *) ""
-        write(name, *) "Creating a bundle, add some fields and then retrieve the data pointers from the bundle " // &
-            "with array slicing"
-        call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+    !EX_UTest_Multi_Proc_Only
+    ! Create a bundle, add some fields and then retrieve the data pointers from the bundle
+    call bundle_test2(rc)
+    write(failMsg, *) ""
+    write(name, *) "Creating Bundle, Add Fields, Retrieve the data pointers - with slicing"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 #endif
     call ESMF_TestEnd(result, ESMF_SRCLINE)
@@ -116,7 +115,6 @@ contains
 
         real(ESMF_KIND_R8), dimension(:,:), pointer :: farray1
         real(ESMF_KIND_R4), dimension(:,:), pointer :: farray2
-        real(ESMF_KIND_R4), dimension(:,:), pointer :: farray3
         type(ESMF_Field)    :: f1, f2, f3
         type(ESMF_DistGrid) :: distgrid
         type(ESMF_Array)  :: array8, array
@@ -132,13 +130,11 @@ contains
 
         allocate(farray1(5,10))
         allocate(farray2(5,10))
-        allocate(farray3(10,20))
 
         do i = 1, 5
             do j = 1, 10
                 farray1(i, j) = i + j * 2
                 farray2(i, j) = i + j * 3
-                farray3(i*2, j*2) = i + j * 4
             enddo
         enddo
 
@@ -170,7 +166,6 @@ contains
 
         real(ESMF_KIND_R8), dimension(:,:), pointer :: farray1
         real(ESMF_KIND_R4), dimension(:,:), pointer :: farray2
-        real(ESMF_KIND_R4), dimension(:,:), pointer :: farray3
         type(ESMF_Field)    :: f1, f2, f3
         type(ESMF_Grid)     :: grid
         type(ESMF_DistGrid) :: distgrid
@@ -273,13 +268,14 @@ contains
 
         allocate(farray1(5,10))
         allocate(farray2(5,10))
-        allocate(farray3(10,20))
+        allocate(farray3(5,20))
 
         do i = 1, 5
             do j = 1, 10
                 farray1(i, j) = i + j * 2
                 farray2(i, j) = i + j * 3
-                farray3(i*2, j*2) = i + j * 4
+                farray3(i, j) = i + j * 4
+                farray3(i, j+10) = i + (j+10) * 4
             enddo
         enddo
 
@@ -303,7 +299,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
 
-        f3 = ESMF_FieldCreate(grid, farray3(1:5, 1:10), name='field3', rc=localrc)
+        f3 = ESMF_FieldCreate(grid, farray3(:, 4:13), name='field3', rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
@@ -364,8 +360,24 @@ contains
         do i = 1, 5
             do j = 1, 10
                 if( farray1(i, j) .ne. i + j * 2) localrc = ESMF_FAILURE
+            enddo
+        enddo
+        if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+
+        do i = 1, 5
+            do j = 1, 10
                 if( farray2(i, j) .ne. i + j * 3) localrc = ESMF_FAILURE
-                if( farray3(i*2, j*2) .ne. i + j * 4) localrc = ESMF_FAILURE
+            enddo
+        enddo
+        if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+
+        do i = 1, 5
+            do j = 1, 10
+                if( farray3(i, j) .ne. i + (j+3) * 4) localrc = ESMF_FAILURE
             enddo
         enddo
         if (ESMF_LogMsgFoundError(localrc, &
