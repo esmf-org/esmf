@@ -1,4 +1,4 @@
-! $Id: ESMF_State_C.F90,v 1.13 2008/03/19 21:18:46 rosalind Exp $
+! $Id: ESMF_State_C.F90,v 1.14 2008/03/20 18:50:51 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_State_C.F90,v 1.13 2008/03/19 21:18:46 rosalind Exp $'
+!      '$Id: ESMF_State_C.F90,v 1.14 2008/03/20 18:50:51 rosalind Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -73,13 +73,17 @@
        ! local variable
        type(ESMF_Array) :: farray
 
+       ! Must first create a proper ESMF_Array that contains the 
+       ! required "isInit" class member.
+       
        ! Initialize return code; assume routine not implemented
        rc = ESMF_RC_NOT_IMPL
 
-       farray%this = array%this
+       ! Copy the this pointer a new ESMF_Array object
+       call ESMF_ArrayCopyThis(array, farray, rc)
 
-       !  set the valid init code
-       ESMF_INIT_SET_CREATED(farray)
+       !  set the valid init code of the new object
+       call ESMF_ArraySetInitCreated(farray, rc)
 
        call ESMF_StateAddArray(state=state, array=farray, rc=rc)
 
@@ -95,25 +99,23 @@
        use ESMF_ArrayCreateMod
 
        type(ESMF_State) :: state        !in
-       character(len=*), intent(in) :: arrayName
+       character(len=*) :: arrayName    !in
        type(ESMF_Array) :: array        !out
       integer, intent(out) :: rc        !out
 
        ! local variable
        type(ESMF_Array) :: farray
 
-       print*,'In f_esmf_stategetarray, before call to ESMF_StateGetArray'
-
        ! Initialize return code; assume routine not implemented
        rc = ESMF_RC_NOT_IMPL
 
-       call ESMF_StateGetArray(state=state, arrayName=arrayName, array=farray, rc=rc)
+       call ESMF_StateGetArray(state=state, arrayName=arrayName, &
+                               array=farray, rc=rc)
 
        ! the array object returned to the C interface must consist only of the
        ! this pointer. It must not contain the isInit member.
-       array%this = farray%this
+       call ESMF_ArrayCopyThis(farray, array, rc)
 
-       print*,'In f_esmf_stategetarray, after  call to ESMF_StateGetArray'
 
    end subroutine f_esmf_stategetarray
 
