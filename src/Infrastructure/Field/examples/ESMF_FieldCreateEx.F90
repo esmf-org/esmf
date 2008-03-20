@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.8 2008/03/20 21:04:41 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.9 2008/03/20 22:17:45 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -238,7 +238,7 @@
 !  if it was a empty field.
 !
 !  There are important details that can be skipped but good to know for {\tt ESMF\_FieldSetCommit}
-!  and {\tt ESMF\_FieldCreate}. 1) these methods require each PET contains
+!  and {\tt ESMF\_FieldCreate} from a fortran data pointer. 1) these methods require each PET contains
 !  exactly one DE. This implies that a code using FieldCreate from a data pointer or FieldSetCommit must
 !  have the same number of DEs and PETs, formally $n_{DE} = n_{PET}$. Violation of this condition
 !  generally induces run time failure. 2) the bounds and counts retrieved from GridGet are DE specific
@@ -316,7 +316,7 @@
 !  we formally introduce the mapping concept.
 !
 !  Let $map_{A,B}(i=1...n_A) = i_B$, and $i_B \in [1, n_B]$. $n_A$ is the number
-!  of element in set A, $n_B$ is the number of element in set B. $map_{A,B}(i)$ defines
+!  of elements in set A, $n_B$ is the number of elements in set B. $map_{A,B}(i)$ defines
 !  a mapping between i-th element of set A to $i_B$-th element in set B.
 !
 !  Suppose we have a mapping between dimension index of ungriddedLBound (or
