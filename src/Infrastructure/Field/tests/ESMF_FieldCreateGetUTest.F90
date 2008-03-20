@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.11 2008/03/14 15:00:35 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.12 2008/03/20 15:36:34 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -794,6 +794,37 @@
         write(name, *) "Creating a Field from a fortran array 3d all dims distributed, " // &
             "neither dimension divisible, " // &
             "with extra padding and halo"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 3d array
+        call test3d_generic(rc, minindex=(/4,5,6/), maxindex=(/17,20,33/), &
+            gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
+            regDecomp=(/2,1,2/), &
+            copyflag=ESMF_DATA_COPY, &
+            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/1,3,2/), &
+            fieldget=.true., &
+            maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
+        write(failMsg, *) ""
+        write(name, *) "Creating a Field from a fortran array 3d all dims distributed, " // &
+            "neither dimension divisible, minindex starts from numbers greater than 1, " // &
+            "with halo and data copy"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 3d array
+        call test3d_generic(rc, minindex=(/3,3,5/), maxindex=(/17,20,33/), &
+            regDecomp=(/2,1,2/), &
+            copyflag=ESMF_DATA_COPY, &
+            staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/1,3,2/), &
+            fieldget=.true., &
+            maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
+        write(failMsg, *) ""
+        write(name, *) "Creating a Field from a fortran array 3d all dims distributed, " // &
+            "neither dimension divisible, " // &
+            "with extra padding, halo, and data copy"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
     call ESMF_TestEnd(result, ESMF_SRCLINE)
