@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.hcppF90,v 1.3.2.8 2008/03/20 04:10:33 theurich Exp $
+! $Id: ESMF_LocalArrayMacros.hcppF90,v 1.3.2.9 2008/03/20 22:25:05 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -547,8 +547,11 @@
           ESMF_CONTEXT, rc)) return @\
         ! some compilers will have made a copy on the way to down here @\
         ! the following call forces the base address encoded in the F90 @\
-        ! dope vector to point to the actual memory allocation, not a copy @\
-        call c_ESMC_LocalArrayForceF90Ptr(array, localrc) @\
+        ! dope vector to point to the actual memory allocation *if* a mismatch @\
+        ! on the first data element location is detected, i.e. we are dealing @\
+        ! with a temporary copy of the actual array. @\
+        call c_ESMC_LocalArrayForceF90Ptr(array, & @\
+          ESMF_DATA_ADDRESS(fshape(mloc)), localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
           ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rc)) return @\
