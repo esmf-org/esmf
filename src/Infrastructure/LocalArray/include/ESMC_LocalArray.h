@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.21.2.1 2008/01/15 18:54:15 theurich Exp $
+// $Id: ESMC_LocalArray.h,v 1.21.2.2 2008/03/20 04:10:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -234,6 +234,12 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
     // copy the contents of an f90 ptr
     int ESMC_LocalArraySetF90Ptr(const struct c_F90ptr *p);
     int ESMC_LocalArrayGetF90Ptr(struct c_F90ptr *p) const;
+    
+    // force the base address in f90 ptr to be that stored in LocalArray
+    int ESMC_LocalArrayForceF90Ptr(){
+      *((void **)(&f90dopev)) = base_addr;
+      return ESMF_SUCCESS;
+    }
 
     // create a new LocalArray from an old one, decreasing the rank by one.
     ESMC_LocalArray *ESMC_LocalArraySlice(int slicedim, int sliceloc, int *rc)
