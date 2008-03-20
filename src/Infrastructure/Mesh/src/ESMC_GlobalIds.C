@@ -138,7 +138,7 @@ void GlobalIds(const std::vector<long> &current_ids,
     msg.communicate();
 
     // unpack
-    for (UInt *p = msg.inProc_begin(); p != msg.inProc_end(); p++) {
+    for (std::vector<UInt>::iterator p = msg.inProc_begin(); p != msg.inProc_end(); p++) {
       SparseMsg::buffer &b = *msg.getRecvBuffer(*p);
 
       UInt nids = b.msg_size() / SparsePack<ULong>::size();
@@ -263,7 +263,7 @@ if (id == 0) Throw() << "Id is zero, why?? from proc:" << Par::Rank() << ".  id_
      std::vector<long> incoming_ids; incoming_ids.reserve(nnew_ids_l);
 
      UInt num_in = 0;
-     for (UInt *p = msg.inProc_begin(); p != msg.inProc_end(); p++) {
+     for (std::vector<UInt>::iterator p = msg.inProc_begin(); p != msg.inProc_end(); p++) {
        UInt proc = *p;
        SparseMsg::buffer &b = *msg.getRecvBuffer(proc);
 

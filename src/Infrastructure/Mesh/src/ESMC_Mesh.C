@@ -373,7 +373,7 @@ Par::Out() << "Resolve object type:" << MeshObjTypeString(obj_type) << std::endl
       msg.communicate();
 
       // ** Unpack **
-     for (UInt *p = msg.inProc_begin(); p != msg.inProc_end(); ++p) {
+     for (std::vector<UInt>::iterator p = msg.inProc_begin(); p != msg.inProc_end(); ++p) {
        UInt proc = *p;
        SparseMsg::buffer &b = *msg.getRecvBuffer(proc);
   
@@ -991,7 +991,7 @@ Par::Out() << std::endl;
 
 
       // ** Unpack **
-      for (UInt *p = msg.inProc_begin(); p != msg.inProc_end(); ++p) {
+      for (std::vector<UInt>::iterator p = msg.inProc_begin(); p != msg.inProc_end(); ++p) {
         UInt proc = *p;
          SparseMsg::buffer &b = *msg.getRecvBuffer(proc);
 
@@ -1132,7 +1132,7 @@ Par::Out() << "\tok to delete: no used_by relations here" << std::endl;
       rmsg.communicate();
 
       // Unpack the responses.
-      for (UInt *p = rmsg.inProc_begin(); p != rmsg.inProc_end(); ++p) {
+      for (std::vector<UInt>::iterator p = rmsg.inProc_begin(); p != rmsg.inProc_end(); ++p) {
         UInt proc = *p;
          SparseMsg::buffer &b = *rmsg.getRecvBuffer(proc);
 
@@ -1258,7 +1258,7 @@ Par::Out() << "Vote map insert:" << MeshObjTypeString(obj_type) << " " << obj.ge
 
       // Unpack:
       MeshObjIDMap &omap = get_map(obj_type);
-      for (UInt *p = vmsg.inProc_begin(); p != vmsg.inProc_end(); ++p) {
+      for (std::vector<UInt>::iterator p = vmsg.inProc_begin(); p != vmsg.inProc_end(); ++p) {
         UInt proc = *p;
         SparseMsg::buffer &b = *vmsg.getRecvBuffer(proc);
 
@@ -1461,7 +1461,7 @@ void Mesh::CreateGhost() {
               std::lower_bound(selem.begin(), selem.end(), cnode);
               
             if (lb == selem.end() || *lb != cnode)
-              selem.push_back(CommRel::CommNode(elem[e], nprocs[i]));
+              selem.insert(lb, CommRel::CommNode(elem[e], nprocs[i]));
               
           }
         

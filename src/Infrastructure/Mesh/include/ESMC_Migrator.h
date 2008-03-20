@@ -240,7 +240,7 @@ void Migrator::Migrate(T &t, R &r, bool obj_equal) {
     msg.communicate();
   
     // Now unpack the object
-    for (UInt *p = msg.inProc_begin(); p != msg.inProc_end(); p++) {
+    for (std::vector<UInt>::iterator p = msg.inProc_begin(); p != msg.inProc_end(); p++) {
       
       UInt proc = *p;
       SparseMsg::buffer &b = *msg.getRecvBuffer(proc);

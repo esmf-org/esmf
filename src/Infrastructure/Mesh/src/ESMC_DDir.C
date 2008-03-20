@@ -113,7 +113,7 @@ if (sizes[i] != sizest[i]) std::cout << "sizes mismatch:" << sizes[i] << ", " <<
   msg.communicate();
 
   // Now unpack
-  for (UInt *p = msg.inProc_begin(); p != msg.inProc_end(); ++p) {
+  for (std::vector<UInt>::iterator p = msg.inProc_begin(); p != msg.inProc_end(); ++p) {
    UInt proc = *p;
    SparseMsg::buffer &b = *msg.getRecvBuffer(proc);
 
@@ -217,7 +217,7 @@ void DDir<HASH>::RemoteGID(UInt ngid, const UInt gid[], UInt orig_proc[], UInt l
     msg.communicate();
   
     // Now unpack
-    for (UInt *p = msg.inProc_begin(); p != msg.inProc_end(); ++p) {
+    for (std::vector<UInt>::iterator p = msg.inProc_begin(); p != msg.inProc_end(); ++p) {
      UInt proc = *p;
      SparseMsg::buffer &b = *msg.getRecvBuffer(proc);
   
@@ -375,7 +375,7 @@ void DDir<HASH>::RemoteGID(UInt ngid, const UInt gid[], std::vector<dentry> &res
     msg.communicate();
   
     // Now unpack
-    for (UInt *p = msg.inProc_begin(); p != msg.inProc_end(); ++p) {
+    for (std::vector<UInt>::iterator p = msg.inProc_begin(); p != msg.inProc_end(); ++p) {
      UInt proc = *p;
      SparseMsg::buffer &b = *msg.getRecvBuffer(proc);
   
@@ -478,7 +478,7 @@ void DDir<HASH>::RemoteGID(UInt ngid, const UInt gid[], std::vector<dentry> &res
     tresponse.clear();
     
     // Now unpack
-    for (UInt *p = msg.inProc_begin(); p != msg.inProc_end(); ++p) {
+    for (std::vector<UInt>::iterator p = msg.inProc_begin(); p != msg.inProc_end(); ++p) {
      UInt proc = *p;
      SparseMsg::buffer &b = *msg.getRecvBuffer(proc);
 

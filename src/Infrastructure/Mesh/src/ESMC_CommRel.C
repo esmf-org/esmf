@@ -186,7 +186,7 @@ MPI_Barrier(MPI_COMM_WORLD);
   MapType new_domain_objs;
   MapType::iterator ri = bootStrap.range_begin();
   // And now unpack the ids.  Since we don't have a range yet, we use buffer to unpack
-  for (UInt *p = msg.inProc_begin(); p != msg.inProc_end(); p++) {
+  for (std::vector<UInt>::iterator p = msg.inProc_begin(); p != msg.inProc_end(); p++) {
     UInt proc = *p;
     SparseMsg::buffer &b = *msg.getRecvBuffer(proc);
 
@@ -458,7 +458,7 @@ std::cout << "P:" << msg.commRank() << " putting in nid=" << send_size_all[domai
 
 
   // ** Unapck; And now unpack the ids.  Since we don't have a range yet, we use buffer to unpack
-  for (UInt *p = msg.inProc_begin(); p != msg.inProc_end(); p++) {
+  for (std::vector<UInt>::iterator p = msg.inProc_begin(); p != msg.inProc_end(); p++) {
     UInt proc = *p;
     SparseMsg::buffer &b = *msg.getRecvBuffer(proc);
 
@@ -615,7 +615,7 @@ void CommRel::complete_range() {
 
 
   // And now unpack the ids.  Since we don't have a range yet, we use buffer to unpack
-  for (UInt *p = msg.inProc_begin(); p != msg.inProc_end(); p++) {
+  for (std::vector<UInt>::iterator p = msg.inProc_begin(); p != msg.inProc_end(); p++) {
     UInt proc = *p;
     SparseMsg::buffer &b = *msg.getRecvBuffer(proc);
 
@@ -812,7 +812,7 @@ void CommRel::send_fields(UInt _nfields, _field *const *_sfields, _field *const 
 
   MapType::iterator ri = range_begin();
   // And now unpack the fields
-  for (UInt *p = msg.inProc_begin(); p != msg.inProc_end(); p++) {
+  for (std::vector<UInt>::iterator p = msg.inProc_begin(); p != msg.inProc_end(); p++) {
     UInt proc = *p;
     SparseMsg::buffer &b = *msg.getRecvBuffer(proc);
 

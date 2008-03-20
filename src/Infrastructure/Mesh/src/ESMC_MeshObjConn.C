@@ -239,7 +239,7 @@ void common_objs(MeshObj *obj,
 {
   std::vector<MeshObj*> on(1, obj);
 
-  common_objs(&on[0], &on[on.size()], rel_type, out_obj_type, out_obj);
+  common_objs(&on[0], &on[0]+on.size(), rel_type, out_obj_type, out_obj);
 }
 
 #ifdef OLD_COMMON_OBJS

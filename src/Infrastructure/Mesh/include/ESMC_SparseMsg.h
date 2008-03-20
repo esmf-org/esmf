@@ -112,8 +112,8 @@ public:
 
   // Iterators to incoming processor messages.  These will be sorted
   // by processor number.
-  UInt *inProc_begin() {return &inProcs[0];}
-  UInt *inProc_end() {return &inProcs[num_incoming];}
+  std::vector<UInt>::iterator inProc_begin() {return inProcs.begin();}
+  std::vector<UInt>::iterator inProc_end() {return inProcs.end();}
 
   // send bug Filled to send?
   bool filled();
