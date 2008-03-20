@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.21.2.2 2008/03/20 04:10:33 theurich Exp $
+// $Id: ESMC_LocalArray.h,v 1.21.2.3 2008/03/20 21:24:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -237,7 +237,14 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
     
     // force the base address in f90 ptr to be that stored in LocalArray
     int ESMC_LocalArrayForceF90Ptr(){
-      *((void **)(&f90dopev)) = base_addr;
+      void **f90dopev_cast = (void **)(&f90dopev);
+      if ((char *)(*f90dopev_cast)-(char *)base_addr > 16 ||
+        (char *)(*f90dopev_cast)-(char *)base_addr < -16){
+        // Only force base_addr into dope vector if it appears to suffer from
+        // temp. copy problem. This check helps in cases where dope vector 
+        // base address has a small offset, e.g. g95
+        *f90dopev_cast = base_addr;
+      }
       return ESMF_SUCCESS;
     }
 
