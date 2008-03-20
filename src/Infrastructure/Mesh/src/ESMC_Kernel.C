@@ -265,7 +265,10 @@ void Kernel::CompactStores() {
 
     sn = si; ++sn;
 
-    if (si->empty()) stores.erase(*si);
+    if (si->empty()) {
+      stores.erase(*si);
+      delete &*si;
+    }
 
     si = sn;
 
