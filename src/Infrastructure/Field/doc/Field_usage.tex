@@ -1,4 +1,4 @@
-% $Id: Field_usage.tex,v 1.9.2.1 2008/02/07 05:24:01 theurich Exp $
+% $Id: Field_usage.tex,v 1.9.2.2 2008/03/20 21:04:05 feiliu Exp $
 
 %\subsection{Use and Examples}
 
@@ -59,13 +59,3 @@ data values in the array.  Then at Field create time, the
 appropriate amount of memory is allocated to contain the
 data which is local to each DE.
 
-\subsubsection{Field Deletion}
-
-There is a {\tt ESMF\_FieldDestroy()} method which releases
-any data buffers which were allocated or internally referenced 
-by this Field,
-and deletes the Field object.  Since a single Grid reference 
-can be shared by multiple Fields, the internal Grid is not deleted by 
-this call. Field provides copy behavior through creation and
-set interface, the internally referenced {\tt ESMF\_Array} object
-will be deleted upon Field destruction.
