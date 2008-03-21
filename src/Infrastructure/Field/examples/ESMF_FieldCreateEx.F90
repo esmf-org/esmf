@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.10 2008/03/21 14:58:55 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.11 2008/03/21 19:43:02 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -46,6 +46,7 @@
     integer, dimension(2) :: compEdgeUWdith
     integer, dimension(ESMF_MAXDIM) :: gcc, gec, fa_shape
     integer, dimension(2) :: gridToFieldMap2d
+    integer, dimension(2) :: maxHaloLWidth2d, maxHaloUWidth2d
 
     integer :: i, j, k
 
@@ -344,6 +345,14 @@
 ! 
 !  \end{verbatim}
 !
+!  Here we use rank and dimension count interchangably. These 2 terminologies are typically
+!  equivalent. But there are subtle differences
+!  under certain conditions. Rank is the total number of dimensions of a tensor object.
+!  Dimension count allows a finer description of the heterogeneous dimensions in that object.
+!  For example, A Field of rank 5 can have 3 gridded dimensions and 2 ungridded dimensions.
+!  Rank is precisely the summation of dimension count of all exclusive types of dimensions 
+!  of a tensor object. 
+! 
 !  For example, if a 5D array is used with 3D Grid, there are 2 ungridded dimensions.
 !  And ungriddedLBound=(/1,2/), ungriddedUBound=(/5,7/).
 !  Suppose, the distribution of dimensions look like (O, X, O, X, O), O means gridded,
@@ -389,21 +398,21 @@
 !
 !  In this example, both dimensions of the Grid are distributed and the
 !  mapping between DistGrid and Grid is (/1,2/). We will introduce rule 3
-!  assuming distgridToGrid=(/1,2,3...gridDimCount/), and distgridDimCount equals
-!  to gridDimCount.
+!  assuming distgridToGridMap=(/1,2,3...gridDimCount/), and distgridDimCount equals
+!  to gridDimCount. This is a reasonable assumption in typical Field use.
 !
 !  We apply the mapping gridToFieldMap on rule 1 to create rule 3:
 !  \begin{verbatim}
 ! 
 !  (3) fa_shape(gridToFieldMap(i)) = max(computationalCount(i), exclusiveCount(i)        
-!                                 i = 1,..gridDimCount.
+!                                i = 1,..GridDimCount.
 ! 
 !  \end{verbatim}
 !
 !  Back to our example, suppose the 2nd
 !  Field dimension is ungridded, ungriddedLBound=(/3/), ungriddedUBound=(/9/).
 !  gridToFieldMap=(/3,1/), meaning the 1st Grid dimension maps to 3rd Field dimension,
-!  and 2nd grid dimension maps to 1st Field dimension.
+!  and 2nd Grid dimension maps to 1st Field dimension.
 !
 !  First we use rule 3 to compute shapes of the gridded fortran array dimension,
 !  then we use rule 2 to compute shapes of the ungridded fortran array dimension.
@@ -411,8 +420,8 @@
 !  example.
 !EOE
 !BOC
-    gridToFieldMap2d(1) = 1
-    gridToFieldMap2d(2) = 3
+    gridToFieldMap2d(1) = 3
+    gridToFieldMap2d(2) = 1
     do i = 1, 2
         fa_shape(gridToFieldMap2d(i)) = max(gec(i), gcc(i))
     end do
@@ -420,6 +429,159 @@
     allocate(farray3d(fa_shape(1), fa_shape(2), fa_shape(3)))
     field2 = ESMF_FieldCreate(grid, farray3d, &
         ungriddedLBound=(/3/), ungriddedUBound=(/9/), &
+        gridToFieldMap=gridToFieldMap2d, &
+        rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!EOC
+    print *, "Field Create from a Grid and a Fortran data pointer returned"
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_FieldDestroy(field2,rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    deallocate(farray3d)
+
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!-------------------------------- Example -----------------------------
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!BOE
+!\subsubsection{Create 3D Field with 2D Grid and 3D Fortran data pointer with halos}
+!  This example is similar to example 18.2.7, in addition we will show
+!  a user can associate different halo width to a fortran array to create
+!  a Field through the maxHaloLWidth and maxHaloUWdith optional arguments.
+!  
+!  The {\tt ESMF\_FieldCreate} supports creating a Field from a Grid and a
+!  fortran array padded with halos on the distributed dimensions of the fortran
+!  array. Using this technique can avoid passing non-contiguous fortran array
+!  slice to FieldCreate. It gurantees same computational region,
+!  and with halos, a bigger total region is used to contain the entire contiguous
+!  memory block of the fortran array.
+!
+!  The elements of maxHaloLWidth and maxHaloUWdith are applied in the order
+!  distributed dimensions appear in the fortran array. By definition, 
+!  maxHaloLWidth and maxHaloUWdith are 1 dimensional arrays of non-negative 
+!  integer values. The size of haloWidth arrays equal to the number of distributed
+!  dimensions of the fortran array, which is also equal to the number of
+!  distributed dimensions of the Grid used in the Field creation.
+!
+!  Because the order of maxHaloWidth (representing both maxHaloLWidth and
+!  maxHaloUWdith) element is applied to the order distributed dimensions
+!  appear in the fortran array dimensions, it's quite simple to compute
+!  the shape of distributed dimensions of fortran array. They are done
+!  in the same manner when applying ungriddedLBound and ungriddedUBound 
+!  to ungridded dimensions of the fortran array.
+!
+!  Assume we have the mapping between the dimension index of maxHaloWidth
+!  and the dimension index of fortran array, called mhw2fa; and we also
+!  have a mapping between dimension index of fortran array and dimension
+!  index of the DistGrid contained in the Grid. The shape of
+!  distributed dimensions of fortran array can be computed by rule 4: 
+! 
+!  \begin{verbatim}
+!
+!  (4) fa_shape(mhw2fa(k)) = max((computationalCount(fa2dg(mhw2fa(k))), 
+!                            exclusiveCount(fa2dg(mhw2fa(k))) +
+!                            maxHaloUWidth(k) - maxHaloLWidth(k) + 1
+!                        k = 1...size(maxHaloWidth) 
+!
+!  \end{verbatim}
+!  
+!  This may seem a little daunting but algorithmically the computation
+!  can be done a lot easily shown by the following pseudocode:
+!
+!  \begin{verbatim}
+!
+!  fa_index = 1
+!  do i = 1, farray_rank
+!     if i-th index of fortran array is distributed
+!         fa_shape(i) = maxHaloUWidth(fa_index) - maxHaloLWidth(fa_index) + 1
+!                     + max(computationalCount(fa2dg(i)), exclusiveCount(fa2dg(i)))
+!     endif
+!  enddo
+!
+!  \end{verbatim}
+!
+!  The only complication then is to figure out the mapping from fortran
+!  array dimension index to DistGrid dimension index. This process can
+!  be done by first compute reverse mapping from  Field to Grid, and from
+!  Grid to DistGrid, then by chaining the reverse mappings, one can obtain
+!  the mapping from fortran array to DistGrid.
+!
+!  Typically, we don't have to consider these complications if the following
+!  conditions are met: 1) all Grid dimensions are distributed; 2) DistGrid
+!  in the Grid has a dimension index mapping to the Grid in the form of 
+!  natural order (/1,2,3,.../). This natural order mapping is the
+!  default mapping between various objects throughout ESMF; 3) Grid to Field
+!  mapping is in the form of natural order, i.e. default mapping. These
+!  seem like a lot of conditions but they are the default case in the interaction
+!  between DistGrid, Grid, and Field. When these conditions are met, which
+!  is typically true, the shape of distributed dimensions of fortran array
+!  follows rule 5:
+!
+!  \begin{verbatim}
+!
+!  (5) fa_shape(k) = max(exclusiveCount(k), computationalCount(k) + 
+!                    maxHaloUWidth(k) + maxHaloLWidth(k)) 
+!                k = 1...size(maxHaloWidth)
+!
+!  \end{verbatim}
+!
+!  Let's examine an example on how to apply rule 5. Suppose we have a
+!  5D array and a 3D Grid that has its first 3 dimensions mapped to the first
+!  3 dimensions of the fortran array. maxHaloLWidth=(/1,2,3/), 
+!  maxHaloUWdith=(/7,9,10/), then by rule 5, the following pseudo code
+!  can be used to compute the shape of the first 3 dimensions of the fortran
+!  array. The shape of the remaining two ungridded dimensions are to be
+!  computed according to rule 2.
+!
+!  \begin{verbatim}
+!
+!  do k = 1, 3
+!      fa_shape(k) = max(exclusiveCount(k), computationalCount(k) + 
+!                    maxHaloUWidth(k) + maxHaloLWidth(k)) 
+!  enddo
+!
+!  \end{verbatim}
+!
+!  Suppose now the gridToFieldMap=(/2,3,4/) instead which says
+!  the first dimension of Grid maps to the 2nd dimension of Field (or 
+!  fortran array) and so on and so forth, we can obtain a more general form 
+!  of rule 5 by introducing first_distdim_index shift when Grid to Field
+!  map (gridToFieldMap) is in the form of (/a,a+1,a+2.../).
+!
+!  \begin{verbatim}
+!
+!  (6) fa_shape(k+first_distdim_index-1) = max(exclusiveCount(k),
+!                 computationalCount(k)) +  maxHaloUWidth(k) + maxHaloLWidth(k) )
+!                                      k = 1...size(maxHaloWidth)
+!
+!  \end{verbatim}
+!
+!  It's instictive that first_distdim_index=a. If the first dimension of the fortran
+!  array is distributed, then rule 6 degenerates into rule 5, which is
+!  the typical case.
+!
+!  Back to our example creating a 3D Field from a 2D Grid and a 3D intrinsic
+!  fortran array, we will use the Grid created from preceeding example
+!  that satisfies condition 1 and 2. We'll also use a simple gridToFieldMap
+!  (1,2) which is the default mapping. First we use rule 5 to compute
+!  the shape of distributed dimensions then we use rule 2 to compute the shape
+!  of the ungridded dimensions.
+!EOE  
+
+!BOC
+    gridToFieldMap2d(1) = 1
+    gridToFieldMap2d(2) = 2
+    maxHaloLWidth2d(1) = 3
+    maxHaloLWidth2d(2) = 4
+    maxHaloUWidth2d(1) = 3
+    maxHaloUWidth2d(2) = 5
+    do k = 1, 2
+        fa_shape(k) = max(gec(k), gcc(k)+maxHaloLWidth2d(k)+maxHaloUWidth2d(k) )
+    end do
+    fa_shape(3) = 7
+    allocate(farray3d(fa_shape(1), fa_shape(2), fa_shape(3)))
+    field2 = ESMF_FieldCreate(grid, farray3d, &
+        ungriddedLBound=(/3/), ungriddedUBound=(/9/), &
+        maxHaloLWidth=maxHaloLWidth2d, maxHaloUWidth=maxHaloUWidth2d, &
         gridToFieldMap=gridToFieldMap2d, &
         rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
