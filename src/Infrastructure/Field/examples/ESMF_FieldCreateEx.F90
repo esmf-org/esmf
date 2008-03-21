@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.12 2008/03/21 19:56:40 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.13 2008/03/21 22:20:23 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -448,12 +448,12 @@
 !  a user can associate different halo width to a fortran array to create
 !  a Field through the maxHaloLWidth and maxHaloUWdith optional arguments.
 !  
-!  The {\tt ESMF\_FieldCreate} supports creating a Field from a Grid and a
+!  The {\tt ESMF\_FieldCreate} interface supports creating a Field from a Grid and a
 !  fortran array padded with halos on the distributed dimensions of the fortran
-!  array. Using this technique can avoid passing non-contiguous fortran array
-!  slice to FieldCreate. It gurantees same computational region,
-!  and with halos, a bigger total region is used to contain the entire contiguous
-!  memory block of the fortran array.
+!  array. Using this technique one can avoid passing non-contiguous fortran array
+!  slice to FieldCreate. It gurantees same computational region;
+!  and by using halos, it also defines a bigger total region to contain 
+!  the entire contiguous memory block of the fortran array.
 !
 !  The elements of maxHaloLWidth and maxHaloUWdith are applied in the order
 !  distributed dimensions appear in the fortran array. By definition, 
@@ -466,14 +466,14 @@
 !  maxHaloUWdith) element is applied to the order distributed dimensions
 !  appear in the fortran array dimensions, it's quite simple to compute
 !  the shape of distributed dimensions of fortran array. They are done
-!  in the same manner when applying ungriddedLBound and ungriddedUBound 
-!  to ungridded dimensions of the fortran array.
+!  in the similar manner when applying ungriddedLBound and ungriddedUBound 
+!  to ungridded dimensions of the fortran array defined by rule 2.
 !
 !  Assume we have the mapping between the dimension index of maxHaloWidth
 !  and the dimension index of fortran array, called mhw2fa; and we also
 !  have a mapping between dimension index of fortran array and dimension
-!  index of the DistGrid contained in the Grid. The shape of
-!  distributed dimensions of fortran array can be computed by rule 4: 
+!  index of the DistGrid contained in the Grid, called fa2dg. The shape of
+!  distributed dimensions of a fortran array can be computed by rule 4: 
 ! 
 !  \begin{verbatim}
 !
@@ -516,7 +516,7 @@
 !  seem like a lot of conditions but they are the default case in the interaction
 !  between DistGrid, Grid, and Field. When these conditions are met, which
 !  is typically true, the shape of distributed dimensions of fortran array
-!  follows rule 5:
+!  follows rule 5 in a simple form:
 !
 !  \begin{verbatim}
 !
@@ -564,9 +564,10 @@
 !  Back to our example creating a 3D Field from a 2D Grid and a 3D intrinsic
 !  fortran array, we will use the Grid created from preceeding example
 !  that satisfies condition 1 and 2. We'll also use a simple gridToFieldMap
-!  (1,2) which is the default mapping. First we use rule 5 to compute
+!  (1,2) which is the default mapping that satisfies condtion 3. 
+!  First we use rule 5 to compute
 !  the shape of distributed dimensions then we use rule 2 to compute the shape
-!  of the ungridded dimensions.
+!  of the ungridded dimensions, in this example 7=9-3+1.
 !EOE  
 
 !BOC
