@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.11 2008/03/21 19:43:02 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.12 2008/03/21 19:56:40 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -477,9 +477,9 @@
 ! 
 !  \begin{verbatim}
 !
-!  (4) fa_shape(mhw2fa(k)) = max((computationalCount(fa2dg(mhw2fa(k))), 
-!                            exclusiveCount(fa2dg(mhw2fa(k))) +
-!                            maxHaloUWidth(k) - maxHaloLWidth(k) + 1
+!  (4) fa_shape(mhw2fa(k)) = max((exclusiveCount(fa2dg(mhw2fa(k))), 
+!                            computationalCount(fa2dg(mhw2fa(k))) +
+!                            maxHaloUWidth(k) + maxHaloLWidth(k))
 !                        k = 1...size(maxHaloWidth) 
 !
 !  \end{verbatim}
@@ -492,8 +492,10 @@
 !  fa_index = 1
 !  do i = 1, farray_rank
 !     if i-th index of fortran array is distributed
-!         fa_shape(i) = maxHaloUWidth(fa_index) - maxHaloLWidth(fa_index) + 1
-!                     + max(computationalCount(fa2dg(i)), exclusiveCount(fa2dg(i)))
+!         fa_shape(i) = max(exclusiveCount(fa2dg(i)), 
+!                       computationalCount(fa2dg(i)) +
+!                       maxHaloUWidth(fa_index) + maxHaloLWidth(fa_index))
+!         fa_index = fa_index + 1
 !     endif
 !  enddo
 !
