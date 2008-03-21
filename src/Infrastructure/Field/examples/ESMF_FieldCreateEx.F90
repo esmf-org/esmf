@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.9 2008/03/20 22:17:45 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.10 2008/03/21 14:58:55 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -187,15 +187,15 @@
 !  1st dimension of fortran array pointer, 2nd dimension of grid maps to 2nd dimension of
 !  fortran array pointer, so on and so forth. 
 !
-!  In order for a Field to be created/finalized from the Grid and the fortran array pointer, 
-!  certain rules of the fortran array bounds must be followed. We will talk through these
+!  In order for a Field to be created/finalized from a Grid and a fortran array pointer, 
+!  certain rules of the fortran array bounds must be obeyed. We will talk through these
 !  rules as we progress in Field creation examples. In general, we will make
 !  frequent references to a few key terminologies in the ESMF framework. These terminologies
 !  reflects the fact that a {\tt ESMF\_Field} is a higher level data structure consisting of
-!  a {\tt ESMF\_Grid} and a {\tt ESMF\_Array}. Therefore
-!  to better understand these terminologies and concepts behind them, 
+!  a {\tt ESMF\_Grid} and a {\tt ESMF\_Array}. For a better discussion of
+!  these terminologies and concepts behind them, 
 !  e.g. exclusive, computational, total bounds
-!  for the lower and upper corner of data region, a user is encouraged to refer to 
+!  for the lower and upper corner of data region, etc.., user can refer to 
 !  the explanation of these concepts for Grid and Array in their respective chapters 
 !  in the reference manual. The examples here aim to help a user to get up to speed to
 !  create Fields for most use scenarios.
@@ -213,8 +213,7 @@
 !  \end{verbatim}
 ! 
 !  fa\_shape(i) defines the shape of i-th dimension that needs to be allocated if a user
-!  intends to use a fortran array pointer instead of explicit-shape array as target of a
-!  fortran array pointer.
+!  intends to use a fortran array pointer instead of explicit-shape array.
 !  
 !  Fortran array dimension size (formally called shape in most Fortran language books), sometimes
 !  this manual also uses the terminology bounds, counts because the following equation holds: 
@@ -230,12 +229,12 @@
 !  
 !  rule 1 is most useful for a user working with Field creation from a Grid and a fortran
 !  array pointer in most scenarios. It extends to higher dimension count, 3D, 4D, etc...
-!  Typically, as the code example demonstrates, the user first creates a Grid (here we
+!  Typically, as the code example demonstrates, a user first creates a Grid (here we
 !  reuse the grid created in the preceeding example), then the user use {\tt ESMF\_GridGet}
 !  to retrieve the computational and exclusive counts, next the user calculates the shape
 !  of each fortran array dimension according to rule 1. The fortran array pointer is allocated
 !  and initialized based on the computed shape and a Field can either be created or finalized
-!  if it was a empty field.
+!  from an empty field.
 !
 !  There are important details that can be skipped but good to know for {\tt ESMF\_FieldSetCommit}
 !  and {\tt ESMF\_FieldCreate} from a fortran data pointer. 1) these methods require each PET contains
@@ -294,11 +293,11 @@
 !  a 2D grid and 3D data pointer. One immediate problem follows: 
 !  how does one define the bounds of the ungridded dimension? This is
 !  achieved by the optional arguments ungriddedLBound and ungriddedUBound
-!  of FieldCreate interface. By definition, ungriddedUBound and ungriddedUBound
+!  of FieldCreate interface. By definition, ungriddedLBound and ungriddedUBound
 !  are both 1 dimensional integer fortran arrays.
 !
-!  Formally, let fa\_shape(j=1...FieldDimCount-GridDimCount) be the size of 
-!  ungridded dimension of a Field relative to the Grid used in Field creation,
+!  Formally, let fa\_shape(j=1...FieldDimCount-GridDimCount) be the shape of 
+!  ungridded dimensions of a Field relative to the Grid used in Field creation,
 !  here FieldDimCount is the number of dimensions of the fortran array, which
 !  equals to the number of dimensions of the result Field. GridDimCount is
 !  the number of dimensions of the Grid. 
@@ -328,11 +327,11 @@
 !  \begin{verbatim}
 ! 
 !  (2) fa_shape(ugb2fa(j)) = ungriddedUBound(j) - ungriddedLBound(j) + 1 
-! 
+!                        j = 1..FortranArrayDimCount - GridDimCount 
 !  \end{verbatim}
 !
 !  The mapping can be computed in linear time proportional to the
-!  fortran array dimension count using the following algorithm in pseudocode:
+!  fortran array dimension count (rank) using the following algorithm in pseudocode:
 !  \begin{verbatim}
 !
 !  map_index = 1
