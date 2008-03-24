@@ -1,4 +1,4 @@
-% $Id: Field_implnotes.tex,v 1.3 2005/03/22 22:02:45 nscollins Exp $
+% $Id: Field_implnotes.tex,v 1.3.6.1 2008/03/24 19:05:55 feiliu Exp $
 
 %\subsection{Design and Implementation Notes}
 
@@ -16,14 +16,7 @@ is done.
 defined inside the framework by a Field derived type and a set of 
 subprograms (functions and subroutines) which operate on that derived type.  
 The Field class itself is very thin; it is a container class which
-groups a Grid, an Array, and a FieldDataMap object together.
-As a programming convienence, the parts of the Field which refer to 
-data which is local to a single DE are grouped in a LocalField 
-sub-derived type,
-but it is not a true class in that there are no LocalField methods
-which operate on it.   In general, any derived type members which
-are not in the LocalField subtype describe global information about
-the Field.
+groups a Grid and an Array object together.
 
 \item Fields follow the framework-wide convention of the
 {\it unison} creation and operation rule: All PETs which are
