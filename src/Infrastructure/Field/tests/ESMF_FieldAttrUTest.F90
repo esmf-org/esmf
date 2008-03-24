@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldAttrUTest.F90,v 1.1 2008/03/04 17:40:37 rokuingh Exp $
+! $Id: ESMF_FieldAttrUTest.F90,v 1.2 2008/03/24 18:18:42 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldAttrUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldAttrUTest.F90,v 1.1 2008/03/04 17:40:37 rokuingh Exp $'
+      '$Id: ESMF_FieldAttrUTest.F90,v 1.2 2008/03/24 18:18:42 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -48,7 +48,7 @@ program ESMF_FieldAttrUTest
 
       type(ESMF_Field) :: field
       character(ESMF_MAXSTR) :: conv, purp, attrname, attrvalue
-      integer :: rc, count, number
+      integer :: rc, count, number, defaultvalue
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -87,6 +87,18 @@ program ESMF_FieldAttrUTest
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an integer attribute from a Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.65), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      defaultvalue = 7;
+
+      !EX_UTest
+      ! Get an integer attribute from a Field Test
+      call ESMF_FieldAttributeGet(field, name="NotSides", value=number, &
+        defaultvalue=defaultvalue, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting an integer attribute from a Field Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.7), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
