@@ -1,4 +1,4 @@
-! $Id: modelComp.F90,v 1.1.2.3 2008/03/05 21:03:31 theurich Exp $
+! $Id: modelComp.F90,v 1.1.2.4 2008/03/25 20:41:44 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -194,7 +194,7 @@ module modelCompMod
     call ESMF_StateGetRouteHandle(modelAExp, "modelA2BRedist", routehandle, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_RouteHandleRelease(routehandle=routehandle, rc=rc)
+    call ESMF_ArrayRedistRelease(routehandle=routehandle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! Destroy both internal model Components

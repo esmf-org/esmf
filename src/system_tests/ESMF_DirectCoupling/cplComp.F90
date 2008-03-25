@@ -1,4 +1,4 @@
-! $Id: cplComp.F90,v 1.1.2.2 2008/02/11 18:19:33 theurich Exp $
+! $Id: cplComp.F90,v 1.1.2.3 2008/03/25 20:41:43 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -159,7 +159,7 @@ module cplCompMod
     call ESMF_StateGetRouteHandle(importState, "io2modelRedist", routehandle, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_RouteHandleRelease(routehandle=routehandle, rc=rc)
+    call ESMF_ArrayRedistRelease(routehandle=routehandle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine
@@ -182,7 +182,7 @@ module cplCompMod
     call ESMF_StateGetRouteHandle(importState, "model2ioRedist", routehandle, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_RouteHandleRelease(routehandle=routehandle, rc=rc)
+    call ESMF_ArrayRedistRelease(routehandle=routehandle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine

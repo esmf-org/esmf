@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.4.2.1 2008/02/11 06:13:46 theurich Exp $
+! $Id: user_coupler.F90,v 1.4.2.2 2008/03/25 20:41:43 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -206,8 +206,8 @@ module user_coupler
 
     print *, "User Coupler Final starting"
   
-    ! Release resources stored for the Regridding.
-    call ESMF_RouteHandleRelease(routehandle=routehandle, rc=rc)
+    ! Release resources stored for the ArraySparseMatMul.
+    call ESMF_ArraySparseMatMulRelease(routehandle=routehandle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     print *, "User Coupler Final returning"
