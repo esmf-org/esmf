@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateGetUTest.F90,v 1.1.2.8 2008/03/21 14:44:08 feiliu Exp $
+! $Id: ESMF_BundleCreateGetUTest.F90,v 1.1.2.9 2008/03/25 00:35:04 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -90,7 +90,7 @@
     call bundle_test1_generic(rc, ESMF_DATA_REF, do_slicing=.true., do_slicing1=.true.)
     write(name, *) "Creating Bundle, add Fields, retrieve data pointers, ESMF_DATA_REF, slicing type 0 and 1"
     write(failMsg, *) "Did not return SUCCESS"
-    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
     !EX_UTest_Multi_Proc_Only
@@ -98,7 +98,7 @@
     call bundle_test1_generic(rc, ESMF_DATA_COPY, do_slicing=.true., do_slicing1=.true.)
     write(name, *) "Creating Bundle, add Fields, retrieve data pointers, ESMF_DATA_COPY, slicing type 0 and 1"
     write(failMsg, *) "Did not return SUCCESS"
-    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
     call ESMF_TestEnd(result, ESMF_SRCLINE)
 
@@ -136,7 +136,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
 
-        call retrieve_bundle_dataptr(bundle, do_slicing, do_slicing1, rc=localrc)
+        call retrieve_bundle_dataptr(bundle, copyflag, do_slicing, do_slicing1, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
@@ -247,7 +247,7 @@ contains
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
 
-            f5 = ESMF_FieldCreate(grid, farray3(3:7, ::2), copyflag, name='field5', rc=localrc)
+            f5 = ESMF_FieldCreate(grid, farray4(3:7, ::2), copyflag, name='field5', rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
@@ -260,8 +260,9 @@ contains
 
     end subroutine assemble_bundle
 
-    subroutine retrieve_bundle_dataptr(bundle, do_slicing, do_slicing1, rc)
+    subroutine retrieve_bundle_dataptr(bundle, copyflag, do_slicing, do_slicing1, rc)
         type(ESMF_Bundle)   :: bundle
+        type(ESMF_CopyFlag), optional, intent(in)   :: copyflag
         logical, optional, intent(in)               :: do_slicing
         logical, optional, intent(in)               :: do_slicing1
         integer, optional   :: rc
@@ -325,6 +326,7 @@ contains
 
         if(ldo_slicing) then
             ! test field3 created from farray3 :, 4:13
+            ! contiguous slice -> will work in DATA_REF and DATA_COPY mode              
             call ESMF_BundleGetField(bundle, 'field3', f3, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
@@ -345,6 +347,7 @@ contains
         endif
         if(ldo_slicing1) then
             ! test field4 created from farray4 3:7, 4:13
+            ! discontiguous slice -> DATA_COPY will work, DATA_REF will not work
             call ESMF_BundleGetField(bundle, 'field4', f4, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
@@ -359,11 +362,20 @@ contains
                     if( farray4(i, j) .ne. i + 2 + (j+3) * 5) localrc = ESMF_FAILURE
                 enddo
             enddo
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (present(copyflag) .and. copyflag.eq.ESMF_DATA_COPY) then
+              ! only DATA_COPY is expected to work correctly
+              if (ESMF_LogMsgFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
+            else
+              if (ESMF_LogMsgFoundError(localrc, &
+                    ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rc)) continue
+              rc = ESMF_SUCCESS ! reset
+            endif
 
             ! test field5 created from farray4 3:7, ::2
+            ! discontiguous slice -> DATA_COPY will work, DATA_REF will not work
             call ESMF_BundleGetField(bundle, 'field5', f5, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
@@ -378,9 +390,17 @@ contains
                     if( farray5(i, j) .ne. i + 2 + (j*2-1) * 5) localrc = ESMF_FAILURE
                 enddo
             enddo
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (present(copyflag) .and. copyflag.eq.ESMF_DATA_COPY) then
+              ! only DATA_COPY is expected to work correctly
+              if (ESMF_LogMsgFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
+            else
+              if (ESMF_LogMsgFoundError(localrc, &
+                    ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rc)) continue
+              rc = ESMF_SUCCESS ! reset
+            endif
         endif
 
 
