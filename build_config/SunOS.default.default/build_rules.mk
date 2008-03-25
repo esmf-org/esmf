@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.14.6.2 2008/03/25 17:52:57 theurich Exp $
+# $Id: build_rules.mk,v 1.14.6.3 2008/03/25 18:04:37 theurich Exp $
 # 
 # SunOS.default.default
 #
@@ -51,6 +51,11 @@ ESMF_CXXCOMPILER_VERSION    = echo Studio 12
 # How to specify module directories
 #
 ESMF_F90IMOD        = -M
+
+############################################################
+# Use cpp for Fortran preprocessing
+#
+ESMF_F90COMPILEOPTS += -xpp=cpp
 
 ############################################################
 # 32- vs. 64-bit ABI
