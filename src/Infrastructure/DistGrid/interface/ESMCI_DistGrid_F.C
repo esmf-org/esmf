@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid_F.C,v 1.1.2.2 2008/03/01 01:30:25 theurich Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.1.2.3 2008/03/25 21:34:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -401,10 +401,6 @@ extern "C" {
           ii[j] = 0;  // reset
         // loop over all elements in exclusive region for localDe
         while(ii[dimCount-1] < iiEnd[dimCount-1]){
-//          int jjj;
-//          for (jjj=0; jjj<dimCount-1; jjj++)
-//            printf("%d, ", ii[jjj]);
-//          printf("%d)\n", ii[jjj]);
           (*seqIndexList)->array[index] =
             (*ptr)->getSequenceIndexLocalDe(localDe, ii);
           ++index;
@@ -417,6 +413,7 @@ extern "C" {
             }
           }
         }
+        delete [] ii;
       }
     }
     // return successfully
