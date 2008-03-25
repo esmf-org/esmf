@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompSetServ.F90,v 1.10 2008/03/06 19:22:27 svasquez Exp $
+! $Id: ESMF_GridCompSetServ.F90,v 1.11 2008/03/25 00:44:31 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -125,6 +125,7 @@
 !
 !  The user-supplied routine must conform to the following interface:
 !
+! !INTERFACE:
 !      interface
 !        subroutine subroutineName (comp, importState, exportState, clock, rc)
 !          type(ESMF\_GridComp) :: comp
@@ -218,6 +219,7 @@
 !  The user-supplied registration routine must conform to the following
 !  interface:
 !
+! !INTERFACE:
 !      interface
 !        subroutine subroutineName (comp, rc)
 !          type(ESMF\_GridComp) :: comp
@@ -225,6 +227,7 @@
 !        end subroutine
 !      end interface
 !
+! !DESCRIPTION:
 !  The subroutine, when called by the framework, must make successive calls to
 !  {\tt ESMF\_GridCompSetEntryPoint} to preset callback routines for initialization,
 !  run, and finalization for a coupler component.
