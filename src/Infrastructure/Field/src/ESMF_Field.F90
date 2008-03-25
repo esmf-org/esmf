@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.272.2.18 2008/03/14 01:46:40 theurich Exp $
+! $Id: ESMF_Field.F90,v 1.272.2.19 2008/03/25 14:29:07 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -202,7 +202,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.272.2.18 2008/03/14 01:46:40 theurich Exp $'
+      '$Id: ESMF_Field.F90,v 1.272.2.19 2008/03/25 14:29:07 feiliu Exp $'
 
 !==============================================================================
 !
@@ -4036,21 +4036,6 @@
       ftype%grid  = grid
       ftype%gridstatus = ESMF_STATUS_READY
       ftype%fieldstatus = ESMF_STATUS_READY 
-
-      ! instead of adding error checking all over the place, call the
-      ! validate routine to check sizes of array vs grid to be sure
-      ! they are consistent.  the tfield is a temp wrapper so we can
-      ! call the user level validate
-      tfield%ftypep => ftype
-      ESMF_INIT_SET_CREATED(tfield)
-
-      call ESMF_FieldValidate(tfield, "", localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
-          ftype%fieldstatus = ESMF_STATUS_INVALID
-          return
-      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
