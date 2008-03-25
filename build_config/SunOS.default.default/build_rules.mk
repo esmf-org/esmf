@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.14.6.1 2008/03/25 17:49:03 theurich Exp $
+# $Id: build_rules.mk,v 1.14.6.2 2008/03/25 17:52:57 theurich Exp $
 # 
 # SunOS.default.default
 #
@@ -46,6 +46,11 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = echo Studio 12
 ESMF_CXXCOMPILER_VERSION    = echo Studio 12
+
+############################################################
+# How to specify module directories
+#
+ESMF_F90IMOD        = -M
 
 ############################################################
 # 32- vs. 64-bit ABI
