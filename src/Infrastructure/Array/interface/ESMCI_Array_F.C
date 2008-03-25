@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.1.2.6 2008/03/12 17:59:50 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.1.2.7 2008/03/25 00:29:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -47,6 +47,7 @@ extern "C" {
         
   void FTN(c_esmc_arraycreatelocalarray)(ESMCI::Array **ptr, 
     ESMC_LocalArray **larrayList, int *larrayCount, ESMCI::DistGrid **distgrid,
+    ESMC_DataCopy *copyflag,
     ESMCI::InterfaceInt **distgridToArrayMap,
     ESMCI::InterfaceInt **computationalEdgeLWidthArg,
     ESMCI::InterfaceInt **computationalEdgeUWidthArg,
@@ -64,7 +65,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     // call into C++
     *ptr = ESMCI::Array::create(larrayList, *larrayCount, *distgrid,
-      *distgridToArrayMap,
+      *copyflag, *distgridToArrayMap,
       *computationalEdgeLWidthArg, *computationalEdgeUWidthArg,
       *computationalLWidthArg, *computationalUWidthArg, *totalLWidthArg,
       *totalUWidthArg, ESMC_NOT_PRESENT_FILTER(indexflag),

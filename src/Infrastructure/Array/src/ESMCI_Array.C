@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.11 2008/03/14 04:08:43 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.12 2008/03/25 00:29:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.11 2008/03/14 04:08:43 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.12 2008/03/25 00:29:22 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -322,6 +322,7 @@ Array *Array::create(
   ESMC_LocalArray **larrayListArg,            // (in)
   int larrayCount,                            // (in)
   DistGrid *distgrid,                         // (in)
+  ESMC_DataCopy copyflag,                     // (in)
   InterfaceInt *distgridToArrayMap,           // (in)
   InterfaceInt *computationalEdgeLWidthArg,   // (in)
   InterfaceInt *computationalEdgeUWidthArg,   // (in)
@@ -864,10 +865,12 @@ Array *Array::create(
       }
     }
     // Adjust LocalArray object for specific undistLBound and undistUBound.
-    // This will allocate memory for a _new_ LocalArray object for each element,
-    // however, the original memory used for data storage will be referenced!
+    // This will allocate memory for a _new_ LocalArray object for each element.
+    // Depending on copyflag the original memory used for data storage will be
+    // referenced or a copy of the data will be made.
     larrayList[i] = larrayListArg[i]->
-      ESMC_LocalArrayAdjust(temp_larrayLBound, temp_larrayUBound, &localrc);
+      ESMC_LocalArrayAdjust(copyflag, temp_larrayLBound, temp_larrayUBound,
+        &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }

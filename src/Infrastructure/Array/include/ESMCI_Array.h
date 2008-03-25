@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.1.2.9 2008/03/12 17:59:50 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.1.2.10 2008/03/25 00:29:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -144,7 +144,8 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     ~Array();
     // create() and destroy()
     static Array *create(ESMC_LocalArray **larrayList, int larrayCount,
-      DistGrid *distgrid, InterfaceInt *distgridToArrayMap,
+      DistGrid *distgrid, ESMC_DataCopy copyflag,
+      InterfaceInt *distgridToArrayMap,
       InterfaceInt *computationalEdgeLWidthArg,
       InterfaceInt *computationalEdgeUWidthArg,
       InterfaceInt *computationalLWidthArg,
