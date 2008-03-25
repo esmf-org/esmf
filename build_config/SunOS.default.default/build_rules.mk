@@ -1,93 +1,95 @@
-# $Id: build_rules.mk,v 1.14 2005/04/11 15:53:38 nscollins Exp $
-#
+# $Id: build_rules.mk,v 1.14.6.1 2008/03/25 17:49:03 theurich Exp $
+# 
 # SunOS.default.default
 #
 
-
+############################################################
+# Default compiler setting.
 #
+ESMF_F90DEFAULT         = f90
+ESMF_CXXDEFAULT         = CC
+
+############################################################
 # Default MPI setting.
 #
 ifeq ($(ESMF_COMM),default)
 export ESMF_COMM := mpi
 endif
 
-
-
 ############################################################
+# MPI dependent settings.
 #
-# location of external libs.  if you want to use any of these,
-# define ESMF_SITE to my_site so the build system can find it,
-# copy this file into Linux.absoft.my_site, and uncomment the
-# libs you want included.  remove the rest of this file since
-# both this file and the site file will be included.
-
-# LAPACK_INCLUDE   = 
-# LAPACK_LIB       = -L/usr/local/lib -llapack
-# NETCDF_INCLUDE   = -I/usr/local/include/netcdf
-# NETCDF_LIB       = -L/usr/local/lib -lnetcdf
-# HDF_INCLUDE      = -I/usr/local/include/hdf
-# HDF_LIB          = -L/usr/local/lib/ -lmfhdf -ldf -ljpeg -lz
-# BLAS_INCLUDE     = 
-# BLAS_LIB         = -latlas
-
-#
-############################################################
-
-# Location of MPI (Message Passing Interface) software
-
+ifeq ($(ESMF_COMM),mpiuni)
+# MPI stub library -----------------------------------------
+ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
+ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
+else
 ifeq ($(ESMF_COMM),mpi)
-MPI_HOME       = /opt/SUNWhpc
-MPI_LIB        += -R${MPI_HOME}/lib -lmpi
+# Vendor MPI -----------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_CXXDEFAULT         = mpiCC
+ESMF_CXXLINKERDEFAULT   = mpif90
+ESMF_MPIRUNDEFAULT      = mpirun
+else
+ifeq ($(ESMF_COMM),user)
+# User specified flags -------------------------------------
+else
+$(error Invalid ESMF_COMM setting: $(ESMF_COMM))
+endif
+endif
 endif
 
+############################################################
+# Print compiler version string
+#
+ESMF_F90COMPILER_VERSION    = echo Studio 12
+ESMF_CXXCOMPILER_VERSION    = echo Studio 12
 
-# commands in a different place from defaults
-AR		   = /usr/ccs/bin/ar
-RANLIB		   = /usr/ccs/bin/ranlib
+############################################################
+# 32- vs. 64-bit ABI
+#
+ifeq ($(ESMF_ABI),32)
+ESMF_CXXCOMPILEOPTS       += -m32
+ESMF_CXXLINKOPTS          += -m32
+ESMF_F90COMPILEOPTS       += -m32
+ESMF_F90LINKOPTS          += -m32
+endif
+ifeq ($(ESMF_ABI),64)
+ESMF_CXXCOMPILEOPTS       += -m64
+ESMF_CXXLINKOPTS          += -m64
+ESMF_F90COMPILEOPTS       += -m64
+ESMF_F90LINKOPTS          += -m64
+endif
 
-# compilers
-C_CC		   = /opt/SUNWspro/bin/cc -KPIC -dalign -xtarget=native
-C_CXX		   = /opt/SUNWspro/bin/CC -instances=static
-C_FC		   = /opt/SUNWspro/bin/f90 -xpp=cpp -dalign
+############################################################
+# Conditionally add pthread compiler and linker flags
+#
+ifeq ($(ESMF_PTHREADS),ON)
+ESMF_CXXCOMPILEOPTS       += -mt
+ESMF_CXXLINKOPTS          += -mt
+ESMF_F90COMPILEOPTS       += -mt
+ESMF_F90LINKOPTS          += -mt
+endif
 
-C_FC_MOD           = -M
+############################################################
+# Blank out variables to prevent rpath encoding
+#
+ESMF_F90LINKRPATHS      =
+ESMF_CXXLINKRPATHS      =
 
-# Must use f90 to link C to get omp libs
-C_CLINKER	   = /opt/SUNWspro/bin/f90 -dalign
-C_FLINKER	   = /opt/SUNWspro/bin/f90 -dalign -R .
+############################################################
+# Link against libesmf.a using the F90 linker front-end
+#
+ESMF_F90LINKLIBS += -lCrun -lrt
 
-C_CCV		   = ${C_CC} -V
-C_CXXV		   = ${C_CXX} -V
-C_FCV              = /opt/SUNWspro/bin/f90 -dalign
+############################################################
+# Link against libesmf.a using the C++ linker front-end
+#
+ESMF_CXXLINKLIBS += -lCrun -lrt
 
-
-# compiler flags
-O_CFLAGS	   += -fast -xO4 -fsimple=2 -xtarget=native
-O_FFLAGS	   += -fast
-
-# Fortran compiler flags
-F_FREECPP               = -free -fpp
-F_FIXCPP                = -fixed -fpp
-F_FREENOCPP             = -free
-F_FIXNOCPP              = -fixed
-
-
-C_LINKOPTS = -Kpic  -lCstd -lCrun -lm -lw -lcx -lc -lrt
-
-C_F90CXXLIBS       = -lfui -lfai -lfai2 -lfsumai -lfprodai -lfminlai \
-		     -lfmaxlai -lfminvai -lfmaxvai -lfsu -lsunmath \
-                     -lCrun -lCstd -lCrun -lm -lcx -lc -lrt
-C_CXXF90LIBS       = -L/opt/SUNWspro/prod/lib -lfui -lfai -lfai2 -lfsumai \
-                     -lfprodai -lfminlai -lfmaxlai -lfminvai -lfmaxvai \
-                     -lfsu -lsunmath -lm -lc -lrt
-
-
-###############################################################################
-
-PARCH		   = solaris
-
-SL_LIBS_TO_MAKE = 
-
-C_SL_LIBOPTS  = -G
-
-
+############################################################
+# Blank out shared library options
+#
+ESMF_SL_LIBS_TO_MAKE  =
