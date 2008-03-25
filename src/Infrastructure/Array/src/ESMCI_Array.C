@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.12 2008/03/25 00:29:22 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.13 2008/03/25 23:39:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.12 2008/03/25 00:29:22 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.13 2008/03/25 23:39:47 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4447,6 +4447,8 @@ int Array::sparseMatMulStore(
   if (factorPetCount < 1){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "- at least one PET must provide a valid factorList", &rc);
+    // garbage collection before bail out
+    delete [] factorPetList;
     return rc;
   }
   
@@ -4467,6 +4469,8 @@ int Array::sparseMatMulStore(
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- factorIndexList without tensor mixing requires matching srcArray and"
         " dstArray tensorElementCount", &rc);
+      // garbage collection before bail out
+      delete [] factorPetList;
       return rc;
     }
   }
