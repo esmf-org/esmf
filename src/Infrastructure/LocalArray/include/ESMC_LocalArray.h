@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.21.2.4 2008/03/20 22:25:04 theurich Exp $
+// $Id: ESMC_LocalArray.h,v 1.21.2.5 2008/03/25 00:21:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -126,7 +126,8 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
     int ESMC_LocalArrayDestruct();
 
     // adjust()
-    ESMC_LocalArray *ESMC_LocalArrayAdjust(int *lbounds, int *ubounds, int *rc);
+    ESMC_LocalArray *ESMC_LocalArrayAdjust(ESMC_DataCopy copyflag,
+      int *lbounds, int *ubounds, int *rc);
 
     // required methods inherited and overridden from the ESMC_Base class
     int ESMC_LocalArrayDeserialize(char *buffer, int *boffset);
