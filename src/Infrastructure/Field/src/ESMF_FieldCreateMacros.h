@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.25.2.15 2008/03/14 04:20:37 theurich Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.25.2.16 2008/03/25 00:32:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -415,7 +415,7 @@
            ESMF_CONTEXT, rc)) return @\
 @\
        ! Create Array with undistributed dimensions                                @\
-       array = ESMF_ArrayCreate(farray, distgrid=distgrid, & @\
+       array = ESMF_ArrayCreate(farray, distgrid=distgrid, copyflag=copyflag, & @\
                distgridToArrayMap=distgridToArrayMap (1:gridDistDimCount), & @\
                undistLBound=undistLBound(1:fieldUndistDimCount), & @\
                undistUBound=undistUBound(1:fieldUndistDimCount), & @\
@@ -427,29 +427,10 @@
                if (ESMF_LogMsgFoundError(localrc, & @\
                       ESMF_ERR_PASSTHRU, & @\
                       ESMF_CONTEXT, rc)) return @\
+     field%ftypep%array = array @\
 @\
-     ! Set Values in Field structure @\
-@\
-     ! default copyflag value is ESMF_DATA_REF @\
      ! set array_internal to .true. because field%array is internal @\
      field%ftypep%array_internal = .true. @\
-     if(.not. present(copyflag)) then @\
-         field%ftypep%array = array @\
-     else @\
-         if(copyflag == ESMF_DATA_REF) then @\
-             field%ftypep%array = array @\
-         else @\
-             newarray = ESMF_ArrayCreate(array, rc=localrc) @\
-             if (ESMF_LogMsgFoundError(localrc, & @\
-                                     ESMF_ERR_PASSTHRU, & @\
-                                     ESMF_CONTEXT, rc)) return @\
-             field%ftypep%array = newarray @\
-             call ESMF_ArrayDestroy(array, rc=localrc) @\
-             if (ESMF_LogMsgFoundError(localrc, & @\
-                                     ESMF_ERR_PASSTHRU, & @\
-                                     ESMF_CONTEXT, rc)) return @\
-         endif @\
-     endif @\
 @\
      ! Should call a common FieldSetCommitConstructor here instead @\
      ! of just setting things up ourselves @\
