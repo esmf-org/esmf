@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.C,v 1.6 2008/03/17 18:06:57 rokuingh Exp $
+// $Id: ESMC_Attribute.C,v 1.7 2008/03/26 03:50:59 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute.C,v 1.6 2008/03/17 18:06:57 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute.C,v 1.7 2008/03/26 03:50:59 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -131,10 +131,31 @@
   // Initialize local return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
 
+  // simple sanity checks
+  if ((!purpose) || (purpose[0] == '\0')) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                               "bad attribute purpose", NULL);
+       return ESMF_FAILURE;
+  }
+  
+  // simple sanity checks
+  if ((!convention) || (convention[0] == '\0')) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                               "bad attribute convention", NULL);
+       return ESMF_FAILURE;
+  }
+  
+  // simple sanity checks
+  if ((!object) || (object[0] == '\0')) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                               "bad attribute object", NULL);
+       return ESMF_FAILURE;
+  }
+
   // Search for the attpack, make it if not found
   attpack = ESMC_AttPackGet(convention, purpose, object);
   if(!attpack) {
-    sprintf(attpackname,"Attribute Package");
+    sprintf(attpackname,"Attribute Package %s %s %s",object,purpose,convention);
     attpack = new ESMC_Attribute(attpackname, convention, purpose, object);
     if (!attpack)
       return ESMF_FAILURE;
@@ -196,8 +217,9 @@
   for (int i=0; i<attrCount; i++) {
       if (strcmp(convention, attrList[i]->attrConvention) == 0 && 
           strcmp(purpose, attrList[i]->attrPurpose) == 0 &&
-          strcmp(object, attrList[i]->attrObject) == 0)
+          strcmp(object, attrList[i]->attrObject) == 0) {
           return attrList[i];
+          }
   }
  
   // if you got here, you did not find the attpack

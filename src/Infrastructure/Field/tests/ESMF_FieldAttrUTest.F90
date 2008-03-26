@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldAttrUTest.F90,v 1.2 2008/03/24 18:18:42 rokuingh Exp $
+! $Id: ESMF_FieldAttrUTest.F90,v 1.3 2008/03/26 03:50:27 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldAttrUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldAttrUTest.F90,v 1.2 2008/03/24 18:18:42 rokuingh Exp $'
+      '$Id: ESMF_FieldAttrUTest.F90,v 1.3 2008/03/26 03:50:27 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -48,6 +48,7 @@ program ESMF_FieldAttrUTest
 
       type(ESMF_Field) :: field
       character(ESMF_MAXSTR) :: conv, purp, attrname, attrvalue
+      character(ESMF_MAXSTR), dimension(3) :: attrList
       integer :: rc, count, number, defaultvalue
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -97,7 +98,7 @@ program ESMF_FieldAttrUTest
       call ESMF_FieldAttributeGet(field, name="NotSides", value=number, &
         defaultvalue=defaultvalue, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting an integer attribute from a Field Test"
+      write(name, *) "Getting a default integer attribute from a Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.7), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -123,8 +124,26 @@ program ESMF_FieldAttrUTest
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      attrList(1) = "Custom1"
+      attrList(2) = "Custom2"
+      attrList(3) = "Custom3"
+      count = 3
+      conv = "customconvention"
+      purp = "custompurpose"
+      
+      !EX_UTest
+      ! Create a custom attribute package on a Field Test
+      call ESMF_FieldAttPackCreate(field, convention=conv, &
+        purpose=purp, attrList=attrList, count=count, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Creating a custom Attpack on a Field Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
       attrname = "units"
       attrvalue = "m/s"
+      conv = "defaultconvention"
+      purp = "defaultpurpose"
 
       !EX_UTest
       ! Set an attribute in an attribute package on a Field Test

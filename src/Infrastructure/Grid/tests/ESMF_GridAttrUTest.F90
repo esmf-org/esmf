@@ -1,4 +1,4 @@
-! $Id: ESMF_GridAttrUTest.F90,v 1.1 2008/03/04 03:43:30 rokuingh Exp $
+! $Id: ESMF_GridAttrUTest.F90,v 1.2 2008/03/26 03:49:10 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridAttrUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridAttrUTest.F90,v 1.1 2008/03/04 03:43:30 rokuingh Exp $'
+    '$Id: ESMF_GridAttrUTest.F90,v 1.2 2008/03/26 03:49:10 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -46,6 +46,7 @@ program ESMF_GridAttrUTest
 
   type(ESMF_Grid) :: grid
   character(ESMF_MAXSTR) :: conv, purp, attrname, attrvalue
+  character(ESMF_MAXSTR), dimension(3) :: attrList
   integer                :: rc, count, number
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -109,8 +110,26 @@ program ESMF_GridAttrUTest
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      attrList(1) = "Custom1"
+      attrList(2) = "Custom2"
+      attrList(3) = "Custom3"
+      count = 3
+      conv = "customconvention"
+      purp = "custompurpose"
+      
+      !EX_UTest
+      ! Create a custom attribute package on a Grid Test
+      call ESMF_GridAttPackCreate(grid, convention=conv, &
+        purpose=purp, attrList=attrList, count=count, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Creating a custom Attpack on a Grid Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
       attrname = "units"
       attrvalue = "m/s"
+      conv = "defaultconvention"
+      purp = "defaultpurpose"
       
       !EX_UTest
       ! Set an attribute in an attribute package on a Grid Test

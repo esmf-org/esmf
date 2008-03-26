@@ -1,5 +1,5 @@
 
-! $Id: ESMF_Bundle.F90,v 1.127 2008/03/04 22:25:49 rokuingh Exp $
+! $Id: ESMF_Bundle.F90,v 1.128 2008/03/26 03:49:50 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -605,19 +605,23 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleAttPackCreate()
-      subroutine ESMF_BundleAttPackCreate(bundle, convention, purpose, rc)
+      subroutine ESMF_BundleAttPackCreate(bundle, convention, purpose, attrList, &
+      count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(inout) :: bundle  
       character (len = *), intent(in), optional :: convention
       character (len = *), intent(in), optional :: purpose
+      integer, intent(in), optional :: count   
+      character (len = *), dimension(:), intent(in), optional :: attrList
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !     Sets up the attribute package for the {\tt bundle}.
 !     The attribute package defines the convention, purpose, and object type of the three 
-!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
+!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.  A user
+!     can create their own attribute package by using the count and attrList parameters.
 !
 !     The arguments are:
 !     \begin{description}
@@ -627,6 +631,10 @@ end function
 !      The convention of the attribute package.
 !     \item [purpose]
 !      The purpose of the attribute package.
+!     \item [count]
+!      The count of the number of attributes in a user specified attribute package
+!     \item [attrList]
+!      An array of character strings specifying the names of the user defined attributes
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -634,7 +642,7 @@ end function
 !
 !EOP
 
-      integer :: localrc                           ! Error status
+      integer :: localrc, i                           ! Error status
       character(ESMF_MAXSTR) :: name1, name2, name3, name4
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
@@ -658,6 +666,20 @@ end function
 
       fobject = 'bundle'
 
+      if (present(count)) then
+      
+      do i = 1, count
+      
+        call c_ESMC_AttPackCreate(bundle%btypep%base, attrList(i), fconvention, &
+          fpurpose, fobject, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      
+      end do
+      
+      else
+
       name1 = 'longname'
       name2 = 'shortname'
       name3 = 'units'
@@ -675,6 +697,8 @@ end function
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
+
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
