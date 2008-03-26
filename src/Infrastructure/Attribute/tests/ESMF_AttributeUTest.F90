@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUTest.F90,v 1.4 2008/03/13 05:36:02 rokuingh Exp $
+! $Id: ESMF_AttributeUTest.F90,v 1.5 2008/03/26 17:34:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeUTest.F90,v 1.4 2008/03/13 05:36:02 rokuingh Exp $'
+      '$Id: ESMF_AttributeUTest.F90,v 1.5 2008/03/26 17:34:58 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -76,7 +76,7 @@ program ESMF_AttributeUTest
       call ESMF_BaseCreate(base, "Base", "test object", 0, rc)
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-      !EX_UTest
+     
       ! test setting of ESMF Base attribute values
 !      call ESMF_AttributeSet(base, name, data_value, rc)
 !      write(name, *) "Testing non-implemented Attribute Set"

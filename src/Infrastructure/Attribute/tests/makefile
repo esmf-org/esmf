@@ -1,7 +1,8 @@
-# $Id: makefile,v 1.2 2008/03/13 14:31:59 rokuingh Exp $ 
+# $Id: makefile,v 1.3 2008/03/26 17:34:58 rokuingh Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
+run_uni:  run_unit_tests_uni
 
 CFLAGS    =
 FFLAGS    =
@@ -15,11 +16,11 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/Attribute/tests
 
-TESTS_BUILD   = #$(ESMF_TESTDIR)/ESMF_AttributeUTest
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_AttributeUTest
 
-TESTS_RUN     = #RUN_ESMF_AttributeUTest
+TESTS_RUN     = RUN_ESMF_AttributeUTest
 
-TESTS_RUN_UNI = #RUN_ESMF_AttributeUTestUNI
+TESTS_RUN_UNI = RUN_ESMF_AttributeUTestUNI
 
 
 include ${ESMF_DIR}/makefile
