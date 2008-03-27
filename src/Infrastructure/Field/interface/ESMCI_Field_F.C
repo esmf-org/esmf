@@ -1,4 +1,4 @@
-// $Id: ESMC_Field_F.C,v 1.11 2007/11/09 20:37:13 cdeluca Exp $
+// $Id: ESMCI_Field_F.C,v 1.1.2.1 2008/03/27 23:36:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -14,10 +14,6 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ {\tt ESMC\_Field} methods declared
-// in the companion file ESMC_Field.h
-//
-// 
 //
 //-----------------------------------------------------------------------------
 //
@@ -25,14 +21,12 @@
 #include "ESMC_Start.h"
 #include "ESMC_LogErr.h"
 
- // associated class definition file
-#include "ESMC_Field.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_Field_F.C,v 1.11 2007/11/09 20:37:13 cdeluca Exp $";
+             "$Id: ESMCI_Field_F.C,v 1.1.2.1 2008/03/27 23:36:43 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {

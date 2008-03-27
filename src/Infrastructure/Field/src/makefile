@@ -1,11 +1,9 @@
-# $Id: makefile,v 1.23.2.2 2008/02/14 04:29:16 cdeluca Exp $ 
+# $Id: makefile,v 1.23.2.3 2008/03/27 23:36:44 theurich Exp $ 
 
 #
 ALL: build_here 
 
-AUTOGEN   = ESMF_FieldCreate.F90 ESMF_FieldGet.F90
-# ESMF_FieldSet.F90
-#TODO:FIELDINTEGRATION Restore FieldSet
+AUTOGEN   = ESMF_FieldGet.F90 ESMF_FieldSet.F90 ESMF_FieldCreate.F90
 CFLAGS    =
 FFLAGS    =
 SOURCEC	  = 
@@ -34,13 +32,4 @@ DIRS	  =
 CLEANDIRS   =
 CLEANFILES  = $(AUTOGEN) $(addprefix ../doc/, $(TEXFILES) )
 CLOBBERDIRS =
-
-
-ESMF_FieldGet.o: ESMF_Field.o ESMF_FieldGet.cppF90 ESMF_FieldGetMacros.h
-
-ESMF_FieldSet.o: ESMF_Field.o ESMF_FieldSet.cppF90 ESMF_FieldSetMacros.h
-
-ESMF_FieldCreate.o: ESMF_Field.o ESMF_FieldGet.o ESMF_FieldSet.o \
-                    ESMF_FieldCreate.cppF90 ESMF_FieldCreateMacros.h
-
 
