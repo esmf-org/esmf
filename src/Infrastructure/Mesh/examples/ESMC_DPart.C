@@ -30,8 +30,6 @@
 #include <ESMC_Search.h>
 #include <ESMC_Transfer.h>
 
-#include <ESMC_Field.h>
-
 #include <ESMC_MeshUtils.h>
 #include <ESMC_MasterElement.h>
 

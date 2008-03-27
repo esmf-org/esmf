@@ -1,14 +1,14 @@
-# $Id: makefile,v 1.10 2007/10/31 16:58:52 cdeluca Exp $ 
+# $Id: makefile,v 1.11 2008/03/27 23:42:56 theurich Exp $ 
 
 ALL: build_here 
 
 CFLAGS    =
 FFLAGS    =
-SOURCEC	  = ESMC_Field_F.C
+SOURCEC	  = ESMCI_Field_F.C
 SOURCEF	  = 
 ! TODO:FIELDINTEGRATION Restore ESMF_Field_C.F90
 # ESMF_Field_C.F90 
-STOREH	  = ESMC_Field.h 
+STOREH	  = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))

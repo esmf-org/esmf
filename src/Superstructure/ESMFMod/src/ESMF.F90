@@ -1,4 +1,4 @@
-! $Id: ESMF.F90,v 1.49 2008/02/15 23:36:06 theurich Exp $
+! $Id: ESMF.F90,v 1.50 2008/03/27 23:42:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -62,9 +62,10 @@ module ESMF_Mod
  !   use ESMF_InternArrayCommMod
 
     use ESMF_FieldMod
-!    use ESMF_FieldGetMod
-!    use ESMF_FieldSetMod
+    use ESMF_FieldGetMod
+    use ESMF_FieldSetMod
     use ESMF_FieldCreateMod
+    use ESMF_FieldRegridMod
     use ESMF_BundleMod
 !    use ESMF_BundleGetMod
 
