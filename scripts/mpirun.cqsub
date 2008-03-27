@@ -1,5 +1,5 @@
 #!/bin/ksh
-# $Id: mpirun.cqsub,v 1.4.2.1 2008/03/24 22:02:06 svasquez Exp $
+# $Id: mpirun.cqsub,v 1.4.2.2 2008/03/27 16:39:29 svasquez Exp $
 # This script provides an interface such that the simple command
 # mpirun -np #
 # runs # copies of the program in parallel.
@@ -23,8 +23,11 @@ proc_id=`cqsub -qdebug $ESMF_BATCHOPTIONS -C $working_dir -t30 -n$num_procs -O $
 
 sleep 5 
 
+echo $proc_id > proc_id
+
 cqwait $proc_id
 
+sleep 30
 
 mv $prog.output $prog.stdout
 
