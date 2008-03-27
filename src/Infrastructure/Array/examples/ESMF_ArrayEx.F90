@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.37 2007/12/14 23:31:26 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.38 2008/03/27 01:21:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -24,7 +24,6 @@ program ESMF_ArrayEx
   integer:: rc, de, i, j, k, petCount, localDeCount, localPet
 !  integer:: dim, nodeCount, dimCount
 !  integer:: deNeighborCount, linkCount
-  integer:: idm1, idm3
   type(ESMF_VM):: vm
   type(ESMF_DELayout):: delayout
   type(ESMF_DistGrid):: distgrid, distgrid3D, distgrid2D, distgrid1D
@@ -1509,19 +1508,19 @@ program ESMF_ArrayEx
 !
 ! \subsubsection{Array and DistGrid rank -- 2D+1 Arrays}
 !
-! All of the Array create interfaces require the specification of at least the 
-! {\tt arrayspec} and the {\tt distgrid} arguments. Both arguments contain a
-! sense of dimensionality. The relationship between these two arguments deserves
-! extra attention.
+! Except for the special Array create interface that implements a copy from
+! an existing Array object all other Array create interfaces require the 
+! specification of at least two arguments: {\tt farray} and {\tt distgrid},
+! {\tt larrayList} and {\tt distgrid}, or {\tt arrayspec} and {\tt distgrid}.
+! In all these cases both required arguments contain a sense of dimensionality.
+! The relationship between these two arguments deserves extra attention.
 !
-! The {\tt arrayspec} argument is of type {\tt ESMF\_ArraySpec} and determines,
-! among other things, the rank of the Array, i.e. the dimensionality of the
-! actual data storage. This means, for example, that the rank of a native 
-! language array extracted from an Array object is equal to the rank specified
-! by the {\tt arrayspec} argument. It is also equal to the {\tt rank} that is
-! returned as by the {\tt ESMF\_ArrayGet()} call. The {\tt arrayspec} argument
-! does not determine, however, how the Array dimensions are decomposed and
-! distributed.
+! The first argument, {\tt farray}, {\tt larrayList} or {\tt arrayspec}, 
+! determines the rank of the created Array object, i.e. the dimensionality
+! of the actual data storage. The rank of a native language array, extracted 
+! from an Array object, is equal to the rank specified by either of these
+! arguments. So is the {\tt rank} that is returned by the {\tt ESMF\_ArrayGet()}
+! call.
 !
 ! The rank specification contained in the {\tt distgrid} argument, which is of 
 ! type {\tt ESMF\_DistGrid}, on the other hand has no affect on the 
@@ -1536,20 +1535,20 @@ program ESMF_ArrayEx
 ! dimensions. The index space dimensionality is equal to the number of 
 ! decomposed Array dimensions.
 !
-! Array dimensions that are not mapped to DistGrid dimensions are
-! considered extra or {\em tensor} dimensions of the Array. They are not part
+! Array dimensions that are not mapped to DistGrid dimensions are the 
+! {\em undistributed} dimensions of the Array. They are not part
 ! of the index space. The mapping is specified during {\tt ESMF\_ArrayCreate()}
 ! via the the {\tt distgridToArrayMap} argument. DistGrid dimensions that have
-! not been associated with Array dimensions are {\tt replicating} dimensions.
+! not been associated with Array dimensions are {\em replicating} dimensions.
 ! The Array will be replicated across the DEs that lie along replication
 ! DistGrid dimensions.
 !
-! Array tensor dimensions can be used to store multi-dimensional data for each
-! Array index space element. A special purpose of tensor dimensions is to store
-! multiple data arrays in the same Array object. It is, for example,
+! Undistribted Array dimensions can be used to store multi-dimensional data for
+! each Array index space element. A special purpose of undistributed dimensions
+! is to store multiple data arrays in the same Array object. It is, for example,
 ! possible to store {\tt array1} and {\tt array2} of section
 ! \ref{ArrayEx_staggeredArrays} in a single Array object using one 
-! tensor dimension of size 2. The same {\tt distgrid} object as 
+! undistributed dimension of size 2. The same {\tt distgrid} object as 
 ! before can be used to create the Array. 
 !EOE
 !BOC
@@ -1567,15 +1566,15 @@ program ESMF_ArrayEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
 ! During Array creation with extra dimension(s) it is necessary to specify the
-! bounds of these tensor dimension(s). This requires two additional arguments,
-! {\tt undistLBound} and {\tt undistUBound}, which are vectors in order to 
-! accommodate higher order tensor dimensions. The other arguments remain 
-! unchanged and apply across all tensor components. 
+! bounds of these undistributed dimension(s). This requires two additional
+! arguments, {\tt undistLBound} and {\tt undistUBound}, which are vectors in 
+! order to accommodate multiple undistributed dimensions. The other arguments
+! remain unchanged and apply across all undistributed components. 
 !
 ! The optional arguments used in the following call are identical to those
 ! used to create {\tt array1} of section \ref{ArrayEx_staggeredArrays}. This
-! will set the total region and the stagger location of both tensor components 
-! to be those of {\tt array1}.
+! will set the total region and the stagger location of both undistributed
+! components to be those of {\tt array1}.
 !EOE
 !BOC
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
@@ -1596,12 +1595,12 @@ program ESMF_ArrayEx
 ! with the first Array dimensions in sequence. For the example above this means
 ! that the first 2 Array dimensions are decomposed according to the provided 2D
 ! DistGrid. The 3rd Array dimension does not have an associated DistGrid
-! dimension, rendering it a tensor dimension.
+! dimension, rendering it an undistributed Array dimension.
 !
 ! The optional arguments that were used to create {\tt array} ensure that
 ! the {\em total region} is large enough to accommodate the arrays for
-! tensor component 1 and 2. The Array class provides a special
-! {\tt Set()} method that allows to individually address tensor elements
+! undistributed component 1 and 2. The Array class provides a special
+! {\tt Set()} method that allows to individually address undistributed elements
 ! in an Array and set {\tt staggerLoc} and {\tt vectorDim} arguments.
 !EOE
 !BOC
@@ -1622,8 +1621,8 @@ program ESMF_ArrayEx
 #endif
 
 !BOE
-! Native language access to an Array with tensor dimensions is in principle
-! the same as without extra dimensions.
+! Native language access to an Array with undistributed dimensions is in
+! principle the same as without extra dimensions.
 !EOE
 !BOC
   call ESMF_ArrayGet(array, localDeCount=localDeCount, rc=rc)
@@ -1634,8 +1633,8 @@ program ESMF_ArrayEx
 ! can be obtained and used to set data values in the exclusive regions. The
 ! {\tt myF90Array3D} variable must be of rank 3 to match the Array rank of
 ! {\tt array}. However, variables such as {\tt exclusiveUBound} that store the
-! information about the decomposition, remain to be allocated for a 2D 
-! decomposition.
+! information about the decomposition, remain to be allocated for the 2D 
+! index space.
 !EOE
 !BOC
   call ESMF_ArrayGet(array, exclusiveLBound=exclusiveLBound, &
@@ -1655,15 +1654,16 @@ program ESMF_ArrayEx
 !BOE
 ! For some applications the default association rules between DistGrid and Array
 ! dimensions may not satisfy the user's needs. The optional {\tt distgridToArrayMap} 
-! argument may be used during Array creation to explicitly specify the mapping 
-! between Array and DistGrid dimensions. To demonstrate this the
-! following lines of code reproduce the above example but with rearranged
-! dimensions. Here the {\tt distgridToArrayMap} argument is a list with two elements 
-! corresponding to the DistGrid {\tt dimCount} of 2. The first element indicates
-! which Array dimension the first DistGrid dimension is mapped against. Here the
-! 1st DistGrid dimension maps against the 3rd Array and the 2nd DistGrid
-! dimension maps against the 1st Array dimension. This leaves the 2nd Array
-! dimension to be the extra or tensor dimension of the created Array object.
+! argument can be used during Array creation to explicitly specify the mapping 
+! between DistGrid and Array dimensions. To demonstrate this the following lines
+! of code reproduce the above example but with rearranged dimensions. Here the
+! {\tt distgridToArrayMap} argument is a list with two elements corresponding to
+! the DistGrid {\tt dimCount} of 2. The first element indicates which Array
+! dimension the first DistGrid dimension is mapped against. Here the
+! 1st DistGrid dimension maps against the 3rd Array dimension and the 2nd 
+! DistGrid dimension maps against the 1st Array dimension. This leaves the 2nd
+! Array dimension to be the extra and undistributed dimension in the resulting
+! Array object.
 !EOE
 !BOC
   call ESMF_ArrayDestroy(array, rc=rc)
@@ -1686,31 +1686,30 @@ program ESMF_ArrayEx
 
 !BOE
 ! When working with Arrays that contain explicitly mapped Array and DistGrid 
-! dimensions it is critical to understand that {\em width} and {\em bound}
-! arguments are always defined in terms of the DistGrid dimension order. The
-! Array dimensions indicate how the data is actually stored in the Array
-! object, and that can be different for each Array, even if the same DistGrid
-! is used. The decomposition defined by the DistGrid, however, does not change 
-! and is the same for each Array that uses it, regardless of the dimension order
-! in the Array. The DistGrid dimension order thus becomes a common reference
-! frame for all Arrays that use the same DistGrid.
+! dimensions it is critical to know the order in which the entries of
+! {\em width} and {\em bound} arguments that are associated with distributed
+! Array dimensions are specified. The size of these arguments is equal to the
+! DistGrid {\tt dimCount}, because the maximum number of distributed Array
+! dimensions is given by the dimensionality of the index space.
+!
+! The order of dimensions in these arguments, however, is {\em not} that of
+! the associated DistGrid. Instead each entry corresponds to the distributed
+! Array dimensions in sequence. In the example above the entries in 
+! {\tt totalLWidth} and {\tt totalUWidth} correspond to Array dimensions 1 and
+! 3 in this sequence. 
 !
 ! The {\tt distgridToArrrayMap} argument optionally provided during Array create
-! indicates the DistGrid to Array dimension mapping. Depending on the 
-! formulation of the computational kernel, the inverse mapping, i.e. Array to
-! DistGrid dimension mapping, is just as important. The {\tt ESMF\_ArrayGet()}
-! call offers both mappings as {\tt distgridToArrrayMap} and
-! {\tt arrayToDistGridMap}, respectively. The number of elements in 
-! {\tt arrayToDistGridMap} is equal to the rank of the Array.
-! Each element corresponds to an Array dimension and indicates the associated
-! DistGrid dimension by an integer number. An entry of "0" indicates an
-! extra Array dimension.
+! indicates how the DistGrid dimensions map to Array dimensions. The inverse
+! mapping, i.e. Array to DistGrid dimensions, is just as important. The 
+! {\tt ESMF\_ArrayGet()} call offers both mappings as {\tt distgridToArrrayMap}
+! and {\tt arrayToDistGridMap}, respectively. The number of elements in 
+! {\tt arrayToDistGridMap} is equal to the rank of the Array. Each element
+! corresponds to an Array dimension and indicates the associated DistGrid
+! dimension by an integer number. An entry of "0" in {\tt arrayToDistGridMap}
+! indicates that the corresponding Array dimension is undistributed.
 !
-! The association between Array and DistGrid dimensions becomes critical for
-! correct native language access to the Array. In the following example the
-! inverse mapping information is used to determine the correct bounds of the
-! Array dimensions and to verify that the kernel's assumption about which Array
-! dimension is a tensor dimension is correct. 
+! Correct understanding about the association between Array and DistGrid
+! dimensions becomes critical for correct data access into the Array.
 !EOE
 !BOC
   allocate(arrayToDistGridMap(3))  ! arrayRank = 3
@@ -1723,15 +1722,12 @@ program ESMF_ArrayEx
   ! obtain larrayList for local DEs
   allocate(larrayList(localDeCount))
   call ESMF_ArrayGet(array, larrayList=larrayList, rc=rc)
-  ! prepare inverse distgridToArrayMap variables for kernel loop
-  idm1=arrayToDistGridMap(1)
-  idm3=arrayToDistGridMap(3)
   do de=1, localDeCount
     call ESMF_LocalArrayGet(larrayList(de), myF90Array3D, ESMF_DATA_REF, rc=rc)
-    myF90Array3D(exclusiveLBound(idm1,de):exclusiveUBound(idm1,de), &
-      1, exclusiveLBound(idm3,de):exclusiveUBound(idm3,de)) = 10.5 ! dummy assignment
-    myF90Array3D(exclusiveLBound(idm1,de):exclusiveUBound(idm1,de), &
-      2, exclusiveLBound(idm3,de):exclusiveUBound(idm3,de)) = 23.3 ! dummy assignment
+    myF90Array3D(exclusiveLBound(1,de):exclusiveUBound(1,de), &
+      1, exclusiveLBound(2,de):exclusiveUBound(2,de)) = 10.5 ! dummy assignment
+    myF90Array3D(exclusiveLBound(1,de):exclusiveUBound(1,de), &
+      2, exclusiveLBound(2,de):exclusiveUBound(2,de)) = 23.3 ! dummy assignment
   enddo
   deallocate(exclusiveLBound, exclusiveUBound)
   deallocate(arrayToDistGridMap)

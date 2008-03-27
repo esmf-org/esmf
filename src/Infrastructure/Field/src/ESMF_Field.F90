@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.311 2008/03/26 03:50:26 rokuingh Exp $
+! $Id: ESMF_Field.F90,v 1.312 2008/03/27 01:21:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -211,7 +211,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.311 2008/03/26 03:50:26 rokuingh Exp $'
+      '$Id: ESMF_Field.F90,v 1.312 2008/03/27 01:21:23 theurich Exp $'
 
 !==============================================================================
 !
@@ -2543,7 +2543,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldCreateEmpty"
 
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldCreateEmpty - Create a Field with no Grid or Array
 
 ! !INTERFACE:
@@ -2572,7 +2572,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 
 
       type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
@@ -2683,7 +2683,7 @@
 !
 ! !INTERFACE:
       subroutine ESMF_FieldGet(field, grid, array, &
-                               typekind, rank, staggerloc, &
+                               typekind, dimCount, staggerloc, &
                                gridToFieldMap, ungriddedLBound, &
                                ungriddedUBound, maxHaloLWidth, &
                                maxHaloUWidth, name, iospec, rc) 
@@ -2694,7 +2694,7 @@
       type(ESMF_Grid), intent(out), optional :: grid     
       type(ESMF_Array), intent(out), optional :: array     
       type(ESMF_TypeKind), intent(out), optional :: typekind
-      integer, intent(out), optional :: rank
+      integer, intent(out), optional :: dimCount
       type(ESMF_StaggerLoc), intent(out), optional :: staggerloc 
       integer, intent(out), optional :: gridToFieldMap(:)    
       integer, intent(out), optional :: ungriddedLBound(:)
@@ -2707,52 +2707,96 @@
 !
 ! !DESCRIPTION:
 !      Query an {\tt ESMF\_Field} for various things.  All arguments after
-!      the {\tt Field} are optional.  To select individual items use the
+!      the {\tt field} are optional.  To select individual items use the
 !      named\_argument=value syntax.
 !
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [ftype]
-!           Pointer to an {\tt ESMF\_Field} object.
+!     \item [field]
+!           {\tt ESMF\_Field} object to query.
 !     \item [{[grid]}]
 !           {\tt ESMF\_Grid}.
 !     \item [{[array]}]
 !           {\tt ESMF\_Array}.
 !     \item [{[typekind]}]
 !           TypeKind specifier for Field.
-!     \item [{[rank]}]
-!           Rank of Field data.
+!     \item [{[dimCount]}]
+!           Number of dimensions in {\tt field} data.
 !     \item [{[staggerloc]}]
-!           Stagger location of data in grid cells.  For valid values 
-!           and interpretation
-!           of results see Section \ref{sec:opt:staggerloc}.
+!           Stagger location of data in grid cells.  For valid
+!           predefined values and interpretation of results see
+!           Section \ref{sec:opt:staggerloc}.
 !     \item [{[gridToFieldMap]}]
-!           List that contains as many elements as is indicated by the {\tt grid}'s rank. 
-!           The list elements map each dimension of the Grid object to a dimension in the
-!           Field's Array by specifying the appropriate Array dimension index. The default is to
-!           map all of the grid's dimensions against the lower dimensions of the Field's
-!           Array in sequence, i.e. gridDimmap = (/1, 2, .../). Unmapped dimensions are
-!           undistributed dimensions.  The total undistributed dimensions are the total 
-!           Array dimensions - the distributed dimensions in the Grid (distRank).  All
-!           gridToFieldMap entries must be greater than or equal to one and smaller than or equal
-!           to the Array rank. It is erroneous to specify the same entry multiple times
-!           unless it is zero.  If the Array rank is less than the Grid dimCount then
-!           the default gridToFieldMap will contain zeros for the dimCount.
-!           A zero entry in the dimmap indicates that the particular Grid dimension will
-!           be replicating the Array across the DEs along this direction.
+!           List with number of elements equal to the 
+!           {\tt grid}'s dimCount.  The list elements map each dimension 
+!           of the {\tt grid} to a dimension in the {\tt farray} by 
+!           specifying the appropriate {\tt farray} dimension index. The default is to 
+!           map all of the {\tt grid}'s dimensions against the lowest dimensions of 
+!           the {\tt farray} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). 
+!           The values of all {\tt gridToFieldMap} entries must be greater than or equal 
+!           to one and smaller than or equal to the {\tt farray} rank. 
+!           It is erroneous to specify the same {\tt gridToFieldMap} entry 
+!           multiple times. The total ungridded dimensions in the {\tt field}
+!           are the total {\tt farray} dimensions less
+!           the total (distributed + undistributed) dimensions in
+!           the {\tt grid}.  Ungridded dimensions must be in the same order they are
+!           stored in the {\t farray}.  Permutations of the order of
+!           dimensions are handled via individual communication methods.  For example,
+!           an undistributed dimension can be remapped to a distributed dimension
+!           as part of the ESMF\_ ArrayRedist() operation.
 !     \item [{[ungriddedLBound]}]
-!           Lower bounds of the ungridded dimensions of the Field.
+!           Lower bounds of the ungridded dimensions of the {\tt field}.
+!           The number of elements in the {\tt ungriddedLBound} is equal to the number of
+!           ungridded dimensions in the {\tt field}.  All ungridded dimensions of the
+!           {\tt field} are also undistributed. If neither ungriddedLBounds or
+!           ungriddedUBounds are specified, the ungriddedLBound defaults to 1,
+!           and the ungriddedUBound defaults to the size of the dimension.
+!           If either ungriddedLBounds OR ungriddedUBounds are specified, the
+!           other will be calculated.  If BOTH are specified the values are checked
+!           for consistency.  Note that the the ordering of
+!           these ungridded dimensions is the same as their order in the {\tt farray}.
+!           Note also that the bounds for undistributed dimensions included in the
+!           {\tt grid} are set in the {\tt grid}.
 !     \item [{[ungriddedUBound]}]
-!           Upper bounds of the ungridded dimensions of the Field.
+!           Upper bounds of the ungridded dimensions of the {\tt field}.
+!           The number of elements in the {\tt ungriddedUBound} is equal to the number of
+!           ungridded dimensions in the {\tt field}.  All ungridded dimensions of the
+!           {\tt field} are also undistributed. If neither ungriddedLBounds or
+!           ungriddedUBounds are specified, the ungriddedLBound defaults to 1,
+!           and the ungriddedUBound defaults to the size of the dimension.
+!           If either ungriddedLBounds OR ungriddedUBounds are specified, the
+!           other will be calculated.  If BOTH are specified the values are checked
+!           for consistency.  Note that the the ordering of
+!           these ungridded dimensions is the same as their order in the {\tt farray}.
+!           Note also that the bounds for undistributed dimensions included in the
+!           {\tt grid} are set in the {\tt grid}.
 !     \item [{[maxHaloLWidth]}]
-!           Lower bound of halo region.  Defaults to 0. ! NOT IMPLEMENTED
+!           Lower bounds of halo region.  The size of this array is the number
+!           of distributed dimensions in the {\tt grid}.  However, ordering of the elements
+!           needs to be the same as they appear in the {\tt farray}.  Values default
+!           to 0.  If values for maxHaloLWidth are specified they must be reflected in
+!           the size of the {\tt farray}.  That is, for each distributed dimension the
+!           {\tt farray} size should be {\tt maxHaloLWidth} + {\tt maxHaloUWidth} 
+!           + {\tt computationalCount}. Although the halo operation is not
+!           implemented, the {\tt minHaloLWidth} is checked for validity and stored
+!           in preparation for the implementation of the halo method.
+!           HALO OPERATION NOT IMPLEMENTED
 !     \item [{[maxHaloUWidth]}]
-!           Upper bound of halo region.  Defaults to 0. ! NOT IMPLEMENTED
+!           Upper bounds of halo region.  The size of this array is the number
+!           of distributed dimensions in the {\tt grid}.  However, ordering of the elements
+!           needs to be the same as they appear in the {\tt farray}.  Values default
+!           to 0.  If values for maxHaloUWidth are specified they must be reflected in
+!           the size of the {\tt farray}.  That is, for each distributed dimension the
+!           {\tt farray} size should {\tt maxHaloLWidth} + {\tt maxHaloUWidth}
+!           + {\tt computationalCount}.  Although the halo operation is not
+!           implemented, the {\tt maxHaloUWidth} is checked for validity and stored
+!           in preparation for the implementation of the halo method.
+!           HALO OPERATION NOT IMPLEMENTED
 !     \item [{[name]}]
 !           Name of queried item.
 !     \item [{[iospec]}]
-!           {\tt ESMF\_IOSpec} object which contains settings for options ! NOT IMPLEMENTED
+!           {\tt ESMF\_IOSpec} object which contains settings for options. NOT IMPLEMENTED
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2832,14 +2876,14 @@
                                       ESMF_CONTEXT, rc)) return
         endif
 
-        if (present(rank)) then
+        if (present(dimCount)) then
             if (ftype%datastatus .ne. ESMF_STATUS_READY) then
                 if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                 "Cannot return rank because no data attached to Field", &
+                 "Cannot return dimCount because no data attached to Field", &
                                  ESMF_CONTEXT, rc)) return
             endif
             call ESMF_ArrayGet(ftype%array, &
-                               rank=rank, rc=rc)
+                               rank=dimCount, rc=rc)
             if (ESMF_LogMsgFoundError(rc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
@@ -3469,7 +3513,8 @@
       logical :: hasgrid, hasarray             ! decide what we can validate
       integer :: i, lDE                        ! helper variables to verify bounds
       integer :: localDECount, dimCount        ! and distgrid
-      integer, allocatable :: dimmap(:)
+      integer, allocatable :: distgridToGridMap(:)
+      integer, allocatable :: distgridToPackedArrayMap(:)
       integer, allocatable :: arrayCompUBnd(:, :), arrayCompLBnd(:, :)
       integer, allocatable :: gridCompUBnd(:), gridCompLBnd(:)
       type(ESMF_DistGrid)  :: arrayDistGrid, gridDistGrid
@@ -3504,14 +3549,14 @@
       hasgrid = .FALSE.
       hasarray = .FALSE.
 
-      staggerloc = ESMF_STAGGERLOC_CENTER
+      staggerloc = ftypep%staggerloc
 
       ! make sure there is a grid before asking it questions.
       if (ftypep%gridstatus .eq. ESMF_STATUS_READY) then
-          !call ESMF_GridValidate(grid=ftypep%grid, rc=localrc)
-          !if (ESMF_LogMsgFoundError(localrc, &
-          !                          ESMF_ERR_PASSTHRU, &
-          !                          ESMF_CONTEXT, rc)) return
+          call ESMF_GridValidate(grid=ftypep%grid, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
 
           ! get grid dim and extents for the local piece
           call ESMF_GridGet(ftypep%grid, dimCount=gridrank, &
@@ -3573,16 +3618,25 @@
 
           ! Verify that the computational bounds of array and grid contained
           ! in the field match.
-          allocate(dimmap(dimCount))
+          allocate(distgridToGridMap(dimCount))
+          allocate(distgridToPackedArrayMap(dimCount))
           allocate(arrayCompLBnd(dimCount, 0:localDECount-1))
           allocate(arrayCompUBnd(dimCount, 0:localDECount-1))
 
-          call ESMF_ArrayGet(ftypep%array, distgridToArrayMap=dimmap, &
+          call ESMF_GridGet(ftypep%grid, distgridToGridMap=distgridToGridMap, rc=localrc)
+          if (localrc .ne. ESMF_SUCCESS) then
+             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                "Cannot retrieve distgridToGridMap from ftypep%grid", &
+                 ESMF_CONTEXT, rc)
+             return
+          endif 
+          call ESMF_ArrayGet(ftypep%array, &
+              distgridToPackedArrayMap=distgridToPackedArrayMap, &
               computationalLBound=arrayCompLBnd, &
               computationalUBound=arrayCompUBnd, rc=localrc)
           if (localrc .ne. ESMF_SUCCESS) then
              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                "Cannot retrieve computational bounds and dimmap from ftypep%array", &
+                "Cannot retrieve computational bounds from ftypep%array", &
                  ESMF_CONTEXT, rc)
              return
           endif 
@@ -3601,13 +3655,13 @@
                  return
               endif 
               do i=1, dimCount
-                  if(gridCompLBnd(dimmap(i)) .ne. arrayCompLBnd(i, lDE)) then
+                  if(gridCompLBnd(distgridToGridMap(i)) .ne. arrayCompLBnd(distgridToPackedArrayMap(i), lDE)) then
                       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
                          "grid computationalLBound does not match array computationalLBound", &
                           ESMF_CONTEXT, rc)
                       return
                   endif
-                  if(gridCompUBnd(dimmap(i)) .ne. arrayCompUBnd(i, lDE)) then
+                  if(gridCompUBnd(distgridToGridMap(i)) .ne. arrayCompUBnd(distgridToPackedArrayMap(i), lDE)) then
                       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
                          "grid computationalUBound does not match array computationalUBound", &
                           ESMF_CONTEXT, rc)
@@ -3616,7 +3670,7 @@
               enddo
               deallocate(gridCompUBnd, gridCompLBnd)
           enddo
-          deallocate(dimmap, arrayCompUBnd, arrayCompLBnd)
+          deallocate(distgridToGridMap, arrayCompUBnd, arrayCompLBnd)
       endif
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -4102,17 +4156,17 @@
             ftype%gridToFieldMap(i) = i
           enddo
       else
-         ftype%gridToFieldMap = gridToFieldMap
+         ftype%gridToFieldMap(1:size(gridToFieldMap)) = gridToFieldMap
       endif
 
       if(present(ungriddedLBound)) &
-         ftype%ungriddedLBound = ungriddedLBound
+         ftype%ungriddedLBound(1:size(ungriddedLBound)) = ungriddedLBound
       if(present(ungriddedUBound)) &
-         ftype%ungriddedUBound = ungriddedUBound
+         ftype%ungriddedUBound(1:size(ungriddedUBound)) = ungriddedUBound
       if(present(maxHaloLWidth)) &
-         ftype%maxHaloLWidth = maxHaloLWidth
+         ftype%maxHaloLWidth(1:size(maxHaloLWidth)) = maxHaloLWidth
       if(present(maxHaloUWidth)) &
-         ftype%maxHaloUWidth = maxHaloUWidth
+         ftype%maxHaloUWidth(1:size(maxHaloUWidth)) = maxHaloUWidth
 
       ftype%array = array
       ftype%array_internal = .true.
@@ -4290,21 +4344,6 @@
       ftype%grid  = grid
       ftype%gridstatus = ESMF_STATUS_READY
       ftype%fieldstatus = ESMF_STATUS_READY 
-
-      ! instead of adding error checking all over the place, call the
-      ! validate routine to check sizes of array vs grid to be sure
-      ! they are consistent.  the tfield is a temp wrapper so we can
-      ! call the user level validate
-      tfield%ftypep => ftype
-      ESMF_INIT_SET_CREATED(tfield)
-
-      call ESMF_FieldValidate(tfield, "", localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
-          ftype%fieldstatus = ESMF_STATUS_INVALID
-          return
-      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.C,v 1.31 2008/03/05 21:30:52 theurich Exp $
+// $Id: ESMC_LocalArray.C,v 1.32 2008/03/27 01:21:29 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_LocalArray.C,v 1.31 2008/03/05 21:30:52 theurich Exp $";
+static const char *const version = "$Id: ESMC_LocalArray.C,v 1.32 2008/03/27 01:21:29 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // prototypes for Fortran calls
@@ -623,6 +623,7 @@ int ESMC_LocalArray::ESMC_LocalArrayConstruct(
 //     pointer to newly allocated ESMC_LocalArray
 //
 // !ARGUMENTS:
+    ESMC_DataCopy copyflag,     // copy or reference original data
     int *lbounds,               // lower index number per dim
     int *ubounds,               // upper index number per dim
     int *rc                     // return code
@@ -641,14 +642,21 @@ int ESMC_LocalArray::ESMC_LocalArrayConstruct(
   if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
   localrc = ESMC_RC_NOT_IMPL;
 
-  // allocate memory for new LocalArray object
-  ESMC_LocalArray *larray = new ESMC_LocalArray;
+  ESMC_LocalArray *larray;
   
-  // copy the contents
-  *larray = *this;
-  
-  // mark this copy not to be responsible for deallocation
-  larray->needs_dealloc = ESMF_FALSE;
+  if (copyflag == ESMC_DATA_COPY){
+    // make a copy of the LocalArray object including the data allocation
+    larray = ESMC_LocalArrayCreate(this, &localrc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      return NULL;
+  }else{
+    // allocate memory for new LocalArray object
+    larray = new ESMC_LocalArray;
+    // copy the LocalArray members, including the _reference_ to its data alloc.
+    *larray = *this;
+    // mark this copy not to be responsible for deallocation
+    larray->needs_dealloc = ESMF_FALSE;
+  }
 
   // adjust the lbound and ubound members while checking counts
   for (int i=0; i<rank; i++){

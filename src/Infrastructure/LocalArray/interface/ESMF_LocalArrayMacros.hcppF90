@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.hcppF90,v 1.7 2008/01/16 21:25:10 theurich Exp $
+! $Id: ESMF_LocalArrayMacros.hcppF90,v 1.8 2008/03/27 01:21:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -542,6 +542,19 @@
 !call c_esmc_vmpointerprint(fshape) @\
         wrap%ptr##mrank##D##mtypekind => fshape @\
         call c_ESMC_LocalArraySetF90Ptr(array, wrap, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+          ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rc)) return @\
+        ! some compilers will have made a copy on the way to down here @\
+        ! the following call forces the base address encoded in the F90 @\
+        ! dope vector to point to the actual memory allocation *if* a mismatch @\
+        ! on the first data element location is detected, i.e. we are dealing @\
+        ! with a temporary copy of the actual array. @\
+        call c_ESMC_LocalArrayForceF90Ptr(array, & @\
+          ESMF_DATA_ADDRESS(fshape(mloc)), localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+          ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rc)) return @\
       else @\
         ! first recursion -> get F90ptr member and call subr. recursively @\
         call c_ESMC_LocalArrayGetF90Ptr(array, wrap, localrc) @\
@@ -552,6 +565,9 @@
 !print *, "First recursion: ", lbound(fptr), ubound(fptr) @\
 !call c_esmc_vmpointerprint(fptr) @\
         call ESMF_LocalArrayAdjust##mrank##D##mtypekind(array, counts, lb, ub, fptr, rc=localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+          ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rc)) return @\
       endif @\
  @\
       ! return successfully @\
@@ -680,9 +696,22 @@
         if (ESMF_LogMsgFoundAllocError(localrc, & @\
           "local data space", & @\
           ESMF_CONTEXT, rc)) return @\
-        ! this must do a contents assignment to perform a copy operation @\
-        lp = wrap%ptr##mrank##D##mtypekind @\
-        fptr => lp  @\
+        ! test if incoming pointer was associated @\
+        if (associated(fptr)) then @\
+          if (size(fptr) .ne. size(lp)) then @\
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+              "- fptr was associated but of incorrect size", & @\
+              ESMF_CONTEXT, rc) @\
+            return @\
+          endif @\
+          ! this must do a contents assignment to perform a copy operation @\
+          fptr = wrap%ptr##mrank##D##mtypekind @\
+          deallocate(lp) @\
+        else @\
+          ! this must do a contents assignment to perform a copy operation @\
+          lp = wrap%ptr##mrank##D##mtypekind @\
+          fptr => lp  @\
+        endif @\
       else @\
         fptr => wrap%ptr##mrank##D##mtypekind ! return a reference @\
       endif @\

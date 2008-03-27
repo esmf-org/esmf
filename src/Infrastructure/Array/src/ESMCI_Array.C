@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.9 2008/03/05 21:37:24 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.10 2008/03/27 01:21:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.9 2008/03/05 21:37:24 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.10 2008/03/27 01:21:19 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -92,6 +92,7 @@ Array::Array(
   int *vectorDimArray,                    // (in)
   int *distgridToArrayMapArray,           // (in)
   int *arrayToDistGridMapArray,           // (in)
+  int *distgridToPackedArrayMapArray,     // (in)
   ESMC_IndexFlag indexflagArg,            // (in)
   int *rc                                 // (out)
   ){
@@ -156,11 +157,14 @@ Array::Array(
   memcpy(staggerLoc, staggerLocArray, tensorElementCount * sizeof(int));
   vectorDim = new int[tensorElementCount];
   memcpy(vectorDim, vectorDimArray, tensorElementCount * sizeof(int));
-  // distgridToArrayMap and arrayToDistGridMap
+  // distgridToArrayMap, arrayToDistGridMap and distgridToPackedArrayMap
   distgridToArrayMap = new int[dimCount];
   memcpy(distgridToArrayMap, distgridToArrayMapArray, dimCount * sizeof(int));
   arrayToDistGridMap = new int[rank];
   memcpy(arrayToDistGridMap, arrayToDistGridMapArray, rank * sizeof(int));
+  distgridToPackedArrayMap = new int[dimCount];
+  memcpy(distgridToPackedArrayMap, distgridToPackedArrayMapArray,
+    dimCount * sizeof(int));
   // indexflag
   indexflag = indexflagArg;
   // contiguous flag
@@ -281,6 +285,8 @@ Array::~Array(){
     delete [] distgridToArrayMap;
   if (arrayToDistGridMap != NULL)
     delete [] arrayToDistGridMap;
+  if (distgridToPackedArrayMap != NULL)
+    delete [] distgridToPackedArrayMap;
   if (contiguousFlag != NULL)
     delete [] contiguousFlag;
   if (exclusiveElementCountPDe != NULL)
@@ -316,6 +322,7 @@ Array *Array::create(
   ESMC_LocalArray **larrayListArg,            // (in)
   int larrayCount,                            // (in)
   DistGrid *distgrid,                         // (in)
+  ESMC_DataCopy copyflag,                     // (in)
   InterfaceInt *distgridToArrayMap,           // (in)
   InterfaceInt *computationalEdgeLWidthArg,   // (in)
   InterfaceInt *computationalEdgeUWidthArg,   // (in)
@@ -396,14 +403,30 @@ Array *Array::create(
         "- distgridToArrayMap and distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
+    memcpy(distgridToArrayMapArray, distgridToArrayMap->array,
+      dimCount*sizeof(int));
+  }
+  {
+    // check distgridToArrayMapArray
+    bool *check = new bool[rank];
+    for (int i=0; i<rank; i++)
+      check[i] = false; // initialize
     for (int i=0; i<dimCount; i++){
       if (distgridToArrayMapArray[i] < 0 || distgridToArrayMapArray[i] > rank){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
           "- invalid distgridToArrayMap element", rc);
         return ESMC_NULL_POINTER;
       }
-      distgridToArrayMapArray[i] = distgridToArrayMap->array[i];  // copy
+      if (distgridToArrayMapArray[i] > 0){
+        if(check[distgridToArrayMapArray[i]-1]){
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+            "- invalid distgridToArrayMap element", rc);
+          return ESMC_NULL_POINTER;
+        }
+        check[distgridToArrayMapArray[i]-1] = true;
+      }
     }
+    delete [] check;
   }
   // determine replicatorCount
   int replicatorCount = 0;  // initialize
@@ -416,9 +439,21 @@ Array *Array::create(
   int *arrayToDistGridMapArray = new int[rank];
   for (int i=0; i<rank; i++)
     arrayToDistGridMapArray[i] = 0; // reset  (basis 1), 0 indicates tensor dim
-  for (int i=0; i<dimCount; i++){
-    if (distgridToArrayMapArray[i] > 0)
-      arrayToDistGridMapArray[distgridToArrayMapArray[i]-1] = i+1;
+  for (int i=0; i<dimCount; i++)
+    if (int j=distgridToArrayMapArray[i])
+      arrayToDistGridMapArray[j-1] = i+1;
+  // generate distgridToPackedArrayMap - labels the distributed Array dims 1,2,.
+  int *distgridToPackedArrayMap = new int[dimCount];
+  for (int i=0; i<dimCount; i++)
+    distgridToPackedArrayMap[i] = 0; // reset  (basis 1), 0 indicates repl. dim
+  {
+    int k=1;  // reset
+    for (int i=0; i<rank; i++){
+      if (int j=arrayToDistGridMapArray[i]){
+        distgridToPackedArrayMap[j-1] = k;
+        ++k;
+      }
+    }
   }
   // check for undistLBound and undistUBound arguments and that they match
   // dimCount, rank. By default use undistLBound and undistUBound of LocalArray
@@ -526,34 +561,37 @@ Array *Array::create(
   // DistGrid
   for (int i=0; i<localDeCount; i++){
     int de = localDeList[i];
-    memcpy(&(exclusiveUBound[i*dimCount]), &(indexCountPDimPDe[de*dimCount]),
-      dimCount*sizeof(int));
+    for (int j=0; j<dimCount; j++)
+      if (int k=distgridToPackedArrayMap[j])
+        exclusiveUBound[i*dimCount+k-1] = indexCountPDimPDe[de*dimCount+j];
   }
   // optionally shift origin of exclusive region to pseudo global index space
   if (indexflag == ESMF_INDEX_GLOBAL){
     for (int i=0; i<localDeCount; i++){
       int de = localDeList[i];
       for (int j=0; j<dimCount; j++){
+        // check that this DE/dim has a contiguous index list
+        const int *contigFlagPDimPDe = distgrid->getContigFlagPDimPDe();
+        if (!contigFlagPDimPDe[de*dimCount+j]){
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_VALID,
+            "- Cannot use non-contiguous decomposition for pseudo global"
+            " index space", rc);
+          return ESMC_NULL_POINTER;
+        }
         // obtain indexList for this DE and dim
         const int *indexList =
           distgrid->getIndexListPDimPLocalDe(i, j+1, &localrc);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
           return ESMC_NULL_POINTER;
-        // check that this dim has a contiguous index list
-        for (int k=1; k<indexCountPDimPDe[de*dimCount+j]; k++){
-          if (indexList[k] != indexList[k-1]+1){
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_VALID,
-              "- Cannot use non-contiguous decomposition for pseudo global"
-              " index space", rc);
-            return ESMC_NULL_POINTER;
-          }
-        }
         // shift bounds of exclusive region to match indexList[0]
         if (indexCountPDimPDe[de*dimCount+j]){
           // only shift if there are indices associated
-          int shift = indexList[0] - exclusiveLBound[i*dimCount+j];
-          exclusiveLBound[i*dimCount+j] += shift;
-          exclusiveUBound[i*dimCount+j] += shift;
+          if (int k=distgridToPackedArrayMap[j]){
+            // only shift if this isn't a replicated dim
+            int shift = indexList[0] - exclusiveLBound[i*dimCount+k-1];
+            exclusiveLBound[i*dimCount+k-1] += shift;
+            exclusiveUBound[i*dimCount+k-1] += shift;
+          }
         }
       } // j
     } // i
@@ -611,11 +649,10 @@ Array *Array::create(
         "- computationalLWidth and distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
-    for (int i=0; i<dimCount; i++){
-      for (int j=0; j<localDeCount; j++)
+    for (int j=0; j<localDeCount; j++)
+      for (int i=0; i<dimCount; i++)
         computationalLBound[j*dimCount+i] = exclusiveLBound[j*dimCount+i]
           - computationalLWidthArg->array[i];
-    }
   }else{
     // set default
     memcpy(computationalLBound, exclusiveLBound,
@@ -632,11 +669,10 @@ Array *Array::create(
         "- computationalUWidth and distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
-    for (int i=0; i<dimCount; i++){
-      for (int j=0; j<localDeCount; j++)
+    for (int j=0; j<localDeCount; j++)
+      for (int i=0; i<dimCount; i++)
         computationalUBound[j*dimCount+i] = exclusiveUBound[j*dimCount+i]
           + computationalUWidthArg->array[i];
-    }
   }else{
     // set default
     memcpy(computationalUBound, exclusiveUBound,
@@ -650,14 +686,16 @@ Array *Array::create(
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
           return ESMC_NULL_POINTER;
         if (onEdgeL)
-          computationalLBound[j*dimCount+i] -= computationalEdgeLWidth[i];
+          if (int k=distgridToPackedArrayMap[i])
+            computationalLBound[j*dimCount+k-1] -= computationalEdgeLWidth[k-1];
       }
       if (computationalEdgeUWidth[i]){
         bool onEdgeU = distgrid->isLocalDeOnEdgeU(j, i+1, &localrc);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
           return ESMC_NULL_POINTER;
         if (onEdgeU)
-          computationalUBound[j*dimCount+i] += computationalEdgeUWidth[i];
+          if (int k=distgridToPackedArrayMap[i])
+            computationalUBound[j*dimCount+k-1] += computationalEdgeUWidth[k-1];
       }
     }
   }
@@ -767,11 +805,11 @@ Array *Array::create(
   int *temp_larrayUBound = new int[rank];
   for (int i=0; i<localDeCount; i++){
     larrayListArg[i]->ESMC_LocalArrayGetCounts(rank, temp_counts);
-    int jjj=0;  // reset
+    int j=0;    // reset distributed index
+    int jjj=0;  // reset undistributed index
     for (int jj=0; jj<rank; jj++){
       if (arrayToDistGridMapArray[jj]){
         // distributed dimension
-        int j = arrayToDistGridMapArray[jj] - 1; // shift to basis 0
         if (temp_counts[jj] < 
           totalUBound[i*dimCount+j] - totalLBound[i*dimCount+j] + 1){
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
@@ -816,6 +854,7 @@ Array *Array::create(
         }
         totalLBound[i*dimCount+j] = temp_larrayLBound[jj]; // write back
         totalUBound[i*dimCount+j] = temp_larrayUBound[jj]; // write back
+        ++j;
       }else{
         // non-distributed dimension
         if (temp_counts[jj] < 
@@ -830,10 +869,12 @@ Array *Array::create(
       }
     }
     // Adjust LocalArray object for specific undistLBound and undistUBound.
-    // This will allocate memory for a _new_ LocalArray object for each element,
-    // however, the original memory used for data storage will be referenced!
+    // This will allocate memory for a _new_ LocalArray object for each element.
+    // Depending on copyflag the original memory used for data storage will be
+    // referenced or a copy of the data will be made.
     larrayList[i] = larrayListArg[i]->
-      ESMC_LocalArrayAdjust(temp_larrayLBound, temp_larrayUBound, &localrc);
+      ESMC_LocalArrayAdjust(copyflag, temp_larrayLBound, temp_larrayUBound,
+        &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }
@@ -847,8 +888,8 @@ Array *Array::create(
       exclusiveLBound, exclusiveUBound, computationalLBound,
       computationalUBound, totalLBound, totalUBound, tensorCount,
       tensorElementCount, undistLBoundArray, undistUBoundArray, staggerLoc,
-      vectorDim, distgridToArrayMapArray, arrayToDistGridMapArray, indexflag,
-      &localrc);
+      vectorDim, distgridToArrayMapArray, arrayToDistGridMapArray,
+      distgridToPackedArrayMap, indexflag, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }catch(...){
@@ -867,6 +908,7 @@ Array *Array::create(
   delete [] totalUBound;
   delete [] distgridToArrayMapArray;
   delete [] arrayToDistGridMapArray;
+  delete [] distgridToPackedArrayMap;
   delete [] staggerLoc;
   delete [] vectorDim;
   if (undistLBoundArrayAllocFlag) delete [] undistLBoundArray;
@@ -967,14 +1009,30 @@ Array *Array::create(
         "- distgridToArrayMap and distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
+    memcpy(distgridToArrayMapArray, distgridToArrayMap->array,
+      dimCount*sizeof(int));
+  }
+  {
+    // check distgridToArrayMapArray
+    bool *check = new bool[rank];
+    for (int i=0; i<rank; i++)
+      check[i] = false; // initialize
     for (int i=0; i<dimCount; i++){
       if (distgridToArrayMapArray[i] < 0 || distgridToArrayMapArray[i] > rank){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
           "- invalid distgridToArrayMap element", rc);
         return ESMC_NULL_POINTER;
       }
-      distgridToArrayMapArray[i] = distgridToArrayMap->array[i];  // copy
+      if (distgridToArrayMapArray[i] > 0){
+        if(check[distgridToArrayMapArray[i]-1]){
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+            "- invalid distgridToArrayMap element", rc);
+          return ESMC_NULL_POINTER;
+        }
+        check[distgridToArrayMapArray[i]-1] = true;
+      }
     }
+    delete [] check;
   }
   // determine replicatorCount
   int replicatorCount = 0;  // initialize
@@ -987,9 +1045,21 @@ Array *Array::create(
   int *arrayToDistGridMapArray = new int[rank];
   for (int i=0; i<rank; i++)
     arrayToDistGridMapArray[i] = 0; // reset  (basis 1), 0 indicates tensor dim
-  for (int i=0; i<dimCount; i++){
-    if (distgridToArrayMapArray[i] > 0)
-      arrayToDistGridMapArray[distgridToArrayMapArray[i]-1] = i+1;
+  for (int i=0; i<dimCount; i++)
+    if (int j=distgridToArrayMapArray[i])
+      arrayToDistGridMapArray[j-1] = i+1;
+  // generate distgridToPackedArrayMap - labels the distributed Array dims 1,2,.
+  int *distgridToPackedArrayMap = new int[dimCount];
+  for (int i=0; i<dimCount; i++)
+    distgridToPackedArrayMap[i] = 0; // reset  (basis 1), 0 indicates repl. dim
+  {
+    int k=1;  // reset
+    for (int i=0; i<rank; i++){
+      if (int j=arrayToDistGridMapArray[i]){
+        distgridToPackedArrayMap[j-1] = k;
+        ++k;
+      }
+    }
   }
   // check for undistLBound and undistUBound arguments and that they match
   // dimCount, rank
@@ -1072,34 +1142,37 @@ Array *Array::create(
   // DistGrid
   for (int i=0; i<localDeCount; i++){
     int de = localDeList[i];
-    memcpy(&(exclusiveUBound[i*dimCount]), &(indexCountPDimPDe[de*dimCount]),
-      dimCount*sizeof(int));
+    for (int j=0; j<dimCount; j++)
+      if (int k=distgridToPackedArrayMap[j])
+        exclusiveUBound[i*dimCount+k-1] = indexCountPDimPDe[de*dimCount+j];
   }
   // optionally shift origin of exclusive region to pseudo global index space
   if (indexflag == ESMF_INDEX_GLOBAL){
     for (int i=0; i<localDeCount; i++){
       int de = localDeList[i];
       for (int j=0; j<dimCount; j++){
+        // check that this DE/dim has a contiguous index list
+        const int *contigFlagPDimPDe = distgrid->getContigFlagPDimPDe();
+        if (!contigFlagPDimPDe[de*dimCount+j]){
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_VALID,
+            "- Cannot use non-contiguous decomposition for pseudo global"
+            " index space", rc);
+          return ESMC_NULL_POINTER;
+        }
         // obtain indexList for this DE and dim
         const int *indexList =
           distgrid->getIndexListPDimPLocalDe(i, j+1, &localrc);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
           return ESMC_NULL_POINTER;
-        // check that this dim has a contiguous index list
-        for (int k=1; k<indexCountPDimPDe[de*dimCount+j]; k++){
-          if (indexList[k] != indexList[k-1]+1){
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_VALID,
-              "- Cannot use non-contiguous decomposition for pseudo global"
-              " index space", rc);
-            return ESMC_NULL_POINTER;
-          }
-        }
         // shift bounds of exclusive region to match indexList[0]
         if (indexCountPDimPDe[de*dimCount+j]){
           // only shift if there are indices associated
-          int shift = indexList[0] - exclusiveLBound[i*dimCount+j];
-          exclusiveLBound[i*dimCount+j] += shift;
-          exclusiveUBound[i*dimCount+j] += shift;
+          if (int k=distgridToPackedArrayMap[j]){
+            // only shift if this isn't a replicated dim
+            int shift = indexList[0] - exclusiveLBound[i*dimCount+k-1];
+            exclusiveLBound[i*dimCount+k-1] += shift;
+            exclusiveUBound[i*dimCount+k-1] += shift;
+          }
         }
       } // j
     } // i
@@ -1158,10 +1231,9 @@ Array *Array::create(
       return ESMC_NULL_POINTER;
     }
     for (int j=0; j<localDeCount; j++)
-      for (int i=0; i<dimCount; i++){
+      for (int i=0; i<dimCount; i++)
         computationalLBound[j*dimCount+i] = exclusiveLBound[j*dimCount+i]
           - computationalLWidthArg->array[i];
-    }
   }else{
     // set default
     memcpy(computationalLBound, exclusiveLBound,
@@ -1179,10 +1251,9 @@ Array *Array::create(
       return ESMC_NULL_POINTER;
     }
     for (int j=0; j<localDeCount; j++)
-      for (int i=0; i<dimCount; i++){
+      for (int i=0; i<dimCount; i++)
         computationalUBound[j*dimCount+i] = exclusiveUBound[j*dimCount+i]
           + computationalUWidthArg->array[i];
-    }
   }else{
     // set default
     memcpy(computationalUBound, exclusiveUBound,
@@ -1196,14 +1267,16 @@ Array *Array::create(
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
           return ESMC_NULL_POINTER;
         if (onEdgeL)
-          computationalLBound[j*dimCount+i] -= computationalEdgeLWidth[i];
+          if (int k=distgridToPackedArrayMap[i])
+            computationalLBound[j*dimCount+k-1] -= computationalEdgeLWidth[k-1];
       }
       if (computationalEdgeUWidth[i]){
         bool onEdgeU = distgrid->isLocalDeOnEdgeU(j, i+1, &localrc);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
           return ESMC_NULL_POINTER;
         if (onEdgeU)
-          computationalUBound[j*dimCount+i] += computationalEdgeUWidth[i];
+          if (int k=distgridToPackedArrayMap[i])
+            computationalUBound[j*dimCount+k-1] += computationalEdgeUWidth[k-1];
       }
     }
   }
@@ -1274,7 +1347,7 @@ Array *Array::create(
     if (exclusiveUBound[i] > totalUBound[i])
       totalUBound[i] = exclusiveUBound[i];
   }
-
+  
   // check computational bounds against total bounds
   for (int i=0; i<localDeCount*dimCount; i++){
     if (totalLBound[i] <= totalUBound[i]){
@@ -1308,15 +1381,16 @@ Array *Array::create(
   int *temp_larrayLBound = new int[rank];
   int *temp_larrayUBound = new int[rank];
   for (int i=0; i<localDeCount; i++){
-    int jjj=0;  // reset
+    int j=0;    // reset distributed index
+    int jjj=0;  // reset undistributed index
     for (int jj=0; jj<rank; jj++){
       if (arrayToDistGridMapArray[jj]){
         // distributed dimension
-        int j = arrayToDistGridMapArray[jj] - 1; // shift to basis 0
         temp_counts[jj] =
           totalUBound[i*dimCount+j] - totalLBound[i*dimCount+j] + 1;
         temp_larrayLBound[jj] = totalLBound[i*dimCount+j];
         temp_larrayUBound[jj] = totalUBound[i*dimCount+j];
+        ++j;
       }else{
         // non-distributed dimension
         temp_counts[jj] = undistUBoundArray[jjj] - undistLBoundArray[jjj] + 1;
@@ -1342,8 +1416,8 @@ Array *Array::create(
       exclusiveLBound, exclusiveUBound, computationalLBound,
       computationalUBound, totalLBound, totalUBound, tensorCount,
       tensorElementCount, undistLBoundArray, undistUBoundArray, staggerLoc,
-      vectorDim, distgridToArrayMapArray, arrayToDistGridMapArray, indexflag,
-      &localrc);
+      vectorDim, distgridToArrayMapArray, arrayToDistGridMapArray,
+      distgridToPackedArrayMap, indexflag, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }catch(...){
@@ -1351,7 +1425,7 @@ Array *Array::create(
     ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMCI::Array.", rc);  
     return ESMC_NULL_POINTER;
   }
-
+  
   // garbage collection
   delete [] larrayList;
   delete [] exclusiveLBound;
@@ -1362,6 +1436,7 @@ Array *Array::create(
   delete [] totalUBound;
   delete [] distgridToArrayMapArray;
   delete [] arrayToDistGridMapArray;
+  delete [] distgridToPackedArrayMap;
   delete [] staggerLoc;
   delete [] vectorDim;
   
@@ -1376,6 +1451,7 @@ Array *Array::create(
   return array;
 }
 //-----------------------------------------------------------------------------
+
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -1478,13 +1554,16 @@ Array *Array::create(
     arrayOut->vectorDim = new int[tensorElementCount];
     memcpy(arrayOut->vectorDim, arrayIn->vectorDim,
       tensorElementCount * sizeof(int));
-    // distgridToArrayMap and arrayToDistGridMap
+    // distgridToArrayMap, arrayToDistGridMap and distgridToPackedArrayMap
     arrayOut->distgridToArrayMap = new int[dimCount];
     memcpy(arrayOut->distgridToArrayMap, arrayIn->distgridToArrayMap,
       dimCount * sizeof(int));
     arrayOut->arrayToDistGridMap = new int[rank];
     memcpy(arrayOut->arrayToDistGridMap, arrayIn->arrayToDistGridMap,
       rank * sizeof(int));
+    arrayOut->distgridToPackedArrayMap = new int[dimCount];
+    memcpy(arrayOut->distgridToPackedArrayMap,
+      arrayIn->distgridToPackedArrayMap, dimCount * sizeof(int));
     // contiguous flag
     arrayOut->contiguousFlag = new int[localDeCount];
     memcpy(arrayOut->contiguousFlag, arrayIn->contiguousFlag,
@@ -1601,14 +1680,15 @@ int Array::getLinearIndexExclusive(
   int joff = localDe*dimCount;      // offset according to localDe index
   int linIndex = 0;                 // reset
   int tensorIndex = tensorCount-1;  // reset
+  int packedIndex = dimCount-1;     // reset
   for (int jj=rank-1; jj>=0; jj--){
-    int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 for tensor
-    if (j){
+    if (arrayToDistGridMap[jj]){
       // decomposed dimension 
-      --j;  // shift to basis 0
+      int j = packedIndex;
       // first time multiply with zero intentionally:
       linIndex *= totalUBound[joff+j] - totalLBound[joff+j] + 1;
       linIndex += exclusiveLBound[joff+j] - totalLBound[joff+j] + index[jj];    
+      --packedIndex;
     }else{
       // tensor dimension
       // first time multiply with zero intentionally:
@@ -1685,8 +1765,7 @@ SeqIndex Array::getSequenceIndexExclusive(
   int tensorSeqIndex = 0;             // reset
   int tensorIndex = tensorCount - 1;  // reset
   for (int jj=rank-1; jj>=0; jj--){
-    int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 for tensor
-    if (j==0){
+    if (arrayToDistGridMap[jj]==0){
       // tensor dimension
       // first time multiply with zero intentionally:
       tensorSeqIndex *= undistUBound[tensorIndex] - undistLBound[tensorIndex]
@@ -1766,8 +1845,7 @@ SeqIndex Array::getSequenceIndexPatch(
   int tensorSeqIndex = 0;             // reset
   int tensorIndex = tensorCount - 1;  // reset
   for (int jj=rank-1; jj>=0; jj--){
-    int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 for tensor
-    if (j==0){
+    if (arrayToDistGridMap[jj]==0){
       // tensor dimension
       // first time multiply with zero intentionally:
       tensorSeqIndex *= undistUBound[tensorIndex] - undistLBound[tensorIndex]
@@ -1987,16 +2065,17 @@ int Array::print()const{
     larrayList[i]->ESMC_LocalArrayPrint();
     if (exclusiveElementCountPDe[de]){
       // associated DE
+      int j=0;    // reset
       int jjj=0;  // reset
       for (int jj=0; jj<rank; jj++){
         if (arrayToDistGridMap[jj]){
           // distributed dimension
-          int j = arrayToDistGridMap[jj] - 1;  // shift to basis 0
           printf("dim %d: [%d]: [%d [%d [%d, %d] %d] %d]\n", 
             jj+1, j, 
             totalLBound[i*dimCount+j], computationalLBound[i*dimCount+j],
             exclusiveLBound[i*dimCount+j], exclusiveUBound[i*dimCount+j],
             computationalUBound[i*dimCount+j], totalUBound[i*dimCount+j]);
+          ++j;
         }else{
           // non-distributed dimension
           printf("dim %d: undistLBound[%d]=%d            undistUBound[%d]=%d\n",
@@ -2126,6 +2205,8 @@ int Array::serialize(
     *ip++ = distgridToArrayMap[i];
   for (int i=0; i<rank; i++)
     *ip++ = arrayToDistGridMap[i];
+  for (int i=0; i<distgrid->getDimCount(); i++)
+    *ip++ = distgridToPackedArrayMap[i];
   *ip++ = tensorElementCount;
   for (int i=0; i<delayout->getDeCount(); i++)
     *ip++ = exclusiveElementCountPDe[i];
@@ -2206,6 +2287,9 @@ int Array::deserialize(
   arrayToDistGridMap = new int[rank];
   for (int i=0; i<rank; i++)
     arrayToDistGridMap[i] = *ip++;
+  distgridToPackedArrayMap = new int[distgrid->getDimCount()];
+  for (int i=0; i<distgrid->getDimCount(); i++)
+    distgridToPackedArrayMap[i] = *ip++;
   tensorElementCount = *ip++;
   exclusiveElementCountPDe = new int[delayout->getDeCount()];
   for (int i=0; i<delayout->getDeCount(); i++)
@@ -2417,13 +2501,13 @@ int Array::gather(
       int *iiSrt = new int[rank];
       int *iiEnd = new int[rank];
       int *skipWidth = new int[rank];
+      int packedIndex = 0;    // reset
       int tensorIndex = 0;    // reset
       int totalWidthProd = 1; // reset
       for (int jj=0; jj<rank; jj++){
-        int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 for tensor
-        if (j){
+        if (arrayToDistGridMap[jj]){
           // decomposed dimension 
-          --j;  // shift to basis 0
+          int j = packedIndex;
           iiSrt[jj] = exclusiveLBound[i*dimCount+j] - totalLBound[i*dimCount+j];
           iiEnd[jj] = exclusiveUBound[i*dimCount+j] - totalLBound[i*dimCount+j]
             + 1;
@@ -2433,6 +2517,7 @@ int Array::gather(
           // update totalWidthProd for next dims
           totalWidthProd *=
             totalUBound[i*dimCount+j] - totalLBound[i*dimCount+j] + 1;
+          ++packedIndex;
         }else{
           // tensor dimension
           iiSrt[jj] = 0;
@@ -2448,14 +2533,17 @@ int Array::gather(
       // via multi-dim while-loop
       int sendBufferIndex = 0;  // reset
       // determine start lin. index for this element into larrayBaseAddrList[i]
-      int linearIndex = ii[rank-1];  // init
+      int linearIndex = ii[rank-1];   // init
+      packedIndex = dimCount-1;   // reset
+      if (arrayToDistGridMap[rank-1])
+        --packedIndex;  // adjust starting index
       for (int jj=rank-2; jj>=0; jj--){
-        int j = arrayToDistGridMap[jj];
-        if (j){
+        if (arrayToDistGridMap[jj]){
           // decomposed dimension 
-          --j;  // shift to basis 0
+          int j = packedIndex;
           linearIndex *= totalUBound[i*dimCount+j]
             - totalLBound[i*dimCount+j] + 1;
+          --packedIndex;
         }else{
           // tensor dimension
           linearIndex *= counts[jj];
@@ -3009,13 +3097,13 @@ int Array::scatter(
       int *iiSrt = new int[rank];
       int *iiEnd = new int[rank];
       int *skipWidth = new int[rank];
+      int packedIndex = 0;    // reset
       int tensorIndex = 0;    // reset
       int totalWidthProd = 1; // reset
       for (int jj=0; jj<rank; jj++){
-        int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 for tensor
-        if (j){
+        if (arrayToDistGridMap[jj]){
           // decomposed dimension 
-          --j;  // shift to basis 0
+          int j = packedIndex;
           iiSrt[jj] = exclusiveLBound[i*dimCount+j] - totalLBound[i*dimCount+j];
           iiEnd[jj] = exclusiveUBound[i*dimCount+j] - totalLBound[i*dimCount+j]
             + 1;
@@ -3025,6 +3113,7 @@ int Array::scatter(
           // update totalWidthProd for next dims
           totalWidthProd *=
             totalUBound[i*dimCount+j] - totalLBound[i*dimCount+j] + 1;
+          ++packedIndex;
         }else{
           // tensor dimension
           iiSrt[jj] = 0;
@@ -3041,13 +3130,16 @@ int Array::scatter(
       int recvBufferIndex = 0;  // reset
       // determine start lin. index for this element into larrayBaseAddrList[i]
       int linearIndex = ii[rank-1];  // init
+      packedIndex = dimCount-1;  // reset
+      if (arrayToDistGridMap[rank-1])
+        --packedIndex;  // adjust starting index
       for (int jj=rank-2; jj>=0; jj--){
-        int j = arrayToDistGridMap[jj];
-        if (j){
+        if (arrayToDistGridMap[jj]){
           // decomposed dimension 
-          --j;  // shift to basis 0
+          int j = packedIndex;
           linearIndex *= totalUBound[i*dimCount+j]
             - totalLBound[i*dimCount+j] + 1;
+          --packedIndex;
         }else{
           // tensor dimension
           linearIndex *= counts[jj];
@@ -3395,8 +3487,7 @@ int Array::redistStore(
     int *dstArrayToTensorMap = new int[rank];
     int tensorIndex = 0;
     for (int jj=0; jj<rank; jj++){
-      int j = dstArrayToDistGridMap[jj];  // j is dimIndex bas 1, or 0 undist.
-      if (j==0){
+      if (dstArrayToDistGridMap[jj]==0){
         // tensor dimension
         dstArrayToTensorMap[jj] = tensorIndex;
         ++tensorIndex;
@@ -3497,7 +3588,7 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
           // decomposed dimension 
           --j;  // shift to basis 0
           if (j == srcDimCount-1){
-            srcTupleStart[jj] =localStart[i];
+            srcTupleStart[jj] = localStart[i];
             srcTuple[jj] = srcTupleStart[jj];
             srcTupleEnd[jj] = localStart[i] + localSize[i];
           }else{
@@ -4364,6 +4455,8 @@ int Array::sparseMatMulStore(
   if (factorPetCount < 1){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "- at least one PET must provide a valid factorList", &rc);
+    // garbage collection before bail out
+    delete [] factorPetList;
     return rc;
   }
   
@@ -4384,6 +4477,8 @@ int Array::sparseMatMulStore(
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- factorIndexList without tensor mixing requires matching srcArray and"
         " dstArray tensorElementCount", &rc);
+      // garbage collection before bail out
+      delete [] factorPetList;
       return rc;
     }
   }
@@ -4501,16 +4596,16 @@ int Array::sparseMatMulStore(
     if (srcLocalDeElementCount[i]){
       // reset counters
       int joff = i*srcArray->distgrid->getDimCount();  // offset into bounds
+      int packedIndex = 0;    // reset
       int tensorIndex = 0;    // reset
       for (int jj=0; jj<srcRank; jj++){
         ii[jj] = 0;  // reset
-        int j = srcArray->arrayToDistGridMap[jj];
-        // j is dimIndex basis 1, or 0 for tensor dims
-        if (j){
+        if (srcArray->arrayToDistGridMap[jj]){
           // decomposed dimension 
-          --j;  // shift to basis 0
+          int j = packedIndex;
           iiEnd[jj] = srcArray->exclusiveUBound[joff+j]
             - srcArray->exclusiveLBound[joff+j] + 1;
+          ++packedIndex;
         }else{
           // tensor dimension
           iiEnd[jj] = srcArray->undistUBound[tensorIndex]
@@ -4590,16 +4685,16 @@ int Array::sparseMatMulStore(
     if (dstLocalDeElementCount[i]){
       // reset counters
       int joff = i*dstArray->distgrid->getDimCount();  // offset into bounds
+      int packedIndex = 0;    // reset
       int tensorIndex = 0;    // reset
       for (int jj=0; jj<dstRank; jj++){
         ii[jj] = 0;  // reset
-        int j = dstArray->arrayToDistGridMap[jj];
-        // j is dimIndex basis 1, or 0 for tensor dims
-        if (j){
+        if (dstArray->arrayToDistGridMap[jj]){
           // decomposed dimension 
-          --j;  // shift to basis 0
+          int j = packedIndex;
           iiEnd[jj] = dstArray->exclusiveUBound[joff+j]
             - dstArray->exclusiveLBound[joff+j] + 1;
+          ++packedIndex;
         }else{
           // tensor dimension
           iiEnd[jj] = dstArray->undistUBound[tensorIndex]

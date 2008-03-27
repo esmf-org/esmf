@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.4 2008/03/01 02:55:52 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.5 2008/03/27 01:21:18 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -47,6 +47,7 @@ extern "C" {
         
   void FTN(c_esmc_arraycreatelocalarray)(ESMCI::Array **ptr, 
     ESMC_LocalArray **larrayList, int *larrayCount, ESMCI::DistGrid **distgrid,
+    ESMC_DataCopy *copyflag,
     ESMCI::InterfaceInt **distgridToArrayMap,
     ESMCI::InterfaceInt **computationalEdgeLWidthArg,
     ESMCI::InterfaceInt **computationalEdgeUWidthArg,
@@ -64,7 +65,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     // call into C++
     *ptr = ESMCI::Array::create(larrayList, *larrayCount, *distgrid,
-      *distgridToArrayMap,
+      *copyflag, *distgridToArrayMap,
       *computationalEdgeLWidthArg, *computationalEdgeUWidthArg,
       *computationalLWidthArg, *computationalUWidthArg, *totalLWidthArg,
       *totalUWidthArg, ESMC_NOT_PRESENT_FILTER(indexflag),
@@ -150,7 +151,9 @@ extern "C" {
     int *rank, ESMC_LocalArray **opt_localArrayList,
     int *len_localArrayList, ESMCI::DistGrid **distgrid,
     ESMCI::DELayout **delayout,
-    ESMC_IndexFlag *indexflag, ESMCI::InterfaceInt **distgridToArrayMap,
+    ESMC_IndexFlag *indexflag, 
+    ESMCI::InterfaceInt **distgridToArrayMap,
+    ESMCI::InterfaceInt **distgridToPackedArrayMap,
     ESMCI::InterfaceInt **arrayToDistGridMap,
     ESMCI::InterfaceInt **undistLBound,
     ESMCI::InterfaceInt **undistUBound,
@@ -211,6 +214,24 @@ extern "C" {
       // fill in distgridToArrayMap
       memcpy((*distgridToArrayMap)->array, (*ptr)->getDistGridToArrayMap(),
         sizeof(int) * dimCount);
+    }
+    // fill distgridToPackedArrayMap
+    if (*distgridToPackedArrayMap != NULL){
+      // distgridToPackedArrayMap was provided -> do some error checking
+      if ((*distgridToPackedArrayMap)->dimCount != 1){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+          "- distgridToPackedArrayMap array must be of rank 1", rc);
+        return;
+      }
+      if ((*distgridToPackedArrayMap)->extent[0] < dimCount){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+          "- 1st dimension of distgridToPackedArrayMap array must be of size "
+          "'dimCount'", rc);
+        return;
+      }
+      // fill in distgridToPackedArrayMap
+      memcpy((*distgridToPackedArrayMap)->array,
+        (*ptr)->getDistGridToPackedArrayMap(), sizeof(int) * dimCount);
     }
     // fill arrayToDistGridMap
     if (*arrayToDistGridMap != NULL){

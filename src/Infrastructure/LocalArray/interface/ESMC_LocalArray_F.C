@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray_F.C,v 1.24 2008/01/16 21:25:10 theurich Exp $
+// $Id: ESMC_LocalArray_F.C,v 1.25 2008/03/27 01:21:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -227,6 +227,15 @@ char *name = NULL;
         //fprintf(stderr, "interface code, getting f90 ptr into %lx, this = %lx, &this = %lx\n", 
         //                                (ESMC_I8)p, (ESMC_I8)(*ptr), (ESMC_I8)ptr);
           *localrc = (*ptr)->ESMC_LocalArrayGetF90Ptr(p);
+     }
+
+     void FTN(c_esmc_localarrayforcef90ptr)(ESMC_LocalArray **ptr, 
+        void XD *base, int *localrc) {
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *localrc = ESMF_FAILURE;
+              return;
+          }
+          *localrc = (*ptr)->ESMC_LocalArrayForceF90Ptr(XD base);
      }
 
      void FTN(c_esmc_localarraysetdealloc)(ESMC_LocalArray **ptr, int *localrc) {

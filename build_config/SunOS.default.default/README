@@ -1,10 +1,3 @@
-Settings for Sun OS, using the SUNWspro Fortran and C++ compilers.
+Settings for SunOS, using the SUNWspro Fortran and C++ compilers.
 
-Note:  We no longer have a working version of ESMF on the Sun
-platform.  We ran into compiler problems (internal compiler
-errors in trying to compile and/or link the applications)
-which we could not solve.
-
-The settings in this file are the last ones which worked.
-If anyone gets ESMF running on this platform again, please
-let us know.
+Default ESMF_ABI is 64. To compile for 32-bit set ESMF_ABI to 32.

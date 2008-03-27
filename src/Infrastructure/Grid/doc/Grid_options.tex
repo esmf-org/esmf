@@ -1,4 +1,4 @@
-% $Id: Grid_options.tex,v 1.24 2007/09/27 17:18:25 oehmke Exp $
+% $Id: Grid_options.tex,v 1.25 2008/03/27 01:21:25 theurich Exp $
 
 \subsubsection{ESMF\_GridConn}
 \label{sec:opt:gridconn}
@@ -63,59 +63,59 @@ following are the valid predefined stagger locations.
 
 \medskip
 
-\begin{verbatim}
-    
-                 2----4----2
-                 |         |
-                 |         |
-                 3    1    3
-                 |         |
-                 |         |
-                 2----4----2
- 
-      Diagram Illustrating 2D Stagger Locations
-   (Numbers correspond to bracketed numbers in list.)
+\begin{center}
+\begin{figure}
+\scalebox{0.75}{\includegraphics{GridStaggerLoc2D}}
+\caption{2D Predefined Stagger Locations}
+\label{fig:gridstaggerloc2d}
+\end{figure}
+\end{center}
 
-\end{verbatim}
-
-The 2D predefined stagger locations are:\\
+The 2D predefined stagger locations (illustrated in figure~\ref{gridstaggerloc2d}) are:\\
 \begin{description}
-\item [ESMF\_STAGGERLOC\_CENTER:] The center of the cell [1].
-\item [ESMF\_STAGGERLOC\_CORNER:] The corners of the cell [2].
-\item [ESMF\_STAGGERLOC\_EDGE1:] The edges offset from the center in the 1st dimension [3].
-\item [ESMF\_STAGGERLOC\_EDGE2:] The edges offset from the center in the 2nd dimension [4].
+\item [ESMF\_STAGGERLOC\_CENTER:] The center of the cell.
+\item [ESMF\_STAGGERLOC\_CORNER:] The corners of the cell.
+\item [ESMF\_STAGGERLOC\_EDGE1:] The edges offset from the center in the 1st dimension.
+\item [ESMF\_STAGGERLOC\_EDGE2:] The edges offset from the center in the 2nd dimension.
 \end{description}
 
 \medskip
 
-\begin{verbatim}
-    
-      5----7----5        2----4----2         5----7----5
-      |         |        |         |         |         |
-      |         |        |         |         |         | 
-      6    8    6        3    1    3         6    8    6
-      |         |        |         |         |         |
-      |         |        |         |         |         |
-      5----7----5        2----4----2         5----7----5
+\begin{center}
+\begin{figure}
+\scalebox{0.75}{\includegraphics{GridStaggerLoc3D_top}}
+\caption{3D Predefined Stagger Locations - Cell Top}
+\label{fig:gridstaggerloc3dtop}
+\end{figure}
+\end{center}
 
-       Cell Top          Cell Middle         Cell Bottom
-         
+\begin{center}
+\begin{figure}
+\scalebox{0.75}{\includegraphics{GridStaggerLoc3D_mid}}
+\caption{3D Predefined Stagger Locations - Cell Middle}
+\label{fig:gridstaggerloc3dmid}
+\end{figure}
+\end{center}
 
-           Diagram Illustrating 3D Stagger Locations
-       (Numbers correspond to bracketed numbers in list.)
+\begin{center}
+\begin{figure}
+\scalebox{0.75}{\includegraphics{GridStaggerLoc3D_btm}}
+\caption{3D Predefined Stagger Locations - Cell Bottom}
+\label{fig:gridstaggerloc3dbtm}
+\end{figure}
+\end{center}
 
-\end{verbatim}
 
-The 3D predefined stagger locations are:\\
+The 3D predefined stagger locations (illustrated in figures~\ref{gridstaggerloc3dtop}~,~\ref{gridstaggerloc3dmid},~and~\ref{gridstaggerloc3dbtm}) are:\\
 \begin{description}
-\item [ESMF\_STAGGERLOC\_CENTER\_VCENTER:] The center of the 3D cell [1].
-\item [ESMF\_STAGGERLOC\_CORNER\_VCENTER:] Half way up the vertical edges of the cell [2].
-\item [ESMF\_STAGGERLOC\_EDGE1\_VCENTER:] The center of the face bounded by edge 1 and the vertical dimension [3].
-\item [ESMF\_STAGGERLOC\_EDGE2\_VCENTER:] The center of the face bounded by edge 2 and the vertical dimension [4]. 
-\item [ESMF\_STAGGERLOC\_CORNER\_VFACE:] The corners of the 3D cell [5].
-\item [ESMF\_STAGGERLOC\_EDGE1\_VFACE:] The center of the edges of the 3D cell parallel offset from the center in the 1st dimension [6].
-\item [ESMF\_STAGGERLOC\_EDGE2\_VFACE:] The center of the edges of the 3D cell parallel offset from the center in the 2nd dimension [7].
-\item [ESMF\_STAGGERLOC\_CENTER\_VFACE:] The center of the top and bottom face. The face bounded by the 1st and 2nd dimensions [8]. 
+\item [ESMF\_STAGGERLOC\_CENTER\_VCENTER:] The center of the 3D cell.
+\item [ESMF\_STAGGERLOC\_CORNER\_VCENTER:] Half way up the vertical edges of the cell.
+\item [ESMF\_STAGGERLOC\_EDGE1\_VCENTER:] The center of the face bounded by edge 1 and the vertical dimension.
+\item [ESMF\_STAGGERLOC\_EDGE2\_VCENTER:] The center of the face bounded by edge 2 and the vertical dimension. 
+\item [ESMF\_STAGGERLOC\_CORNER\_VFACE:] The corners of the 3D cell.
+\item [ESMF\_STAGGERLOC\_EDGE1\_VFACE:] The center of the edges of the 3D cell parallel offset from the center in the 1st dimension.
+\item [ESMF\_STAGGERLOC\_EDGE2\_VFACE:] The center of the edges of the 3D cell parallel offset from the center in the 2nd dimension.
+\item [ESMF\_STAGGERLOC\_CENTER\_VFACE:] The center of the top and bottom face. The face bounded by the 1st and 2nd dimensions. 
 \end{description}
 
 

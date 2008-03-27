@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.9 2008/02/28 00:42:22 theurich Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.10 2008/03/27 01:21:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -54,7 +54,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGet.cppF90,v 1.9 2008/02/28 00:42:22 theurich Exp $'
+      '$Id: ESMF_FieldGet.cppF90,v 1.10 2008/03/27 01:21:24 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -201,7 +201,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         integer :: gridCompLBnd(ESMF_MAXDIM), gridCompUBnd(ESMF_MAXDIM)
         integer :: gridExclLBnd(ESMF_MAXDIM), gridExclUBnd(ESMF_MAXDIM)
         integer :: gridTotaLBnd(ESMF_MAXDIM), gridTotaUBnd(ESMF_MAXDIM)
-        integer :: gridrank, arrayrank, fieldrank, localrc
+        integer :: gridrank, fieldrank, localrc
         integer :: i, j
         logical :: filled(ESMF_MAXDIM)
 
@@ -209,6 +209,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         integer, allocatable :: arrayBnd(:, :)
         integer, allocatable :: undistBnd(:)
         integer, allocatable :: distgridToArrayMap(:)
+        integer, allocatable :: distgridToPackedArrayMap(:)
 
         if (present(rc)) rc = ESMF_RC_NOT_IMPL 
         localrc = ESMF_RC_NOT_IMPL
@@ -223,15 +224,86 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
                ESMF_CONTEXT, rc)
            return
         endif 
-        call ESMF_ArrayGet(field%ftypep%array, rank=arrayrank, rc=localrc)
+        call ESMF_ArrayGet(field%ftypep%array, rank=fieldrank, rc=localrc)
         if (localrc .ne. ESMF_SUCCESS) then
            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-              "Cannot retrieve arrayrank from ftypep%array", &
+              "Cannot retrieve fieldrank from ftypep%array", &
                ESMF_CONTEXT, rc)
            return
         endif 
 
-        fieldrank = arrayrank
+        if(present(exclusiveLBound)) then
+            if(size(exclusiveLBound) .ne. fieldrank) then
+               call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                  "the size of exclusiveLBound must equal to the field rank", &
+                   ESMF_CONTEXT, rc)
+               return
+            endif 
+        endif
+        if(present(exclusiveUBound)) then
+            if(size(exclusiveUBound) .ne. fieldrank) then
+               call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                  "the size of exclusiveUBound must equal to the field rank", &
+                   ESMF_CONTEXT, rc)
+               return
+            endif 
+        endif
+        if(present(exclusiveCount)) then
+            if(size(exclusiveCount) .ne. fieldrank) then
+               call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                  "the size of exclusiveCount must equal to the field rank", &
+                   ESMF_CONTEXT, rc)
+               return
+            endif 
+        endif
+        if(present(computationalLBound)) then
+            if(size(computationalLBound) .ne. fieldrank) then
+               call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                  "the size of computationalLBound must equal to the field rank", &
+                   ESMF_CONTEXT, rc)
+               return
+            endif 
+        endif
+        if(present(computationalUBound)) then
+            if(size(computationalUBound) .ne. fieldrank) then
+               call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                  "the size of computationalUBound must equal to the field rank", &
+                   ESMF_CONTEXT, rc)
+               return
+            endif 
+        endif
+        if(present(computationalCount)) then
+            if(size(computationalCount) .ne. fieldrank) then
+               call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                  "the size of computationalCount must equal to the field rank", &
+                   ESMF_CONTEXT, rc)
+               return
+            endif 
+        endif
+        if(present(totalLBound)) then
+            if(size(totalLBound) .ne. fieldrank) then
+               call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                  "the size of totalLBound must equal to the field rank", &
+                   ESMF_CONTEXT, rc)
+               return
+            endif 
+        endif
+        if(present(totalUBound)) then
+            if(size(totalUBound) .ne. fieldrank) then
+               call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                  "the size of totalUBound must equal to the field rank", &
+                   ESMF_CONTEXT, rc)
+               return
+            endif 
+        endif
+        if(present(totalCount)) then
+            if(size(totalCount) .ne. fieldrank) then
+               call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                  "the size of totalCount must equal to the field rank", &
+                   ESMF_CONTEXT, rc)
+               return
+            endif 
+        endif
 
         if (present(totalLBound) .or. present(totalUBound)) then
         
@@ -242,13 +314,15 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
             ! Allocate storage for Array info
             allocate(arrayBnd(dimCount, 0:localDECount-1))
             allocate(undistBnd(fieldRank-dimCount))
+            allocate(distgridToPackedArrayMap(dimCount))
             allocate(distgridToArrayMap(dimCount))
                   
            ! get distributed dimension map
            call ESMF_ArrayGet(field%ftypep%array, & 
-               distgridToArrayMap=distgridToArrayMap, rc=localrc)
+             distgridToPackedArrayMap=distgridToPackedArrayMap, &
+             distgridToArrayMap=distgridToArrayMap, rc=localrc)
       
-            ! compute totalLBounds
+            ! fill totalLBounds
             if (present(totalLBound)) then
                 call ESMF_ArrayGet(field%ftypep%array, totalLBound=arrayBnd, & 
                     undistLBound=undistBnd, rc=localrc)
@@ -256,7 +330,8 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
                 ! set distributed dimensions
                 filled=.false.
                 do i=1, dimCount
-                   totalLBound(distgridToArrayMap(i))=arrayBnd(i,localDE)
+                   totalLBound(distgridToArrayMap(i))=&
+                    arrayBnd(distgridToPackedArrayMap(i),localDE)
                    filled(distgridToArrayMap(i))=.true.
                 enddo
       
@@ -270,7 +345,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
                 enddo
             endif
       
-            ! compute totalUBounds
+            ! fill totalUBounds
             if (present(totalUBound)) then
                 call ESMF_ArrayGet(field%ftypep%array, totalUBound=arrayBnd, & 
                     undistUBound=undistBnd, rc=localrc)
@@ -278,7 +353,8 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
                 ! set distributed dimensions
                 filled=.false.
                 do i=1, dimCount
-                   totalUBound(distgridToArrayMap(i))=arrayBnd(i,localDE)
+                   totalUBound(distgridToArrayMap(i))=&
+                    arrayBnd(distgridToPackedArrayMap(i),localDE)
                    filled(distgridToArrayMap(i))=.true.
                 enddo
       
@@ -294,6 +370,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
             ! deallocate data
             deallocate(arrayBnd)
             deallocate(undistBnd)
+            deallocate(distgridToPackedArrayMap)
             deallocate(distgridToArrayMap)
         endif
 

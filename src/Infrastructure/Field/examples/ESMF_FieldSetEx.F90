@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetEx.F90,v 1.4 2008/02/15 23:35:59 theurich Exp $
+! $Id: ESMF_FieldSetEx.F90,v 1.5 2008/03/27 01:21:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,6 +37,8 @@
     type(ESMF_DistGrid) :: distgrid8
     type(ESMF_Array)  :: array8, array
     integer           :: xdim, ydim, zdim
+    integer             :: gec(3), gcc(3)
+    integer             :: fa_shape(3)
 
     integer :: finalrc       
 !   !Set finalrc to success
@@ -56,24 +58,34 @@
 !  {\tt ESMF\_FieldSetDataPtr} is an overloaded interface based on the type,
 !  kind, and rank of the input fortran pointer argument. In this example,
 !  a rank 3 ESMF\_KIND\_R8 fortran data pointer is used.
-!  This method creates an internally referenced ESMF\_Array inside the
+!  This method internally creates a ESMF\_Array inside the
 !  field. The previous ESMF\_Array will be deleted if it was internally
-!  referenced by the field, otherwise it's replaced by the newly created
+!  created by the field, otherwise it's simply replaced by the newly created
 !  array. 
+! 
+!  The shape of the Fortran array is computed using the same approach explained
+!  in the sections on Field creation from a Fortran data array.
 !
 !EOE
+!BOC
     xdim = 12
     ydim = 22
     zdim = 31
 
-    grid8 = ESMF_GridCreateShapeTile(minIndex=(/1,1,1/), maxIndex=(/4*xdim-1,ydim-1,zdim-1/), &
+    grid8 = ESMF_GridCreateShapeTile(minIndex=(/1,1,1/), maxIndex=(/4*xdim,ydim,zdim/), &
                               regDecomp=(/4,1,1/), name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-!BOC
-    allocate(farray(xdim,ydim,zdim))
-!EOC
-    allocate(farray1(xdim,ydim,zdim))
+
+    call ESMF_GridGet(grid, localDE=0, staggerloc=ESMF_STAGGERLOC_CENTER, &
+        computationalCount=gcc, exclusiveCount=gec, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    do i = 1, 3
+        fa_shape(i) = max(gec(i), gcc(i))
+    end do
+
+    allocate(farray1(fa_shape(1), fa_shape(2), fa_shape(3)))
     call ESMF_GridGet(grid8, distgrid=distgrid8, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -84,7 +96,7 @@
     f8 = ESMF_FieldCreate(grid8, array8, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
   
-!BOC
+    allocate(farray(fa_shape(1), fa_shape(2), fa_shape(3)))
     call ESMF_FieldSetDataPtr(f8, farray, rc=rc)
 !EOC
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -97,12 +109,14 @@
 !\subsubsection{Reset the Grid in a Field}
 !
 !  User can reset the internal {\tt ESMF\_Grid} object of a {\tt ESMF\_Field}
-!  through ESMF\_FieldSetGrid interface. Invalid Grid will be rejected, check
-!  return code for status.
+!  through ESMF\_FieldSetGrid interface. Invalid Grid that has different computational
+!  or exclusive bounds from the Array in the Field will be rejected. These
+!  are expensive operations that should be avoided for performance critical portion
+!  of a model.
 !
 !EOE
 !BOC
-    grid = ESMF_GridCreateShapeTile(minIndex=(/1,1,1/), maxIndex=(/4*xdim-1,ydim-1,zdim-1/), &
+    grid = ESMF_GridCreateShapeTile(minIndex=(/1,1,1/), maxIndex=(/4*xdim,ydim,zdim/), &
                               regDecomp=(/4,1,1/), name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGetEx.F90,v 1.5 2008/02/27 22:25:51 theurich Exp $
+! $Id: ESMF_FieldGetEx.F90,v 1.6 2008/03/27 01:21:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -54,6 +54,7 @@
     integer                    :: ungriddedUBound(ESMF_MAXDIM)
     integer                    :: maxHaloLWidth(ESMF_MAXDIM)
     integer                    :: maxHaloUWidth(ESMF_MAXDIM)
+    integer                    :: gcc(3), gec(3), fa_shape(3)
     character(len=32)          :: name
 
     integer :: finalrc       
@@ -71,7 +72,8 @@
 !  User can get various bounds and counts information from a {\tt ESMF\_Field}
 !  through the ESMF\_FieldGetDataPtr interface in addition to the intrinsic
 !  Fortran data pointer contained in the internal {\tt ESMF\_Array} object
-!  of a {\tt ESMF\_Field}
+!  of a {\tt ESMF\_Field}. The bounds and counts information are DE specific
+!  for the associated Fortran data pointer.
 !
 !EremoveOE
 !-------------------------------------------------------------------------
@@ -82,11 +84,19 @@
     ydim = 22
     zdim = 31
 
-    grid8 = ESMF_GridCreateShapeTile(minIndex=(/1,1,1/), maxIndex=(/4*xdim-1,ydim-1,zdim-1/), &
+    grid8 = ESMF_GridCreateShapeTile(minIndex=(/1,1,1/), maxIndex=(/4*xdim,ydim,zdim/), &
                               regDecomp=(/4,1,1/), name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    allocate(farray(xdim,ydim,zdim))
+    call ESMF_GridGet(grid8, localDE=0, staggerloc=ESMF_STAGGERLOC_CENTER, &
+        computationalCount=gcc, exclusiveCount=gec, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    do i = 1, 3
+        fa_shape(i) = max(gcc(3), gec(3))
+    enddo
+    allocate(farray(fa_shape(1), fa_shape(2), fa_shape(3)) )
+
     call ESMF_GridGet(grid8, distgrid=distgrid8, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 

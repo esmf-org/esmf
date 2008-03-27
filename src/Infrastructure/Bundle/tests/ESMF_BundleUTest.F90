@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.65 2008/02/28 18:56:42 rokuingh Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.66 2008/03/27 01:21:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,14 +36,13 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.65 2008/02/28 18:56:42 rokuingh Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.66 2008/03/27 01:21:21 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
       integer :: rc, fieldcount, count, countlist(2)
       integer :: number, i
       type(ESMF_Grid) :: grid, grid2
-      type(ESMF_DELayout) :: layout
       type(ESMF_VM) :: vm
       character (len = ESMF_MAXSTR) :: bname1, fname1, fname2, fname3
       character(len = ESMF_MAXSTR), dimension(10) :: fieldNameList
@@ -293,22 +292,12 @@
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !  Verify that an empty Bundle can be created
+      !Verify that an empty Bundle can be created
       !EX_UTest
       bundle2 = ESMF_BundleCreate(name="time step 1", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating Empty Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Creating a layout
-      call ESMF_VMGetGlobal(vm, rc=rc)
-      layout = ESMF_DELayoutCreate(vm, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Create a Layout Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -459,6 +448,7 @@
       write(failMsg, *) ""
       write(name, *) "Getting a Grid from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BundleDestroy(bundle2)
       !------------------------------------------------------------------------
 
       ! Create an empty Bundle and then add multiple fields to it.
@@ -480,6 +470,7 @@
       write(name, *) "Getting Field count from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fieldcount.eq.3), &
                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BundleDestroy(bundle3)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -561,16 +552,14 @@
       ! print *, "rc =",  rc
       !------------------------------------------------------------------------
 
-
-      !EX_removeUTest
+      !EX_UTest
       ! Print a Bundle Test
-!      call ESMF_BundlePrint(bundle1, rc=rc)
-!      write(failMsg, *) "Did not return ESMF_SUCCESS"
-!      write(name, *) "Printing a Bundle Test"
-!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BundlePrint(bundle1, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Printing a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-
 
       !EX_UTest
       ! Validate a Bundle Test
@@ -668,14 +657,6 @@
       call ESMF_GridDestroy(grid, rc=rc)
       write(failMsg, *) "Destroying a Grid"
       write(name, *) "Destroying a Grid"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Destroying a layout
-      call ESMF_DELayoutDestroy(layout, rc=rc)
-      write(failMsg, *) "Destroying a Layout"
-      write(name, *) "Destroying a Layout"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.28 2008/03/19 20:36:52 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.29 2008/03/27 01:21:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -109,7 +109,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.28 2008/03/19 20:36:52 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.29 2008/03/27 01:21:18 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -162,7 +162,7 @@ contains
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_ArrayCreate() @\
 ! function ESMF_ArrayCreateAssmdShape<rank><type><kind>(farray, & @\
-!   distgrid, distgridToArrayMap, computationalEdgeLWidth, & @\
+!   distgrid, copyflag, distgridToArrayMap, computationalEdgeLWidth, & @\
 !   computationalEdgeUWidth, computationalLWidth, & @\
 !   computationalUWidth, totalLWidth, & @\
 !   totalUWidth, indexflag, staggerLoc, vectorDim, & @\
@@ -171,6 +171,7 @@ contains
 ! !ARGUMENTS: @\
 !   <type> (ESMF_KIND_<kind>),dimension(<rank>),intent(in),target :: farray @\
 !   type(ESMF_DistGrid),   intent(in)              :: distgrid @\
+!   type(ESMF_CopyFlag),   intent(in),   optional  :: copyflag @\
 !   integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
 !   integer,               intent(in),   optional  :: computationalEdgeLWidth(:) @\
 !   integer,               intent(in),   optional  :: computationalEdgeUWidth(:) @\
@@ -223,6 +224,13 @@ contains
 !      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and @\
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal @\
 !      to the rank of farray. @\
+! \item[{[copyflag]}] @\
+!      Specifies whether the Array object will reference the memory allocation @\
+!      provided by {\tt farray} directly or will copy the data from @\
+!      {\tt farray} into a new memory allocation. Valid options are @\
+!      {\tt ESMF\_DATA\_REF} (default) or {\tt ESMF\_DATA\_COPY}. @\
+!      Depending on the specific situation the {\tt ESMF\_DATA\_REF} option @\
+!      may be unsafe when specifying an array slice for {\tt farray}. @\
 ! \item[{[distgridToArrayMap]}] @\
 !      List that contains as many elements as is indicated by @\
 !      {\tt distgrids}|s dimCount. The list elements map each dimension of @\
@@ -314,7 +322,7 @@ contains
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_ArrayCreateAssmdShape" @\
   function ESMF_ArrayCreateAssmdShape##mrank##D##mtypekind(farray, & @\
-    distgrid, distgridToArrayMap, & @\
+    distgrid, copyflag, distgridToArrayMap, & @\
     computationalEdgeLWidth, computationalEdgeUWidth, & @\
     computationalLWidth, computationalUWidth, totalLWidth, & @\
     totalUWidth, indexflag, staggerLoc, vectorDim, & @\
@@ -324,6 +332,7 @@ contains
 @\
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),intent(in),target :: farray @\
     type(ESMF_DistGrid),   intent(in)              :: distgrid @\
+    type(ESMF_CopyFlag),   intent(in),   optional  :: copyflag @\
     integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
     integer,               intent(in),   optional  :: computationalEdgeLWidth(:) @\
     integer,               intent(in),   optional  :: computationalEdgeUWidth(:) @\
@@ -344,6 +353,7 @@ contains
     type(ESMF_Array)                    :: array    ! new Array @\
     type(ESMF_LocalArray), allocatable  :: larrayList(:)  ! helper variable @\
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),pointer :: fptr ! helper variable @\
+    type(ESMF_CopyFlag)                 :: copyflag_opt   ! helper variable @\
 @\
     ! Initialize return code; assume failure until success is certain @\
     localrc = ESMF_RC_NOT_IMPL @\
@@ -355,18 +365,23 @@ contains
     ! Mark this Array object as invalid @\
     array%this = ESMF_NULL_POINTER @\
 @\
+    ! Set copy/ref behavior @\
+    copyflag_opt = ESMF_DATA_REF  ! default @\
+    if (present(copyflag)) copyflag_opt = copyflag @\
+@\
     ! Prepare the LocalArray list to be used in the ArrayCreate() call @\
     allocate(larrayList(1)) @\
     fptr => farray @\
-    larrayList(1) = ESMF_LocalArrayCreate(fptr, ESMF_DATA_REF, rc=localrc) @\
+    larrayList(1) = ESMF_LocalArrayCreate(fptr, copyflag_opt, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     ! Create the Array object by calling into overloaded ArrayCreate() interf. @\
-    array = ESMF_ArrayCreate(larrayList, distgrid, distgridToArrayMap, & @\
-      computationalEdgeLWidth, computationalEdgeUWidth, computationalLWidth, & @\
-      computationalUWidth, totalLWidth, totalUWidth, indexflag, staggerLoc, & @\
-      vectorDim, undistLBound, undistUBound, name, localrc) @\
+    array = ESMF_ArrayCreate(larrayList, distgrid, copyflag_opt, & @\
+      distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, & @\
+      computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, & @\
+      indexflag, staggerLoc, vectorDim, undistLBound, undistUBound, name, & @\
+      localrc) @\
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
@@ -399,14 +414,15 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
-  function ESMF_ArrayCreateLocalArray(larrayList, distgrid, distgridToArrayMap, &
-    computationalEdgeLWidth, computationalEdgeUWidth, computationalLWidth, &
-    computationalUWidth, totalLWidth, totalUWidth, &
+  function ESMF_ArrayCreateLocalArray(larrayList, distgrid, copyflag, &
+    distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, &
+    computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
     indexflag, staggerLoc, vectorDim, undistLBound, undistUBound, name, rc)
 !
 ! !ARGUMENTS:
        type(ESMF_LocalArray), intent(in)              :: larrayList(:)
        type(ESMF_DistGrid),   intent(in)              :: distgrid
+       type(ESMF_CopyFlag),   intent(in),   optional  :: copyflag
        integer,               intent(in),   optional  :: distgridToArrayMap(:)
        integer,               intent(in),   optional  :: computationalEdgeLWidth(:)
        integer,               intent(in),   optional  :: computationalEdgeUWidth(:)
@@ -460,6 +476,13 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal
 !      to the rank specified in arrayspec, otherwise a runtime ESMF error will be
 !      raised.
+! \item[{[copyflag]}]
+!      Specifies whether the Array object will reference the memory allocation
+!      provided by {\tt farray} directly or will copy the data from
+!      {\tt farray} into a new memory allocation. Valid options are
+!      {\tt ESMF\_DATA\_REF} (default) or {\tt ESMF\_DATA\_COPY}.
+!      Depending on the specific situation the {\tt ESMF\_DATA\_REF} option
+!      may be unsafe when specifying an array slice for {\tt farray}.
 ! \item[{[distgridToArrayMap]}]
 !      List that contains as many elements as is indicated by @\
 !      {\tt distgrids}|s dimCount. The list elements map each dimension of @\
@@ -558,6 +581,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     type(ESMF_InterfaceInt) :: undistUBoundArg        ! helper variable
     type(ESMF_Pointer), allocatable :: larrayPointerList(:) ! helper variable
     integer                 :: len_name               ! helper variable
+    type(ESMF_CopyFlag)     :: copyflag_opt           ! helper variable
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -582,6 +606,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
         ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
     
+    ! Set copy/ref behavior
+    copyflag_opt = ESMF_DATA_REF  ! default
+    if (present(copyflag)) copyflag_opt = copyflag
+
     ! Deal with (optional) array arguments
     distgridToArrayMapArg = ESMF_InterfaceIntCreate(distgridToArrayMap, &
       rc=localrc)
@@ -624,18 +652,18 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     if (present(name)) then
       len_name = len(name)
       call c_ESMC_ArrayCreateLocalArray(array, larrayPointerList, larrayCount, &
-        distgrid, distgridToArrayMapArg, computationalEdgeLWidthArg, &
-        computationalEdgeUWidthArg, computationalLWidthArg, &
-        computationalUWidthArg, totalLWidthArg, totalUWidthArg, &
-        indexflag, staggerLoc, vectorDim, &
+        distgrid, copyflag_opt, distgridToArrayMapArg, &
+        computationalEdgeLWidthArg, computationalEdgeUWidthArg, &
+        computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
+        totalUWidthArg, indexflag, staggerLoc, vectorDim, &
         undistLBoundArg, undistUBoundArg, name, len_name, localrc)
     else
       len_name = 0
       call c_ESMC_ArrayCreateLocalArray(array, larrayPointerList, larrayCount, &
-        distgrid, distgridToArrayMapArg, computationalEdgeLWidthArg, &
-        computationalEdgeUWidthArg, computationalLWidthArg, &
-        computationalUWidthArg, totalLWidthArg, totalUWidthArg, &
-        indexflag, staggerLoc, vectorDim, &
+        distgrid, copyflag_opt, distgridToArrayMapArg, &
+        computationalEdgeLWidthArg, computationalEdgeUWidthArg, &
+        computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
+        totalUWidthArg, indexflag, staggerLoc, vectorDim, &
         undistLBoundArg, undistUBoundArg, "", len_name, localrc)
     endif    
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &

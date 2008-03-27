@@ -1086,7 +1086,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !
 !\begin{center}
 !\begin{figure}
-!%\scalebox{1.0}{\includegraphics{exclusive}}
+!\scalebox{0.75}{\includegraphics{GridExclusiveReg}}
 !\caption{An example of a Grid's exclusive region.}
 !\label{fig:gridexreg}
 !\end{figure}
@@ -1134,7 +1134,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! 
 !\begin{center}
 !\begin{figure}
-!%\scalebox{1.0}{\includegraphics{comp_center}}
+!\scalebox{0.75}{\includegraphics{GridCompCenterReg}}
 !\caption{An example of a Grid's computational region for the center stagger location.}
 !\label{fig:gridcompcntrreg}
 !\end{figure}
@@ -1167,7 +1167,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !BOE
 !\begin{center}
 !\begin{figure}
-!%\scalebox{1.0}{\includegraphics{comp_edge}}
+!\scalebox{0.75}{\includegraphics{GridCompEdgeReg}}
 !\caption{An example of a Grid's computational region for the edge1 stagger location.}
 !\label{fig:gridcompedgereg}
 !\end{figure}
@@ -1213,7 +1213,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! 
 !\begin{center}
 !\begin{figure}
-!%\scalebox{1.0}{\includegraphics{total_center}}
+!\scalebox{0.75}{\includegraphics{GridTotalCenterReg}}
 !\caption{An example of a Grid's total region for the center stagger location.}
 !\label{fig:gridtotcntrreg}
 !\end{figure}
@@ -1222,7 +1222,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! Figure~\ref{fig:gridtotcntrreg} shows an example of a Grid total region.
 ! This example is for the same Grid used for the exclusive region figure above (Figure~\ref{fig:gridexreg}).
 ! The total region is the outer red area. This region is 
-! for the center stagger location. TotalWidth adjustment of a stagger location allocation 
+! for the center stagger location. Total width adjustment of a stagger location allocation 
 ! is not currently implement, but when it is, this would be the total region
 ! for a stagger location allocated by the following call:
 !EOE
@@ -1249,7 +1249,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !BOE
 !\begin{center}
 !\begin{figure}
-!%\scalebox{1.0}{\includegraphics{total_edge}}
+!\scalebox{0.75}{\includegraphics{GridTotalEdgeReg}}
 !\caption{An example of a Grid's total region for the edge1 stagger location.}
 !\label{fig:gridtotedgereg}
 !\end{figure}
@@ -1258,7 +1258,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! Figure~\ref{fig:gridtotedgereg} shows an example of a Grid total region.
 ! This example is for the same Grid used for the exclusive region figure above (Figure~\ref{fig:gridexreg}).
 ! The total region is the outer red area. This region is 
-! for the edge1 stagger location. TotalWidth adjustment of a stagger location allocation 
+! for the edge1 stagger location. Total width adjustment of a stagger location allocation 
 ! is not currently implement, but when it is, this would be the total region
 ! for a stagger location allocated by the following call:
 !EOE

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.84 2008/02/12 23:30:50 w6ws Exp $
+# $Id: makefile,v 1.85 2008/03/27 01:21:15 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -62,7 +62,7 @@ script_info:
 	-@echo "C++ Compiler version:"; $(ESMF_CXXCOMPILER_VERSION); echo "" 
 	-@echo "--------------------------------------------------------------"
 	-@echo "Preprocessor version:"
-	@$(ESMF_CPP) --version
+	@$(ESMF_CPP) --version $(ESMF_DIR)/scpripts/empty.C
 	-@echo "" 
 	-@echo "--------------------------------------------------------------"
 	-@if [ -f $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h ] ; then \

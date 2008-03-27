@@ -1,7 +1,14 @@
-# $Id: makefile,v 1.9 2008/03/01 00:37:00 theurich Exp $
+# $Id: makefile,v 1.10 2008/03/27 01:21:21 theurich Exp $
 
 # leave alone.
 ALL: build_here 
+
+# on the Cray X1 default template instantiation is a pain
+ifeq ($(ESMF_OS),Unicos)
+ifeq ($(ESMF_COMPILER),default)
+ESMF_CXXCOMPILEOPTS += -h simple_templates
+endif
+endif
 
 # If you have C files in this directory, list them all on the line below.
 SOURCEC	  = ESMCI_DELayout.C

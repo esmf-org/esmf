@@ -145,7 +145,7 @@ public  ESMF_DefaultFlag
 
   public operator(.eq.), operator(.ne.) 
   public ESMF_ArrayCreateFromGrid
-  public ESMF_GridGetArrayUndistInfo
+  public ESMF_GridGetArrayInfo
 
   public ESMF_GridAttPackCreate      ! Attribute packages
   public ESMF_GridAttPackSet         ! Attribute packages
@@ -166,7 +166,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.66 2008/03/26 03:49:10 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.67 2008/03/27 01:21:26 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2750,55 +2750,36 @@ end interface
        enddo
     endif
 
-
-
-
    ! construct ArraySpec
    call ESMF_ArraySpecSet(arrayspec,rank=arrayDimCount,typekind=localTypeKind, rc=localrc)
    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
-
-
-
-    ! Get computationalEdgeWidths
-    call ESMF_GridGet(grid, localStaggerLoc, &
-           computationalEdgeLWidth=compELWidth, computationalEdgeUWidth=compEUWidth, &
-           rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
-
-
 
     ! allocate distgridToArrayMap
     allocate(distgridToArrayMap(distDimCount) , stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToArrayMap", &
                                      ESMF_CONTEXT, rc)) return   
 
-
-   ! construct array based on the presence of distributed dimensions
-   ! if there are undistributed dimensions ...
-   if (undistArrayDimCount .gt. 0) then      
-
-      !! allocate undistributed Bounds
-      allocate(arrayLBound(undistArrayDimCount) , stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridLBound", &
+    ! allocate undistributed Bounds
+    allocate(arrayLBound(undistArrayDimCount) , stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridLBound", &
                                      ESMF_CONTEXT, rc)) return   
-      allocate(arrayUBound(undistArrayDimCount) , stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridUBound", &
+    allocate(arrayUBound(undistArrayDimCount) , stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridUBound", &
                                      ESMF_CONTEXT, rc)) return   
 
-
-      !! Get dimmap and undistibuted bounds
-      call ESMF_GridGetArrayUndistInfo(grid, localstaggerloc,               &
+    ! Get dimmap and undistibuted bounds
+    call ESMF_GridGetArrayInfo(grid, localstaggerloc,               &
                             gridToArrayMap, ungriddedLBound, ungriddedUBound, &
                             distgridToArrayMap, arrayLBound, arrayUBound,   &
+                            computationalEdgeLWidth=compELWidth, computationalEdgeUWidth=compEUWidth, &
                             rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-      !! create Array
-      array=ESMF_ArrayCreate(arrayspec=arrayspec, &
+    ! create Array
+    array=ESMF_ArrayCreate(arrayspec=arrayspec, &
               distgrid=distgrid, distgridToArrayMap=distgridToArrayMap, &
               computationalEdgeLWidth=compELWidth(1:distDimCount), &
               computationalEdgeUWidth=compEUWidth(1:distDimCount), &
@@ -2806,58 +2787,36 @@ end interface
               indexflag=indexflag, staggerLoc=localStaggerLoc%staggerloc, &
               undistLBound=arrayLBound, undistUBound=arrayUBound, name=name, &
               rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-
-      !! cleanup
-      deallocate(arrayLBound)
-      deallocate(arrayUBound)
-    else
-
-      !! Get info from Grid
-      call ESMF_GridGet(grid, distgridToGridMap=distgridToArrayMap, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-      !! create Array
-      array=ESMF_ArrayCreate(arrayspec=arrayspec, &
-             distgrid=distgrid, distgridToArrayMap=distgridToArrayMap, &
-             computationalEdgeLWidth=compELWidth(1:distDimCount), &
-             computationalEdgeUWidth=compEUWidth(1:distDimCount), &
-             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
-             indexflag=indexflag, staggerLoc=localStaggerLoc%staggerloc, &
-             name=name, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-    endif
 
 
     ! Set return value
     ESMF_ArrayCreateFromGrid = array
 
+
     ! cleanup
     deallocate(distgridToArrayMap)
- 
+    deallocate(arrayLBound)
+    deallocate(arrayUBound)
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
     end function ESMF_ArrayCreateFromGrid
 
-
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridGetArrayUndistInfo"
+#define ESMF_METHOD "ESMF_GridGetArrayInfo"
 
 !BOPI
-! !IROUTINE: ESMF_GridGetArrayUndistInfo" - get information about the undist. dim of a Grid
+! !IROUTINE: ESMF_GridGetArrayInfo" - get information to make an Array from a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetArrayUndistInfo(grid, staggerloc,               &
+      subroutine ESMF_GridGetArrayInfo(grid, staggerloc,               &
                            gridToArrayMap, ungriddedLBound, ungriddedUBound, &
                            distgridToArrayMap, undistLBound, undistUBound,   &
+                           computationalEdgeLWidth, computationalEdgeUWidth, &
                            rc)
 !
 ! !ARGUMENTS:
@@ -2869,6 +2828,8 @@ end interface
        integer,               intent(out)           :: distgridToArrayMap(:)
        integer,               intent(out)           :: undistLBound(:)
        integer,               intent(out)           :: undistUBound(:)
+       integer,               intent(out)           :: computationalEdgeLWidth(:)
+       integer,               intent(out)           :: computationalEdgeUWidth(:)
        integer,               intent(out), optional :: rc
 
 !
@@ -2917,8 +2878,17 @@ end interface
     integer, pointer :: arrayDimInd(:)
     integer, pointer :: distgridToGridMap(:)
     integer :: dimCount,distDimCount,undistDimCount, arrayDimCount
-    integer :: i,ungriddedDimCount, undistArrayDimCount, bndpos
+    integer :: i,j,ungriddedDimCount, undistArrayDimCount, bndpos
+    integer :: gridComputationalEdgeLWidth(ESMF_MAXDIM)
+    integer :: gridComputationalEdgeUWidth(ESMF_MAXDIM)
+    integer :: tmpArrayComputationalEdgeLWidth(ESMF_MAXDIM)
+    integer :: tmpArrayComputationalEdgeUWidth(ESMF_MAXDIM)
+    integer :: packedGridToArrayMap(ESMF_MAXDIM)
+    integer :: localGridToArrayMap(ESMF_MAXDIM)
+    logical :: filled(ESMF_MAXDIM)
    
+
+
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -3001,26 +2971,89 @@ end interface
         return 
     endif
 
+    ! Check distgridToArrayMap
+    if (size(computationalEdgeLWidth) < distDimCount) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+                   "- computationalEdgeLWidth is too small", & 
+                          ESMF_CONTEXT, rc) 
+        return 
+    endif
+
+    ! Check distgridToArrayMap
+    if (size(computationalEdgeUWidth) < distDimCount) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+                   "- computationalEdgeUWidth is too small", & 
+                          ESMF_CONTEXT, rc) 
+        return 
+    endif
+
+   ! set default GridToArrayMap
+   if (present(gridToArrayMap)) then
+     localGridToArrayMap(1:dimCount)=gridToArrayMap(1:dimCount)
+   else
+      do i=1,dimCount
+        localGridToArrayMap(i)=i
+      enddo
+   endif  
+
+
 
     ! allocate distgridToGridMap
     allocate(distgridToGridMap(distDimCount) , stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToGridMap", &
                                      ESMF_CONTEXT, rc)) return   
-
     ! Get info from Grid
     call ESMF_GridGet(grid, distgridToGridMap=distgridToGridMap, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
+    ! Get grid mapped computationalEdgeWidths
+    call ESMF_GridGet(grid, localStaggerLoc, &
+           computationalEdgeLWidth=gridComputationalEdgeLWidth, &
+           computationalEdgeUWidth=gridComputationalEdgeUWidth, &
+           rc=localrc)
+
+    ! map to Array ordering
+    !! SetupMap
+    filled=.false.
+    do i=1,distDimCount
+       packedGridToArrayMap(distgridToGridMap(i))=localGridToArrayMap(distgridToGridMap(i))
+       filled(distgridToGridMap(i))=.true.
+    enddo
+
+    !! Collapse
+    j=1
+    do i=1,dimCount
+       if (filled(i)) then
+          packedGridToArrayMap(j)=packedGridToArrayMap(i)
+          j=j+1
+       endif
+    enddo
+
+    !! build new arrays
+    filled=.false.
+    do i=1,distDimCount
+       tmpArrayComputationalEdgeLWidth(packedGridToArrayMap(i))=gridComputationalEdgeLWidth(i)
+       tmpArrayComputationalEdgeUWidth(packedGridToArrayMap(i))=gridComputationalEdgeUWidth(i)
+       filled(packedGridToArrayMap(i))=.true.
+    enddo
+
+    !! Collapse
+    j=1
+    do i=1,arrayDimCount
+       if (filled(i)) then
+          computationalEdgeLWidth(j)=tmpArrayComputationalEdgeLWidth(i)
+          computationalEdgeUWidth(j)=tmpArrayComputationalEdgeUWidth(i)
+          j=j+1
+       endif
+    enddo
+
+
    ! construct distgridToArrayMap
-   if (present(gridToArrayMap)) then
-      do i=1,distDimCount
-        distgridToArrayMap(i)=gridToArrayMap(distgridToGridMap(i))
-      enddo
-   else
-     distgridToArrayMap(:)=distgridToGridMap(:)
-   endif
+   do i=1,distDimCount
+      distgridToArrayMap(i)=localGridToArrayMap(distgridToGridMap(i))
+   enddo
 
    ! construct array based on the presence of distributed dimensions
    ! if there are undistributed dimensions ...
@@ -3053,26 +3086,15 @@ end interface
             gridDimType(distGridToGridMap(i))=1 ! Set to distributed
          enddo
 
-        !!! put record Grid bound info depending if gridToArrayMap exists
-        if (present(gridToArrayMap)) then
-           bndpos=1
-           do i=1,dimCount
-              if (gridDimType(i) .eq. 0) then
-                 arrayDimInd(gridToArrayMap(i))=bndpos
-                 arrayDimType(gridToArrayMap(i))=2 ! set to undistributed Grid
-                 bndpos=bndpos+1
-              endif
-           enddo
-        else
-           bndpos=1
-           do i=1,dimCount
-              if (gridDimType(i) .eq. 0) then
-                 arrayDimInd(i)=bndpos
-                 arrayDimType(i)=2 ! set to undistributed Grid
-                 bndpos=bndpos+1
-              endif
-           enddo
-        endif
+        !!! put record Grid bound info
+        bndpos=1
+        do i=1,dimCount
+           if (gridDimType(i) .eq. 0) then
+              arrayDimInd(localGridToArrayMap(i))=bndpos
+              arrayDimType(localGridToArrayMap(i))=2 ! set to undistributed Grid
+              bndpos=bndpos+1
+           endif
+        enddo
 
          !!! cleanup
          deallocate(gridDimType)
@@ -3144,7 +3166,7 @@ end interface
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-    end  subroutine ESMF_GridGetArrayUndistInfo
+    end  subroutine ESMF_GridGetArrayInfo
 
 
 
@@ -5127,17 +5149,6 @@ end interface
        enddo
     endif
 
-    ! Set default for decompFlag 
-    allocate(decompFlagLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating decompFlagLocal", &
-                                     ESMF_CONTEXT, rc)) return
-
-    if (present(decompFlag)) then
-       decompFlagLocal=decompFlag
-    else
-       decompFlagLocal=ESMF_DECOMP_HOMOGEN
-    endif
-
 
     ! Set Default for connections (although they don't work yet in distgrid/array, so they aren't really used anywhere yet.)
     if (present(connDim1)) then
@@ -5284,6 +5295,30 @@ end interface
     do i=1,dimCount
        maxIndexLocal(i)=maxIndexLocal(i)+gridEdgeUWidthLocal(i)
     enddo
+
+
+   ! Set default for decomp flag based on gridEdgeWidths -----------------------------------
+   ! NOTE: This is a temporary fix until we have something better implemented in distGrid
+
+    ! Set default for decompFlag 
+    allocate(decompFlagLocal(dimCount), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating decompFlagLocal", &
+                                     ESMF_CONTEXT, rc)) return
+
+    if (present(decompFlag)) then
+        decompFlagLocal(:)=decompFlag(:)
+    else
+      do i=1, dimCount
+         ! set flag based on where the padding is
+         if (gridEdgeLWidthLocal(i) > gridEdgeUWidthLocal(i)) then
+            decompFlagLocal(i)=ESMF_DECOMP_RESTFIRST
+         else if (gridEdgeLWidthLocal(i) < gridEdgeUWidthLocal(i)) then
+            decompFlagLocal(i)=ESMF_DECOMP_RESTLAST
+         else 
+            decompFlagLocal(i)=ESMF_DECOMP_HOMOGEN
+         endif 
+      enddo
+    endif
 
 
    ! Calc minIndex,maxIndex,distgridToGridMap for DistGrid -----------------------------------
@@ -10547,17 +10582,6 @@ endif
        enddo
     endif
 
-    ! Set default for decompFlag 
-    allocate(decompFlagLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating decompFlagLocal", &
-                                     ESMF_CONTEXT, rc)) return
-
-    if (present(decompFlag)) then
-       decompFlagLocal=decompFlag
-    else
-       decompFlagLocal=ESMF_DECOMP_HOMOGEN
-    endif
-
 
     ! Set Default for connections (although they don't work yet in distgrid/array, so they aren't really used anywhere yet.)
     if (present(connDim1)) then
@@ -10705,6 +10729,29 @@ endif
     do i=1,dimCount
        maxIndexLocal(i)=maxIndexLocal(i)+gridEdgeUWidthLocal(i)
     enddo
+
+   ! Set default for decomp flag based on gridEdgeWidths -----------------------------------
+   ! NOTE: This is a temporary fix until we have something better implemented in distGrid
+
+    ! Set default for decompFlag 
+    allocate(decompFlagLocal(dimCount), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating decompFlagLocal", &
+                                     ESMF_CONTEXT, rc)) return
+
+    if (present(decompFlag)) then
+        decompFlagLocal(:)=decompFlag(:)
+    else
+      do i=1, dimCount
+         ! set flag based on where the padding is
+         if (gridEdgeLWidthLocal(i) > gridEdgeUWidthLocal(i)) then
+            decompFlagLocal(i)=ESMF_DECOMP_RESTFIRST
+         else if (gridEdgeLWidthLocal(i) < gridEdgeUWidthLocal(i)) then
+            decompFlagLocal(i)=ESMF_DECOMP_RESTLAST
+         else 
+            decompFlagLocal(i)=ESMF_DECOMP_HOMOGEN
+         endif 
+      enddo
+    endif
 
 
    ! Calc minIndex,maxIndex,distgridToGridMap for DistGrid -----------------------------------

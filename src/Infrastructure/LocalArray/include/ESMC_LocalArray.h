@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.23 2008/01/16 21:25:10 theurich Exp $
+// $Id: ESMC_LocalArray.h,v 1.24 2008/03/27 01:21:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -128,7 +128,8 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
     int ESMC_LocalArrayDestruct();
 
     // adjust()
-    ESMC_LocalArray *ESMC_LocalArrayAdjust(int *lbounds, int *ubounds, int *rc);
+    ESMC_LocalArray *ESMC_LocalArrayAdjust(ESMC_DataCopy copyflag,
+      int *lbounds, int *ubounds, int *rc);
 
     // required methods inherited and overridden from the ESMC_Base class
     int ESMC_LocalArrayDeserialize(char *buffer, int *boffset);
@@ -236,6 +237,34 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
     // copy the contents of an f90 ptr
     int ESMC_LocalArraySetF90Ptr(const struct c_F90ptr *p);
     int ESMC_LocalArrayGetF90Ptr(struct c_F90ptr *p) const;
+    
+    // force the base address in f90 ptr dope vector *if* mismatch detected
+    int ESMC_LocalArrayForceF90Ptr(void *base){
+      void **f90dopev_cast = (void **)(&f90dopev);
+      // The rationale for this call is as follows:
+      // - some Fortran compilers will make temporary copies of the actual
+      //   data array.
+      // - such copies can be detected by comparing the address of the first
+      //   array element against the address of the first element of the
+      //   original data array, stored in the LocalArray object.
+      // - if/when a temporary data copy has been detected this routine tries
+      //   to force the base address in the stored f90 ptr dope vector to the
+      //   correct base address stored in the LocalArray. The assumption is made
+      //   that the base address is that of the first element and is stored 
+      //   without offset at the start of the dope vector.
+      // - since the details about the f90 ptr dope vector are compiler
+      //   dependent the above assumption of where to force the base address
+      //   (and with what offset in the address) may turn out to be incorrect.
+      //   However, this routine is a last resort in those cases where a 
+      //   temporary copy has been detected and it tests out fine on XLF and
+      //   lahey.
+      if (base != base_addr){
+        // Only force base_addr into dope vector if the first element according
+        // to dope vector is located somewhere else, i.e. a temporary copy.
+        *f90dopev_cast = base_addr;
+      }
+      return ESMF_SUCCESS;
+    }
 
     // create a new LocalArray from an old one, decreasing the rank by one.
     ESMC_LocalArray *ESMC_LocalArraySlice(int slicedim, int sliceloc, int *rc)

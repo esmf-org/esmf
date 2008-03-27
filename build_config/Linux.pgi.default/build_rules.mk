@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.32 2008/01/18 23:30:54 theurich Exp $
+# $Id: build_rules.mk,v 1.33 2008/03/27 01:21:15 theurich Exp $
 #
 # Linux.pgi.default
 #
@@ -43,7 +43,11 @@ ifeq ($(ESMF_COMM),mpich2)
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun
+ifeq ($(ESMF_BATCH),sge.batch)
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.sge.batch
+else
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+endif
 else
 ifeq ($(ESMF_COMM),scalimpi)
 # scaliMPI -------------------------------------------------

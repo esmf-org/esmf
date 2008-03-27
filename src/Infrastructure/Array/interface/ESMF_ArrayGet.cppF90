@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.32 2008/02/14 04:14:54 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.33 2008/03/27 01:21:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.32 2008/02/14 04:14:54 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.33 2008/03/27 01:21:18 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -125,11 +125,11 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()
   subroutine ESMF_ArrayGetDefault(array, typekind, rank, larrayList, &
-    indexflag, distgridToArrayMap, arrayToDistGridMap, undistLBound, &
-    undistUBound, exclusiveLBound, exclusiveUBound, &
-    computationalLBound, computationalUBound, totalLBound, totalUBound, &
-    computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
-    name, distgrid, dimCount, patchCount, minIndexPDimPPatch, &
+    indexflag, distgridToArrayMap, distgridToPackedArrayMap, &
+    arrayToDistGridMap, undistLBound, undistUBound, exclusiveLBound, &
+    exclusiveUBound, computationalLBound, computationalUBound, totalLBound, &
+    totalUBound, computationalLWidth, computationalUWidth, totalLWidth, &
+    totalUWidth, name, distgrid, dimCount, patchCount, minIndexPDimPPatch, &
     maxIndexPDimPPatch, patchListPDe, indexCountPDimPDe, delayout, deCount, &
     localDeCount, localDeList, rc)
 !
@@ -140,6 +140,7 @@ contains
     type(ESMF_LocalArray), target, intent(out), optional :: larrayList(:)
     type(ESMF_IndexFlag),          intent(out), optional :: indexflag
     integer,                       intent(out), optional :: distgridToArrayMap(:)
+    integer,                       intent(out), optional :: distgridToPackedArrayMap(:)
     integer,                       intent(out), optional :: arrayToDistGridMap(:)
     integer,                       intent(out), optional :: undistLBound(:)
     integer,                       intent(out), optional :: undistUBound(:)
@@ -195,6 +196,12 @@ contains
 !     to be of size {\tt dimCount}. An entry of zero indicates that the
 !     respective DistGrid dimension is replicating the Array across the DEs
 !     along this direction.
+!   \item[{[distgridToPackedArrayMap]}]
+!     Upon return this list holds the indices of the Array dimensions in packed
+!     format against which the DistGrid dimensions are mapped.
+!     {\tt distgridToPackedArrayMap} must be allocated to be of size 
+!     {\tt dimCount}. An entry of zero indicates that the respective DistGrid
+!     dimension is replicating the Array across the DEs along this direction.
 !   \item[{[arrayToDistGridMap]}]
 !     Upon return this list holds the DistGrid dimensions against which the
 !     Array dimensions are mapped. {\tt arrayToDistGridMap} must be allocated
@@ -290,6 +297,7 @@ contains
     type(ESMF_Pointer), pointer   :: opt_larrayPtrList(:)   ! helper variable
     integer                       :: len_larrayPtrList, i   ! helper variable
     type(ESMF_InterfaceInt)       :: distgridToArrayMapArg  ! helper variable
+    type(ESMF_InterfaceInt)       :: distgridToPackedArrayMapArg ! helper var
     type(ESMF_InterfaceInt)       :: arrayToDistGridMapArg  ! helper variable
     type(ESMF_InterfaceInt)       :: undistLBoundArg        ! helper variable
     type(ESMF_InterfaceInt)       :: undistUBoundArg        ! helper variable
@@ -323,6 +331,10 @@ contains
     endif
     distgridToArrayMapArg = ESMF_InterfaceIntCreate(distgridToArrayMap, &
       rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    distgridToPackedArrayMapArg = &
+      ESMF_InterfaceIntCreate(distgridToPackedArrayMap, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     arrayToDistGridMapArg = ESMF_InterfaceIntCreate(arrayToDistGridMap, &
@@ -375,7 +387,8 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayGet(array, typekind, rank, opt_larrayPtrList, &
       len_larrayPtrList, opt_distgrid, opt_delayout, indexflag, &
-      distgridToArrayMapArg, arrayToDistGridMapArg, &
+      distgridToArrayMapArg, distgridToPackedArrayMapArg, &
+      arrayToDistGridMapArg, &
       undistLBoundArg, undistUBoundArg, &
       exclusiveLBoundArg, exclusiveUBoundArg, &
       computationalLBoundArg, computationalUBoundArg, &
@@ -413,6 +426,9 @@ contains
     ! Garbage collection
     deallocate(opt_larrayPtrList)
     call ESMF_InterfaceIntDestroy(distgridToArrayMapArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(distgridToPackedArrayMapArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(arrayToDistGridMapArg, rc=localrc)

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2008/02/28 18:56:42 rokuingh Exp $ 
+# $Id: makefile,v 1.14 2008/03/27 01:21:21 theurich Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -16,15 +16,17 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/Bundle/tests
 
-TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_BundleUTest     \
+TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_BundleUTest \
+                $(ESMC_TESTDIR)/ESMF_BundleCreateGetUTest \
                 $(ESMC_TESTDIR)/ESMF_BundleAttrUTest
 
 TESTS_RUN     = RUN_ESMF_BundleUTest \
-	RUN_ESMF_BundleAttrUTest     \
-	RUN_ESMF_BundleHarness2UTest \
-	RUN_ESMF_BundleHarness4UTest
+                RUN_ESMF_BundleCreateGetUTest \
+                RUN_ESMF_BundleAttrUTest \
+                RUN_ESMF_BundleHarness2UTest \
+                RUN_ESMF_BundleHarness4UTest
 
-TESTS_RUN_UNI = RUN_ESMF_BundleUTestUNI     \
+TESTS_RUN_UNI = RUN_ESMF_BundleUTestUNI \
                 RUN_ESMF_BundleAttrUTestUNI 
 
 
@@ -45,6 +47,9 @@ RUN_ESMF_BundleUTest:
 
 RUN_ESMF_BundleUTestUNI:
 	$(MAKE) TNAME=Bundle NP=1 ftest
+
+RUN_ESMF_BundleCreateGetUTest:
+	$(MAKE) TNAME=BundleCreateGet NP=4 ftest
 
 RUN_ESMF_BundleAttrUTest:
 	$(MAKE) TNAME=BundleAttr NP=4 ftest

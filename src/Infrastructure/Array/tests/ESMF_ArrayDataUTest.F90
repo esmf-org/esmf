@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataUTest.F90,v 1.8 2007/06/27 20:36:05 cdeluca Exp $
+! $Id: ESMF_ArrayDataUTest.F90,v 1.9 2008/03/27 01:21:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayDataUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayDataUTest.F90,v 1.8 2007/06/27 20:36:05 cdeluca Exp $'
+    '$Id: ESMF_ArrayDataUTest.F90,v 1.9 2008/03/27 01:21:20 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -54,6 +54,7 @@ program ESMF_ArrayDataUTest
 
   ! F90 array pointer of 4-byte integers
   integer (ESMF_KIND_I4),dimension(:), pointer :: fdata
+  integer (ESMF_KIND_I4),dimension(:), pointer :: fdataSlice
   integer (ESMF_KIND_I4),dimension(:), pointer :: fptr
 
   type(ESMF_DistGrid) :: distgrid
@@ -77,8 +78,7 @@ program ESMF_ArrayDataUTest
   enddo
 
   ! prepare DistGrid
-  distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/7*petCount/), &
-    rc=rc)
+  distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/7*petCount/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   !-----------------------------------------------------------------------------
@@ -155,8 +155,318 @@ program ESMF_ArrayDataUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Creating an Array from allocated F90 array pointer using ESMF_DATA_COPY"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  array = ESMF_ArrayCreate(fdata, distgrid, copyflag=ESMF_DATA_COPY, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Printing Array created from allocated F90 array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayPrint(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Obtaining access to data in Array via F90 array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(array, farrayPtr=fptr, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verifying data in Array via F90 array pointer access"
+  write(failMsg, *) "Incorrect data detected"
+  looptest = .true.
+  do i = -12, -6
+    j = i + 12 + lbound(fptr, 1)
+    print *, fptr(j), fdata(i)
+    if (fptr(j) /= fdata(i)) looptest = .false.
+  enddo
+  call ESMF_Test(looptest, name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+  ! Fill in different values
+  do i = -12, -6
+    fdata(i) = fdata(i) + 57
+  enddo
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Printing Array created from allocated F90 array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayPrint(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verifying data in Array via F90 array pointer access"
+  write(failMsg, *) "Incorrect data detected"
+  looptest = .true.
+  do i = -12, -6
+    j = i + 12 + lbound(fptr, 1)
+    print *, fptr(j), fdata(i)
+    if (fptr(j) /= fdata(i)-57) looptest = .false.
+  enddo
+  call ESMF_Test(looptest, name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Destroying Array created from an allocated F90 ",&
+    "array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  ! test with array slice
+  fdataSlice => fdata(:)
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Creating an Array from allocated F90 array pointer slice"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  array = ESMF_ArrayCreate(fdataSlice, distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Printing Array created from allocated F90 array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayPrint(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Obtaining access to data in Array via F90 array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(array, farrayPtr=fptr, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verifying data in Array via F90 array pointer access"
+  write(failMsg, *) "Incorrect data detected"
+  looptest = .true.
+  do i = -12, -6
+    j = i + 12 + lbound(fptr, 1)
+    print *, fptr(j), fdata(i)
+    if (fptr(j) /= fdata(i)) looptest = .false.
+  enddo
+  call ESMF_Test(looptest, name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+  ! Fill in different values
+  do i = -12, -6
+    fdata(i) = fdata(i) + 57
+  enddo
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Printing Array created from allocated F90 array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayPrint(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verifying data in Array via F90 array pointer access"
+  write(failMsg, *) "Incorrect data detected"
+  looptest = .true.
+  do i = -12, -6
+    j = i + 12 + lbound(fptr, 1)
+    print *, fptr(j), fdata(i)
+    if (fptr(j) /= fdata(i)) looptest = .false.
+  enddo
+  call ESMF_Test(looptest, name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Destroying Array created from an allocated F90 ",&
+    "array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  ! test with array slice
+  deallocate(fdata)
+  allocate(fdata(-20:10))
+  do i = -20, 10
+    fdata(i) = i*1000
+  enddo
+  fdataSlice => fdata(-12:-6)
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Creating an Array from allocated F90 array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  array = ESMF_ArrayCreate(fdataSlice, distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Printing Array created from allocated F90 array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayPrint(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Obtaining access to data in Array via F90 array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(array, farrayPtr=fptr, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verifying data in Array via F90 array pointer access"
+  write(failMsg, *) "Incorrect data detected"
+  looptest = .true.
+  do i = -12, -6
+    j = i + 12 + lbound(fptr, 1)
+    print *, fptr(j), fdata(i)
+    if (fptr(j) /= fdata(i)) looptest = .false.
+  enddo
+  call ESMF_Test(looptest, name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+  ! Fill in different values
+  do i = -12, -6
+    fdata(i) = fdata(i) + 57
+  enddo
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Printing Array created from allocated F90 array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayPrint(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verifying data in Array via F90 array pointer access"
+  write(failMsg, *) "Incorrect data detected"
+  looptest = .true.
+  do i = -12, -6
+    j = i + 12 + lbound(fptr, 1)
+    print *, fptr(j), fdata(i)
+    if (fptr(j) /= fdata(i)) looptest = .false.
+  enddo
+  call ESMF_Test(looptest, name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Destroying Array created from an allocated F90 ",&
+    "array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Creating an Array from allocated F90 array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  array = ESMF_ArrayCreate(fdataSlice, distgrid, copyflag=ESMF_DATA_COPY, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Printing Array created from allocated F90 array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayPrint(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Obtaining access to data in Array via F90 array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(array, farrayPtr=fptr, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verifying data in Array via F90 array pointer access"
+  write(failMsg, *) "Incorrect data detected"
+  looptest = .true.
+  do i = -12, -6
+    j = i + 12 + lbound(fptr, 1)
+    print *, fptr(j), fdata(i)
+    if (fptr(j) /= fdata(i)) looptest = .false.
+  enddo
+  call ESMF_Test(looptest, name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+  ! Fill in different values
+  do i = -12, -6
+    fdata(i) = fdata(i) + 57
+  enddo
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Printing Array created from allocated F90 array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayPrint(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verifying data in Array via F90 array pointer access"
+  write(failMsg, *) "Incorrect data detected"
+  looptest = .true.
+  do i = -12, -6
+    j = i + 12 + lbound(fptr, 1)
+    print *, fptr(j), fdata(i)
+    if (fptr(j) /= fdata(i)-57) looptest = .false.
+  enddo
+  call ESMF_Test(looptest, name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Destroying Array created from an allocated F90 ",&
+    "array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
   ! garbage collection
   deallocate(fdata, stat=rc)
+
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(result, ESMF_SRCLINE)
