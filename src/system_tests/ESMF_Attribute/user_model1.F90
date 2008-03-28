@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.16 2008/03/13 14:32:53 rokuingh Exp $
+! $Id: user_model1.F90,v 1.17 2008/03/28 06:48:27 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -176,7 +176,7 @@ module user_model1
       name = 'longname'
       value = 'zonal wind'
       
-      uwind = ESMF_FieldCreateEmpty("uwind", rc=status)
+      uwind = ESMF_FieldCreate("uwind", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       call ESMF_FieldAttPackCreate(uwind, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
@@ -184,7 +184,7 @@ module user_model1
       if (status .ne. ESMF_SUCCESS) goto 20
       
       value = 'ozone'
-      ozone = ESMF_FieldCreateEmpty("ozone", rc=status)
+      ozone = ESMF_FieldCreate("ozone", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       call ESMF_FieldAttPackCreate(ozone, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
@@ -192,7 +192,7 @@ module user_model1
       if (status .ne. ESMF_SUCCESS) goto 20
       
       value = 'carbon monoxide'
-      co = ESMF_FieldCreateEmpty("co", rc=status)
+      co = ESMF_FieldCreate("co", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       call ESMF_FieldAttPackCreate(co, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
@@ -200,7 +200,7 @@ module user_model1
       if (status .ne. ESMF_SUCCESS) goto 20
       
       value = 'turbulent kinetic energy'
-      tke = ESMF_FieldCreateEmpty("tke", rc=status)
+      tke = ESMF_FieldCreate("tke", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       call ESMF_FieldAttPackCreate(tke, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
@@ -208,7 +208,7 @@ module user_model1
       if (status .ne. ESMF_SUCCESS) goto 20
       
       value = 'heat fluxes'
-      wt = ESMF_FieldCreateEmpty("wt", rc=status)
+      wt = ESMF_FieldCreate("wt", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       call ESMF_FieldAttPackCreate(wt, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
@@ -286,7 +286,7 @@ module user_model1
       if (status .ne. ESMF_SUCCESS) goto 20
 
       ! field stuff
-      field = ESMF_FieldCreateEmpty(rc=status)
+      field = ESMF_FieldCreate(rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       call ESMF_FieldAttPackCreate(field, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.4 2008/03/06 19:20:48 dneckels Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.5 2008/03/28 06:48:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.4 2008/03/06 19:20:48 dneckels Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.5 2008/03/28 06:48:27 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -184,9 +184,9 @@ program ESMF_FieldRegridEx
                             computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrYC, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
 
-      call ESMF_FieldGetDataPtr(srcField, fptr, lDE, computationalLBound=fclbnd, &
+      call ESMF_FieldGet(srcField, fptr, lDE, computationalLBound=fclbnd, &
                              computationalUBound=fcubnd,  rc=localrc)
-      write(failMsg, *) "ESMF_FieldGetDataPtr"
+      write(failMsg, *) "ESMF_FieldGet"
       call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (localrc .ne. ESMF_SUCCESS) goto 10
 
@@ -229,9 +229,9 @@ program ESMF_FieldRegridEx
                             computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrYC, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
 
-     call ESMF_FieldGetDataPtr(dstField, fptr, lDE, computationalLBound=fclbnd, &
+     call ESMF_FieldGet(dstField, fptr, lDE, computationalLBound=fclbnd, &
                              computationalUBound=fcubnd,  rc=localrc)
-     write(failMsg, *) "ESMF_FieldGetDataPtr"
+     write(failMsg, *) "ESMF_FieldGet"
      call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      if (localrc .ne. ESMF_SUCCESS) goto 10
 

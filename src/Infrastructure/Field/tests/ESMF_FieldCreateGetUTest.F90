@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.3 2008/02/28 01:17:48 theurich Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.4 2008/03/28 06:48:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -73,7 +73,7 @@
         !------------------------------------------------------------------------
         !EX_removeUTest_Multi_Proc_Only
         ! Create an empty field
-        field = ESMF_FieldCreateEmpty(rc=rc) 
+        field = ESMF_FieldCreate(rc=rc) 
         write(failMsg, *) ""
         write(name, *) "Creating an empty Field"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
