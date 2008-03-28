@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.13 2008/03/28 19:04:58 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.14 2008/03/28 19:35:37 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.13 2008/03/28 19:04:58 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.14 2008/03/28 19:35:37 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -934,8 +934,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !       {\tt field} are also undistributed. If neither ungriddedLBounds or
 !       ungriddedUBounds are specified, the ungriddedLBound defaults to 1,
 !       and the ungriddedUBound defaults to the size of the dimension.
-!       If either ungriddedLBounds OR ungriddedUBounds are specified, the
-!       other will be calculated.  If BOTH are specified the values are checked
+!       If BOTH are specified the values are checked
 !       for consistency.  Note that the the ordering of
 !       these ungridded dimensions is the same as their order in the {\tt farray}.
 !       Note also that the bounds for undistributed dimensions included in the
@@ -947,8 +946,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !       {\tt field} are also undistributed. If neither ungriddedLBounds or
 !       ungriddedUBounds are specified, the ungriddedLBound defaults to 1,
 !       and the ungriddedUBound defaults to the size of the dimension.
-!       If either ungriddedLBounds OR ungriddedUBounds are specified, the
-!       other will be calculated.  If BOTH are specified the values are checked
+!       If BOTH are specified the values are checked
 !       for consistency.  Note that the the ordering of
 !       these ungridded dimensions is the same as their order in the {\tt farray}.
 !       Note also that the bounds for undistributed dimensions included in the
@@ -996,14 +994,13 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !  !Local Variables
     integer :: localrc
 
-    integer :: gridrank, arrayrank, uglb_size, ugub_size
     type(ESMF_STAGGERLOC)                  :: lstaggerloc
 
-    integer, dimension(ESMF_MAXDIM)        :: ec, cc, g2fm, mhlw, mhuw, dg2fm, f2dgm, dg2gm
+    integer, dimension(ESMF_MAXDIM)        :: ec, cc, l_g2fm, l_mhlw, l_mhuw, dg2fm, f2dgm, dg2gm
     integer, dimension(ESMF_MAXDIM)        :: f2gm, gelb, geub, gclb, gcub
-    integer, dimension(ESMF_MAXDIM)        :: fsize
-    integer                                :: forderIndex, i
     logical, dimension(ESMF_MAXDIM)        :: flipflop
+    integer                                :: forderIndex, i
+    integer                                :: gridrank, arrayrank, uglb_size, ugub_size
 
     integer, dimension(:), allocatable     :: l_alb, l_aub, l_ac, l_uglb, l_ugub
 
@@ -1013,6 +1010,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
+    ! default staggerloc setup
     if(present(staggerloc)) then
         lstaggerloc = staggerloc
     else
@@ -1113,11 +1111,12 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         endif 
     endif
 
+    ! set up gridToFieldMap
     if(present(gridToFieldMap)) then
-        g2fm(1:size(gridToFieldMap)) = gridToFieldMap
+        l_g2fm(1:size(gridToFieldMap)) = gridToFieldMap
     else
         do i = 1, ESMF_MAXDIM
-            g2fm(i) = i
+            l_g2fm(i) = i
         enddo
     endif
     ! gridToFieldMap elements must be in range 1...fieldRank and unique  
@@ -1127,38 +1126,38 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     !          or O(ESMF_MAXDIM+ESMF_MAXDIM/sizeof(integer)) with bitvector  
     flipflop = .false.  
     do i = 1, gridrank
-       if(g2fm(i) .lt. 1 .and. g2fm(i) .gt. arrayrank) then  
+       if(l_g2fm(i) .lt. 1 .and. l_g2fm(i) .gt. arrayrank) then  
            call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &   
                  "- gridToFieldMap element must be within range 1...array rank", &  
                    ESMF_CONTEXT, rc)   
            return  
        endif  
-       if(flipflop(g2fm(i))) then  
+       if(flipflop(l_g2fm(i))) then  
            call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &   
                  "- gridToFieldMap element must be unique", &  
                    ESMF_CONTEXT, rc)   
            return  
        endif  
-       flipflop(g2fm(i)) = .true.  
+       flipflop(l_g2fm(i)) = .true.  
     enddo  
 
     ! At this point input arguments are validated
     allocate(l_alb(arrayrank), l_aub(arrayrank), l_ac(arrayrank))
-    mhlw = 0
+    l_mhlw = 0
     if(present(maxHaloLWidth)) then
-        mhlw(1:gridrank) = maxHaloLWidth(1:gridrank)
+        l_mhlw(1:gridrank) = maxHaloLWidth(1:gridrank)
     endif
-    mhuw = 0
+    l_mhuw = 0
     if(present(maxHaloUWidth)) then
-        mhuw(1:gridrank) = maxHaloUWidth(1:gridrank)
+        l_mhuw(1:gridrank) = maxHaloUWidth(1:gridrank)
     endif
 
     ! First we compute the ungridded bounds:
     ! compute a reverse mapping then use rule 2 
-    ! to compute Fortran array bounds
+    ! to compute ungridded Fortran array bounds
     f2gm = 0
     do i = 1, gridrank
-        f2gm(g2fm(i)) = i
+        f2gm(l_g2fm(i)) = i
     enddo
     forderIndex = 1
     do i = 1, arrayrank
@@ -1177,16 +1176,16 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     ! 2. compute gridded Fortran array shape
     f2dgm = 0
     do i = 1, gridrank
-        dg2fm(i) = g2fm(dg2gm(i))
+        dg2fm(i) = l_g2fm(dg2gm(i))
         f2dgm(dg2fm(i)) = i
     enddo
     forderIndex = 1
     do i = 1, arrayrank
         ! if i-th dimension is distributed (including trivially distributed)
         if(f2dgm(i) .gt. 0) then
-            l_ac(i) = max(cc(f2dgm(i))+mhlw(forderIndex)+mhuw(forderIndex), ec(f2dgm(i)))
+            l_ac(i) = max(cc(f2dgm(i))+l_mhlw(forderIndex)+l_mhuw(forderIndex), ec(f2dgm(i)))
             l_alb(i) = gclb(f2dgm(i))
-            l_aub(i) = l_alb(i) + l_ac(i)
+            l_aub(i) = l_alb(i) + l_ac(i) - 1
             forderIndex = forderIndex + 1
         endif
     enddo
