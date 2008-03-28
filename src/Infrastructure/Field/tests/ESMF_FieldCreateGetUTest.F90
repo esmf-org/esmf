@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.13 2008/03/28 05:37:32 theurich Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.14 2008/03/28 19:04:58 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -450,6 +450,17 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
+        call test2f_generic(rc, minIndex=(/1,1,1/), maxIndex=(/10,20,30/), &
+            staggerloc=ESMF_STAGGERLOC_CENTER, &
+            regDecomp=(/4,1,1/))
+        write(failMsg, *) ""
+        write(name, *) "Creating a Field from a fortran array 3d grid 2d distgrid 2d, " // &
+            "grid has extra padding, use GetAllocBounds internally"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 3d array
         call test2e_generic(rc, minIndex=(/1,1,1/), maxIndex=(/10,20,30/), &
             gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
@@ -457,6 +468,18 @@
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 3d grid 2d distgrid 2d, " // &
             "grid has no extra padding"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 3d array
+        call test2f_generic(rc, minIndex=(/1,1,1/), maxIndex=(/10,20,30/), &
+            gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
+            staggerloc=ESMF_STAGGERLOC_CENTER, &
+            regDecomp=(/4,1,1/))
+        write(failMsg, *) ""
+        write(name, *) "Creating a Field from a fortran array 3d grid 2d distgrid 2d, " // &
+            "grid has extra padding, use GetAllocBounds internally"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
@@ -473,6 +496,17 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
+        call test2f_generic(rc, minIndex=(/1,1,1/), maxIndex=(/10,20,30/), &
+            staggerloc=ESMF_STAGGERLOC_CORNER, &
+            regDecomp=(/4,1,1/))
+        write(failMsg, *) ""
+        write(name, *) "Creating a Field from a fortran array 3d grid 2d distgrid 2d, " // &
+            "grid has extra padding, cornor stagger, use GetAllocBounds internally"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 3d array
         call test2e_generic(rc, minIndex=(/1,1,1/), maxIndex=(/10,20,30/), &
             gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
@@ -484,7 +518,19 @@
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
-        ! Create a field from an fortran array 2d 1st dimension distributed
+        ! Create a field from an fortran 3d array
+        call test2f_generic(rc, minIndex=(/1,1,1/), maxIndex=(/10,20,30/), &
+            gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
+            staggerloc=ESMF_STAGGERLOC_CORNER, &
+            regDecomp=(/4,1,1/))
+        write(failMsg, *) ""
+        write(name, *) "Creating a Field from a fortran array 3d grid 2d distgrid 2d, " // &
+            "grid has no extra padding, corner stagger, use GetAllocBounds internally"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 3d array
         call test2e_generic(rc, minindex=(/1,1/), maxindex=(/10,20/), &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
             regDecomp=(/2,2/), &
@@ -499,6 +545,21 @@
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 3d array
+        call test2f_generic(rc, minindex=(/1,1/), maxindex=(/10,20/), &
+            gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+            regDecomp=(/2,2/), &
+            staggerloc=ESMF_STAGGERLOC_CENTER, &
+            gridToFieldMap=(/3,1/), &
+            ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
+            maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/))
+        write(failMsg, *) ""
+        write(name, *) "Creating a Field from a fortran array 3d 1,3 dim distributed, " // &
+            "2nd dimension undistributed, 1,3 dimension swapped, use GetAllocBounds internally"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
         ! Create a field from an fortran array 2d 1st dimension distributed
         call test2e_generic(rc, minindex=(/1,1/), maxindex=(/10,20/), &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
@@ -509,6 +570,21 @@
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 3d 2,3 dim distributed, " // &
             "1st dimension undistributed, 2,3 dimension swapped"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran array 2d 1st dimension distributed
+        call test2f_generic(rc, minindex=(/1,1/), maxindex=(/10,20/), &
+            gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+            regDecomp=(/2,2/), &
+            staggerloc=ESMF_STAGGERLOC_CENTER, &
+            gridToFieldMap=(/3,2/), &
+            ungriddedLBound=(/3/), ungriddedUBound=(/9/), &
+            maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/))
+        write(failMsg, *) ""
+        write(name, *) "Creating a Field from a fortran array 3d 2,3 dim distributed, " // &
+            "1st dimension undistributed, 2,3 dimension swapped, use GetAllocBounds internally"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
@@ -1725,8 +1801,8 @@ contains
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        write(*, "(A7, 17I3)") 'MZS: ', lpe, ec(1:3), cc(1:3), fsize(1:3), &
-            dg2fm(1:3), f2dgm(1:3), gridDistDimCount
+!        write(*, "(A7, 17I3)") 'MZS: ', lpe, ec(1:3), cc(1:3), fsize(1:3), &
+!            dg2fm(1:3), f2dgm(1:3), gridDistDimCount
 
         allocate(farray(fsize(1), fsize(2), fsize(3)))
 
@@ -1760,6 +1836,114 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
     end subroutine test2e_generic
+
+    ! test2e_generic provides an generic interface to test fieldCreateFromDataPtr
+    ! based on 3d real type fortran array
+    ! The fortran array shape is automatically computed from FieldGetAllocBounds
+    subroutine test2f_generic(rc, minindex, maxindex, &
+        gridEdgeLWidth, gridEdgeUWidth, &
+        regDecomp, &
+        copyflag, &
+        staggerloc, &
+        gridToFieldMap, &
+        ungriddedLBound, ungriddedUBound, &
+        maxHaloLWidth, maxHaloUWidth, &
+        fieldget)
+        integer, intent(inout)  :: rc
+        integer, dimension(:)   :: minIndex
+        integer, dimension(:)   :: maxIndex
+        integer, dimension(:), optional   :: gridEdgeLWidth, gridEdgeUWidth
+        integer, dimension(:), optional   :: regDecomp
+        type(ESMF_CopyFlag),   optional   :: copyflag
+        type(ESMF_STAGGERLOC), optional   :: staggerloc
+        integer, dimension(:), optional   :: gridToFieldMap
+        integer, dimension(:), optional   :: ungriddedLBound, ungriddedUBound
+        integer, dimension(:), optional   :: maxHaloLWidth, maxHaloUWidth
+        logical, optional                 :: fieldget
+
+        type(ESMF_Field)        :: field
+        type(ESMF_Grid)         :: grid
+        integer                 :: localrc, i
+
+        type(ESMF_Grid)         :: grid1
+        type(ESMF_Array)        :: array
+        type(ESMF_TypeKind)     :: typekind
+        integer                 :: dimCount
+        type(ESMF_StaggerLoc)   :: lstaggerloc
+        integer, dimension(ESMF_MAXDIM) :: lgridToFieldMap
+        integer, dimension(ESMF_MAXDIM) :: lungriddedLBound 
+        integer, dimension(ESMF_MAXDIM) :: lungriddedUBound 
+        integer, dimension(ESMF_MAXDIM) :: lmaxHaloLWidth
+        integer, dimension(ESMF_MAXDIM) :: lmaxHaloUWidth
+
+        real, dimension(:,:,:), allocatable    :: farray
+        type(ESMF_VM)                          :: vm
+        integer                                :: lpe
+
+        integer, dimension(ESMF_MAXDIM)        :: ec, cc, g2fm, mhlw, mhuw, dg2fm, f2dgm, dg2gm
+        integer, dimension(ESMF_MAXDIM)        :: gelb, geub, gclb, gcub
+        integer, dimension(3)                  :: fsize
+        integer                                :: gridDistDimCount, forderIndex
+
+        rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
+
+        grid = ESMF_GridCreateShapeTile(minIndex=minIndex, maxIndex=maxindex, &
+                                  gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
+                                  regDecomp=regDecomp, name="testgrid", rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldGet(grid, staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+            maxHaloLWidth, maxHaloUWidth, allocCount=fsize, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_VMGetGlobal(vm, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+        call ESMF_VMGet(vm, localPet=lpe, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+!        write(*, "(A7, 17I3)") 'MZS: ', lpe, ec(1:3), cc(1:3), fsize(1:3), &
+!            dg2fm(1:3), f2dgm(1:3), gridDistDimCount
+
+        allocate(farray(fsize(1), fsize(2), fsize(3)))
+
+        field = ESMF_FieldCreate(grid, farray, copyflag=copyflag, &
+            staggerloc=staggerloc,  gridToFieldMap=gridToFieldMap, &
+            ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
+            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        if(present(fieldget)) then
+          if(fieldget) then
+            call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
+                dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
+                ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
+                maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
+                rc=localrc)
+                if (ESMF_LogMsgFoundError(localrc, &
+                    ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rc)) return
+          endif
+        endif
+
+        call ESMF_FieldDestroy(field, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+    end subroutine test2f_generic
 
     subroutine test3a(rc)
         integer, intent(inout)  :: rc
