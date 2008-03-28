@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.1.2.2 2008/03/25 20:41:43 theurich Exp $
+! $Id: user_coupler.F90,v 1.1.2.3 2008/03/28 21:20:51 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -78,7 +78,7 @@ module user_coupler
     integer :: rc
 
     ! Local variables
-    integer :: itemcount, localPet
+    integer :: itemcount
     type(ESMF_Array) :: srcArray, dstArray
     type(ESMF_VM) :: vm
 
@@ -105,10 +105,6 @@ module user_coupler
 
     ! Get destination Array out of export state
     call ESMF_StateGetArray(exportState, "array data", dstArray, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
-    ! get localPet
-    call ESMF_VMGet(vm, localPet=localPet, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Precompute and store an ArrayRedist operation
