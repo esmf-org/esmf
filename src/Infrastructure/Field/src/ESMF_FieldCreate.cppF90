@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.7 2008/03/27 23:36:44 theurich Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.8 2008/03/28 05:37:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -55,14 +55,13 @@ module ESMF_FieldCreateMod
 
   public ESMF_FieldCreate
   public ESMF_FieldCreateNoData       ! Create a new Field without data
-  public ESMF_FieldCreateEmpty        ! Create a new Field without grid or data
   public ESMF_FieldDestroy            ! Destroy a Field
 
  
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.7 2008/03/27 23:36:44 theurich Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.8 2008/03/28 05:37:31 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -80,9 +79,10 @@ module ESMF_FieldCreateMod
    
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-    module procedure ESMF_FieldCreateNew
+    module procedure ESMF_FieldCreateFromArraySpec
     module procedure ESMF_FieldCreateFromArray
     TypeKindRankInterfaceMacro(FieldCreateFromDataPtr)
+    module procedure ESMF_FieldCreateEmpty
 
 ! !DESCRIPTION:
 !   This interface provides an entry point for methods that create a complete
@@ -103,7 +103,7 @@ module ESMF_FieldCreateMod
    
 ! !PRIVATE MEMBER FUNCTIONS:
     module procedure ESMF_FieldCreateNoDataPtr
-    module procedure ESMF_FieldCreateNoArray
+    module procedure ESMF_FieldCreateNoDataArray
 ! !DESCRIPTION:
 !   This interface provides an entry point for methods that create 
 !   an {\tt ESMF\_Field} without allocating or referencing any associated data.
@@ -125,18 +125,18 @@ contains
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldCreateNew"
+^define ESMF_METHOD "ESMF_FieldCreateFromArraySpec"
 !BOP
-! !IROUTINE:   ESMF_FieldCreate - Create a new Field from Grid and ArraySpec
+! !IROUTINE:   ESMF_FieldCreate - Create a Field from Grid and ArraySpec
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateNew(grid, arrayspec, allocflag, staggerloc, &
-    gridToFieldMap, ungriddedLBound, ungriddedUBound, maxHaloLWidth, &
-    maxHaloUWidth, name, iospec, rc)
+  function ESMF_FieldCreateFromArraySpec(grid, arrayspec, allocflag, &
+    staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    maxHaloLWidth, maxHaloUWidth, name, iospec, rc)
 !
 ! !RETURN VALUE:
-    type(ESMF_Field) :: ESMF_FieldCreateNew
+    type(ESMF_Field) :: ESMF_FieldCreateFromArraySpec
 !
 ! !ARGUMENTS:
     type(ESMF_Grid) :: grid               
@@ -264,7 +264,7 @@ contains
     localrc = ESMF_RC_NOT_IMPL
     rcpresent = .FALSE.
     nullify(ftype)
-    nullify(ESMF_FieldCreateNew%ftypep)
+    nullify(ESMF_FieldCreateFromArraySpec%ftypep)
 
     ! Initialize return code   
     if(present(rc)) then
@@ -423,20 +423,20 @@ contains
                                 ESMF_CONTEXT, rc)) return
    
     ! Set return values.
-    ESMF_FieldCreateNew%ftypep => ftype
-    ESMF_INIT_SET_CREATED(ESMF_FieldCreateNew)
+    ESMF_FieldCreateFromArraySpec%ftypep => ftype
+    ESMF_INIT_SET_CREATED(ESMF_FieldCreateFromArraySpec)
 
-    call ESMF_FieldValidate(ESMF_FieldCreateNew, rc=localrc)
+    call ESMF_FieldValidate(ESMF_FieldCreateFromArraySpec, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) then
-        ESMF_FieldCreateNew%ftypep%fieldstatus = ESMF_STATUS_INVALID
+        ESMF_FieldCreateFromArraySpec%ftypep%fieldstatus = ESMF_STATUS_INVALID
         return
     endif
 
     if(rcpresent) rc = ESMF_SUCCESS
 
-  end function ESMF_FieldCreateNew
+  end function ESMF_FieldCreateFromArraySpec
 !------------------------------------------------------------------------------
 
 
@@ -760,10 +760,10 @@ contains
 #define FieldCreateFromDataPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldCreateFromDataPtr - Create a Field from Fortran data array @\
+! !IROUTINE: ESMF_FieldCreate - Create a Field from Fortran array pointer @\
 ! @\
 ! !INTERFACE: @\
-! ! Private name; call using ESMF_FieldCreateFromDataPtr() @\
+! ! Private name; call using ESMF_FieldCreate() @\
 ! function ESMF_FieldCreateFromDataPtr<rank><type><kind>(grid, & @\
 !   farray, copyflag, staggerloc, gridToFieldMap, ungriddedLBound, & @\
 !   ungriddedUBound, maxHaloLWidth, maxHaloUWidth, name, iospec, rc) @\
@@ -948,6 +948,79 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
 
 
 !------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldCreateEmpty"
+!BOP
+! !IROUTINE: ESMF_FieldCreate - Create an empty Field (no Grid)
+
+! !INTERFACE:
+  ! Private name; call using ESMF_FieldCreate()
+  function ESMF_FieldCreateEmpty(name, iospec, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_Field) :: ESMF_FieldCreateEmpty 
+!
+! !ARGUMENTS:
+    character (len = *), intent(in), optional :: name  
+    type(ESMF_IOSpec), intent(in), optional :: iospec  
+    integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+! This version of {\tt ESMF\_FieldCreate} builds an empty {\tt ESMF\_Field} 
+! and depends on later calls to add an {\tt ESMF\_Grid} and {\tt ESMF\_Array} to 
+! it. Attributes can be added to an empty Field object. 
+!
+! The arguments are:
+! \begin{description}
+! \item [{[name]}] 
+!       {\tt Field} name. 
+! \item [{[iospec]}] 
+!       I/O specification. ! NOT IMPLEMENTED 
+! \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
+    integer :: localrc                     
+    
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    nullify(ftype)
+    nullify(ESMF_FieldCreateEmpty%ftypep)
+
+    allocate(ftype, stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Field information", &
+                                     ESMF_CONTEXT, rc)) return
+    call ESMF_FieldInitialize(ftype, rc=localrc) 
+    if (ESMF_LogMsgFoundAllocError(localrc, "Default initialize Field", &
+                                     ESMF_CONTEXT, rc)) return
+
+    ! Call field construction method
+    call ESMF_FieldConstructEmpty(ftype, name, iospec, localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+    ! Set return values.
+    ESMF_FieldCreateEmpty%ftypep => ftype
+
+    ESMF_INIT_SET_CREATED(ESMF_FieldCreateEmpty)
+
+    call ESMF_FieldValidate(ESMF_FieldCreateEmpty, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_FieldCreateEmpty
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
 ! TODO:FIELDINTEGRATION Decide if FieldCreateNoArray is still needed
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldCreateNoDataPtr"
@@ -1068,17 +1141,17 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
 
 
 !------------------------------------------------------------------------------
-! TODO:FIELDINTEGRATION Decide if FieldCreateNoArray is still needed
+! TODO:FIELDINTEGRATION Decide if FieldCreateNoDataArray is still needed
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldCreateNoArray"
+^define ESMF_METHOD "ESMF_FieldCreateNoDataArray"
 !BOPI
 ! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no associated Array object
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreateNoData()
-  function ESMF_FieldCreateNoArray(grid, staggerloc, name, iospec, rc)
+  function ESMF_FieldCreateNoDataArray(grid, staggerloc, name, iospec, rc)
 !
 ! !RETURN VALUE:
-    type(ESMF_Field) :: ESMF_FieldCreateNoArray 
+    type(ESMF_Field) :: ESMF_FieldCreateNoDataArray 
 !
 ! !ARGUMENTS:
     type(ESMF_Grid) :: grid                 
@@ -1118,7 +1191,7 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     nullify(ftype)
-    nullify(ESMF_FieldCreateNoArray%ftypep)
+    nullify(ESMF_FieldCreateNoDataArray%ftypep)
 
 #if 0
     allocate(ftype, stat=localrc)
@@ -1137,11 +1210,11 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
                                 ESMF_CONTEXT, rc)) return
 
     ! Set return values.
-    ESMF_FieldCreateNoArray%ftypep => ftype
+    ESMF_FieldCreateNoDataArray%ftypep => ftype
 
-    ESMF_INIT_SET_CREATED(ESMF_FieldCreateNoArray)
+    ESMF_INIT_SET_CREATED(ESMF_FieldCreateNoDataArray)
 
-    call ESMF_FieldValidate(ESMF_FieldCreateNoArray, rc=localrc)
+    call ESMF_FieldValidate(ESMF_FieldCreateNoDataArray, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1149,79 +1222,7 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
     if (present(rc)) rc = ESMF_SUCCESS
 #endif
 
-  end function ESMF_FieldCreateNoArray
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldCreateEmpty"
-!BOP
-! !IROUTINE: ESMF_FieldCreateEmpty - Create a Field with no Grid or Array
-
-! !INTERFACE:
-  function ESMF_FieldCreateEmpty(name, iospec, rc)
-!
-! !RETURN VALUE:
-    type(ESMF_Field) :: ESMF_FieldCreateEmpty 
-!
-! !ARGUMENTS:
-    character (len = *), intent(in), optional :: name  
-    type(ESMF_IOSpec), intent(in), optional :: iospec  
-    integer, intent(out), optional :: rc               
-!
-! !DESCRIPTION:
-! This version of {\tt ESMF\_FieldCreate} builds an empty {\tt ESMF\_Field} 
-! and depends on later calls to add an {\tt ESMF\_Grid} and {\tt ESMF\_Array} to 
-! it. Attributes can be added to an empty Field object. 
-!
-! The arguments are:
-! \begin{description}
-! \item [{[name]}] 
-!       {\tt Field} name. 
-! \item [{[iospec]}] 
-!       I/O specification. ! NOT IMPLEMENTED 
-! \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
-    integer :: localrc                     
-    
-    ! Initialize
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    nullify(ftype)
-    nullify(ESMF_FieldCreateEmpty%ftypep)
-
-    allocate(ftype, stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Field information", &
-                                     ESMF_CONTEXT, rc)) return
-    call ESMF_FieldInitialize(ftype, rc=localrc) 
-    if (ESMF_LogMsgFoundAllocError(localrc, "Default initialize Field", &
-                                     ESMF_CONTEXT, rc)) return
-
-    ! Call field construction method
-    call ESMF_FieldConstructEmpty(ftype, name, iospec, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-    ! Set return values.
-    ESMF_FieldCreateEmpty%ftypep => ftype
-
-    ESMF_INIT_SET_CREATED(ESMF_FieldCreateEmpty)
-
-    call ESMF_FieldValidate(ESMF_FieldCreateEmpty, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function ESMF_FieldCreateEmpty
+  end function ESMF_FieldCreateNoDataArray
 !------------------------------------------------------------------------------
 
 

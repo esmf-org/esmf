@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.14 2008/03/24 19:05:55 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.15 2008/03/28 05:37:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -148,7 +148,7 @@
             computationalEdgeUWidth=compEdgeUWdith, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_FieldSetArray(field1, array2, rc=rc)
+    call ESMF_FieldSet(field1, array2, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
     print *, "Field reset internal array through ArrayCreate returned"
@@ -254,7 +254,7 @@
 !EOE
 
 !BOC
-    field3 = ESMF_FieldCreateEmpty("precip", rc=rc)
+    field3 = ESMF_FieldCreate("precip", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_GridGet(grid, localDE=0, staggerloc=ESMF_STAGGERLOC_CENTER, &
@@ -265,7 +265,7 @@
 
     call ESMF_FieldSetCommit(field3, grid, farray, rc=rc)
 !EOC
-    print *, "Finish a Field created by ESMF_FieldCreateEmpty returned"
+    print *, "Finish a Field created by ESMF_FieldCreate returned"
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
@@ -554,7 +554,7 @@
 !  Suppose now gridToFieldMap=(/2,3,4/) instead which says
 !  the first dimension of Grid maps to the 2nd dimension of Field (or 
 !  Fortran array) and so on and so forth, we can obtain a more general form 
-!  of rule 5 by introducing first_distdim_index shift when Grid to Field
+!  of rule 5 by introducing first\_distdim\_index shift when Grid to Field
 !  map (gridToFieldMap) is in the form of (/a,a+1,a+2.../).
 !
 !  \begin{verbatim}
@@ -565,7 +565,7 @@
 !
 !  \end{verbatim}
 !
-!  It's obvious that first_distdim_index=a. If the first dimension of the Fortran
+!  It's obvious that first\_distdim\_index=a. If the first dimension of the Fortran
 !  array is distributed, then rule 6 degenerates into rule 5, which is
 !  the typical case.
 !

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.11 2008/03/27 23:36:44 theurich Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.12 2008/03/28 05:37:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -51,13 +51,11 @@ module ESMF_FieldGetMod
 ! !PUBLIC MEMBER FUNCTIONS:
 
   public ESMF_FieldGet
-  public ESMF_FieldGetArray
-  public ESMF_FieldGetDataPtr
  
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.11 2008/03/27 23:36:44 theurich Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.12 2008/03/28 05:37:31 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -68,21 +66,20 @@ module ESMF_FieldGetMod
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_FieldGetDataPtr -- Get a Fortran pointer to the data contents
+! !IROUTINE: ESMF_FieldGet -- Overloaded FieldGet interface
 
 ! !INTERFACE:
-  interface ESMF_FieldGetDataPtr
+  interface ESMF_FieldGet
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-    module procedure ESMF_FieldGetDataBounds
+    module procedure ESMF_FieldGetDefault
+    !module procedure ESMF_FieldGetLocalArray !TODO: FIELDINTEGRATION
     TypeKindRankInterfaceMacro(FieldGetDataPtr)
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_FieldGetDataPtr} subroutines.   
-! The T/K/R subroutines allows retrieval of data pointer and data bounds
-! FieldGetDataBound subroutine allows retrieval of modified grid bounds
+!  types of {\tt ESMF\_FieldGet} subroutines.   
   end interface
 !EOPI 
 !------------------------------------------------------------------------------
@@ -99,14 +96,15 @@ contains
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldGet"
+^define ESMF_METHOD "ESMF_FieldGetDefault"
 !BOP
 ! !IROUTINE: ESMF_FieldGet - Return info associated with a Field
 
 ! !INTERFACE:
-  subroutine ESMF_FieldGet(field, grid, array, typekind, dimCount, staggerloc, &
-    gridToFieldMap, ungriddedLBound, ungriddedUBound, maxHaloLWidth, &
-    maxHaloUWidth, name, iospec, rc) 
+  ! Private name; call using ESMF_FieldGet()
+  subroutine ESMF_FieldGetDefault(field, grid, array, typekind, dimCount, &
+    staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    maxHaloLWidth, maxHaloUWidth, name, iospec, rc) 
 !
 ! !ARGUMENTS:
     type(ESMF_Field), intent(inout) :: field    
@@ -317,7 +315,7 @@ contains
 
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_FieldGet
+  end subroutine ESMF_FieldGetDefault
 !------------------------------------------------------------------------------
 
 
@@ -327,9 +325,10 @@ contains
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldGetLocalArray"
 !BOPI
-! !IROUTINE: ESMF_FieldGetLocalArray - Get Local Array associated with the Field
+! !IROUTINE: ESMF_FieldGet - Get LocalArray associated with the Field
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_FieldGet()
   subroutine ESMF_FieldGetLocalArray(field, localarray, rc)
 !
 ! !ARGUMENTS:
@@ -387,69 +386,161 @@ contains
 #endif
 
 
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldGetArray"
-!BOP
-! !IROUTINE: ESMF_FieldGetArray - Get data Array associated with the Field
+#define FieldGetDataPtrDoc() \
+!---------------------------------------------------------------------------- @\
+!BOP @\
+! !IROUTINE: ESMF_FieldGet - Get Fortran data pointer from a Field @\
+! @\
+! !INTERFACE: @\
+! ! Private name; call using ESMF_FieldGet() @\
+! subroutine ESMF_FieldGetDataPtr<rank><type><kind>(field, farray, & @\
+!   localDE, exclusiveLBound, exclusiveUBound, exclusiveCount, & @\
+!   computationalLBound, computationalUBound, computationalCount, & @\
+!   totalLBound, totalUBound, totalCount, rc) @\
+! @\
+! !ARGUMENTS: @\
+!   type(ESMF_Field), intent(in)            :: field @\
+!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farray @\
+!   integer,          intent(in) , optional :: localDE @\
+!   integer,          intent(out), optional :: exclusiveLBound(:) @\
+!   integer,          intent(out), optional :: exclusiveUBound(:) @\
+!   integer,          intent(out), optional :: exclusiveCount(:) @\
+!   integer,          intent(out), optional :: computationalLBound(:) @\
+!   integer,          intent(out), optional :: computationalUBound(:) @\
+!   integer,          intent(out), optional :: computationalCount(:) @\
+!   integer,          intent(out), optional :: totalLBound(:) @\
+!   integer,          intent(out), optional :: totalUBound(:) @\
+!   integer,          intent(out), optional :: totalCount(:) @\
+!   integer,          intent(out), optional :: rc @\
+! @\
+! !DESCRIPTION: @\
+! Get a Fortran pointer to DE-local memory allocation within {\tt field}. @\
+! For convenience DE-local bounds can be queried at the same time. @\
+! @\
+! The arguments are: @\
+! \begin{description} @\
+! \item [field]  @\
+!   {\tt ESMF\_Field} object. @\
+! \item [farray] @\
+!   Fortran array pointer which will be pointed at DE-local memory allocation. @\
+! \item[{[localDE]}] @\
+!   The local DE from which to get the information.  If not set, defaults to  @\
+!   the first DE on this PET. (localDE starts at 0 for each PET) @\
+! \item[{[exclusiveLBound]}] @\
+!   Upon return this holds the lower bounds of the exclusive region. @\
+!   {\tt exclusiveLBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
+!   See section \ref{sec:field:usage:bounds} for a description @\
+!   of the regions and their associated bounds and counts.  @\
+! \item[{[exclusiveUBound]}] @\
+!   Upon return this holds the upper bounds of the exclusive region. @\
+!   {\tt exclusiveUBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
+!   See section \ref{sec:field:usage:bounds} for a description @\
+!   of the regions and their associated bounds and counts.  @\
+! \item[{[exclusiveCount]}] @\
+!   Upon return this holds the number of items in the exclusive region per dimension @\
+!   (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must @\
+!   be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
+!   See section \ref{sec:field:usage:bounds} for a description @\
+!   of the regions and their associated bounds and counts.  @\
+! \item[{[computationalLBound]}] @\
+!   Upon return this holds the lower bounds of the computational region. @\
+!   {\tt computationalLBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
+!   See section \ref{sec:field:usage:bounds} for a description @\
+!   of the regions and their associated bounds and counts.  @\
+! \item[{[computationalUBound]}] @\
+!   Upon return this holds the lower bounds of the computational region. @\
+!   {\tt computationalLBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
+!   See section \ref{sec:field:usage:bounds} for a description @\
+!   of the regions and their associated bounds and counts.  @\
+! \item[{[computationalCount]}] @\
+!   Upon return this holds the number of items in the computational region per dimension @\
+!   (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount} must @\
+!   be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
+!   See section \ref{sec:field:usage:bounds} for a description @\
+!   of the regions and their associated bounds and counts.  @\
+! \item[{[totalLBound]}] @\
+!   Upon return this holds the lower bounds of the total region. @\
+!   {\tt totalLBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
+!   See section \ref{sec:field:usage:bounds} for a description @\
+!   of the regions and their associated bounds and counts.  @\
+! \item[{[totalUBound]}] @\
+!   Upon return this holds the lower bounds of the total region. @\
+!   {\tt totalUBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
+!   See section \ref{sec:field:usage:bounds} for a description @\
+!   of the regions and their associated bounds and counts.  @\
+! \item[{[totalCount]}] @\
+!   Upon return this holds the number of items in the total region per dimension @\
+!   (i.e. {\tt totalUBound-totalLBound+1}). {\tt computationalCount} must @\
+!   be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
+!   See section \ref{sec:field:usage:bounds} for a description @\
+!   of the regions and their associated bounds and counts.  @\
+! \item [{[rc]}]  @\
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+! \end{description} @\
+! @\
+!EOP @\
+!---------------------------------------------------------------------------- @\
 
-! !INTERFACE:
-  subroutine ESMF_FieldGetArray(field, array, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Field), intent(inout) :: field      
-    type(ESMF_Array), intent(out) :: array
-    integer, intent(out), optional :: rc           
-!
-! !DESCRIPTION:
-! Get data in {\tt ESMF\_Array} form.
-!
-! The arguments are:
-! \begin{description}
-! \item [field]
-!       An {\tt ESMF\_Field} object.
-! \item [{[array]}]
-!       Field {\tt ESMF\_Array}.
-! \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!EOP
-!------------------------------------------------------------------------------
-    integer :: localrc
-    !character(len=ESMF_MAXSTR) :: str
-    type(ESMF_FieldType), pointer :: ftypep
+#define FieldGetDataPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+!---------------------------------------------------------------------------- @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_FieldGetDataPtr" @\
+  subroutine ESMF_FieldGetDataPtr##mrank##D##mtypekind(field, farray, & @\
+    localDE, exclusiveLBound, exclusiveUBound, exclusiveCount, & @\
+    computationalLBound, computationalUBound, computationalCount, & @\
+    totalLBound, totalUBound, totalCount, rc) @\
+@\
+    ! input arguments @\
+    type(ESMF_Field), intent(in)            :: field @\
+    mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farray @\
+    integer,          intent(in) , optional :: localDE @\
+    integer,          intent(out), optional :: exclusiveLBound(:) @\
+    integer,          intent(out), optional :: exclusiveUBound(:) @\
+    integer,          intent(out), optional :: exclusiveCount(:) @\
+    integer,          intent(out), optional :: computationalLBound(:) @\
+    integer,          intent(out), optional :: computationalUBound(:) @\
+    integer,          intent(out), optional :: computationalCount(:) @\
+    integer,          intent(out), optional :: totalLBound(:) @\
+    integer,          intent(out), optional :: totalUBound(:) @\
+    integer,          intent(out), optional :: totalCount(:) @\
+    integer,          intent(out), optional :: rc @\
+@\
+    ! local variables @\
+    integer          :: localrc, lde @\
+@\
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+    localrc = ESMF_RC_NOT_IMPL @\
+@\
+    ! check variables @\
+    ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
+@\
+    call ESMF_ArrayGet(field%ftypep%array, farrayPtr=farray, rc=localrc) @\
+@\
+    if (ESMF_LogMsgFoundError(localrc, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rc)) return @\
+@\
+    if(present(localDE)) then @\
+          lde = localDE @\
+    else @\
+          lde = 0 @\
+    end if @\
+    call ESMF_FieldGetDataBounds(field, lde, & @\
+        exclusiveLBound, exclusiveUBound, exclusiveCount, & @\
+        computationalLBound, computationalUBound, computationalCount, & @\
+        totalLBound, totalUBound, totalCount, & @\
+        rc = localrc) @\
+@\
+    if (ESMF_LogMsgFoundError(localrc, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rc)) return @\
+@\
+    if (present(rc)) rc = ESMF_SUCCESS @\
+@\
+  end subroutine ESMF_FieldGetDataPtr##mrank##D##mtypekind  @\
+!---------------------------------------------------------------------------- @\
 
-    ! Initialize
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! check variables
-    ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
-
-    !cheung turn off for now
-    !! Validate first
-    !call ESMF_FieldValidate(field, rc=localrc)
-    !if (ESMF_LogMsgFoundError(localrc, &
-    !                          ESMF_ERR_PASSTHRU, &
-    !                          ESMF_CONTEXT, rc)) return
-
-    ftypep => field%ftypep
-
-    if (ftypep%datastatus .ne. ESMF_STATUS_READY) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                              "No data associated with Field", &
-                               ESMF_CONTEXT, rc)) return
-    endif
-
-    !call ESMF_StatusString(ftypep%datastatus, str, rc)
-    !print *, "getting array data, status = ", trim(str)
-    array = ftypep%array
-   
-    ! Set return values.
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_FieldGetArray
-!------------------------------------------------------------------------------
+TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
 
 !------------------------------------------------------------------------------
@@ -459,7 +550,6 @@ contains
 ! !IROUTINE: ESMF_FieldGetDataBounds -  Get Field data bounds
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_FieldGetDataPtr()
   subroutine ESMF_FieldGetDataBounds(field, localDE, exclusiveLBound, &
     exclusiveUBound, exclusiveCount, computationalLBound, computationalUBound, &
     computationalCount, totalLBound, totalUBound, totalCount, rc)
@@ -777,163 +867,6 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_FieldGetDataBounds
 !------------------------------------------------------------------------------
-
-
-#define FieldGetDataPtrDoc() \
-!---------------------------------------------------------------------------- @\
-!BOP @\
-! !IROUTINE: ESMF_FieldGetDataPtr - Get the Fortran data pointer from a Field @\
-! @\
-! !INTERFACE: @\
-! ! Private name; call using ESMF_FieldGetDataPtr() @\
-! subroutine ESMF_FieldGetDataPtr<rank><type><kind>(field, farray, & @\
-!   localDE, exclusiveLBound, exclusiveUBound, exclusiveCount, & @\
-!   computationalLBound, computationalUBound, computationalCount, & @\
-!   totalLBound, totalUBound, totalCount, rc) @\
-! @\
-! !ARGUMENTS: @\
-!   type(ESMF_Field), intent(in)            :: field @\
-!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farray @\
-!   integer,          intent(in) , optional :: localDE @\
-!   integer,          intent(out), optional :: exclusiveLBound(:) @\
-!   integer,          intent(out), optional :: exclusiveUBound(:) @\
-!   integer,          intent(out), optional :: exclusiveCount(:) @\
-!   integer,          intent(out), optional :: computationalLBound(:) @\
-!   integer,          intent(out), optional :: computationalUBound(:) @\
-!   integer,          intent(out), optional :: computationalCount(:) @\
-!   integer,          intent(out), optional :: totalLBound(:) @\
-!   integer,          intent(out), optional :: totalUBound(:) @\
-!   integer,          intent(out), optional :: totalCount(:) @\
-!   integer,          intent(out), optional :: rc @\
-! @\
-! !DESCRIPTION: @\
-! Get a Fortran pointer to DE-local memory allocation within {\tt field}. @\
-! For convenience DE-local bounds can be queried at the same time. @\
-! @\
-! The arguments are: @\
-! \begin{description} @\
-! \item [field]  @\
-!   {\tt ESMF\_Field} object. @\
-! \item [farray] @\
-!   Fortran array pointer which will be pointed at DE-local memory allocation. @\
-! \item[{[localDE]}] @\
-!   The local DE from which to get the information.  If not set, defaults to  @\
-!   the first DE on this PET. (localDE starts at 0 for each PET) @\
-! \item[{[exclusiveLBound]}] @\
-!   Upon return this holds the lower bounds of the exclusive region. @\
-!   {\tt exclusiveLBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
-!   See section \ref{sec:field:usage:bounds} for a description @\
-!   of the regions and their associated bounds and counts.  @\
-! \item[{[exclusiveUBound]}] @\
-!   Upon return this holds the upper bounds of the exclusive region. @\
-!   {\tt exclusiveUBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
-!   See section \ref{sec:field:usage:bounds} for a description @\
-!   of the regions and their associated bounds and counts.  @\
-! \item[{[exclusiveCount]}] @\
-!   Upon return this holds the number of items in the exclusive region per dimension @\
-!   (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must @\
-!   be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
-!   See section \ref{sec:field:usage:bounds} for a description @\
-!   of the regions and their associated bounds and counts.  @\
-! \item[{[computationalLBound]}] @\
-!   Upon return this holds the lower bounds of the computational region. @\
-!   {\tt computationalLBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
-!   See section \ref{sec:field:usage:bounds} for a description @\
-!   of the regions and their associated bounds and counts.  @\
-! \item[{[computationalUBound]}] @\
-!   Upon return this holds the lower bounds of the computational region. @\
-!   {\tt computationalLBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
-!   See section \ref{sec:field:usage:bounds} for a description @\
-!   of the regions and their associated bounds and counts.  @\
-! \item[{[computationalCount]}] @\
-!   Upon return this holds the number of items in the computational region per dimension @\
-!   (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount} must @\
-!   be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
-!   See section \ref{sec:field:usage:bounds} for a description @\
-!   of the regions and their associated bounds and counts.  @\
-! \item[{[totalLBound]}] @\
-!   Upon return this holds the lower bounds of the total region. @\
-!   {\tt totalLBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
-!   See section \ref{sec:field:usage:bounds} for a description @\
-!   of the regions and their associated bounds and counts.  @\
-! \item[{[totalUBound]}] @\
-!   Upon return this holds the lower bounds of the total region. @\
-!   {\tt totalUBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
-!   See section \ref{sec:field:usage:bounds} for a description @\
-!   of the regions and their associated bounds and counts.  @\
-! \item[{[totalCount]}] @\
-!   Upon return this holds the number of items in the total region per dimension @\
-!   (i.e. {\tt totalUBound-totalLBound+1}). {\tt computationalCount} must @\
-!   be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
-!   See section \ref{sec:field:usage:bounds} for a description @\
-!   of the regions and their associated bounds and counts.  @\
-! \item [{[rc]}]  @\
-!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
-! \end{description} @\
-! @\
-!EOP @\
-!---------------------------------------------------------------------------- @\
-
-#define FieldGetDataPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
-!---------------------------------------------------------------------------- @\
-^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_FieldGetDataPtr" @\
-  subroutine ESMF_FieldGetDataPtr##mrank##D##mtypekind(field, farray, & @\
-    localDE, exclusiveLBound, exclusiveUBound, exclusiveCount, & @\
-    computationalLBound, computationalUBound, computationalCount, & @\
-    totalLBound, totalUBound, totalCount, rc) @\
-@\
-    ! input arguments @\
-    type(ESMF_Field), intent(in)            :: field @\
-    mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farray @\
-    integer,          intent(in) , optional :: localDE @\
-    integer,          intent(out), optional :: exclusiveLBound(:) @\
-    integer,          intent(out), optional :: exclusiveUBound(:) @\
-    integer,          intent(out), optional :: exclusiveCount(:) @\
-    integer,          intent(out), optional :: computationalLBound(:) @\
-    integer,          intent(out), optional :: computationalUBound(:) @\
-    integer,          intent(out), optional :: computationalCount(:) @\
-    integer,          intent(out), optional :: totalLBound(:) @\
-    integer,          intent(out), optional :: totalUBound(:) @\
-    integer,          intent(out), optional :: totalCount(:) @\
-    integer,          intent(out), optional :: rc @\
-@\
-    ! local variables @\
-    integer          :: localrc, lde @\
-@\
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
-    localrc = ESMF_RC_NOT_IMPL @\
-@\
-    ! check variables @\
-    ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
-@\
-    call ESMF_ArrayGet(field%ftypep%array, farrayPtr=farray, rc=localrc) @\
-@\
-    if (ESMF_LogMsgFoundError(localrc, & @\
-        ESMF_ERR_PASSTHRU, & @\
-        ESMF_CONTEXT, rc)) return @\
-@\
-    if(present(localDE)) then @\
-          lde = localDE @\
-    else @\
-          lde = 0 @\
-    end if @\
-    call ESMF_FieldGetDataBounds(field, lde, & @\
-        exclusiveLBound, exclusiveUBound, exclusiveCount, & @\
-        computationalLBound, computationalUBound, computationalCount, & @\
-        totalLBound, totalUBound, totalCount, & @\
-        rc = localrc) @\
-@\
-    if (ESMF_LogMsgFoundError(localrc, & @\
-        ESMF_ERR_PASSTHRU, & @\
-        ESMF_CONTEXT, rc)) return @\
-@\
-    if (present(rc)) rc = ESMF_SUCCESS @\
-@\
-  end subroutine ESMF_FieldGetDataPtr##mrank##D##mtypekind  @\
-!---------------------------------------------------------------------------- @\
-
-TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
 
 end module ESMF_FieldGetMod

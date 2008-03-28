@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.12 2008/03/20 15:36:34 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.13 2008/03/28 05:37:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -838,7 +838,7 @@ contains
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
-        field = ESMF_FieldCreateEmpty(rc=localrc) 
+        field = ESMF_FieldCreate(rc=localrc) 
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -866,7 +866,7 @@ contains
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
-        field = ESMF_FieldCreateEmpty(rc=localrc) 
+        field = ESMF_FieldCreate(rc=localrc) 
         if(localrc /= ESMF_SUCCESS) rc = ESMF_FAILURE
         call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
             dimCount=dimCount, staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, &
@@ -998,7 +998,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGetDataPtr(field, farray1, totalCount=totalCount, rc=localrc)
+        call ESMF_FieldGet(field, farray1, totalCount=totalCount, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -1356,7 +1356,7 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_FieldGetDataPtr(field, farray=farray1, &
+            call ESMF_FieldGet(field, farray=farray1, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
                 totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
@@ -2204,7 +2204,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGetDataPtr(field, farray=farray1, &
+        call ESMF_FieldGet(field, farray=farray1, &
             exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
             computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
             totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
@@ -2363,7 +2363,7 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_FieldGetDataPtr(field, farray=farray1, &
+            call ESMF_FieldGet(field, farray=farray1, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
                 totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
