@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2007/04/09 18:09:25 theurich Exp $ 
+# $Id: makefile,v 1.8 2008/03/28 23:51:35 w6ws Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -18,15 +18,19 @@ LOCDIR	  = src/prologue/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_StringUTest \
                 $(ESMF_TESTDIR)/ESMF_WordsizeUTest \
-                $(ESMF_TESTDIR)/ESMF_F90ArrayPtrUTest
+                $(ESMF_TESTDIR)/ESMF_F90ArrayPtrUTest \
+		$(ESMF_TESTDIR)/ESMF_LAPACKUTest
 
 TESTS_RUN     = RUN_ESMF_StringUTest \
                 RUN_ESMF_WordsizeUTest \
-                RUN_ESMF_F90ArrayPtrUTest
+                RUN_ESMF_F90ArrayPtrUTest \
+		RUN_ESMF_F90ARR \
+		RUN_ESMF_LAPACKUTest
 
 TESTS_RUN_UNI = RUN_ESMF_StringUTestUNI \
                 RUN_ESMF_WordsizeUTestUNI \
-                RUN_ESMF_F90ArrayPtrUTestUNI
+                RUN_ESMF_F90ArrayPtrUTestUNI \
+		RUN_ESMF_LAPACKUTestUNI
 
 include ${ESMF_DIR}/makefile
 
@@ -81,3 +85,12 @@ RUN_ESMF_WordsizeUTestUNI:
 	$(MAKE) TNAME=Wordsize NP=1 ftest
 
 
+#
+# Demonstrate that LAPACK is linkable and works
+#
+
+RUN_ESMF_LAPACKUTest:
+	$(MAKE) TNAME=LAPACK NP=2 ftest
+
+RUN_ESMF_LAPACKUTestUNI:
+	$(MAKE) TNAME=LAPACK NP=1 ftest

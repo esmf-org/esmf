@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.209 2008/03/05 21:40:50 theurich Exp $
+#  $Id: common.mk,v 1.210 2008/03/28 23:54:19 w6ws Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -660,6 +660,14 @@ endif
 #  with =, but should be appended to if neeeded with +=
 #-------------------------------------------------------------------------------
 
+#-------------------------------------------------------------------------------
+# LAPACK is used by a few ESMF routines, when available.  The following links
+# them in.
+#-------------------------------------------------------------------------------
+ifdef ESMF_LAPACK
+ESMF_CXXLINKLIBS     += $(ESMF_LAPACK_LIBS)
+ESMF_F90LINKLIBS     += $(ESMF_LAPACK_LIBS)
+endif
 
 #-------------------------------------------------------------------------------
 # For convenience ESMF_NETCDF_INCLUDE and ESMF_NETCDF_LIBPATH variables are 

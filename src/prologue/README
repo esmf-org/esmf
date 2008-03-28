@@ -16,6 +16,8 @@ MPI - that the proper mpi interfaces are available and executables
 
 threading - that a program using threads can be linked
 
+LAPACK - that a program calling LAPACK can be linked
+
 netCDF - that a program calling netCDF can be linked
 
 
