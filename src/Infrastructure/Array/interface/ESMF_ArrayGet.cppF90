@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.30.2.3 2008/03/12 17:59:51 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.30.2.4 2008/03/28 21:30:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -17,8 +17,7 @@ module ESMF_ArrayGetMod
 !
 !==============================================================================
 !
-! This file contains the LocalArray class definition and all LocalArray
-! class methods.
+! This file contains the ArrayGet() methods.
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -69,7 +68,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.30.2.3 2008/03/12 17:59:51 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.30.2.4 2008/03/28 21:30:02 theurich Exp $'
 
 !==============================================================================
 ! 
