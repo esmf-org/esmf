@@ -6,3 +6,10 @@ compilers.
 Requires the following environment settings:
 
 ESMF_COMPILER intel
+
+To incorporate MKL v10 into the build, for access to LAPACK, set:
+
+  ESMF_LAPACK MKL
+
+Currently the path to the MKL library files must be in the LD_LIBRARY_PATH in order
+for the tests and examples to link and run.

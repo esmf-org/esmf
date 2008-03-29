@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.66 2008/02/14 05:36:54 theurich Exp $
+# $Id: build_rules.mk,v 1.67 2008/03/29 00:01:38 w6ws Exp $
 #
 # Linux.intel.default
 #
@@ -150,6 +150,15 @@ ESMF_F90COMPILEOPTS +=  -threads
 ESMF_CXXCOMPILEOPTS +=  -pthread
 ESMF_F90LINKOPTS    += -threads
 ESMF_CXXLINKOPTS    += -pthread
+endif
+
+############################################################
+# Add LAPACK libraries
+#
+ifeq ($(ESMF_MACHINE),x86_64)
+ifeq ($(ESMF_LAPACK),MKL)
+ESMF_LAPACK_LIBS    = -lmkl -lmkl_em64t -openmp
+endif
 endif
 
 ############################################################
