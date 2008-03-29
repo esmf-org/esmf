@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.14 2008/03/28 19:35:37 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.15 2008/03/29 03:22:32 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.14 2008/03/28 19:35:37 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.15 2008/03/29 03:22:32 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -996,7 +996,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
     type(ESMF_STAGGERLOC)                  :: lstaggerloc
 
-    integer, dimension(ESMF_MAXDIM)        :: ec, cc, l_g2fm, l_mhlw, l_mhuw, dg2fm, f2dgm, dg2gm
+    integer, dimension(ESMF_MAXDIM)        :: ec, cc, l_g2fm, l_mhlw, l_mhuw, dg2gm
     integer, dimension(ESMF_MAXDIM)        :: f2gm, gelb, geub, gclb, gcub
     logical, dimension(ESMF_MAXDIM)        :: flipflop
     integer                                :: forderIndex, i
@@ -1171,20 +1171,12 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     enddo
 
     ! Now compute the gridded bounds
-    ! 1. compute mapping between distgrid and Fortran array
-    !   and between Fortran array and distgrid
-    ! 2. compute gridded Fortran array shape
-    f2dgm = 0
-    do i = 1, gridrank
-        dg2fm(i) = l_g2fm(dg2gm(i))
-        f2dgm(dg2fm(i)) = i
-    enddo
     forderIndex = 1
     do i = 1, arrayrank
         ! if i-th dimension is distributed (including trivially distributed)
-        if(f2dgm(i) .gt. 0) then
-            l_ac(i) = max(cc(f2dgm(i))+l_mhlw(forderIndex)+l_mhuw(forderIndex), ec(f2dgm(i)))
-            l_alb(i) = gclb(f2dgm(i))
+        if(f2gm(i) .gt. 0) then
+            l_ac(i) = max(cc(f2gm(i))+l_mhlw(forderIndex)+l_mhuw(forderIndex), ec(f2gm(i)))
+            l_alb(i) = gclb(f2gm(i))
             l_aub(i) = l_alb(i) + l_ac(i) - 1
             forderIndex = forderIndex + 1
         endif
