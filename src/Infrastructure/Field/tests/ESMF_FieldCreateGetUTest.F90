@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.16 2008/03/29 03:22:32 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.17 2008/03/29 13:17:13 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -956,6 +956,8 @@
 !        !------------------------------------------------------------------------
 !        !E-X_UTest_Multi_Proc_Only
 !        ! Create a 7D field from a 5D grid and 2D ungridded bounds
+!        ! The following test fails with Intel compiler v 10.0.23 
+!        ! due to run time memory requirement
 !        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/10,20,10,20,10/), &
 !            regDecomp=(/2,1,2,1,1/), &
 !            ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
@@ -967,6 +969,21 @@
 !        write(name, *) "Creating a 7D field from a 5D grid and 2D ungridded bounds " // &
 !            "using generic interface, irregular gridToFieldMap, data copy"
 !        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a 7D field from a 5D grid and 2D ungridded bounds
+        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/4,2,4,2,2/), &
+            regDecomp=(/2,1,2,1,1/), &
+            ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
+            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,1,2,1,1/), &
+            copyflag=ESMF_DATA_COPY, &
+            gridToFieldMap=(/1,2,4,5,7/) &
+            )
+        write(failMsg, *) ""
+        write(name, *) "Creating a 7D field from a 5D grid and 2D ungridded bounds " // &
+            "using generic interface, irregular gridToFieldMap, data copy"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
