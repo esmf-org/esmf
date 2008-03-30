@@ -1,4 +1,4 @@
-// $Id: ESMCI.h,v 1.11 2008/03/27 23:42:57 theurich Exp $
+// $Id: ESMCI.h,v 1.12 2008/03/30 23:34:39 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -21,7 +21,8 @@
 // common macros and constants, #defines
 #include "ESMC_Start.h"
 
-// base class, I/O, and error
+// attribute class, base class, I/O, and error
+#include "ESMC_Attribute.h"
 #include "ESMC_Base.h"
 #include "ESMC_IOSpec.h"
 #include "ESMC_LogErr.h"
