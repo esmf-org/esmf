@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.87 2008/03/19 20:36:52 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.88 2008/03/30 23:07:26 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -142,7 +142,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.87 2008/03/19 20:36:52 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.88 2008/03/30 23:07:26 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -3384,12 +3384,14 @@ contains
 ! !IROUTINE: ESMF_ArrayAttributeGet  - Retrieve an attribute
 !
 ! !INTERFACE:
-!     subroutine ESMF_ArrayAttributeGet(array, name, <value argument>, rc)
+!     subroutine ESMF_ArrayAttributeGet(array, name, <value argument>, &
+!                                       defaultvalue, rc)
 !
 ! !ARGUMENTS:
 !     type(ESMF_Array), intent(inout) :: array  
 !     character (len = *), intent(in) :: name
 !     <value argument>, see below for supported values
+!     <defaultvalue>, see below for supported values   
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -3408,6 +3410,15 @@ contains
 !     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
 !     \item character (len = *), intent(out), value
 !     \end{description}
+!     Supported values for <defaultvalue argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: defaultvalue
+!     \item integer(ESMF\_KIND\_I8), intent(out) :: defaultvalue
+!     \item real (ESMF\_KIND\_R4), intent(out) :: defaultvalue
+!     \item real (ESMF\_KIND\_R8), intent(out) :: defaultvalue
+!     \item type(ESMF\_Logical), intent(out) :: defaultvalue
+!     \item character (len = *), intent(out), defaultvalue
+!     \end{description}
 !
 !     The arguments are:
 !     \begin{description}
@@ -3417,6 +3428,8 @@ contains
 !           The name of the attribute to retrieve.
 !     \item [<value argument>]
 !           The value of the named attribute.
+!     \item [<defaultvalue argument>]
+!           The default value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3433,12 +3446,13 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayAttributeGet()
-      subroutine ESMF_ArrayAttrGetInt4(array, name, value, rc)
+      subroutine ESMF_ArrayAttrGetInt4(array, name, value, defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array  
       character (len = *), intent(in) :: name
       integer(ESMF_KIND_I4), intent(out) :: value
+      integer(ESMF_KIND_I4), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -3452,6 +3466,8 @@ contains
 !           The name of the attribute to retrieve.
 !     \item [value]
 !           The integer value of the named attribute.
+!     \item [defaultvalue]
+!           The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3472,7 +3488,13 @@ contains
         ESMF_TYPEKIND_I4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3487,13 +3509,15 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayAttributeGet()
-      subroutine ESMF_ArrayAttrGetInt4List(array, name, count, valueList, rc)
+      subroutine ESMF_ArrayAttrGetInt4List(array, name, count, valueList, &
+                                           defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
+      integer(ESMF_KIND_I4), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -3511,6 +3535,8 @@ contains
 !     \item [valueList]
 !           The integer values of the named attribute.
 !           The list must be at least {\tt count} items long.
+!     \item [defaultvalue]
+!           The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3539,7 +3565,13 @@ contains
         ESMF_TYPEKIND_I4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3554,12 +3586,13 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayAttributeGet()
-      subroutine ESMF_ArrayAttrGetInt8(array, name, value, rc)
+      subroutine ESMF_ArrayAttrGetInt8(array, name, value, defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array  
       character (len = *), intent(in) :: name
       integer(ESMF_KIND_I8), intent(out) :: value
+      integer(ESMF_KIND_I8), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -3574,6 +3607,8 @@ contains
 !           The name of the attribute to retrieve.
 !     \item [value]
 !           The integer value of the named attribute.
+!     \item [defaultvalue]
+!           The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3594,7 +3629,13 @@ contains
         ESMF_TYPEKIND_I8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3609,13 +3650,15 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayAttributeGet()
-      subroutine ESMF_ArrayAttrGetInt8List(array, name, count, valueList, rc)
+      subroutine ESMF_ArrayAttrGetInt8List(array, name, count, valueList, &
+                                           defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
+      integer(ESMF_KIND_I8), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -3633,6 +3676,8 @@ contains
 !     \item [valueList]
 !           The integer values of the named attribute.
 !           The list must be at least {\tt count} items long.
+!     \item [defaultvalue]
+!           The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3661,7 +3706,13 @@ contains
         ESMF_TYPEKIND_I8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3676,12 +3727,13 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayAttributeGet()
-      subroutine ESMF_ArrayAttrGetReal4(array, name, value, rc)
+      subroutine ESMF_ArrayAttrGetReal4(array, name, value, defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array  
       character (len = *), intent(in) :: name
       real(ESMF_KIND_R4), intent(out) :: value
+      real(ESMF_KIND_R4), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -3696,6 +3748,8 @@ contains
 !           The name of the attribute to retrieve.
 !     \item [value]
 !           The real value of the named attribute.
+!     \item [defaultvalue]
+!           The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3716,7 +3770,13 @@ contains
         ESMF_TYPEKIND_R4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3731,13 +3791,15 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayAttributeGet()
-      subroutine ESMF_ArrayAttrGetReal4List(array, name, count, valueList, rc)
+      subroutine ESMF_ArrayAttrGetReal4List(array, name, count, valueList, &
+                                           defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
+      real(ESMF_KIND_R4), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -3755,6 +3817,8 @@ contains
 !     \item [valueList]
 !           The real values of the named attribute.
 !           The list must be at least {\tt count} items long.
+!     \item [defaultvalue]
+!           The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3783,7 +3847,13 @@ contains
         ESMF_TYPEKIND_R4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3798,12 +3868,13 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayAttributeGet()
-      subroutine ESMF_ArrayAttrGetReal8(array, name, value, rc)
+      subroutine ESMF_ArrayAttrGetReal8(array, name, value, defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array  
       character (len = *), intent(in) :: name
       real(ESMF_KIND_R8), intent(out) :: value
+      real(ESMF_KIND_R8), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -3818,6 +3889,8 @@ contains
 !           The name of the attribute to retrieve.
 !     \item [value]
 !           The real value of the named attribute.
+!     \item [defaultvalue]
+!           The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3838,7 +3911,13 @@ contains
         ESMF_TYPEKIND_R8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3853,13 +3932,15 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayAttributeGet()
-      subroutine ESMF_ArrayAttrGetReal8List(array, name, count, valueList, rc)
+      subroutine ESMF_ArrayAttrGetReal8List(array, name, count, valueList, &
+                                           defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
+      real(ESMF_KIND_R8), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -3877,6 +3958,8 @@ contains
 !     \item [valueList]
 !           The real values of the named attribute.
 !           The list must be at least {\tt count} items long.
+!     \item [defaultvalue]
+!           The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3905,7 +3988,13 @@ contains
         ESMF_TYPEKIND_R8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3920,12 +4009,13 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayAttributeGet()
-      subroutine ESMF_ArrayAttrGetLogical(array, name, value, rc)
+      subroutine ESMF_ArrayAttrGetLogical(array, name, value, defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array  
       character (len = *), intent(in) :: name
       type(ESMF_Logical), intent(out) :: value
+      type(ESMF_Logical), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -3940,6 +4030,8 @@ contains
 !           The name of the attribute to retrieve.
 !     \item [value]
 !           The logical value of the named attribute.
+!     \item [defaultvalue]
+!           The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3960,7 +4052,13 @@ contains
         ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3975,13 +4073,15 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayAttributeGet()
-      subroutine ESMF_ArrayAttrGetLogicalList(array, name, count, valueList, rc)
+      subroutine ESMF_ArrayAttrGetLogicalList(array, name, count, valueList, &
+                                           defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       type(ESMF_Logical), dimension(:), intent(out) :: valueList
+      type(ESMF_Logical), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -3999,6 +4099,8 @@ contains
 !     \item [valueList]
 !           The logical values of the named attribute.
 !           The list must be at least {\tt count} items long.
+!     \item [defaultvalue]
+!           The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4027,7 +4129,13 @@ contains
         ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -4042,12 +4150,13 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayAttributeGet()
-      subroutine ESMF_ArrayAttrGetChar(array, name, value, rc)
+      subroutine ESMF_ArrayAttrGetChar(array, name, value, defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array  
       character (len = *), intent(in) :: name
       character (len = *), intent(out) :: value
+      character (len = *), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -4062,6 +4171,8 @@ contains
 !           The name of the attribute to retrieve.
 !     \item [value]
 !           The character value of the named attribute.
+!     \item [defaultvalue]
+!           The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4081,7 +4192,13 @@ contains
       call c_ESMC_ArrayAttributeGetChar(array, name, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 

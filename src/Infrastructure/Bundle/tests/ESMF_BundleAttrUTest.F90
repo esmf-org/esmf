@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleAttrUTest.F90,v 1.4 2008/03/28 06:48:26 theurich Exp $
+! $Id: ESMF_BundleAttrUTest.F90,v 1.5 2008/03/30 23:07:27 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_BundleAttrUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleAttrUTest.F90,v 1.4 2008/03/28 06:48:26 theurich Exp $'
+      '$Id: ESMF_BundleAttrUTest.F90,v 1.5 2008/03/30 23:07:27 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -50,7 +50,7 @@ program ESMF_BundleAttrUTest
       type(ESMF_Bundle) :: bundle1
       character(ESMF_MAXSTR) :: conv, purp, attrname, attrvalue
       character(ESMF_MAXSTR), dimension(3) :: attrList
-      integer :: rc, count, number
+      integer :: rc, count, number, defaultvalue
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -93,6 +93,18 @@ program ESMF_BundleAttrUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      defaultvalue = 7;
+
+      !EX_UTest
+      ! Get an integer attribute from a Field Test
+      call ESMF_BundleAttributeGet(bundle1, name="NotSides", value=number, &
+        defaultvalue=defaultvalue, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting a default integer attribute from a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.7), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Get an integer attribute from a Bundle Test
       call ESMF_BundleAttributeGetInfo(bundle1, name="Sides", count=number, rc=rc)

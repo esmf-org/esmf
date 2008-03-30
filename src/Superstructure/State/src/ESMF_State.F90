@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.135 2008/03/27 23:42:57 theurich Exp $
+! $Id: ESMF_State.F90,v 1.136 2008/03/30 23:08:46 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.135 2008/03/27 23:42:57 theurich Exp $'
+      '$Id: ESMF_State.F90,v 1.136 2008/03/30 23:08:46 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -1473,12 +1473,14 @@ end interface
 ! !IROUTINE: ESMF_StateAttributeGet - Retrieve an attribute 
 !
 ! !INTERFACE:
-!      subroutine ESMF_StateAttributeGet(state, name, <value argument>, rc)
+!      subroutine ESMF_StateAttributeGet(state, name, <value argument>, &
+!                                       defaultvalue, rc)
 !
 ! !ARGUMENTS:
 !      type(ESMF_State), intent(inout) :: state  
 !      character (len = *), intent(in) :: name
 !      <value argument>, see below for supported values
+!      <defaultvalue>, see below for supported values   
 !      integer, intent(out), optional :: rc   
 !
 !
@@ -1498,6 +1500,15 @@ end interface
 !     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
 !     \item character (len = *), intent(out), value
 !     \end{description}
+!     Supported values for <defaultvalue argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: defaultvalue
+!     \item integer(ESMF\_KIND\_I8), intent(out) :: defaultvalue
+!     \item real (ESMF\_KIND\_R4), intent(out) :: defaultvalue
+!     \item real (ESMF\_KIND\_R8), intent(out) :: defaultvalue
+!     \item type(ESMF\_Logical), intent(out) :: defaultvalue
+!     \item character (len = *), intent(out), defaultvalue
+!     \end{description}
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -1507,6 +1518,8 @@ end interface
 !      The name of the attribute to retrieve.
 !     \item [<value argument>]
 !      The value of the named attribute.
+!     \item [<defaultvalue argument>]
+!      The default value of the named attribute.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1521,12 +1534,13 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAttributeGet()
-      subroutine ESMF_StateAttrGetInt4(state, name, value, rc)
+      subroutine ESMF_StateAttrGetInt4(state, name, value, defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
       character (len = *), intent(in) :: name
       integer(ESMF_KIND_I4), intent(out) :: value
+      integer(ESMF_KIND_I4), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -1541,6 +1555,8 @@ end interface
 !      The name of the attribute to retrieve.
 !     \item [value]
 !      The 4-byte integer value of the named attribute.
+!     \item [defaultvalue]
+!      The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1564,7 +1580,13 @@ end interface
         ESMF_TYPEKIND_I4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1578,13 +1600,15 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAttributeGet()
-      subroutine ESMF_StateAttrGetInt4List(state, name, count, valueList, rc)
+      subroutine ESMF_StateAttrGetInt4List(state, name, count, valueList, &
+                                           defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
+      integer(ESMF_KIND_I4), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -1602,6 +1626,8 @@ end interface
 !     \item [valueList]
 !      The 4-byte integer values of the named attribute.
 !      The list must be at least {\tt count} items long.
+!     \item [defaultvalue]
+!      The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1634,7 +1660,13 @@ end interface
         ESMF_TYPEKIND_I4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1648,12 +1680,13 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAttributeGet()
-      subroutine ESMF_StateAttrGetInt8(state, name, value, rc)
+      subroutine ESMF_StateAttrGetInt8(state, name, value, defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
       character (len = *), intent(in) :: name
       integer(ESMF_KIND_I8), intent(out) :: value
+      integer(ESMF_KIND_I8), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -1668,6 +1701,8 @@ end interface
 !      The name of the attribute to retrieve.
 !     \item [value]
 !      The 8-byte integer value of the named attribute.
+!     \item [defaultvalue]
+!      The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1691,7 +1726,13 @@ end interface
         ESMF_TYPEKIND_I8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1705,13 +1746,15 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAttributeGet()
-      subroutine ESMF_StateAttrGetInt8List(state, name, count, valueList, rc)
+      subroutine ESMF_StateAttrGetInt8List(state, name, count, valueList, &
+                                           defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
+      integer(ESMF_KIND_I8), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -1729,6 +1772,8 @@ end interface
 !     \item [valueList]
 !      The 8-byte integer values of the named attribute.
 !      The list must be at least {\tt count} items long.
+!     \item [defaultvalue]
+!      The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1761,7 +1806,13 @@ end interface
         ESMF_TYPEKIND_I8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1775,12 +1826,13 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAttributeGet()
-      subroutine ESMF_StateAttrGetReal4(state, name, value, rc)
+      subroutine ESMF_StateAttrGetReal4(state, name, value, defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
       character (len = *), intent(in) :: name
       real(ESMF_KIND_R4), intent(out) :: value
+      real(ESMF_KIND_R4), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -1795,6 +1847,8 @@ end interface
 !      The name of the attribute to retrieve.
 !     \item [value]
 !      The 4-byte real value of the named attribute.
+!     \item [defaultvalue]
+!      The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1820,7 +1874,13 @@ end interface
         ESMF_TYPEKIND_R4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1834,13 +1894,15 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAttributeGet()
-      subroutine ESMF_StateAttrGetReal4List(state, name, count, valueList, rc)
+      subroutine ESMF_StateAttrGetReal4List(state, name, count, valueList, &
+                                           defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
+      real(ESMF_KIND_R4), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -1858,6 +1920,8 @@ end interface
 !     \item [valueList]
 !      The 4-byte real values of the named attribute.  
 !      The list must be at least {\tt count} items long.
+!     \item [defaultvalue]
+!      The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1890,7 +1954,13 @@ end interface
         ESMF_TYPEKIND_R4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1904,12 +1974,13 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAttributeGet()
-      subroutine ESMF_StateAttrGetReal8(state, name, value, rc)
+      subroutine ESMF_StateAttrGetReal8(state, name, value, defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
       character (len = *), intent(in) :: name
       real(ESMF_KIND_R8), intent(out) :: value
+      real(ESMF_KIND_R8), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -1924,6 +1995,8 @@ end interface
 !      The name of the attribute to retrieve.
 !     \item [value]
 !      The 8-byte real value of the named attribute.
+!     \item [defaultvalue]
+!      The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1948,7 +2021,13 @@ end interface
         ESMF_TYPEKIND_R8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1962,13 +2041,15 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAttributeGet()
-      subroutine ESMF_StateAttrGetReal8List(state, name, count, valueList, rc)
+      subroutine ESMF_StateAttrGetReal8List(state, name, count, valueList, &
+                                           defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
+      real(ESMF_KIND_R8), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -1986,6 +2067,8 @@ end interface
 !     \item [valueList]
 !      The 8-byte real values of the named attribute.  
 !      The list must be at least {\tt count} items long.
+!     \item [defaultvalue]
+!      The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2018,7 +2101,13 @@ end interface
         ESMF_TYPEKIND_R8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2032,12 +2121,13 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAttributeGet()
-      subroutine ESMF_StateAttrGetLogical(state, name, value, rc)
+      subroutine ESMF_StateAttrGetLogical(state, name, value, defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
       character (len = *), intent(in) :: name
       type(ESMF_Logical), intent(out) :: value
+      type(ESMF_Logical), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -2052,6 +2142,8 @@ end interface
 !      The name of the attribute to retrieve.
 !     \item [value]
 !      The logical value of the named attribute.
+!     \item [defaultvalue]
+!      The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2076,7 +2168,13 @@ end interface
         ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2090,13 +2188,15 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAttributeGet()
-      subroutine ESMF_StateAttrGetLogicalList(state, name, count, valueList, rc)
+      subroutine ESMF_StateAttrGetLogicalList(state, name, count, valueList, &
+                                           defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       type(ESMF_Logical), dimension(:), intent(out) :: valueList
+      type(ESMF_Logical), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -2114,6 +2214,8 @@ end interface
 !     \item [valueList]
 !      The logical values of the named attribute.
 !      The list must be at least {\tt count} items long.
+!     \item [defaultvalue]
+!      The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2146,7 +2248,13 @@ end interface
         ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2160,12 +2268,13 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAttributeGet()
-      subroutine ESMF_StateAttrGetChar(state, name, value, rc)
+      subroutine ESMF_StateAttrGetChar(state, name, value, defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
       character (len = *), intent(in) :: name
       character (len = *), intent(out) :: value
+      character (len = *), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -2180,6 +2289,8 @@ end interface
 !      The name of the attribute to retrieve.
 !     \item [value]
 !      The character value of the named attribute.
+!     \item [defaultvalue]
+!      The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2203,7 +2314,13 @@ end interface
       call c_ESMC_AttributeGetChar(state%statep%base, name, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 

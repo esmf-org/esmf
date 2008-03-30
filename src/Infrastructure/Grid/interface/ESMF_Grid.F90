@@ -166,7 +166,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.67 2008/03/27 01:21:26 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.68 2008/03/30 23:07:29 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -868,12 +868,14 @@ end interface
 ! !IROUTINE: ESMF_GridAttributeGet  - Retrieve an attribute
 !
 ! !INTERFACE:
-!     subroutine ESMF_GridAttributeGet(grid, name, <value argument>, rc)
+!     subroutine ESMF_GridAttributeGet(grid, name, <value argument>, &
+!                                       defaultvalue, rc)
 !
 ! !ARGUMENTS:
 !     type(ESMF_Grid), intent(inout) :: grid  
 !     character (len = *), intent(in) :: name
 !     <value argument>, see below for supported values
+!     <defaultvalue>, see below for supported values   
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -892,6 +894,15 @@ end interface
 !     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
 !     \item character (len = *), intent(out), value
 !     \end{description}
+!     Supported values for <defaultvalue argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: defaultvalue
+!     \item integer(ESMF\_KIND\_I8), intent(out) :: defaultvalue
+!     \item real (ESMF\_KIND\_R4), intent(out) :: defaultvalue
+!     \item real (ESMF\_KIND\_R8), intent(out) :: defaultvalue
+!     \item type(ESMF\_Logical), intent(out) :: defaultvalue
+!     \item character (len = *), intent(out), defaultvalue
+!     \end{description}
 !
 !     The arguments are:
 !     \begin{description}
@@ -901,6 +912,8 @@ end interface
 !           The name of the attribute to retrieve.
 !     \item [<value argument>]
 !           The value of the named attribute.
+!     \item [<defaultvalue argument>]
+!           The default value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -917,12 +930,13 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_GridAttributeGet()
-      subroutine ESMF_GridAttrGetInt4(grid, name, value, rc)
+      subroutine ESMF_GridAttrGetInt4(grid, name, value, defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid  
       character (len = *), intent(in) :: name
       integer(ESMF_KIND_I4), intent(out) :: value
+      integer(ESMF_KIND_I4), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -936,6 +950,8 @@ end interface
 !           The name of the attribute to retrieve.
 !     \item [value]
 !           The integer value of the named attribute.
+!     \item [defaultvalue]
+!           The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -956,7 +972,13 @@ end interface
         ESMF_TYPEKIND_I4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -971,13 +993,15 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_GridAttributeGet()
-      subroutine ESMF_GridAttrGetInt4List(grid, name, count, valueList, rc)
+      subroutine ESMF_GridAttrGetInt4List(grid, name, count, valueList, &
+                                           defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
+      integer(ESMF_KIND_I4), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -995,6 +1019,8 @@ end interface
 !     \item [valueList]
 !           The integer values of the named attribute.
 !           The list must be at least {\tt count} items long.
+!     \item [defaultvalue]
+!           The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1023,7 +1049,13 @@ end interface
         ESMF_TYPEKIND_I4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1038,12 +1070,13 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_GridAttributeGet()
-      subroutine ESMF_GridAttrGetInt8(grid, name, value, rc)
+      subroutine ESMF_GridAttrGetInt8(grid, name, value, defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid  
       character (len = *), intent(in) :: name
       integer(ESMF_KIND_I8), intent(out) :: value
+      integer(ESMF_KIND_I8), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -1058,6 +1091,8 @@ end interface
 !           The name of the attribute to retrieve.
 !     \item [value]
 !           The integer value of the named attribute.
+!     \item [defaultvalue]
+!           The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1078,7 +1113,13 @@ end interface
         ESMF_TYPEKIND_I8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1093,13 +1134,15 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_GridAttributeGet()
-      subroutine ESMF_GridAttrGetInt8List(grid, name, count, valueList, rc)
+      subroutine ESMF_GridAttrGetInt8List(grid, name, count, valueList, &
+                                           defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
+      integer(ESMF_KIND_I8), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -1117,6 +1160,8 @@ end interface
 !     \item [valueList]
 !           The integer values of the named attribute.
 !           The list must be at least {\tt count} items long.
+!     \item [defaultvalue]
+!           The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1145,7 +1190,13 @@ end interface
         ESMF_TYPEKIND_I8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1160,12 +1211,13 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_GridAttributeGet()
-      subroutine ESMF_GridAttrGetReal4(grid, name, value, rc)
+      subroutine ESMF_GridAttrGetReal4(grid, name, value, defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid  
       character (len = *), intent(in) :: name
       real(ESMF_KIND_R4), intent(out) :: value
+      real(ESMF_KIND_R4), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -1180,6 +1232,8 @@ end interface
 !           The name of the attribute to retrieve.
 !     \item [value]
 !           The real value of the named attribute.
+!     \item [defaultvalue]
+!           The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1200,7 +1254,13 @@ end interface
         ESMF_TYPEKIND_R4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1215,13 +1275,15 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_GridAttributeGet()
-      subroutine ESMF_GridAttrGetReal4List(grid, name, count, valueList, rc)
+      subroutine ESMF_GridAttrGetReal4List(grid, name, count, valueList, &
+                                           defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
+      real(ESMF_KIND_R4), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -1239,6 +1301,8 @@ end interface
 !     \item [valueList]
 !           The real values of the named attribute.
 !           The list must be at least {\tt count} items long.
+!     \item [defaultvalue]
+!           The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1267,7 +1331,13 @@ end interface
         ESMF_TYPEKIND_R4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1282,12 +1352,13 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_GridAttributeGet()
-      subroutine ESMF_GridAttrGetReal8(grid, name, value, rc)
+      subroutine ESMF_GridAttrGetReal8(grid, name, value, defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid  
       character (len = *), intent(in) :: name
       real(ESMF_KIND_R8), intent(out) :: value
+      real(ESMF_KIND_R8), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -1302,6 +1373,8 @@ end interface
 !           The name of the attribute to retrieve.
 !     \item [value]
 !           The real value of the named attribute.
+!     \item [defaultvalue]
+!           The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1322,7 +1395,13 @@ end interface
         ESMF_TYPEKIND_R8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1337,13 +1416,15 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_GridAttributeGet()
-      subroutine ESMF_GridAttrGetReal8List(grid, name, count, valueList, rc)
+      subroutine ESMF_GridAttrGetReal8List(grid, name, count, valueList, &
+                                           defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
+      real(ESMF_KIND_R8), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -1361,6 +1442,8 @@ end interface
 !     \item [valueList]
 !           The real values of the named attribute.
 !           The list must be at least {\tt count} items long.
+!     \item [defaultvalue]
+!           The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1389,7 +1472,13 @@ end interface
         ESMF_TYPEKIND_R8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1404,12 +1493,13 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_GridAttributeGet()
-      subroutine ESMF_GridAttrGetLogical(grid, name, value, rc)
+      subroutine ESMF_GridAttrGetLogical(grid, name, value, defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid  
       character (len = *), intent(in) :: name
       type(ESMF_Logical), intent(out) :: value
+      type(ESMF_Logical), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -1424,6 +1514,8 @@ end interface
 !           The name of the attribute to retrieve.
 !     \item [value]
 !           The logical value of the named attribute.
+!     \item [defaultvalue]
+!           The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1444,7 +1536,13 @@ end interface
         ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1459,13 +1557,15 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_GridAttributeGet()
-      subroutine ESMF_GridAttrGetLogicalList(grid, name, count, valueList, rc)
+      subroutine ESMF_GridAttrGetLogicalList(grid, name, count, valueList, &
+                                           defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       type(ESMF_Logical), dimension(:), intent(out) :: valueList
+      type(ESMF_Logical), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -1483,6 +1583,8 @@ end interface
 !     \item [valueList]
 !           The logical values of the named attribute.
 !           The list must be at least {\tt count} items long.
+!     \item [defaultvalue]
+!           The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1511,7 +1613,13 @@ end interface
         ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1526,12 +1634,13 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_GridAttributeGet()
-      subroutine ESMF_GridAttrGetChar(grid, name, value, rc)
+      subroutine ESMF_GridAttrGetChar(grid, name, value, defaultvalue, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid  
       character (len = *), intent(in) :: name
       character (len = *), intent(out) :: value
+      character (len = *), intent(inout), optional :: defaultvalue
       integer, intent(out), optional :: rc   
 
 !
@@ -1546,6 +1655,8 @@ end interface
 !           The name of the attribute to retrieve.
 !     \item [value]
 !           The character value of the named attribute.
+!     \item [defaultvalue]
+!           The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1565,7 +1676,13 @@ end interface
       call c_ESMC_GridAttributeGetChar(grid, name, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.313 2008/03/27 23:42:56 theurich Exp $
+! $Id: ESMF_Field.F90,v 1.314 2008/03/30 23:07:28 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -186,7 +186,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.313 2008/03/27 23:42:56 theurich Exp $'
+    '$Id: ESMF_Field.F90,v 1.314 2008/03/30 23:07:28 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -602,7 +602,7 @@ contains
 !     type(ESMF_Field), intent(inout) :: field  
 !     character (len = *), intent(in) :: name
 !     <value argument>, see below for supported values
-!     integer, intent(inout), optional :: defaultvalue   
+!     <defaultvalue>, see below for supported values   
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -621,6 +621,15 @@ contains
 !     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
 !     \item character (len = *), intent(out), value
 !     \end{description}
+!     Supported values for <defaultvalue argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: defaultvalue
+!     \item integer(ESMF\_KIND\_I8), intent(out) :: defaultvalue
+!     \item real (ESMF\_KIND\_R4), intent(out) :: defaultvalue
+!     \item real (ESMF\_KIND\_R8), intent(out) :: defaultvalue
+!     \item type(ESMF\_Logical), intent(out) :: defaultvalue
+!     \item character (len = *), intent(out), defaultvalue
+!     \end{description}
 !
 !     The arguments are:
 !     \begin{description}
@@ -630,8 +639,8 @@ contains
 !           The name of the attribute to retrieve.
 !     \item [<value argument>]
 !           The value of the named attribute.
-!     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!     \item [<defaultvalue argument>]
+!           The default value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -690,7 +699,13 @@ contains
         ESMF_TYPEKIND_I4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) value = defaultvalue;
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -761,7 +776,13 @@ contains
         ESMF_TYPEKIND_I4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) valueList=defaultvalue
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -797,6 +818,8 @@ contains
 !           The name of the attribute to retrieve.
 !     \item [value]
 !           The integer value of the named attribute.
+!     \item [defaultvalue]
+!           The default integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -817,7 +840,13 @@ contains
         ESMF_TYPEKIND_I8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) value=defaultvalue
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -888,7 +917,13 @@ contains
         ESMF_TYPEKIND_I8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) valueList=defaultvalue
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -946,7 +981,13 @@ contains
         ESMF_TYPEKIND_R4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) value=defaultvalue
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1017,7 +1058,13 @@ contains
         ESMF_TYPEKIND_R4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) valueList=defaultvalue
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1075,7 +1122,13 @@ contains
         ESMF_TYPEKIND_R8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) value=defaultvalue
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1146,7 +1199,13 @@ contains
         ESMF_TYPEKIND_R8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) valueList=defaultvalue
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1204,7 +1263,13 @@ contains
         ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) value=defaultvalue
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1275,7 +1340,13 @@ contains
         ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) valueList=defaultvalue
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1332,7 +1403,13 @@ contains
       call c_ESMC_AttributeGetChar(field%ftypep%base, name, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) value=defaultvalue
+                                  ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
 
       if (present(rc)) rc = ESMF_SUCCESS
 

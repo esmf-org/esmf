@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAttrUTest.F90,v 1.5 2008/03/28 06:48:27 theurich Exp $
+! $Id: ESMF_StateAttrUTest.F90,v 1.6 2008/03/30 23:08:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_StateAttrUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateAttrUTest.F90,v 1.5 2008/03/28 06:48:27 theurich Exp $'
+      '$Id: ESMF_StateAttrUTest.F90,v 1.6 2008/03/30 23:08:47 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -50,7 +50,7 @@ program ESMF_StateAttrUTest
       type(ESMF_Bundle) :: bundle
 			type(ESMF_Field) :: field
       character(ESMF_MAXSTR) :: conv, purp, attrname, attrvalue
-      integer :: rc, count, number
+      integer :: rc, count, number, defaultvalue
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -92,6 +92,18 @@ program ESMF_StateAttrUTest
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an integer attribute from a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.65), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+       defaultvalue = 7;
+
+      !EX_UTest
+      ! Get an integer attribute from a Field Test
+      call ESMF_StateAttributeGet(state, name="NotSides", value=number, &
+        defaultvalue=defaultvalue, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting a default integer attribute from a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.7), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
