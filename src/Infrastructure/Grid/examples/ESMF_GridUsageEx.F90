@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.28.2.8 2008/03/31 05:54:00 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.28.2.9 2008/03/31 17:37:41 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -54,7 +54,8 @@ program ESMF_GridCreateEx
 
       type(ESMF_distGrid) :: distgrid2D,distgrid4D,distgrid
       type(ESMF_StaggerLoc) :: staggerloc
-      integer :: localPet, petCount,localDECount
+      integer :: localPet, petCount
+      integer :: lDE,localDECount
 
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
@@ -99,17 +100,15 @@ program ESMF_GridCreateEx
 ! grid cells in the first dimension (e.g. NPx1x1...1) as evenly 
 ! as possible by  the number of processors NP.
 ! The remaining dimensions are not partitioned.
-! The dimension of the Grid is the size of {\tt maxIndex}. To create
-! an undistributed dimension set that entry in {\tt regDecomp}
-! to 1, and set the corresponding entry in distDim to .false.. 
+! The dimension of the Grid is the size of {\tt maxIndex}. 
 ! The following is an example of creating a 10x20x30 3D grid
 ! where the first dimensions is broken into 2 pieces, the second
-! is broken into 4 pieces, and the third is undistributed. 
+! is broken into 4 pieces, and the third is "distributed" across only one processor. 
 !EOE
 
 !BOC
   grid3D=ESMF_GridCreateShapeTile(regDecomp=(/2,4,1/), maxIndex=(/10,20,30/), &
-           distDim=(/.true.,.true.,.false./), rc=rc)   
+           rc=rc)   
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    !-------------------------------------------------------------------
@@ -183,23 +182,6 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-!BOE 
-! Alternatively, to make the third dimension undistributed, then 
-! {\tt countsPerDEDim3} in the call should only have a single term and
-! the third term of {\tt distDim} should be set to false. This makes
-! the third dimension not a part of the DistGrid. Note that its
-! an error to make undistributed a dimension that has been
-! specified with more than 1 element in a {\tt countsPerDEDim}
-! argument. By default {\tt distDim} is set to all false (e.g. 
-! all dimensions are undistributed).
-!EOE
-
-!BOC
-   grid3D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/3,7/),  &
-          countsPerDEDim2=(/11,2,7/), countsPerDEDim3=(/30/), &
-          distDim=(/.true.,.true.,.false./), rc=rc)   
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Cleanup after Example
@@ -385,8 +367,8 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !                  With Uniformly Spaced Coordinates}
 ! \label{example:2DRegUniGrid}
 !
-! The following is an example of creating a simple rectilinear grid with a
-! regular distribution and loading in a set of coordinates. It illustrates a straightforward use
+! The following is an example of creating a simple rectilinear grid 
+! and loading in a set of coordinates. It illustrates a straightforward use
 ! of the {\tt ESMF\_GridCreateShapeTile()} call described in the previous section. 
 ! This code creates a 10x20 2D grid with uniformly spaced coordinates varying from (10,10) to (100,200).
 ! The grid is partitioned using a regular distribution. The first dimension
@@ -656,20 +638,17 @@ endif
 
 !BOE
 !\subsubsection{Creating an Irregularly Distributed Rectilinear Grid with
-!                an Undistributed Vertical Dimension}
+!                a Non-distributed Vertical Dimension}
 ! \label{example:CurviGridWithUndistDim}
 !
 ! This example demonstrates how a user can build a rectilinear 
-! horizontal grid with an undistributed vertical dimension. The Grid 
+! horizontal grid with a non-distributed vertical dimension. The Grid 
 ! contains both the center and corner stagger locations (i.e. Arakawa 
-! B-Grid). ! This example assumes that the code is being run with a 1-1 mapping between 
-! PETs and DEs because we are only accessing the first DE on each PET (localDE=0).
-! Because we have 12 DEs (3x4), this example would only work when run on 12 PETs. 
+! B-Grid). In contrast to the previous examples, this example doesn't
+! assume that the code is being run with a 1-1 mapping between 
+! PETs and DEs. It should work when run on any number of PETs.
 !
 !EOE
-
-! Don't run without correct number of procs
-if (petCount .le. 12) then
 
 !BOC
    !-------------------------------------------------------------------
@@ -677,7 +656,7 @@ if (petCount .le. 12) then
    ! grid is defined to be 180 elements in Dim1 (longitude), 90 in
    ! Dim2 (longitude), and 40 in Dim3 (depth).  The first dimension is
    ! decomposed over 4 DEs, the second over 3 DEs, and the third is 
-   ! undistributed.  The connectivities in each dimension default 
+   ! not distributed.  The connectivities in each dimension default 
    ! to aperiodic since they are not yet implemented.  (Once connectivities
    ! are implemented, the longitude dimension will be periodic, the 
    ! poles will be defined at each end of the latitude dimension, 
@@ -690,7 +669,6 @@ if (petCount .le. 12) then
               coordDep1=(/1/),                    &
               coordDep2=(/2/),                    &
               coordDep3=(/3/),                    &
-              distDim=(/.true.,.true.,.false./),  & 
               indexflag=ESMF_INDEX_GLOBAL,        & ! Use global indices
               rc=rc)
 
@@ -704,108 +682,126 @@ if (petCount .le. 12) then
    call ESMF_GridAllocCoord(grid3D, &
           staggerloc=ESMF_STAGGERLOC_CORNER_VCENTER, rc=rc)
 
-!----------------------------------------------------------------------
-! Fill in the coordinates for the corner stagger location first.
-!----------------------------------------------------------------------
-   !-------------------------------------------------------------------
-   ! Get the local bounds of the global indexing for the first
-   ! coordinate array on the local DE. If the number of processors
-   ! is less than the total number of DEs then the rest of this
-   ! example would be in a loop over the local DEs.  Also get the
-   ! pointer to the first coordinate array. 
-   !-------------------------------------------------------------------
-   call ESMF_GridGetCoord(grid3D, coordDim=1, localDE=0,   &
-          staggerLoc=ESMF_STAGGERLOC_CORNER_VCENTER,       &
-          computationalLBound=lbnd_corner,                 &
-          computationalUBound=ubnd_corner,                 &
-          fptr=cornerX, rc=rc)
 
    !-------------------------------------------------------------------
-   ! Calculate and set coordinates in the first dimension.
+   ! Get the number of DEs on this PET, so that the program
+   ! can loop over them when accessing data.
    !-------------------------------------------------------------------
-    do i=lbnd_corner(1),ubnd_corner(1)
-        cornerX(i) = (i-1)*(360.0/180.0)
+   call ESMF_GridGet(grid3D, localDECount=localDECount, rc=rc)
+
+   !-------------------------------------------------------------------
+   ! Loop over each localDE when accessing data
+   !-------------------------------------------------------------------
+   do lDE=0,localDECount-1
+
+    !------------------------------------------------------------------
+    ! Fill in the coordinates for the corner stagger location first.
+    !------------------------------------------------------------------
+      !----------------------------------------------------------------
+      ! Get the local bounds of the global indexing for the first
+      ! coordinate array on the local DE. If the number of processors
+      ! is less than the total number of DEs then the rest of this
+      ! example would be in a loop over the local DEs.  Also get the
+      ! pointer to the first coordinate array. 
+      !----------------------------------------------------------------
+      call ESMF_GridGetCoord(grid3D, coordDim=1, localDE=lDE, &
+             staggerLoc=ESMF_STAGGERLOC_CORNER_VCENTER,       &
+             computationalLBound=lbnd_corner,                 &
+             computationalUBound=ubnd_corner,                 &
+             fptr=cornerX, rc=rc)
+
+      !----------------------------------------------------------------
+      ! Calculate and set coordinates in the first dimension.
+      !----------------------------------------------------------------
+      do i=lbnd_corner(1),ubnd_corner(1)
+         cornerX(i) = (i-1)*(360.0/180.0)
+      enddo
+
+      !----------------------------------------------------------------
+      ! Get the local bounds of the global indexing for the second
+      ! coordinate array on the local DE.  Also get the pointer to the
+      ! second coordinate array.
+      !----------------------------------------------------------------
+      call ESMF_GridGetCoord(grid3D, coordDim=2, localDE=lDE,   &
+             staggerLoc=ESMF_STAGGERLOC_CORNER_VCENTER,         &
+             computationalLBound=lbnd_corner,                   &
+             computationalUBound=ubnd_corner,                   &
+             fptr=cornerY, rc=rc)
+
+      !----------------------------------------------------------------
+      ! Calculate and set coordinates in the second dimension.
+      !----------------------------------------------------------------
+      do j=lbnd_corner(1),ubnd_corner(1)
+         cornerY(j) = (j-1)*(180.0/90.0)
+      enddo
+
+    !------------------------------------------------------------------
+    ! Now fill the coordinates for the center stagger location with
+    ! the average of the corner coordinate location values.
+    !------------------------------------------------------------------
+      !----------------------------------------------------------------
+      ! Get the local bounds of the global indexing for the first 
+      ! coordinate array on the local DE, and the pointer to the array.
+      !----------------------------------------------------------------
+      call ESMF_GridGetCoord(grid3D, coordDim=1, localDE=lDE,    &
+             staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER,          &
+             computationalLBound=lbnd, computationalUBound=ubnd, &
+             fptr=centerX, rc=rc)
+
+      !----------------------------------------------------------------
+      ! Calculate and set coordinates in the first dimension.
+      !----------------------------------------------------------------
+      do i=lbnd(1),ubnd(1)
+         centerX(i) = 0.5*(i-1 + i)*(360.0/180.0) 
+      enddo
+
+      !----------------------------------------------------------------
+      ! Get the local bounds of the global indexing for the second
+      ! coordinate array on the local DE, and the pointer to the array.
+      !----------------------------------------------------------------
+       call ESMF_GridGetCoord(grid3D, coordDim=2, localDE=lDE,    &
+              staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER,          &
+              computationalLBound=lbnd, computationalUBound=ubnd, &
+              fptr=centerY, rc=rc)
+
+      !----------------------------------------------------------------
+      ! Calculate and set coordinates in the second dimension.
+      !----------------------------------------------------------------
+      do j=lbnd(1),ubnd(1)
+         centerY(j) = 0.5*(j-1 + j)*(180.0/90.0) 
+      enddo
+
+      !----------------------------------------------------------------
+      ! Get the local bounds of the global indexing for the third
+      ! coordinate array on the local DE, and the pointer to the array.
+      !----------------------------------------------------------------
+      call ESMF_GridGetCoord(grid3D, coordDim=3, localDE=lDE,   &
+             staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER,         &
+             computationalLBound=lbnd, computationalUBound=ubnd,&
+             fptr=centerZ, rc=rc)
+
+      !----------------------------------------------------------------
+      ! Calculate and set the vertical coordinates
+      ! Note that the centerZ array needs to be 3D because currently
+      ! all coordinate arrays must each have the same dimension as the 
+      ! grid, but because the coordinate is rectilinear we only need to 
+      ! store a 1D array.
+      !----------------------------------------------------------------
+      do k=lbnd(1),ubnd(1)
+         centerZ(k) = 4000.0*( (1./39.)*(k-1)  )**2
+      enddo
+
+   !-------------------------------------------------------------------
+   ! End of loop over DEs
+   !-------------------------------------------------------------------
    enddo
-
-
-   !-------------------------------------------------------------------
-   ! Get the local bounds of the global indexing for the second
-   ! coordinate array on the local DE.  Also get the pointer to the
-   ! second coordinate array.
-   !-------------------------------------------------------------------
-   call ESMF_GridGetCoord(grid3D, coordDim=2, localDE=0,     &
-          staggerLoc=ESMF_STAGGERLOC_CORNER_VCENTER,         &
-          computationalLBound=lbnd_corner,                   &
-          computationalUBound=ubnd_corner,                   &
-          fptr=cornerY, rc=rc)
-
-   !-------------------------------------------------------------------
-   ! Calculate and set coordinates in the second dimension.
-   !-------------------------------------------------------------------
-   do j=lbnd_corner(1),ubnd_corner(1)
-        cornerY(j) = (j-1)*(180.0/90.0)
-   enddo
-
-
-!----------------------------------------------------------------------
-! Now fill the coordinates for the center stagger location with
-! the average of the corner coordinate location values.
-!----------------------------------------------------------------------
-   !-------------------------------------------------------------------
-   ! Get the local bounds of the global indexing for the first 
-   ! coordinate array on the local DE, and the pointer to the array.
-   !-------------------------------------------------------------------
-   call ESMF_GridGetCoord(grid3D, coordDim=1, localDE=0,   &
-          staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER,       &
-          computationalLBound=lbnd, computationalUBound=ubnd, fptr=centerX, rc=rc)
-
-   !-------------------------------------------------------------------
-   ! Calculate and set coordinates in the first dimension.
-   !-------------------------------------------------------------------
-   do i=lbnd(1),ubnd(1)
-        centerX(i) = 0.5*(i-1 + i)*(360.0/180.0) 
-   enddo
-
-   !-------------------------------------------------------------------
-   ! Get the local bounds of the global indexing for the second
-   ! coordinate array on the local DE, and the pointer to the array.
-   !-------------------------------------------------------------------
-   call ESMF_GridGetCoord(grid3D, coordDim=2, localDE=0,   &
-          staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER,       &
-          computationalLBound=lbnd, computationalUBound=ubnd, fptr=centerY, rc=rc)
-
-   !-------------------------------------------------------------------
-   ! Calculate and set coordinates in the second dimension.
-   !-------------------------------------------------------------------
-   do j=lbnd(1),ubnd(1)
-        centerY(j) = 0.5*(j-1 + j)*(180.0/90.0) 
-   enddo
-
-
-   !-------------------------------------------------------------------
-   ! Get the local bounds of the global indexing for the third
-   ! coordinate array on the local DE, and the pointer to the array.
-   !-------------------------------------------------------------------
-   call ESMF_GridGetCoord(grid3D, coordDim=3, localDE=0,  &
-          staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER,      &
-          computationalLBound=lbnd, computationalUBound=ubnd, fptr=centerZ, rc=rc)
-
-   !-------------------------------------------------------------------
-   ! Calculate and set the vertical coordinates
-   ! Note that the centerZ array needs to be 3D because currently
-   ! all coordinate arrays must each have the same dimension as the grid, but 
-   ! because the coordinate is rectilinear we only need to store a 1D array.
-   !-------------------------------------------------------------------
-   do k=lbnd(1),ubnd(1)
-        centerZ(k) = 4000.0*( (1./39.)*(k-1)  )**2
-   enddo
+ 
 
 !EOC
    !-------------------------------------------------------------------
    ! Clean up to prepare for the next example.
    !-------------------------------------------------------------------
    call ESMF_GridDestroy(grid3D, rc=rc)
-endif
 
 
 !BOE
@@ -1187,7 +1183,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! for specific types of Grid information. 
 !
 ! The exclusive region is the index space defined by the 
-! distgrid, undistLBound, and undistUBound of the Grid. These correspond to the
+! distgrid of the Grid. These correspond to the
 ! maximum index space usable by any stagger location in the Grid.
 ! The size of the exclusive region is the index space for the 
 ! Grid cells, plus the stagger padding. 
@@ -1415,8 +1411,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! the format here is different. The Array bounds are only for
 ! distributed dimensions and are ordered to correspond 
 ! to the dimension order in the associated DistGrid. The bounds
-! provided by the Grid are for both distributed and undistributed dimensions
-! and are ordered according to the order of dimensions of the data
+! provided by the Grid are ordered according to the order of dimensions of the data
 ! in question. This means that the bounds provided should be usable
 ! "as is" to access the data. 
 !
@@ -1524,8 +1519,7 @@ endif
 ! no Array is contained there and so no total region exists, so the 
 ! user may only retrieve exclusive and computational bounds from
 ! a stagger location.  The bounds
-! provided by {\tt ESMF\_GridGet} are for both distributed
-! and undistributed dimensions and are ordered according to the
+! provided by {\tt ESMF\_GridGet} are ordered according to the
 ! order of dimensions in the Grid. 
 !
 ! The following is an example of retrieving the bounds for localDE 0
@@ -1569,24 +1563,16 @@ endif
 !\subsubsection{Getting Grid Stagger Location Information}
 !
 ! In addition to the per DE information that can be accessed about
-! a stagger location there is a set of global information that can
+! a stagger location there is some global information that can
 ! accessed by using {\tt ESMF\_GridGet} without specifying a
 ! localDE. One of the main uses of this information is to create
 ! an ESMF Array to hold data for a stagger location. 
 !
-! There are several types of information currently available from a stagger
-! location. The first set is {\tt computationalEdgeLWidth}  and
+! The information currently available from a stagger
+! location is {\tt computationalEdgeLWidth}  and
 ! {\tt computationalEdgeUWidth} these give the difference between
 ! the lower and upper boundary of the exclusive region and the computational 
-! region. This information is just for the distributed dimensions and
-! so is the same size as the distgrid dimension and is arranged to 
-! correspond to the distgrid dimensions. 
-!
-! The second set is {\tt undistLBound} and {\tt undistUBound} these are the bounds
-! of the undistributed dimensions of the stagger locations. These
-! will be of the same size as the undistributed dimensions of the Grid. 
-! The values of these bounds are the undistributed bounds of the 
-! Grid modified by the padding for this stagger location.  
+! region.
 !
 ! The following is an example of retrieving information for localDE 0
 ! from the corner stagger location. 
@@ -1607,7 +1593,7 @@ endif
     ! Get info about staggerloc
     call ESMF_GridGet(grid3D, staggerLoc=ESMF_STAGGERLOC_CORNER,  &
            computationalEdgeLWidth=celwdth, computationalEdgeUWidth=ceuwdth, &
-           undistLBound=lbnd, undistUBound=ubnd, rc=rc)
+           rc=rc)
 
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1636,21 +1622,14 @@ endif
 ! are obtained using the {\tt ESMF\_GridGet} method. 
 !
 ! The information that needs to be obtained from the stagger
-! location are the distributed and undistributed sizes. 
-! The distributed sizes are give as offsets from the edges of the 
+! location are the offsets from the edges of the 
 ! exclusive region of the distgrid. These may be obtained
 ! from {\tt ESMF\_GridGet} by passing in the 
 ! stagger location and the arguments {\tt computationalEdgeLWidth}  and
-! {\tt computationalEdgeUWidth}. The undistributed sizes may
-! may be obtained from the same call using the {\tt undistLBound} and 
-! {\tt undistUBound} arguments. Note that if the Grid doesn't contain 
-! undistributed dimensions, then this second set of 
-! bounds shouldn't be used. 
+! {\tt computationalEdgeUWidth}. 
 !
 ! The following is an example of using information from the Grid
 ! to create an Array corresponding to a stagger location.
-! The Grid is 3D and contains both distributed and undistributed
-! dimensions.
 !
 !EOE
 
@@ -1659,30 +1638,30 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!
    distgrid2D=ESMF_DistGridCreate(minIndex=(/1,1/),maxIndex=(/10,10/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-   grid3D=ESMF_GridCreate(distgrid=distgrid2D, undistLBound=(/1/), undistUBound=(/10/), rc=rc)
+   grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_GridAllocCoord(grid3D, staggerloc=ESMF_STAGGERLOC_CORNER, rc=rc)
+  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CORNER, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
  
 !BOC
 
     ! Get info from Grid
-    call ESMF_GridGet(grid3D, distgrid=distgrid, distgridToGridMap=distgridToGridMap, rc=rc)
+    call ESMF_GridGet(grid2D, distgrid=distgrid, distgridToGridMap=distgridToGridMap, rc=rc)
 
     ! Get info about staggerloc
-    call ESMF_GridGet(grid3D, staggerLoc=ESMF_STAGGERLOC_CORNER, &
+    call ESMF_GridGet(grid2D, staggerLoc=ESMF_STAGGERLOC_CORNER, &
            computationalEdgeLWidth=celwdth, computationalEdgeUWidth=ceuwdth, &
-           undistLBound=lbnd1D, undistUBound=ubnd1D, rc=rc)
+           rc=rc)
 
     ! construct ArraySpec
-    call ESMF_ArraySpecSet(arrayspec, rank=3, typekind=ESMF_TYPEKIND_R8, rc=rc)
+    call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=ESMF_TYPEKIND_R8, rc=rc)
 
     ! Create an Array based on the presence of distributed dimensions
     array=ESMF_ArrayCreate(arrayspec=arrayspec, &
             distgrid=distgrid, distgridToArrayMap=distgridToGridMap, &
             computationalEdgeLWidth=celwdth, &
             computationalEdgeUWidth=ceuwdth, &
-            undistLBound=lbnd1D, undistUBound=ubnd1D, rc=rc)
+            rc=rc)
 
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1690,7 +1669,7 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Cleanup after Example
 !!!!!!!!!!!!!!!!!!!!!!
-   call ESMF_GridDestroy(grid3D, rc=rc)
+   call ESMF_GridDestroy(grid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    call ESMF_DistGridDestroy(distgrid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -2125,15 +2104,8 @@ endif
 ! See the DistGrid documentation in Section~\ref{sec:DistGrid} for an 
 ! in-depth description of its interface and use. 
 !
-! A DistGrid describes only the distributed dimensions of the index
-! space, so when creating a Grid from a DistGrid some arguments
-! are needed to describe the undistributed part, To add undistributed dimensions
-! to the Grid, the arguments {\tt undistLBound} and {\tt undistUBound} are used. 
-! The {\tt undistLBound} argument
-! contains the lower bounds of the undistributed dimensions and {\tt undistUBound}
-! contains the upper bounds. As an example, the following call constructs
-! a 10x20x30 Grid with a lower bound of (1,2,3), with the third dimension
-! undistributed.
+! As an example, the following call constructs
+! a 10x20 Grid with a lower bound of (1,2).
 !EOE
 
 !BOC 
@@ -2141,9 +2113,7 @@ endif
    distgrid2D = ESMF_DistGridCreate(minIndex=(/1,2/), maxIndex=(/11,22/), rc=rc)  
 
    ! Create Grid
-   grid3D=ESMF_GridCreate(distGrid=distgrid2D,        & 
-                       undistLBound=(/3/), undistUBound=(/33/), & 
-                       rc=rc)
+   grid3D=ESMF_GridCreate(distGrid=distgrid2D, rc=rc)
 !EOC  
 
 !!!!!!!!!!!!!!!!!!!!!!!
@@ -2163,9 +2133,8 @@ endif
 ! the underlying default DistGrid are mapped to the Grid. Each entry
 ! in {\tt distgridToGridMap} contains the Grid dimension to which the cooresponding
 ! DistGrid dimension should be mapped. 
-! The following example illustrates the creation of a Grid where the undistributed
-! dimension is first. To accomplish this the two distributed dimensions are mapped
-! to the last two Grid dimensions (i.e. 2 and 3). 
+! The following example illustrates the creation of a Grid where the largest
+! dimension is first. To accomplish this the two dimensions are swapped. 
 !EOE
 
 !BOC 
@@ -2173,8 +2142,7 @@ endif
    distgrid2D = ESMF_DistGridCreate(minIndex=(/1,2/), maxIndex=(/11,22/), rc=rc)  
 
    ! Create Grid
-   grid3D=ESMF_GridCreate(distGrid=distgrid2D, undistLBound=(/3/), undistUBound=(/33/), & 
-          distgridToGridMap=(/2,3/), rc=rc)
+   grid2D=ESMF_GridCreate(distGrid=distgrid2D, distgridToGridMap=(/2,1/), rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -2182,7 +2150,7 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Cleanup after Example
 !!!!!!!!!!!!!!!!!!!!!!!
-   call ESMF_GridDestroy(grid3D, rc=rc)
+   call ESMF_GridDestroy(grid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    call ESMF_DistGridDestroy(distgrid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
