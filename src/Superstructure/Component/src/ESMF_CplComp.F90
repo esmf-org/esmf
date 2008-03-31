@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.86 2008/03/06 02:23:21 w6ws Exp $
+! $Id: ESMF_CplComp.F90,v 1.87 2008/03/31 16:55:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 
       !public operator(.eq.), operator(.ne.), assignment(=)
      
-      ! interface blocks for C++ routines
+      ! interface blocks for ESMF routines that are implemented in C
       public :: ESMF_CplCompSetEntryPoint
       public :: ESMF_CplCompSetServices
 
@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.86 2008/03/06 02:23:21 w6ws Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.87 2008/03/31 16:55:01 theurich Exp $'
 
 !==============================================================================
 !
