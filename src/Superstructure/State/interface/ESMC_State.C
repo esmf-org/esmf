@@ -20,12 +20,15 @@
 //
 //-----------------------------------------------------------------------------
 //
- // insert any higher level, 3rd party or system includes here
-#include <string.h>         // strlen()
+
+// associated header file
 #include "ESMC_State.h"
-#include "ESMCI_State.h"
-#include "ESMC_Array.h"
+
+// insert any higher level, 3rd party or system includes here
+#include <string.h>         // strlen()
+
 #include "ESMCI_Array.h"
+#include "ESMCI_State.h"
 #include "ESMC_Start.h"
 #include "ESMC_LogErr.h"
 #include "ESMC_ArraySpec.h"
@@ -43,7 +46,7 @@
 
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_State.C,v 1.18 2008/03/19 21:18:46 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_State.C,v 1.19 2008/03/31 22:25:25 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -146,7 +149,7 @@ extern "C" {
 // !ARGUMENTS:
       ESMC_State state,    // in - state
       char* arrayName,     // in - name of Array to get
-      ESMC_Array array){       // out - array to get
+      ESMC_Array *array){       // out - array to get
 //
 // !DESCRIPTION:
 //      Get an array to an existing state
@@ -160,10 +163,10 @@ extern "C" {
       rc = ESMF_RC_NOT_IMPL;
       localrc = ESMF_RC_NOT_IMPL;
 
-
-      localrc = ((ESMCI::State*)&state)->getArray( (ESMCI::State*)state.ptr,
-                                         arrayName,
-                                         (ESMCI::Array*)&array.ptr );
+      localrc = ((ESMCI::State*)&state)->getArray(
+        (ESMCI::State*)state.ptr,
+        arrayName,
+        (ESMCI::Array**)&(array->ptr) );
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
       return localrc;
     }

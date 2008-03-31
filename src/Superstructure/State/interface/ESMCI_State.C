@@ -20,15 +20,13 @@
 //
 //-----------------------------------------------------------------------------
 //
- // insert any higher level, 3rd party or system includes here
-#include <string.h>         // strlen()
-#include "ESMCI_Util.h"
-#include "ESMCI_State.h"
-#include "ESMC_Array.h"
-#include "ESMC_Start.h"
-#include "ESMC_LogErr.h"
-#include "ESMC_ArraySpec.h"
 
+
+// associated header file
+#include "ESMCI_State.h"
+
+//insert any higher level, 3rd party or system includes here
+#include <string.h>         // strlen()
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -42,7 +40,7 @@
 
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_State.C,v 1.3 2008/03/19 02:37:53 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_State.C,v 1.4 2008/03/31 22:25:25 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -170,7 +168,7 @@ namespace ESMCI {
 // !ARGUMENTS:
       ESMCI::State *state,        // in - state
       char         *name,         // in - array name
-      ESMCI::Array *array){       // out - array being geted
+      ESMCI::Array **array){      // out - array being geted
 //
 // !DESCRIPTION:
 //      Get an array from an existing state

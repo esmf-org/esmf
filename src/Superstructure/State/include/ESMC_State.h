@@ -1,4 +1,4 @@
-// $Id: ESMC_State.h,v 1.18 2008/03/27 23:42:57 theurich Exp $
+// $Id: ESMC_State.h,v 1.19 2008/03/31 22:25:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -35,9 +35,7 @@
 //-----------------------------------------------------------------------------
 // 
 // !USES:
-#include "ESMC_Base.h"  // all classes inherit from the ESMC Base class.
 #include "ESMC_Array.h"
-#include "ESMC_Bundle.h"
 
 
 extern "C" {
@@ -80,7 +78,7 @@ typedef struct {
 
  int ESMC_StateAddArray(ESMC_State state, ESMC_Array array);
 
- int ESMC_StateGetArray(ESMC_State state, char *name, ESMC_Array array);
+ int ESMC_StateGetArray(ESMC_State state, char *name, ESMC_Array *array);
  }; // end extern "C"
 
 // !PRIVATE TYPES:

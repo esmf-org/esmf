@@ -1,4 +1,4 @@
-// $Id: ESMC_StateUTest.C,v 1.7 2008/03/19 21:18:46 rosalind Exp $
+// $Id: ESMC_StateUTest.C,v 1.8 2008/03/31 22:25:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -35,8 +35,6 @@
 int main(void){
 
   ESMC_State st;              // ESMC_State object
-  char* StateName = "stateName";                   // state name
-  char* arrayName = "array1 \0";
   char name[80];
   char failMsg[80];
   int result = 0;
@@ -60,8 +58,8 @@ int main(void){
   // Create a state object -- cf
   strcpy(name, "StateCreate Unit test \0");
   strcpy(failMsg, "Did not return ESMF_SUCCESS \0");
-  st = ESMC_StateCreate(StateName,&rc);
-  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  st = ESMC_StateCreate("stateName\0",&rc);
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
@@ -124,7 +122,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Create ESMC_Array object\0");
   strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
-  array = ESMC_ArrayCreate(arrayspec, distgrid, arrayName, &rc);
+  array = ESMC_ArrayCreate(arrayspec, distgrid, "array1\0", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
  
@@ -147,12 +145,12 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Get an array from a state, based on its name\0");
   strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
-  rc = ESMC_StateGetArray(st, "array1", retrievedArray);
+  rc = ESMC_StateGetArray(st, "array1\0", &retrievedArray);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
- //----------------------------------------------------------------------------
-  //NEX_removeUTest
+  //----------------------------------------------------------------------------
+  //NEX_UTest
   strcpy(name, "Compare array stored into and array retrieved from a state\0");
   strcpy(failMsg, "Discrepancy on array pointers\0");
   ESMC_Test((array.ptr==retrievedArray.ptr), name, failMsg, &result, __FILE__, 
@@ -182,7 +180,7 @@ int main(void){
   strcpy(name, "StateDestroy Unit test \0");
   strcpy(failMsg, "Did not return ESMF_SUCCESS \0");
   rc = ESMC_StateDestroy(st);
-  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
   //----------------------------------------------------------------------------
  
 
