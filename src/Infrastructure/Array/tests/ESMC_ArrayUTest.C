@@ -1,4 +1,4 @@
-// $Id: ESMC_ArrayUTest.C,v 1.3 2008/03/19 02:34:29 rosalind Exp $
+// $Id: ESMC_ArrayUTest.C,v 1.4 2008/03/31 18:09:18 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Create ESMC_Array object\0");
   strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
-  array = ESMC_ArrayCreate(arrayspec, distgrid, "array1", &rc);
+  array = ESMC_ArrayCreate(arrayspec, distgrid, "array1\0", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
