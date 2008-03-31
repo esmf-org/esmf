@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.87 2008/03/31 16:55:01 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.88 2008/03/31 17:10:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -54,7 +54,7 @@
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
-      !private
+      private
 
 
 !------------------------------------------------------------------------------
@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.87 2008/03/31 16:55:01 theurich Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.88 2008/03/31 17:10:37 theurich Exp $'
 
 !==============================================================================
 !
@@ -123,8 +123,9 @@
 !     to default, to be specified explicitly, or inherited from a parent
 !     component.
 !
+
 !EOPI
-end interface
+      end interface
 
 !==============================================================================
 
@@ -1335,6 +1336,10 @@ end interface
     ESMF_CplCompIsPetLocal = localresult
     
   end function ESMF_CplCompIsPetLocal
+    
+!------------------------------------------------------------------------------
+
+
 
 end module ESMF_CplCompMod
 
