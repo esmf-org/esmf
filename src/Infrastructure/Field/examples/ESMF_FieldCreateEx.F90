@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.15 2008/03/28 05:37:30 theurich Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.16 2008/03/31 15:21:55 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -49,6 +49,12 @@
     integer, dimension(2) :: maxHaloLWidth2d, maxHaloUWidth2d
 
     integer :: i, j, k
+
+    real(ESMF_KIND_R8), dimension(:,:,:,:,:,:,:), pointer :: farray7d
+    type(ESMF_Field)    :: field7d
+    type(ESMF_Grid)     :: grid5d
+    type(ESMF_DistGrid) :: distgrid5d
+    integer             :: fsize(7)
 
     integer :: finalrc       
 !   !Set finalrc to success
@@ -114,8 +120,6 @@
 
     print *, "Field creation from Grid and Arrayspec returned"
 
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
@@ -152,7 +156,6 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
     print *, "Field reset internal array through ArrayCreate returned"
-
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
@@ -389,7 +392,6 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
     print *, "Field Create from a Grid and a Fortran data pointer returned"
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_FieldDestroy(field2,rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(farray3d)
@@ -442,7 +444,6 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
     print *, "Field Create from a Grid and a Fortran data pointer returned"
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_FieldDestroy(field2,rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(farray3d)
@@ -480,13 +481,13 @@
 !  Assume we have the mapping between the dimension index of maxHaloWidth
 !  and the dimension index of Fortran array, called mhw2fa; and we also
 !  have the mapping between dimension index of Fortran array and dimension
-!  index of the DistGrid contained in the Grid, called fa2dg. The shape of
+!  index of the Grid, called fa2g. The shape of
 !  distributed dimensions of a Fortran array can be computed by rule 4: 
 ! 
 !  \begin{verbatim}
 !
-!  (4) fa_shape(mhw2fa(k)) = max((exclusiveCount(fa2dg(mhw2fa(k))), 
-!                            computationalCount(fa2dg(mhw2fa(k))) +
+!  (4) fa_shape(mhw2fa(k)) = max((exclusiveCount(fa2g(mhw2fa(k))), 
+!                            computationalCount(fa2g(mhw2fa(k))) +
 !                            maxHaloUWidth(k) + maxHaloLWidth(k))
 !                        k = 1...size(maxHaloWidth) 
 !
@@ -500,8 +501,8 @@
 !  fa_index = 1
 !  do i = 1, farray_rank
 !     if i-th dimension of Fortran array is distributed
-!         fa_shape(i) = max(exclusiveCount(fa2dg(i)), 
-!                       computationalCount(fa2dg(i)) +
+!         fa_shape(i) = max(exclusiveCount(fa2g(i)), 
+!                       computationalCount(fa2g(i)) +
 !                       maxHaloUWidth(fa_index) + maxHaloLWidth(fa_index))
 !         fa_index = fa_index + 1
 !     endif
@@ -510,10 +511,8 @@
 !  \end{verbatim}
 !
 !  The only complication then is to figure out the mapping from Fortran
-!  array dimension index to DistGrid dimension index. This process can
-!  be done by first compute reverse mapping from  Field to Grid, and from
-!  Grid to DistGrid, then by chaining the reverse mappings, one can obtain
-!  the mapping from Fortran array to DistGrid.
+!  array dimension index to Grid dimension index. This process can
+!  be done by compute reverse mapping from Field to Grid.
 !
 !  Typically, we don't have to consider these complications if the following
 !  conditions are met: 1) all Grid dimensions are distributed; 2) DistGrid
@@ -598,10 +597,63 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
     print *, "Field Create from a Grid and a Fortran data pointer returned"
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_FieldDestroy(field2,rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(farray3d)
+
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!-------------------------------- Example -----------------------------
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!BOE
+!\subsubsection{Create 7D Field with 5D Grid and 2D ungridded bounds}
+! In this example, we will show how to create a 7D Field from a 5D {\tt
+! ESMF\_Grid} and 2D ungridded bounds with arbitrary halo widths and 
+! gridToFieldMap.
+!
+! This example introduces a helper method, part of the {\tt ESMF\_FieldGet}
+! interface that facilitates the computation of Fortran data array bounds
+! and shape to assist {\tt ESMF\_FieldCreate} creating a Field from a
+! instrinsic Fortran data array following the rules discussed in previous
+! examples.
+!
+! We first create a 5D DistGrid and a 5D Grid based on the DistGrid; then
+! {\tt ESMF\_FieldGet} computes the shape of a 7D array in fsize. We can then
+! create a 7D Field from the 5D grid and the 7D Fortran data array with
+! other assimilating parameters.
+!EOE
+
+!BOC
+    distgrid5d = ESMF_DistGridCreate(minIndex=(/1,1,1,1,1/), maxIndex=(/10,4,10,4,6/), &
+        regDecomp=(/2,1,2,1,1/), rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    grid5d = ESMF_GridCreate(distgrid=distgrid5d, name="grid", rc=rc)
+
+    call ESMF_FieldGet(grid5d, ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
+        maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+        gridToFieldMap=(/3,2,5,4,1/), &
+        allocCount=fsize, &
+        rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    allocate(farray7d(fsize(1), fsize(2), fsize(3), fsize(4), fsize(5), fsize(6), fsize(7)))
+
+    field7d = ESMF_FieldCreate(grid5d, farray7d, &
+        ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
+        maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+        gridToFieldMap=(/3,2,5,4,1/), &
+        rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!EOC
+
+    print *, "Field Create from a Grid and a Fortran data pointer returned"
+    call ESMF_FieldDestroy(field7d)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_GridDestroy(grid5d)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_DistGridDestroy(distgrid5d)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    deallocate(farray7d)
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
