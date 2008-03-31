@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.94 2007/08/23 17:16:01 cdeluca Exp $
+! $Id: ESMF_GridComp.F90,v 1.94.2.1 2008/03/31 17:41:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -89,13 +89,17 @@
       
       ! function to simplify user code pet-conditionals
       public ESMF_GridCompIsPetLocal
-      
+     
+      ! interface blocks for ESMF routines that are implemented in C
+      public :: ESMF_GridCompSetEntryPoint
+      public :: ESMF_GridCompSetServices
+
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.94 2007/08/23 17:16:01 cdeluca Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.94.2.1 2008/03/31 17:41:41 theurich Exp $'
 
 !==============================================================================
 !
@@ -130,6 +134,69 @@
             type(ESMF_CompClass) :: comp 
             integer :: rc
           end subroutine
+      end interface
+
+!==============================================================================
+      interface
+!BOPI
+! !IROUTINE: ESMF_GridCompSetEntryPoint
+!
+! !INTERFACE:
+        subroutine ESMF_GridCompSetEntryPoint (comp, subroutineType, subroutineName, phase, rc)
+
+! !ARGUMENTS:
+	  use ESMF_CompMod
+	  implicit none
+	  type(ESMF_GridComp) :: comp
+	  character(*), intent(in) :: subroutineType
+	  interface
+            subroutine subroutineName (comp, importState, exportState, clock, rc)
+        	use ESMF_CompMod
+        	use ESMF_StateMod
+        	use ESMF_ClockMod
+        	implicit none
+        	type(ESMF_GridComp) :: comp
+        	type(ESMF_State) :: importState, exportState
+        	type(ESMF_Clock) :: clock
+        	integer, intent(out) :: rc
+            end subroutine
+	  end interface
+	  integer, intent(in) :: phase
+	  integer, intent(out) :: rc
+
+! !DESCRIPTION:
+!     Registers a user-supplied initialization, run, or finalize call-back
+!     routine for a grid component.
+!EOPI
+	end subroutine
+      end interface
+
+      interface
+!BOPI
+! !IROUTINE: ESMF_GridCompSetServices
+!
+! !INTERFACE:
+        subroutine ESMF_GridCompSetServices (comp, subroutineName, rc)
+
+! !ARGUMENTS:
+          use ESMF_CompMod
+          implicit none
+          type(ESMF_GridComp), intent(inout) :: comp
+          interface
+            subroutine subroutineName (comp, rc)
+              use ESMF_CompMod
+              implicit none
+              type(ESMF_GridComp) :: comp
+              integer, intent(out) :: rc
+            end subroutine
+          end interface
+          integer, intent(out) :: rc
+! !DESCRIPTION:
+!     Registers a user-supplied subroutine whose purpose is to then
+!     register initialization, run, and finalize call-back routines
+!     for a grid component.
+!EOPI
+        end subroutine
       end interface
 
 !==============================================================================

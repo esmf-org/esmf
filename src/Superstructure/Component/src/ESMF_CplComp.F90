@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.81 2007/08/30 05:06:42 cdeluca Exp $
+! $Id: ESMF_CplComp.F90,v 1.81.2.1 2008/03/31 17:41:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -91,13 +91,17 @@
       public ESMF_CplCompIsPetLocal
 
       !public operator(.eq.), operator(.ne.), assignment(=)
+     
+      ! interface blocks for ESMF routines that are implemented in C
+      public :: ESMF_CplCompSetEntryPoint
+      public :: ESMF_CplCompSetServices
 
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.81 2007/08/30 05:06:42 cdeluca Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.81.2.1 2008/03/31 17:41:41 theurich Exp $'
 
 !==============================================================================
 !
@@ -121,6 +125,70 @@
 !
 
 !EOPI
+      end interface
+
+!==============================================================================
+
+      interface
+!BOPI
+! !IROUTINE: ESMF_CplCompSetEntryPoint
+!
+! !INTERFACE:
+        subroutine ESMF_CplCompSetEntryPoint (comp, subroutineType, subroutineName, phase, rc)
+
+! !ARGUMENTS:
+	  use ESMF_CompMod
+	  implicit none
+	  type(ESMF_CplComp) :: comp
+	  character(*), intent(in) :: subroutineType
+	  interface
+            subroutine subroutineName (comp, importState, exportState, clock, rc)
+        	use ESMF_CompMod
+        	use ESMF_StateMod
+        	use ESMF_ClockMod
+        	implicit none
+        	type(ESMF_CplComp) :: comp
+        	type(ESMF_State) :: importState, exportState
+        	type(ESMF_Clock) :: clock
+        	integer, intent(out) :: rc
+            end subroutine
+	  end interface
+	  integer, intent(in) :: phase
+	  integer, intent(out) :: rc
+
+! !DESCRIPTION:
+!     Registers a user-supplied initialization, run, or finalize call-back
+!     routine for a coupler component.
+!EOPI
+	end subroutine
+      end interface
+
+      interface
+!BOPI
+! !IROUTINE: ESMF_CplCompSetServices
+!
+! !INTERFACE:
+        subroutine ESMF_CplCompSetServices (comp, subroutineName, rc)
+
+! !ARGUMENTS:
+          use ESMF_CompMod
+          implicit none
+          type(ESMF_CplComp), intent(inout) :: comp
+          interface
+            subroutine subroutineName (comp, rc)
+              use ESMF_CompMod
+              implicit none
+              type(ESMF_CplComp) :: comp
+              integer, intent(out) :: rc
+            end subroutine
+          end interface
+          integer, intent(out) :: rc
+! !DESCRIPTION:
+!     Registers a user-supplied subroutine whose purpose is to then
+!     register initialization, run, and finalize call-back routines
+!     for a coupler component.
+!EOPI
+        end subroutine
       end interface
 
 !------------------------------------------------------------------------------

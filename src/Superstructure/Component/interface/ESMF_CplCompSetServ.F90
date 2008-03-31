@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompSetServ.F90,v 1.7 2007/03/31 05:51:31 cdeluca Exp $
+! $Id: ESMF_CplCompSetServ.F90,v 1.7.2.1 2008/03/31 17:41:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -73,11 +73,11 @@
 ! !IROUTINE: ESMF_CplCompSetEntryPoint - Set name of CplComp subroutines
 !
 ! !INTERFACE:
-!      subroutine ESMF_CplCompSetEntryPoint(cplcomp, subroutineType, &
+!      subroutine ESMF_CplCompSetEntryPoint(comp, subroutineType, &
 !                                            subroutineName, phase, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF_CplComp), intent(inout) :: cplcomp
+!      type(ESMF_CplComp), intent(inout) :: comp
 !      character(len=*), intent(in) :: subroutineType
 !      subroutine, intent(in) :: subroutineName
 !      integer, intent(in) :: phase
@@ -98,13 +98,13 @@
 !    
 !  The arguments are:
 !  \begin{description}
-!   \item[cplcomp]
+!   \item[comp]
 !    An {\tt ESMF\_CplComp} object.
 !   \item[subroutineType]
 !    One of a set of predefined subroutine types - e.g. {\tt ESMF\_SETINIT}, 
 !    {\tt ESMF\_SETRUN}, {\tt ESMF\_SETFINAL}.
 !   \item[subroutineName]
-!    The name of the {\tt cplcomp} subroutine to be associated with the
+!    The name of the user-supplied {\tt cplcomp} subroutine to be associated with the
 !    {\tt subroutineType}.  This subroutine does not have to be
 !    public to the module.
 !   \item[{[phase]}] 
@@ -121,6 +121,19 @@
 !    Note: unlike most other ESMF routines, this argument is not optional
 !    because of implementation considerations.
 !   \end{description}
+!
+!  The user-supplied routine must conform to the following interface:
+!
+! !INTERFACE:
+!      interface
+!        subroutine subroutineName (comp, importState, exportState, clock, rc)
+!          type(ESMF\_CplComp) :: comp
+!          type(ESMF\_State) :: importState, exportState
+!          type(ESMF\_Clock) :: clock
+!          integer, intent(out) :: rc
+!        end subroutine
+!      end interface
+!
 !EOP
 
 !BOP
@@ -170,10 +183,10 @@
 ! !IROUTINE: ESMF_CplCompSetServices - Register CplComp interface routines
 !
 ! !INTERFACE:
-!      subroutine ESMF_CplCompSetServices(cplcomp, subroutineName, rc)
+!      subroutine ESMF_CplCompSetServices(comp, subroutineName, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF_CplComp), intent(inout) :: cplcomp
+!      type(ESMF_CplComp), intent(inout) :: comp
 !      subroutine, intent(in) :: subroutineName
 !      integer, intent(out) :: rc
 !
@@ -181,11 +194,11 @@
 !  Call an {\tt ESMF\_CplComp}'s setservices registration routine.  
 !  The parent component must first create an {\tt ESMF\_CplComp}, then
 !  call this routine. The arguments are the object returned from the create
-!  call, plus the public, well-known, subroutine name
+!  call, plus the user-supplied, public, well-known, subroutine name
 !  that is the registration routine for this {\tt ESMF\_CplComp}.  
 !  This name must be documented by the {\tt ESMF\_CplComp} provider.
 !
-!  After this subroutine returns the framework now knows how to call
+!  After this subroutine returns, the framework now knows how to call
 !  the initialize, run, and finalize routines for the {\tt ESMF\_CplComp}.
 !    
 !  The arguments are:
@@ -193,8 +206,8 @@
 !   \item[cplcomp]
 !    An {\tt ESMF\_CplComp} object.
 !   \item[subroutineName]
-!    The public name of the {\tt cplcomp}'s 
-!    {\tt ESMF\_CplCompSetServices} call.  
+!    The public name of the user-supplied {\tt cplcomp} 
+!    {\tt ESMF\_CplCompSetServices} routine.  
 !    An {\tt ESMF\_CplComp} writer must provide this information.
 !    Note this is the actual subroutine, not a character string.
 !   \item[rc] 
@@ -202,5 +215,21 @@
 !    Note: unlike most other ESMF routines, this argument is not optional
 !    because of implementation considerations.
 !   \end{description}
+!
+!  The user-supplied registration routine must conform to the following
+!  interface:
+!
+! !INTERFACE:
+!      interface
+!        subroutine subroutineName (comp, rc)
+!          type(ESMF\_CplComp) :: comp
+!          integer, intent(out) :: rc
+!        end subroutine
+!      end interface
+!
+! !DESCRIPTION:
+!  The subroutine, when called by the framework, must make successive calls to
+!  {\tt ESMF\_CplCompSetEntryPoint} to preset callback routines for initialization,
+!  run, and finalization for a coupler component.
 !
 !EOP
