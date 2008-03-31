@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.17 2008/03/29 13:17:13 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.18 2008/03/31 16:55:07 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -909,6 +909,15 @@
         call test7d1(rc)
         write(failMsg, *) ""
         write(name, *) "Creating a 7D field from a 5D grid and 2D ungridded bounds"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a 7D field from a 5D grid and 2D ungridded bounds
+        call test7d2(rc)
+        write(failMsg, *) ""
+        write(name, *) "Creating a 7D field from a 5D grid and 2D ungridded bounds " // &
+            "allocate the Fortran array from bounds instead of counts"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
@@ -2055,8 +2064,10 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGet(grid, staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-            maxHaloLWidth, maxHaloUWidth, allocCount=fsize, rc=localrc)
+        call ESMF_FieldGet(grid, staggerloc, gridToFieldMap=gridToFieldMap, &
+            ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
+            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            allocCount=fsize, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -2794,6 +2805,55 @@ contains
         call ESMF_DistGridDestroy(distgrid)
         call ESMF_ArrayDestroy(array8)
     end subroutine test7d1
+
+    ! create a 7d Field from 5d grid and 2d ungridded bounds using ESMF_FieldGetDataBounds
+    subroutine test7d2(rc)
+        integer, intent(inout) :: rc
+
+        real(ESMF_KIND_R8), dimension(:,:,:,:,:,:,:), pointer :: farray
+        type(ESMF_Field)    :: f8
+        type(ESMF_Grid)     :: grid
+        type(ESMF_DistGrid) :: distgrid
+        type(ESMF_Array)    :: array8, array
+        integer             :: localrc
+        integer             :: flb(7), fub(7)
+
+        localrc = ESMF_SUCCESS
+        distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1,1,1/), maxIndex=(/10,20,10,20,10/), &
+            regDecomp=(/2,1,2,1,1/), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        grid = ESMF_GridCreate(distgrid=distgrid, name="grid", rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldGet(grid, ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
+            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            allocLBound=flb, allocUBound=fub, &
+            rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        allocate(farray(flb(1):fub(1), flb(2):fub(2), flb(3):fub(3), &
+            flb(4):fub(4), flb(5):fub(5), flb(6):fub(6), flb(7):fub(7)) )
+
+        f8 = ESMF_FieldCreate(grid, farray, &
+            ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
+            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldDestroy(f8)
+        call ESMF_GridDestroy(grid)
+        call ESMF_DistGridDestroy(distgrid)
+        call ESMF_ArrayDestroy(array8)
+    end subroutine test7d2
 
     ! create a 7d Field from 5d grid and 2d ungridded bounds using ESMF_FieldGetDataBounds
     subroutine test7d_generic(rc, minindex, maxindex, &

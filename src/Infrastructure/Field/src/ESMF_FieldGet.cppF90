@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.15 2008/03/29 03:22:32 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.16 2008/03/31 16:55:07 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.15 2008/03/29 03:22:32 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.16 2008/03/31 16:55:07 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -876,14 +876,15 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 ! !IROUTINE: ESMF_FieldGetAllocBounds -  Get precomputed Fortran data array bounds
 
 ! !INTERFACE:
-    subroutine ESMF_FieldGetAllocBounds(grid, staggerloc, gridToFieldMap, &
+    subroutine ESMF_FieldGetAllocBounds(grid, staggerloc, localDE, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         maxHaloLWidth, maxHaloUWidth, &
         allocLBound, allocUBound, allocCount, rc)
     
 ! !ARGUMENTS:
-    type(ESMF_Grid), intent(inout), optional :: grid     
+    type(ESMF_Grid), intent(inout) :: grid     
     type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
+    integer, intent(in), optional :: localDE
     integer, intent(in), optional :: gridToFieldMap(:)    
     integer, intent(in), optional :: ungriddedLBound(:)
     integer, intent(in), optional :: ungriddedUBound(:)
@@ -898,8 +899,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 ! !DESCRIPTION:
 ! Compute the lower and upper bounds of Fortran data array that can later
 ! be used in FieldCreate interface to create a {\tt ESMF\_Field} from a
-! {\tt ESMF\_Grid} and the Fortran data array. This helper method also
-! assumes that there is a 1 DE per PET.
+! {\tt ESMF\_Grid} and the Fortran data array. 
 !
 ! The arguments are:
 ! \begin{description}
@@ -909,6 +909,10 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !       Stagger location of data in grid cells.  For valid
 !       predefined values and interpretation of results see
 !       Section \ref{sec:opt:staggerloc}.
+! \item [{[localDE]}]
+!       The local DE number in its PET context to compute the bounds and counts
+!       information based on the computational and exclusive bounds and counts 
+!       information of the grid from that local DE in its PET context. Defaults to 0.
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the 
 !       {\tt grid}'s dimCount.  The list elements map each dimension 
@@ -999,7 +1003,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     integer, dimension(ESMF_MAXDIM)        :: ec, cc, l_g2fm, l_mhlw, l_mhuw, dg2gm
     integer, dimension(ESMF_MAXDIM)        :: f2gm, gelb, geub, gclb, gcub
     logical, dimension(ESMF_MAXDIM)        :: flipflop
-    integer                                :: forderIndex, i
+    integer                                :: forderIndex, i, l_lde
     integer                                :: gridrank, arrayrank, uglb_size, ugub_size
 
     integer, dimension(:), allocatable     :: l_alb, l_aub, l_ac, l_uglb, l_ugub
@@ -1017,11 +1021,18 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         lstaggerloc = ESMF_STAGGERLOC_CENTER
     endif
 
+    ! default localDE setup
+    if(present(localDE)) then
+        l_lde = localDE
+    else
+        l_lde = 0
+    endif
+
     call ESMF_GridGet(grid, dimCount=gridrank, distgridToGridMap=dg2gm, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
-    call ESMF_GridGet(grid, localDe=0, staggerloc=lstaggerloc, &
+    call ESMF_GridGet(grid, localDE=l_lde, staggerloc=lstaggerloc, &
        exclusiveLBound=gelb, exclusiveUBound=geub, exclusiveCount=ec,  &
        computationalLBound=gclb, computationalUBound=gcub, computationalCount=cc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
@@ -1176,7 +1187,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         ! if i-th dimension is distributed (including trivially distributed)
         if(f2gm(i) .gt. 0) then
             l_ac(i) = max(cc(f2gm(i))+l_mhlw(forderIndex)+l_mhuw(forderIndex), ec(f2gm(i)))
-            l_alb(i) = gclb(f2gm(i))
+            l_alb(i) = gclb(f2gm(i)) - l_mhlw(forderIndex)
             l_aub(i) = l_alb(i) + l_ac(i) - 1
             forderIndex = forderIndex + 1
         endif
