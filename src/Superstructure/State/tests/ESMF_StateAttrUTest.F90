@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAttrUTest.F90,v 1.6 2008/03/30 23:08:47 rokuingh Exp $
+! $Id: ESMF_StateAttrUTest.F90,v 1.7 2008/03/31 01:56:56 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_StateAttrUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateAttrUTest.F90,v 1.6 2008/03/30 23:08:47 rokuingh Exp $'
+      '$Id: ESMF_StateAttrUTest.F90,v 1.7 2008/03/31 01:56:56 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -50,6 +50,7 @@ program ESMF_StateAttrUTest
       type(ESMF_Bundle) :: bundle
 			type(ESMF_Field) :: field
       character(ESMF_MAXSTR) :: conv, purp, attrname, attrvalue
+      character(ESMF_MAXSTR), dimension(3) :: attrList
       integer :: rc, count, number, defaultvalue
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -128,8 +129,26 @@ program ESMF_StateAttrUTest
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      attrList(1) = "Custom1"
+      attrList(2) = "Custom2"
+      attrList(3) = "Custom3"
+      count = 3
+      conv = "customconvention"
+      purp = "custompurpose"
+      
+      !EX_UTest
+      ! Create a custom attribute package on a Field Test
+      call ESMF_StateAttPackCreate(state, convention=conv, &
+        purpose=purp, attrList=attrList, count=count, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Creating a custom Attpack on a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
       attrname = "organization"
       attrvalue = "NCAR"
+      conv = "defaultconvention"
+      purp = "defaultpurpose"
 
       !EX_UTest
       ! Set an attribute in an attribute package on a State Test

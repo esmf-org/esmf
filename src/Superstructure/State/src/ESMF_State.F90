@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.136 2008/03/30 23:08:46 rokuingh Exp $
+! $Id: ESMF_State.F90,v 1.137 2008/03/31 01:56:56 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.136 2008/03/30 23:08:46 rokuingh Exp $'
+      '$Id: ESMF_State.F90,v 1.137 2008/03/31 01:56:56 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -1168,19 +1168,23 @@ end interface
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAttPackCreate()
-      subroutine ESMF_StateAttPackCreate(state, convention, purpose, rc)
+      subroutine ESMF_StateAttPackCreate(state, convention, purpose, attrList, &
+      count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
       character (len = *), intent(in), optional :: convention
       character (len = *), intent(in), optional :: purpose
+      integer, intent(in), optional :: count   
+      character (len = *), dimension(:), intent(in), optional :: attrList
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !     Sets up the attribute package for the {\tt state}.
 !     The attribute package defines the convention, purpose, and object type of the three 
-!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
+!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.  A user
+!     can create their own attribute package by using the count and attrList parameters.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1190,6 +1194,10 @@ end interface
 !      The convention of the attribute package.
 !     \item [purpose]
 !      The purpose of the attribute package.
+!     \item [count]
+!      The count of the number of attributes in a user specified attribute package
+!     \item [attrList]
+!      An array of character strings specifying the names of the user defined attributes
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1197,7 +1205,7 @@ end interface
 !
 !EOP
 
-      integer :: localrc                           ! Error status
+      integer :: localrc, i                           ! Error status
       character(ESMF_MAXSTR) :: name1, name2, name3
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
@@ -1227,6 +1235,20 @@ end interface
       
       fobject = 'state'
 
+      if (present(count)) then
+      
+      do i = 1, count
+      
+        call c_ESMC_AttPackCreate(state%statep%base, attrList(i), fconvention, &
+          fpurpose, fobject, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      
+      end do
+      
+      else
+
       name1 = 'name'
       name2 = 'organization'
       name3 = 'discipline'
@@ -1241,6 +1263,8 @@ end interface
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
+
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 

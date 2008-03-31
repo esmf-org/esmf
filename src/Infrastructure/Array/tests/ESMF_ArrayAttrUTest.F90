@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayAttrUTest.F90,v 1.3 2008/03/30 23:07:27 rokuingh Exp $
+! $Id: ESMF_ArrayAttrUTest.F90,v 1.4 2008/03/31 01:55:46 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ArrayAttrUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayAttrUTest.F90,v 1.3 2008/03/30 23:07:27 rokuingh Exp $'
+    '$Id: ESMF_ArrayAttrUTest.F90,v 1.4 2008/03/31 01:55:46 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -49,6 +49,7 @@ program ESMF_ArrayAttrUTest
   type(ESMF_Array)       :: array
   type(ESMF_ArraySpec)   :: arrayspec
   character(ESMF_MAXSTR) :: conv, purp, attrname, attrvalue
+  character(ESMF_MAXSTR), dimension(3) :: attrList
   integer                :: rc, count, number, defaultvalue
   
   ! cumulative result: count failures; no failures equals "all pass"
@@ -128,8 +129,26 @@ program ESMF_ArrayAttrUTest
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      attrList(1) = "Custom1"
+      attrList(2) = "Custom2"
+      attrList(3) = "Custom3"
+      count = 3
+      conv = "customconvention"
+      purp = "custompurpose"
+      
+      !EX_UTest
+      ! Create a custom attribute package on a Field Test
+      call ESMF_ArrayAttPackCreate(array, convention=conv, &
+        purpose=purp, attrList=attrList, count=count, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Creating a custom Attpack on an Array Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
       attrname = "units"
       attrvalue = "m/s"
+      conv = "defaultconvention"
+      purp = "defaultpurpose"
       
       !EX_UTest
       ! Set an attribute in an attribute package on a Array Test
