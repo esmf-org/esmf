@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.6 2008/03/19 21:20:20 rosalind Exp $
+// $Id: ESMC_Array.C,v 1.7 2008/03/31 18:08:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -30,13 +30,12 @@
 #include "ESMCI_Arg.h"
 #include "ESMC_LogErr.h"
 #include "ESMF_LogMacros.inc"             // for LogErr
-#include "ESMF_InitMacros.inc"
 #include "ESMCI_Array.h"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.6 2008/03/19 21:20:20 rosalind Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.7 2008/03/31 18:08:53 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -63,18 +62,15 @@ ESMC_Array ESMC_ArrayCreate(ESMC_ArraySpec arrayspec, ESMC_DistGrid distgrid,
     return array;  // bail out
   }
 
-  // add its name to the newly created array
+  // set name in newly created Array
   localrc = (*(ESMCI::Array*)(array.ptr)).setName(name);
-  printf("the array name is %c \n",((ESMCI::Array *)array.ptr)->getName());
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
     array.ptr = NULL;
     return array;  // bail out
   }
 
-
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
-
   return array;
 }
 
