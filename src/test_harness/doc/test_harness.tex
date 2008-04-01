@@ -1,48 +1,44 @@
-% 
-\documentclass{article}
-%
-\begin{document}
-\title{Test Harness: A test controller for exhaustive testing of Regrid and Redist (DRAFT)} 
-\date{}
-\maketitle
+\section{Test Harness (DRAFT)}
+\label{sec:harness}
+
 
 %%%%%%%%%%%%%%%%%%%%
-\section{Test Harness Overview}
-The Test Harness is a flexible test control system, intended to provide a thorough parameter space exploration of the configuration space accessible to the remapping and redistribution of distributed arrays, fields, and bundles.
+% \subsubsection{Test Harness Overview}
+The Test Harness is a flexible test control system for unit style testing, 
+intended to provide thorough parameter space exploration of specific Infrastructure classes. Specifically, the ESMF\_GRID class, and remapping and redistribution of distributed arrays and fields.
 
 The Test Harness consists of a single shared executable and a collection of customizable helper configuration files located within the \texttt{tests} directory of each class. The Test Harness is integrated into the Unit test framework, enabling the Test Harness to be built and run as part of the Unit tests. The test results are reported to a single standard-out file which is located with the unit test results.
 
 %%%%%%%%%%%%%%%%%%%%
-\section{Test Harness Status}
-Currently the Test Harness functions as an advanced stub of the test controlling system. It is integrated into the Unit test build and run and it parses trivial bundle and field redistribution test configurations. Future development will focus on additional robustness of the parser, and an expansion of the testing capability. It builds and runs on all tested systems.
-  
-%%%%%%%%%%%%%%%%%%%%
-\section{Test Harness Structure}
-The Test Harness source code is  located in the \texttt{esmf/src/test\_harness/src/} directory. The test harness code consists of a single executable that runs as a Unit test. The executable is augmented by a hierarchy  of customizable configuration files which are located within and below the \texttt{tests/} directory of each class; Bundle, Field, and Array. These configuration files are combined by the executable to generate specific test configurations. 
+\subsection{Test Harness Structure}
+The Test Harness source code is  located in the \texttt{esmf/src/test\_harness/src/} directory. The test harness code consists of a single executable that runs as a Unit test. The executable is augmented by a hierarchy  of customizable configuration files which are located within and below the \texttt{tests/} directory of each class; currently Array and Field. These configuration files are combined by the executable to generate specific test configurations. 
 
-The top level configuration file is called \texttt{test\_harness.rc} and is located in the \texttt{tests/} directory of each class; e.g. \texttt{esmf/src/Infrastructure/\$CLASS/tests/}. The top level helper file \texttt{test\_harness.rc} is unique to each class and specifies the test class, the format for reporting the test results, and the location and file names containing the \textit{problem descriptor files}. 
+The top level configuration file is called \texttt{test\_harness.rc} and is located in the \texttt{tests/} directory of each class; e.g. 
+\texttt{esmf/src/Infrastructure/\$CLASS/tests/}. The top level helper file called \texttt{test\_harness.rc} is unique to each class and specifies the test class, the format for reporting the test results, and the location and file names containing the \textit{problem descriptor files}. 
 
-The \textit{problem descriptor files} are the first level of configuration files used by the test harness routines. They contain a collection of \textit{problem descriptor strings} which describe a family of problems with the same memory topology, distribution, and grid association. For instance, a \textit{problem descriptor string} might describe the class of all redistributions between a pair of two-dimensional blocks memory, each with a specific type of distribution. The \textit{problem descriptor strings} are augmented by a collection of \textit{specifier files} which define specific aspects of the configuration space such as the size and rank of the distributions, the grid type, connectivity, size, etc. Both the problem descriptor files and the specifier files are located  in the subdirectory \texttt{tests/test\_config/} within the class directory.
+The \textit{problem descriptor files} are the next level of configuration files used by the test harness routines. They contain a collection of 
+\textit{problem descriptor strings} which describe a family of problems with the same memory topology, distribution, and grid association. For instance, a \textit{problem descriptor string} might describe the ensemble of all redistributions between a pair of two-dimensional blocks memory, each with a specific type of distribution and grid association. The \textit{problem descriptor strings} are augmented by a collection of \textit{specifier files} which complete the  description by defining specific aspects of the configuration space such as the size and rank of the distributions, connectivity, etc. Both the problem descriptor files and the specifier files are located in the subdirectory \texttt{tests/test\_config/} within the class directory.
 
-The motivation for employing such a hierarchy configuration files is to allow a high degree of customization of the problem configuration by combining individual specification files. In addition it was desired to make the specification files simple to read so that user is not forced to engage in complicated encoding. The end result is that each class will have its own collection of specification files tailored to the needs of that class.
+The motivation for employing such a hierarchy configuration files is to allow a high degree of customization of the problem configuration by combining individual specification files. In addition it was desired to make the specification files as simple to read as is possbile so that user is not forced to engage in complicated encoding to specify a problem. The end result is that each class will have its own 
+collection of specification files tailored to the needs of that class.
 
 %%%%%%%%%%%%%%%%%%%%%%
-\section{Specification of Test Configuration}
-The ensemble of tests specific to an \texttt{ESMF_CLASS} is specified by three levels of customizable configuration files. The top level file called \texttt{test\_harness.rc}. It is located within each classes' \texttt{tests/} directory and contains class specific attributes as well as a list of the next level of configuration files known as the \texttt{problem descriptor files}. The problem descriptor files contain the \texttt{problem descriptor strings}, which define a general family of problems, as well as the associated \texttt{problem specifier files} which are the final level of configuration files. The specifier files indicate which members of the family described by the \texttt{problem descriptor string} will be tested. The test harness combines the three levels of configuration files to generate the specific test configurations. 
+\subsection{Specification of Test Configuration}
+The ensemble of tests specific to an {ESMF\_CLASS} is specified by three levels of customizable configuration files. The top level file called \texttt{test\_harness.rc}. It is located within each classes' \texttt{tests/} directory and contains class specific attributes as well as a list of the next level of configuration files known as the \texttt{problem descriptor files}. The problem descriptor files contain the \texttt{problem descriptor strings}, which define a general family of problems, as well as the associated \texttt{problem specifier files} which are the final level of configuration files. The specifier files indicate which members of the family described by the \texttt{problem descriptor string} will be tested. The test harness combines the three levels of configuration files to generate the specific test configurations. 
  
 %%%%%%%%%%%%%%%%%%%%%%
-\subsection{test_harness.rc}
+\subsubsection{test\_harness.rc}
 
 The test results are reported to a single standard-out file located with the unit test results. A variety of reporting styles, ranging from no output to a report fully specifying every aspect of the parameter space, is available by setting a flag in the top level helper file \texttt{test\_harness.rc}. These reports are designed to maximize  \textit{readability}.
 
 %%%%%%%%%%%%%%%%%%%%%%
-\subsection{Problem Descriptor Files}
+\subsubsection{Problem Descriptor Files}
 Each descriptor file, contains a collection of \textit{problem descriptor strings}, each of which describe an family of problems with the same memory topology, distribution, and grid association. The files also contain the names of \textit{specifier files} which are used to complete the qualitative descriptions provided by the descriptor strings. This structure allows a high level of customization of the test suite.
 
 %%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%
-\subsection{Top level helper file}
+\subsubsection{Top level helper file}
 The top level helper file \texttt{test\_harness.rc} is unique to each class. It specifies the test class, the style of test result reporting, and lists the names of the \textit{problem descriptor files}. These descriptor files are categorized into two sets. The first set lists the file names that specify the \textbf{NONEXHAUSTIVE} test suite, and the second lists those that describe the \textbf{EXHAUSTIVE} test suite. 
 
 Below is an example of the file \texttt{test\_harness.rc} for the \texttt{ESMF\_Field} class. Notice that comments are preceded by the {\#} sign, and that parameter values follow a single colon {:} punctuation mark, while tables follow, and are terminated, by a double set of colon {::} punctuation marks.  This file is read by the \texttt{ESMF\_Config} class methods, therefore it must adhere to very specific syntax requirements. The entries can be in any order, but the name tags must be exact - including capitalization. In addition, while not strictly necessary, the file names are enclosed in quotation marks, either single or double, to guarantee they are read correctly.
@@ -75,7 +71,7 @@ exhaustive::
 The argument for the tag \texttt{test\_class:} specifies the ESMF class to be tested. Here it is Field. The tag  \texttt{test\_report:} specifies the style of report to be constructed. This report is appended to the standard-out file which is located with the Unit test results. The tag \texttt{nonexhaustive::} delimits a table which contains the file names of problem descriptor files pertaining to a nonexhaustive test configuration. Likewise the tag \texttt{exhaustive::} delimits a table for the exhaustive case. Each table may contain any number of problem descriptor file names. Here the exhaustive case inputs two problem descriptor files, \texttt{exhaustive\_descriptor.rc} and \texttt{even\_more\_exhaustive\_descriptor.rc}.
 
 %%%%%%%%%%%%%%%%%%
-\subsection{Problem descriptor file}
+\subsubsection{Problem descriptor file}
 All of the problem descriptor files pertaining to the current class live in the local directory \texttt{tests/test\_config}.
 
 The problem descriptor files contain \textit{descriptor strings} that describe the family of problems with the same memory topology, distribution, and grid association. The files also contain the names of \textit{specifier files} which complete the descriptions contained within the descriptor strings. This structure allows a high level of customization of the test suite.
@@ -101,7 +97,7 @@ The files that follow a flag, are used to specify the values for the parameter a
 In the above example, the problem descriptor string specifies that a redistribution test is to be conducted. This is indicated by the syntax  \texttt{-->} and will be discussed in detail in the next section. The range of distributions to be tested are specified by the configurations contained within the two files \texttt{DistGrid.rc} and  \texttt{otherDistGrid.rc}. Similarly, the range of grid configurations are specified within the single file \texttt{Grid.rc}.
 
 %%%%%%%%%%%%%%%%%%%%%%%
-\section{Problem descriptor string}
+\subsubsection{Problem descriptor string}
 The test configuration is specified by two sources. The first is the problem descriptor string. The problem descriptor string is the first argument of the problem descriptor file, and describes an ensemble of tests to be conducted. 
 
 The basic syntax describes a contiguous chunk of memory spanned by some sort of logically rectangular indexing, where the left most index varies fastest in memory. Each semicolon delineated entry is associated with a native array dimension. The index locations are replaced by signifiers that express associations and distributions of the memory through the use of short descriptors. 
@@ -110,15 +106,14 @@ For example $[ G1; G2 ]$ indicates that a 2D logically rectangular block of memo
 
 This document is organized as follows. The first section describes the grid classification syntax in detail. The second section describes the distribution classification. The third section describes how to construct general structures out of the memory chunks. 
 
-\subsection{Grid Association}
+\subsubsection{Grid Association}
 Continuing with the above example, consider a two dimensional logically rectangular block of memory is associated with the first two dimensions of a tensor grid $G1 \otimes G2$ in their natural order. It is the represented by $[ G1; G2 ]$. Reversing the grid signifiers $[ G2; G1 ]$ indicates that the fastest varying dimension is instead associated with the second grid dimension. Specific information about the grid type is unspecified. It is the associations between memory and the grid that are stressed with this syntax. We will see that grid size, as well as boundary information are optional specifiers. 
 
 The specification of additional grid information is supported by expanding the $G$ specifier. The default $G$ indicates a tensor grid, while the specifier $U$ indicates an unstructured grid, and $S$ indicates a spherical tensor grid. Information about the grid stagger is available by appending a coordinate subscript to the signifier, while an unknown or undefined staggering is indicated with an $X$.
-The complete syntax for grid specification is $G i_g \; @ \Sigma \; + P + H \{ \# : \# \}$ where
+The complete syntax for grid specification is $G i_g \; @ \Sigma \; + H \{ \# : \# \}$ where
 \begin{itemize}
 	\item where $i_g$ is the grid axis,
 	\item $\Sigma$ specifies the stagger location relative to  the cell center (see below),
-	\item $P$ the optional signifier indicates periodicity along an axis,
 	\item $H \{ \# : \# \}$ the optional signifier specifies the size of the  halo on both ends of the memory. This allows the specification of asymmetric haloes.
 \end{itemize}
 Notice that the grid periodicity and halo specifiers are appended to the grid specifier through use of $+$ signs. The absence of any of these specifiers indicates no specified boundary information.
@@ -149,7 +144,7 @@ The vertical stagger is indicated in a similar way;
 \end{description}
 where one of these signifiers is used as the third coordinate.
 
-\subsection{Distribution}
+\subsubsection{Distribution}
 The description of the distribution of a contiguous chunk of memory among the DEs is similar to the description for the grid association. Descriptors for two types of memory distribution are supported
 \begin{description}
 	\item[simple block] $B \; i_D \; \{ n_D \} $; where $i_D$ is the DELayout axis and $n_D$ is the number of DEs decomposed along the $i_D$ axis.
@@ -180,31 +175,46 @@ For example, the string
 \end{displaymath}
 indicates that a collection of regridding tests are to be run where a block distributed two dimensional field, is interpolated from one two dimensional grid onto a second two dimensional grid, using a first order conservative method. It is indicated that both grids are periodic in their first dimension. The source field data is located at the cell centers (an A-grid stagger location) and the destination field is to be located at north east corner (a B-grid stagger location). The additional information about a pair of grids and distributions must be specified to run an actual test. 
 
-%%%%%%%%%%%%%%%%%%%%%%
-\section{Specifier files}
-The second part of specifying the test configuration are the specifier files. 
 
 %%%%%%%%%%%%%%%%%%%%%%
-\section{Reporting test results}
-The purpose of the testing report is to provide a concise human-readable summary of the testing results. The goal is not to provide a complete description, but a useful summary and references to where in the code the failure occurred.
+\subsection{Reporting test results}
+The test harness offers the option of producing a human readable report on the test results. The report consists of a concise summary of the test configuration along with the test results. The test configuration is described in terms of the Field Taxonomy syntax and user provided 
+strings. The intent is not to provide a exhaustive description of the test, but rather to provide a useful description of the failed tests.
 
-Suppose there are two problem descriptor strings in the test configuration file.
-\begin{displaymath}
-[ B1 \; G1; \; B2 \; G2 ] =C=> [ B1 \; G1@(+,+); \; B2 \; G2@(+,+) ] 
-\end{displaymath}
-\begin{displaymath}
-[ B1 \; G1+P; \; B2 \; G2 ] =C=> [ B1 \; G1@(+,+)+P; \; B2 \; G2@(+,+) ]
-\end{displaymath}
-The testing report might look like this
-{\footnotesize{
-\[ \begin{array}{ll}
-\mbox{SUCCESS: } & [B1 \; G1; \; B2 \; G2 ] =C=> [B1 \; G1@(+,+); \; B2 \; G2@(+,+) ] \\
-\mbox{FAILURE: } & [B1\{ 1 \} \; G1 \{100\} +P; \; B2\{npets\} \; G2\{50\} ]  =C=> [B1\{ 1 \} \; G1 \{80\} @(+,+)+P; \; B2\{npets\} \; G2 \{20\}@(+,+) ]  \\
- & \mbox{failure at line 101 of test.F90} \\
-\mbox{FAILURE: } & [ B1\{npets\} \; G1 \{100\} +P; \; B2\{ 1 \} \; G2\{50\} ]  =C=> [ B1\{npets\} \; G1 \{80\}@(+,+)+P; \; B2\{ 1 \} \; G2\{20\}@(+,+) ]  \\
- & \mbox{failure at line 201 of test.F90}
-\end{array} \] }}
+Consider a problem descriptor string consisting of two descriptor strings describing an ensemble of remapping tests. 
 
-This report indicates that all the configurations of the first description pass. This is class of problems without periodic boundary conditions in the first argument. Since all of the tests pass there is no need to include any information than the problem descriptor string. The remaining lines of the report indicate that two configurations of the second description class fail. The report includes the additional information of the delayout and the grid size and a reference to the location in the code where the failure occurs. This additional information, while not a complete description, is intended to assist in isolating the failed test.
+\begin{verbatim}
+[ B1 G1; B2 G2 ] =C=> [ B1 G1@(+,+); B2 G2@(+,+) ] 
+[ B1 G1; B2 G2 ] =B=> [ B1 G1@(+,+); B2 G2@(+,+) ]
+\end{verbatim}
 
-\end{document}
+Suppose the associated specifier files indicate that the source  grid is rectilinear and is 100 X 50 in size. The destination grid is also rectilinear and is 80 X 20 in size. The remapping is conducted from the A-grid position of the source grid to the B-grid stagger of the destination grid. Both grids are block distributed in two 
+ways, 1 X NPETS and NPETS X 1. And suppose that the first dimension of both the source and destination grids are periodic. If the test succeeds for the conservative remapping, but fails for one of the first order bilinear remapping configurations, the reported results
+could look something like
+
+\begin{verbatim}
+SUCCESS: [B1 G1; B2 G2 ] =C=> [B1 G1@(+,+); B2 G2@(+,+) ] 
+FAILURE: [B1{1} G1{100}+P; B2{npets} G2{50} ] =B=> [B1{1} G1{80}@(+,+)+P; B2{npets} G2{20}@(+,+) ] 
+     failure at line 101 of test.F90
+SUCCESS: [ B1{npets} G1{100} +P; B2{1} G2{50} ] =B=> [ B1{npets} G1{80}@(+,+)+P; B2{1} G2{20}@(+,+) ] 
+\end{verbatim}
+
+The report indicates that all the test configurations for the conservative remapping are successful. This is indicated by the key word SUCCESS which is followed by the successful problem descriptor string. Since all of the tests in the first case pass,there is no need to include any of the specifier information. For the second ensemble of tests, one configuration passed, while the other failed. In this case,
+since there is a mixture of successes and failures, the report includes 
+specifier information for all configurations to help indicate the source of the test failure. 
+
+Next consider a problem descriptor string consisting of three descriptor strings describing an ensemble of redistribution tests. 
+
+\begin{verbatim}
+[ B1 G1@(+,+); B2 G2@(+,+) ] --> [ B1 G1@(+,+); B2 G2@(+,+) ] 
+[ C1 G1; C2 G2 ] --> [ B1 G1; B2 G2 ]
+[ B1 G1; B2 G2 ] --> [ B2 G2; B1 G1 ]
+\end{verbatim}
+
+
+The supplemental information, while not a complete problem description since it lacks items such as the physical coordinates of the grid and the nature of the test field, includes information crucial to isolating the failed test.
+
+
+
+
+
