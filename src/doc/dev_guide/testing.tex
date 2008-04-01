@@ -1,5 +1,5 @@
 %===============================================================================
-% CVS $Id: testing.tex,v 1.13 2007/09/18 21:38:18 cdeluca Exp $
+% CVS $Id: testing.tex,v 1.14 2008/04/01 15:06:09 donstark Exp $
 % CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/testing.tex,v $
 % CVS $Name:  $
 %===============================================================================
@@ -10,6 +10,7 @@
 ESMF software is subject to the following tests:
 \begin{enumerate}
 \item Unit tests, which are simple per-class tests.
+\item Testing Harness, parameter space spanning tests similar to the unit tests
 \item System tests, which generally involve inter-component interactions.
 \item Use test cases (UTCs), which are tests at realistic problem
 sizes (e.g., large data sets, processor counts, grids).
@@ -184,6 +185,115 @@ handle this case, the unit test must verify results from each processor as in th
     !------------------------------------------------------------------------
 
 \end{verbatim}
+
+\subsubsection{Test Harness}
+The Test Harness is a highly configurable test control system for conducting 
+thorough testing of the Remapping and Redistribution processes. The Test Harness 
+consists of a single shared executable and a collection of customizable resource
+files that define an ensemble of test configurations tailored to each ESMF class.
+The Test Harness is integrated into the Unit test framework, enabling
+the Test Harness to be built and run as part of the Unit tests. The test results 
+are reported to a single standard-out file which is located with the unit test 
+results.
+
+\paragraph{Specifying Tests Harness tests}
+The test harness code consists of a single executable that runs along with the
+unit tests. The executable is augmented by a hierarchy of customizable configuration
+files which are located within and below the \texttt{tests/} directory of each 
+class; currently only ESMF\_ARRAY and ESMF\_FIELD. These configuration files are 
+combined by the executable to generate specific test configurations. 
+
+The top level configuration file is called \texttt{test\_harness.rc} and is located 
+in the \texttt{tests/} directory of each class; e.g. 
+\texttt{esmf/src/Infrastructure/\$CLASS/tests/}. The top level helper file called
+\texttt{test\_harness.rc} is unique to each class and specifies the test class, the 
+format for reporting the test results, and the location and file names containing 
+the \textit{problem descriptor files}. 
+
+The \textit{problem descriptor files} are the next level of configuration files
+used by the test harness routines. They contain a collection of 
+\textit{problem descriptor strings} which describe a family of problems with the 
+same memory topology, distribution, and grid association. The problem descriptor 
+strings employ the Field Taxonomy to describe an ensemble of tests. For instance, a
+\textit{problem descriptor string} might describe the ensemble of all 
+remappings between a pair of two-dimensional blocks memory, each with a  specific
+type of distribution and grid association. One such configuration could look like
+
+\begin{verbatim}
+[ B1 G1; B2 G2 ] =C=> [ B1 G1@(+,+); B2 G2@(+,+) ] 
+[ B1 G1; B2 G2 ] =B=> [ B1 G1@(+,+); B2 G2@(+,+) ]
+\end{verbatim}
+
+This pair of problem descriptor strings defines two types of remapping tests.
+The first describes an ensemble of conservative remapping tests between a 
+block distributed A-grid and a block distributed B-grid. The second string describes
+an ensemble of first order bilinear remapping tests between the same two 
+distributed grids. See section~\ref{sec:harness} for a complete discussion of the 
+syntax and use of problem descriptor strings.
+
+The \textit{problem descriptor strings} are augmented by a collection of 
+\textit{specifier files} which complete the  description by defining specific 
+aspects of the configuration space such as the grid size, rank, and type, as well
+the nature of the distribution, its connectivity, etc. Both the problem descriptor
+files and the specifier files are located in the subdirectory 
+\texttt{tests/test\_config/} within the class directory.
+
+A complete description of the grid configuration files and their syntax is available
+in section~\ref{sec:harness} of the developers guide. An equivalent discussion of 
+the distribution configuration files is available in section~\ref{sec:harness} of 
+the developers guide.
+
+The motivation for employing such a hierarchy configuration files is to allow a 
+high degree of customization of the problem configuration by combining individual 
+specification files. In addition it was desired to make the specification files 
+as simple to read as is possible so that user is not forced to engage in complicated 
+encoding to specify a problem. The end result is that each class will have its own 
+collection of specification files tailored to the needs of that class.
+
+\paragraph{Analyzing Test Harness results }
+When the Test Harness completes a run, the results from the ensemble of tests are
+reported in two ways. The first is analogous to the unit test reporting, since the
+test harness is run as part of the unit tests, a summary of the results are recorded 
+just as with the unit tests. In addition to the standard unit test reporting, the
+test harness is also able to produce a human readable report. The report consists 
+of a concise summary of the test configuration along with the test results. The test 
+configuration is described in terms of the Field Taxonomy syntax and user provided 
+strings. The intent is not to provide a exhaustive description of the test, but 
+rather to provide a useful description of the failed tests.
+
+Consider the previous example of the two descriptor strings describing an ensemble 
+of remapping tests. 
+
+\begin{verbatim}
+[ B1 G1; B2 G2 ] =C=> [ B1 G1@(+,+); B2 G2@(+,+) ] 
+[ B1 G1; B2 G2 ] =B=> [ B1 G1@(+,+); B2 G2@(+,+) ]
+\end{verbatim}
+
+Suppose the associated specifier files indicate that the source  grid is rectilinear
+and is 100 X 50 in size. The destination grid is also rectilinear and is 80 X 20 
+in size. The remapping is conducted from the A-grid position of the source grid to 
+the B-grid stagger of the destination grid. Both grids are block distributed in two 
+ways, 1 X NPETS and NPETS X 1. And suppose that the first dimension of both the
+source and destination grids are periodic. If the test succeeds for the conservative
+remapping, but fails for one of the first order bilinear remapping configurations, the reported results
+could look something like
+
+\begin{verbatim}
+SUCCESS: [B1 G1; B2 G2 ] =C=> [B1 G1@(+,+); B2 G2@(+,+) ] 
+FAILURE: [B1{1} G1{100}+P; B2{npets} G2{50} ] =B=> [B1{1} G1{80}@(+,+)+P; B2{npets} G2{20}@(+,+) ] 
+     failure at line 101 of test.F90
+SUCCESS: [ B1{npets} G1{100} +P; B2{1} G2{50} ] =B=> [ B1{npets} G1{80}@(+,+)+P; B2{1} G2{20}@(+,+) ] 
+\end{verbatim}
+
+The report indicates that all the test configurations for the conservative remapping 
+are successful. This is indicated by the key word SUCCESS which is followed by the 
+successful problem descriptor string. Since all of the tests in the first case pass,
+there is no need to include any of the specifier information. For the second
+ensemble of tests, one configuration passed, while the other failed. In this case,
+since there is a mixture of successes and failures, the report includes 
+specifier information for all configurations to help indicate the source of the
+test failure. The supplemental information, while not a complete problem description
+since it lacks items such as the physical coordinates of the grid and the nature of the test field, includes information crucial to isolating the failed test.
 
 \subsubsection{System Tests}
 
