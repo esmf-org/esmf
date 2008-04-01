@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.31 2007/05/01 21:13:35 dneckels Exp $
+# $Id: build_rules.mk,v 1.32 2008/04/01 00:17:50 w6ws Exp $
 # 
 # IRIX64.default.default
 #
@@ -71,6 +71,17 @@ endif
 # OpenMP on IRIX64 is incompatible with Pthreads thus turn off by default
 #
 ESMF_PTHREADSDEFAULT       = OFF
+
+############################################################
+# Add LAPACK libraries
+#
+# Normally, the SCSL library is in /usr/lib32 and /usr/lib64.
+# However if alternative versions of SCSL need to be used, the
+# ESMF_LAPACK_PATH environment variable can be used to point
+# to the alternative location.
+ESMF_LAPACK		   = ON
+# ESMF_LAPACK_PATH           =
+ESMF_LAPACK_LIBS	   = -lscs
 
 ############################################################
 # Special compiler flags
