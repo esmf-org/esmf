@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.28.2.9 2008/03/31 17:37:41 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.28.2.10 2008/04/01 02:34:25 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -372,11 +372,11 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! of the {\tt ESMF\_GridCreateShapeTile()} call described in the previous section. 
 ! This code creates a 10x20 2D grid with uniformly spaced coordinates varying from (10,10) to (100,200).
 ! The grid is partitioned using a regular distribution. The first dimension
-! it is divided into two pieces, and the second dimension is divided into 3.
+! is divided into two pieces, and the second dimension is divided into 3.
 ! This example assumes that the code is being run with a 1-1 mapping between 
 ! PETs and DEs because we are only accessing the first DE on each PET (localDE=0).
 ! Because we have 6 DEs (2x3), this example would only work when run on 6 PETs. 
-! The Grid is created with global indices. After grid creation the
+! The Grid is created with global indices. After Grid creation the
 ! local bounds and native Fortran arrays are retrieved and the
 ! coordinates are set by the user. 
 !
@@ -388,7 +388,7 @@ if (petCount .le. 6) then
 !BOC
    !-------------------------------------------------------------------
    ! Create the Grid:  Allocate space for the Grid object, define the
-   ! topology and distribution of the grid, and specify that it 
+   ! topology and distribution of the Grid, and specify that it 
    ! will have global coordinates.  Note that aperiodic bounds are
    ! specified by default - if periodic bounds were desired they
    ! would need to be specified using an additional gridConn argument
@@ -401,7 +401,7 @@ if (petCount .le. 6) then
             ! Specify mapping of coords dim to Grid dim
             coordDep1=(/1/), &
             coordDep2=(/2/), &
-            indexflag=ESMF_INDEX_GLOBAL, & ! Use global indices
+            indexflag=ESMF_INDEX_GLOBAL, &
             rc=rc)
 
    !-------------------------------------------------------------------
@@ -454,7 +454,7 @@ endif
 !
 ! The remaining examples in this section will use the irregular 
 ! distribution because of its greater generality. To create code similar to these, but
-! using a regular distribution replace the {\tt countsPerDEDim} arguments
+! using a regular distribution, replace the {\tt countsPerDEDim} arguments
 ! in the Grid create with the appropriate {\tt maxIndex} and {\tt regDecomp} arguments. 
 !
 !\subsubsection{Creating a 2D Irregularly Distributed Rectilinear Grid
@@ -465,15 +465,15 @@ endif
 ! a regular and irregular distribution. It repeats the previous example
 ! except using an irregular distribution to give the user more control
 ! over how the cells are divided between the DEs. As before, this code
-! creates a 10x20 2D grid with uniformly spaced coordinates  varying from (10,10) to (100,200).
-! In this example, the grid is partitioned using an irregular distribution. The first dimension
-! is divided into two pieces, the first with 3 grid cells per
-! DE and the second with 7 grid cells per DE. In the second dimension,
-! the Grid is divided into 3 pieces, with 5, 9, and 6 cells per DE respectively.
+! creates a 10x20 2D Grid with uniformly spaced coordinates  varying from (10,10) to (100,200).
+! In this example, the Grid is partitioned using an irregular distribution. The first dimension
+! is divided into two pieces, the first with 3 Grid cells per
+! DE and the second with 7 Grid cells per DE. In the second dimension,
+! the Grid is divided into 3 pieces, with 11, 2, and 7 cells per DE respectively.
 ! This example assumes that the code is being run with a 1-1 mapping between 
 ! PETs and DEs because we are only accessing the first DE on each PET (localDE=0).
 ! Because we have 6 DEs (2x3), this example would only work when run on 6 PETs. 
-! The Grid is created with global indices. After grid creation the
+! The Grid is created with global indices. After Grid creation the
 ! local bounds and native Fortran arrays are retrieved and the
 ! coordinates are set by the user. 
 !
@@ -485,7 +485,7 @@ if (petCount .le. 6) then
 !BOC
    !-------------------------------------------------------------------
    ! Create the Grid:  Allocate space for the Grid object, define the
-   ! topology and distribution of the grid, and specify that it 
+   ! topology and distribution of the Grid, and specify that it 
    ! will have global coordinates.  Note that aperiodic bounds are
    ! specified by default - if periodic bounds were desired they
    ! would need to be specified using an additional gridConn argument
@@ -498,7 +498,7 @@ if (petCount .le. 6) then
             ! Specify mapping of coords dim to Grid dim
             coordDep1=(/1/), &
             coordDep2=(/2/), &
-            indexflag=ESMF_INDEX_GLOBAL, & ! Use global indices
+            indexflag=ESMF_INDEX_GLOBAL, & 
             rc=rc)
 
    !-------------------------------------------------------------------
@@ -552,17 +552,17 @@ endif
 !                  With Curvilinear Coordinates}
 ! \label{example:2DIrregCurviGrid}
 !
-! The following is an example of creating a simple curvilinear grid and
+! The following is an example of creating a simple curvilinear Grid and
 ! loading in a set of coordinates. It creates a 10x20
-! 2D grid where the coordinates vary along every dimension. 
-! The grid is partitioned using an irregular distribution. The first dimension
-! is divided into two pieces, the first with 3 grid cells per
-! DE and the second with 7 grid cells per DE. In the second dimension,
+! 2D Grid where the coordinates vary along every dimension. 
+! The Grid is partitioned using an irregular distribution. The first dimension
+! is divided into two pieces, the first with 3 Grid cells per
+! DE and the second with 7 Grid cells per DE. In the second dimension,
 ! the Grid is divided into 3 pieces, with 11, 2, and 7 cells per DE respectively.
 ! This example assumes that the code is being run with a 1-1 mapping between 
 ! PETs and DEs because we are only accessing the first DE on each PET (localDE=0).
 ! Because we have 6 DEs (2x3), this example would only work when run on 6 PETs. 
-! The Grid is created with global indices. After grid creation the
+! The Grid is created with global indices. After Grid creation the
 ! local bounds and native Fortran arrays are retrieved and the
 ! coordinates are set by the user. 
 !
@@ -574,7 +574,7 @@ if (petCount .le. 6) then
 !BOC
    !-------------------------------------------------------------------
    ! Create the Grid:  Allocate space for the Grid object, define the
-   ! distribution of the grid, and specify that it 
+   ! distribution of the Grid, and specify that it 
    ! will have global coordinates.  Note that aperiodic bounds are
    ! specified by default - if periodic bounds were desired they
    ! would need to be specified using an additional gridConn argument
@@ -584,7 +584,7 @@ if (petCount .le. 6) then
             ! Define an irregular distribution
             countsPerDEDim1=(/3,7/),     &
             countsPerDEDim2=(/11,2,7/),   &
-            indexflag=ESMF_INDEX_GLOBAL, & ! Use global indices
+            indexflag=ESMF_INDEX_GLOBAL, &
             rc=rc)
 
    !-------------------------------------------------------------------
@@ -638,11 +638,11 @@ endif
 
 !BOE
 !\subsubsection{Creating an Irregularly Distributed Rectilinear Grid with
-!                a Non-distributed Vertical Dimension}
+!                a Non-Distributed Vertical Dimension}
 ! \label{example:CurviGridWithUndistDim}
 !
 ! This example demonstrates how a user can build a rectilinear 
-! horizontal grid with a non-distributed vertical dimension. The Grid 
+! horizontal Grid with a non-distributed vertical dimension. The Grid 
 ! contains both the center and corner stagger locations (i.e. Arakawa 
 ! B-Grid). In contrast to the previous examples, this example doesn't
 ! assume that the code is being run with a 1-1 mapping between 
@@ -653,14 +653,12 @@ endif
 !BOC
    !-------------------------------------------------------------------
    ! Create the Grid:  Allocate space for the Grid object.  The
-   ! grid is defined to be 180 elements in Dim1 (longitude), 90 in
-   ! Dim2 (longitude), and 40 in Dim3 (depth).  The first dimension is
+   ! Grid is defined to be 180 Grid cells in the first dimension
+   ! (e.g. longitude), 90 Grid cells in the second dimension (e.g. latitude), and
+   ! 40 Grid cells in the third dimension (e.g. height).  The first dimension is
    ! decomposed over 4 DEs, the second over 3 DEs, and the third is 
    ! not distributed.  The connectivities in each dimension default 
-   ! to aperiodic since they are not yet implemented.  (Once connectivities
-   ! are implemented, the longitude dimension will be periodic, the 
-   ! poles will be defined at each end of the latitude dimension, 
-   ! and the depth dimension will remain aperiodic.
+   ! to aperiodic since they are not yet implemented. 
    !-------------------------------------------------------------------
    grid3D=ESMF_GridCreateShapeTile(               &
               countsPerDEDim1=(/45,75,40,20/),    &
@@ -699,7 +697,7 @@ endif
     !------------------------------------------------------------------
       !----------------------------------------------------------------
       ! Get the local bounds of the global indexing for the first
-      ! coordinate array on the local DE. If the number of processors
+      ! coordinate array on the local DE. If the number of PETs
       ! is less than the total number of DEs then the rest of this
       ! example would be in a loop over the local DEs.  Also get the
       ! pointer to the first coordinate array. 
@@ -808,7 +806,7 @@ endif
 !\subsubsection{Creating an Empty Grid in a Parent Component 
 ! for Completion in a Child Component}\label{sec:usage:setcommit}
 !
-! ESMF Grids can be created using an incremental paradigm. To do this,
+! ESMF Grids can be created incrementally. To do this,
 ! the user first calls ESMF\_GridCreateEmpty to allocate the shell of
 ! a Grid. Next, a series of {\tt ESMF\_GridSet()} calls are used to fill
 ! in the details of the grid. Here we use a convenient {\tt ESMF\_GridSetCommitShapeTile()}
@@ -817,16 +815,16 @@ endif
 ! user must explicity call {\tt ESMF\_GridCommit} afterwards to make the Grid usable.
 ! {\tt ESMF\_GridSetCommitShapeTile()} contains this commit internally, so it doesn't
 ! need to done separately. For consistency's sake the initial {\tt ESMF\_GridCreateEmpty}
-! call must occur on the same or a superset of the processors as the
+! call must occur on the same or a superset of the PETs as the
 ! {\tt ESMF\_GridSet()} calls. The following example uses the incremental
-! technique to create a rectangular 10x20 grid with coordinates at the
+! technique to create a rectangular 10x20 Grid with coordinates at the
 ! center and corner stagger locations. 
 !EOE
 
 !BOC
 !---------------------------------------------------------------------------
 ! IN THE PARENT COMPONENT:
-! Create an empty grid in the parent component for use in a child component.
+! Create an empty Grid in the parent component for use in a child component.
 ! The parent may be defined on more PETs than the child component.  
 ! The child's [vm or pet list] is passed into the create call so that
 ! the Grid is defined on the appropriate subset of the parent's PETs. 
@@ -835,7 +833,7 @@ endif
 
 !---------------------------------------------------------------------------
 ! IN THE CHILD COMPONENT:
-! Set the grid topology.  Here we define an irregularly distributed 
+! Set the Grid topology.  Here we define an irregularly distributed 
 ! rectangular Grid.
 !---------------------------------------------------------------------------
 
@@ -844,12 +842,12 @@ endif
                           countsPerDEDim2=(/10,3,7/), rc=rc)
 
 !---------------------------------------------------------------------------
-! Set Grid coordinates at the cell center location.
+! Add Grid coordinates at the cell center location.
 !---------------------------------------------------------------------------
    call ESMF_GridAllocCoord(grid2D, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
 
 !---------------------------------------------------------------------------
-! Set Grid coordinates at the corner stagger location.
+! Add Grid coordinates at the corner stagger location.
 !---------------------------------------------------------------------------
    call ESMF_GridAllocCoord(grid2D, staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
 
@@ -1030,7 +1028,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 call ESMF_GridDestroy(grid2D,rc=rc)
 
 !BOE
-! By default the local piece of the array on each processor starts at 
+! By default the local piece of the array on each PET starts at 
 ! (1,1,..), however, the indexing for each grid coordinate array  
 ! on each DE may be shifted to the global indices by using the {\tt indexflag}.
 ! For example, the following call switches the grid to use global indices. 
@@ -1683,7 +1681,7 @@ endif
 ! to set data into the local piece of the coordinates residing on the DE.
 ! The following call gets a pointer (fptr) to the Fortran array holding the 
 ! first component (e.g. x) coordinates for the corner stagger
-! for the piece of tile 2 which is on this processor. It
+! for the piece of tile 2 which is on this PET. It
 ! defaults to the first DE because it isn't specified. 
 !EOEI
 
@@ -1772,8 +1770,8 @@ endif
 !
 ! The Grid halo operation allows users to update the
 ! halos (if present) of the Grid coordinate arrays to contain the coordinate values on the 
-! neighboring processor. This would be convenient in cases like regrid
-! in which having coordinate information for cells neighboring the processor
+! neighboring PET. This would be convenient in cases like regrid
+! in which having coordinate information for cells neighboring the PET
 ! boundary is useful. The maximum width of the halo region around each
 ! localTile (DE local piece of a Grid Tile) can be set with the 
 ! {\tt computationalLWidth} and {\tt computationalUWidth} options during 
@@ -1874,7 +1872,7 @@ endif
 ! Grid on the DE. {\tt ESMF\_GridLocalTileSetMetric} enables the user
 ! to set data into the local piece of the metric residing on the DE.
 ! The following call gets a pointer (fptr) to the Fortran array holding the 
-! area for the piece of tile 2 which is on this processor. It
+! area for the piece of tile 2 which is on this PET. It
 ! defaults to the first DE because it isn't specified. 
 !removeEOE
 
@@ -1917,7 +1915,7 @@ endif
 ! \subsubsection{Creating a Regularly Distributed 3D Grid with Generated Coordinates}
 !
 ! This example illustrates the creation of a 100x100x100  3D Grid distributed across
-! 5 processors in each dimension. The coordinates in the Grid are uniformly distributed
+! 5 PETs in each dimension. The coordinates in the Grid are uniformly distributed
 ! between (0.0, 0.0, 0.0) and (200.0, 200.0, 200.0).
 !
 !EOEI
@@ -1956,10 +1954,10 @@ endif
 !
 ! This example illustrates the creation of a simple 2D Grid from coordinate data
 !  contained in 4 byte real fortan arrays.  The new Grid contains just the center stagger location.
-!  Each processor contains a pair of 10x10 Fortran 90 arrays named fptrX and fptrY. 
+!  Each PET contains a pair of 10x10 Fortran 90 arrays named fptrX and fptrY. 
 !  These arrays contain the coordinates for the piece of the global Grid held by each
-!  processor. The final global Grid will be 20x20 and the pieces of this Grid held
-! by each processor are as follows:
+!  PET. The final global Grid will be 20x20 and the pieces of this Grid held
+!  by each PET are as follows:
 !
 ! \begin{verbatim}
 !
@@ -1982,9 +1980,9 @@ endif
 !
 ! \end{verbatim}
 !
-!   As illustrated by the diagram, the arrays on processor 1 hold piece (1,1)-(10,10) of the 
-!   global index space. The arrays on processor 2 hold piece (11,1)-(20,10). The arrays on 
-!   processor 3 hold piece (1,11)-(10,20), and the arrays on processor 4 hold piece (11,11)-(20,20).
+!   As illustrated by the diagram, the arrays on PET 1 hold piece (1,1)-(10,10) of the 
+!   global index space. The arrays on PET 2 hold piece (11,1)-(20,10). The arrays on 
+!   PET 3 hold piece (1,11)-(10,20), and the arrays on PET 4 hold piece (11,11)-(20,20).
 !
 !removeEOE
 
