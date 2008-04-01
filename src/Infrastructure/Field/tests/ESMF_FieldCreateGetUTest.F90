@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.19 2008/04/01 18:21:13 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.20 2008/04/01 20:05:32 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -2782,7 +2782,7 @@ contains
 !            maxHaloLWidth=(/2,3,4,5,6/), maxHaloUWidth=(/10,11,12,13,14/), &
 !            allocCount=fsize, &
 !            rc=localrc)
-        call ESMF_FieldGet(grid, ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
+        call ESMF_FieldGet(grid, localDE=0, ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
             allocCount=fsize, &
             rc=localrc)
@@ -2830,7 +2830,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGet(grid, ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
+        call ESMF_FieldGet(grid, localDE=0, ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
             allocLBound=flb, allocUBound=fub, &
             rc=localrc)
@@ -2919,7 +2919,8 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGet(grid, ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
+        call ESMF_FieldGet(grid, localDE=0, &
+            ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
             gridToFieldMap=gridToFieldMap, &
             allocCount=fsize, &

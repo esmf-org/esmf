@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.19 2008/04/01 18:31:26 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.20 2008/04/01 20:05:32 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.19 2008/04/01 18:31:26 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.20 2008/04/01 20:05:32 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -425,7 +425,7 @@ contains
 ! \item [farray] @\
 !   Fortran array pointer which will be pointed at DE-local memory allocation. @\
 ! \item[{[localDE]}] @\
-!   The local DE from which to get the information.  
+!   The local DE from which to get the information. @\
 ! \item[{[exclusiveLBound]}] @\
 !   Upon return this holds the lower bounds of the exclusive region. @\
 !   {\tt exclusiveLBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
