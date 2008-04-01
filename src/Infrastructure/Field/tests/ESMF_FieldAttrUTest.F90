@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldAttrUTest.F90,v 1.4 2008/03/28 06:48:27 theurich Exp $
+! $Id: ESMF_FieldAttrUTest.F90,v 1.5 2008/04/01 21:31:29 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldAttrUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldAttrUTest.F90,v 1.4 2008/03/28 06:48:27 theurich Exp $'
+      '$Id: ESMF_FieldAttrUTest.F90,v 1.5 2008/04/01 21:31:29 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -76,7 +76,7 @@ program ESMF_FieldAttrUTest
 
       !EX_UTest
       ! Add an integer attribute to a Field Test
-      call ESMF_FieldAttributeSet(field, name="Sides", value=65, rc=rc)
+      call ESMF_FieldAttSet(field, name="Sides", value=65, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding an integer attribute to a Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -84,7 +84,7 @@ program ESMF_FieldAttrUTest
 
       !EX_UTest
       ! Get an integer attribute from a Field Test
-      call ESMF_FieldAttributeGet(field, name="Sides", value=number, rc=rc)
+      call ESMF_FieldAttGet(field, name="Sides", value=number, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an integer attribute from a Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.65), &
@@ -95,7 +95,7 @@ program ESMF_FieldAttrUTest
 
       !EX_UTest
       ! Get an integer attribute from a Field Test
-      call ESMF_FieldAttributeGet(field, name="NotSides", value=number, &
+      call ESMF_FieldAttGet(field, name="NotSides", value=number, &
         defaultvalue=defaultvalue, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting a default integer attribute from a Field Test"
@@ -105,7 +105,7 @@ program ESMF_FieldAttrUTest
 
       !EX_UTest
       ! Get an integer attribute from a Field Test
-      call ESMF_FieldAttributeGetInfo(field, name="Sides", count=number, rc=rc)
+      call ESMF_FieldAttGet(field, name="Sides", count=number, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an attribute info from a Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.1), &
@@ -117,7 +117,7 @@ program ESMF_FieldAttrUTest
 
       !EX_UTest
       ! Create an attribute package on a Field Test
-      call ESMF_FieldAttPackCreate(field, convention=conv, &
+      call ESMF_FieldAttAdd(field, convention=conv, &
         purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating an Attpack on a Field Test"
@@ -133,7 +133,7 @@ program ESMF_FieldAttrUTest
       
       !EX_UTest
       ! Create a custom attribute package on a Field Test
-      call ESMF_FieldAttPackCreate(field, convention=conv, &
+      call ESMF_FieldAttAdd(field, convention=conv, &
         purpose=purp, attrList=attrList, count=count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a custom Attpack on a Field Test"
@@ -147,7 +147,7 @@ program ESMF_FieldAttrUTest
 
       !EX_UTest
       ! Set an attribute in an attribute package on a Field Test
-      call ESMF_FieldAttPackSet(field, name=attrname, value=attrvalue, &
+      call ESMF_FieldAttSet(field, name=attrname, value=attrvalue, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an Attribute in an Attpack from a Field Test"
@@ -156,7 +156,7 @@ program ESMF_FieldAttrUTest
 
       !EX_UTest
       ! Write the attribute package from a Field Test
-      call ESMF_FieldAttPackWrite(field, convention=conv, &
+      call ESMF_FieldAttWrite(field, convention=conv, &
         purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Writing an Attpack from a Field Test"
@@ -165,7 +165,7 @@ program ESMF_FieldAttrUTest
 
       !EX_UTest
       ! Getting Attribute count from a Field
-      call ESMF_FieldAttributeGetCount(field, count, rc=rc)
+      call ESMF_FieldAttGet(field, count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Attribute Count from a Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
