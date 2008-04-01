@@ -1,4 +1,4 @@
-! $Id: ioComp.F90,v 1.1.2.4 2008/02/21 05:59:00 theurich Exp $
+! $Id: ioComp.F90,v 1.1.2.5 2008/04/01 00:26:11 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -19,7 +19,7 @@ module ioCompMod
 !-------------------------------------------------------------------------
 
   subroutine ioCompReg(comp, rc)
-    type(ESMF_GridComp), intent(inout) :: comp
+    type(ESMF_GridComp) :: comp
     integer, intent(out) :: rc
 
     ! Initialize
@@ -51,9 +51,9 @@ module ioCompMod
 !-------------------------------------------------------------------------
     
   subroutine compInit(comp, importState, exportState, clock, rc)
-    type(ESMF_GridComp), intent(inout) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
     ! Local variables
@@ -96,9 +96,9 @@ module ioCompMod
 !-------------------------------------------------------------------------
  
   subroutine compRun(comp, importState, exportState, clock, rc)
-    type(ESMF_GridComp), intent(inout) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
     ! Local variables
@@ -190,9 +190,9 @@ module ioCompMod
 !-------------------------------------------------------------------------
  
   subroutine compFinal(comp, importState, exportState, clock, rc)
-    type(ESMF_GridComp), intent(inout) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
     ! Local variables

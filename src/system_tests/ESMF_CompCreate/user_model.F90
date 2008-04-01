@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.10.2.3 2008/03/28 05:37:33 theurich Exp $
+! $Id: user_model.F90,v 1.10.2.4 2008/04/01 00:26:10 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -41,7 +41,7 @@
  
     subroutine user_register(comp, rc)
         type(ESMF_GridComp) :: comp
-        integer :: rc
+        integer, intent(out) :: rc
 
         ! Local variables
         type(mydata), pointer :: mydatablock
@@ -97,7 +97,7 @@
         type(ESMF_GridComp) :: comp
         type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
-        integer :: rc
+        integer, intent(out) :: rc
 
         print *, "first init routine called"
         rc = ESMF_SUCCESS
@@ -113,7 +113,7 @@
         type(ESMF_GridComp) :: comp
         type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
-        integer :: rc
+        integer, intent(out) :: rc
 
 !     ! Local variables
         type(ESMF_Field) :: humidity
@@ -157,7 +157,7 @@
         type(ESMF_GridComp) :: comp
         type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
-        integer :: rc
+        integer, intent(out) :: rc
 
         type(ESMF_Field) :: humidity
         integer, save :: onetime=1              ! static variable
@@ -212,7 +212,7 @@
         type(ESMF_GridComp) :: comp
         type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
-        integer :: rc
+        integer, intent(out) :: rc
 
 !     ! Local variables
         type(mydata), pointer :: mydatablock

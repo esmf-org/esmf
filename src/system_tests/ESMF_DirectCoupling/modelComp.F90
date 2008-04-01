@@ -1,4 +1,4 @@
-! $Id: modelComp.F90,v 1.1.2.4 2008/03/25 20:41:44 theurich Exp $
+! $Id: modelComp.F90,v 1.1.2.5 2008/04/01 00:26:11 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -27,7 +27,7 @@ module modelCompMod
 !-------------------------------------------------------------------------
 
   subroutine modelCompReg(comp, rc)
-    type(ESMF_GridComp), intent(inout) :: comp
+    type(ESMF_GridComp) :: comp
     integer, intent(out) :: rc
 
     ! Initialize
@@ -59,9 +59,9 @@ module modelCompMod
 !-------------------------------------------------------------------------
     
   subroutine compInit(comp, importState, exportState, clock, rc)
-    type(ESMF_GridComp), intent(inout) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
     
     ! Local variables
@@ -148,9 +148,9 @@ module modelCompMod
 !-------------------------------------------------------------------------
  
   subroutine compRun(comp, importState, exportState, clock, rc)
-    type(ESMF_GridComp), intent(inout) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
     ! Initialize
@@ -169,9 +169,9 @@ module modelCompMod
 !-------------------------------------------------------------------------
  
   subroutine compFinal(comp, importState, exportState, clock, rc)
-    type(ESMF_GridComp), intent(inout) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
     ! Local variables

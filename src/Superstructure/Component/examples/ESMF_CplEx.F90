@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.27.4.1 2007/12/14 20:25:35 svasquez Exp $
+! $Id: ESMF_CplEx.F90,v 1.27.4.2 2008/04/01 00:26:07 theurich Exp $
 !
 ! Example/test code which shows Coupler Component calls.
 
@@ -54,7 +54,7 @@
 
     subroutine CPL_SetServices(comp, rc)
         type(ESMF_CplComp) :: comp
-        integer :: rc
+        integer, intent(out) :: rc
 
         ! SetServices the callback routines.
         call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, CPL_Init, 0, rc)
@@ -93,7 +93,7 @@
         type(ESMF_State) :: importState
         type(ESMF_State) :: exportState
         type(ESMF_Clock) :: clock
-        integer :: rc
+        integer, intent(out) :: rc
 
         print *, "Coupler Init starting"
     
@@ -135,7 +135,7 @@
         type(ESMF_State) :: importState
         type(ESMF_State) :: exportState
         type(ESMF_Clock) :: clock
-        integer :: rc
+        integer, intent(out) :: rc
 
 
         print *, "Coupler Run starting"
@@ -168,7 +168,7 @@
         type(ESMF_State) :: importState
         type(ESMF_State) :: exportState
         type(ESMF_Clock) :: clock
-        integer :: rc
+        integer, intent(out) :: rc
 
 
         print *, "Coupler Final starting"

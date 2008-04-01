@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.1.2.1 2008/03/28 23:17:53 theurich Exp $
+! $Id: user_coupler.F90,v 1.1.2.2 2008/04/01 00:26:08 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -33,7 +33,7 @@ module user_coupler
  
   subroutine usercpl_register(comp, rc)
     type(ESMF_CplComp) :: comp
-    integer :: rc
+    integer, intent(out) :: rc
 
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -75,7 +75,7 @@ module user_coupler
     type(ESMF_CplComp) :: comp
     type(ESMF_State) :: importState, exportState
     type(ESMF_Clock) :: clock
-    integer :: rc
+    integer, intent(out) :: rc
 
     ! Local variables
     integer :: itemcount
@@ -125,7 +125,7 @@ module user_coupler
     type(ESMF_CplComp) :: comp
     type(ESMF_State) :: importState, exportState
     type(ESMF_Clock) :: clock
-    integer :: rc
+    integer, intent(out) :: rc
 
     ! Local variables
     type(ESMF_Array) :: srcArray, dstArray
@@ -161,7 +161,7 @@ module user_coupler
     type(ESMF_CplComp) :: comp
     type(ESMF_State) :: importState, exportState
     type(ESMF_Clock) :: clock
-    integer :: rc
+    integer, intent(out) :: rc
 
     ! Initialize return code
     rc = ESMF_SUCCESS

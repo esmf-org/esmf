@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentUTest.F90,v 1.11.2.1 2008/02/22 19:25:22 theurich Exp $
+! $Id: ESMF_VMComponentUTest.F90,v 1.11.2.2 2008/04/01 00:26:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -26,7 +26,7 @@ module ESMF_VMComponentUTest_gcomp_mod
 
   subroutine mygcomp_register_nexh(gcomp, rc)
     ! arguments
-    type(ESMF_GridComp), intent(inout):: gcomp
+    type(ESMF_GridComp):: gcomp
     integer, intent(out):: rc
     
     ! register INIT method
@@ -52,7 +52,7 @@ module ESMF_VMComponentUTest_gcomp_mod
   
   subroutine mygcomp_register_exh(gcomp, rc)
     ! arguments
-    type(ESMF_GridComp), intent(inout):: gcomp
+    type(ESMF_GridComp):: gcomp
     integer, intent(out):: rc
     
     ! register INIT method
@@ -89,9 +89,9 @@ module ESMF_VMComponentUTest_gcomp_mod
   
   recursive subroutine mygcomp_init(gcomp, istate, estate, clock, rc)
     ! arguments
-    type(ESMF_GridComp), intent(inout):: gcomp
-    type(ESMF_State), intent(in):: istate, estate
-    type(ESMF_Clock), intent(in):: clock
+    type(ESMF_GridComp):: gcomp
+    type(ESMF_State):: istate, estate
+    type(ESMF_Clock):: clock
     integer, intent(out):: rc
 
     ! local variables
@@ -108,9 +108,9 @@ module ESMF_VMComponentUTest_gcomp_mod
   recursive subroutine mygcomp_run(gcomp, istate, estate, clock, rc)
     ! like mygcomp_init...
     ! arguments
-    type(ESMF_GridComp), intent(inout):: gcomp
-    type(ESMF_State), intent(in):: istate, estate
-    type(ESMF_Clock), intent(in):: clock
+    type(ESMF_GridComp):: gcomp
+    type(ESMF_State):: istate, estate
+    type(ESMF_Clock):: clock
     integer, intent(out):: rc
     
     ! local variables
@@ -127,9 +127,9 @@ module ESMF_VMComponentUTest_gcomp_mod
   recursive subroutine mygcomp_final(gcomp, istate, estate, clock, rc)
     ! like mygcomp_init...
     ! arguments
-    type(ESMF_GridComp), intent(inout):: gcomp
-    type(ESMF_State), intent(in):: istate, estate
-    type(ESMF_Clock), intent(in):: clock
+    type(ESMF_GridComp):: gcomp
+    type(ESMF_State):: istate, estate
+    type(ESMF_Clock):: clock
     integer, intent(out):: rc
 
     ! local variables
@@ -176,7 +176,7 @@ program ESMF_VMComponentUTest
 !------------------------------------------------------------------------------
   ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMComponentUTest.F90,v 1.11.2.1 2008/02/22 19:25:22 theurich Exp $'
+    '$Id: ESMF_VMComponentUTest.F90,v 1.11.2.2 2008/04/01 00:26:07 theurich Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0

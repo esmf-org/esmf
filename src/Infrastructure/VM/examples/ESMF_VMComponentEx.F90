@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentEx.F90,v 1.11.2.1 2007/12/14 20:25:34 svasquez Exp $
+! $Id: ESMF_VMComponentEx.F90,v 1.11.2.2 2008/04/01 00:26:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ module ESMF_VMComponentEx_gcomp_mod
   subroutine mygcomp_register(gcomp, rc)
 !EOC
     ! arguments
-    type(ESMF_GridComp), intent(inout):: gcomp
+    type(ESMF_GridComp):: gcomp
     integer, intent(out):: rc
     
     print *, '*** hi from mygcomp_register ***'
@@ -75,9 +75,9 @@ module ESMF_VMComponentEx_gcomp_mod
   recursive subroutine mygcomp_init(gcomp, istate, estate, clock, rc)
 !EOC
     ! arguments
-    type(ESMF_GridComp), intent(inout):: gcomp
-    type(ESMF_State), intent(in):: istate, estate
-    type(ESMF_Clock), intent(in):: clock
+    type(ESMF_GridComp):: gcomp
+    type(ESMF_State):: istate, estate
+    type(ESMF_Clock):: clock
     integer, intent(out):: rc
 
     ! local variables
@@ -101,9 +101,9 @@ module ESMF_VMComponentEx_gcomp_mod
 !EOC
     ! like mygcomp_init...
     ! arguments
-    type(ESMF_GridComp), intent(inout):: gcomp
-    type(ESMF_State), intent(in):: istate, estate
-    type(ESMF_Clock), intent(in):: clock
+    type(ESMF_GridComp):: gcomp
+    type(ESMF_State):: istate, estate
+    type(ESMF_Clock):: clock
     integer, intent(out):: rc
     
     ! local variables
@@ -127,9 +127,9 @@ module ESMF_VMComponentEx_gcomp_mod
 !EOC
     ! like mygcomp_init...
     ! arguments
-    type(ESMF_GridComp), intent(inout):: gcomp
-    type(ESMF_State), intent(in):: istate, estate
-    type(ESMF_Clock), intent(in):: clock
+    type(ESMF_GridComp):: gcomp
+    type(ESMF_State):: istate, estate
+    type(ESMF_Clock):: clock
     integer, intent(out):: rc
 
     ! local variables
