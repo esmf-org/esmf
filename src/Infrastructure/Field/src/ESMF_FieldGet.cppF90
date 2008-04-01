@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.20 2008/04/01 20:05:32 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.21 2008/04/01 20:49:56 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.20 2008/04/01 20:05:32 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.21 2008/04/01 20:49:56 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -402,7 +402,7 @@ contains
 ! !ARGUMENTS: @\
 !   type(ESMF_Field), intent(in)            :: field @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farray @\
-!   integer,          intent(in) , optional :: localDE @\
+!   integer,          intent(in)            :: localDE @\
 !   integer,          intent(out), optional :: exclusiveLBound(:) @\
 !   integer,          intent(out), optional :: exclusiveUBound(:) @\
 !   integer,          intent(out), optional :: exclusiveCount(:) @\
@@ -424,7 +424,7 @@ contains
 !   {\tt ESMF\_Field} object. @\
 ! \item [farray] @\
 !   Fortran array pointer which will be pointed at DE-local memory allocation. @\
-! \item[{[localDE]}] @\
+! \item[localDE] @\
 !   The local DE from which to get the information. @\
 ! \item[{[exclusiveLBound]}] @\
 !   Upon return this holds the lower bounds of the exclusive region. @\
@@ -574,13 +574,8 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 ! \begin{description}
 ! \item[{field}]
 !    Field to get the information from.
-! \item[{[localDE]}]
+! \item[{localDE}]
 !     The local DE from which to get the information.  
-! \item[{staggerloc}]
-!     The stagger location to get the information for. 
-!     Please see Section~\ref{sec:opt:staggerloc} for a list 
-!     of predefined stagger locations. If not present, defaults to
-!     ESMF\_STAGGERLOC\_CENTER.
 ! \item[{[exclusiveLBound]}]
 !     Upon return this holds the lower bounds of the exclusive region.
 !     {\tt exclusiveLBound} must be allocated to be of size equal to the field rank.
@@ -891,16 +886,16 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !
 ! The arguments are:
 ! \begin{description}
-! \item [{[grid]}]
+! \item [{grid}]
 !       {\tt ESMF\_Grid}.
+! \item [{localDE}]
+!       The local DE number in its PET context to compute the bounds and counts
+!       information based on the computational and exclusive bounds and counts 
+!       information of the grid from that local DE in its PET context.
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
 !       predefined values and interpretation of results see
 !       Section \ref{sec:opt:staggerloc}.
-! \item [{[localDE]}]
-!       The local DE number in its PET context to compute the bounds and counts
-!       information based on the computational and exclusive bounds and counts 
-!       information of the grid from that local DE in its PET context.
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the 
 !       {\tt grid}'s dimCount.  The list elements map each dimension 
