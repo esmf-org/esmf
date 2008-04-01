@@ -1,5 +1,5 @@
 
-! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.6.2.1 2007/12/14 20:25:32 svasquez Exp $
+! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.6.2.2 2008/04/01 05:35:58 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -74,7 +74,7 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC
-   call ESMF_GridAllocCoord(Grid2D,  &
+   call ESMF_GridAddCoord(Grid2D,  &
           staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
 !EOC
 
