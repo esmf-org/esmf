@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.18 2008/04/01 18:21:10 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.19 2008/04/01 18:31:26 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.18 2008/04/01 18:21:10 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.19 2008/04/01 18:31:26 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -425,8 +425,7 @@ contains
 ! \item [farray] @\
 !   Fortran array pointer which will be pointed at DE-local memory allocation. @\
 ! \item[{[localDE]}] @\
-!   The local DE from which to get the information.  If not set, defaults to  @\
-!   the first DE on this PET. (localDE starts at 0 for each PET) @\
+!   The local DE from which to get the information.  
 ! \item[{[exclusiveLBound]}] @\
 !   Upon return this holds the lower bounds of the exclusive region. @\
 !   {\tt exclusiveLBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
@@ -576,8 +575,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 ! \item[{field}]
 !    Field to get the information from.
 ! \item[{[localDE]}]
-!     The local DE from which to get the information.  If not set, defaults to 
-!     the first DE on this processor. (localDE starts at 0)
+!     The local DE from which to get the information.  
 ! \item[{staggerloc}]
 !     The stagger location to get the information for. 
 !     Please see Section~\ref{sec:opt:staggerloc} for a list 
@@ -586,51 +584,45 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 ! \item[{[exclusiveLBound]}]
 !     Upon return this holds the lower bounds of the exclusive region.
 !     {\tt exclusiveLBound} must be allocated to be of size equal to the field rank.
-!     Please see Section~\ref{sec:field:usage:bounds} for a description
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 ! \item[{[exclusiveUBound]}]
 !     Upon return this holds the upper bounds of the exclusive region.
 !     {\tt exclusiveUBound} must be allocated to be of size equal to the field rank.
-!     Please see Section~\ref{sec:field:usage:bounds} for a description
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 ! \item[{[exclusiveCount]}]
 !     Upon return this holds the number of items in the exclusive region per dimension
 !     (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
 !     be allocated to be of size equal to the field rank.
-!     Please see Section~\ref{sec:field:usage:bounds} for a description
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 ! \item[{[computationalLBound]}]
 !     Upon return this holds the lower bounds of the stagger region.
 !     {\tt computationalLBound} must be allocated to be of size equal to the field rank.
-!     Please see Section~\ref{sec:field:usage:bounds} for a description
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 ! \item[{[computationalUBound]}]
 !     Upon return this holds the upper bounds of the stagger region.
 !     {\tt computationalUBound} must be allocated to be of size equal to the field rank.
-!     Please see Section~\ref{sec:field:usage:bounds} for a description
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 ! \item[{[computationalCount]}]
 !     Upon return this holds the number of items in the computational region per dimension
 !     (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
 !      must be allocated to be of size equal to the field rank.
-!     Please see Section~\ref{sec:field:usage:bounds} for a description
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 ! \item[{[totalLBound]}]
 !     Upon return this holds the lower bounds of the total region.
 !     {\tt totalLBound} must be allocated to be of size equal to the field rank.
-!     Please see Section~\ref{sec:field:usage:bounds} for a description
-!     of the regions and their associated bounds and counts. 
 ! \item[{[totalUBound]}]
 !     Upon return this holds the upper bounds of the total region.
 !     {\tt totalUBound} must be allocated to be of size equal to the field rank.
-!     Please see Section~\ref{sec:field:usage:bounds} for a description
-!     of the regions and their associated bounds and counts. 
 ! \item[{[totalCount]}]
 !     Upon return this holds the number of items in the total region per dimension
 !     (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
 !      be allocated to be of size equal to the field rank.
-!     Please see Section~\ref{sec:field:usage:bounds} for a description
-!     of the regions and their associated bounds and counts. 
 ! \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -908,7 +900,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 ! \item [{[localDE]}]
 !       The local DE number in its PET context to compute the bounds and counts
 !       information based on the computational and exclusive bounds and counts 
-!       information of the grid from that local DE in its PET context. Defaults to 0.
+!       information of the grid from that local DE in its PET context.
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the 
 !       {\tt grid}'s dimCount.  The list elements map each dimension 
