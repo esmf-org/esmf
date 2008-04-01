@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1.2.1 2008/03/28 23:17:53 theurich Exp $ 
+# $Id: makefile,v 1.1.2.2 2008/04/01 23:06:21 theurich Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -19,10 +19,8 @@ LOCDIR	  = src/system_tests/ESMF_ArrayRedistMPMD
 
 SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_ArrayRedistSTestA $(ESMC_TESTDIR)/ESMF_ArrayRedistSTestB
 
-# Object files other than SysTest%.o that the
-# system tests executable will depend on.
-# List objects files in the order that they
-# are to be compiled/created.
+# Object files other than STest%.o that the system tests executable will depend
+# on. List objects files in the order that they are to be compiled/created.
 SYSTEM_TESTS_OBJ_A    = user_model1.o user_coupler.o
 SYSTEM_TESTS_OBJ_B    = user_model2.o user_coupler.o
 
@@ -44,4 +42,4 @@ CLOBBERDIRS =
 
 
 RUN_ArrayRedistMPMD:
-	-${ESMF_MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_ArrayRedistSTestA : -np 2 $(ESMF_TESTDIR)/ESMF_ArrayRedistSTestB >$(ESMF_TESTDIR)/ESMF_ArrayRedistMPMDSTest.stdout
+	-${ESMF_MPIMPMDRUN} -np 4 $(ESMF_TESTDIR)/ESMF_ArrayRedistSTestA : -np 2 $(ESMF_TESTDIR)/ESMF_ArrayRedistSTestB >$(ESMF_TESTDIR)/ESMF_ArrayRedistSTestA.stdout
