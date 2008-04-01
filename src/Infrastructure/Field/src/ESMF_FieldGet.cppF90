@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.17 2008/03/31 19:33:45 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.18 2008/04/01 18:21:10 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.17 2008/03/31 19:33:45 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.18 2008/04/01 18:21:10 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -494,7 +494,7 @@ contains
     ! input arguments @\
     type(ESMF_Field), intent(in)            :: field @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farray @\
-    integer,          intent(in) , optional :: localDE @\
+    integer,          intent(in)            :: localDE @\
     integer,          intent(out), optional :: exclusiveLBound(:) @\
     integer,          intent(out), optional :: exclusiveUBound(:) @\
     integer,          intent(out), optional :: exclusiveCount(:) @\
@@ -507,7 +507,7 @@ contains
     integer,          intent(out), optional :: rc @\
 @\
     ! local variables @\
-    integer          :: localrc, lde @\
+    integer          :: localrc @\
 @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
     localrc = ESMF_RC_NOT_IMPL @\
@@ -521,12 +521,7 @@ contains
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\
-    if(present(localDE)) then @\
-          lde = localDE @\
-    else @\
-          lde = 0 @\
-    end if @\
-    call ESMF_FieldGetDataBounds(field, lde, & @\
+    call ESMF_FieldGetDataBounds(field, localDE, & @\
         exclusiveLBound, exclusiveUBound, exclusiveCount, & @\
         computationalLBound, computationalUBound, computationalCount, & @\
         totalLBound, totalUBound, totalCount, & @\
@@ -873,19 +868,19 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldGetAllocBounds"
 !BOP
-! !IROUTINE: ESMF_FieldGetAllocBounds -  Get precomputed Fortran data array bounds
+! !IROUTINE: ESMF_FieldGet -  Get precomputed Fortran data array bounds
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
-    subroutine ESMF_FieldGetAllocBounds(grid, staggerloc, localDE, gridToFieldMap, &
+    subroutine ESMF_FieldGetAllocBounds(grid, localDE, staggerloc, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         maxHaloLWidth, maxHaloUWidth, &
         allocLBound, allocUBound, allocCount, rc)
     
 ! !ARGUMENTS:
     type(ESMF_Grid), intent(inout) :: grid     
+    integer, intent(in)            :: localDE
     type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
-    integer, intent(in), optional :: localDE
     integer, intent(in), optional :: gridToFieldMap(:)    
     integer, intent(in), optional :: ungriddedLBound(:)
     integer, intent(in), optional :: ungriddedUBound(:)
@@ -1004,7 +999,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     integer, dimension(ESMF_MAXDIM)        :: ec, cc, l_g2fm, l_mhlw, l_mhuw, dg2gm
     integer, dimension(ESMF_MAXDIM)        :: f2gm, gelb, geub, gclb, gcub
     logical, dimension(ESMF_MAXDIM)        :: flipflop
-    integer                                :: forderIndex, i, l_lde
+    integer                                :: forderIndex, i
     integer                                :: gridrank, arrayrank, uglb_size, ugub_size
 
     integer, dimension(:), allocatable     :: l_alb, l_aub, l_ac, l_uglb, l_ugub
@@ -1022,18 +1017,11 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         lstaggerloc = ESMF_STAGGERLOC_CENTER
     endif
 
-    ! default localDE setup
-    if(present(localDE)) then
-        l_lde = localDE
-    else
-        l_lde = 0
-    endif
-
     call ESMF_GridGet(grid, dimCount=gridrank, distgridToGridMap=dg2gm, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
-    call ESMF_GridGet(grid, localDE=l_lde, staggerloc=lstaggerloc, &
+    call ESMF_GridGet(grid, localDE=localDE, staggerloc=lstaggerloc, &
        exclusiveLBound=gelb, exclusiveUBound=geub, exclusiveCount=ec,  &
        computationalLBound=gclb, computationalUBound=gcub, computationalCount=cc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &

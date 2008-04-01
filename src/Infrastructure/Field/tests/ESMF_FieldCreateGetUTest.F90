@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.18 2008/03/31 16:55:07 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.19 2008/04/01 18:21:13 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -1243,7 +1243,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGet(field, farray1, totalCount=totalCount, rc=localrc)
+        call ESMF_FieldGet(field, farray1, localDE=0, totalCount=totalCount, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -1601,7 +1601,7 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_FieldGet(field, farray=farray1, &
+            call ESMF_FieldGet(field, farray=farray1, localDE=0, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
                 totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
@@ -2064,7 +2064,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGet(grid, staggerloc, gridToFieldMap=gridToFieldMap, &
+        call ESMF_FieldGet(grid, localDE=0, staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
             allocCount=fsize, rc=localrc)
@@ -2559,7 +2559,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGet(field, farray=farray1, &
+        call ESMF_FieldGet(field, farray=farray1, localDE=0, &
             exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
             computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
             totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
@@ -2718,7 +2718,7 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_FieldGet(field, farray=farray1, &
+            call ESMF_FieldGet(field, farray=farray1, localDE=0, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
                 totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
@@ -2971,7 +2971,7 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_FieldGet(field, farray=farray1, &
+            call ESMF_FieldGet(field, farray=farray1, localDE=0, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
                 totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
