@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.16 2008/03/31 15:21:55 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.17 2008/04/01 12:43:29 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -328,11 +328,11 @@
 !
 !  Let $map_{A,B}(i=1...n_A) = i_B$, and $i_B \in [\phi, 1...n_B]$. $n_A$ is the number
 !  of elements in set A, $n_B$ is the number of elements in set B. $map_{A,B}(i)$ defines
-!  a mapping between i-th element of set A to $i_B$-th element in set B. $i_B = \phi$ 
-!  indicates there does not exist a mapping between i-th element of set A to set B.
+!  a mapping from i-th element of set A to $i_B$-th element in set B. $i_B = \phi$ 
+!  indicates there does not exist a mapping from i-th element of set A to set B.
 !
-!  Suppose we have a mapping between dimension index of ungriddedLBound (or
-!  ungriddedUBound) and Fortran array dimension index, called ugb2fa. 
+!  Suppose we have a mapping from dimension index of ungriddedLBound (or
+!  ungriddedUBound) to Fortran array dimension index, called ugb2fa. 
 !  By defintion, $n_A$ equals to the dimension count of
 !  ungriddedLBound (or ungriddedUBound), $n_B$ equals to the dimension count of
 !  the Fortran array. We can now formulate the computation of ungridded
@@ -407,7 +407,7 @@
 !  dimension index to Field dimension index.
 !
 !  In this example, both dimensions of the Grid are distributed and the
-!  mapping between DistGrid and Grid is (/1,2/). We will introduce rule 3
+!  mapping from DistGrid to Grid is (/1,2/). We will introduce rule 3
 !  assuming distgridToGridMap=(/1,2,3...gridDimCount/), and distgridDimCount equals
 !  to gridDimCount. This is a reasonable assumption in typical Field use.
 !
@@ -478,9 +478,9 @@
 !  in a similar manner when applying ungriddedLBound and ungriddedUBound 
 !  to ungridded dimensions of the Fortran array defined by rule 2.
 !
-!  Assume we have the mapping between the dimension index of maxHaloWidth
-!  and the dimension index of Fortran array, called mhw2fa; and we also
-!  have the mapping between dimension index of Fortran array and dimension
+!  Assume we have the mapping from the dimension index of maxHaloWidth
+!  to the dimension index of Fortran array, called mhw2fa; and we also
+!  have the mapping from dimension index of Fortran array to dimension
 !  index of the Grid, called fa2g. The shape of
 !  distributed dimensions of a Fortran array can be computed by rule 4: 
 ! 
@@ -521,7 +521,7 @@
 !  default mapping between various objects throughout ESMF; 3) Grid to Field
 !  mapping is in the form of natural order, i.e. default mapping. These
 !  seem like a lot of conditions but they are the default case in the interaction
-!  between DistGrid, Grid, and Field. When these conditions are met, which
+!  among DistGrid, Grid, and Field. When these conditions are met, which
 !  is typically true, the shape of distributed dimensions of Fortran array
 !  follows rule 5 in a simple form:
 !
