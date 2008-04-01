@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.67 2008/03/29 00:01:38 w6ws Exp $
+# $Id: build_rules.mk,v 1.68 2008/04/01 00:18:52 w6ws Exp $
 #
 # Linux.intel.default
 #
@@ -155,9 +155,17 @@ endif
 ############################################################
 # Add LAPACK libraries
 #
-ifeq ($(ESMF_MACHINE),x86_64)
+# The MKL locaion may either be set externally via
+# LD_LIBRARY_PATH or internally via ESMF_LAPACK_LIBPATH.
+#
 ifeq ($(ESMF_LAPACK),MKL)
+ifeq ($(ESMF_MACHINE),x86_64)
+# ESMf_LAPACK_LIBPATH =
 ESMF_LAPACK_LIBS    = -lmkl -lmkl_em64t -openmp
+endif
+ifeq ($(ESMF_MACHINE),ia64)
+# ESMF_LAPACK_LIBPATH =
+ESMF_LAPACK_LIBS    = -lmkl -openmp
 endif
 endif
 
