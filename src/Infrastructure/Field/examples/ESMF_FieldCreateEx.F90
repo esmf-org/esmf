@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.17 2008/04/01 12:43:29 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.18 2008/04/01 13:02:29 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -123,7 +123,7 @@
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
-!BOE
+!BremoveOE
 !\subsubsection{Use ESMF\_ArrayCreate to reset Field internal Array}
 !  It's often necessary to reset the data array contained within a field.
 !  The following example demonstrates how to create a compliant {\tt ESMF\_Array}
@@ -131,14 +131,14 @@
 !  User can reset the {\tt ESMF\_Array} inside an existing Field by construct a proper
 !  shape {\tt ESMF\_Array}. 
 !  arrayspec, distgrid are objects created from previous examples.
-!EOE
+!EremoveOE
 !-------------------------------------------------------------------------
 !   !
 !   ! The user can substitute another array created by ArrayCreate in field1.
 !   ! This example
 !   ! makes it clear that field1's array has a computational region smaller
 !   ! than its exclusive region.
-!BOC
+!BremoveOC
     call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
         computationalEdgeLWidth=compEdgeLWdith, &
         computationalEdgeUWidth=compEdgeUWdith, rc=rc)
@@ -154,7 +154,7 @@
 
     call ESMF_FieldSet(field1, array2, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!EOC
+!EremoveOC
     print *, "Field reset internal array through ArrayCreate returned"
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
