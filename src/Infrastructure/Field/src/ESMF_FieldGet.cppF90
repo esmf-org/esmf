@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.21 2008/04/01 20:49:56 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.22 2008/04/01 21:58:04 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.21 2008/04/01 20:49:56 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.22 2008/04/01 21:58:04 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -572,9 +572,9 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !
 ! The arguments are:
 ! \begin{description}
-! \item[{field}]
+! \item[field]
 !    Field to get the information from.
-! \item[{localDE}]
+! \item[localDE]
 !     The local DE from which to get the information.  
 ! \item[{[exclusiveLBound]}]
 !     Upon return this holds the lower bounds of the exclusive region.
@@ -886,9 +886,9 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !
 ! The arguments are:
 ! \begin{description}
-! \item [{grid}]
+! \item [grid]
 !       {\tt ESMF\_Grid}.
-! \item [{localDE}]
+! \item [localDE]
 !       The local DE number in its PET context to compute the bounds and counts
 !       information based on the computational and exclusive bounds and counts 
 !       information of the grid from that local DE in its PET context.
