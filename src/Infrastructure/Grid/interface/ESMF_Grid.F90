@@ -120,7 +120,7 @@ public  ESMF_DefaultFlag
 !
 !
 ! - ESMF-public methods:
-  public ESMF_GridAllocCoord
+  public ESMF_GridAddCoord
   public ESMF_GridCommit
 
   public ESMF_GridCreate
@@ -154,7 +154,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47.2.7 2008/03/12 23:20:11 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47.2.8 2008/04/01 05:32:32 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -167,18 +167,18 @@ public  ESMF_DefaultFlag
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
-! !IROUTINE: ESMF_GridAllocCoord -- Generic interface
+! !IROUTINE: ESMF_GridAddCoord -- Generic interface
 
 ! !INTERFACE:
-interface ESMF_GridAllocCoord
+interface ESMF_GridAddCoord
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-      module procedure ESMF_GridAllocCoordNoValues
+      module procedure ESMF_GridAddCoordNoValues
       
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_GridAllocCoord} functions.   
+!  types of {\tt ESMF\_GridAddCoord} functions.   
 !EOPI 
 end interface
 
@@ -360,14 +360,14 @@ end interface
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridAllocCoord"
+#define ESMF_METHOD "ESMF_GridAddCoord"
 
 !BOP
-! !IROUTINE: ESMF_GridAllocCoord - Allocate coordinate arrays but don't set their values
+! !IROUTINE: ESMF_GridAddCoord - Allocate coordinate arrays but don't set their values
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_GridAllocCoord()
-     subroutine ESMF_GridAllocCoordNoValues(grid, staggerloc,  &
+  ! Private name; call using ESMF_GridAddCoord()
+     subroutine ESMF_GridAddCoordNoValues(grid, staggerloc,  &
                 staggerEdgeLWidth, staggerEdgeUWidth, staggerAlign, &
                 totalLWidth, totalUWidth,rc)
 
@@ -482,7 +482,7 @@ end interface
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call C++ Subroutine to do the create
-    call c_ESMC_gridalloccoord(grid%this,tmp_staggerloc, &
+    call c_ESMC_gridaddcoord(grid%this,tmp_staggerloc, &
       staggerEdgeLWidthArg, staggerEdgeUWidthArg, staggerAlignArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -502,7 +502,7 @@ end interface
 
     if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_GridAllocCoordNoValues
+      end subroutine ESMF_GridAddCoordNoValues
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1229,7 +1229,7 @@ end interface
 ! dimensions are intermixed. The {\tt coordDimCount} and {\tt coordDimMap} arguments
 ! allow the user to specify how the coordinate arrays should map to the grid
 ! dimensions. (Note, though, that creating a grid does not allocate coordinate
-! storage. A method such as {\tt ESMF\_GridAllocCoord()} must be called
+! storage. A method such as {\tt ESMF\_GridAddCoord()} must be called
 ! before adding coordinate values.)
 !
 ! The arguments are:
@@ -3869,7 +3869,7 @@ end subroutine ESMF_GridGet
 !  undistributed dimensions and are
 !  ordered to reflect the order of the indices in the Grid. This call will 
 !  still give correct values even if the stagger location does not contain
-!  coordinate arrays (e.g. if  {\tt ESMF\_GridAllocCoord} hasn't yet 
+!  coordinate arrays (e.g. if  {\tt ESMF\_GridAddCoord} hasn't yet 
 !  been called on the stagger location).
 !
 !The arguments are:
@@ -6336,7 +6336,7 @@ endif
 !    This method allows the user to get access to the ESMF Array holding
 !    coordinate data at a particular stagger location. This is useful, for example, 
 !    to set the coordinate values. To have an Array to access, the coordinate Arrays
-!    must have already been allocated, for example by {\tt ESMF\_GridAllocCoord} or
+!    must have already been allocated, for example by {\tt ESMF\_GridAddCoord} or
 !    {\tt ESMF\_GridSetCoord}.
 !
 !     The arguments are:

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.28.2.10 2008/04/01 02:34:25 cdeluca Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.28.2.11 2008/04/01 05:32:30 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -409,7 +409,7 @@ if (petCount .le. 6) then
    ! stagger location.  Since no coordinate values are specified in
    ! this call no coordinate values are set yet.
    !-------------------------------------------------------------------
-   call ESMF_GridAllocCoord(grid2D,  & 
+   call ESMF_GridAddCoord(grid2D,  & 
           staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
 
    !-------------------------------------------------------------------
@@ -506,7 +506,7 @@ if (petCount .le. 6) then
    ! stagger location.  Since no coordinate values are specified in
    ! this call no coordinate values are set yet.
    !-------------------------------------------------------------------
-   call ESMF_GridAllocCoord(grid2D,  & 
+   call ESMF_GridAddCoord(grid2D,  & 
           staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
 
    !-------------------------------------------------------------------
@@ -592,7 +592,7 @@ if (petCount .le. 6) then
    ! stagger location.  Since no coordinate values are specified in
    ! this call no coordinate values are set yet.
    !-------------------------------------------------------------------
-   call ESMF_GridAllocCoord(grid2D,  & 
+   call ESMF_GridAddCoord(grid2D,  & 
           staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
 
    !-------------------------------------------------------------------
@@ -675,9 +675,9 @@ endif
    ! locations.  Since no coordinate values are specified in this
    ! call no coordinate values are set yet.
    !-------------------------------------------------------------------
-   call ESMF_GridAllocCoord(grid3D, &
+   call ESMF_GridAddCoord(grid3D, &
           staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, rc=rc)
-   call ESMF_GridAllocCoord(grid3D, &
+   call ESMF_GridAddCoord(grid3D, &
           staggerloc=ESMF_STAGGERLOC_CORNER_VCENTER, rc=rc)
 
 
@@ -844,12 +844,12 @@ endif
 !---------------------------------------------------------------------------
 ! Add Grid coordinates at the cell center location.
 !---------------------------------------------------------------------------
-   call ESMF_GridAllocCoord(grid2D, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
+   call ESMF_GridAddCoord(grid2D, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
 
 !---------------------------------------------------------------------------
 ! Add Grid coordinates at the corner stagger location.
 !---------------------------------------------------------------------------
-   call ESMF_GridAllocCoord(grid2D, staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
+   call ESMF_GridAddCoord(grid2D, staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
 
 !EOC
    !-------------------------------------------------------------------
@@ -912,7 +912,7 @@ endif
 ! array on a particular DE. 
 !
 ! The user can allocate coordinate arrays without setting coordinates 
-! using the {\tt ESMF\_AllocCoord()} call, or allocate and 
+! using the {\tt ESMF\_AddCoord()} call, or allocate and 
 ! set coordinates in a single call with {\tt ESMF\_SetCoord()}.    
 ! When adding or accessing
 ! coordinate data, the stagger location is specified to tell the Grid method 
@@ -936,7 +936,7 @@ endif
 
 
 !BOC 
-   call ESMF_GridAllocCoord(grid2D, staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
+   call ESMF_GridAddCoord(grid2D, staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -1108,7 +1108,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-   call ESMF_GridAllocCoord(grid2D,&
+   call ESMF_GridAddCoord(grid2D,&
           staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -1145,7 +1145,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-   call ESMF_GridAllocCoord(grid2D,&
+   call ESMF_GridAddCoord(grid2D,&
           staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -1269,7 +1269,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
            indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
 
 !BOC
-  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
+  call ESMF_GridAddCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -1302,7 +1302,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
            indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
 
 !BOC
-  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_EDGE1, rc=rc)
+  call ESMF_GridAddCoord(grid2D, staggerloc=ESMF_STAGGERLOC_EDGE1, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -1349,7 +1349,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
            indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
 
 !BOC
-  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER, &
+  call ESMF_GridAddCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER, &
 !        totalLWidth=(/1,1/), totalUWidth=(/1,1/), & ! NOT YET IMPLEMENTED
          rc=rc) 
 !EOC
@@ -1385,7 +1385,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
            indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
 
 !BOC
-  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER, &
+  call ESMF_GridAddCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER, &
 !        totalLWidth=(/1,1/), totalUWidth=(/1,1/), & ! NOT YET IMPLEMENTED
          rc=rc) 
 !EOC
@@ -1473,7 +1473,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CORNER, rc=rc)
+  call ESMF_GridAddCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CORNER, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 ! Don't run without correct number of DEs
@@ -1531,7 +1531,7 @@ endif
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CORNER, rc=rc)
+  call ESMF_GridAddCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CORNER, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 ! Don't run without correct number of DEs
@@ -1584,7 +1584,7 @@ endif
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    grid3D=ESMF_GridCreate(distgrid=distgrid2D, undistLBound=(/1/), undistUBound=(/10/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_GridAllocCoord(grid3D, staggerloc=ESMF_STAGGERLOC_CORNER, rc=rc)
+  call ESMF_GridAddCoord(grid3D, staggerloc=ESMF_STAGGERLOC_CORNER, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOC
@@ -1638,7 +1638,7 @@ endif
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CORNER, rc=rc)
+  call ESMF_GridAddCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CORNER, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
  
 !BOC
@@ -2320,11 +2320,11 @@ endif
 
    ! Set Center
    call ESMF_StaggerLocSet(staggerLoc,loc=(/0,0,0,0/),rc=rc)
-   call ESMF_GridAllocCoord(grid4D, staggerLoc=staggerLoc, rc=rc)
+   call ESMF_GridAddCoord(grid4D, staggerLoc=staggerLoc, rc=rc)
 
    ! Set Corner
    call ESMF_StaggerLocSet(staggerLoc,loc=(/1,1,1,1/),rc=rc)
-   call ESMF_GridAllocCoord(grid4D, staggerLoc=staggerLoc, rc=rc)
+   call ESMF_GridAddCoord(grid4D, staggerLoc=staggerLoc, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -2493,11 +2493,11 @@ endif
    grid2D=ESMF_GridCreate(distgrid=distgrid2D, &
             gridEdgeLWidth=(/1,1/), gridEdgeUWidth=(/0,0/), rc=rc)
 
-   call ESMF_GridAllocCoord(grid2D, &
+   call ESMF_GridAddCoord(grid2D, &
           staggerLoc=ESMF_STAGGERLOC_CORNER, &
           staggerEdgeLWidth=(/0,0/), staggerEdgeUWidth=(/0,0/), rc=rc)
 
-   call ESMF_GridAllocCoord(grid2D, &
+   call ESMF_GridAddCoord(grid2D, &
           staggerLoc=ESMF_STAGGERLOC_CENTER, &
           staggerEdgeLWidth=(/1,1/), staggerEdgeUWidth=(/0,0/), rc=rc)
 
@@ -2541,7 +2541,7 @@ endif
    grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
 
 !BOC 
-   call ESMF_GridAllocCoord(grid2D, &
+   call ESMF_GridAddCoord(grid2D, &
           staggerLoc=ESMF_STAGGERLOC_CORNER, staggerAlign=(/1,1/), rc=rc)
 !EOC  
 
