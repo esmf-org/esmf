@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.6 2008/02/14 05:36:54 theurich Exp $
+# $Id: build_rules.mk,v 1.7 2008/04/02 03:21:09 w6ws Exp $
 #
 # Linux.intelgcc.default
 #
@@ -138,6 +138,17 @@ endif
 #
 ESMF_F90COMPILEFREENOCPP = -fpp0 -FR
 ESMF_F90COMPILEFIXCPP    = -fpp
+
+############################################################
+# Add LAPACK libraries
+#
+# The MKL locaion may either be set externally via
+# LD_LIBRARY_PATH or internally via ESMF_LAPACK_LIBPATH.
+#
+ifeq ($(ESMF_LAPACK),MKL)
+# ESMf_LAPACK_LIBPATH =
+ESMF_LAPACK_LIBS    = -lmkl_intel_lp64 -lmkl_core -lmkl_sequential
+endif
 
 ############################################################
 # Determine where ifort's libraries are located
