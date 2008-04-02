@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.138 2008/04/02 20:42:59 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.139 2008/04/02 23:05:29 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.138 2008/04/02 20:42:59 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.139 2008/04/02 23:05:29 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -696,7 +696,7 @@ end interface
 
       temp_list(1) = bundle
 
-      call ESMF_StateClassAddFieldBundleList(state%statep, 1, temp_list, &
+      call ESMF_StateClAddFieldBundleList(state%statep, 1, temp_list, &
         proxyflag=proxyflag, rc=localrc)      
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
@@ -761,7 +761,7 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_StateClassAddFieldBundleList(state%statep, bundleCount, &
+      call ESMF_StateClAddFieldBundleList(state%statep, bundleCount, &
                                           bundleList, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
@@ -5185,7 +5185,7 @@ end interface
         if (present(bundles)) then
           count = size(bundles)
           if (count .gt. 0) then
-            call ESMF_StateClassAddFieldBundleList(stypep, count, bundles, &
+            call ESMF_StateClAddFieldBundleList(stypep, count, bundles, &
               rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -6008,12 +6008,12 @@ end interface
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateClassAddFieldBundleList"
+#define ESMF_METHOD "ESMF_StateClAddFieldBundleList"
 !BOPI
-! !IROUTINE: ESMF_StateClassAddFieldBundleList - Add a list of FieldBundles to a StateClass
+! !IROUTINE: ESMF_StateClAddFieldBundleList - Add a list of FieldBundles to a StateClass
 !
 ! !INTERFACE:
-      subroutine ESMF_StateClassAddFieldBundleList(stypep, bcount, bundles, &
+      subroutine ESMF_StateClAddFieldBundleList(stypep, bcount, bundles, &
         proxyflag, rc)
 !
 ! !ARGUMENTS:
@@ -6361,7 +6361,7 @@ end interface
 
 
       if (present(rc)) rc = localrc
-      end subroutine ESMF_StateClassAddFieldBundleList
+      end subroutine ESMF_StateClAddFieldBundleList
 
 
 !------------------------------------------------------------------------------

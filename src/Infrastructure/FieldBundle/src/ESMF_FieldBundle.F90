@@ -1,5 +1,4 @@
-
-! $Id: ESMF_FieldBundle.F90,v 1.2 2008/04/02 20:42:54 cdeluca Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.3 2008/04/02 23:05:29 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -124,7 +123,6 @@
         type(ESMF_Grid) :: grid                  ! associated global Grid
         type(ESMF_LocalFieldBundle) :: localbundle    ! this differs per DE
         type(ESMF_Packflag) :: pack_flag         ! is packed data present?
-        type(ESMF_FieldBundleFieldIntrlv) :: fil  ! ordering in buffer
         type(ESMF_IOSpec) :: iospec              ! iospec values
         type(ESMF_Status) :: iostatus            ! if unset, inherit from gcomp
         logical :: isCongruent                   ! are all fields identical?
@@ -156,20 +154,12 @@
       ! intended for internal ESMF use only but public for FieldBundleComms
       public ESMF_FieldBundleType           ! internal ESMF use only, for FieldBundleComm
       public ESMF_LocalFieldBundle          ! internal ESMF use only, for FieldBundleComm
-      public ESMF_FieldBundleFieldIntrlv ! internal ESMF use only, for FieldBundleComm
 
 
 ! !PUBLIC MEMBER FUNCTIONS:
 !
-       ! public ESMF_FieldBundleFieldAccessValidate   ! For Standardized Initialization
-       ! ESMF_FieldBundleFieldAccess(Init) and (GetInit) are privite
 
-       public ESMF_FieldBundleFieldIntrlvInit     ! For Standardized Initialization
-       public ESMF_FieldBundleFieldIntrlvValidate ! For Standardized Initialization
-
-       public ESMF_FieldBundleFieldIntrlvGetInit  ! For Standardized Initialization
-
-       ! public ESMF_FieldBundleCongrntDataValidate  ! For Standardized Initialization
+       ! public ESMF_FieldBundleCongDataVdate  ! For Standardized Initialization
        ! ESMF_FieldBundleCongrntData(Init) and (GetInit) are private
 
        public ESMF_LocalFieldBundleInit     ! For Standardized Initialization
@@ -243,7 +233,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_FieldBundleCreateNew
-        module procedure ESMF_FieldBundleCreateEmpty
+        module procedure ESMF_FieldBundleCreateNoFields
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
@@ -260,7 +250,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_FieldBundleConstructNew
-        module procedure ESMF_FieldBundleConstructNoFields
+        module procedure ESMF_FieldBundleConstructEmpty
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
@@ -391,7 +381,7 @@ end function
 
       btype => bundle%btypep
     
-      call ESMF_FieldBundleTypeAddFieldList(btype, 1, temp_list, rc=status)
+      call ESMF_FieldBundleTypeAddList(btype, 1, temp_list, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -470,7 +460,7 @@ end function
 
       btype => bundle%btypep
     
-      call ESMF_FieldBundleTypeAddFieldList(btype, fieldCount, fieldList, rc=status)
+      call ESMF_FieldBundleTypeAddList(btype, fieldCount, fieldList, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -601,16 +591,16 @@ end function
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleCreateEmpty"
+#define ESMF_METHOD "ESMF_FieldBundleCreateNoFields"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleCreate - Create a FieldBundle with no Fields
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleCreate()
-      function ESMF_FieldBundleCreateEmpty(grid, name, iospec, rc)
+      function ESMF_FieldBundleCreateNoFields(grid, name, iospec, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateEmpty
+      type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateNoFields
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in), optional :: grid
@@ -649,7 +639,7 @@ end function
       ! Initialize pointers
       status = ESMF_RC_NOT_IMPL
       nullify(btypep)
-      nullify(ESMF_FieldBundleCreateEmpty%btypep)
+      nullify(ESMF_FieldBundleCreateNoFields%btypep)
 
       ! Initialize return code
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -662,7 +652,7 @@ end function
                                        ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize bundle internals.
-      call ESMF_FieldBundleConstructNoFields(btypep, name, iospec, rc)
+      call ESMF_FieldBundleConstructEmpty(btypep, name, iospec, rc)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -680,12 +670,12 @@ end function
       endif
 
       ! Set return values.
-      ESMF_FieldBundleCreateEmpty%btypep => btypep
-      ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreateEmpty)
+      ESMF_FieldBundleCreateNoFields%btypep => btypep
+      ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreateNoFields)
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_FieldBundleCreateEmpty
+      end function ESMF_FieldBundleCreateNoFields
 
 
 !------------------------------------------------------------------------------
@@ -1837,12 +1827,12 @@ end function
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleTypeAddFieldList"
+#define ESMF_METHOD "ESMF_FieldBundleTypeAddList"
 !BOPI
-! !IROUTINE: ESMF_FieldBundleTypeAddFieldList - Add a list of Fields to a FieldBundle.
+! !IROUTINE: ESMF_FieldBundleTypeAddList - Add a list of Fields to a FieldBundle.
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleTypeAddFieldList(btype, fieldCount, fields, rc)
+      subroutine ESMF_FieldBundleTypeAddList(btype, fieldCount, fields, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundleType), pointer :: btype        
@@ -2069,7 +2059,7 @@ end function
 10 continue
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleTypeAddFieldList
+      end subroutine ESMF_FieldBundleTypeAddList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2139,7 +2129,7 @@ end function
       enddo
 
       ! Initialize the derived type contents.
-      call ESMF_FieldBundleConstructNoFields(btype, name, iospec, status)
+      call ESMF_FieldBundleConstructEmpty(btype, name, iospec, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -2157,7 +2147,7 @@ end function
       endif  
  
       ! Add the fields in the list, checking for consistency.
-      call ESMF_FieldBundleTypeAddFieldList(btype, fieldCount, fields, status)
+      call ESMF_FieldBundleTypeAddList(btype, fieldCount, fields, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -2170,12 +2160,12 @@ end function
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleConstructNoFields"
+#define ESMF_METHOD "ESMF_FieldBundleConstructEmpty"
 !BOPI
-! !IROUTINE: ESMF_FieldBundleConstructNoFields - Construct the internals of a FieldBundle
+! !IROUTINE: ESMF_FieldBundleConstructEmpty - Construct the internals of a FieldBundle
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleConstructNoFields(btype, name, iospec, rc)
+      subroutine ESMF_FieldBundleConstructEmpty(btype, name, iospec, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundleType), pointer :: btype 
@@ -2240,7 +2230,7 @@ end function
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleConstructNoFields
+      end subroutine ESMF_FieldBundleConstructEmpty
 
 
 !------------------------------------------------------------------------------
@@ -2359,7 +2349,6 @@ end function
         type(ESMF_Grid) :: grid                  ! associated global grid
         type(ESMF_LocalFieldBundle) :: localbundle    ! this differs per DE
         type(ESMF_Packflag) :: pack_flag         ! is packed data present?
-        type(ESMF_FieldBundleFieldIntrlv) :: fil  ! ordering in buffer
         type(ESMF_IOSpec) :: iospec              ! iospec values
         type(ESMF_Status) :: iostatus            ! if unset, inherit from gcomp
 
@@ -2546,16 +2535,16 @@ end function
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleCongrntDataGetInit"
+#define ESMF_METHOD "ESMF_FieldBundleCongDataGetInit"
 !BOPI
-! !IROUTINE:  ESMF_FieldBundleCongrntDataGetInit - Get initialization status.
+! !IROUTINE:  ESMF_FieldBundleCongDataGetInit - Get initialization status.
 
 ! !INTERFACE:
-    function ESMF_FieldBundleCongrntDataGetInit(s)
+    function ESMF_FieldBundleCongDataGetInit(s)
 !
 ! !ARGUMENTS:
        type(ESMF_FieldBundleCongrntData), intent(in), optional :: s
-       ESMF_INIT_TYPE :: ESMF_FieldBundleCongrntDataGetInit
+       ESMF_INIT_TYPE :: ESMF_FieldBundleCongDataGetInit
 !
 ! !DESCRIPTION:
 !      Get the initialization status of the shallow class {\tt bundlecongruentdata}.
@@ -2569,12 +2558,12 @@ end function
 !EOPI
 
        if (present(s)) then
-         ESMF_FieldBundleCongrntDataGetInit = ESMF_INIT_GET(s)
+         ESMF_FieldBundleCongDataGetInit = ESMF_INIT_GET(s)
        else
-         ESMF_FieldBundleCongrntDataGetInit = ESMF_INIT_DEFINED
+         ESMF_FieldBundleCongDataGetInit = ESMF_INIT_DEFINED
        endif
 
-    end function ESMF_FieldBundleCongrntDataGetInit
+    end function ESMF_FieldBundleCongDataGetInit
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2604,12 +2593,12 @@ end function
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleCongrntDataValidate"
+#define ESMF_METHOD "ESMF_FieldBundleCongDataVdate"
 !BOPI
-! !IROUTINE:  ESMF_FieldBundleCongrntDataValidate - Check validity of a FieldBundleCongruentData
+! !IROUTINE:  ESMF_FieldBundleCongDataVdate - Check validity of a FieldBundleCongruentData
 
 ! !INTERFACE:
-    subroutine ESMF_FieldBundleCongrntDataValidate(s,rc)
+    subroutine ESMF_FieldBundleCongDataVdate(s,rc)
 !
 ! !ARGUMENTS:
        type(ESMF_FieldBundleCongrntData), intent(inout) :: s
@@ -2631,13 +2620,13 @@ end function
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldBundleCongrntDataGetInit, ESMF_FieldBundleCongrntDataInit,s)
+     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldBundleCongDataGetInit, ESMF_FieldBundleCongrntDataInit,s)
 
      ! return success
      if(present(rc)) then
        rc = ESMF_SUCCESS
      endif 
-    end subroutine ESMF_FieldBundleCongrntDataValidate
+    end subroutine ESMF_FieldBundleCongDataVdate
 
 
 !------------------------------------------------------------------------------
