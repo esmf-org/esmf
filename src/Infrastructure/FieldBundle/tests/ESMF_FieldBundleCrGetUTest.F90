@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCreateGetUTest.F90,v 1.1.2.1 2008/04/02 20:07:24 cdeluca Exp $
+! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.1.2.1 2008/04/02 23:20:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -291,7 +291,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGet(f1, farray1, rc=localrc)
+        call ESMF_FieldGet(f1, localDe=0, farray=farray1, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
@@ -301,7 +301,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGet(f2, farray2, rc=localrc)
+        call ESMF_FieldGet(f2, localDe=0, farray=farray2, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
@@ -332,7 +332,7 @@ contains
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
 
-            call ESMF_FieldGet(f3, farray3, rc=localrc)
+            call ESMF_FieldGet(f3, localDe=0, farray=farray3, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
@@ -353,7 +353,7 @@ contains
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
 
-            call ESMF_FieldGet(f4, farray4, rc=localrc)
+            call ESMF_FieldGet(f4, localDe=0, farray=farray4, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
@@ -381,7 +381,7 @@ contains
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
 
-            call ESMF_FieldGet(f5, farray5, rc=localrc)
+            call ESMF_FieldGet(f5, localDe=0, farray=farray5, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
