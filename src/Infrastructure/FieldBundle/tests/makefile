@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2008/04/02 20:42:55 cdeluca Exp $ 
+# $Id: makefile,v 1.3 2008/04/02 21:23:40 cdeluca Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -17,17 +17,17 @@ DIRS	  =
 LOCDIR	  = src/Infrastructure/FieldBundle/tests
 
 TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_FieldBundleUTest \
-                $(ESMC_TESTDIR)/ESMF_FieldBundleCreateGetUTest \
-                $(ESMC_TESTDIR)/ESMF_FieldBundleAttrUTest
+                $(ESMC_TESTDIR)/ESMF_FieldBundleCreateGetUTest
+#                $(ESMC_TESTDIR)/ESMF_FieldBundleAttrUTest
 
 TESTS_RUN     = RUN_ESMF_FieldBundleUTest \
                 RUN_ESMF_FieldBundleCreateGetUTest \
-                RUN_ESMF_FieldBundleAttrUTest \
+#                RUN_ESMF_FieldBundleAttrUTest \
                 RUN_ESMF_FieldBundleHarness2UTest \
                 RUN_ESMF_FieldBundleHarness4UTest
 
-TESTS_RUN_UNI = RUN_ESMF_FieldBundleUTestUNI \
-                RUN_ESMF_FieldBundleAttrUTestUNI 
+TESTS_RUN_UNI = RUN_ESMF_FieldBundleUTestUNI 
+#                RUN_ESMF_FieldBundleAttrUTestUNI 
 
 
 include ${ESMF_DIR}/makefile

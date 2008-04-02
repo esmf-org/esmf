@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleAttrUTest.F90,v 1.1 2008/04/02 20:42:54 cdeluca Exp $
+! $Id: ESMF_FieldBundleAttrUTest.F90,v 1.2 2008/04/02 21:23:40 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldBundleAttrUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleAttrUTest.F90,v 1.1 2008/04/02 20:42:54 cdeluca Exp $'
+      '$Id: ESMF_FieldBundleAttrUTest.F90,v 1.2 2008/04/02 21:23:40 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -76,7 +76,7 @@ program ESMF_FieldBundleAttrUTest
       simplefield = ESMF_FieldCreate(name="field 1", rc=rc)
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-      !EX_UTest
+      !EX_removeUTest
       ! Add an integer attribute to a FieldBundle Test
       call ESMF_FieldBundleAttributeSet(bundle1, name="Sides", value=65, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -84,7 +84,7 @@ program ESMF_FieldBundleAttrUTest
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_removeUTest
       ! Get an integer attribute from a FieldBundle Test
       call ESMF_FieldBundleAttributeGet(bundle1, name="Sides", value=number, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -95,7 +95,7 @@ program ESMF_FieldBundleAttrUTest
 
       defaultvalue = 7;
 
-      !EX_UTest
+      !EX_removeUTest
       ! Get an integer attribute from a Field Test
       call ESMF_FieldBundleAttributeGet(bundle1, name="NotSides", value=number, &
         defaultvalue=defaultvalue, rc=rc)
@@ -105,7 +105,7 @@ program ESMF_FieldBundleAttrUTest
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_removeUTest
       ! Get an integer attribute from a FieldBundle Test
       call ESMF_FieldBundleAttributeGetInfo(bundle1, name="Sides", count=number, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -117,7 +117,7 @@ program ESMF_FieldBundleAttrUTest
       conv = "defaultconvention"
       purp = "defaultpurpose"
 
-      !EX_UTest
+      !EX_removeUTest
       ! Create an attribute package on a FieldBundle Test
       call ESMF_FieldBundleAttPackCreate(bundle1, convention=conv, &
         purpose=purp, rc=rc)
@@ -133,7 +133,7 @@ program ESMF_FieldBundleAttrUTest
       conv = "customconvention"
       purp = "custompurpose"
       
-      !EX_UTest
+      !EX_removeUTest
       ! Create a custom attribute package on a FieldBundle Test
       call ESMF_FieldBundleAttPackCreate(bundle1, convention=conv, &
         purpose=purp, attrList=attrList, count=count, rc=rc)
@@ -147,7 +147,7 @@ program ESMF_FieldBundleAttrUTest
       conv = "defaultconvention"
       purp = "defaultpurpose"
 
-      !EX_UTest
+      !EX_removeUTest
       ! Set an attribute in an attribute package on a FieldBundle Test
       call ESMF_FieldBundleAttPackSet(bundle1, name=attrname, value=attrvalue, &
         convention=conv, purpose=purp, rc=rc)
@@ -156,7 +156,7 @@ program ESMF_FieldBundleAttrUTest
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_removeUTest
       ! Write the attribute package from a FieldBundle Test
       call ESMF_FieldBundleAttPackWrite(bundle1, convention=conv, &
         purpose=purp, rc=rc)
@@ -165,7 +165,7 @@ program ESMF_FieldBundleAttrUTest
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_removeUTest
       ! Link a bundle attribute hierarchy to a field attribute hierarchy FieldBundle Test
       call ESMF_FieldBundleAttributeSetLink(bundle1, simplefield, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -173,7 +173,7 @@ program ESMF_FieldBundleAttrUTest
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_removeUTest
       ! Getting Attribute count from a FieldBundle
       call ESMF_FieldBundleAttributeGetCount(bundle1, count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
