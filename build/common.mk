@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.210 2008/03/28 23:54:19 w6ws Exp $
+#  $Id: common.mk,v 1.211 2008/04/02 00:14:10 w6ws Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -665,7 +665,9 @@ endif
 # them in.
 #-------------------------------------------------------------------------------
 ifdef ESMF_LAPACK
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_LAPACK=$(ESMF_LAPACK)
 ESMF_CXXLINKLIBS     += $(ESMF_LAPACK_LIBS)
+ESMF_F90COMPILECPPFLAGS += -DESMF_LAPACK=$(ESMF_LAPACK)
 ESMF_F90LINKLIBS     += $(ESMF_LAPACK_LIBS)
 endif
 
