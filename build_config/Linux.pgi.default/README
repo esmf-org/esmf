@@ -3,3 +3,5 @@ Settings for Linux, using the commercial Portland Group PGI Fortran and C++ comp
 Requires the following environment settings:
 
 ESMF_COMPILER pgi
+
+ESMF is currently configured to use the PGI-provided version of LAPACK.

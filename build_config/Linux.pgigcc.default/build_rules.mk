@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.5 2007/05/01 20:51:57 dneckels Exp $
+# $Id: build_rules.mk,v 1.6 2008/04/02 06:09:24 w6ws Exp $
 #
 # Linux.pgigcc.default
 #
@@ -84,6 +84,15 @@ ESMF_F90LINKLIBS  += -lstdc++
 #
 ESMF_F90COMPILEFREENOCPP = -Mfreeform
 ESMF_F90COMPILEFIXCPP    = -Mpreprocess -Mnofreeform
+
+############################################################
+# Add LAPACK libraries
+#
+# Use the PGI version of LAPACK
+#
+ESMF_LAPACK         = PGI
+# ESMf_LAPACK_LIBPATH =
+ESMF_LAPACK_LIBS    = -llapack -lblas
 
 ############################################################
 # Determine where pgf90's libraries are located
