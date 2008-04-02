@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.7 2008/03/31 18:08:53 theurich Exp $
+// $Id: ESMC_Array.C,v 1.8 2008/04/02 02:58:38 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -23,19 +23,21 @@
 //
 //-----------------------------------------------------------------------------
 
+// include generic header files
+#include <string.h>
+
 // include associated header file
 #include "ESMC_Array.h"
 
 // include ESMF headers
 #include "ESMCI_Arg.h"
 #include "ESMC_LogErr.h"
-#include "ESMF_LogMacros.inc"             // for LogErr
 #include "ESMCI_Array.h"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.7 2008/03/31 18:08:53 theurich Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.8 2008/04/02 02:58:38 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -50,20 +52,15 @@ ESMC_Array ESMC_ArrayCreate(ESMC_ArraySpec arrayspec, ESMC_DistGrid distgrid,
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   ESMC_Array array;
-  
-  // call into ESMCI interface
+
   array.ptr = (void *)
     ESMCI::Array::create((ESMCI::ArraySpec *)&arrayspec,
     (ESMCI::DistGrid *)(distgrid.ptr),
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     &localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
-    array.ptr = NULL;
-    return array;  // bail out
-  }
 
-  // set name in newly created Array
-  localrc = (*(ESMCI::Array*)(array.ptr)).setName(name);
+  // Set name in newly created Array
+  localrc = ((ESMCI::Array*)(array.ptr))->ESMCI::Array::setName(name);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
     array.ptr = NULL;
     return array;  // bail out
@@ -73,6 +70,29 @@ ESMC_Array ESMC_ArrayCreate(ESMC_ArraySpec arrayspec, ESMC_DistGrid distgrid,
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return array;
 }
+
+
+char* ESMC_ArrayGetName(ESMC_Array array, int *rc){
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArrayGetName()"
+
+  // initialize return code; assume routine not implemented
+  *rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  ESMCI::Array *ap = (ESMCI::Array *)(array.ptr); // typecast into ESMCI type
+
+  // call into ESMCI method 
+  char* name;
+  name = new char;
+  memset(name, ' ', ESMF_MAXSTR);
+  strncpy(name, ap->getName(), ESMF_MAXSTR);
+
+//printf("In ESMC_ArrayGetName, name= %s \n",name);
+
+  *rc = ESMF_SUCCESS;
+  return name;
+} 
+
 
 int ESMC_ArrayPrint(ESMC_Array array){
 #undef  ESMC_METHOD
