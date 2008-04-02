@@ -1,4 +1,4 @@
-// $Id: ESMC_StateEx.C,v 1.11 2007/07/19 21:41:08 cdeluca Exp $
+// $Id: ESMC_StateEx.C,v 1.11.2.1 2008/04/02 20:07:42 cdeluca Exp $
 //
 // Example/test code which creates a new State.
 
@@ -67,19 +67,19 @@ main(int argc, char **argv) {
     printf("State Create returned, name = %s\n", compname);
 
     bundlename = "Temperature";
-    bundle1 = ESMF_BundleCreate(bundlename, rc=rc);
-    printf("Bundle Create returned, rc = %d", rc);
+    bundle1 = ESMF_FieldBundleCreate(bundlename, rc=rc);
+    printf("FieldBundle Create returned, rc = %d", rc);
 
-    rc = ESMF_StateAddBundle(state2, bundle1);
-    printf("StateAddBundle returned, rc = %d", rc);
+    rc = ESMF_StateAddFieldBundle(state2, bundle1);
+    printf("StateAddFieldBundle returned, rc = %d", rc);
 
-    // Loop here, updating Bundle contents each time step
+    // Loop here, updating FieldBundle contents each time step
 
     rc = ESMF_StateDestroy(state2);
     printf("State Destroy returned, rc = %d", rc);
 
-    rc = ESMF_BundleDestroy(bundle1);
-    printf("Bundle Destroy returned, rc = %d", rc);
+    rc = ESMF_FieldBundleDestroy(bundle1);
+    printf("FieldBundle Destroy returned, rc = %d", rc);
 
     printf("State Example 2 finished");
 
@@ -117,7 +117,7 @@ main(int argc, char **argv) {
 //-------------------------------------------------------------------------
 //   // Example 4:
 //   //
-//   //  Mark and Query Needed flags, and add Bundle data
+//   //  Mark and Query Needed flags, and add FieldBundle data
 
     printf("State Example 4: Get/Set Needed flags in Export State\n");
 
@@ -132,7 +132,7 @@ main(int argc, char **argv) {
 //-------------------------------------------------------------------------
 //   // Example 5:
 //   //
-//   //  Query Needed flags, and add Bundle data
+//   //  Query Needed flags, and add FieldBundle data
 
     printf("State Example 5: Get/Set Needed flags in Export State, cont.\n");
 
@@ -145,11 +145,11 @@ main(int argc, char **argv) {
         printf("Data marked as needed, name = %s\n", dataname);
 
         bundlename = dataname;
-        bundle2 = ESMF_BundleCreate(bundlename, rc=rc);
-        printf("Bundle Create returned, rc = %d, name = %s\n", rc, bundlename);
+        bundle2 = ESMF_FieldBundleCreate(bundlename, rc=rc);
+        printf("FieldBundle Create returned, rc = %d, name = %s\n", rc, bundlename);
 
-        rc = ESMF_StateAddBundle(state3, bundle2);
-        printf("StateAddBundle returned, rc = %d\n", rc);
+        rc = ESMF_StateAddFieldBundle(state3, bundle2);
+        printf("StateAddFieldBundle returned, rc = %d\n", rc);
     } else 
         printf("Data marked as not needed, name = %s\n", statename);
 

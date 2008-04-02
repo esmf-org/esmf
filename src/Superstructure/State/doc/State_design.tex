@@ -1,4 +1,4 @@
-% $Id: State_design.tex,v 1.6 2007/07/19 21:41:06 cdeluca Exp $
+% $Id: State_design.tex,v 1.6.2.1 2008/04/02 20:07:40 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -18,7 +18,7 @@ without rewriting the internal code inside the Component.
 
 States contain the name of the associated Component, a flag for Import
 or Export, and a list of data objects, which can be a combination of
-Bundles, Fields, and/or Arrays.  The objects must be named and have
+FieldBundles, Fields, and/or Arrays.  The objects must be named and have
 the proper attributes so they can be identified by the receiver of
 the data.  For example, units and other detailed information
 may need to be associated with the data as an Attribute.  

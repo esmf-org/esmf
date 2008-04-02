@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2005/03/01 20:58:43 nscollins Exp $
+# $Id: makefile,v 1.4.6.1 2008/04/02 20:07:06 cdeluca Exp $
 
 # leave alone.
 ALL: build_here 
@@ -24,12 +24,12 @@ OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
 
 # is MANSEC something about documentation?
-MANSEC	  = BundleCommobj
+MANSEC	  = FieldBundleCommobj
 LIBBASE	  = libesmf
 
 # the following line must be set to the current subdir name relative
 # to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
-LOCDIR	  = src/Infrastructure/BundleComm/interface
+LOCDIR	  = src/Infrastructure/FieldBundleComm/interface
 
 CLEANDIRS   =
 CLEANFILES  = 
@@ -47,9 +47,9 @@ DIRS	  =
 #
 # e.g.:
 #
-# ESMF_Bundle.o:   ESMF_DataArray.o
+# ESMF_FieldBundle.o:   ESMF_DataArray.o
 #
-# ESMF_Bundle.o:  ESMF_Bundle.o
+# ESMF_FieldBundle.o:  ESMF_FieldBundle.o
 #
 
 

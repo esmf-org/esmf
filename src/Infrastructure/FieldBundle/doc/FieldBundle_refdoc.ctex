@@ -1,4 +1,4 @@
-% $Id: Bundle_refdoc.ctex,v 1.22.2.1 2008/02/13 03:54:33 cdeluca Exp $
+% $Id: FieldBundle_refdoc.ctex,v 1.1.2.1 2008/04/02 20:07:19 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -13,7 +13,7 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{Bundles Design}
+\newcommand{\mytitle}{FieldBundles Design}
 \newcommand{\myauthors}{Nancy Collins}
 #endif
 
@@ -33,72 +33,72 @@
 \newpage
 #endif
 
-\section{Bundle Class}
+\section{FieldBundle Class}
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{Bundle_desc}
+\input{FieldBundle_desc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Bundle/doc/Bundle_desc}
+\input{../Infrastructure/FieldBundle/doc/FieldBundle_desc}
 #endif
 
-\subsection{Bundle Options}
+\subsection{FieldBundle Options}
 #ifdef STANDALONE
-\input{Bundle_options}
+\input{FieldBundle_options}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Bundle/doc/Bundle_options}
+\input{../Infrastructure/FieldBundle/doc/FieldBundle_options}
 #endif
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{Bundle_usage}
-\input{ESMF_BundleCreateEx_fapi}
+\input{FieldBundle_usage}
+\input{ESMF_FieldBundleCreateEx_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Bundle/doc/Bundle_usage}
-\input{../Infrastructure/Bundle/doc/ESMF_BundleCreateEx_fapi}
+\input{../Infrastructure/FieldBundle/doc/FieldBundle_usage}
+\input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleCreateEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
 #ifdef STANDALONE
-\input{Bundle_rest}
+\input{FieldBundle_rest}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Bundle/doc/Bundle_rest}
+\input{../Infrastructure/FieldBundle/doc/FieldBundle_rest}
 #endif
 
 \subsection{Design and Implementation Notes}
 #ifdef STANDALONE
-\input{Bundle_implnotes}
+\input{FieldBundle_implnotes}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Bundle/doc/Bundle_implnotes}
+\input{../Infrastructure/FieldBundle/doc/FieldBundle_implnotes}
 #endif
 
 %\subsection{Global Parameters}
 %#ifdef STANDALONE
-%\input{Bundle_fparam}
+%\input{FieldBundle_fparam}
 %#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Bundle/doc/Bundle_fparam}
+%\input{../Infrastructure/FieldBundle/doc/FieldBundle_fparam}
 %#endif
 
-\subsection{Class API: Basic Bundle Methods}
+\subsection{Class API: Basic FieldBundle Methods}
 #ifdef STANDALONE
-\input{ESMF_Bundle_fapi}
+\input{ESMF_FieldBundle_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Bundle/doc/ESMF_Bundle_fapi}
+\input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundle_fapi}
 #endif
 
-%TODO:FIELDINTEGRATION Restore BundleGet methods
-%\subsection{Class API: Bundle Overloads for Fortran Arrays}
+%TODO:FIELDINTEGRATION Restore FieldBundleGet methods
+%\subsection{Class API: FieldBundle Overloads for Fortran Arrays}
 %#ifdef STANDALONE
-%\input{ESMF_BundleGet_fapi}
+%\input{ESMF_FieldBundleGet_fapi}
 %#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Bundle/doc/ESMF_BundleGet_fapi}
+%\input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleGet_fapi}
 %#endif
 
-#\subsection{Class API: Bundle Communications}
+#\subsection{Class API: FieldBundle Communications}
 #ifdef STANDALONE
-%\input{../../BundleComm/doc/ESMF_BundleComm_fapi}
+%\input{../../FieldBundleComm/doc/ESMF_FieldBundleComm_fapi}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/BundleComm/doc/ESMF_BundleComm_fapi}
+%\input{../Infrastructure/FieldBundleComm/doc/ESMF_FieldBundleComm_fapi}
 #endif
 
 #ifdef STANDALONE

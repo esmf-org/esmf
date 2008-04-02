@@ -1,4 +1,4 @@
-// $Id: ESMC_State.h,v 1.11.2.2 2008/03/27 23:36:45 theurich Exp $
+// $Id: ESMC_State.h,v 1.11.2.3 2008/04/02 20:07:43 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 // !USES:
 #include "ESMC_Base.h"  // all classes inherit from the ESMC Base class.
 #include "ESMCI_Array.h"
-#include "ESMC_Bundle.h"
+#include "ESMC_FieldBundle.h"
 
 
 // !PUBLIC TYPES:
@@ -55,7 +55,7 @@ typedef enum ESMC_StateType {
       ESMC_StateImport=1, ESMC_StateExport, 
       ESMC_StateImpExp, ESMC_StateUnknown } ESMC_StateType;
 
-typedef enum ESMC_Objtype { Bundle=1, Field=2, Array=3 } ESMC_Objtype;
+typedef enum ESMC_Objtype { FieldBundle=1, Field=2, Array=3 } ESMC_Objtype;
 typedef enum ESMC_Needed { Needed=1, NotNeeded=2 } ESMC_Needed;
 typedef enum ESMC_Ready { ReadyToRead=1, ReadyToWrite=2 } ESMC_Ready;
 
@@ -142,7 +142,7 @@ typedef enum ESMC_Ready { ReadyToRead=1, ReadyToWrite=2 } ESMC_Ready;
       void FTN(f_esmf_statecreate)(char *statename, statetype, compname,
             bundles, fields, arrays, nestedstates, names, itemcount, int *rc);
       void FTN(f_esmf_statedestroy)(ESMC_State *state, int *rc);
-      void FTN(f_esmf_stateaddbundle)(ESMC_State *state, ESMC_Bundle *bundle, int *rc);
+      void FTN(f_esmf_stateaddbundle)(ESMC_State *state, ESMC_FieldBundle *bundle, int *rc);
       void FTN(f_esmf_stateaddfield)(ESMC_State *state, ESMC_Field *field, int *rc);
       void FTN(f_esmf_stateaddarray)(ESMC_State *state, ESMC_Array *array, int *rc);
       void FTN(f_esmf_stateaddstate)(ESMC_State *state, nestedstate, int *rc);
@@ -155,7 +155,7 @@ typedef enum ESMC_Ready { ReadyToRead=1, ReadyToWrite=2 } ESMC_Ready;
       void FTN(f_esmf_stategetneeded)(ESMC_State *state, char *dataname, 
                                  needed, int *rc);
       void FTN(f_esmf_statesetneeded)(ESMC_State *state, char *dataname, needed, int *rc);
-      void FTN(f_esmf_stategetbundle)(ESMC_State *state, char *name, ESMC_Bundle *bundle, int *rc);
+      void FTN(f_esmf_stategetbundle)(ESMC_State *state, char *name, ESMC_FieldBundle *bundle, int *rc);
       void FTN(f_esmf_stategetfield)(ESMC_State *state, char *name, ESMC_Field *field, int *rc);
       void FTN(f_esmf_stategetarray)(ESMC_State *state, char *name, ESMC_Array *array, int *rc);
       void FTN(f_esmf_stategetstate)(ESMC_State *state, char *name, nestedstate, int *rc);

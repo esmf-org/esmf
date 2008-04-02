@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2005/03/01 20:59:04 nscollins Exp $
+# $Id: makefile,v 1.4.6.1 2008/04/02 20:07:09 cdeluca Exp $
 
 # leave alone.
 ALL: build_here 
@@ -12,7 +12,7 @@ FFLAGS    =
 # if you have C files in this directory, list them all on the line below.
 SOURCEC	  = 
 # if you have F90 files in this directory, list them all on the line below.
-SOURCEF	  =  ESMF_BundleComm.F90
+SOURCEF	  =  ESMF_FieldBundleComm.F90
 # if you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 # list all .h files which should be copied to common include dir
@@ -24,12 +24,12 @@ OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
 
 # is MANSEC something about documentation?
-MANSEC	  = BundleCommobj
+MANSEC	  = FieldBundleCommobj
 LIBBASE	  = libesmf
 
 # the following line must be set to the current subdir name relative
 # to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
-LOCDIR	  = src/Infrastructure/BundleComm/src
+LOCDIR	  = src/Infrastructure/FieldBundleComm/src
 
 CLEANDIRS   =
 CLEANFILES  = 
@@ -47,9 +47,9 @@ DIRS	  =
 #
 # e.g.:
 #
-# ESMF_Bundle.o:   ESMF_DataArray.o
+# ESMF_FieldBundle.o:   ESMF_DataArray.o
 #
-# ESMF_Bundle.o:  ESMF_Bundle.o
+# ESMF_FieldBundle.o:  ESMF_FieldBundle.o
 #
 
 

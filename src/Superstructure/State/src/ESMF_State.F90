@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.114.2.3 2008/03/27 23:36:45 theurich Exp $
+! $Id: ESMF_State.F90,v 1.114.2.4 2008/04/02 20:07:43 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
       use ESMF_FieldMod
       use ESMF_FieldGetMod
       use ESMF_FieldCreateMod
-      use ESMF_BundleMod
+      use ESMF_FieldBundleMod
       use ESMF_RHandleMod
       use ESMF_StateTypesMod
       use ESMF_InitMacrosMod
@@ -57,9 +57,9 @@
       public ESMF_StateCreate, ESMF_StateDestroy
 
       public ESMF_StateAddNameOnly
-      public ESMF_StateAddBundle, ESMF_StateAddField, ESMF_StateAddArray
+      public ESMF_StateAddFieldBundle, ESMF_StateAddField, ESMF_StateAddArray
       public ESMF_StateAddRouteHandle, ESMF_StateAddState
-      public ESMF_StateGetBundle, ESMF_StateGetField, ESMF_StateGetArray
+      public ESMF_StateGetFieldBundle, ESMF_StateGetField, ESMF_StateGetArray
       public ESMF_StateGetRouteHandle, ESMF_StateGetState
       public ESMF_StateGetItemInfo
 
@@ -91,7 +91,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.114.2.3 2008/03/27 23:36:45 theurich Exp $'
+      '$Id: ESMF_State.F90,v 1.114.2.4 2008/04/02 20:07:43 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -112,8 +112,8 @@
 !!        module procedure ESMF_StateAddArrayList
 !!        module procedure ESMF_StateAddOneField
 !!        module procedure ESMF_StateAddFieldList
-!!        module procedure ESMF_StateAddOneBundle
-!!        module procedure ESMF_StateAddBundleList
+!!        module procedure ESMF_StateAddOneFieldBundle
+!!        module procedure ESMF_StateAddFieldBundleList
 !!        module procedure ESMF_StateAddOneState
 !!        module procedure ESMF_StateAddStateList
 !!        module procedure ESMF_StateAddOneName
@@ -188,19 +188,19 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_StateAddBundle -- Add Bundles to a State
+! !IROUTINE: ESMF_StateAddFieldBundle -- Add FieldBundles to a State
 
 ! !INTERFACE:
-     interface ESMF_StateAddBundle
+     interface ESMF_StateAddFieldBundle
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-        module procedure ESMF_StateAddOneBundle
-        module procedure ESMF_StateAddBundleList
+        module procedure ESMF_StateAddOneFieldBundle
+        module procedure ESMF_StateAddFieldBundleList
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_StateAddBundle} functions.   
+!  types of {\tt ESMF\_StateAddFieldBundle} functions.   
 !  
 !EOPI 
 end interface
@@ -248,14 +248,14 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_StateGetData -- Retrieve Bundles, Fields, or Arrays from a State
+! !IROUTINE: ESMF_StateGetData -- Retrieve FieldBundles, Fields, or Arrays from a State
 
 ! !INTERFACE:
 !!     interface ESMF_StateGetData
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-!!      module procedure ESMF_StateGetBundle
+!!      module procedure ESMF_StateGetFieldBundle
 !!      module procedure ESMF_StateGetField
 !!      module procedure ESMF_StateGetArray
 !!      module procedure ESMF_StateGetState
@@ -614,17 +614,17 @@ end interface
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateAddOneBundle"
+#define ESMF_METHOD "ESMF_StateAddOneFieldBundle"
 !BOP
-! !IROUTINE: ESMF_StateAddBundle - Add a Bundle to a State
+! !IROUTINE: ESMF_StateAddFieldBundle - Add a FieldBundle to a State
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAddBundle()   
-      subroutine ESMF_StateAddOneBundle(state, bundle, proxyflag, rc)
+      ! Private name; call using ESMF_StateAddFieldBundle()   
+      subroutine ESMF_StateAddOneFieldBundle(state, bundle, proxyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state
-      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_FieldBundle), intent(in) :: bundle
       logical, optional :: proxyflag
       integer, intent(out), optional :: rc
 !     
@@ -638,10 +638,10 @@ end interface
 !     \item[state]
 !      The {\tt ESMF\_State} object.
 !     \item[bundle]
-!      The {\tt ESMF\_Bundle} to be added.
+!      The {\tt ESMF\_FieldBundle} to be added.
 !      This is a reference only; when
 !      the {\tt ESMF\_State} is destroyed the objects contained in it will
-!      not be destroyed.   Also, the {\tt ESMF\_Bundle} cannot be safely 
+!      not be destroyed.   Also, the {\tt ESMF\_FieldBundle} cannot be safely 
 !      destroyed before the {\tt ESMF\_State} is destroyed.
 !      Since objects can be added to multiple containers, it remains
 !      the user's responsibility to manage the
@@ -653,11 +653,11 @@ end interface
 !EOP
 
       integer :: localrc
-      type(ESMF_Bundle) :: temp_list(1)
+      type(ESMF_FieldBundle) :: temp_list(1)
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -670,44 +670,44 @@ end interface
 
       temp_list(1) = bundle
 
-      call ESMF_StateClassAddBundleList(state%statep, 1, temp_list, &
+      call ESMF_StateClAddFieldBundleList(state%statep, 1, temp_list, &
         proxyflag=proxyflag, rc=localrc)      
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       if (present(rc)) rc = ESMF_SUCCESS
-      end subroutine ESMF_StateAddOneBundle
+      end subroutine ESMF_StateAddOneFieldBundle
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateAddBundleList"
+#define ESMF_METHOD "ESMF_StateAddFieldBundleList"
 !BOP
-! !IROUTINE: ESMF_StateAddBundle - Add a list of Bundles to a State
+! !IROUTINE: ESMF_StateAddFieldBundle - Add a list of FieldBundles to a State
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAddBundle()   
-      subroutine ESMF_StateAddBundleList(state, bundleCount, bundleList, rc)
+      ! Private name; call using ESMF_StateAddFieldBundle()   
+      subroutine ESMF_StateAddFieldBundleList(state, bundleCount, bundleList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state 
       integer, intent(in) :: bundleCount
-      type(ESMF_Bundle), dimension(:), intent(inout) :: bundleList
+      type(ESMF_FieldBundle), dimension(:), intent(inout) :: bundleList
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Add multiple {\tt ESMF\_Bundle}s to an {\tt ESMF\_State}.
+!      Add multiple {\tt ESMF\_FieldBundle}s to an {\tt ESMF\_State}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[state]
 !      An {\tt ESMF\_State} object.
 !     \item[bundleCount]
-!      The number of {\tt ESMF\_Bundle}s to be added.
+!      The number of {\tt ESMF\_FieldBundle}s to be added.
 !     \item[bundleList]
-!      The list (Fortran array) of {\tt ESMF\_Bundle}s to be added.
+!      The list (Fortran array) of {\tt ESMF\_FieldBundle}s to be added.
 !      This is a reference only; when
 !      the {\tt ESMF\_State} is destroyed the objects contained in it will
-!      not be destroyed.   Also, the {\tt ESMF\_Bundle}s cannot be safely 
+!      not be destroyed.   Also, the {\tt ESMF\_FieldBundle}s cannot be safely 
 !      destroyed before the {\tt ESMF\_State} is destroyed.
 !      Since objects can be added to multiple containers, it remains
 !      the user's responsibility to manage the
@@ -722,7 +722,7 @@ end interface
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
       do i=1,bundleCount
-         ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundleList(i),rc)
+         ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundleList(i),rc)
       enddo
 
       ! Initialize return code; assume routine not implemented
@@ -735,13 +735,13 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_StateClassAddBundleList(state%statep, bundleCount, &
+      call ESMF_StateClAddFieldBundleList(state%statep, bundleCount, &
                                           bundleList, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       if (present(rc)) rc = ESMF_SUCCESS
-      end subroutine ESMF_StateAddBundleList
+      end subroutine ESMF_StateAddFieldBundleList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -895,7 +895,7 @@ end interface
 !      The {\tt name} must be unique within the {\tt state}.
 !      It is available to be marked needed by the
 !      consumer of the export {\tt ESMF\_State}. Then the data 
-!      provider can replace the name with the actual {\tt ESMF\_Bundle},
+!      provider can replace the name with the actual {\tt ESMF\_FieldBundle},
 !      {\tt ESMF\_Field}, or {\tt ESMF\_Array} which carries the needed data.
 !
 !     The arguments are:
@@ -958,7 +958,7 @@ end interface
 !      the {\tt state}
 !      It is available to be marked needed by the
 !      consumer of the export {\tt ESMF\_State}. Then the data 
-!      provider can replace the name with the actual {\tt ESMF\_Bundle},
+!      provider can replace the name with the actual {\tt ESMF\_FieldBundle},
 !      {\tt ESMF\_Field}, or {\tt ESMF\_Array} which carries the needed data.
 !      Unneeded data need not be generated.
 !
@@ -1153,7 +1153,7 @@ end interface
 ! !ARGUMENTS:
       character(len=*), intent(in), optional :: stateName 
       type(ESMF_StateType), intent(in), optional :: statetype
-      type(ESMF_Bundle), dimension(:), intent(inout), optional :: bundleList
+      type(ESMF_FieldBundle), dimension(:), intent(inout), optional :: bundleList
       type(ESMF_Field), dimension(:), intent(inout), optional :: fieldList
       type(ESMF_Array), dimension(:), intent(in), optional :: arrayList
       type(ESMF_State), dimension(:), intent(in), optional :: nestedStateList
@@ -1180,7 +1180,7 @@ end interface
 !    or {\tt ESMF\_STATE\_UNSPECIFIED} The default 
 !    is {\tt ESMF\_STATE\_UNSPECIFIED}.
 !   \item[{[bundleList]}]
-!    A list (Fortran array) of {\tt ESMF\_Bundle}s.
+!    A list (Fortran array) of {\tt ESMF\_FieldBundle}s.
 !   \item[{[fieldList]}]
 !    A list (Fortran array) of {\tt ESMF\_Field}s.
 !   \item[{[arrayList]}]
@@ -1191,7 +1191,7 @@ end interface
 !   \item[{[nameList]}]
 !    A list (Fortran array) of character string name placeholders.
 !   \item[{[itemCount]}]
-!    The total number of things -- Bundles, Fields, 
+!    The total number of things -- FieldBundles, Fields, 
 !    Arrays, States, and Names -- to be added.
 !    If {\tt itemCount} is not specified, it will be computed internally based
 !    on the length of each object list.
@@ -1232,7 +1232,7 @@ end interface
         ! check input variables
         if (present(bundleList)) then
            do i=1,size(bundleList)
-              ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundleList(i),rc)
+              ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundleList(i),rc)
            enddo
         endif
         if (present(fieldList)) then
@@ -1429,7 +1429,7 @@ end interface
       if (present(name)) call c_ESMC_GetName(stypep%base, name, localrc)
       if (present(statetype)) statetype = stypep%st
 
-      ! TODO: indirect entries for Fields inside of Bundles complicates
+      ! TODO: indirect entries for Fields inside of FieldBundles complicates
       !  this code.  the count needs to be both primary objects and
       !  total objects.  perhaps the state derived type needs to bookkeep
       !  both numbers.  For now, return entire raw count.
@@ -2615,24 +2615,24 @@ end interface
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateGetBundle"
+#define ESMF_METHOD "ESMF_StateGetFieldBundle"
 !BOP
-! !IROUTINE: ESMF_StateGetBundle - Retrieve a Bundle from a State
+! !IROUTINE: ESMF_StateGetFieldBundle - Retrieve a FieldBundle from a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StateGetBundle(state, bundleName, bundle, &
+      subroutine ESMF_StateGetFieldBundle(state, bundleName, bundle, &
                                      nestedStateName, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state
       character (len=*), intent(in) :: bundleName
-      type(ESMF_Bundle), intent(out) :: bundle
+      type(ESMF_FieldBundle), intent(out) :: bundle
       character (len=*), intent(in), optional :: nestedStateName
       integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
-!      Returns an {\tt ESMF\_Bundle} from an {\tt ESMF\_State} by name.  
+!      Returns an {\tt ESMF\_FieldBundle} from an {\tt ESMF\_State} by name.  
 !      If the {\tt ESMF\_State} contains the object directly, only
 !      {\tt bundleName} is required.
 !      If the {\tt state} contains multiple nested {\tt ESMF\_State}s
@@ -2646,11 +2646,11 @@ end interface
 !     The arguments are:
 !  \begin{description}     
 !  \item[state]
-!   State to query for a {\tt ESMF\_Bundle} named {\tt bundlename}.
+!   State to query for a {\tt ESMF\_FieldBundle} named {\tt bundlename}.
 !  \item[bundleName]
-!    Name of {\tt ESMF\_Bundle} to be returned.
+!    Name of {\tt ESMF\_FieldBundle} to be returned.
 !  \item[bundle]
-!    Returned reference to the {\tt ESMF\_Bundle}.
+!    Returned reference to the {\tt ESMF\_FieldBundle}.
 !  \item[{[nestedStateName]}]
 !    Optional.  An error if specified when the {\tt state} argument contains
 !    no nested {\tt ESMF\_State}s.  Required if the {\tt state} contains 
@@ -2706,13 +2706,13 @@ end interface
       exists = ESMF_StateClassFindData(top%statep, bundleName, .true., &
                                                           dataitem, rc=localrc)
       if (.not. exists) then
-          write(errmsg, *) "no Bundle found named ", trim(bundleName)
+          write(errmsg, *) "no FieldBundle found named ", trim(bundleName)
           if (ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
                                       ESMF_CONTEXT, rc)) return
       endif
 
       if (dataitem%otype .ne. ESMF_STATEITEM_BUNDLE) then
-          write(errmsg, *) trim(bundleName), " found but not type Bundle"
+          write(errmsg, *) trim(bundleName), " found but not type FieldBundle"
           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
                                       ESMF_CONTEXT, rc)) return
       endif
@@ -2721,7 +2721,7 @@ end interface
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StateGetBundle
+      end subroutine ESMF_StateGetFieldBundle
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2824,7 +2824,7 @@ end interface
           if (dataitem%otype .eq. ESMF_STATEITEM_INDIRECT) then
               ! TODO: how do we return the info that this is inside a bundle?
               if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                       "extracting Fields directly from Bundles in a State", &
+                       "extracting Fields directly from FieldBundles in a State", &
                        ESMF_CONTEXT, rc)) return
           endif
           write(errmsg, *) trim(fieldname), " found but not type Field"
@@ -3246,7 +3246,7 @@ end interface
 
          select case (dp%otype%ot)
            case (ESMF_STATEITEM_BUNDLE%ot)
-             outbuf = trim(outbuf) //  " type Bundle,"
+             outbuf = trim(outbuf) //  " type FieldBundle,"
            case (ESMF_STATEITEM_FIELD%ot)
              outbuf = trim(outbuf) //  " type Field,"
            case (ESMF_STATEITEM_ARRAY%ot)
@@ -4357,7 +4357,7 @@ end interface
       type (ESMF_StateClass), pointer :: stypep
       character(len=*), intent(in), optional :: statename 
       type(ESMF_StateType), intent(in), optional :: statetype
-      type(ESMF_Bundle), dimension(:), intent(inout), optional :: bundles
+      type(ESMF_FieldBundle), dimension(:), intent(inout), optional :: bundles
       type(ESMF_Field), dimension(:), intent(inout), optional :: fields
       type(ESMF_Array), dimension(:), intent(in), optional :: arrays
       type(ESMF_State), dimension(:), intent(in), optional :: states
@@ -4384,7 +4384,7 @@ end interface
 !    {\tt ESMF\_STATE\_EXPORT}, or {\tt ESMF\_STATE\_LIST}.   
 !    {\tt ESMF\_STATE\_LIST} is the default if not specified.
 !   \item[{[bundles]}]
-!    An array of {\tt Bundles}.
+!    An array of {\tt FieldBundles}.
 !   \item[{[fields]}]
 !    An array of {\tt Fields}.
 !   \item[{[arrays]}]
@@ -4394,7 +4394,7 @@ end interface
 !   \item[{[names]}]
 !    An array of name placeholders.
 !   \item[{[itemcount]}]
-!    The total number of Bundles, Fields, Arrays, States, and Names specified.
+!    The total number of FieldBundles, Fields, Arrays, States, and Names specified.
 !    This argument is optional, and if specified is used as an error check
 !    to verify that the actual total number of items found matches this count.
 !   \item[{[neededflag]}]
@@ -4437,7 +4437,7 @@ end interface
         ! check input variables
         if (present(bundles)) then
            do i=1,size(bundles)
-              ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundles(i),rc)
+              ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundles(i),rc)
            enddo
         endif
         if (present(fields)) then
@@ -4515,7 +4515,7 @@ end interface
         if (present(bundles)) then
           count = size(bundles)
           if (count .gt. 0) then
-            call ESMF_StateClassAddBundleList(stypep, count, bundles, &
+            call ESMF_StateClAddFieldBundleList(stypep, count, bundles, &
               rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -4683,7 +4683,7 @@ end interface
           if (stateItem%proxyFlag) then
             select case(stateItem%otype%ot)
             case (ESMF_STATEITEM_BUNDLE%ot)
-              call ESMF_BundleDestroy(stateItem%datap%bp, rc=localrc)
+              call ESMF_FieldBundleDestroy(stateItem%datap%bp, rc=localrc)
               if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
@@ -5338,18 +5338,18 @@ end interface
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateClassAddBundleList"
+#define ESMF_METHOD "ESMF_StateClAddFieldBundleList"
 !BOPI
-! !IROUTINE: ESMF_StateClassAddBundleList - Add a list of Bundles to a StateClass
+! !IROUTINE: ESMF_StateClAddFieldBundleList - Add a list of FieldBundles to a StateClass
 !
 ! !INTERFACE:
-      subroutine ESMF_StateClassAddBundleList(stypep, bcount, bundles, &
+      subroutine ESMF_StateClAddFieldBundleList(stypep, bcount, bundles, &
         proxyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_StateClass), pointer :: stypep
       integer, intent(in) :: bcount
-      type(ESMF_Bundle), dimension(:), intent(inout) :: bundles
+      type(ESMF_FieldBundle), dimension(:), intent(inout) :: bundles
       logical, optional :: proxyflag
       integer, intent(out), optional :: rc     
 !
@@ -5361,9 +5361,9 @@ end interface
 !     \item[stypep]
 !       Internal StateClass pointer.  Required.
 !     \item[bcount]
-!       The number of {\tt ESMF\_Bundles} to be added.
+!       The number of {\tt ESMF\_FieldBundles} to be added.
 !     \item[bundles]
-!       The array of {\tt ESMF\_Bundles} to be added.
+!       The array of {\tt ESMF\_FieldBundles} to be added.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5389,7 +5389,7 @@ end interface
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
       do i=1,bcount
-         ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundles(i),rc)
+         ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundles(i),rc)
       enddo
   
       ! Return with error if list is empty.  
@@ -5408,11 +5408,11 @@ end interface
       ! get a count of all fields in all bundles
       fruncount = 0
       do i=1, bcount
-        call ESMF_BundleValidate(bundles(i), rc=localrc)
+        call ESMF_FieldBundleValidate(bundles(i), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        call ESMF_BundleGet(bundles(i), fieldCount=fcount, rc=localrc)
+        call ESMF_FieldBundleGet(bundles(i), fieldCount=fcount, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -5448,7 +5448,7 @@ end interface
       ! For each bundle...
       do i=1, bcount
 
-        call ESMF_BundleGet(bundles(i), name=bname, rc=localrc)
+        call ESMF_FieldBundleGet(bundles(i), name=bname, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) goto 10
@@ -5482,14 +5482,14 @@ end interface
         endif
 
         ! and now the same for each field in the bundle
-        call ESMF_BundleGet(bundles(i), fieldCount=fcount, rc=localrc)
+        call ESMF_FieldBundleGet(bundles(i), fieldCount=fcount, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) goto 10
 
         do j=1, fcount
             ! get next field and query name
-            call ESMF_BundleGetField(bundles(i), j, field, localrc)
+            call ESMF_FieldBundleGetField(bundles(i), j, field, localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) goto 10
@@ -5574,7 +5574,7 @@ end interface
             if (present(proxyflag)) nextitem%proxyFlag = proxyflag
 
             ! Add name
-            call ESMF_BundleGet(bundles(i), name=nextitem%namep, rc=localrc)
+            call ESMF_FieldBundleGet(bundles(i), name=nextitem%namep, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) goto 10
@@ -5594,7 +5594,7 @@ end interface
         ! Whether it was found in pass 1 or just added above, we still
         !  have to go through each field and see if any of them need to
         !  be added or updated.
-        call ESMF_BundleGet(bundles(i), fieldCount=fcount, rc=localrc)
+        call ESMF_FieldBundleGet(bundles(i), fieldCount=fcount, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) goto 10
@@ -5615,7 +5615,7 @@ end interface
             if (present(proxyflag)) nextitem%proxyFlag = proxyflag
     
             ! get next field and query name
-            call ESMF_BundleGetField(bundles(i), j, field, localrc)
+            call ESMF_FieldBundleGetField(bundles(i), j, field, localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) goto 10
@@ -5691,7 +5691,7 @@ end interface
 
 
       if (present(rc)) rc = localrc
-      end subroutine ESMF_StateClassAddBundleList
+      end subroutine ESMF_StateClAddFieldBundleList
 
 
 !------------------------------------------------------------------------------
@@ -6021,7 +6021,7 @@ end interface
 !      The {\tt name}s must be unique within the {\tt State}
 !      They are available to be marked {\tt needed} by the
 !      consumer of the export {\tt State}. Then the data 
-!      provider can replace the name with the actual {\tt Bundle},
+!      provider can replace the name with the actual {\tt FieldBundle},
 !      {\tt Field}, or {\tt Array} which carries the needed data.
 !      Unneeded data need not be generated.
 !
@@ -6340,7 +6340,7 @@ end interface
 
           select case (sip%otype%ot)
             case (ESMF_STATEITEM_BUNDLE%ot)
-             call ESMF_BundleSerialize(sip%datap%bp, buffer, length, &
+             call ESMF_FieldBundleSerialize(sip%datap%bp, buffer, length, &
                                        offset, localrc)
               continue ! TODO: serialize
             case (ESMF_STATEITEM_FIELD%ot)
@@ -6461,7 +6461,7 @@ end interface
 
           select case (sip%otype%ot)
             case (ESMF_STATEITEM_BUNDLE%ot)
-              sip%datap%bp = ESMF_BundleDeserialize(vm, buffer, offset, localrc)
+              sip%datap%bp = ESMF_FieldBundleDeserialize(vm, buffer, offset, localrc)
               continue ! TODO: deserialize
             case (ESMF_STATEITEM_FIELD%ot)
               sip%datap%fp = ESMF_FieldDeserialize(vm, buffer, offset, localrc)

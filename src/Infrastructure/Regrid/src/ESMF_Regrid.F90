@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.120 2007/09/27 19:53:11 cdeluca Exp $
+! $Id: ESMF_Regrid.F90,v 1.120.2.1 2008/04/02 20:07:33 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -58,7 +58,7 @@
       use ESMF_InternArrayCommMod      ! array communications class
       use ESMF_FieldDataMapMod   ! field datamap class
       use ESMF_FieldMod          ! field class
-      use ESMF_BundleMod         ! bundle class
+      use ESMF_FieldBundleMod         ! bundle class
       use ESMF_RegridTypesMod    ! regrid data types and utilities
       use ESMF_RegridBilinearMod ! methods related to bilinear regrid
       use ESMF_RegridNearNbrMod  ! methods related to nearest-nbr regrid
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.120 2007/09/27 19:53:11 cdeluca Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.120.2.1 2008/04/02 20:07:33 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -1307,7 +1307,7 @@
 
 !==============================================================================
 ! These are the user-level, public entry points for calling regridding at
-! the Array level. The Field and Bundle routines are expected to be more
+! the Array level. The Field and FieldBundle routines are expected to be more
 ! useful to the user. These exist, honestly, to fufill a user request that 
 ! array-level calls exist, but they need both igrid and datamap information, 
 ! so they are not fundamentally different from the field level calls.   

@@ -1,4 +1,4 @@
-% $Id: State_implnotes.tex,v 1.11 2007/07/02 19:34:41 cdeluca Exp $
+% $Id: State_implnotes.tex,v 1.11.2.1 2008/04/02 20:07:41 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 \item
 States contain the name of the associated Component, a flag for Import
 or Export, and a list of data objects, which can be a combination of
-Bundles, Fields, and/or Arrays.  The objects must be named and have
+FieldBundles, Fields, and/or Arrays.  The objects must be named and have
 the proper attributes so they can be identified by the receiver of
 the data.  For example, units and other detailed information
 may need to be associated with the data as an Attribute.  
@@ -78,7 +78,7 @@ in the FieldExcl system test.}
 In the coupler code, all PETs must make the reconcile call before
 accessing data in the State.  On PETs which already contain data,
 the objects are unchanged.  On PETs which were not involved during
-the creation of the Bundles or Fields, the reconcile call adds an
+the creation of the FieldBundles or Fields, the reconcile call adds an
 object to the State which contains all the same metadata associated
 with the object, but creates a slightly different Grid object,
 called a Proxy Grid. These PETs contain no local data, so the

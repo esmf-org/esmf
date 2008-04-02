@@ -1,0 +1,22 @@
+# FieldBundle test Harness Config file
+
+# test class
+test_class: 'BUNDLE' 
+
+# request extra report
+#       -1 = report test failures
+#        0 = no output
+#        1 = report successful tests
+#        2 = report both successes and failures.
+test_report: 0
+
+# descriptor file for the nonexhaustive case
+nonexhaustive::
+   nonexhaustive_descriptor.rc
+::   # end of list
+
+# descriptor files for the exhaustive case
+exhaustive::
+   exhaustive_descriptor.rc
+:: # end of list
+

@@ -1,10 +1,10 @@
-# $Id: makefile,v 1.7 2007/08/17 20:53:25 cdeluca Exp $
+# $Id: makefile,v 1.7.2.1 2008/04/02 20:07:04 cdeluca Exp $
 
 ALL: build_here
 
 # This needs to be the path of this directory relative to the
 # top level esmf directory.
-LOCDIR	  = src/Infrastructure/BundleComm/
+LOCDIR	  = src/Infrastructure/FieldBundleComm/
 
 # Leave this line alone.
 include ${ESMF_DIR}/makefile

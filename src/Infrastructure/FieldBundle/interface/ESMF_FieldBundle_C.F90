@@ -1,4 +1,4 @@
-!  $Id: ESMF_Bundle_C.F90,v 1.7 2007/04/27 14:23:33 rosalind Exp $
+!  $Id: ESMF_FieldBundle_C.F90,v 1.1.2.1 2008/04/02 20:07:22 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -23,14 +23,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Bundle_C.F90,v 1.7 2007/04/27 14:23:33 rosalind Exp $'
+!      '$Id: ESMF_FieldBundle_C.F90,v 1.1.2.1 2008/04/02 20:07:22 cdeluca Exp $'
 !==============================================================================
    subroutine f_esmf_bundlecreate(bundlep, rc)
        use ESMF_UtilTypesMod    ! ESMF generic types class
        use ESMF_BaseMod         ! ESMF base class
-       use ESMF_BundleMod
-     type(ESMF_Bundle), pointer :: bundlep
-     type(ESMF_Bundle), target :: thebundle
+       use ESMF_FieldBundleMod
+     type(ESMF_FieldBundle), pointer :: bundlep
+     type(ESMF_FieldBundle), target :: thebundle
      integer, intent(out) :: rc              
      integer :: localrc
 
@@ -38,7 +38,7 @@
      rc = ESMF_RC_NOT_IMPL
      localrc = ESMF_RC_NOT_IMPL
 
-     thebundle = ESMF_BundleCreate(rc=localrc)
+     thebundle = ESMF_FieldBundleCreate(rc=localrc)
     
      bundlep => thebundle
      rc = localrc
@@ -47,14 +47,14 @@
    subroutine f_esmf_bundledestroy(bundlep, rc)
        use ESMF_UtilTypesMod    ! ESMF generic types class
        use ESMF_BaseMod         ! ESMF base class
-       use ESMF_BundleMod
-     type(ESMF_Bundle), pointer :: bundlep      
+       use ESMF_FieldBundleMod
+     type(ESMF_FieldBundle), pointer :: bundlep      
      integer, intent(out), optional :: rc     
 
      ! Initialize return codes; assume routines not initialized
      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-     call ESMF_BundleDestroy(bundlep, rc)
+     call ESMF_FieldBundleDestroy(bundlep, rc)
 
 
    end subroutine f_esmf_bundledestroy

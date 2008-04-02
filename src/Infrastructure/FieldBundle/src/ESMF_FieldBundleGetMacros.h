@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_BundleGetMacros.h,v 1.12.2.3 2008/02/14 04:29:14 cdeluca Exp $
+! $Id: ESMF_FieldBundleGetMacros.h,v 1.1.2.1 2008/04/02 20:07:23 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -14,29 +14,29 @@
 #endif
 #if 0
 !------------------------------------------------------------------------------
-! Macros for the Bundle class.
+! Macros for the FieldBundle class.
 !------------------------------------------------------------------------------
 #endif
 
 #if 0
 !------------------------------------------------------------------------------
-! Documentation for the general BundleGetDataPointer macro
+! Documentation for the general FieldBundleGetDataPointer macro
 !------------------------------------------------------------------------------
 #endif
 
-#define BundleGetDataPointerDoc() \
+#define FieldBundleGetDataPointerDoc() \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOPI @\
-! !IROUTINE: ESMF_BundleGetDataPointer - Retrieve Fortran pointer directly from a Bundle @\
+! !IROUTINE: ESMF_FieldBundleGetDataPointer - Retrieve Fortran pointer directly from a FieldBundle @\
 ! @\
 ! !INTERFACE: @\
-!     ! Private name; call using ESMF_BundleGetDataPointer() @\
-!      subroutine ESMF_BundleGetDataPointer<rank><type><kind>(bundle, & @\
+!     ! Private name; call using ESMF_FieldBundleGetDataPointer() @\
+!      subroutine ESMF_FieldBundleGetDataPointer<rank><type><kind>(bundle, & @\
 !                                 fieldName, dataPointer, copyflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!      type(ESMF_Bundle), intent(in) :: bundle @\
+!      type(ESMF_FieldBundle), intent(in) :: bundle @\
 !      character(len=*), intent(in) :: fieldName @\
 !      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: dataPointer @\
 !      type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
@@ -52,14 +52,14 @@
 ! The arguments are: @\
 !  \begin{description} @\
 !  \item[bundle] @\
-!   The {\tt ESMF\_Bundle} to query. @\
+!   The {\tt ESMF\_FieldBundle} to query. @\
 !  \item[fieldName] @\
 !   The name of the {\tt ESMF\_Field} inside the {\tt bundle} @\
 !   to return.  The {\tt bundle} cannot have packed data. @\
 !  \item[dataPointer] @\
 !   An unassociated Fortran pointer of the proper Type, Kind, and Rank as the data @\
-!   in the Bundle.  When this call returns successfully, the pointer will now point to @\
-!   the data in the Bundle.  This is either a reference or a copy, depending on the @\
+!   in the FieldBundle.  When this call returns successfully, the pointer will now point to @\
+!   the data in the FieldBundle.  This is either a reference or a copy, depending on the @\
 !   setting of the following argument.  The default is to return a reference. @\
 !  \item[{[copyflag]}] @\
 !   Defaults to {\tt ESMF\_DATA\_REF}.  If set to {\tt ESMF\_DATA\_COPY}, a separate @\
@@ -73,19 +73,19 @@
 
 #if 0
 !------------------------------------------------------------------------------
-! Get a Fortran pointer back to Bundle Data macro
+! Get a Fortran pointer back to FieldBundle Data macro
 !------------------------------------------------------------------------------
 #endif
 
-#define BundleGetDataPointerMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+#define FieldBundleGetDataPointerMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 ^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_BundleGetDataPointer" @\
-      subroutine ESMF_BundleGetDataPointer##mrank##D##mtypekind(bundle, & @\
+^define ESMF_METHOD "ESMF_FieldBundleGetDataPointer" @\
+      subroutine ESMF_FieldBundleGetDataPointer##mrank##D##mtypekind(bundle, & @\
                       fieldName, dataPointer, copyflag, rc) @\
  @\
-      type(ESMF_Bundle), intent(inout) :: bundle @\
+      type(ESMF_FieldBundle), intent(inout) :: bundle @\
       character(len=*), intent(in) :: fieldName @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: dataPointer @\
       type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
@@ -104,7 +104,7 @@
  @\
  @\
         ! check variables @\
-        ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc) @\
+        ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc) @\
  @\
         if (present(rc)) then @\
           rcpresent = .TRUE. @\
@@ -118,7 +118,7 @@
                               ESMF_CONTEXT, rc)) return @\
         endif @\
  @\
-        call ESMF_BundleGetField(bundle, fieldName, field, status) @\
+        call ESMF_FieldBundleGetField(bundle, fieldName, field, status) @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
@@ -135,7 +135,7 @@
  @\
         if (rcpresent) rc = status @\
  @\
-        end subroutine ESMF_BundleGetDataPointer##mrank##D##mtypekind   @\
+        end subroutine ESMF_FieldBundleGetDataPointer##mrank##D##mtypekind   @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\

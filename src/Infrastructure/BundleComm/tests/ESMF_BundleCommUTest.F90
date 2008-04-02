@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCommUTest.F90,v 1.22 2007/08/17 18:37:44 cdeluca Exp $
+! $Id: ESMF_BundleCommUTest.F90,v 1.22.2.1 2008/04/02 20:07:11 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -10,35 +10,35 @@
 !
 !==============================================================================
 !
-      program ESMF_BundleCommUTest
+      program ESMF_FieldBundleCommUTest
 
 !------------------------------------------------------------------------------
-#define ESMF_FILENAME "ESMF_BundleCommUTest.F90"
+#define ESMF_FILENAME "ESMF_FieldBundleCommUTest.F90"
 !
 !
 #include <ESMF.h>
 
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_BundleCommUTest - Bundle Communication Unit Tests
+! !PROGRAM: ESMF_FieldBundleCommUTest - FieldBundle Communication Unit Tests
 !
 ! !DESCRIPTION:
 !
-! The code in this file drives F90 Bundle Communication unit tests.
+! The code in this file drives F90 FieldBundle Communication unit tests.
 ! These include calls like Halo, Gather, Regrid, and Redistribution.
 !
 !-----------------------------------------------------------------------------
 ! !USES:
       use ESMF_TestMod     ! test methods
       use ESMF_Mod
-      use ESMF_BundleRedistHelpers
+      use ESMF_FieldBundleRedistHelpers
 
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleCommUTest.F90,v 1.22 2007/08/17 18:37:44 cdeluca Exp $'
+      '$Id: ESMF_BundleCommUTest.F90,v 1.22.2.1 2008/04/02 20:07:11 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -46,14 +46,14 @@
       type(ESMF_VM) :: vm
       type(ESMF_IGrid) :: igrid
       type(ESMF_Field) :: fields(8)
-      type(ESMF_Bundle) :: bundle1, bundle2
+      type(ESMF_FieldBundle) :: bundle1, bundle2
       type(ESMF_DELayout) :: layout 
       type(ESMF_RouteHandle) :: rh
       integer :: nroutes
 
 #ifdef ESMF_EXHAUSTIVE
       ! try to avoid "unused variable" warnings from some of our compilers.
-      type(ESMF_Bundle) :: nobundle
+      type(ESMF_FieldBundle) :: nobundle
       type(ESMF_Field) :: nofield
       type(ESMF_RouteHandle) :: rh1, rh2, rh3
 #endif
@@ -147,20 +147,20 @@
       !------------------------------------------------------------------------
       !NEX_removeUTest
       !  Create 2 bundles with the already created fields.
-      bundle1 = ESMF_BundleCreate(2, fields(1:2), name="ocn export", rc=rc)
-      write(name, *) "Creating source Bundle with 2 fields"
+      bundle1 = ESMF_FieldBundleCreate(2, fields(1:2), name="ocn export", rc=rc)
+      write(name, *) "Creating source FieldBundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
       !NEX_removeUTest
-      bundle2 = ESMF_BundleCreate(2, fields(3:4), name="atm import", rc=rc)
-      write(name, *) "Creating destination Bundle with 2 fields"
+      bundle2 = ESMF_FieldBundleCreate(2, fields(3:4), name="atm import", rc=rc)
+      write(name, *) "Creating destination FieldBundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
       !NEX_removeUTest
       ! redistribute data from bundle1 to bundle2
-      call ESMF_BundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
+      call ESMF_FieldBundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
       write(name, *) "Precompute Redist Communication"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
@@ -177,9 +177,9 @@
       
       !------------------------------------------------------------------------
       !NEX_removeUTest
-      !  Redist both fields in a single Bundle call.
-      call ESMF_BundleRedist(bundle1, bundle2, rh, rc=rc)
-      write(name, *) "Redistributing data from all Fields in a Bundle"
+      !  Redist both fields in a single FieldBundle call.
+      call ESMF_FieldBundleRedist(bundle1, bundle2, rh, rc=rc)
+      write(name, *) "Redistributing data from all Fields in a FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
@@ -197,7 +197,7 @@
       !------------------------------------------------------------------------
       !NEX_removeUTest
       !  Release the routehandle
-      call ESMF_BundleRedistRelease(rh, rc=rc)
+      call ESMF_FieldBundleRedistRelease(rh, rc=rc)
       write(name, *) "Release the RouteHandle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
@@ -205,15 +205,15 @@
       ! clean up the objects
       !------------------------------------------------------------------------
       !NEX_removeUTest
-      ! Clean up by deleting the Bundles.
-      call ESMF_BundleDestroy(bundle1, rc=rc)
-      write(name, *) "Bundle Destroy 1"
+      ! Clean up by deleting the FieldBundles.
+      call ESMF_FieldBundleDestroy(bundle1, rc=rc)
+      write(name, *) "FieldBundle Destroy 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_removeUTest
-      call ESMF_BundleDestroy(bundle2, rc=rc)
-      write(name, *) "Bundle Destroy 2"
+      call ESMF_FieldBundleDestroy(bundle2, rc=rc)
+      write(name, *) "FieldBundle Destroy 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -238,26 +238,26 @@
       !------------------------------------------------------------------------
 
       !EX_removeUTest
-      ! Bundle Halo Release of non-initialized routehandle
+      ! FieldBundle Halo Release of non-initialized routehandle
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
-      call ESMF_BundleHaloRelease(rh3,rc)
-      write(name, *) "Bundle Halo Release of non-initialized routehandle"
+      call ESMF_FieldBundleHaloRelease(rh3,rc)
+      write(name, *) "FieldBundle Halo Release of non-initialized routehandle"
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
 
       !EX_removeUTest
-      ! Bundle Halo Store of non-initialized routehandle
+      ! FieldBundle Halo Store of non-initialized routehandle
       write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
-      call ESMF_BundleHaloStore(bundle1, rh3, rc=rc)
-      write(name, *) "Bundle Halo Store of deleted Bundle"
+      call ESMF_FieldBundleHaloStore(bundle1, rh3, rc=rc)
+      write(name, *) "FieldBundle Halo Store of deleted FieldBundle"
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
 
       ! set these up for use later
-      nobundle = ESMF_BundleCreate()
-      call ESMF_BundleDestroy(nobundle)
+      nobundle = ESMF_FieldBundleCreate()
+      call ESMF_FieldBundleDestroy(nobundle)
       nofield = ESMF_FieldCreateNoData()
       call ESMF_FieldDestroy(nofield)
 
@@ -321,20 +321,20 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       !  Create 2 bundles with the already created fields.
-      bundle1 = ESMF_BundleCreate(2, fields(1:2), name="ocn export", rc=rc)
-      write(name, *) "Creating source Bundle with 2 fields"
+      bundle1 = ESMF_FieldBundleCreate(2, fields(1:2), name="ocn export", rc=rc)
+      write(name, *) "Creating source FieldBundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
       !EX_removeUTest
-      bundle2 = ESMF_BundleCreate(2, fields(3:4), name="atm import", rc=rc)
-      write(name, *) "Creating destination Bundle with 2 fields"
+      bundle2 = ESMF_FieldBundleCreate(2, fields(3:4), name="atm import", rc=rc)
+      write(name, *) "Creating destination FieldBundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! redistribute data from bundle1 to bundle2
-      call ESMF_BundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
+      call ESMF_FieldBundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
       write(name, *) "Precompute Redist Communication"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
@@ -351,9 +351,9 @@
       
       !------------------------------------------------------------------------
       !EX_removeUTest
-      !  Redist both fields in a single Bundle call.
-      call ESMF_BundleRedist(bundle1, bundle2, rh, rc=rc)
-      write(name, *) "Redistributing data from all Fields in a Bundle"
+      !  Redist both fields in a single FieldBundle call.
+      call ESMF_FieldBundleRedist(bundle1, bundle2, rh, rc=rc)
+      write(name, *) "Redistributing data from all Fields in a FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
@@ -371,7 +371,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       !  Release the routehandle
-      call ESMF_BundleRedistRelease(rh, rc=rc)
+      call ESMF_FieldBundleRedistRelease(rh, rc=rc)
       write(name, *) "Release the RouteHandle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
@@ -379,15 +379,15 @@
       ! clean up the objects
       !------------------------------------------------------------------------
       !EX_removeUTest
-      ! Clean up by deleting the Bundles.
-      call ESMF_BundleDestroy(bundle1, rc=rc)
-      write(name, *) "Bundle Destroy 1"
+      ! Clean up by deleting the FieldBundles.
+      call ESMF_FieldBundleDestroy(bundle1, rc=rc)
+      write(name, *) "FieldBundle Destroy 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_removeUTest
-      call ESMF_BundleDestroy(bundle2, rc=rc)
-      write(name, *) "Bundle Destroy 2"
+      call ESMF_FieldBundleDestroy(bundle2, rc=rc)
+      write(name, *) "FieldBundle Destroy 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -495,40 +495,40 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       !  Create 2 bundles with the already created fields.
-      bundle1 = ESMF_BundleCreate(2, fields(1:2), name="ocn export", rc=rc)
-      write(name, *) "Creating source Bundle with 2 fields"
+      bundle1 = ESMF_FieldBundleCreate(2, fields(1:2), name="ocn export", rc=rc)
+      write(name, *) "Creating source FieldBundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
       !EX_removeUTest
-      bundle2 = ESMF_BundleCreate(2, fields(3:4), name="atm import", rc=rc)
-      write(name, *) "Creating destination Bundle with 2 fields"
+      bundle2 = ESMF_FieldBundleCreate(2, fields(3:4), name="atm import", rc=rc)
+      write(name, *) "Creating destination FieldBundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! compute halo routehandles for both bundle1 and bundle2
-      call ESMF_BundleHaloStore(bundle1, rh1, rc=rc)
+      call ESMF_FieldBundleHaloStore(bundle1, rh1, rc=rc)
       write(name, *) "Precompute Halo Communication 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_removeUTest
-      call ESMF_BundleHaloStore(bundle2, rh2, rc=rc)
+      call ESMF_FieldBundleHaloStore(bundle2, rh2, rc=rc)
       write(name, *) "Precompute Halo Communication 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_removeUTest
-      !  Halo both fields in a single Bundle call.
-      call ESMF_BundleHalo(bundle1, rh1, rc=rc)
-      write(name, *) "Halo data from all Fields in a Bundle 1"
+      !  Halo both fields in a single FieldBundle call.
+      call ESMF_FieldBundleHalo(bundle1, rh1, rc=rc)
+      write(name, *) "Halo data from all Fields in a FieldBundle 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_removeUTest
-      call ESMF_BundleHalo(bundle2, rh2, rc=rc)
-      write(name, *) "Halo data from all Fields in a Bundle 2"
+      call ESMF_FieldBundleHalo(bundle2, rh2, rc=rc)
+      write(name, *) "Halo data from all Fields in a FieldBundle 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
@@ -557,47 +557,47 @@
       
       !------------------------------------------------------------------------
       !EX_removeUTest
-      ! Bundle Halo Release of routehandle
+      ! FieldBundle Halo Release of routehandle
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      call ESMF_BundleHaloRelease(rh1, rc)
-      write(name, *) "Bundle Halo Release of routehandle"
+      call ESMF_FieldBundleHaloRelease(rh1, rc)
+      write(name, *) "FieldBundle Halo Release of routehandle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_removeUTest
       !  Release the routehandles
       write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
-      call ESMF_BundleRedistRelease(rh1, rc=rc)
+      call ESMF_FieldBundleRedistRelease(rh1, rc=rc)
       write(name, *) "Release RouteHandle 1"
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_removeUTest
       !  Release the routehandles
-      call ESMF_BundleRedistRelease(rh2, rc=rc)
+      call ESMF_FieldBundleRedistRelease(rh2, rc=rc)
       write(name, *) "Release RouteHandle 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_removeUTest
-      ! Bundle Halo Release of routehandle
+      ! FieldBundle Halo Release of routehandle
       write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
-      call ESMF_BundleHaloRelease(rh1,rc)
-      write(name, *) "Bundle Halo Release of routehandle"
+      call ESMF_FieldBundleHaloRelease(rh1,rc)
+      write(name, *) "FieldBundle Halo Release of routehandle"
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       ! clean up the data used by the previous tests.
       !------------------------------------------------------------------------
       !EX_removeUTest
-      ! Clean up by deleting the Bundles.
-      call ESMF_BundleDestroy(bundle1, rc=rc)
-      write(name, *) "Bundle Destroy 1"
+      ! Clean up by deleting the FieldBundles.
+      call ESMF_FieldBundleDestroy(bundle1, rc=rc)
+      write(name, *) "FieldBundle Destroy 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_removeUTest
-      call ESMF_BundleDestroy(bundle2, rc=rc)
-      write(name, *) "Bundle Destroy 2"
+      call ESMF_FieldBundleDestroy(bundle2, rc=rc)
+      write(name, *) "FieldBundle Destroy 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -675,29 +675,29 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       !  Create 2 bundles with the already created fields.
-      bundle1 = ESMF_BundleCreate(2, fields(1:2), name="ocn export", rc=rc)
-      write(name, *) "Creating source Bundle with 2 fields"
+      bundle1 = ESMF_FieldBundleCreate(2, fields(1:2), name="ocn export", rc=rc)
+      write(name, *) "Creating source FieldBundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
       !EX_removeUTest
-      bundle2 = ESMF_BundleCreate(2, fields(3:4), name="atm import", rc=rc)
-      write(name, *) "Creating destination Bundle with 2 fields"
+      bundle2 = ESMF_FieldBundleCreate(2, fields(3:4), name="atm import", rc=rc)
+      write(name, *) "Creating destination FieldBundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! regrid data from bundle1 to bundle2
-      call ESMF_BundleRegridStore(bundle1, bundle2, vm, rh, &
+      call ESMF_FieldBundleRegridStore(bundle1, bundle2, vm, rh, &
                                   ESMF_REGRID_METHOD_BILINEAR, rc=rc)
       write(name, *) "Precompute Regrid Communication"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_removeUTest
-      !  Regrid both fields in a single Bundle call.
-      call ESMF_BundleRegrid(bundle1, bundle2, rh, rc=rc)
-      write(name, *) "Regridding data from all Fields in a Bundle"
+      !  Regrid both fields in a single FieldBundle call.
+      call ESMF_FieldBundleRegrid(bundle1, bundle2, rh, rc=rc)
+      write(name, *) "Regridding data from all Fields in a FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
@@ -715,7 +715,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       !  Release the routehandle
-      call ESMF_BundleRegridRelease(rh, rc=rc)
+      call ESMF_FieldBundleRegridRelease(rh, rc=rc)
       write(name, *) "Release the RouteHandle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
@@ -723,15 +723,15 @@
       ! clean up the objects
       !------------------------------------------------------------------------
       !EX_removeUTest
-      ! Clean up by deleting the Bundles.
-      call ESMF_BundleDestroy(bundle1, rc=rc)
-      write(name, *) "Bundle Destroy 1"
+      ! Clean up by deleting the FieldBundles.
+      call ESMF_FieldBundleDestroy(bundle1, rc=rc)
+      write(name, *) "FieldBundle Destroy 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_removeUTest
-      call ESMF_BundleDestroy(bundle2, rc=rc)
-      write(name, *) "Bundle Destroy 2"
+      call ESMF_FieldBundleDestroy(bundle2, rc=rc)
+      write(name, *) "FieldBundle Destroy 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -817,20 +817,20 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       !  Create 2 bundles with the already created fields.
-      bundle1 = ESMF_BundleCreate(2, fields(1:2), name="ocn export", rc=rc)
-      write(name, *) "Creating source Bundle with 2 fields"
+      bundle1 = ESMF_FieldBundleCreate(2, fields(1:2), name="ocn export", rc=rc)
+      write(name, *) "Creating source FieldBundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
       !EX_removeUTest
-      bundle2 = ESMF_BundleCreate(2, fields(3:4), name="atm import", rc=rc)
-      write(name, *) "Creating destination Bundle with 2 fields"
+      bundle2 = ESMF_FieldBundleCreate(2, fields(3:4), name="atm import", rc=rc)
+      write(name, *) "Creating destination FieldBundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! regrid data from bundle1 to bundle2
-      call ESMF_BundleRegridStore(bundle1, bundle2, vm, rh, &
+      call ESMF_FieldBundleRegridStore(bundle1, bundle2, vm, rh, &
                                   ESMF_REGRID_METHOD_BILINEAR, rc=rc)
                                   !ESMF_REGRID_METHOD_CONSERV1, rc=rc)
       write(name, *) "Precompute Regrid Communication"
@@ -838,9 +838,9 @@
       
       !------------------------------------------------------------------------
       !EX_removeUTest
-      !  Regrid both fields in a single Bundle call.
-      call ESMF_BundleRegrid(bundle1, bundle2, rh, rc=rc)
-      write(name, *) "Regridding data from all Fields in a Bundle"
+      !  Regrid both fields in a single FieldBundle call.
+      call ESMF_FieldBundleRegrid(bundle1, bundle2, rh, rc=rc)
+      write(name, *) "Regridding data from all Fields in a FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
@@ -858,7 +858,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       !  Release the routehandle
-      call ESMF_BundleRegridRelease(rh, rc=rc)
+      call ESMF_FieldBundleRegridRelease(rh, rc=rc)
       write(name, *) "Release the RouteHandle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
@@ -866,15 +866,15 @@
       ! clean up the objects
       !------------------------------------------------------------------------
       !EX_removeUTest
-      ! Clean up by deleting the Bundles.
-      call ESMF_BundleDestroy(bundle1, rc=rc)
-      write(name, *) "Bundle Destroy 1"
+      ! Clean up by deleting the FieldBundles.
+      call ESMF_FieldBundleDestroy(bundle1, rc=rc)
+      write(name, *) "FieldBundle Destroy 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_removeUTest
-      call ESMF_BundleDestroy(bundle2, rc=rc)
-      write(name, *) "Bundle Destroy 2"
+      call ESMF_FieldBundleDestroy(bundle2, rc=rc)
+      write(name, *) "FieldBundle Destroy 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -956,20 +956,20 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       !  Create 2 bundles with the already created fields.
-      bundle1 = ESMF_BundleCreate(2, fields(1:2), name="ocn export", rc=rc)
-      write(name, *) "Creating source Bundle with 2 fields"
+      bundle1 = ESMF_FieldBundleCreate(2, fields(1:2), name="ocn export", rc=rc)
+      write(name, *) "Creating source FieldBundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
       !EX_removeUTest
-      bundle2 = ESMF_BundleCreate(2, fields(3:4), name="atm import", rc=rc)
-      write(name, *) "Creating destination Bundle with 2 fields"
+      bundle2 = ESMF_FieldBundleCreate(2, fields(3:4), name="atm import", rc=rc)
+      write(name, *) "Creating destination FieldBundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! regrid data from bundle1 to bundle2
-      call ESMF_BundleRegridStore(bundle1, bundle2, vm, rh, &
+      call ESMF_FieldBundleRegridStore(bundle1, bundle2, vm, rh, &
                                   ESMF_REGRID_METHOD_BILINEAR, rc=rc)
                                   !ESMF_REGRID_METHOD_CONSERV1, rc=rc)
       write(name, *) "Precompute Regrid Communication"
@@ -977,9 +977,9 @@
       
       !------------------------------------------------------------------------
       !EX_removeUTest
-      !  Regrid both fields in a single Bundle call.
-      call ESMF_BundleRegrid(bundle1, bundle2, rh, rc=rc)
-      write(name, *) "Regridding data from all Fields in a Bundle"
+      !  Regrid both fields in a single FieldBundle call.
+      call ESMF_FieldBundleRegrid(bundle1, bundle2, rh, rc=rc)
+      write(name, *) "Regridding data from all Fields in a FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
@@ -997,7 +997,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       !  Release the routehandle
-      call ESMF_BundleRegridRelease(rh, rc=rc)
+      call ESMF_FieldBundleRegridRelease(rh, rc=rc)
       write(name, *) "Release the RouteHandle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
@@ -1005,15 +1005,15 @@
       ! clean up the objects
       !------------------------------------------------------------------------
       !EX_removeUTest
-      ! Clean up by deleting the Bundles.
-      call ESMF_BundleDestroy(bundle1, rc=rc)
-      write(name, *) "Bundle Destroy 1"
+      ! Clean up by deleting the FieldBundles.
+      call ESMF_FieldBundleDestroy(bundle1, rc=rc)
+      write(name, *) "FieldBundle Destroy 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_removeUTest
-      call ESMF_BundleDestroy(bundle2, rc=rc)
-      write(name, *) "Bundle Destroy 2"
+      call ESMF_FieldBundleDestroy(bundle2, rc=rc)
+      write(name, *) "FieldBundle Destroy 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -1101,21 +1101,21 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       !  Create 2 bundles with the already created fields.
-      bundle1 = ESMF_BundleCreate(3, fields(1:3), name="ocn export", rc=rc)
-      write(name, *) "Creating source Bundle with 3 fields"
+      bundle1 = ESMF_FieldBundleCreate(3, fields(1:3), name="ocn export", rc=rc)
+      write(name, *) "Creating source FieldBundle with 3 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
       !EX_removeUTest
-      bundle2 = ESMF_BundleCreate(2, fields(4:5), name="atm import", rc=rc)
-      write(name, *) "Creating destination Bundle with 2 fields"
+      bundle2 = ESMF_FieldBundleCreate(2, fields(4:5), name="atm import", rc=rc)
+      write(name, *) "Creating destination FieldBundle with 2 fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! redistribute data from bundle1 to bundle2 - this *should* fail
       ! because count of fields in source and dest bundles not same.
-      call ESMF_BundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
+      call ESMF_FieldBundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
       write(name, *) "Precompute Redist with mismatching field counts"
       write(failMsg, *) "rc should not be ESMF_SUCCESS"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1124,7 +1124,7 @@
       !!EX_removeUTest
       ! redistribute data from bundle1 to bundle2 - this *should* fail
       ! because data types do not line up between src and dst bundles.
-      call ESMF_BundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
+      call ESMF_FieldBundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
       write(name, *) "Precompute Redist with mismatched data types"
       write(failMsg, *) "rc should not be ESMF_SUCCESS"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1133,7 +1133,7 @@
       !EX_removeUTest
       ! redistribute data from bundle1 to bundle2 - this *should* fail
       ! because empty fields do not line up.
-      call ESMF_BundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
+      call ESMF_FieldBundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
       write(name, *) "Precompute Redist with mismatched empty fields"
       write(failMsg, *) "rc should not be ESMF_SUCCESS"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1142,7 +1142,7 @@
       !EX_removeUTest
       ! redistribute data from bundle1 to bundle2 - this *should* fail
       ! because both bundles have no fields.
-      call ESMF_BundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
+      call ESMF_FieldBundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
       write(name, *) "Precompute Redist with empty bundles"
       write(failMsg, *) "rc should not be ESMF_SUCCESS"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1151,7 +1151,7 @@
       !EX_removeUTest
       ! redistribute data from bundle1 to bundle2 - this *should* fail
       ! because both bundles have fields but the fields have no data.
-      call ESMF_BundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
+      call ESMF_FieldBundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
       write(name, *) "Precompute Redist with only empty fields"
       write(failMsg, *) "rc should not be ESMF_SUCCESS"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1166,15 +1166,15 @@
       ! clean up the objects
       !------------------------------------------------------------------------
       !EX_removeUTest
-      ! Clean up by deleting the Bundles.
-      call ESMF_BundleDestroy(bundle1, rc=rc)
-      write(name, *) "Bundle Destroy 1"
+      ! Clean up by deleting the FieldBundles.
+      call ESMF_FieldBundleDestroy(bundle1, rc=rc)
+      write(name, *) "FieldBundle Destroy 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_removeUTest
-      call ESMF_BundleDestroy(bundle2, rc=rc)
-      write(name, *) "Bundle Destroy 2"
+      call ESMF_FieldBundleDestroy(bundle2, rc=rc)
+      write(name, *) "FieldBundle Destroy 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -1203,4 +1203,4 @@
 
       !------------------------------------------------------------------------
 
-      end program ESMF_BundleCommUTest
+      end program ESMF_FieldBundleCommUTest

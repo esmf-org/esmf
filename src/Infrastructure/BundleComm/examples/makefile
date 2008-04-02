@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2006/01/30 20:10:06 nscollins Exp $
+# $Id: makefile,v 1.8.4.1 2008/04/02 20:07:05 cdeluca Exp $
 
 ALL:  build_examples
 
@@ -14,18 +14,18 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
-LOCDIR	  = src/Infrastructure/BundleComm/examples
+LOCDIR	  = src/Infrastructure/FieldBundleComm/examples
 
 
-#EXAMPLES_BUILD   =  $(ESMF_EXDIR)/ESMF_BundleCommEx
+#EXAMPLES_BUILD   =  $(ESMF_EXDIR)/ESMF_FieldBundleCommEx
 EXAMPLES_BUILD   =
 
 
-#EXAMPLES_RUN     =  run_ESMF_BundleCommEx
+#EXAMPLES_RUN     =  run_ESMF_FieldBundleCommEx
 EXAMPLES_RUN     =
 
 
-#EXAMPLES_RUN_UNI =  run_ESMF_BundleCommEx_uni
+#EXAMPLES_RUN_UNI =  run_ESMF_FieldBundleCommEx_uni
 EXAMPLES_RUN_UNI =
 
 
@@ -38,9 +38,9 @@ CLEANFILES  = $(EXAMPLES_BUILD)
 CLOBBERDIRS =
 
 
-run_ESMF_BundleCommEx:
-	$(MAKE) EXNAME=BundleComm NP=4 exfrun
+run_ESMF_FieldBundleCommEx:
+	$(MAKE) EXNAME=FieldBundleComm NP=4 exfrun
 
-run_ESMF_BundleCommEx_uni:
-	$(MAKE) EXNAME=BundleComm NP=1 exfrun
+run_ESMF_FieldBundleCommEx_uni:
+	$(MAKE) EXNAME=FieldBundleComm NP=1 exfrun
 

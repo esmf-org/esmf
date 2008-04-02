@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_StateMacros.h,v 1.18.2.2 2008/02/14 04:29:16 cdeluca Exp $
+! $Id: ESMF_StateMacros.h,v 1.18.2.3 2008/04/02 20:07:45 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -55,7 +55,7 @@
 !  \item[state] @\
 !   The {\tt ESMF\_State} to query. @\
 !  \item[itemName] @\
-!   The name of the Bundle, Field, or Array to return data from. @\
+!   The name of the FieldBundle, Field, or Array to return data from. @\
 !  \item[dataPointer] @\
 !   An unassociated Fortran pointer of the proper Type, Kind, and Rank as the data @\
 !   in the State.  When this call returns successfully, the pointer will now reference @\
@@ -99,7 +99,7 @@
       integer, intent(out), optional :: rc   @\
  @\
         ! Local variables @\
-        !!type (ESMF_Bundle) :: bundle      ! bundle object @\
+        !!type (ESMF_FieldBundle) :: bundle      ! bundle object @\
         type (ESMF_Field) :: field          ! field object @\
         type(ESMF_Array) :: array           ! array object @\
         type(ESMF_State) :: top     @\
@@ -184,7 +184,7 @@
 @\
            ! get the bundle data @\
 ! TODO:FIELDINTEGRATION uncomment the next line, and erase the next after that @\
-!           call ESMF_BundleGetDataPointer(dataitem%datap%bp, & @\
+!           call ESMF_FieldBundleGetDataPointer(dataitem%datap%bp, & @\
 !                 fieldName, dataPointer, copyflag, status) @\
            status=ESMF_RC_NOT_IMPL @\
            if (ESMF_LogMsgFoundError(status, & @\

@@ -1,4 +1,4 @@
-Redist is designed to be called with Field or Bundle arguments in order to
+Redist is designed to be called with Field or FieldBundle arguments in order to
 utilize information embedded in these objects.  For example, Redist requires
 knowledge of the distribution contained in the underlying IGrid and of the
 relative location (staggering) of Fields on the IGrid.  In addition, Redist uses
@@ -21,7 +21,7 @@ The Redist functions use the communication patterns contained in the RouteHandle
 object to perform the actual redistribution of the ESMF data objects.  The
 Release function deletes the RouteHandle object and frees all memory associated
 with a Redist.  ESMF assumes users will call each of these functions
-sequentially, but the Redist also has Field and Bundle interfaces that allow for
+sequentially, but the Redist also has Field and FieldBundle interfaces that allow for
 a single call to the Redist function instead, without requiring Store and
 Release calls.  In this case, the Redist interfaces have been overloaded and
 for this version a parent VM must be included in the calling argument list.

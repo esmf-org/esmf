@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateEx.F90,v 1.30.2.1 2007/12/14 20:25:30 svasquez Exp $
+! $Id: ESMF_FieldBundleCreateEx.F90,v 1.1.2.1 2008/04/02 20:07:20 cdeluca Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -9,13 +9,13 @@
 !BOP
 !
 ! !DESCRIPTION:
-! See the following code fragments for examples of how to create new Bundles.
+! See the following code fragments for examples of how to create new FieldBundles.
 !
 !\begin{verbatim}
 
-!   ! Example program showing various ways to create a Bundle object.
+!   ! Example program showing various ways to create a FieldBundle object.
 
-    program ESMF_BundleCreateEx
+    program ESMF_FieldBundleCreateEx
 
     ! ESMF Framework module
     use ESMF_Mod
@@ -31,7 +31,7 @@
     type(ESMF_VM) :: vm
     character (len = ESMF_MAXSTR) :: bname1, fname1, fname2
     type(ESMF_Field) :: field(10), returnedfield1, returnedfield2, simplefield
-    type(ESMF_Bundle) :: bundle1, bundle2, bundle3
+    type(ESMF_FieldBundle) :: bundle1, bundle2, bundle3
   !real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr1, f90ptr2
     integer :: counts(2)
     real(ESMF_KIND_R8) :: min_coord(2), max_coord(2)
@@ -51,7 +51,7 @@
 
 !BOC
 
-!   !  Create several Fields and add them to a new Bundle.
+!   !  Create several Fields and add them to a new FieldBundle.
  
 !    counts = (/ 100, 200 /)
 !    min_coord = (/  0.0,  0.0 /)
@@ -99,16 +99,16 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    bundle1 = ESMF_BundleCreate(3, field, name="atmosphere data", rc=rc)
+    bundle1 = ESMF_FieldBundleCreate(3, field, name="atmosphere data", rc=rc)
 
-    print *, "Bundle example 1 returned"
+    print *, "FieldBundle example 1 returned"
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
 !-------------------------------------------------------------------------
-!   !  Create an empty Bundle and then add a single field to it.
+!   !  Create an empty FieldBundle and then add a single field to it.
 
 
     simplefield = ESMF_FieldCreate(grid, arrayspec, &
@@ -118,55 +118,55 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    bundle2 = ESMF_BundleCreate(name="time step 1", rc=rc)
+    bundle2 = ESMF_FieldBundleCreate(name="time step 1", rc=rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     
 !BOC
-    call ESMF_BundleAddField(bundle2, simplefield, rc)
+    call ESMF_FieldBundleAddField(bundle2, simplefield, rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    call ESMF_BundleGet(bundle2, fieldCount=fieldcount, rc=rc)
+    call ESMF_FieldBundleGet(bundle2, fieldCount=fieldcount, rc=rc)
 
-    print *, "Bundle example 2 returned, fieldcount =", fieldcount
-!EOC
-
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-!-------------------------------------------------------------------------
-!   !  Create an empty Bundle and then add multiple fields to it.
-
-
-    bundle3 = ESMF_BundleCreate(name="southern hemisphere", rc=rc)
-!EOC
-
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-    call ESMF_BundleAddField(bundle3, 3, field, rc)
-!EOC
-
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-    call ESMF_BundleGet(bundle3, fieldCount=fieldcount, rc=rc)
-
-    print *, "Bundle example 3 returned, fieldcount =", fieldcount
+    print *, "FieldBundle example 2 returned, fieldcount =", fieldcount
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
 !-------------------------------------------------------------------------
-!   !  Get a Field back from a Bundle, first by name and then by index.
-!   !  Also get the Bundle name.
+!   !  Create an empty FieldBundle and then add multiple fields to it.
 
-    call ESMF_BundleGetField(bundle1, "pressure", returnedfield1, rc)
+
+    bundle3 = ESMF_FieldBundleCreate(name="southern hemisphere", rc=rc)
+!EOC
+
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
+    call ESMF_FieldBundleAddField(bundle3, 3, field, rc)
+!EOC
+
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
+    call ESMF_FieldBundleGet(bundle3, fieldCount=fieldcount, rc=rc)
+
+    print *, "FieldBundle example 3 returned, fieldcount =", fieldcount
+!EOC
+
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
+!-------------------------------------------------------------------------
+!   !  Get a Field back from a FieldBundle, first by name and then by index.
+!   !  Also get the FieldBundle name.
+
+    call ESMF_FieldBundleGetField(bundle1, "pressure", returnedfield1, rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -178,7 +178,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    call ESMF_BundleGetField(bundle1, 2, returnedfield2, rc)
+    call ESMF_FieldBundleGetField(bundle1, 2, returnedfield2, rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -190,11 +190,11 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    call ESMF_BundleGet(bundle1, name=bname1, rc=rc)
+    call ESMF_FieldBundleGet(bundle1, name=bname1, rc=rc)
 
-    print *, "Bundle example 4 returned, field names = ", &
+    print *, "FieldBundle example 4 returned, field names = ", &
                    trim(fname1), ", ", trim(fname2)
-    print *, "Bundle name = ", trim(bname1)
+    print *, "FieldBundle name = ", trim(bname1)
 !EOC
  
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -202,19 +202,19 @@
 !BOC
 !-------------------------------------------------------------------------
 
-     call ESMF_BundleDestroy(bundle1, rc=rc)
+     call ESMF_FieldBundleDestroy(bundle1, rc=rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-     call ESMF_BundleDestroy(bundle2, rc=rc)
+     call ESMF_FieldBundleDestroy(bundle2, rc=rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-     call ESMF_BundleDestroy(bundle3, rc=rc)
+     call ESMF_FieldBundleDestroy(bundle3, rc=rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -235,14 +235,14 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     if (finalrc.EQ.ESMF_SUCCESS) then
-       print *, "PASS: ESMF_BundleCreateEx.F90"
+       print *, "PASS: ESMF_FieldBundleCreateEx.F90"
     else
-       print *, "FAIL: ESMF_BundleCreateEx.F90"
+       print *, "FAIL: ESMF_FieldBundleCreateEx.F90"
     end if
 
       call ESMF_Finalize(rc=rc)
 
 !BOC
-     end program ESMF_BundleCreateEx
+     end program ESMF_FieldBundleCreateEx
 !EOC
     

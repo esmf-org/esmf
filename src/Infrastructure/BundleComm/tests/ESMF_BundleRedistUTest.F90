@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistUTest.F90,v 1.9 2007/08/17 18:37:44 cdeluca Exp $
+! $Id: ESMF_BundleRedistUTest.F90,v 1.9.2.1 2008/04/02 20:07:11 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,13 +34,13 @@
 ! !USES:
       use ESMF_TestMod     ! test methods
       use ESMF_Mod
-      use ESMF_BundleRedistHelpers
+      use ESMF_FieldBundleRedistHelpers
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleRedistUTest.F90,v 1.9 2007/08/17 18:37:44 cdeluca Exp $'
+      '$Id: ESMF_BundleRedistUTest.F90,v 1.9.2.1 2008/04/02 20:07:11 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -61,7 +61,7 @@
       type(ESMF_RouteHandle) :: redist_rh
       type(ESMF_IGrid) :: igrid1, igrid2
       type(ESMF_Field) :: field1, field2, field3, field4
-      type(ESMF_Bundle) :: bundle1, bundle2
+      type(ESMF_FieldBundle) :: bundle1, bundle2
       type(ESMF_VM) :: vm
 
       integer :: combined_rc
@@ -102,7 +102,7 @@
       !------------------------------------------------------------------------
       !NEX_removeUTest
       ! create src bundle
-      call CreateBundle(bundle1, field1, field3, rc=rc)
+      call CreateFieldBundle(bundle1, field1, field3, rc=rc)
       write(name, *) "Creating src bundle"
       write(failMsg, *) "Unable to create src bundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -110,7 +110,7 @@
       !------------------------------------------------------------------------
       !NEX_removeUTest
       ! create dst bundle
-      call CreateBundle(bundle2, field2, field4, rc=rc)
+      call CreateFieldBundle(bundle2, field2, field4, rc=rc)
       write(name, *) "Creating dst bundle"
       write(failMsg, *) "Unable to create dstsrc bundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -151,7 +151,7 @@
       !NEX_removeUTest
       ! store
       call ESMF_VMGetGlobal(vm, rc=rc)
-      call ESMF_BundleRedistStore(bundle1, bundle2, vm, &
+      call ESMF_FieldBundleRedistStore(bundle1, bundle2, vm, &
                                                 routehandle=redist_rh, rc=rc)
       write(name, *) "Computing route for redist"
       write(failMsg, *) "Computing route for redist"
@@ -160,7 +160,7 @@
       !------------------------------------------------------------------------
       !NEX_removeUTest
       ! run
-      call ESMF_BundleRedist(bundle1, bundle2, routehandle=redist_rh, rc=rc)
+      call ESMF_FieldBundleRedist(bundle1, bundle2, routehandle=redist_rh, rc=rc)
       write(name, *) "Executing redist"
       write(failMsg, *) "Executing redist"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -217,7 +217,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! run
-      call ESMF_BundleRedist(bundle1, bundle2, routehandle=redist_rh, rc=rc)
+      call ESMF_FieldBundleRedist(bundle1, bundle2, routehandle=redist_rh, rc=rc)
       write(name, *) "Executing redist 2"
       write(failMsg, *) "Executing redist 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -257,7 +257,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! release first route handle, compute another below
-      call ESMF_BundleRedistRelease(redist_rh, rc=rc)
+      call ESMF_FieldBundleRedistRelease(redist_rh, rc=rc)
       write(name, *) "Releasing route"
       write(failMsg, *) "Releasing route"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -282,7 +282,7 @@
       !EX_removeUTest
       ! store
       call ESMF_VMGetGlobal(vm, rc=rc)
-      call ESMF_BundleRedistStore(bundle2, bundle1, vm, &
+      call ESMF_FieldBundleRedistStore(bundle2, bundle1, vm, &
                                                 routehandle=redist_rh, rc=rc)
       write(name, *) "Computing route for redist, 2 to 1"
       write(failMsg, *) "Computing route for redist, 2 to 1"
@@ -291,7 +291,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! run
-      call ESMF_BundleRedist(bundle2, bundle1, routehandle=redist_rh, rc=rc)
+      call ESMF_FieldBundleRedist(bundle2, bundle1, routehandle=redist_rh, rc=rc)
       write(name, *) "Executing redist"
       write(failMsg, *) "Executing redist"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -323,7 +323,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! run
-      call ESMF_BundleRedist(bundle2, bundle1, routehandle=redist_rh, rc=rc)
+      call ESMF_FieldBundleRedist(bundle2, bundle1, routehandle=redist_rh, rc=rc)
       write(name, *) "Executing redist 2 -> 1"
       write(failMsg, *) "Executing redist 2 -> 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -349,7 +349,7 @@
       !------------------------------------------------------------------------
       !NEX_removeUTest
       ! release
-      call ESMF_BundleRedistRelease(redist_rh, rc=rc)
+      call ESMF_FieldBundleRedistRelease(redist_rh, rc=rc)
       write(name, *) "Releasing route"
       write(failMsg, *) "Releasing route"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -358,9 +358,9 @@
       !NEX_removeUTest
       ! cleanup
       combined_rc = ESMF_SUCCESS
-      call BundleCleanup(bundle1, rc=rc)
+      call FieldBundleCleanup(bundle1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) combined_rc = rc
-      call BundleCleanup(bundle2, rc=rc)
+      call FieldBundleCleanup(bundle2, rc=rc)
       if (rc .ne. ESMF_SUCCESS) combined_rc = rc
 
       write(name, *) "Deleting bundles at cleanup time"

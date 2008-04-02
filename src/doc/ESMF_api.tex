@@ -91,7 +91,7 @@ The ESMF contains two types of classes.  {\bf Deep} classes require
 They take significant time to set up and should not be created
 in a time-critical portion of code.  Deep objects persist 
 even after the method in which they were created has returned.
-Most classes in the ESMF, including Fields, Bundles, Arrays,
+Most classes in the ESMF, including Fields, FieldBundles, Arrays,
 Grids and Clocks, fall into this category.
 
 {\tt Shallow} classes do not require {\tt ESMF\_<Class>Create()}
@@ -158,13 +158,13 @@ array that can carry information such as its type, kind, rank, and
 associated halo widths.  It contains a reference to a native Fortran array.
 \item {\bf Field}  A Field represents a physical scalar or vector field.
 It contains a reference to an Array along with grid information and metadata.
-\item {\bf Bundle}  A Bundle is a collection of Fields discretized 
+\item {\bf FieldBundle}  A FieldBundle is a collection of Fields discretized 
 on the same grid.  The staggering of data points may be different for 
-different Fields within a Bundle.
+different Fields within a FieldBundle.
 \item {\bf State}  A State represents the collection of data that a 
 Component either requires to run (an Import State) or can make 
 available to other Components (an Export State).
-States may contain references to Bundles, Fields, or Arrays. 
+States may contain references to FieldBundles, Fields, or Arrays. 
 \item {\bf Component}  A Component is a substantial piece of software 
 with a distinct function.  ESMF currently recognizes two types 
 of Components.  Components that represent a physical domain 
@@ -181,7 +181,7 @@ be used to compose more complex applications.
 
 Underlying these data classes are native language arrays.  ESMF allows 
 you to reference an existing Fortran array to an ESMF Array, 
-Field, or Bundle, so that ESMF data classes can be readily 
+Field, or FieldBundle, so that ESMF data classes can be readily 
 introduced into existing code.  You can perform communication operations 
 directly on Fortran arrays through the VM class, which serves 
 as a unifying wrapper for distributed and shared memory communication 
@@ -289,8 +289,8 @@ will not deallocate that buffer at the time the object is
 destroyed.  The user must arrange for the buffer to be deallocated
 when all use of it is complete.
 
-Classes such as Fields, Bundles, and States may have Arrays, 
-Fields, Grids and Bundles created externally and associated with
+Classes such as Fields, FieldBundles, and States may have Arrays, 
+Fields, Grids and FieldBundles created externally and associated with
 them.  These associated items are not destroyed along with the rest  
 of the data object since it is possible for the items to be added 
 to more than one data object at a time (e.g. the same Grid could 
@@ -315,7 +315,7 @@ Attributes are (name, value) pairs, where
 the name is a character string and the value can be either a single
 value or list of {\tt int}/{\tt I*4}, {\tt double}/{\tt R*8},
 logical ({\tt ESMF\_Logical}), or {\tt char *}/{\tt character} values.
-Attributes can be associated with Fields, Bundles, and States. 
+Attributes can be associated with Fields, FieldBundles, and States. 
 Mixed types are not allowed in a single attribute, and all attribute
 names must be unique within a single object.    Attributes are set
 by name, and can be retrieved either directly by name or by querying

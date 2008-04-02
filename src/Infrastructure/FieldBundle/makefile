@@ -1,10 +1,10 @@
-# $Id: makefile,v 1.9 2007/11/15 21:08:34 feiliu Exp $ 
+# $Id: makefile,v 1.1.2.1 2008/04/02 20:07:16 cdeluca Exp $ 
 
 ALL: build_here
 
 # This needs to be the path of this directory relative to the
 # top level esmf directory.
-LOCDIR	  = src/Infrastructure/Bundle/
+LOCDIR	  = src/Infrastructure/FieldBundle/
 
 # Leave this line alone.
 include $(ESMF_DIR)/makefile
@@ -13,7 +13,7 @@ include $(ESMF_DIR)/makefile
 # directly below this directory, and have either library,
 # example/test code, or documents which need to be generated.
 DIRS	  = src interface doc tests examples
-# TODO:FIELDINTEGRATION Restore Bundle examples.
+# TODO:FIELDINTEGRATION Restore FieldBundle examples.
 
 CLEANDIRS   =
 CLEANFILES  =

@@ -1,4 +1,4 @@
-// $Id: ESMC_State_F.C,v 1.6.2.1 2008/03/01 04:12:51 theurich Exp $
+// $Id: ESMC_State_F.C,v 1.6.2.2 2008/04/02 20:07:43 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_State_F.C,v 1.6.2.1 2008/03/01 04:12:51 theurich Exp $";
+             "$Id: ESMC_State_F.C,v 1.6.2.2 2008/04/02 20:07:43 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -142,7 +142,7 @@ void FTN(c_esmc_statedeserialize)(int *statestatus,
 
 #if 0
       type ESMF_DataHolder
-          type(ESMF_Bundle) :: bp
+          type(ESMF_FieldBundle) :: bp
           type(ESMF_Field)  :: fp
           type(ESMF_Array)  :: ap
           type(ESMF_StateClass), pointer  :: spp

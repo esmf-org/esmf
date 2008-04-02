@@ -1,4 +1,4 @@
-% $Id: Field_req.tex,v 1.1 2003/03/10 21:54:20 cdeluca Exp $
+% $Id: Field_req.tex,v 1.1.16.1 2008/04/02 20:07:14 cdeluca Exp $
 
 %jm WRF checked 5/14/2002
 %===============================================================================
@@ -356,7 +356,7 @@ or gridpoints in its underlying grid.
 \end{reqlist}
 
 %===============================================================================
-\req{Bundles}
+\req{FieldBundles}
 %-------------------------------------------------------------------------------
 
 \sreq{Creation}
@@ -366,7 +366,7 @@ or gridpoints in its underlying grid.
 It shall be possible to create a bundle with a field list, an 
 optional I/O specification, and an identifier that specifies whether 
 the bundle is to be packed (contiguous data) or loose (noncontiguous data).
-Bundles within 
+FieldBundles within 
 \begin{reqlist}
 {\bf Priority:} 1\\
 {\bf Source:} CCSM-CPL, POP, CICE. \\
@@ -387,7 +387,7 @@ bundle shall be referenced and not copied.
 \end{reqlist}
 
 \ssreq{Creation with remap}
-Bundles may be created as the result of a remapping operation on an 
+FieldBundles may be created as the result of a remapping operation on an 
 existing bundle.  The grid in this case is a pointer to the reference 
 grid.
 \begin{reqlist}
@@ -421,7 +421,7 @@ interleaving of bundle data and also to rearrange it.
 \end{reqlist}
 
 \sreq{Deletion}
-Bundles may be deleted.  Data allocated by and included in packed bundles 
+FieldBundles may be deleted.  Data allocated by and included in packed bundles 
 is deleted along with the bundle.  Pointers to field data in unpacked bundles
 are returned at deletion.
 \begin{reqlist} 
@@ -482,7 +482,7 @@ a subset of the data values associated with a bundle.
 \end{reqlist}
 
 \ssreq{Set}
-Bundle data may be identified in its entirety or by index or coordinate and
+FieldBundle data may be identified in its entirety or by index or coordinate and
 set to a single value, for example, for initialization.
 \begin{reqlist}
 {\bf Priority:} 2 \\

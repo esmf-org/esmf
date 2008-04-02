@@ -1,4 +1,4 @@
-# Bundle test Harness Config file
+# FieldBundle test Harness Config file
 
 # test class
 test_class: FIELD 

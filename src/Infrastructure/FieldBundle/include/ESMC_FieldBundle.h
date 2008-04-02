@@ -1,4 +1,4 @@
-// $Id: ESMC_Bundle.h,v 1.8 2007/06/23 04:00:04 cdeluca Exp $
+// $Id: ESMC_FieldBundle.h,v 1.1.2.1 2008/04/02 20:07:21 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -8,25 +8,25 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-// ESMF Bundle C++ declaration include file
+// ESMF FieldBundle C++ declaration include file
 //
 //-----------------------------------------------------------------------------
 //
  // these lines prevent this file from being read more than once if it
  // ends up being included multiple times
 
-#ifndef ESMC_Bundle_H
-#define ESMC_Bundle_H
+#ifndef ESMC_FieldBundle_H
+#define ESMC_FieldBundle_H
 
 //-----------------------------------------------------------------------------
 //BOP
-// !CLASS:  ESMC_Bundle - C++ interface to the F90 Bundle object
+// !CLASS:  ESMC_FieldBundle - C++ interface to the F90 FieldBundle object
 //
 // !DESCRIPTION:
 //
-// The code in this file defines the C++ Bundle members and declares method 
-// signatures (prototypes).  The companion file ESMC\_Bundle.C contains
-// the definitions (full code bodies) for the Bundle methods.
+// The code in this file defines the C++ FieldBundle members and declares method 
+// signatures (prototypes).  The companion file ESMC\_FieldBundle.C contains
+// the definitions (full code bodies) for the FieldBundle methods.
 //
 //-----------------------------------------------------------------------------
 // 
@@ -35,14 +35,14 @@
 #include "ESMC_Base.h"  // all classes inherit from the ESMC Base class.
 
 // !PUBLIC TYPES:
- class ESMC_Bundle;
+ class ESMC_FieldBundle;
 
 // !PRIVATE TYPES:
 
  // fortran interface declarations
 extern "C" {
-   void FTN(f_esmf_bundlecreate)(ESMC_Bundle *, int *rc);
-   void FTN(f_esmf_bundledestroy)(ESMC_Bundle *, int *rc);
+   void FTN(f_esmf_bundlecreate)(ESMC_FieldBundle *, int *rc);
+   void FTN(f_esmf_bundledestroy)(ESMC_FieldBundle *, int *rc);
 
    void FTN(c_esmc_bundleserialize)(ESMC_Status *bundlestatus,
               ESMC_Status *igridstatus, int *field_count, int *pack_flag,
@@ -59,27 +59,27 @@ extern "C" {
  // TODO: decide if this does or does not inherit from the ESMC_Base class.
  //  NO: not needed because this is simply an interface to the F90 code      
  //  YES: makes inheritance on the C++ side possible before crossing into F90
- class ESMC_Bundle {                     
- //class ESMC_Bundle : public ESMC_Base {
+ class ESMC_FieldBundle {                     
+ //class ESMC_FieldBundle : public ESMC_Base {
 
    private:
-     void *handle;    // pointer to Fortran ESMF_BundleType
+     void *handle;    // pointer to Fortran ESMF_FieldBundleType
 
 // !PUBLIC MEMBER FUNCTIONS:
 //
 
    public:
-     int ESMC_BundleConstruct(void);        
-     int ESMC_BundleDestruct(void);        
+     int ESMC_FieldBundleConstruct(void);        
+     int ESMC_FieldBundleDestruct(void);        
 
     
  // required methods inherited and overridden from the ESMC_Base class
-    int ESMC_BundleValidate(const char *options) const;
-    int ESMC_BundlePrint(const char *options) const;
+    int ESMC_FieldBundleValidate(const char *options) const;
+    int ESMC_FieldBundlePrint(const char *options) const;
 
  // native C++ constructors/destructors
-	ESMC_Bundle(void) {  handle = 0; }
-	~ESMC_Bundle(void) { }
+	ESMC_FieldBundle(void) {  handle = 0; }
+	~ESMC_FieldBundle(void) { }
   
  // < declare the rest of the public interface methods here >
   
@@ -92,13 +92,13 @@ extern "C" {
 //EOP
 //-----------------------------------------------------------------------------
 
- };   // end class ESMC_Bundle
+ };   // end class ESMC_FieldBundle
 
 
-ESMC_Bundle *ESMC_BundleCreate(int *rc);
-int ESMC_BundleDestroy(ESMC_Bundle *f);
+ESMC_FieldBundle *ESMC_FieldBundleCreate(int *rc);
+int ESMC_FieldBundleDestroy(ESMC_FieldBundle *f);
 
-#endif  // ESMC_Bundle_H
+#endif  // ESMC_FieldBundle_H
 
 
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCommOptionsUTest.F90,v 1.15 2007/08/17 18:37:44 cdeluca Exp $
+! $Id: ESMF_BundleCommOptionsUTest.F90,v 1.15.2.1 2008/04/02 20:07:09 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-      program ESMF_BundleCommOptionsUTest
+      program ESMF_FieldBundleCommOptionsUTest
 
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -18,14 +18,14 @@
 !
 !=============================================================================
 !BOP
-! !PROGRAM: ESMF_BundleCommOptionsUTest - Test Bundle Route Run-time Options
+! !PROGRAM: ESMF_FieldBundleCommOptionsUTest - Test FieldBundle Route Run-time Options
 !
 ! !DESCRIPTION:
 !
-! TODO: this test currently works at the Field level; once the Bundle
+! TODO: this test currently works at the Field level; once the FieldBundle
 !  communications code is complete, this test needs to be revised to create
-!  a loose Bundle of Fields with different data values, and redist them
-!  into a second Bundle of Fields which are decomposed differently.
+!  a loose FieldBundle of Fields with different data values, and redist them
+!  into a second FieldBundle of Fields which are decomposed differently.
 !
 ! The code in this file exercises various combinations of internal options
 !  controlling how to do the actual redist communications - e.g. pack 
@@ -44,7 +44,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_BundleCommOptionsUTest.F90,v 1.15 2007/08/17 18:37:44 cdeluca Exp $'
+      '$Id: ESMF_BundleCommOptionsUTest.F90,v 1.15.2.1 2008/04/02 20:07:09 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -977,4 +977,4 @@ contains
 
 !-------------------------------------------------------------------------
 
-end program ESMF_BundleCommOptionsUTest
+end program ESMF_FieldBundleCommOptionsUTest

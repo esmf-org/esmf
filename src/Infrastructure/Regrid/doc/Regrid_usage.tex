@@ -1,7 +1,7 @@
-% $Id: Regrid_usage.tex,v 1.15 2006/02/01 19:10:46 cdeluca Exp $
+% $Id: Regrid_usage.tex,v 1.15.4.1 2008/04/02 20:07:33 cdeluca Exp $
 
 
-Regrid is designed to be called with Field or Bundle
+Regrid is designed to be called with Field or FieldBundle
 arguments in order to utilize information embedded in
 these objects.  For example, Regrid requires knowledge
 of underlying grid information (both PhysGrid and DistGrid)
@@ -18,7 +18,7 @@ requirements for performing a regridding of a Field
 from one Grid to another, returning an object called an
 {\tt ESMF\_RouteHandle}.  The Regrid function uses
 the created RouteHandle object to perform the actual regridding
-of Fields or Bundles.  The Release function deletes the
+of Fields or FieldBundles.  The Release function deletes the
 RouteHandle object and frees all memory associated with a Regrid.
 The reason for the separation is that in many cases, the
 initial creation is expensive and re-used often throughout

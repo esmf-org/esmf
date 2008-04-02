@@ -1,8 +1,8 @@
-% $Id: Regrid_design.tex,v 1.2 2003/05/07 19:05:08 pwjones Exp $
+% $Id: Regrid_design.tex,v 1.2.16.1 2008/04/02 20:07:33 cdeluca Exp $
 
 \subsection{Design}
 
-Regrid is designed to be called with Field or Bundle
+Regrid is designed to be called with Field or FieldBundle
 arguments in order to utilize information embedded in
 these objects.  For example, Regrid requires knowledge
 of underlying grid information (both PhysGrid and DistGrid)
@@ -16,7 +16,7 @@ interpolation weights and initializes communication
 requirements for performing a regridding of a Field
 from one Grid to another.  The Run function uses
 a created Regrid object to perform the actual regridding
-of Fields or Bundles.  The reason for the separation
+of Fields or FieldBundles.  The reason for the separation
 is that in many cases, the initial creation is
 expensive and re-used often throughout an application.
 

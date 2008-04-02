@@ -1,4 +1,4 @@
-% $Id: Route_options.tex,v 1.5 2006/03/14 21:22:39 theurich Exp $
+% $Id: Route_options.tex,v 1.5.4.1 2008/04/02 20:07:35 cdeluca Exp $
 
 \subsubsection{ESMF\_RouteOptions}
 
@@ -39,7 +39,7 @@ Valid values are:
         which has regular strides when sending or receiving.
     \item [ESMF\_ROUTE\_OPTION\_PACK\_BUFFER]
         When multiple data addresses are sent to the Route routines (for
-        example, identical {\tt ESMF\_Fields} from an {\tt ESMF\_Bundle}),
+        example, identical {\tt ESMF\_Fields} from an {\tt ESMF\_FieldBundle}),
         this flag controls whether to pack the buffers together or send
         them separately.  
     \item [ESMF\_ROUTE\_OPTION\_DEFAULT]

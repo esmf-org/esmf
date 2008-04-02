@@ -1,4 +1,4 @@
-// $Id: ESMC_Bundle_F.C,v 1.7 2007/06/23 04:00:04 cdeluca Exp $
+// $Id: ESMC_FieldBundle_F.C,v 1.1.2.1 2008/04/02 20:07:22 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -14,8 +14,8 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ {\tt ESMC\_Bundle} methods declared
-// in the companion file ESMC_Bundle.h
+// The code in this file implements the C++ {\tt ESMC\_FieldBundle} methods declared
+// in the companion file ESMC_FieldBundle.h
 //
 // 
 //
@@ -26,13 +26,13 @@
 #include "ESMC_LogErr.h"
 
  // associated class definition file
-#include "ESMC_Bundle.h"
+#include "ESMC_FieldBundle.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_Bundle_F.C,v 1.7 2007/06/23 04:00:04 cdeluca Exp $";
+             "$Id: ESMC_FieldBundle_F.C,v 1.1.2.1 2008/04/02 20:07:22 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -40,7 +40,7 @@ extern "C" {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
-// This section includes all the Bundle routines
+// This section includes all the FieldBundle routines
 //
 //
 
@@ -52,37 +52,37 @@ extern "C" {
       type(ESMF_PackFlag), parameter :: ESMF_PACKED_DATA = ESMF_PackFlag(1), &
                                         ESMF_NO_PACKED_DATA = ESMF_PackFlag(2)
 
-      type ESMF_BundleFieldAccess
+      type ESMF_FieldBundleFieldAccess
          type(ESMF_InterleaveFlag) :: bfa_type
          integer :: bfa_start
          integer :: bfa_end
          integer :: bfa_strides
       end type
 
-      type ESMF_BundleFieldInterleave
+      type ESMF_FieldBundleFieldInterleave
         integer :: field_order                      ! index of this field
         type(ESMF_FieldDataMap) :: field_dm         ! copy of this fields dm
-        type(ESMF_BundleFieldAccess) :: field_bfa   ! access info if packed
+        type(ESMF_FieldBundleFieldAccess) :: field_bfa   ! access info if packed
       end type
 
-      type ESMF_LocalBundle
+      type ESMF_LocalFieldBundle
         type(ESMF_Array) :: packed_data               ! local packed array
         type(ESMF_Status) :: igridstatus
         type(ESMF_Status) :: arraystatus
         integer :: accesscount
       end type
 
-      type ESMF_BundleType
+      type ESMF_FieldBundleType
         type(ESMF_Base) :: base                   ! base class object
         type(ESMF_Field), dimension(:), pointer :: flist
         type(ESMF_Status) :: bundlestatus
         type(ESMF_Status) :: igridstatus
         integer :: field_count
         type(ESMF_IGrid) :: igrid                  ! associated global igrid
-        type(ESMF_LocalBundle) :: localbundle    ! this differs per DE
+        type(ESMF_LocalFieldBundle) :: localbundle    ! this differs per DE
         type(ESMF_Packflag) :: pack_flag         ! is packed data present?
-        type(ESMF_BundleFieldInterleave) :: fil  ! ordering in buffer
-        type(ESMF_BundleDataMap) :: mapping      ! map info
+        type(ESMF_FieldBundleFieldInterleave) :: fil  ! ordering in buffer
+        type(ESMF_FieldBundleDataMap) :: mapping      ! map info
         type(ESMF_IOSpec) :: iospec              ! iospec values
         type(ESMF_Status) :: iostatus            ! if unset, inherit from gcomp
       
@@ -108,7 +108,7 @@ void FTN(c_esmc_bundleserialize)(ESMC_Status *bundlestatus,
     if ((*length - *offset) < fixedpart) {
          
          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                            "Buffer too short to add a Bundle object", localrc);
+                            "Buffer too short to add a FieldBundle object", localrc);
          return;
  
         //buffer = (char *)realloc((void *)buffer,

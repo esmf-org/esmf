@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistUseUTest.F90,v 1.14 2007/08/17 18:37:44 cdeluca Exp $
+! $Id: ESMF_BundleRedistUseUTest.F90,v 1.14.2.1 2008/04/02 20:07:11 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-      program ESMF_BundleRedistUseUTest
+      program ESMF_FieldBundleRedistUseUTest
 
 #include "ESMF_Macros.inc"
 
@@ -18,7 +18,7 @@
 !
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_BundleRedistUseUTest - Data redistribution tests
+! !PROGRAM: ESMF_FieldBundleRedistUseUTest - Data redistribution tests
 !
 ! !DESCRIPTION:
 !
@@ -34,13 +34,13 @@
 ! !USES:
       use ESMF_TestMod     ! test methods
       use ESMF_Mod
-      use ESMF_BundleRedistHelpers
+      use ESMF_FieldBundleRedistHelpers
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleRedistUseUTest.F90,v 1.14 2007/08/17 18:37:44 cdeluca Exp $'
+      '$Id: ESMF_BundleRedistUseUTest.F90,v 1.14.2.1 2008/04/02 20:07:11 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -61,7 +61,7 @@
       type(ESMF_RouteHandle) :: redist_rh
       type(ESMF_IGrid) :: igrid(2)
       type(ESMF_Field) :: sfield(10), dfield(10)
-      type(ESMF_Bundle) :: bundle(2)
+      type(ESMF_FieldBundle) :: bundle(2)
       type(ESMF_VM) :: vm
 
       integer :: combined_rc
@@ -102,13 +102,13 @@
 !---   
 !---   Case 1:
 !---   
-!---   A Bundle with a 3D IGrid.  The IGrid corresponds to a (long, lat)
+!---   A FieldBundle with a 3D IGrid.  The IGrid corresponds to a (long, lat)
 !---   igrid which is periodic in X, non-periodic in Y.    The community
 !---   describes igrid sizes in (lat, long) order, confusingly enough,
 !---   so a 2 x 2.5 degree igrid is 2 degrees in latitude, 2.5 in longitude,
 !---   giving an overall igrid size of (144, 90).  There are 72 vertical levels.
 !---   
-!---   The Bundle contains roughly 10 Fields, each with data type Real*8,
+!---   The FieldBundle contains roughly 10 Fields, each with data type Real*8,
 !---   scalar, cell-centered.
 !---   
 !---   The redistribution goes from source to destination and back
@@ -191,7 +191,7 @@
       !------------------------------------------------------------------------
       !NEX_removeUTest
       ! create src bundle
-      call CreateBundle(bundle(1), sfield(1), sfield(2), sfield(3), &
+      call CreateFieldBundle(bundle(1), sfield(1), sfield(2), sfield(3), &
                                    sfield(4), sfield(5), rc=rc)
       write(name, *) "Creating src bundle"
       write(failMsg, *) "Unable to create src bundle"
@@ -200,7 +200,7 @@
       !------------------------------------------------------------------------
       !NEX_removeUTest
       ! add more fields
-      call AddBundle(bundle(1), sfield(6), sfield(7), sfield(8), &
+      call AddFieldBundle(bundle(1), sfield(6), sfield(7), sfield(8), &
                                 sfield(9), sfield(10), rc=rc)
       write(name, *) "Adding to src bundle"
       write(failMsg, *) "Unable to add to src bundle"
@@ -249,7 +249,7 @@
       !------------------------------------------------------------------------
       !NEX_removeUTest
       ! create dst bundle
-      call CreateBundle(bundle(2), dfield(1), dfield(2), dfield(3), &
+      call CreateFieldBundle(bundle(2), dfield(1), dfield(2), dfield(3), &
                                    dfield(4), dfield(5), rc=rc)
       write(name, *) "Creating dst bundle"
       write(failMsg, *) "Unable to create dst bundle"
@@ -258,7 +258,7 @@
       !------------------------------------------------------------------------
       !NEX_removeUTest
       ! add more fields
-      call AddBundle(bundle(2), dfield(6), dfield(7), dfield(8), &
+      call AddFieldBundle(bundle(2), dfield(6), dfield(7), dfield(8), &
                                 dfield(9), dfield(10), rc=rc)
       write(name, *) "Adding to dst bundle"
       write(failMsg, *) "Unable to add to dst bundle"
@@ -436,7 +436,7 @@
       !NEX_removeUTest
       ! store
       call ESMF_VMGetGlobal(vm, rc=rc)
-      call ESMF_BundleRedistStore(bundle(1), bundle(2), vm, &
+      call ESMF_FieldBundleRedistStore(bundle(1), bundle(2), vm, &
         routehandle=redist_rh, routeOptions=ESMF_ROUTE_OPTION_PACK_PET, rc=rc)
       write(name, *) "Computing route for redist"
       write(failMsg, *) "Computing route for redist"
@@ -446,7 +446,7 @@
       !------------------------------------------------------------------------
       !NEX_removeUTest
       ! run
-      call ESMF_BundleRedist(bundle(1), bundle(2), routehandle=redist_rh, rc=rc)
+      call ESMF_FieldBundleRedist(bundle(1), bundle(2), routehandle=redist_rh, rc=rc)
       write(name, *) "Executing redist"
       write(failMsg, *) "Executing redist"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -568,7 +568,7 @@
       !------------------------------------------------------------------------
       !NEX_removeUTest
       ! release
-      call ESMF_BundleRedistRelease(redist_rh, rc=rc)
+      call ESMF_FieldBundleRedistRelease(redist_rh, rc=rc)
       write(name, *) "Releasing route"
       write(failMsg, *) "Releasing route"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -576,7 +576,7 @@
       !------------------------------------------------------------------------
       !NEX_removeUTest
       ! cleanup
-      call BundleCleanup(bundle(1), bundle(2), rc=rc)
+      call FieldBundleCleanup(bundle(1), bundle(2), rc=rc)
       write(name, *) "Deleting bundles at cleanup time"
       write(failMsg, *) "Deleting bundles at cleanup time"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -608,7 +608,7 @@
   
       ! -------- end of unit test code ------------------------
 
-      end program ESMF_BundleRedistUseUTest
+      end program ESMF_FieldBundleRedistUseUTest
 
 
 

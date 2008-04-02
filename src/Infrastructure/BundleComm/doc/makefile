@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2006/11/17 16:59:13 cdeluca Exp $ 
+# $Id: makefile,v 1.4.2.1 2008/04/02 20:07:05 cdeluca Exp $ 
 
 ALL: onedoc 
 
@@ -11,7 +11,7 @@ OBJSC     =
 OBJSF     = 
 MANSEC	  = 
 LIBBASE	  = 
-LOCDIR	  = src/Infrastructure/BundleComm/doc
+LOCDIR	  = src/Infrastructure/FieldBundleComm/doc
 
 #
 # Tex Files to make
@@ -32,8 +32,8 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 include $(ESMF_DIR)/makefile
 
 DIRS	    = 
-CLEANDIRS   = BundleComm_refdoc $(HTMLFILES)
-CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) BundleComm_refdoc.tex $(PDFFILES)
+CLEANDIRS   = FieldBundleComm_refdoc $(HTMLFILES)
+CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) FieldBundleComm_refdoc.tex $(PDFFILES)
 CLOBBERDIRS =
 
 
