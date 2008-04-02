@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.7.2.1 2008/03/07 23:59:30 theurich Exp $
+! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.7.2.2 2008/04/02 03:55:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayArbIdxSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.7.2.1 2008/03/07 23:59:30 theurich Exp $'
+    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.7.2.2 2008/04/02 03:55:45 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -186,7 +186,7 @@ program ESMF_ArrayArbIdxSMMUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Get srcArray Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_ArrayGet(srcArray, farrayPtr=farrayPtr, rc=rc)
+  call ESMF_ArrayGet(srcArray, localDe=0, farrayPtr=farrayPtr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
@@ -209,7 +209,7 @@ program ESMF_ArrayArbIdxSMMUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "Get srcArray2 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_ArrayGet(srcArray2, farrayPtr=farrayPtr, rc=rc)
+  call ESMF_ArrayGet(srcArray2, localDe=0, farrayPtr=farrayPtr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
@@ -231,7 +231,7 @@ program ESMF_ArrayArbIdxSMMUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "Get srcArray3 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_ArrayGet(srcArray3, farrayPtr=farrayPtr2D, rc=rc)
+  call ESMF_ArrayGet(srcArray3, localDe=0, farrayPtr=farrayPtr2D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   do j=0,1
@@ -418,7 +418,7 @@ program ESMF_ArrayArbIdxSMMUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "dstArray Get Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_ArrayGet(dstArray, farrayPtr=farrayPtr, rc=rc)
+  call ESMF_ArrayGet(dstArray, localDe=0, farrayPtr=farrayPtr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   print *, "localPet: ",localPet," dstArray: ",farrayPtr
@@ -472,7 +472,7 @@ program ESMF_ArrayArbIdxSMMUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "dstArray2 Get Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_ArrayGet(dstArray2, farrayPtr=farrayPtr, rc=rc)
+  call ESMF_ArrayGet(dstArray2, localDe=0, farrayPtr=farrayPtr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   print *, "localPet: ",localPet," dstArray2: ",farrayPtr
@@ -542,7 +542,7 @@ program ESMF_ArrayArbIdxSMMUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "dstArray3 Get Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_ArrayGet(dstArray3, farrayPtr=farrayPtr2D, rc=rc)
+  call ESMF_ArrayGet(dstArray3, localDe=0, farrayPtr=farrayPtr2D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   print *, "localPet: ",localPet," dstArray3: ",farrayPtr2D
@@ -676,7 +676,7 @@ program ESMF_ArrayArbIdxSMMUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "dstArray2 Get Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_ArrayGet(dstArray2, farrayPtr=farrayPtr, rc=rc)
+  call ESMF_ArrayGet(dstArray2, localDe=0, farrayPtr=farrayPtr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   print *, "localPet: ",localPet," dstArray2: ",farrayPtr
@@ -780,7 +780,7 @@ call ESMF_ArrayPrint(dstArray3)
   !EX_UTest_Multi_Proc_Only
   write(name, *) "dstArray3 Get Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_ArrayGet(dstArray3, farrayPtr=farrayPtr2D, rc=rc)
+  call ESMF_ArrayGet(dstArray3, localDe=0, farrayPtr=farrayPtr2D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   print *, "localPet: ",localPet," dstArray3: ",farrayPtr2D

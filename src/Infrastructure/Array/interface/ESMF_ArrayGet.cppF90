@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.30.2.4 2008/03/28 21:30:02 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.30.2.5 2008/04/02 03:55:44 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -68,7 +68,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.30.2.4 2008/03/28 21:30:02 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.30.2.5 2008/04/02 03:55:44 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -612,23 +612,24 @@ contains
 @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_ArrayGet() @\
-! subroutine ESMF_ArrayGetFPtr<rank><type><kind>(array, farrayPtr, rc) @\
+! subroutine ESMF_ArrayGetFPtr<rank><type><kind>(array, localDe, farrayPtr, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_Array),           intent(in)            :: array @\
+!   type(ESMF_Array),           intent(in)              :: array @\
+!   integer,                    intent(in)              :: localDe @\
 !   <type> (ESMF_KIND_<kind>),dimension(<rank>),pointer :: farrayPtr @\
-!   integer,                    intent(out), optional :: rc  @\
+!   integer,                    intent(out), optional   :: rc  @\
 ! @\
 ! !DESCRIPTION: @\
-!   Get Fortran90 pointer to DE-local memory regions in Array object. @\
-! @\
-!   This interface requires that exactly 1 DE is associated with the calling @\
-!   PET. An error will be returned if this condition is not met. @\
+!   Get Fortran90 pointer to the DE-local memory regions in Array object for @\
+!   the specified local DE. @\
 ! @\
 !   The arguments are: @\
 !   \begin{description} @\
 !   \item[array] @\
 !     Queried {\tt ESMF\_Array} object. @\
+!   \item[localDe] @\
+!     Local DE for which information is requested. {\tt [0,..,localDeCount-1]} @\
 !   \item[farrayPtr] @\
 !     Upon return {\tt farrayPtr} points to the DE-local data allocation of @\
 !     {\tt array}. @\
@@ -643,18 +644,18 @@ contains
 ! -------------------------- ESMF-public method ----------------------------- @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_ArrayGetFPtr" @\
-  subroutine ESMF_ArrayGetFPtr##mrank##D##mtypekind(array, farrayPtr, rc) @\
+  subroutine ESMF_ArrayGetFPtr##mrank##D##mtypekind(array, localDe, farrayPtr, rc) @\
 @\
-    type(ESMF_Array),           intent(in)            :: array @\
+    type(ESMF_Array),           intent(in)                :: array @\
+    integer,                    intent(in)                :: localDe @\
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),pointer :: farrayPtr @\
-    integer,                    intent(out), optional :: rc @\
+    integer,                    intent(out), optional     :: rc @\
 @\
     ! Local variables @\
     integer                             :: localrc     ! local return code @\
-    type(ESMF_DELayout)                 :: delayout @\
-    integer                             :: localDeCount, rank @\
+    integer                             :: rank @\
     type(ESMF_TypeKind)                 :: typekind @\
-    type(ESMF_LocalArray), allocatable  :: larrayList(:) @\
+    type(ESMF_LocalArray)               :: larray @\
 @\
     ! Initialize return code @\
     localrc = ESMF_RC_NOT_IMPL @\
@@ -664,8 +665,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc) @\
 @\
     ! Check consistency @\
-    call ESMF_ArrayGet(array, typekind=typekind, rank=rank, & @\
-      delayout=delayout, rc=localrc) @\
+    call ESMF_ArrayGet(array, typekind=typekind, rank=rank, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
     ! Require farrayPtr typekind to match Array typekind @\
@@ -682,39 +682,14 @@ contains
         ESMF_CONTEXT, rc) @\
       return @\
     endif @\
-    call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-      ESMF_CONTEXT, rcToReturn=rc)) return @\
-    ! Require DELayout to be 1 DE per PET @\
-    if (localDeCount < 0) then @\
-      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & @\
-        "- Negative number of localDeCount prohibits request", & @\
-        ESMF_CONTEXT, rc) @\
-      return @\
-    endif @\
-    if (localDeCount == 0) then @\
-      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & @\
-        "- localDeCount == 0 prohibits request", & @\
-        ESMF_CONTEXT, rc) @\
-      return @\
-    endif @\
-    if (localDeCount > 1) then @\
-      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & @\
-        "- Multiple DEs per PET prohibits request", & @\
-        ESMF_CONTEXT, rc) @\
-      return @\
-    endif @\
 @\
     ! Obtain the native F90 array pointer via the LocalArray interface @\
-    allocate(larrayList(localDeCount)) @\
-    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) @\
+    call ESMF_ArrayGet(array, localDe=localDe, larray=larray, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
-    call ESMF_LocalArrayGet(larrayList(1), farrayPtr, ESMF_DATA_REF, & @\
-      rc=localrc) @\
+    call ESMF_LocalArrayGet(larray, farrayPtr, ESMF_DATA_REF, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
-    deallocate(larrayList) @\
 @\
     ! Return successfully @\
     if (present(rc)) rc = ESMF_SUCCESS @\
@@ -733,24 +708,25 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()
-  subroutine ESMF_ArrayGetLarray(array, larray, rc)
+  subroutine ESMF_ArrayGetLarray(array, localDe, larray, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in)            :: array
+    integer,                intent(in)            :: localDe
     type(ESMF_LocalArray),  intent(inout)         :: larray
     integer,                intent(out), optional :: rc  
 !         
 !
 ! !DESCRIPTION:
-!     Get internal information.
-!
-! This interface requires that exactly 1 DE is associated with the calling PET.
-! An error will be returned if this condition is not met.
+!     Provide access to {\tt ESMF\_LocalArray} object that holds data for
+!     the specified local DE.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[array] 
 !        Queried {\tt ESMF\_Array} object.
+!     \item[localDe]
+!       Local DE for which information is requested. {\tt [0,..,localDeCount-1]}
 !     \item[larray] 
 !        Upon return {\tt larray} refers to the DE-local data allocation of
 !        {\tt array}.
@@ -779,30 +755,24 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
     call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    ! Require DELayout to be 1 DE per PET
-    if (localDeCount < 0) then
+    ! Check that provided localDe is within limits
+    if (localDeCount <= 0) then
       call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, &
-        "- Negative number of localDeCount prohibits request", &
+        "- localDeCount <= 0 prohibits request", &
         ESMF_CONTEXT, rc)
       return
     endif
-    if (localDeCount == 0) then
-      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, &
-        "- localDeCount == 0 prohibits request", &
-        ESMF_CONTEXT, rc)
-      return
-    endif
-    if (localDeCount > 1) then
-      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, &
-        "- Multiple DEs per PET prohibits request", &
+    if (localDe < 0 .or. localDe > localDeCount-1) then
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_OUTOFRANGE, &
+        "- localDe out of range", &
         ESMF_CONTEXT, rc)
       return
     endif
     ! get localArray via larrayList
-    allocate(larrayList(localDeCount))
+    allocate(larrayList(localDeCount))  ! basis 1
     call ESMF_ArrayGet(array, larrayList=larrayList, rc=rc)
-    ! todo: this overrides anything that is currently in the larray argument!!!
-    larray = larrayList(1)  ! copy the contents, i.e. the C pointer
+    ! copy the contents, i.e. the C pointer
+    larray = larrayList(localDe+1)      ! shift localDe index to basis 1
     deallocate(larrayList)
     
     ! Return successfully

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.18 2008/04/01 13:02:29 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.19 2008/04/02 03:55:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -629,7 +629,8 @@
 
     grid5d = ESMF_GridCreate(distgrid=distgrid5d, name="grid", rc=rc)
 
-    call ESMF_FieldGet(grid5d, ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
+    call ESMF_FieldGet(grid5d, localDe=0, ungriddedLBound=(/1,2/), &
+        ungriddedUBound=(/4,5/), &
         maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
         gridToFieldMap=(/3,2,5,4,1/), &
         allocCount=fsize, &

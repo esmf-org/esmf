@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.1.2.2 2008/04/01 00:26:08 theurich Exp $
+! $Id: user_model1.F90,v 1.1.2.3 2008/04/02 03:55:46 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -141,7 +141,7 @@ module user_model1
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer
-    call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
+    call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Fill source Array with data

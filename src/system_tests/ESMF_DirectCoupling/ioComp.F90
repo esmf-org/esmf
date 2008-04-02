@@ -1,4 +1,4 @@
-! $Id: ioComp.F90,v 1.1.2.5 2008/04/01 00:26:11 theurich Exp $
+! $Id: ioComp.F90,v 1.1.2.6 2008/04/02 03:55:47 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -118,7 +118,7 @@ module ioCompMod
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer
-    call ESMF_ArrayGet(arraySrc, farrayPtr=farraySrcPtr, rc=rc)
+    call ESMF_ArrayGet(arraySrc, localDe=0, farrayPtr=farraySrcPtr, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Fill source Array with data
@@ -135,7 +135,7 @@ module ioCompMod
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer
-    call ESMF_ArrayGet(arrayDst, farrayPtr=farrayDstPtr, rc=rc)
+    call ESMF_ArrayGet(arrayDst, localDe=0, farrayPtr=farrayDstPtr, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! Initialize destination Array

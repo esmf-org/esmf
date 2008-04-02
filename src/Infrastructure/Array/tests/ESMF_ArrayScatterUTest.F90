@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterUTest.F90,v 1.30 2007/11/02 23:13:08 theurich Exp $
+! $Id: ESMF_ArrayScatterUTest.F90,v 1.30.2.1 2008/04/02 03:55:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArrayScatterUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayScatterUTest.F90,v 1.30 2007/11/02 23:13:08 theurich Exp $'
+    '$Id: ESMF_ArrayScatterUTest.F90,v 1.30.2.1 2008/04/02 03:55:45 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -107,7 +107,7 @@ print *, min_R4, min_R8
     indexflag=ESMF_INDEX_GLOBAL, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !call ESMF_ArrayPrint(array)
-  call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
+  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   farrayPtr = real(localPet,ESMF_KIND_R8)  ! initialize each DE-local data chunk of Array
 !print *, "farrayPtr:", farrayPtr
@@ -200,7 +200,7 @@ print *, min_R4, min_R8
     indexflag=ESMF_INDEX_GLOBAL, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !call ESMF_ArrayPrint(array)
-  call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
+  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   farrayPtr = real(localPet,ESMF_KIND_R8)  ! initialize each DE-local data chunk of Array
 !print *, "farrayPtr:", farrayPtr
@@ -283,7 +283,7 @@ print *, min_R4, min_R8
     indexflag=ESMF_INDEX_GLOBAL, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !call ESMF_ArrayPrint(array)
-  call ESMF_ArrayGet(array, farrayPtr=farrayPtr_R4, rc=rc)
+  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr_R4, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   farrayPtr_R4 = real(localPet,ESMF_KIND_R4)  ! initialize each DE-local data chunk of Array
 !print *, "farrayPtr_R4:", farrayPtr_R4
@@ -362,7 +362,7 @@ print *, min_R4, min_R8
     indexflag=ESMF_INDEX_GLOBAL, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !call ESMF_ArrayPrint(array)
-  call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
+  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   farrayPtr = real(localPet,ESMF_KIND_R8)  ! initialize each DE-local data chunk of Array
 !print *, "farrayPtr:", farrayPtr
@@ -438,7 +438,7 @@ print *, min_R4, min_R8
     rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !call ESMF_ArrayPrint(array)
-  call ESMF_ArrayGet(array, farrayPtr=farrayPtr3d, rc=rc)
+  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr3d, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   farrayPtr3d = real(localPet,ESMF_KIND_R8)  ! initialize each DE-local data chunk of Array
 !print *, "farrayPtr3d:", farrayPtr3d
@@ -518,7 +518,7 @@ print *, min_R4, min_R8
     undistLBound=(/-5/), undistUBound=(/4/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !call ESMF_ArrayPrint(array)
-  call ESMF_ArrayGet(array, farrayPtr=farrayPtr3d, rc=rc)
+  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr3d, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   farrayPtr3d = real(localPet,ESMF_KIND_R8)  ! initialize each DE-local data chunk of Array
 !print *, "farrayPtr3d:", farrayPtr3d
@@ -616,7 +616,7 @@ print *, min_R4, min_R8
     undistLBound=(/-5/), undistUBound=(/4/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !call ESMF_ArrayPrint(array)
-  call ESMF_ArrayGet(array, farrayPtr=farrayPtr3d, rc=rc)
+  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr3d, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   farrayPtr3d = real(localPet,ESMF_KIND_R8)  ! initialize each DE-local data chunk of Array
 !print *, "farrayPtr3d:", farrayPtr3d

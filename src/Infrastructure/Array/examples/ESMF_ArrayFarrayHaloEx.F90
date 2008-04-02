@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.7.2.1 2007/12/14 20:25:29 svasquez Exp $
+! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.7.2.2 2008/04/02 03:55:44 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ call ESMF_ArrayPrint(array)
 ! for more details on Array regions.
 !EOE
 !BOC
-  call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
+  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE

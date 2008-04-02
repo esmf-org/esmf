@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.22 2008/04/01 21:58:04 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.23 2008/04/02 03:55:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.22 2008/04/01 21:58:04 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.23 2008/04/02 03:55:46 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -394,15 +394,15 @@ contains
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldGet() @\
-! subroutine ESMF_FieldGetDataPtr<rank><type><kind>(field, farray, & @\
-!   localDE, exclusiveLBound, exclusiveUBound, exclusiveCount, & @\
+! subroutine ESMF_FieldGetDataPtr<rank><type><kind>(field, localDe, farray, & @\
+!   exclusiveLBound, exclusiveUBound, exclusiveCount, & @\
 !   computationalLBound, computationalUBound, computationalCount, & @\
 !   totalLBound, totalUBound, totalCount, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field), intent(in)            :: field @\
+!   integer,          intent(in)            :: localDe @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farray @\
-!   integer,          intent(in)            :: localDE @\
 !   integer,          intent(out), optional :: exclusiveLBound(:) @\
 !   integer,          intent(out), optional :: exclusiveUBound(:) @\
 !   integer,          intent(out), optional :: exclusiveCount(:) @\
@@ -422,10 +422,10 @@ contains
 ! \begin{description} @\
 ! \item [field]  @\
 !   {\tt ESMF\_Field} object. @\
+! \item[localDe] @\
+!   The local DE from which to get the information. @\
 ! \item [farray] @\
 !   Fortran array pointer which will be pointed at DE-local memory allocation. @\
-! \item[localDE] @\
-!   The local DE from which to get the information. @\
 ! \item[{[exclusiveLBound]}] @\
 !   Upon return this holds the lower bounds of the exclusive region. @\
 !   {\tt exclusiveLBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
@@ -485,15 +485,15 @@ contains
 !---------------------------------------------------------------------------- @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldGetDataPtr" @\
-  subroutine ESMF_FieldGetDataPtr##mrank##D##mtypekind(field, farray, & @\
-    localDE, exclusiveLBound, exclusiveUBound, exclusiveCount, & @\
+  subroutine ESMF_FieldGetDataPtr##mrank##D##mtypekind(field, localDe, farray, & @\
+    exclusiveLBound, exclusiveUBound, exclusiveCount, & @\
     computationalLBound, computationalUBound, computationalCount, & @\
     totalLBound, totalUBound, totalCount, rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field), intent(in)            :: field @\
+    integer,          intent(in)            :: localDe @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farray @\
-    integer,          intent(in)            :: localDE @\
     integer,          intent(out), optional :: exclusiveLBound(:) @\
     integer,          intent(out), optional :: exclusiveUBound(:) @\
     integer,          intent(out), optional :: exclusiveCount(:) @\
@@ -514,13 +514,14 @@ contains
     ! check variables @\
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
 @\
-    call ESMF_ArrayGet(field%ftypep%array, farrayPtr=farray, rc=localrc) @\
+    call ESMF_ArrayGet(field%ftypep%array, localDe=localDe, & @\
+      farrayPtr=farray, rc=localrc) @\
 @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\
-    call ESMF_FieldGetDataBounds(field, localDE, & @\
+    call ESMF_FieldGetDataBounds(field, localDe, & @\
         exclusiveLBound, exclusiveUBound, exclusiveCount, & @\
         computationalLBound, computationalUBound, computationalCount, & @\
         totalLBound, totalUBound, totalCount, & @\
@@ -545,13 +546,13 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 ! !IROUTINE: ESMF_FieldGetDataBounds -  Get Field data bounds
 
 ! !INTERFACE:
-  subroutine ESMF_FieldGetDataBounds(field, localDE, exclusiveLBound, &
+  subroutine ESMF_FieldGetDataBounds(field, localDe, exclusiveLBound, &
     exclusiveUBound, exclusiveCount, computationalLBound, computationalUBound, &
     computationalCount, totalLBound, totalUBound, totalCount, rc)
 
 ! !ARGUMENTS:
     type(ESMF_Field),       intent(in) :: field
-    integer,                intent(in) :: localDE
+    integer,                intent(in) :: localDe
     integer,                intent(out), optional :: exclusiveLBound(:)
     integer,                intent(out), optional :: exclusiveUBound(:)
     integer,                intent(out), optional :: exclusiveCount(:)
@@ -574,7 +575,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 ! \begin{description}
 ! \item[field]
 !    Field to get the information from.
-! \item[localDE]
+! \item[localDe]
 !     The local DE from which to get the information.  
 ! \item[{[exclusiveLBound]}]
 !     Upon return this holds the lower bounds of the exclusive region.
@@ -630,7 +631,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     integer :: i, j
     logical :: filled(ESMF_MAXDIM)
 
-    integer :: localDECount, dimCount
+    integer :: localDeCount, dimCount
     integer, allocatable :: arrayBnd(:, :)
     integer, allocatable :: undistBnd(:)
     integer, allocatable :: distgridToArrayMap(:)
@@ -733,11 +734,11 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     if (present(totalLBound) .or. present(totalUBound)) then
     
         ! Get Size of Array info
-        call ESMF_ArrayGet(field%ftypep%array, localDeCount=localDECount, &
+        call ESMF_ArrayGet(field%ftypep%array, localDeCount=localDeCount, &
             dimCount=dimCount, rc=localrc)
     
         ! Allocate storage for Array info
-        allocate(arrayBnd(dimCount, 0:localDECount-1))
+        allocate(arrayBnd(dimCount, 0:localDeCount-1))
         allocate(undistBnd(fieldRank-dimCount))
         allocate(distgridToPackedArrayMap(dimCount))
         allocate(distgridToArrayMap(dimCount))
@@ -756,7 +757,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
             filled=.false.
             do i=1, dimCount
                totalLBound(distgridToArrayMap(i))=&
-                arrayBnd(distgridToPackedArrayMap(i),localDE)
+                arrayBnd(distgridToPackedArrayMap(i),localDe)
                filled(distgridToArrayMap(i))=.true.
             enddo
     
@@ -779,7 +780,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
             filled=.false.
             do i=1, dimCount
                totalUBound(distgridToArrayMap(i))=&
-                arrayBnd(distgridToPackedArrayMap(i),localDE)
+                arrayBnd(distgridToPackedArrayMap(i),localDe)
                filled(distgridToArrayMap(i))=.true.
             enddo
     
@@ -800,7 +801,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     endif
 
     ! get grid info 
-    call ESMF_GridGet(field%ftypep%grid, localDE=localDE, & 
+    call ESMF_GridGet(field%ftypep%grid, localDe=localDe, & 
             staggerloc=field%ftypep%staggerloc, & 
             computationalLBound=gridCompLBnd, &
             computationalUBound=gridCompUBnd, &
@@ -859,14 +860,14 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
-    subroutine ESMF_FieldGetAllocBounds(grid, localDE, staggerloc, gridToFieldMap, &
+    subroutine ESMF_FieldGetAllocBounds(grid, localDe, staggerloc, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         maxHaloLWidth, maxHaloUWidth, &
         allocLBound, allocUBound, allocCount, rc)
     
 ! !ARGUMENTS:
     type(ESMF_Grid), intent(inout) :: grid     
-    integer, intent(in)            :: localDE
+    integer, intent(in)            :: localDe
     type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
     integer, intent(in), optional :: gridToFieldMap(:)    
     integer, intent(in), optional :: ungriddedLBound(:)
@@ -888,7 +889,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 ! \begin{description}
 ! \item [grid]
 !       {\tt ESMF\_Grid}.
-! \item [localDE]
+! \item [localDe]
 !       The local DE number in its PET context to compute the bounds and counts
 !       information based on the computational and exclusive bounds and counts 
 !       information of the grid from that local DE in its PET context.
@@ -1008,7 +1009,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
-    call ESMF_GridGet(grid, localDE=localDE, staggerloc=lstaggerloc, &
+    call ESMF_GridGet(grid, localDe=localDe, staggerloc=lstaggerloc, &
        exclusiveLBound=gelb, exclusiveUBound=geub, exclusiveCount=ec,  &
        computationalLBound=gclb, computationalUBound=gcub, computationalCount=cc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
