@@ -1,13 +1,7 @@
-# $Id: makefile,v 1.18.2.2 2008/04/02 20:06:56 cdeluca Exp $
+# $Id: makefile,v 1.18.2.3 2008/04/02 23:16:38 theurich Exp $
 
 # leave alone.
 ALL: build_here
-
-# Don't set these unless absolutely necessary - they've got to be
-# architecture and compiler independent and should be inherited
-# from the upper level makefile if possible.
-CFLAGS    =
-FFLAGS    =
 
 # If you have auto-generated files in this directory, list them all here.
 AUTOGEN   = ESMF_ArrayCreate.F90 ESMF_ArrayGet.F90 ESMF_ArrayGather.F90 ESMF_ArrayScatter.F90
@@ -40,12 +34,3 @@ include ${ESMF_DIR}/makefile
 # Leave the following line blank.
 DIRS	  = 
 
-# If you have class files which need to be compiled in a particular
-# order, list the dependencies below, with no rules following.
-#
-# e.g.:
-#
-# ESMF_Field.o:   ESMF_DataArray.o
-#
-# ESMF_FieldBundle.o:  ESMF_Field.o
-#
