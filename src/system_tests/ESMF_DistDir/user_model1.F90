@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.5 2007/06/27 20:36:11 cdeluca Exp $
+! $Id: user_model1.F90,v 1.6 2008/04/02 19:44:24 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -30,7 +30,7 @@ module user_model1
 !   !   private to the module.
  
   subroutine userm1_register(comp, rc)
-    type(ESMF_GridComp), intent(inout) :: comp
+    type(ESMF_GridComp) :: comp
     integer, intent(out) :: rc
 
     print *, "in user register routine"
@@ -64,9 +64,9 @@ module user_model1
  
     
   subroutine user_init(comp, importState, exportState, clock, rc)
-    type(ESMF_GridComp), intent(inout) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
     ! Local variables
@@ -97,9 +97,9 @@ module user_model1
 !   !
  
   subroutine user_run(comp, importState, exportState, clock, rc)
-    type(ESMF_GridComp), intent(inout) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
     type(ESMF_VM)        :: vm
     integer              :: status, petCount
@@ -130,9 +130,9 @@ module user_model1
 !   !
  
   subroutine user_final(comp, importState, exportState, clock, rc)
-    type(ESMF_GridComp), intent(inout) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
     print *, "User Comp Final starting"

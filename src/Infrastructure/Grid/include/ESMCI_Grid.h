@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.40 2008/03/27 01:21:25 theurich Exp $
+// $Id: ESMCI_Grid.h,v 1.41 2008/04/02 19:44:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -352,7 +352,7 @@ int getComputationalUBound(
                    ESMC_DataCopy *_docopy
                    );
 
- int allocCoordFromArrayList(
+ int addCoordFromArrayList(
                        int *staggerlocArg,        // (in) optional
                        int arrayCount,             // (in) 
                        Array **arrayList,           // (in)
@@ -364,7 +364,7 @@ int getComputationalUBound(
 
 
  // Allocate coordinate Arrays for every coord in a staggerloc
- int allocCoordArray(
+ int addCoordArray(
                      int *_staggerloc,
                      InterfaceInt *_staggerEdgeLWidthArg,
                      InterfaceInt *_staggerEdgeUWidthArg,

@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.3 2008/03/27 01:21:36 theurich Exp $
+! $Id: user_coupler.F90,v 1.4 2008/04/02 19:44:18 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -33,7 +33,7 @@ module user_coupler
  
   subroutine usercpl_register(comp, rc)
     type(ESMF_CplComp) :: comp
-    integer :: rc
+    integer, intent(out) :: rc
 
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -75,10 +75,10 @@ module user_coupler
     type(ESMF_CplComp) :: comp
     type(ESMF_State) :: importState, exportState
     type(ESMF_Clock) :: clock
-    integer :: rc
+    integer, intent(out) :: rc
 
     ! Local variables
-    integer :: itemcount, localPet
+    integer :: itemcount
     type(ESMF_Array) :: srcArray, dstArray
     type(ESMF_VM) :: vm
 
@@ -107,10 +107,6 @@ module user_coupler
     call ESMF_StateGetArray(exportState, "array data", dstArray, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    ! get localPet
-    call ESMF_VMGet(vm, localPet=localPet, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
     ! Precompute and store an ArrayRedist operation
     call ESMF_ArrayRedistStore(srcArray=srcArray, dstArray=dstArray, &
       routehandle=routehandle, rc=rc)
@@ -129,7 +125,7 @@ module user_coupler
     type(ESMF_CplComp) :: comp
     type(ESMF_State) :: importState, exportState
     type(ESMF_Clock) :: clock
-    integer :: rc
+    integer, intent(out) :: rc
 
     ! Local variables
     type(ESMF_Array) :: srcArray, dstArray
@@ -165,7 +161,7 @@ module user_coupler
     type(ESMF_CplComp) :: comp
     type(ESMF_State) :: importState, exportState
     type(ESMF_Clock) :: clock
-    integer :: rc
+    integer, intent(out) :: rc
 
     ! Initialize return code
     rc = ESMF_SUCCESS

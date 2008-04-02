@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.4 2008/02/14 04:15:00 theurich Exp $
+! $Id: user_model2.F90,v 1.5 2008/04/02 19:44:25 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -29,7 +29,7 @@ module user_model2
 !   !   private to the module.
  
   subroutine userm2_register(comp, rc)
-    type(ESMF_GridComp), intent(inout) :: comp
+    type(ESMF_GridComp) :: comp
     integer, intent(out) :: rc
 
     ! Initialize return code
@@ -70,9 +70,9 @@ module user_model2
 !   !   Initialization routine.
  
   subroutine user_init(comp, importState, exportState, clock, rc)
-    type(ESMF_GridComp), intent(inout) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
     ! Local variables
@@ -118,9 +118,9 @@ module user_model2
 !   !
  
   subroutine user_run(comp, importState, exportState, clock, rc)
-    type(ESMF_GridComp), intent(inout) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
     ! Local variables
@@ -148,7 +148,7 @@ module user_model2
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer
-    call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
+    call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
       
     ! Get Bounds
@@ -179,9 +179,9 @@ module user_model2
 !   !
  
   subroutine user_final(comp, importState, exportState, clock, rc)
-    type(ESMF_GridComp), intent(inout) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
     ! Local variables

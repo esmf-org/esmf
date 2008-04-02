@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.26 2008/03/27 01:21:27 theurich Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.27 2008/04/02 19:44:04 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.26 2008/03/27 01:21:27 theurich Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.27 2008/04/02 19:44:04 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -546,7 +546,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D GridAllocCoord, by allocating coordinates for every stagger"
+  write(name, *) "Test 2D GridAddCoord, by allocating coordinates for every stagger"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! init success flag
@@ -569,16 +569,16 @@ program ESMF_GridCoordUTest
   endif
 
   ! Allocate Staggers
-  call ESMF_GridAllocCoord(grid2D, &
+  call ESMF_GridAddCoord(grid2D, &
                staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_GridAllocCoord(grid2D, &
+  call ESMF_GridAddCoord(grid2D, &
                staggerloc=ESMF_STAGGERLOC_EDGE1, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_GridAllocCoord(grid2D, &
+  call ESMF_GridAddCoord(grid2D, &
                staggerloc=ESMF_STAGGERLOC_EDGE2, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_GridAllocCoord(grid2D, &
+  call ESMF_GridAddCoord(grid2D, &
                staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -739,7 +739,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D GridAllocCoord with staggerWidths, by allocating coordinates for every stagger with different widths"
+  write(name, *) "Test 2D GridAddCoord with staggerWidths, by allocating coordinates for every stagger with different widths"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! init success flag
@@ -766,16 +766,16 @@ program ESMF_GridCoordUTest
   endif
 
   ! Allocate Staggers
-  call ESMF_GridAllocCoord(grid2D, staggerEdgeLWidth=(/1,2/), staggerEdgeUWidth=(/3,4/), &
+  call ESMF_GridAddCoord(grid2D, staggerEdgeLWidth=(/1,2/), staggerEdgeUWidth=(/3,4/), &
                staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_GridAllocCoord(grid2D, staggerEdgeLWidth=(/5,6/), &
+  call ESMF_GridAddCoord(grid2D, staggerEdgeLWidth=(/5,6/), &
                staggerloc=ESMF_STAGGERLOC_EDGE1, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_GridAllocCoord(grid2D, staggerEdgeUWidth=(/7,8/), &
+  call ESMF_GridAddCoord(grid2D, staggerEdgeUWidth=(/7,8/), &
                staggerloc=ESMF_STAGGERLOC_EDGE2, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_GridAllocCoord(grid2D, staggerEdgeUWidth=(/1,1/), &
+  call ESMF_GridAddCoord(grid2D, staggerEdgeUWidth=(/1,1/), &
                staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -966,10 +966,10 @@ program ESMF_GridCoordUTest
   endif
 
   ! Allocate Staggers
-  call ESMF_GridAllocCoord(grid2D, staggerEdgeLWidth=(/1,2/), staggerEdgeUWidth=(/3,4/), &
+  call ESMF_GridAddCoord(grid2D, staggerEdgeLWidth=(/1,2/), staggerEdgeUWidth=(/3,4/), &
                staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_GridAllocCoord(grid2D, staggerEdgeUWidth=(/1,1/), &
+  call ESMF_GridAddCoord(grid2D, staggerEdgeUWidth=(/1,1/), &
                staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1062,7 +1062,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D plus 1 GridAllocCoord, by allocating coordinates for every stagger"
+  write(name, *) "Test 2D plus 1 GridAddCoord, by allocating coordinates for every stagger"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! init success flag
@@ -1089,28 +1089,28 @@ program ESMF_GridCoordUTest
   endif
 
   ! Allocate Staggers
-  call ESMF_GridAllocCoord(grid2D, &
+  call ESMF_GridAddCoord(grid2D, &
                staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_GridAllocCoord(grid2D, &
+  call ESMF_GridAddCoord(grid2D, &
                staggerloc=ESMF_STAGGERLOC_EDGE1_VCENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_GridAllocCoord(grid2D, &
+  call ESMF_GridAddCoord(grid2D, &
                staggerloc=ESMF_STAGGERLOC_EDGE2_VCENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_GridAllocCoord(grid2D, &
+  call ESMF_GridAddCoord(grid2D, &
                staggerloc=ESMF_STAGGERLOC_CORNER_VCENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_GridAllocCoord(grid2D, &
+  call ESMF_GridAddCoord(grid2D, &
                staggerloc=ESMF_STAGGERLOC_CENTER_VFACE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_GridAllocCoord(grid2D, &
+  call ESMF_GridAddCoord(grid2D, &
                staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_GridAllocCoord(grid2D, &
+  call ESMF_GridAddCoord(grid2D, &
                staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_GridAllocCoord(grid2D, &
+  call ESMF_GridAddCoord(grid2D, &
                staggerloc=ESMF_STAGGERLOC_CORNER_VFACE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1505,7 +1505,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D plus 1 GridAllocCoord with non-default stagger widths, by allocating coordinates for every stagger"
+  write(name, *) "Test 2D plus 1 GridAddCoord with non-default stagger widths, by allocating coordinates for every stagger"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! init success flag
@@ -1536,28 +1536,28 @@ program ESMF_GridCoordUTest
   endif
 
   ! Allocate Staggers
-  call ESMF_GridAllocCoord(grid2D, staggerEdgeLWidth=(/1,2,3/), staggerEdgeUWidth=(/4,5,6/), &
+  call ESMF_GridAddCoord(grid2D, staggerEdgeLWidth=(/1,2,3/), staggerEdgeUWidth=(/4,5,6/), &
                staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_GridAllocCoord(grid2D, staggerEdgeUWidth=(/7,8,9/), &
+  call ESMF_GridAddCoord(grid2D, staggerEdgeUWidth=(/7,8,9/), &
                staggerloc=ESMF_STAGGERLOC_EDGE1_VCENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_GridAllocCoord(grid2D, staggerEdgeLWidth=(/1,2,3/), &
+  call ESMF_GridAddCoord(grid2D, staggerEdgeLWidth=(/1,2,3/), &
                staggerloc=ESMF_STAGGERLOC_EDGE2_VCENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_GridAllocCoord(grid2D,  staggerEdgeUWidth=(/1,1,0/), &
+  call ESMF_GridAddCoord(grid2D,  staggerEdgeUWidth=(/1,1,0/), &
                staggerloc=ESMF_STAGGERLOC_CORNER_VCENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_GridAllocCoord(grid2D,  staggerEdgeUWidth=(/0,0,1/), &
+  call ESMF_GridAddCoord(grid2D,  staggerEdgeUWidth=(/0,0,1/), &
                staggerloc=ESMF_STAGGERLOC_CENTER_VFACE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_GridAllocCoord(grid2D,  staggerEdgeLWidth=(/1,2,3/), &
+  call ESMF_GridAddCoord(grid2D,  staggerEdgeLWidth=(/1,2,3/), &
                staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_GridAllocCoord(grid2D, staggerEdgeLWidth=(/1,2,3/), staggerEdgeUWidth=(/4,5,6/), &
+  call ESMF_GridAddCoord(grid2D, staggerEdgeLWidth=(/1,2,3/), staggerEdgeUWidth=(/4,5,6/), &
                staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_GridAllocCoord(grid2D, staggerEdgeUWidth=(/7,8,9/), &
+  call ESMF_GridAddCoord(grid2D, staggerEdgeUWidth=(/7,8,9/), &
                staggerloc=ESMF_STAGGERLOC_CORNER_VFACE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1980,7 +1980,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D plus 1 GridAllocCoord with non-default stagger widths and non-defaults coordDep"
+  write(name, *) "Test 2D plus 1 GridAddCoord with non-default stagger widths and non-defaults coordDep"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! init success flag
@@ -2017,16 +2017,16 @@ program ESMF_GridCoordUTest
   endif
 
   ! Allocate Staggers
-  call ESMF_GridAllocCoord(grid2D, staggerEdgeUWidth=(/7,8,9/), &
+  call ESMF_GridAddCoord(grid2D, staggerEdgeUWidth=(/7,8,9/), &
                staggerloc=ESMF_STAGGERLOC_EDGE1_VCENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_GridAllocCoord(grid2D,  staggerEdgeLWidth=(/1,2,3/), &
+  call ESMF_GridAddCoord(grid2D,  staggerEdgeLWidth=(/1,2,3/), &
                staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_GridAllocCoord(grid2D, staggerEdgeLWidth=(/1,2,3/), staggerEdgeUWidth=(/4,5,6/), &
+  call ESMF_GridAddCoord(grid2D, staggerEdgeLWidth=(/1,2,3/), staggerEdgeUWidth=(/4,5,6/), &
                staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_GridAllocCoord(grid2D, staggerEdgeUWidth=(/7,8,9/), &
+  call ESMF_GridAddCoord(grid2D, staggerEdgeUWidth=(/7,8,9/), &
                staggerloc=ESMF_STAGGERLOC_CORNER_VFACE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -2203,7 +2203,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 2D plus 1 GridAllocCoord with DELOCAL Index"
+  write(name, *) "Test 2D plus 1 GridAddCoord with DELOCAL Index"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! init success flag
@@ -2242,7 +2242,7 @@ program ESMF_GridCoordUTest
   endif
 
   ! Allocate Staggers
-  call ESMF_GridAllocCoord(grid2D, staggerEdgeLWidth=(/1,2,3/), staggerEdgeUWidth=(/4,5,6/), &
+  call ESMF_GridAddCoord(grid2D, staggerEdgeLWidth=(/1,2,3/), staggerEdgeUWidth=(/4,5,6/), &
                staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -2341,7 +2341,7 @@ program ESMF_GridCoordUTest
   endif
 
   ! Allocate coordinates
-  call ESMF_GridAllocCoord(grid2D, staggerEdgeLWidth=(/1,2,3/), staggerEdgeUWidth=(/4,5,6/), &
+  call ESMF_GridAddCoord(grid2D, staggerEdgeLWidth=(/1,2,3/), staggerEdgeUWidth=(/4,5,6/), &
                staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -2535,7 +2535,7 @@ program ESMF_GridCoordUTest
   endif
 
   ! Allocate coordinates
-  call ESMF_GridAllocCoord(grid2D, staggerEdgeLWidth=(/1,2,3/), staggerEdgeUWidth=(/4,5,6/), &
+  call ESMF_GridAddCoord(grid2D, staggerEdgeLWidth=(/1,2,3/), staggerEdgeUWidth=(/4,5,6/), &
                staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -2604,7 +2604,7 @@ program ESMF_GridCoordUTest
   endif
 
   ! Allocate coordinates
-  call ESMF_GridAllocCoord(grid2D, &
+  call ESMF_GridAddCoord(grid2D, &
                staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -2673,7 +2673,7 @@ program ESMF_GridCoordUTest
   endif
 
   ! Allocate coordinates
-  call ESMF_GridAllocCoord(grid2D, &
+  call ESMF_GridAddCoord(grid2D, &
                staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -2743,7 +2743,7 @@ program ESMF_GridCoordUTest
   endif
 
   ! Allocate Staggers
-  call ESMF_GridAllocCoord(grid2D, &
+  call ESMF_GridAddCoord(grid2D, &
                staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -2794,7 +2794,7 @@ program ESMF_GridCoordUTest
   endif
 
   ! Allocate Staggers
-  call ESMF_GridAllocCoord(grid2D, &
+  call ESMF_GridAddCoord(grid2D, &
                staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -2853,7 +2853,7 @@ program ESMF_GridCoordUTest
   endif
 
   ! Allocate Staggers
-  call ESMF_GridAllocCoord(grid2D, staggerEdgeLWidth=(/1,2,3/), staggerEdgeUWidth=(/4,5,6/), &
+  call ESMF_GridAddCoord(grid2D, staggerEdgeLWidth=(/1,2,3/), staggerEdgeUWidth=(/4,5,6/), &
                staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -2892,14 +2892,14 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 3D GridAllocCoord, by allocating coordinates and then getting fortran pointer"
+  write(name, *) "Test 3D GridAddCoord, by allocating coordinates and then getting fortran pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! init success flag
   rc=ESMF_SUCCESS
 
   ! Set Coord From Array
-  call ESMF_GridAllocCoord(grid3D, &
+  call ESMF_GridAddCoord(grid3D, &
                staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 

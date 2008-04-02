@@ -1,4 +1,4 @@
-! $Id: cplComp.F90,v 1.3 2008/03/27 01:21:37 theurich Exp $
+! $Id: cplComp.F90,v 1.4 2008/04/02 19:44:22 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -19,7 +19,7 @@ module cplCompMod
 !-------------------------------------------------------------------------
 
   subroutine cplCompReg(comp, rc)
-    type(ESMF_CplComp), intent(inout) :: comp
+    type(ESMF_CplComp) :: comp
     integer, intent(out) :: rc
 
     ! Initialize
@@ -50,9 +50,9 @@ module cplCompMod
 !-------------------------------------------------------------------------
     
   subroutine compInit1(comp, importState, exportState, clock, rc)
-    type(ESMF_CplComp), intent(inout) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_CplComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
     
     ! Local variables
@@ -97,9 +97,9 @@ module cplCompMod
 !-------------------------------------------------------------------------
  
   subroutine compInit2(comp, importState, exportState, clock, rc)
-    type(ESMF_CplComp), intent(inout) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_CplComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
     
     ! Local variables
@@ -144,9 +144,9 @@ module cplCompMod
 !-------------------------------------------------------------------------
  
   subroutine compFinal1(comp, importState, exportState, clock, rc)
-    type(ESMF_CplComp), intent(inout) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_CplComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
     ! Local variables
@@ -167,9 +167,9 @@ module cplCompMod
 !-------------------------------------------------------------------------
  
   subroutine compFinal2(comp, importState, exportState, clock, rc)
-    type(ESMF_CplComp), intent(inout) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_CplComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
     ! Local variables

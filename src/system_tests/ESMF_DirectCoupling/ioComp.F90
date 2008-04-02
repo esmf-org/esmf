@@ -1,4 +1,4 @@
-! $Id: ioComp.F90,v 1.3 2008/02/21 05:55:57 theurich Exp $
+! $Id: ioComp.F90,v 1.4 2008/04/02 19:44:23 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -19,7 +19,7 @@ module ioCompMod
 !-------------------------------------------------------------------------
 
   subroutine ioCompReg(comp, rc)
-    type(ESMF_GridComp), intent(inout) :: comp
+    type(ESMF_GridComp) :: comp
     integer, intent(out) :: rc
 
     ! Initialize
@@ -51,9 +51,9 @@ module ioCompMod
 !-------------------------------------------------------------------------
     
   subroutine compInit(comp, importState, exportState, clock, rc)
-    type(ESMF_GridComp), intent(inout) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
     ! Local variables
@@ -96,9 +96,9 @@ module ioCompMod
 !-------------------------------------------------------------------------
  
   subroutine compRun(comp, importState, exportState, clock, rc)
-    type(ESMF_GridComp), intent(inout) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
     ! Local variables
@@ -118,7 +118,7 @@ module ioCompMod
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer
-    call ESMF_ArrayGet(arraySrc, farrayPtr=farraySrcPtr, rc=rc)
+    call ESMF_ArrayGet(arraySrc, localDe=0, farrayPtr=farraySrcPtr, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Fill source Array with data
@@ -135,7 +135,7 @@ module ioCompMod
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer
-    call ESMF_ArrayGet(arrayDst, farrayPtr=farrayDstPtr, rc=rc)
+    call ESMF_ArrayGet(arrayDst, localDe=0, farrayPtr=farrayDstPtr, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! Initialize destination Array
@@ -190,9 +190,9 @@ module ioCompMod
 !-------------------------------------------------------------------------
  
   subroutine compFinal(comp, importState, exportState, clock, rc)
-    type(ESMF_GridComp), intent(inout) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
     ! Local variables

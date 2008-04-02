@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.31 2007/12/14 20:49:09 svasquez Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.32 2008/04/02 19:44:08 theurich Exp $
 !
 ! Example code for a main Application program. 
 
@@ -29,7 +29,7 @@
 !   ! various user-supplied subroutines which make up this Component.
     subroutine PHYS_SetServices(gcomp, rc)
       type(ESMF_GridComp) :: gcomp
-      integer :: rc
+      integer, intent(out) :: rc
 
        call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init, &
                                                      ESMF_SINGLEPHASE, rc)
@@ -46,7 +46,7 @@
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
-      integer :: rc
+      integer, intent(out) :: rc
 
       print *, "PHYS initialize routine called"
       rc = ESMF_SUCCESS
@@ -59,7 +59,7 @@
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
-      integer :: rc
+      integer, intent(out) :: rc
 
       print *, "PHYS run routine called"
       rc = ESMF_SUCCESS
@@ -72,7 +72,7 @@
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
-      integer :: rc
+      integer, intent(out) :: rc
 
       print *, "PHYS finalize routine called"
       rc = ESMF_SUCCESS
@@ -95,7 +95,7 @@
 !   ! various user-supplied subroutines which make up this Component.
     subroutine DYNM_SetServices(gcomp, rc)
       type(ESMF_GridComp) :: gcomp
-      integer :: rc
+      integer, intent(out) :: rc
 
        call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init, &
                                                      ESMF_SINGLEPHASE, rc)
@@ -112,7 +112,7 @@
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
-      integer :: rc
+      integer, intent(out) :: rc
 
       print *, "DYNM initialize routine called"
       rc = ESMF_SUCCESS
@@ -125,7 +125,7 @@
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
-      integer :: rc
+      integer, intent(out) :: rc
 
       print *, "DYNM run routine called"
       rc = ESMF_SUCCESS
@@ -138,7 +138,7 @@
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
-      integer :: rc
+      integer, intent(out) :: rc
 
       print *, "DYNM finalize routine called"
       rc = ESMF_SUCCESS
@@ -162,7 +162,7 @@
 !   ! various user-supplied subroutines which make up this Component.
     subroutine CPLR_SetServices(cpl, rc)
       type(ESMF_CplComp) :: cpl
-      integer :: rc
+      integer, intent(out) :: rc
 
        call ESMF_CplCompSetEntryPoint(cpl, ESMF_SETINIT, my_init, &
                                                      ESMF_SINGLEPHASE, rc)
@@ -179,7 +179,7 @@
       type(ESMF_State) :: importStatelist
       type(ESMF_State) :: exportStatelist
       type(ESMF_Clock) :: externalclock
-      integer :: rc
+      integer, intent(out) :: rc
 
       print *, "CPLR initialize routine called"
       rc = ESMF_SUCCESS
@@ -192,7 +192,7 @@
       type(ESMF_State) :: importStatelist
       type(ESMF_State) :: exportStatelist
       type(ESMF_Clock) :: externalclock
-      integer :: rc
+      integer, intent(out) :: rc
 
       print *, "CPLR run routine called"
       rc = ESMF_SUCCESS
@@ -205,7 +205,7 @@
       type(ESMF_State) :: importStatelist
       type(ESMF_State) :: exportStatelist
       type(ESMF_Clock) :: externalclock
-      integer :: rc
+      integer, intent(out) :: rc
 
       print *, "CPLR finalize routine called"
       rc = ESMF_SUCCESS

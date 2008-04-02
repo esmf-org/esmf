@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.31 2007/12/14 20:49:09 svasquez Exp $
+! $Id: ESMF_GCompEx.F90,v 1.32 2008/04/02 19:44:09 theurich Exp $
 !
 ! Example/test code which shows Gridded Component calls.
 
@@ -54,7 +54,7 @@
 
     subroutine GComp_SetServices(comp, rc)
         type(ESMF_GridComp) :: comp
-        integer :: rc
+        integer, intent(out) :: rc
 
         ! SetServices the callback routines.
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, GComp_Init, 0, rc)
@@ -92,7 +92,7 @@
         type(ESMF_GridComp) :: comp
         type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
-        integer :: rc
+        integer, intent(out) :: rc
 
         print *, "Gridded Comp Init starting"
 
@@ -134,7 +134,7 @@
         type(ESMF_GridComp) :: comp
         type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
-        integer :: rc
+        integer, intent(out) :: rc
 
         print *, "Gridded Comp Run starting"
         ! call ESMF_StateGetField(), etc to get fields, bundles, arrays
@@ -168,7 +168,7 @@
         type(ESMF_GridComp) :: comp
         type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
-        integer :: rc
+        integer, intent(out) :: rc
 
         print *, "Gridded Comp Final starting"
     

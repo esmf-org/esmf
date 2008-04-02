@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.122 2008/03/28 06:48:27 theurich Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.123 2008/04/02 19:43:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.122 2008/03/28 06:48:27 theurich Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.123 2008/04/02 19:43:59 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -389,49 +389,6 @@
       call ESMF_FieldDestroy(f3)
 
       !------------------------------------------------------------------------
-      !EX_remove_UTest_Multi_Proc_Only
-      ! Create a different size Grid for testing with an incompatible Array
-!      igrid4 =  ESMF_IGridCreateHorzXYUni((/ 100, 20 /), minCoord, &
-!                                     name="biglandigrid", rc=rc)
-!      call ESMF_IGridDistribute(igrid4, delayout=delayout, rc=rc)
-!      write(failMsg, *) ""
-!      write(name, *) "Creating a IGrid to use in Field Tests"
-!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-     
-      !------------------------------------------------------------------------
-      !EX_remove_UTest_Multi_Proc_Only
-      ! Try to create a Field with a IGrid and ArraySpec of the wrong sizes
-      ! try dimCount 1,2,3 :-)
-      !TODO: with the removal of the old Array class (now called InternArray)
-      !TODO: this test really does not work. 
-      ! call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R4, rc=rc)
-!      f6 = ESMF_FieldCreate(igrid4, arrayspec, allocflag=ESMF_ALLOC, &
-!                        horzRelloc=ESMF_STAGGERLOC_CENTER, vertRelloc=ESMF_STAGGERLOC_CENTER, &
-!                        haloWidth=2, datamap=dm, name="Field 1", iospec=ios, rc=rc)
-!
-!      write(failMsg, *) ""
-!      write(name, *) "Creating a Field with a mismatched Grid/Array"
-!      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_remove_UTest_Multi_Proc_Only
-      ! Verifying that destroying a IGrid in a Field is not allowed
-      ! TODO: the IGrid has no way to tell that it is being referenced by
-      ! any other object, because we have so far chosen not to implement
-      ! reference counts.  so this cannot be tested and expected to fail.
-      ! however - it is reasonable to expect that the field might need to
-      ! notice the next time the user tries to access the field and the
-      ! associated igrid has been destroyed.  but the testing for validity
-      ! does have a cost (in performance), and so far we have not put in
-      ! a ton of checks into every function.  it is reasonable to add a
-      ! field function after the igrid is destroyed and see if that is 
-      ! detected, after we decide on a framework-wide consistent strategy.
-!       write(failMsg, *) ""
-!       call ESMF_IGridDestroy(igrid, rc=rc)
-!       write(name, *) "Destroying a IGrid in a Field Test"
-!       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       ! Verifying that destroying the Field did not destroy the Grid
        call ESMF_GridValidate(grid, rc=rc)
@@ -480,100 +437,6 @@
       call ESMF_GridGet(grid3, name=gname3, rc=rc)
       print *, "Grid (grid3) name = ", trim(gname3)
       call ESMF_Test((gname.eq.gname3), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-      !EX_remove_UTest_Multi_Proc_Only
-      ! Req. xxx - getting a data pointer directly from a field
-      ! f3 exists and is valid at this point.
-!       nullify(f90ptr2)
-!       call ESMF_FieldGetDataPointer(f3, f90ptr2, rc=rc)
-!       print *, "data = ", f90ptr2(1,1)
-!       write(failMsg, *) ""
-!       write(name, *) "Getting an F90 pointer directly back from a Field"
-!       call ESMF_Test((associated(f90ptr2)), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-
-      !------------------------------------------------------------------------
-
-      !------------------------------------------------------------------------
-
-      !------------------------------------------------------------------------
-      !EX_remove_UTest_Multi_Proc_Only
-      ! Create a 3D igrid for testing
-!      igrid5 =  ESMF_IGridCreateHorzXYUni((/ 10, 20 /), minCoord, &
-!                                     name="landigrid", rc=rc)
-!      deltas(:) = (/ (i,i=1,10) /)
-!      call ESMF_IGridAddVertHeight(igrid5, delta=deltas)
-!      call ESMF_IGridDistribute(igrid5, delayout=delayout, rc=rc)
-!      write(failMsg, *) ""
-!      write(name, *) "Creating a 3D IGrid to use in Field Tests"
-!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_remove_UTest_Multi_Proc_Only
-      ! TODO: this fails.
-      ! Create a Field with 3D igrid and 3D data array, vertex centered in vert
-!      call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R4, rc=rc)
-!      f7 = ESMF_FieldCreate(igrid5, arrayspec, ESMF_ALLOC, ESMF_STAGGERLOC_CENTER, &
-!                      ESMF_CELL_VERTEX, 3, name="Field 7", rc=rc)
-!      write(failMsg, *) ""
-!      write(name, *) "Creating Field with 3D igrid and 3D data, vert=vertex"
-!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-!      call ESMF_FieldDestroy(f7)
-
-      !------------------------------------------------------------------------
-      !EX_remove_UTest_Multi_Proc_Only
-      ! Create a Field with 3D igrid and 3D data array, cell centered
-!      call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R4, rc=rc)
-!      f7 = ESMF_FieldCreate(igrid5, arrayspec, ESMF_ALLOC, ESMF_STAGGERLOC_CENTER, &
-!                            ESMF_CELL_CELL, 3, name="Field 7", rc=rc)
-!      write(failMsg, *) ""
-!      write(name, *) "Creating Field with 3D igrid and 3D data, vert=cell"
-!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_remove_UTest_Multi_Proc_Only
-      ! Bug 1160730 filed on this
-      ! fails in field validate when the igrid is queried for the
-      ! number of counts in the local decomposition.
-      ! Create a Field with 3D igrid and 3D data array
-!      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
-!      f7 = ESMF_FieldCreate(igrid5, arrayspec, ESMF_ALLOC, ESMF_STAGGERLOC_CENTER, &
-!                            ESMF_CELL_VERTEX, 3, name="Field 7", rc=rc)
-!      write(failMsg, *) ""
-!      write(name, *) "Creating Field with 3D igrid and 3D data"
-!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_remove_UTest_Multi_Proc_Only 
-      ! Call FieldSetCommit on a field created from FieldCreateEmpty
-      ! The data ptr size must match the grid size and only works when np=decomp
-!      f8 = ESMF_FieldCreate("pressure", rc=rc)
-!      allocate(farray(10,20))
-!      call ESMF_FieldSetCommit(f8, grid, farray, rc=rc)
-!      write(failMsg, *) ""
-!      write(name, *) "SetCommit on an empty field"
-!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-!      call ESMF_FieldDestroy(f8)
-
-      !------------------------------------------------------------------------
-      !EX_remove_UTest_Multi_Proc_Only 
-      ! FieldCreateFromDataPtr creates a field from a fortran data ptr
-!      f8 = ESMF_FieldCreate(grid, farray, rc=rc)
-!      write(failMsg, *) ""
-!      write(name, *) "Creates a field from a fortran data ptr"
-!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-!      call ESMF_FieldDestroy(f8)
-      
-      !------------------------------------------------------------------------
-      !EX_remove_UTest_Multi_Proc_Only 
-      ! FieldCreateFromDataPtr creates a field from a fortran data ptr
-      ! This test focuses on copy behavior
-!      f8 = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, rc=rc)
-!      write(failMsg, *) ""
-!      write(name, *) "Creates a field from a fortran data ptr (copy)"
-!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-!      call ESMF_FieldDestroy(f8)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only 
@@ -591,111 +454,6 @@
       write(failMsg, *) ""
       write(name, *) "Test ESMF_StaggerLocPrint public interface"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_remove_UTest_Multi_Proc_Only
-      ! FieldCreateFromArray creates a field from an ESMF_Array
-!      call ESMF_GridGet(grid, distgrid=distgrid, rc=rc)
-
-!      array8 = ESMF_ArrayCreate(farray, distgrid=distgrid, &
-!          staggerloc=0, computationalEdgeUWidth=(/-1,-1/), rc=rc) 
-!      f8 = ESMF_FieldCreate(grid, array8, rc=rc)
-!      write(failMsg, *) ""
-!      write(name, *) "Creates a field from a ESMF_Array"
-!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-!      call ESMF_FieldDestroy(f8)
-
-      !------------------------------------------------------------------------
-      !EX_remove_UTest_Multi_Proc_Only 
-      ! FieldCreateFromArray creates a field from a ESMF_Array
-      ! This test focus on copy behavior
-!      call ESMF_GridGet(grid, distgrid=distgrid, rc=rc)
-
-!      array8 = ESMF_ArrayCreate(farray, distgrid=distgrid, &
-!          staggerloc=0, computationalEdgeUWidth=(/-1,-1/), rc=rc) 
-!      f9 = ESMF_FieldCreate(grid, array8, copyflag=ESMF_DATA_COPY, rc=rc)
-!      write(failMsg, *) ""
-!      write(name, *) "Creates a field from a ESMF_Array (copy)"
-!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-!      call ESMF_FieldDestroy(f9)
-
-      !------------------------------------------------------------------------
-      !EX_remove_UTest_Multi_Proc_Only 
-      ! FieldGetDataPtr gets the fortran data ptr from a ESMF_Field.
-      ! Create f8 here before restoring this test.
-!      call ESMF_FieldGetDataPtr(f8, farray1, rc=rc)
-!      write(failMsg, *) ""
-!      write(name, *) "Retrieves the fortran data ptr from a ESMF_Field"
-!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_remove_UTest_Multi_Proc_Only
-!      write(failMsg, *) ""
-!      write(name, *) "Verify the data ptr size is correct"
-!      if(size(farray1, 1) .ne. 10 .or. size(farray1, 2) .ne. 20) &
-!            rc = ESMF_FAILURE
-!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-!
-!      call ESMF_ArrayDestroy(array8)
-      !------------------------------------------------------------------------
-      !EX_remove_UTest_Multi_Proc_Only 
-      ! FieldSetDataPtr sets the fortran data ptr in a ESMF_Field
-      ! This test uses f8 created from previous test
-!       allocate(farray2(size(farray1,1), size(farray1,2)))
-!       call ESMF_FieldSetDataPtr(f8, dataptr=farray2, rc=rc)
-!       write(failMsg, *) ""
-!       write(name, *) "Sets the fortran data ptr in a ESMF_Field"
-!       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-      !EX_remove_UTest_Multi_Proc_Only
-      ! FieldSetDataPtr sets the fortran data ptr in a ESMF_Field
-      ! This test uses f8 created from previous test
-      ! This test test the copy behavior of setptr
-!       allocate(farray2(size(farray1,1), size(farray1,2)))
-!       call ESMF_FieldSetDataPtr(f8, dataptr=farray2, copyflag=ESMF_DATA_COPY, rc=rc)
-!       write(failMsg, *) ""
-!       write(name, *) "Sets the fortran data ptr (copy) in a ESMF_Field"
-!       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-!
-!       deallocate(farray2)
-!       call ESMF_FieldDestroy(f8)
-
-      !------------------------------------------------------------------------
-      !EX_remove_UTest_Multi_Proc_Only
-      ! Setting a (bad) data pointer directly in an empty Field
-!      nullify(f90ptr4)
-!      call ESMF_FieldSetDataPointer(f2, f90ptr4, rc=rc)
-!      write(failMsg, *) "Did not return ESMF_FAILURE"
-!      write(name, *) "Setting a null F90 pointer directly in a Field"
-!      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_remove_UTest_Multi_Proc_Only
-      ! Setting a (good) data pointer directly in an empty Field
-!      allocate(f90ptr4(4,4))
-!      f90ptr4(:,:) = 3.14159
-!      call ESMF_FieldSetDataPointer(f2, f90ptr4, rc=rc)
-!      write(failMsg, *) "Did not return ESMF_SUCCESS"
-!      write(name, *) "Setting an F90 pointer directly in a Field"
-!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_remove_UTest_Multi_Proc_Only
-      ! Getting the data pointer back from a Field
-!      call ESMF_FieldGetDataPointer(f2, f90ptr4, rc=rc)
-!      print *, "data = ", f90ptr4(1,1)
-!      write(failMsg, *) "Did not return ESMF_SUCCESS"
-!      write(name, *) "Getting an F90 pointer directly back from a Field"
-!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_remove_UTest_Multi_Proc_Only
-      ! Verify the pointers are equal
-!      call ESMF_FieldGetDataPointer(f2, f90ptr5, rc=rc)
-!      print *, "data = ", f90ptr5(1,1)
-!      write(failMsg, *) "The pointers are not equal"
-!      write(name, *) "Compare F90 pointers Test"
-!      call ESMF_Test((associated(f90ptr4,f90ptr5)), name, failMsg, result, ESMF_SRCLINE)
 
       call ESMF_FieldDestroy(f3)
 

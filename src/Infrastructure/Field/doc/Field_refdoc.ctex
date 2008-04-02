@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.37 2008/03/05 17:39:49 dneckels Exp $
+% $Id: Field_refdoc.ctex,v 1.38 2008/04/02 19:43:57 theurich Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -71,22 +71,17 @@
 \input{../Infrastructure/Field/doc/Field_implnotes}
 #endif
 
-\subsection{Class API: Basic Field Methods}
-#ifdef STANDALONE
-\input{ESMF_Field_fapi}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/ESMF_Field_fapi}
-#endif
-
-\subsection{Class API: Field Overloads for Fortran Arrays}
+\subsection{Class API}
 #ifdef STANDALONE
 \input{ESMF_FieldCreate_fapi}
 \input{ESMF_FieldGet_fapi}
-%\input{ESMF_FieldSet_fapi}
+\input{ESMF_FieldSet_fapi}
+\input{ESMF_Field_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Field/doc/ESMF_FieldCreate_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldGet_fapi}
-%\input{../Infrastructure/Field/doc/ESMF_FieldSet_fapi}
+\input{../Infrastructure/Field/doc/ESMF_FieldSet_fapi}
+\input{../Infrastructure/Field/doc/ESMF_Field_fapi}
 #endif
 
 \subsection{Class API: Field Communications}

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayEx.F90,v 1.7 2007/12/14 20:49:07 svasquez Exp $
+! $Id: ESMF_ArrayFarrayEx.F90,v 1.8 2008/04/02 19:43:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -198,7 +198,7 @@ program ESMF_ArrayFarrayEx
 ! PET-local array.
 !EOE
 !BOC
-  call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
+  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
@@ -229,7 +229,7 @@ program ESMF_ArrayFarrayEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
   print *, farrayA            ! print PET-local farrayA directly
-  call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)  ! obtain array pointer
+  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr, rc=rc)! obtain array pointer
   print *, farrayPtr          ! print PET-local piece of Array through pointer
   call ESMF_ArrayDestroy(array, rc=rc) ! destroy the Array
   deallocate(farrayA)         ! user controlled de-allocation
@@ -245,7 +245,7 @@ program ESMF_ArrayFarrayEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
   print *, farrayP            ! print PET-local farrayA directly
-  call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)  ! obtain array pointer
+  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr, rc=rc)! obtain array pointer
   print *, farrayPtr          ! print PET-local piece of Array through pointer
   call ESMF_ArrayDestroy(array, rc=rc) ! destroy the Array
   deallocate(farrayP)         ! user controlled de-allocation

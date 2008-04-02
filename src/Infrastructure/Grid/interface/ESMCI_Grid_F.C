@@ -385,7 +385,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
-  void FTN(c_esmc_gridalloccoord)(ESMCI::Grid **grid, 
+  void FTN(c_esmc_gridaddcoord)(ESMCI::Grid **grid, 
                                          int *staggerloc, 
                                          ESMCI::InterfaceInt **staggerEdgeLWidthArg, 
                                          ESMCI::InterfaceInt **staggerEdgeUWidthArg, 
@@ -393,13 +393,13 @@ extern "C" {
                                          int *rc) {
     int localrc;
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_gridalloccoord()"
+#define ESMC_METHOD "c_esmc_gridaddcoord()"
 
     //Initialize return code
     localrc = ESMC_RC_NOT_IMPL;
 
     // call into C++
-    localrc= (*grid)->allocCoordArray(ESMC_NOT_PRESENT_FILTER(staggerloc),
+    localrc= (*grid)->addCoordArray(ESMC_NOT_PRESENT_FILTER(staggerloc),
       *staggerEdgeLWidthArg, *staggerEdgeUWidthArg, *staggerAlignArg);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));

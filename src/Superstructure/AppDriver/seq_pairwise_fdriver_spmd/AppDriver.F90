@@ -47,8 +47,8 @@
     ! Configuration information
     type(ESMF_Config) :: config
 
-    ! A common igrid
-    type(ESMF_IGrid) :: igrid
+    ! A common grid
+    type(ESMF_Grid) :: grid
 
     ! A clock, a calendar, and timesteps
     type(ESMF_Clock) :: clock
@@ -56,10 +56,11 @@
     type(ESMF_Time) :: startTime
     type(ESMF_Time) :: stopTime
 
-    ! Variables related to igrid and clock
+    ! Variables related to grid and clock
     integer :: i_max, j_max
     real(ESMF_KIND_R4) :: x_min4, x_max4, y_min4, y_max4
     real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
+    integer :: ix_min, ix_max, iy_min, iy_max
 
     ! Return codes for error checks
     integer :: rc
@@ -84,7 +85,7 @@
 
     ! Get standard config parameters, for example:
 
-    ! the default igrid size and type
+    ! the default grid size and type
     ! the default start time, stop time, and running intervals
     !  for the main time loop.
     !
@@ -125,11 +126,11 @@
 
 !!------------------------------------------------------------------------------
 !!------------------------------------------------------------------------------
-!!  Create and initialize a clock, and a igrid.
+!!  Create and initialize a clock, and a grid.
 !!------------------------------------------------------------------------------
 !!------------------------------------------------------------------------------
 
-     ! Based on values from the Config file, create a default IGrid
+     ! Based on values from the Config file, create a default grid
      ! and Clock.  We assume we have read in the variables below from
      ! the config file.
 
@@ -144,22 +145,20 @@
                                 stopTime, rc=rc)
 
 
-      ! Same with the igrid.  Get a default layout based on the VM.
+      ! Same with the grid.  Get a default layout based on the VM.
       defaultlayout = ESMF_DELayoutCreate(defaultvm, rc=rc)
 
-      x_min = x_min4
-      y_min = y_min4
-      x_max = x_max4
-      y_max = y_max4
-      igrid = ESMF_IGridCreateHorzXYUni(counts=(/i_max, j_max/), &
-                             minGlobalCoordPerDim=(/x_min, y_min/), &
-                             maxGlobalCoordPerDim=(/x_max, y_max/), &
-                             horzStagger=ESMF_IGRID_HORZ_STAGGER_C_SE, &
-                             name="source igrid", rc=rc)
-      call ESMF_IGridDistribute(igrid, delayout=defaultlayout, rc=rc)
+      ix_min = x_min4
+      iy_min = y_min4
+      ix_max = x_max4
+      iy_max = y_max4
+      grid = ESMF_GridCreateShapeTile(minIndex=(/ix_min, iy_min/), &
+                             maxIndex=(/ix_max, iy_max/), &
+                             name="source grid", rc=rc)
+      !call ESMF_gridDistribute(grid, delayout=defaultlayout, rc=rc)
 
-      ! Attach the IGrid to the Component
-      call ESMF_GridCompSet(compGridded, igrid=igrid, rc=rc)
+      ! Attach the grid to the Component
+      call ESMF_GridCompSet(compGridded, grid=grid, rc=rc)
 
 
 !!------------------------------------------------------------------------------

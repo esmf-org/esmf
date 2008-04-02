@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.14 2008/03/27 01:21:20 theurich Exp $
+! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.15 2008/04/02 19:43:56 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ArrayCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.14 2008/03/27 01:21:20 theurich Exp $'
+    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.15 2008/04/02 19:43:56 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -128,7 +128,7 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet F90 array pointer, 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, farrayPtr=farrayPtr2D, rc=rc)
+  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr2D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -366,14 +366,14 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet F90 array pointer, 1D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, farrayPtr=farrayPtr1D, rc=rc)
+  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr1D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet w/ incompatible F90 array pointer, 1D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, farrayPtr=farrayPtr2D, rc=rc)
+  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr2D, rc=rc)
   call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -433,14 +433,14 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet F90 array pointer, 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, farrayPtr=farrayPtr2D, rc=rc)
+  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr2D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet w/ incompatible F90 array pointer, 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, farrayPtr=farrayPtr3D, rc=rc)
+  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr3D, rc=rc)
   call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -472,7 +472,7 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet F90 array pointer, 3D ESMF_TYPEKIND_R4 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, farrayPtr=farrayPtr3D, rc=rc)
+  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr3D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -504,7 +504,7 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet F90 array pointer, 4D ESMF_TYPEKIND_I4 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, farrayPtr=farrayPtr4D, rc=rc)
+  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr4D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.29 2008/03/27 01:21:18 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.30 2008/04/02 19:43:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -17,8 +17,7 @@ module ESMF_ArrayCreateMod
 !
 !==============================================================================
 !
-! This file contains the LocalArray class definition and all LocalArray
-! class methods.
+! This file contains the ArrayCreate() methods.
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -109,7 +108,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.29 2008/03/27 01:21:18 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.30 2008/04/02 19:43:55 theurich Exp $'
 
 !==============================================================================
 ! 

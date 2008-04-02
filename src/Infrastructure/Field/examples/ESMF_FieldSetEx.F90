@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetEx.F90,v 1.5 2008/03/27 01:21:23 theurich Exp $
+! $Id: ESMF_FieldSetEx.F90,v 1.6 2008/04/02 19:43:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
-!BOE
+!BremoeOE
 !\subsubsection{Set the Fortran data pointer in a Field}
 !
 !  Through the {\tt ESMF\_FieldSetDataPtr} interface user can reset the intrinsic
@@ -66,8 +66,8 @@
 !  The shape of the Fortran array is computed using the same approach explained
 !  in the sections on Field creation from a Fortran data array.
 !
-!EOE
-!BOC
+!EremoeOE
+!BremoeOC
     xdim = 12
     ydim = 22
     zdim = 31
@@ -98,15 +98,15 @@
   
     allocate(farray(fa_shape(1), fa_shape(2), fa_shape(3)))
     call ESMF_FieldSetDataPtr(f8, farray, rc=rc)
-!EOC
+!EremoeOC
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     print *, "Field Set Data Pointer example returned"
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
-!BOE
-!\subsubsection{Reset the Grid in a Field}
+!BremoeOE
+!\subsubsection{Set the Grid in a Field}
 !
 !  User can reset the internal {\tt ESMF\_Grid} object of a {\tt ESMF\_Field}
 !  through ESMF\_FieldSetGrid interface. Invalid Grid that has different computational
@@ -114,14 +114,14 @@
 !  are expensive operations that should be avoided for performance critical portion
 !  of a model.
 !
-!EOE
-!BOC
+!EremoveOE
+!BremoveOC
     grid = ESMF_GridCreateShapeTile(minIndex=(/1,1,1/), maxIndex=(/4*xdim,ydim,zdim/), &
                               regDecomp=(/4,1,1/), name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     
     call ESMF_FieldSetGrid(f8, grid=grid, rc=rc)
-!EOC
+!EremoveOC
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     print *, "Field Set Grid example returned"
 

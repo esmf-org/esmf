@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2007/06/23 07:00:49 cdeluca Exp $ 
+# $Id: makefile,v 1.15 2008/04/02 19:44:06 theurich Exp $ 
 
 # by default, this makefile builds the executable named "Application"
 ALL:  executable
@@ -25,7 +25,7 @@ APPOBJS = CplCompTemplate.o GridComp1Template.o GridComp2Template.o \
 
 # build the executable.
 executable: $(APPOBJS)
-	$(FLINKER) $(LINKOPTS) -o Application $(APPOBJS) $(FLINKLIBS)
+	$(ESMF_F90COMPILER) $(ESMF_F90LINKOPTS) -o Application $(APPOBJS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) $(ESMF_F90ESMFLINKLIBS)
 
 # run the executable in parallel.
 run:  Application

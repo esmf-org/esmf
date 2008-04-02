@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: sys_tests_results.pl,v 1.4 2007/12/14 19:56:46 svasquez Exp $
+# $Id: sys_tests_results.pl,v 1.5 2008/04/02 19:43:54 theurich Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 # The results are either complete results or a summary.
@@ -99,7 +99,7 @@ use File::Find
                                 push all_files, "$File::Find::name\n"  if -e;
                 }
                 # Get *STest.stdout files
-                @stdout_files=grep (/STest.stdout/, @all_files);
+                @stdout_files=grep (/STest*.stdout/, @all_files);
                 #Sort the list of stdout files.
                 @stdout_files = sort (@stdout_files);
                 # Find the stdout fles that are in the st_ex_files
@@ -139,7 +139,7 @@ use File::Find
                         }
                         # Find the act_st_files fles that are in the pass_tests
                         foreach $file ( @pass_tests) {
-                                push @pass_st_files, grep (/$file/, @act_st_files);
+                                push @pass_st_files, grep (/$file.F90/, @act_st_files);
                         }
 			if (!$SUMMARY) { # Print only if full output requested
                 		print "\n\n";

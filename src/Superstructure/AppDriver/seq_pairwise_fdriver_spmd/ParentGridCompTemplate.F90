@@ -1,4 +1,4 @@
-! $Id: ParentGridCompTemplate.F90,v 1.5 2006/02/02 01:59:59 theurich Exp $
+! $Id: ParentGridCompTemplate.F90,v 1.6 2008/04/02 19:44:06 theurich Exp $
 !
 ! Template code for a Gridded Component which creates 3 child Components:
 !  two Gridded Components which perform a computation and a Coupler component
@@ -104,10 +104,10 @@
 
       Cplimp = ESMF_StateCreate("Coupler Import", ESMF_STATE_IMPORT)
       Cplexp = ESMF_StateCreate("Coupler Export", ESMF_STATE_EXPORT)
-      call ESMF_StateAddState(Cplimp, G1imp, rc)
-      call ESMF_StateAddState(Cplimp, G2imp, rc)
-      call ESMF_StateAddState(Cplexp, G1exp, rc)
-      call ESMF_StateAddState(Cplexp, G2exp, rc)
+      call ESMF_StateAddState(Cplimp, G1imp, rc=rc)
+      call ESMF_StateAddState(Cplimp, G2imp, rc=rc)
+      call ESMF_StateAddState(Cplexp, G1exp, rc=rc)
+      call ESMF_StateAddState(Cplexp, G2exp, rc=rc)
 
       ! Now give each of the subcomponents a chance to initialize themselves.
       call ESMF_GridCompInitialize(comp1Grid, G1imp, G1exp, parentclock, rc=rc)

@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.211 2008/04/02 00:14:10 w6ws Exp $
+#  $Id: common.mk,v 1.212 2008/04/02 19:43:53 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -617,6 +617,11 @@ ESMF_SL_LIBLIBS      +=
 # - MPIRUN
 ifneq ($(origin ESMF_MPIRUN), environment)
 ESMF_MPIRUN = $(ESMF_MPIRUNDEFAULT)
+endif
+
+# - MPIMPMDRUN
+ifneq ($(origin ESMF_MPIMPMDRUN), environment)
+ESMF_MPIMPMDRUN = $(ESMF_MPIMPMDRUNDEFAULT)
 endif
 
 
