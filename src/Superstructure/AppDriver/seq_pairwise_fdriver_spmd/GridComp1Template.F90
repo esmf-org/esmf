@@ -1,4 +1,4 @@
-! $Id: GridComp1Template.F90,v 1.2 2004/08/19 16:52:23 nscollins Exp $
+! $Id: GridComp1Template.F90,v 1.3 2008/04/02 23:44:54 theurich Exp $
 !
 ! Template code for a child Grid Component, which has no subcomponents
 !  below it.  This is where the bulk of the computation is expected to be
@@ -55,6 +55,7 @@
       integer :: rc
      
       call ESMF_LogWrite("User initialize routine called", ESMF_LOG_INFO)
+      rc = ESMF_SUCCESS
 
     end subroutine my_init
 
@@ -67,6 +68,7 @@
       integer :: rc
      
       call ESMF_LogWrite("User run routine called", ESMF_LOG_INFO)
+      rc = ESMF_SUCCESS
 
     end subroutine my_run
 
@@ -79,6 +81,7 @@
       integer :: rc
      
       call ESMF_LogWrite("User finalize routine called", ESMF_LOG_INFO)
+      rc = ESMF_SUCCESS
 
     end subroutine my_final
 

@@ -1,13 +1,7 @@
-# $Id: makefile,v 1.10 2008/04/02 20:42:57 cdeluca Exp $
+# $Id: makefile,v 1.11 2008/04/02 23:44:53 theurich Exp $
 
 # leave alone.
 ALL: build_here
-
-# Don't set these unless absolutely necessary - they've got to be
-# architecture and compiler independent and should be inherited
-# from the upper level makefile if possible.
-CFLAGS    =
-FFLAGS    =
 
 SOURCEC	  = ESMC_VM_F.C
 SOURCEF	  = ESMF_VM.F90
@@ -33,19 +27,4 @@ include ${ESMF_DIR}/makefile
 
 # Leave the following line blank.
 DIRS	  = 
-
-
-
-# If you have class files which need to be compiled in a particular
-# order, list the dependencies below, with no rules following.
-#
-# e.g.:
-#
-# ESMF_Field.o:   ESMF_DataArray.o
-#
-# ESMF_FieldBundle.o:  ESMF_Field.o
-#
-
-
-
 

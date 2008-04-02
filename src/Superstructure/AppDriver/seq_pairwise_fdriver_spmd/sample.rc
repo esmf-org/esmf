@@ -3,11 +3,11 @@
 #
 # Lines starting with # are comments
 
-# Number of IGrid cells in each direction
+# Number of Grid cells in each direction
 I Counts: 10
 J Counts: 40
 
-# Coordinate information for the IGrid
+# Coordinate information for the Grid
 X Min: 0.0
 Y Min: -180.0
 X Max: 90.0

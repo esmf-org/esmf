@@ -1,4 +1,4 @@
-! $Id: ParentGridCompTemplate.F90,v 1.6 2008/04/02 19:44:06 theurich Exp $
+! $Id: ParentGridCompTemplate.F90,v 1.7 2008/04/02 23:44:54 theurich Exp $
 !
 ! Template code for a Gridded Component which creates 3 child Components:
 !  two Gridded Components which perform a computation and a Coupler component
@@ -116,6 +116,7 @@
       call ESMF_CplCompInitialize(compCoupler, Cplimp, Cplexp, parentclock, rc=rc)
 
       call ESMF_LogWrite("Parent Component Initialize finished", ESMF_LOG_INFO)
+      rc=ESMF_SUCCESS
 
     end subroutine my_init
 
@@ -137,6 +138,7 @@
 
 
       call ESMF_LogWrite("Parent Component Run finished", ESMF_LOG_INFO)
+      rc=ESMF_SUCCESS
 
     end subroutine my_run
 
@@ -162,6 +164,7 @@
       call ESMF_CplCompDestroy(compCoupler, rc)
 
       call ESMF_LogWrite( "Parent Gridded Component Finalize routine finished", ESMF_LOG_INFO)
+      rc=ESMF_SUCCESS
 
     end subroutine my_final
 

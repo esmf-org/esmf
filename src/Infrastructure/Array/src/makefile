@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2008/04/02 20:42:50 cdeluca Exp $
+# $Id: makefile,v 1.11 2008/04/02 23:44:52 theurich Exp $
 
 # leave alone.
 ALL: build_here 
@@ -38,19 +38,4 @@ include ${ESMF_DIR}/makefile
 
 # Leave the following line blank.
 DIRS	  = 
-
-
-
-# If you have class files which need to be compiled in a particular
-# order, list the dependencies below, with no rules following.
-#
-# e.g.:
-#
-# ESMF_Field.o:   ESMF_DataArray.o
-#
-# ESMF_FieldBundle.o:  ESMF_Field.o
-#
-
-
-
 

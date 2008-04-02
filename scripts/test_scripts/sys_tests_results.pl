@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: sys_tests_results.pl,v 1.5 2008/04/02 19:43:54 theurich Exp $
+# $Id: sys_tests_results.pl,v 1.6 2008/04/02 23:44:52 theurich Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 # The results are either complete results or a summary.
@@ -21,6 +21,7 @@ use File::Find
 @ex_files = (); 	# All executable files
 @all_files = (); 	# All files
 @stdout_files = (); 	# System Test stdout files 
+@tmp_stdout_files = (); # tmp system Test stdout files 
 @file_lines = ();	# stdout file lines
 @fail_tests = ();	# system tests that failed
 @pass_tests = ();	# system tests that passed
@@ -98,8 +99,9 @@ use File::Find
                                 # Put all files in a list
                                 push all_files, "$File::Find::name\n"  if -e;
                 }
-                # Get *STest.stdout files
-                @stdout_files=grep (/STest*.stdout/, @all_files);
+                # Get *STest*.stdout files in 2 steps
+                @tmp_stdout_files=grep (/stdout/, @all_files);
+                @stdout_files=grep (/STest/, @tmp_stdout_files);
                 #Sort the list of stdout files.
                 @stdout_files = sort (@stdout_files);
                 # Find the stdout fles that are in the st_ex_files

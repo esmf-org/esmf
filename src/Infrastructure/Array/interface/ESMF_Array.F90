@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.90 2008/04/02 20:42:50 cdeluca Exp $
+! $Id: ESMF_Array.F90,v 1.91 2008/04/02 23:44:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -142,7 +142,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.90 2008/04/02 20:42:50 cdeluca Exp $'
+    '$Id: ESMF_Array.F90,v 1.91 2008/04/02 23:44:52 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2871,7 +2871,7 @@ contains
     integer, intent(out), optional                  :: rc
 !
 ! !DESCRIPTION:
-!   Store an ArrayRedistFieldBundle() operation for {\tt srcArrayBundle} and 
+!   Store a Redist() operation for {\tt srcArrayBundle} and 
 !   {\tt dstArrayBundle}. See ArrayBundleRedist() for details.
 !
 !   The returned {\tt routehandle} can be used with {\tt srcArrayBundle} and
