@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.315 2008/04/01 21:31:28 rokuingh Exp $
+! $Id: ESMF_Field.F90,v 1.316 2008/04/02 15:23:25 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -181,7 +181,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.315 2008/04/01 21:31:28 rokuingh Exp $'
+    '$Id: ESMF_Field.F90,v 1.316 2008/04/02 15:23:25 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -492,13 +492,15 @@ contains
 !
 ! !INTERFACE:
 !     subroutine ESMF_FieldAttGet(field, name, <value argument>, &
-!                                       defaultvalue, rc)
+!                            <defaultvalue argument>, convention, purpose, rc)
 !
 ! !ARGUMENTS:
 !     type(ESMF_Field), intent(inout) :: field  
 !     character (len = *), intent(in) :: name
 !     <value argument>, see below for supported values
 !     <defaultvalue>, see below for supported values   
+!     character(ESMF_MAXSTR), intent(in), optional :: convention
+!     character(ESMF_MAXSTR), intent(in), optional :: purpose
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -537,6 +539,10 @@ contains
 !           The value of the named attribute.
 !     \item [<defaultvalue argument>]
 !           The default value of the named attribute.
+!     \item [convention]
+!           The convention of the attribute package.
+!     \item [purpose]
+!           The purpose of the attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -553,13 +559,16 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAttGet()
-      subroutine ESMF_FieldAttGetInt4(field, name, value, defaultvalue, rc)
+      subroutine ESMF_FieldAttGetInt4(field, name, value, defaultvalue, &
+        convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       integer(ESMF_KIND_I4), intent(out) :: value
       integer(ESMF_KIND_I4), intent(inout), optional :: defaultvalue
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -575,6 +584,10 @@ contains
 !           The integer value of the named attribute.
 !     \item [defaultvalue]
 !           The default integer value of the named attribute.
+!     \item [convention]
+!           The convention of the attribute package.
+!     \item [purpose]
+!           The purpose of the attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -583,6 +596,7 @@ contains
 !EOPI
 
       integer :: localrc                       
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -591,6 +605,37 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
+      if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'field'
+
+!      call c_ESMC_AttPackGetValue(field%ftypep%base, name, ESMF_TYPEKIND_I4, &
+!        1, value, fconvention, fpurpose, fobject, localrc)
+        
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
+                                
+      else
+      
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_I4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -602,6 +647,8 @@ contains
           return
         end if
       end if
+
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -617,7 +664,7 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAttGet()
       subroutine ESMF_FieldAttGetInt4List(field, name, count, valueList, &
-                                           defaultvalue, rc)
+        defaultvalue, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
@@ -625,6 +672,8 @@ contains
       integer, intent(in) :: count   
       integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
       integer(ESMF_KIND_I4), intent(inout), optional :: defaultvalue
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
 
 !
@@ -644,6 +693,10 @@ contains
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
 !           The default integer value of the named attribute.
+!     \item [convention]
+!           The convention of the attribute package.
+!     \item [purpose]
+!           The purpose of the attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -653,6 +706,7 @@ contains
 
       integer :: localrc      
       integer :: limit
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -664,10 +718,41 @@ contains
       limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than valueList", &
-                                 ESMF_CONTEXT, rc)) return
+                                    "count longer than valueList", &
+                                     ESMF_CONTEXT, rc)) return
       endif
 
+      if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'field'
+
+!      call c_ESMC_AttPackGetValue(field%ftypep%base, name, ESMF_TYPEKIND_I4, &
+!        count, valueList, fconvention, fpurpose, fobject, localrc)
+        
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
+                                
+      else
+      
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_I4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -679,6 +764,8 @@ contains
           return
         end if
       end if
+
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -693,13 +780,16 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAttGet()
-      subroutine ESMF_FieldAttGetInt8(field, name, value, defaultvalue, rc)
+      subroutine ESMF_FieldAttGetInt8(field, name, value, defaultvalue, &
+        convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       integer(ESMF_KIND_I8), intent(out) :: value
       integer(ESMF_KIND_I8), intent(inout), optional :: defaultvalue
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
 
 !
@@ -716,6 +806,10 @@ contains
 !           The integer value of the named attribute.
 !     \item [defaultvalue]
 !           The default integer value of the named attribute.
+!     \item [convention]
+!           The convention of the attribute package.
+!     \item [purpose]
+!           The purpose of the attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -723,7 +817,8 @@ contains
 !
 !EOPI
 
-      integer :: localrc       
+      integer :: localrc                       
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -732,6 +827,37 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
+      if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'field'
+
+!      call c_ESMC_AttPackGetValue(field%ftypep%base, name, ESMF_TYPEKIND_I8, &
+!        1, value, fconvention, fpurpose, fobject, localrc)
+        
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
+                                
+      else
+      
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_I8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -743,6 +869,8 @@ contains
           return
         end if
       end if
+
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -758,7 +886,7 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAttGet()
       subroutine ESMF_FieldAttGetInt8List(field, name, count, valueList, &
-                                           defaultvalue, rc)
+        defaultvalue, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
@@ -766,6 +894,8 @@ contains
       integer, intent(in) :: count   
       integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
       integer(ESMF_KIND_I8), intent(inout), optional :: defaultvalue
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
 
 !
@@ -785,6 +915,10 @@ contains
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
 !           The default integer value of the named attribute.
+!     \item [convention]
+!           The convention of the attribute package.
+!     \item [purpose]
+!           The purpose of the attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -794,8 +928,9 @@ contains
 
       integer :: localrc                 
       integer :: limit
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
-      ! Initialize 
+      ! Initialize
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -805,10 +940,41 @@ contains
       limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than valueList", &
-                                 ESMF_CONTEXT, rc)) return
+                                    "count longer than valueList", &
+                                     ESMF_CONTEXT, rc)) return
       endif
 
+      if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'field'
+
+!      call c_ESMC_AttPackGetValue(field%ftypep%base, name, ESMF_TYPEKIND_I8, &
+!        count, valueList, fconvention, fpurpose, fobject, localrc)
+        
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
+                                
+      else
+      
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_I8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -820,6 +986,8 @@ contains
           return
         end if
       end if
+
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -834,13 +1002,16 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAttGet()
-      subroutine ESMF_FieldAttGetReal4(field, name, value, defaultvalue, rc)
+      subroutine ESMF_FieldAttGetReal4(field, name, value, defaultvalue, &
+        convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       real(ESMF_KIND_R4), intent(out) :: value
       real(ESMF_KIND_R4), intent(inout), optional :: defaultvalue
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
 
 !
@@ -857,6 +1028,10 @@ contains
 !           The real value of the named attribute.
 !     \item [defaultvalue]
 !           The real default value of the named attribute.
+!     \item [convention]
+!           The convention of the attribute package.
+!     \item [purpose]
+!           The purpose of the attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -864,15 +1039,47 @@ contains
 !
 !EOPI
 
-      integer :: localrc           
+      integer :: localrc                       
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
-      ! Initialize 
+      ! Initialize
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
+      if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'field'
+
+!      call c_ESMC_AttPackGetValue(field%ftypep%base, name, ESMF_TYPEKIND_R4, &
+!        1, value, fconvention, fpurpose, fobject, localrc)
+        
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
+                                
+      else
+      
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_R4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -884,6 +1091,8 @@ contains
           return
         end if
       end if
+
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -899,7 +1108,7 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAttGet()
       subroutine ESMF_FieldAttGetReal4List(field, name, count, valueList, &
-                                            defaultvalue, rc)
+        defaultvalue, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
@@ -907,6 +1116,8 @@ contains
       integer, intent(in) :: count   
       real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
       real(ESMF_KIND_R4), intent(inout), optional :: defaultvalue
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
 
 !
@@ -926,6 +1137,10 @@ contains
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
 !           The real default value of the named attribute.
+!     \item [convention]
+!           The convention of the attribute package.
+!     \item [purpose]
+!           The purpose of the attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -935,8 +1150,9 @@ contains
 
       integer :: localrc                
       integer :: limit
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
-      ! Initialize 
+      ! Initialize
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -946,10 +1162,41 @@ contains
       limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than valueList", &
-                                 ESMF_CONTEXT, rc)) return
+                                    "count longer than valueList", &
+                                     ESMF_CONTEXT, rc)) return
       endif
 
+      if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'field'
+
+!      call c_ESMC_AttPackGetValue(field%ftypep%base, name, ESMF_TYPEKIND_R4, &
+!        count, valueList, fconvention, fpurpose, fobject, localrc)
+        
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
+                                
+      else
+      
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_R4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -961,6 +1208,8 @@ contains
           return
         end if
       end if
+
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -975,13 +1224,16 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAttGet()
-      subroutine ESMF_FieldAttGetReal8(field, name, value, defaultvalue, rc)
+      subroutine ESMF_FieldAttGetReal8(field, name, value, defaultvalue, &
+        convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       real(ESMF_KIND_R8), intent(out) :: value
       real(ESMF_KIND_R8), intent(inout), optional :: defaultvalue
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
 
 !
@@ -998,6 +1250,10 @@ contains
 !           The real value of the named attribute.
 !     \item [defaultvalue]
 !           The real default value of the named attribute.
+!     \item [convention]
+!           The convention of the attribute package.
+!     \item [purpose]
+!           The purpose of the attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1005,15 +1261,47 @@ contains
 !
 !EOPI
 
-      integer :: localrc            
+      integer :: localrc                       
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
-      ! Initialize 
+      ! Initialize
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
+      if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'field'
+
+!      call c_ESMC_AttPackGetValue(field%ftypep%base, name, ESMF_TYPEKIND_R8, &
+!        1, value, fconvention, fpurpose, fobject, localrc)
+        
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
+                                
+      else
+      
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_R8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1025,6 +1313,8 @@ contains
           return
         end if
       end if
+
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1040,7 +1330,7 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAttGet()
       subroutine ESMF_FieldAttGetReal8List(field, name, count, valueList, &
-                                            defaultvalue, rc)
+        defaultvalue, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
@@ -1048,6 +1338,8 @@ contains
       integer, intent(in) :: count   
       real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
       real(ESMF_KIND_R8), intent(inout), optional :: defaultvalue
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
 
 !
@@ -1067,6 +1359,10 @@ contains
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
 !           The real default value of the named attribute.
+!     \item [convention]
+!           The convention of the attribute package.
+!     \item [purpose]
+!           The purpose of the attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1076,6 +1372,7 @@ contains
 
       integer :: localrc     
       integer :: limit
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -1087,10 +1384,41 @@ contains
       limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than valueList", &
-                                 ESMF_CONTEXT, rc)) return
+                                    "count longer than valueList", &
+                                     ESMF_CONTEXT, rc)) return
       endif
 
+      if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'field'
+
+!      call c_ESMC_AttPackGetValue(field%ftypep%base, name, ESMF_TYPEKIND_R8, &
+!        count, valueList, fconvention, fpurpose, fobject, localrc)
+        
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
+                                
+      else
+      
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_R8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1102,6 +1430,8 @@ contains
           return
         end if
       end if
+
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1116,13 +1446,16 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAttGet()
-      subroutine ESMF_FieldAttGetLogical(field, name, value, defaultvalue, rc)
+      subroutine ESMF_FieldAttGetLogical(field, name, value, defaultvalue, &
+        convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       type(ESMF_Logical), intent(out) :: value
       type(ESMF_Logical), intent(inout), optional :: defaultvalue
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
 
 !
@@ -1139,6 +1472,10 @@ contains
 !           The logical value of the named attribute.
 !     \item [defaultvalue]
 !           The logical default value of the named attribute.
+!     \item [convention]
+!           The convention of the attribute package.
+!     \item [purpose]
+!           The purpose of the attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1146,7 +1483,8 @@ contains
 !
 !EOPI
 
-      integer :: localrc
+      integer :: localrc                       
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -1155,6 +1493,38 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
+      if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'field'
+
+!      call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
+!        ESMF_TYPEKIND_LOGICAL, 1, value, fconvention, fpurpose, &
+!        fobject, localrc)
+        
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
+                                
+      else
+      
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1166,6 +1536,8 @@ contains
           return
         end if
       end if
+
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1181,7 +1553,7 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAttGet()
       subroutine ESMF_FieldAttGetLogicalList(field, name, count, valueList, &
-                                              defaultvalue, rc)
+        defaultvalue, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
@@ -1189,6 +1561,8 @@ contains
       integer, intent(in) :: count   
       type(ESMF_Logical), dimension(:), intent(out) :: valueList
       type(ESMF_Logical), intent(inout), optional :: defaultvalue
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
 
 !
@@ -1208,6 +1582,10 @@ contains
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
 !           The logical default value of the named attribute.
+!     \item [convention]
+!           The convention of the attribute package.
+!     \item [purpose]
+!           The purpose of the attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1217,6 +1595,7 @@ contains
 
       integer :: localrc                
       integer :: limit
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -1232,6 +1611,38 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
+      if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'field'
+
+!      call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
+!        ESMF_TYPEKIND_LOGICAL, count, valueList, fconvention, fpurpose, &
+!        fobject, localrc)
+        
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          valueList = defaultvalue
+        else 
+          return
+        end if
+      end if
+                                
+      else
+      
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1243,6 +1654,8 @@ contains
           return
         end if
       end if
+
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1257,13 +1670,16 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAttGet()
-      subroutine ESMF_FieldAttGetChar(field, name, value, defaultvalue, rc)
+      subroutine ESMF_FieldAttGetChar(field, name, value, defaultvalue, &
+        convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       character (len = *), intent(out) :: value
       character (len = *), intent(inout), optional :: defaultvalue
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
 
 !
@@ -1280,6 +1696,10 @@ contains
 !           The character value of the named attribute.
 !     \item [defaultvalue]
 !           The character default value of the named attribute.
+!     \item [convention]
+!           The convention of the attribute package.
+!     \item [purpose]
+!           The purpose of the attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1288,6 +1708,7 @@ contains
 !EOPI
 
       integer :: localrc 
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -1296,6 +1717,37 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
+      if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'field'
+
+!      call c_ESMC_AttPackGetChar(field%ftypep%base, name, value, fconvention, &
+!        fpurpose, fobject, localrc)
+        
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) then
+        if(present(defaultvalue)) then
+          value = defaultvalue
+        else 
+          return
+        end if
+      end if
+                                
+      else
+      
       call c_ESMC_AttributeGetChar(field%ftypep%base, name, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1306,6 +1758,8 @@ contains
           return
         end if
       end if
+
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
