@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUTest.F90,v 1.5 2008/03/26 17:34:58 rokuingh Exp $
+! $Id: ESMF_AttributeUTest.F90,v 1.6 2008/04/02 14:42:32 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeUTest.F90,v 1.5 2008/03/26 17:34:58 rokuingh Exp $'
+      '$Id: ESMF_AttributeUTest.F90,v 1.6 2008/04/02 14:42:32 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -48,7 +48,7 @@ program ESMF_AttributeUTest
       ! local variables needed to pass into function/subroutine calls
 !      character(ESMF_MAXSTR) :: name_set, name_get, value_set, value_get
       type(ESMF_DataValue) :: data_value
-      type(ESMF_Base) :: base
+!      type(ESMF_Base) :: base
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -73,7 +73,7 @@ program ESMF_AttributeUTest
 
       !------------------------------------------------------------------------
       ! preparations
-      call ESMF_BaseCreate(base, "Base", "test object", 0, rc)
+!      call ESMF_BaseCreate(base, "Base", "test object", 0, rc)
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
      
@@ -85,7 +85,7 @@ program ESMF_AttributeUTest
 
       !------------------------------------------------------------------------
       ! clean up
-      call ESMF_BaseDestroy(base, rc)
+!      call ESMF_BaseDestroy(base, rc)
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
                   
 #endif
