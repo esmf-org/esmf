@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.1.2.1 2008/04/02 23:20:13 theurich Exp $
+! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.1.2.2 2008/04/02 23:33:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-      program ESMF_FieldBundleCreateGetUTest
+      program ESMF_FieldBundleCrGetUTest
 
 !------------------------------------------------------------------------------
 
@@ -18,7 +18,7 @@
 
 !==============================================================================
 !BOPI
-! !PROGRAM: ESMF_FieldBundleCreateGetUTest - Unit tests for FieldBundle Create and Get methods
+! !PROGRAM: ESMF_FieldBundleCrGetUTest - Unit tests for FieldBundle Create and Get methods
 !
 ! !DESCRIPTION:
 !
@@ -410,5 +410,5 @@ contains
                 ESMF_CONTEXT, rc)) return
 
     end subroutine retrieve_bundle_dataptr
-end program ESMF_FieldBundleCreateGetUTest
+end program ESMF_FieldBundleCrGetUTest
 
