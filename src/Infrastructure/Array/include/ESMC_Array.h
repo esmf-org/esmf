@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.102 2008/04/02 02:57:25 rosalind Exp $
+// $Id: ESMC_Array.h,v 1.103 2008/04/02 03:31:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ typedef struct{
 ESMC_Array ESMC_ArrayCreate(ESMC_ArraySpec arrayspec, ESMC_DistGrid distgrid,
   char* name, int *rc); //TODO: complete this API
 int ESMC_ArrayPrint(ESMC_Array array);
-char* ESMC_ArrayGetName(ESMC_Array array, int *rc);
+const char* ESMC_ArrayGetName(ESMC_Array array, int *rc);
 int ESMC_ArrayDestroy(ESMC_Array *array);
 
 
