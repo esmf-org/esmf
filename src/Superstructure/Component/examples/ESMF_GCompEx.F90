@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.32 2008/04/02 19:44:09 theurich Exp $
+! $Id: ESMF_GCompEx.F90,v 1.33 2008/04/02 20:42:58 cdeluca Exp $
 !
 ! Example/test code which shows Gridded Component calls.
 
@@ -100,7 +100,7 @@
  
         ! If the initial Export state needs to be filled, do it here.
         !call ESMF_StateAddField(exportState, field, rc)
-        !call ESMF_StateAddBundle(exportState, bundle, rc)
+        !call ESMF_StateAddFieldBundle(exportState, bundle, rc)
         print *, "Gridded Comp Init returning"
    
         rc = ESMF_SUCCESS

@@ -1,4 +1,4 @@
-% $Id: ESMF_archoverview.tex,v 1.18 2007/05/04 22:24:47 cdeluca Exp $
+% $Id: ESMF_archoverview.tex,v 1.19 2008/04/02 20:43:02 cdeluca Exp $
 
 \section{Architectural Overview}
 \label{sec:ArchOver}
@@ -29,7 +29,7 @@ The ESMF design is based upon modular components.  There
 are two types of components, one of which represents models 
 (Gridded Components) and one which represents couplers (Coupler Components).  
 Data are always passed between components using a data structure 
-called a State, which can store Fields, Bundles of Fields,
+called a State, which can store Fields, FieldBundles of Fields,
 Arrays, and other States.  A Gridded Component stores no information about 
 the internals of the Gridded Components that it interacts with; this information 
 is passed in through the argument lists of its initialize, run, 
@@ -236,8 +236,8 @@ and algorithms.  }
 \scalebox{0.5}{\includegraphics{regrid}}
 \end{figure}
 
-\subsubsection{Bundle, Field and Array Classes}
-Bundle, Field and Array classes contain data together with descriptive
+\subsubsection{FieldBundle, Field and Array Classes}
+FieldBundle, Field and Array classes contain data together with descriptive
 physical and computational attribute information. The physical attributes include information that describes the units
 of the data. The computational attributes include information on the layout in memory of the field data. The Field class
 is primarily geared toward structured data. A comparable class called Location Stream, not yet implemented, will provide a self-describing

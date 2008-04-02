@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.13 2007/06/23 07:01:01 cdeluca Exp $
+! $Id: user_model1.F90,v 1.14 2008/04/02 20:43:04 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -215,7 +215,7 @@
 
         print *, "run, scale_factor = ", mydatablock%scale_factor
 
-        ! Get the Field and Bundle data from the State
+        ! Get the Field and FieldBundle data from the State
         call ESMF_StateGetField(exportState, "humidity", humidity, rc=status)
       
         ! get the igrid and coordinates

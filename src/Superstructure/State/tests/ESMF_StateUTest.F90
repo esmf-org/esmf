@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.59 2008/03/04 18:07:52 rokuingh Exp $
+! $Id: ESMF_StateUTest.F90,v 1.60 2008/04/02 20:43:01 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.59 2008/03/04 18:07:52 rokuingh Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.60 2008/04/02 20:43:01 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -43,7 +43,7 @@
       character(ESMF_MAXSTR) :: statename, bundlename, bname
       character(ESMF_MAXSTR) :: fieldname, fname, aname, arrayname
       type(ESMF_Field) :: field1, field2, field3(3), field4, field5(3),fieldGDP
-      type(ESMF_Bundle) :: bundle1, bundle2(1), bundle3, bundle5, bundleGDP
+      type(ESMF_FieldBundle) :: bundle1, bundle2(1), bundle3, bundle5, bundleGDP
       type(ESMF_State) :: state1, state2, state3, state4,stateGDP
       type(ESMF_StateItemType) :: stateItemType
       type(ESMF_NeededFlag) :: needed
@@ -187,7 +187,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest 
       ! Test Get Item Info from an empty import State 
-      call ESMF_StateGetItemInfo(state1, name="Bundle1", stateitemtype=stateItemType, rc=rc)
+      call ESMF_StateGetItemInfo(state1, name="FieldBundle1", stateitemtype=stateItemType, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting item info from an empty import State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -210,7 +210,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest 
       ! Test Get Item Info from destroyed import State 
-      call ESMF_StateGetItemInfo(state1, name="Bundle1", stateitemtype=stateItemType, rc=rc)
+      call ESMF_StateGetItemInfo(state1, name="FieldBundle1", stateitemtype=stateItemType, rc=rc)
       write(failMsg, *) "Returned ESMF_SUCCESS"
       write(name, *) "Getting item info from destroyed State Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
@@ -228,17 +228,17 @@
       !------------------------------------------------------------------------
 
       !EX_removeUTest
-      ! Test adding Bundle to a State
+      ! Test adding FieldBundle to a State
       bundlename = "Temperature"
-      bundle1 = ESMF_BundleCreate(name=bundlename, rc=rc)
+      bundle1 = ESMF_FieldBundleCreate(name=bundlename, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Creating a Bundle Test"
+      write(name, *) "Creating a FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_removeUTest
-      call ESMF_StateAddBundle(state1, bundle1, rc)
-      write(name, *) "Adding a Bundle to a State Test"
+      call ESMF_StateAddFieldBundle(state1, bundle1, rc)
+      write(name, *) "Adding a FieldBundle to a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -247,30 +247,30 @@
       ! Test Get Item Info from State 
       call ESMF_StateGetItemInfo(state1, name="Temperature", stateitemtype=stateItemType, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Getting Bundle item info from State Test"
+      write(name, *) "Getting FieldBundle item info from State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_removeUTest 
       ! Test Verifying Item Info from a State 
       write(failMsg, *) "Item info incorrect"
-      write(name, *) "Verifying Bundle item info from a State Test"
+      write(name, *) "Verifying FieldBundle item info from a State Test"
       call ESMF_Test((stateItemType.eq.ESMF_STATEITEM_BUNDLE), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
 
       !EX_removeUTest
-      ! Test adding a second Bundle to a State
+      ! Test adding a second FieldBundle to a State
       bundlename = "Temperature"
-      bundle1 = ESMF_BundleCreate(name=bundlename, rc=rc)
+      bundle1 = ESMF_FieldBundleCreate(name=bundlename, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Creating a Bundle Test"
+      write(name, *) "Creating a FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !EX_removeUTest
-      call ESMF_StateAddBundle(state1, bundle1, rc)
-      write(name, *) "Adding a second Bundle to a State Test"
+      call ESMF_StateAddFieldBundle(state1, bundle1, rc)
+      write(name, *) "Adding a second FieldBundle to a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -278,10 +278,10 @@
 
 
       !EX_removeUTest
-      ! Test adding a Bundle with Fields to a State
-      bundle3 = ESMF_BundleCreate(name="Atmosphere", rc=rc)
+      ! Test adding a FieldBundle with Fields to a State
+      bundle3 = ESMF_FieldBundleCreate(name="Atmosphere", rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Creating a Bundle Test"
+      write(name, *) "Creating a FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -307,15 +307,15 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !EX_removeUTest
-      call ESMF_BundleAddField(bundle3, 3, field5, rc=rc)
+      call ESMF_FieldBundleAddField(bundle3, 3, field5, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Adding 3 Fields to a Bundle"
+      write(name, *) "Adding 3 Fields to a FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !EX_removeUTest
-      call ESMF_StateAddBundle(state1, bundle3, rc)
-      write(name, *) "Adding a Bundle with Fields to a State Test"
+      call ESMF_StateAddFieldBundle(state1, bundle3, rc)
+      write(name, *) "Adding a FieldBundle with Fields to a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -444,47 +444,47 @@
 
       !------------------------------------------------------------------------
       !EX_removeUTest
-      ! Test State for Bundle being needed
+      ! Test State for FieldBundle being needed
       IsNeeded = ESMF_StateIsNeeded(state1, "Temperature", rc)
       write(failMsg, *) ""
-      write(name, *) "Query if Bundle is needed in a State Test"
+      write(name, *) "Query if FieldBundle is needed in a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(IsNeeded), name, failMsg, &
         result, ESMF_SRCLINE)
       print *, "IsNeeded = ", IsNeeded
 
       !------------------------------------------------------------------------
       !EX_removeUTest
-      ! Test setting Bundle as not needed in a State
+      ! Test setting FieldBundle as not needed in a State
       call ESMF_StateSetNeeded(state1, "Temperature", ESMF_NOTNEEDED, rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Set Bundle as not needed in a State Test"
+      write(name, *) "Set FieldBundle as not needed in a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_removeUTest
-      ! Test State for Bundle NOT being needed
+      ! Test State for FieldBundle NOT being needed
       IsNeeded = ESMF_StateIsNeeded(state1, "Temperature", rc)
-      write(name, *) "Test if Bundle is NOT needed in a State Test"
+      write(name, *) "Test if FieldBundle is NOT needed in a State Test"
       call ESMF_Test((.not.IsNeeded), name, failMsg, result, &
         ESMF_SRCLINE)
       print *, "IsNeeded = ", IsNeeded
 
       !------------------------------------------------------------------------
       !EX_removeUTest
-      ! Test getting Bundle from State
-      call  ESMF_StateGetBundle(state1, bundlename, bundle2(1), rc=rc)
+      ! Test getting FieldBundle from State
+      call  ESMF_StateGetFieldBundle(state1, bundlename, bundle2(1), rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Getting Bundle from a State Test"
+      write(name, *) "Getting FieldBundle from a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
         ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_removeUTest
-      ! Test name of Bundle from State
-      call ESMF_BundleGet(bundle2(1), name=bname, rc=rc)
-      write(failMsg, *) "Bundle name not 'Temperature'"
-      write(name, *) "Verifying that the Bundle has correct name Test"
+      ! Test name of FieldBundle from State
+      call ESMF_FieldBundleGet(bundle2(1), name=bname, rc=rc)
+      write(failMsg, *) "FieldBundle name not 'Temperature'"
+      write(name, *) "Verifying that the FieldBundle has correct name Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bname.eq."Temperature"), name, &
         failMsg, result, ESMF_SRCLINE)
 
@@ -626,19 +626,19 @@
 
       !------------------------------------------------------------------------
       !EX_removeUTest
-      ! Test setting Bundle as needed in a State
+      ! Test setting FieldBundle as needed in a State
       call ESMF_StateSetNeeded(state1, "Temperature", ESMF_NEEDED, rc)
       write(failMsg, *) ""
-      write(name, *) "Set Bundle as needed in a State Test"
+      write(name, *) "Set FieldBundle as needed in a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
         ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_removeUTest
-      ! Test State for Bundle being needed
+      ! Test State for FieldBundle being needed
       IsNeeded = ESMF_StateIsNeeded(state1, "Temperature", rc)
       write(failMsg, *) ""
-      write(name, *) "Test if Bundle is needed in a State Test"
+      write(name, *) "Test if FieldBundle is needed in a State Test"
       call ESMF_Test((IsNeeded), name, failMsg, result, &
         ESMF_SRCLINE)
       print *, "IsNeeded = ", IsNeeded
@@ -692,8 +692,8 @@
       !------------------------------------------------------------------------
 
       !EX_removeUTest
-      call ESMF_StateAddBundle(state1, bundle5, rc=rc)
-      write(name, *) "Adding an uninitialized Bundle to a State Test"
+      call ESMF_StateAddFieldBundle(state1, bundle5, rc=rc)
+      write(name, *) "Adding an uninitialized FieldBundle to a State Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -711,15 +711,15 @@
       !------------------------------------------------------------------------
 
       !EX_removeUTest
-      ! Test Creation of an export State with Bundle
+      ! Test Creation of an export State with FieldBundle
       bundlename = "Humidity"
       statename = "Export State"
       x = 1
-      bundle2(1) = ESMF_BundleCreate(name=bundlename, rc=rc)
+      bundle2(1) = ESMF_FieldBundleCreate(name=bundlename, rc=rc)
       state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
                                 bundleList=bundle2, itemcount=x, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Creating an export State with a Bundle Test"
+      write(name, *) "Creating an export State with a FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       call  ESMF_StatePrint(state2, rc=rc)
@@ -894,7 +894,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      ! TODO: Add Tests for StateGetDataPointer for Field and Bundle when they're
+      ! TODO: Add Tests for StateGetDataPointer for Field and FieldBundle when they're
       !       working again. 
 
       call ESMF_StateDestroy(stateGDP, rc=rc)

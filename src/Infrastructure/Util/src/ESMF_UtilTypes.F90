@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.58 2008/02/15 23:36:06 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.59 2008/04/02 20:42:57 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -242,8 +242,8 @@
          ESMF_ID_ROUTEHANDLE = ESMF_ObjectID(24, "ESMF_RouteHandle"), &
          ESMF_ID_FIELDDATAMAP = ESMF_ObjectID(25, "ESMF_FieldDataMap"), &
          ESMF_ID_FIELD = ESMF_ObjectID(26, "ESMF_Field"), &
-         ESMF_ID_BUNDLEDATAMAP = ESMF_ObjectID(27, "ESMF_BundleDataMap"), &
-         ESMF_ID_BUNDLE = ESMF_ObjectID(28, "ESMF_Bundle"), &
+         ESMF_ID_BUNDLEDATAMAP = ESMF_ObjectID(27, "ESMF_FieldBundleDataMap"), &
+         ESMF_ID_BUNDLE = ESMF_ObjectID(28, "ESMF_FieldBundle"), &
          ESMF_ID_TRANSFORMVALUES = ESMF_ObjectID(29, "ESMF_TransformValues"), &
          ESMF_ID_REGRID = ESMF_ObjectID(30, "ESMF_Regrid"), &
          ESMF_ID_TRANSFORM = ESMF_ObjectID(31, "ESMF_Transform"), &

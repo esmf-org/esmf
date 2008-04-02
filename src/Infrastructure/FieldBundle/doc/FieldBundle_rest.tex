@@ -1,0 +1,46 @@
+% $Id: FieldBundle_rest.tex,v 1.2 2008/04/02 20:42:52 cdeluca Exp $
+
+\label{sec:bundlerest}
+
+\begin{enumerate}
+\item{\bf No mathematical operators.}
+The FieldBundle class does not support differential or other
+mathematical operators.  We do not anticipate providing this 
+functionality in the near future.
+
+\item{\bf Limited validation and print options.}
+We are planning to increase the number of validity checks available
+for FieldBundles as soon as possible.  We also will
+be working on print options.
+
+\item{\bf Limited communication support.}
+Only a subset of the communication routines are currently supported
+for FieldBundles, and the Fields contained in the FieldBundles must currently
+have the same structure (e.g. same halo width, same dimensionality). 
+Support for more variable data will be added in a later release.
+For those routines not implemented yet, or for those FieldBundles which
+contain Fields with differing data, the user can loop over the Fields 
+in the FieldBundle and call the Field level communication routines instead.
+
+\item{\bf Packed data not supported.}
+One of the options that we are currently working on for FieldBundles is
+packing.  Packing means that the data from all the
+Fields that comprise the FieldBundle are copied into a single Array and
+manipulated collectively.  This operation can be done without 
+destroying the original Field data.  Packing is being designed to 
+facilitate optimized regridding, data communication, and IO operations.  
+It will be possible to collectively manipulate all the Fields within 
+a FieldBundle at once, rather than operating on each Field separately.  
+This will reduce the latency overhead of the communication.  
+
+\item{\bf Interleaving Fields within a FieldBundle.}
+Data locality is important for performance on some computing
+platforms.  An interleave option will allow the user to create
+a packed FieldBundle in which Fields are either concatenated in memory
+or in which Field elements are interleaved.
+
+\end{enumerate}
+
+
+
+

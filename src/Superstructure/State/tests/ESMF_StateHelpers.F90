@@ -1,4 +1,4 @@
-! $Id: ESMF_StateHelpers.F90,v 1.12 2007/06/23 04:01:11 cdeluca Exp $
+! $Id: ESMF_StateHelpers.F90,v 1.13 2008/04/02 20:43:01 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -18,7 +18,7 @@ module ESMF_StateHelpers
    use ESMF_Mod
 
    public Create2DIGrids, Create3DIGrids
-   public CreateFields, CreateBundle, AddBundle
+   public CreateFields, CreateFieldBundle, AddFieldBundle
 
    public FillConstantR8Field, FillConstantR4Field
    public FillConstantI8Field, FillConstantI4Field
@@ -29,7 +29,7 @@ module ESMF_StateHelpers
    public ValidateConstantR8Halo, ValidateConstantR4Halo
    public FillIndexField
    public ValidateIndexField
-   public FieldCleanup, BundleCleanup
+   public FieldCleanup, FieldBundleCleanup
 
    public CreateIGrid, CreateLayout
    public CreateEmptyDataField, CreateDataField
@@ -322,9 +322,9 @@ end subroutine CreateFields
 ! TODO: make fields an array and add as many as are in the list
 !
 #undef  ESMF_METHOD
-#define ESMF_METHOD "CreateBundle"
-subroutine CreateBundle(bundle, field1, field2, field3, field4, field5, rc)
-    type(ESMF_Bundle), intent(out) :: bundle
+#define ESMF_METHOD "CreateFieldBundle"
+subroutine CreateFieldBundle(bundle, field1, field2, field3, field4, field5, rc)
+    type(ESMF_FieldBundle), intent(out) :: bundle
     type(ESMF_Field), intent(inout), optional :: field1,field2,field3,field4,field5
     integer, intent(out), optional :: rc
     
@@ -333,38 +333,38 @@ subroutine CreateBundle(bundle, field1, field2, field3, field4, field5, rc)
     if (present(rc)) rc = ESMF_FAILURE
         
     ! make a bundle and add fields to it
-    bundle = ESMF_BundleCreate(rc=localrc)
+    bundle = ESMF_FieldBundleCreate(rc=localrc)
     if (localrc.NE.ESMF_SUCCESS) return
 
     if (present(field1)) then
-      call ESMF_BundleAddField(bundle, field1, rc=localrc)
+      call ESMF_FieldBundleAddField(bundle, field1, rc=localrc)
       if (localrc.NE.ESMF_SUCCESS) return
     endif
 
     if (present(field2)) then
-      call ESMF_BundleAddField(bundle, field2, rc=localrc)
+      call ESMF_FieldBundleAddField(bundle, field2, rc=localrc)
       if (localrc.NE.ESMF_SUCCESS) return
     endif
 
     if (present(field3)) then
-      call ESMF_BundleAddField(bundle, field3, rc=localrc)
+      call ESMF_FieldBundleAddField(bundle, field3, rc=localrc)
       if (localrc.NE.ESMF_SUCCESS) return
     endif
 
     if (present(field4)) then
-      call ESMF_BundleAddField(bundle, field4, rc=localrc)
+      call ESMF_FieldBundleAddField(bundle, field4, rc=localrc)
       if (localrc.NE.ESMF_SUCCESS) return
     endif
 
     if (present(field5)) then
-      call ESMF_BundleAddField(bundle, field5, rc=localrc)
+      call ESMF_FieldBundleAddField(bundle, field5, rc=localrc)
       if (localrc.NE.ESMF_SUCCESS) return
     endif
 
     if (present(rc)) rc = ESMF_SUCCESS
     return
 
-end subroutine CreateBundle
+end subroutine CreateFieldBundle
 
 
 !------------------------------------------------------------------------------
@@ -374,9 +374,9 @@ end subroutine CreateBundle
 ! TODO: make fields an array and add as many as are in the list
 !
 #undef  ESMF_METHOD
-#define ESMF_METHOD "AddBundle"
-subroutine AddBundle(bundle, field1, field2, field3, field4, field5, rc)
-    type(ESMF_Bundle), intent(inout) :: bundle
+#define ESMF_METHOD "AddFieldBundle"
+subroutine AddFieldBundle(bundle, field1, field2, field3, field4, field5, rc)
+    type(ESMF_FieldBundle), intent(inout) :: bundle
     type(ESMF_Field), intent(inout), optional :: field1,field2,field3,field4,field5
     integer, intent(out), optional :: rc
     
@@ -385,34 +385,34 @@ subroutine AddBundle(bundle, field1, field2, field3, field4, field5, rc)
     if (present(rc)) rc = ESMF_FAILURE
         
     if (present(field1)) then
-      call ESMF_BundleAddField(bundle, field1, rc=localrc)
+      call ESMF_FieldBundleAddField(bundle, field1, rc=localrc)
       if (localrc.NE.ESMF_SUCCESS) return
     endif
 
     if (present(field2)) then
-      call ESMF_BundleAddField(bundle, field2, rc=localrc)
+      call ESMF_FieldBundleAddField(bundle, field2, rc=localrc)
       if (localrc.NE.ESMF_SUCCESS) return
     endif
 
     if (present(field3)) then
-      call ESMF_BundleAddField(bundle, field3, rc=localrc)
+      call ESMF_FieldBundleAddField(bundle, field3, rc=localrc)
       if (localrc.NE.ESMF_SUCCESS) return
     endif
 
     if (present(field4)) then
-      call ESMF_BundleAddField(bundle, field4, rc=localrc)
+      call ESMF_FieldBundleAddField(bundle, field4, rc=localrc)
       if (localrc.NE.ESMF_SUCCESS) return
     endif
 
     if (present(field5)) then
-      call ESMF_BundleAddField(bundle, field5, rc=localrc)
+      call ESMF_FieldBundleAddField(bundle, field5, rc=localrc)
       if (localrc.NE.ESMF_SUCCESS) return
     endif
 
     if (present(rc)) rc = ESMF_SUCCESS
     return
 
-end subroutine AddBundle
+end subroutine AddFieldBundle
 
 
 !------------------------------------------------------------------------------
@@ -1863,11 +1863,11 @@ end subroutine FieldCleanup
 !  and only delete it once.
 !
 #undef  ESMF_METHOD
-#define ESMF_METHOD "BundleCleanup"
-subroutine BundleCleanup(bundle1, bundle2, bundle3, bundle4, bundle5, rc)
-    type(ESMF_Bundle), intent(inout) :: bundle1
-    type(ESMF_Bundle), intent(inout), optional :: bundle2, bundle3
-    type(ESMF_Bundle), intent(inout), optional :: bundle4, bundle5
+#define ESMF_METHOD "FieldBundleCleanup"
+subroutine FieldBundleCleanup(bundle1, bundle2, bundle3, bundle4, bundle5, rc)
+    type(ESMF_FieldBundle), intent(inout) :: bundle1
+    type(ESMF_FieldBundle), intent(inout), optional :: bundle2, bundle3
+    type(ESMF_FieldBundle), intent(inout), optional :: bundle4, bundle5
     integer, intent(out), optional :: rc
     
     ! Local variables
@@ -1877,10 +1877,10 @@ subroutine BundleCleanup(bundle1, bundle2, bundle3, bundle4, bundle5, rc)
     if (present(rc)) rc = ESMF_FAILURE
 
     ! query for igrid.  bundle1 is required; all other bundles optional.
-    !call ESMF_BundleGet(bundle1, field=allfields, igrid=igrid, rc=rc)
+    !call ESMF_FieldBundleGet(bundle1, field=allfields, igrid=igrid, rc=rc)
     !if (rc.NE.ESMF_SUCCESS) return
 
-    call ESMF_BundleDestroy(bundle1, rc=rc)
+    call ESMF_FieldBundleDestroy(bundle1, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
     !do i=1 to nfields
@@ -1903,7 +1903,7 @@ subroutine BundleCleanup(bundle1, bundle2, bundle3, bundle4, bundle5, rc)
     ! if present, delete
     if (present(bundle2)) then
 
-        call ESMF_BundleDestroy(bundle2, rc=rc)
+        call ESMF_FieldBundleDestroy(bundle2, rc=rc)
         if (rc.NE.ESMF_SUCCESS) return
 
     endif
@@ -1911,7 +1911,7 @@ subroutine BundleCleanup(bundle1, bundle2, bundle3, bundle4, bundle5, rc)
     ! if present, delete
     if (present(bundle3)) then
 
-        call ESMF_BundleDestroy(bundle3, rc=rc)
+        call ESMF_FieldBundleDestroy(bundle3, rc=rc)
         if (rc.NE.ESMF_SUCCESS) return
 
     endif
@@ -1919,7 +1919,7 @@ subroutine BundleCleanup(bundle1, bundle2, bundle3, bundle4, bundle5, rc)
     ! if present, delete
     if (present(bundle4)) then
 
-        call ESMF_BundleDestroy(bundle4, rc=rc)
+        call ESMF_FieldBundleDestroy(bundle4, rc=rc)
         if (rc.NE.ESMF_SUCCESS) return
 
     endif
@@ -1927,7 +1927,7 @@ subroutine BundleCleanup(bundle1, bundle2, bundle3, bundle4, bundle5, rc)
     ! if present, delete
     if (present(bundle5)) then
 
-        call ESMF_BundleDestroy(bundle5, rc=rc)
+        call ESMF_FieldBundleDestroy(bundle5, rc=rc)
         if (rc.NE.ESMF_SUCCESS) return
 
     endif
@@ -1939,7 +1939,7 @@ subroutine BundleCleanup(bundle1, bundle2, bundle3, bundle4, bundle5, rc)
     if (present(rc)) rc = ESMF_SUCCESS
     return
 
-end subroutine BundleCleanup
+end subroutine FieldBundleCleanup
 
 
 !------------------------------------------------------------------------------

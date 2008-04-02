@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.24 2007/12/14 20:49:09 svasquez Exp $
+! $Id: ESMF_StateEx.F90,v 1.25 2008/04/02 20:42:59 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
     integer :: rc
     character(ESMF_MAXSTR) :: statename, bundlename, dataname
     !type(ESMF_Field) :: field1
-    type(ESMF_Bundle) :: bundle1, bundle2
+    type(ESMF_FieldBundle) :: bundle1, bundle2
     type(ESMF_State) :: state1, state2, state3
 !EOC
     integer :: finalrc
@@ -66,8 +66,8 @@
 !BOE
 !\subsubsection{Adding Items to a State}
 !   
-!  Creation of an empty {\tt ESMF\_State}, and adding an {\tt ESMF\_Bundle}
-!  to it.  Note that the {\tt ESMF\_Bundle} does not get destroyed when
+!  Creation of an empty {\tt ESMF\_State}, and adding an {\tt ESMF\_FieldBundle}
+!  to it.  Note that the {\tt ESMF\_FieldBundle} does not get destroyed when
 !  the {\tt ESMF\_State} is destroyed; the {\tt ESMF\_State} only contains
 !  a reference to the objects it contains.  It also does not make a copy;
 !  the original objects can be updated and code accessing them by using
@@ -90,17 +90,17 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
     bundlename = "Temperature"
-    bundle1 = ESMF_BundleCreate(name=bundlename, rc=rc)
-    print *, "Bundle Create returned", rc
+    bundle1 = ESMF_FieldBundleCreate(name=bundlename, rc=rc)
+    print *, "FieldBundle Create returned", rc
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-    call ESMF_StateAddBundle(state2, bundle1, rc)
-    print *, "StateAddBundle returned", rc
+    call ESMF_StateAddFieldBundle(state2, bundle1, rc)
+    print *, "StateAddFieldBundle returned", rc
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    ! Loop here, updating Bundle contents each time step
+    ! Loop here, updating FieldBundle contents each time step
 
 !BOC
     call ESMF_StateDestroy(state2, rc)
@@ -108,9 +108,9 @@
     print *, "State Destroy returned", rc
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-    call ESMF_BundleDestroy(bundle1, rc)
+    call ESMF_FieldBundleDestroy(bundle1, rc)
 !EOC
-    print *, "Bundle Destroy returned", rc
+    print *, "FieldBundle Destroy returned", rc
     print *, "State Example 2 finished"
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -182,7 +182,7 @@
 ! to help coordinate the data exchange between components.
 !EOE
 
-    !  Query Needed flags, and add Bundle data
+    !  Query Needed flags, and add FieldBundle data
  
     print *, "State Example 5: Get/Set Needed flags in Export State, continued"
 
@@ -196,14 +196,14 @@
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
         bundlename = dataname
-        bundle2 = ESMF_BundleCreate(name=bundlename, rc=rc)
+        bundle2 = ESMF_FieldBundleCreate(name=bundlename, rc=rc)
 !EOC
-        print *, "Bundle Create returned", rc, "name = ", trim(bundlename)
+        print *, "FieldBundle Create returned", rc, "name = ", trim(bundlename)
         if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-        call ESMF_StateAddBundle(state3, bundle2, rc)
+        call ESMF_StateAddFieldBundle(state3, bundle2, rc)
 !EOC
-        print *, "StateAddBundle returned", rc
+        print *, "StateAddFieldBundle returned", rc
         if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
     else

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.28 2007/06/23 07:00:58 cdeluca Exp $
+! $Id: user_model1.F90,v 1.29 2008/04/02 20:43:03 cdeluca Exp $
 !
 ! System test for Exclusive Components.  User-code, component 1.
 
@@ -198,7 +198,7 @@
 
         pi = 3.14159
 
-        ! Get the Field and Bundle data from the State
+        ! Get the Field and FieldBundle data from the State
         call ESMF_StateGetField(exportState, "humidity1", humidity1, rc=status)
         call ESMF_StateGetField(exportState, "pressure1", pressure1, rc=status)
       

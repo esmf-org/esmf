@@ -1,4 +1,4 @@
-% $Id: InternArray_implnotes.tex,v 1.3 2007/06/23 04:00:32 cdeluca Exp $
+% $Id: InternArray_implnotes.tex,v 1.4 2008/04/02 20:42:56 cdeluca Exp $
 
 %\subsection{Design and Implementation Notes}
 
@@ -91,7 +91,7 @@ size is to explicitly limit the number of supported user datatypes to:
 \item{\bf ArrayComm design.}
 The source of the ESMF\_Array communication routines are separated out into 
 an ESMF\_ArrayComm directory.  This allows basic Array functions to be
-compiled and used by IGrid, Field, and Bundle code before the communication
+compiled and used by IGrid, Field, and FieldBundle code before the communication
 code has been compiled.  
 
 The Array communication routines require IGrid and DataMap information in 

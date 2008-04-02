@@ -59,13 +59,13 @@ numerical and computational methods.
   Binary Universal Form of Representation.  This is a World Meteorological Organization
 data format.  See \htmladdnormallink{BUFR links}{http://dss.ucar.edu/docs/formats/bufr/}.
 
-\label{glos:Bundle}
-\item[Bundle] The ESMF Bundle class represents a set of fields that 
+\label{glos:FieldBundle}
+\item[FieldBundle] The ESMF FieldBundle class represents a set of fields that 
   are associated with the same physical grid and are distributed in 
   the same fashion across the same physical axes.  Fields within a
-  Bundle may be staggered differently and may have different (non-distributed)
-  dimensions.  See also \htmlref{Field}{glos:Field}, \htmlref{Packed Bundle}{glos:PackedBundle},
-  \htmlref{Loose Bundle}{glos:LooseBundle}. 
+  FieldBundle may be staggered differently and may have different (non-distributed)
+  dimensions.  See also \htmlref{Field}{glos:Field}, \htmlref{Packed FieldBundle}{glos:PackedFieldBundle},
+  \htmlref{Loose FieldBundle}{glos:LooseFieldBundle}. 
 
 \label{glos:Calendar}
 \item[Calendar] The Calendar is an ESMF class that 
@@ -127,8 +127,8 @@ are in the \htmladdnormallink{ESMF Project Plan}{http://www.esmf.ucar.edu/manage
 
 \label{glos:Congruent}
 \item[Congruent] 
-  If all Fields in a Bundle contain the same data type, rank, shape, and 
-  relative locations, the Bundle is said to be congruent. 
+  If all Fields in a FieldBundle contain the same data type, rank, shape, and 
+  relative locations, the FieldBundle is said to be congruent. 
 
 \label{glos:Coupler}
 \item[Coupler Component]
@@ -447,12 +447,12 @@ This format is frequently used by operational weather centers.  See the
   points (i,j,k, ...) in a rectangular logical space, preserving
   proximate relationships.  See also \htmlref{Grid}{glos:Grid}.
 
-\label{glos:LooseBundle} 
-\item[Loose Bundle] 
-  A loose Bundle 
-  is an ESMF Bundle object that contains fields whose data is 
-  not contiguous in memory.  See also \htmlref{Bundle}{glos:Bundle},
-  \htmlref{packed Bundle}{glos:PackedBundle}.
+\label{glos:LooseFieldBundle} 
+\item[Loose FieldBundle] 
+  A loose FieldBundle 
+  is an ESMF FieldBundle object that contains fields whose data is 
+  not contiguous in memory.  See also \htmlref{FieldBundle}{glos:FieldBundle},
+  \htmlref{packed FieldBundle}{glos:PackedFieldBundle}.
 
 \item[Machine model] A generic representation of the computing 
   platform architecture.
@@ -505,12 +505,12 @@ in the Earth sciences. See \htmladdnormallink{NetCDF home page}{http://www.unida
   and days per month as in a non-leap year of a Gregorian calendar.  See
   also \htmlref{Calendar}{glos:Calendar}, \htmlref{360-day calendar}{glos:360DayCal}.
 
-\label{glos:PackedBundle} 
-\item[Packed Bundle] 
-  A packed Bundle is an 
-  ESMF Bundle object that contains
+\label{glos:PackedFieldBundle} 
+\item[Packed FieldBundle] 
+  A packed FieldBundle is an 
+  ESMF FieldBundle object that contains
   a data buffer with field data arranged contiguously in memory. See 
-  also \htmlref{Bundle}{glos:Bundle}, \htmlref{loose Bundle}{glos:LooseBundle}.
+  also \htmlref{FieldBundle}{glos:FieldBundle}, \htmlref{loose FieldBundle}{glos:LooseFieldBundle}.
 
 \label{glos:Parallel}
 \item[Parallel execution]
@@ -608,7 +608,7 @@ in the Earth sciences. See \htmladdnormallink{NetCDF home page}{http://www.unida
 \label{glos:State} 
 \item [State] 
   The ESMF State class may 
-  contain Arrays, Bundles, Fields, or other States.  It is used to 
+  contain Arrays, FieldBundles, Fields, or other States.  It is used to 
   transfer data between components.  See also \htmlref{import State}
   {glos:ImportState}, \htmlref{export State}{glos:ExportState}.
 

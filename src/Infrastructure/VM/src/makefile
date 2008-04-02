@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2005/03/01 21:05:29 nscollins Exp $
+# $Id: makefile,v 1.6 2008/04/02 20:42:58 cdeluca Exp $
 
 # leave alone.
 ALL: build_here 
@@ -47,7 +47,7 @@ DIRS	  =
 #
 # ESMF_Field.o:   ESMF_DataArray.o
 #
-# ESMF_Bundle.o:  ESMF_Field.o
+# ESMF_FieldBundle.o:  ESMF_Field.o
 #
 
 

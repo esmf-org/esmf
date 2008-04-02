@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.7 2007/10/31 16:59:05 cdeluca Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.8 2008/04/02 20:43:01 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -32,14 +32,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.7 2007/10/31 16:59:05 cdeluca Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.8 2008/04/02 20:43:01 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
     integer :: rc
     character(ESMF_MAXSTR) :: sname, bname
     !type(ESMF_Field) :: field1, field2
-    type(ESMF_Bundle) :: bundle1, bundle2, qbundle
+    type(ESMF_FieldBundle) :: bundle1, bundle2, qbundle
     type(ESMF_State) :: state1, state2, state3, state4, state5
     logical :: isNeeded
 
@@ -113,7 +113,7 @@
       !EX_removeUTest 
       ! Create a bundle to use in the subsequent tests
       bname="Surface pressure"
-      bundle1 = ESMF_BundleCreate(name=bname, rc=rc)
+      bundle1 = ESMF_FieldBundleCreate(name=bname, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an empty bundle for State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -121,24 +121,24 @@
       !------------------------------------------------------------------------
       !EX_removeUTest 
       ! Test adding a bundle to a state
-      call ESMF_StateAddBundle(state2, bundle1, rc=rc)
+      call ESMF_StateAddFieldBundle(state2, bundle1, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Adding a Bundle to a State"
+      write(name, *) "Adding a FieldBundle to a State"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_removeUTest      
-      ! Test printing a State with 1 Bundle
+      ! Test printing a State with 1 FieldBundle
       call ESMF_StatePrint(state2, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Printing a State with 1 Bundle"
+      write(name, *) "Printing a State with 1 FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_removeUTest 
       ! Create a second bundle to use in the subsequent tests
       bname="Temperature"
-      bundle2 = ESMF_BundleCreate(name=bname, rc=rc)
+      bundle2 = ESMF_FieldBundleCreate(name=bname, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an empty bundle for State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -146,25 +146,25 @@
       !------------------------------------------------------------------------
       !EX_removeUTest 
       ! Test adding a second bundle to a state
-      call ESMF_StateAddBundle(state2, bundle2, rc=rc)
+      call ESMF_StateAddFieldBundle(state2, bundle2, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Adding a second Bundle to a State"
+      write(name, *) "Adding a second FieldBundle to a State"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_removeUTest      
-      ! Test printing a State with 2 Bundles
+      ! Test printing a State with 2 FieldBundles
       call ESMF_StatePrint(state2, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Printing a State with 2 Bundles"
+      write(name, *) "Printing a State with 2 FieldBundles"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_removeUTest      
-      ! Test getting a Bundle by name
-      call ESMF_StateGetBundle(state2, "Surface pressure", qbundle, rc=rc)
+      ! Test getting a FieldBundle by name
+      call ESMF_StateGetFieldBundle(state2, "Surface pressure", qbundle, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Getting a Bundle from a State by name"
+      write(name, *) "Getting a FieldBundle from a State by name"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -177,18 +177,18 @@
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_removeUTest      
-      ! Destroying a Bundle
-      call ESMF_BundleDestroy(bundle1, rc=rc)
+      ! Destroying a FieldBundle
+      call ESMF_FieldBundleDestroy(bundle1, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Destroying a Bundle"
+      write(name, *) "Destroying a FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_removeUTest      
-      ! Destroying the other Bundle
-      call ESMF_BundleDestroy(bundle2, rc=rc)
+      ! Destroying the other FieldBundle
+      call ESMF_FieldBundleDestroy(bundle2, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Destroying a Bundle"
+      write(name, *) "Destroying a FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -230,16 +230,16 @@
 
       !------------------------------------------------------------------------
       !EX_removeUTest      
-      ! Creating a Bundle to add to a State
-      bundle2 = ESMF_BundleCreate(name=sname, rc=rc)
+      ! Creating a FieldBundle to add to a State
+      bundle2 = ESMF_FieldBundleCreate(name=sname, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Creating a Bundle"
+      write(name, *) "Creating a FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_removeUTest      
       ! Replacing a name placeholder with a real item, using bundle from above
-      call ESMF_StateAddBundle(state3, bundle2, rc=rc)
+      call ESMF_StateAddFieldBundle(state3, bundle2, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Replacing a name placeholder with a bundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -255,10 +255,10 @@
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_removeUTest      
-      ! Destroying a Bundle
-      call ESMF_BundleDestroy(bundle2, rc=rc)
+      ! Destroying a FieldBundle
+      call ESMF_FieldBundleDestroy(bundle2, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Destroying a Bundle"
+      write(name, *) "Destroying a FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -405,28 +405,28 @@
     call ESMF_StatePrint(state4, rc=rc)
 
     bname = "Collected quantities"
-    bundle2 = ESMF_BundleCreate(name=bname, rc=rc)
+    bundle2 = ESMF_FieldBundleCreate(name=bname, rc=rc)
       
     fname = "Surface pressure"
     field1 = ESMF_FieldCreateNoData(fname, rc=rc)
 
-    call ESMF_BundleAddField(bundle2, field1, rc=rc) 
+    call ESMF_FieldBundleAddField(bundle2, field1, rc=rc) 
 
     fname = "Energy Flux"
     field2 = ESMF_FieldCreateNoData(fname, rc=rc)
 
-    call ESMF_BundleAddField(bundle2, field2, rc=rc) 
+    call ESMF_FieldBundleAddField(bundle2, field2, rc=rc) 
 
-    call ESMF_BundlePrint(bundle2, "", rc=rc)
+    call ESMF_FieldBundlePrint(bundle2, "", rc=rc)
 
 
-    call ESMF_StateAddBundle(state4, bundle2, rc=rc)
+    call ESMF_StateAddFieldBundle(state4, bundle2, rc=rc)
 
     call ESMF_StatePrint(state4, rc=rc)
     
     call ESMF_StateDestroy(state4, rc=rc)
 
-    call ESMF_BundleDestroy(bundle2, rc=rc)
+    call ESMF_FieldBundleDestroy(bundle2, rc=rc)
 
     call ESMF_FieldDestroy(field1, rc=rc)
 

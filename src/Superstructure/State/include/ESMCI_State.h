@@ -1,4 +1,4 @@
-// $Id: ESMCI_State.h,v 1.7 2008/03/31 22:25:25 theurich Exp $
+// $Id: ESMCI_State.h,v 1.8 2008/04/02 20:42:59 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -87,7 +87,7 @@ extern "C" {
       void FTN(f_esmf_statecreate)(char *statename, statetype, compname,
             bundles, fields, arrays, nestedstates, names, itemcount, int *rc);
       void FTN(f_esmf_statedestroy)(ESMC_State *state, int *rc);
-      void FTN(f_esmf_stateaddbundle)(ESMC_State *state, ESMC_Bundle *bundle, int *rc);
+      void FTN(f_esmf_stateaddbundle)(ESMC_State *state, ESMC_FieldBundle *bundle, int *rc);
       void FTN(f_esmf_stateaddfield)(ESMC_State *state, ESMC_Field *field, int *rc);
       void FTN(f_esmf_stateaddarray)(ESMC_State *state, ESMC_Array *array, int *rc);
       void FTN(f_esmf_stateaddstate)(ESMC_State *state, nestedstate, int *rc);
@@ -100,7 +100,7 @@ extern "C" {
       void FTN(f_esmf_stategetneeded)(ESMC_State *state, char *dataname, 
                                  needed, int *rc);
       void FTN(f_esmf_statesetneeded)(ESMC_State *state, char *dataname, needed, int *rc);
-      void FTN(f_esmf_stategetbundle)(ESMC_State *state, char *name, ESMC_Bundle *bundle, int *rc);
+      void FTN(f_esmf_stategetbundle)(ESMC_State *state, char *name, ESMC_FieldBundle *bundle, int *rc);
       void FTN(f_esmf_stategetfield)(ESMC_State *state, char *name, ESMC_Field *field, int *rc);
       void FTN(f_esmf_stategetarray)(ESMC_State *state, char *name, ESMC_Array *array, int *rc);
       void FTN(f_esmf_stategetstate)(ESMC_State *state, char *name, nestedstate, int *rc);

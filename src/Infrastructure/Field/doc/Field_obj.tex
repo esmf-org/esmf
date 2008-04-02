@@ -1,9 +1,9 @@
-% $Id: Field_obj.tex,v 1.6 2007/03/31 02:24:30 cdeluca Exp $
+% $Id: Field_obj.tex,v 1.7 2008/04/02 20:42:51 cdeluca Exp $
 
 %\section{Object Model}
 
 The following section describes design considerations for
-Fields and Bundles, and the relationship between and subdivison of
+Fields and FieldBundles, and the relationship between and subdivison of
 responsibilities into separate objects.
 It also discusses ESMF Arrays and DataMaps and their
 role in supporting the storage and movement of user data.
@@ -46,22 +46,22 @@ the level which is most consistent to the application without
 restricting where inside the ESMF the actual implementation
 is done.
 
-\subsection{Bundles}
+\subsection{FieldBundles}
 
-Bundles depend on the underlying Fields for most of their 
+FieldBundles depend on the underlying Fields for most of their 
 communication and querying functions.  The information which
-must be maintained in the Bundle object is a list of constituent
-Fields, and whether there is a packed Array at the Bundle level.
+must be maintained in the FieldBundle object is a list of constituent
+Fields, and whether there is a packed Array at the FieldBundle level.
 
 Memory layout information is encapsulated in an DataMap object which
-is attached to the Array.  It can be accessed by the Bundle
+is attached to the Array.  It can be accessed by the FieldBundle
 by querying the Array.
 
-The Bundle object collects multiple Field objects which share a
+The FieldBundle object collects multiple Field objects which share a
 common or compatible Grid object.  In addition to the basic methods for
 setting, retrieving, and querying the constituent Fields, it provides
 methods for configuring and querying memory layouts for the Array
-and some limited collective operations on all Fields in a Bundle.
+and some limited collective operations on all Fields in a FieldBundle.
 
 \subsection{Array}
 
@@ -96,7 +96,7 @@ This includes how the indicies map, what the unit data values are,
 the RelativeLocations of the data items to a single Grid element
 (this is related to but separate from the Grid "staggering" value).
 It also contains interleaving information for vectors and for
-packed Data associated with a Bundle.
+packed Data associated with a FieldBundle.
 Vector data which must be transformed if the underlying grid
 is transformed (e.g. u,v wind vectors) must be tagged as such
 so the framework can transform the data and maintain consistency
@@ -124,7 +124,7 @@ DataMap objects use this.
 
 Figures~\ref{fig:fieldhier} and \ref{fig:bundlehier} show the object hierarchy of
 %those objects which are subobjects or aggregated objects
-%of Fields and Bundles.
+%of Fields and FieldBundles.
 
 \begin{figure}
 \caption[Field hierarchy]{The object hierarchy for objects closely related to Fields.}
@@ -133,13 +133,13 @@ Figures~\ref{fig:fieldhier} and \ref{fig:bundlehier} show the object hierarchy o
 \end{figure}
 
 %\begin{figure}
-%\caption[Bundle hierarchy]{The object hierarchy for objects closely related to Bundles.}
+%\caption[FieldBundle hierarchy]{The object hierarchy for objects closely related to FieldBundles.}
 %\label{fig:bundlehier}
 %\scalebox{0.70}{\includegraphics{bundleclassNH.eps}}
 %\end{figure}
 
 A more detailed description of the interactions between
-these objects and Fields and Bundles follows.
+these objects and Fields and FieldBundles follows.
 
 \subsubsection{Grids}
 
@@ -213,7 +213,7 @@ create a new Field with the transformed data.
 
 A Subset object 
 exists to encapsulate the possible types of subsetting an existing
-Field or Bundle.  This might include subsetting by Bounding Box,
+Field or FieldBundle.  This might include subsetting by Bounding Box,
 by Hyperslab, by strides through the data, and other options.
 The use of Subset objects simplifies the interface to
 any operations which allow subsetting, by separating the
@@ -228,7 +228,7 @@ as well as global (name, value) configuration information.
 The name management is a general dictionary utility.  It
 manages multiple namespaces (e.g. per application, per component,
 per field, per grid, etc) and contains methods used by the
-Field and Bundle objects to ensure Field and Bundle names
+Field and FieldBundle objects to ensure Field and FieldBundle names
 are unique, and to generate unique names if the caller does
 not specify a field name.
 % examples of methods i can see fields using:

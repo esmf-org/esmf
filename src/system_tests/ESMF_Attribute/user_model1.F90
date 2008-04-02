@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.17 2008/03/28 06:48:27 theurich Exp $
+! $Id: user_model1.F90,v 1.18 2008/04/02 20:43:03 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -111,7 +111,7 @@ module user_model1
     type(ESMF_ArraySpec)        :: arrayspec
     type(ESMF_Array)            :: array
     type(ESMF_Field)            :: uwind, ozone, co, tke, wt, field
-    type(ESMF_Bundle)           :: bundle, tracers, turbulence
+    type(ESMF_FieldBundle)           :: bundle, tracers, turbulence
     type(ESMF_Grid)             :: grid
     integer                     :: petCount, backward_run, status, myPet
     character(len=ESMF_MAXSTR)  :: name, value, conv, purp, fconv, fpurp, sname, svalue, outvalue
@@ -216,21 +216,21 @@ module user_model1
       if (status .ne. ESMF_SUCCESS) goto 20
 
       ! bundle stuff
-      tracers = ESMF_BundleCreate(name="tracers", rc=status)
+      tracers = ESMF_FieldBundleCreate(name="tracers", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       
-      turbulence = ESMF_BundleCreate(name="turbulence", rc=status)
+      turbulence = ESMF_FieldBundleCreate(name="turbulence", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       
       ! connect the attribute hierarchy
-      call ESMF_BundleAttributeSetLink(turbulence, tke, rc=status)
+      call ESMF_FieldBundleAttributeSetLink(turbulence, tke, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_BundleAttributeSetLink(turbulence, wt, rc=status)
+      call ESMF_FieldBundleAttributeSetLink(turbulence, wt, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
 
-      call ESMF_BundleAttributeSetLink(tracers, ozone, rc=status)
+      call ESMF_FieldBundleAttributeSetLink(tracers, ozone, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_BundleAttributeSetLink(tracers, co, rc=status)
+      call ESMF_FieldBundleAttributeSetLink(tracers, co, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
 
       call ESMF_StateAttributeSetLink(physics, turbulence, rc=status)
@@ -278,11 +278,11 @@ module user_model1
       value = 'longattributename'
       
       ! bundle stuff
-      bundle = ESMF_BundleCreate(name="bundle1", rc=status)
+      bundle = ESMF_FieldBundleCreate(name="bundle1", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_BundleAttPackCreate(bundle, convention=fconv, purpose=fpurp, rc=status)
+      call ESMF_FieldBundleAttPackCreate(bundle, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_BundleAttPackSet(bundle, name, value, convention=fconv, purpose=fpurp, rc=status)
+      call ESMF_FieldBundleAttPackSet(bundle, name, value, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
 
       ! field stuff
@@ -309,8 +309,8 @@ module user_model1
         call ESMF_ArrayAttPackWrite(array, convention=fconv, purpose=fpurp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
 
-        print *, 'Write the Bundle Attpack from the second run of component 1.'
-        call ESMF_BundleAttPackWrite(bundle, convention=fconv, purpose=fpurp, rc=rc)
+        print *, 'Write the FieldBundle Attpack from the second run of component 1.'
+        call ESMF_FieldBundleAttPackWrite(bundle, convention=fconv, purpose=fpurp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
 
         print *, 'Write the Field Attpack from the second run of component 1.'
@@ -332,14 +332,14 @@ module user_model1
     call ESMF_FieldDestroy(co, rc=rc)
     call ESMF_FieldDestroy(tke, rc=rc)
     call ESMF_FieldDestroy(wt, rc=rc)
-    call ESMF_BundleDestroy(tracers, rc=rc)
-    call ESMF_BundleDestroy(turbulence, rc=rc)
+    call ESMF_FieldBundleDestroy(tracers, rc=rc)
+    call ESMF_FieldBundleDestroy(turbulence, rc=rc)
     call ESMF_StateDestroy(physics, rc=rc)
     call ESMF_StateDestroy(MyState, rc=rc)
 
     call ESMF_ArrayDestroy(array, rc=rc)
     call ESMF_DistGridDestroy(distgrid, rc=rc)
-    call ESMF_BundleDestroy(bundle, rc=rc)
+    call ESMF_FieldBundleDestroy(bundle, rc=rc)
     call ESMF_FieldDestroy(field, rc=rc)
     call ESMF_GridDestroy(grid, rc=rc)
 

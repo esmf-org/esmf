@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.2 2008/02/27 00:57:29 rokuingh Exp $
+% $Id: Attribute_desc.tex,v 1.3 2008/04/02 20:42:51 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -16,7 +16,7 @@ ESMF Attributes are meant to be used as a tool for the user to help internally d
 
 \begin{itemize}
 \item Array
-\item Bundle
+\item FieldBundle
 \item Field
 \item Grid
 \item State
@@ -27,12 +27,12 @@ ESMF Attributes are meant to be used as a tool for the user to help internally d
 Of these ESMF objects with attributes, only three can link their attribute hierarchies together.  They are:
 
 \begin{itemize}
-\item Bundle
+\item FieldBundle
 \item Field
 \item State
 \end{itemize}
 
-These ESMF objects can only link their attribute hierarchies to an object that is "bigger" than it is.  For instance, and Bundle can link its attribute hierarchy to a State but not a Field.  On the other hand, a Field is allowed to link its attribute hierarchy to a Bundle.  
+These ESMF objects can only link their attribute hierarchies to an object that is "bigger" than it is.  For instance, and FieldBundle can link its attribute hierarchy to a State but not a Field.  On the other hand, a Field is allowed to link its attribute hierarchy to a FieldBundle.  
 %When attribute hierarchies are linked a full deep copy of the attribute hierarchy being linked is made.  Thus any further changes to the original attribute hierarchy will not be reflected in the linked version.
 
 \subsubsection{Attribute Packages}

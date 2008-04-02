@@ -1,8 +1,8 @@
-% $Id: ESMF_inframethodoverview.tex,v 1.20 2006/12/13 20:17:55 cdeluca Exp $
+% $Id: ESMF_inframethodoverview.tex,v 1.21 2008/04/02 20:43:02 cdeluca Exp $
 
 \section{Overview of Distributed Data Methods}
 
-Bundles, Fields, and Arrays all have versions of the following
+FieldBundles, Fields, and Arrays all have versions of the following
 data communication methods.  In these objects, data is communicated 
 between DEs.  Depending on the underlying communication 
 mechanism, this may translate within the framework to a data 
@@ -197,10 +197,10 @@ A RouteHandle contains a handle type and a pointer to a Route object.
 In addition, for use only by the Regrid code, there is an additional Route
 pointer and a TransformValues pointer.  (TransformValues is an internal
 class only used by the Regridding code.)  If the RouteHandle describes the
-Route for a Bundle, then the RouteHandle can contain a list of Routes,
-one for each Field in the Bundle, and for Regrid use, a list of additional
+Route for a FieldBundle, then the RouteHandle can contain a list of Routes,
+one for each Field in the FieldBundle, and for Regrid use, a list of additional
 Routes instead of a single Route.  There is also a flag to indicate whether
-a single Route is applicable to all Fields in a Bundle or whether there
+a single Route is applicable to all Fields in a FieldBundle or whether there
 are multiple Routes.
 The RouteHandle methods are fairly basic; mostly accessor methods
 for getting and setting values.
@@ -429,13 +429,13 @@ simpler, but separate, version of the RouteRun() subroutine.)
 
 \item
 
-Bundle-level communication calls have additional packing options
-under certain circumstances.  Bundles are groups of Fields which
+FieldBundle-level communication calls have additional packing options
+under certain circumstances.  FieldBundles are groups of Fields which
 share the same Grid, but they are not required to share the same
-data types, data ranks, nor relative data locations.  Bundles
+data types, data ranks, nor relative data locations.  FieldBundles
 in which these things are the same in all Fields are marked inside the
 bundle code as being {\bf congruent}.  At communication store time
-Bundles which have congruent data in all the Fields have the option
+FieldBundles which have congruent data in all the Fields have the option
 of packing all Field data together into fewer communication calls
 which generally is expected to give better performance.   
 Fields where the data is not of the same type or perhaps not
@@ -447,17 +447,17 @@ on non-standard byte offsets or putting mixing integer data
 with floating data and causing NaN (not a number) exceptions.
 In this case, the conservative implementation strategy is to construct 
 a separate Route object for each Field, all enclosed in the same
-RouteHandle.  Inside the Bundle communication code the execution
-for both types of Bundles is identical for the caller, but inside
-the congruent Bundle code calls the {\tt ESMF\_RouteRun()} code
-once and all communication for all Fields in the Bundle is done
-when it returns.  The non-congruent Bundles execute a separate
+RouteHandle.  Inside the FieldBundle communication code the execution
+for both types of FieldBundles is identical for the caller, but inside
+the congruent FieldBundle code calls the {\tt ESMF\_RouteRun()} code
+once and all communication for all Fields in the FieldBundle is done
+when it returns.  The non-congruent FieldBundles execute a separate
 {\tt ESMF\_RouteRun()} call for each Field and return to the user 
 when all Field data have been sent/received.
 
 There are comments in the code for an intermediate level of
-optimization in which the Bundle code determines the smallest
-number of unique types of Fields in the Bundle, and all same types
+optimization in which the FieldBundle code determines the smallest
+number of unique types of Fields in the FieldBundle, and all same types
 share the same Route object, but this has not been implemented
 at this time.  Once the existing code has been in use for a while,
 whether this is useful or needed may become more clear.

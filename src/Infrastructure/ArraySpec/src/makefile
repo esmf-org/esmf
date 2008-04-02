@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2004/03/17 18:23:28 nscollins Exp $
+# $Id: makefile,v 1.3 2008/04/02 20:42:51 cdeluca Exp $
 
 # leave alone.
 ALL: build_here 
@@ -38,7 +38,7 @@ CLOBBERDIRS =
 #
 # ESMF_Field.o:   ESMF_DataArray.o
 #
-# ESMF_Bundle.o:  ESMF_Field.o
+# ESMF_FieldBundle.o:  ESMF_Field.o
 #
 
 

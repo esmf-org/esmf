@@ -1,4 +1,4 @@
-! $Id: ESMF_StateTypes.F90,v 1.24 2008/02/14 04:14:56 theurich Exp $
+! $Id: ESMF_StateTypes.F90,v 1.25 2008/04/02 20:43:00 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
       use ESMF_VMMod
       use ESMF_ArrayMod
       use ESMF_FieldMod
-      use ESMF_BundleMod
+      use ESMF_FieldBundleMod
       use ESMF_RHandleMod
       use ESMF_InitMacrosMod
       implicit none
@@ -69,7 +69,7 @@
 !------------------------------------------------------------------------------
 !     ! ESMF_StateItemType
 !     !   Each entry in the list of states is either simply a name placeholder
-!     !   or an actual data item - Bundle, Field, Array, or State. 
+!     !   or an actual data item - FieldBundle, Field, Array, or State. 
 !
       type ESMF_StateItemType
       sequence
@@ -152,7 +152,7 @@
 !------------------------------------------------------------------------------
 !     ! ESMF_DataHolder
 !
-!     ! Make a single data type for Bundles, Fields, and Arrays.
+!     ! Make a single data type for FieldBundles, Fields, and Arrays.
 !     !  The ObjectType is one level up, because this structure is not
 !     !  allocated until it is actually needed.  This is a private type.
 
@@ -163,7 +163,7 @@
       sequence
 #endif
       !private
-          type(ESMF_Bundle) :: bp
+          type(ESMF_FieldBundle) :: bp
           type(ESMF_Field)  :: fp 
           type(ESMF_Array)  :: ap
           type(ESMF_RouteHandle)  :: rp
@@ -283,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateTypes.F90,v 1.24 2008/02/14 04:14:56 theurich Exp $'
+      '$Id: ESMF_StateTypes.F90,v 1.25 2008/04/02 20:43:00 cdeluca Exp $'
 
 !==============================================================================
 ! 

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAttrUTest.F90,v 1.7 2008/03/31 01:56:56 rokuingh Exp $
+! $Id: ESMF_StateAttrUTest.F90,v 1.8 2008/04/02 20:43:00 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_StateAttrUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateAttrUTest.F90,v 1.7 2008/03/31 01:56:56 rokuingh Exp $'
+      '$Id: ESMF_StateAttrUTest.F90,v 1.8 2008/04/02 20:43:00 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -47,7 +47,7 @@ program ESMF_StateAttrUTest
       character(ESMF_MAXSTR) :: name
 
 			type(ESMF_State) :: state, state2
-      type(ESMF_Bundle) :: bundle
+      type(ESMF_FieldBundle) :: bundle
 			type(ESMF_Field) :: field
       character(ESMF_MAXSTR) :: conv, purp, attrname, attrvalue
       character(ESMF_MAXSTR), dimension(3) :: attrList
@@ -75,7 +75,7 @@ program ESMF_StateAttrUTest
       ! preparations
       state = ESMF_StateCreate("state 1", ESMF_STATE_IMPORT, rc=rc)
       state2 = ESMF_StateCreate("state 2", ESMF_STATE_EXPORT, rc=rc)
-      bundle = ESMF_BundleCreate(name="bundle 1", rc=rc)
+      bundle = ESMF_FieldBundleCreate(name="bundle 1", rc=rc)
       field = ESMF_FieldCreate(name="field 1", rc=rc)
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -172,7 +172,7 @@ program ESMF_StateAttrUTest
       ! Link a state attribute hierarchy to a bundle attribute hierarchy State Test
       call ESMF_StateAttributeSetLink(state, bundle, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Linking a State hierarchy to a Bundle hierarchy Test"
+      write(name, *) "Linking a State hierarchy to a FieldBundle hierarchy Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -204,7 +204,7 @@ program ESMF_StateAttrUTest
       ! clean up
       call ESMF_StateDestroy(state, rc=rc)
       call ESMF_StateDestroy(state2, rc=rc)
-			call ESMF_BundleDestroy(bundle, rc=rc)
+			call ESMF_FieldBundleDestroy(bundle, rc=rc)
       call ESMF_FieldDestroy(field, rc=rc)
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 

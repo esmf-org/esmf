@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.30 2007/06/23 07:01:03 cdeluca Exp $
+! $Id: InjectorMod.F90,v 1.31 2008/04/02 20:43:05 cdeluca Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -294,13 +294,13 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
         datablock => wrap%ptr
 
 
-        ! Get the Field and Bundle data from the State that we might update
+        ! Get the Field and FieldBundle data from the State that we might update
         call ESMF_StateGetField(importState, "SIE", local_sie, rc=rc)
         call ESMF_StateGetField(importState, "V", local_v, rc=rc)
         call ESMF_StateGetField(importState, "RHO", local_rho, rc=rc)
         call ESMF_StateGetField(importState, "FLAG", local_flag, rc=rc)
       
-        ! Get the Field and Bundle data from the State, and a pointer to
+        ! Get the Field and FieldBundle data from the State, and a pointer to
         !  the existing data (not a copy).
         call ESMF_FieldGetDataPointer(local_sie, data_sie, ESMF_DATA_REF, rc=rc)
             

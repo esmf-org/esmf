@@ -1,4 +1,4 @@
-% $Id: State_usage.tex,v 1.10 2007/07/19 21:41:06 cdeluca Exp $
+% $Id: State_usage.tex,v 1.11 2008/04/02 20:42:59 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -21,22 +21,22 @@ by the parent component into the Gridded Component's initialize
 method.  This is where the States get prepared for use 
 and the import State is first filled with data.
 
-States can be created without the Fields, Arrays, Bundles,
+States can be created without the Fields, Arrays, FieldBundles,
 and other States they will eventually contain in a number 
 of ways.  They can be created with names as placeholders where 
 these data items will eventually be.  When the States are passed 
 into the Gridded Component's initialize method, Field,
-Bundle, and Array create calls can be made in that method
+FieldBundle, and Array create calls can be made in that method
 to replace the name placeholders with real data objects.
 
 States can also be filled with data items that do not yet 
-have data allocated.  Fields, Bundles, and Arrays each have 
+have data allocated.  Fields, FieldBundles, and Arrays each have 
 methods that support their creation without actual data 
 allocation - the grid and metadata are set up but no
 Fortran array of data values is allocated.  In this approach, 
 when a State is passed into its associated Gridded Component's 
 initialize method, the incomplete Arrays, Fields, and 
-Bundles within the State can allocate or reference data 
+FieldBundles within the State can allocate or reference data 
 inside the initialize method.
 
 States are passed through the interfaces of the Gridded 

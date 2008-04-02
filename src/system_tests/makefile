@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.40 2008/02/25 22:01:02 theurich Exp $ 
+# $Id: makefile,v 1.41 2008/04/02 20:43:03 cdeluca Exp $ 
 
 ALL: build_system_tests
 
@@ -28,15 +28,15 @@ DIRS      = ESMF_CompCreate \
 #           ESMF_FieldRegridMulti \
 #           ESMF_FieldRegridOrder \
 #           ESMF_FieldExcl \
-# TODO:FIELDINTEGRATION Restore when Field and Bundle comms are restored. 
+# TODO:FIELDINTEGRATION Restore when Field and FieldBundle comms are restored. 
 #           ESMF_FlowWithCoupling \
 #           ESMF_FlowComp \
 #           ESMF_FieldRedist \
 #           ESMF_FieldHalo \
 #           ESMF_FieldHaloPer \
-#           ESMF_BundleRedistArb2Arb \
-#           ESMF_BundleRedistBlk2Arb \
-#	    ESMF_BundleRedistBlk2Blk \
+#           ESMF_FieldBundleRedistArb2Arb \
+#           ESMF_FieldBundleRedistBlk2Arb \
+#	    ESMF_FieldBundleRedistBlk2Blk \
 #           ESMF_FieldRedistArb2Arb \
 #           ESMF_FieldRedistBlk2Arb \
 #           ESMF_FieldRedistBlk2Blk \

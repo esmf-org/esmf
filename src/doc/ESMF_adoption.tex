@@ -1,4 +1,4 @@
-% $Id: ESMF_adoption.tex,v 1.10 2007/08/24 16:03:57 cdeluca Exp $
+% $Id: ESMF_adoption.tex,v 1.11 2008/04/02 20:43:01 cdeluca Exp $
 
 \section{How to Adapt Applications for ESMF}
 \label{sec:Adoption}
@@ -80,10 +80,10 @@ framework which routines satisfy the initialize, run, and finalize
 requirements.  If it has a single derived type that holds its private data,
 that can be registered too.
 
-\item Create ESMF Fields and Bundles for holding data
+\item Create ESMF Fields and FieldBundles for holding data
 
 An ESMF State object is fundamentally an annotated list of other
-ESMF items, most often expected to be ESMF Bundles (groups of
+ESMF items, most often expected to be ESMF FieldBundles (groups of
 Fields on the same grid).  Other things which can be placed in a 
 State object are Fields, Arrays (raw data with no gridding/coordinate 
 information)
@@ -141,7 +141,7 @@ can be written to couple either only one-way
 (e.g. output of component A into input of component B), or two-way
 (both A to B and B to A).  
 
-The coupler must understand States, Fields, Bundles, 
+The coupler must understand States, Fields, FieldBundles, 
 Grids, and Arrays and ESMF execution/environment objects
 such as DELayouts.    
 

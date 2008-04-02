@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayComm.F90,v 1.25 2007/07/09 15:18:08 oehmke Exp $
+! $Id: ESMF_InternArrayComm.F90,v 1.26 2008/04/02 20:42:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_InternArrayCommMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArrayComm.F90,v 1.25 2007/07/09 15:18:08 oehmke Exp $'
+    '$Id: ESMF_InternArrayComm.F90,v 1.26 2008/04/02 20:42:56 cdeluca Exp $'
 !
 !==============================================================================
 !
@@ -1150,7 +1150,7 @@ module ESMF_InternArrayCommMod
 ! !IROUTINE: ESMF_IArrayHaloStoreIndex - Store resources for a halo operation
 !
 ! !INTERFACE:
-      ! Internal routine, intended to be called directly by Bundle code only
+      ! Internal routine, intended to be called directly by FieldBundle code only
   subroutine ESMF_IArrayHaloStoreIndex(array, localFlag, index, rmaptype, &
     maxindex, igrid, datamap, routehandle, halodirection, routeOptions, rc)
 !
@@ -2043,7 +2043,7 @@ module ESMF_InternArrayCommMod
 ! !IROUTINE: ESMF_IArrayRedistStoreIndex - Store resources for a redist operation
 !
 ! !INTERFACE:
-      ! internal use only; called by Bundle code for multi-fields
+      ! internal use only; called by FieldBundle code for multi-fields
   subroutine ESMF_IArrayRedistStoreIndex(srcArray, srcLocalFlag, srcIGrid, &
     srcDataMap, dstArray, dstLocalFlag, dstIGrid, dstDataMap, index, &
     rmaptype, maxindex, parentVM, routehandle, routeOptions, rc)
@@ -2377,7 +2377,7 @@ module ESMF_InternArrayCommMod
 ! !IROUTINE: ESMF_IArrayRedistStoreIndexArb - Store resources for a redist operation
 !
 ! !INTERFACE:
-      ! internal use only; called by Bundle code for multi-fields
+      ! internal use only; called by FieldBundle code for multi-fields
   subroutine ESMF_IArrayRedistStoreIndexArb(srcArray, srcIGrid, srcDataMap, &
                                        dstArray, dstIGrid, dstDataMap, &
                                        index, rmaptype, maxindex, &

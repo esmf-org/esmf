@@ -1,4 +1,4 @@
-// $Id: ESMC_State.h,v 1.19 2008/03/31 22:25:25 theurich Exp $
+// $Id: ESMC_State.h,v 1.20 2008/04/02 20:42:59 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -87,7 +87,7 @@ typedef enum ESMC_StateType {
       ESMC_StateImport=1, ESMC_StateExport,
       ESMC_StateImpExp, ESMC_StateUnknown } ESMC_StateType;
 
-typedef enum ESMC_Objtype { Bundle=1, Field=2, Array=3 } ESMC_Objtype;
+typedef enum ESMC_Objtype { FieldBundle=1, Field=2, Array=3 } ESMC_Objtype;
 typedef enum ESMC_Needed { Needed=1, NotNeeded=2 } ESMC_Needed;
 typedef enum ESMC_Ready { ReadyToRead=1, ReadyToWrite=2 } ESMC_Ready;
 

@@ -1,4 +1,4 @@
-% $Id: ESMF_infradataoverview.tex,v 1.21 2006/12/13 20:17:55 cdeluca Exp $
+% $Id: ESMF_infradataoverview.tex,v 1.22 2008/04/02 20:43:02 cdeluca Exp $
 
 \section{Overview of Infrastructure Data Handling}
 
@@ -97,19 +97,19 @@ locations.  It provides methods for configuration,
 initialization, setting and retrieving data values, 
 data I/O, data regridding, and manipulation of attributes.
 
-\item {\bf Bundle} Groups of Fields on the same underlying 
-physical grid can be collected into a single object called a Bundle.  
-A Bundle provides two major functions: it allows groups of 
+\item {\bf FieldBundle} Groups of Fields on the same underlying 
+physical grid can be collected into a single object called a FieldBundle.  
+A FieldBundle provides two major functions: it allows groups of 
 Fields to be manipulated using a single identifier, for example 
 during export or import of data between Components; and 
 it allows data from multiple Fields to be packed together 
 in memory for higher locality of reference and ease in 
 subsetting operations.  Packing a set of Fields into a single
-Bundle before performing a data communication allows the set 
+FieldBundle before performing a data communication allows the set 
 to be transferred at once rather than as a Field at a time.
 This can improve performance on high-latency platforms.
 
-Bundle objects contain methods for setting and retrieving constituent 
+FieldBundle objects contain methods for setting and retrieving constituent 
 fields, regridding, data I/O, and reordering of data in memory.
 
 \end{itemize}
@@ -117,13 +117,13 @@ fields, regridding, data I/O, and reordering of data in memory.
 \subsection{Object Model}
 
 The following is a simplified UML diagram showing the relationships among
-ESMF Field, Grid and Bundle classes.  See Appendix A, {\it A Brief 
+ESMF Field, Grid and FieldBundle classes.  See Appendix A, {\it A Brief 
 Introduction to UML},
 for a translation table that lists the symbols in the diagram and their 
 meaning.
 
 \begin{center}
-\includegraphics{Bundle_obj}   
+\includegraphics{FieldBundle_obj}   
 \end{center}
 
 
