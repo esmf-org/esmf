@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.68 2008/04/01 00:18:52 w6ws Exp $
+# $Id: build_rules.mk,v 1.69 2008/04/02 02:34:04 w6ws Exp $
 #
 # Linux.intel.default
 #
@@ -161,11 +161,11 @@ endif
 ifeq ($(ESMF_LAPACK),MKL)
 ifeq ($(ESMF_MACHINE),x86_64)
 # ESMf_LAPACK_LIBPATH =
-ESMF_LAPACK_LIBS    = -lmkl -lmkl_em64t -openmp
+ESMF_LAPACK_LIBS    = -lmkl_intel_lp64 -lmkl_core -lmkl_sequential
 endif
 ifeq ($(ESMF_MACHINE),ia64)
 # ESMF_LAPACK_LIBPATH =
-ESMF_LAPACK_LIBS    = -lmkl -openmp
+ESMF_LAPACK_LIBS    = -lmkl_intel_lp64 -lmkl_core -lmkl_sequential
 endif
 endif
 
