@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.18 2008/04/02 20:43:03 cdeluca Exp $
+! $Id: user_model1.F90,v 1.19 2008/04/03 00:42:56 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -125,28 +125,19 @@ module user_model1
     call ESMF_VMGet(vm, petCount=petCount, localPet=myPet, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
 
-    ! Get the direction of the run
-    call ESMF_StateAttributeGetInfo(importState, "backward_run", rc=backward_run)
-    if (status .ne. ESMF_SUCCESS) goto 20
-
-    ! if this is the forward run
-    if (backward_run .ne. ESMF_SUCCESS) then
       conv = 'ESG-CDP'  
       purp = 'general'
       name = 'name'
       value = 'changed attpack attribute name in user model 1 run 1'
-      call ESMF_StateAttPackSet(importState, name, value, convention=conv, purpose=purp, rc=rc)
+!      call ESMF_StateAttPackSet(importState, name, value, convention=conv, purpose=purp, rc=rc)
       if (status .ne. ESMF_SUCCESS) goto 20
-    endif
-
-    ! if this is the backward run
-    if (backward_run .eq. ESMF_SUCCESS) then
+   
       ! state stuff
       conv = 'ESG-CDP'  
       purp = 'general'
       name = 'discipline'
       value = 'changed attpack attribute discipline in user model 1 run 2'
-      call ESMF_StateAttPackSet(importState, name, value, convention=conv, purpose=purp, rc=status)
+!      call ESMF_StateAttPackSet(importState, name, value, convention=conv, purpose=purp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       
   !!! Arlindo's State Pretty Print example
@@ -178,41 +169,41 @@ module user_model1
       
       uwind = ESMF_FieldCreate("uwind", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldAttPackCreate(uwind, convention=fconv, purpose=fpurp, rc=status)
+      call ESMF_FieldAttAdd(uwind, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldAttPackSet(uwind, name, value, convention=fconv, purpose=fpurp, rc=status)
+      call ESMF_FieldAttSet(uwind, name, value, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       
       value = 'ozone'
       ozone = ESMF_FieldCreate("ozone", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldAttPackCreate(ozone, convention=fconv, purpose=fpurp, rc=status)
+      call ESMF_FieldAttAdd(ozone, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldAttPackSet(ozone, name, value, convention=fconv, purpose=fpurp, rc=status)
+      call ESMF_FieldAttSet(ozone, name, value, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       
       value = 'carbon monoxide'
       co = ESMF_FieldCreate("co", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldAttPackCreate(co, convention=fconv, purpose=fpurp, rc=status)
+      call ESMF_FieldAttAdd(co, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldAttPackSet(co, name, value, convention=fconv, purpose=fpurp, rc=status)
+      call ESMF_FieldAttSet(co, name, value, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       
       value = 'turbulent kinetic energy'
       tke = ESMF_FieldCreate("tke", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldAttPackCreate(tke, convention=fconv, purpose=fpurp, rc=status)
+      call ESMF_FieldAttAdd(tke, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldAttPackSet(tke, name, value, convention=fconv, purpose=fpurp, rc=status)
+      call ESMF_FieldAttSet(tke, name, value, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       
       value = 'heat fluxes'
       wt = ESMF_FieldCreate("wt", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldAttPackCreate(wt, convention=fconv, purpose=fpurp, rc=status)
+      call ESMF_FieldAttAdd(wt, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldAttPackSet(wt, name, value, convention=fconv, purpose=fpurp, rc=status)
+      call ESMF_FieldAttSet(wt, name, value, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
 
       ! bundle stuff
@@ -223,14 +214,14 @@ module user_model1
       if (status .ne. ESMF_SUCCESS) goto 20
       
       ! connect the attribute hierarchy
-      call ESMF_FieldBundleAttributeSetLink(turbulence, tke, rc=status)
+!      call ESMF_FieldBundleAttributeSetLink(turbulence, tke, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldBundleAttributeSetLink(turbulence, wt, rc=status)
+!      call ESMF_FieldBundleAttributeSetLink(turbulence, wt, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
 
-      call ESMF_FieldBundleAttributeSetLink(tracers, ozone, rc=status)
+!      call ESMF_FieldBundleAttributeSetLink(tracers, ozone, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldBundleAttributeSetLink(tracers, co, rc=status)
+!      call ESMF_FieldBundleAttributeSetLink(tracers, co, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
 
       call ESMF_StateAttributeSetLink(physics, turbulence, rc=status)
@@ -262,7 +253,7 @@ module user_model1
       if (status .ne. ESMF_SUCCESS) goto 20
       call ESMF_ArrayAttPackCreate(array, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_ArrayAttPackSet(array, name, value, convention=fconv, purpose=fpurp, rc=status)
+!      call ESMF_ArrayAttPackSet(array, name, value, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
       name = 'retrievable'
       value = 'retrieved' 
@@ -280,17 +271,17 @@ module user_model1
       ! bundle stuff
       bundle = ESMF_FieldBundleCreate(name="bundle1", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldBundleAttPackCreate(bundle, convention=fconv, purpose=fpurp, rc=status)
+!      call ESMF_FieldBundleAttPackCreate(bundle, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldBundleAttPackSet(bundle, name, value, convention=fconv, purpose=fpurp, rc=status)
+!      call ESMF_FieldBundleAttPackSet(bundle, name, value, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
 
       ! field stuff
       field = ESMF_FieldCreate(rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldAttPackCreate(field, convention=fconv, purpose=fpurp, rc=status)
+      call ESMF_FieldAttAdd(field, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldAttPackSet(field, name, value, convention=fconv, purpose=fpurp, rc=status)
+      call ESMF_FieldAttSet(field, name, value, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
 
       ! grid stuff
@@ -298,7 +289,7 @@ module user_model1
       if (status .ne. ESMF_SUCCESS) goto 20
       call ESMF_GridAttPackCreate(grid, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_GridAttPackSet(grid, name, value, convention=fconv, purpose=fpurp, rc=status)
+!      call ESMF_GridAttPackSet(grid, name, value, convention=fconv, purpose=fpurp, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 20
 
       if (myPet .eq. 0) then
@@ -310,11 +301,11 @@ module user_model1
         if (status .ne. ESMF_SUCCESS) goto 20
 
         print *, 'Write the FieldBundle Attpack from the second run of component 1.'
-        call ESMF_FieldBundleAttPackWrite(bundle, convention=fconv, purpose=fpurp, rc=rc)
+!        call ESMF_FieldBundleAttPackWrite(bundle, convention=fconv, purpose=fpurp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
 
         print *, 'Write the Field Attpack from the second run of component 1.'
-        call ESMF_FieldAttPackWrite(field, convention=fconv, purpose=fpurp, rc=rc)
+        call ESMF_FieldAttWrite(field, convention=fconv, purpose=fpurp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
 
         print *, 'Write the Grid Attpack from the second run of component 1.'
@@ -325,7 +316,6 @@ module user_model1
         call ESMF_StateAttPackWrite(importState, convention=conv, purpose=purp, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 20
       endif
-    endif
 
     call ESMF_FieldDestroy(uwind, rc=rc)
     call ESMF_FieldDestroy(ozone, rc=rc)
