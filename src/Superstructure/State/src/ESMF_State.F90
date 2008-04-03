@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.140 2008/04/03 00:53:35 rokuingh Exp $
+! $Id: ESMF_State.F90,v 1.141 2008/04/03 17:55:53 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.140 2008/04/03 00:53:35 rokuingh Exp $'
+      '$Id: ESMF_State.F90,v 1.141 2008/04/03 17:55:53 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -354,7 +354,7 @@ end interface
       interface ESMF_StateAttributeSetLink
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_StateAttrSetLinkFieldBundle
+        module procedure ESMF_StateAttrSetLinkFB
         module procedure ESMF_StateAttrSetLinkField
         module procedure ESMF_StateAttrSetLinkState
 
@@ -3359,13 +3359,13 @@ end interface
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateAttrSetLinkFieldBundle"
+#define ESMF_METHOD "ESMF_StateAttrSetLinkFB"
 !BOPI
-! !IROUTINE: ESMF_StateAttrSetLinkFieldBundle - Link a State to a FieldBundle in an attribute hierarchy
+! !IROUTINE: ESMF_StateAttrSetLinkFB - Link a State to a FieldBundle in an attribute hierarchy
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAttributeSetLink()
-      subroutine ESMF_StateAttrSetLinkFieldBundle(state, bundle, rc)
+      subroutine ESMF_StateAttrSetLinkFB(state, bundle, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state
@@ -3408,7 +3408,7 @@ end interface
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StateAttrSetLinkFieldBundle
+      end subroutine ESMF_StateAttrSetLinkFB
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAttrSetLinkField"
