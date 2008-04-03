@@ -46,7 +46,7 @@
 
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_State.C,v 1.19 2008/03/31 22:25:25 theurich Exp $";
+ static const char *const version = "$Id: ESMC_State.C,v 1.20 2008/04/03 20:37:41 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -125,8 +125,7 @@ extern "C" {
       localrc = ESMF_RC_NOT_IMPL;
 
       
-      localrc = ((ESMCI::State*)&state)->addArray( (ESMCI::State*)state.ptr,
-                                       (ESMCI::Array*)&array.ptr );
+      localrc = ((ESMCI::State*)&state)->addArray( (ESMCI::Array*)&array.ptr );
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
       return localrc;
     }
@@ -164,7 +163,6 @@ extern "C" {
       localrc = ESMF_RC_NOT_IMPL;
 
       localrc = ((ESMCI::State*)&state)->getArray(
-        (ESMCI::State*)state.ptr,
         arrayName,
         (ESMCI::Array**)&(array->ptr) );
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
@@ -175,6 +173,42 @@ extern "C" {
       return rc;
 
    } // end ESMC_StateAddArray
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_StatePrint - print the internal data for a State
+//
+// !INTERFACE:
+      int ESMC_StatePrint(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_State state) {    // in - state object to destroy
+//
+// !DESCRIPTION:
+//      ESMC routine which prints the internal data of a state
+//      via an ESMCI::State::print routine.
+//
+//      Note: this is a class helper function, not a class method
+//      (see declaration in ESMC\_State.h)
+//
+//EOP
+// !REQUIREMENTS:
+
+    int rc, localrc;
+
+    // Invoque the C++ interface
+    localrc = ((ESMCI::State*)&state)->print();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+      return localrc;
+    }
+
+    return rc = localrc;
+
+  } // end ESMC_StatePrint
+
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -207,7 +241,7 @@ extern "C" {
     localrc = ESMC_RC_NOT_IMPL;
 
     // Invoque the C++ interface
-    localrc = ((ESMCI::State*)&state)->destroy( (ESMCI::State*)state.ptr );
+    localrc = ((ESMCI::State*)&state)->destroy();
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
       return localrc;
     }

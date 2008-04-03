@@ -1,4 +1,4 @@
-// $Id: ESMC_State.h,v 1.20 2008/04/02 20:42:59 cdeluca Exp $
+// $Id: ESMC_State.h,v 1.21 2008/04/03 20:36:37 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -75,6 +75,8 @@ typedef struct {
  ESMC_State ESMC_StateCreate(char *name, int *rc);
 
  int ESMC_StateDestroy(ESMC_State state);
+
+ int ESMC_StatePrint(ESMC_State state);
 
  int ESMC_StateAddArray(ESMC_State state, ESMC_Array array);
 

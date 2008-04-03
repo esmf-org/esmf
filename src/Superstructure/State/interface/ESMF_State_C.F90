@@ -1,4 +1,4 @@
-! $Id: ESMF_State_C.F90,v 1.14 2008/03/20 18:50:51 rosalind Exp $
+! $Id: ESMF_State_C.F90,v 1.15 2008/04/03 20:37:41 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_State_C.F90,v 1.14 2008/03/20 18:50:51 rosalind Exp $'
+!      '$Id: ESMF_State_C.F90,v 1.15 2008/04/03 20:37:41 rosalind Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -118,6 +118,24 @@
 
 
    end subroutine f_esmf_stategetarray
+
+!------------------------------------------------------------------------------
+
+
+   subroutine f_esmf_stateprint(state, rc)
+       use ESMF_UtilTypesMod
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_StateMod
+
+       type(ESMF_State) :: state
+       integer :: rc
+
+       ! Initialize return code; assume routine not implemented
+       rc = ESMF_RC_NOT_IMPL
+
+       call ESMF_StatePrint(state,rc=rc)
+
+   end subroutine f_esmf_stateprint
 
 !------------------------------------------------------------------------------
 

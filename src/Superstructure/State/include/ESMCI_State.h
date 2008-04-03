@@ -1,4 +1,4 @@
-// $Id: ESMCI_State.h,v 1.8 2008/04/02 20:42:59 cdeluca Exp $
+// $Id: ESMCI_State.h,v 1.9 2008/04/03 20:36:37 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -54,9 +54,10 @@
 
      public:
      static State* create(char* name, int *rc);
-     int addArray(State *state, Array *array);
-     int getArray(State *state, char* name, Array **array);
-     int destroy(State* state);
+     int addArray( Array *array);
+     int print();
+     int getArray(char* name, Array **array);
+     int destroy();
    }; // class State
    };// namespace ESMCI
 
@@ -75,6 +76,8 @@ extern "C" {
 
   void FTN(f_esmf_stateaddarray)(ESMCI::State* state, ESMCI::Array* array, 
                                  int* rc);
+
+  void FTN(f_esmf_stateprint)(ESMCI::State* state, int* rc);
 
   void FTN(f_esmf_stategetarray)(ESMCI::State* state, char* name, 
                                  ESMCI::Array** array, int* rc, 

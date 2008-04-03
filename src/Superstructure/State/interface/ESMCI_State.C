@@ -1,4 +1,4 @@
-// $1.10 2007/04/26 16:13:59 rosalind Exp $
+//$1.10 2007/04/26 16:13:59 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_State.C,v 1.4 2008/03/31 22:25:25 theurich Exp $";
+ static const char *const version = "$Id: ESMCI_State.C,v 1.5 2008/04/03 20:37:41 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -127,7 +127,6 @@ namespace ESMCI {
 //     return code rc.
 //
 // !ARGUMENTS:
-     ESMCI::State *state,    // inout - state
      ESMCI::Array *array){       // in - array being added
 //
 // !DESCRIPTION:
@@ -144,7 +143,7 @@ namespace ESMCI {
   
       
     // Invoque the fortran interface through the F90-C++ "glue" code
-     FTN(f_esmf_stateaddarray)(state, array, &localrc);
+     FTN(f_esmf_stateaddarray)(this, array, &localrc);
      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
        return localrc;
      }
@@ -166,7 +165,6 @@ namespace ESMCI {
 //     return code rc.
 //
 // !ARGUMENTS:
-      ESMCI::State *state,        // in - state
       char         *name,         // in - array name
       ESMCI::Array **array){      // out - array being geted
 //
@@ -193,10 +191,8 @@ namespace ESMCI {
       return localrc;
     }
 
-    printf("In ESMCI::State::getArray, before calling the glue \n");
-
     // Invoque the fortran interface through the F90-C++ "glue" code
-    FTN(f_esmf_stategetarray)(state, fName, array, &localrc, nlen);
+    FTN(f_esmf_stategetarray)(this, fName, array, &localrc, nlen);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
       delete[] fName;
       return localrc;
@@ -212,17 +208,46 @@ namespace ESMCI {
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  ESMCI::State::print - print the internal data for a state
+
+// !INTERFACE:
+      int ESMCI::State::print(){
+
+// !RETURN VALUE:
+//    int error return code
+  
+// !ARGUMENTS:
+//   none
+
+//  !DESCRIPTION
+//    Prints information about the {\tt state} to {\tt stdout}.
+
+    // Local data
+    int rc, localrc;
+
+    // Invoque the fortran interface through the F90-C++ "glue" code
+    FTN(f_esmf_stateprint)(this, &localrc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+      return localrc;
+    }
+    rc = localrc;
+    return rc;
+
+} // end ESMCI::State::print
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  ESMCI::State::destroy - free a State created with Create
 //
 // !INTERFACE:
-      int ESMCI::State::destroy(
+      int ESMCI::State::destroy(){
 //
 // !RETURN VALUE:
 //    int error return code
-//
+  
 // !ARGUMENTS:
-      ESMCI::State *state) {    // in - state object to destroy
-//
+//  none
+
 // !DESCRIPTION:
 //      ESMF routine which destroys a State object previously allocated
 //      via an ESMC\_StateCreate routine.  Define for deep classes only.
@@ -241,7 +266,7 @@ namespace ESMCI {
     localrc = ESMC_RC_NOT_IMPL;
 
     // Invoque the fortran interface through the F90-C++ "glue" code
-    FTN(f_esmf_statedestroy)(state, &localrc);
+    FTN(f_esmf_statedestroy)(this, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
       return localrc;
     }
