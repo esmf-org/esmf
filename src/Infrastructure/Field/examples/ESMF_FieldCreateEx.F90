@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.19 2008/04/02 03:55:46 theurich Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.20 2008/04/03 16:21:12 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -456,6 +456,15 @@
 !  This example is similar to example 18.2.7, in addition we will show
 !  a user can associate different halo width to a Fortran array to create
 !  a Field through the maxHaloLWidth and maxHaloUWdith optional arguments.
+!  A diagram of the dimension configuration from Grid, halos, and Fortran data pointer
+!  is shown here.
+!\begin{center}
+!\begin{figure}
+!\scalebox{0.75}{\includegraphics{FieldParameterSetup}}
+!\caption{Field dimension configuration from Grid, halos, and Fortran data pointer.}
+!\label{fig:fieldparameter}
+!\end{figure}
+!\end{center}
 !  
 !  The {\tt ESMF\_FieldCreate} interface supports creating a Field from a Grid and a
 !  Fortran array padded with halos on the distributed dimensions of the Fortran

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.23 2008/04/02 03:55:46 theurich Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.24 2008/04/03 16:21:12 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.23 2008/04/02 03:55:46 theurich Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.24 2008/04/03 16:21:12 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -982,15 +982,18 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !  !Local Variables
     integer :: localrc
 
-    type(ESMF_STAGGERLOC)                  :: lstaggerloc
+!   temporary local variables corresponding to input arguments
+    type(ESMF_STAGGERLOC)                  :: l_staggerloc
+    integer, dimension(:), allocatable     :: l_alb, l_aub, l_ac, l_uglb, l_ugub
+    integer, dimension(ESMF_MAXDIM)        :: l_g2fm, l_mhlw, l_mhuw
 
-    integer, dimension(ESMF_MAXDIM)        :: ec, cc, l_g2fm, l_mhlw, l_mhuw, dg2gm
+!   internal local variables 
+    integer, dimension(ESMF_MAXDIM)        :: ec, cc, dg2gm
     integer, dimension(ESMF_MAXDIM)        :: f2gm, gelb, geub, gclb, gcub
     logical, dimension(ESMF_MAXDIM)        :: flipflop
     integer                                :: forderIndex, i
     integer                                :: gridrank, arrayrank, uglb_size, ugub_size
 
-    integer, dimension(:), allocatable     :: l_alb, l_aub, l_ac, l_uglb, l_ugub
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -1000,23 +1003,23 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
     ! default staggerloc setup
     if(present(staggerloc)) then
-        lstaggerloc = staggerloc
+        l_staggerloc = staggerloc
     else
-        lstaggerloc = ESMF_STAGGERLOC_CENTER
+        l_staggerloc = ESMF_STAGGERLOC_CENTER
     endif
 
     call ESMF_GridGet(grid, dimCount=gridrank, distgridToGridMap=dg2gm, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
-    call ESMF_GridGet(grid, localDe=localDe, staggerloc=lstaggerloc, &
+    call ESMF_GridGet(grid, localDe=localDe, staggerloc=l_staggerloc, &
        exclusiveLBound=gelb, exclusiveUBound=geub, exclusiveCount=ec,  &
        computationalLBound=gclb, computationalUBound=gcub, computationalCount=cc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
 
-    ! check argument validity
+    ! Validate input arguments
     if(present(gridToFieldMap) ) then
         if(size(gridToFieldMap) .ne. gridrank) then
            call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
@@ -1046,7 +1049,8 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
     ! User must either provide both ungriddedLBound and ungriddedUBound
     ! with same size or don't specify either one of them. There is no
-    ! suitable default value for unbounded variables.
+    ! suitable default value for unbounded variables, especially when
+    ! the intent is to create a Field with a greater rank than Grid
     if(present(ungriddedLBound)) then
         uglb_size = size(ungriddedLBound)
     else 
@@ -1099,7 +1103,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         endif 
     endif
 
-    ! set up gridToFieldMap
+    ! set up local gridToFieldMap
     if(present(gridToFieldMap)) then
         l_g2fm(1:size(gridToFieldMap)) = gridToFieldMap
     else
@@ -1130,6 +1134,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     enddo  
 
     ! At this point input arguments are validated
+    ! allocate the return value arrays
     allocate(l_alb(arrayrank), l_aub(arrayrank), l_ac(arrayrank))
     l_mhlw = 0
     if(present(maxHaloLWidth)) then
@@ -1141,7 +1146,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     endif
 
     ! First we compute the ungridded bounds:
-    ! compute a reverse mapping then use rule 2 
+    ! compute a reverse mapping from Field to Grid then use rule 2 
     ! to compute ungridded Fortran array bounds
     f2gm = 0
     do i = 1, gridrank
@@ -1158,7 +1163,8 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         endif
     enddo
 
-    ! Now compute the gridded bounds
+    ! Next compute the gridded bounds according to rule 4 using the mapping
+    ! from Field to Grid computed in last step
     forderIndex = 1
     do i = 1, arrayrank
         ! if i-th dimension is distributed (including trivially distributed)
@@ -1170,6 +1176,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         endif
     enddo
 
+    ! Prepare the return values
     if(present(allocLBound)) allocLBound(1:arrayrank) = l_alb(1:arrayrank)
     if(present(allocUBound)) allocUBound(1:arrayrank) = l_aub(1:arrayrank)
     if(present(allocCount))  allocCount(1:arrayrank)  = l_ac(1:arrayrank)
