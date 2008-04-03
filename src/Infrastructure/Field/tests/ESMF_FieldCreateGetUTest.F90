@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.21 2008/04/02 03:55:46 theurich Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.22 2008/04/03 16:38:32 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -923,7 +923,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/10,20,10,20,10/), &
+        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/) &
@@ -937,7 +937,7 @@
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
         ! fieldget is very expensive for 7D grid, only this test has it set true
-        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/10,20,10,20,10/), &
+        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
@@ -951,7 +951,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/10,20,10,20,10/), &
+        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
@@ -997,7 +997,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/10,20,10,20,10/), &
+        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
@@ -1012,7 +1012,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/10,20,10,20,10/), &
+        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
@@ -1029,7 +1029,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/10,20,10,20,10/), &
+        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
@@ -1044,7 +1044,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/10,20,10,20,10/), &
+        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
@@ -1059,7 +1059,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 4D grid and 3D ungridded bounds
-        call test7d_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/10,20,10,20/), &
+        call test7d_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
             regDecomp=(/2,1,2,1/), &
             ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,5,3/), &
             maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/2,3,4,5/), &
@@ -2767,7 +2767,7 @@ contains
         integer             :: fsize(7)
 
         localrc = ESMF_SUCCESS
-        distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1,1,1/), maxIndex=(/10,20,10,20,10/), &
+        distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
             regDecomp=(/2,1,2,1,1/), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -2784,8 +2784,8 @@ contains
 !            allocCount=fsize, &
 !            rc=localrc)
         call ESMF_FieldGet(grid, localDe=0, ungriddedLBound=(/1,2/), &
-            ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            ungriddedUBound=(/2,3/), &
+            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,2,1/), &
             allocCount=fsize, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -2795,8 +2795,8 @@ contains
         allocate(farray(fsize(1), fsize(2), fsize(3), fsize(4), fsize(5), fsize(6), fsize(7)))
 
         f8 = ESMF_FieldCreate(grid, farray, &
-            ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            ungriddedLBound=(/1,2/), ungriddedUBound=(/2,3/), &
+            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,2,1/), &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -2821,7 +2821,7 @@ contains
         integer             :: flb(7), fub(7)
 
         localrc = ESMF_SUCCESS
-        distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1,1,1/), maxIndex=(/10,20,10,20,10/), &
+        distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
             regDecomp=(/2,1,2,1,1/), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -2833,8 +2833,8 @@ contains
             ESMF_CONTEXT, rc)) return
 
         call ESMF_FieldGet(grid, localDe=0, ungriddedLBound=(/1,2/), &
-            ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            ungriddedUBound=(/2,3/), &
+            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,2,1/), &
             allocLBound=flb, allocUBound=fub, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -2845,8 +2845,8 @@ contains
             flb(4):fub(4), flb(5):fub(5), flb(6):fub(6), flb(7):fub(7)) )
 
         f8 = ESMF_FieldCreate(grid, farray, &
-            ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            ungriddedLBound=(/1,2/), ungriddedUBound=(/2,3/), &
+            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,2,1/), &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -2937,13 +2937,14 @@ contains
 
         if(present(fieldget)) then
           if(fieldget) then
-            do ii = 1, fsize(1)
-             do ij = 1, fsize(2)
-              do ik = 1, fsize(3)
+            ! reverse looping order to make this a little faster by improving data locality
+            do ip = 1, fsize(7)
+             do io = 1, fsize(6)
+              do im = 1, fsize(5)
                do il = 1, fsize(4)
-                do im = 1, fsize(5)
-                 do io = 1, fsize(6)
-                  do ip = 1, fsize(7)
+                do ik = 1, fsize(3)
+                 do ij = 1, fsize(2)
+                  do ii = 1, fsize(1)
                     farray(ii,ij,ik,il,im,io,ip) = ii+ij*2+ik+il*2+im+io*2+ip
                   enddo
                  enddo
@@ -2984,13 +2985,14 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             !write(*, "(A5, 42I3)") 'MZY: ', felb, feub, fclb, fcub, ftlb, ftub
-            do ii = ftlb(1), ftub(1)
-             do ij = ftlb(2), ftub(2)
-              do ik = ftlb(3), ftub(3)
+            ! reverse looping order to make this a little faster by improving data locality
+            do ip = ftlb(7), ftub(7)
+             do io = ftlb(6), ftub(6)
+              do im = ftlb(5), ftub(5)
                do il = ftlb(4), ftub(4)
-                do im = ftlb(5), ftub(5)
-                 do io = ftlb(6), ftub(6)
-                  do ip = ftlb(7), ftub(7)
+                do ik = ftlb(3), ftub(3)
+                 do ij = ftlb(2), ftub(2)
+                  do ii = ftlb(1), ftub(1)
                     n=(ii-ftlb(1)+1)+(ij-ftlb(2)+1)*2+ &
                       (ik-ftlb(3)+1)+(il-ftlb(4)+1)*2+ &
                       (im-ftlb(5)+1)+(io-ftlb(6)+1)*2+ &
