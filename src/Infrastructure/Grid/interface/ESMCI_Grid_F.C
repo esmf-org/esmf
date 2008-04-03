@@ -1959,7 +1959,7 @@ void FTN(c_esmc_gridattpackcreate)(ESMCI::Grid **grid, char *name, char *convent
   }
 
   // Set the attribute on the object.
-  *rc = (*grid)->attpackset(cname, cvalue, cconv, cpurp, cobj);
+//  *rc = (*grid)->attpackset(cname, cvalue, cconv, cpurp, cobj);
 
   delete [] cname;
   delete [] cvalue;

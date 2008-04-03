@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.58 2008/04/02 19:44:03 theurich Exp $
+// $Id: ESMCI_Grid.C,v 1.59 2008/04/03 00:51:27 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.58 2008/04/02 19:44:03 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.59 2008/04/03 00:51:27 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -4492,7 +4492,7 @@ int Grid::attpackset(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  localrc = (*this).root.ESMC_Attribute::ESMC_AttPackSet(name, value, convention, purpose, object);
+//  localrc = (*this).root.ESMC_Attribute::ESMC_AttPackSet(name, value, convention, purpose, object);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 

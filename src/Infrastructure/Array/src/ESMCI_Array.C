@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.10 2008/03/27 01:21:19 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.11 2008/04/03 00:50:01 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.10 2008/03/27 01:21:19 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.11 2008/04/03 00:50:01 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -8194,9 +8194,10 @@ int Array::attpackset(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-
+/*
   localrc = (*this).root.ESMC_Attribute::ESMC_AttPackSet(name, value, convention, purpose,
     object);
+*/
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 

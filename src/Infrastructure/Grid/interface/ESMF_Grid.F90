@@ -166,7 +166,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.69 2008/04/02 19:44:02 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.70 2008/04/03 00:51:27 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -782,8 +782,8 @@ end interface
       
       fobject = 'grid'
 
-      call c_ESMC_GridAttPackSet(grid, name, value, fconvention, &
-        fpurpose, fobject, localrc)
+!      call c_ESMC_GridAttPackSet(grid, name, value, fconvention, &
+!        fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.5 2008/03/27 01:21:18 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.6 2008/04/03 00:50:00 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -1442,7 +1442,7 @@ void FTN(c_esmc_arrayattpackcreate)(ESMCI::Array **array, char *name, char *conv
   }
 
   // Set the attribute on the object.
-  *rc = (*array)->attpackset(cname, cvalue, cconv, cpurp, cobj);
+  //*rc = (*array)->attpackset(cname, cvalue, cconv, cpurp, cobj);
 
   delete [] cname;
   delete [] cvalue;

@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.139 2008/04/02 23:05:29 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.140 2008/04/03 00:53:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.139 2008/04/02 23:05:29 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.140 2008/04/03 00:53:35 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -1342,8 +1342,8 @@ end interface
       
       fobject = 'state'
 
-      call c_ESMC_AttPackSet(state%statep%base, name, value, fconvention, &
-        fpurpose, fobject, localrc)
+!      call c_ESMC_AttPackSet(state%statep%base, name, value, fconvention, &
+!        fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
