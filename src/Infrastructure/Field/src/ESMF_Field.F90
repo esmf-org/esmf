@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.316 2008/04/02 15:23:25 rokuingh Exp $
+! $Id: ESMF_Field.F90,v 1.317 2008/04/03 00:38:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -181,7 +181,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.316 2008/04/02 15:23:25 rokuingh Exp $'
+    '$Id: ESMF_Field.F90,v 1.317 2008/04/03 00:38:58 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -621,8 +621,9 @@ contains
       
       fobject = 'field'
 
-!      call c_ESMC_AttPackGetValue(field%ftypep%base, name, ESMF_TYPEKIND_I4, &
-!        1, value, fconvention, fpurpose, fobject, localrc)
+      call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
+        ESMF_TYPEKIND_I4, 1, value, &
+        fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -738,8 +739,9 @@ contains
       
       fobject = 'field'
 
-!      call c_ESMC_AttPackGetValue(field%ftypep%base, name, ESMF_TYPEKIND_I4, &
-!        count, valueList, fconvention, fpurpose, fobject, localrc)
+      call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
+        ESMF_TYPEKIND_I4, count, valueList, &
+        fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -843,8 +845,9 @@ contains
       
       fobject = 'field'
 
-!      call c_ESMC_AttPackGetValue(field%ftypep%base, name, ESMF_TYPEKIND_I8, &
-!        1, value, fconvention, fpurpose, fobject, localrc)
+      call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
+        ESMF_TYPEKIND_I8, 1, value, &
+        fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -960,8 +963,9 @@ contains
       
       fobject = 'field'
 
-!      call c_ESMC_AttPackGetValue(field%ftypep%base, name, ESMF_TYPEKIND_I8, &
-!        count, valueList, fconvention, fpurpose, fobject, localrc)
+      call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
+        ESMF_TYPEKIND_I8, count, valueList, &
+        fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1065,8 +1069,9 @@ contains
       
       fobject = 'field'
 
-!      call c_ESMC_AttPackGetValue(field%ftypep%base, name, ESMF_TYPEKIND_R4, &
-!        1, value, fconvention, fpurpose, fobject, localrc)
+      call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
+        ESMF_TYPEKIND_R4, 1, value, &
+        fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1182,8 +1187,9 @@ contains
       
       fobject = 'field'
 
-!      call c_ESMC_AttPackGetValue(field%ftypep%base, name, ESMF_TYPEKIND_R4, &
-!        count, valueList, fconvention, fpurpose, fobject, localrc)
+      call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
+        ESMF_TYPEKIND_R4, count, valueList, &
+        fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1287,8 +1293,9 @@ contains
       
       fobject = 'field'
 
-!      call c_ESMC_AttPackGetValue(field%ftypep%base, name, ESMF_TYPEKIND_R8, &
-!        1, value, fconvention, fpurpose, fobject, localrc)
+      call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
+        ESMF_TYPEKIND_R8, 1, value, &
+        fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1404,8 +1411,9 @@ contains
       
       fobject = 'field'
 
-!      call c_ESMC_AttPackGetValue(field%ftypep%base, name, ESMF_TYPEKIND_R8, &
-!        count, valueList, fconvention, fpurpose, fobject, localrc)
+      call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
+        ESMF_TYPEKIND_R8, count, valueList, &
+        fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1509,9 +1517,9 @@ contains
       
       fobject = 'field'
 
-!      call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
-!        ESMF_TYPEKIND_LOGICAL, 1, value, fconvention, fpurpose, &
-!        fobject, localrc)
+      call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
+        ESMF_TYPEKIND_LOGICAL, 1, value, &
+        fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1627,9 +1635,9 @@ contains
       
       fobject = 'field'
 
-!      call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
-!        ESMF_TYPEKIND_LOGICAL, count, valueList, fconvention, fpurpose, &
-!        fobject, localrc)
+      call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
+        ESMF_TYPEKIND_LOGICAL, count, valueList, &
+        fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1733,8 +1741,8 @@ contains
       
       fobject = 'field'
 
-!      call c_ESMC_AttPackGetChar(field%ftypep%base, name, value, fconvention, &
-!        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackGetChar(field%ftypep%base, name, value, &
+        fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2053,7 +2061,6 @@ contains
 
       integer :: localrc 
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-      type(ESMF_TypeKind) :: tk
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -2077,10 +2084,10 @@ contains
       endif
       
       fobject = 'field'
-      tk = ESMF_TYPEKIND_I4
 
-!      call c_ESMC_AttPackSet(field%ftypep%base, name, value, fconvention, &
-!        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackSetValue(field%ftypep%base, name, &
+        ESMF_TYPEKIND_I4, 1, value, &
+        fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2152,7 +2159,6 @@ contains
       integer :: localrc
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-      type(ESMF_TypeKind) :: tk
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -2176,10 +2182,10 @@ contains
       endif
       
       fobject = 'field'
-      tk = ESMF_TYPEKIND_I4
 
-!      call c_ESMC_AttPackSet(field%ftypep%base, name, valueList, fconvention, &
-!        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackSetValue(field%ftypep%base, name, &
+        ESMF_TYPEKIND_I4, count, valueList, &
+        fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2252,7 +2258,6 @@ contains
 
       integer :: localrc
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-      type(ESMF_TypeKind) :: tk
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -2276,10 +2281,10 @@ contains
       endif
       
       fobject = 'field'
-      tk = ESMF_TYPEKIND_I8
 
-!      call c_ESMC_AttPackSet(field%ftypep%base, name, value, fconvention, &
-!        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackSetValue(field%ftypep%base, name, &
+        ESMF_TYPEKIND_I8, 1, value, &
+        fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2351,7 +2356,6 @@ contains
       integer :: localrc
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-      type(ESMF_TypeKind) :: tk
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -2375,10 +2379,10 @@ contains
       endif
       
       fobject = 'field'
-      tk = ESMF_TYPEKIND_I8
 
-!      call c_ESMC_AttPackSet(field%ftypep%base, name, valueList, fconvention, &
-!        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackSetValue(field%ftypep%base, name, &
+        ESMF_TYPEKIND_I8, count, valueList, &
+        fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2451,7 +2455,6 @@ contains
 
       integer :: localrc
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-      type(ESMF_TypeKind) :: tk
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -2475,10 +2478,10 @@ contains
       endif
       
       fobject = 'field'
-      tk = ESMF_TYPEKIND_R4
 
-!      call c_ESMC_AttPackSet(field%ftypep%base, name, value, fconvention, &
-!        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackSetValue(field%ftypep%base, name, &
+        ESMF_TYPEKIND_R4, 1, value, &
+        fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2550,7 +2553,6 @@ contains
       integer :: localrc
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-      type(ESMF_TypeKind) :: tk
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -2574,10 +2576,10 @@ contains
       endif
       
       fobject = 'field'
-      tk = ESMF_TYPEKIND_R4
 
-!      call c_ESMC_AttPackSet(field%ftypep%base, name, valueList, fconvention, &
-!        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackSetValue(field%ftypep%base, name, &
+        ESMF_TYPEKIND_R4, count, valueList, &
+        fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2650,7 +2652,6 @@ contains
 
       integer :: localrc
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-      type(ESMF_TypeKind) :: tk
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -2674,10 +2675,10 @@ contains
       endif
       
       fobject = 'field'
-      tk = ESMF_TYPEKIND_R8
 
-!      call c_ESMC_AttPackSet(field%ftypep%base, name, value, fconvention, &
-!        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackSetValue(field%ftypep%base, name, &
+        ESMF_TYPEKIND_R8, 1, value, &
+        fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2773,10 +2774,10 @@ contains
       endif
       
       fobject = 'field'
-      tk = ESMF_TYPEKIND_R8
 
-!      call c_ESMC_AttPackSet(field%ftypep%base, name, valueList, fconvention, &
-!        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackSetValue(field%ftypep%base, name, &
+        ESMF_TYPEKIND_R8, count, valueList, &
+        fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2849,7 +2850,6 @@ contains
 
       integer :: localrc
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-      type(ESMF_TypeKind) :: tk
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -2873,10 +2873,10 @@ contains
       endif
       
       fobject = 'field'
-      tk = ESMF_TYPEKIND_Logical
 
-!      call c_ESMC_AttPackSet(field%ftypep%base, name, value, fconvention, &
-!        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackSetValue(field%ftypep%base, name, &
+        ESMF_TYPEKIND_LOGICAL, 1, value, &
+        fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2948,7 +2948,6 @@ contains
       integer :: localrc
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-      type(ESMF_TypeKind) :: tk
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -2972,10 +2971,10 @@ contains
       endif
       
       fobject = 'field'
-      tk = ESMF_TYPEKIND_Logical
 
-!      call c_ESMC_AttPackSet(field%ftypep%base, name, valueList, fconvention, &
-!        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackSetValue(field%ftypep%base, name, &
+        ESMF_TYPEKIND_LOGICAL, count, valueList, &
+        fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3048,7 +3047,6 @@ contains
 
       integer :: localrc
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-      type(ESMF_TypeKind) :: tk
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -3072,10 +3070,9 @@ contains
       endif
       
       fobject = 'field'
-      tk = ESMF_TYPEKIND_Character
 
-      call c_ESMC_AttPackSet(field%ftypep%base, name, value, fconvention, &
-        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackSetChar(field%ftypep%base, name, value, &
+        ESMF_TYPEKIND_CHARACTER, fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldAttrUTest.F90,v 1.5 2008/04/01 21:31:29 rokuingh Exp $
+! $Id: ESMF_FieldAttrUTest.F90,v 1.6 2008/04/03 00:38:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldAttrUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldAttrUTest.F90,v 1.5 2008/04/01 21:31:29 rokuingh Exp $'
+      '$Id: ESMF_FieldAttrUTest.F90,v 1.6 2008/04/03 00:38:58 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -49,7 +49,7 @@ program ESMF_FieldAttrUTest
       type(ESMF_Field) :: field
       character(ESMF_MAXSTR) :: conv, purp, attrname, attrvalue
       character(ESMF_MAXSTR), dimension(3) :: attrList
-      integer :: rc, count, number, defaultvalue
+      integer :: rc, count, number, defaultvalue, inval, outval
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -138,6 +138,28 @@ program ESMF_FieldAttrUTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a custom Attpack on a Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      attrname = "Custom1"
+      inval = 4
+
+      !EX_UTest
+      ! Set an attribute in an attribute package on a Field Test
+      call ESMF_FieldAttSet(field, name=attrname, value=inval, &
+        convention=conv, purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting an Attribute in an Attpack from a Field Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------    
+
+      !EX_UTest
+      ! Set an attribute in an attribute package on a Field Test
+      call ESMF_FieldAttGet(field, name=attrname, value=outval, &
+        convention=conv, purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting an Attribute in an Attpack from a Field Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(outval.eq.4), name, failMsg, &
+                     result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       attrname = "units"

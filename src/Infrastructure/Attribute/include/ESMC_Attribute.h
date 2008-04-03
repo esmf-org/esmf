@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.h,v 1.6 2008/03/17 18:06:57 rokuingh Exp $
+// $Id: ESMC_Attribute.h,v 1.7 2008/04/03 00:38:28 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -85,8 +85,10 @@ class ESMC_Attribute
     // attpack methods
     int ESMC_AttPackCreate(char *name, char *convention, char *purpose, char *object);
     ESMC_Attribute *ESMC_AttPackGet(char *convention, char *purpose, char *object) const;
-    ESMC_Attribute *ESMC_AttPackGetAttribute(char *name, char *convention, char *purpose, char *object) const;
-    int ESMC_AttPackSet(char *name, char *value, char *convention, char *purpose, char *object);
+    ESMC_Attribute *ESMC_AttPackGetAttribute(char *name, 
+                                             char *convention, char *purpose, char *object) const;
+    int ESMC_AttPackSet(char *name, ESMC_TypeKind tk, int count, void *value, 
+                        char *convention, char *purpose, char *object);
     int ESMC_AttPackWrite(char *convention, char *purpose, char *object) const;
 
     

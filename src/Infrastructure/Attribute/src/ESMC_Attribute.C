@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.C,v 1.7 2008/03/26 03:50:59 rokuingh Exp $
+// $Id: ESMC_Attribute.C,v 1.8 2008/04/03 00:38:28 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute.C,v 1.7 2008/03/26 03:50:59 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute.C,v 1.8 2008/04/03 00:38:28 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -309,7 +309,9 @@
 // 
 // !ARGUMENTS:
       char *name,             // in - attribute name
-      char *value,            // in - attributte value
+      ESMC_TypeKind tk,       // in - typekind
+      int count,              // in - item count
+      void *value,            // in - attribute value
       char *convention,       // in - attpack convention
       char *purpose,          // in - attpack purpose
       char *object) {         // in - attpack object type
@@ -348,7 +350,7 @@
   }
 
   // Set the attribute
-  rc = attr->ESMC_AttrModifyValue(ESMC_TYPEKIND_CHARACTER, 1, value);
+  rc = attr->ESMC_AttrModifyValue(tk, count, value);
   if (rc != ESMF_SUCCESS) return ESMF_FAILURE;
    
   return rc;
