@@ -1,4 +1,4 @@
-// $Id: ESMC_StateUTest.C,v 1.8 2008/03/31 22:25:25 theurich Exp $
+// $Id: ESMC_StateUTest.C,v 1.9 2008/04/03 19:09:53 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -35,6 +35,7 @@
 int main(void){
 
   ESMC_State st;              // ESMC_State object
+  const char* arrayName;
   char name[80];
   char failMsg[80];
   int result = 0;
@@ -126,6 +127,21 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Retrieve the name of an ESMC_Array object\0");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  arrayName = ESMC_ArrayGetName(array,&rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Verify array object name retrieved\0");
+  strcpy(failMsg, "Did not retrieve array name correctly\0");
+  ESMC_Test(!strcmp(arrayName, "array1"), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "Print ESMC_Array object\0");
