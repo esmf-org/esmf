@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.24 2008/04/03 16:21:12 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.25 2008/04/04 18:28:31 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.24 2008/04/03 16:21:12 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.25 2008/04/04 18:28:31 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -429,50 +429,50 @@ contains
 ! \item[{[exclusiveLBound]}] @\
 !   Upon return this holds the lower bounds of the exclusive region. @\
 !   {\tt exclusiveLBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
-!   See section \ref{sec:field:usage:bounds} for a description @\
+!   See section \ref{Array_regions_and_default_bounds} for a description @\
 !   of the regions and their associated bounds and counts.  @\
 ! \item[{[exclusiveUBound]}] @\
 !   Upon return this holds the upper bounds of the exclusive region. @\
 !   {\tt exclusiveUBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
-!   See section \ref{sec:field:usage:bounds} for a description @\
+!   See section \ref{Array_regions_and_default_bounds} for a description @\
 !   of the regions and their associated bounds and counts.  @\
 ! \item[{[exclusiveCount]}] @\
 !   Upon return this holds the number of items in the exclusive region per dimension @\
 !   (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must @\
 !   be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
-!   See section \ref{sec:field:usage:bounds} for a description @\
+!   See section \ref{Array_regions_and_default_bounds} for a description @\
 !   of the regions and their associated bounds and counts.  @\
 ! \item[{[computationalLBound]}] @\
 !   Upon return this holds the lower bounds of the computational region. @\
 !   {\tt computationalLBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
-!   See section \ref{sec:field:usage:bounds} for a description @\
+!   See section \ref{Array_regions_and_default_bounds} for a description @\
 !   of the regions and their associated bounds and counts.  @\
 ! \item[{[computationalUBound]}] @\
 !   Upon return this holds the lower bounds of the computational region. @\
 !   {\tt computationalLBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
-!   See section \ref{sec:field:usage:bounds} for a description @\
+!   See section \ref{Array_regions_and_default_bounds} for a description @\
 !   of the regions and their associated bounds and counts.  @\
 ! \item[{[computationalCount]}] @\
 !   Upon return this holds the number of items in the computational region per dimension @\
 !   (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount} must @\
 !   be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
-!   See section \ref{sec:field:usage:bounds} for a description @\
+!   See section \ref{Array_regions_and_default_bounds} for a description @\
 !   of the regions and their associated bounds and counts.  @\
 ! \item[{[totalLBound]}] @\
 !   Upon return this holds the lower bounds of the total region. @\
 !   {\tt totalLBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
-!   See section \ref{sec:field:usage:bounds} for a description @\
+!   See section \ref{Array_regions_and_default_bounds} for a description @\
 !   of the regions and their associated bounds and counts.  @\
 ! \item[{[totalUBound]}] @\
 !   Upon return this holds the lower bounds of the total region. @\
 !   {\tt totalUBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
-!   See section \ref{sec:field:usage:bounds} for a description @\
+!   See section \ref{Array_regions_and_default_bounds} for a description @\
 !   of the regions and their associated bounds and counts.  @\
 ! \item[{[totalCount]}] @\
 !   Upon return this holds the number of items in the total region per dimension @\
 !   (i.e. {\tt totalUBound-totalLBound+1}). {\tt computationalCount} must @\
 !   be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
-!   See section \ref{sec:field:usage:bounds} for a description @\
+!   See section \ref{Array_regions_and_default_bounds} for a description @\
 !   of the regions and their associated bounds and counts.  @\
 ! \item [{[rc]}]  @\
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.21 2008/04/04 15:54:35 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.22 2008/04/04 18:28:31 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -70,6 +70,8 @@
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
 !\subsubsection{Create Field with Grid and Arrayspec}
+!\label{sec:field:usage:create_grid_arrayspec}
+!
 !  The user first creates an {\tt ESMF\_Grid} and an
 !  {\tt ESMF\_Arrayspec} with corresponding rank and type.  
 !  This create associates the two objects.  
@@ -165,6 +167,8 @@
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
 !\subsubsection{Create Field with Grid and Array}
+!\label{sec:field:usage:create_grid_array}
+!
 !  User can create a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a 
 !  {\tt ESMF\_Array}. grid and array2 are objects created in previous examples.
 !EOE
@@ -199,7 +203,8 @@
 !BOE
 !\subsubsection{Create Empty Field and Finish an empty Field 
 !  with FieldSetCommit}
-
+!\label{sec:field:usage:create_empty_setcommit}
+!
 !  The user creates an empty {\tt ESMF\_Field} object.
 !  Then the user can finalize a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a intrinsic 
 !  Fortran data array. This interface is overloaded for type, kind, rank of
@@ -295,6 +300,8 @@
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
 !\subsubsection{Create 2D Field with 2D Grid and Fortran data pointer}
+!\label{sec:field:usage:create_2dptr}
+!
 !  User can create a {\tt ESMF\_Field} directly from a {\tt ESMF\_Grid} and a intrinsic 
 !  Fortran data array. This interface is overloaded for type, kind, rank of
 !  of the Fortran data array. grid and farray are created in previous examples.
@@ -316,6 +323,8 @@
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
 !\subsubsection{Create 3D Field with 2D Grid and 3D Fortran data pointer}
+!\label{sec:field:usage:create_2dgrid_3dptr}
+!
 !  User can create a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a intrinsic 
 !  Fortran data array. This interface is overloaded for type, kind, rank of
 !  of the Fortran data array.
@@ -420,6 +429,8 @@
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
 !\subsubsection{Create 3D Field with 2D Grid and 3D Fortran data pointer with gridToFieldMap}
+!\label{sec:field:usage:create_2dgrid_3dptr_map}
+!
 !  Building upon the previous example, we will create a 3D Field from
 !  2D grid and 3D array but with a slight twist. In this example, we
 !  introduce the gridToFieldMap argument that allows a user to map Grid 
@@ -472,7 +483,10 @@
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
 !\subsubsection{Create 3D Field with 2D Grid and 3D Fortran data pointer with halos}
-!  This example is similar to example 18.2.7, in addition we will show
+!\label{sec:field:usage:create_2dgrid_3dptr_map_halo}
+!
+!  This example is similar to example \ref{sec:field:usage:create_2dgrid_3dptr_map}, 
+!  in addition we will show
 !  a user can associate different halo width to a Fortran array to create
 !  a Field through the maxHaloLWidth and maxHaloUWdith optional arguments.
 !  A diagram of the dimension configuration from Grid, halos, and Fortran data pointer
@@ -634,6 +648,8 @@
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
 !\subsubsection{Create 7D Field with 5D Grid and 2D ungridded bounds}
+!\label{sec:field:usage:create_5dgrid_7dptr_2dungridded}
+!
 ! In this example, we will show how to create a 7D Field from a 5D {\tt
 ! ESMF\_Grid} and 2D ungridded bounds with arbitrary halo widths and 
 ! gridToFieldMap.
@@ -689,7 +705,8 @@
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
 !\subsubsection{Destroy a Field}
-
+!\label{sec:field:usage:destroy}
+!
 !  When finished with an {\tt ESMF\_Field}, the destroy method
 !  removes it.  However, the objects inside the {\tt ESMF\_Field}
 !  but created externally should be deleted separately, 
