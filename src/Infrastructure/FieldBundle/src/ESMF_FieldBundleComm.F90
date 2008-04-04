@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleComm.F90,v 1.2 2008/04/03 17:55:52 cdeluca Exp $
+! $Id: ESMF_FieldBundleComm.F90,v 1.3 2008/04/04 00:19:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -10,14 +10,14 @@
 !
 !==============================================================================
 !
-#define ESMF_FILENAME "ESMF_BundleComm.F90"
+#define ESMF_FILENAME "ESMF_FieldBundleComm.F90"
 !
-!     ESMF Bundle Communications module
-      module ESMF_BundleCommMod
+!     ESMF FieldBundle Communications module
+      module ESMF_FieldBundleCommMod
 !
 !==============================================================================
 !
-! This file contains the Bundle communication methods.
+! This file contains the FieldBundle communication methods.
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -26,10 +26,10 @@
 !------------------------------------------------------------------------------
 !
 !BOPI
-! !MODULE: ESMF_BundleCommMod - Communication routines for Bundle objects
+! !MODULE: ESMF_FieldBundleCommMod - Communication routines for FieldBundle objects
 !
 ! !DESCRIPTION:
-! The code in this file implements the {\tt ESMF\_Bundle} class
+! The code in this file implements the {\tt ESMF\_FieldBundle} class
 ! communication routines, including Regridding, Redistribution, Halo, Gather,
 ! Scatter, and others.
 !
@@ -55,7 +55,7 @@
       use ESMF_FieldDataMapMod
       use ESMF_FieldMod
       use ESMF_FieldCommMod
-      use ESMF_BundleMod
+      use ESMF_FieldBundleMod
       use ESMF_RegridMod
       use ESMF_RegridTypesMod
       implicit none
@@ -82,24 +82,24 @@
 
    ! These are the recommended entry points; the code itself is in Array:
                              ! Synchronize boundary data between decompositions
-   public ESMF_BundleHaloStore, ESMF_BundleHalo, ESMF_BundleHaloRelease 
+   public ESMF_FieldBundleHaloStore, ESMF_FieldBundleHalo, ESMF_FieldBundleHaloRelease 
                              ! Redistribute existing arrays, matching igrids
-   public ESMF_BundleRedistStore, ESMF_BundleRedist, ESMF_BundleRedistRelease 
+   public ESMF_FieldBundleRedistStore, ESMF_FieldBundleRedist, ESMF_FieldBundleRedistRelease 
                              ! Regridding and interpolation, different igrids
-   public ESMF_BundleRegridStore, ESMF_BundleRegrid, ESMF_BundleRegridRelease 
+   public ESMF_FieldBundleRegridStore, ESMF_FieldBundleRegrid, ESMF_FieldBundleRegridRelease 
 
-   public ESMF_BundleGather   ! Combine 1 decomposed bundle into 1 on 1 DE
-   !public ESMF_BundleAllGather! Combine 1 decomposed bundle into N copies on N DEs
+   public ESMF_FieldBundleGather   ! Combine 1 decomposed bundle into 1 on 1 DE
+   !public ESMF_FieldBundleAllGather! Combine 1 decomposed bundle into N copies on N DEs
 
-   public ESMF_BundleScatter  ! Split 1 bundle into a decomposed one over N DEs
-   !public ESMF_BundleBroadcast! Send 1 bundle to all DEs, none decomposed
-   !public ESMF_BundleAlltoAll ! might make sense with bundles; each DE could
+   public ESMF_FieldBundleScatter  ! Split 1 bundle into a decomposed one over N DEs
+   !public ESMF_FieldBundleBroadcast! Send 1 bundle to all DEs, none decomposed
+   !public ESMF_FieldBundleAlltoAll ! might make sense with bundles; each DE could
                               ! call with a different non-decomposed bundle
                               ! and the result would be a packed bundle of
                               ! data with decomposed bundle on each DE.
 
-   public ESMF_BundleReduce     ! Global reduction operation, return on 1 DE
-   !public ESMF_BundleAllReduce  ! Global reduction operation, return on each DE
+   public ESMF_FieldBundleReduce     ! Global reduction operation, return on 1 DE
+   !public ESMF_FieldBundleAllReduce  ! Global reduction operation, return on each DE
 
 !
 !EOPI
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleComm.F90,v 1.2 2008/04/03 17:55:52 cdeluca Exp $'
+      '$Id: ESMF_FieldBundleComm.F90,v 1.3 2008/04/04 00:19:25 theurich Exp $'
 
 !==============================================================================
 !
@@ -116,14 +116,14 @@
 !==============================================================================
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_BundleRedist - Redist data, either with a routehandle or not
+! !IROUTINE: ESMF_FieldBundleRedist - Redist data, either with a routehandle or not
 !
 ! !INTERFACE:
-      interface ESMF_BundleRedist
+      interface ESMF_FieldBundleRedist
 
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_BundleRedistAllinOne
-        module procedure ESMF_BundleRedistRun
+        module procedure ESMF_FieldBundleRedistAllinOne
+        module procedure ESMF_FieldBundleRedistRun
 
 ! !DESCRIPTION:
 !     Allow a single call to redist which precomputes, runs and releases
@@ -138,14 +138,14 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_BundleRegrid - Regrid data, either with a routehandle or not
+! !IROUTINE: ESMF_FieldBundleRegrid - Regrid data, either with a routehandle or not
 !
 ! !INTERFACE:
-      interface ESMF_BundleRegrid
+      interface ESMF_FieldBundleRegrid
 
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_BundleRegridAllinOne
-        module procedure ESMF_BundleRegridRun
+        module procedure ESMF_FieldBundleRegridAllinOne
+        module procedure ESMF_FieldBundleRegridRun
 
 ! !DESCRIPTION:
 !     Allow a single call to regrid which precomputes, runs and releases
@@ -175,16 +175,16 @@
 #if 0
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleAllGather"
+#define ESMF_METHOD "ESMF_FieldBundleAllGather"
 !BOPI
-! !IROUTINE: ESMF_BundleAllGather - Data AllGather operation on a Bundle
+! !IROUTINE: ESMF_FieldBundleAllGather - Data AllGather operation on a FieldBundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleAllGather(bundle, array, blocking, commhandle, rc)
+      subroutine ESMF_FieldBundleAllGather(bundle, array, blocking, commhandle, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle                 
+      type(ESMF_FieldBundle), intent(inout) :: bundle                 
       type(ESMF_InternArray), intent(out) :: array
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
@@ -192,14 +192,14 @@
 !
 ! !DESCRIPTION:
 !     Perform an allgather operation
-!     over the data in an {\tt ESMF\_Bundle}.  If the {\tt ESMF\_Bundle} is
+!     over the data in an {\tt ESMF\_FieldBundle}.  If the {\tt ESMF\_FieldBundle} is
 !     decomposed over N DEs, this routine returns a copy of the
 !     entire collected data {\tt ESMF\_Array} on each of the N DEs.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle] 
-!           {\tt ESMF\_Bundle} containing data to be gathered.
+!           {\tt ESMF\_FieldBundle} containing data to be gathered.
 !     \item [array] 
 !           Newly created array containing the collected data.
 !           It is the size of the entire undecomposed igrid.
@@ -225,14 +225,14 @@
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
-      type(ESMF_BundleType), pointer :: btypep    ! bundle type info
+      type(ESMF_FieldBundleType), pointer :: btypep    ! bundle type info
    
       ! Initialize return code   
       status = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
 
       btypep => bundle%btypep
 
@@ -246,23 +246,23 @@
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_BundleAllGather
+      end subroutine ESMF_FieldBundleAllGather
 #endif
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGather"
+#define ESMF_METHOD "ESMF_FieldBundleGather"
 !BOPI
-! !IROUTINE: ESMF_BundleGather - Data gather operation on a Bundle
+! !IROUTINE: ESMF_FieldBundleGather - Data gather operation on a FieldBundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleGather(bundle, destinationDE, arrayList, blocking, &
+      subroutine ESMF_FieldBundleGather(bundle, destinationDE, arrayList, blocking, &
                                     commhandle, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle                 
+      type(ESMF_FieldBundle), intent(inout) :: bundle                 
       integer, intent(in) :: destinationDE
       type(ESMF_InternArray), intent(out) :: arrayList(:)
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
@@ -271,7 +271,7 @@
 !
 ! !DESCRIPTION:
 !     Perform a gather operation
-!     over the data in an {\tt ESMF\_Bundle}.  If the {\tt ESMF\_Bundle} is
+!     over the data in an {\tt ESMF\_FieldBundle}.  If the {\tt ESMF\_FieldBundle} is
 !     decomposed over N DEs, this routine returns a copy of the
 !     entire collected data as an {\tt ESMF\_Array} 
 !     on the specified destination
@@ -280,12 +280,12 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle] 
-!           {\tt ESMF\_Bundle} containing data to be gathered.
+!           {\tt ESMF\_FieldBundle} containing data to be gathered.
 !     \item [destinationDE] 
 !           Destination DE number where the gathered data is to be returned.
 !     \item [arrayList] 
 !           Newly created list of {\tt ESMF\_Array}s, one per {\tt ESMF\_Field}
-!           in the {\tt ESMF\_Bundle}, containing the collected data on the
+!           in the {\tt ESMF\_FieldBundle}, containing the collected data on the
 !           specified DE.  It is the size of the entire undecomposed igrid.
 !           On all other DEs this argument returns an invalid object.
 !     \item [{[blocking]}]
@@ -310,14 +310,14 @@
 
       integer :: status                           ! Error status
       integer :: i                                ! loop counter
-      type(ESMF_BundleType), pointer :: btypep    ! bundle type info
+      type(ESMF_FieldBundleType), pointer :: btypep    ! bundle type info
    
       ! Initialize return code   
       status = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
 
       btypep => bundle%btypep
 
@@ -334,22 +334,22 @@
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_BundleGather
+      end subroutine ESMF_FieldBundleGather
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleHalo"
+#define ESMF_METHOD "ESMF_FieldBundleHalo"
 !BOPI
-! !IROUTINE: ESMF_BundleHalo - Execute a halo operation on each Field in a Bundle
+! !IROUTINE: ESMF_FieldBundleHalo - Execute a halo operation on each Field in a FieldBundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleHalo(bundle, routehandle, blocking, &
+      subroutine ESMF_FieldBundleHalo(bundle, routehandle, blocking, &
                                  commhandle, routeOptions, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle
+      type(ESMF_FieldBundle), intent(inout) :: bundle
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_BlockingFlag), intent(in) , optional :: blocking
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
@@ -358,19 +358,19 @@
 !
 ! !DESCRIPTION:
 !     Perform a halo operation over each {\tt ESMF\_Field}
-!     in an {\tt ESMF\_Bundle}.  This routine updates the data 
-!     inside the {\tt ESMF\_Bundle} in place.  The current version
-!     of the code does not support {\tt ESMF\_Bundle}s with packed data.
+!     in an {\tt ESMF\_FieldBundle}.  This routine updates the data 
+!     inside the {\tt ESMF\_FieldBundle} in place.  The current version
+!     of the code does not support {\tt ESMF\_FieldBundle}s with packed data.
 !     It simply operates on a {\tt ESMF\_Field} by {\tt ESMF\_Field}
 !     basis, updating each one at a time.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle] 
-!           {\tt ESMF\_Bundle} containing data to be haloed.
+!           {\tt ESMF\_FieldBundle} containing data to be haloed.
 !     \item [routehandle] 
 !           {\tt ESMF\_RouteHandle} which was returned by the corresponding
-!           {\tt ESMF\_BundleHaloStore()} call. It is associated with 
+!           {\tt ESMF\_FieldBundleHaloStore()} call. It is associated with 
 !           the precomputed data movement and communication needed to 
 !           perform the halo operation.
 !     \item [{[blocking]}]
@@ -398,7 +398,7 @@
       integer :: status                           ! Error status
       integer :: i                                ! loop counter
       integer :: nitems
-      type(ESMF_BundleType), pointer :: btypep    ! bundle type info
+      type(ESMF_FieldBundleType), pointer :: btypep    ! bundle type info
       type(ESMF_InternArray), allocatable :: arrayList(:)
       integer :: maptype
       logical :: bundlepack
@@ -410,10 +410,10 @@
       if(present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
 
       ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
+      call ESMF_FieldBundleValidate(bundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -446,7 +446,7 @@
                                     ESMF_CONTEXT, rc)) return
           if (rcount .ne. btypep%field_count) then
               call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                  "Bundles do not match Bundles used in BundleHaloStore", &
+                  "FieldBundles do not match FieldBundles used in FieldBundleHaloStore", &
                    ESMF_CONTEXT, rc)
               return
           endif
@@ -463,11 +463,11 @@
 
       else
         ! a single route applies to all fields.  requires a congruent bundle.
-        if (.not. ESMF_BundleIsCongruent(bundle, rc=status)) then
+        if (.not. ESMF_FieldBundleIsCongruent(bundle, rc=status)) then
           ! problem - the map was computed with a congruent bundle
           ! and this one is not.  error out and return. 
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                  "BundleHaloStore() was called with an incompatible Bundle", &
+                  "FieldBundleHaloStore() was called with an incompatible FieldBundle", &
                    ESMF_CONTEXT, rc)
           return
         else
@@ -508,16 +508,16 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_BundleHalo
+      end subroutine ESMF_FieldBundleHalo
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleHaloRelease"
+#define ESMF_METHOD "ESMF_FieldBundleHaloRelease"
 !BOPI
-! !IROUTINE: ESMF_BundleHaloRelease - Release resources associated w/ handle
+! !IROUTINE: ESMF_FieldBundleHaloRelease - Release resources associated w/ handle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleHaloRelease(routehandle, rc)
+      subroutine ESMF_FieldBundleHaloRelease(routehandle, rc)
 !
 !
 ! !ARGUMENTS:
@@ -548,21 +548,21 @@
       ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
-      end subroutine ESMF_BundleHaloRelease
+      end subroutine ESMF_FieldBundleHaloRelease
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleHaloStore"
+#define ESMF_METHOD "ESMF_FieldBundleHaloStore"
 !BOPI
-! !IROUTINE: ESMF_BundleHaloStore - Precompute a data halo operation on a Bundle
+! !IROUTINE: ESMF_FieldBundleHaloStore - Precompute a data halo operation on a FieldBundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleHaloStore(bundle, routehandle, halodirection, &
+      subroutine ESMF_FieldBundleHaloStore(bundle, routehandle, halodirection, &
                                       routeOptions, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle
+      type(ESMF_FieldBundle), intent(inout) :: bundle
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_HaloDirection), intent(in), optional :: halodirection
       type(ESMF_RouteOptions), intent(in), optional :: routeOptions
@@ -570,30 +570,30 @@
 !
 ! !DESCRIPTION:
 !     Precompute the data movement or communication operations needed 
-!     to perform a halo operation over the data in an {\tt ESMF\_Bundle}. 
+!     to perform a halo operation over the data in an {\tt ESMF\_FieldBundle}. 
 !     The list of operations will be associated internally to the
 !     framework with the 
 !     {\tt ESMF\_RouteHandle} object.  
 !     To perform the actual halo operation
-!     the {\tt ESMF\_BundleHalo()} routine must be called with the
-!     {\tt ESMF\_Bundle} containing the data to be updated and the 
+!     the {\tt ESMF\_FieldBundleHalo()} routine must be called with the
+!     {\tt ESMF\_FieldBundle} containing the data to be updated and the 
 !     {\tt ESMF\_RouteHandle} computed during this store call.
 !     Although probably less common with bundles than with fields,
-!     if more than one {\tt ESMF\_Bundle} has an identical 
+!     if more than one {\tt ESMF\_FieldBundle} has an identical 
 !     {\tt ESMF\_IGrid} and contains identical {\tt ESMF\_Field}s, then
 !     the same {\tt ESMF\_RouteHandle} can be computed once and used
 !     in multiple executions of the halo operation.
-!     In the current version of the code {\tt ESMF\_Bundle}s with
+!     In the current version of the code {\tt ESMF\_FieldBundle}s with
 !     packed data are not supported.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle] 
-!           {\tt ESMF\_Bundle} containing data to be haloed.
+!           {\tt ESMF\_FieldBundle} containing data to be haloed.
 !     \item [routehandle] 
 !           {\tt ESMF\_RouteHandle} which will be returned after being
 !           associated with the precomputed 
-!           information for a halo operation on this {\tt ESMF\_Bundle}.
+!           information for a halo operation on this {\tt ESMF\_FieldBundle}.
 !           This handle must be supplied at run time to execute the halo.
 !     \item [{[halodirection]}]
 !           Optional argument to restrict halo direction to a subset of the
@@ -612,7 +612,7 @@
 
       integer :: status                           ! Error status
       integer :: i
-      type(ESMF_BundleType), pointer :: btypep     ! bundle type info
+      type(ESMF_FieldBundleType), pointer :: btypep     ! bundle type info
       logical :: bundlepack
       integer :: bopt, bflag
    
@@ -621,10 +621,10 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
 
       ! Validate bundle before going further
-      call ESMF_BundleValidate(bundle, rc=status)
+      call ESMF_FieldBundleValidate(bundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -641,7 +641,7 @@
       endif
 
       ! if all fields are identical, they can share a route
-      if (ESMF_BundleIsCongruent(bundle, rc=status) .and. bundlepack) then
+      if (ESMF_FieldBundleIsCongruent(bundle, rc=status) .and. bundlepack) then
         call ESMF_IArrayHaloStore( &
                                   btypep%flist(1)%ftypep%localfield%localdata, &
                                   btypep%flist(1)%ftypep%localfield%localFlag, &
@@ -680,23 +680,23 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_BundleHaloStore
+      end subroutine ESMF_FieldBundleHaloStore
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleRedist"
+#define ESMF_METHOD "ESMF_FieldBundleRedist"
 !BOP
-! !IROUTINE: ESMF_BundleRedist - Data redistribution operation on a Bundle
+! !IROUTINE: ESMF_FieldBundleRedist - Data redistribution operation on a FieldBundle
 
 ! !INTERFACE:
-      ! Private name; call using ESMF_BundleRedist()
-      subroutine ESMF_BundleRedistAllinOne(srcBundle, dstBundle, parentVM, &
+      ! Private name; call using ESMF_FieldBundleRedist()
+      subroutine ESMF_FieldBundleRedistAllinOne(srcFieldBundle, dstFieldBundle, parentVM, &
                                    blocking, commhandle, routeOptions, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: srcBundle
-      type(ESMF_Bundle), intent(inout) :: dstBundle
+      type(ESMF_FieldBundle), intent(inout) :: srcFieldBundle
+      type(ESMF_FieldBundle), intent(inout) :: dstFieldBundle
       type(ESMF_VM), intent(in) :: parentVM
       type(ESMF_BlockingFlag), intent(in) , optional :: blocking
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
@@ -705,7 +705,7 @@
 !
 ! !DESCRIPTION:
 !     Perform a redistribution operation over the data
-!     in an {\tt ESMF\_Bundle}.  This version does not take a {\tt routehandle}
+!     in an {\tt ESMF\_FieldBundle}.  This version does not take a {\tt routehandle}
 !     and computes, runs, and releases the communication information in a
 !     single subroutine.  It should be used when a redist operation will be
 !     done only a single time; otherwise computing and reusing a communication
@@ -717,17 +717,17 @@
 !     The {\tt ESMF\_IGrid}s may have different decompositions (different
 !     {\tt ESMF\_DELayout}s) or different data maps, but the source and
 !     destination igrids must describe the same set of coordinates.
-!     Unlike {\tt ESMF\_BundleRegrid} this routine does not do interpolation,
+!     Unlike {\tt ESMF\_FieldBundleRegrid} this routine does not do interpolation,
 !     only data movement.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [srcBundle] 
-!           {\tt ESMF\_Bundle} containing source data.
-!     \item [dstBundle] 
-!           {\tt ESMF\_Bundle} containing destination igrid.
+!     \item [srcFieldBundle] 
+!           {\tt ESMF\_FieldBundle} containing source data.
+!     \item [dstFieldBundle] 
+!           {\tt ESMF\_FieldBundle} containing destination igrid.
 !     \item [parentVM]
-!           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Bundle}s,
+!           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_FieldBundle}s,
 !           most commonly the VM of the Coupler if the redistribution is
 !           inter-component, but could also be the individual VM for a
 !           component if the redistribution is intra-component.
@@ -756,7 +756,7 @@
 ! !REQUIREMENTS: 
 
       integer :: status                            ! Error status
-      type(ESMF_BundleType) :: stypep, dtypep      ! bundle type info
+      type(ESMF_FieldBundleType) :: stypep, dtypep      ! bundle type info
       type(ESMF_RouteHandle) :: routehandle
    
       ! Initialize return code   
@@ -764,32 +764,32 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,srcBundle,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,dstBundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,srcFieldBundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,dstFieldBundle,rc)
 
-      stypep = srcBundle%btypep
-      dtypep = dstBundle%btypep
+      stypep = srcFieldBundle%btypep
+      dtypep = dstFieldBundle%btypep
       routehandle = ESMF_RouteHandleCreate(status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! call BundleRedistStore
-      call ESMF_BundleRedistStore(srcBundle, dstBundle, parentVM, &
+      ! call FieldBundleRedistStore
+      call ESMF_FieldBundleRedistStore(srcFieldBundle, dstFieldBundle, parentVM, &
                                   routehandle, routeOptions, status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! call BundleRedistRun
-      call ESMF_BundleRedistRun(srcBundle, dstBundle, routehandle, &
+      ! call FieldBundleRedistRun
+      call ESMF_FieldBundleRedistRun(srcFieldBundle, dstFieldBundle, routehandle, &
                                 blocking, commhandle, routeOptions, status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! call BundleRedistRelease
-      call ESMF_BundleRedistRelease(routehandle, status)
+      ! call FieldBundleRedistRelease
+      call ESMF_FieldBundleRedistRelease(routehandle, status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -797,23 +797,23 @@
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_BundleRedistAllinOne
+      end subroutine ESMF_FieldBundleRedistAllinOne
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleRedist"
+#define ESMF_METHOD "ESMF_FieldBundleRedist"
 !BOP
-! !IROUTINE: ESMF_BundleRedist - Data redistribution operation on a Bundle
+! !IROUTINE: ESMF_FieldBundleRedist - Data redistribution operation on a FieldBundle
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldRedist()
-      subroutine ESMF_BundleRedistRun(srcBundle, dstBundle, routehandle, &
+      subroutine ESMF_FieldBundleRedistRun(srcFieldBundle, dstFieldBundle, routehandle, &
                                    blocking, commhandle, routeOptions, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: srcBundle
-      type(ESMF_Bundle), intent(inout) :: dstBundle
+      type(ESMF_FieldBundle), intent(inout) :: srcFieldBundle
+      type(ESMF_FieldBundle), intent(inout) :: dstFieldBundle
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_BlockingFlag), intent(in) , optional :: blocking
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
@@ -822,7 +822,7 @@
 !
 ! !DESCRIPTION:
 !     Perform a redistribution operation over the data
-!     in an {\tt ESMF\_Bundle}.  
+!     in an {\tt ESMF\_FieldBundle}.  
 !     This routine reads the source bundle and leaves 
 !     the data untouched.  It reads the {\tt ESMF\_IGrid} and 
 !     {\tt ESMF\_FieldDataMap}
@@ -830,18 +830,18 @@
 !     The {\tt ESMF\_IGrid}s may have different decompositions (different
 !     {\tt ESMF\_DELayout}s) or different data maps, but the source and
 !     destination igrids must describe the same set of coordinates.
-!     Unlike {\tt ESMF\_BundleRegrid} this routine does not do interpolation,
+!     Unlike {\tt ESMF\_FieldBundleRegrid} this routine does not do interpolation,
 !     only data movement.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [srcbundle] 
-!           {\tt ESMF\_Bundle} containing source data.
+!           {\tt ESMF\_FieldBundle} containing source data.
 !     \item [dstbundle] 
-!           {\tt ESMF\_Bundle} containing destination igrid.
+!           {\tt ESMF\_FieldBundle} containing destination igrid.
 !     \item [routehandle]
 !           {\tt ESMF\_RouteHandle} which was returned by the corresponding
-!           {\tt ESMF\_BundleRedistStore()} call. It is associated with
+!           {\tt ESMF\_FieldBundleRedistStore()} call. It is associated with
 !           the precomputed data movement and communication needed to
 !           perform the redistribution operation.
 !     \item [{[blocking]}]
@@ -870,7 +870,7 @@
 
       integer :: status                            ! Error status
       integer :: i                                 ! loop counter
-      type(ESMF_BundleType) :: stypep, dtypep      ! bundle type info
+      type(ESMF_FieldBundleType) :: stypep, dtypep      ! bundle type info
       type(ESMF_InternArray), allocatable :: srcArrayList(:), dstArrayList(:)
       integer :: condition
       integer :: maptype
@@ -882,14 +882,14 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,srcBundle,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,dstBundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,srcFieldBundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,dstFieldBundle,rc)
 
-      stypep = srcBundle%btypep
-      dtypep = dstBundle%btypep
+      stypep = srcFieldBundle%btypep
+      dtypep = dstFieldBundle%btypep
 
       ! Does validate of both bundles and checks for consistent types.
-      condition = ESMF_BundleCommPrepCheck(srcBundle, dstBundle, rc=status)
+      condition = ESMF_FieldBundleCommPrepCheck(srcFieldBundle, dstFieldBundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -938,7 +938,7 @@
         ! can be compared against the number of routes in this handle.
         if (rcount .ne. stypep%field_count) then
             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                "RouteHandle and Bundles do not have matching Field counts", &
+                "RouteHandle and FieldBundles do not have matching Field counts", &
                                      ESMF_CONTEXT, rc)
             return
         endif
@@ -963,7 +963,7 @@
         if (condition .eq. ESMF_BUNDLECOMM_NONCONGRUENT) then
           ! problem.  routehandle thinks they are.
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                  "Bundles do not match Bundles used in BundleRedistStore()", &
+                  "FieldBundles do not match FieldBundles used in FieldBundleRedistStore()", &
                    ESMF_CONTEXT, rc)
           return
         else
@@ -1018,16 +1018,16 @@
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_BundleRedistRun
+      end subroutine ESMF_FieldBundleRedistRun
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleRedistRelease"
+#define ESMF_METHOD "ESMF_FieldBundleRedistRelease"
 !BOP
-! !IROUTINE: ESMF_BundleRedistRelease - Release resources associated with handle
+! !IROUTINE: ESMF_FieldBundleRedistRelease - Release resources associated with handle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleRedistRelease(routehandle, rc)
+      subroutine ESMF_FieldBundleRedistRelease(routehandle, rc)
 !
 !
 ! !ARGUMENTS:
@@ -1058,22 +1058,22 @@
       ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
-      end subroutine ESMF_BundleRedistRelease
+      end subroutine ESMF_FieldBundleRedistRelease
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleRedistStore"
+#define ESMF_METHOD "ESMF_FieldBundleRedistStore"
 !BOP
-! !IROUTINE: ESMF_BundleRedistStore - Data redistribution operation on a Bundle
+! !IROUTINE: ESMF_FieldBundleRedistStore - Data redistribution operation on a FieldBundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleRedistStore(srcBundle, dstBundle, parentVM, &
+      subroutine ESMF_FieldBundleRedistStore(srcFieldBundle, dstFieldBundle, parentVM, &
                                         routehandle, routeOptions, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: srcBundle
-      type(ESMF_Bundle), intent(inout) :: dstBundle
+      type(ESMF_FieldBundle), intent(inout) :: srcFieldBundle
+      type(ESMF_FieldBundle), intent(inout) :: dstFieldBundle
       type(ESMF_VM), intent(in) :: parentVM
       type(ESMF_RouteHandle), intent(out) :: routehandle
       type(ESMF_RouteOptions), intent(in), optional :: routeOptions
@@ -1082,7 +1082,7 @@
 ! !DESCRIPTION:
 !     Precompute the data movement or communications operations needed to
 !     accomplish a data redistribution operation over the data
-!     in an {\tt ESMF\_Bundle}.  Data redistribution differs from regridding
+!     in an {\tt ESMF\_FieldBundle}.  Data redistribution differs from regridding
 !     in that redistribution does no interpolation, only a 1-for-1 movement
 !     of data from one location to another.
 !     Therefore, while 
@@ -1093,19 +1093,19 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [srcBundle]
-!           {\tt ESMF\_Bundle} containing source data.
-!     \item [dstBundle]
-!           {\tt ESMF\_Bundle} containing destination igrid.
+!     \item [srcFieldBundle]
+!           {\tt ESMF\_FieldBundle} containing source data.
+!     \item [dstFieldBundle]
+!           {\tt ESMF\_FieldBundle} containing destination igrid.
 !     \item [parentVM]
-!           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Bundle}s, 
+!           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_FieldBundle}s, 
 !           most commonly the VM
 !           of the Coupler if the redistribution is inter-component, 
 !           but could also be the individual VM for a component if the 
 !           redistribution is intra-component.  
 !     \item [routehandle]
 !           {\tt ESMF\_RouteHandle} which will be used to execute the
-!           redistribution when {\tt ESMF\_BundleRedist} is called.
+!           redistribution when {\tt ESMF\_FieldBundleRedist} is called.
 !     \item [{[routeOptions]}]
 !           Not normally specified.  Specify which internal strategy to 
 !           select when executing the communication needed to update the halo.
@@ -1120,7 +1120,7 @@
       integer :: status                           ! Error status
       integer :: i
       integer :: condition
-      type(ESMF_BundleType), pointer :: stypep, dtypep
+      type(ESMF_FieldBundleType), pointer :: stypep, dtypep
       logical :: bundlepack
       integer :: bopt, bflag
    
@@ -1129,16 +1129,16 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,srcBundle,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,dstBundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,srcFieldBundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,dstFieldBundle,rc)
 
       ! Validate bundle before going further
-      call ESMF_BundleValidate(srcBundle, rc=status)
+      call ESMF_FieldBundleValidate(srcFieldBundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      call ESMF_BundleValidate(dstBundle, rc=status)
+      call ESMF_FieldBundleValidate(dstFieldBundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1147,7 +1147,7 @@
       ! validate both bundles, make sure they have the same number
       ! of fields, make sure the data types are consistent, etc.
 
-      condition = ESMF_BundleCommPrepCheck(srcBundle, dstBundle, rc=status)
+      condition = ESMF_FieldBundleCommPrepCheck(srcFieldBundle, dstFieldBundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1163,8 +1163,8 @@
           if (iand(bopt, bflag) .eq. 0) bundlepack = .false.
       endif
 
-      dtypep => dstBundle%btypep
-      stypep => srcBundle%btypep
+      dtypep => dstFieldBundle%btypep
+      stypep => srcFieldBundle%btypep
 
       ! if all fields are identical, they can share a route
       if ((condition .eq. ESMF_BUNDLECOMM_CONGRUENT) .and. bundlepack) then 
@@ -1208,21 +1208,21 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_BundleRedistStore
+      end subroutine ESMF_FieldBundleRedistStore
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleReduce"
+#define ESMF_METHOD "ESMF_FieldBundleReduce"
 !BOPI
-! !IROUTINE: ESMF_BundleReduce - Reduction operation on a Bundle
+! !IROUTINE: ESMF_FieldBundleReduce - Reduction operation on a FieldBundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleReduce(bundle, rtype, result, blocking, commhandle, rc)
+      subroutine ESMF_FieldBundleReduce(bundle, rtype, result, blocking, commhandle, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle) :: bundle                 
+      type(ESMF_FieldBundle) :: bundle                 
       integer :: rtype
       integer :: result
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
@@ -1230,12 +1230,12 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Perform a reduction operation over the data in an {\tt ESMF\_Bundle}.
+!     Perform a reduction operation over the data in an {\tt ESMF\_FieldBundle}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle] 
-!           {\tt ESMF\_Bundle} containing data to be reduced.
+!           {\tt ESMF\_FieldBundle} containing data to be reduced.
 !     \item [rtype]
 !           Type of reduction operation to perform.  Options include: ...
 !           (Not yet implemented).
@@ -1278,25 +1278,25 @@
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_BundleReduce
+      end subroutine ESMF_FieldBundleReduce
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleRegrid"
+#define ESMF_METHOD "ESMF_FieldBundleRegrid"
 !BOP
-! !IROUTINE: ESMF_BundleRegrid - Execute a regrid operation on a Bundle
+! !IROUTINE: ESMF_FieldBundleRegrid - Execute a regrid operation on a FieldBundle
 
 ! !INTERFACE:
-      ! Private name; call using ESMF_BundleRegrid()
-      subroutine ESMF_BundleRegridAllinOne(srcBundle, dstBundle, parentVM, &
+      ! Private name; call using ESMF_FieldBundleRegrid()
+      subroutine ESMF_FieldBundleRegridAllinOne(srcFieldBundle, dstFieldBundle, parentVM, &
                                    regridMethod, regridNorm, &
                                    srcMask, dstMask, blocking, commhandle, &
                                    routeOptions, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: srcBundle
-      type(ESMF_Bundle), intent(inout) :: dstBundle
+      type(ESMF_FieldBundle), intent(inout) :: srcFieldBundle
+      type(ESMF_FieldBundle), intent(inout) :: dstFieldBundle
       type(ESMF_VM), intent(in) :: parentVM
       type(ESMF_RegridMethod), intent(in) :: regridMethod
       type(ESMF_RegridNormOpt), intent(in), optional :: regridNorm
@@ -1309,7 +1309,7 @@
 !
 ! !DESCRIPTION:
 !     Perform a regrid operation over the data
-!     in an {\tt ESMF\_Bundle}.  This routine reads the source bundle and 
+!     in an {\tt ESMF\_FieldBundle}.  This routine reads the source bundle and 
 !     leaves the data untouched.  It uses the {\tt ESMF\_IGrid} and
 !     {\tt ESMF\_FieldDataMap} information in the destination bundle to
 !     control the transformation of data.  The array data in the 
@@ -1322,12 +1322,12 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [srcBundle] 
-!           {\tt ESMF\_Bundle} containing source data.
-!     \item [dstBundle] 
-!           {\tt ESMF\_Bundle} containing destination igrid.
+!     \item [srcFieldBundle] 
+!           {\tt ESMF\_FieldBundle} containing source data.
+!     \item [dstFieldBundle] 
+!           {\tt ESMF\_FieldBundle} containing destination igrid.
 !     \item [parentVM]
-!           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Bundle}s, 
+!           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_FieldBundle}s, 
 !           most commonly the VM of the Coupler if the regridding is
 !           inter-component, but could also be the individual VM for a component
 !           if the regridding is intra-component.  
@@ -1361,7 +1361,7 @@
 ! !REQUIREMENTS: 
 
       integer :: localrc                           ! Error status
-      type(ESMF_BundleType) :: stypep, dtypep      ! bundle type info
+      type(ESMF_FieldBundleType) :: stypep, dtypep      ! bundle type info
       type(ESMF_RouteHandle) :: routehandle
    
       ! Initialize return code   
@@ -1369,34 +1369,34 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,srcBundle,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,dstBundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,srcFieldBundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,dstFieldBundle,rc)
 
-      stypep = srcBundle%btypep
-      dtypep = dstBundle%btypep
+      stypep = srcFieldBundle%btypep
+      dtypep = dstFieldBundle%btypep
       routehandle = ESMF_RouteHandleCreate(localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! call BundleRegridStore
-      call ESMF_BundleRegridStore(srcBundle, dstBundle, parentVM, &
+      ! call FieldBundleRegridStore
+      call ESMF_FieldBundleRegridStore(srcFieldBundle, dstFieldBundle, parentVM, &
                                   routehandle, regridMethod, regridNorm, &
                                   srcMask, dstMask, routeOptions, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! call BundleRegridRun
-      call ESMF_BundleRegridRun(srcBundle, dstBundle, routehandle, &
+      ! call FieldBundleRegridRun
+      call ESMF_FieldBundleRegridRun(srcFieldBundle, dstFieldBundle, routehandle, &
                                 srcMask, dstMask, blocking, commhandle, &
                                 routeOptions, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! call BundleRegridRelease
-      call ESMF_BundleRegridRelease(routehandle, localrc)
+      ! call FieldBundleRegridRelease
+      call ESMF_FieldBundleRegridRelease(routehandle, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1404,24 +1404,24 @@
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_BundleRegridAllinOne
+      end subroutine ESMF_FieldBundleRegridAllinOne
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleRegrid"
+#define ESMF_METHOD "ESMF_FieldBundleRegrid"
 !BOPI
-! !IROUTINE: ESMF_BundleRegrid - Execute a regrid operation on a Bundle
+! !IROUTINE: ESMF_FieldBundleRegrid - Execute a regrid operation on a FieldBundle
 
 ! !INTERFACE:
-      ! Private name; call using ESMF_BundleRegrid()
-      subroutine ESMF_BundleRegridRun(srcBundle, dstBundle, routehandle, &
+      ! Private name; call using ESMF_FieldBundleRegrid()
+      subroutine ESMF_FieldBundleRegridRun(srcFieldBundle, dstFieldBundle, routehandle, &
                                    srcMask, dstMask, blocking, commhandle, &
                                    routeOptions, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: srcBundle
-      type(ESMF_Bundle), intent(inout) :: dstBundle
+      type(ESMF_FieldBundle), intent(inout) :: srcFieldBundle
+      type(ESMF_FieldBundle), intent(inout) :: dstFieldBundle
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_Mask), intent(in), optional :: srcMask
       type(ESMF_Mask), intent(in), optional :: dstMask
@@ -1432,7 +1432,7 @@
 !
 ! !DESCRIPTION:
 !     Perform a regrid operation over the data
-!     in an {\tt ESMF\_Bundle}.  This routine reads the source bundle and 
+!     in an {\tt ESMF\_FieldBundle}.  This routine reads the source bundle and 
 !     leaves the data untouched.  It uses the {\tt ESMF\_IGrid} and
 !     {\tt ESMF\_FieldDataMap} information in the destination bundle to
 !     control the transformation of data.  The array data in the 
@@ -1441,9 +1441,9 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [srcbundle] 
-!           {\tt ESMF\_Bundle} containing source data.
+!           {\tt ESMF\_FieldBundle} containing source data.
 !     \item [dstbundle] 
-!           {\tt ESMF\_Bundle} containing destination igrid and data map.
+!           {\tt ESMF\_FieldBundle} containing destination igrid and data map.
 !     \item [routehandle]
 !           {\tt ESMF\_RouteHandle} which will be returned after being
 !           associated with the precomputed
@@ -1481,7 +1481,7 @@
 
       integer :: status                            ! Error status
       integer :: i                                 ! loop counter
-      type(ESMF_BundleType) :: stypep, dtypep      ! bundle type info
+      type(ESMF_FieldBundleType) :: stypep, dtypep      ! bundle type info
       type(ESMF_InternArray), allocatable :: srcArrayList(:), dstArrayList(:)
       integer :: condition
       logical :: hasSrcData, hasDstData
@@ -1494,11 +1494,11 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,srcBundle,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,dstBundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,srcFieldBundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,dstFieldBundle,rc)
 
       ! Does validate of both bundles and checks for consistent types.
-      condition = ESMF_BundleCommPrepCheck(srcBundle, dstBundle, rc=status)
+      condition = ESMF_FieldBundleCommPrepCheck(srcFieldBundle, dstFieldBundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1522,8 +1522,8 @@
           ! call ESMF_RouteSet(route, routeOptions, rc=status)
       endif
    
-      stypep = srcBundle%btypep
-      dtypep = dstBundle%btypep
+      stypep = srcFieldBundle%btypep
+      dtypep = dstFieldBundle%btypep
 
       
       ! If the bundle consists of identical fields - in every way: data type,
@@ -1544,7 +1544,7 @@
                                     ESMF_CONTEXT, rc)) return
           if (rcount .ne. stypep%field_count) then
               call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                  "Bundles do not match Bundles used in BundleRegridStore", &
+                  "FieldBundles do not match FieldBundles used in FieldBundleRegridStore", &
                    ESMF_CONTEXT, rc)
               return
           endif
@@ -1573,7 +1573,7 @@
           if (condition .eq. ESMF_BUNDLECOMM_NONCONGRUENT) then
             ! problem.  routehandle thinks they are.
             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                  "Bundles do not match Bundles used in BundleRegridStore()", &
+                  "FieldBundles do not match FieldBundles used in FieldBundleRegridStore()", &
                    ESMF_CONTEXT, rc)
             return
           endif
@@ -1639,17 +1639,17 @@
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_BundleRegridRun
+      end subroutine ESMF_FieldBundleRegridRun
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleRegridRelease"
+#define ESMF_METHOD "ESMF_FieldBundleRegridRelease"
 !BOPI
-! !IROUTINE: ESMF_BundleRegridRelease - Release information for this handle
+! !IROUTINE: ESMF_FieldBundleRegridRelease - Release information for this handle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleRegridRelease(routehandle, rc)
+      subroutine ESMF_FieldBundleRegridRelease(routehandle, rc)
 !
 !
 ! !ARGUMENTS:
@@ -1681,23 +1681,23 @@
       ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
-      end subroutine ESMF_BundleRegridRelease
+      end subroutine ESMF_FieldBundleRegridRelease
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleRegridStore"
+#define ESMF_METHOD "ESMF_FieldBundleRegridStore"
 !BOPI
-! !IROUTINE: ESMF_BundleRegridStore - Precompute regrid operation on a Bundle
+! !IROUTINE: ESMF_FieldBundleRegridStore - Precompute regrid operation on a FieldBundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleRegridStore(srcBundle, dstBundle, parentVM, &
+      subroutine ESMF_FieldBundleRegridStore(srcFieldBundle, dstFieldBundle, parentVM, &
                                         routehandle, regridMethod, regridNorm, &
                                         srcMask, dstMask, routeOptions, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: srcBundle
-      type(ESMF_Bundle), intent(inout) :: dstBundle
+      type(ESMF_FieldBundle), intent(inout) :: srcFieldBundle
+      type(ESMF_FieldBundle), intent(inout) :: dstFieldBundle
       type(ESMF_VM), intent(in) :: parentVM
       type(ESMF_RouteHandle), intent(out) :: routehandle
       type(ESMF_RegridMethod), intent(in) :: regridMethod
@@ -1719,19 +1719,19 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [srcBundle] 
-!           {\tt ESMF\_Bundle} containing source data.
-!     \item [dstBundle] 
-!           {\tt ESMF\_Bundle} containing destination igrid and data map.
+!     \item [srcFieldBundle] 
+!           {\tt ESMF\_FieldBundle} containing source data.
+!     \item [dstFieldBundle] 
+!           {\tt ESMF\_FieldBundle} containing destination igrid and data map.
 !     \item [parentVM]
-!           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Bundle}s, 
+!           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_FieldBundle}s, 
 !           most commonly the VM
 !           of the Coupler if the regridding is inter-component, but could 
 !           also be the individual VM for a component if the 
 !           regridding is intra-component.  
 !     \item [routehandle]
 !           Output from this call, identifies the precomputed work which
-!           will be executed when {\tt ESMF\_BundleRegrid} is called.
+!           will be executed when {\tt ESMF\_FieldBundleRegrid} is called.
 !     \item [regridMethod]
 !           Type of regridding to do.  A set of predefined methods are
 !           supplied.
@@ -1754,7 +1754,7 @@
 
       integer :: status                           ! Error status
       integer :: i
-      type(ESMF_BundleType), pointer :: stypep, dtypep
+      type(ESMF_FieldBundleType), pointer :: stypep, dtypep
       integer :: condition
       logical :: bundlepack
       integer :: bopt, bflag
@@ -1764,11 +1764,11 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,srcBundle,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,dstBundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,srcFieldBundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,dstFieldBundle,rc)
 
       ! Does validate of both bundles and checks for consistent types.
-      condition = ESMF_BundleCommPrepCheck(srcBundle, dstBundle, rc=status)
+      condition = ESMF_FieldBundleCommPrepCheck(srcFieldBundle, dstFieldBundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1784,8 +1784,8 @@
           if (iand(bopt, bflag) .eq. 0) bundlepack = .false.  ! bitwise and
       endif
 
-      dtypep => dstBundle%btypep
-      stypep => srcBundle%btypep
+      dtypep => dstFieldBundle%btypep
+      stypep => srcFieldBundle%btypep
 
       ! TODO: this only works for all fields in the bundle being identical,
       ! including relloc.  if that is not true, we have to compute different
@@ -1829,24 +1829,24 @@
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_BundleRegridStore
+      end subroutine ESMF_FieldBundleRegridStore
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleScatter"
+#define ESMF_METHOD "ESMF_FieldBundleScatter"
 !BOPI
-! !IROUTINE: ESMF_BundleScatter - Data scatter operation on a Bundle
+! !IROUTINE: ESMF_FieldBundleScatter - Data scatter operation on a FieldBundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleScatter(array, sourceDE, bundle, &
+      subroutine ESMF_FieldBundleScatter(array, sourceDE, bundle, &
                                     blocking, commhandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_InternArray), intent(inout) :: array
       integer, intent(in) :: sourceDE
-      type(ESMF_Bundle), intent(inout) :: bundle                 
+      type(ESMF_FieldBundle), intent(inout) :: bundle                 
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
@@ -1854,12 +1854,12 @@
 ! !DESCRIPTION:
 !   Perform a scatter operation over the data
 !   in an {\tt ESMF\_Array}, returning it as the data array 
-!   in an {\tt ESMF\_Bundle}.  
-!   If the Bundle is decomposed over N DEs, this routine
+!   in an {\tt ESMF\_FieldBundle}.  
+!   If the FieldBundle is decomposed over N DEs, this routine
 !   takes a single array on the specified DE and 
 !   returns a decomposed copy
 !   on each of the N DEs, as the {\tt ESMF\_Array} 
-!   associated with the given empty {\tt ESMF\_Bundle}.
+!   associated with the given empty {\tt ESMF\_FieldBundle}.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1871,10 +1871,10 @@
 !         is located.  The
 !         {\tt ESMF\_Array} input is ignored on all other DEs.
 !   \item [bundle] 
-!         Empty Bundle containing {\tt ESMF\_IGrid} which will correspond to 
+!         Empty FieldBundle containing {\tt ESMF\_IGrid} which will correspond to 
 !         the data 
 !         in the array which will be scattered.  When this routine returns
-!         each {\tt ESMF\_Bundle} will contain a valid data array containing 
+!         each {\tt ESMF\_FieldBundle} will contain a valid data array containing 
 !         the subset of the decomposed data.
 !   \item [{[blocking]}]
 !         Optional argument which specifies whether the operation should
@@ -1897,7 +1897,7 @@
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
-      type(ESMF_BundleType) :: btypep             ! bundle type info
+      type(ESMF_FieldBundleType) :: btypep             ! bundle type info
       !type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for IGrid
       type(ESMF_DELayout) :: delayout          ! layout
       type(ESMF_InternArray) :: dstarray                ! Destination array
@@ -1912,7 +1912,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
 
       btypep = bundle%btypep
 
@@ -1958,26 +1958,26 @@
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_BundleScatter
+      end subroutine ESMF_FieldBundleScatter
 
 
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleCommPrepCheck"
+#define ESMF_METHOD "ESMF_FieldBundleCommPrepCheck"
 !BOPI
-! !IROUTINE: ESMF_BundleCommPrepCheck - Validate 2 Bundles before Store call
+! !IROUTINE: ESMF_FieldBundleCommPrepCheck - Validate 2 FieldBundles before Store call
 
 ! !INTERFACE:
-      function ESMF_BundleCommPrepCheck(srcBundle, dstBundle, rc)
+      function ESMF_FieldBundleCommPrepCheck(srcFieldBundle, dstFieldBundle, rc)
 !
 ! !RETURN VALUE:
-      integer :: ESMF_BundleCommPrepCheck
+      integer :: ESMF_FieldBundleCommPrepCheck
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: srcBundle                 
-      type(ESMF_Bundle), intent(inout) :: dstBundle                 
+      type(ESMF_FieldBundle), intent(inout) :: srcFieldBundle                 
+      type(ESMF_FieldBundle), intent(inout) :: dstFieldBundle                 
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -1996,10 +1996,10 @@
 !
 !   The arguments are:
 !   \begin{description}
-!   \item [srcBundle] 
-!         {\tt ESMF\_Bundle} to be validated and compared to destination.
-!   \item [dstBundle] 
-!         {\tt ESMF\_Bundle} to be validated and compared to source.
+!   \item [srcFieldBundle] 
+!         {\tt ESMF\_FieldBundle} to be validated and compared to destination.
+!   \item [dstFieldBundle] 
+!         {\tt ESMF\_FieldBundle} to be validated and compared to source.
 !   \item [{[rc]}] 
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2009,38 +2009,38 @@
 
       integer :: status                           ! Error status
       integer :: i
-      type(ESMF_BundleType), pointer :: stypep, dtypep
+      type(ESMF_FieldBundleType), pointer :: stypep, dtypep
       type(ESMF_IGridStorage) :: sigridStorage, digridStorage
       integer :: srank, drank
       type(ESMF_TypeKind) :: skind, dkind
    
       ! Initialize return code   
-      ESMF_BundleCommPrepCheck = ESMF_BUNDLECOMM_NOMATCH
+      ESMF_FieldBundleCommPrepCheck = ESMF_BUNDLECOMM_NOMATCH
       status = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variable
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,srcBundle,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_BundleGetInit,dstBundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,srcFieldBundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,dstFieldBundle,rc)
 
       ! Validate bundles before going further
-      call ESMF_BundleValidate(srcBundle, rc=status)
+      call ESMF_FieldBundleValidate(srcFieldBundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      call ESMF_BundleValidate(dstBundle, rc=status)
+      call ESMF_FieldBundleValidate(dstFieldBundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      stypep => srcBundle%btypep
-      dtypep => dstBundle%btypep
+      stypep => srcFieldBundle%btypep
+      dtypep => dstFieldBundle%btypep
 
       ! Make sure both bundles have the same number of fields.
       if (stypep%field_count .ne. dtypep%field_count) then
         call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                 "Bundles must contain same number of Fields", &
+                                 "FieldBundles must contain same number of Fields", &
                                  ESMF_CONTEXT, rc)
         return
 
@@ -2049,7 +2049,7 @@
       ! For now, make sure that none of the fields are empty.
       if ((stypep%field_count .le. 0) .or. (dtypep%field_count .le. 0)) then
         call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                 "Bundles must not be empty", &
+                                 "FieldBundles must not be empty", &
                                   ESMF_CONTEXT, rc)
         return
 
@@ -2087,7 +2087,7 @@
           if (sigridStorage.eq.digridStorage) then				    
             if (srank .ne. drank) then
               call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                  "Corresponding Fields in Bundles must have same data rank", &
+                  "Corresponding Fields in FieldBundles must have same data rank", &
                                        ESMF_CONTEXT, rc)
               return
             endif
@@ -2095,7 +2095,7 @@
 
           if (skind .ne. dkind) then
               call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                  "Corresponding Fields in Bundles must have same typekind", &
+                  "Corresponding Fields in FieldBundles must have same typekind", &
                                        ESMF_CONTEXT, rc)
               return
           endif
@@ -2103,16 +2103,16 @@
       enddo
 
       ! Set return value based on whether both bundles are congruent or not.
-      if (ESMF_BundleIsCongruent(srcBundle, rc=status) .and. &
-          ESMF_BundleIsCongruent(dstBundle, rc=status)) then
-              ESMF_BundleCommPrepCheck = ESMF_BUNDLECOMM_CONGRUENT
+      if (ESMF_FieldBundleIsCongruent(srcFieldBundle, rc=status) .and. &
+          ESMF_FieldBundleIsCongruent(dstFieldBundle, rc=status)) then
+              ESMF_FieldBundleCommPrepCheck = ESMF_BUNDLECOMM_CONGRUENT
       else
-              ESMF_BundleCommPrepCheck = ESMF_BUNDLECOMM_NONCONGRUENT
+              ESMF_FieldBundleCommPrepCheck = ESMF_BUNDLECOMM_NONCONGRUENT
       endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_BundleCommPrepCheck
+      end function ESMF_FieldBundleCommPrepCheck
 !------------------------------------------------------------------------------
 
-      end module ESMF_BundleCommMod
+      end module ESMF_FieldBundleCommMod
