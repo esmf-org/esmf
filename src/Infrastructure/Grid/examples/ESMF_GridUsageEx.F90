@@ -391,15 +391,19 @@ if (petCount .le. 6) then
    ! will have global coordinates.  Note that aperiodic bounds are
    ! specified by default - if periodic bounds were desired they
    ! would need to be specified using an additional gridConn argument
-   ! (which isn't implemented yet).
+   ! (which isn't implemented yet). In this call the minIndex hasn't 
+   ! been set, so it defaults to (1,1,...). The default is to 
+   ! divide the index range as equally as possible among the DEs
+   ! specified in regDecomp. This behavior can be changed by 
+   ! specifying decompFlag. 
    !-------------------------------------------------------------------
    grid2D=ESMF_GridCreateShapeTile(          &
             ! Define a regular distribution
-            maxIndex=(/10,20/), &
-            regDecomp=(/2,3/),  &
+            maxIndex=(/10,20/), & ! define index space
+            regDecomp=(/2,3/),  & ! specify how to divide into DEs
             ! Specify mapping of coords dim to Grid dim
-            coordDep1=(/1/), &
-            coordDep2=(/2/), &
+            coordDep1=(/1/), & ! 1st coord is 1D and depends on 1st Grid dim
+            coordDep2=(/2/), & ! 2nd coord is 1D and depends on 2nd Grid dim
             indexflag=ESMF_INDEX_GLOBAL, &
             rc=rc)
 
@@ -415,7 +419,7 @@ if (petCount .le. 6) then
    ! Get the pointer to the first coordinate array and the bounds
    ! of its global indices on the local DE.   
    !-------------------------------------------------------------------
-   call ESMF_GridGetCoord(grid2D, coordDim=1, &
+   call ESMF_GridGetCoord(grid2D, coordDim=1, localDE=0, &
           staggerloc=ESMF_STAGGERLOC_CENTER, &
           computationalLBound=lbnd, computationalUBound=ubnd, fptr=coordX, rc=rc)
 
@@ -430,7 +434,7 @@ if (petCount .le. 6) then
    ! Get the pointer to the second coordinate array and the bounds of
    ! its global indices on the local DE.
    !-------------------------------------------------------------------
-   call ESMF_GridGetCoord(grid2D, coordDim=2, &
+   call ESMF_GridGetCoord(grid2D, coordDim=2, localDE=0, &
           staggerloc=ESMF_STAGGERLOC_CENTER, &
           computationalLBound=lbnd, computationalUBound=ubnd, fptr=coordY, rc=rc)
 
@@ -488,15 +492,16 @@ if (petCount .le. 6) then
    ! will have global coordinates.  Note that aperiodic bounds are
    ! specified by default - if periodic bounds were desired they
    ! would need to be specified using an additional gridConn argument
-   ! (which isn't implemented yet).
+   ! (which isn't implemented yet). In this call the minIndex hasn't 
+   ! been set, so it defaults to (1,1,...).
    !-------------------------------------------------------------------
    grid2D=ESMF_GridCreateShapeTile(          &
             ! Define an irregular distribution
             countsPerDEDim1=(/3,7/),     &
             countsPerDEDim2=(/11,2,7/),   &
             ! Specify mapping of coords dim to Grid dim
-            coordDep1=(/1/), &
-            coordDep2=(/2/), &
+            coordDep1=(/1/), & ! 1st coord is 1D and depends on 1st Grid dim
+            coordDep2=(/2/), & ! 2nd coord is 1D and depends on 2nd Grid dim
             indexflag=ESMF_INDEX_GLOBAL, & 
             rc=rc)
 
@@ -512,7 +517,7 @@ if (petCount .le. 6) then
    ! Get the pointer to the first coordinate array and the bounds
    ! of its global indices on the local DE.   
    !-------------------------------------------------------------------
-   call ESMF_GridGetCoord(grid2D, coordDim=1, &
+   call ESMF_GridGetCoord(grid2D, coordDim=1, localDE=0, &
           staggerloc=ESMF_STAGGERLOC_CENTER, &
           computationalLBound=lbnd, computationalUBound=ubnd, fptr=coordX, rc=rc)
 
@@ -527,7 +532,7 @@ if (petCount .le. 6) then
    ! Get the pointer to the second coordinate array and the bounds of
    ! its global indices on the local DE.
    !-------------------------------------------------------------------
-   call ESMF_GridGetCoord(grid2D, coordDim=2, &
+   call ESMF_GridGetCoord(grid2D, coordDim=2, localDE=0, &
           staggerloc=ESMF_STAGGERLOC_CENTER, &
           computationalLBound=lbnd, computationalUBound=ubnd, fptr=coordY, rc=rc)
 
@@ -574,15 +579,19 @@ if (petCount .le. 6) then
    !-------------------------------------------------------------------
    ! Create the Grid:  Allocate space for the Grid object, define the
    ! distribution of the Grid, and specify that it 
-   ! will have global coordinates.  Note that aperiodic bounds are
+   ! will have global indices.  Note that aperiodic bounds are
    ! specified by default - if periodic bounds were desired they
    ! would need to be specified using an additional gridConn argument
-   ! (which isn't implemented yet).
+   ! (which isn't implemented yet). In this call the minIndex hasn't 
+   ! been set, so it defaults to (1,1,...). 
    !-------------------------------------------------------------------
-   grid2D=ESMF_GridCreateShapeTile(          &
+   grid2D=ESMF_GridCreateShapeTile(      &
             ! Define an irregular distribution
             countsPerDEDim1=(/3,7/),     &
-            countsPerDEDim2=(/11,2,7/),   &
+            countsPerDEDim2=(/11,2,7/),  &
+            ! Specify mapping of coords dim to Grid dim
+            coordDep1=(/1,2/), & ! 1st coord is 2D and depends on both Grid dim
+            coordDep2=(/1,2/), & ! 2nd coord is 1D and depends on both Grid dim
             indexflag=ESMF_INDEX_GLOBAL, &
             rc=rc)
 
@@ -657,17 +666,20 @@ endif
    ! 40 Grid cells in the third dimension (e.g. height).  The first dimension is
    ! decomposed over 4 DEs, the second over 3 DEs, and the third is 
    ! not distributed.  The connectivities in each dimension default 
-   ! to aperiodic since they are not yet implemented. 
+   ! to aperiodic since they are not yet implemented. In this call the 
+   ! minIndex hasn't been set, so it defaults to (1,1,...). 
    !-------------------------------------------------------------------
-   grid3D=ESMF_GridCreateShapeTile(               &
-              countsPerDEDim1=(/45,75,40,20/),    &
-              countsPerDEDim2=(/30,40,20/),       &
-              countsPerDEDim3=(/40/),             &
-              coordDep1=(/1/),                    &
-              coordDep2=(/2/),                    &
-              coordDep3=(/3/),                    &
-              indexflag=ESMF_INDEX_GLOBAL,        & ! Use global indices
-              rc=rc)
+   grid3D=ESMF_GridCreateShapeTile(          &
+            ! Define an irregular distribution
+            countsPerDEDim1=(/45,75,40,20/), &
+            countsPerDEDim2=(/30,40,20/),    &
+            countsPerDEDim3=(/40/),          &
+            ! Specify mapping of coords dim to Grid dim
+            coordDep1=(/1/), & ! 1st coord is 1D and depends on 1st Grid dim
+            coordDep2=(/2/), & ! 2nd coord is 1D and depends on 2nd Grid dim
+            coordDep3=(/3/), & ! 3rd coord is 1D and depends on 3rd Grid dim
+            indexflag=ESMF_INDEX_GLOBAL,   & ! Use global indices
+            rc=rc)
 
    !-------------------------------------------------------------------
    ! Allocate coordinate storage for both center and corner stagger
@@ -779,10 +791,6 @@ endif
 
       !----------------------------------------------------------------
       ! Calculate and set the vertical coordinates
-      ! Note that the centerZ array needs to be 3D because currently
-      ! all coordinate arrays must each have the same dimension as the 
-      ! grid, but because the coordinate is rectilinear we only need to 
-      ! store a 1D array.
       !----------------------------------------------------------------
       do k=lbnd(1),ubnd(1)
          centerZ(k) = 4000.0*( (1./39.)*(k-1)  )**2
