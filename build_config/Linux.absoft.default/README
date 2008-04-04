@@ -4,3 +4,7 @@ GNU C++ compiler (g++).
 Requires the following environment settings:
 
 ESMF_COMPILER absoft
+
+Absofts precompiled version of LAPACK is assumed to be available.  If it is not,
+an alternative path may be provided by setting the ESMF_LAPACKPATH environment
+variable.

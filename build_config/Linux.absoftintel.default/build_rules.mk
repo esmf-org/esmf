@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.5 2007/08/01 05:36:40 theurich Exp $
+# $Id: build_rules.mk,v 1.6 2008/04/04 18:49:58 w6ws Exp $
 #
 # Linux.absoftintel.default
 #
@@ -69,7 +69,7 @@ endif
 ############################################################
 # Print compiler version string
 #
-ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v
 
 ############################################################
@@ -95,6 +95,15 @@ endif
 #
 ESMF_F90COMPILEFREENOCPP = -ffree
 ESMF_F90COMPILEFIXCPP    = -ffixed
+
+############################################################
+# Add LAPACK libraries
+#
+# Use the Absoft version of LAPACK
+#
+ESMF_LAPACK         = Absoft
+# ESMF_LAPACK_LIBPATH =
+ESMF_LAPACK_LIBS    = -llapack -lblas
 
 ############################################################
 # Determine where absoft f90's libraries are located
