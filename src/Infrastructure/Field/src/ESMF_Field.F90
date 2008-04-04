@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.272.2.20 2008/03/27 23:36:43 theurich Exp $
+! $Id: ESMF_Field.F90,v 1.272.2.21 2008/04/04 19:54:01 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -104,16 +104,16 @@ module ESMF_FieldMod
     sequence
     !private
     type (ESMF_Base)              :: base             ! base class object
+    type (ESMF_Array)             :: array
+    type (ESMF_Grid)              :: grid
     type (ESMF_Status)            :: fieldstatus
     type (ESMF_Status)            :: gridstatus
     type (ESMF_Status)            :: datastatus
-    type (ESMF_Grid)              :: grid
     type (ESMF_IOSpec)            :: iospec           ! iospec values
     type (ESMF_Status)            :: iostatus         ! if unset, inherit from gcomp
-    type (ESMF_Array)             :: array
     type (ESMF_StaggerLoc)        :: staggerloc
-    logical                       :: array_internal   ! .true. if field%array has 
-                                                      ! no external reference
+    logical                       :: array_internal   ! .true. if field%array is
+                                                      ! internally allocated
     integer                       :: gridToFieldMap(ESMF_MAXDIM)
     integer                       :: ungriddedLBound(ESMF_MAXDIM)
     integer                       :: ungriddedUBound(ESMF_MAXDIM)
@@ -182,7 +182,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.272.2.20 2008/03/27 23:36:43 theurich Exp $'
+    '$Id: ESMF_Field.F90,v 1.272.2.21 2008/04/04 19:54:01 feiliu Exp $'
 
 !==============================================================================
 !
