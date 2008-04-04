@@ -1,4 +1,4 @@
-! $Id: ESMF_HaloUTest.F90,v 1.6 2007/08/30 05:06:40 cdeluca Exp $
+! $Id: ESMF_HaloUTest.F90,v 1.6.2.1 2008/04/04 16:17:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_HaloUTest.F90,v 1.6 2007/08/30 05:06:40 cdeluca Exp $'
+      '$Id: ESMF_HaloUTest.F90,v 1.6.2.1 2008/04/04 16:17:37 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -120,7 +120,7 @@
       write(failMsg, *) "Validating constant data in dest fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-#if ESMF_EXHAUSTIVE
+#if ESMF_TESTEXHAUSTIVE
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! fill computational area of field with known data

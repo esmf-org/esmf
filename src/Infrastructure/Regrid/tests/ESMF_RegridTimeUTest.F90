@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RegridTimeUTest.F90,v 1.10 2007/08/17 18:29:03 cdeluca Exp $'
+      '$Id: ESMF_RegridTimeUTest.F90,v 1.10.2.1 2008/04/04 16:17:35 theurich Exp $'
 !------------------------------------------------------------------------------
 
     integer :: lrc,iFunction
@@ -86,7 +86,7 @@
     call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:),regridmethod=ESMF_REGRID_METHOD_BILINEAR)
     call ESMF_Test((sub_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
 
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
    !--------------------------------
    !EX_removeUTest
    ! Verify that ESMF_VMWtime works (we are going to use it to verify that

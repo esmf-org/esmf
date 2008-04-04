@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.25 2007/03/31 05:51:27 cdeluca Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.25.2.1 2008/04/04 16:17:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.25 2007/03/31 05:51:27 cdeluca Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.25.2.1 2008/04/04 16:17:42 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -125,7 +125,7 @@
       print *, "startTime = ", timeString
 
 
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
 
       ! ----------------------------------------------------------------------------
       !EX_UTest

@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.201.2.4 2008/03/28 23:16:10 theurich Exp $
+#  $Id: common.mk,v 1.201.2.5 2008/04/04 16:17:04 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -132,20 +132,12 @@ ifndef ESMF_OPTLEVEL
 export ESMF_OPTLEVEL = default
 endif
 
-ifndef ESMF_EXHAUSTIVE
-export ESMF_EXHAUSTIVE = default
-endif
-
 ifndef ESMF_SITE
 export ESMF_SITE = default
 endif
 
 ifndef ESMF_PTHREADS
 export ESMF_PTHREADS = $(ESMF_PTHREADSDEFAULT)
-endif
-
-ifndef ESMF_TESTWITHTHREADS
-export ESMF_TESTWITHTHREADS = default
 endif
 
 ifndef ESMF_ARRAY_LITE
@@ -162,6 +154,18 @@ endif
 
 ifndef ESMF_FORTRANSYMBOLS
 export ESMF_FORTRANSYMBOLS = default
+endif
+
+ifndef ESMF_TESTEXHAUSTIVE
+export ESMF_TESTEXHAUSTIVE = default
+endif
+
+ifndef ESMF_TESTWITHTHREADS
+export ESMF_TESTWITHTHREADS = default
+endif
+
+ifndef ESMF_TESTMPMD
+export ESMF_TESTMPMD = default
 endif
 
 #-------------------------------------------------------------------------------
@@ -266,14 +270,6 @@ ifeq ($(ESMF_BOPT),default)
 export ESMF_BOPT = O
 endif
 
-ifneq ($(ESMF_EXHAUSTIVE),ON)
-export ESMF_EXHAUSTIVE = OFF
-endif
-
-ifneq ($(ESMF_TESTWITHTHREADS),ON)
-export ESMF_TESTWITHTHREADS = OFF
-endif
-
 ifneq ($(ESMF_ARRAY_LITE),TRUE)
 export ESMF_ARRAY_LITE = FALSE
 endif
@@ -284,6 +280,18 @@ endif
 
 ifneq ($(ESMF_NO_INTEGER_2_BYTE),TRUE)
 export ESMF_NO_INTEGER_2_BYTE = FALSE
+endif
+
+ifneq ($(ESMF_TESTEXHAUSTIVE),ON)
+export ESMF_TESTEXHAUSTIVE = OFF
+endif
+
+ifneq ($(ESMF_TESTWITHTHREADS),ON)
+export ESMF_TESTWITHTHREADS = OFF
+endif
+
+ifneq ($(ESMF_TESTMPMD),ON)
+export ESMF_TESTMPMD = OFF
 endif
 
 #-------------------------------------------------------------------------------
@@ -418,8 +426,8 @@ TESTS_CONFIG        = $(ESMF_TESTDIR)/tests.config
 ESMF_TESTSCRIPTS    = $(ESMF_DIR)/scripts/test_scripts
 DO_UT_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ut_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
 DO_EX_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ex_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
-DO_ST_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_st_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
-DO_SUM_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_summary.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) -b $(ESMF_BOPT)
+DO_ST_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_st_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) -m $(ESMF_TESTMPMD)
+DO_SUM_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_summary.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) -b $(ESMF_BOPT) -m $(ESMF_TESTMPMD)
 DO_UTC_RESULTS	    = $(ESMF_UTCSCRIPTS)/do_utc_results.pl -h $(ESMF_UTCSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) -e $(ESMF_MAX_PROCS)
 
 # C specific variables
@@ -694,6 +702,14 @@ endif
 ESMF_CXXCOMPILEPATHSLOCAL += -I$(ESMF_DIR)/src/Infrastructure/stubs/pthread
 
 #-------------------------------------------------------------------------------
+# ESMF_TESTEXHAUSTIVE is passed (by CPP) into test programs to control the
+# number of tests that a test program will do.
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_TESTEXHAUSTIVE),ON) 
+CPPFLAGS       += -DESMF_TESTEXHAUSTIVE 
+endif
+
+#-------------------------------------------------------------------------------
 # ESMF_TESTWITHTHREADS is passed (by CPP) into test programs to control the
 # dependency on ESMF-threading.
 #-------------------------------------------------------------------------------
@@ -702,11 +718,11 @@ CPPFLAGS       += -DESMF_TESTWITHTHREADS
 endif
 
 #-------------------------------------------------------------------------------
-# ESMF_EXHAUSTIVE is passed (by CPP) into test programs to control the number 
-# of tests that a test program will do.
+# ESMF_TESTWITHTHREADS is passed (by CPP) into test programs to control the
+# dependency on ESMF-threading.
 #-------------------------------------------------------------------------------
-ifeq ($(ESMF_EXHAUSTIVE),ON) 
-CPPFLAGS       += -DESMF_EXHAUSTIVE 
+ifeq ($(ESMF_TESTMPMD),ON)
+CPPFLAGS       += -DESMF_TESTMPMD
 endif
 
 #-------------------------------------------------------------------------------
@@ -1085,11 +1101,11 @@ ALLTEST_TARGETS_UNI = $(TEST_TARGETS_UNI) \
 # TODO: a bit more on what eventually these targets should be:
 #
 # according to the GNU conventions, 'gmake check' should test the build.
-# so check builds and runs the unit and system tests with EXHAUSTIVE pinned off.
-# this does a cursory check, not a full, exhaustive check.
+# so check builds and runs the unit and system tests with TESTEXHAUSTIVE
+# pinned off.  this does a cursory check, not a full, exhaustive check.
 #
 # 'gmake all_tests' makes and runs the full set of tests, respecting the user
-# setting for EXHAUSTIVE.  it runs the unit tests, system tests, examples,
+# setting for TESTEXHAUSTIVE.  it runs the unit tests, system tests, examples,
 # and the demo.
 #
 # 'gmake validate' should probably do some numerical validation to make
@@ -1098,7 +1114,7 @@ ALLTEST_TARGETS_UNI = $(TEST_TARGETS_UNI) \
 # just runs the unit tests.
 #
 
-# quick sanity check, defaulting to EXHAUSTIVE OFF but respecting
+# quick sanity check, defaulting to TESTEXHAUSTIVE OFF but respecting
 # the user setting if it already has a value.
 check:
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
@@ -1124,7 +1140,7 @@ clean_check:
 	$(MAKE) clean_unit_tests clean_system_tests
 
 
-# all tests, respecting user setting of EXHAUSTIVE
+# all tests, respecting user setting of TESTEXHAUSTIVE
 all_tests: 
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
 	  $(MAKE) info $(ALLTEST_TARGETS_UNI) results_summary ;\
@@ -1668,7 +1684,7 @@ tree_run_unit_tests_uni: $(TESTS_RUN_UNI)
 #
 config_unit_tests:
 	@echo "# This file used by test scripts, please do not delete." > $(TESTS_CONFIG)
-ifeq ($(ESMF_EXHAUSTIVE),ON) 
+ifeq ($(ESMF_TESTEXHAUSTIVE),ON) 
 ifeq ($(MULTI),) 
 	@echo "Last built Exhaustive ;  Last run Noprocessor" >> $(TESTS_CONFIG)
 else
@@ -1685,13 +1701,13 @@ endif
 #
 # verify that either there is no TESTS_CONFIG file, or if one exists that
 # the string Exhaustive or Non-exhaustive matches the current setting of the
-# ESMF_EXHAUSTIVE environment variable.  this is used when trying to run
+# ESMF_TESTEXHAUSTIVE environment variable.  this is used when trying to run
 # already-built unit tests, to be sure the user has not changed the setting
 # of exhaustive and then assumed that it will take effect.  unfortunately at
 # this time, the flag is compile-time and not run-time.   
 #
 verify_exhaustive_flag:
-ifeq ($(ESMF_EXHAUSTIVE),ON) 
+ifeq ($(ESMF_TESTEXHAUSTIVE),ON) 
 	@$(MAKE) UNIT_TEST_STRING="Exhaustive" exhaustive_flag_check
 else
 	@$(MAKE) UNIT_TEST_STRING="Non-exhaustive" exhaustive_flag_check
@@ -1700,25 +1716,25 @@ endif
 exhaustive_flag_check:
 	@if [ -s $(TESTS_CONFIG) -a \
 	     `$(ESMF_SED) -ne '/$(UNIT_TEST_STRING)/p' $(TESTS_CONFIG) | $(ESMF_WC) -l` -ne 1 ] ; then \
-	  echo "The ESMF_EXHAUSTIVE environment variable is a compile-time control for" ;\
+	  echo "The ESMF_TESTEXHAUSTIVE environment variable is a compile-time control for" ;\
           echo "whether a basic set or an exhaustive set of tests are built." ;\
 	  echo "" ;\
-	  echo "The current setting of ESMF_EXHAUSTIVE is \"$(ESMF_EXHAUSTIVE)\", which" ;\
+	  echo "The current setting of ESMF_TESTEXHAUSTIVE is \"$(ESMF_TESTEXHAUSTIVE)\", which" ;\
 	  echo "is not the same as when the unit tests were last built." ;\
 	  echo "(This is based on the contents of the file:" ;\
           echo "$(TESTS_CONFIG) ";\
 	  echo "which contains: `$(ESMF_SED) -e '1d' $(TESTS_CONFIG)` )." ;\
 	  echo "" ;\
-	  echo "To rebuild and run the unit tests with the current ESMF_EXHAUSTIVE value, run:" ;\
+	  echo "To rebuild and run the unit tests with the current ESMF_TESTEXHAUSTIVE value, run:" ;\
 	  echo "   $(MAKE) clean_unit_tests unit_tests"  ;\
-	  echo "or change ESMF_EXHAUSTIVE to ON or OFF to match the build-time value." ;\
+	  echo "or change ESMF_TESTEXHAUSTIVE to ON or OFF to match the build-time value." ;\
 	  echo "" ;\
 	  $(MAKE) err ;\
 	fi
 
 # call clean only if flags do not match
 clean_if_exhaustive_flag_mismatch:
-ifeq ($(ESMF_EXHAUSTIVE),ON) 
+ifeq ($(ESMF_TESTEXHAUSTIVE),ON) 
 	@$(MAKE) UNIT_TEST_STRING="Exhaustive" exhaustive_flag_clobber
 else
 	@$(MAKE) UNIT_TEST_STRING="Non-exhaustive" exhaustive_flag_clobber

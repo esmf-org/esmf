@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.22 2008/04/03 16:38:32 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.23 2008/04/04 16:17:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -66,7 +66,7 @@
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
  
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create an empty field

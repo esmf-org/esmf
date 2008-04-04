@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterUTest.F90,v 1.30.2.1 2008/04/02 03:55:45 theurich Exp $
+! $Id: ESMF_ArrayScatterUTest.F90,v 1.30.2.2 2008/04/04 16:17:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArrayScatterUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayScatterUTest.F90,v 1.30.2.1 2008/04/02 03:55:45 theurich Exp $'
+    '$Id: ESMF_ArrayScatterUTest.F90,v 1.30.2.2 2008/04/04 16:17:19 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -62,7 +62,7 @@ program ESMF_ArrayScatterUTest
   real(ESMF_KIND_R4), pointer :: farrayPtr_R4(:,:)     ! matching F90 array pointer
   real(ESMF_KIND_R4), allocatable :: srcfarray_R4(:,:)
   real(ESMF_KIND_R4):: value_R4
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
   integer:: k, kk, ii, jj, dimExtent1, dimExtent2
   integer, allocatable:: indexList1(:), indexList2(:)
   real(ESMF_KIND_R8), pointer :: farrayPtr3d(:,:,:) ! matching F90 array pointer
@@ -128,7 +128,7 @@ print *, min_R4, min_R8
   call ESMF_ArrayScatter(array, srcfarray_R4, rootPet=0, rc=rc)
   call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "2D ESMF_TYPEKIND_R8 ArrayScatter() w/ incompatible Fortran Array (rank) Test"
@@ -423,7 +423,7 @@ print *, min_R4, min_R8
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   deallocate(srcfarray)
 
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
 
   !------------------------------------------------------------------------
   ! preparations for testing ArrayScatter() for a 

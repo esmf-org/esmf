@@ -1,4 +1,4 @@
-! $Id: ESMF_CompSetServUTest.F90,v 1.8 2007/08/23 17:16:03 cdeluca Exp $
+! $Id: ESMF_CompSetServUTest.F90,v 1.8.2.1 2008/04/04 16:17:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -106,7 +106,7 @@
 
 
 
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest

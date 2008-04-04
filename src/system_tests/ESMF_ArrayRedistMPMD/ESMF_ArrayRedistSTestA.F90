@@ -1,7 +1,7 @@
-! $Id: ESMF_ArrayRedistSTestA.F90,v 1.1.2.1 2008/03/28 23:17:52 theurich Exp $
+! $Id: ESMF_ArrayRedistSTestA.F90,v 1.1.2.2 2008/04/04 16:17:58 theurich Exp $
 !
 !-------------------------------------------------------------------------
-!ESMF_SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_MPMD_SYSTEM_TEST   String used by test script to count system tests.
 !=========================================================================
 
 ! ************************************************************************

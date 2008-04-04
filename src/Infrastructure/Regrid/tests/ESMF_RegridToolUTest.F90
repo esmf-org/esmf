@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridToolUTest.F90,v 1.10 2007/03/31 05:51:20 cdeluca Exp $
+! $Id: ESMF_RegridToolUTest.F90,v 1.10.2.1 2008/04/04 16:17:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -33,10 +33,10 @@
     !--- Get number of PETs we are running with
     call ESMF_VMGet(vm, petCount=npets, localPET=localPet,  rc=lrc)
 
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
     ! Added the following string for the nightly build scripts
     !UTest_EX
-    ! Get the test list file only if ESMF_EXHAUSTIVE = ON
+    ! Get the test list file only if ESMF_TESTEXHAUSTIVE = ON
     call readTestList(testListFile ="ESMF_RegridTestList.rc", npets=npets, rc=lrc)
 
 #endif

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1.2.2 2008/04/01 23:06:21 theurich Exp $ 
+# $Id: makefile,v 1.1.2.3 2008/04/04 16:17:59 theurich Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -24,7 +24,11 @@ SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_ArrayRedistSTestA $(ESMC_TESTDIR)/E
 SYSTEM_TESTS_OBJ_A    = user_model1.o user_coupler.o
 SYSTEM_TESTS_OBJ_B    = user_model2.o user_coupler.o
 
+ifeq ($(ESMF_TESTMPMD),ON)
 SYSTEM_TESTS_RUN      = RUN_ArrayRedistMPMD
+else
+SYSTEM_TESTS_RUN      =
+endif
 
 SYSTEM_TESTS_RUN_UNI  =
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: do_summary.pl,v 1.6 2006/03/07 20:48:00 svasquez Exp $
+# $Id: do_summary.pl,v 1.6.4.1 2008/04/04 16:17:13 theurich Exp $
 # This prints a summary of system tests, unit tests and examples.
 # The script calls sys_tests_results, examples_results and 
 # unit_tests_results with the summary option turned on,
@@ -17,13 +17,14 @@
 use Getopt::Std;
 use Cwd;
 
-getopts("h:d:e:b:", \%options); 
+getopts("h:d:e:b:m:", \%options); 
 
 
 	$ESMF_TESTSCRIPTS = "$options{h}"; 
 	$TEST_DIR = "$options{d}"; 
 	$EX_DIR = "$options{e}"; 
 	$ESMF_BOPT = "$options{b}";
+	$ESMF_TESTMPMD = "$options{m}";
 
 
 #
@@ -41,7 +42,7 @@ require "unit_tests_results.pl";
 $dir = cwd();
 
 # Call sys_tests_result with SUMMARY request turned on.
-&sys_tests_results("$TEST_DIR","$ESMF_BOPT","1");
+&sys_tests_results("$TEST_DIR","$ESMF_BOPT","1","$ESMF_TESTMPMD");
 
 # Go back tp pwd
 chdir $dir;

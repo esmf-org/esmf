@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteUTest.F90,v 1.12 2007/08/30 20:05:43 cdeluca Exp $
+! $Id: ESMF_RouteUTest.F90,v 1.12.2.1 2008/04/04 16:17:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RouteUTest.F90,v 1.12 2007/08/30 20:05:43 cdeluca Exp $'
+      '$Id: ESMF_RouteUTest.F90,v 1.12.2.1 2008/04/04 16:17:38 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -167,7 +167,7 @@
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
       !------------------------------------------------------------------------
       !EX_removeUTest_Multi_Proc_Only
       ! destroy a destroyed Route

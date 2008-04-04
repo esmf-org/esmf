@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.106.2.10 2008/04/03 16:38:32 feiliu Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.106.2.11 2008/04/04 16:17:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.106.2.10 2008/04/03 16:38:32 feiliu Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.106.2.11 2008/04/04 16:17:24 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -122,7 +122,7 @@
       write(name, *) "Destroying a Field with no data Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only

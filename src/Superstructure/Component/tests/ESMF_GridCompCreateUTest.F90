@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompCreateUTest.F90,v 1.21 2007/08/23 17:16:03 cdeluca Exp $
+! $Id: ESMF_GridCompCreateUTest.F90,v 1.21.2.1 2008/04/04 16:17:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -91,7 +91,7 @@
     write(name, *) "Destroying a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
 
 !-------------------------------------------------------------------------
 !   !

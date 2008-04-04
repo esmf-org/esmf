@@ -110,7 +110,7 @@ contains
 !
 ! !DESCRIPTION:
 ! Routine opens the top level config file "test_harness.rc", which specifies the 
-! test class, the reporting style, and depending on how the ESMF_EXHAUSTIVE flag
+! test class, the reporting style, and depending on how the ESMF_TESTEXHAUSTIVE flag
 ! is set, extracts the list of files containing the problem descriptor strings.
 !
 
@@ -209,7 +209,7 @@ contains
   ! based on whether exhaustive or nonexhaustive tests are to be run,  find 
   ! and load the problem descriptor file names
   !--------------------------------------------------------------------------
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
   ltag = 'exhaustive::'
   print *, "exhaustive"
 #else

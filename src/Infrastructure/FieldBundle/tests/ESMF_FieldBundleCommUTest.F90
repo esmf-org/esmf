@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCommUTest.F90,v 1.1.2.1 2008/04/03 05:54:16 cdeluca Exp $
+! $Id: ESMF_FieldBundleCommUTest.F90,v 1.1.2.2 2008/04/04 16:17:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleCommUTest.F90,v 1.1.2.1 2008/04/03 05:54:16 cdeluca Exp $'
+      '$Id: ESMF_FieldBundleCommUTest.F90,v 1.1.2.2 2008/04/04 16:17:25 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -51,7 +51,7 @@
       type(ESMF_RouteHandle) :: rh
       integer :: nroutes
 
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
       ! try to avoid "unused variable" warnings from some of our compilers.
       type(ESMF_FieldBundle) :: nobundle
       type(ESMF_Field) :: nofield
@@ -233,7 +233,7 @@
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
 
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
 
       !------------------------------------------------------------------------
 

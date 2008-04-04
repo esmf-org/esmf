@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.83.2.2 2008/03/13 00:15:24 theurich Exp $
+# $Id: makefile,v 1.83.2.3 2008/04/04 16:17:02 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -88,7 +88,6 @@ script_info:
 	  echo "ESMF_OPTLEVEL:          $(ESMF_OPTLEVEL)" ; fi
 	-@echo "ESMF_COMM:              $(ESMF_COMM)"
 	-@echo "ESMF_SITE:              $(ESMF_SITE)"
-	-@echo "ESMF_EXHAUSTIVE:        $(ESMF_EXHAUSTIVE)"
 	-@if [ -n "$(ESMF_BATCH)" ] ; then \
 	  echo "ESMF_BATCH:             $(ESMF_BATCH)" ; fi
 	-@if [ -n "$(ESMF_BATCHOPTIONS)" ] ; then \
@@ -96,11 +95,13 @@ script_info:
 	-@if [ -n "$(ESMF_MPIRUNOPTIONS)" ] ; then \
 	  echo "ESMF_MPIRUNOPTIONS:     $(ESMF_MPIRUNOPTIONS)" ; fi
 	-@echo "ESMF_PTHREADS:          $(ESMF_PTHREADS)"
-	-@echo "ESMF_TESTWITHTHREADS:   $(ESMF_TESTWITHTHREADS)"
 	-@echo "ESMF_ARRAY_LITE:        $(ESMF_ARRAY_LITE)"
 	-@echo "ESMF_NO_INTEGER_1_BYTE: $(ESMF_NO_INTEGER_1_BYTE)"
 	-@echo "ESMF_NO_INTEGER_2_BYTE: $(ESMF_NO_INTEGER_2_BYTE)"
 	-@echo "ESMF_FORTRANSYMBOLS:    $(ESMF_FORTRANSYMBOLS)"
+	-@echo "ESMF_TESTEXHAUSTIVE:    $(ESMF_TESTEXHAUSTIVE)"
+	-@echo "ESMF_TESTWITHTHREADS:   $(ESMF_TESTWITHTHREADS)"
+	-@echo "ESMF_TESTMPMD:          $(ESMF_TESTMPMD)"
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
 	-@echo " * ESMF environment variables pointing to 3rd party software *"
@@ -217,7 +218,6 @@ info_mk:
 	  echo "# ESMF_OPTLEVEL: $(ESMF_OPTLEVEL)" >> $(MKINFO) ; fi
 	-@echo "# ESMF_COMM: $(ESMF_COMM)" >> $(MKINFO)
 	-@echo "# ESMF_SITE: $(ESMF_SITE)" >> $(MKINFO)
-	-@echo "# ESMF_EXHAUSTIVE: $(ESMF_EXHAUSTIVE)" >> $(MKINFO)
 	-@if [ -n "$(ESMF_BATCH)" ] ; then \
 	  echo "# ESMF_BATCH: $(ESMF_BATCH)" >> $(MKINFO) ; fi
 	-@if [ -n "$(ESMF_BATCHOPTIONS)" ] ; then \
@@ -225,11 +225,13 @@ info_mk:
 	-@if [ -n "$(ESMF_MPIRUNOPTIONS)" ] ; then \
 	  echo "# ESMF_MPIRUNOPTIONS: $(ESMF_MPIRUNOPTIONS)" >> $(MKINFO) ; fi
 	-@echo "# ESMF_PTHREADS: $(ESMF_PTHREADS)" >> $(MKINFO)
-	-@echo "# ESMF_TESTWITHTHREADS: $(ESMF_TESTWITHTHREADS)" >> $(MKINFO)
 	-@echo "# ESMF_ARRAY_LITE: $(ESMF_ARRAY_LITE)" >> $(MKINFO)
 	-@echo "# ESMF_NO_INTEGER_1_BYTE: $(ESMF_NO_INTEGER_1_BYTE)" >> $(MKINFO)
 	-@echo "# ESMF_NO_INTEGER_2_BYTE: $(ESMF_NO_INTEGER_2_BYTE)" >> $(MKINFO)
 	-@echo "# ESMF_FORTRANSYMBOLS: $(ESMF_FORTRANSYMBOLS)" >> $(MKINFO)
+	-@echo "# ESMF_TESTEXHAUSTIVE: $(ESMF_TESTEXHAUSTIVE)" >> $(MKINFO)
+	-@echo "# ESMF_TESTWITHTHREADS: $(ESMF_TESTWITHTHREADS)" >> $(MKINFO)
+	-@echo "# ESMF_TESTMPMD: $(ESMF_TESTMPMD)" >> $(MKINFO)
 	-@echo "# " >> $(MKINFO)
 	-@echo "# ESMF environment variables pointing to 3rd party software:" >> $(MKINFO)
 	-@if [ -n "$(ESMF_NETCDF_INCLUDE)" ] ; then \

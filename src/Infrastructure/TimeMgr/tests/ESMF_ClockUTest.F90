@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.103 2007/07/13 18:00:59 samsoncheung Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.103.2.1 2008/04/04 16:17:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.103 2007/07/13 18:00:59 samsoncheung Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.103.2.1 2008/04/04 16:17:41 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -161,7 +161,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
 
-#ifdef ESMF_EXHAUSTIVE 
+#ifdef ESMF_TESTEXHAUSTIVE 
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
