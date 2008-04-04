@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.20 2008/04/03 16:21:12 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.21 2008/04/04 15:54:35 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -120,43 +120,45 @@
 
     print *, "Field creation from Grid and Arrayspec returned"
 
-!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
-!-------------------------------- Example -----------------------------
-!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
-!BremoveOE
-!\subsubsection{Use ESMF\_ArrayCreate to reset Field internal Array}
-!  It's often necessary to reset the data array contained within a field.
-!  The following example demonstrates how to create a compliant {\tt ESMF\_Array}
-!  and reset the existing {\tt ESMF\_Array} of a {\tt ESMF\_Field}.
-!  User can reset the {\tt ESMF\_Array} inside an existing Field by construct a proper
-!  shape {\tt ESMF\_Array}. 
-!  arrayspec, distgrid are objects created from previous examples.
-!EremoveOE
-!-------------------------------------------------------------------------
-!   !
-!   ! The user can substitute another array created by ArrayCreate in field1.
-!   ! This example
-!   ! makes it clear that field1's array has a computational region smaller
-!   ! than its exclusive region.
-!BremoveOC
-    call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-        computationalEdgeLWidth=compEdgeLWdith, &
-        computationalEdgeUWidth=compEdgeUWdith, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    array2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, staggerLoc=0, &
-            computationalEdgeLWidth=compEdgeLWdith, &
-            computationalEdgeUWidth=compEdgeUWdith, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    call ESMF_FieldSet(field1, array2, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!EremoveOC
-    print *, "Field reset internal array through ArrayCreate returned"
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+! The following example is removed when FieldSetArray is removed
+! Final removal pending.
+!!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!!-------------------------------- Example -----------------------------
+!!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!!BremoveOE
+!!\subsubsection{Use ESMF\_ArrayCreate to reset Field internal Array}
+!!  It's often necessary to reset the data array contained within a field.
+!!  The following example demonstrates how to create a compliant {\tt ESMF\_Array}
+!!  and reset the existing {\tt ESMF\_Array} of a {\tt ESMF\_Field}.
+!!  User can reset the {\tt ESMF\_Array} inside an existing Field by construct a proper
+!!  shape {\tt ESMF\_Array}. 
+!!  arrayspec, distgrid are objects created from previous examples.
+!!EremoveOE
+!!-------------------------------------------------------------------------
+!!   !
+!!   ! The user can substitute another array created by ArrayCreate in field1.
+!!   ! This example
+!!   ! makes it clear that field1's array has a computational region smaller
+!!   ! than its exclusive region.
+!!BremoveOC
+!    call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+!        computationalEdgeLWidth=compEdgeLWdith, &
+!        computationalEdgeUWidth=compEdgeUWdith, rc=rc)
+!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!
+!    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc)
+!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!
+!    array2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, staggerLoc=0, &
+!            computationalEdgeLWidth=compEdgeLWdith, &
+!            computationalEdgeUWidth=compEdgeUWdith, rc=rc)
+!    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!
+!    call ESMF_FieldSet(field1, array2, rc=rc)
+!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!!EremoveOC
+!    print *, "Field reset internal array through ArrayCreate returned"
+!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
@@ -168,6 +170,23 @@
 !EOE
 
 !BOC
+    ! Get necessary information from the Grid
+    call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+        computationalEdgeLWidth=compEdgeLWdith, &
+        computationalEdgeUWidth=compEdgeUWdith, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! Create a 2D ESMF_TYPEKIND_R4 arrayspec
+    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! Create a ESMF_Array from the arrayspec and distgrid
+    array2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, staggerLoc=0, &
+            computationalEdgeLWidth=compEdgeLWdith, &
+            computationalEdgeUWidth=compEdgeUWdith, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! Create a ESMF_Field from the grid and array
     field4 = ESMF_FieldCreate(grid, array2, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
