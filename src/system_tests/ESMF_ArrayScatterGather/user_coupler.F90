@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.1.2.3 2008/04/01 00:26:08 theurich Exp $
+! $Id: user_coupler.F90,v 1.1.2.4 2008/04/04 22:51:10 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -75,7 +75,6 @@ module user_coupler
     integer, intent(out) :: rc
 
     ! Local variables
-    integer :: itemcount
     type(ESMF_Array) :: srcArray1, srcArray2
     integer          :: srcF90(100,150)
     type(ESMF_VM) :: vm

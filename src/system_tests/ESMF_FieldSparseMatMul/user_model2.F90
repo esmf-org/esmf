@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.3.2.3 2008/04/02 03:55:47 theurich Exp $
+! $Id: user_model2.F90,v 1.3.2.4 2008/04/04 22:51:13 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -81,7 +81,6 @@ module user_model2
     type(ESMF_Field)      :: field
     type(ESMF_VM)         :: vm
     integer               :: petCount
-    real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
     
     ! Initialize return code
     rc = ESMF_SUCCESS
