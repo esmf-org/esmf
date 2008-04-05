@@ -1,7 +1,7 @@
-// $Id: ESMC_Rebalance.C,v 1.10 2007/11/28 16:45:55 dneckels Exp $
+// $Id: ESMC_Rebalance.C,v 1.7.2.1 2008/04/05 03:13:19 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -17,9 +17,10 @@
 #include <ESMC_MeshField.h>
 
 
-#include <Zoltan/zoltan.h>
+#include <Mesh/src/Zoltan/zoltan.h>
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 static bool form_rebalance_comm(Mesh &mesh, CommReg &migration);
 
@@ -29,71 +30,11 @@ static void set_new_elem_owners(Mesh &mesh, CommReg &migration);
 
 static void build_obj_migration(Mesh &mesh, CommReg &migration, UInt obj_type);
 
-/*
- * Set everyone to !SHARED, and set owner based on get_owner.
- */
-static void resolve_rebalance_ownership(Mesh &mesh) {
-  
-  UInt rank = Par::Rank();
-  
-  Mesh::iterator oi = mesh.obj_begin_all(), oe = mesh.obj_end_all(), on;
-  
-  for (; oi != oe; ) {
-    
-    on = oi; ++on;
-    
-    MeshObj &obj = *oi;
-    const Context &ctxt = GetMeshObjContext(obj);
-  
-    bool lowned = rank == obj.get_owner();
-    
-    if (ctxt.is_set(Attr::SHARED_ID)) {
-      
-      // Must clear shared.  Update lowned at same time.
-      
-      const Attr &oattr = GetAttr(obj);
-
-      Context newctxt(ctxt);
-      newctxt.clear(Attr::SHARED_ID);
-      
-      if (lowned) newctxt.set(Attr::OWNED_ID);
-      else newctxt.clear(Attr::OWNED_ID);
-      
-      Attr attr(oattr, newctxt);
-      mesh.update_obj(&obj, attr);
-      
-    } else {
-      // Object not marked shared, but see if we need to update
-      // locally owned status.
-      
-      if (lowned != (ctxt.is_set(Attr::OWNED_ID))) {
-        
-        const Attr &oattr = GetAttr(obj);
-
-        Context newctxt(ctxt);
-         
-         if (lowned) newctxt.set(Attr::OWNED_ID);
-         else newctxt.clear(Attr::OWNED_ID);
-         
-         Attr attr(oattr, newctxt);
-         mesh.update_obj(&obj, attr);
-      }
-      
-    }
-    
-    oi = on;
-  }
-}
-
 /*--------------------------------------------------------*/
 // Rebalance mesh
 /*--------------------------------------------------------*/
 bool Rebalance(Mesh &mesh) {
-  Trace __trace("Rebalance(Mesh &mesh)");
-  
   CommReg mig("_rebalance_migration", mesh, mesh);
-
-  ThrowRequire(mesh.is_committed());
 
   if (!form_rebalance_comm(mesh, mig)) {
     //std::cout << "No rebalance!!";
@@ -123,7 +64,6 @@ bool Rebalance(Mesh &mesh) {
   build_obj_migration(mesh, mig, MeshObj::EDGE);
   build_obj_migration(mesh, mig, MeshObj::FACE);
 
-//mig.GetCommRel(MeshObj::EDGE).Print(Par::Out());
   // Do this one last since the calls above traverse what
   // we have in this spec.
   build_obj_migration(mesh, mig, MeshObj::ELEMENT);
@@ -163,19 +103,10 @@ bool Rebalance(Mesh &mesh) {
   // we KNOW will go, then start zapping lower order objects with no
   // USED_BY/CHILD left.
 
-  mig.GetCommRel(MeshObj::ELEMENT).delete_domain();
-  mig.GetCommRel(MeshObj::FACE).delete_domain();
-  mig.GetCommRel(MeshObj::EDGE).delete_domain();
-  mig.GetCommRel(MeshObj::NODE).delete_domain();
-  
-  /*
-   * Now the shared and owned attributes may not be correct
-   * for the mesh.  Building the comm rel's below will mark
-   * the shared, so, for now, mark everyone as !SHARED,
-   * and set the correct owned id.
-   */
-  resolve_rebalance_ownership(mesh);
- 
+  mig.GetCommRel(MeshObj::ELEMENT).delete_range();
+  mig.GetCommRel(MeshObj::FACE).delete_range();
+  mig.GetCommRel(MeshObj::EDGE).delete_range();
+  mig.GetCommRel(MeshObj::NODE).delete_range();
 
   mesh.remove_unused_kernels();
 
@@ -187,10 +118,7 @@ bool Rebalance(Mesh &mesh) {
   mesh.build_sym_comm_rel(MeshObj::NODE);
   mesh.build_sym_comm_rel(MeshObj::EDGE);
   mesh.build_sym_comm_rel(MeshObj::FACE);
-  
-  mesh.remove_unused_kernels();
 
-  mesh.CompactData();
 
   return true;
 }
@@ -204,8 +132,7 @@ static void add_obj_children(MeshObj &obj, std::vector<CommRel::CommNode> &cnode
         std::lower_bound(cnodes.begin(), cnodes.end(), tnode);
       if (lb == cnodes.end() || *lb != tnode) {
         cnodes.insert(lb, tnode);
-//Par::Out() << "obj " << obj.get_id() << ", Adding child " << MeshObjTypeString(obj.get_type()) << " id " << ri->obj->get_id() << 
-// "to proc:" << P << std::endl;
+//Par::Out() << "Adding child " << MeshObjTypeString(obj.get_type()) << " id " << ri->obj->get_id() << std::endl;
       }
     }
   }
@@ -237,9 +164,8 @@ static void build_obj_migration_recursive(MeshObj &obj, std::vector<CommRel::Com
         cnodes.insert(lb, tnode);
         // Also add the objects children, since they may not have a USES
         // from an element
+        add_obj_children(*ri->obj, cnodes, P);
       }
-      // Not sure why, but this must be outside
-      add_obj_children(*ri->obj, cnodes, P);
     }
    
     // recurse on element children
@@ -302,6 +228,16 @@ void set_new_elem_owners(Mesh &mesh, CommReg &mig) {
   }
 }
 
+// Act like a field that returns owner
+struct OwnerAction {
+  typedef UInt real_type;
+  UInt dim() { return 1; }
+  real_type *data(const MeshObj &obj) {
+    return const_cast<MeshObj&>(obj).get_owner_ptr();
+  }
+  bool OnObj(const MeshObj &) { return true;}
+};
+
 /*--------------------------------------------------------*/
 // Figure out who the future owners of the nodes are.
 // We simply traverse all element attached to the node,
@@ -309,11 +245,11 @@ void set_new_elem_owners(Mesh &mesh, CommReg &mig) {
 // will have the nodes.
 /*--------------------------------------------------------*/
 static void set_new_obj_owners(Mesh &mesh, CommReg &mig, UInt obj_type) {
-  Trace __trace("set_new_obj_owners(Mesh &mesh, CommReg &mig, UInt obj_type)");
+
   // First, just assign by looping the local elements and
   // picking out the smallest proc.
   {
-    Mesh::iterator nb = mesh.obj_begin_all(obj_type), ne = mesh.obj_end_all(obj_type);
+    Mesh::iterator nb = mesh.obj_begin(obj_type), ne = mesh.obj_end(obj_type);
     for (; nb != ne; ++nb) {
       MeshObj &node = *nb;
 
@@ -326,13 +262,10 @@ static void set_new_obj_owners(Mesh &mesh, CommReg &mig, UInt obj_type) {
       // Seek to elements
       ei = MeshObjConn::find_relation(node, MeshObj::ELEMENT);
       node.set_owner(std::numeric_limits<UInt>::max());
-      bool found_elem = false;
       for (; ei != ee && ei->obj->get_type() == MeshObj::ELEMENT && ei->type == MeshObj::USED_BY; ++ei) {
-        found_elem = true;
         const int proc = ei->obj->get_owner();
         if ((UInt) proc < node.get_owner()) node.set_owner(proc);
       }
-      
     }
   } // node owners
 
@@ -441,38 +374,13 @@ static void GetObject(void *user, int numGlobalIds, int numLids, int numObjs,
   for (UInt i = 0; i < (UInt) numObjs; i++) {
     UInt idx = lids[i];
 
-    int ind = i*numDim;
-
     std::vector<double> ndata(numDim);
     double *c;
     MeshObj *elemp = udata.gen_elem[idx];
     elemCentroid(*coord_field, *elemp, &ndata[0]);
     c = &ndata[0];
 
-    // Rotate the points ever so slightly to avoid a line of centers falling
-    // along a coordinate axis (causes Zoltan issues).
-
-    // Sin/cos of rotation angle.
-    static const double sa = 0.0001;
-    static const double ca = std::sqrt(1 - sa*sa);
-    static const double t = (1.0-ca);
-
-    // Rotate around (1,1,1)
-    // http://www.fastgraph.com/makegames/3Drotation/
-    static const double len = 1.0/std::sqrt(3.0);
-    static const double onethird = 1.0/3.0;
-    static const double m1 = onethird*t + ca;
-    static const double m2 = onethird*t - len*sa;
-    static const double m3 = onethird*t + len*sa;
-
-    if (numDim == 3) {
-      pts[ind]   = m1*c[0] + m2*c[1] + m3*c[2];
-      pts[ind+1] = m3*c[0] + m1*c[1] + m2*c[2];
-      pts[ind+2] = m2*c[0] + m3*c[1] + m1*c[2];
-    } else if (numDim == 2) {
-      pts[ind] = ca*c[0] - sa*c[1];
-      pts[ind+1] = sa*c[0] + ca*c[1];
-    }
+    for (UInt d = 0; d < (UInt) numDim; d++) pts[i*numDim + d] = c[d];
   }
 }
 
@@ -497,14 +405,14 @@ static bool form_rebalance_comm(Mesh &mesh, CommReg &migration) {
     Zoltan_Set_Param(zz, "NUM_GID_ENTRIES", "1");
     Zoltan_Set_Param(zz, "NUM_LID_ENTRIES", "1");
     Zoltan_Set_Param(zz, "RETURN_LISTS", "ALL");
+    Zoltan_Set_Param(zz, "RCB_RECTILINEAR_BLOCKS", "1");
     Zoltan_Set_Param(zz, "AVERAGE_CUTS", "1");
     Zoltan_Set_Param(zz, "OBJ_WEIGHT_DIM", "1");
   
      
     // RCB
-    //Zoltan_Set_Param(zz, "RCB_RECTILINEAR_BLOCKS", "1");
     Zoltan_Set_Param(zz, "KEEP_CUTS", "1");
-    //Zoltan_Set_Param(zz, "RCB_LOCK_DIRECTIONS", "1");
+    Zoltan_Set_Param(zz, "RCB_LOCK_DIRECTIONS", "1");
     Zoltan_Set_Param(zz, "RCB_REUSE", "1");
     Zoltan_Set_Param(zz, "RCB_OUTPUT_LEVEL", "0");
   }
@@ -569,4 +477,5 @@ static bool form_rebalance_comm(Mesh &mesh, CommReg &migration) {
   return changes != 0;
 }
 
+} // namespace
 } // namespace

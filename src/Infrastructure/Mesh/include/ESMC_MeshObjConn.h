@@ -1,15 +1,20 @@
-// $Id: ESMC_MeshObjConn.h,v 1.4 2007/11/28 16:43:50 dneckels Exp $
+// $Id: ESMC_MeshObjConn.h,v 1.2.2.1 2008/04/05 03:13:12 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-//
-//-----------------------------------------------------------------------------
+
+// (all lines below between the !BOP and !EOP markers will be included in
+//  the automated document processing.)
+//-------------------------------------------------------------------------
+// these lines prevent this file from being read more than once if it
+// ends up being included multiple times
+
 #ifndef ESMC_MeshObjConn_h
 #define ESMC_MeshObjConn_h
 
@@ -22,7 +27,8 @@
 // This file abstracts things that depend on a mesh object and a meshh object topology.
 // This is necessary since the MeshObj Cannot directly access its topo.
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 namespace MeshObjConn {
 
@@ -47,10 +53,7 @@ MeshObjRelationList::const_iterator find_relation(const MeshObj &obj, UInt objty
 MeshObjRelationList::iterator find_relation(MeshObj &obj, UInt objtype);
 
 // Get all nodes connected to an object and the elements around this element
-void PatchNodes(const MeshObj &elem, std::set<MeshObj*> &nodes);
-
-// Return all neighboring elements of this element
-void NeighborElements(MeshObj &elem, std::set<MeshObj*> &nbors);
+void PatchNodes(const MeshObj &elem, std::set<const MeshObj*> &nodes);
 
 // Return (in out_obj) a list of all objects that have a rel_type to all objects in in_obj.
 // For instance, to find all elements that use a set of nodes (rl_type=USES),
@@ -60,8 +63,6 @@ void common_objs(obj_iter in_obj_begin, obj_iter in_obj_end, // set of object to
                  UInt out_obj_type, // type of out object to select
                  std::vector<MeshObj*> &out_obj // list of results (vector size is set by routine)
                  );
-
-void common_objs(MeshObj *, UInt rel_type, UInt out_obj_type, std::vector<MeshObj*> &out_obj);
 
 // For a list of nodes and elems, return the ordinals and polarity of the elem
 // wrt the edge, with standard edge polarity given by the ordering in nodes.
@@ -141,6 +142,8 @@ bool verify_edge_relations(Mesh &mesh);
 bool verify_face_relations(Mesh &mesh);
 
 } // namespace 
-} // namespace 
+
+} // namespace
+} // namespace
 
 #endif

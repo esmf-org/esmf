@@ -1,7 +1,7 @@
-// $Id: ESMC_Mesh.C,v 1.7 2007/11/28 16:42:42 dneckels Exp $
+// $Id: ESMC_Mesh.C,v 1.5.2.1 2008/04/05 03:13:17 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -11,18 +11,19 @@
 //==============================================================================
 #include <ESMC_Mesh.h>
 #include <ESMC_MeshField.h>
+
 #include <ESMC_MeshObjConn.h>
 #include <ESMC_MeshObjPack.h>
 #include <ESMC_MeshSkin.h>
 #include <ESMC_SparseMsg.h>
 #include <ESMC_ParEnv.h>
 #include <ESMC_GlobalIds.h>
-
 #include <bitset>
 
 //#define CRE_DEBUG
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 // *** Mesh implementation ***
 
@@ -207,7 +208,7 @@ Par::Out() << "Resolve object type:" << MeshObjTypeString(obj_type) << std::endl
     CommRel orel("object_resolution", *this, false);
 
     // Those objects that find mates on other processors go into this comm, which,
-    // after symmetrization, are added to symetric comm.
+    // after symetrization, are added to symetric comm.
     CommRel orel1("final_object_resolution", *this, false);
 
     {
@@ -519,7 +520,7 @@ Par::Out() << "Did not find node on other side, creating" << std::endl; // TODO:
 
              MeshObj *newnode = new MeshObj(MeshObj::NODE, get_new_local_id(MeshObj::NODE));
 
-             Context ctxt(a.GetContext());
+             Context ctxt(a.get_context());
              //ctxt.clear(Attr::ACTIVE_ID); // make child nodes without USES inactive
 
              // This function connects the node to the appropriate local element(s)
@@ -551,16 +552,16 @@ Par::Out() << "Did not find node on other side, creating" << std::endl; // TODO:
   
                MeshObj *newside = new MeshObj(obj_type, get_new_local_id(obj_type));
 
-               Context ctxt(a.GetContext());
+               Context ctxt(a.get_context());
    
                // Add object to mesh; depends on object type.
                if (obj_type == MeshObj::EDGE) {
    
-                  add_edge_local(*newside, *elems[0], ordinals[0], a.GetBlock(), etopo, ctxt);
+                  add_edge_local(*newside, *elems[0], ordinals[0], a.get_key(), etopo, ctxt);
   
                 } else if (obj_type == MeshObj::FACE) {
   
-                  add_side_local(*newside, *elems[0], ordinals[0], a.GetBlock(), etopo, ctxt);
+                  add_side_local(*newside, *elems[0], ordinals[0], a.get_key(), etopo, ctxt);
   
                 } else Throw() << "Unknown obj type in side create resolution";
   
@@ -577,7 +578,7 @@ Par::Out() << "Did not find node on other side, creating" << std::endl; // TODO:
                 // that processor will be the only one requesting a create this round.  It will assume
                 // that it is the lowest processor and I will retain ownership, causing a global inconsistency.
                 // We break this by letting the other proc own the object.
-                if (obj_type == MeshObj::EDGE && !GetAttr(*eobj).GetContext().is_set(Attr::PENDING_CREATE_ID)) {
+                if (obj_type == MeshObj::EDGE && !GetAttr(*eobj).get_context().is_set(Attr::PENDING_CREATE_ID)) {
 #ifdef CRE_DEBUG
 Par::Out() << "local obj " << eobj->get_id() << " not pending create, relinquishing ownership" << std::endl;
 #endif
@@ -857,7 +858,6 @@ GetCommRel(obj_type).Print(Par::Out());
 #endif
 
   } // subcases
-  
   } // For object type
 
   // We assume all objects are taken care of.  Let base class remove pendingcreate bit
@@ -1039,7 +1039,7 @@ Par::Out() << "request about " << obj_id << " from proc:" << proc << ", del_stat
 #ifdef DEL_DEBUG
 Par::Out() << "\tok to delete: object not on this proc" << std::endl;
 #endif
-         } else if (GetAttr(*mi).GetContext().is_set(Attr::PENDING_DELETE_ID)) {
+         } else if (GetAttr(*mi).get_context().is_set(Attr::PENDING_DELETE_ID)) {
            // Case 1:
            proc_reply.push_back(1); // have at it
 #ifdef DEL_DEBUG
@@ -1354,7 +1354,7 @@ Par::Out() << "Deleting object: " << MeshObjTypeString(obj_type) << " " << vmi->
 #ifdef DEL_DEBUG
 Par::Out() << "Objects to delete:" << std::endl;
 for (UInt i = 0; i < to_delete_list.size(); i++) 
-  Par::Out() << "\t" << MeshObjTypeString(to_delete_list[i]->GetType()) << " " << to_delete_list[i]->get_id() << std::endl;
+  Par::Out() << "\t" << MeshObjTypeString(to_delete_list[i]->get_type()) << " " << to_delete_list[i]->get_id() << std::endl;
 
 Par::Out() << "commrel before delete:" << std::endl;
     GetCommRel(obj_type).Print(Par::Out());
@@ -1371,7 +1371,7 @@ CommRel &nrel = GetCommRel(obj_type);
 for (UInt i = 0; i < to_delete_list.size(); i++)  {
   CommRel::MapType::iterator lb = std::lower_bound(nrel.domain_begin(), nrel.domain_end(), CommRel::CommNode(to_delete_list[i], 0));
   if (lb != nrel.domain_end() && lb->obj == to_delete_list[i])
-    Throw() << "Did not delete object:" << MeshObjTypeString(to_delete_list[i]->GetType()) << " " << to_delete_list[i]->get_id();
+    Throw() << "Did not delete object:" << MeshObjTypeString(to_delete_list[i]->get_type()) << " " << to_delete_list[i]->get_id();
 }
 }
 #endif
@@ -1399,13 +1399,8 @@ void Mesh::Commit() {
     Throw() << "Mesh is already committed!";
 
   // Create sides/edges, if requested
-  if (use_sides) {
+  if (use_sides)
     CreateAllSides();
-  }
-  if (use_edges && side_type() != MeshObj::EDGE) {
-    CreateAllEdges();
-  }
-  
   ResolvePendingCreate();
 
   FieldReg::CreateDBFields();
@@ -1416,7 +1411,7 @@ void Mesh::Commit() {
   FieldReg::PopulateDBFields(*this);
   FieldReg::ReleaseDBFields();
 
-  committed = true;
+  // Parallel stuff.
 }
 
 void Mesh::CreateGhost() {
@@ -1476,7 +1471,7 @@ void Mesh::CreateGhost() {
   ecomm.dependants(sghost->GetCommRel(MeshObj::FACE), MeshObj::FACE);
 
   // Ship objects over;
-  // First the sourcemesh
+   // First the sourcemesh
   sghost->GetCommRel(MeshObj::NODE).build_range(true);
   sghost->GetCommRel(MeshObj::EDGE).build_range(true);
   sghost->GetCommRel(MeshObj::FACE).build_range(true);
@@ -1492,12 +1487,10 @@ void Mesh::CreateGhost() {
 void Mesh::RemoveGhost() {
   if (!sghost) return; // must already be scratched
   
-  sghost->Transpose();
-  
-  sghost->GetCommRel(MeshObj::ELEMENT).delete_domain();
-  sghost->GetCommRel(MeshObj::FACE).delete_domain();
-  sghost->GetCommRel(MeshObj::EDGE).delete_domain();
-  sghost->GetCommRel(MeshObj::NODE).delete_domain();
+  sghost->GetCommRel(MeshObj::ELEMENT).delete_range();
+  sghost->GetCommRel(MeshObj::FACE).delete_range();
+  sghost->GetCommRel(MeshObj::EDGE).delete_range();
+  sghost->GetCommRel(MeshObj::NODE).delete_range();
   
   delete sghost; sghost = 0; // does delete do this?? don't remember...
 }
@@ -1511,7 +1504,7 @@ void Mesh::build_sym_comm_rel(UInt obj_type) {
    std::vector<CommRel::CommNode> snodes;
  
    // Ok, now the trick.  Loop through nodes, if _OWNER != rank, then node is owned
-   MeshDB::iterator ni = obj_begin_all(obj_type), ne = obj_end_all(obj_type);
+   MeshDB::iterator ni = obj_begin(obj_type), ne = obj_end(obj_type);
    if (Par::Size() > 1)
    for (; ni != ne; ++ni) {
      MeshObj &node = *ni;
@@ -1563,37 +1556,5 @@ void Mesh::build_sym_comm_rel(UInt obj_type) {
 
 }
 
-void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
-  CommRel &crel = GetCommRel(obj_type);
-
-  // To every proc send whether we are to be deleted or not
-  UInt nproc = Par::Size();
-  UInt rank = Par::Rank();
-  
-  CommRel::MapType::iterator ci = crel.domain_begin(), ce = crel.domain_end();
-
-  // First loop the comm.  If staying, set owner=rank, else owner=nproc.
-  // Use actfield to min the owners.  At the end, meshobj owner has a valid
-  // owner installed, or nproc if all departing.
-  
-  for (; ci != ce; ++ci) {
-    
-    MeshObj &obj = *ci->obj;
-    
-    MeshObj::OwnerType &d = *obj.get_owner_ptr();
-    
-    if (GetMeshObjContext(obj).is_set(Attr::PENDING_DELETE_ID)) {
-      d = nproc;
-    } else {
-      d = rank;
-    }
-  }
-  
-  ActField<OwnerAction> af("_ofield");
-  ActField<OwnerAction> *afp = &af;
-  
-  crel.swap_op<MeshObj::OwnerType, ActField<OwnerAction> >(1, &afp, CommRel::OP_MIN);
-  
-}
-
+} // namespace
 } // namespace

@@ -1,7 +1,7 @@
-// $Id: ESMC_FieldReg.C,v 1.7 2007/11/28 16:42:40 dneckels Exp $
+// $Id: ESMC_FieldReg.C,v 1.5.2.1 2008/04/05 03:13:15 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -15,7 +15,8 @@
 
 #include <algorithm>
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 FieldReg::FieldReg() :
 is_committed(false),
@@ -47,8 +48,6 @@ FieldReg::~FieldReg() {
 }
 
 MEField<> *FieldReg::GetCoordField() const {
-  Trace __trace("FieldReg::GetCoordField()");
-  
   MEField<> *cf = GetField("coordinates");
   ThrowAssert(cf);
   return cf;
@@ -63,10 +62,7 @@ void FieldReg::MatchFields(UInt nfields, MEField<> **fds, std::vector<MEField<>*
 }
 
 MEField<> *FieldReg::RegisterField(const std::string &name, const MEFamily &mef,
-        UInt obj_type, const Context &ctxt, 
-        UInt dim, bool out, 
-        bool interp,
-        const _fieldTypeBase &ftype)
+        UInt obj_type, const Context &ctxt, UInt dim, bool out, bool interp, const _fieldTypeBase &ftype)
 {
 
   if (is_committed)
@@ -134,7 +130,6 @@ void FieldReg::CreateDBFields() {
     UInt n = ndfields.size();
     // Use the standard lagrange 
     for (UInt i = 0; i < n; i++) {
-//std::cout << "P:" << Par::Rank() << "nodal field:" << ndfields[i]->name() << std::endl;
       IOField<NodalField> &nf = *ndfields[i];
       RegisterField(nf.name(), MEFamilyStd::instance(), MeshObj::ELEMENT,
          ctxt, nf.dim(), nf.output_status());
@@ -320,7 +315,7 @@ void FieldReg::Commit(MeshDB &mesh) {
           if (!otopo)
             Throw() << "Field " << f.name() << " has no topo on matching kernel";
           const MEFamily &mef = f.GetMEFamily();
-          MasterElement<> &me = *mef.getME(otopo->name, METraits<>());
+          MasterElement<> &me = *mef.getME(otopo->name);
   //std::cout << "topo:" << otopo->name << " yields me:" << me.name << std::endl;
           // loop objects, imprint
           Kernel::obj_iterator oi = ker.obj_begin(), oe = ker.obj_end(), on;
@@ -393,7 +388,7 @@ void FieldReg::Commit(MeshDB &mesh) {
           if (!otopo)
             Throw() << "Field " << f.name() << " has no topo on matching kernel";
           const MEFamily &mef = f.GetMEFamily();
-          MasterElement<> &me = *mef.getME(otopo->name, METraits<>());
+          MasterElement<> &me = *mef.getME(otopo->name);
   //std::cout << "topo:" << otopo->name << " yields me:" << me.name << std::endl;
           // loop objects, imprint
           Kernel::obj_iterator oi = ker.obj_begin(), oe = ker.obj_end(), on;
@@ -455,4 +450,5 @@ IOField<ElementField> *FieldReg::RegisterElementField(const MeshDB &mesh, const 
   return efields.back();
 }
 
+} // namespace
 } // namespace

@@ -1,7 +1,7 @@
-// $Id: ESMC_MeshObjPack.C,v 1.4 2007/11/28 16:42:43 dneckels Exp $
+// $Id: ESMC_MeshObjPack.C,v 1.2.2.1 2008/04/05 03:13:18 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -14,7 +14,8 @@
 #include <ESMC_MeshObjConn.h>
 
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 UInt MeshObjPackSize(MeshObj &obj) {
   
@@ -60,15 +61,7 @@ void MeshObjPack(SparseMsg::buffer &b, MeshObj &obj, bool ghosting) {
   SparsePack<UInt>(b, owner);
 
   // Obj Attr
-  if (!ghosting)
-    SparsePack<Attr>(b, GetAttr(obj));
-  else {
-    // Set inactive bit for ghosted object; (found only through relations)
-    Attr a(GetAttr(obj));
-    Context &ctxt = a.GetContext();
-    ctxt.clear(Attr::ACTIVE_ID);
-    SparsePack<Attr>(b, a);
-  }
+  SparsePack<Attr>(b, GetAttr(obj));
 
   // Pack Relations size
   MeshObjRelationList::iterator ri = obj.Relations.begin(), re = obj.Relations.end();
@@ -108,16 +101,16 @@ void MeshObjUnpack(MeshDB &mesh, SparseMsg::buffer &b, MeshObj *&obj) {
   // First, See if the object is already there:
   bool obj_exists = false;
   MeshDB::MeshObjIDMap::iterator mi =
-       mesh.map_find(attr.GetType(), id);
+       mesh.map_find(attr.get_type(), id);
 
-  if (mi != mesh.map_end(attr.GetType())) {
+  if (mi != mesh.map_end(attr.get_type())) {
     obj_exists = true;
     // TODO: check that everything is the same
   }
 
   // We now have enough info to create the meshobj
   if (!obj_exists) {
-    obj = new MeshObj(attr.GetType(), id, 0);
+    obj = new MeshObj(attr.get_type(), id, 0);
     obj->set_owner(owner);
   } else obj = &*mi;
 
@@ -136,25 +129,6 @@ Par::Out() << "obj " << MeshObjTypeString(obj->get_type()) << " " << obj->get_id
     << obj->get_owner() << " -> " << owner << std::endl;
 */
     obj->set_owner(owner);
-
-    // If the object sent is active, make the local obj active.  This is used (for instance)
-    // when sending objects to rendezvous and a ghosted object gets there first;
-    {
-      const Context &ctxt = GetMeshObjContext(*obj);
-      
-      if (!ctxt.is_set(Attr::ACTIVE_ID) && attr.GetContext().is_set(Attr::ACTIVE_ID)) {
-        
-        const Attr &oattr = GetAttr(*obj);
-        
-        Context newctxt(ctxt);
-        newctxt.set(Attr::ACTIVE_ID); 
-        Attr attr(oattr, newctxt);
-        
-        mesh.update_obj(obj, attr);
-                
-      }
-    }
-
 
     for (UInt n = 0; n < nrel; n++) {
       MeshObj::Relation r;
@@ -233,4 +207,5 @@ Par::Out() << "obj " << MeshObjTypeString(obj->get_type()) << " " << obj->get_id
 
 }
 
-} // namespace ESMC
+} // namespace DVD
+} // namespace DVD

@@ -1,7 +1,7 @@
-// $Id: ESMC_MeshRefine.C,v 1.4 2007/11/28 16:42:43 dneckels Exp $
+// $Id: ESMC_MeshRefine.C,v 1.2.2.1 2008/04/05 03:13:18 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -22,7 +22,8 @@
 
 //#define REF_DEBUG
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 // Same as below, but instead of having the side object, we only
 // have the nodes that represent it.
@@ -167,7 +168,7 @@ Par::Out() << "r_n ";
   // Make sure all nodes are active: nodes may be inactive if they are here only as ghosts
   for (UInt i = 0; i < nodes.size(); i++) {
     MeshObj *node = nodes[i];
-    if (!node || GetAttr(*node).GetContext().is_set(Attr::ACTIVE_ID)) continue;
+    if (!node || GetAttr(*node).get_context().is_set(Attr::ACTIVE_ID)) continue;
     const Attr &oattr = GetAttr(*node);
     const Context &ctxt = GetMeshObjContext(*node);
     Context newctxt(ctxt);
@@ -279,19 +280,17 @@ static void create_interior_faces(MeshObj &obj, const RefineTopo &rtopo) {
 
 void RefineMeshObjLocal(MeshObj &obj, const RefineTopo &rtopo) {
   Trace __trace("RefineMeshObjLocal(MeshObj &obj, const RefineTopo &rtopo)");
-
-  #ifdef REF_DEBUG
-Par::Out() << "Refining object:" << MeshObjTypeString(obj.GetType()) << ":" << obj.get_id() << std::endl;
+#ifdef REF_DEBUG
+Par::Out() << "Refining object:" << MeshObjTypeString(obj.get_type()) << ":" << obj.get_id() << std::endl;
 #endif
 
-  // Return if an object is already refined.
   if (GetMeshObjContext(obj).is_set(Attr::REFINED_ID)) {
 
 #ifdef REF_DEBUG
-Par::Out() << MeshObjTypeString(obj.GetType()) << " already refined, children" << std::endl;
+Par::Out() << MeshObjTypeString(obj.get_type()) << " already refined, children" << std::endl;
 MeshObjRelationList::iterator cri = obj.Relations.begin(), cre = obj.Relations.end();
 for (; cri != cre; ++cri) {
-if (cri->obj->GetType() == obj.GetType() && cri->type == MeshObj::CHILD) 
+if (cri->obj->get_type() == obj.get_type() && cri->type == MeshObj::CHILD) 
   Par::Out() << " " << cri->obj->get_id() ;
 }
 Par::Out() << std::endl;
@@ -310,21 +309,14 @@ Par::Out() << std::endl;
 
     for (UInt e = 0; e < (UInt) topo->num_edges; e++) {
 
-      MeshObjRelationList::iterator ei = 
-         MeshObjConn::find_relation(obj, MeshObj::EDGE, e, MeshObj::USES);
+      MeshObjRelationList::iterator ei = MeshObjConn::find_relation(obj, MeshObj::EDGE, e, MeshObj::USES);
 
       // If no edge, then don't refine!
       if (ei != obj.Relations.end()) {
-        
         RefineMeshObjLocal(*ei->obj, *rtopo.EdgeRTopo(e));
-        
       } else {
-      
-        // If edges are turned on, we better find it!
-        ThrowRequire(!mesh.AllEdges());
-        
+        ThrowRequire(!mesh.AllSides());
       }
-      
     } // edge
   } // if pdim >= 2
 
@@ -336,26 +328,19 @@ Par::Out() << std::endl;
       MeshObjRelationList::iterator fi = MeshObjConn::find_relation(obj, MeshObj::FACE, f, MeshObj::USES);
       // If no face, then don't refine!
       if (fi != obj.Relations.end()) {
-        
 #ifdef REF_DEBUG
 Par::Out() << "\t";
 #endif
-
         RefineMeshObjLocal(*fi->obj, *rtopo.FaceRTopo(f));
-        
       } else {
-        
         ThrowRequire(!mesh.AllSides());
-        
       }
     } // edge
   } // if pdim >= 2
 
-  
   /*--------------------------------------------------------------*/
   // And now the object itself.
-  // Start by searching the mesh to find all the nodes (including
-  // child nodes) for the object.
+  // Start by searching the mesh to find all the nodes (including child) for the object.
   /*--------------------------------------------------------------*/
  
   std::vector<MeshObj*> nodes(topo->num_child_nodes, (MeshObj*)NULL);
@@ -363,12 +348,11 @@ Par::Out() << "\t";
 #ifdef REF_DEBUG
 Par::Out() << "\tretrieving nodes...";
 #endif
-
   if (obj.get_type() == MeshObj::ELEMENT)
     retrieve_nodes(obj, topo, nodes);
 
 #ifdef REF_DEBUG
-if (obj.GetType() == MeshObj::ELEMENT) {
+if (obj.get_type() == MeshObj::ELEMENT) {
 Par::Out() << std::endl;
   for (UInt i = 0; i < nodes.size(); i++) {
     if (nodes[i]) { 
@@ -384,20 +368,14 @@ Par::Out() << std::endl;
   /*-------------------------------------------------------------------*/
   // Create nodes that don't exist and connect to parents.  Only for
   // elements, however.
-  /*-------------------------------------------------------------------*/
+  /*--------------------------------------------------------------*/
   if (obj.get_type() == MeshObj::ELEMENT) {
-    
     for (UInt i = topo->num_nodes; i < (UInt) topo->num_child_nodes; i++) {
-      
-      if (nodes[i] == NULL) {
-        // Did not find the node, so create
-        
+      if (nodes[i] == NULL) {  
         MeshObj *newnode = new MeshObj(MeshObj::NODE, mesh.get_new_local_id(MeshObj::NODE));
-        
 #ifdef REF_DEBUG
 Par::Out() << "CRE NODE:" << newnode->get_id() << std::endl;
 #endif
-
         Context newctxt; 
         newctxt.set(Attr::PENDING_CREATE_ID);
         newctxt.set(Attr::ACTIVE_ID);
@@ -406,7 +384,10 @@ Par::Out() << "CRE NODE:" << newnode->get_id() << std::endl;
         mesh.add_node(newnode, attr);
         nodes[i] = newnode;
   
-        // Add node as children (duplicates are ignored)
+      }
+  
+      // If an elememt, add nodes as children (duplicates are ignored)
+      if (obj.get_type() == MeshObj::ELEMENT) {
         MeshObj::Relation r;
         r.obj = nodes[i];
         r.ordinal = i;
@@ -416,7 +397,6 @@ Par::Out() << "CRE NODE:" << newnode->get_id() << std::endl;
         r.ordinal = i;
         r.type = MeshObj::PARENT;
         AddMeshObjRelation(*nodes[i], r);
-        
       }
   
     } // i nodes
@@ -428,7 +408,6 @@ Par::Out() << "CRE NODE:" << newnode->get_id() << std::endl;
   /*--------------------------------------------------------------*/
   std::vector<MeshObj*> children; children.reserve(rtopo.NumChild());
   {
-   
     // We copy the object parents context, since it will contain the contexts necessary
     // to imprint the object
     Context newctxt(GetMeshObjContext(obj)); // imprints any usage sets
@@ -438,19 +417,14 @@ Par::Out() << "CRE NODE:" << newnode->get_id() << std::endl;
     Attr attr(GetAttr(obj), newctxt); 
 
     for (UInt c = 0; c < rtopo.NumChild(); c++) {
-      
       const MeshObjTopo *ctopo = rtopo.ChildTopo(c);
-      
       const UInt *child_node = rtopo.ChildNode(c);
-      
       MeshObj *child = new MeshObj(obj.get_type(), mesh.get_new_local_id(obj.get_type()), -1, Par::Rank());
-      
       children.push_back(child);
   
 #ifdef REF_DEBUG
 Par::Out() << "\t\tchild:" << child->get_id() << " attaching to " << obj.get_id() << std::endl;
 #endif
-
       // Connect to parent
       MeshObj::Relation r;
       r.obj = child;
@@ -463,15 +437,13 @@ Par::Out() << "\t\tchild:" << child->get_id() << " attaching to " << obj.get_id(
 
       // For an element, connect up the child nodes (faces/edges do not have child relations)
       if (obj.get_type() == MeshObj::ELEMENT) {
+  
         // Set up relations
         // nodes:
-        
 #ifdef REF_DEBUG
 Par::Out() << "\tattaching nodes:(ctopo=" << ctopo->name << ")";
 #endif
-
         for (UInt n = 0; n < ctopo->num_nodes; n++) {
-          
 #ifdef REF_DEBUG
 Par::Out() << nodes[child_node[n]]->get_id() << " ";
 #endif
@@ -480,9 +452,7 @@ Par::Out() << nodes[child_node[n]]->get_id() << " ";
           r.ordinal = n;
           r.type = MeshObj::USES;
           AddMeshObjRelation(*child, r);
-          
         }
-        
 #ifdef REF_DEBUG
 Par::Out() << std::endl;
 #endif
@@ -512,6 +482,7 @@ Par::Out() << std::endl;
             }
           }
         }
+
         // Imprint the child
         child->GetKernel()->Imprint(*child);
       }
@@ -662,7 +633,7 @@ Par::Out() << "should add to? " << nobj.get_id() << std::endl;
         has_edge =  (pfi != obj.Relations.end());
 
         // If use all sides, then all sides must be present.
-        ThrowRequire(!mesh.AllEdges() || has_edge);
+        ThrowRequire(!mesh.AllSides() || has_edge);
 
         // Loop children of edge
         const MeshObjTopo *pftopo = topo->edge_topo(pf);
@@ -788,7 +759,7 @@ Par::Out() << std::endl;
       } // pf // edge
       // Now, if AllSides, every child should have every edge.  However, if the edge
       // were interior, they will not have been created, so they must be created now.
-      if (mesh.AllEdges())
+      if (mesh.AllSides())
         create_interior_edges(obj, rtopo);
     } // pdim >= 2
   } // element
@@ -1112,4 +1083,5 @@ Par::Out() << "Unrefine edge 738!!" << std::endl;
   mesh.update_obj(&obj, attr);
 } 
 
+} // namespace
 } // namespace

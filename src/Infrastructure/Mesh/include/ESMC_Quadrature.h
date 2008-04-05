@@ -1,30 +1,32 @@
-// $Id: ESMC_Quadrature.h,v 1.3 2007/11/28 16:43:50 dneckels Exp $
+// $Id: ESMC_Quadrature.h,v 1.1.2.1 2008/04/05 03:13:13 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-//
-//-----------------------------------------------------------------------------
+
+// (all lines below between the !BOP and !EOP markers will be included in
+//  the automated document processing.)
+//-------------------------------------------------------------------------
+// these lines prevent this file from being read more than once if it
+// ends up being included multiple times
+
 #ifndef ESMC_Quadrature_h
 #define ESMC_Quadrature_h
+#include <string>
 
 #include <ESMC_MeshTypes.h>
 #include <ESMC_Exception.h>
-
-#include <string>
 #include <algorithm>
 #include <map>
-#include <vector>
 // Quadrature algorithms
 
-namespace ESMC { 
-
-class MeshObjTopo;
+namespace ESMCI { 
+namespace MESH { 
 
 // Generic interface/management of locs, wgts arrays
 class intgRule {
@@ -36,14 +38,10 @@ public:
 
   UInt order() const { return q; }
 
-  UInt parametric_dim() const { return pdim; }
-
   // parametric locations
   const double *locations() const { return locs; }
   // weights
   const double *weights() const { return wgts; }
-
-  virtual const intgRule *side_rule() const = 0;
 
   virtual const std::string &iname() const = 0;
 
@@ -61,17 +59,12 @@ protected:
 // Assign arbitrary parametric coords, null weights
 class arbq : public intgRule {
 public:
-  arbq(UInt _pdim, UInt nq, const double pcoord[], const double *_wgts=NULL) :
+  arbq(UInt _pdim, UInt nq, const double pcoord[]) :
     intgRule(nq,nq,_pdim) {
     std::copy(pcoord, pcoord+(nq*pdim), locs);
-    if (_wgts) std::copy(_wgts, _wgts+nq, wgts);
   }
   ~arbq() {}
   const std::string &iname() const {return name;}
-
-  const intgRule *side_rule() const {
-    Throw() << "No side rule for arbq";
-  }
 
   const intgRule *ChangeOrder(UInt q) const {
     Throw() << "Arbq doesnt swap order";
@@ -90,9 +83,6 @@ public:
   const intgRule *ChangeOrder(UInt q) const {
     return &instance(q);
   }
-  const intgRule *side_rule() const {
-    Throw() << "No side rule for bar";
-  }
 private:
   barq(UInt ord);  // order of quadrature
   static std::map<UInt,barq*> classInstances;
@@ -108,9 +98,6 @@ public:
   const intgRule *ChangeOrder(UInt q) const {
     return &instance(q);
   }
-  const intgRule *side_rule() const {
-    return &barq::instance(q);
-  }
 private:
   quadq(UInt ord);  // order of quadrature
   static std::map<UInt,quadq*> classInstances;
@@ -124,9 +111,6 @@ public:
   const std::string &iname() const {return name;}
   const intgRule *ChangeOrder(UInt q) const {
     return &instance(q);
-  }
-  const intgRule *side_rule() const {
-    return &barq::instance(q);
   }
 private:
   triq(UInt q);  // order of quadrature
@@ -143,9 +127,6 @@ public:
   const intgRule *ChangeOrder(UInt q) const {
     return &instance(q);
   }
-  const intgRule *side_rule() const {
-    return &quadq::instance(q);
-  }
 private:
   hexq(UInt q);  // order of quadrature
   static std::map<UInt, hexq*> classInstances;
@@ -159,9 +140,6 @@ public:
   const std::string &iname() const {return name;}
   const intgRule *ChangeOrder(UInt q) const {
     return &instance(q);
-  }
-  const intgRule *side_rule() const {
-    return &triq::instance(q);
   }
 private:
   tetraq(UInt q);  // order of quadrature
@@ -178,33 +156,7 @@ struct Topo2Intg {
 intgRule *operator()(UInt q, const std::string &toponame);
 };
 
-/**
- * An set of integration rule factories for
- * various topology types and lower dimensional
- * integration rules.
- */
-class sideIntgFactory {
-public:
-  const intgRule *GetSideRule(UInt side_num) const {
-    return side_rules[side_num];
-  }
-
-  /**
-   * Create a factory given the topology type and the base (lower dimensional rule)
-   */
-  static const sideIntgFactory *instance(const std::string &toponame, const intgRule *base_rule);
-
-  typedef std::map<std::pair<std::string,const intgRule*>, sideIntgFactory*> InstanceMap;
-private:
-  sideIntgFactory(const MeshObjTopo *topo, const intgRule *irule);
-  sideIntgFactory(const sideIntgFactory&);
-  sideIntgFactory &operator=(const sideIntgFactory&);
-
-  std::vector<const intgRule*> side_rules;
-  const MeshObjTopo *topo;
-  const intgRule *base;
-};
-
+} // namespace
 } // namespace
 
 #endif

@@ -1,15 +1,20 @@
-// $Id: ESMC_ShapeFunc.h,v 1.3 2007/11/28 16:43:50 dneckels Exp $
+// $Id: ESMC_ShapeFunc.h,v 1.1.2.1 2008/04/05 03:13:13 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-//
-//-----------------------------------------------------------------------------
+
+// (all lines below between the !BOP and !EOP markers will be included in
+//  the automated document processing.)
+//-------------------------------------------------------------------------
+// these lines prevent this file from being read more than once if it
+// ends up being included multiple times
+
 #ifndef ESMC_ShapeFunc_h
 #define ESMC_ShapeFunc_h
 
@@ -17,29 +22,21 @@
 
 #include <string>
 
-/**
- * @defgroup shapefunc
- * 
- * A basic shape function interface, which can be used by the virtual
- * master element interface to construct a full ME.
- * 
- * The degrees of freedom are to be enumerated by a descriptive map:
- * dof_description:
- *       for each dof, a tuple = {type |node=0,edge=1,face=2,elem=3}|
- *                                ordinal |e.g, node 5, edge 3, etc...|
- *                                index |e.g, edge 4, second dof|
- * @ingroup mesystem
- */
+namespace ESMCI {
+namespace MESH {
 
-namespace ESMC {
+// A variety of shape functions defined on basic topological entities
+
+// dof_description:
+//       for each dof, a tuple = {type |node=0,edge=1,face=2,elem=3}|
+//                                ordinal |e.g, node 5, edge 3, etc...|
+//                                index |e.g, edge 4, second dof|
 
 
 typedef enum {DOF_NODE=0, DOF_EDGE=1, DOF_FACE=2, DOF_ELEM=3} DofLoc;
 
-/**
- * The shapefunction interface.  Basic shape function and dual notions.
- * @ingroup shapefunc
- */
+// An abstract Base class that an implementation can (but doesn't have to) inherit from.
+
 class ShapeFunc {
 public:
   ShapeFunc() {}
@@ -47,64 +44,33 @@ public:
   virtual UInt NumFunctions() const = 0;
   virtual UInt ParametricDim() const = 0;
   virtual UInt IntgOrder() const = 0;
-  /**
-   *  Return array of the shape function values at the given pcoords(npts,pdim)
-   * in results(npts,ndofs)
-   */
+  // Return array of the shape function values at the given pcoords(npts,pdim)
+  // in results(npts,ndofs)
   virtual void shape(UInt npts, const double pcoord[], double results[]) const = 0;
   virtual void shape(UInt npts, const fad_type pcoord[], fad_type results[]) const = 0;
 
-  /**
-   *  Return gradients at the given points pcoord(npts,pdim) in results(npts,ndofs,pdim)
-   */ 
+  // Return gradients at the given points pcoord(npts,pdim) in results(npts,ndofs,pdim) 
   virtual void shape_grads(UInt npts, const double pcoord[], double results[]) const = 0;
   virtual void shape_grads(UInt npts, const fad_type pcoord[], fad_type results[]) const = 0;
 
   virtual const std::string &name() const = 0;
 
-  /**
-   *  Return true if values only occur at nodes and interpolation is from node values.
-   */
+  // Return true if values only occur at nodes and interpolation is from node values.
   virtual bool is_nodal() const = 0;
-  
-  /**
-   * face/edge orientation type.
-   */
-  virtual UInt orientation() const = 0;
 
-  /**
-   * Number of interpolation points.
-   */
   virtual UInt NumInterp() const = 0;
 
-  /**
-   *  List of parametric points needed for interpolation, (NumInterp x pdim).
-   */
+  // List of parametric points needed for interpolation, (NumInterp x pdim).
   virtual const double *InterpPoints() const = 0;
 
-  /**
-   *  Form coefficients, given function values at ipoints;
-   */
+  // Form coefficients, given function values at ipoints;
   virtual void Interpolate(const double fvals[], double mcoef[]) const = 0;
 
-  /**
-   *  description for each dof (Obj type, Obj ordinal, index).
-   */
+  // description for each dof (Obj type, Obj ordinal, index).
   virtual const int *DofDescriptionTable() const = 0;
 };
 
-/**
- * @defgroup tshapefunc
- * These are template shape functions that can be used by the generic programming
- * master element interface.
- * 
- * @ingroup shapefunc 
- */
-
-/**
- * DG shape func.
- * @ingroup tshapefunc 
- */
+// PDIM
 template<int PDIM>
 class dg0_shape_func {
   public:
@@ -135,10 +101,6 @@ class dg0_shape_func {
   const static int dof_description[ndofs][4];
 };
 
-/**
- * 1d bar shape func.
- * @ingroup tshapefunc
- */
 class bar_shape_func {
   public:
   bar_shape_func(){}
@@ -169,10 +131,6 @@ class bar_shape_func {
 
 };
 
-/**
- * 1d quadratic bar
- * @ingroup tshapefunc 
- */
 class bar3_shape_func {
   public:
   bar3_shape_func(){}
@@ -203,10 +161,6 @@ class bar3_shape_func {
 
 };
 
-/**
-  3 node triangle.
- * @ingroup tshapefunc
- */
 class tri_shape_func {
   public:
   tri_shape_func() {}
@@ -235,10 +189,6 @@ class tri_shape_func {
   static bool is_nodal() { return true;}
 };
 
-/**
- * 4 node quadrilateral
- * @ingroup tshapefunc
- */
 class quad_shape_func {
   public:
   quad_shape_func() {}
@@ -268,10 +218,6 @@ class quad_shape_func {
   static bool is_nodal() { return true;}
 };
 
-/**
- * 9 node quadrilateral
- * @ingroup tshapefunc 
- */
 class quad9_shape_func {
   public:
   quad9_shape_func() {}
@@ -300,10 +246,7 @@ class quad9_shape_func {
   static bool is_nodal() { return true;}
 };
 
-/**
- * 8 node hex
- * @ingroup tshapefunc 
- */
+// A variety of shape functions defined on basic topological entities
 class hex_shape_func {
   public:
   hex_shape_func() {}
@@ -333,10 +276,7 @@ class hex_shape_func {
   static bool is_nodal() { return true;}
 };
 
-/**
- * 4 node tet.
- * @ingroup tshapefunc 
- */
+// A variety of shape functions defined on basic topological entities
 class tet_shape_func {
   public:
   tet_shape_func() {}
@@ -366,10 +306,6 @@ class tet_shape_func {
   static bool is_nodal() { return true;}
 };
 
-/**
- * A quadratic based partition of unity.
- * @ingroup tshapefunc 
- */
 class quad_zeroderiv_shape_func {
   public:
   quad_zeroderiv_shape_func() {}
@@ -398,6 +334,7 @@ class quad_zeroderiv_shape_func {
   static bool is_nodal() { return false;}
 };
 
+} // namespace
 } // namespace
 
 #endif

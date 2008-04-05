@@ -1,7 +1,7 @@
-// $Id: ESMC_MeshPartition.C,v 1.6 2007/11/28 16:42:43 dneckels Exp $
+// $Id: ESMC_MeshPartition.C,v 1.4.2.1 2008/04/05 03:13:18 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -34,7 +34,8 @@ typedef int idxtype;
 void METIS_PartGraphKway(int *, idxtype *, idxtype *, idxtype *, idxtype *, int *, int *, int *, int *, int *, idxtype *);
 }
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 void GetMetisPartition(const Mesh &mesh, UInt npart, const MEField<> &ep);
 
@@ -48,6 +49,7 @@ void MeshMetisPartition(const Mesh &mesh, UInt npart, const MEField<> &ep, const
 
 
 void GetMetisPartition(const Mesh &mesh, UInt npart, const MEField<> &ep) {
+#ifdef ESMC_METIS
 //mesh.Print();
 
 
@@ -116,6 +118,7 @@ void GetMetisPartition(const Mesh &mesh, UInt npart, const MEField<> &ep) {
     i++;
   }
 
+#endif
 }
 
 
@@ -238,21 +241,6 @@ std::cout << "new_nodeid=" << new_nodes[node_index[node.get_data_index()]]->get_
         piece.add_element(new_elem, elem_nodes, GetAttr(elem),
              GetMeshObjTopo(elem));
         cur_elem++;
-
-        // May as well add any exposed sides at the same time
-        const MeshObjTopo *etopo = GetMeshObjTopo(elem);
-        for (UInt s = 0; s < etopo->num_sides; s++) {
-          MeshObjRelationList::const_iterator si = 
-            MeshObjConn::find_relation(elem, mesh.side_type(), s, MeshObj::USES);
- 
-          if (si != elem.Relations.end() && GetMeshObjContext(*si->obj).is_set(Attr::EXPOSED_BOUNDARY_ID)) {
-            MeshObj &side = *si->obj;
-
-            MeshObj *newside = new MeshObj(mesh.side_type(), side.get_id());
-
-            piece.add_side(*newside, const_cast<MeshObj&>(elem), si->ordinal, GetAttr(side).GetBlock(), GetMeshObjTopo(side));
-          }
-        }
       }
     } // for ei
 
@@ -376,33 +364,7 @@ void MeshConcat(Mesh &mesh, std::vector<Mesh*> &srcmesh) {
       // If element already there, don't do this:
       MeshDB::MeshObjIDMap::iterator efi = mesh.map_find(MeshObj::ELEMENT, elem.get_id());
       if (efi != mesh.map_end(MeshObj::ELEMENT)) continue;
-      mesh.add_element(newelem, nconnect, GetAttr(elem).GetBlock(), GetMeshObjTopo(elem));
-    }
-  }
-  }
-  // Step 3, the sides.  Assuming unique here.
-  {
-  for (UInt i = 0; i < npart; i++) {
-    Mesh &src = *srcmesh[i];
-
-    MeshDB::const_iterator ni = src.side_begin(), ne = src.side_end();
-    std::vector<MeshObj*> nconnect;
-    for (; ni != ne; ++ni) {
-      const MeshObj &side = *ni;
-      MeshObj *newside = new MeshObj(src.side_type(), side.get_id());
-
-      MeshObjRelationList::const_iterator ei = MeshObjConn::find_relation(side, MeshObj::ELEMENT);
-      if (ei == side.Relations.end()) continue;
-
-      MeshObj &elem = *ei->obj;
-
-      //int block = (*ni)->get_int("block");
-      //newelem->add_data("block", block);
-      // If element already there, don't do this:
-
-      MeshDB::MeshObjIDMap::iterator efi = mesh.map_find(src.side_type(), side.get_id());
-      if (efi != mesh.map_end(src.side_type())) continue;
-      mesh.add_side(*newside, elem, ei->ordinal, GetAttr(side).GetBlock(), GetMeshObjTopo(side));
+      mesh.add_element(newelem, nconnect, GetAttr(elem).get_key(), GetMeshObjTopo(elem));
     }
   }
   }
@@ -536,4 +498,5 @@ void MeshConcat(Mesh &mesh, std::vector<Mesh*> &srcmesh) {
   
 }
 
+} // namespace
 } // namespace

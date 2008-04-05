@@ -1,7 +1,7 @@
-// $Id: ESMC_MasterElement.C,v 1.6 2007/11/28 16:42:41 dneckels Exp $
+// $Id: ESMC_MasterElement.C,v 1.4.2.1 2008/04/05 03:13:17 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -20,7 +20,8 @@
 #include <map>
 #include <iterator>
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 typedef std::map<UInt, std::vector<int> > DofIdMapType;
 
@@ -122,13 +123,15 @@ void MasterElementImpl<SHAPE_FUNC,METRAITS>::JxW(
 template <class SHAPE_FUNC, class METRAITS>
 void MasterElementImpl<SHAPE_FUNC,METRAITS>::shape_grads(UInt npts,
       const Mapping<typename ME2MPTraits<METRAITS>::value> *mapping, 
-      const mdata_type mdata[], const double pcoord[], 
-      const double param_shape_grads[], mdata_type result[]) const 
+      const mdata_type mdata[], const double pcoord[], mdata_type result[]) const 
 {
   // First get the mapping derivatives
+  double sgrads[ndofs][pdim];
   UInt sdim = mapping->spatial_dim();
   std::vector<mdata_type> jac_inv(sdim*sdim);
   for (UInt j = 0; j < npts; j++) {
+    // Get shape function derivs
+    SHAPE_FUNC::shape_grads(1, &pcoord[j*pdim], &sgrads[0][0]);
 
     // Mapping inv jac
     mapping->jac_inv(mdata, &pcoord[j*pdim], &jac_inv[0]);
@@ -139,8 +142,7 @@ void MasterElementImpl<SHAPE_FUNC,METRAITS>::shape_grads(UInt npts,
         result[(j*ndofs + nd)*sdim + i] = 0.0;
         // Only do to pdim, not sdim, because assume zero deriv w/rspt d coord
         for (UInt k = 0; k < pdim; k++) {
-          //result[(j*ndofs + nd)*sdim + i] += sgrads[nd][k]*jac_inv[k*sdim+i];
-          result[(j*ndofs + nd)*sdim + i] += param_shape_grads[(j*ndofs + nd)*pdim+k]*jac_inv[k*sdim+i];
+          result[(j*ndofs + nd)*sdim + i] += sgrads[nd][k]*jac_inv[k*sdim+i];
         }
       }
     } // nd
@@ -151,10 +153,12 @@ template <class SHAPE_FUNC, class METRAITS>
 void MasterElementImpl<SHAPE_FUNC,METRAITS>::function_grads(UInt npts, UInt fdim,
    const Mapping<typename ME2MPTraits<METRAITS>::value> *mapping,
     const mdata_type mdata[], const double pcoord[], const field_type fdata[], 
-   typename richest_type<mdata_type,field_type>::value result[],
-   mdata_type shape_grads[]) const 
+   typename richest_type<mdata_type,field_type>::value result[]) const 
 {
   UInt sdim = mapping->spatial_dim();
+  std::vector<mdata_type> sgrads(npts*ndofs*sdim);
+
+  this->shape_grads(npts, mapping, mdata, pcoord, &sgrads[0]);
 
   // Now contract
   for (UInt p = 0; p < npts; p++) {
@@ -162,7 +166,7 @@ void MasterElementImpl<SHAPE_FUNC,METRAITS>::function_grads(UInt npts, UInt fdim
       for (UInt d = 0; d < sdim; d++) {
         result[(p*fdim + fd)*sdim + d] = 0;
         for (UInt n = 0; n < ndofs; n++) {
-          result[(p*fdim+fd)*sdim+d] += fdata[n*fdim +fd]*shape_grads[(p*ndofs+n)*sdim+d];
+          result[(p*fdim+fd)*sdim+d] += fdata[n*fdim +fd]*sgrads[(p*ndofs+n)*sdim+d];
         }
       }
     }
@@ -173,8 +177,7 @@ template <class SHAPE_FUNC, class METRAITS>
 void MasterElementImpl<SHAPE_FUNC,METRAITS>::function_curl(UInt npts,
   const Mapping<typename ME2MPTraits<METRAITS>::value> *mapping,
   const mdata_type mdata[], const double pcoord[], const field_type fdata[], 
-  typename richest_type<mdata_type,field_type>::value result[],
-  mdata_type shape_grads[]) const 
+  typename richest_type<mdata_type,field_type>::value result[]) const 
 {
   // This is a dumb implementation, since it calculates way to many grads.  TODO optimize.
   UInt sdim = mapping->spatial_dim();
@@ -183,7 +186,7 @@ void MasterElementImpl<SHAPE_FUNC,METRAITS>::function_curl(UInt npts,
   if (sdim != 3) throw("function_curl not yet implemented for sdim != 3");
 
   // First get all gradients of function
-  function_grads(npts, sdim, mapping, mdata, pcoord, fdata, &fgrads[0], &shape_grads[0]);
+  function_grads(npts, sdim, mapping, mdata, pcoord, fdata, &fgrads[0]);
 
   // Curl is {dyf3-dzf2, dzf1-dxf3,dxf2-dyf1} 
   for (UInt p = 0; p < npts; p++) {
@@ -194,31 +197,31 @@ void MasterElementImpl<SHAPE_FUNC,METRAITS>::function_curl(UInt npts,
 }
 
 template <class SHAPE_FUNC, class METRAITS>
-void MasterElementImpl<SHAPE_FUNC,METRAITS>::function_values(
-               UInt npts, UInt fdim, const double pcoord[],
-                const field_type fdata[], field_type results[]) const
+void MasterElementImpl<SHAPE_FUNC,METRAITS>::normal(UInt npts, 
+  const Mapping<typename ME2MPTraits<METRAITS>::value> *mapping,
+  const mdata_type mdata[], const double pcoord[], mdata_type result[]) const 
 {
-  std::vector<double> svals(npts*ndofs);
-  SHAPE_FUNC::shape(npts, pcoord, &svals[0]);
-
-  function_values(npts, fdim, pcoord, fdata, results, &svals[0]);
+  // get normals
+  mapping->normal(npts, mdata, pcoord, result);
 
 }
 
 template <class SHAPE_FUNC, class METRAITS>
-void MasterElementImpl<SHAPE_FUNC,METRAITS>::function_values(
-               UInt npts, UInt fdim, const double pcoord[],
-               const field_type fdata[], field_type results[],
-               double shape_vals[]) const
+void MasterElementImpl<SHAPE_FUNC,METRAITS>::unit_normal(UInt npts, 
+  const Mapping<typename ME2MPTraits<METRAITS>::value> *mapping,
+  const mdata_type mdata[], const double pcoord[], mdata_type result[]) const 
 {
-  // contract
-  for (UInt j = 0; j < npts; j++) {
-   for (UInt f = 0; f < fdim; f++) {
-     results[j*fdim + f] = 0;
-     for (UInt n = 0; n < ndofs; n++) {
-        results[j*fdim + f] += shape_vals[j*ndofs+n]*fdata[n*fdim + f];
-      }
-    }
+  UInt sdim = mapping->spatial_dim();
+
+  // get normals
+  mapping->normal(npts, mdata, pcoord, result);
+
+  // normalize
+  for (UInt p = 0; p < npts; p++) {
+    mdata_type rnorm_i = 0;
+    for (UInt i = 0; i < sdim; i++) rnorm_i += result[p*sdim+i]*result[p*sdim+i];
+    rnorm_i = 1.0/std::sqrt(rnorm_i);
+    for (UInt i = 0; i < sdim; i++) result[p*sdim+i] *= rnorm_i;
   }
 }
 
@@ -238,35 +241,15 @@ void MasterElementImpl<SHAPE_FUNC,METRAITS>::InterpPoints(
 }
 
 template <class SHAPE_FUNC, class METRAITS>
-void MasterElementImpl<SHAPE_FUNC,METRAITS>::Interpolate(UInt fdim, const double vals[], double res[]) const {
+void MasterElementImpl<SHAPE_FUNC,METRAITS>::Interpolate(const double vals[], double res[]) const {
   Throw() << "ME:" << this->name << " is a template version, most likely nodal, so use nodes" <<
         " for interplation";
 }
 
 // Side element specializations
 template<class SHAPE_FUNC, class METRAITS>
-MasterElement<METRAITS> *MasterElementImpl<SHAPE_FUNC, METRAITS>::side_element(UInt side) const {
+MasterElement<METRAITS> *MasterElementImpl<SHAPE_FUNC, METRAITS>::side_element(UInt side) {
   Throw() << "Could not find side element, side=" << side << "ME=" << this->name << std::endl;
-}
-
-template<>
-MasterElement<METraits<> > *MasterElementImpl<quad_shape_func,METraits<> >::side_element(UInt side) const {
-  return MasterElementImpl<bar_shape_func,METraits<> >::instance();
-}
-
-template<>
-MasterElement<METraits<> > *MasterElementImpl<hex_shape_func,METraits<> >::side_element(UInt side) const {
-  return MasterElementImpl<quad_shape_func,METraits<> >::instance();
-}
-
-template<>
-MasterElement<METraits<> > *MasterElementImpl<tri_shape_func,METraits<> >::side_element(UInt side) const {
-  return MasterElementImpl<bar_shape_func,METraits<> >::instance();
-}
-
-template<>
-MasterElement<METraits<> > *MasterElementImpl<tet_shape_func,METraits<> >::side_element(UInt side) const {
-  return MasterElementImpl<tri_shape_func,METraits<> >::instance();
 }
 
 #ifdef NOT
@@ -381,4 +364,5 @@ template class  MasterElementImpl<dg0_shape_func<3>, fad_metraits1 >;
 template class  MasterElementImpl<dg0_shape_func<3>, fad_metraits2>;
 template class  MasterElementImpl<dg0_shape_func<3>, fad_metraits3>;
 
+} // namespace
 } // namespace

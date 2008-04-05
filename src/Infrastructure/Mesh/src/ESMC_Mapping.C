@@ -1,7 +1,7 @@
-// $Id: ESMC_Mapping.C,v 1.5 2007/11/28 16:42:41 dneckels Exp $
+// $Id: ESMC_Mapping.C,v 1.3.2.1 2008/04/05 03:13:16 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -11,7 +11,6 @@
 //==============================================================================
 #include <ESMC_Mapping.h>
 #include <ESMC_ShapeFunc.h>
-#include <ESMC_ParEnv.h>
 #include <iostream>
 #include <limits>
 
@@ -19,47 +18,44 @@
 
 #include <ESMC_Exception.h>
 
-namespace ESMC {
-
+namespace ESMCI {
+namespace MESH {
 
 template<class SFUNC_TYPE,typename MPTRAITS, int SPATIAL_DIM, int PARAMETRIC_DIM>
 POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM> *POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM>::classInstance = NULL;
 
+template<class SFUNC_TYPE,typename MPTRAITS, int SPATIAL_DIM, int PARAMETRIC_DIM>
+const std::string POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM>::name("POLY_MAPPING:s=d:" + SFUNC_TYPE::name);
+
 template<class SFUNC_TYPE,typename MPTRAITS>
 POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,1> *POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,1>::classInstance = NULL;
+template<class SFUNC_TYPE,typename MPTRAITS>
+const std::string POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,1>::name("POLY_MAPPING:3,1:" + SFUNC_TYPE::name);
 
 template<class SFUNC_TYPE,typename MPTRAITS>
 POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2> *POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::classInstance = NULL;
-
 template<class SFUNC_TYPE,typename MPTRAITS>
-POLY_Mapping<SFUNC_TYPE,MPTRAITS,2,1> *POLY_Mapping<SFUNC_TYPE,MPTRAITS,2,1>::classInstance = NULL;
+const std::string POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::name("POLY_MAPPING:3,2:" + SFUNC_TYPE::name);
 
 
 template<class SFUNC_TYPE,typename MPTRAITS, int SPATIAL_DIM, int PARAMETRIC_DIM>
 POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM> *POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM>::instance() {
   if (classInstance == NULL)
-    classInstance = new POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM>("mapdd" + SFUNC_TYPE::name);
+    classInstance = new POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM>();
 
   return classInstance;
 }
 template<class SFUNC_TYPE,typename MPTRAITS>
 POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2> *POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::instance() {
   if (classInstance == NULL)
-    classInstance = new POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>("map32," + SFUNC_TYPE::name);
+    classInstance = new POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>();
 
   return classInstance;
 }
 template<class SFUNC_TYPE,typename MPTRAITS>
 POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,1> *POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,1>::instance() {
   if (classInstance == NULL)
-    classInstance = new POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,1>("map31," + SFUNC_TYPE::name);
-
-  return classInstance;
-}
-template<class SFUNC_TYPE,typename MPTRAITS>
-POLY_Mapping<SFUNC_TYPE,MPTRAITS,2,1> *POLY_Mapping<SFUNC_TYPE,MPTRAITS,2,1>::instance() {
-  if (classInstance == NULL)
-    classInstance = new POLY_Mapping<SFUNC_TYPE,MPTRAITS,2,1>("map21," + SFUNC_TYPE::name);
+    classInstance = new POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,1>();
 
   return classInstance;
 }
@@ -71,15 +67,6 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,1>::is_in_cell(const double *mdata,
                              double *dist) const
 {
   Throw() << "is_in_cell not implemented for 3,1";
-}
-
-template<class SFUNC_TYPE,typename MPTRAITS>
-bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,2,1>::is_in_cell(const double *mdata,
-                             const double *point,
-                             double *pcoord,
-                             double *dist) const
-{
-  Throw() << "is_in_cell not implemented for 2,1";
 }
 
 template<class SFUNC_TYPE,typename MPTRAITS>
@@ -383,37 +370,6 @@ std::cout << std::endl;
   } // npts
 }
 
-template<class SFUNC_TYPE,typename MPTRAITS>
-void POLY_Mapping<SFUNC_TYPE,MPTRAITS,2,1>::forward(const unsigned int npts,
-                          const mdata_type mdata[],
-                          const pcoord_type points[],
-                          typename richest_type<mdata_type,pcoord_type>::value results[]) const
-{
-  // We get the shape function values at points
-  std::vector<pcoord_type> svals(npts*SFUNC_TYPE::ndofs);
-
-  SFUNC_TYPE::shape(npts, points, &svals[0]);
-
-/*
-std::cout << "shape:";
-for (unsigned int i = 0; i < npts; i++) {
-for (unsigned int j = 0; j < SFUNC_TYPE::ndofs; j++) {
-  std::cout << svals[i][j] << ", ";
-}
-std::cout << std::endl;
-}
-*/
-
-  for (unsigned int j = 0; j < npts; j++) {
-    for (unsigned int i = 0; i < sdim; i++) {
-    results[j*sdim+i] = 0.0;
-      for (unsigned int ncf = 0; ncf < SFUNC_TYPE::ndofs; ncf++) {
-        results[j*sdim+i] += mdata[ncf*sdim+i]*svals[j*SFUNC_TYPE::ndofs+ncf];
-      } // ncf
-    } // sdim
-  } // npts
-}
-
 template<class SFUNC_TYPE, typename MPTRAITS, int SPATIAL_DIM, int PARAMETRIC_DIM>
 void POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM>::Jx(
   UInt npts, const mdata_type mdata[], const pcoord_type pcoord[], 
@@ -432,7 +388,7 @@ void POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM>::Jx(
       }
     } // for sdim
 
-    result[n] = std::abs(POLY_Mapping_determinant<sdim>(&jac[0][0]));
+    result[n] = POLY_Mapping_determinant<sdim>(&jac[0][0]);
   }
 
 }
@@ -477,31 +433,6 @@ void POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,1>::Jx(
   }
 }
 
-template<class SFUNC_TYPE,typename MPTRAITS>
-void POLY_Mapping<SFUNC_TYPE,MPTRAITS,2,1>::Jx(
-  UInt npts, const mdata_type mdata[], const pcoord_type pcoord[], 
-   typename richest_type<mdata_type,pcoord_type>::value result[]) const
-{
-
-  // Acually, the answer is simply the norm of the tanget
-  pcoord_type sgrads[SFUNC_TYPE::ndofs][pdim];
-
-  for (UInt n = 0; n < npts; n++) {
-    SFUNC_TYPE::shape_grads(1,&pcoord[n*pdim], &sgrads[0][0]);
-
-    typename richest_type<mdata_type,pcoord_type>::value Fxi[sdim];
-  
-    for (UInt i = 0; i < sdim; i++) {
-      Fxi[i] = 0.0;
-      for (UInt n = 0; n < SFUNC_TYPE::ndofs; n++) {
-        Fxi[i] += mdata[n*sdim+i]*sgrads[n][0];
-      }
-    }
-    result[n] = std::sqrt(Fxi[0]*Fxi[0]+Fxi[1]*Fxi[1]);
-//Par::Out() << "Jx="  << result[n] << std::endl;
-  }
-}
-
 template<class SFUNC_TYPE,typename MPTRAITS, int SPATIAL_DIM, int PARAMETRIC_DIM>
 void POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM>::jac_inv(
                            const mdata_type mdata[],
@@ -533,14 +464,6 @@ void POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,1>::jac_inv(
 }
 
 template<class SFUNC_TYPE,typename MPTRAITS>
-void POLY_Mapping<SFUNC_TYPE,MPTRAITS,2,1>::jac_inv(
-                           const mdata_type mdata[],
-                           const pcoord_type pcoord[],
-                                 typename richest_type<mdata_type,pcoord_type>::value result[]) const {
-  Throw() << "No jacobian invert for 2,1";
-}
-
-template<class SFUNC_TYPE,typename MPTRAITS>
 void POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::jac_inv(
                            const mdata_type mdata[],
                            const pcoord_type pcoord[],
@@ -567,39 +490,12 @@ void POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::jac_inv(
   POLY_Mapping_jacobian_invert<sdim>(&jac[0][0], result);
 }
 
-template<class SFUNC_TYPE,typename MPTRAITS, int SPATIAL_DIM, int PARAMETRIC_DIM>
-const Mapping<MPTRAITS> *POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM>::side_mapping(UInt side_num) const
-{
-  Throw() << "side mapping not implemented";
-}
-
-template<>
-const Mapping<MPTraits<> > *POLY_Mapping<quad_shape_func,MPTraits<>,2, 2>::side_mapping(UInt side_num) const
-{
-  return POLY_Mapping<bar_shape_func,MPTraits<>,2,1>::instance();
-}
-
-template<>
-const Mapping<MPTraits<> > *POLY_Mapping<hex_shape_func,MPTraits<>,3, 3>::side_mapping(UInt side_num) const
-{
-  return POLY_Mapping<quad_shape_func,MPTraits<>,3,2>::instance();
-}
-
 template<class SFUNC_TYPE,typename MPTRAITS>
 void POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,1>::normal(UInt npts, const mdata_type mdata[],
                            const pcoord_type pcoord[],
                                  typename richest_type<mdata_type,pcoord_type>::value result[]) const {
 
   Throw() << "No normal for 3,1";
-
-}
-
-template<class SFUNC_TYPE,typename MPTRAITS>
-void POLY_Mapping<SFUNC_TYPE,MPTRAITS,2,1>::normal(UInt npts, const mdata_type mdata[],
-                           const pcoord_type pcoord[],
-                                 typename richest_type<mdata_type,pcoord_type>::value result[]) const {
-
-  Throw() << "No normal for 2,1";
 
 }
 
@@ -759,7 +655,7 @@ MappingBase *Topo2Map::operator()(const std::string &toponame) {
   } else if (name == "BAR3_3D") {
     return POLY_Mapping<bar3_shape_func,MPTraits<>,3,1>::instance();
   } else if (name == "BAR2_2D") {
-    return POLY_Mapping<bar_shape_func,MPTraits<>,2,1>::instance();
+    return POLY_Mapping<bar_shape_func,MPTraits<>,3,2>::instance();
   } else if (name == "QUAD" || name == "QUAD4") {
     return POLY_Mapping<quad_shape_func,MPTraits<> >::instance();
   } else if (name == "QUAD_3D") {
@@ -852,4 +748,5 @@ template class POLY_Mapping<tet_shape_func,MPTraits<fad_type,double> >;
 template class POLY_Mapping<tet_shape_func,MPTraits<double,fad_type> >;
 
 
-} // namespace
+} //namespace
+} //namespace

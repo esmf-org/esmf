@@ -1,23 +1,28 @@
-// $Id: ESMC_MeshNC.h,v 1.3 2007/11/28 16:43:50 dneckels Exp $
+// $Id: ESMC_MeshNC.h,v 1.1.2.1 2008/04/05 03:13:12 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-//
-//-----------------------------------------------------------------------------
+
+// (all lines below between the !BOP and !EOP markers will be included in
+//  the automated document processing.)
+//-------------------------------------------------------------------------
+// these lines prevent this file from being read more than once if it
+// ends up being included multiple times
+
 #ifndef ESMC_MeshNC_h
 #define ESMC_MeshNC_h
 
 #include <ESMC_MEField.h>
-#include <ESMC_Mesh.h>
 #include <string>
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 class Mesh;
 class MeshDB;
@@ -29,13 +34,7 @@ typedef bool (latlon_func)(double lat, double lon);
 
 class MeshDB;
 // land = false doesn't instantiate the land cells.
-void LoadNCMesh(Mesh &mesh, const std::string name);
-
-/* Load the dual mesh of a given netcdf file.  Note: this loads the file on
- * processor zero only.  It should, however, be called from all processors.
- * Will generate a bilinear mesh unless use_quad = true, then a quadratic.
- */
-void LoadNCDualMesh(Mesh &mesh, const std::string fname, bool use_quad=false);
+void LoadNCMesh(MeshDB &mesh, const std::string name, bool land=true, pole_func pf = NULL, latlon_func lf = NULL);
 
 // Return true if lowerleft corner lat lon means include cell
 void LoadNCTMesh(Mesh &mesh, const std::string name, latlon_func lf = NULL);
@@ -47,7 +46,7 @@ bool LoadNCTData(MeshDB &mesh,
                  const MEField<> &field, // Read into this field
                  int timestep);
 
-
+} // namespace
 } // namespace
 
 #endif

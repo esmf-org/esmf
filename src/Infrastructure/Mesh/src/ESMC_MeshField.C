@@ -1,7 +1,7 @@
-// $Id: ESMC_MeshField.C,v 1.5 2007/11/28 16:42:42 dneckels Exp $
+// $Id: ESMC_MeshField.C,v 1.3.2.1 2008/04/05 03:13:17 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -18,7 +18,8 @@
 #include <sacado/Sacado.hpp>
 
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 
 
@@ -38,21 +39,20 @@ SField::~SField() {
 }
 
 void SField::Reset() {
-  dmap.clear();
-  objs.clear();
+  DMapType().swap(dmap); // remove data
 }
 
 fad_type *SField::data(const MeshObj &obj) const {
   DMapType::const_iterator mi =
-    //dmap.find(obj.get_id());
-    dmap.find(&obj);
+    dmap.find(obj.get_data_index());
 
   if (mi == dmap.end())
-    Throw() << "SField.data, idx=" << obj.get_id() << " not in SField!";
+    Throw() << "SField.data, idx=" << obj.get_data_index() << " not in SField!";
 
   // use const cast to emulate when data is only in an array.
   UInt lidx = mi->second; // *fdim rolled into lidx already.
   return const_cast<fad_type*>(&fdata[lidx]);
 }
 
+} // namespace
 } // namespace

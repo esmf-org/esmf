@@ -1,7 +1,7 @@
-// $Id: ESMC_SmallAlloc.C,v 1.4 2007/11/28 16:42:46 dneckels Exp $
+// $Id: ESMC_SmallAlloc.C,v 1.2.2.1 2008/04/05 03:13:20 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -13,7 +13,8 @@
 
 #include <ESMC_Exception.h>
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 
 
@@ -186,6 +187,7 @@ SmallObject<ObjType>::~SmallObject() {
 }
 
 } // namespace 
+} // namespace 
 
 
 
@@ -194,12 +196,13 @@ SmallObject<ObjType>::~SmallObject() {
 #include <ESMC_MeshObj.h>
 
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 
 template class ObjPool<MeshObj>;
 template class SmallObject<MeshObj>;
 
-}
-
+} // namespace
+} // namespace
 

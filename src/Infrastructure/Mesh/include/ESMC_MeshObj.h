@@ -1,15 +1,20 @@
-// $Id: ESMC_MeshObj.h,v 1.4 2007/11/28 16:43:50 dneckels Exp $
+// $Id: ESMC_MeshObj.h,v 1.2.2.1 2008/04/05 03:13:12 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-//
-//-----------------------------------------------------------------------------
+
+// (all lines below between the !BOP and !EOP markers will be included in
+//  the automated document processing.)
+//-------------------------------------------------------------------------
+// these lines prevent this file from being read more than once if it
+// ends up being included multiple times
+
 #ifndef ESMC_MeshObj_h
 #define ESMC_MeshObj_h
 
@@ -37,7 +42,8 @@
 
 // A basic container for all mesh objects (used to connect different types)
 //  Some container types
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 class MeshObj;
 typedef List<MeshObj> MeshObjList;
@@ -61,25 +67,11 @@ typedef long MeshObj_id_type;
  * between mesh objects such as USES, CHILD, etc...
  * A main goal of this class is to be as small as possible, since there
  * very well may be millions of these present.
- * @ingroup meshdatabase
 */
 class MeshObj :  public ListNode<MeshObj>, public TreeNode<MeshObj_id_type> {
 public:
-#ifdef ESMC_MESHOBJ_MMANAGE
   static void *operator new(std::size_t);
   static void operator delete(void *p, std::size_t);
-#endif
-  /**
-   * The list of objects that have relation to this meshobject.
-   * The relation has several attributes:
-   * <ol>
-   * <li> obj: a pointer to the object
-   * <li> ordinal: topological number of object (e.g. node 2)
-   * <li> type: type of relation (USES,USED_BY,PARENT,CHILD)
-   * <li> polarity,rotation:defines edge/face orienation wrt this object.
-   * </ol>
-   * @ingroup meshdatabase
-   */
 class Relation {
 public:
   Relation() : obj(NULL), ordinal(0), type(0), polarity(0), rotation(0) {}
@@ -114,7 +106,11 @@ public:
  friend class Kernel;
  typedef enum {NONE = 0x0, NODE = 0x01, EDGE=0x02, FACE=0x04, ELEMENT=0x08, INTERP= 0x10, ANY=0xFF } MeshObjType;
  typedef enum {USES=0x01, USED_BY=0x02, PARENT=0x04, CHILD=0x08} RelationType;
-
+/*
+ MeshObj() :
+   TreeNode<MeshObj_id_type>(0),
+   type(NONE), data_index(0), meshset(NULL) {}
+*/
  MeshObj(UChar _type, int _id, long _data_index=-1, int _owner=std::numeric_limits<int>::max());
  ~MeshObj();
  typedef std::vector<Relation> RelationList;
@@ -129,17 +125,13 @@ public:
  //const MeshObjTopo * get_topo() const {return topo;}
  // Find the element opposite to this one's side 'side_ordinal'.  Return the oridnal
  // in the other elements numbering, rotation and polarity.  Return NULL if nothing there.
- UInt get_type() const;
+ UInt get_type() const {return type;}
  UInt get_owner() const { return owner;}
 
- typedef UInt OwnerType;
- OwnerType *get_owner_ptr() { return &owner; }
- void set_owner(OwnerType _owner) { owner = _owner;}
-
- typedef long DataIndexType;
-
- DataIndexType get_data_index() const { return data_index;}
- DataIndexType *get_data_index_ptr() { return &data_index;}
+ // Long story; 
+ UInt *get_owner_ptr() { return &owner; }
+ void set_owner(UInt _owner) { owner = _owner;}
+ long get_data_index() const { return data_index;}
  bool operator==(const MeshObj &r) const { return &r == this;}
  bool operator!=(const MeshObj &r) const { return &r != this;}
  void AssignStore(_fieldStore *s, UInt idx);
@@ -147,10 +139,10 @@ public:
 private:
  MeshObj(const MeshObj &rhs);
  MeshObj &operator=(const MeshObj &rhs);
- DataIndexType data_index;
  UChar type;
+ long data_index;
  Kernel *meshset; // point back to mesh set
- OwnerType owner;  // owning proc
+ UInt owner;  // owning proc
  std::pair<_fieldStore*,UInt> fstore;
  friend std::ostream &operator<<(std::ostream &os, const MeshObj &dc);
 
@@ -175,6 +167,7 @@ const UInt MeshObjTypes[] = {
 // Return converse of obj relation type
 UInt MeshObjRelationConverse(UInt rel_type);
 
+} //namespace
 } //namespace
 
 

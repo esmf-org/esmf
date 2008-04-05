@@ -1,7 +1,7 @@
-! $Id: ESMF_VMComponentUTest.F90,v 1.11.2.3 2008/04/04 16:17:44 theurich Exp $
+! $Id: ESMF_VMComponentUTest.F90,v 1.11.2.4 2008/04/05 03:13:57 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2007, University Corporation for Atmospheric Research,
+! Copyright 2002-2008, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -176,7 +176,7 @@ program ESMF_VMComponentUTest
 !------------------------------------------------------------------------------
   ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMComponentUTest.F90,v 1.11.2.3 2008/04/04 16:17:44 theurich Exp $'
+    '$Id: ESMF_VMComponentUTest.F90,v 1.11.2.4 2008/04/05 03:13:57 cdeluca Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0

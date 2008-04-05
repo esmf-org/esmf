@@ -1,15 +1,20 @@
-// $Id: ESMC_MeshObjPack.h,v 1.3 2007/11/28 16:43:50 dneckels Exp $
+// $Id: ESMC_MeshObjPack.h,v 1.1.2.1 2008/04/05 03:13:12 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-//
-//-----------------------------------------------------------------------------
+
+// (all lines below between the !BOP and !EOP markers will be included in
+//  the automated document processing.)
+//-------------------------------------------------------------------------
+// these lines prevent this file from being read more than once if it
+// ends up being included multiple times
+
 #ifndef ESMC_MeshObjPack_h
 #define ESMC_MeshObjPack_h
 
@@ -22,7 +27,8 @@
 
 #include <cstddef>
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 // Pack a meshobject, or determine its packing size
 UInt MeshObjPackSize(MeshObj &obj);
@@ -101,9 +107,9 @@ class SparsePack<Attr> {
 public:
   SparsePack(SparseMsg::buffer &b, const Attr &a, bool ghosting = false) {
     // If ghosting, then object will be shared and not locally owned.
-    SparsePack<UInt>(b, a.GetType()); // type
-    SparsePack<UInt>(b, a.GetBlock()); // blockKey
-    SparsePack<Context>(b, a.GetContext()); // context
+    SparsePack<UInt>(b, a.get_type()); // type
+    SparsePack<UInt>(b, a.get_key()); // blockKey
+    SparsePack<Context>(b, a.get_context()); // context
   }
   static UInt size() {
     return
@@ -123,6 +129,7 @@ public:
   }
 };
 
+} // namespace
 } // namespace
 
 #endif

@@ -1,15 +1,20 @@
-// $Id: ESMC_MeshField.h,v 1.3 2007/11/28 16:43:50 dneckels Exp $
+// $Id: ESMC_MeshField.h,v 1.1.2.1 2008/04/05 03:13:11 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-//
-//-----------------------------------------------------------------------------
+
+// (all lines below between the !BOP and !EOP markers will be included in
+//  the automated document processing.)
+//-------------------------------------------------------------------------
+// these lines prevent this file from being read more than once if it
+// ends up being included multiple times
+
 #ifndef ESMC_MeshField_h
 #define ESMC_MeshField_h
 
@@ -17,18 +22,18 @@
 #include <ESMC_MeshObj.h>
 #include <ESMC_MEFamily.h>
 #include <ESMC_Context.h>
-#include <ESMC_MeshllField.h>
+#include <ESMC_Meshfield.h>
 
 #include <string>
 #include <map>
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 /**
  * A field that allows one to provide an object that acts on
  * a mesh object to return a value.  The provided class ACTION
  * must provide the dim and data functions, and a copy constructor.
- * @ingroup field
 */
 template <typename ACTION>
 class ActField {
@@ -49,31 +54,8 @@ std::string fname;
 ACTION a;
 };
 
-// Act like a field that returns owner
-struct OwnerAction {
-  typedef UInt real_type;
-  UInt dim() { return 1; }
-  real_type *data(const MeshObj &obj) {
-    return const_cast<MeshObj&>(obj).get_owner_ptr();
-  }
-  bool OnObj(const MeshObj &) { return true;}
-};
-
-// Act like a field that returns data index
-struct DataIndexAction {
-  typedef MeshObj::DataIndexType real_type;
-  UInt dim() { return 1; }
-  real_type *data(const MeshObj &obj) {
-    return const_cast<MeshObj&>(obj).get_data_index_ptr();
-  }
-  bool OnObj(const MeshObj &) { return true;}
-};
-
-
-
 /**
- * A field that can be used for sensitivities, replacing a Low Level Field.
- * @ingroup BaseField
+ * A field that can be used for sensitivities.
 */
 class SField {
 public:
@@ -89,35 +71,30 @@ public:
   UInt dim() const { return fdim;}
   real_type *data(const MeshObj &obj) const;
   real_type *FadBase() { return fdata;}
-  UInt NumFadObj() { return nobj;}
-  MeshObj* Obj(UInt i) { ThrowRequire(i < nobj); return objs[i];}
+  UInt NumFad() { return fdim*nobj;}
   const std::string &name() const { return fname;}
   private:
   const _field &field;
   const std::string fname;
   UInt fdim;
   // Takes data index to local index.
-  typedef std::map<const MeshObj*, UInt> DMapType;
+  typedef std::map<UInt, UInt> DMapType;
   DMapType dmap;
   fad_type* fdata;
   UInt nobj;
-  std::vector<MeshObj*> objs;
 };
 
 template<typename obj_iter>
 void SField::SetData(obj_iter obj_begin, obj_iter obj_end,
       fad_type *base) {
   fdata = base;
+  nobj = std::distance(obj_begin, obj_end);
   // First, how many objects?
   // Loop Objects.  Set variables and build index map.
   UInt i = 0;
-  nobj = 0;
   for (obj_iter oi = obj_begin; oi != obj_end; ++oi) {
-    nobj++;
-    objs.push_back(*oi);
     const double *fd = field.data(**oi);
-    //dmap[(*oi)->get_id()] = i; // access map
-    dmap[*oi] = i; // access map
+    dmap[(*oi)->get_data_index()] = i; // access map
     for (UInt d = 0; d < fdim; d++) {
       // Initialize the fad vars;
       fdata[i] = fd[d];
@@ -127,6 +104,7 @@ void SField::SetData(obj_iter obj_begin, obj_iter obj_end,
   
 }
 
+} // namespace
 } // namespace
 
 #endif

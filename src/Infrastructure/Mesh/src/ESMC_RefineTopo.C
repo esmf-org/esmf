@@ -1,7 +1,7 @@
-// $Id: ESMC_RefineTopo.C,v 1.4 2007/11/28 16:42:45 dneckels Exp $
+// $Id: ESMC_RefineTopo.C,v 1.2.2.1 2008/04/05 03:13:19 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -13,7 +13,8 @@
 
 #include <map>
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 static UInt bar_homorefine_cnodes[] = {
 0, 2, // child 0
@@ -166,5 +167,6 @@ const RefineTopo *GetHomoRefineTopo(const std::string &tname) {
 }
 
 
+} // namespace
 } // namespace
 

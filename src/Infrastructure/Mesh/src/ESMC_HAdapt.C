@@ -1,7 +1,7 @@
-// $Id: ESMC_HAdapt.C,v 1.8 2007/11/28 16:42:41 dneckels Exp $
+// $Id: ESMC_HAdapt.C,v 1.6.2.1 2008/04/05 03:13:15 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -20,7 +20,8 @@
 #include <ESMC_MEField.h>
 #include <ESMC_ParEnv.h>
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 HAdapt::HAdapt(Mesh &_mesh) :
 mesh(_mesh)
@@ -31,17 +32,11 @@ mesh(_mesh)
 
   {
     node_marker = mesh.RegisterField("_node_hadapt_marker", MEFamilyStd::instance(),
-                                     MeshObj::ELEMENT, ctxt, 1, 
-                                     false, // output 
-                                     false, // interp
-                                     _fieldType<char>::instance());
+                                     MeshObj::ELEMENT, ctxt, 1, false, false, _fieldType<char>::instance());
   }
   {
     elem_marker = mesh.RegisterField("_hadapt_marker", MEFamilyDG0::instance(),
-                                     MeshObj::ELEMENT, ctxt, 1, 
-                                     false, // no output
-                                     false, // no interp
-                                     _fieldType<char>::instance());
+                                     MeshObj::ELEMENT, ctxt, 1, false, false, _fieldType<char>::instance());
   }
 }
 
@@ -56,7 +51,7 @@ void HAdapt::RefineUniformly(bool keep_parents) {
 
   RefineMesh();
 
-  refinement_resolution();
+  RefinementResolution();
 
   // If not to keep parents, mark all inactive objects to delete
   if (!keep_parents) {
@@ -168,52 +163,44 @@ static bool is_hanging(const MeshObj &node) {
   return false;
 }
 
-void HAdapt::refinement_resolution() const {
-  Trace __trace("HAdapt::refinement_resolution() const");
-  
-  // Get these out the way 
-  mesh.remove_unused_kernels();
-  
+void HAdapt::RefinementResolution() const {
+  Trace __trace("HAdapt::RefinementResolution() const");
+
 //Par::Out() << "Refine res, mesh:" << std::endl;
 //mesh.Print(Par::Out());
 
   // Determine hanging nodes.  A node is 'hanging' if it is a child node
   // for an active element.  Simple, eh?
-  {
-    Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end(), nn;
-    for (; ni != ne; ) {
-      nn = ni; ++nn;
-      if (is_hanging(*ni)) {
-        // Mark constrained
-        const Context &ctxt = GetMeshObjContext(*ni);
-        
-        if (!ctxt.is_set(Attr::CONSTRAINED_ID)) {
-          Context newctxt(ctxt);
-          newctxt.set(Attr::CONSTRAINED_ID);
-  
-          Attr attr(GetAttr(*ni), newctxt);
-          mesh.update_obj(&*ni, attr);
-        }
-      } else {
-        // Mark unconstrained
-        const Context &ctxt = GetMeshObjContext(*ni);
-  
-        if (ctxt.is_set(Attr::CONSTRAINED_ID)) {
-          Context newctxt(ctxt);
-          newctxt.clear(Attr::CONSTRAINED_ID);
-    
-          Attr attr(GetAttr(*ni), newctxt);
-          mesh.update_obj(&*ni, attr);
-        }
-        
+  Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end(), nn;
+  for (; ni != ne; ) {
+    nn = ni; ++nn;
+    if (is_hanging(*ni)) {
+      // Mark constrained
+      const Context &ctxt = GetMeshObjContext(*ni);
+      Context newctxt(ctxt);
+      newctxt.set(Attr::CONSTRAINED_ID);
+
+      if (newctxt != ctxt) {
+        Attr attr(GetAttr(*ni), newctxt);
+        mesh.update_obj(&*ni, attr);
       }
-      ni = nn;
-    } // for nodes
-  }  
-  
+    } else {
+      // Mark unconstrained
+      const Context &ctxt = GetMeshObjContext(*ni);
+      Context newctxt(ctxt);
+      newctxt.clear(Attr::CONSTRAINED_ID);
+
+      if (newctxt != ctxt) {
+        Attr attr(GetAttr(*ni), newctxt);
+        mesh.update_obj(&*ni, attr);
+      }
+    }
+    ni = nn;
+  } // for nodes
+
   // Another fix:  During unrefinement/delete resolution, we tried
   // to figure out refine/active status.  However, this is not possible
-  // until deleteion is resolved.  Rule: if a FACE or EDGE has its children
+  // until deleteion is resolve.  Rule: if a FACE or EDGE has its children
   // it is refined and inactive, else unrefined and active
   Mesh::iterator oi = mesh.obj_begin_all(), oe = mesh.obj_end_all(), on;
   for (; oi != oe;) {
@@ -251,96 +238,6 @@ void HAdapt::refinement_resolution() const {
   // Parallel sync of attributes.
   mesh.SyncAttributes();
 
-  /*
-   * Now that hanging node constraints are shared, we can 
-   * update constrained status of sides.  
-   * We mark a side constrained if it USES a constrained node.  This 
-   * USES is, of course, indirect, since edges don't have USES
-   * relations.  Hence we get the USED_BY elements, edge node tables, and
-   * verify this way.
-   * 
-   * Since an edge may be ghosted on a processor and not have an element,
-   * we or the attributes after computing; one side will have the element
-   * and node.  This is the reason we must call this after the syncatt
-   * above, since we nodes to be globally consistent.
-   * 
-   * We only update active objects; the state of inactive objects
-   * is indeterminant.
-   */
-  {
-    Mesh::iterator ei = mesh.side_begin(), ee = mesh.side_end(), en;
-
-    for (; ei != ee; ) {
-      
-      en = ei; ++en;
-      
-      MeshObj &side = *ei;
-
-      bool constr = false;
-      
-      // Loop USED_BY elements:
-      MeshObjRelationList::iterator ri = side.Relations.begin(), re = side.Relations.end();
-      
-      for (; !constr && ri != re; ++ri) {
-        
-        if (ri->type == MeshObj::USED_BY && ri->obj->get_type() == MeshObj::ELEMENT) {
-          
-          MeshObj &elem = *ri->obj;
-          
-          const MeshObjTopo *etopo = GetMeshObjTopo(elem);
-          
-          const int *side_nodes = etopo->get_side_nodes(ri->ordinal);
-          
-          for (UInt sn = 0; !constr && sn != etopo->num_side_nodes; ++sn) {
-           
-            // Child nodes may not all be there, so we must use find_rel.
-            MeshObjRelationList::iterator ni =
-              MeshObjConn::find_relation(elem, MeshObj::NODE, side_nodes[sn], MeshObj::USES);
-            
-            if (ni != elem.Relations.end())
-              constr = GetMeshObjContext(*ni->obj).is_set(Attr::CONSTRAINED_ID);
-            
-          } // snn
-          
-        } // used_by, element
-
-      } // ri
-      
-      
-      // And now set the correct bit for the object.
-      if (constr) {
-
-        const Context &ctxt = GetMeshObjContext(side);
-        
-        if (!ctxt.is_set(Attr::CONSTRAINED_ID)) {
-//Par::Out() << "Setting side:" << side.get_id() << " constrained" << std::endl;
-          Context newctxt(ctxt);
-          newctxt.set(Attr::CONSTRAINED_ID);
-          Attr attr(GetAttr(side), newctxt);
-          mesh.update_obj(&side, attr);
-        }
-        
-      } else {
-        
-        const Context &ctxt = GetMeshObjContext(side);
-        
-        if (ctxt.is_set(Attr::CONSTRAINED_ID)) {
-          Context newctxt(ctxt);
-          newctxt.clear(Attr::CONSTRAINED_ID);
-          Attr attr(GetAttr(side), newctxt);
-          mesh.update_obj(&side, attr);
-        }
-        
-      }
-      
-      ei = en;
-    } // ei
-  
-    // Finally, we must share what we have found.
-    mesh.SyncAttributes(mesh.side_type());
-    
-  }
-  
   // Make sure coordinate fields are assigned good values
   {
     MEField<> *cf = mesh.GetCoordField();
@@ -396,8 +293,8 @@ static int mark_cnode_parents(MeshObj &cnode, MEField<> *node_marker, MEField<> 
   return nmarked;
 }
 
-void HAdapt::resolve_refinement_markers(std::vector<MeshObj*> &refine_list) {
-  Trace __trace("HAdapt::resolve_refinement_markers(std::vector<MeshObj*> &refine_list)");
+void HAdapt::resolve_refinement(std::vector<MeshObj*> &refine_list) {
+  Trace __trace("HAdapt::resolve_refinement(std::vector<MeshObj*> &refine_list)");
 
   int nproc = Par::Size();
 
@@ -479,8 +376,8 @@ Par::Out() << "total_marked=" << total_marked_g << std::endl;
 
 }
 
-void HAdapt::resolve_unrefinement_markers(std::vector<MeshObj*> &unrefine_list) {
-  Trace __trace("HAdapt::resolve_unrefinement_markers(std::vector<MeshObj*> &unrefine_list)");
+void HAdapt::resolve_unrefinement(std::vector<MeshObj*> &unrefine_list) {
+  Trace __trace("HAdapt::resolve_unrefinement(std::vector<MeshObj*> &unrefine_list)");
 
   // Firstly, enforce the following basic rules; an element can unrefine only if:
   //  -1) elem not refined
@@ -709,10 +606,10 @@ void HAdapt::MarkerResolution() {
   std::vector<MeshObj*>().swap(unrefine_list);
 
   // Propogate 2-1 rule for refinement requests
-  resolve_refinement_markers(refine_list);
+  resolve_refinement(refine_list);
 
   // And now, resolve unrefinement requests
-  resolve_unrefinement_markers(unrefine_list);
+  resolve_unrefinement(unrefine_list);
 }
 
 
@@ -732,8 +629,6 @@ void HAdapt::RefineMesh() {
   MEField<> &coord = *mesh.GetCoordField();
   ProlongNodeCoords(refine_list, coord);
 
-  refinement_resolution();
-
 }
 
 void HAdapt::UnrefineMesh() {
@@ -751,12 +646,7 @@ Par::Out() << "UNREFINING:" << (*ri)->get_id() << std::endl;
   }
 
   mesh.ResolvePendingDelete();
-
-  refinement_resolution();
-
-  // Defragment stores, in case we left holes.
-  mesh.CompactData();
-
 }
 
+} // namespace
 } // namespace

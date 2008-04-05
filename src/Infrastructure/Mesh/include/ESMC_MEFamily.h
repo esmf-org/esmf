@@ -1,15 +1,20 @@
-// $Id: ESMC_MEFamily.h,v 1.3 2007/11/28 16:43:50 dneckels Exp $
+// $Id: ESMC_MEFamily.h,v 1.1.2.1 2008/04/05 03:13:11 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-//
-//-----------------------------------------------------------------------------
+
+// (all lines below between the !BOP and !EOP markers will be included in
+//  the automated document processing.)
+//-------------------------------------------------------------------------
+// these lines prevent this file from being read more than once if it
+// ends up being included multiple times
+
 #ifndef ESMC_MEFamily_h
 #define ESMC_MEFamily_h
 
@@ -21,33 +26,20 @@
 #include <map>
 #include <string>
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
-/**
- * The basic role of this class is to provide for master elements
- * and mesh heterogeneity to interact suitably.  It also provides
- * dimension independence for a master element.
- *
- * This class provides a mesh topology (QUAD, HEX, TRI) to master
- * element mapping.  Thus we can register a field that lives over
- * say, a mesh of quads and tri's, and treat the field as a single
- * entity, rather than two distinct fields.  
- * Also, we can register an ME type that is dimension independant,
- * i.e. 10th order lagrange.  Provided the master element is
- * implemented, the MEFamily will hand back the correct element, and
- * the users code will not have to switch on this element type.
- */
+// A topo->me class switcher
 class MEFamily {
 public:
 MEFamily() {}
 virtual ~MEFamily() {}
 // Get standard specific trait versions
 virtual MasterElement<METraits<> > *getME(const std::string &toponame, METraits<>) const = 0;
+MasterElement<METraits<> > *getME(const std::string &toponame) const;
 
-template<typename METRAITS>
-MasterElement<METRAITS> *getME(const std::string &toponame, METRAITS) const {
-  return getME(toponame, METraits<>())->operator()(METRAITS());
-}
+MasterElement<METraits<double,fad_type> > *getME(const std::string &toponame, METraits<double,fad_type> ) const;
+MasterElement<METraits<fad_type,double> > *getME(const std::string &toponame, METraits<fad_type,double> ) const;
 
 // True if the dofs live strictly on the nodes. e.g. lagrangian
 virtual bool is_nodal() const = 0;
@@ -129,45 +121,12 @@ private:
 MEFamilyHier(const MEFamilyHier&);
 const std::string fname;
 UInt order;
+// Store the base element, since these are not instanced.
+std::map<std::string, MasterElement<METraits<> >*> meMap;
 
 };
 
-// High order lagrange
-class MEFLagrange : public MEFamily {
-MEFLagrange(UInt order);
-static std::map<UInt, MEFLagrange*> classInstances;
-public:
-bool is_nodal() const { return false;} 
-bool is_elemental() const { return false;} 
-static const MEFLagrange &instance(UInt order);
-
-MasterElement<METraits<> > *getME(const std::string &toponame, METraits<>) const;
-const std::string &name() const { return fname;}
-private:
-MEFLagrange(const MEFLagrange&);
-const std::string fname;
-UInt order;
-
-};
-
-// High order lagrange, DG
-class MEFLagrangeDG : public MEFamily {
-MEFLagrangeDG(UInt order);
-static std::map<UInt, MEFLagrangeDG*> classInstances;
-public:
-bool is_nodal() const { return false;} 
-bool is_elemental() const { return true;} 
-static const MEFLagrangeDG &instance(UInt order);
-
-MasterElement<METraits<> > *getME(const std::string &toponame, METraits<>) const;
-const std::string &name() const { return fname;}
-private:
-MEFLagrangeDG(const MEFLagrangeDG&);
-const std::string fname;
-UInt order;
-
-};
-
+} // namespace
 } // namespace
 
 #endif

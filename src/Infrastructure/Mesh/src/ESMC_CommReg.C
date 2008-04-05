@@ -1,7 +1,7 @@
-// $Id: ESMC_CommReg.C,v 1.4 2007/11/28 16:42:39 dneckels Exp $
+// $Id: ESMC_CommReg.C,v 1.2.2.1 2008/04/05 03:13:15 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -10,14 +10,15 @@
 //
 //==============================================================================
 #include <ESMC_CommReg.h>
-#include <ESMC_MeshllField.h>
+#include <ESMC_Meshfield.h>
 #include <ESMC_MeshObjPack.h>
 #include <ESMC_SparseMsg.h>
 #include <ESMC_ParEnv.h>
 #include <ESMC_Mesh.h>
 
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 CommReg::CommReg() :
 node_rel(),
@@ -83,7 +84,7 @@ void CommReg::SendFields(UInt nfields, MEField<> *const *sfields, MEField<> *con
   }
 
   for (UInt j = 0; j < sf.size(); j++)
-    obj_type |= sf[j]->GetAttr().GetType();
+    obj_type |= sf[j]->GetAttr().get_type();
 
 
 /*
@@ -115,7 +116,7 @@ void CommReg::HaloFields(UInt nfields, MEField<> **sfields) {
     sfields[i]->Getfields(sf);
   }
   for (UInt j = 0; j < sf.size(); j++)
-    obj_type |= sf[j]->GetAttr().GetType();
+    obj_type |= sf[j]->GetAttr().get_type();
 
   // Now send via the spec(s)
   // TODO: be smarter: select only the relevant spec to send each field.
@@ -196,12 +197,12 @@ void static sync(CommRel &comm) {
     const Attr &oa = GetAttr(obj);
 
     // For sanity:
-    ThrowRequire(a.GetType() == oa.GetType());
-    ThrowRequire(a.GetBlock() == oa.GetBlock());
+    ThrowRequire(a.get_type() == oa.get_type());
+    ThrowRequire(a.get_key() == oa.get_key());
     
     // Now merge the contexts
-    Context c = a.GetContext();
-    const Context &oc = oa.GetContext();
+    Context c = a.get_context();
+    const Context &oc = oa.get_context();
     Context nc(oc);
 
     // More sanity checks
@@ -261,13 +262,6 @@ void CommReg::SyncAttributes() {
   sync(elem_rel);
 }
 
-void CommReg::SyncAttributes(UInt obj_type) {
-  Trace __trace("CommReg::SyncAttributes(UInt obj_type)");
-  if (obj_type & MeshObj::NODE) sync(node_rel);
-  if (obj_type & MeshObj::EDGE) sync(edge_rel);
-  if (obj_type & MeshObj::FACE) sync(face_rel);
-}
-
 template<typename VTYPE>
 void CommReg::SwapOp(UInt nfields, MEField<> **sfields, int op) {
   ThrowRequire(dom==ran);
@@ -278,14 +272,13 @@ void CommReg::SwapOp(UInt nfields, MEField<> **sfields, int op) {
     sfields[i]->Getfields(sf);
   }
   for (UInt j = 0; j < sf.size(); j++)
-    obj_type |= sf[j]->GetAttr().GetType();
+    obj_type |= sf[j]->GetAttr().get_type();
 
   // Now send via the spec(s)
   // TODO: be smarter: select only the relevant spec to send each field.
-  // The template keyword below is to make older versions of g++ happy.
-  if (obj_type & MeshObj::NODE) node_rel.template swap_op<VTYPE,_field>(sf.size(), &sf[0], op);
-  if (obj_type & MeshObj::EDGE) edge_rel.template swap_op<VTYPE,_field>(sf.size(), &sf[0], op);
-  if (obj_type & MeshObj::FACE) face_rel.template swap_op<VTYPE,_field>(sf.size(), &sf[0], op);
+  if (obj_type & MeshObj::NODE) node_rel.swap_op<VTYPE,_field>(sf.size(), &sf[0], op);
+  if (obj_type & MeshObj::EDGE) edge_rel.swap_op<VTYPE,_field>(sf.size(), &sf[0], op);
+  if (obj_type & MeshObj::FACE) face_rel.swap_op<VTYPE,_field>(sf.size(), &sf[0], op);
 // doesnt make sense for halo  if (obj_type & MeshObj::ELEMENT) elem_rel.halo_fields(sf.size(), &sf[0]);
 }
 
@@ -313,6 +306,6 @@ void CommReg::clear() {
 template void CommReg::SwapOp<double>(UInt nfields, MEField<> **sfields,int);
 template void CommReg::SwapOp<int>(UInt nfields, MEField<> **sfields,int);
 template void CommReg::SwapOp<char>(UInt nfields, MEField<> **sfields,int);
-template void CommReg::SwapOp<long>(UInt nfields, MEField<> **sfields,int);
 
+} // namespace 
 } // namespace 

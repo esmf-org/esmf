@@ -1,7 +1,7 @@
-// $Id: ESMC_PatchRecovery.C,v 1.8 2007/11/28 16:42:45 dneckels Exp $
+// $Id: ESMC_PatchRecovery.C,v 1.6.2.1 2008/04/05 03:13:19 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -16,8 +16,6 @@
 #include <ESMC_MEValues.h>
 #include <ESMC_Polynomial.h>
 #include <ESMC_MeshField.h>
-#include <ESMC_MeshTypes.h>
-#include <ESMC_Ftn.h>
 
 
 #include <set>
@@ -31,13 +29,13 @@
 
 
 
-
+#ifdef ESMC_LAPACK
 extern "C" void FTN(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,double*,int*,double*,int*,int*);
-
+#endif
           
 
-namespace ESMC {
-
+namespace ESMCI {
+namespace MESH {
 
 template<typename NFIELD, typename Real>
 UInt PatchRecov<NFIELD,Real>::get_ncoeff(UInt dim, UInt deg) {
@@ -94,33 +92,8 @@ idim(rhs.idim),
 ncoeff(rhs.ncoeff),
 patch_ok(rhs.patch_ok),
 coeff(rhs.coeff),
-mc(rhs.mc),
-use_mc(rhs.use_mc)
+mc(rhs.mc)
 {
-}
-
-template<typename NFIELD, typename Real>
-PatchRecov<NFIELD,Real> PatchRecov<NFIELD,Real>::operator*(double val) {
-  
-  PatchRecov pv(*this);
-  
-  for (UInt i = 0; i < coeff.size(); i++)
-    pv.coeff[i] *= val;
-  
-  return pv;
-}
-
-template<typename NFIELD, typename Real>
-void PatchRecov<NFIELD,Real>::operator+=(const PatchRecov &rhs)
-{
-  ThrowRequire(ncoeff == 0 || ncoeff == rhs.ncoeff);
-  if (ncoeff == 0) {
-    // assume the zero patch
-    *this = rhs;
-  } else {
-    for (UInt i = 0; i < coeff.size(); i++)
-      coeff[i] += rhs.coeff[i];
-  }
 }
 
 template<typename NFIELD, typename Real>
@@ -132,18 +105,15 @@ PatchRecov<NFIELD,Real> &PatchRecov<NFIELD,Real>::operator=(const PatchRecov &rh
   patch_ok=rhs.patch_ok;
   coeff=rhs.coeff;
   mc = rhs.mc;
-  use_mc = rhs.use_mc;
   return *this;
 }
 
 template<typename NFIELD, typename Real>
 PatchRecov<NFIELD,Real>::PatchRecov() :
-pdeg(0),
 idim(0),
 ncoeff(0),
 patch_ok(false),
-coeff(),
-mc()
+coeff()
 {
 }
 
@@ -152,7 +122,6 @@ void PatchRecov<NFIELD,Real>::CreatePatch(
            UInt _pdeg,
            const MeshDB &mesh,
            const MeshObj &node,
-           const MeshObj *elem_hint,
            UInt numfields,
            NFIELD **rfield,
            UInt threshold,           
@@ -160,18 +129,18 @@ void PatchRecov<NFIELD,Real>::CreatePatch(
            const MCoord *_mc
            ) 
 {
+#ifdef ESMC_LAPACK
   patch_ok = true; // used below
   pdeg = _pdeg;
-  use_mc = _mc == NULL ? false : true;
-  if (use_mc) mc = *_mc;
+  mc = _mc;
   UInt pdim = mesh.parametric_dim();
   UInt sdim = mesh.spatial_dim();
 
   if (coord.dim() != sdim)
     Throw() << "Patch:sdim=" << sdim << ", but fdim=" << coord.dim();
 
-  if (use_mc) {
-    if (mc.ManifoldDim() != pdim) Throw() << "MCoord manifold dim:" << mc.ManifoldDim() << " is  not = pdim:" << pdim;
+  if (mc) {
+    if (mc->ManifoldDim() != pdim) Throw() << "MCoord manifold dim not = pdim";
     idim = pdim;
   } else idim = sdim;
 
@@ -183,24 +152,17 @@ void PatchRecov<NFIELD,Real>::CreatePatch(
   std::set<const MeshObj*> elems;
   MeshObjRelationList::const_iterator el = MeshObjConn::find_relation(node, MeshObj::ELEMENT);
 
-  
-  while (el != node.Relations.end() && el->obj->get_type() == MeshObj::ELEMENT){
-        elems.insert(el->obj);
-        ++el;
- }
-  
-  
   // Stack elements in
   // Use integration rule for field 0
   UInt nsamples = 0;
-  std::set<const MeshObj*>::iterator esi = elems.begin(), ese = elems.end();
-  
-  for (; esi != ese; ++esi) {
-    const MeshObj &selem = **esi;
+  while (el != node.Relations.end() && el->obj->get_type() == MeshObj::ELEMENT){
+    elems.insert(el->obj);
+    const MeshObj &selem = *el->obj;
     MasterElement<METraits<Real> > *me = GetME(*rfield[0], selem)(METraits<Real>());
     const intgRule *ir = GetIntg(selem)->ChangeOrder(2);
     if (ir == NULL) Throw() << "Patch, no intg rule for me:" << me->name;
     nsamples += ir->npoints();
+    el++;
   }
 
 //std::cout << "nsamples=" << nsamples << std::endl;
@@ -248,9 +210,9 @@ std::cout << "threshold  tripped.  nsamples=" << nsamples << ", ncoef=" << ncoef
       // Loop Gauss points
       const MeshObj &selem = **ei;
       // Gather field data for element.
-      MEValues<METraits<Real,double>, METraits<>, NFIELD> mev(field.GetMEFamily(), &coord);
+      MEValues<METraits<Real,double>, METraits<>, NFIELD> mev(field.GetMEFamily(), coord);
       const intgRule *ir = GetIntg(selem)->ChangeOrder(2);
-      mev.Setup(selem, MEV::update_sf, ir);
+      mev.Setup(selem, 0, ir);
       mev.ReInit(selem);
      
       std::vector<Real> felem(field.dim()*mev.GetNumFunctions());
@@ -262,8 +224,8 @@ std::cout << "threshold  tripped.  nsamples=" << nsamples << ", ncoef=" << ncoef
       mev.GetFunctionValues(field, &fdata[0]);
       for (UInt q = 0; q < mev.GetNQPoints(); q++) {
         double *cd = &cdatas[q*sdim]; // default here
-        if (use_mc) {
-          mc.Transform(&cdatas[q*sdim], &cdata[0]);
+        if (mc) {
+          mc->Transform(&cdatas[q*sdim], &cdata[0]);
           cd = &cdata[0]; // point to transformed point
         }
       
@@ -389,40 +351,15 @@ std::copy(tst.begin(), tst.end(), std::ostream_iterator<double>(std::cout, ", ")
   //std::copy(&rhs[0], &rhs[nrhs*ncoef], coeff.begin());
 
   patch_ok = true;
-}
-
-template <typename NFIELD, typename Real>
-void PatchRecov<NFIELD,Real>::CreateConstantPatch(const MeshObj &node,
-                                                  UInt numfields,
-                                                  NFIELD **rfield)
-{
-  pdeg = 0;
-  
-  ncoeff = 1;
-  
-  for (UInt i = 0; i < numfields; i++) {
-    NFIELD *nf = rfield[i];
-    
-    Real *data = nf->data(node);
-    
-    for (UInt f = 0; f < nf->dim(); f++) {
-      
-      coeff.push_back(data[f]);
-      
-    }
-    
-  }
-  
-  patch_ok = true;
-  
+#endif
 }
 
 template<typename NFIELD, typename Real>
 Real PatchRecov<NFIELD,Real>::EvalPatch(UInt nfield, const double coords[]) const {
   const double *cd = coords;
-  std::vector<double> mcoords(use_mc ? mc.ManifoldDim() : 0);
-  if (use_mc) {
-    mc.Transform(coords, &mcoords[0]);
+  std::vector<double> mcoords(mc ? mc->ManifoldDim() : 0);
+  if (mc) {
+    mc->Transform(coords, &mcoords[0]);
     cd = &mcoords[0];
   }
   const Real *coef = &coeff[nfield*ncoeff];
@@ -470,35 +407,10 @@ flen(0)
 }
 
 template <typename NFIELD, typename Real>
-ElemPatch<NFIELD,Real>::ElemPatch(const ElemPatch &rhs) :
-  patches(rhs.patches),
-  mcs(rhs.mcs),
-  pelem(rhs.pelem),
-  pmesh(rhs.pmesh),
-  pcfield(rhs.pcfield),
-  flen(rhs.flen)
-{
-}
-
-template <typename NFIELD, typename Real>
-ElemPatch<NFIELD,Real> &ElemPatch<NFIELD,Real>::operator=(const ElemPatch &rhs)
-{
-  if (this == &rhs) return *this;
-  
-  patches = rhs.patches;
-  mcs = rhs.mcs;
-  pelem = rhs.pelem;
-  pmesh = rhs.pmesh;
-  pcfield = rhs.pcfield;
-  flen = rhs.flen;
-  
-  return *this;
-}
-
-
-template <typename NFIELD, typename Real>
 ElemPatch<NFIELD,Real>::~ElemPatch() 
 {
+  for (UInt n = 0; n < mcs.size(); n++) 
+    delete mcs[n];
 }
 
 template <typename NFIELD, typename Real>
@@ -527,55 +439,44 @@ void ElemPatch<NFIELD,Real>::CreateElemPatch(UInt pdeg,
 
   patches.resize(nv);
   if (use_mc)
-    mcs.resize(nv);
+    mcs.resize(nv, NULL);
 
   // Loop vertices creating the appropriate patch
+  std::vector<MCoord *> mcs(nv, NULL);
   for (UInt n = 0; n < nv; n++) {
     const MeshObj &node = *elem.Relations[n].obj;
-    
-    //if (use_mc) mcs[n] = getMCoordNode(*pcfield, node);
-    
-    // Center coordinate system at center so we can average patches if not
-    // all nodes are interior (otherwise patches have different coordinate systems)
-    if (use_mc) mcs[n] = getMCoordElem(*pcfield, elem);
+    if (use_mc) mcs[n] = getMCoordNode(*pcfield, node);
 
     if (GetMeshObjContext(node).is_set(Attr::EXPOSED_BOUNDARY_ID)) {
-      
-      //patches[n].CreateConstantPatch(node, numfields, rfield);
       patches[n].MarkPatchBad();
-      
-      
-    } else
-      patches[n].CreatePatch(pdeg, *pmesh, node, &elem, numfields, rfield,
-                     700000, *pcfield, use_mc ? &mcs[n] : NULL);
-    
+//std::cout << "node:" << node.get_id() << " is boundary!" << std::endl;
+    } else {
+      if (ptype == NODAL_PATCH) {
+        // TODO, fix as nodal integration rule
+        patches[n].CreatePatch(pdeg, *pmesh, node, numfields, rfield,
+                         700, *pcfield, mcs[n]);
+      } else {
+        patches[n].CreatePatch(pdeg, *pmesh, node, numfields, rfield,
+                         700, *pcfield, mcs[n]);
+      }
+    }
   } // for nv
 
 
   // Resolve bad (boundary) patches
   UInt nok = 0;
-  std::vector<int> ok(nv,0);
+  UInt ok_idx = 0;
   for (UInt n = 0; n < nv; n++) {
     nok += patches[n].PatchOk() ? 1 : 0;
-    if (patches[n].PatchOk()) ok[n] = 1;
+    if (patches[n].PatchOk()) ok_idx = n;
   }
-
   if (nok == 0) Throw() << "Transfer, found no ok nodes";
 //std::cout << "nok=" << nok << " , ok_idx=" << ok_idx<< std::endl;
 
   // do the copying
-  double avg = 1.0 / nok;
-
-//if (nok < nv) std::cout << "avg=" << avg << std::endl;
-  
   for (UInt n = 0; n < nv; n++) {
-    if (ok[n] == 0) {
-      for (UInt n1 = 0; n1 < nv; n1++)
-      {
-        if (ok[n1] == 1)
-        //  patches[n] = patches[n1];
-          patches[n] += patches[n1]*avg;
-      }
+    if (patches[n].PatchOk() == false) {
+      patches[n] = patches[ok_idx];
     }
   } // n
 
@@ -600,7 +501,7 @@ void ElemPatch<NFIELD,Real>::Eval(UInt npts,
 
   // Now the linear weights to combine nodal patches
   MEValues<METraits<Real,double>, METraits<>, NFIELD, MEField<> > mevl(MEFamilyLow::instance(), // bilinear POU
-                  pcfield);
+                  *pcfield);
                   
 
   // View pcoord as integration points so MEValues may be used.
@@ -633,4 +534,6 @@ template class PatchRecov<MEField<SField> ,fad_type>;
 template class ElemPatch<MEField<> ,double>;
 template class ElemPatch<MEField<SField> ,fad_type>;
 
+
+} // namespace
 } // namespace

@@ -1,7 +1,7 @@
-// $Id: ESMC_BBox.C,v 1.4 2007/11/28 16:42:38 dneckels Exp $
+// $Id: ESMC_BBox.C,v 1.2.2.1 2008/04/05 03:13:14 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -10,11 +10,13 @@
 //
 //==============================================================================
 #include <ESMC_BBox.h>
+
 #include <ESMC_MeshTypes.h>
+
 #include <ESMC_MeshObjTopo.h>
+
 #include <ESMC_MeshUtils.h>
 #include <ESMC_Mapping.h>
-#include <ESMC_MeshllField.h>
 
 #include <limits>
 #include <vector>
@@ -22,7 +24,8 @@
 
 #include <mpi.h>
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 BBox::BBox(UInt _dim, const double _min[], const double _max[]) :
  isempty(false),
@@ -69,32 +72,11 @@ BBox::BBox(const MEField<> &coords, const MeshObj &obj, double normexp) :
     double nr[3];
     MasterElement<> *me = GetME(coords, obj)(METraits<>());
     std::vector<double> cd(3*me->num_functions());
-    GatherElemData<>(*me, coords, obj, &cd[0]);
+    GatherElemData(*me, coords, obj, &cd[0]);
 
     double pc[] = {0,0};
     const Mapping<> *mp = GetMapping(obj)(MPTraits<>());
     mp->normal(1,&cd[0], &pc[0], &nr[0]);
-   
-    double ns = std::sqrt(nr[0]*nr[0]+nr[1]*nr[1]+nr[2]*nr[2]);
-    
-    nr[0] /= ns; nr[1] /= ns; nr[2] /= ns;
-    /*
-    if (obj.get_id() == 2426) {
-      std::cout << "elem 2426 coords:";
-      std::copy(&cd[0], &cd[0] + 3*me->num_functions(), std::ostream_iterator<double>(std::cout, " "));
-      std::cout << std::endl;
-    }*/
-    // Get cell diameter
-    double diam = 0;
-    for (UInt n = 1; n < me->num_functions(); n++) {
-      double dist = std::sqrt( (cd[0]-cd[3*n])*(cd[0]-cd[3*n]) +
-               (cd[1]-cd[3*n+1])*(cd[1]-cd[3*n+1])
-               + (cd[2]-cd[3*n+2])*(cd[2]-cd[3*n+2]));
-      
-      if (dist > diam) diam = dist;
-    }
-    
-    normexp *= diam;
     
     for (UInt n = 0; n < npe; n++) {
       for (UInt j = 0; j < dim; j++) {
@@ -253,4 +235,5 @@ std::ostream &operator<<(std::ostream &os, const BBox &cn) {
   return os;
 }
 
+} // namespace
 } // namespace

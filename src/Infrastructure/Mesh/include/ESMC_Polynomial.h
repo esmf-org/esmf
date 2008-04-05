@@ -1,15 +1,20 @@
-// $Id: ESMC_Polynomial.h,v 1.3 2007/11/28 16:43:50 dneckels Exp $
+// $Id: ESMC_Polynomial.h,v 1.1.2.1 2008/04/05 03:13:13 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-//
-//-----------------------------------------------------------------------------
+
+// (all lines below between the !BOP and !EOP markers will be included in
+//  the automated document processing.)
+//-------------------------------------------------------------------------
+// these lines prevent this file from being read more than once if it
+// ends up being included multiple times
+
 #ifndef ESMC_Polynomial_h
 #define ESMC_Polynomial_h
 
@@ -18,7 +23,8 @@
 
 #include <vector>
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 template<typename POLY, typename Real=typename POLY::real_type>
 struct EvalPoly {
@@ -190,6 +196,7 @@ private:
 template<typename POLY>
 void PolyFit1D(UInt nsamples, const double coord[], const double vals[], const std::vector<POLY*> &poly, double coef[]);
 
+} // namespace
 } // namespace
 
 #endif

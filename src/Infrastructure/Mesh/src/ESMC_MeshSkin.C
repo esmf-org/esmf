@@ -1,7 +1,7 @@
-// $Id: ESMC_MeshSkin.C,v 1.3 2007/11/28 16:42:44 dneckels Exp $
+// $Id: ESMC_MeshSkin.C,v 1.1.2.1 2008/04/05 03:13:18 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -21,7 +21,8 @@
 #include <iostream>
 #include <fstream>
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 const UInt exposed_sideset_key = 10001;
 
@@ -39,9 +40,11 @@ void Skin(Mesh &mesh) {
   // through elements.  However, since elements come AFTER nodes and sides,
   // I know the iterator for element will not be affected.
 
+//std::cout << "Skinning mesh up reaal goood!" << std::endl;
   MeshDB::iterator eit = mesh.elem_begin(), eet = mesh.elem_end();
   for (; eit != eet; eit++) {
     MeshObj &elem = *eit;
+//std::cout << "elem:" << elem.get_id() << std::endl;
     const MeshObjTopo *const topo = GetMeshObjTopo(elem);
     for (UInt nf = 0; nf < topo->num_sides; nf++) {
       // Is there already a side here?
@@ -155,8 +158,6 @@ Par::Out() << "is pending create=" << GetMeshObjContext(side).is_set(Attr::PENDI
   // We have created some local faces, so resolve global numbering
   ResolveParSkin(mesh);
 
-  mesh.SetSkinned();
-  
 }
 
 void ResolveParSkin(Mesh &mesh) {
@@ -253,4 +254,5 @@ void ResolveParSkin(Mesh &mesh) {
 
 }
 
+} // namespace
 } // namespace

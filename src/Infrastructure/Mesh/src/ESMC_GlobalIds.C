@@ -1,7 +1,7 @@
-// $Id: ESMC_GlobalIds.C,v 1.3 2007/11/28 16:42:41 dneckels Exp $
+// $Id: ESMC_GlobalIds.C,v 1.1.2.1 2008/04/05 03:13:15 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -18,7 +18,8 @@
 #include <bitset>
  
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 
 void GlobalIds(const std::vector<long> &current_ids,
@@ -292,4 +293,5 @@ if (id == 0) Throw() << "Id is zero, why?? from proc:" << proc;
 
 }
 
+} // namespace
 } // namespace

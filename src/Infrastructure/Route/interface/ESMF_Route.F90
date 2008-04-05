@@ -1,7 +1,7 @@
-! $Id: ESMF_Route.F90,v 1.97 2007/07/07 04:21:13 samsoncheung Exp $
+! $Id: ESMF_Route.F90,v 1.97.2.1 2008/04/05 03:13:28 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2007, University Corporation for Atmospheric Research, 
+! Copyright 2002-2008, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -146,7 +146,7 @@ end interface
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.97 2007/07/07 04:21:13 samsoncheung Exp $'
+      '$Id: ESMF_Route.F90,v 1.97.2.1 2008/04/05 03:13:28 cdeluca Exp $'
 
 !==============================================================================
 !

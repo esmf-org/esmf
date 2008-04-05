@@ -1,7 +1,7 @@
-// $Id: ESMC_Search.C,v 1.6 2007/11/28 16:48:22 dneckels Exp $
+// $Id: ESMC_Search.C,v 1.3.2.1 2008/04/05 03:13:19 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -13,11 +13,9 @@
 #include <ESMC_MeshTypes.h>
 #include <ESMC_MeshObjTopo.h>
 #include <ESMC_Mapping.h>
-#include <ESMC_MeshObj.h>
-#include <ESMC_Mesh.h>
+
 #include <ESMC_MeshUtils.h>
-#include <ESMC_OctBox3d.h>
- 
+
 #include <iostream>
 #include <algorithm>
 #include <iterator>
@@ -27,11 +25,11 @@
 #include <set>
 
 #include <limits>
-#include <vector>
 
 #include <ESMC_BBox.h>
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 // Store the index and a found flag for the
 // dimension.
@@ -203,7 +201,7 @@ void Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResult &
     for (; ei != ee; ++ei) {
       const MeshObj &elem = *ei;
    
-     BBox bounding_box(coord_field, elem, 0.15);
+     BBox bounding_box(coord_field, elem, 0.5);
   
      // First check to see if the box even intersects the dest mesh bounding
      // box.  
@@ -213,7 +211,7 @@ void Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResult &
        continue;
      }
   
-     GatherElemData<>(cme, coord_field, elem, &node_coord[0]);
+     GatherElemData(cme, coord_field, elem, &node_coord[0]);
   
      std::set<Search_index*> candidates[3];
      bool empty_dimension = false;
@@ -350,295 +348,6 @@ void Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResult &
     
 }
 
-
-
-/*--------------------------------------------------------------------------*/
-// Octree version of the above.
-/*--------------------------------------------------------------------------*/
-
-
-static int num_intersecting_elems(const Mesh &src, const BBox &dstBBox, double btol, double nexp) {
-  
-  int ret = 0;
-
-  MEField<> &coord_field = *src.GetCoordField();
-  
-  KernelList::const_iterator ki = src.set_begin(), ke = src.set_end();
-  
-  for (; ki != ke; ++ki) {
-    const Kernel &ker = *ki;
-    
-    if (ker.type() != MeshObj::ELEMENT || !ker.is_active()) continue;
-    
-    Kernel::obj_const_iterator ei = ker.obj_begin(), ee = ker.obj_end();
-    
-    MasterElement<> &cme = *GetME(coord_field, ker)(METraits<>());
-    
-    std::vector<double> node_coord(cme.num_functions()*src.spatial_dim());
-    
-    for (; ei != ee; ++ei) {
-      const MeshObj &elem = *ei;
-   
-     BBox bounding_box(coord_field, elem, nexp);
-  
-     // First check to see if the box even intersects the dest mesh bounding
-     // box.  
-     if (BBoxIntersect(dstBBox, bounding_box, btol)) ++ret;
-  
-    }
-    
-  }
-  return ret;
-}
-
-static void populate_box(BOX3D *box, const Mesh &src, const BBox &dstBBox, double btol, double nexp) {
-
-  MEField<> &coord_field = *src.GetCoordField();
-  
-  KernelList::const_iterator ki = src.set_begin(), ke = src.set_end();
-  
-  for (; ki != ke; ++ki) {
-    const Kernel &ker = *ki;
-    
-    if (ker.type() != MeshObj::ELEMENT || !ker.is_active()) continue;
-    
-    Kernel::obj_const_iterator ei = ker.obj_begin(), ee = ker.obj_end();
-    
-    MasterElement<> &cme = *GetME(coord_field, ker)(METraits<>());
-    
-    std::vector<double> node_coord(cme.num_functions()*src.spatial_dim());
-    
-    for (; ei != ee; ++ei) {
-      const MeshObj &elem = *ei;
-   
-     BBox bounding_box(coord_field, elem, nexp);
-  
-     // First check to see if the box even intersects the dest mesh bounding
-     // box.  
-     if (BBoxIntersect(dstBBox, bounding_box, btol)) {
-       
-       double min[3], max[3];
-       
-       min[0] = bounding_box.getMin()[0] - btol;
-       min[1] = bounding_box.getMin()[1] - btol;
-       min[2] = bounding_box.getMin()[2] - btol;
-       
-       max[0] = bounding_box.getMax()[0] + btol;
-       max[1] = bounding_box.getMax()[1] + btol;
-       max[2] = bounding_box.getMax()[2] + btol;
-    
-       /*
-       if (elem.get_id() == 2426) {
-         std::cout << "elem 2426, bbox=" << bounding_box << std::endl;
-       }*/
-       Add_BOX3D(box, min, max, (void*)&elem);
-       
-     }
-  
-    }
-    
-  }
-}
-
-struct OctSearchData {
-
-Search_node_result snr;
-bool investigated;
-double coords[3];
-double best_dist;
-MEField<> *src_cfield;
-const MeshObj *elem;
-};
-
-static int found_func(BOX3DNODE *n, void *c, void *y) {
-  MeshObj &elem = *static_cast<MeshObj*>(c);
-  OctSearchData &si = *static_cast<OctSearchData*>(y);
-  
-  // Do the is_in calculation
-  const MappingBase &map = GetMapping(elem);
-  si.investigated = true;
-  double pcoord[3];
-  double dist;
-  
-  const Kernel &ker = *elem.GetKernel();
-  
-  const MeshObjTopo *etopo = GetMeshObjTopo(elem);
-  
-  MasterElement<> &cme = *GetME(*si.src_cfield, ker)(METraits<>());
-      
-  std::vector<double> node_coord(cme.num_functions()*etopo->spatial_dim);
-      
-  GatherElemData<>(cme, *si.src_cfield, elem, &node_coord[0]);
-    
-  bool in = map.is_in_cell(&node_coord[0], si.coords, &pcoord[0], &dist);
-  /*
-if (elem.get_id() == 2426) {
-  std::cout << "Comping node " << si.snr.node->get_id() << " against 2426, in=" << in << std::endl;
-}*/
-  if (in) {
-    std::copy(pcoord, pcoord+etopo->spatial_dim, &si.snr.pcoord[0]);
-    si.elem = &elem;
-  } else {
-    //si.investigated = false;
-    if (dist < si.best_dist) {
-      si.elem = &elem;
-      si.best_dist = dist;
-      std::copy(pcoord, pcoord+etopo->spatial_dim, &si.snr.pcoord[0]);
-    }
-  }
-  
- // std::cout << "Found node:" << si.snr.node->get_id() << " in element:" << elem.get_id() << ", in=" << in << std::endl;
-  return in ? 1 : 0;
-}
-
-// The main routine
-void OctSearch(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResult &result, double stol,
-     std::vector<const MeshObj*> *to_investigate,BOX3D *box_in) {
-  Trace __trace("Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResult &result, double stol, std::vector<const MeshObj*> *to_investigate");
-
-  std::cout << "Start octree search" << std::endl;
-
-  MEField<> &coord_field = *src.GetCoordField();
-  
-  // Destination coordinate is only a _field, not an MEField, since there
-  // are no master elements.
-  _field *dcptr = dest.Getfield("coordinates_1");
-  ThrowRequire(dcptr);
-  _field &dstcoord_field = *dcptr;
-   
-  //MEField<> &dstcoord_field = *dest.GetCoordField();
-
-  if (src.spatial_dim() != dest.spatial_dim()) {
-    Throw() << "Meshes must have same spatial dim for search";
-  }
-
-  // TODO: only grab objects in the current interpolation realm.
-
-  // Load the destination objects into a list
-  std::vector<const MeshObj*> dest_nlist;
-  {
-
-    if (to_investigate == NULL) {
-      MeshDB::const_iterator ni = dest.obj_begin(), ne = dest.obj_end();
-      for (; ni != ne; ++ni) {
-        if (dst_obj_type & ni->get_type())
-          dest_nlist.push_back(&*ni);
-      }
-    } else {
-      std::vector<const MeshObj*>::const_iterator ni = to_investigate->begin(),
-                       ne = to_investigate->end();
-      for (; ni != ne; ++ni) dest_nlist.push_back(*ni);
-      if (dest_nlist.size() == 0) return;
-    }
-
-  }
-
-  // Get a bounding box for the dest mesh.
-  BBox dstBBox(dstcoord_field, dest);
-  
-  BOX3D *box;
-  
-  const double normexp = 0.15;
-  const double dstint = 1e-8;
-  
-  if (!box_in) {
-    int num_box = num_intersecting_elems(src, dstBBox, dstint, normexp);
-  
-    std::cout << "num_box=" << num_box << std::endl;
-    Create_BOX3D(&box, num_box); 
-
-    populate_box(box, src, dstBBox, dstint, normexp);
-
-    Finalize_BOX3D(box);
-
-  } else box = box_in;
-  
-  UInt sdim = dest.spatial_dim();
-  
-  std::vector<const MeshObj *> again;
-  
-  std::set<Search_result> tmp_sr; // store in map for quick lookup
-  
-  // Loop the destination points, find hosts.
-  for (UInt p = 0; p < dest_nlist.size(); ++p) {
-    
-    const MeshObj &node = *dest_nlist[p];
-    
-    
-    const double *c = dstcoord_field.data(node);
-    
-    double pmin[3], pmax[3];
-    
-    pmin[0] = c[0]-stol;
-    pmin[1] = c[1] - stol;
-    pmin[2] = sdim == 3 ? c[2]-stol : -stol;
-    
-    pmax[0] = c[0] + stol;
-    pmax[1] = c[1] + stol;
-    pmax[2] = sdim == 3 ? c[2]+stol : +stol;
-    
-    OctSearchData si;
-    si.snr.node = &node;
-    si.investigated = false;
-    si.best_dist = std::numeric_limits<double>::max();
-    si.src_cfield = &coord_field; 
-    
-    // The node coordinates.
-    si.coords[0] = c[0]; si.coords[1] = c[1]; si.coords[2] = (sdim == 3 ? c[2] : 0.0);
-    
-    
-    Runon_intersecting_BOX3D(box, pmin, pmax, found_func, (void*)&si);
-    
-    if (!si.investigated) {
-      again.push_back(&node);
-    } else {
-      Search_result sr; sr.elem = si.elem;
-      std::set<Search_result>::iterator sri =
-        tmp_sr.lower_bound(sr);
-      if (sri == tmp_sr.end() || *sri != sr) {
-        sr.nodes.push_back(si.snr);
-        tmp_sr.insert(sri, sr);
-      } else {
-       // std::cout << "second choice" << std::endl;
-        std::vector<Search_node_result> &r
-           = const_cast<std::vector<Search_node_result>&>(sri->nodes);
-        r.push_back(si.snr);
-        
-        //std::cout << "size=" << sri->nodes.size() << std::endl;
-      }
-    }
-    
-  } // for dest nodes
-  
-  {
-    // Build seach res
-    std::set<Search_result>::iterator si = 
-      tmp_sr.begin(), se = tmp_sr.end();
-    
-    for (; si != se; ++si)
-      result.push_back(new Search_result(*si));
-  }
-  
-  std::set<Search_result>().swap(tmp_sr);
-  std::vector<const MeshObj*>().swap(dest_nlist);
-  
-  if (again.size() != 0) {
-     if (stol > 1e-6) {
-       std::cout << "Bailing, since stol=" << stol << " which is above limit" << std::endl;
-       if (again.size() > 0)
-         std::cout << "left with " << again.size() << " items unfound" << std::endl;
-     } else {
-       std::cout << "Going again to resolve " << again.size() << " items, with stol=" << stol*1e-2 << std::endl;
-       OctSearch(src, dest, dst_obj_type, result, stol*1e+2, &again, box);
-     }
-  }
-  std::cout << "end octree search" << std::endl;
-
-  if (!box_in)
-    Destroy_BOX3D(&box);
-  
-}
-
 void PrintSearchResult(const SearchResult &result) {
   SearchResult::const_iterator si = result.begin(), se = result.end();
   for (; si != se; ++si) {
@@ -651,4 +360,5 @@ void PrintSearchResult(const SearchResult &result) {
   }
 }
 
+} // namespace
 } // namespace

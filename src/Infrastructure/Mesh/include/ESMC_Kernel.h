@@ -1,24 +1,28 @@
-// $Id: ESMC_Kernel.h,v 1.4 2007/11/28 16:43:50 dneckels Exp $
+// $Id: ESMC_Kernel.h,v 1.2.2.1 2008/04/05 03:13:10 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-//
-//-----------------------------------------------------------------------------
+
+// (all lines below between the !BOP and !EOP markers will be included in
+//  the automated document processing.)
+//-------------------------------------------------------------------------
+// these lines prevent this file from being read more than once if it
+// ends up being included multiple times
+
 #ifndef ESMC_Kernel_h
 #define ESMC_Kernel_h
 
 #include <ESMC_Attr.h>
 #include <ESMC_MeshObj.h>
 
-#include <ostream>
-
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 class MeshDB;
 class MeshObjTopo;
@@ -33,7 +37,6 @@ class intgRule;
 /**
  * Class to hold and manage a group of homogeneous mesh objects.
  * All such objects have the exact same fields, type, etc...
- * @ingroup meshdatabase
 */
 class Kernel : public ListNode<Kernel> {
 public:
@@ -51,11 +54,11 @@ public:
   // Send the list of all fields (whether they live here or not)
   void Commit(UInt nFields, MEFieldBase **Fields, UInt nfields, _field **fields);
 
-  UInt type() const { return my_attr.GetType();}
+  UInt type() const { return my_attr.get_type();}
   bool empty() const { return count == 0; }
-  UInt key() const { return my_attr.GetBlock();}
+  UInt key() const { return my_attr.get_key();}
   const Attr &GetAttr() const { return my_attr;}
-  const Context &GetContext() const { return my_attr.GetContext();}
+  const Context &GetContext() const { return my_attr.get_context();}
   UInt NumObjects() { return count; }
   obj_iterator obj_begin() { 
     return objects.begin(); }
@@ -80,13 +83,8 @@ public:
   // Called when an object is to free data
   void ReleaseStore(_fieldStore *store, UInt idx);
 
- /*
-  * Function to remove free data stores and compact the existing ones.
-  */
-  void CompactStores();
 
-
-  void PrintStoreInfo(std::ostream &) const;
+  void PrintStoreInfo() const;
 
   List<MeshObj> objects;
   List<_fieldStore> stores;
@@ -144,7 +142,7 @@ inline const Attr &GetAttr(const MeshObj &obj) {
 
 inline const Context &GetMeshObjContext(const MeshObj &obj) {
   const Kernel *md = obj.GetKernel();
-  return md->GetAttr().GetContext();
+  return md->GetAttr().get_context();
 }
 
 inline const MeshDB &GetMeshObjMesh(const MeshObj &obj) {
@@ -159,12 +157,9 @@ inline bool IsExposed(const MeshObj &obj) {
   return obj.GetKernel()->is_exposed();
 }
 
-inline UInt GetMeshObjType(const MeshObj &obj) {
-  return obj.GetKernel()->type();
-}
-
 std::ostream &operator<<(std::ostream &os, const MeshObj &obj);
 
+} // namespace
 } // namespace
 
 #endif

@@ -1,7 +1,7 @@
-// $Id: ESMC_LocalArray.C,v 1.27.2.5 2008/03/25 00:21:10 theurich Exp $
+// $Id: ESMC_LocalArray.C,v 1.27.2.6 2008/04/05 03:12:59 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -45,7 +45,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_LocalArray.C,v 1.27.2.5 2008/03/25 00:21:10 theurich Exp $";
+static const char *const version = "$Id: ESMC_LocalArray.C,v 1.27.2.6 2008/04/05 03:12:59 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 // prototypes for Fortran calls

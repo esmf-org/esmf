@@ -1,7 +1,7 @@
-// $Id: ESMC_CommRel.C,v 1.5 2007/11/28 16:42:39 dneckels Exp $
+// $Id: ESMC_CommRel.C,v 1.3.2.1 2008/04/05 03:13:15 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -20,13 +20,14 @@
 
 #include <iostream>
 #include <iterator>
-#include <functional>
 
 #include <limits>
 #include <algorithm>
 #include <mpi.h>
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
+
 
 CommRel::CommRel() :
 domain(),
@@ -341,22 +342,6 @@ void CommRel::sort_domain()
   std::sort(domain.begin(), domain.end());
 }
 
-struct cnode_is_inactive {
-bool operator()(const CommRel::CommNode &cn) const {
-  return !GetMeshObjContext(*cn.obj).is_set(Attr::ACTIVE_ID);
-}
-};
-
-void CommRel::remove_inactive() {
-
-  ThrowRequire(symmetric);
-  
-  domain.erase(std::remove_if(domain.begin(), domain.end(), cnode_is_inactive()), domain.end());
-  
-  build_domain_procs();
-  
-}
-
 void CommRel::Append(const CommRel &rhs) {
   Trace __trace("CommRel::Append(const CommRel &rhs)");
 
@@ -486,19 +471,7 @@ std::cout << "P:" << msg.commRank() << " putting in nid=" << send_size_all[domai
 
 }
 
-bool has_parent_used(MeshObj &obj) {
-  bool par = false;
-  
-  MeshObjRelationList::iterator ri = obj.Relations.begin(), re = obj.Relations.end();
-  
-  for (; ri != re && !par; ++ri) {
-    if (ri->type == MeshObj::USED_BY) par = true;
-  }
-  
-  return par;
-}
-
-void CommRel::delete_domain() {
+void CommRel::delete_range() {
 
   UInt obj_type = 0;
 
@@ -515,16 +488,8 @@ void CommRel::delete_domain() {
       MeshObjRelationList::iterator ri = obj.Relations.begin(), re = obj.Relations.end();
       
       for (; ok_delete && ri != re; ++ri) {
-        
-        // Keep if object is USED_BY, or if it has an element parent.
-        // Also, if the object has a parent that is USED_BY, keep (think
-        // of a ghosted edge)
         if (ri->type == MeshObj::USED_BY || 
           (ri->type == MeshObj::PARENT && ri->obj->get_type() == MeshObj::ELEMENT))
-          ok_delete = false;
-        
-        if (ri->type == MeshObj::PARENT && ri->obj->get_type() == obj_type &&
-            has_parent_used(*ri->obj))
           ok_delete = false;
       }
     }
@@ -536,13 +501,13 @@ void CommRel::delete_domain() {
       newctxt.set(Attr::PENDING_DELETE_ID);
       if (newctxt != ctxt) {
         Attr attr(oattr, newctxt);
-        domMesh->update_obj(&obj, attr);
+        ranMesh->update_obj(&obj, attr);
       }
     }
   }
 
   // Go straight to delete; no parallel resolution needed, since we are handling this explicitly
-  if (obj_type != 0) domMesh->MeshDB::ResolvePendingDelete(obj_type);
+  if (obj_type != 0) ranMesh->MeshDB::ResolvePendingDelete(obj_type);
   
   // Clean up range of commrel
   MapType().swap(range);
@@ -633,8 +598,8 @@ void CommRel::complete_range() {
   
       MeshDB::MeshObjIDMap::iterator ro = ranMesh->map_find(type, id);
       if (ro == ranMesh->map_end(type)) {
-       Par::Out() << "P:" << Par::Rank() << "Error, complete range,couldn't find object!  Commname:" << comm_name << std::endl;
-       Par::Out() << " object =" << MeshObjTypeString(type) << ", id=" << id << std::endl;
+       std::cerr << "P:" << Par::Rank() << "Error, complete range,couldn't find object!  Commname:" << comm_name << std::endl;
+       std::cerr << " object =" << MeshObjTypeString(type) << ", id=" << id << std::endl;
        Throw() << "In complete range, could not find object!!";
       }
       
@@ -801,7 +766,7 @@ void CommRel::send_fields(UInt _nfields, _field *const *_sfields, _field *const 
     const MeshObj &obj = *ci->obj;
     for (UInt f = 0; f < nfields; f++) {
       if (sfields[f]->OnObj(*ci->obj)) {
-         field_pack(b, *sfields[f], obj);
+        field_pack(b, *sfields[f], obj);
       }
     }
   }
@@ -1215,21 +1180,6 @@ bool CommRel::verify_symmetric_comm() {
 
 }
 
-UInt CommRel::SetMsgPattern(SparseMsg &msg) {
-  
-  UInt ndproc = domain_processors.size();
-  UInt csize = msg.commSize();
-
-  if (ndproc > 0) {
-    msg.setPattern(ndproc, &domain_processors[0]);
-  } else {
-    msg.setPattern(ndproc, NULL);
-  }
-
-  return ndproc;
-
-}
-
 std::ostream &operator<<(std::ostream &os, const CommRel::CommNode &cn) {
   int rank = Par::Rank();
   os << "(" << cn.obj->get_id() << ", P:" << rank << ", {" << GetAttr(*cn.obj) << "}, " << cn.processor << ")";
@@ -1237,4 +1187,5 @@ std::ostream &operator<<(std::ostream &os, const CommRel::CommNode &cn) {
 }
 
 
+} // namespace
 } // namespace

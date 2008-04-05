@@ -1,7 +1,7 @@
-// $Id: ESMC_Context.C,v 1.3 2007/11/28 16:42:39 dneckels Exp $
+// $Id: ESMC_Context.C,v 1.1.2.1 2008/04/05 03:13:15 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -16,7 +16,8 @@
 #include <iomanip>
 
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 // Just in case someday a byte is not 8??
 #define CSIZE 8
@@ -136,4 +137,5 @@ std::ostream &operator<<(std::ostream &os, const Context &ctxt) {
   return os;
 }
 
+} // namespace
 } // namespace

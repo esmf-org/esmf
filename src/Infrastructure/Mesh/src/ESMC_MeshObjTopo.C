@@ -1,7 +1,7 @@
-// $Id: ESMC_MeshObjTopo.C,v 1.5 2007/11/28 16:42:43 dneckels Exp $
+// $Id: ESMC_MeshObjTopo.C,v 1.3.2.1 2008/04/05 03:13:18 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -14,8 +14,8 @@
 
 #include <map>
 
-namespace ESMC {
-
+namespace ESMCI {
+namespace MESH {
 
 
 static int hex_sides[] = {
@@ -42,37 +42,6 @@ static int hex_edges[] = {
  3,7,  15
 };
 
-static double hex_node_coord[] = {
--1,  -1,  -1,
- 1,  -1,  -1,
- 1, 1, -1,
- -1, 1, -1, 
--1,-1,1,
-1, -1, 1,
-1, 1,  1,
--1, 1, 1,
-// Child
-0, -1, -1,
-1, 0, -1,
-0, 1, -1,
--1 ,0, -1,
--1, -1, 0,
-1, 0, 0,
-1,  1, 0,
--1, 1, 0,
-0, -1, 1,
-1, 0, 1,
-0, 1, 1,
--1, 0, 1,
-0, 0, 0,
-0, 0, -1,
-0, 0, 1,
--1, 0, 0,
-1, 0, 0,
-0, -1, 0,
-0, 1, 0
-};
-
 #ifdef FACE_EDGE
 static int hex_face_edge[] = {
   0,  9,  4,  8,
@@ -92,7 +61,6 @@ static int hex_face_edge_pol[] = {
 };
 #endif
 
-
 static int quad_sides[] = {
  0, 1,  4,
  1, 2,  5,
@@ -100,23 +68,6 @@ static int quad_sides[] = {
  3, 0,  7
 };
 
-static double quad_node_coord[] = {
- -1, -1,
-  1, -1,
-  1,  1,
- -1,  1,
-  // child nodes
-  0, -1,
-  1,  0,
-  0,  1,
- -1,  0,
-  0,  0
-};
-
-/**
- * Quad permuation.  For polarity reverse,
- * we reverse the nodes first, then rotate.
- */
 static int quad_perm[] = {
 // rotation 0
 0, 1, 2, 3,  4, 5, 6, 7,  8, // pol=true
@@ -152,17 +103,6 @@ static int tri_perm[] = {
 1, 0, 2,  3, 5, 4 // pol=false
 };
 
-static double tri_node_coord[] = {
- 0,  0,
- 1,  0,
- 0,  1,
- // child nodes
-0.5, 0,
- 0.5, 0.5,
- 0, 0.5
-};
-
-
 static int tet_sides[] = {
  0, 1, 3,   4, 8, 7,
  1, 2, 3,   5, 9, 8,
@@ -177,20 +117,6 @@ static int tet_edges[] = {
  0,3,  7,
  1,3,  8,
  2,3,  9
-};
-
-static double tet_node_coord[] = {
-  0, 0, 0,
-  1, 0, 0,
-  0, 1, 0,
-  0, 0, 1,
-  // child nodes
-  0.5, 0, 0,
-  0.5, 0.5, 0,
-  0, 0.5, 0,
-  0, 0, 0.5,
-  0.5, 0, 0.5,
-  0, 0.5, 0.5
 };
 
 #ifdef FACE_EDGE
@@ -209,22 +135,9 @@ static int tet_face_edge_pol[] = {
 };
 #endif
 
-/*
- * Bar topology:
- * 
- *   o-----*-----o 
- *   0     2     1
- * 
- */
 static int bar_sides[] = {
  0,
  1
-};
-
-static double bar_node_coord[] = {
- -1,
-  1,
-  0
 };
 
 static int bar_perm[] = {
@@ -269,7 +182,6 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     AddHomoSide(topo, "QUAD_3D");
     AddHomoEdge(topo, "BAR2_3D");
     topo->ptable = NULL;
-    topo->node_coords = hex_node_coord;
   }
   else if (name == "HEX27") {
     topo = new MeshObjTopo(name, 2, 8, 27, 6, 3,3);
@@ -286,7 +198,6 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     AddHomoSide(topo, "QUAD9_3D");
     AddHomoEdge(topo, "BAR3_3D");
     topo->ptable = NULL;
-    topo->node_coords = hex_node_coord;
   }
   else if (name == "TETRA4" || name == "TETRA") {
     topo = new MeshObjTopo(name, 3, 4, 4, 4, 3,3);
@@ -301,7 +212,6 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     AddHomoSide(topo, "TRI3_3D");
     AddHomoEdge(topo, "BAR2_3D");
     topo->ptable = NULL;
-    topo->node_coords = tet_node_coord;
   }
   else if (name == "TETRA10") {
     topo = new MeshObjTopo(name, 4, 4, 10, 4, 3,3);
@@ -318,7 +228,6 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     AddHomoSide(topo, "TRI6_3D");
     AddHomoEdge(topo, "BAR3_3D");
     topo->ptable = NULL;
-    topo->node_coords = tet_node_coord;
   }
   else if (name == "TRI3") {
     topo = new MeshObjTopo(name, 5, 3, 3, 3, 2,2);
@@ -333,9 +242,8 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     AddHomoSide(topo, "BAR2_2D");
     AddHomoEdge(topo, "BAR2_2D");
     topo->ptable = NULL;
-    topo->node_coords = tri_node_coord;
   }
-  else if (name == "TRI3_3D" || name == "TRISHELL") {
+  else if (name == "TRI3_3D") {
     topo = new MeshObjTopo(name, 6, 3, 3, 3, 3,2);
     topo->side_node_map = tri_sides;
     topo->num_side_nodes = 2;
@@ -348,7 +256,6 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     AddHomoSide(topo, "BAR2_3D");
     AddHomoEdge(topo, "BAR2_3D");
     topo->ptable = tri_perm;
-    topo->node_coords = tri_node_coord;
   }
   else if (name == "TRI6") {
     topo = new MeshObjTopo(name, 7, 3, 6, 3, 2,2);
@@ -366,7 +273,6 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     AddHomoSide(topo, "BAR3_2D");
     AddHomoEdge(topo, "BAR3_2D");
     topo->ptable = NULL;
-    topo->node_coords = tri_node_coord;
   }
   else if (name == "TRI6_3D") {
     topo = new MeshObjTopo(name, 8, 3, 6, 3, 3,2);
@@ -382,7 +288,6 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     AddHomoSide(topo, "BAR3_3D");
     AddHomoEdge(topo, "BAR3_3D");
     topo->ptable = tri_perm;
-    topo->node_coords = tri_node_coord;
   }
   else if (name == "QUAD4" || name == "QUAD") {
     topo = new MeshObjTopo(name, 9, 4, 4, 4, 2,2);
@@ -397,7 +302,6 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     AddHomoSide(topo, "BAR2_2D");
     AddHomoEdge(topo, "BAR2_2D");
     topo->ptable =quad_perm;
-    topo->node_coords = quad_node_coord;
   }
   else if (name == "QUAD4_3D" || name == "QUAD_3D") {
     topo = new MeshObjTopo(name, 10, 4, 4, 4, 3,2);
@@ -412,7 +316,6 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     AddHomoSide(topo, "BAR2_3D");
     AddHomoEdge(topo, "BAR2_3D");
     topo->ptable = quad_perm;
-    topo->node_coords = quad_node_coord;
   }
   else if (name == "QUAD9") {
     topo = new MeshObjTopo(name, 11, 4, 9, 4, 2,2);
@@ -429,7 +332,6 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     AddHomoSide(topo, "BAR3_2D");
     AddHomoEdge(topo, "BAR3_2D");
     topo->ptable = NULL;
-    topo->node_coords = quad_node_coord;
   }
   else if (name == "QUAD9_3D") {
     topo = new MeshObjTopo(name, 12, 4, 9, 4, 3,2);
@@ -445,7 +347,6 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     AddHomoSide(topo, "BAR3_3D");
     AddHomoEdge(topo, "BAR3_3D");
     topo->ptable = quad_perm;
-    topo->node_coords = quad_node_coord;
   }
   else if (name == "SHELL" || name == "SHELL4") {
     topo = new MeshObjTopo(name, 13, 4, 4, 4, 3,2);
@@ -460,7 +361,6 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     AddHomoSide(topo, "BAR2_3D");
     AddHomoEdge(topo, "BAR2_3D");
     topo->ptable = quad_perm;
-    topo->node_coords = quad_node_coord;
   }
   else if (name == "SHELL9") {
     topo = new MeshObjTopo(name, 14, 4, 9, 4, 3,2);
@@ -476,7 +376,6 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     AddHomoSide(topo, "BAR3_3D");
     AddHomoEdge(topo, "BAR3_3D");
     topo->ptable = quad_perm;
-    topo->node_coords = quad_node_coord;
   }
   else if (name == "SHELL3") {
     topo = new MeshObjTopo(name, 15, 3, 3, 3, 3,2);
@@ -491,7 +390,6 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     AddHomoSide(topo, "BAR2_3D");
     AddHomoEdge(topo, "BAR2_3D");
     topo->ptable = tri_perm;
-    topo->node_coords = tri_node_coord;
   }
   else if (name == "BAR2") {
     topo = new MeshObjTopo(name, 16, 2, 2, 2, 1,1);
@@ -504,7 +402,6 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     topo->num_child_nodes = 3;
     topo->edge_node_map = NULL;
     topo->ptable = bar_perm;
-    topo->node_coords = bar_node_coord;
   }
   else if (name == "BAR2_2D") {
     topo = new MeshObjTopo(name, 17, 2, 2, 2, 2,1);
@@ -517,7 +414,6 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     topo->num_child_nodes = 3;
     topo->edge_node_map = NULL;
     topo->ptable = bar_perm;
-    topo->node_coords = bar_node_coord;
   }
   else if (name == "BAR2_3D") {
     topo = new MeshObjTopo(name, 18, 2, 2, 2, 3,1);
@@ -530,7 +426,6 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     topo->num_child_nodes = 3;
     topo->edge_node_map = NULL;
     topo->ptable = bar_perm;
-    topo->node_coords = bar_node_coord;
   }
   else if (name == "BAR3") {
     topo = new MeshObjTopo(name, 19, 2, 3, 2, 1,1);
@@ -544,7 +439,6 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     topo->num_child_nodes = 3;
     topo->edge_node_map = NULL;
     topo->ptable = NULL;
-    topo->node_coords = bar_node_coord;
   }
   else if (name == "BAR3_2D") {
     topo = new MeshObjTopo(name, 20, 2, 3, 2, 2,1);
@@ -558,7 +452,6 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     topo->num_child_nodes = 3;
     topo->edge_node_map = NULL;
     topo->ptable = bar_perm;
-    topo->node_coords = bar_node_coord;
   }
   else if (name == "BAR3_3D") {
     topo = new MeshObjTopo(name, 21, 2, 3, 2, 3,1);
@@ -572,7 +465,6 @@ MeshObjTopo *ManufactureTopo(const std::string &name) {
     topo->num_child_nodes = 3;
     topo->edge_node_map = NULL;
     topo->ptable = bar_perm;
-    topo->node_coords = bar_node_coord;
   } else Ex() << "Illegal topo type:" << name;
 
   return topo;
@@ -641,4 +533,5 @@ MeshObjTopo *LowerTopo(const MeshObjTopo &topo) {
   return NULL;
 }
 
+} // namespace
 } // namespace

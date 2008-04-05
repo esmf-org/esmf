@@ -1,21 +1,27 @@
-// $Id: ESMC_MeshSkin.h,v 1.2 2007/11/28 16:23:22 dneckels Exp $
+// $Id: ESMC_MeshSkin.h,v 1.1.2.1 2008/04/05 03:13:12 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-//
-//-----------------------------------------------------------------------------
+
+// (all lines below between the !BOP and !EOP markers will be included in
+//  the automated document processing.)
+//-------------------------------------------------------------------------
+// these lines prevent this file from being read more than once if it
+// ends up being included multiple times
+
 #ifndef ESMC_MeshSkin_h
 #define ESMC_MeshSkin_h
 
 #include "ESMC_Mesh.h"
 
-namespace ESMC {
+namespace ESMCI {
+namespace MESH {
 
 // Add sidesets for exterior blocks and for interior block boundaries
 // (Locally) mark nodes as boundary nodes.  If add_fadces=true, create the faces.
@@ -27,6 +33,7 @@ void Skin(Mesh &mesh);
 // nodes.
 void ResolveParSkin(Mesh &mesh);
 
+} //namespace
 } //namespace
 
 #endif

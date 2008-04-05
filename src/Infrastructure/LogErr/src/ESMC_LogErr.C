@@ -1,7 +1,7 @@
-// $Id: ESMC_LogErr.C,v 1.78 2007/07/18 05:11:48 theurich Exp $
+// $Id: ESMC_LogErr.C,v 1.78.2.1 2008/04/05 03:13:02 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -50,7 +50,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.78 2007/07/18 05:11:48 theurich Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.78.2.1 2008/04/05 03:13:02 cdeluca Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
