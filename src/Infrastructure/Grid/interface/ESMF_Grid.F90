@@ -166,7 +166,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.71 2008/04/04 23:32:11 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.72 2008/04/05 01:59:25 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -8973,7 +8973,7 @@ endif
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridSetCmmitShapeTileIrreg"
+#define ESMF_METHOD "ESMF_GridSetCommitShapeTileIrreg"
 !BOP
 ! !IROUTINE: ESMF_GridSetCommitShapeTile - Set and complete a Grid with an irregular distribution
 
@@ -9582,7 +9582,6 @@ endif
        return 
     endif
 
-
    !TODO: Consider making some of these a separate local subroutine (particularly if you're going to 
    !      have 3 of these ShapeCreate subroutines with only minor changes
 
@@ -10106,7 +10105,7 @@ endif
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridSetCmmitShapeTileReg"
+#define ESMF_METHOD "ESMF_GridSetCommitShapeTileReg"
 !BOP
 ! !IROUTINE: ESMF_GridSetCommitShapeTile - Set and complete a Grid with a regular distribution
 
