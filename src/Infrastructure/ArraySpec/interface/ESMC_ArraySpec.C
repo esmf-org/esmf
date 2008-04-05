@@ -1,7 +1,7 @@
-// $Id: ESMC_ArraySpec.C,v 1.9 2008/03/03 18:38:37 theurich Exp $
+// $Id: ESMC_ArraySpec.C,v 1.10 2008/04/05 03:38:05 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2007, University Corporation for Atmospheric Research, 
+// Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -36,7 +36,7 @@
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
 static const char *const version =
-  "$Id: ESMC_ArraySpec.C,v 1.9 2008/03/03 18:38:37 theurich Exp $";
+  "$Id: ESMC_ArraySpec.C,v 1.10 2008/04/05 03:38:05 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {

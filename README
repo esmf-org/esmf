@@ -5,7 +5,7 @@
                     Earth System Modeling Framework (ESMF)
 
  Earth System Modeling Framework
- Copyright 2002-2007, University Corporation for Atmospheric Research,
+ Copyright 2002-2008, University Corporation for Atmospheric Research,
  Massachusetts Institute of Technology, Geophysical Fluid Dynamics
  Laboratory, University of Michigan, National Centers for Environmental
  Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -567,4 +567,4 @@ Please contact esmf_support@ucar.edu with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.89 2007/11/30 17:07:30 theurich Exp $
+ $Id: README,v 1.90 2008/04/05 03:37:45 cdeluca Exp $

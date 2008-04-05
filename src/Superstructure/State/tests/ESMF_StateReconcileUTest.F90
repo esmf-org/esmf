@@ -1,7 +1,7 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.16 2007/08/30 20:05:43 cdeluca Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.17 2008/04/05 03:39:19 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2007, University Corporation for Atmospheric Research,
+! Copyright 2002-2008, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,

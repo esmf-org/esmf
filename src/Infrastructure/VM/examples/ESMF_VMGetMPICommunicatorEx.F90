@@ -1,7 +1,7 @@
-! $Id: ESMF_VMGetMPICommunicatorEx.F90,v 1.11 2007/12/14 20:49:09 svasquez Exp $
+! $Id: ESMF_VMGetMPICommunicatorEx.F90,v 1.12 2008/04/05 03:39:06 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2007, University Corporation for Atmospheric Research,
+! Copyright 2002-2008, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
