@@ -1,4 +1,4 @@
-! $Id: ESMF_RecursiveComponentSTest.F90,v 1.1.2.2 2008/02/28 01:42:04 theurich Exp $
+! $Id: ESMF_RecursiveComponentSTest.F90,v 1.1.2.3 2008/04/07 21:24:28 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -9,7 +9,20 @@
 ! !DESCRIPTION:
 ! System test RecursiveComponent.  
 !
-!     Component hierarchy:
+!   A single component is created by the driver code and its SetServices() 
+!   routine is invoked. Consequently the component's Initialize(), Run(), 
+!   Finalize() methods are called in sequence. The component Initialize()
+!   method creates two recursive subcomponents by invoking its own 
+!   SetServices() routine on two exclusive sets of PETs. It then calls the
+!   Initialize() routine for these two subcomponents which results in two more
+!   recursive subcomponents for each call. The recursion stops at a recursion
+!   level of 2. After the Initialize() method has returned through the recursion
+!   stack for all subcomponents, the driver calls into the component's Run()
+!   method which again starts a recursive call tree into the second level
+!   before it returns. Finally the Finalize() call recursively destroys all
+!   subcomponents and returns to the driver code.
+!
+!   Recursive component hierarchy:
 !
 !                        Driver (PET 0,1,2,3,4,5)
 !                          |
