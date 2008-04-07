@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.124 2008/04/05 03:38:19 cdeluca Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.125 2008/04/07 06:45:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.124 2008/04/05 03:38:19 cdeluca Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.125 2008/04/07 06:45:54 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -122,7 +122,7 @@
       write(name, *) "Destroying a Field with no data Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
@@ -303,13 +303,13 @@
       write(name, *) "Creating a Field with no data"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      ! Setting a Grid associated with Field
-      call ESMF_FieldSet(f4, grid, rc=rc) 
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting a Grid associated with Field Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      !------------------------------------------------------------------------
+!      !EremoveX_UTest_Multi_Proc_Only
+!      ! Setting a Grid associated with Field
+!      call ESMF_FieldSet(f4, grid, rc=rc) 
+!      write(failMsg, *) "Did not return ESMF_SUCCESS"
+!      write(name, *) "Setting a Grid associated with Field Test"
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only

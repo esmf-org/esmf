@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiInitUTest.F90,v 1.9 2008/04/05 03:39:10 cdeluca Exp $
+! $Id: ESMF_VMUserMpiInitUTest.F90,v 1.10 2008/04/07 06:46:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -526,7 +526,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUserMpiInitUTest.F90,v 1.9 2008/04/05 03:39:10 cdeluca Exp $'
+      '$Id: ESMF_VMUserMpiInitUTest.F90,v 1.10 2008/04/07 06:46:02 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
@@ -569,7 +569,7 @@
       call ESMF_VMPrint(vm, rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
 
       !------------------------------------------------------------------------
       !EX_UTest

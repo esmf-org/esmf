@@ -1,4 +1,4 @@
-! $Id: ESMF_ComponentUTest.F90,v 1.12 2007/11/27 21:31:12 svasquez Exp $
+! $Id: ESMF_ComponentUTest.F90,v 1.13 2008/04/07 06:46:03 theurich Exp $
 !
 ! Test code which creates a new Component.
 
@@ -69,7 +69,7 @@
     write(name, *) "Destroying a Gridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
 
     !------------------------------------------------------------------------
     !EX_UTest

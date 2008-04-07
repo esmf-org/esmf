@@ -80,7 +80,7 @@
     
 
 
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
     ! Pointers to arrays of data type Real * 4 
     type PtrRWrap1  
     sequence
@@ -203,7 +203,7 @@
     type(PtrIWrap6) :: sizetest6I(2)
     type(PtrIWrap7) :: sizetest7I(2)
     
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
     type(PtrRWrap1) :: sizetest1R(2)
     type(PtrRWrap2) :: sizetest2R(2)
     type(PtrRWrap3) :: sizetest3R(2)
@@ -322,7 +322,7 @@
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
 
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_StringUTest.F90,v 1.6 2008/04/05 03:39:22 cdeluca Exp $
+! $Id: ESMF_StringUTest.F90,v 1.7 2008/04/07 06:46:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -80,7 +80,7 @@
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
 
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------

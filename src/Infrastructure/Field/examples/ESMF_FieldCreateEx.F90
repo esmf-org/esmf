@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.70 2008/04/05 03:38:15 cdeluca Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.71 2008/04/07 06:45:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -70,6 +70,8 @@
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
 !\subsubsection{Create Field with Grid and Arrayspec}
+!\label{sec:field:usage:create_grid_arrayspec}
+!
 !  The user first creates an {\tt ESMF\_Grid} and an
 !  {\tt ESMF\_Arrayspec} with corresponding rank and type.  
 !  This create associates the two objects.  
@@ -120,54 +122,75 @@
 
     print *, "Field creation from Grid and Arrayspec returned"
 
-!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
-!-------------------------------- Example -----------------------------
-!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
-!BremoveOE
-!\subsubsection{Use ESMF\_ArrayCreate to reset Field internal Array}
-!  It's often necessary to reset the data array contained within a field.
-!  The following example demonstrates how to create a compliant {\tt ESMF\_Array}
-!  and reset the existing {\tt ESMF\_Array} of a {\tt ESMF\_Field}.
-!  User can reset the {\tt ESMF\_Array} inside an existing Field by construct a proper
-!  shape {\tt ESMF\_Array}. 
-!  arrayspec, distgrid are objects created from previous examples.
-!EremoveOE
-!-------------------------------------------------------------------------
-!   !
-!   ! The user can substitute another array created by ArrayCreate in field1.
-!   ! This example
-!   ! makes it clear that field1's array has a computational region smaller
-!   ! than its exclusive region.
-!BremoveOC
-    call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-        computationalEdgeLWidth=compEdgeLWdith, &
-        computationalEdgeUWidth=compEdgeUWdith, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    array2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, staggerLoc=0, &
-            computationalEdgeLWidth=compEdgeLWdith, &
-            computationalEdgeUWidth=compEdgeUWdith, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    call ESMF_FieldSet(field1, array2, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!EremoveOC
-    print *, "Field reset internal array through ArrayCreate returned"
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+! The following example is removed when FieldSetArray is removed
+! Final removal pending.
+!!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!!-------------------------------- Example -----------------------------
+!!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!!BremoveOE
+!!\subsubsection{Use ESMF\_ArrayCreate to reset Field internal Array}
+!!  It's often necessary to reset the data array contained within a field.
+!!  The following example demonstrates how to create a compliant {\tt ESMF\_Array}
+!!  and reset the existing {\tt ESMF\_Array} of a {\tt ESMF\_Field}.
+!!  User can reset the {\tt ESMF\_Array} inside an existing Field by construct a proper
+!!  shape {\tt ESMF\_Array}. 
+!!  arrayspec, distgrid are objects created from previous examples.
+!!EremoveOE
+!!-------------------------------------------------------------------------
+!!   !
+!!   ! The user can substitute another array created by ArrayCreate in field1.
+!!   ! This example
+!!   ! makes it clear that field1's array has a computational region smaller
+!!   ! than its exclusive region.
+!!BremoveOC
+!    call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+!        computationalEdgeLWidth=compEdgeLWdith, &
+!        computationalEdgeUWidth=compEdgeUWdith, rc=rc)
+!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!
+!    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc)
+!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!
+!    array2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, staggerLoc=0, &
+!            computationalEdgeLWidth=compEdgeLWdith, &
+!            computationalEdgeUWidth=compEdgeUWdith, rc=rc)
+!    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!
+!    call ESMF_FieldSet(field1, array2, rc=rc)
+!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!!EremoveOC
+!    print *, "Field reset internal array through ArrayCreate returned"
+!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
 !\subsubsection{Create Field with Grid and Array}
+!\label{sec:field:usage:create_grid_array}
+!
 !  User can create a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a 
 !  {\tt ESMF\_Array}. grid and array2 are objects created in previous examples.
 !EOE
 
 !BOC
+    ! Get necessary information from the Grid
+    call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+        computationalEdgeLWidth=compEdgeLWdith, &
+        computationalEdgeUWidth=compEdgeUWdith, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! Create a 2D ESMF_TYPEKIND_R4 arrayspec
+    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! Create a ESMF_Array from the arrayspec and distgrid
+    array2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, staggerLoc=0, &
+            computationalEdgeLWidth=compEdgeLWdith, &
+            computationalEdgeUWidth=compEdgeUWdith, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! Create a ESMF_Field from the grid and array
     field4 = ESMF_FieldCreate(grid, array2, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
@@ -180,7 +203,8 @@
 !BOE
 !\subsubsection{Create Empty Field and Finish an empty Field 
 !  with FieldSetCommit}
-
+!\label{sec:field:usage:create_empty_setcommit}
+!
 !  The user creates an empty {\tt ESMF\_Field} object.
 !  Then the user can finalize a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a intrinsic 
 !  Fortran data array. This interface is overloaded for type, kind, rank of
@@ -276,6 +300,8 @@
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
 !\subsubsection{Create 2D Field with 2D Grid and Fortran data pointer}
+!\label{sec:field:usage:create_2dptr}
+!
 !  User can create a {\tt ESMF\_Field} directly from a {\tt ESMF\_Grid} and a intrinsic 
 !  Fortran data array. This interface is overloaded for type, kind, rank of
 !  of the Fortran data array. grid and farray are created in previous examples.
@@ -297,6 +323,8 @@
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
 !\subsubsection{Create 3D Field with 2D Grid and 3D Fortran data pointer}
+!\label{sec:field:usage:create_2dgrid_3dptr}
+!
 !  User can create a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a intrinsic 
 !  Fortran data array. This interface is overloaded for type, kind, rank of
 !  of the Fortran data array.
@@ -401,6 +429,8 @@
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
 !\subsubsection{Create 3D Field with 2D Grid and 3D Fortran data pointer with gridToFieldMap}
+!\label{sec:field:usage:create_2dgrid_3dptr_map}
+!
 !  Building upon the previous example, we will create a 3D Field from
 !  2D grid and 3D array but with a slight twist. In this example, we
 !  introduce the gridToFieldMap argument that allows a user to map Grid 
@@ -453,9 +483,21 @@
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
 !\subsubsection{Create 3D Field with 2D Grid and 3D Fortran data pointer with halos}
-!  This example is similar to example 18.2.7, in addition we will show
+!\label{sec:field:usage:create_2dgrid_3dptr_map_halo}
+!
+!  This example is similar to example \ref{sec:field:usage:create_2dgrid_3dptr_map}, 
+!  in addition we will show
 !  a user can associate different halo width to a Fortran array to create
 !  a Field through the maxHaloLWidth and maxHaloUWdith optional arguments.
+!  A diagram of the dimension configuration from Grid, halos, and Fortran data pointer
+!  is shown here.
+!\begin{center}
+!\begin{figure}
+!\scalebox{0.75}{\includegraphics{FieldParameterSetup}}
+!\caption{Field dimension configuration from Grid, halos, and Fortran data pointer.}
+!\label{fig:fieldparameter}
+!\end{figure}
+!\end{center}
 !  
 !  The {\tt ESMF\_FieldCreate} interface supports creating a Field from a Grid and a
 !  Fortran array padded with halos on the distributed dimensions of the Fortran
@@ -606,6 +648,8 @@
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
 !\subsubsection{Create 7D Field with 5D Grid and 2D ungridded bounds}
+!\label{sec:field:usage:create_5dgrid_7dptr_2dungridded}
+!
 ! In this example, we will show how to create a 7D Field from a 5D {\tt
 ! ESMF\_Grid} and 2D ungridded bounds with arbitrary halo widths and 
 ! gridToFieldMap.
@@ -661,7 +705,8 @@
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
 !\subsubsection{Destroy a Field}
-
+!\label{sec:field:usage:destroy}
+!
 !  When finished with an {\tt ESMF\_Field}, the destroy method
 !  removes it.  However, the objects inside the {\tt ESMF\_Field}
 !  but created externally should be deleted separately, 

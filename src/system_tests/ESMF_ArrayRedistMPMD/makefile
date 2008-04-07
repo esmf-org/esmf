@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2008/04/02 19:44:19 theurich Exp $ 
+# $Id: makefile,v 1.3 2008/04/07 06:46:18 theurich Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -24,7 +24,11 @@ SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_ArrayRedistSTestA $(ESMC_TESTDIR)/E
 SYSTEM_TESTS_OBJ_A    = user_model1.o user_coupler.o
 SYSTEM_TESTS_OBJ_B    = user_model2.o user_coupler.o
 
+ifeq ($(ESMF_TESTMPMD),ON)
 SYSTEM_TESTS_RUN      = RUN_ArrayRedistMPMD
+else
+SYSTEM_TESTS_RUN      =
+endif
 
 SYSTEM_TESTS_RUN_UNI  =
 
@@ -42,4 +46,4 @@ CLOBBERDIRS =
 
 
 RUN_ArrayRedistMPMD:
-	-${ESMF_MPIMPMDRUN} -np 4 $(ESMF_TESTDIR)/ESMF_ArrayRedistSTestA : -np 2 $(ESMF_TESTDIR)/ESMF_ArrayRedistSTestB >$(ESMF_TESTDIR)/ESMF_ArrayRedistSTestA.stdout
+	-${ESMF_MPIMPMDRUN} -n 4 $(ESMF_TESTDIR)/ESMF_ArrayRedistSTestA : -n 2 $(ESMF_TESTDIR)/ESMF_ArrayRedistSTestB >$(ESMF_TESTDIR)/ESMF_ArrayRedistSTestA.stdout

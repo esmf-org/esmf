@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cppF90,v 1.6 2008/04/05 03:38:18 cdeluca Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.7 2008/04/07 06:45:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldSetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSet.cppF90,v 1.6 2008/04/05 03:38:18 cdeluca Exp $'
+    '$Id: ESMF_FieldSet.cppF90,v 1.7 2008/04/07 06:45:53 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -74,9 +74,9 @@ module ESMF_FieldSetMod
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-    module procedure ESMF_FieldSetArray
+    !module procedure ESMF_FieldSetArray
     !module procedure ESMF_FieldSetLocalArray !TODO: FIELDINTEGRATION
-    module procedure ESMF_FieldSetGrid
+    !module procedure ESMF_FieldSetGrid
     TypeKindRankInterfaceMacro(FieldSetDataPtr)
 
 ! !DESCRIPTION: 
@@ -119,7 +119,7 @@ contains
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldSetArray"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldSet - Set data Array associated with the Field
 
 ! !INTERFACE:
@@ -143,7 +143,7 @@ contains
 ! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer :: localrc
     !character(len=ESMF_MAXSTR) :: str
@@ -528,6 +528,19 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
 !   farray, copyflag, staggerloc, gridToFieldMap, ungriddedLBound, & @\
 !   ungriddedUBound, maxHaloLWidth, maxHaloUWidth, rc) @\
 ! @\
+! !ARGUMENTS: @\
+!   type(ESMF_Field),                intent(inout)         :: field @\
+!   integer,                         intent(in)            :: grid @\
+!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farray @\
+!   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
+!   type(ESMF_STAGGERLOC), intent(in), optional :: staggerloc @\
+!   integer,               intent(in), optional :: gridToFieldMap(:) @\
+!   integer,               intent(in), optional :: ungriddedLBound(:) @\
+!   integer,               intent(in), optional :: ungriddedUBound(:) @\
+!   integer,               intent(in), optional :: maxHaloLWidth(:) @\
+!   integer,               intent(in), optional :: maxHaloUWidth(:) @\
+!   integer,               intent(inout), optional :: rc @\
+! @\
 ! !DESCRIPTION: @\
 ! This call completes an {\tt ESMF\_Field} allocated with the @\
 ! {\tt ESMF\_FieldCreateEmpty()} call. @\
@@ -545,7 +558,7 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
 !       Native fortran data array to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the farray. @\
-! \item [copyflag] @\
+! \item [{[copyflag]}] @\
 !       Indicates whether to copy the {\tt farray} or reference it directly. @\
 !       For valid values see \ref{opt:copyflag}.  The default is @\
 !       {\tt ESMF\_DATA\_REF}. @\

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.42 2008/04/05 03:38:25 cdeluca Exp $
+// $Id: ESMCI_Grid.h,v 1.43 2008/04/07 06:45:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -171,17 +171,17 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   // accessor methods
   // NOTE: For efficiencies sake the following functions don't error check
   //       so be sure to error check the grid or any input before using.  
-  const ESMC_GridStatus getStatus(void) const {return status;}
+  ESMC_GridStatus getStatus(void) const {return status;}
 
   const ESMC_GridConn *getConnL(void) const {return connL;}
   const ESMC_GridConn *getConnU(void) const {return connU;} 
-  const int getDimCount(void) const {return dimCount;}
-  const int getDistDimCount(void) const {return distDimCount;}
-  const int getUndistDimCount(void) const {return undistDimCount;}
-  const int getTileCount(void) const {return distgrid->getPatchCount();}
-  const int getStaggerLocCount(void) const {return staggerLocCount;}
-  const ESMC_IndexFlag getIndexFlag(void) const {return indexflag;}
-  const ESMC_TypeKind getTypeKind(void) const {return typekind;}
+  int getDimCount(void) const {return dimCount;}
+  int getDistDimCount(void) const {return distDimCount;}
+  int getUndistDimCount(void) const {return undistDimCount;}
+  int getTileCount(void) const {return distgrid->getPatchCount();}
+  int getStaggerLocCount(void) const {return staggerLocCount;}
+  ESMC_IndexFlag getIndexFlag(void) const {return indexflag;}
+  ESMC_TypeKind getTypeKind(void) const {return typekind;}
   const DistGrid *getDistGrid(void) const {return distgrid;}
   const int *getDistgridToGridMap(void) const {return distgridToGridMap;}
   const int *getUndistLBound(void) const {return undistLBound;}

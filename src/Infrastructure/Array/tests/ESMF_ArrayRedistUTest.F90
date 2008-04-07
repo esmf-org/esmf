@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistUTest.F90,v 1.7 2008/04/05 03:38:04 cdeluca Exp $
+! $Id: ESMF_ArrayRedistUTest.F90,v 1.8 2008/04/07 06:45:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ArrayRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayRedistUTest.F90,v 1.7 2008/04/05 03:38:04 cdeluca Exp $'
+    '$Id: ESMF_ArrayRedistUTest.F90,v 1.8 2008/04/07 06:45:50 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -52,7 +52,7 @@ program ESMF_ArrayRedistUTest
   type(ESMF_ArraySpec)  :: arrayspec
   type(ESMF_RouteHandle):: routehandle
   integer(ESMF_KIND_I4), pointer :: farrayPtr(:)  ! matching F90 array pointer
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
   type(ESMF_DistGrid)   :: srcDistgrid2
   type(ESMF_Array)      :: srcArray2, srcArray3
   type(ESMF_Array)      :: dstArray2, dstArray3
@@ -145,7 +145,7 @@ program ESMF_ArrayRedistUTest
   ! 4     0         4     random, random, random, random, random, random, random
   ! 5     0         5     random, random, random, random, random, random, random
 
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "dstArray2 Create Test"
@@ -304,7 +304,7 @@ call ESMF_ArrayPrint(dstArray)
   call ESMF_ArrayDestroy(srcArray, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "Array Spec rank=1, R8 Set Test"
@@ -501,7 +501,7 @@ call ESMF_ArrayPrint(dstArray5)
   ! 4     0         4     22, 21, 20, 19, 18, 17, 16, 15, 14, 13
   ! 5     0         5     12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
   
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "srcDistgrid2 Create Test"
@@ -519,7 +519,7 @@ call ESMF_ArrayPrint(dstArray5)
   srcArray = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=srcDistgrid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "srcArray2 Create Test"
@@ -559,7 +559,7 @@ call ESMF_ArrayPrint(dstArray5)
   ! 4     0         4     41, 42, 43, 44, 45, 46, 47, 48, 49, 50
   ! 5     0         5     51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62
   
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "Get srcArray2 Test"
@@ -693,7 +693,7 @@ call ESMF_ArrayPrint(dstArray5)
       name, failMsg, result, ESMF_SRCLINE)
   endif
 
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "ArrayRedist: srcArray2 -> dstArray2 (RRA) Test"
@@ -928,7 +928,7 @@ call ESMF_ArrayPrint(dstArray5)
   call ESMF_DistGridDestroy(srcDistGrid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "srcArray2 Destroy Test"
@@ -958,7 +958,7 @@ call ESMF_ArrayPrint(dstArray5)
   call ESMF_ArrayDestroy(dstArray, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "dstArray2 Destroy Test"

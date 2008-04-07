@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayDataMapUTest.F90,v 1.6 2008/04/05 03:38:33 cdeluca Exp $
+! $Id: ESMF_InternArrayDataMapUTest.F90,v 1.7 2008/04/07 06:45:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InternArrayDataMapUTest.F90,v 1.6 2008/04/05 03:38:33 cdeluca Exp $'
+      '$Id: ESMF_InternArrayDataMapUTest.F90,v 1.7 2008/04/07 06:45:57 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -95,7 +95,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
 
 
       !------------------------------------------------------------------------

@@ -1,14 +1,15 @@
 #!/usr/bin/env perl
-# $Id: sys_tests_results.pl,v 1.6 2008/04/02 23:44:52 theurich Exp $
+# $Id: sys_tests_results.pl,v 1.7 2008/04/07 06:45:50 theurich Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 # The results are either complete results or a summary.
 
-sub sys_tests_results($$$) {
+sub sys_tests_results($$$$) {
 
         my $TEST_DIR	= $_[0];
         my $ESMF_BOPT   = $_[1];
         my $SUMMARY     = $_[2];
+        my $MPMDFLAG    = $_[3];
 
 
 use File::Find
@@ -49,6 +50,13 @@ use File::Find
                                 push (act_st_files, $file);
                                         $st_count=$st_count + 1;
                                 }
+                        if ( $MPMDFLAG =~ m/^ON$/ ) {
+                          $count=grep ( /ESMF_MPMD_SYSTEM_TEST/, @file_lines);
+                          if ($count != 0) {
+                                push (act_st_files, $file);
+                                        $st_count=$st_count + 1;
+                                }
+                        }
                         @file_lines=();
         }
         if ( $st_count == 0 ) {

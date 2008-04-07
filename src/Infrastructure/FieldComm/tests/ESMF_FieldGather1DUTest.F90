@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGather1DUTest.F90,v 1.17 2008/04/05 03:38:24 cdeluca Exp $
+! $Id: ESMF_FieldGather1DUTest.F90,v 1.18 2008/04/07 06:45:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldGather1DUTest.F90,v 1.17 2008/04/05 03:38:24 cdeluca Exp $'
+      '$Id: ESMF_FieldGather1DUTest.F90,v 1.18 2008/04/07 06:45:55 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -84,7 +84,7 @@
       call ESMF_VMGet(vm, petCount=npets, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 20
 
-#if ESMF_EXHAUSTIVE
+#if ESMF_TESTEXHAUSTIVE
 !-----------------------------------------------------------------------------
       ! Create a 1D layout to be used by the Field
       !EX_removeUTest

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.19 2008/04/05 03:38:17 cdeluca Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.20 2008/04/07 06:45:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.19 2008/04/05 03:38:17 cdeluca Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.20 2008/04/07 06:45:52 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -797,7 +797,7 @@ contains
 !       Native fortran data array to be copied/referenced in the {\tt field} @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the farray. @\
-! \item [copyflag] @\
+! \item [{[copyflag]}] @\
 !       Whether to copy the {\tt farray} or reference directly. @\
 !       For valid values see \ref{opt:copyflag}.  The default is @\
 !       {\tt ESMF\_DATA\_REF}. @\

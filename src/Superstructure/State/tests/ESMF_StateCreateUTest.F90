@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.9 2008/04/05 03:39:19 cdeluca Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.10 2008/04/07 06:46:10 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.9 2008/04/05 03:39:19 cdeluca Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.10 2008/04/07 06:46:10 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -98,7 +98,7 @@
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
       
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
 
       !------------------------------------------------------------------------
       !EX_removeUTest 

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.3 2008/04/05 03:38:21 cdeluca Exp $
+! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.4 2008/04/07 06:45:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -51,7 +51,7 @@
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
  
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
     !------------------------------------------------------------------------
     !EX_UTest_Multi_Proc_Only
     ! Create a bundle, add some fields and then retrieve the data pointers from the bundle

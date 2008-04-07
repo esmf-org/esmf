@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.51 2008/02/27 22:25:53 theurich Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.52 2008/04/07 06:45:58 theurich Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -218,7 +218,7 @@
     array1 = ESMF_LocalArrayCreate(real3dptr, ESMF_DATA_COPY, rc=rc)
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
    
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
 
     !--------------------------------------------------------------------------
     !EX_UTest

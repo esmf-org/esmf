@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: unit_tests_results.pl,v 1.10 2008/02/19 22:50:14 svasquez Exp $
+# $Id: unit_tests_results.pl,v 1.11 2008/04/07 06:45:50 theurich Exp $
 # This script runs at the end of the "run_unit_tests", "run_unit_tests_uni" and "check_results" targets.
 # The purpose is to give the user the results of running the unit tests.
 # The results are either complete results or a summary.
@@ -43,8 +43,8 @@ use File::Find
 		return 0;
 	}
 	# Get flags from tests_config file.
-	# exhaustive = 0 for ESMF_EXHAUSTIVE=OFF
-	# exhaustive = 1 for ESMF_EXHAUSTIVE=ON
+	# exhaustive = 0 for ESMF_TESTEXHAUSTIVE=OFF
+	# exhaustive = 1 for ESMF_TESTEXHAUSTIVE=ON
 	# processor = 0 for uni_processor
 	# processor = 1 for multi_processor
 	foreach $line (<F>){
