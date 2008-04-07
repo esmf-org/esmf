@@ -34,7 +34,7 @@ program ESMF_GridCreateEx
       type(ESMF_ArraySpec) ::  arrayspec2D,arrayspec
 
       real(ESMF_KIND_R8), pointer :: centerX(:), centerY(:), centerZ(:)
-      real(ESMF_KIND_R8), pointer :: cornerX(:), cornerY(:)
+      real(ESMF_KIND_R8), pointer :: cornerX(:), cornerY(:), cornerZ(:)
       real(ESMF_KIND_R8), pointer :: coordX2D(:,:), coordY2D(:,:)
       real(ESMF_KIND_R8), pointer :: coordX(:), coordY(:)
 
@@ -744,6 +744,22 @@ endif
          cornerY(j) = (j-1)*(180.0/90.0)
       enddo
 
+      !----------------------------------------------------------------
+      ! Get the local bounds of the global indexing for the third
+      ! coordinate array on the local DE, and the pointer to the array.
+      !----------------------------------------------------------------
+      call ESMF_GridGetCoord(grid3D, coordDim=3, localDE=lDE,   &
+             staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER,         &
+             computationalLBound=lbnd, computationalUBound=ubnd,&
+             fptr=cornerZ, rc=rc)
+
+      !----------------------------------------------------------------
+      ! Calculate and set the vertical coordinates
+      !----------------------------------------------------------------
+      do k=lbnd(1),ubnd(1)
+         cornerZ(k) = 4000.0*( (1./39.)*(k-1)  )**2
+      enddo
+
     !------------------------------------------------------------------
     ! Now fill the coordinates for the center stagger location with
     ! the average of the corner coordinate location values.
@@ -1207,6 +1223,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !
 !\begin{center}
 !\begin{figure}
+!\center
 !\scalebox{0.75}{\includegraphics{GridExclusiveReg}}
 !\caption{An example of a Grid's exclusive region.}
 !\label{fig:gridexreg}
@@ -1255,6 +1272,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! 
 !\begin{center}
 !\begin{figure}
+!\center
 !\scalebox{0.75}{\includegraphics{GridCompCenterReg}}
 !\caption{An example of a Grid's computational region for the center stagger location.}
 !\label{fig:gridcompcntrreg}
@@ -1288,6 +1306,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !BOE
 !\begin{center}
 !\begin{figure}
+!\center
 !\scalebox{0.75}{\includegraphics{GridCompEdgeReg}}
 !\caption{An example of a Grid's computational region for the edge1 stagger location.}
 !\label{fig:gridcompedgereg}
@@ -1334,6 +1353,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 ! 
 !\begin{center}
 !\begin{figure}
+!\center
 !\scalebox{0.75}{\includegraphics{GridTotalCenterReg}}
 !\caption{An example of a Grid's total region for the center stagger location.}
 !\label{fig:gridtotcntrreg}
@@ -1370,6 +1390,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !BOE
 !\begin{center}
 !\begin{figure}
+!\center
 !\scalebox{0.75}{\includegraphics{GridTotalEdgeReg}}
 !\caption{An example of a Grid's total region for the edge1 stagger location.}
 !\label{fig:gridtotedgereg}
@@ -2283,6 +2304,7 @@ endif
 !
 !\begin{center}
 !\begin{figure}
+!\center
 !\scalebox{0.75}{\includegraphics{GridCustStaggerLoc}}
 !\caption{An example of specifying 2D stagger locations using coordinates.}
 !\label{fig:gridcuststaggerloc}
@@ -2353,6 +2375,7 @@ endif
 !
 !\begin{center}
 !\begin{figure}
+!\center
 !\scalebox{0.75}{\includegraphics{GridCellsAndCorners}}
 !\caption{An example 2D Grid with cell centers and corners.}
 !\label{fig:gridcellsandcorners}
