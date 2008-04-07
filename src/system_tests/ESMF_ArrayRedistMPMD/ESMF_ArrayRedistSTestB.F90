@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTestB.F90,v 1.1.2.2 2008/04/01 23:06:21 theurich Exp $
+! $Id: ESMF_ArrayRedistSTestB.F90,v 1.1.2.3 2008/04/07 20:58:47 theurich Exp $
 !
 !-------------------------------------------------------------------------
 ! ESMF_ArrayRedistSTestA.F90 sets string used by test script to count system tests.
@@ -13,8 +13,14 @@
 !-------------------------------------------------------------------------
 !
 ! !DESCRIPTION:
-! System test ArrayRedist.  
+! System test ArrayRedistMPMD.  
 !    Two gridded components and one coupler component, one-way coupling.
+!
+!    The two gridded components are compiled and linked into two separate
+!    executables. The coupler component which must run on the union of
+!    PETs is linked into both executables. The first executable is started
+!    on the first 4 PETs and the second executable is started on the last
+!    2 PETs.
 !
 !    First gridded component runs on 4 PETs and defines a 2D source Array 
 !    100x150. Second gridded component defines a destination Array also 
