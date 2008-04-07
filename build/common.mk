@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.201.2.6 2008/04/04 20:14:20 theurich Exp $
+#  $Id: common.mk,v 1.201.2.7 2008/04/07 15:42:04 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -94,6 +94,10 @@ endif
 
 ifeq ($(origin ESMF_NO_IOCODE), environment)
 $(error Obsolete environment variable ESMF_NO_IOCODE detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
+endif
+
+ifeq ($(origin ESMF_EXHAUSTIVE), environment)
+$(error Obsolete environment variable ESMF_EXHAUSTIVE detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
 endif
 
 ifeq ($(origin MPI_HOME), environment)
@@ -722,8 +726,8 @@ CPPFLAGS       += -DESMF_TESTWITHTHREADS
 endif
 
 #-------------------------------------------------------------------------------
-# ESMF_TESTWITHTHREADS is passed (by CPP) into test programs to control the
-# dependency on ESMF-threading.
+# ESMF_TESTMPMD is passed (by CPP) into test programs to control the
+# dependency on MPMD testing.
 #-------------------------------------------------------------------------------
 ifeq ($(ESMF_TESTMPMD),ON)
 CPPFLAGS       += -DESMF_TESTMPMD
