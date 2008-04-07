@@ -177,19 +177,31 @@ provided as absolute path or relative to {\tt ESMF\_DIR}.
 
 \end{description}
 
+
+\subsubsection{GNU make}
+The ESMF build system uses the GNU make program; it is normally named 
+{\tt gmake} but may also be simply {\tt make} or {\tt gnumake} on some 
+platforms (we will use {\tt gmake} in this document). ESMF does not use
+configure or autoconf;  the selection of various options is done by
+setting environment variables before building the framework. 
+
+
 \subsubsection{gmake info}
 {\tt gmake info} is a command that assists the user in verifying that the ESMF 
-variables have been set appropriatly.
-It also tells the user the paths to various libararies e.g. MPI that are set on the system.  The user to review this
-information to verify their settings. In the case of a build failure, this information is invaluable and will be the
-first thing asked for by the ESMF support team. Below is an {/b example output} from {/tt gmake info}:  
+variables have been set appropriatly. It also tells the user the paths to 
+various libraries e.g. MPI that are set on the system. The user to review 
+this information to verify their settings. In the case of a build failure, 
+this information is invaluable and will be the first thing asked for by the
+ESMF support team. Below is an {/b example output} from {/tt gmake info}: 
+ 
 \begin{verbatim}
+
 --------------------------------------------------------------
 Make version:
 GNU Make version 3.79, by Richard Stallman and Roland McGrath.
 Built for powerpc-apple-darwin7.0
 Copyright (C) 1988, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99
-        Free Software Foundation, Inc.
+	Free Software Foundation, Inc.
 This is free software; see the source for copying conditions.
 There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE.
@@ -199,8 +211,8 @@ Report bugs to <bug-make@gnu.org>.
 
 --------------------------------------------------------------
 Fortran Compiler version:
-Pro Fortran 9.0
 ERROR: No input files.
+Pro Fortran 9.0
 
 --------------------------------------------------------------
 C++ Compiler version:
@@ -211,54 +223,60 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 
 --------------------------------------------------------------
-ESMF_VERSION_STRING ``3.0.1''
---------------------------------------------------------------
+Preprocessor version:
+gcc (GCC) 3.3 20030304 (Apple Computer, Inc. build 1666)
+Copyright (C) 2002 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
 
 --------------------------------------------------------------
+ESMF_VERSION_STRING "3.1.0r beta snapshot"
+--------------------------------------------------------------
+ 
+--------------------------------------------------------------
+ * User set ESMF environment variables *
+ESMF_OS=Darwin
+ESMF_DIR=/Users/svasquez/script_dirs/branch_builds/esmf
+ESMF_TESTWITHTHREADS=OFF
+ESMF_INSTALL_PREFIX=/Users/svasquez/script_dirs/branch_builds/esmf/../install_dir
+ESMF_COMM=mpiuni
+ESMF_TESTEXHAUSTIVE=ON
+ESMF_SITE=default
+ESMF_ABI=32
+ESMF_COMPILER=absoft
+ 
+--------------------------------------------------------------
  * ESMF environment variables *
-ESMF_DIR: /Users/murphys/esmf_head
+ESMF_DIR: /Users/svasquez/script_dirs/branch_builds/esmf
 ESMF_OS:                Darwin
-ESMF_MACHINE:           default
+ESMF_MACHINE:           Power Macintosh
 ESMF_ABI:               32
 ESMF_COMPILER:          absoft
-ESMF_BOPT:              O
+ESMF_BOPT:              g
 ESMF_COMM:              mpiuni
 ESMF_SITE:              default
-ESMF_EXHAUSTIVE:        OFF
 ESMF_PTHREADS:          ON
-ESMF_TESTWITHTHREADS:   OFF
 ESMF_ARRAY_LITE:        FALSE
 ESMF_NO_INTEGER_1_BYTE: FALSE
 ESMF_NO_INTEGER_2_BYTE: FALSE
 ESMF_FORTRANSYMBOLS:    default
-
+ESMF_TESTEXHAUSTIVE:    ON
+ESMF_TESTWITHTHREADS:   OFF
+ESMF_TESTMPMD:          OFF
+ 
 --------------------------------------------------------------
  * ESMF environment variables pointing to 3rd party software *
+ 
 --------------------------------------------------------------
  * ESMF environment variables for final installation *
-ESMF_INSTALL_PREFIX:    ./DEFAULTINSTALLDIR
+ESMF_INSTALL_PREFIX:    /Users/svasquez/script_dirs/branch_builds/esmf/../install_dir
 ESMF_INSTALL_HEADERDIR: include
-ESMF_INSTALL_MODDIR:    mod/modO/Darwin.absoft.32.mpiuni.default
-ESMF_INSTALL_LIBDIR:    lib/libO/Darwin.absoft.32.mpiuni.default
+ESMF_INSTALL_MODDIR:    mod/modg/Darwin.absoft.32.mpiuni.default
+ESMF_INSTALL_LIBDIR:    lib/libg/Darwin.absoft.32.mpiuni.default
 ESMF_INSTALL_DOCDIR:    doc
-
-
---------------------------------------------------------------
- * Compilers, Linkers, Flags, and Libraries *
-Location of the preprocessor:      /usr/bin/gcc
-Location of the Fortran compiler:  /Applications/Absoft/bin/f90
-Location of the Fortran linker:    /Applications/Absoft/bin/f90
-Location of the C++ compiler:      /usr/bin/g++
-Location of the C++ linker:        /usr/bin/g++
---------------------------------------------------------------
- * ESMF environment variables for final installation *
-ESMF_INSTALL_PREFIX:    ./DEFAULTINSTALLDIR
-ESMF_INSTALL_HEADERDIR: include
-ESMF_INSTALL_MODDIR:    mod/modO/Darwin.absoft.32.mpiuni.default
-ESMF_INSTALL_LIBDIR:    lib/libO/Darwin.absoft.32.mpiuni.default
-ESMF_INSTALL_DOCDIR:    doc
-
-
+ 
+ 
 --------------------------------------------------------------
  * Compilers, Linkers, Flags, and Libraries *
 Location of the preprocessor:      /usr/bin/gcc
@@ -268,44 +286,37 @@ Location of the C++ compiler:      /usr/bin/g++
 Location of the C++ linker:        /usr/bin/g++
 
 Fortran compiler flags:
-ESMF_F90COMPILEOPTS: -O -YEXT_NAMES=LCS -YEXT_SFX=_
-ESMF_F90COMPILEPATHS: -p/Users/murphys/esmf_head/mod/modO/Darwin.absoft.32.mpiuni.default -I/Users/murphys/esmf_head/src/inc\
-lude
-ESMF_F90COMPILECPPFLAGS:  -DS32=1 -DESMF_MPIUNI
+ESMF_F90COMPILEOPTS: -g -YEXT_NAMES=LCS -YEXT_SFX=_
+ESMF_F90COMPILEPATHS: -p/Users/svasquez/script_dirs/branch_builds/esmf/mod/modg/Darwin.absoft.32.mpiuni.default -I/Users/svasquez/script_dirs/branch_builds/esmf/src/include
+ESMF_F90COMPILECPPFLAGS:  -DESMF_TESTEXHAUSTIVE -DS32=1 -DESMF_OS_Darwin=1 -DESMF_MPIUNI
 
 Fortran linker flags:
-ESMF_F90LINKOPTS:
-ESMF_F90LINKPATHS: -L/Users/murphys/esmf_head/lib/libO/Darwin.absoft.32.mpiuni.default
-ESMF_F90LINKRPATHS:
+ESMF_F90LINKOPTS:  -YEXT_NAMES=LCS -YEXT_SFX=_
+ESMF_F90LINKPATHS: -L/Users/svasquez/script_dirs/branch_builds/esmf/lib/libg/Darwin.absoft.32.mpiuni.default
+ESMF_F90LINKRPATHS: 
 ESMF_F90LINKLIBS:  -lstdc++
 ESMF_F90ESMFLINKLIBS: -lesmf  -lstdc++
+
 C++ compiler flags:
-ESMF_CXXCOMPILEOPTS: -O
-ESMF_CXXCOMPILEPATHS: -I/Users/murphys/esmf_head/src/include -I/Users/murphys/esmf_head/src/Infrastructure/stubs/mpiuni
-ESMF_CXXCOMPILECPPFLAGS: -DS32=1 -D__SDIR__='src/doc' -DESMF_MPIUNI
+ESMF_CXXCOMPILEOPTS: -g -DESMF_LOWERCASE_SINGLEUNDERSCORE
+ESMF_CXXCOMPILEPATHS: -I/Users/svasquez/script_dirs/branch_builds/esmf/src/include -I/Users/svasquez/script_dirs/branch_builds/esmf/src/Infrastructure/stubs/mpiuni
+ESMF_CXXCOMPILECPPFLAGS: -DESMF_TESTEXHAUSTIVE  -DS32=1 -DESMF_OS_Darwin=1 -D__SDIR__='' -DESMF_MPIUNI
 
 C++ linker flags:
-ESMF_CXXLINKOPTS:
-ESMF_CXXLINKPATHS: -L/Users/murphys/esmf_head/lib/libO/Darwin.absoft.32.mpiuni.default -L/Applications/Absoft/lib
-ESMF_CXXLINKRPATHS:
+ESMF_CXXLINKOPTS: 
+ESMF_CXXLINKPATHS: -L/Users/svasquez/script_dirs/branch_builds/esmf/lib/libg/Darwin.absoft.32.mpiuni.default -L/Applications/Absoft/lib
+ESMF_CXXLINKRPATHS: 
 ESMF_CXXLINKLIBS:  -lf90math -lfio -lac -lf77math -lm
 ESMF_CXXESMFLINKLIBS: -lesmf  -lf90math -lfio -lac -lf77math -lm
 
 
 --------------------------------------------------------------
-Compiling on Mon May 14 14:54:47 MDT 2007 on glass.scd.ucar.edu
-Machine characteristics: Darwin glass.scd.ucar.edu 7.9.0 Darwin Kernel Version 7.9.0: Wed Mar 30 20:11:17 PST 2005; root:xnu\
-/xnu-517.12.7.obj~1/RELEASE_PPC Power Macintosh powerpc
+Compiling on Mon Apr 7 03:11:21 MDT 2008 on glass.image.ucar.edu
+Machine characteristics: Darwin glass.image.ucar.edu 7.9.0 Darwin Kernel Version 7.9.0: Wed Mar 30 20:11:17 PST 2005; root:xnu/xnu-517.12.7.obj~1/RELEASE_PPC Power Macintosh powerpc
 ==============================================================
+
 \end{verbatim}
 
-
-\subsubsection{GNU make}
-The ESMF build system uses the GNU make program; it is normally named 
-{\tt gmake} but may also be simply {\tt make} or {\tt gnumake} on some 
-platforms.  ESMF does not use configure or autoconf;  the selection of 
-various options is done by
-setting environment variables before building the framework. 
 
 \subsubsection{Building Makefile Targets}
 

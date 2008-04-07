@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.58 2007/09/18 21:38:17 cdeluca Exp $
+% $Id: ESMF_install.tex,v 1.58.2.1 2008/04/07 20:15:48 theurich Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -176,15 +176,6 @@ of the top level ESMF directory before building the framework. This is the
 only environment variable which is required to be set on all platforms under 
 all conditions.
 
-\item[ESMF\_EXHAUSTIVE] 
-Possible value: {\tt ON}, {\tt OFF} (default)
-
-Variable specifying how to compile the unit tests. If set to the value {\tt ON},
-then all unit tests will be compiled and will be executed when the test is
-run.  If unset or set to any other value, only a subset of the unit tests
-will be included to verify basic functions. Note that this is a compile-time
-selection, not a run-time option.
-
 \item[ESMF\_F90]
 Possible value: {\em executable}
 
@@ -282,6 +273,13 @@ the machine on which the ESMF library is being built. The value of this
 variable will affect which ABI settings are available and what they mean. 
 {\tt ESMF\_MACHINE} is set automatically.
 
+\item[ESMF\_MPIMPMDRUN]
+Possible value: {\em executable}
+
+This variable can be used to override the default utility used to launch
+parallel execution of ESMF test applications in MPMD mode. The executable in
+{\tt ESMF\_MPIMPMDRUN} may be specified with path.
+
 \item[ESMF\_MPIRUN]
 Possible value: {\em executable}
 
@@ -364,6 +362,21 @@ and you wish to use it, download the corresponding files into the
 (which corresponds to the last part of the directory name).  See the 
 Sourceforge site {\tt http://sourceforge.net/projects/esmfcontrib} for more 
 information.
+
+\item[ESMF\_TESTEXHAUSTIVE] 
+Possible value: {\tt ON}, {\tt OFF} (default)
+
+Variable specifying how to compile the unit tests. If set to the value {\tt ON},
+then all unit tests will be compiled and will be executed when the test is
+run.  If unset or set to any other value, only a subset of the unit tests
+will be included to verify basic functions. Note that this is a compile-time
+selection, not a run-time option.
+
+\item[ESMF\_TESTMPMD] 
+Possible value: {\tt ON}, {\tt OFF} (default)
+
+Variable specifying whether to run MPMD-style tests, i.e. test applications
+that start up as multiple separate executables.
 
 \item[ESMF\_TESTWITHTHREADS]
 Possible value: {\tt ON}, {\tt OFF} (default)

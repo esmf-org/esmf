@@ -1,4 +1,4 @@
-%  $Id: ESMF_builddetail.tex,v 1.6 2007/02/12 23:34:27 theurich Exp $
+%  $Id: ESMF_builddetail.tex,v 1.6.2.1 2008/04/07 20:15:48 theurich Exp $
 
 % there is a separate copy of this under build/doc which is
 % now used only by the implementation report.  this was separated
@@ -251,7 +251,6 @@ a more complicated dependency on the environment variables set by the user.
 \item[ESMF\_DIR]
 \item[ESMF\_DOCDIR]
 \item[ESMF\_EXDIR]
-\item[ESMF\_EXHAUSTIVE]
 \item[ESMF\_F90COMPILECPPFLAGS]
 \item[ESMF\_F90COMPILEFIXCPP]
 \item[ESMF\_F90COMPILEFIXNOCPP]
@@ -291,6 +290,7 @@ a more complicated dependency on the environment variables set by the user.
 \item[ESMF\_LIBDIR]
 \item[ESMF\_MACHINE]
 \item[ESMF\_MODDIR]
+\item[ESMF\_MPIMPMDRUN]
 \item[ESMF\_MPIRUN]
 \item[ESMF\_MV]
 \item[ESMF\_NO\_INTEGER\_1\_BYTE]
@@ -315,6 +315,8 @@ a more complicated dependency on the environment variables set by the user.
 \item[ESMF\_STDIR]
 \item[ESMF\_TEMPLATES]
 \item[ESMF\_TESTDIR]
+\item[ESMF\_TESTEXHAUSTIVE]
+\item[ESMF\_TESTMPMD]
 \item[ESMF\_TESTWITHTHREADS]
 \item[ESMF\_UTCDIR]
 \item[ESMF\_UTCSCRIPTS]
@@ -326,13 +328,17 @@ a more complicated dependency on the environment variables set by the user.
 
 \subsubsection{Customizing {\tt ESMC\_Conf.h} and {\tt ESMF\_Conf.inc}}
 
-The {\tt ESMC\_Conf.h} file is used to define several important macros used
+The {\tt ESMC\_Conf.h} file is used to define several settings used
 during compilation of ESMF library code written in C++.
 
 \begin{description}
 
 \item[FTN(func)]
 Macro that will correctly expand "func" to match the Fortran symbol convention.
+
+\item[ESMCI\_FortranStrLenArg]
+Typedef to match the data type of the 'hidden' string length argument that
+Fortran uses when passing CHARACTER strings.
 
 \item[ESMF\_PRESENT(arg)]
 Macro for a boolean expression that returns TRUE if "arg" is a "present"
