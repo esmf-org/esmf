@@ -1,5 +1,5 @@
 %===============================================================================
-% CVS $Id: testing.tex,v 1.14 2008/04/01 15:06:09 donstark Exp $
+% CVS $Id: testing.tex,v 1.15 2008/04/08 16:45:23 donstark Exp $
 % CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/testing.tex,v $
 % CVS $Name:  $
 %===============================================================================
@@ -219,10 +219,12 @@ strings employ the Field Taxonomy to describe an ensemble of tests. For instance
 remappings between a pair of two-dimensional blocks memory, each with a  specific
 type of distribution and grid association. One such configuration could look like
 
+\begin{center}
 \begin{verbatim}
-[ B1 G1; B2 G2 ] =C=> [ B1 G1@(+,+); B2 G2@(+,+) ] 
-[ B1 G1; B2 G2 ] =B=> [ B1 G1@(+,+); B2 G2@(+,+) ]
+[ B1 G1; B2 G2 ] =C=> [ B1 G1; B2 G2 ] @{+,+}
+[ B1 G1; B2 G2 ] =B=> [ B1 G1; B2 G2 ] @{+,+} 
 \end{verbatim}
+\end{center}
 
 This pair of problem descriptor strings defines two types of remapping tests.
 The first describes an ensemble of conservative remapping tests between a 
@@ -238,10 +240,10 @@ the nature of the distribution, its connectivity, etc. Both the problem descript
 files and the specifier files are located in the subdirectory 
 \texttt{tests/test\_config/} within the class directory.
 
-A complete description of the grid configuration files and their syntax is available
-in section~\ref{sec:harness} of the developers guide. An equivalent discussion of 
-the distribution configuration files is available in section~\ref{sec:harness} of 
-the developers guide.
+A complete description of the grid specifier files and their syntax is available
+in section~\ref{sec:harness_gridspecifier} of the developers guide. An equivalent 
+discussion of the distribution configuration files is available in 
+section~\ref{sec:harness_distributionsspecifier} of the developers guide.
 
 The motivation for employing such a hierarchy configuration files is to allow a 
 high degree of customization of the problem configuration by combining individual 
@@ -264,10 +266,12 @@ rather to provide a useful description of the failed tests.
 Consider the previous example of the two descriptor strings describing an ensemble 
 of remapping tests. 
 
+\begin{center}
 \begin{verbatim}
-[ B1 G1; B2 G2 ] =C=> [ B1 G1@(+,+); B2 G2@(+,+) ] 
-[ B1 G1; B2 G2 ] =B=> [ B1 G1@(+,+); B2 G2@(+,+) ]
+[ B1 G1; B2 G2 ] =C=> [ B1 G1; B2 G2 ] @{+,+}
+[ B1 G1; B2 G2 ] =B=> [ B1 G1; B2 G2 ] @{+,+} 
 \end{verbatim}
+\end{center}
 
 Suppose the associated specifier files indicate that the source  grid is rectilinear
 and is 100 X 50 in size. The destination grid is also rectilinear and is 80 X 20 
