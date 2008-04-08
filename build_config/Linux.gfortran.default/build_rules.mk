@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.7 2008/01/30 00:42:15 theurich Exp $
+# $Id: build_rules.mk,v 1.8 2008/04/08 17:18:24 w6ws Exp $
 #
 # Linux.gfortran.default
 #
@@ -142,6 +142,23 @@ endif
 #
 ESMF_F90COMPILEFREENOCPP = -ffree-form
 ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
+
+############################################################
+# Add LAPACK libraries
+#
+# The MKL locaion may either be set externally via
+# LD_LIBRARY_PATH or internally via ESMF_LAPACK_LIBPATH.
+#
+ifeq ($(ESMF_LAPACK),MKL)
+ifeq ($(ESMF_MACHINE),x86_64)
+# ESMf_LAPACK_LIBPATH =
+ESMF_LAPACK_LIBS    = -lmkl_gf_lp64 -lmkl_core -lmkl_sequential
+endif
+ifeq ($(ESMF_MACHINE),ia64)
+# ESMF_LAPACK_LIBPATH =
+ESMF_LAPACK_LIBS    = -lmkl_gf_lp64 -lmkl_core -lmkl_sequential
+endif
+endif
 
 ############################################################
 # Determine where gcc's libraries are located

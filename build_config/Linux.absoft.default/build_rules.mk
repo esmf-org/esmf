@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.23 2008/04/04 18:49:58 w6ws Exp $
+# $Id: build_rules.mk,v 1.24 2008/04/08 17:18:23 w6ws Exp $
 #
 # Linux.absoft.default
 #
@@ -93,7 +93,7 @@ ESMF_F90COMPILEFIXCPP    = -ffixed
 #
 # Use the Absoft version of LAPACK
 #
-ESMF_LAPACK         = Absoft
+ESMF_LAPACK         = 1
 # ESMF_LAPACK_LIBPATH =
 ESMF_LAPACK_LIBS    = -llapack -lblas
 
