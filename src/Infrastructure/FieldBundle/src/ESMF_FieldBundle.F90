@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.1.2.3 2008/04/08 03:23:57 cdeluca Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.1.2.4 2008/04/08 05:34:19 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -208,6 +208,34 @@
     public ESMF_FieldBundleDeserialize  ! ... and back into an object again
     public ESMF_FieldBundleValidate     ! Check internal consistency
     public ESMF_FieldBundlePrint        ! Print contents of a FieldBundle
+
+    public ESMF_FieldBundleGetI4Attr
+    public ESMF_FieldBundleGetI4ListAttr
+    public ESMF_FieldBundleGetI8Attr
+    public ESMF_FieldBundleGetI8ListAttr
+    public ESMF_FieldBundleGetR4Attr
+    public ESMF_FieldBundleGetR4ListAttr
+    public ESMF_FieldBundleGetR8Attr
+    public ESMF_FieldBundleGetR8ListAttr
+    public ESMF_FieldBundleGetLogAttr
+    public ESMF_FieldBundleGetLogListAttr
+    public ESMF_FieldBundleGetCharAttr
+
+    public ESMF_FieldBundleGetAttByName
+    public ESMF_FieldBundleGetAttByNum
+    public ESMF_FieldBundleGetAttCount
+
+    public ESMF_FieldBundleSetI4Attr
+    public ESMF_FieldBundleSetI4ListAttr
+    public ESMF_FieldBundleSetI8Attr
+    public ESMF_FieldBundleSetI8ListAttr
+    public ESMF_FieldBundleSetR4Attr
+    public ESMF_FieldBundleSetR4ListAttr
+    public ESMF_FieldBundleSetR8Attr
+    public ESMF_FieldBundleSetR8ListAttr
+    public ESMF_FieldBundleSetLogAttr
+    public ESMF_FieldBundleSetLogListAttr
+    public ESMF_FieldBundleSetCharAttr
 
     public operator(.eq.), operator(.ne.)
 

@@ -1,4 +1,4 @@
-! $Id: ESMF.F90,v 1.48.2.4 2008/04/05 03:14:21 cdeluca Exp $
+! $Id: ESMF.F90,v 1.48.2.5 2008/04/08 05:34:20 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -67,6 +67,8 @@ module ESMF_Mod
     use ESMF_FieldCreateMod
     use ESMF_FieldBundleMod
 !    use ESMF_FieldBundleGetMod
+
+    use ESMF_AttributeMod
 
 !    use ESMF_RegridTypesMod
 !    use ESMF_RegridMod
