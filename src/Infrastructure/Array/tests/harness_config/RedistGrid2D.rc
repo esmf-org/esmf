@@ -1,0 +1,17 @@
+# grid_rectilinear.rc
+#
+# This file contains the grid specifications for the Test Harness.
+# Requirements:
+# See documentation for further details of the descriptor syntax.
+#################################################################################
+
+grid_type: REDISTRIBUTION
+
+# regular rectilinear Grid specification 
+grid_redist::
+#rank spacing  size  range (min/max)  units
+#
+2  'UNIFORM'  120  -3.14159  3.14159  'RAD'   'UNIFORM'  90  -1.57  1.57  'RAD'   
+#
+2  'UNIFORM'  120  -180   180  'DEG_E'  'GAUSSIAN'  88  -88   88   'DEG_N'  
+::
