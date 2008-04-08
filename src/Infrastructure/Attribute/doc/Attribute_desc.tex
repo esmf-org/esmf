@@ -1,0 +1,43 @@
+% $Id: Attribute_desc.tex,v 1.4.2.2 2008/04/08 03:23:56 cdeluca Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2008, University Corporation for Atmospheric Research,
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+% Laboratory, University of Michigan, National Centers for Environmental
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+The ESMF Attribute class is used to hold the metadata for other ESMF objects.  This class can be used to build attribute hierarchies for date linking in complex ways.  The attribute class is capable of allowing the representation of {\bf attribute packages} for more unified description of an object.  The attribute class is only partially implemented in this release. 
+
+\subsubsection{Attribute Representation in ESMF}
+
+ESMF Attributes are meant to be used as a tool for the user to help internally document their project.   Several ESMF objects are allowed to have attributes associated with them, and some ESMF object have pre-specified attribute packages as well.  The ESMF objects which have attributes are the following:
+
+\begin{itemize}
+\item Array
+\item FieldBundle
+\item Field
+\item Grid
+\item State
+\end{itemize}
+
+\subsubsection{Attribute Hierarchies}
+
+Of these ESMF objects with attributes, only three can link their attribute hierarchies together.  They are:
+
+\begin{itemize}
+\item FieldBundle
+\item Field
+\item State
+\end{itemize}
+
+These ESMF objects can only link their attribute hierarchies to an object that is "bigger" than it is.  For instance, and FieldBundle can link its attribute hierarchy to a State but not a Field.  On the other hand, a Field is allowed to link its attribute hierarchy to a FieldBundle.  
+%When attribute hierarchies are linked a full deep copy of the attribute hierarchy being linked is made.  Thus any further changes to the original attribute hierarchy will not be reflected in the linked version.
+
+\subsubsection{Attribute Packages}
+
+At this point, all classes that have attribute capabilities also have attribute packages.  The attribute packages are a work in progress in collaboration with the Earth Systems Grid - Community Data Portal (ESG-CDP).  Every attribute package is specified by a {\bf convention} and a {\bf purpose}, such as netCDF and general.  As this capability evolves there will be many more attribute package options for users.  
+
+
+
