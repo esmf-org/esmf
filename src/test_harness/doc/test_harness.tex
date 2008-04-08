@@ -12,18 +12,18 @@ The Test Harness consists of a single shared executable and a collection of cust
 \subsection{Test Harness Structure}
 The Test Harness source code is  located in the \texttt{esmf/src/test\_harness/src/} directory. The test harness code consists of a single executable that runs as a Unit test. The executable is augmented by a hierarchy  of customizable configuration files which are located within and below the \texttt{tests/} directory of each class; currently Array and Field. These configuration files are combined by the executable to generate specific test configurations. 
 
-The top level configuration file is called \texttt{test\_harness.rc} and is located in the \texttt{tests/} directory of each class; e.g. \texttt{esmf/src/Infrastructure/\$CLASS/tests/}. The top level helper file called \texttt{test\_harness.rc} is unique to each class and specifies the test class, the format for reporting the test results, and the location and file names containing the \textit{problem descriptor files}. The \textit{problem descriptor files} are the next level of configuration files used by the test harness routines.
+The top level configuration file is called \texttt{test\_harness.rc} and is located in the \texttt{tests/} directory of each class; e.g. \texttt{esmf/src/Infrastructure/\$CLASS/tests/}. The top level helper file called \texttt{test\_harness.rc} is unique to each class and specifies the test class, the format for reporting the test results, and the location and the filenames of the \textit{problem descriptor files}. The \textit{problem descriptor files} are the next level of configuration files used by the test harness routines.
 
-The \textit{problem descriptor files} contain a collection of \textit{problem descriptor strings}, each of which describe, by use of the field taxonomy syntax, a family of problems with the same memory topology, distribution, and grid association. The table below summarizes what is defined by a problem descriptor string.  
+The \textit{problem descriptor files} contain a collection of \textit{problem descriptor strings}, each of which describe, by use of the field taxonomy syntax, a family of problems with the same memory topology, distribution, and grid association. The table below summarizes the information defined by a problem descriptor string.  
 \begin{center}
-\begin{tabular}{|l|} \hline \hline
+\begin{tabular}{|l|} \hline
 Problem Descriptor Strings \\
-\hline
-memory shape and rank \\
-type of memory distribution (block, block cyclic, or arbitrary) \\
-grid association with memory location \\
-grid stagger location \\
-memory halo \\
+\hline \hline
+Memory shape and rank \\
+Type of memory distribution (block, block cyclic, or arbitrary) \\
+Grid association with memory location \\
+Grid stagger location \\
+Memory halo \\
 \hline
 \end{tabular}
 \end{center}
@@ -33,56 +33,44 @@ The \textit{problem descriptor strings} are augmented by a collection of three \
 
 The Grid specifier file defines the type of grid, its size, the topology of the domain, and the grid coordinates. The table below summarizes of what is defined by the grid specifier file.  
 \begin{center}
-\begin{tabular}{|l|} \hline \hline
+\begin{tabular}{|l|} \hline
 Grid Specifier File \\
-\hline
-grid type (uniform and irregular rectilinear, or curvilinear) \\
-grid rank \\
-grid size \\
-grid coordinates \\
-grid connectivity (periodic, etc.) \\
+\hline \hline
+Grid type (uniform and irregular rectilinear, or curvilinear) \\
+Grid rank \\
+Grid size \\
+Grid coordinates \\
+Grid connectivity (periodic, etc.) \\
 \hline
 \end{tabular}
 \end{center}
 
-The Distribution specifier file defines the size of the source and destination distribution. The table below summarizes of what is defined by this file. 
+The Distribution specifier file defines the size of the source and destination distribution. The table below summarizes the information defined by this file. 
 \begin{center}
-\begin{tabular}{|l|} \hline \hline
+\begin{tabular}{|l|} \hline
 Distribution Specifier File \\
-\hline
-distribution rank \\
-distribution size \\
+\hline \hline
+source and destination distribution rank \\
+source and destination distribution size \\
 \hline
 \end{tabular}
 \end{center}
  Both the problem descriptor files and the specifier files are located in the subdirectory \texttt{tests/test\_config/} within the class directory.
 
-The motivation for employing such a hierarchy configuration files is to allow a high degree of customization of the problem configuration by combining individual specification files. In addition it was desired to make the specification files as simple to read as is possbile so that user is not forced to engage in complicated encoding to specify a problem. The end result is that each class will have its own collection of specification files tailored to the needs of that class.
+The motivation for employing such a hierarchy configuration files is to allow a high degree of customization of the problem configuration by combining individual specification files. In addition it was desired to make the specification files simple to read so that user is not forced to engage in complicated encoding to specify a problem. The end result is that each class will have its own collection of specification files tailored to the needs of that class.
 
 %%%%%%%%%%%%%%%%%%%%%%
 \subsection{Specification of Test Configuration}
 The ensemble of tests specific to an {ESMF\_CLASS} is specified by three levels of customizable configuration files. The top level file called \texttt{test\_harness.rc}. It is located within each classes' \texttt{tests/} directory and contains class specific attributes as well as a list of the next level of configuration files known as the \texttt{problem descriptor files}. The problem descriptor files contain the \texttt{problem descriptor strings}, which define a general family of problems, as well as the associated \texttt{problem specifier files} which are the final level of configuration files. The test harness combines these three levels of configuration files to generate the specific test configurations. 
 
-The specifier files indicate which members of the family described by the \texttt{problem descriptor string} will be tested. The nature of the specifier files varies depending on whether a redistribution or remapping test is specified. A redistribution test takes a field associated with a grid and rearranges it in processor space. Therefore a source and destination distribution are needed, but only a single grid needs to be specified. A remapping test takes a field associated with a source grid and interpolates it to a destination grid. So both a source and destination grid specification are needed in addition to a source and destination distribution.
-
-%\medskip
-\begin{center}
-\begin{tabular}{| c | c |} \hline \hline
-{\em Redistribution} & {\em Remapping} \\
-\hline
-source grid & source \& destination grids  \\
-source \& destination distribution &  source \& destination distribution \\
-\hline
-\end{tabular}
-\end{center}
-%\medskip
-
+The specifier files indicate which members of the family described by the \texttt{problem descriptor string} will be tested. 
  
 %%%%%%%%%%%%%%%%%%
 \subsubsection{Top level helper file}
-The top level helper file \texttt{test\_harness.rc} is unique to each class. It specifies the test class, the style of test result reporting, and lists the names of the \textit{problem descriptor files}. These descriptor files are categorized into two sets. The first set lists the filenames that associated with the \textbf{NONEXHAUSTIVE} test suite, and the second set lists the filename that associated with the \textbf{EXHAUSTIVE} test suite. 
+\label{sec:harness_toplevelfile}
+The top level helper file \texttt{test\_harness.rc} is unique to each class. It specifies the test class, the style of test result reporting, and lists the names of the \textit{problem descriptor files}. These descriptor files are categorized into two sets. The first set lists the filenames associated with the \textbf{NONEXHAUSTIVE} test suite, while the second set lists the filenames associated with the \textbf{EXHAUSTIVE} test suite. 
 
-Below is an example of the file \texttt{test\_harness.rc} for the \texttt{ESMF\_Field} class. Notice that comments are preceded by the {\#} sign, and that parameter values follow a single colon {:} punctuation mark, while tables follow, and are terminated, by a double set of colon {::} punctuation marks.  This file is read by the \texttt{ESMF\_Config} class methods, therefore must adhere to very specific syntax requirements. The entries can be in any order, but the name tags must be exact - including capitalization. In addition, while not strictly necessary, the file names are enclosed in quotation marks, either single or double, to guarantee they are read correctly.
+Below is an example of the file \texttt{test\_harness.rc} for the \texttt{ESMF\_Field} class. Notice that comments are preceded by the {\#} sign, that single parameter values follow a single colon {:} punctuation mark, while tables of multiple parameter values follow, and are terminated by, a double set of colon {::} punctuation marks.  This file is read by the \texttt{ESMF\_Config} class methods, therefore must adhere to very specific syntax requirements. The entries can be in any order, but the name tags must be exact - including CAPITALIZATION. While it is not strictly necessary, the file names are enclosed in quotation marks, either single or double, to guarantee they are read correctly.
 \begin{verbatim}
 # Field test Harness Config file
 
@@ -113,49 +101,120 @@ The argument for the tag \texttt{test\_class:} specifies the ESMF class to be te
 
 %%%%%%%%%%%%%%%%%%
 \subsubsection{Problem descriptor file}
-All of the problem descriptor files pertaining to the current class live in the local directory \texttt{tests/test\_config}.
+\label{sec:harness_problemdescriptorfile}
+All of the problem descriptor files pertaining to a particular class live in the local directory \texttt{tests/test\_config}.
 
 The problem descriptor files contain \textit{descriptor strings} that describe the family of problems with the same memory topology, distribution, and grid association. The files also contain the names of \textit{specifier files} which complete the descriptions contained within the descriptor strings. This structure allows a high level of customization of the test suite.
 
-The problem descriptor file contains only one table, again conforming to the \texttt{ESMF\_Config} class standard. The contents of the table must be delimited by the tag \texttt{problem\_descriptor\_string::}. The first element on the line, enclosed by quotes, is the problem descriptor string itself. Since the descriptor strings have gaps, it is necessary that they are enclosed in quotation marks to guarantee they are read correctly. The problem descriptor table may contain any number of descriptor strings, up to the limit imposed by the \texttt{ESMF\_Config} class, each on a new line. Lines can be continued by use of an ampersand {\&} as a continuation symbol at the beginning of any continued line. The syntax of the problem descriptor string follows the field taxonomy syntax discussed in section~\ref{}. Here is a basic redistribution example.
+The problem descriptor file contains only one table, again conforming to the \texttt{ESMF\_Config} class standard. The contents of the table must be delimited by the tag \texttt{problem\_descriptor\_string::}. The first element on the line, enclosed by quotes, is the problem descriptor string itself. Since the descriptor strings contain gaps and special characters, it is necessary to enclose the strings in quotation marks to guarantee proper parsing. The problem descriptor table may contain any number of descriptor strings, up to the limit imposed by the \texttt{ESMF\_Config} class, each on a new line. Lines can be continued by use of an ampersand {\&} as a continuation symbol at the beginning of any continued line. The syntax of the problem descriptor string follows the field taxonomy syntax. The following is a basic redistribution example.
 \begin{verbatim}
 # Basic redistribution example
 #####################################
 problem_descriptor_string::
-'[B1G1;B2G2] --> [B1G1;B2G2]' -c FieldClass.rc -d DistGrid.rc -g Grid.rc 
-'[B1G1;B2G2] --> [B1G2;B2G1]' -c fieldClass.rc -d DistGrid.rc 
+'[B1G1;B2G2] --> [B1G1;B2G2]' -c ArrayClass.rc -d Dist.rc -g Grid.rc 
+'[B1G1;B2G2] --> [B1G2;B2G1]' -c ArrayClass.rc -d DistGrid.rc 
  & otherDistGrid.rc yetanotherDistGrid.rc
- &  -g Grid.rc   
+ &  -g Grid.rc anotherGrid.rc  
 ::   # end of list
 \end{verbatim}
-In the above example, the two problem descriptor strings specify that a redistribution test is to be conducted, indicated by the syntax  \texttt{-->}, between two rank two blocks of memory. Following the problem descriptor string, are multiple flags and the names of specifier files. Each flag indicates a portion of the configuration space which is defined by the contents of the indicated specifier files.  
+In the above example, the two problem descriptor strings specify that a redistribution test is to be conducted, indicated by the syntax  \texttt{-->}, between a pair of rank two blocks of memory. Following the problem descriptor string, are multiple flags and the names of specifier files. Each flag indicates a portion of the configuration space which is defined by the contents of the indicated specifier files.  
 \begin{center}
-\begin{tabular}{| c | c |} \hline \hline
+\begin{tabular}{| c | c |} \hline
 {\em argument } & {\em definition} \\
-\hline
+\hline \hline
 -c &  Class specific information \\
 -d & DELayout/DistGrid specification \\
 -g & Grid specification \\
 \hline 
 \end{tabular}
 \end{center}
-The files that follow a flag, are used to specify the values for the parameter associated with that flag. The specified values from each file are combined to define that parameter's span of values.  All the files associated with all the flags are combined to define the full ensemble of tests. So in the first problem descriptor string of the example, the ensemble of distribution configurations to be tested are specified by the configurations contained within the file \texttt{DistGrid.rc}. Similarly, the range of grid configurations are specified within the single file \texttt{Grid.rc}. For the second problem descriptor string, the ensemble of distribution configurations to be tested are specified by the union of configurations contained within the three files \texttt{DistGrid.rc}, \texttt{otherDistGrid.rc}, and \texttt{yetanotherDistGrid.rc}. Just as before, the range of grid configurations are specified within the single file \texttt{Grid.rc}.
+The filenames following a flag are used to specify the values for the parameter associated with that flag. The specified values from each file are combined to define that parameter's span of values.  All the files associated with all the flags are combined to define the full ensemble of tests. The first problem descriptor string in the example indicates that the ensemble of distribution configurations to be tested are specified by the configurations contained within the file \texttt{Dist.rc}. Similarly, the range of grid configurations are specified within the single file \texttt{Grid.rc}. For the second problem descriptor string, the ensemble of distribution configurations to be tested are specified by the union of configurations contained within the three files \texttt{DistGrid.rc}, \texttt{otherDistGrid.rc}, and \texttt{yetanotherDistGrid.rc}. While in the first case, the range of grid configurations is specified by the single file \texttt{Grid.rc}, the second case adds the configurations found in \texttt{anotherGrid.rc} to the ensemble.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Problem descriptor syntax}
+\subsubsection{Problem descriptor string syntax}
 The problem descriptor string is contained in the problem descriptor file and describes a class of tests to be conducted. The basic syntax describes a contiguous chunk of memory spanned by some sort of logically rectangular indexing, where the left most index varies fastest in memory. Each semicolon delineated entry is associated with a native array dimension. The index locations are replaced by signifiers that express associations and distributions of the memory through the use of short descriptors. 
 
 For example $[ G1 \; ; G2 ]$ indicates that a 2D logically rectangular block of memory is associated with a 2D grid in its natural order. The signifier $G$ represents an undistributed grid. Reversing the grid signifiers $[ G2; G1 ]$ indicates that the fastest varying dimension is instead associated with the second grid dimension. Specific information about the grid, such as its size, type, topology are left to be defined by the specifier files. It is the associations between memory and the grid that are stressed with this syntax.
 
-To distribute the grid, a distribution signifier is needed. The block distribution of each memory dimension is specified by the signifier $B$. Therefore $[B1 \; G1; \; B2 \; G2; \; G3]$ signifies that a 3D logically rectangular block of memory, which has a 3D associated grid, is distributed in its first two dimensions, and not its third.
+To distribute the grid, a distribution signifier is needed. The block distribution of each memory dimension is indicated by the signifier $B$. Therefore $[B1 \; G1; \; B2 \; G2; \; G3]$ signifies that a 3D logically rectangular block of memory, which has a 3D associated grid, is distributed in its first two dimensions, and not its third.
 
-The action of redistribution and remapping are signified by the symbols $-- \!\!\! >$ and $=X=>$ respectively, where $X$ is a key to the specific interpolation method.
+%%%%%%%%%%%%%%%%%%%%%%%
+\paragraph{Grid syntax}
+As we have already seen, the symbol $G$ in the problem descriptor string indicates that a dimension of a tensor grid is associated with a memory location. Alternatively, an unstructured grid is indicated with the symbol $U$.
 
+As an example, consider a block of memory. To associate a tensor grid with specific dimensions of that block, the symbol $G$ is used with a numerical  suffix  to indicate a specific dimension of the grid. The specific aspects of this grid are left undefined at this point, only the fact that a particular dimension of a grid is associated with a particular dimension of the memory block is implied by the grid syntax. 
+
+The complete syntax for a tensor grid specification is $G i_g \; + H \{ \# : \# \}$ where
+\begin{itemize}
+	\item where $i_g$ is the index of the grid axis,
+	\item $H \{ \# : \# \}$, is the optional signifier indicating the upper and lower sizes of the halo, where the $\#$ symbols represent integer values. The option of a separate upper and lower values allow the indication of asymmetric haloes.
+\end{itemize}
+The symbol to indicate a halo is appended to the grid description through use of a $+$ sign. Its absence indicates that there is no halo.
+
+To illustrate the use of this syntax consider the following example.
 \begin{center}
-\begin{tabular}{| c | c |} \hline \hline
-{X} & {\em Action} \\
-\hline
+\begin{verbatim}
+ [ G1 ; G2 + H{1:2} ]
+\end{verbatim}
+\end{center}
+This string indicates that each memory location of a 2D block of memory is associated with a grid dimension. The first memory location with the first grid dimension, and the second memory location with the second grid dimension. In addition the second memory index has an asymmetric halo of size one at the low end, and size 2 at the high end.
+
+At times a memory location might have no grid association. The symbol $\ast$ is used in this case as a place holder. For example, 
+\begin{center}
+\begin{verbatim}
+ [ G2 ; G1 ; * ]
+\end{verbatim}
+\end{center}
+indicates that only the first two memory locations are associated with grid dimensions. The symbol $\ast$ located in the last memory location is a placeholder that indicates that location in memory has no associations. We will see later that the $\ast$ can be used to indicate that a memory location has both no grid and no distribution association. 
+
+In this example, the grid association has been reversed from from its natural order. The first memory location is associated with the second grid dimension, and the second memory location with the first grid dimension. 
+
+%%%%%%%%%%%%%%%%%%%%%%%
+\paragraph{Distribution syntax}
+The distribution syntax describes how a contiguous chunk of memory is distributed among the DEs. The syntax is analogous to the grid description syntax.Three styles of memory distribution are supported;
+\begin{description}
+   \item[simple block] $B \; i_D$; where $i_D$ is the distribution space axis.
+   \item[full block-cyclic] $C \; i_D$; where $i_D$ is the distribution space axis.  
+   \item[arbitrary] $A$ 
+\end{description}
+Assuming a two dimensional distribution, the expression $[ B1 \; G1; \; B2 \; G2 ]$ indicates that the two dimensional logically rectangular block of memory is;
+\begin{itemize}
+	\item associated with a two dimensional grid, in its natural order.
+	\item the first memory dimension is distributed according to the first distribution axis.
+	\item the second memory dimension is distributed according to the second distribution axis.
+\end{itemize}
+The order of the distribution signifiers can be reversed just as with the grid association. 
+
+As was mentioned before, the symbol $\ast$ is used as a place holder to indicate a lack of association. If the third memory location of an undistributed block of memory has no grid association, it would look like this;
+\begin{center}
+\begin{verbatim}
+[ G1; G2; * ]
+\end{verbatim}
+\end{center}
+Alternatively if the first two dimensions of a block of memory are distributed, but all three have associated grid dimensions it would take the form;
+\begin{center}
+\begin{verbatim}
+[ B1 G1; B2 G2; * G3 ]
+\end{verbatim}
+\end{center}
+An example of where the third memory location would have a grid association, but no distribution, is the case where the domain has been decomposed along the horizontal, but not the vertical. This is common for a 3D field such as the ocean or atmosphere. 
+
+Lastly, if the last memory location has no associations, it would look like;
+\begin{center}
+\begin{verbatim}
+[ B1 G1; B2 G2; * * ]
+\end{verbatim}
+\end{center}
+The purpose of the $\ast$ symbols is increase readability by acting as a place holder. An illustrative example of this memory configuration is a two dimensional spatial field with multiple species or tracers represented by the third dimension.
+
+%%%%%%%%%%%%%%%%%%%%%%%
+\paragraph{Transformation method}
+The action of redistribution and remapping are signified by the symbols $-- \!\!\! >$ and $=\chi=>$ respectively, where $\chi$ refers to a character key representing a specific interpolation method. The supported interpolation methods are $C$, for first order conservative, $S$ for second order conservative, $B$ for bilinear, $P$ for second order bilinear, and $N$ for nearest neighbor. The character $X$ is reserved for unknown or user provided methods. 
+\begin{center}
+\begin{tabular}{| c | c |} \hline 
+{$\chi$} & {\em Action} \\
+\hline \hline
   C & first order conservative interpolation \\
   S & second order conservative interpolation \\
   B & first order bilinear interpolation \\
@@ -166,141 +225,488 @@ The action of redistribution and remapping are signified by the symbols $-- \!\!
 \end{tabular}
 \end{center}
 
-Therefore, the problem descriptor string
+The problem descriptor string
 \begin{center}
 \begin{verbatim}
       [B1 G1; B2 G2 ] --> [B1 G1; B2 G2 ]
 \end{verbatim}
 \end{center}
-indicates the redistribution of a distributed source field, associated with a grid, to the destination distribution. 
+indicates an ensemble of redistribution problems where a 2D distributed source field, associated with a 2D grid, is redistributed into a new  2D {\em destination} distribution. 
 
-This document is organized as follows. The first section describes the grid classification syntax in detail. The second section describes the distribution classification. The third section describes how to construct general structures out of the memory chunks. 
-
-\paragraph{Grid syntax}
-The specification of additional grid information is supported by expanding the $G$ specifier. The default $G$ indicates a tensor grid, while the specifier $U$ indicates an unstructured grid. Information about the grid stagger is available by appending a coordinate subscript to the signifier, while an unknown or undefined staggering is indicated with an $X$.
-The complete syntax for grid specification is $G i_g \; + H \{ \# : \# \}$ where
-\begin{itemize}
-	\item where $i_g$ is the grid axis,
-	\item $H \{ \# : \# \}$ the optional signifier specifies the size of the  halo on both ends of the memory. This allows the specification of asymmetric haloes.
-\end{itemize}
-
-Notice that the halo specifiers are appended to the grid specifier through use of $+$ signs. The absence of any of these specifiers indicates no specified boundary information.
+Alternatively the example 
 \begin{center}
-\begin{tabular}{| c | c |} \hline \hline
+\begin{verbatim}
+      [ B1 G1; B2 G2 ] =C=>  [ B1 G1; B2 G2 ]
+\end{verbatim}
+\end{center}
+indicates the interpolation of one distributed 2D gridded field to another 2D grid using a first order conservative method. The interpolation method of first order conservative is indicated by placing a character $C$ in between a pair of equal $=$ signs. 
+
+%%%%%%%%%%%%%%%%%%%%%%%
+\paragraph{Staggering syntax}
+In addition to the default grid description, the stagger of the associated grid
+can be indicated by appending a key with an @ sign to the end of the block memory syntax. Since the stagger relates to the whole grid and not individual components of the grid, it is natural for it to be located outside of the block memory syntax $[ \cdots ]$.
+\begin{center}
+\begin{verbatim}
+      [ B1 G1; B2 G2 ] @{#,#}
+\end{verbatim}
+\end{center}
+The key consists of values enclosed by a pair of brackets $\{ \cdots \}$. The rank of these values, equals the rank of the associated grid. Thus in the above example, there are two values indicating the stagger since the grid is of rank two. 
+
+The stagger location key represents the location of a field with respect to the cell center location. It is indicated by relative cartesian coordinates of a unit square, cube etc. To illustrate this further, consider the example of a 2D grid. The cell is represented by a unit square with the xy axis placed at its center, with the positive x-axis oriented {\em East} and the positive y-axis oriented {\em North}. The actual values are suppressed, only the directions $+$, and $0$ are used. This geometry is for reference purposes only, and does not literally represent the shape of an actual cell. 
+
+The cell center, located at the origin of the cell, is indicated by $\{ 0,0 \}$. The corner of the cell is indicated by $\{ +,+ \}$, where the ones have been dropped to just leave the plus signs. The cell face normal to the X axis (right wall) is indicated by $\{ +, 0 \}$, while the face normal to the Y axis ( top wall) is indicated by $\{ 0,+ \}$. This approach generalizes well to higher dimensions. 
+\begin{center}
+\begin{tabular}{| c | c |} \hline 
 {\em argument } & {\em definition} \\
-\hline
- &   \\
- &  \\
- &  \\
+\hline \hline
+ Center & \{ 0,0 \}  \\
+ Corner & \{ +,+ \} \\
+ Face normal to X axis & \{+,0 \} \\
+ Face normal to Y axis & \{0,+ \} \\
 \hline 
 \end{tabular}
 \end{center}
 
+With these four locations, it is possible to indicate the standard Arakawa grid staggerings. A key of $\{ 0,0 \}$ would be equivalent to an Arakawa A-grid, while a key of $\{ +,+ \}$ would represent an Arakawa B-grid. Components of the C and D grids would be indicated by wall positions $\{ +,0 \}$ and $\{ 0,+ \}$.
 \begin{center}
-\begin{tabular}{| c | c |} \hline \hline
+\begin{tabular}{| c | c |} \hline 
 {\em Grid Stagger } & {\em coordinates} \\
-\hline
-A & (0,0) \\
- B & (1,1) \\
- C \& D & (0,1 and (1,0) \\
+\hline \hline
+  A-grid & \{ 0,0 \}  \\
+  B-grid & \{ 1,1 \}  \\
+  C-grid \& D-grid & \{ 0,1 \} and \{ 1,0\} \\
 \hline 
 \end{tabular}
 \end{center}
-The stagger location coordinate represents the location a field with respect to the cell center location. It is indicated by relative cartesian coordinates, where the cell center is placed at the origin of the cell. The coordinate attached to each dimension relative to the cell center. This approach generalizes well to higher dimensions. 
+Therefore a key of $\{ 0,0 \}$ in the previous example would indicate that the stagger is located at the cell center location, or the A-grid. Typically the stagger coordinates are suppressed for the A-grid. 
 
-To illustrate this further consider the example of a 2D grid. The cell is represented by a unit square with the xy axis placed at its center with the positive x-axis oriented {\em East} and the positive y-axis oriented {\em North}. The actual values are suppressed, only the directions $+$, $-$, and $0$ are used. This geometry is for reference purposes only, and does not literally represent the shape of an actual cell. 
-
-The A-grid location could be represented by attaching the coordinate pair $(0,0)$ dimension or alternatively left blank. The B-grid places the staggered location at the corner or the cell center. These are indicated by their relative position;
-\begin{description}
-	\item [Center] $(0,0)$
-	\item [Corner] $(+,+)$
-\end{description}  
-The C and D-grid places the staggered location at one of two faces or the cell center. Again, these are indicated their relative location.
-\begin{description}
-	\item [Center] $(0,0)$
-	\item [X normal face] $(+,0)$
-	\item [Y normal face] $(0,+)$
-\end{description}  
-
-A C-grid configuration where {\em U} is located on the East face and {\em V} is located at the North face would look like $[ G1 @(+,0) ; G2 @ (0,+)]$. Similar descriptions can be constructed for the remaining Arakawa grid staggerings. 
-
-The vertical stagger is indicated in a similar way;  
-\begin{description}
-	\item [top face] $(+)$
-	\item [cell center] $(0)$
-	\item [bottom face] $(-)$
-\end{description}
-where one of these signifiers is used as the third coordinate.
-
-\paragraph{Distribution syntax}
-The description of the distribution of a contiguous chunk of memory among the DEs is similar to the description for the grid association. Descriptors for two types of memory distribution are supported
-\begin{description}
-	\item[simple block] $B \; i_D \; \{ n_D \} $; where $i_D$ is the DELayout axis and $n_D$ is the number of DEs decomposed along the $i_D$ axis.
-	\item[full block-cyclic] $C \; i_D \{ r,n_D \} $; where $i_D$ is the DELayout axis, $r$ is the repeat period, and $n_D$ is the number of DEs decomposed along the $i_D$ axis.
-	\item[arbitrary] $A$ 
-\end{description}
-Assuming a two dimensional distribution, the expression $[ B1 \; G1; \; B2 \; G2 ]$ indicates that the previously described two dimensional logically rectangular block of memory is;
-\begin{itemize}
-	\item associated with a two dimensional grid, in its natural order,
-	\item the first memory dimension is distributed according to the first distribution axis.
-	\item the second memory dimension is distributed according to the second distribution axis.
-
-\end{itemize}
-The order of the distribution signifiers can be reversed just as with the grid association from the example above. 
-
-Suppose a dimension is neither associated with a grid and/or distributed? The symbol $\ast$ is used as a placeholder. Therefore $[ B1 \; G1; \; B2 \; G2; \; \ast \ast ]$ indicates that only the first two dimensions have associated grids and are distributed. The two asterisks in the third dimension indicate that it is not distributed and has no associated grid. An example of this configuration could be a two dimensional spatial field with multiple species/tracers represented by the third dimension. Alternatively, if the third memory dimension has a spatial association, such as height, it would be represented as $[ B1 \; G1; \; B2 \; G2; \; \ast \; G3 ]$.
-
-\subsection{General Data Structures}
-More general data structures, which cannot be described by logically rectangular representations can be constructed by combining multiple contiguous data chunks separated by commas. Parentheses are used as delimiters to combine logically rectangular chunks of memory. Suppose you have an indexed structure with an embedded logically rectangular array. You might want to do this in order to hold a collection of arrays with different dimensions.  It would be represented $( patch , \; [ B1 \; G1; \; B2 \; G2 ] \; )$. This structure frequently arises in nested models or multigrid methods.
-
-\subsection{Redistribution and Remapping}
-Redistribution and remapping are just transformations from one space to another. In the case of redistribution, the spaces are DELayouts, while for remapping a field is interpolated from one grid to another. These transformations are signified by the symbols $-->$ and $=A=>$, respectively. Thus 
-$[ B1 \; G1;\; B2 \; G2 ] -- \!\!\! >  [ B1 \; G1;\; B2 \; G2 ]$ indicates the redistribution of a 2D distributed gridded field from one DELayout to another, while $[ B1 \; G1;\; B2 \; G2 ] =C=>  [ B1 \; G1;\; B2 \; G2 ]$ indicates the interpolation of one distributed 2D gridded field to another 2D grid using a first order conservative method. A character is placed in between the equal signs to indicate the remapping method. $C$ is for first order conservative, and $S$ is for second order conservative. $B$ is for bilinear. $N$ is for nearest neighbor, and $X$ is for an unknown or user provided method. More methods will be added as needed.
- 
 For example, the string
-\begin{displaymath}
-[B1 \; G1+P; \; B2 \; G2 ] =C=> [B1 \; G1@(+,+)+P; \; B2 \; G2@(+,+) ] 
-\end{displaymath}
-indicates that a collection of regridding tests are to be run where a block distributed two dimensional field, is interpolated from one two dimensional grid onto a second two dimensional grid, using a first order conservative method. It is indicated that both grids are periodic in their first dimension. The source field data is located at the cell centers (an A-grid stagger location) and the destination field is to be located at north east corner (a B-grid stagger location). The additional information about a pair of grids and distributions must be specified to run an actual test. 
+\begin{verbatim}
+[B1 G1; B2 G2 ] =C=> [B1 G1; B2 G2 ] @(+,+)
+\end{verbatim}
+indicates that a collection of regridding tests are to be run where a block distributed two dimensional field, is interpolated from one two dimensional grid onto a second two dimensional grid, using a first order conservative method. The source field data is located at the cell centers (an A-grid stagger location) and the destination field is to be located at north east corner (a B-grid stagger location). Additional information about the pair of grids and their distributions must be specified to run an actual test. 
+
+This process generalizes to higher dimensions. Consider 
+\begin{verbatim}
+[B1 G1; B2 G2 ; G3 ] =C=> [B1 G1; B2 G2 ; G3 ] @(+,+,+)
+\end{verbatim}
+indicates that a collection of regridding tests are to be run between a 3D source grid (cell centered) and a 3D destination grid where the field stagger location is the upper corner of the 3D cell (B-grid horizontally and top of the cell vertically).
+
+A further discussion on grid staggers can be found in section on the ESMF Grid class in the Reference manual.  
+
+%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{General Data Structures}
+It is possible to represent more general data structures which cannot be described as simple logically rectangular blocks of memory. These embedded structures are represented by combining multiple contiguous data chunks separated by commas. 
+
+For example, in models with nested grids or which employ multi-grid methods, it is useful to have an indexed structure of  logically rectangular blocks of memory, where each block is generally a different shape and size. Such a structure can be represented with parentheses as delimiters, such as
+\begin{center}
+\begin{verbatim}
+   ( patch , [ B1 G1; B2 G2 ] )
+\end{verbatim}
+\end{center}
+Here we have a collection of 2D blocks of memory, each block being associated with a 2D grid and being distributed in both dimensions.
+
+%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Specifier files}
+The \textit{problem descriptor strings} are augmented by a collection of three types of \textit{specifier files} which complete the description of the test configuration. The specifier files indicate which members of the family described by the \texttt{problem descriptor string} are to be tested. The three types of specifier files define the grid, the distribution, and the class specific information needed to completely define a test. The class specifier file provides class specific information needed by the tests and is included primarily for future expansion of the test harness. The remaining two specifier files define information such as the type, size, and coordinates of the grid, the test function to be remapped or redistributed, and the size of the distribution.  
+
+The nature of the grid specifier file varies depending on whether the test is a redistribution or a remapping. A redistribution test takes a field associated with a grid and rearranges it in processor space. So while a source and destination distribution are needed, only a single grid is necessary to conduct the test. A remapping test, on the other hand, takes a field associated with a source grid and interpolates it to a destination grid. In this case both a source and destination grid are needed. It is also assumed that a source and destination distribution will also be specified.
+\begin{center}
+\begin{tabular}{| c | c |} \hline 
+{\em Redistribution} &  source grid  \\
+ & source \& destination distribution \\
+\hline \hline
+ {\em Remapping}  & source \& destination grids  \\
+ &  source \& destination distribution \\
+\hline
+\end{tabular}
+\end{center}
 
 
 %%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Grid Specification}
+\label{sec:harness_gridspecifier}
+For the purposes of the test harness, a grid is completely defined in terms of its type, size, coordinates, and units. From this information either a rectilinear or a curvilinear grid is generated. 
+
+\paragraph{Grid Coordinate Generation}
+The first step of the grid generation is to generate a rectilinear grid of specified size, range of coordinates, and either uniform or gaussian spacing between the coordinates. If only a rectilinear grid needed, the grid generation is finished. If a curvilinear grid is desired, the rectilinear grid is taken as a base grid and its coordinates are smoothly stretched and/or shrunk according to an analytical function, to produce a curvilinear mesh according.  
+The algebraic grid generation takes the form
+\begin{eqnarray*}
+X_{ij} &=& \hat{x}_{i} + \epsilon \Delta x \Gamma_{x}(x_{i},y_{j}) \\
+Y_{ij} &=& \hat{y}_{j} + \epsilon \Delta y  \Gamma_{y}(x_{i},y_{j})
+\end{eqnarray*}
+where the new curvilinear coordinates $X_{ij}$ and $Y_{ij}$ are functions of  the original rectilinear grid coordinates $\hat{x}_{i}$ and $\hat{y}_{j}$, a small parameter $0 < \epsilon < 1$, the smallest mesh spacings $\Delta x$ and $\Delta y$, and an analytical function of the coordinates $\Gamma$. Four forms of $\Gamma$ are supported, a contacted grid, an expanded grid, a symmetric sine perturbed grid, and an asymmetric sine perturbed grid. 
+\begin{center}
+\begin{tabular}{| l | l |} \hline 
+{\em key word } & {\em formula }$\Gamma(x_{i},y_{j})$ \\
+\hline \hline
+contracting & $\Gamma_{x}(x_{i},y_{j}) = -(x_{i}/L_{x})(1-x_{i}/L_{x})(0.5-x_{i}/L_{x} )(y_{j}/L_{y})(1-y_{j}/L_{y})$ \\
+& $\Gamma_{y}(x_{i},y_{j}) = -(y_{j}/L_{y})(1-y_{j}/L_{y})(0.5-y_{j}/L_{y} )(x_{i}/L_{x})(1-x_{i}/L_{x})$ \\
+\hline
+expanding & $\Gamma_{x}(x_{i},y_{j}) = +(x_{i}/L_{x})(1-x_{i}/L_{x} )(0.5-x_{i}/L_{x} )(y_{j}/L_{y})(1-y_{j}/L_{y})$ \\
+& $\Gamma_{y}(x_{i},y_{j}) = +(y_{j}/L_{y})(1-y_{j}/L_{y})(0.5-y_{j}/L_{y} )(x_{i}/L_{x})(1-x_{i}/L_{x})$ \\
+\hline
+symmetric\_sin  & $ \Gamma_{x}(x_{i},y_{j}) = \sin(4 \pi x{i}/L_{x}) \cos(6 \pi y_{j})/L_{y})$ \\
+   &    $ \Gamma_{y}(x_{i},y_{j}) = \sin(4 \pi x{i}/L_{x}) \cos(6 \pi y_{j})/L_{y})$ \\
+\hline
+asymmetric\_sin &  $ \Gamma_{x}(x_{i},y_{j}) = \sin(4 \pi x{i}/L_{x}) \cos(6 \pi y_{j})/L_{y})$ \\
+   &    $ \Gamma_{y}(x_{i},y_{j}) = \sin(4 \pi y{j}/L_{y}) \cos(6 \pi x_{i})/L_{x})$ \\
+\hline
+\end{tabular}
+\end{center}
+These four choices for $\Gamma$ equate into four options for analytically generated curvilinear grids.
+
+Examples of these four curvilinear grid options are plotted in figure~\ref{fig:harness_smoothGrids}.
+\begin{center}
+\begin{figure}
+\begin{tabular}{ l l}
+\scalebox{0.3}{\includegraphics{Harness_ContractedGrid} } &
+\scalebox{0.3}{\includegraphics{Harness_ExpandedGrid} } \\
+\scalebox{0.3}{\includegraphics{Harness_SymmetricGrid} } & 
+\scalebox{0.3}{\includegraphics{Harness_AsymmetricGrid} }
+\end{tabular}
+\caption{The four options for smooth curvilinear grids; clockwise from the top left corner, a contacted grid, an expanded grid, a symmetric sine perturbed grid, and an asymmetric sine perturbed grid.}
+\label{fig:harness_smoothGrids}
+\end{figure}
+\end{center}
+
+The adds up to a total of 2 types of rectilinear grids (uniform and gaussian), each with three options (no connection, spherical pole connection, and a periodic option). A large variety of grids can be formed by mixing and matching the grid types and options. For example a standard latitude-longitude grid on a sphere is formed by using the pair of grid types uniform\_periodic and uniform\_pole. A gaussian grid is formed with uniform\_periodic and gaussian\_pole. And a regional grid on a sphere, without periodicity, with uniform and uniform. A summary of the rectilinear grid types is given below. 
+\begin{center}
+\begin{tabular}{| c | l |} 
+\multicolumn{2}{c}{Rectilinear grid options}  \\ 
+\hline
+{\em grid type } & {\em modifier} \\
+\hline \hline
+ uniform &  {\em none } \\ 
+              &  \_pole         \\
+              &   \_periodic  \\
+ \hline
+ gaussian & {\em none } \\
+                 & \_pole         \\
+                &  \_periodic \\
+  \hline
+\end{tabular}
+\end{center}
+
+The various curvilinear grid types are created in the same way of mixing and matching grid type options. A regional expanding grid is formed using the grid types expanding and expanding. Likewise a rotated regional grid is created by
+using the grid types rotation\_15degrees and rotation\_15degrees to indicate the grid type. A summary of the curvilinear grid types is given below. 
+\begin{center}
+\begin{tabular}{| c | l |} 
+\multicolumn{2}{c}{Curvilinear grid options}  \\
+\hline
+{\em grid type } & {\em modifier} \\
+\hline \hline
+ contracting & {\em none} \\ 
+                    &   \_pole       \\
+                    &   \_periodic  \\
+ \hline                   
+ expanding  & {\em none} \\ 
+                    &   \_pole       \\
+                    &   \_periodic  \\
+\hline
+symmetric\_sin & {\em none} \\ 
+                    &   \_pole       \\
+                    &   \_periodic  \\
+\hline
+asymmetric\_sin & {\em none} \\ 
+                    &   \_pole       \\
+                    &   \_periodic  \\
+\hline
+rotation\_15degrees & {\em none} \\ 
+\hline
+rotation\_30degrees & {\em none} \\ 
+\hline
+rotation\_30degrees & {\em none} \\ 
+\hline 
+\end{tabular}
+\end{center}
+It should be noted that the rotated grid type only supports non-connected domains, and therefore has no option for \_pole and \_periodic connectivity.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\paragraph{Specifier file syntax for redistribution}
+Since a redistribution test takes a field associated with a grid and rearranges it in processor space, the test requires only a single grid between the source and destination. The information requires is:
+\begin{center}
+\begin{tabular}{| l |} \hline 
+{\em parameters to define a grid for redistribution }  \\
+\hline \hline
+ Grid rank    \\
+ Grid dimensions   \\
+ Range of the coordinate axis  \\
+ Coordinate units \\
+\hline 
+\end{tabular}
+\end{center}
+
+This information is provided by the redistribution grid specifier file.
+An example of a redistribution grid specifier file is provided below. 
+\begin{center}
+\begin{verbatim}
+# grid.rc
+########################################
+grid_type: REDISTRIBUTION
+# Grid specification for redistribution.
+
+#rank spacing  size  range (min/max)  units
+grid_redist::
+# example of a uniform 3D rectilinear grid (non-periodic)
+3   UNIFORM   120   -3.14159  3.14159  RADIANS   
+&   UNIFORM    90    -1.57        1.57        RADIANS   
+&   UNIFORM    20     0       4000             METERS   
+#
+# example of a gaussian 3D rectilinear grid (periodic)
+3   UNIFORM_PERIODIC   120  -180      180     DEG_E   
+&  GAUSSIAN_POLE            88    -88        88     DEG_N   
+&   UNIFORM                        20       0     4000    METERS
+#
+# example of a spherical grid - periodic in first dimension
+3   EXPANDING_PERIODIC  120  -180      180      DEG_E   
+&   EXPANDING_POLE          88    -88        88       DEG_N 
+&   UNIFORM                          20       0    4000       M
+::
+\end{verbatim}
+\end{center}
+
+The first piece of information required for the file is the \texttt{grid\_type} key. It should be set to \texttt{REDISTRIBUTION} to indicate that it is intended to define grids for a redistribution test. Next is a configuration table which specifies multiple grids. The specification can be stretched over multiple table lines by use of the continuation symbol $\&$. The order of information is as follows:
+\begin{center}
+\begin{tabular}{| l |} \hline 
+{\em parameters to define a grid for redistribution }  \\
+\hline \hline
+ Grid rank    \\
+ Grid axis type   \\
+ Grid size \\
+ Range of the coordinate axis  \\
+ Coordinate units \\
+\hline 
+\end{tabular}
+\end{center}
+ 
+ There are three 3D grids specified in the file. The first is a standard uniformly spaced latitude-longitude grid, plus a uniform third dimension. None of the grid coordinates has topological connections. The horizontal coordinates are in radians, and the vertical coordinates, which range from $0-4000$ are in meters. The second 3D grid is a gaussian spherical grid with a uniform vertical coordinate. The gaussian grid has a spherical topology and is in degrees. The third 3D grid is curvilinear. It has a spherical topology and expanding coordinates. 
+ 
+Four types of coordinate units are supported; degrees, radians, meters and kilometers.  Each has multiple equivalent key words. 
+ \begin{center}
+\begin{tabular}{| l | l |} 
+\multicolumn{2}{c}{ Supported units }  \\
+\hline 
+{\em name } & {\em key word} \\
+\hline \hline
+Degrees & DEGREES \\
+  & DEG \\
+  & DEG\_E \\
+  & DEG\_N \\
+  \hline
+Radians & RADIANS \\
+  & RAD \\
+  \hline
+ Meters & METERS \\
+    & M \\
+    \hline
+   Kilometers & KILOMETERS \\
+      & KM \\
+\hline 
+\end{tabular}
+\end{center}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\paragraph{Specifier file syntax for remapping}
+The process of remapping takes a distributed test field from a source grid and interpolates it to a distributed destination grid. Therefore it requires information specifying both a source and destination grid, in addition to an explicit test function to interpolate. The information required is:
+\begin{center}
+\begin{tabular}{| l |} \hline 
+{\em parameters to define a grid for remapping }  \\
+\hline \hline
+ source and destination grid rank    \\
+ source and destination grid axis type   \\
+ source and destination grid dimensions   \\
+ source and destination range of coordinate axis  \\
+ source and destination coordinate units \\
+ list of test functions to interpolate \\
+\hline 
+\end{tabular}
+\end{center}
+
+This information is provided by the remapping grid specifier file.
+An example of a remapping grid specifier file is provided below. 
+\begin{center}
+\begin{verbatim}
+# grid.rc
+########################################
+grid_type: REMAP
+
+# Grid specification for remapping
+
+#rank spacing  size  range (min/max)  units
+grid_remap::
+# example of a pair of 2D periodic grids 
+2   SRC    UNIFORM_PERIODIC   120   -3.14159  3.14159  RADIANS   
+&              UNIFORM_POLE             90    -1.57        1.57        RADIANS   
+&   DST    UNIFORM_PERIODIC   120  -180      180             DEG_E   
+&              GAUSSIAN_POLE           88    -88        88             DEG_N   
+&   FUNCTION    CONSTANT    PERIODIC
+::
+\end{verbatim}
+\end{center}
+
+The first piece of information required for the file is the \texttt{grid\_type} key. It should be set to \texttt{REMAP} to indicate that it is intended to define grids for a remapping test. Next is a configuration table which specifies multiple pairs of grids. The specification can be stretched over multiple table lines by use of the continuation symbol $\&$. The order of information is as follows:
+\begin{center}
+\begin{tabular}{| l |} \hline 
+{\em parameters to define a grid for reremapping }  \\
+\hline \hline
+ Grid rank    \\
+ Source grid axis type   \\
+ Source grid size \\
+ Source range of the coordinate axis  \\
+ Source coordinate units \\
+ Destination grid axis type   \\
+ Destination grid size \\
+ Destination range of the coordinate axis  \\
+ Destination coordinate units \\
+ Test function choices \\
+\hline 
+\end{tabular}
+\end{center}
+
+The one new piece of information for the remapping specifier files are the test predefined test functions. The test functions provide a physical field to be interpolated and are generated as an analytical function of the grid coordinates. Supported options include:
+\begin{center}
+\begin{tabular}{| l | l |} 
+\multicolumn{2}{c}{ Test functions }  \\
+\hline 
+{\em name } & {\em function} \\
+\hline \hline
+constant & set value at all locations \\
+periodic & periodic function of the grid coordinates \\
+pulse &  a gaussian pulse centered at the origin \\
+\hline 
+\end{tabular}
+\end{center}
+All the test functions are defined on both periodic and unconnected domains. 
+
+The remapping grid specifier file contains a pair of 2D grids. The source grid is a standard latitude-longitude grid on a spherical topology. The destination grid is a spherical gaussian grid also on a spherical topology. The source grid is in radians, while the destination grid is in degrees. The test function is a periodic function of the grid coordinates. 
+
+%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Distribution Specification}
+\label{sec:harness_distributionsspecifier}
+The purpose of the distribution specification is to characterize the distribution of the grid. It differs from the grid specification in that it is designed to specify the distribution as both absolute values such as $2 \times 3$ PETS as well as in relative terms based on fractions of the total number of PETS. This second option is intended to allow the distribution space to scale with changing machine resources without having to change the distribution specification file. 
+
+Here is an example of a distribution specification file for block and block cyclic distributions.
+\begin{center}
+\begin{verbatim}
+##################################################
+# descriptive | source | source | operator | destination | dest | operator | end
+# string      |  tag   |  rank  |  & value |     tag     | rank | & value  | tag
+##################################################
+
+# table specifing 2D to 2D distributions
+distgrid_block_2d2d::
+
+# example with two fixed distribution sizes
+ '(1,2)-->(2,1)'  'SRC' 2  'D1==' 1  'D2==' 2  'DST' 2  'D1==' 2  'D2==' 1  'END'  
+
+# example with one fixed and one variable distribution size
+ '(1,n)-->(n,1)'  'SRC' 2  'D1==' 1  'D2=*' 1  'DST' 2  'D1=*' 1  'D2==' 1  'END'  
+
+# example with variable distribution sizes
+ '(2n,n/2)-->(n/2,2n)'  'SRC'  2  'D1=*'  2    'D2=*'  0.5  
+ &                      'DST'  2  'D1=*'  0.5  'D2=*'  2     'END'
+
+# another example with variable distribution sizes
+ '(2n,n/2)-->(2n,(n/2)-1)'  'SRC' 2  'D1=*' 2  'D2=*'  0.5  
+ &                          'DST' 2  'D1=*' 2  'D2=*'  0.5  'D2=+' 1   'END'
+::
+
+# table specifing 3D to 3D distributions
+distgrid_block_3d3d::
+
+# example with two fixed distribution sizes
+ '(1,2,1)-->(2,1,1)'  'SRC' 3  'D1==' 1  'D2==' 2  'D3==' 1  
+ &                    'DST' 3  'D1==' 2  'D2==' 1  'D3==' 1  'END'  
+::
+\end{verbatim}
+\end{center}
+The contents of the file are tables which specify pairs of distributions. Each table specifies a particular rank of distributions. The first table consists of 2D to 2D distributions, while the second table consists of a 3D to 3D pair of distributions. 
+The order of information is as follows:
+\begin{center}
+\begin{tabular}{| l |} \hline 
+{\em parameters to define a grid distribution }  \\
+\hline \hline
+ Descriptive string    \\
+ Source key   \\
+ Source distribution rank \\
+ Source distribution axis and size for each dimension of the distribution  \\
+ Destination key \\
+ Destination distribution rank    \\
+ Destination grid size \\
+ Destination distribution axis and size for each dimension of the distribution  \\
+ Termination key \\
+\hline 
+\end{tabular}
+\end{center}
+The first example in the table starts with a string used by the report as a brief description of the distribution. Such as  $(1,2)-->(2,1)$ which indicates a source distribution of $ 1 \times 2$ and a destination distribution of $ 2 \times 1$. Next comes a key word, either \texttt{SRC} or \texttt{DST} to indicate the beginning of the source and destination descriptions, respectively. Following each tag is a specification of the distribution. In the first case a fixed source distribution is specified by the entries $D1==1$ and $D2=2$. This indicates that the source distribution is fixed to be $ 1 \times 2$, provided that the test is running with at least two processors. Likewise the destination distribution is fixed to $ 2 \times 1$.
+
+The second example, illustrates how to indicate a scalable distribution. Again the entry $D1==1$ indicates that the first dimension of the distribution is set to one, but the entry $D2=*1$ has a different meaning. It takes the total number of PETS NPETS and scales it by one. Therefore the source distribution becomes $ 1 \times NPETS$. It automatically scales with the number of PETS. Likewise, the destination distribution is set to $NPETS \times 1$. 
+
+The third example is completely dynamic. Since both $D1$ and $D2$ are scalable, each dimension starts with $N$ PETS, where $N$ is the square root of $NPETS$ rounded down to the nearest integer. Therefore $N\times N \leq NPETS$. So if $NPETS=4$, Then $N=2$. If $NPETS=6$ then $N$ still equals $4$. This base value is then modified by the indicated entries. In this case the source distribution is $2 N \times 1/2 N$, since the tag $D1=*  2$ indicates that first dimension is the result of the base value being multiplied by two, and the second dimension is the result of the base value being multiplied by one half. Likewise, the destination distribution is set to $1/2 N \times 2N$, no matter the number of $NPETS$.
+
+For a rank three scalable distribution, $N$ is the cube root of NPETS rounded down to the next integer. And so on for higher rank distributions. 
+
+The fourth example illustrates the last option in the syntax. Again, since the distribution specifies two scalable distributions, $N$ is the square root of $NPETS$ rounded down to the nearest integer. The source distribution is exactly the same as in the third example, but destination distribution has a new entry $D2=+ 1$. The first dimension of the destination distribution is set to $2N$ by the entry $D1=* 2$. the second dimension is first set to $1/2N$ by the entry $D2=* 0.5$, but then modified further to $(1/2)(N) +1$ by the entry $D2=+ 1$. The resulting destination distribution is $2N \times (1/2)(N) +1$. 
+
+The syntax for modifying the size of the distribution space combines according to the order of the operations. The entries $D2=* 0.5$ and $D2=+ 1$, are not identical to $D2=+ 1$ and $D2=* 0.5$, which would result in a dimension of size $(1/2)(N+1)$.
+
+Three operations are supported:
+\begin{center}
+\begin{tabular}{| c | c |} \hline 
+{\em Distribution specification operations}  \\
+\hline \hline
+ D\# == & specify a fixed value \\
+ D\# =* & multiply a base value by a constant \\
+ D\# =+ & add a constant to the base value  \\
+ \hline 
+\end{tabular}
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Class Specification}
+The class specific specifier file is current unused, but is made available for future test expansion.
+
+
+%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Reporting test results}
-The test harness offers the option of producing a human readable report on the test results. The report consists of a concise summary of the test configuration along with the test results. The test configuration is described in terms of the Field Taxonomy syntax and user provided 
-strings. The intent is not to provide a exhaustive description of the test, but rather to provide a useful description of the failed tests.
+The test harness offers the option of producing a human readable report on the test results. The report consists of a concise summary of the test configuration along with the test results. The test configuration is described in terms of the Field Taxonomy syntax and user provided strings. The intent is not to provide a exhaustive description of the test, but rather to provide a useful description of the failed tests.
 
 Consider a problem descriptor string consisting of two descriptor strings describing an ensemble of remapping tests. 
-
+\begin{center}
 \begin{verbatim}
-[ B1 G1; B2 G2 ] =C=> [ B1 G1@(+,+); B2 G2@(+,+) ] 
-[ B1 G1; B2 G2 ] =B=> [ B1 G1@(+,+); B2 G2@(+,+) ]
+[ B1 G1; B2 G2 ] =C=> [ B1 G1; B2 G2 ] @{+,+}
+[ B1 G1; B2 G2 ] =B=> [ B1 G1; B2 G2 ] @{+,+} 
 \end{verbatim}
+\end{center}
 
-Suppose the associated specifier files indicate that the source  grid is rectilinear and is 100 X 50 in size. The destination grid is also rectilinear and is 80 X 20 in size. The remapping is conducted from the A-grid position of the source grid to the B-grid stagger of the destination grid. Both grids are block distributed in two 
-ways, 1 X NPETS and NPETS X 1. And suppose that the first dimension of both the source and destination grids are periodic. If the test succeeds for the conservative remapping, but fails for one of the first order bilinear remapping configurations, the reported results
+Suppose the associated specifier files indicate that the source grid is rectilinear and is 100 X 50 in size. The destination grid is also rectilinear and is 80 X 20 in size. The remapping is conducted from the A-grid position of the source grid to the B-grid stagger of the destination grid. Both grids are block distributed in two ways, 1 X NPETS and NPETS X 1. And suppose that the first dimension of both the source and destination grids are periodic. If the test succeeds for the conservative remapping, but fails for one of the first order bilinear remapping configurations, the reported results
 could look something like
-
+\begin{center}
 \begin{verbatim}
-SUCCESS: [B1 G1; B2 G2 ] =C=> [B1 G1@(+,+); B2 G2@(+,+) ] 
-FAILURE: [B1{1} G1{100}+P; B2{npets} G2{50} ] =B=> [B1{1} G1{80}@(+,+)+P; B2{npets} G2{20}@(+,+) ] 
+SUCCESS: [B1 G1; B2 G2 ] =C=> [B1 G1; B2 G2 ] @{+,+}
+FAILURE: [B1{1} G1{100}+P; B2{npets} G2{50} ] =B=> 
+                         [B1{1} G1{80}+P; B2{npets} G2{20} ] @{+,+}
      failure at line 101 of test.F90
-SUCCESS: [ B1{npets} G1{100} +P; B2{1} G2{50} ] =B=> [ B1{npets} G1{80}@(+,+)+P; B2{1} G2{20}@(+,+) ] 
+SUCCESS: [ B1{npets} G1{100} +P; B2{1} G2{50} ] =B=> 
+                         [ B1{npets} G1{80}+P; B2{1} G2{20} ] @{+,+}
 \end{verbatim}
-
-The report indicates that all the test configurations for the conservative remapping are successful. This is indicated by the key word SUCCESS which is followed by the successful problem descriptor string. Since all of the tests in the first case pass,there is no need to include any of the specifier information. For the second ensemble of tests, one configuration passed, while the other failed. In this case,
-since there is a mixture of successes and failures, the report includes 
-specifier information for all configurations to help indicate the source of the test failure. 
-
-Next consider a problem descriptor string consisting of three descriptor strings describing an ensemble of redistribution tests. 
-
+\end{center}
+Notice that the problem descriptor string differs from that of the configuration files. This is because it represents specific realizations of ensemble. For example 
+\begin{center}
 \begin{verbatim}
-[ B1 G1@(+,+); B2 G2@(+,+) ] --> [ B1 G1@(+,+); B2 G2@(+,+) ] 
-[ C1 G1; C2 G2 ] --> [ B1 G1; B2 G2 ]
-[ B1 G1; B2 G2 ] --> [ B2 G2; B1 G1 ]
+[ B1{npets} G1{80}+P; B2{1} G2{20} ] @{+,+}
 \end{verbatim}
+\end{center}
+indicates that the 2D block of memory is periodic in the first dimension by the addition of the $+P$ to the first grid key. The size of the grid is indicated as $80 \times 20$ by the size arguments appended to the grid indicators $G1 \{80 \}$ and $G2 \{ 20 \}$. The size of the distribution is indicated in the same way as $npets \times 1$ by the block distribution indicators $B1 \{ npets \}$ and $B2 \{ 1 \}$.
+
+The report indicates that all the test configurations for the conservative remapping are successful. This is indicated by the key word SUCCESS which is followed by the successful problem descriptor string. Since all of the tests in the first case pass,there is no need to include any of the specifier information. For the second ensemble of tests, one configuration passed, while the other failed. In this case, since there is a mixture of successes and failures, the report includes specifier information for all the configurations to help indicate the source of the test failure. 
 
 
-The supplemental information, while not a complete problem description since it lacks items such as the physical coordinates of the grid and the nature of the test field, includes information crucial to isolating the failed test.
+The supplemental information, while not a complete problem description, since it lacks items such as the physical coordinates of the grid and the nature of the test field, includes information crucial to isolating the failed test.
 
 
 
