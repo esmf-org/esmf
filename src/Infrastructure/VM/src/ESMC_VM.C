@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.55.2.1 2008/04/05 03:13:55 cdeluca Exp $
+// $Id: ESMC_VM.C,v 1.55.2.2 2008/04/09 22:26:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -51,7 +51,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.55.2.1 2008/04/05 03:13:55 cdeluca Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.55.2.2 2008/04/09 22:26:11 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -370,10 +370,14 @@ void *VM::startup(
   if (!(vmp->parentVMflag) && vmp->nspawn>0){
     // Only do this if this is really a new VM context (not the parent's)
     // and the local PET spawns any child PETs.
-    int i, vas, m, n;
-    // TODO: make this section thread-safe for when we allow ESMF-threading!
-    // TODO: the issue is that multiple threads within the same VAS may access
-    // TODO: the same matchTable instance at the same time (read & write access)
+
+    //TODO: Make this section thread-safe for when we allow creation of child
+    //TODO: components out of ESMF-multithreading parent components!
+    //TODO: The issue is that multiple threads within the same VAS may access
+    //TODO: the same matchTable instance at the same time (read & write access)
+    //TODO: There is no problem with the current implementation creating
+    //TODO: a multi-threaded child component out of a single-threaded
+    //TODO: parent component.
 
     // The VMId is that same for all PETs spawned by local PET
     VMId vmID = VMIdCreate(&localrc);
@@ -381,11 +385,11 @@ void *VM::startup(
       return NULL;  // bail out on error
     // vmKey part of the vmID gets set to the appropriate bit pattern:
     // ->  set the bit in vmKey for each VAS in which this VM exists <-
-    for (i=0; i<vmp->myvms[0]->getNpets(); i++){
+    for (int i=0; i<vmp->myvms[0]->getNpets(); i++){
       // loop through all the pets in the VM
-      vas = vmp->myvms[0]->getVas(i);
-      m = vas / 8;
-      n = vas % 8;
+      int vas = vmp->myvms[0]->getVas(i);
+      int m = vas / 8;
+      int n = vas % 8;
       vmID.vmKey[m] |= 0x80>>n;  // set the bits
     }
     vmID.localID = 0;  // reset localID
@@ -396,7 +400,7 @@ void *VM::startup(
     // down.
     int *emptyList = new int[matchTableBound];  // can't be larger than that
     int emptyListBound = 0; // reset
-    for (i=0; i<matchTableBound; i++){
+    for (int i=0; i<matchTableBound; i++){
       if (matchTable_vm[i]!=NULL){
         // This is a valid entry to consider
         if (VMKeyCompare(matchTable_vmID[i].vmKey, vmID.vmKey) == ESMF_TRUE){
@@ -436,9 +440,15 @@ void *VM::startup(
       }
       matchTable_tid[index]  = vmp->myvms[j]->getMypthid();   // pthid
       matchTable_vm[index]   = vmp->myvms[j];                 // ptr to this VM
-      matchTable_vmID[index] = vmID;                          // vmID
+      matchTable_vmID[index] = VMIdCreate(&localrc);          // vmID
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+        return NULL;  // bail out on error
+      VMIdCopy(&(matchTable_vmID[index]), &vmID);             // deep copy
     }
     delete [] emptyList;
+    VMIdDestroy(&vmID, &localrc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      return NULL;  // bail out on error
   }
   
   // return successfully
@@ -480,6 +490,15 @@ void VM::shutdown(
   // For each locally spawned PET mark the matchTable entry invalid
   if (!(vmp->parentVMflag)){
     // This is really a separate VM context (not the parent's)
+    
+    //TODO: Make this section thread-safe for when we allow creation of child
+    //TODO: components out of ESMF-multithreading parent components!
+    //TODO: The issue is that multiple threads within the same VAS may access
+    //TODO: the same matchTable instance at the same time (read & write access)
+    //TODO: There is no problem with the current implementation creating
+    //TODO: a multi-threaded child component out of a single-threaded
+    //TODO: parent component.
+    
     for (int j=0; j<vmp->nspawn; j++){
       int i;
       for (i=0; i<matchTableBound; i++)
@@ -1035,12 +1054,12 @@ VM *VM::initialize(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   GlobalVM = new VM;
-  GlobalVM->VMK::init(mpiCommunicator);  // set up default ESMC_VMK (all MPI)
   if (GlobalVM==NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- VMK::init() returned invalid GlobalVM", rc);
+      "- GlobalVM allocation failure", rc);
     return NULL;
   }
+  GlobalVM->VMK::init(mpiCommunicator);  // set up default VMK (all MPI)
   
   // allocate the VM association table
 //gjtNotYet  matchTable_tid = new pthread_t[ESMC_VM_MATCHTABLEMAX];
@@ -1116,6 +1135,10 @@ void VM::finalize(
     if (*keepMpiFlag==ESMF_TRUE) finalizeMpi = 0; // reset
   }
   GlobalVM->VMK::finalize(finalizeMpi);
+  delete GlobalVM;
+  GlobalVM=NULL;
+
+  // clean-up matchTable
   matchTableBound = 0;
   // delete the VM association table
   VMIdDestroy(&(matchTable_vmID[0]), &localrc);
