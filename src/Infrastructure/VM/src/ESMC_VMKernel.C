@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.99.2.1 2008/04/05 03:13:55 cdeluca Exp $
+// $Id: ESMC_VMKernel.C,v 1.99.2.2 2008/04/09 22:21:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -315,7 +315,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
       commarray[0][0].comm_type = VM_COMM_TYPE_MPIUNI;
       commarray[0][0].shmp = new shared_mp;
       sync_reset(&(commarray[0][0].shmp->shms));
-#else      
+#else
       // normally for the default ESMC_VMK all communication is via MPI-1
       commarray[i][j].comm_type = VM_COMM_TYPE_MPI1;
 #endif      
@@ -387,9 +387,36 @@ void VMK::init(MPI_Comm mpiCommunicator){
 
 
 void VMK::finalize(int finalizeMpi){
-  // finalize default (all MPI) virtual machine
+  // finalize default (all MPI) virtual machine, deleting all its allocations
   for (int k=0; k<100; k++)
     delete [] argv[k];
+  pthread_mutex_destroy(pth_mutex);
+  delete pth_mutex;
+  pthread_mutex_destroy(pth_mutex2);
+  delete pth_mutex2;
+#ifdef ESMF_MPIUNI
+  delete commarray[0][0].shmp;
+#endif
+  for (int i=0; i<npets; i++)
+    delete [] commarray[i];
+  delete [] commarray;
+  delete [] ipshmTable;
+  delete [] ipshmDeallocTable;
+  delete ipshmCount;
+  pthread_mutex_destroy(ipshmMutex);
+  delete ipshmMutex;
+  pthread_mutex_destroy(ipSetupMutex);
+  delete ipSetupMutex;
+  delete [] cpuid;
+  delete [] ssiid;
+  delete [] lpid;
+  delete [] pid;
+  delete [] tid;
+  delete [] ncpet;
+  for (int i=0; i<npets; i++)
+    delete [] cid[i];
+  delete [] cid;
+  // conditionally finalize MPI
   int finalized;
   MPI_Finalized(&finalized);
   if (!finalized){
@@ -397,7 +424,7 @@ void VMK::finalize(int finalizeMpi){
     MPI_Group_free(&mpi_g);
     if (finalizeMpi)
       MPI_Finalize();
-   }
+  }
 }
 
 
