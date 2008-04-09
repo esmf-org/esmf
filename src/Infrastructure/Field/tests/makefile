@@ -1,14 +1,13 @@
-# $Id: makefile,v 1.42.2.3 2008/04/07 20:13:46 feiliu Exp $ 
+# $Id: makefile,v 1.42.2.4 2008/04/09 01:14:33 feiliu Exp $ 
 
-ALL:  build_unit_tests
-run:  run_unit_tests
+ALL:      build_unit_tests
+run:      run_unit_tests
 run_uni:  run_unit_tests_uni
 
 CFLAGS    =
 FFLAGS    =
 SOURCEC	  = 
 SOURCEF	  =
-CPFILES   = 
 
 SOURCEH	  = 
 OBJSC	  =  
@@ -19,12 +18,13 @@ DIRS	  =
 LOCDIR	  = src/Infrastructure/Field/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_FieldUTest  \
-		$(ESMF_TESTDIR)/ESMF_FieldStressUTest \
-		$(ESMF_TESTDIR)/ESMF_FieldCreateGetUTest
+				$(ESMF_TESTDIR)/ESMF_FieldCreateGetUTest \
+    			$(ESMF_TESTDIR)/ESMF_FieldStressUTest
 
 TESTS_RUN     = RUN_ESMF_FieldUTest \
-		RUN_ESMF_FieldStressUTest \
-		RUN_ESMF_FieldCreateGetUTest
+				RUN_ESMF_FieldCreateGetUTest
+
+TESTS_RUN_UNI = RUN_ESMF_FieldStressUTestUNI
 
 include ${ESMF_DIR}/makefile
 
@@ -41,5 +41,6 @@ RUN_ESMF_FieldUTest:
 RUN_ESMF_FieldCreateGetUTest:
 	$(MAKE) TNAME=FieldCreateGet NP=4 ftest
 
-RUN_ESMF_FieldStressUTest:
-	$(MAKE) TNAME=FieldCreateGet ftest
+RUN_ESMF_FieldStressUTestUNI:
+	$(MAKE) TNAME=FieldStress NP=1 ftest
+
