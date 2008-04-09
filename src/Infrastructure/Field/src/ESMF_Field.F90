@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.272.2.22 2008/04/05 03:12:40 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.272.2.23 2008/04/09 05:20:52 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -182,7 +182,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.272.2.22 2008/04/05 03:12:40 cdeluca Exp $'
+    '$Id: ESMF_Field.F90,v 1.272.2.23 2008/04/09 05:20:52 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -416,7 +416,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
+      call c_ESMC_BaseAttGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_I4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -483,7 +483,7 @@ contains
                                  ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
+      call c_ESMC_BaseAttGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_I4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -538,7 +538,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
+      call c_ESMC_BaseAttGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_I8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -605,7 +605,7 @@ contains
                                  ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
+      call c_ESMC_BaseAttGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_I8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -660,7 +660,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
+      call c_ESMC_BaseAttGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_R4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -727,7 +727,7 @@ contains
                                  ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
+      call c_ESMC_BaseAttGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_R4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -782,7 +782,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
+      call c_ESMC_BaseAttGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_R8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -849,7 +849,7 @@ contains
                                  ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
+      call c_ESMC_BaseAttGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_R8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -904,7 +904,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
+      call c_ESMC_BaseAttGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -971,7 +971,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
+      call c_ESMC_BaseAttGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1026,7 +1026,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      call c_ESMC_AttributeGetChar(field%ftypep%base, name, value, localrc)
+      call c_ESMC_BaseAttGetChar(field%ftypep%base, name, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1078,7 +1078,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      call c_ESMC_AttributeGetCount(field%ftypep%base, count, localrc)
+      call c_ESMC_BaseAttGetCount(field%ftypep%base, count, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1139,7 +1139,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      call c_ESMC_AttributeGetAttrInfoName(field%ftypep%base, name, &
+      call c_ESMC_BaseAttGetAttrInfoName(field%ftypep%base, name, &
         localTk, localCount, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1209,7 +1209,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      call c_ESMC_AttributeGetAttrInfoNum(field%ftypep%base, attributeIndex, &
+      call c_ESMC_BaseAttGetAttrInfoNum(field%ftypep%base, attributeIndex, &
         localName, localTk, localCount, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1494,7 +1494,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+      call c_ESMC_BaseAttSetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_I4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1563,7 +1563,7 @@ contains
                                  ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+      call c_ESMC_BaseAttSetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_I4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1619,7 +1619,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+      call c_ESMC_BaseAttSetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_I8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1688,7 +1688,7 @@ contains
                                  ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+      call c_ESMC_BaseAttSetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_I8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1744,7 +1744,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+      call c_ESMC_BaseAttSetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_R4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1813,7 +1813,7 @@ contains
                                  ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+      call c_ESMC_BaseAttSetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_R4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1869,7 +1869,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+      call c_ESMC_BaseAttSetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_R8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1938,7 +1938,7 @@ contains
                                  ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+      call c_ESMC_BaseAttSetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_R8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1994,7 +1994,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+      call c_ESMC_BaseAttSetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -2063,7 +2063,7 @@ contains
                                  ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+      call c_ESMC_BaseAttSetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -2119,7 +2119,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      call c_ESMC_AttributeSetChar(field%ftypep%base, name, value, localrc)
+      call c_ESMC_BaseAttSetChar(field%ftypep%base, name, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return

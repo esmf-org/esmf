@@ -1,4 +1,4 @@
-! $Id: ESMF_Overloads.F90,v 1.10.2.1 2008/04/05 03:14:21 cdeluca Exp $
+! $Id: ESMF_Overloads.F90,v 1.10.2.2 2008/04/09 05:20:59 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -50,14 +50,14 @@
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
-    !public ESMF_AttributeSetCharacter
-    !public ESMF_AttributeGetCharacter
-    public ESMF_AttributeSetInteger
-    public ESMF_AttributeGetInteger
-    !public ESMF_AttributeSetReal
-    !public ESMF_AttributeGetReal
-    !public ESMF_AttributeSetLogical
-    !public ESMF_AttributeGetLogical
+    !public ESMF_BaseAttSetCharacter
+    !public ESMF_BaseAttGetCharacter
+    public ESMF_BaseAttSetInteger
+    public ESMF_BaseAttGetInteger
+    !public ESMF_BaseAttSetReal
+    !public ESMF_BaseAttGetReal
+    !public ESMF_BaseAttSetLogical
+    !public ESMF_BaseAttGetLogical
 
     !public ESMF_Read
     !public ESMF_Write
@@ -71,7 +71,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Overloads.F90,v 1.10.2.1 2008/04/05 03:14:21 cdeluca Exp $'
+      '$Id: ESMF_Overloads.F90,v 1.10.2.2 2008/04/09 05:20:59 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -80,7 +80,7 @@
 !==============================================================================
 !BOPI
 ! !INTERFACE:
-      interface ESMF_AttributeSetCharacter
+      interface ESMF_BaseAttSetCharacter
 
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_FieldAttrSetChar
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface ESMF_AttributeGetCharacter
+      interface ESMF_BaseAttGetCharacter
 
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_FieldAttrGetChar
@@ -118,7 +118,7 @@
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface ESMF_AttributeSetInteger
+      interface ESMF_BaseAttSetInteger
 
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_FieldAttrSetInt
@@ -137,7 +137,7 @@
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface ESMF_AttributeGetInteger
+      interface ESMF_BaseAttGetInteger
 
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_FieldAttrGetInt
@@ -212,7 +212,7 @@
 
         ! pass thru f90/c++ interface - this requires first entry of object
         ! is a base type.
-        call c_ESMC_AttributeSetChar(field, name, value, status)
+        call c_ESMC_BaseAttSetChar(field, name, value, status)
 
         if (rcpresent) rc = status
 
@@ -266,7 +266,7 @@
 
         ! pass thru f90/c++ interface - this requires first entry of object
         ! is a base type.
-        call c_ESMF_AttributeGetChar(field, name, value, status)
+        call c_ESMF_BaseAttGetChar(field, name, value, status)
 
         if (rcpresent) rc = status
 
@@ -320,7 +320,7 @@
 
         ! pass thru f90/c++ interface - this requires first entry of object
         ! is a base type.
-        call c_ESMF_AttributeSetInt(field, name, value, status)
+        call c_ESMF_BaseAttSetInt(field, name, value, status)
 
         if (rcpresent) rc = status
 
@@ -374,7 +374,7 @@
 
         ! pass thru f90/c++ interface - this requires first entry of object
         ! is a base type.
-        call c_ESMF_AttributeGetInt(field, name, value, status)
+        call c_ESMF_BaseAttGetInt(field, name, value, status)
 
         if (rcpresent) rc = status
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.134.2.1 2008/04/05 03:12:32 cdeluca Exp $
+! $Id: ESMF_Base.F90,v 1.134.2.2 2008/04/09 05:20:48 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -121,17 +121,17 @@ module ESMF_BaseMod
 !      public ESMF_Print
 
 !  Attribute methods
-      public ESMF_AttributeSet
-      public ESMF_AttributeGet
-      public ESMF_AttributeGetCount
-      public ESMF_AttributeGetbyNumber
-      public ESMF_AttributeGetNameList
-      public ESMF_AttributeSetList
-      public ESMF_AttributeGetList
-      public ESMF_AttributeSetObjectList
-      public ESMF_AttributeGetObjectList
-      public ESMF_AttributeCopy
-      public ESMF_AttributeCopyAll
+      public ESMF_BaseAttSet
+      public ESMF_BaseAttGet
+      public ESMF_BaseAttGetCount
+      public ESMF_BaseAttGetbyNumber
+      public ESMF_BaseAttGetNameList
+      public ESMF_BaseAttSetList
+      public ESMF_BaseAttGetList
+      public ESMF_BaseAttSetObjectList
+      public ESMF_BaseAttGetObjectList
+      public ESMF_BaseAttCopy
+      public ESMF_BaseAttCopyAll
 
 !  Misc methods - work on Base object but apply to any type
       public ESMF_SetName
@@ -148,7 +148,7 @@ module ESMF_BaseMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.134.2.1 2008/04/05 03:12:32 cdeluca Exp $'
+               '$Id: ESMF_Base.F90,v 1.134.2.2 2008/04/09 05:20:48 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -281,12 +281,12 @@ module ESMF_BaseMod
 
 !-------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_AttributeSet"
+#define ESMF_METHOD "ESMF_BaseAttSet"
 !BOPI
-! !IROUTINE:  ESMF_AttributeSet - set attribute on an ESMF type
+! !IROUTINE:  ESMF_BaseAttSet - set attribute on an ESMF type
 !
 ! !INTERFACE:
-  subroutine ESMF_AttributeSet(base, name, value, rc)
+  subroutine ESMF_BaseAttSet(base, name, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: base
@@ -323,20 +323,20 @@ module ESMF_BaseMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, base, rc)
       
-    !call c_ESMC_AttributeSet(base , name, value, status) 
+    !call c_ESMC_BaseAttSet(base , name, value, status) 
     if (present(rc)) rc = status
 
-  end subroutine ESMF_AttributeSet
+  end subroutine ESMF_BaseAttSet
 
 
 !-------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_AttributeGet"
+#define ESMF_METHOD "ESMF_BaseAttGet"
 !BOPI
-! !IROUTINE:  ESMF_AttributeGet - get attribute from an ESMF type
+! !IROUTINE:  ESMF_BaseAttGet - get attribute from an ESMF type
 !
 ! !INTERFACE:
-  subroutine ESMF_AttributeGet(base, name, value, rc)
+  subroutine ESMF_BaseAttGet(base, name, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: base 
@@ -373,20 +373,20 @@ module ESMF_BaseMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, base, rc)
       
-    !call c_ESMC_AttributeGet(base , name, value, status) 
+    !call c_ESMC_BaseAttGet(base , name, value, status) 
     if (present(rc)) rc = status
 
-  end subroutine ESMF_AttributeGet
+  end subroutine ESMF_BaseAttGet
 
 
 !-------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_AttributeGetCount"
+#define ESMF_METHOD "ESMF_BaseAttGetCount"
 !BOPI
-! !IROUTINE:  ESMF_AttributeGetCount - get an ESMF object's number of attributes
+! !IROUTINE:  ESMF_BaseAttGetCount - get an ESMF object's number of attributes
 !
 ! !INTERFACE:
-  subroutine ESMF_AttributeGetCount(anytype, count, rc)
+  subroutine ESMF_BaseAttGetCount(anytype, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: anytype             ! any ESMF type
@@ -419,20 +419,20 @@ module ESMF_BaseMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, anytype, rc)
 
-    !call c_ESMC_AttributeGetCount(base , count, status) 
+    !call c_ESMC_BaseAttGetCount(base , count, status) 
     if (present(rc)) rc = status
 
-  end subroutine ESMF_AttributeGetCount
+  end subroutine ESMF_BaseAttGetCount
 
 
 !-------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_AttributeGetbyNumber"
+#define ESMF_METHOD "ESMF_BaseAttGetbyNumber"
 !BOPI
-! !IROUTINE:  ESMF_AttributeGetbyNumber - get an object attribute by number
+! !IROUTINE:  ESMF_BaseAttGetbyNumber - get an object attribute by number
 !
 ! !INTERFACE:
-  subroutine ESMF_AttributeGetbyNumber(anytype, number, name, value, rc)
+  subroutine ESMF_BaseAttGetbyNumber(anytype, number, name, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: anytype
@@ -473,20 +473,20 @@ module ESMF_BaseMod
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit, anytype, rc)
     
-    !call c_ESMC_AttributeGetbyNumber(base, number, name, value, status) 
+    !call c_ESMC_BaseAttGetbyNumber(base, number, name, value, status) 
     if (present(rc)) rc = status
 
-  end subroutine ESMF_AttributeGetbyNumber
+  end subroutine ESMF_BaseAttGetbyNumber
 
 
 !-------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_AttributeGetNameList"
+#define ESMF_METHOD "ESMF_BaseAttGetNameList"
 !BOPI
-! !IROUTINE:  ESMF_AttributeGetNameList - get an object attribute name list
+! !IROUTINE:  ESMF_BaseAttGetNameList - get an object attribute name list
 !
 ! !INTERFACE:
-  subroutine ESMF_AttributeGetNameList(anytype, count, namelist, rc)
+  subroutine ESMF_BaseAttGetNameList(anytype, count, namelist, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: anytype
@@ -518,17 +518,17 @@ module ESMF_BaseMod
       !TODO: when code added here, change (inout) for namelist to just out.
       ! absoft compiler was unhappy.
 
-  end subroutine ESMF_AttributeGetNameList
+  end subroutine ESMF_BaseAttGetNameList
 
 
 !-------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_AttributeSetList"
+#define ESMF_METHOD "ESMF_BaseAttSetList"
 !BOPI
-! !IROUTINE:  ESMF_AttributeSetList - set an ESMF object's attributes 
+! !IROUTINE:  ESMF_BaseAttSetList - set an ESMF object's attributes 
 !
 ! !INTERFACE:
-  subroutine ESMF_AttributeSetList(anytype, namelist, valuelist, rc)
+  subroutine ESMF_BaseAttSetList(anytype, namelist, valuelist, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: anytype
@@ -559,17 +559,17 @@ module ESMF_BaseMod
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  end subroutine ESMF_AttributeSetList
+  end subroutine ESMF_BaseAttSetList
 
 
 !-------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_AttributeGetList"
+#define ESMF_METHOD "ESMF_BaseAttGetList"
 !BOPI
-! !IROUTINE:  ESMF_AttributeGetList - get an objects attributes
+! !IROUTINE:  ESMF_BaseAttGetList - get an objects attributes
 !
 ! !INTERFACE:
-  subroutine ESMF_AttributeGetList(anytype, namelist, valuelist, rc)
+  subroutine ESMF_BaseAttGetList(anytype, namelist, valuelist, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: anytype
@@ -599,17 +599,17 @@ module ESMF_BaseMod
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  end subroutine ESMF_AttributeGetList
+  end subroutine ESMF_BaseAttGetList
 
 
 !-------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_AttributeSetObjectList"
+#define ESMF_METHOD "ESMF_BaseAttSetObjectList"
 !BOPI
-! !IROUTINE:  ESMF_AttributeSetObjectList - set an attribute on multiple ESMF objects 
+! !IROUTINE:  ESMF_BaseAttSetObjectList - set an attribute on multiple ESMF objects 
 !
 ! !INTERFACE:
-  subroutine ESMF_AttributeSetObjectList(anytypelist, name, value, rc)
+  subroutine ESMF_BaseAttSetObjectList(anytypelist, name, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base), dimension (:), intent(in) :: anytypelist
@@ -638,17 +638,17 @@ module ESMF_BaseMod
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  end subroutine ESMF_AttributeSetObjectList
+  end subroutine ESMF_BaseAttSetObjectList
 
 
 !-------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_AttributeGetObjectList"
+#define ESMF_METHOD "ESMF_BaseAttGetObjectList"
 !BOPI
-! !IROUTINE:  ESMF_AttributeGetObjectList - get an attribute from multiple ESMF objects 
+! !IROUTINE:  ESMF_BaseAttGetObjectList - get an attribute from multiple ESMF objects 
 !
 ! !INTERFACE:
-  subroutine ESMF_AttributeGetObjectList(anytypelist, name, valuelist, rc)
+  subroutine ESMF_BaseAttGetObjectList(anytypelist, name, valuelist, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base), dimension (:), intent(in) :: anytypelist
@@ -677,17 +677,17 @@ module ESMF_BaseMod
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  end subroutine ESMF_AttributeGetObjectList
+  end subroutine ESMF_BaseAttGetObjectList
 
 
 !-------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_AttributeCopy"
+#define ESMF_METHOD "ESMF_BaseAttCopy"
 !BOPI
-! !IROUTINE:  ESMF_AttributeCopy - copy an attribute between two objects
+! !IROUTINE:  ESMF_BaseAttCopy - copy an attribute between two objects
 !
 ! !INTERFACE:
-  subroutine ESMF_AttributeCopy(name, source, destination, rc)
+  subroutine ESMF_BaseAttCopy(name, source, destination, rc)
 !
 ! !ARGUMENTS:
       character (len = *), intent(in) :: name
@@ -719,17 +719,17 @@ module ESMF_BaseMod
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  end subroutine ESMF_AttributeCopy
+  end subroutine ESMF_BaseAttCopy
 
 
 !-------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_AttributeCopyAll"
+#define ESMF_METHOD "ESMF_BaseAttCopyAll"
 !BOPI
-! !IROUTINE:  ESMF_AttributeCopyAll - copy attributes between two objects
+! !IROUTINE:  ESMF_BaseAttCopyAll - copy attributes between two objects
 !
 ! !INTERFACE:
-  subroutine ESMF_AttributeCopyAll(source, destination, rc)
+  subroutine ESMF_BaseAttCopyAll(source, destination, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: source
@@ -759,7 +759,7 @@ module ESMF_BaseMod
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  end subroutine ESMF_AttributeCopyAll
+  end subroutine ESMF_BaseAttCopyAll
 
 !-------------------------------------------------------------------------
 !------------------------------------------------------------------------------

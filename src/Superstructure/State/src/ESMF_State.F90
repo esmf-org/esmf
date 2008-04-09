@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.114.2.5 2008/04/05 03:14:25 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.114.2.6 2008/04/09 05:21:00 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -91,7 +91,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.114.2.5 2008/04/05 03:14:25 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.114.2.6 2008/04/09 05:21:00 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -1767,7 +1767,7 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeGetValue(state%statep%base, name, &
+      call c_ESMC_BaseAttGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_I4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1837,7 +1837,7 @@ end interface
                                       ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeGetValue(state%statep%base, name, &
+      call c_ESMC_BaseAttGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_I4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1894,7 +1894,7 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeGetValue(state%statep%base, name, &
+      call c_ESMC_BaseAttGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_I8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1964,7 +1964,7 @@ end interface
                                       ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeGetValue(state%statep%base, name, &
+      call c_ESMC_BaseAttGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_I8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2023,7 +2023,7 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeGetValue(state%statep%base, name, &
+      call c_ESMC_BaseAttGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_R4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2093,7 +2093,7 @@ end interface
                                       ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeGetValue(state%statep%base, name, &
+      call c_ESMC_BaseAttGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_R4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2151,7 +2151,7 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeGetValue(state%statep%base, name, &
+      call c_ESMC_BaseAttGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_R8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2221,7 +2221,7 @@ end interface
                                       ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeGetValue(state%statep%base, name, &
+      call c_ESMC_BaseAttGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_R8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2279,7 +2279,7 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeGetValue(state%statep%base, name, &
+      call c_ESMC_BaseAttGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2349,7 +2349,7 @@ end interface
                                       ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeGetValue(state%statep%base, name, &
+      call c_ESMC_BaseAttGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2407,7 +2407,7 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeGetChar(state%statep%base, name, value, localrc)
+      call c_ESMC_BaseAttGetChar(state%statep%base, name, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2462,7 +2462,7 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeGetCount(state%statep%base, count, localrc)
+      call c_ESMC_BaseAttGetCount(state%statep%base, count, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2526,7 +2526,7 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeGetAttrInfoName(state%statep%base, name, &
+      call c_ESMC_BaseAttGetAttrInfoName(state%statep%base, name, &
         localTk, localCount, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2599,7 +2599,7 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeGetAttrInfoNum(state%statep%base, attributeIndex, &
+      call c_ESMC_BaseAttGetAttrInfoNum(state%statep%base, attributeIndex, &
         localName, localTk, localCount, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3435,7 +3435,7 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+      call c_ESMC_BaseAttSetValue(state%statep%base, name, &
         ESMF_TYPEKIND_I4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3508,7 +3508,7 @@ end interface
                                       ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+      call c_ESMC_BaseAttSetValue(state%statep%base, name, &
         ESMF_TYPEKIND_I4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3568,7 +3568,7 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+      call c_ESMC_BaseAttSetValue(state%statep%base, name, &
         ESMF_TYPEKIND_I8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3641,7 +3641,7 @@ end interface
                                       ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+      call c_ESMC_BaseAttSetValue(state%statep%base, name, &
         ESMF_TYPEKIND_I8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3702,7 +3702,7 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+      call c_ESMC_BaseAttSetValue(state%statep%base, name, &
         ESMF_TYPEKIND_R4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3775,7 +3775,7 @@ end interface
                                       ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+      call c_ESMC_BaseAttSetValue(state%statep%base, name, &
         ESMF_TYPEKIND_R4, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3836,7 +3836,7 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+      call c_ESMC_BaseAttSetValue(state%statep%base, name, &
         ESMF_TYPEKIND_R8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3909,7 +3909,7 @@ end interface
                                       ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+      call c_ESMC_BaseAttSetValue(state%statep%base, name, &
         ESMF_TYPEKIND_R8, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3969,7 +3969,7 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+      call c_ESMC_BaseAttSetValue(state%statep%base, name, &
         ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4042,7 +4042,7 @@ end interface
                                       ESMF_CONTEXT, rc)) return
       endif
 
-      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+      call c_ESMC_BaseAttSetValue(state%statep%base, name, &
         ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4102,7 +4102,7 @@ end interface
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeSetChar(state%statep%base, name, value, localrc)
+      call c_ESMC_BaseAttSetChar(state%statep%base, name, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return

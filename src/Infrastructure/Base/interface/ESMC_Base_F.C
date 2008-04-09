@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.48.2.1 2008/04/05 03:12:32 cdeluca Exp $
+// $Id: ESMC_Base_F.C,v 1.48.2.2 2008/04/09 05:20:47 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.48.2.1 2008/04/05 03:12:32 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.48.2.2 2008/04/09 05:20:47 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -617,10 +617,10 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeSetValue - Set Attribute on an ESMF type
+// !IROUTINE:  c_ESMC_BaseAttSetValue - Set Attribute on an ESMF type
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributesetvalue)(
+      void FTN(c_esmc_baseattsetvalue)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -670,20 +670,20 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  *rc = (*base)->ESMC_AttributeSet(cname, *tk, *count, value);
+  *rc = (*base)->ESMC_BaseAttSet(cname, *tk, *count, value);
 
   delete [] cname;
   return;
 
-}  // end c_ESMC_AttributeSetValue
+}  // end c_ESMC_BaseAttSetValue
 
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeSetChar - Set String Attribute on an ESMF type
+// !IROUTINE:  c_ESMC_BaseAttSetChar - Set String Attribute on an ESMF type
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributesetchar)(
+      void FTN(c_esmc_baseattsetchar)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -718,7 +718,7 @@ extern "C" {
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
-      //printf("ESMF_AttributeSet: bad attribute name\n");
+      //printf("ESMF_BaseAttSet: bad attribute name\n");
       if (rc) *rc = status;
       return;
   }
@@ -726,7 +726,7 @@ extern "C" {
   if ((!value) || (vlen <= 0) || (value[0] == '\0')) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value", &status);
-      //printf("ESMF_AttributeSet: bad attribute value\n");
+      //printf("ESMF_BaseAttSet: bad attribute value\n");
       if (rc) *rc = status;
       return;
   }
@@ -746,21 +746,21 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  *rc = (*base)->ESMC_AttributeSet(cname, cvalue);
+  *rc = (*base)->ESMC_BaseAttSet(cname, cvalue);
 
   delete [] cname;
   delete [] cvalue;
   return;
 
-}  // end c_ESMC_AttributeSetChar
+}  // end c_ESMC_BaseAttSetChar
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeGetValue - get attribute from an ESMF type
+// !IROUTINE:  c_ESMC_BaseAttGetValue - get attribute from an ESMF type
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributegetvalue)(
+      void FTN(c_esmc_baseattgetvalue)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -795,7 +795,7 @@ extern "C" {
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
-      //printf("ESMF_AttributeSet: bad attribute name\n");
+      //printf("ESMF_BaseAttSet: bad attribute name\n");
       if (rc) *rc = status;
       return;
   }
@@ -807,10 +807,10 @@ extern "C" {
       return;
   }
 
-  status = (*base)->ESMC_AttributeGet(cname, &attrTk, &attrCount, NULL);
+  status = (*base)->ESMC_BaseAttGet(cname, &attrTk, &attrCount, NULL);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status,
                          "failed getting attribute type and count", &status)) {
-    //printf("ESMF_AttributeGetValue: failed getting attribute info\n");
+    //printf("ESMF_BaseAttGetValue: failed getting attribute info\n");
     delete [] cname;
     if (rc) *rc = status;
     return;
@@ -835,7 +835,7 @@ extern "C" {
     return;
   }
 
-  status = (*base)->ESMC_AttributeGet(cname, NULL, NULL, value);
+  status = (*base)->ESMC_BaseAttGet(cname, NULL, NULL, value);
   ESMC_LogDefault.ESMC_LogMsgFoundError(status,
                          "failed getting attribute value", &status);
   delete [] cname;
@@ -843,15 +843,15 @@ extern "C" {
 
   return;
 
-}  // end c_ESMC_AttributeGetValue
+}  // end c_ESMC_BaseAttGetValue
 
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeGetChar - get attribute from an ESMF type
+// !IROUTINE:  c_ESMC_BaseAttGetChar - get attribute from an ESMF type
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributegetchar)(
+      void FTN(c_esmc_baseattgetchar)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -884,7 +884,7 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      printf("ESMF_AttributeGet: bad attribute name\n");
+      printf("ESMF_BaseAttGet: bad attribute name\n");
       *rc = ESMF_FAILURE;
       return;
   }
@@ -896,7 +896,7 @@ extern "C" {
       return;
   }
 
-  *rc = (*base)->ESMC_AttributeGet(cname, &attrTypeKind, &slen, NULL);
+  *rc = (*base)->ESMC_BaseAttGet(cname, &attrTypeKind, &slen, NULL);
   if (*rc != ESMF_SUCCESS) {
     delete [] cname;
     return;
@@ -907,7 +907,7 @@ extern "C" {
   
 //  if (attrTypeKind != ESMF_TYPEKIND_CHARACTER) {
       // TODO: this needs to sprintf into a buffer to format up the error msg
-//      printf("ESMF_AttributeGet: attribute %s not type character\n", name);
+//      printf("ESMF_BaseAttGet: attribute %s not type character\n", name);
 //      delete [] cname;
 //      *rc = ESMF_FAILURE;
 //      return; 
@@ -915,7 +915,7 @@ extern "C" {
 
   // make sure destination will be long enough
   if (slen > vlen) {
-    printf("ESMF_AttributeGet: attribute %s is %d bytes long, buffer length "
+    printf("ESMF_BaseAttGet: attribute %s is %d bytes long, buffer length "
       "%d is too short", name, slen, vlen);
     delete [] cname;
     *rc = ESMF_FAILURE;
@@ -924,7 +924,7 @@ extern "C" {
 
   cvalue = new char[slen+1];
 
-  *rc = (*base)->ESMC_AttributeGet(cname, cvalue);
+  *rc = (*base)->ESMC_BaseAttGet(cname, cvalue);
   if (*rc != ESMF_SUCCESS) {
     delete [] cname;
     delete [] cvalue;
@@ -937,15 +937,15 @@ extern "C" {
   delete [] cvalue;
   return;
 
-}  // end c_ESMC_AttributeGetChar
+}  // end c_ESMC_BaseAttGetChar
 
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeGetAttrInfoName - get type and number of items in an attr
+// !IROUTINE:  c_ESMC_BaseAttGetAttrInfoName - get type and number of items in an attr
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributegetattrinfoname)(
+      void FTN(c_esmc_baseattgetattrinfoname)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -976,19 +976,19 @@ extern "C" {
 
   // simple sanity check before doing any more work
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      printf("ESMF_AttributeGetValue: bad attribute name\n");
+      printf("ESMF_BaseAttGetValue: bad attribute name\n");
       *rc = ESMF_FAILURE;
       return;
   }
 
   if (!tk) {
-      printf("ESMF_AttributeGetValue: bad attribute typekind argument\n");
+      printf("ESMF_BaseAttGetValue: bad attribute typekind argument\n");
       *rc = ESMF_FAILURE;
       return;
   }
 
   if (!count) {
-      printf("ESMF_AttributeGetValue: bad attribute count argument\n");
+      printf("ESMF_BaseAttGetValue: bad attribute count argument\n");
       *rc = ESMF_FAILURE;
       return;
   }
@@ -1000,19 +1000,19 @@ extern "C" {
       return;
   }
 
-  *rc = (*base)->ESMC_AttributeGet(cname, tk, count, NULL);
+  *rc = (*base)->ESMC_BaseAttGet(cname, tk, count, NULL);
 
   delete [] cname;
   return;
 
-}  // end c_ESMC_AttributeGetAttrInfoName
+}  // end c_ESMC_BaseAttGetAttrInfoName
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeGetAttrInfoNum - get type and number of items in an attr
+// !IROUTINE:  c_ESMC_BaseAttGetAttrInfoNum - get type and number of items in an attr
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributegetattrinfonum)(
+      void FTN(c_esmc_baseattgetattrinfonum)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -1043,26 +1043,26 @@ if (rc) *rc = ESMF_RC_NOT_IMPL;
   }
 
   if (!name) {
-      printf("ESMF_AttributeGetValue: bad attribute name argument\n");
+      printf("ESMF_BaseAttGetValue: bad attribute name argument\n");
       *rc = ESMF_FAILURE;
       return;
   }
 
   if (!tk) {
-      printf("ESMF_AttributeGetValue: bad attribute typekind argument\n");
+      printf("ESMF_BaseAttGetValue: bad attribute typekind argument\n");
       *rc = ESMF_FAILURE;
       return;
   }
 
   if (!count) {
-      printf("ESMF_AttributeGetValue: bad attribute count argument\n");
+      printf("ESMF_BaseAttGetValue: bad attribute count argument\n");
       *rc = ESMF_FAILURE;
       return;
   }
 
   cname = new char[ESMF_MAXSTR];
 
-  *rc = (*base)->ESMC_AttributeGet((*num)-1, cname, tk, count, NULL);
+  *rc = (*base)->ESMC_BaseAttGet((*num)-1, cname, tk, count, NULL);
   if (*rc != ESMF_SUCCESS) {
       delete [] cname;
       return;
@@ -1073,15 +1073,15 @@ if (rc) *rc = ESMF_RC_NOT_IMPL;
   delete [] cname;
   return;
 
-}  // end c_ESMC_AttributeGetAttrInfoNum
+}  // end c_ESMC_BaseAttGetAttrInfoNum
 
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeGetCount - get number of attrs
+// !IROUTINE:  c_ESMC_BaseAttGetCount - get number of attrs
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributegetcount)(
+      void FTN(c_esmc_baseattgetcount)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -1108,17 +1108,17 @@ if (rc) *rc = ESMF_RC_NOT_IMPL;
   }
 
   if (!count) {
-      printf("ESMF_AttributeGetValue: bad attribute count argument\n");
+      printf("ESMF_BaseAttGetValue: bad attribute count argument\n");
       *rc = ESMF_FAILURE;
       return;
   }
 
-  *count = (*base)->ESMC_AttributeGetCount();
+  *count = (*base)->ESMC_BaseAttGetCount();
 
   *rc = (count == 0) ? ESMF_FAILURE : ESMF_SUCCESS;
   return;
 
-}  // end c_ESMC_AttributeGetCount
+}  // end c_ESMC_BaseAttGetCount
 
 
 } // extern "C"

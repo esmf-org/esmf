@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.83.2.1 2008/04/05 03:12:32 cdeluca Exp $
+// $Id: ESMC_Base.C,v 1.83.2.2 2008/04/09 05:20:49 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.83.2.1 2008/04/05 03:12:32 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.83.2.2 2008/04/09 05:20:49 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -886,12 +886,12 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#define ESMC_METHOD "ESMC_BaseAttSet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeSet - set attribute on an ESMF type
+// !IROUTINE:  ESMC_BaseAttSet - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Base::ESMC_BaseAttSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -947,16 +947,16 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   attrCount++;
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeSet
+}  // end ESMC_BaseAttSet
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#define ESMC_METHOD "ESMC_BaseAttSet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeSet(int) - set attribute on an ESMF type
+// !IROUTINE:  ESMC_BaseAttSet(int) - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Base::ESMC_BaseAttSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -980,20 +980,20 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   if (!attr)
     return ESMF_FAILURE;
  
-  rc = ESMC_AttributeSet(attr);
+  rc = ESMC_BaseAttSet(attr);
 
   return rc;
 
-}  // end ESMC_AttributeSet(int)
+}  // end ESMC_BaseAttSet(int)
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#define ESMC_METHOD "ESMC_BaseAttSet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeSet(int *) - set attribute on an ESMF type
+// !IROUTINE:  ESMC_BaseAttSet(int *) - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Base::ESMC_BaseAttSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1018,20 +1018,20 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   if (!attr)
     return ESMF_FAILURE;
  
-  rc = ESMC_AttributeSet(attr);
+  rc = ESMC_BaseAttSet(attr);
 
   return rc;
 
-}  // end ESMC_AttributeSet(int *)
+}  // end ESMC_BaseAttSet(int *)
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#define ESMC_METHOD "ESMC_BaseAttSet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeSet(ESMC_I8) - set attribute on an ESMF type
+// !IROUTINE:  ESMC_BaseAttSet(ESMC_I8) - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Base::ESMC_BaseAttSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1055,20 +1055,20 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   if (!attr)
     return ESMF_FAILURE;
  
-  rc = ESMC_AttributeSet(attr);
+  rc = ESMC_BaseAttSet(attr);
 
   return rc;
 
-}  // end ESMC_AttributeSet(ESMC_I8)
+}  // end ESMC_BaseAttSet(ESMC_I8)
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#define ESMC_METHOD "ESMC_BaseAttSet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeSet(ESMC_I8 *) - set attribute on an ESMF type
+// !IROUTINE:  ESMC_BaseAttSet(ESMC_I8 *) - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Base::ESMC_BaseAttSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1093,20 +1093,20 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   if (!attr)
     return ESMF_FAILURE;
  
-  rc = ESMC_AttributeSet(attr);
+  rc = ESMC_BaseAttSet(attr);
 
   return rc;
 
-}  // end ESMC_AttributeSet(ESMC_I8 *)
+}  // end ESMC_BaseAttSet(ESMC_I8 *)
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#define ESMC_METHOD "ESMC_BaseAttSet"
 //BOP
-// !IROUTINE:  ESMC_AttributeSet(ESMC_R4) - set attribute on an ESMF type
+// !IROUTINE:  ESMC_BaseAttSet(ESMC_R4) - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Base::ESMC_BaseAttSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1130,20 +1130,20 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   if (!attr)
     return ESMF_FAILURE;
  
-  rc = ESMC_AttributeSet(attr);
+  rc = ESMC_BaseAttSet(attr);
 
   return rc;
 
-}  // end ESMC_AttributeSet(ESMC_R4)
+}  // end ESMC_BaseAttSet(ESMC_R4)
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#define ESMC_METHOD "ESMC_BaseAttSet"
 //BOP
-// !IROUTINE:  ESMC_AttributeSet(ESMC_R4 *) - set attribute on an ESMF type
+// !IROUTINE:  ESMC_BaseAttSet(ESMC_R4 *) - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Base::ESMC_BaseAttSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1168,20 +1168,20 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   if (!attr)
     return ESMF_FAILURE;
  
-  rc = ESMC_AttributeSet(attr);
+  rc = ESMC_BaseAttSet(attr);
 
   return rc;
 
-}  // end ESMC_AttributeSet(ESMC_R4 *)
+}  // end ESMC_BaseAttSet(ESMC_R4 *)
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#define ESMC_METHOD "ESMC_BaseAttSet"
 //BOP
-// !IROUTINE:  ESMC_AttributeSet(ESMC_R8) - set attribute on an ESMF type
+// !IROUTINE:  ESMC_BaseAttSet(ESMC_R8) - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Base::ESMC_BaseAttSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1205,20 +1205,20 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   if (!attr)
     return ESMF_FAILURE;
  
-  rc = ESMC_AttributeSet(attr);
+  rc = ESMC_BaseAttSet(attr);
 
   return rc;
 
-}  // end ESMC_AttributeSet(ESMC_R8)
+}  // end ESMC_BaseAttSet(ESMC_R8)
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#define ESMC_METHOD "ESMC_BaseAttSet"
 //BOP
-// !IROUTINE:  ESMC_AttributeSet(ESMC_R8 *) - set attribute on an ESMF type
+// !IROUTINE:  ESMC_BaseAttSet(ESMC_R8 *) - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Base::ESMC_BaseAttSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1243,20 +1243,20 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   if (!attr)
     return ESMF_FAILURE;
  
-  rc = ESMC_AttributeSet(attr);
+  rc = ESMC_BaseAttSet(attr);
 
   return rc;
 
-}  // end ESMC_AttributeSet(ESMC_R8 *)
+}  // end ESMC_BaseAttSet(ESMC_R8 *)
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#define ESMC_METHOD "ESMC_BaseAttSet"
 //BOP
-// !IROUTINE:  ESMC_AttributeSet(bool) - set attribute on an ESMF type
+// !IROUTINE:  ESMC_BaseAttSet(bool) - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Base::ESMC_BaseAttSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1280,20 +1280,20 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   if (!attr)
     return ESMF_FAILURE;
  
-  rc = ESMC_AttributeSet(attr);
+  rc = ESMC_BaseAttSet(attr);
 
   return rc;
 
-}  // end ESMC_AttributeSet(bool)
+}  // end ESMC_BaseAttSet(bool)
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#define ESMC_METHOD "ESMC_BaseAttSet"
 //BOP
-// !IROUTINE:  ESMC_AttributeSet(bool *) - set attribute on an ESMF type
+// !IROUTINE:  ESMC_BaseAttSet(bool *) - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Base::ESMC_BaseAttSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1318,20 +1318,20 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   if (!attr)
     return ESMF_FAILURE;
  
-  rc = ESMC_AttributeSet(attr);
+  rc = ESMC_BaseAttSet(attr);
 
   return rc;
 
-}  // end ESMC_AttributeSet(bool *)
+}  // end ESMC_BaseAttSet(bool *)
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#define ESMC_METHOD "ESMC_BaseAttSet"
 //BOP
-// !IROUTINE:  ESMC_AttributeSet(char) - set attribute on an ESMF type
+// !IROUTINE:  ESMC_BaseAttSet(char) - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Base::ESMC_BaseAttSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1355,21 +1355,21 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   if (!attr)
     return ESMF_FAILURE;
  
-  rc = ESMC_AttributeSet(attr);
+  rc = ESMC_BaseAttSet(attr);
 
   return rc;
 
-}  // end ESMC_AttributeSet(char)
+}  // end ESMC_BaseAttSet(char)
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#define ESMC_METHOD "ESMC_BaseAttSet"
 //BOP
-// !IROUTINE:  ESMC_AttributeSet - set attribute on an ESMF type
+// !IROUTINE:  ESMC_BaseAttSet - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSet(
+      int ESMC_Base::ESMC_BaseAttSet(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1395,22 +1395,22 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   if (!attr)
     return ESMF_FAILURE;
  
-  rc = ESMC_AttributeSet(attr);
+  rc = ESMC_BaseAttSet(attr);
 
   return rc;
 
-}  // end ESMC_AttributeSet
+}  // end ESMC_BaseAttSet
 
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#define ESMC_METHOD "ESMC_BaseAttGet"
 //BOP
-// !IROUTINE:  ESMC_AttributeGet - get attribute from an ESMF type
+// !IROUTINE:  ESMC_BaseAttGet - get attribute from an ESMF type
 //
 // !INTERFACE:
-      ESMC_Attribute *ESMC_Base::ESMC_AttributeGet(
+      ESMC_Attribute *ESMC_Base::ESMC_BaseAttGet(
 // 
 // !RETURN VALUE:
 //    pointer to requested attribute
@@ -1442,16 +1442,16 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   // bad news - you get here if no matches found
   return NULL;
 
-}  // end ESMC_AttributeGet
+}  // end ESMC_BaseAttGet
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#define ESMC_METHOD "ESMC_BaseAttGet"
 //BOP
-// !IROUTINE:  ESMC_AttributeGet(int) - get attribute from an ESMF type
+// !IROUTINE:  ESMC_BaseAttGet(int) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Base::ESMC_BaseAttGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -1477,7 +1477,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  attr = ESMC_AttributeGet(name);
+  attr = ESMC_BaseAttGet(name);
   if (!attr) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not found", &rc);
@@ -1498,16 +1498,16 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   *value = attr->vi;
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(int)
+}  // end ESMC_BaseAttGet(int)
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#define ESMC_METHOD "ESMC_BaseAttGet"
 //BOP
-// !IROUTINE:  ESMC_AttributeGet(int *) - get attribute from an ESMF type
+// !IROUTINE:  ESMC_BaseAttGet(int *) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Base::ESMC_BaseAttGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -1534,7 +1534,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  attr = ESMC_AttributeGet(name);
+  attr = ESMC_BaseAttGet(name);
   if (!attr) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not found", &rc);
@@ -1559,16 +1559,16 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(int *)
+}  // end ESMC_BaseAttGet(int *)
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#define ESMC_METHOD "ESMC_BaseAttGet"
 //BOP
-// !IROUTINE:  ESMC_AttributeGet(ESMC_I8) - get attribute from an ESMF type
+// !IROUTINE:  ESMC_BaseAttGet(ESMC_I8) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Base::ESMC_BaseAttGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -1594,7 +1594,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  attr = ESMC_AttributeGet(name);
+  attr = ESMC_BaseAttGet(name);
   if (!attr) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not found", &rc);
@@ -1615,16 +1615,16 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   *value = attr->vtl;
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(ESMC_I8)
+}  // end ESMC_BaseAttGet(ESMC_I8)
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#define ESMC_METHOD "ESMC_BaseAttGet"
 //BOP
-// !IROUTINE:  ESMC_AttributeGet(ESMC_I8 *) - get attribute from an ESMF type
+// !IROUTINE:  ESMC_BaseAttGet(ESMC_I8 *) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Base::ESMC_BaseAttGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -1651,7 +1651,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  attr = ESMC_AttributeGet(name);
+  attr = ESMC_BaseAttGet(name);
   if (!attr) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not found", &rc);
@@ -1676,16 +1676,16 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(ESMC_I8 *)
+}  // end ESMC_BaseAttGet(ESMC_I8 *)
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#define ESMC_METHOD "ESMC_BaseAttGet"
 //BOP
-// !IROUTINE:  ESMC_AttributeGet(ESMC_R4) - get attribute from an ESMF type
+// !IROUTINE:  ESMC_BaseAttGet(ESMC_R4) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Base::ESMC_BaseAttGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -1711,7 +1711,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  attr = ESMC_AttributeGet(name);
+  attr = ESMC_BaseAttGet(name);
   if (!attr) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not found", &rc);
@@ -1732,16 +1732,16 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   *value = attr->vf;
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(ESMC_R4)
+}  // end ESMC_BaseAttGet(ESMC_R4)
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#define ESMC_METHOD "ESMC_BaseAttGet"
 //BOP
-// !IROUTINE:  ESMC_AttributeGet(ESMC_R4 *) - get attribute from an ESMF type
+// !IROUTINE:  ESMC_BaseAttGet(ESMC_R4 *) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Base::ESMC_BaseAttGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -1768,7 +1768,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  attr = ESMC_AttributeGet(name);
+  attr = ESMC_BaseAttGet(name);
   if (!attr) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not found", &rc);
@@ -1793,16 +1793,16 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(ESMC_R4 *)
+}  // end ESMC_BaseAttGet(ESMC_R4 *)
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#define ESMC_METHOD "ESMC_BaseAttGet"
 //BOP
-// !IROUTINE:  ESMC_AttributeGet(ESMC_R8) - get attribute from an ESMF type
+// !IROUTINE:  ESMC_BaseAttGet(ESMC_R8) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Base::ESMC_BaseAttGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -1828,7 +1828,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  attr = ESMC_AttributeGet(name);
+  attr = ESMC_BaseAttGet(name);
   if (!attr) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not found", &rc);
@@ -1849,16 +1849,16 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   *value = attr->vd;
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(ESMC_R8)
+}  // end ESMC_BaseAttGet(ESMC_R8)
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#define ESMC_METHOD "ESMC_BaseAttGet"
 //BOP
-// !IROUTINE:  ESMC_AttributeGet(ESMC_R8 *) - get attribute from an ESMF type
+// !IROUTINE:  ESMC_BaseAttGet(ESMC_R8 *) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Base::ESMC_BaseAttGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -1885,7 +1885,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  attr = ESMC_AttributeGet(name);
+  attr = ESMC_BaseAttGet(name);
   if (!attr) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not found", &rc);
@@ -1910,16 +1910,16 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(ESMC_R8 *)
+}  // end ESMC_BaseAttGet(ESMC_R8 *)
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#define ESMC_METHOD "ESMC_BaseAttGet"
 //BOP
-// !IROUTINE:  ESMC_AttributeGet(bool) - get attribute from an ESMF type
+// !IROUTINE:  ESMC_BaseAttGet(bool) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Base::ESMC_BaseAttGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -1945,7 +1945,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  attr = ESMC_AttributeGet(name);
+  attr = ESMC_BaseAttGet(name);
   if (!attr) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not found", &rc);
@@ -1967,17 +1967,17 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   *value = attr->vb;
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(bool)
+}  // end ESMC_BaseAttGet(bool)
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#define ESMC_METHOD "ESMC_BaseAttGet"
 //BOP
-// !IROUTINE:  ESMC_AttributeGet(bool *) - get attribute from an ESMF type
+// !IROUTINE:  ESMC_BaseAttGet(bool *) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Base::ESMC_BaseAttGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -2004,7 +2004,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  attr = ESMC_AttributeGet(name);
+  attr = ESMC_BaseAttGet(name);
   if (!attr) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not found", &rc);
@@ -2029,16 +2029,16 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(bool *)
+}  // end ESMC_BaseAttGet(bool *)
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#define ESMC_METHOD "ESMC_BaseAttGet"
 //BOP
-// !IROUTINE:  ESMC_AttributeGet(char) - get attribute from an ESMF type
+// !IROUTINE:  ESMC_BaseAttGet(char) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Base::ESMC_BaseAttGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -2069,7 +2069,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       return ESMF_FAILURE;
   }
 
-  attr = ESMC_AttributeGet(name);
+  attr = ESMC_BaseAttGet(name);
   if (!attr) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                   "attribute not found", &rc);
@@ -2091,16 +2091,16 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   strcpy(value, attr->vcp);
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(char)
+}  // end ESMC_BaseAttGet(char)
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#define ESMC_METHOD "ESMC_BaseAttGet"
 //BOP
-// !IROUTINE:  ESMC_AttributeGet(name) - get attribute from an ESMF type
+// !IROUTINE:  ESMC_BaseAttGet(name) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Base::ESMC_BaseAttGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -2129,7 +2129,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
        return rc;
   }
 
-  attr = ESMC_AttributeGet(name);
+  attr = ESMC_BaseAttGet(name);
   if (!attr) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
                              "attribute not found", &rc);
@@ -2194,16 +2194,16 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(name)
+}  // end ESMC_BaseAttGet(name)
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#define ESMC_METHOD "ESMC_BaseAttGet"
 //BOP
-// !IROUTINE:  ESMC_AttributeGet(num) - get attribute from an ESMF type
+// !IROUTINE:  ESMC_BaseAttGet(num) - get attribute from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
+      int ESMC_Base::ESMC_BaseAttGet(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -2225,7 +2225,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   // Initialize local return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
 
-  attr = ESMC_AttributeGet(num);
+  attr = ESMC_BaseAttGet(num);
   if (!attr) {
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
                              "attribute not found", &rc);
@@ -2292,17 +2292,17 @@ if (count) {
 
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(num)
+}  // end ESMC_BaseAttGet(num)
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGetCount"
+#define ESMC_METHOD "ESMC_BaseAttGetCount"
 //BOP
-// !IROUTINE:  ESMC_AttributeGetCount - get an ESMF object's number of attributes
+// !IROUTINE:  ESMC_BaseAttGetCount - get an ESMF object's number of attributes
 // 
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGetCount(
+      int ESMC_Base::ESMC_BaseAttGetCount(
 // 
 // !RETURN VALUE:
 //    int attribute count
@@ -2318,16 +2318,16 @@ if (count) {
   
   return attrCount;
 
-} // end ESMC_AttributeGetCount
+} // end ESMC_BaseAttGetCount
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#define ESMC_METHOD "ESMC_BaseAttGet"
 //BOP
-// !IROUTINE:  ESMC_AttributeGet - get an ESMF object's attribute by number
+// !IROUTINE:  ESMC_BaseAttGet - get an ESMF object's attribute by number
 //
 // !INTERFACE:
-      ESMC_Attribute *ESMC_Base::ESMC_AttributeGet(
+      ESMC_Attribute *ESMC_Base::ESMC_BaseAttGet(
 // 
 // !RETURN VALUE:
 //    int return code.
@@ -2353,16 +2353,16 @@ if (count) {
 
   return attrList[number];
 
-}  // end ESMC_AttributeGet
+}  // end ESMC_BaseAttGet
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGetNameList"
+#define ESMC_METHOD "ESMC_BaseAttGetNameList"
 //BOP
-// !IROUTINE:  ESMC_AttributeGetNameList - get the list of attribute names
+// !IROUTINE:  ESMC_BaseAttGetNameList - get the list of attribute names
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGetNameList(
+      int ESMC_Base::ESMC_BaseAttGetNameList(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -2378,16 +2378,16 @@ if (count) {
 
   return ESMC_RC_NOT_IMPL;
 
-}  // end ESMC_AttributeGetNameList
+}  // end ESMC_BaseAttGetNameList
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSetList"
+#define ESMC_METHOD "ESMC_BaseAttSetList"
 //BOP
-// !IROUTINE:  ESMC_AttributeSetList - set multiple attributes at once
+// !IROUTINE:  ESMC_BaseAttSetList - set multiple attributes at once
 // 
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeSetList(
+      int ESMC_Base::ESMC_BaseAttSetList(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -2403,16 +2403,16 @@ if (count) {
 
   return ESMC_RC_NOT_IMPL;
 
-}  // end ESMC_AttributeSetList
+}  // end ESMC_BaseAttSetList
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGetList"
+#define ESMC_METHOD "ESMC_BaseAttGetList"
 //BOP
-// !IROUTINE:  ESMC_AttributeGetList - get multiple attributes at once
+// !IROUTINE:  ESMC_BaseAttGetList - get multiple attributes at once
 // 
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGetList(
+      int ESMC_Base::ESMC_BaseAttGetList(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -2428,16 +2428,16 @@ if (count) {
 
   return ESMC_RC_NOT_IMPL;
 
-}  // end ESMC_AttributeGetList
+}  // end ESMC_BaseAttGetList
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeCopy"
+#define ESMC_METHOD "ESMC_BaseAttCopy"
 //BOP
-// !IROUTINE:  ESMC_AttributeCopy - copy an attribute between two objects
+// !IROUTINE:  ESMC_BaseAttCopy - copy an attribute between two objects
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeCopy(
+      int ESMC_Base::ESMC_BaseAttCopy(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -2454,16 +2454,16 @@ if (count) {
 
   return ESMC_RC_NOT_IMPL;
 
-}  // end ESMC_AttributeCopy
+}  // end ESMC_BaseAttCopy
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeCopyAll"
+#define ESMC_METHOD "ESMC_BaseAttCopyAll"
 //BOP
-// !IROUTINE:  ESMC_AttributeCopyAll - copy attributes between two objects 
+// !IROUTINE:  ESMC_BaseAttCopyAll - copy attributes between two objects 
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeCopyAll(
+      int ESMC_Base::ESMC_BaseAttCopyAll(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -2480,7 +2480,7 @@ if (count) {
 
   return ESMC_RC_NOT_IMPL;
 
-}  // end ESMC_AttributeCopyAll
+}  // end ESMC_BaseAttCopyAll
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -2686,12 +2686,12 @@ if (count) {
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSetObjectList"
+#define ESMC_METHOD "ESMC_BaseAttSetObjectList"
 //BOP
-// !IROUTINE:  ESMC_AttributeSetObjectList - set an attribute on multiple ESMF objects
+// !IROUTINE:  ESMC_BaseAttSetObjectList - set an attribute on multiple ESMF objects
 //
 // !INTERFACE:
-      int ESMC_AttributeSetObjectList(
+      int ESMC_BaseAttSetObjectList(
 //
 // !RETURN VALUE:
 //    int return code
@@ -2712,16 +2712,16 @@ if (count) {
 
     return localrc;
 
-}  // end ESMC_AttributeSetObjectList
+}  // end ESMC_BaseAttSetObjectList
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGetObjectList"
+#define ESMC_METHOD "ESMC_BaseAttGetObjectList"
 //BOP
-// !IROUTINE:  ESMC_AttributeGetObjectList - get an attribute from multiple ESMF objects 
+// !IROUTINE:  ESMC_BaseAttGetObjectList - get an attribute from multiple ESMF objects 
 //
 // !INTERFACE:
-      int ESMC_AttributeGetObjectList(
+      int ESMC_BaseAttGetObjectList(
 // 
 // !RETURN VALUE:
 //    int return code
@@ -2742,14 +2742,14 @@ if (count) {
 
     return localrc;
 
-}  // end ESMC_AttributeGetObjectList
+}  // end ESMC_BaseAttGetObjectList
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeCopy(=)"
+#define ESMC_METHOD "ESMC_BaseAttCopy(=)"
 //BOP
-// !IROUTINE:  ESMC_AttributeCopy(=) - assignment operator for attributes
+// !IROUTINE:  ESMC_BaseAttCopy(=) - assignment operator for attributes
 //
 // !INTERFACE:
       ESMC_Attribute& ESMC_Attribute::operator=(
