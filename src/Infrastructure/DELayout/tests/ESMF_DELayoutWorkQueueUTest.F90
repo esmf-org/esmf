@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.9.2.1 2008/04/05 03:12:37 cdeluca Exp $
+! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.9.2.2 2008/04/09 22:39:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -23,7 +23,7 @@ module ESMF_DELayoutWQUTest_mod
   contains !--------------------------------------------------------------------
 
   subroutine mygcomp_register_withoutthreads(gcomp, rc)
-    type(ESMF_GridComp), intent(inout):: gcomp
+    type(ESMF_GridComp):: gcomp
     integer, intent(out):: rc
     
     print *, "*** hi from mygcomp_register ***"
@@ -38,7 +38,7 @@ module ESMF_DELayoutWQUTest_mod
   end subroutine !--------------------------------------------------------------
   
   subroutine mygcomp_register_withthreads(gcomp, rc)
-    type(ESMF_GridComp), intent(inout):: gcomp
+    type(ESMF_GridComp):: gcomp
     integer, intent(out):: rc
     
     print *, "*** hi from mygcomp_register ***"
@@ -55,15 +55,15 @@ module ESMF_DELayoutWQUTest_mod
   end subroutine !--------------------------------------------------------------
   
   recursive subroutine mygcomp_run(gcomp, istate, estate, clock, rc)
-    type(ESMF_GridComp), intent(inout):: gcomp
-    type(ESMF_State), intent(in):: istate, estate
-    type(ESMF_Clock), intent(in):: clock
+    type(ESMF_GridComp):: gcomp
+    type(ESMF_State):: istate, estate
+    type(ESMF_Clock):: clock
     integer, intent(out):: rc
     
     type(ESMF_VM):: vm
     type(ESMF_DELayout):: delayout
     integer:: petCount, localPet, localDeCount, i, workDe, k, deCount
-    integer:: localrc ! absoft refuses to use the dummy variable rc in functions
+    integer:: localrc
     integer, allocatable:: localDeList(:)
     type(ESMF_DELayoutServiceReply):: reply
     real:: x
@@ -71,35 +71,40 @@ module ESMF_DELayoutWQUTest_mod
 
     print *, "*** hi from mygcomp_run ***"
     
-    call ESMF_GridCompGet(gcomp, vm=vm)
-!    call ESMF_VMPrint(vm, rc)
+    call ESMF_GridCompGet(gcomp, vm=vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) goto 10 ! bail out
 
     call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
+    if (rc/=ESMF_SUCCESS) goto 10 ! bail out
 
     deCount = 10*petCount
     delayout = ESMF_DELayoutCreate(deCount=deCount, &
-      dePinFlag=ESMF_DE_PIN_VAS, rc=localrc)
-    rc = localrc
+      dePinFlag=ESMF_DE_PIN_VAS, rc=rc)
+    if (rc/=ESMF_SUCCESS) goto 10 ! bail out
     
 !    call ESMF_DELayoutPrint(delayout, rc=rc)
+!    if (rc/=ESMF_SUCCESS) goto 10 ! bail out
 
     call ESMF_DELayoutGet(delayout, vasLocalDeCount=localDeCount, rc=rc)
+    if (rc/=ESMF_SUCCESS) goto 10 ! bail out
     allocate(localDeList(localDeCount))
     call ESMF_DELayoutGet(delayout, vasLocalDeList=localDeList, rc=rc)
+    if (rc/=ESMF_SUCCESS) goto 10 ! bail out
     
   do k=1, 4
   
     do i=1, localDeCount
       workDe = localDeList(i)
 !      print *, "I am PET", localPET, " and I am offering service for DE ", workDe
-      reply = ESMF_DELayoutServiceOffer(delayout, de=workDe, rc=localrc)
-      rc = localrc
+      reply = ESMF_DELayoutServiceOffer(delayout, de=workDe, rc=rc)
+      if (rc/=ESMF_SUCCESS) goto 10 ! bail out
       if (reply == ESMF_DELAYOUT_SERVICE_ACCEPT) then
 !        print *, "I am PET", localPET, ", service offer for DE ", workDe, &
 !          " was accepted."
         call work(x, workDe, petCount)  ! work for workDe
 !        print *, "x = ", x
         call ESMF_DELayoutServiceComplete(delayout, de=workDe, rc=rc)
+        if (rc/=ESMF_SUCCESS) goto 10 ! bail out
 !        print *, "I am PET", localPET, ", service for DE ", workDe, &
 !          " completed."
       endif
@@ -110,8 +115,10 @@ module ESMF_DELayoutWQUTest_mod
     deallocate(localDeList)
     
     call ESMF_DELayoutDestroy(delayout, rc=rc)
+    if (rc/=ESMF_SUCCESS) goto 10 ! bail out
 
     rc = ESMF_SUCCESS
+10 continue
   end subroutine !--------------------------------------------------------------
 
 
@@ -165,8 +172,6 @@ program ESMF_DELayoutWQUTest
   ! local variables
   integer:: rc
   type(ESMF_GridComp):: gcomp
-  type(ESMF_Clock):: dummyclock
-  type(ESMF_State):: dummystate
   real(ESMF_KIND_R8):: timeStart, timeEnd
   type(ESMF_VM):: vm
   integer:: localPet
@@ -195,11 +200,11 @@ program ESMF_DELayoutWQUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   !------------------------------------------------------------------------
-  !NEX___UTest Disabled see bug 1489171
+  !NEX_UTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Run work queue without threads Test"
   call ESMF_VMWtime(timeStart)
-  call ESMF_GridCompRun(gcomp, dummystate, dummystate, dummyclock, rc=rc)
+  call ESMF_GridCompRun(gcomp, rc=rc)
   call ESMF_VMWtime(timeEnd)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   if (rc.ne.ESMF_SUCCESS) goto 10
@@ -220,11 +225,11 @@ program ESMF_DELayoutWQUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
  
   !------------------------------------------------------------------------
-  !NEX___UTest Disabled see bug 1489171
+  !NEX_UTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Run work queue with threads Test"
   call ESMF_VMWtime(timeStart)
-  call ESMF_GridCompRun(gcomp, dummystate, dummystate, dummyclock, rc=rc)
+  call ESMF_GridCompRun(gcomp, rc=rc)
   call ESMF_VMWtime(timeEnd)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   if (rc.ne.ESMF_SUCCESS) goto 10
