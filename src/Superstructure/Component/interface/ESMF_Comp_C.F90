@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.45.2.1 2008/04/05 03:14:12 cdeluca Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.45.2.2 2008/04/09 22:33:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Comp_C.F90,v 1.45.2.1 2008/04/05 03:14:12 cdeluca Exp $'
+!      '$Id: ESMF_Comp_C.F90,v 1.45.2.2 2008/04/09 22:33:54 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -179,6 +179,8 @@ recursive subroutine f_esmf_compreplicate(comp, comp_src, vm, rc)
   type(ESMF_VM)    :: vm
   integer :: rc
 
+  type(ESMF_VM) :: vm_cpy
+  type(ESMF_Pointer) :: this
   type (ESMF_CompClass), pointer :: compclass  
   
   ! Initialize return code; assume routine not implemented
@@ -188,9 +190,13 @@ recursive subroutine f_esmf_compreplicate(comp, comp_src, vm, rc)
   nullify(compclass)
   allocate(compclass)
   compclass = comp_src%compp
-  call  ESMF_CompClassSetInitCreated(compclass)
-  call ESMF_CompSet(compclass, vm=vm)
+  call ESMF_CompClassSetInitCreated(compclass)
+  call ESMF_VMGetThis(vm, this)
+  call ESMF_VMSetThis(vm_cpy, this)
+  call ESMF_VMSetInitCreated(vm_cpy)
+  call ESMF_CompSet(compclass, vm=vm_cpy)
   comp%compp => compclass
+  call ESMF_CWrapSetInitCreated(comp)
 end subroutine f_esmf_compreplicate
 
 #undef  ESMF_METHOD
