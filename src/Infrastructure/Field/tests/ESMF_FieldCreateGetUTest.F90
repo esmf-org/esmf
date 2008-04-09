@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.7 2008/04/07 06:45:54 theurich Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.8 2008/04/09 18:14:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -30,7 +30,6 @@
 ! !USES:
     use ESMF_TestMod     ! test methods
     use ESMF_Mod
-    use ESMF_FieldGetMod
 
     implicit none
 
@@ -48,21 +47,6 @@
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
     character(512) :: name
-
-    real, dimension(:,:), pointer :: fptr2d
-    real, dimension(:,:,:), pointer :: fptr
-    real, dimension(20,22)  :: farray
-    type(ESMF_Field)        :: field
-    type(ESMF_Grid)         :: grid, grid1
-    type(ESMF_Array)        :: array
-    type(ESMF_TypeKind)     :: typekind
-    integer                 :: dimCount
-    type(ESMF_StaggerLoc)   :: staggerloc
-    integer, dimension(ESMF_MAXDIM) :: gridToFieldMap
-    integer, dimension(ESMF_MAXDIM) :: ungriddedLBound 
-    integer, dimension(ESMF_MAXDIM) :: ungriddedUBound 
-    integer, dimension(ESMF_MAXDIM) :: maxHaloLWidth
-    integer, dimension(ESMF_MAXDIM) :: maxHaloUWidth
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
  

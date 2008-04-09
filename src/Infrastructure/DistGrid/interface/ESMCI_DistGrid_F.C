@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid_F.C,v 1.3 2008/04/05 03:38:14 cdeluca Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.4 2008/04/09 18:14:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -48,6 +48,8 @@ extern "C" {
     ESMCI::InterfaceInt **minIndex, ESMCI::InterfaceInt **maxIndex,
     ESMCI::InterfaceInt **regDecomp,
     ESMCI::DecompFlag *decompflag, int *decompflagCount, 
+    ESMCI::InterfaceInt **regDecompFirstExtra,
+    ESMCI::InterfaceInt **regDecompLastExtra,
     ESMCI::InterfaceInt **deLabelList, ESMC_IndexFlag *indexflag, 
     ESMCI::InterfaceInt **connectionList,
     ESMCI::InterfaceInt **connectionTransList,
@@ -67,8 +69,8 @@ extern "C" {
     else opt_vm = *vm;
     // call into C++
     *ptr = ESMCI::DistGrid::create(*minIndex, *maxIndex, *regDecomp,
-      decompflag, *decompflagCount, *deLabelList, 
-      ESMC_NOT_PRESENT_FILTER(indexflag),
+      decompflag, *decompflagCount, *regDecompFirstExtra, *regDecompLastExtra,
+      *deLabelList, ESMC_NOT_PRESENT_FILTER(indexflag),
       *connectionList, *connectionTransList, opt_delayout, opt_vm,
       &localrc);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
@@ -108,7 +110,9 @@ extern "C" {
   void FTN(c_esmc_distgridcreaterdfa)(ESMCI::DistGrid **ptr, 
     ESMCI::InterfaceInt **minIndex, ESMCI::InterfaceInt **maxIndex,
     ESMCI::InterfaceInt **regDecomp,
-    ESMCI::DecompFlag *decompflag, int *decompflagCount, 
+    ESMCI::DecompFlag *decompflag, int *decompflagCount,
+    ESMCI::InterfaceInt **regDecompFirstExtra,
+    ESMCI::InterfaceInt **regDecompLastExtra,
     ESMCI::InterfaceInt **deLabelList, ESMC_IndexFlag *indexflag, 
     ESMCI::InterfaceInt **connectionList,
     ESMCI::InterfaceInt **connectionTransList,
@@ -124,8 +128,8 @@ extern "C" {
     else opt_vm = *vm;
     // call into C++
     *ptr = ESMCI::DistGrid::create(*minIndex, *maxIndex, *regDecomp,
-      decompflag, *decompflagCount, *deLabelList,
-      ESMC_NOT_PRESENT_FILTER(indexflag),
+      decompflag, *decompflagCount, *regDecompFirstExtra, *regDecompLastExtra,
+      *deLabelList, ESMC_NOT_PRESENT_FILTER(indexflag),
       *connectionList, *connectionTransList, *fastAxis, opt_vm,
       &localrc);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
@@ -136,6 +140,8 @@ extern "C" {
     ESMCI::InterfaceInt **minIndex, ESMCI::InterfaceInt **maxIndex,
     ESMCI::InterfaceInt **regDecomp,
     ESMCI::DecompFlag *decompflag, int *decompflagCount1, int *decompflagCount2,
+    ESMCI::InterfaceInt **regDecompFirstExtra,
+    ESMCI::InterfaceInt **regDecompLastExtra,
     ESMCI::InterfaceInt **deLabelList, ESMC_IndexFlag *indexflag, 
     ESMCI::InterfaceInt **connectionList,
     ESMCI::InterfaceInt **connectionTransList,
@@ -155,7 +161,8 @@ extern "C" {
     else opt_vm = *vm;
     // call into C++
     *ptr = ESMCI::DistGrid::create(*minIndex, *maxIndex, *regDecomp,
-      decompflag, *decompflagCount1, *decompflagCount2, *deLabelList, 
+      decompflag, *decompflagCount1, *decompflagCount2, 
+      *regDecompFirstExtra, *regDecompLastExtra, *deLabelList, 
       ESMC_NOT_PRESENT_FILTER(indexflag),
       *connectionList, *connectionTransList, opt_delayout, opt_vm,
       &localrc);

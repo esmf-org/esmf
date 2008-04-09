@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.3 2008/04/05 03:38:14 cdeluca Exp $
+// $Id: ESMCI_DistGrid.h,v 1.4 2008/04/09 18:14:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -91,6 +91,7 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     static DistGrid *create(InterfaceInt *minIndex,
       InterfaceInt *maxIndex, InterfaceInt *regDecomp, 
       DecompFlag *decompflag, int decompflagCount,
+      InterfaceInt *regDecompFirstExtra, InterfaceInt *regDecompLastExtra, 
       InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
       InterfaceInt *connectionList,
       InterfaceInt *connectionTransList, 
@@ -104,6 +105,7 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     static DistGrid *create(InterfaceInt *minIndex,
       InterfaceInt *maxIndex, InterfaceInt *regDecomp, 
       DecompFlag *decompflag, int decompflagCount,
+      InterfaceInt *regDecompFirstExtra, InterfaceInt *regDecompLastExtra, 
       InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
       InterfaceInt *connectionList,
       InterfaceInt *connectionTransList, 
@@ -111,6 +113,7 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     static DistGrid *create(InterfaceInt *minIndex,
       InterfaceInt *maxIndex, InterfaceInt *regDecomp, 
       DecompFlag *decompflag, int decompflagCount1, int decompflagCount2,
+      InterfaceInt *regDecompFirstExtra, InterfaceInt *regDecompLastExtra, 
       InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
       InterfaceInt *connectionList,
       InterfaceInt *connectionTransList, 

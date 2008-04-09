@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.36 2008/04/05 03:38:14 cdeluca Exp $
+! $Id: ESMF_DistGrid.F90,v 1.37 2008/04/09 18:14:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -111,7 +111,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.36 2008/04/05 03:38:14 cdeluca Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.37 2008/04/09 18:14:38 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -188,14 +188,16 @@ contains
   ! Private name; call using ESMF_DistGridCreate()
   
   function ESMF_DistGridCreateRD(minIndex, maxIndex, regDecomp, &
-    decompflag, deLabelList, indexflag, connectionList, connectionTransList, &
-    delayout, vm, rc)
+    decompflag, regDecompFirstExtra, regDecompLastExtra, deLabelList, &
+    indexflag, connectionList, connectionTransList, delayout, vm, rc)
 !
 ! !ARGUMENTS:
     integer,                      intent(in)            :: minIndex(:)
     integer,                      intent(in)            :: maxIndex(:)
     integer, target,              intent(in), optional  :: regDecomp(:)
     type(ESMF_DecompFlag), target,intent(in), optional  :: decompflag(:)
+    integer, target,              intent(in), optional  :: regDecompFirstExtra(:)
+    integer, target,              intent(in), optional  :: regDecompLastExtra(:)
     integer, target,              intent(in), optional  :: deLabelList(:)
     type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
     integer, target,              intent(in), optional  :: connectionList(:,:)
@@ -231,6 +233,12 @@ contains
 !          patch is to be divided between the DEs. The default setting
 !          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. See section
 !          \ref{opt:decompflag} for a list of valid decomposition flag options.
+!     \item[{[regDecompFirstExtra]}]
+!          Extra elements on the first DEs along each dimension in a regular
+!          decomposition. The default is a zero vector.
+!     \item[{[regDecompLastExtra]}]
+!          Extra elements on the last DEs along each dimension in a regular
+!          decomposition. The default is a zero vector.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
 !          sequence is given by the column major order of the {\tt regDecomp}
@@ -309,6 +317,8 @@ contains
     type(ESMF_DecompFlag), target   :: dummyDf(0)  ! satisfy C interface
     type(ESMF_DecompFlag), pointer  ::  opt_decompflag(:) ! optional arg helper
     integer                 :: len_decompflag ! helper variable
+    type(ESMF_InterfaceInt) :: regDecompFirstExtraArg ! helper variable
+    type(ESMF_InterfaceInt) :: regDecompLastExtraArg ! helper variable
     type(ESMF_InterfaceInt) :: deLabelListArg ! helper variable
     type(ESMF_InterfaceInt) :: connectionListArg ! helper variable
     type(ESMF_InterfaceInt) :: connectionTransListArg ! helper variable
@@ -338,6 +348,14 @@ contains
       len_decompflag = 0
       opt_decompflag => dummyDf
     endif
+    regDecompFirstExtraArg = ESMF_InterfaceIntCreate(regDecompFirstExtra, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    regDecompLastExtraArg = ESMF_InterfaceIntCreate(regDecompLastExtra, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     deLabelListArg = ESMF_InterfaceIntCreate(deLabelList, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -355,7 +373,8 @@ contains
 
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridCreateRD(distgrid, minIndexArg, maxIndexArg, &
-      regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
+      regDecompArg, opt_decompflag, len_decompflag, regDecompFirstExtraArg, &
+      regDecompLastExtraArg, deLabelListArg, indexflag, &
       connectionListArg, connectionTransListArg, delayout, vm, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -368,6 +387,12 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(regDecompArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(regDecompFirstExtraArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(regDecompLastExtraArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(deLabelListArg, rc=localrc)
@@ -609,15 +634,17 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateRDFA(minIndex, maxIndex, &
-    regDecomp, decompflag, deLabelList, indexflag, connectionList, &
-    connectionTransList, fastAxis, vm, rc)
+  function ESMF_DistGridCreateRDFA(minIndex, maxIndex, regDecomp, &
+    decompflag, regDecompFirstExtra, regDecompLastExtra, deLabelList, &
+    indexflag, connectionList, connectionTransList, fastAxis, vm, rc)
 !
 ! !ARGUMENTS:
     integer,                      intent(in)            :: minIndex(:)
     integer,                      intent(in)            :: maxIndex(:)
     integer,                      intent(in), optional  :: regDecomp(:)
     type(ESMF_DecompFlag),target, intent(in), optional  :: decompflag(:)
+    integer, target,              intent(in), optional  :: regDecompFirstExtra(:)
+    integer, target,              intent(in), optional  :: regDecompLastExtra(:)
     integer,                      intent(in), optional  :: deLabelList(:)
     type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
     integer,                      intent(in), optional  :: connectionList(:,:)
@@ -654,6 +681,12 @@ contains
 !          patch is to be divided between the DEs. The default setting
 !          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. See section
 !          \ref{opt:decompflag} for a list of valid decomposition flag options.
+!     \item[{[regDecompFirstExtra]}]
+!          Extra elements on the first DEs along each dimension in a regular
+!          decomposition. The default is a zero vector.
+!     \item[{[regDecompLastExtra]}]
+!          Extra elements on the last DEs along each dimension in a regular
+!          decomposition. The default is a zero vector.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
 !          sequence is given by the column major order of the {\tt regDecomp}
@@ -730,6 +763,8 @@ contains
     type(ESMF_DecompFlag), target   :: dummyDf(0)  ! satisfy C interface
     type(ESMF_DecompFlag), pointer  ::  opt_decompflag(:) ! optional arg helper
     integer                 :: len_decompflag ! helper variable
+    type(ESMF_InterfaceInt) :: regDecompFirstExtraArg ! helper variable
+    type(ESMF_InterfaceInt) :: regDecompLastExtraArg ! helper variable
     type(ESMF_InterfaceInt) :: deLabelListArg ! helper variable
     type(ESMF_InterfaceInt) :: connectionListArg ! helper variable
     type(ESMF_InterfaceInt) :: connectionTransListArg ! helper variable
@@ -758,6 +793,12 @@ contains
       len_decompflag = 0
       opt_decompflag => dummyDf
     endif
+    regDecompFirstExtraArg = ESMF_InterfaceIntCreate(regDecompFirstExtra, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    regDecompLastExtraArg = ESMF_InterfaceIntCreate(regDecompLastExtra, &
+      rc=localrc)
     deLabelListArg = ESMF_InterfaceIntCreate(deLabelList, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -775,7 +816,8 @@ contains
 
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridCreateRDFA(distgrid, minIndexArg, maxIndexArg, &
-      regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
+      regDecompArg, opt_decompflag, len_decompflag, regDecompFirstExtraArg, &
+      regDecompLastExtraArg, deLabelListArg, indexflag, &
       connectionListArg, connectionTransListArg, fastAxis, vm, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -788,6 +830,12 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(regDecompArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(regDecompFirstExtraArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(regDecompLastExtraArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(deLabelListArg, rc=localrc)
@@ -978,14 +1026,16 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateRDP(minIndex, maxIndex, regDecomp,&
-    decompflag, deLabelList, indexflag, connectionList, connectionTransList,&
-    delayout, vm, rc)
+    decompflag, regDecompFirstExtra, regDecompLastExtra, deLabelList, &
+    indexflag, connectionList, connectionTransList, delayout, vm, rc)
 !
 ! !ARGUMENTS:
     integer,                      intent(in)            :: minIndex(:,:)
     integer,                      intent(in)            :: maxIndex(:,:)
     integer,                      intent(in), optional  :: regDecomp(:,:)
     type(ESMF_DecompFlag),target, intent(in), optional  :: decompflag(:,:)
+    integer, target,              intent(in), optional  :: regDecompFirstExtra(:,:)
+    integer, target,              intent(in), optional  :: regDecompLastExtra(:,:)
     integer,                      intent(in), optional  :: deLabelList(:)
     type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
     integer,                      intent(in), optional  :: connectionList(:,:)
@@ -1028,6 +1078,14 @@ contains
 !          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions for all patches. 
 !          See section \ref{opt:decompflag} for a list of valid decomposition
 !          flag options. The second index indicates the patch number.
+!     \item[{[regDecompFirstExtra]}]
+!          Extra elements on the first DEs along each dimension in a regular
+!          decomposition. The default is a zero vector. The second index 
+!          indicates the patch number.
+!     \item[{[regDecompLastExtra]}]
+!          Extra elements on the last DEs along each dimension in a regular
+!          decomposition. The default is a zero vector. The second index 
+!          indicates the patch number.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
 !          sequence is given by the column major order of the {\tt regDecomp}
@@ -1107,6 +1165,8 @@ contains
     type(ESMF_DecompFlag), pointer::  opt_decompflag(:,:) ! optional arg helper
     integer                 :: len1_decompflag ! helper variable
     integer                 :: len2_decompflag ! helper variable
+    type(ESMF_InterfaceInt) :: regDecompFirstExtraArg ! helper variable
+    type(ESMF_InterfaceInt) :: regDecompLastExtraArg ! helper variable
     type(ESMF_InterfaceInt) :: deLabelListArg ! helper variable
     type(ESMF_InterfaceInt) :: connectionListArg ! helper variable
     type(ESMF_InterfaceInt) :: connectionTransListArg ! helper variable
@@ -1138,6 +1198,14 @@ contains
       len2_decompflag = 0
       opt_decompflag => dummyDf
     endif
+    regDecompFirstExtraArg = &
+      ESMF_InterfaceIntCreate(farray2D=regDecompFirstExtra, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    regDecompLastExtraArg = &
+      ESMF_InterfaceIntCreate(farray2D=regDecompLastExtra, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     deLabelListArg = ESMF_InterfaceIntCreate(deLabelList, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1154,10 +1222,11 @@ contains
     distgrid%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridCreateRDP(distgrid, minIndexArg, &
-      maxIndexArg, regDecompArg, opt_decompflag, len1_decompflag, &
-      len2_decompflag, deLabelListArg, indexflag, &
-      connectionListArg, connectionTransListArg, delayout, vm, localrc)
+    call c_ESMC_DistGridCreateRDP(distgrid, minIndexArg, maxIndexArg, &
+      regDecompArg, opt_decompflag, len1_decompflag, len2_decompflag, &
+      regDecompFirstExtraArg, regDecompLastExtraArg, deLabelListArg, &
+      indexflag, connectionListArg, connectionTransListArg, delayout, vm, &
+      localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -1169,6 +1238,12 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(regDecompArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(regDecompFirstExtraArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(regDecompLastExtraArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(deLabelListArg, rc=localrc)

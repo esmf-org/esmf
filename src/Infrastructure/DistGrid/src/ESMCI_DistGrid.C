@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.3 2008/04/05 03:38:15 cdeluca Exp $
+// $Id: ESMCI_DistGrid.C,v 1.4 2008/04/09 18:14:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.3 2008/04/05 03:38:15 cdeluca Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.4 2008/04/09 18:14:39 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -74,6 +74,8 @@ DistGrid *DistGrid::create(
   InterfaceInt *regDecomp,                // (in)
   DecompFlag *decompflag,                 // (in)
   int decompflagCount,                    // (in)
+  InterfaceInt *regDecompFirstExtra,      // (in)
+  InterfaceInt *regDecompLastExtra,       // (in)
   InterfaceInt *deLabelList,              // (in)
   ESMC_IndexFlag *indexflag,              // (in)
   InterfaceInt *connectionList,           // (in)
@@ -186,10 +188,10 @@ DistGrid *DistGrid::create(
     delayoutCreator = false;  // indicate that delayout was not created here
   }
   int *dummy;
-  int regDecompDeleteFlag = 0;  // reset
+  bool regDecompDeleteFlag = false;  // reset
   if (regDecomp == ESMC_NULL_POINTER){
     // regDecomp was not provided -> create a temporary default regDecomp
-    regDecompDeleteFlag = 1;  // set
+    regDecompDeleteFlag = true;  // set
     dummy = new int[dimCount];
     // set default decomposition
     dummy[0] = deCount;
@@ -204,10 +206,10 @@ DistGrid *DistGrid::create(
     distgrid = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
   }
-  int decompflagDeleteFlag = 0; // reset
+  bool decompflagDeleteFlag = false; // reset
   if (decompflagCount==0){
     // decompflag was not provided -> set up default decompflag
-    decompflagDeleteFlag = 1; // set
+    decompflagDeleteFlag = true; // set
     decompflagCount = dimCount;
     decompflag = new DecompFlag[dimCount];
     for (int i=0; i<dimCount; i++)
@@ -220,10 +222,10 @@ DistGrid *DistGrid::create(
     distgrid = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
   }
-  int deLabelListDeleteFlag = 0;  // reset
+  bool deLabelListDeleteFlag = false;  // reset
   if (deLabelList == ESMC_NULL_POINTER){
     // deLabelList was not provided -> create a temporary default deLabelList
-    deLabelListDeleteFlag = 1;  // set
+    deLabelListDeleteFlag = true;  // set
     dummy = new int[deCount];
     // set default sequence
     for (int i=0; i<deCount; i++)
@@ -238,7 +240,7 @@ DistGrid *DistGrid::create(
     return ESMC_NULL_POINTER;
   }
   if (deLabelList->extent[0] < deCount){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
       "- deLabelList array must provide deCount DE labels", rc);
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
@@ -253,10 +255,58 @@ DistGrid *DistGrid::create(
       return ESMC_NULL_POINTER;
     }
   }
+  bool regDecompFirstExtraDeleteFlag = false;  // reset
+  if (regDecompFirstExtra == ESMC_NULL_POINTER){
+    // regDecompFirstExtra was not provided -> create a temporary default
+    regDecompFirstExtraDeleteFlag = true;  // set
+    dummy = new int[dimCount];
+    // set default
+    for (int i=0; i<dimCount; i++)
+      dummy[i] = 0;
+    regDecompFirstExtra = new InterfaceInt(dummy, 1, &dimCount);
+  }
+  if (regDecompFirstExtra->dimCount != 1){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      "- regDecompFirstExtra array must be of rank 1", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (regDecompFirstExtra->extent[0] != dimCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      "- regDecompFirstExtra array must be of size dimCount", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  bool regDecompLastExtraDeleteFlag = false;  // reset
+  if (regDecompLastExtra == ESMC_NULL_POINTER){
+    // regDecompLastExtra was not provided -> create a temporary default
+    regDecompLastExtraDeleteFlag = true;  // set
+    dummy = new int[dimCount];
+    // set default
+    for (int i=0; i<dimCount; i++)
+      dummy[i] = 0;
+    regDecompLastExtra = new InterfaceInt(dummy, 1, &dimCount);
+  }
+  if (regDecompLastExtra->dimCount != 1){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      "- regDecompLastExtra array must be of rank 1", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (regDecompLastExtra->extent[0] != dimCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      "- regDecompLastExtra array must be of size dimCount", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
   
   // setup temporary indexCountPDimPDe, indexListPDimPLocalDe and dimCongtigFlag
   // arrays for construct()
-  int localDeCount = delayout->getLocalDeCount();
+  const int localDeCount = delayout->getLocalDeCount();
   const int *deList = delayout->getDeList();
   int *indexCountPDimPDe = new int[dimCount*deCount];
   int **indexListPDimPLocalDe = new int*[dimCount*localDeCount];
@@ -265,9 +315,19 @@ DistGrid *DistGrid::create(
   int *maxIndexPDimPDe = new int[dimCount*deCount];
   int deDivider = 1;  // reset
   for (int i=0; i<dimCount; i++){
-    int dimLength = maxIndex->array[i] - minIndex->array[i] + 1;
-    int chunkLength = dimLength/regDecomp->array[i];  // basic chunk size
-    int chunkRest = dimLength%regDecomp->array[i];    // left over points
+    const int firstExtra = regDecompFirstExtra->array[i];
+    const int lastExtra = regDecompLastExtra->array[i];
+    const int dimLength = maxIndex->array[i] - minIndex->array[i] + 1
+      - firstExtra - lastExtra;
+    if (dimLength < 0){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+        "- more extra elements specified than are available", rc);
+      delete distgrid;
+      distgrid = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+    const int chunkLength = dimLength/regDecomp->array[i];  // basic chunk size
+    const int chunkRest = dimLength%regDecomp->array[i];    // left over points
     int de, decompChunk, extentIndex;
     switch (decompflag[i]){
       case DECOMP_DEFAULT:
@@ -278,16 +338,22 @@ DistGrid *DistGrid::create(
           indexCountPDimPDe[extentIndex] = chunkLength;
           decompChunk = (j/deDivider)%regDecomp->array[i];
           if (decompChunk < chunkRest)
-            ++indexCountPDimPDe[extentIndex]; // dist. rest
-          contigFlagPDimPDe[extentIndex] = 1; // flag contiguous dimension
+            ++indexCountPDimPDe[extentIndex]; // distribute rest
+          if (decompChunk == 0)
+            indexCountPDimPDe[extentIndex] += firstExtra;
+          if (decompChunk == regDecomp->array[i]-1)
+            indexCountPDimPDe[extentIndex] += lastExtra;
           // determine min and max
           int indexStart = minIndex->array[i] + decompChunk * chunkLength;
           if (decompChunk < chunkRest) indexStart += decompChunk;
           else indexStart += chunkRest;
+          if (decompChunk > 0) indexStart += firstExtra;
           minIndexPDimPDe[extentIndex] = indexStart;
           maxIndexPDimPDe[extentIndex] = indexStart
             + indexCountPDimPDe[extentIndex] - 1;
+          // fill indexListPDimPLocalDe
           if (deList[de] > -1){
+            // de is local
             int localExtentIndex = deList[de]*dimCount+i;
             indexListPDimPLocalDe[localExtentIndex] =
               new int[indexCountPDimPDe[extentIndex]];
@@ -297,6 +363,8 @@ DistGrid *DistGrid::create(
               indexListPDimPLocalDe[localExtentIndex][k] = indexStart + k;
             }
           }
+          // flag contiguous dimension
+          contigFlagPDimPDe[extentIndex] = 1;
         }
         break;
       case DECOMP_RESTLAST:
@@ -307,13 +375,19 @@ DistGrid *DistGrid::create(
           decompChunk = (j/deDivider)%regDecomp->array[i];
           if (decompChunk == regDecomp->array[i]-1) 
             indexCountPDimPDe[extentIndex] += chunkRest; // add rest
-          contigFlagPDimPDe[extentIndex] = 1; // flag contiguous dimension
+          if (decompChunk == 0)
+            indexCountPDimPDe[extentIndex] += firstExtra;
+          if (decompChunk == regDecomp->array[i]-1)
+            indexCountPDimPDe[extentIndex] += lastExtra;
           // determine min and max
           int indexStart = minIndex->array[i] + decompChunk * chunkLength;
+          if (decompChunk > 0) indexStart += firstExtra;
           minIndexPDimPDe[extentIndex] = indexStart;
           maxIndexPDimPDe[extentIndex] = indexStart
             + indexCountPDimPDe[extentIndex] - 1;
+          // fill indexListPDimPLocalDe
           if (deList[de] > -1){
+            // de is local
             int localExtentIndex = deList[de]*dimCount+i;
             indexListPDimPLocalDe[localExtentIndex] =
               new int[indexCountPDimPDe[extentIndex]];
@@ -323,6 +397,8 @@ DistGrid *DistGrid::create(
               indexListPDimPLocalDe[localExtentIndex][k] = indexStart + k;
             }
           }
+          // flag contiguous dimension
+          contigFlagPDimPDe[extentIndex] = 1;
         }
         break;
       case DECOMP_RESTFIRST:
@@ -333,14 +409,20 @@ DistGrid *DistGrid::create(
           decompChunk = (j/deDivider)%regDecomp->array[i];
           if (decompChunk == 0) 
             indexCountPDimPDe[extentIndex] += chunkRest; // add rest
-          contigFlagPDimPDe[extentIndex] = 1; // flag contiguous dimension
+          if (decompChunk == 0)
+            indexCountPDimPDe[extentIndex] += firstExtra;
+          if (decompChunk == regDecomp->array[i]-1)
+            indexCountPDimPDe[extentIndex] += lastExtra;
           // determine min and max
           int indexStart = minIndex->array[i] + decompChunk * chunkLength;
           if (decompChunk > 0) indexStart += chunkRest;
+          if (decompChunk > 0) indexStart += firstExtra;
           minIndexPDimPDe[extentIndex] = indexStart;
           maxIndexPDimPDe[extentIndex] = indexStart
             + indexCountPDimPDe[extentIndex] - 1;
+          // fill indexListPDimPLocalDe
           if (deList[de] > -1){
+            // de is local
             int localExtentIndex = deList[de]*dimCount+i;
             indexListPDimPLocalDe[localExtentIndex] =
               new int[indexCountPDimPDe[extentIndex]];
@@ -350,23 +432,33 @@ DistGrid *DistGrid::create(
               indexListPDimPLocalDe[localExtentIndex][k] = indexStart + k;
             }
           }
+          // flag contiguous dimension
+          contigFlagPDimPDe[extentIndex] = 1;
         }
         break;
       case DECOMP_CYCLIC:
+        if (firstExtra > 0 || lastExtra > 0){
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+            "- extra elements not supported for DECOMP_CYCLIC dims", rc);
+          delete distgrid;
+          distgrid = ESMC_NULL_POINTER;
+          return ESMC_NULL_POINTER;
+        }
         for (int j=0; j<deCount; j++){
           de = deLabelList->array[j];
           extentIndex = de*dimCount+i;  // index into temp. arrays
           indexCountPDimPDe[extentIndex] = chunkLength;
           decompChunk = (j/deDivider)%regDecomp->array[i];
           if (decompChunk < chunkRest)
-            ++indexCountPDimPDe[extentIndex]; // distr. rest
-          contigFlagPDimPDe[extentIndex] = 0; // flag non-contiguous dimension
+            ++indexCountPDimPDe[extentIndex]; // distribute rest
           // determine min and max
           int indexStart = minIndex->array[i] + decompChunk;
           minIndexPDimPDe[extentIndex] = indexStart;
           maxIndexPDimPDe[extentIndex] = indexStart
             + (indexCountPDimPDe[extentIndex] - 1) * regDecomp->array[i];
+          // fill indexListPDimPLocalDe
           if (deList[de] > -1){
+            // de is local
             int localExtentIndex = deList[de]*dimCount+i;
             indexListPDimPLocalDe[localExtentIndex] =
               new int[indexCountPDimPDe[extentIndex]];
@@ -377,6 +469,8 @@ DistGrid *DistGrid::create(
                 indexStart + k * regDecomp->array[i];
             }
           }
+          // flag non-contiguous dimension
+          contigFlagPDimPDe[extentIndex] = 0;
         }
         break;
       default:
@@ -423,6 +517,14 @@ DistGrid *DistGrid::create(
   if (deLabelListDeleteFlag){
     delete [] deLabelList->array;
     delete deLabelList;
+  }
+  if (regDecompFirstExtraDeleteFlag){
+    delete [] regDecompFirstExtra->array;
+    delete regDecompFirstExtra;
+  }
+  if (regDecompLastExtraDeleteFlag){
+    delete [] regDecompLastExtra->array;
+    delete regDecompLastExtra;
   }
   delete [] patchListPDe;
     
@@ -569,10 +671,10 @@ DistGrid *DistGrid::create(
     delayoutCreator = false;  // indicate that delayout was not created here
   }
   int *dummy;
-  int deLabelListDeleteFlag = 0;  // reset
+  bool deLabelListDeleteFlag = false;  // reset
   if (deLabelList == ESMC_NULL_POINTER){
     // deLabelList was not provided -> create a temporary default deLabelList
-    deLabelListDeleteFlag = 1;  // set
+    deLabelListDeleteFlag = true;  // set
     dummy = new int[deCount];
     // set default sequence
     for (int i=0; i<deCount; i++)
@@ -622,11 +724,12 @@ DistGrid *DistGrid::create(
       deBlockIndexMax = deBlockIndexMin + deBlockList->extent[0];
       indexCountPDimPDe[extentIndex] = deBlockList->array[deBlockIndexMax]
         - deBlockList->array[deBlockIndexMin] + 1;
-      contigFlagPDimPDe[extentIndex] = 1; // flag contiguous dimension
       // determine min and max
       minIndexPDimPDe[extentIndex] = deBlockList->array[deBlockIndexMin];
       maxIndexPDimPDe[extentIndex] = deBlockList->array[deBlockIndexMax];
+      // fill indexListPDimPLocalDe
       if (deList[j] > -1){
+        // de is local
         int localExtentIndex = deList[j]*dimCount+i;
         indexListPDimPLocalDe[localExtentIndex] =
           new int[indexCountPDimPDe[extentIndex]];
@@ -634,6 +737,8 @@ DistGrid *DistGrid::create(
           indexListPDimPLocalDe[localExtentIndex][k] =
             deBlockList->array[deBlockIndexMin] + k;
       }
+      // flag contiguous dimension
+      contigFlagPDimPDe[extentIndex] = 1;
     }
   }
   // set up patchListPDe
@@ -693,6 +798,8 @@ DistGrid *DistGrid::create(
   InterfaceInt *regDecomp,                // (in)
   DecompFlag *decompflag,                 // (in)
   int decompflagCount,                    // (in)
+  InterfaceInt *regDecompFirstExtra,      // (in)
+  InterfaceInt *regDecompLastExtra,       // (in)
   InterfaceInt *deLabelList,              // (in)
   ESMC_IndexFlag *indexflag,              // (in)
   InterfaceInt *connectionList,           // (in)
@@ -719,8 +826,8 @@ DistGrid *DistGrid::create(
   // use DistGrid::create() with DELayout to create a suitable DistGrid object
   DistGrid *distgrid = 
     create(minIndex, maxIndex, regDecomp, decompflag,
-      decompflagCount, deLabelList, indexflag, connectionList,
-      connectionTransList, delayout, vm, &localrc);
+      decompflagCount, regDecompFirstExtra, regDecompLastExtra, deLabelList,
+      indexflag, connectionList, connectionTransList, delayout, vm, &localrc);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
     return distgrid;
   
@@ -752,6 +859,8 @@ DistGrid *DistGrid::create(
   DecompFlag *decompflag,                 // (in)
   int decompflagCount1,                   // (in)
   int decompflagCount2,                   // (in)
+  InterfaceInt *regDecompFirstExtra,      // (in)
+  InterfaceInt *regDecompLastExtra,       // (in)
   InterfaceInt *deLabelList,              // (in)
   ESMC_IndexFlag *indexflag,              // (in)
   InterfaceInt *connectionList,           // (in)
@@ -889,10 +998,10 @@ DistGrid *DistGrid::create(
     delayoutCreator = false;  // indicate that delayout was not created here
   }
   int *dummy, dummyLen[2];
-  int regDecompDeleteFlag = 0;  // reset
+  bool regDecompDeleteFlag = false;  // reset
   if (regDecomp == ESMC_NULL_POINTER){
     // regDecomp was not provided -> create a temporary default regDecomp
-    regDecompDeleteFlag = 1;  // set
+    regDecompDeleteFlag = true;  // set
     dummy = new int[dimCount*patchCount];
     // set default decomposition
     for (int i=0; i<dimCount*patchCount; i++)
@@ -908,10 +1017,10 @@ DistGrid *DistGrid::create(
     distgrid = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
   }
-  int decompflagDeleteFlag = 0; // reset
+  bool decompflagDeleteFlag = false; // reset
   if (decompflagCount1==0 || decompflagCount2==0){
     // decompflag was not provided -> set up default decompflag
-    decompflagDeleteFlag = 1; // set
+    decompflagDeleteFlag = true; // set
     decompflagCount1 = dimCount;
     decompflagCount2 = patchCount;
     decompflag = new DecompFlag[dimCount*patchCount];
@@ -932,10 +1041,10 @@ DistGrid *DistGrid::create(
     distgrid = ESMC_NULL_POINTER;
     return ESMC_NULL_POINTER;
   }
-  int deLabelListDeleteFlag = 0;  // reset
+  bool deLabelListDeleteFlag = false;  // reset
   if (deLabelList == ESMC_NULL_POINTER){
     // deLabelList was not provided -> create a temporary default deLabelList
-    deLabelListDeleteFlag = 1;  // set
+    deLabelListDeleteFlag = true;  // set
     dummy = new int[deCount];
     // set default sequence
     for (int i=0; i<deCount; i++)
@@ -965,10 +1074,76 @@ DistGrid *DistGrid::create(
       return ESMC_NULL_POINTER;
     }
   }
+  bool regDecompFirstExtraDeleteFlag = false;  // reset
+  if (regDecompFirstExtra == ESMC_NULL_POINTER){
+    // regDecompFirstExtra was not provided -> create a temporary default
+    regDecompFirstExtraDeleteFlag = true;  // set
+    dummy = new int[dimCount*patchCount];
+    // set default
+    for (int i=0; i<dimCount*patchCount; i++)
+      dummy[i] = 0;
+    dummyLen[0] = dimCount;
+    dummyLen[1] = patchCount;
+    regDecompFirstExtra = new InterfaceInt(dummy, 2, dummyLen);
+  }
+  if (regDecompFirstExtra->dimCount != 2){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      "- regDecompFirstExtra array must be of rank 2", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (regDecompFirstExtra->extent[0] != dimCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      "- 1st dim of regDecompFirstExtra array must be of size dimCount", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (regDecompFirstExtra->extent[1] != patchCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      "- 2nd dim of regDecompFirstExtra array must be of size patchCount", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  bool regDecompLastExtraDeleteFlag = false;  // reset
+  if (regDecompLastExtra == ESMC_NULL_POINTER){
+    // regDecompLastExtra was not provided -> create a temporary default
+    regDecompLastExtraDeleteFlag = true;  // set
+    dummy = new int[dimCount*patchCount];
+    // set default
+    for (int i=0; i<dimCount*patchCount; i++)
+      dummy[i] = 0;
+    dummyLen[0] = dimCount;
+    dummyLen[1] = patchCount;
+    regDecompLastExtra = new InterfaceInt(dummy, 2, dummyLen);
+  }
+  if (regDecompLastExtra->dimCount != 2){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      "- regDecompLastExtra array must be of rank 2", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (regDecompLastExtra->extent[0] != dimCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      "- 1st dim of regDecompLastExtra array must be of size dimCount", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (regDecompLastExtra->extent[1] != patchCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      "- 2nd dim of regDecompLastExtra array must be of size patchCount", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
     
   // setup temporary indexCountPDimPDe, indexListPDimPLocalDe and dimCongtigFlag
   // arrays for construct()
-  int localDeCount = delayout->getLocalDeCount();
+  const int localDeCount = delayout->getLocalDeCount();
   const int *deList = delayout->getDeList();
   int *indexCountPDimPDe = new int[dimCount*deCount];
   int **indexListPDimPLocalDe = new int*[dimCount*localDeCount];
@@ -984,10 +1159,20 @@ DistGrid *DistGrid::create(
   for (int patch=0; patch<patchCount; patch++){
     int deDivider = 1;  // reset
     for (int ii=0; ii<dimCount; ii++){
-      int i = patch*dimCount + ii;  // work in the current patch
-      int dimLength = maxIndex->array[i] - minIndex->array[i] + 1;
-      int chunkLength = dimLength/regDecomp->array[i];  // basic chunk size
-      int chunkRest = dimLength%regDecomp->array[i];    // left over points
+      const int i = patch*dimCount + ii;  // work in the current patch
+      const int firstExtra = regDecompFirstExtra->array[i];
+      const int lastExtra = regDecompLastExtra->array[i];
+      const int dimLength = maxIndex->array[i] - minIndex->array[i] + 1
+        - firstExtra - lastExtra;
+      if (dimLength < 0){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+          "- more extra elements specified than are available", rc);
+        delete distgrid;
+        distgrid = ESMC_NULL_POINTER;
+        return ESMC_NULL_POINTER;
+      }
+      const int chunkLength = dimLength/regDecomp->array[i]; // basic chunk size
+      const int chunkRest = dimLength%regDecomp->array[i];   // left over points
       int de, decompChunk, extentIndex;
       switch (decompflag[i]){
         case DECOMP_DEFAULT:
@@ -999,16 +1184,22 @@ DistGrid *DistGrid::create(
             indexCountPDimPDe[extentIndex] = chunkLength;
             decompChunk = (jj/deDivider)%regDecomp->array[i];
             if (decompChunk < chunkRest)
-              ++indexCountPDimPDe[extentIndex]; //distr. rest
-            contigFlagPDimPDe[extentIndex] = 1; // flag contiguous dimension
+              ++indexCountPDimPDe[extentIndex]; // distribute rest
+            if (decompChunk == 0)
+              indexCountPDimPDe[extentIndex] += firstExtra;
+            if (decompChunk == regDecomp->array[i]-1)
+              indexCountPDimPDe[extentIndex] += lastExtra;
             // determine min and max
             int indexStart = minIndex->array[i] + decompChunk * chunkLength;
             if (decompChunk < chunkRest) indexStart += decompChunk;
             else indexStart += chunkRest;
+            if (decompChunk > 0) indexStart += firstExtra;
             minIndexPDimPDe[extentIndex] = indexStart;
-            maxIndexPDimPDe[extentIndex] = indexStart +
-              indexCountPDimPDe[extentIndex] - 1;
+            maxIndexPDimPDe[extentIndex] = indexStart
+              + indexCountPDimPDe[extentIndex] - 1;
+            // fill indexListPDimPLocalDe
             if (deList[de] > -1){
+              // de is local
               int localExtentIndex = deList[de]*dimCount+ii;
               indexListPDimPLocalDe[localExtentIndex] =
                 new int[indexCountPDimPDe[extentIndex]];
@@ -1018,6 +1209,8 @@ DistGrid *DistGrid::create(
                 indexListPDimPLocalDe[localExtentIndex][k] = indexStart + k;
               }
             }
+            // flag contiguous dimension
+            contigFlagPDimPDe[extentIndex] = 1;
           }
           break;
         case DECOMP_RESTLAST:
@@ -1029,15 +1222,19 @@ DistGrid *DistGrid::create(
             decompChunk = (jj/deDivider)%regDecomp->array[i];
             if (decompChunk == regDecomp->array[i]-1) 
               indexCountPDimPDe[extentIndex] += chunkRest; // add rest
-            contigFlagPDimPDe[extentIndex] = 1; // flag contiguous dimension
+            if (decompChunk == 0)
+              indexCountPDimPDe[extentIndex] += firstExtra;
+            if (decompChunk == regDecomp->array[i]-1)
+              indexCountPDimPDe[extentIndex] += lastExtra;
             // determine min and max
             int indexStart = minIndex->array[i] + decompChunk * chunkLength;
-            if (decompChunk < chunkRest) indexStart += decompChunk;
-            else indexStart += chunkRest;
+            if (decompChunk > 0) indexStart += firstExtra;
             minIndexPDimPDe[extentIndex] = indexStart;
-            maxIndexPDimPDe[extentIndex] = indexStart +
-              indexCountPDimPDe[extentIndex] - 1;
+            maxIndexPDimPDe[extentIndex] = indexStart
+              + indexCountPDimPDe[extentIndex] - 1;
+            // fill indexListPDimPLocalDe
             if (deList[de] > -1){
+              // de is local
               int localExtentIndex = deList[de]*dimCount+ii;
               indexListPDimPLocalDe[localExtentIndex] =
                 new int[indexCountPDimPDe[extentIndex]];
@@ -1047,6 +1244,8 @@ DistGrid *DistGrid::create(
                 indexListPDimPLocalDe[localExtentIndex][k] = indexStart + k;
               }
             }
+            // flag contiguous dimension
+            contigFlagPDimPDe[extentIndex] = 1;
           }
           break;
         case DECOMP_RESTFIRST:
@@ -1058,15 +1257,20 @@ DistGrid *DistGrid::create(
             decompChunk = (jj/deDivider)%regDecomp->array[i];
             if (decompChunk == 0) 
               indexCountPDimPDe[extentIndex] += chunkRest; // add rest
-            contigFlagPDimPDe[extentIndex] = 1; // flag contiguous dimension
+            if (decompChunk == 0)
+              indexCountPDimPDe[extentIndex] += firstExtra;
+            if (decompChunk == regDecomp->array[i]-1)
+              indexCountPDimPDe[extentIndex] += lastExtra;
             // determine min and max
             int indexStart = minIndex->array[i] + decompChunk * chunkLength;
-            if (decompChunk < chunkRest) indexStart += decompChunk;
-            else indexStart += chunkRest;
+            if (decompChunk > 0) indexStart += chunkRest;
+            if (decompChunk > 0) indexStart += firstExtra;
             minIndexPDimPDe[extentIndex] = indexStart;
-            maxIndexPDimPDe[extentIndex] = indexStart +
-              indexCountPDimPDe[extentIndex] - 1;
+            maxIndexPDimPDe[extentIndex] = indexStart
+              + indexCountPDimPDe[extentIndex] - 1;
+            // fill indexListPDimPLocalDe
             if (deList[de] > -1){
+              // de is local
               int localExtentIndex = deList[de]*dimCount+ii;
               indexListPDimPLocalDe[localExtentIndex] =
                 new int[indexCountPDimPDe[extentIndex]];
@@ -1076,9 +1280,18 @@ DistGrid *DistGrid::create(
                 indexListPDimPLocalDe[localExtentIndex][k] = indexStart + k;
               }
             }
+            // flag contiguous dimension
+            contigFlagPDimPDe[extentIndex] = 1;
           }
           break;
         case DECOMP_CYCLIC:
+          if (firstExtra > 0 || lastExtra > 0){
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+              "- extra elements not supported for DECOMP_CYCLIC dims", rc);
+            delete distgrid;
+            distgrid = ESMC_NULL_POINTER;
+            return ESMC_NULL_POINTER;
+          }
           for (int jj=0; jj<deCountPPatch[patch]; jj++){
             int j = dePatchStart + jj;
             de = deLabelList->array[j];
@@ -1086,25 +1299,27 @@ DistGrid *DistGrid::create(
             indexCountPDimPDe[extentIndex] = chunkLength;
             decompChunk = (jj/deDivider)%regDecomp->array[i];
             if (decompChunk < chunkRest)
-              ++indexCountPDimPDe[extentIndex]; //distr. rest
-            contigFlagPDimPDe[extentIndex] = 0; // flag non-contiguous dimension
+              ++indexCountPDimPDe[extentIndex]; // distribute rest
             // determine min and max
             int indexStart = minIndex->array[i] + decompChunk * chunkLength;
-            if (decompChunk < chunkRest) indexStart += decompChunk;
-            else indexStart += chunkRest;
             minIndexPDimPDe[extentIndex] = indexStart;
             maxIndexPDimPDe[extentIndex] = indexStart +
-              indexCountPDimPDe[extentIndex] - 1;
+              + (indexCountPDimPDe[extentIndex] - 1) * regDecomp->array[i];
+            // fill indexListPDimPLocalDe
             if (deList[de] > -1){
+              // de is local
               int localExtentIndex = deList[de]*dimCount+ii;
               indexListPDimPLocalDe[localExtentIndex] =
                 new int[indexCountPDimPDe[extentIndex]];
               // fill the indexListPDimPLocalDe for this dimension and local DE
               for (int k=0; k<indexCountPDimPDe[extentIndex]; k++){
-                // block structure
-                indexListPDimPLocalDe[localExtentIndex][k] = indexStart + k;
+                // cyclic
+                indexListPDimPLocalDe[localExtentIndex][k] = 
+                  indexStart + k * regDecomp->array[i];
               }
             }
+            // flag non-contiguous dimension
+            contigFlagPDimPDe[extentIndex] = 0;
           }
           break;
         default:
@@ -1161,6 +1376,14 @@ DistGrid *DistGrid::create(
   if (deLabelListDeleteFlag){
     delete [] deLabelList->array;
     delete deLabelList;
+  }
+  if (regDecompFirstExtraDeleteFlag){
+    delete [] regDecompFirstExtra->array;
+    delete regDecompFirstExtra;
+  }
+  if (regDecompLastExtraDeleteFlag){
+    delete [] regDecompLastExtra->array;
+    delete regDecompLastExtra;
   }
   delete [] patchListPDe;
   
