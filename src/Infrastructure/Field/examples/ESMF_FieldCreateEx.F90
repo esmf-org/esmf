@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.24 2008/04/10 20:24:33 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.25 2008/04/10 21:06:22 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -738,6 +738,7 @@
         gridToFieldMap=(/3,2,5,4,1/), &
         rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!EOC
 
     print *, "Field Create from a Grid and a Fortran data pointer returned"
     call ESMF_FieldDestroy(field7d)
