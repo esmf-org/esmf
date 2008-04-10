@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.9.2.2 2008/04/09 22:39:12 theurich Exp $
+! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.9.2.3 2008/04/10 23:52:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -124,7 +124,7 @@ module ESMF_DELayoutWQUTest_mod
 
   recursive subroutine work(x, de, petCount)
     real:: x, zend
-    integer:: de, petCount
+    integer:: de, petCount, i, iend
     
     real:: z, de_ratio, random
     
@@ -134,9 +134,12 @@ module ESMF_DELayoutWQUTest_mod
     call random_number(random)
     zend = zend * (1. + 10. * sin(de_ratio) * random)
     
-    x=0.    
-    do z=0., zend, 0.01
+    x=0.
+    z=0.
+    iend = zend/0.01
+    do i=0, iend
       x = x + sin(z) * de
+      z = z + 0.01
     enddo
     
   end subroutine
