@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.99.2.2 2008/04/09 22:21:12 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.99.2.3 2008/04/10 23:39:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -321,12 +321,10 @@ void VMK::init(MPI_Comm mpiCommunicator){
 #endif      
     }
   }
-  // setup the IntraProcessSharedMemoryAllocation Table
-  ipshmTable = new void*[IPSHM_TABLE_SIZE];
-  ipshmDeallocTable = new int[IPSHM_TABLE_SIZE];
-  ipshmCount = new int;
-  *ipshmCount = 0;        // reset
-  ipshmAllocCount = 0;    // reset
+  // setup the IntraProcessSharedMemoryAllocation List
+  ipshmTop = new ipshmAlloc*;
+  *ipshmTop = NULL;      // reset
+  ipshmLocalTop = NULL;   // reset
   ipshmMutex = new pthread_mutex_t;
   pthread_mutex_init(ipshmMutex, NULL);
   ipSetupMutex = new pthread_mutex_t;
@@ -400,9 +398,14 @@ void VMK::finalize(int finalizeMpi){
   for (int i=0; i<npets; i++)
     delete [] commarray[i];
   delete [] commarray;
-  delete [] ipshmTable;
-  delete [] ipshmDeallocTable;
-  delete ipshmCount;
+  while (*ipshmTop != NULL){
+    if ((*ipshmTop)->auxCounter > 0)
+      free((*ipshmTop)->allocation);
+    ipshmAlloc *ipshmPrev = *ipshmTop;
+    *ipshmTop = (*ipshmTop)->next;
+    delete ipshmPrev;
+  }
+  delete ipshmTop;
   pthread_mutex_destroy(ipshmMutex);
   delete ipshmMutex;
   pthread_mutex_destroy(ipSetupMutex);
@@ -473,9 +476,7 @@ struct vmk_spawn_arg{
   pthread_mutex_t *pth_mutex;
   int *pth_finish_count;
   comminfo **commarray;
-  void **ipshmTable;
-  int *ipshmDeallocTable;
-  int *ipshmCount;
+  ipshmAlloc **ipshmTop;
   pthread_mutex_t *ipshmMutex;
   pthread_mutex_t *ipSetupMutex;
   int pref_intra_ssi;
@@ -528,11 +529,9 @@ void VMK::construct(void *ssarg){
   else
     this->mpi_mutex_flag = 0; // don't need to use muteces around mpi comms
   this->commarray = commarray;
-  // setup the IntraProcessSharedMemoryAllocation Table
-  ipshmTable = sarg->ipshmTable;
-  ipshmDeallocTable = sarg->ipshmDeallocTable;
-  ipshmCount = sarg->ipshmCount;
-  ipshmAllocCount = 0;
+  // setup the IntraProcessSharedMemoryAllocation List
+  ipshmTop = sarg->ipshmTop;
+  ipshmLocalTop = *ipshmTop;
   ipshmMutex = sarg->ipshmMutex;
   ipSetupMutex = sarg->ipSetupMutex;
   // initialize the request queue
@@ -654,12 +653,15 @@ void VMK::destruct(){
     pthread_mutex_destroy(pth_mutex);
     delete pth_mutex;
     delete pth_finish_count;
-    // free - the IntraProcessSharedMemoryAllocation Table
-    for (int i=0; i<*ipshmCount; i++)
-      if (ipshmTable[i] != NULL) free(ipshmTable[i]);
-    delete [] ipshmTable;
-    delete [] ipshmDeallocTable;
-    delete ipshmCount;
+    // free - the IntraProcessSharedMemoryAllocation List
+    while (*ipshmTop != NULL){
+      if ((*ipshmTop)->auxCounter > 0)
+        free((*ipshmTop)->allocation);
+      ipshmAlloc *ipshmPrev = *ipshmTop;
+      *ipshmTop = (*ipshmTop)->next;
+      delete ipshmPrev;
+    }
+    delete ipshmTop;
     pthread_mutex_destroy(ipshmMutex);
     delete ipshmMutex;
     pthread_mutex_destroy(ipSetupMutex);
@@ -1056,9 +1058,7 @@ void *VMK::startup(class VMKPlan *vmp,
   pthread_mutex_t *new_pth_mutex2;
   pthread_mutex_t *new_pth_mutex;
   int *new_pth_finish_count;
-  void **new_ipshmTable;
-  int *new_ipshmDeallocTable;
-  int *new_ipshmCount;
+  ipshmAlloc **new_ipshmTop;
   pthread_mutex_t *new_ipshmMutex;
   pthread_mutex_t *new_ipSetupMutex;
   // utility variables that will be used beyond the next i-loop
@@ -1399,10 +1399,8 @@ void *VMK::startup(class VMKPlan *vmp,
           }
         }
         // initialize the IntraProcessSharedMemoryAllocation Table
-        new_ipshmTable = new void*[IPSHM_TABLE_SIZE];
-        new_ipshmDeallocTable = new int[IPSHM_TABLE_SIZE];
-        new_ipshmCount = new int;
-        *new_ipshmCount = 0;
+        new_ipshmTop = new ipshmAlloc*;
+        *new_ipshmTop = NULL;  // reset
         new_ipshmMutex = new pthread_mutex_t;
         pthread_mutex_init(new_ipshmMutex, NULL);
         new_ipSetupMutex = new pthread_mutex_t;
@@ -1418,9 +1416,7 @@ void *VMK::startup(class VMKPlan *vmp,
           vmk_send(&new_pth_mutex, sizeof(pthread_mutex_t*), pet_dest);
           vmk_send(&new_pth_finish_count, sizeof(int*), pet_dest);
           vmk_send(&new_commarray, sizeof(comminfo**), pet_dest);
-          vmk_send(&new_ipshmTable, sizeof(void**), pet_dest);
-          vmk_send(&new_ipshmDeallocTable, sizeof(int*), pet_dest);
-          vmk_send(&new_ipshmCount, sizeof(int*), pet_dest);
+          vmk_send(&new_ipshmTop, sizeof(ipshmAlloc*), pet_dest);
           vmk_send(&new_ipshmMutex, sizeof(pthread_mutex_t*), pet_dest);
           vmk_send(&new_ipSetupMutex, sizeof(pthread_mutex_t*), pet_dest);
         }else if(mypet==pet_dest){
@@ -1434,9 +1430,7 @@ void *VMK::startup(class VMKPlan *vmp,
           vmk_recv(&new_pth_mutex, sizeof(pthread_mutex_t*), pet_src);
           vmk_recv(&new_pth_finish_count, sizeof(int*), pet_src);
           vmk_recv(&new_commarray, sizeof(comminfo**), pet_src);
-          vmk_recv(&new_ipshmTable, sizeof(void**), pet_src);
-          vmk_recv(&new_ipshmDeallocTable, sizeof(int*), pet_src);
-          vmk_recv(&new_ipshmCount, sizeof(int*), pet_src);
+          vmk_recv(&new_ipshmTop, sizeof(ipshmAlloc*), pet_src);
           vmk_recv(&new_ipshmMutex, sizeof(pthread_mutex_t*), pet_src);
           vmk_recv(&new_ipSetupMutex, sizeof(pthread_mutex_t*), pet_src);
         }
@@ -1481,9 +1475,7 @@ void *VMK::startup(class VMKPlan *vmp,
     sarg[i].pth_mutex = new_pth_mutex;
     sarg[i].pth_finish_count = new_pth_finish_count;
     sarg[i].commarray = new_commarray;
-    sarg[i].ipshmTable = new_ipshmTable;
-    sarg[i].ipshmDeallocTable = new_ipshmDeallocTable;
-    sarg[i].ipshmCount = new_ipshmCount;
+    sarg[i].ipshmTop = new_ipshmTop;
     sarg[i].ipshmMutex = new_ipshmMutex;
     sarg[i].ipSetupMutex = new_ipSetupMutex;
     sarg[i].pref_intra_ssi = vmp->pref_intra_ssi;
@@ -4454,41 +4446,67 @@ void VMK::wtimedelay(double delay){
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// ~~~ IntraProcessSharedMemoryAllocation Table Methods
+// ~~~ IntraProcessSharedMemoryAllocation List Methods
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    
+
 void *VMK::vmk_ipshmallocate(int bytes, int *firstFlag){
   if (firstFlag != NULL) *firstFlag = 0; // reset
-  ++ipshmAllocCount;  // increment the local count
-  if (ipshmAllocCount >= IPSHM_TABLE_SIZE) return NULL;
   pthread_mutex_lock(ipshmMutex);
-  if (ipshmAllocCount > *ipshmCount){
-    // this is the first thread for this new request to allocate
-    if (firstFlag != NULL) *firstFlag = 1; // set
-    ipshmTable[*ipshmCount] = (void *)malloc(bytes);
-    ipshmDeallocTable[*ipshmCount] = getNthreads(getMypet()); //reset
-    ++(*ipshmCount);  // increment the count of allocated segments in table
+  if (ipshmLocalTop == *ipshmTop){
+    // this is the first thread for this new request: add element + allocate
+    *ipshmTop = new ipshmAlloc;  // new top element in shared allocation list
+    (*ipshmTop)->allocation = (void *)malloc(bytes); // actual memory alloc
+    (*ipshmTop)->auxCounter = getNthreads(getMypet()); // reset
+    (*ipshmTop)->prev = NULL;          // indicate end of list
+    (*ipshmTop)->next = ipshmLocalTop; // link to previous top element in list
+    if (ipshmLocalTop != NULL)
+      ipshmLocalTop->prev = *ipshmTop;  // back link
+    ipshmLocalTop = *ipshmTop;          // update local top pointer
+    if (firstFlag != NULL) *firstFlag = 1; // set caller provided flag
+  }else{
+    // this is a secondary thread for this request: find allocation element
+    if (ipshmLocalTop != NULL)
+      ipshmLocalTop = ipshmLocalTop->prev;
+    else{
+      // need to search for the previous element
+      ipshmAlloc *ipshmTemp = *ipshmTop; // start at the top
+      while (ipshmTemp != NULL){
+        if (ipshmTemp->next == ipshmLocalTop) break;
+        ipshmTemp = ipshmTemp->next;
+      }
+      if (ipshmTemp != NULL)
+        ipshmLocalTop = ipshmTemp;  // new local top element
+    }
   }
-  void *result = ipshmTable[ipshmAllocCount-1];// pull out the correct alloc
   pthread_mutex_unlock(ipshmMutex);
-  return result;
+  return ipshmLocalTop->allocation;  // return allocation of local top
 }
 
 
 void VMK::vmk_ipshmdeallocate(void *pointer){
-  int i;
+  // this call has undefined behavior if called multiple times from the same
+  // thread with identical pointer argument
   pthread_mutex_lock(ipshmMutex);
-  for (i=0; i<*ipshmCount; i++)
-    if (ipshmTable[i] == pointer) break;
-  if (i<*ipshmCount){
+  ipshmAlloc *ipshmTemp = *ipshmTop; // start at the current top of the list
+  while (ipshmTemp != NULL){
+    if (ipshmTemp->allocation == pointer) break;
+    ipshmTemp = ipshmTemp->next;
+  }
+  if (ipshmTemp!=NULL){
     // found the allocation
-    --ipshmDeallocTable[i]; // indicate that this thread called deallocate
-    if (ipshmDeallocTable[i] == 0){
+    --(ipshmTemp->auxCounter); // count this thread's deallocate call
+    if (ipshmTemp->auxCounter == 0){
+      // this was the last thread to call deallocate for this allocation
       //printf("freeing %p\n", pointer);
       free(pointer);
-      ipshmTable[i] = NULL;
+      // Cannot deallocate the allocation element in list here without
+      // disturbing list structure which is shared between threads.
+      // It is anyway safer to do a centralized deallocation of this structure
+      // during VM shutdown as it gives a chance to free any remaining
+      // pointers that are still allocated in order to prevent memory leaks
+      // because of improper user code.
     }
   }
   pthread_mutex_unlock(ipshmMutex);
