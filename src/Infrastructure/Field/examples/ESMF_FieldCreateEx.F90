@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.23 2008/04/05 03:12:39 cdeluca Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.24 2008/04/10 20:24:33 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -42,6 +42,7 @@
     real(ESMF_KIND_R8), dimension(:,:), pointer :: farray
     real(ESMF_KIND_R8), dimension(:,:), pointer :: farray1
     real(ESMF_KIND_R8), dimension(:,:,:), pointer :: farray3d
+    real(ESMF_KIND_R4), dimension(:,:), pointer :: farray2d
     integer, dimension(2) :: compEdgeLWdith
     integer, dimension(2) :: compEdgeUWdith
     integer, dimension(ESMF_MAXDIM) :: gcc, gec, fa_shape
@@ -51,10 +52,14 @@
     integer :: i, j, k
 
     real(ESMF_KIND_R8), dimension(:,:,:,:,:,:,:), pointer :: farray7d
-    type(ESMF_Field)    :: field7d
+    real(ESMF_KIND_R8), dimension(:,:,:,:,:,:,:), pointer :: farray7d2
+    type(ESMF_Field)    :: field7d, field7d2
     type(ESMF_Grid)     :: grid5d
     type(ESMF_DistGrid) :: distgrid5d
     integer             :: fsize(7)
+    integer             :: flbound(7), fubound(7)
+    integer             :: ftlb(2), ftub(2), ftc(2)
+    real                :: PI = 3.14159265358
 
     integer :: finalrc       
 !   !Set finalrc to success
@@ -83,6 +88,12 @@
 !  Then we create an arrayspec. With grid and arrayspec,
 !  finally we create a field from the grid, arrayspec, and a
 !  user specified staggerloc.
+!
+!  This example also illustrates a typical use of this Field creation
+!  method. By creating a Field from a Grid and an arrayspec, the
+!  user allows the ESMF library to create a internal Array in the Field.
+!  Then the user can use FieldGet to retrieve the Fortran data array
+!  and necessary bounds information to assign initial values to it.
 !EOE
 
 !BOC
@@ -98,6 +109,17 @@
 
     field1 = ESMF_FieldCreate(grid, arrayspec, &
          staggerloc=ESMF_STAGGERLOC_CENTER, name="pressure", rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    call ESMF_FieldGet(field1, localDe=0, farray=farray2d, &
+        totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, rc=rc)
+
+    do i = ftlb(1), ftub(1)
+        do j = ftlb(2), ftub(2)
+            farray2d(i, j) = sin(i/ftc(1)*PI) * cos(j/ftc(2)*PI) 
+        enddo
+    enddo
+
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
 
@@ -690,15 +712,44 @@
         rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
+!BOE
+!  A user can allocate the Fortran array in a different manner using the lower and
+!  upper bounds returned from FieldGet through the optional allocLBound and allocUBound
+!  arguments. In the following example, we crete another 7D Field by retrieving the bounds
+!  and allocate the Fortran array with this approach. In this scheme, indexing the
+!  Fortran array is sometimes more convenient than using the shape directly.
+!EOE
+!BOC
+    call ESMF_FieldGet(grid5d, localDe=0, ungriddedLBound=(/1,2/), &
+        ungriddedUBound=(/4,5/), &
+        maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+        gridToFieldMap=(/3,2,5,4,1/), &
+        allocLBound=flbound, allocUBound=fubound, &
+        rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    allocate(farray7d2(flbound(1):fubound(1), flbound(2):fubound(2), flbound(3):fubound(3), &
+                       flbound(4):fubound(4), flbound(5):fubound(5), flbound(6):fubound(6), &
+                       flbound(7):fubound(7)) )
+
+    field7d2 = ESMF_FieldCreate(grid5d, farray7d2, &
+        ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
+        maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+        gridToFieldMap=(/3,2,5,4,1/), &
+        rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     print *, "Field Create from a Grid and a Fortran data pointer returned"
     call ESMF_FieldDestroy(field7d)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_FieldDestroy(field7d2)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_GridDestroy(grid5d)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_DistGridDestroy(distgrid5d)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(farray7d)
+    deallocate(farray7d2)
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
