@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.9.2.3 2008/04/10 23:52:46 theurich Exp $
+! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.9.2.4 2008/04/10 23:55:05 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -68,6 +68,7 @@ module ESMF_DELayoutWQUTest_mod
     type(ESMF_DELayoutServiceReply):: reply
     real:: x
     
+    rc = ESMF_SUCCESS
 
     print *, "*** hi from mygcomp_run ***"
     
