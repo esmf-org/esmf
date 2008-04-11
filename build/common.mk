@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.201.2.9 2008/04/11 02:03:53 svasquez Exp $
+#  $Id: common.mk,v 1.201.2.10 2008/04/11 02:06:41 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -430,7 +430,7 @@ DO_LATEX	= $(ESMF_TEMPLATES)/scripts/do_latex
 DO_L2H		= $(ESMF_TEMPLATES)/scripts/do_l2h
 
 # test script variables
-UNIT_TESTS_CONFIG        = $(ESMF_TESTDIR)/unit_tests.config
+UNIT_TESTS_CONFIG   = $(ESMF_TESTDIR)/unit_tests.config
 ESMF_TESTSCRIPTS    = $(ESMF_DIR)/scripts/test_scripts
 DO_UT_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ut_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
 DO_EX_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ex_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
