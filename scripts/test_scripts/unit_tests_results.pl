@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: unit_tests_results.pl,v 1.13 2008/04/11 01:18:28 svasquez Exp $
+# $Id: unit_tests_results.pl,v 1.14 2008/04/11 21:08:53 svasquez Exp $
 # This script runs at the end of the "run_unit_tests", "run_unit_tests_uni" and "check_results" targets.
 # The purpose is to give the user the results of running the unit tests.
 # The results are either complete results or a summary.
@@ -29,20 +29,20 @@ use File::Find
 @sorted_fail_testtest__list = ();	# fail_list without duplicated lines.
 
 
-	# Open the test config file 
-	$ok=open(F,"$TEST_DIR/tests.config");
+	# Open the unit test config file 
+	$ok=open(F,"$TEST_DIR/unit_tests.config");
 	if (!(defined $ok)) {
 		print "\n\n";
         	if ($SUMMARY) { # Print only if full output requested
                 	print "UNIT TESTS SUMMARY\n";
         	}
-		print "NOTE: Unable to open $TEST_DIR/tests.config file.\n";
+		print "NOTE: Unable to open $TEST_DIR/unit_tests.config file.\n";
 		print "Either the 'gmake ESMF_BOPT=$ESMF_BOPT build_unit_tests' has not been run ";
 		print "or the 'gmake ESMF_BOPT=$ESMF_BOPT' did not build successfully. \n\n";
 
 		return 0;
 	}
-	# Get flags from tests_config file.
+	# Get flags from unit_tests_config file.
 	# exhaustive = 0 for ESMF_TESTEXHAUSTIVE=OFF
 	# exhaustive = 1 for ESMF_TESTEXHAUSTIVE=ON
 	# processor = 0 for uni_processor
