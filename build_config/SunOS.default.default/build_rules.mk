@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.14.6.3 2008/03/25 18:04:37 theurich Exp $
+# $Id: build_rules.mk,v 1.14.6.4 2008/04/11 20:22:16 theurich Exp $
 # 
 # SunOS.default.default
 #
@@ -44,8 +44,8 @@ endif
 ############################################################
 # Print compiler version string
 #
-ESMF_F90COMPILER_VERSION    = echo Studio 12
-ESMF_CXXCOMPILER_VERSION    = echo Studio 12
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V
 
 ############################################################
 # How to specify module directories
@@ -92,12 +92,12 @@ ESMF_CXXLINKRPATHS      =
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lCrun -lrt
+ESMF_F90LINKLIBS += -lCrun -lrt -lCstd
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lCrun -lrt
+ESMF_CXXLINKLIBS += -lCrun -lrt -lCstd
 
 ############################################################
 # Blank out shared library options
