@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.215 2008/04/10 21:46:28 w6ws Exp $
+#  $Id: common.mk,v 1.216 2008/04/11 21:14:18 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -426,7 +426,7 @@ DO_LATEX	= $(ESMF_TEMPLATES)/scripts/do_latex
 DO_L2H		= $(ESMF_TEMPLATES)/scripts/do_l2h
 
 # test script variables
-TESTS_CONFIG        = $(ESMF_TESTDIR)/tests.config
+UNIT_TESTS_CONFIG   = $(ESMF_TESTDIR)/unit_tests.config
 ESMF_TESTSCRIPTS    = $(ESMF_DIR)/scripts/test_scripts
 DO_UT_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ut_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
 DO_EX_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ex_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
@@ -1671,9 +1671,9 @@ run_unit_tests:  reqdir_tests verify_exhaustive_flag
 	  echo "" ; \
 	  $(MAKE) err ; \
 	fi 
-	@if [ -f $(TESTS_CONFIG) ] ; then \
-	   $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Multiprocessor/' $(TESTS_CONFIG) > $(TESTS_CONFIG).temp; \
-           $(ESMF_MV) $(TESTS_CONFIG).temp $(TESTS_CONFIG); \
+	@if [ -f $(UNIT_TESTS_CONFIG) ] ; then \
+	   $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Multiprocessor/' $(UNIT_TESTS_CONFIG) > $(UNIT_TESTS_CONFIG).temp; \
+           $(ESMF_MV) $(UNIT_TESTS_CONFIG).temp $(UNIT_TESTS_CONFIG); \
         fi
 	-$(MAKE) ACTION=tree_run_unit_tests tree
 	$(MAKE) check_unit_tests
@@ -1684,9 +1684,9 @@ tree_run_unit_tests: $(TESTS_RUN)
 # run_unit_tests_uni
 #
 run_unit_tests_uni:  reqdir_tests verify_exhaustive_flag
-	@if [ -f $(TESTS_CONFIG) ] ; then \
-	   $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Uniprocessor/' $(TESTS_CONFIG) > $(TESTS_CONFIG).temp; \
-           $(ESMF_MV) $(TESTS_CONFIG).temp $(TESTS_CONFIG); \
+	@if [ -f $(UNIT_TESTS_CONFIG) ] ; then \
+	   $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Uniprocessor/' $(UNIT_TESTS_CONFIG) > $(UNIT_TESTS_CONFIG).temp; \
+           $(ESMF_MV) $(UNIT_TESTS_CONFIG).temp $(UNIT_TESTS_CONFIG); \
         fi
 	-$(MAKE) ACTION=tree_run_unit_tests_uni tree 
 	$(MAKE) check_unit_tests
@@ -1701,23 +1701,23 @@ tree_run_unit_tests_uni: $(TESTS_RUN_UNI)
 # how many messages per test are generated.
 #
 config_unit_tests:
-	@echo "# This file used by test scripts, please do not delete." > $(TESTS_CONFIG)
+	@echo "# This file used by test scripts, please do not delete." > $(UNIT_TESTS_CONFIG)
 ifeq ($(ESMF_TESTEXHAUSTIVE),ON) 
 ifeq ($(MULTI),) 
-	@echo "Last built Exhaustive ;  Last run Noprocessor" >> $(TESTS_CONFIG)
+	@echo "Last built Exhaustive ;  Last run Noprocessor" >> $(UNIT_TESTS_CONFIG)
 else
-	@echo "Last built Exhaustive ;  Last run" $(MULTI) >> $(TESTS_CONFIG)
+	@echo "Last built Exhaustive ;  Last run" $(MULTI) >> $(UNIT_TESTS_CONFIG)
 endif
 else
 ifeq ($(MULTI),) 
-	@echo "Last built Non-exhaustive ;  Last run Noprocessor" >> $(TESTS_CONFIG)
+	@echo "Last built Non-exhaustive ;  Last run Noprocessor" >> $(UNIT_TESTS_CONFIG)
 else
-	@echo "Last built Non-exhaustive ;  Last run" $(MULTI) >> $(TESTS_CONFIG)
+	@echo "Last built Non-exhaustive ;  Last run" $(MULTI) >> $(UNIT_TESTS_CONFIG)
 endif
 endif
 
 #
-# verify that either there is no TESTS_CONFIG file, or if one exists that
+# verify that either there is no UNIT_TESTS_CONFIG file, or if one exists that
 # the string Exhaustive or Non-exhaustive matches the current setting of the
 # ESMF_TESTEXHAUSTIVE environment variable.  this is used when trying to run
 # already-built unit tests, to be sure the user has not changed the setting
@@ -1732,16 +1732,16 @@ else
 endif
 
 exhaustive_flag_check:
-	@if [ -s $(TESTS_CONFIG) -a \
-	     `$(ESMF_SED) -ne '/$(UNIT_TEST_STRING)/p' $(TESTS_CONFIG) | $(ESMF_WC) -l` -ne 1 ] ; then \
+	@if [ -s $(UNIT_TESTS_CONFIG) -a \
+	     `$(ESMF_SED) -ne '/$(UNIT_TEST_STRING)/p' $(UNIT_TESTS_CONFIG) | $(ESMF_WC) -l` -ne 1 ] ; then \
 	  echo "The ESMF_TESTEXHAUSTIVE environment variable is a compile-time control for" ;\
           echo "whether a basic set or an exhaustive set of tests are built." ;\
 	  echo "" ;\
 	  echo "The current setting of ESMF_TESTEXHAUSTIVE is \"$(ESMF_TESTEXHAUSTIVE)\", which" ;\
 	  echo "is not the same as when the unit tests were last built." ;\
 	  echo "(This is based on the contents of the file:" ;\
-          echo "$(TESTS_CONFIG) ";\
-	  echo "which contains: `$(ESMF_SED) -e '1d' $(TESTS_CONFIG)` )." ;\
+          echo "$(UNIT_TESTS_CONFIG) ";\
+	  echo "which contains: `$(ESMF_SED) -e '1d' $(UNIT_TESTS_CONFIG)` )." ;\
 	  echo "" ;\
 	  echo "To rebuild and run the unit tests with the current ESMF_TESTEXHAUSTIVE value, run:" ;\
 	  echo "   $(MAKE) clean_unit_tests unit_tests"  ;\
@@ -1759,8 +1759,8 @@ else
 endif
 
 exhaustive_flag_clobber:
-	@if [ -s $(TESTS_CONFIG) -a \
-	     `$(ESMF_SED) -ne '/$(UNIT_TEST_STRING)/p' $(TESTS_CONFIG) | $(ESMF_WC) -l` -ne 1 ] ; then \
+	@if [ -s $(UNIT_TESTS_CONFIG) -a \
+	     `$(ESMF_SED) -ne '/$(UNIT_TEST_STRING)/p' $(UNIT_TESTS_CONFIG) | $(ESMF_WC) -l` -ne 1 ] ; then \
 	  $(MAKE) clean_unit_tests ;\
 	fi
 
@@ -1769,7 +1769,7 @@ exhaustive_flag_clobber:
 # so we can rebuild them with the proper flags if that is what is needed.
 #
 clean_unit_tests:
-	$(ESMF_RM) $(ESMF_TESTDIR)/*UTest* $(TESTS_CONFIG)
+	$(ESMF_RM) $(ESMF_TESTDIR)/*UTest* $(UNIT_TESTS_CONFIG)
 	$(MAKE) ACTION=tree_cleanfiles tree
 
 
