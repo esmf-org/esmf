@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: unit_tests_results.pl,v 1.12 2008/04/08 22:34:34 svasquez Exp $
+# $Id: unit_tests_results.pl,v 1.13 2008/04/11 01:18:28 svasquez Exp $
 # This script runs at the end of the "run_unit_tests", "run_unit_tests_uni" and "check_results" targets.
 # The purpose is to give the user the results of running the unit tests.
 # The results are either complete results or a summary.
@@ -421,6 +421,11 @@ use File::Find
 	else {
 		print ", $total_pass_count passed and $total_fail_count failed.\n\n";
 	}
+
+        # Write test results to be read by regression tests scripts.
+        $results_file="$TEST_DIR/unit_tests_results";
+        open(MYHANDLE, ">$results_file");
+        print MYHANDLE "PASS $total_pass_count FAIL $total_fail_count \n";
 
 }
 1; # This is for the "require" function to work properly.

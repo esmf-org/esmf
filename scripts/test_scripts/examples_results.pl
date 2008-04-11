@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: examples_results.pl,v 1.4 2007/12/14 20:50:58 svasquez Exp $
+# $Id: examples_results.pl,v 1.5 2008/04/11 01:18:28 svasquez Exp $
 # This subroutine is called at the end of the examples, "check_examples" and "check_results" targets.
 # The purpose is to give the user the results of running the examples.
 # The results are either complete results or a summary.
@@ -218,7 +218,11 @@ use File::Find;
 		else {
 			print "Found $example_count examples, $pass_count passed and $fail_count failed.\n\n";
 		}
-		
+
+                # Write test results to be read by regression tests scripts.
+                $results_file="$EX_DIR/examples_results";
+                open(MYHANDLE, ">$results_file");
+                print MYHANDLE "PASS $pass_count FAIL $fail_count \n";
 			
 	}
 }
