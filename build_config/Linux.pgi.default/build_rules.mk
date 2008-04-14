@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.29.2.3 2008/03/13 23:41:43 svasquez Exp $
+# $Id: build_rules.mk,v 1.29.2.4 2008/04/14 18:46:05 theurich Exp $
 #
 # Linux.pgi.default
 #
@@ -28,10 +28,10 @@ ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpich)
 # Mpich ----------------------------------------------------
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPICH
 ESMF_F90DEFAULT         = mpif90
 ESMF_F90LINKLIBS       += -lpmpich++ -lmpich
 ESMF_CXXDEFAULT         = mpiCC
-ESMF_CXXCOMPILEOPTS    += -DESMF_MPICH
 ESMF_CXXLINKLIBS       += -lmpich
 ESMF_MPIRUNDEFAULT      = mpirun
 ifeq ($(ESMF_BATCH),lsf.ibmpjl)
@@ -61,6 +61,8 @@ ESMF_MPIMPMDRUNDEFAULT  = mpiexec
 else
 ifeq ($(ESMF_COMM),lam)
 # LAM (assumed to be built with pgf90) ---------------------
+ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif77
 ESMF_CXXDEFAULT         = mpic++
 ESMF_MPIRUNDEFAULT      = mpirun

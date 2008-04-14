@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.99.2.3 2008/04/10 23:39:27 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.99.2.4 2008/04/14 18:46:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -54,8 +54,7 @@
 #include <math.h>
 
 // Memory mapped files may not be available on all systems
-#ifdef ESMF_NO_POSIXIPC
-#else
+#ifndef ESMF_NO_POSIXIPC
 #include <sys/mman.h>
 #endif
 
@@ -70,10 +69,15 @@
 #define VERBOSITY             (0)       // 0: off, 10: max
 #define VM_TID_MPI_TAG        (10)      // mpi tag used to send/recv TID
 #ifdef SIGRTMIN
-#define VM_SIG1               (SIGRTMIN)
+#define VM_SIG1               (SIGRTMIN)  // avoid sigusr1 and sigusr2 if avail.
+#else
+#ifdef ESMF_NO_SIGUSR2
+#define VM_SIG1               (SIGUSR1)
+// Note that SIGUSR1 interferes with MPICH's CH_P4 device!
 #else
 #define VM_SIG1               (SIGUSR2)
-// Note that SIGUSR1 interferes with MPICH's CH_P4 device!
+// Note that SIGUSR2 interferes with LAM!
+#endif
 #endif
 
 namespace ESMCI {
