@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.25 2008/04/10 21:06:22 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.26 2008/04/14 17:55:53 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
     
     ! Local variables
     integer :: rc, localPet, petCount
-    type(ESMF_Grid) :: grid, grid3d
+    type(ESMF_Grid) :: grid, grid2d
     type(ESMF_DistGrid) :: distgrid
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: array1, array2
@@ -129,16 +129,40 @@
 !BOE
 !   User can also create an ArraySpec that has a different rank
 !   from the Grid, For example, the following code shows creation of 
-!   of 3D Field from a 2D Grid using 3D ArraySpec. We use the
-!   {\tt ESMF\_Grid} grid created from the previous example.
+!   of 3D Field from a 2D Grid using 3D ArraySpec.
+!
+!   This example also demonstrates the technique to create a typical
+!   3D data Field that has 2 gridded dimensions and 1 ungridded
+!   dimension. Such a 3D Field is typically used in atmospheric modelling
+!   such as the temperature or pressure Fields.
+!
+!   First we create a 2D grid with an index space of 180x360 one degree
+!   per Grid element. In the FieldCreate call, we use gridToFieldMap
+!   to indicate the mapping between Grid dimension and Field dimension,
+!   for the ungridded dimension (typically the altitude), we use
+!   ungriddedLBound and ungriddedUBound to describe its bounds. Internally
+!   the ungridded dimension has a stride of 1, so the number of elements
+!   of the ungridded dimension is ungriddedUBound - ungriddedLBound + 1.
+!
+!   The Field in this example has a 1km resolution in the vertical,
+!   upper to 50km to describe a physical Field in the stratosphere.
+!   Note that gridToFieldMap in this specific example is (/1,2/) by default
+!   so the user can neglect this argument for the FieldCreate call.
 !EOE
 
 !BOC
+    grid2d = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+          regDecomp=(/2,2/), name="atmgrid", rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
     call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R4, rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    field1 = ESMF_FieldCreate(grid, arrayspec, &
-         staggerloc=ESMF_STAGGERLOC_CENTER, name="pressure", rc=rc)
+    field1 = ESMF_FieldCreate(grid2d, arrayspec, &
+         staggerloc=ESMF_STAGGERLOC_CENTER, &
+         gridToFieldMap=(/1,2/), &
+         ungriddedLBound=(/1/), ungriddedUBound=(/50/), &
+         name="pressure", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
 
@@ -789,6 +813,8 @@
     call ESMF_ArrayDestroy(array2, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_GridDestroy(grid, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_GridDestroy(grid2d, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(farray)
 
