@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.3 2008/04/05 03:38:07 cdeluca Exp $
+! $Id: ESMF_Attribute.F90,v 1.4 2008/04/14 20:23:46 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -47,6 +47,7 @@ module ESMF_AttributeMod
 !
 !------------------------------------------------------------------------------
 ! !USES:
+  use ESMF_BaseMod
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_LogErrMod        ! ESMF error handling
@@ -56,18 +57,6 @@ module ESMF_AttributeMod
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
   private
-
-!------------------------------------------------------------------------------
-!
-
-  ! Contains pointer to real Base object which is defined in C++
-  type ESMF_Base
-  sequence
-  !private
-    type(ESMF_Pointer) :: this
-    ESMF_INIT_DECLARE
-  end type
-
 
 !------------------------------------------------------------------------------
 !
@@ -102,7 +91,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.3 2008/04/05 03:38:07 cdeluca Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.4 2008/04/14 20:23:46 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
