@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.76.2.1 2008/04/05 03:13:54 cdeluca Exp $
+// $Id: ESMC_VM_F.C,v 1.76.2.2 2008/04/14 22:49:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -866,7 +866,7 @@ extern "C" {
       (*ptr)->vmkplan_mpi_c_part(**ptr_vm);
     }
     // set the nothreadflag because this is the default for new VMs
-    (*ptr)->nothreadflag = 1;
+    (*ptr)->nothreadflag = 1; // override what vmkplan_minthreads() above set
     //debug: (*ptr)->vmkplan_print();
     // Allocate as many ESMCI::VM instances as this PET will spawn 
     // and hold the information in the public portion of ESMCI::VMPlan
@@ -878,7 +878,8 @@ extern "C" {
       (*ptr)->myvmachs[i] = static_cast<ESMCI::VMK *>((*ptr)->myvms[i]);
     }
     (*ptr)->vmkplan_myvms((*ptr)->myvmachs); // use pointer array inside
-    if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
   void FTN(c_esmc_vmplandestruct)(ESMCI::VMPlan **ptr, int *rc){
@@ -893,7 +894,8 @@ extern "C" {
     delete [] (*ptr)->myvmachs;
     // Now delete the actual ESMCI::VMPlan object
     delete (*ptr);
-    if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
   void FTN(c_esmc_vmplanmaxpes)(ESMCI::VMPlan **ptr, ESMCI::VM **ptr_vm,
@@ -947,7 +949,8 @@ extern "C" {
       (*ptr)->myvmachs[i] = static_cast<ESMCI::VMK *>((*ptr)->myvms[i]);
     }
     (*ptr)->vmkplan_myvms((*ptr)->myvmachs); // use pointer array inside
-    if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
        
   void FTN(c_esmc_vmplanmaxthreads)(ESMCI::VMPlan **ptr, ESMCI::VM **ptr_vm,
@@ -1001,7 +1004,8 @@ extern "C" {
       (*ptr)->myvmachs[i] = static_cast<ESMCI::VMK *>((*ptr)->myvms[i]);
     }
     (*ptr)->vmkplan_myvms((*ptr)->myvmachs); // use pointer array inside
-    if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
   void FTN(c_esmc_vmplanminthreads)(ESMCI::VMPlan **ptr, ESMCI::VM **ptr_vm,
@@ -1055,7 +1059,8 @@ extern "C" {
       (*ptr)->myvmachs[i] = static_cast<ESMCI::VMK *>((*ptr)->myvms[i]);
     }
     (*ptr)->vmkplan_myvms((*ptr)->myvmachs); // use pointer array inside
-    if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
