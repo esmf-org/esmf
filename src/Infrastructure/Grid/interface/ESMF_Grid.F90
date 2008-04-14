@@ -166,7 +166,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.73 2008/04/05 02:09:11 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.74 2008/04/14 20:45:35 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -5571,7 +5571,6 @@ end interface
               indexflag=indexflag, rc=localrc)   
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
 
 
    ! Convert coordDeps to coordDimCount and coordDimMap -------------------------------

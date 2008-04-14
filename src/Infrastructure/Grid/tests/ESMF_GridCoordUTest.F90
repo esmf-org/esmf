@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.28 2008/04/05 03:38:26 cdeluca Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.29 2008/04/14 20:45:35 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.28 2008/04/05 03:38:26 cdeluca Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.29 2008/04/14 20:45:35 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -192,7 +192,7 @@ program ESMF_GridCoordUTest
   !!!!!!!!!!!!!!!! Allocate and Fill Centers !!!!!!!!!!!!!!!!!!
 
   ! Allocate Center (e.g. Center) stagger
-  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  call ESMF_GridAddCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Loop through DEs and set Centers as the average of the corners
@@ -223,7 +223,7 @@ program ESMF_GridCoordUTest
   !!!!!!!!!!!!!!!! Allocate and Fill Edge 1 !!!!!!!!!!!!!!!!!!
 
   ! Allocate Center (e.g. Center) stagger
-  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_EDGE1, rc=localrc)
+  call ESMF_GridAddCoord(grid2D, staggerloc=ESMF_STAGGERLOC_EDGE1, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Loop through DEs and set Edge1 computed from the corners
@@ -254,7 +254,7 @@ program ESMF_GridCoordUTest
   !!!!!!!!!!!!!!!! Allocate and Fill Edge 2 !!!!!!!!!!!!!!!!!!
 
   ! Allocate Center (e.g. Center) stagger
-  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_EDGE2, rc=localrc)
+  call ESMF_GridAddCoord(grid2D, staggerloc=ESMF_STAGGERLOC_EDGE2, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Loop through DEs and set Edge1 computed from the corners
@@ -2404,7 +2404,7 @@ program ESMF_GridCoordUTest
   endif
 
   ! Allocate coordinates
-  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, rc=localrc)
+  call ESMF_GridAddCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Get number of local DEs
