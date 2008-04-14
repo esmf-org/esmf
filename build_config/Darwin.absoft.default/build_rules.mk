@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.22.2.1 2008/04/14 18:46:02 theurich Exp $
+# $Id: build_rules.mk,v 1.22.2.2 2008/04/14 19:04:59 theurich Exp $
 #
 # Darwin.absoft.default
 #
@@ -42,7 +42,6 @@ ESMF_MPIMPMDRUNDEFAULT  = mpiexec
 else
 ifeq ($(ESMF_COMM),lam)
 # LAM (assumed to be built with absoft f90) ----------------
-ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif77
 ESMF_CXXDEFAULT         = mpic++

@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.22.2.2 2008/04/14 18:46:04 theurich Exp $
+# $Id: build_rules.mk,v 1.22.2.3 2008/04/14 19:05:04 theurich Exp $
 #
 # Linux.lahey.default
 #
@@ -43,7 +43,6 @@ ESMF_MPIMPMDRUNDEFAULT  = mpiexec
 else
 ifeq ($(ESMF_COMM),lam)
 # LAM (assumed to be built with lf95) ----------------------
-ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif77
 ESMF_CXXDEFAULT         = mpic++
