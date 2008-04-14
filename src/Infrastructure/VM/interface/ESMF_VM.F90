@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.97.2.1 2008/04/05 03:13:54 cdeluca Exp $
+! $Id: ESMF_VM.F90,v 1.97.2.2 2008/04/14 23:38:44 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -183,7 +183,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.97.2.1 2008/04/05 03:13:54 cdeluca Exp $"
+      "$Id: ESMF_VM.F90,v 1.97.2.2 2008/04/14 23:38:44 theurich Exp $"
 
 !==============================================================================
 
@@ -2721,7 +2721,7 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   subroutine ESMF_VMGet(vm, localPet, petCount, peCount, mpiCommunicator, &
-    okOpenMpFlag, rc)
+    supportPthreadsFlag, supportOpenMPFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),      intent(in)              :: vm
@@ -2729,7 +2729,8 @@ module ESMF_VMMod
     integer,            intent(out),  optional  :: petCount
     integer,            intent(out),  optional  :: peCount
     integer,            intent(out),  optional  :: mpiCommunicator
-    type(ESMF_Logical), intent(out),  optional  :: okOpenMpFlag
+    type(ESMF_Logical), intent(out),  optional  :: supportPthreadsFlag
+    type(ESMF_Logical), intent(out),  optional  :: supportOpenMPFlag
     integer,            intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -2753,7 +2754,16 @@ module ESMF_VMMod
 !        user-level MPI communications. It is recommended that the user
 !        duplicates the communicator via {\tt MPI\_Comm\_Dup()} in order to
 !        prevent any interference with ESMF communications.
-!   \item[{[okOpenMpFlag]}]
+!   \item[{[supportPthreadsFlag]}]
+!        Upon return this holds a flag indicating whether Pthreads are
+!        supported by the specified {\tt ESMF\_VM} object.
+!        \begin{description}
+!        \item[{\tt ESMF\_TRUE}]
+!             Pthreads are supported.
+!        \item[{\tt ESMF\_FALSE}]
+!             Pthreads are not supported.
+!        \end{description}
+!   \item[{[supportOpenMPFlag]}]
 !        Upon return this holds a flag indicating whether user-level OpenMP
 !        threading is supported by the specified {\tt ESMF\_VM} object.
 !        \begin{description}
@@ -2779,7 +2789,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMGet(vm, localPet, petCount, peCount, mpiCommunicator, &
-      okOpenMpFlag, localrc)
+      supportPthreadsFlag, supportOpenMPFlag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

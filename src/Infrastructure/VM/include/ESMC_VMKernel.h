@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.53.2.2 2008/04/10 23:39:26 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.53.2.3 2008/04/14 23:38:44 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -268,6 +268,16 @@ class VMK{
     int getLocalPet() const {return mypet;}
     int getPetCount() const {return npets;}
     pthread_t getLocalPthreadId() const {return mypthid;}
+    bool getSupportPthreads() const{
+#ifdef ESMF_NO_PTHREADS
+      return false;
+#else
+      return true;
+#endif
+    }
+    bool getSupportOpenMP() const{
+      return true;  //TODO: determine this during compile time
+    }
 
     // p2p communication calls
     int vmk_send(const void *message, int size, int dest, int tag=-1);
