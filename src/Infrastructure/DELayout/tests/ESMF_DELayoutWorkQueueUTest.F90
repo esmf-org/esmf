@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.9.2.5 2008/04/14 22:54:53 theurich Exp $
+! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.9.2.6 2008/04/14 23:39:36 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -175,6 +175,7 @@ program ESMF_DELayoutWQUTest
   type(ESMF_GridComp):: gcomp
   real(ESMF_KIND_R8):: timeStart, timeEnd
   type(ESMF_VM):: vm
+  type(ESMF_Logical):: supportPthreads
   integer:: localPet
   ! individual test failure message
   character(ESMF_MAXSTR) :: failMsg
@@ -188,7 +189,8 @@ program ESMF_DELayoutWQUTest
   call ESMF_VMGetGlobal(vm, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
-  call ESMF_VMGet(vm, localPet=localPet, rc=rc)
+  call ESMF_VMGet(vm, localPet=localPet, supportPthreadsFlag=supportPthreads, &
+    rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 
@@ -234,11 +236,11 @@ program ESMF_DELayoutWQUTest
   !NEX_UTest
   write(name, *) "GridCompSetServices() - round 2"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-#ifdef ESMF_NO_PTHREADS
-  call ESMF_GridCompSetServices(gcomp, mygcomp_register_withoutthreads, rc)
-#else
-  call ESMF_GridCompSetServices(gcomp, mygcomp_register_withthreads, rc)
-#endif
+  if (supportPthreads==ESMF_TRUE) then
+    call ESMF_GridCompSetServices(gcomp, mygcomp_register_withthreads, rc)
+  else
+    call ESMF_GridCompSetServices(gcomp, mygcomp_register_withoutthreads, rc)
+  endif
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  
   !NEX_UTest
