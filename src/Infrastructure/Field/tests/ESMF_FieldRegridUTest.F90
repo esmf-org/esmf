@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.2 2008/04/05 03:38:19 cdeluca Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.3 2008/04/14 20:30:03 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_FieldRegridUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridUTest.F90,v 1.2 2008/04/05 03:38:19 cdeluca Exp $'
+    '$Id: ESMF_FieldRegridUTest.F90,v 1.3 2008/04/14 20:30:03 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -146,10 +146,10 @@ program ESMF_FieldRegridUTest
   if (localrc .ne. ESMF_SUCCESS) goto 10
 
   ! Allocate coordinates
-  call ESMF_GridAllocCoord(gridSrc, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  call ESMF_GridAddCoord(gridSrc, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  call ESMF_GridAllocCoord(gridDst, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  call ESMF_GridAddCoord(gridDst, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Get number of local DEs
