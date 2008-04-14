@@ -1,4 +1,4 @@
-! $Id: ESMF_GridToMeshUTest.F90,v 1.8 2008/04/05 03:38:29 cdeluca Exp $
+! $Id: ESMF_GridToMeshUTest.F90,v 1.9 2008/04/14 20:47:36 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridToMeshUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridToMeshUTest.F90,v 1.8 2008/04/05 03:38:29 cdeluca Exp $'
+    '$Id: ESMF_GridToMeshUTest.F90,v 1.9 2008/04/14 20:47:36 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -92,7 +92,7 @@ program ESMF_GridToMeshUTest
   endif
 
   ! Allocate coordinates
-  call ESMF_GridAllocCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  call ESMF_GridAddCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Get number of local DEs
