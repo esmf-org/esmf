@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.26 2008/04/14 17:55:53 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.27 2008/04/15 20:15:05 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -216,7 +216,7 @@
 !\label{sec:field:usage:create_grid_array}
 !
 !  User can create a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a 
-!  {\tt ESMF\_Array}. grid and array2 are objects created in previous examples.
+!  {\tt ESMF\_Array}. Object grid is created in the previous example.
 !EOE
 
 !BOC

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.26 2008/04/05 03:12:41 cdeluca Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.27 2008/04/15 20:15:08 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.26 2008/04/05 03:12:41 cdeluca Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.27 2008/04/15 20:15:08 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -883,7 +883,9 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 ! !DESCRIPTION:
 ! Compute the lower and upper bounds of Fortran data array that can later
 ! be used in FieldCreate interface to create a {\tt ESMF\_Field} from a
-! {\tt ESMF\_Grid} and the Fortran data array. 
+! {\tt ESMF\_Grid} and the Fortran data array. For an example and
+! associated documentation using this method see Section 
+! \ref{sec:field:usage:create_5dgrid_7dptr_2dungridded}.
 !
 ! The arguments are:
 ! \begin{description}

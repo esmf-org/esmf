@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.10 2008/04/05 03:12:41 cdeluca Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.11 2008/04/15 20:15:06 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.10 2008/04/05 03:12:41 cdeluca Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.11 2008/04/15 20:15:06 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -154,7 +154,9 @@ contains
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Field} and allocate space internally for an
-! {\tt ESMF\_Array}.  Return a new {\tt ESMF\_Field}.
+! {\tt ESMF\_Array}.  Return a new {\tt ESMF\_Field}. For an example and
+! associated documentation using this method see Section 
+! \ref{sec:field:usage:create_grid_arrayspec}.
 ! 
 ! The arguments are:
 ! \begin{description}
@@ -472,7 +474,9 @@ contains
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Field}.  This version of creation
 ! assumes the data exists already and is being
-! passed in through an {\tt ESMF\_Array}.  
+! passed in through an {\tt ESMF\_Array}.  For an example and
+! associated documentation using this method see Section 
+! \ref{sec:field:usage:create_grid_array}.
 ! 
 ! The arguments are:
 ! \begin{description}
@@ -787,6 +791,13 @@ contains
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_Grid}. @\
+! For examples and @\
+! associated documentations using this method see Section  @\
+! \ref{sec:field:usage:create_2dptr}, @\
+! \ref{sec:field:usage:create_2dgrid_3dptr}, @\
+! \ref{sec:field:usage:create_2dgrid_3dptr_map}, @\
+! \ref{sec:field:usage:create_2dgrid_3dptr_map_halo}, and @\
+! \ref{sec:field:usage:create_5dgrid_7dptr_2dungridded}. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -968,7 +979,10 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
 ! !DESCRIPTION:
 ! This version of {\tt ESMF\_FieldCreate} builds an empty {\tt ESMF\_Field} 
 ! and depends on later calls to add an {\tt ESMF\_Grid} and {\tt ESMF\_Array} to 
-! it. Attributes can be added to an empty Field object. 
+! it. Attributes can be added to an empty Field object. For an example and
+! associated documentation using this method see Section 
+! \ref{sec:field:usage:create_empty_setcommit}.
+!
 !
 ! The arguments are:
 ! \begin{description}
