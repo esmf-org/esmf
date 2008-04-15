@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.7 2008/04/14 20:30:03 oehmke Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.8 2008/04/15 15:40:15 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.7 2008/04/14 20:30:03 oehmke Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.8 2008/04/15 15:40:15 w6ws Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -184,7 +184,7 @@ program ESMF_FieldRegridEx
                             computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrYC, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
 
-      call ESMF_FieldGet(srcField, fptr, lDE, computationalLBound=fclbnd, &
+      call ESMF_FieldGet(srcField, lDE, fptr, computationalLBound=fclbnd, &
                              computationalUBound=fcubnd,  rc=localrc)
       write(failMsg, *) "ESMF_FieldGet"
       call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -229,7 +229,7 @@ program ESMF_FieldRegridEx
                             computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrYC, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
 
-     call ESMF_FieldGet(dstField, fptr, lDE, computationalLBound=fclbnd, &
+     call ESMF_FieldGet(dstField, lDE, fptr, computationalLBound=fclbnd, &
                              computationalUBound=fcubnd,  rc=localrc)
      write(failMsg, *) "ESMF_FieldGet"
      call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
