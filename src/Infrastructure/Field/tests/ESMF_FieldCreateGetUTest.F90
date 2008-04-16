@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.27 2008/04/15 19:28:32 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.28 2008/04/16 18:59:44 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -550,6 +550,7 @@
             regDecomp=(/2,2/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             gridToFieldMap=(/3,2/), &
+            ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
             maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 3d 2,3 dim distributed, " // &

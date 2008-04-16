@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cppF90,v 1.2.2.6 2008/04/15 20:15:09 feiliu Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.2.2.7 2008/04/16 18:59:44 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldSetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.6 2008/04/15 20:15:09 feiliu Exp $'
+    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.7 2008/04/16 18:59:44 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -588,28 +588,24 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
 !       dimensions are handled via individual communication methods.  For example, @\
 !       an undistributed dimension can be remapped to a distributed dimension @\
 !       as part of the ESMF\_ ArrayRedist() operation. @\
-! \item [{[ungriddedLBound]}] @\
+! \item [{[ungriddedLBound]}]
 !       Lower bounds of the ungridded dimensions of the {\tt field}. @\
 !       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded @\
 !       dimensions in the {\tt field}.  All ungridded dimensions of the @\
-!       {\tt field} are also undistributed. If neither ungriddedLBounds or @\
-!       ungriddedUBounds are specified, the ungriddedLBound defaults to 1, @\
-!       and the ungriddedUBound defaults to the size of the dimension. @\
-!       If either ungriddedLBounds OR ungriddedUBounds are specified, the @\
-!       other will be calculated.  If BOTH are specified the values are checked @\
+!       {\tt field} are also undistributed. When field dimension count is @\
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound @\
+!       must be specified. When both are specified the values are checked @\
 !       for consistency.  Note that the the ordering of @\
 !       these ungridded dimensions is the same as their order in the {\tt farray}. @\
 !       Note also that the bounds for undistributed dimensions included in the {\tt grid} are set @\
 !       in the {\tt grid}. @\
-! \item [{[ungriddedUBound]}] @\
+! \item [{[ungriddedUBound]}]
 !       Upper bounds of the ungridded dimensions of the {\tt field}. @\
 !       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded @\
 !       dimensions in the {\tt field}.  All ungridded dimensions of the @\
-!       {\tt field} are also undistributed. If neither ungriddedLBounds or @\
-!       ungriddedUBounds are specified, the ungriddedLBound defaults to 1, @\
-!       and the ungriddedUBound defaults to the size of the dimension. @\
-!       If either ungriddedLBounds OR ungriddedUBounds are specified, the @\
-!       other will be calculated.  If BOTH are specified the values are checked @\
+!       {\tt field} are also undistributed. When field dimension count is @\
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound @\
+!       must be specified. When both are specified the values are checked @\
 !       for consistency.  Note that the the ordering of @\
 !       these ungridded dimensions is the same as their order in the {\tt farray}. @\
 !       Note also that the bounds for undistributed dimensions included in the {\tt grid} are set @\
@@ -728,9 +724,19 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
         ESMF_CONTEXT, rc)) return @\
 @\
     if(fieldDimCount .lt. gridDimCount) then @\
-         call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
-             "- farray rank must be greater than or equal to grid rank", & @\
-               ESMF_CONTEXT, rc)  @\
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
+            "- farray rank must be greater than or equal to grid rank", & @\
+              ESMF_CONTEXT, rc)  @\
+        return @\
+    endif @\
+    if(fieldDimCount .gt. gridDimCount) then @\
+      if( (.not. present(ungriddedLBound)) .or. & @\
+          (.not. present(ungriddedUBound)) ) then @\
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, & @\
+         "- ungridded bounds must be present when Field has ungridded dimension(s)", & @\
+           ESMF_CONTEXT, rc) @\
+        return @\
+      endif @\
     endif @\
 @\
     fieldUngriddedDimCount = fieldDimCount-gridDimCount @\

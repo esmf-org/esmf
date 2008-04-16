@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.27 2008/04/15 20:15:05 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.28 2008/04/16 18:59:42 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -82,7 +82,7 @@
 !  This create associates the two objects.  
 ! 
 !  We first create a Grid with a regular distribution that is
-!  10x20 DEs.  This version of field create simply
+!  10x20 index in 2x2 DEs.  This version of field create simply
 !  associates the data with the Grid.  The data is referenced
 !  explicitly on a regular 2x2 uniform grid. 
 !  Then we create an arrayspec. With grid and arrayspec,
@@ -145,13 +145,14 @@
 !   of the ungridded dimension is ungriddedUBound - ungriddedLBound + 1.
 !
 !   The Field in this example has a 1km resolution in the vertical,
-!   upper to 50km to describe a physical Field in the stratosphere.
-!   Note that gridToFieldMap in this specific example is (/1,2/) by default
+!   upper to 50km to describe a physical Field in the troposphere and stratosphere.
+!   Note that gridToFieldMap in this specific example is (/1,2/) which
+!   is the default value
 !   so the user can neglect this argument for the FieldCreate call.
 !EOE
 
 !BOC
-    grid2d = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+    grid2d = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/180,360/), &
           regDecomp=(/2,2/), name="atmgrid", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -825,8 +826,8 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     if (finalrc.EQ.ESMF_SUCCESS) then
-	print *, "PASS: ESMF_FieldCreateEx.F90"
+        print *, "PASS: ESMF_FieldCreateEx.F90"
     else
-	print *, "FAIL: ESMF_FieldCreateEx.F90"
+        print *, "FAIL: ESMF_FieldCreateEx.F90"
     end if
 end program ESMF_FieldCreateEx

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.106.2.12 2008/04/05 03:12:42 cdeluca Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.106.2.13 2008/04/16 18:59:45 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.106.2.12 2008/04/05 03:12:42 cdeluca Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.106.2.13 2008/04/16 18:59:45 feiliu Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -374,7 +374,8 @@
       ! verify we can create a 3d data on a 2d grid
       call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R4, rc=rc)
       f2 = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, &
-                                          name="rh", rc=rc)
+            ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
+            name="rh", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a Field with a 2d Grid and 3d ArraySpec"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

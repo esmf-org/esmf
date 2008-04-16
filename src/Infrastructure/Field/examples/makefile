@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.25.2.4 2008/02/22 20:21:22 cdeluca Exp $ 
+# $Id: makefile,v 1.25.2.5 2008/04/16 18:59:42 feiliu Exp $ 
 
 ALL:  build_examples
 
@@ -18,14 +18,14 @@ LOCDIR	  = src/Infrastructure/Field/examples
 
 
 EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_FieldCreateEx \
-#                 $(ESMF_EXDIR)/ESMF_FieldGetEx \
+				$(ESMF_EXDIR)/ESMF_FieldGetEx
 #                 $(ESMF_EXDIR)/ESMF_FieldSetEx
 #                 $(ESMF_EXDIR)/ESMF_FieldFromUserEx \
 #                 $(ESMF_EXDIR)/ESMF_FieldGlobalEx \
 #                 $(ESMF_EXDIR)/ESMF_FieldWriteEx
 
 EXAMPLES_RUN = run_ESMF_FieldCreateEx \
-#                   run_ESMF_FieldGetEx \
+				run_ESMF_FieldGetEx
 #                   run_ESMF_FieldSetEx
 #                   run_ESMF_FieldFromUserEx \
 #                   run_ESMF_FieldGlobalEx \

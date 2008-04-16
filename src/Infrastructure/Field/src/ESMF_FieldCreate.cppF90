@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.11 2008/04/15 20:15:06 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.12 2008/04/16 18:59:43 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.11 2008/04/15 20:15:06 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.12 2008/04/16 18:59:43 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -175,71 +175,67 @@ contains
 !       \ref{sec:usage:staggerloc:adv}. The default
 !       value is ESMF\_STAGGERLOC\_CENTER.
 ! \item [{[gridToFieldMap]}]
-!       List with number of elements equal to the @\
-!       {\tt grid}'s dimCount.  The list elements map each dimension @\
-!       of the {\tt grid} to a dimension in the {\tt farray} by @\
-!       specifying the appropriate {\tt farray} dimension index. The default is to @\
-!       map all of the {\tt grid}'s dimensions against the lowest dimensions of @\
-!       the {\tt farray} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\
-!       The values of all {\tt gridToFieldMap} entries must be greater than or equal @\
-!       to one and smaller than or equal to the {\tt farray} rank. @\
-!       It is erroneous to specify the same {\tt gridToFieldMap} entry @\
-!       multiple times. The total ungridded dimensions in the {\tt field} @\
-!       are the total {\tt farray} dimensions less @\
-!       the total (distributed + undistributed) dimensions in @\
-!       the {\tt grid}.  Ungridded dimensions must be in the same order they are @\
-!       stored in the {\t farray}.  Permutations of the order of @\
-!       dimensions are handled via individual communication methods.  For example, @\
-!       an undistributed dimension can be remapped to a distributed dimension @\
-!       as part of the ESMF\_ ArrayRedist() operation. @\
+!       List with number of elements equal to the
+!       {\tt grid}'s dimCount.  The list elements map each dimension
+!       of the {\tt grid} to a dimension in the {\tt farray} by
+!       specifying the appropriate {\tt farray} dimension index. The default is to
+!       map all of the {\tt grid}'s dimensions against the lowest dimensions of
+!       the {\tt farray} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
+!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
+!       to one and smaller than or equal to the {\tt farray} rank.
+!       It is erroneous to specify the same {\tt gridToFieldMap} entry
+!       multiple times. The total ungridded dimensions in the {\tt field}
+!       are the total {\tt farray} dimensions less
+!       the total (distributed + undistributed) dimensions in
+!       the {\tt grid}.  Ungridded dimensions must be in the same order they are
+!       stored in the {\t farray}.  Permutations of the order of
+!       dimensions are handled via individual communication methods.  For example,
+!       an undistributed dimension can be remapped to a distributed dimension
+!       as part of the ESMF\_ ArrayRedist() operation.
 ! \item [{[ungriddedLBound]}]
-!       Lower bounds of the ungridded dimensions of the {\tt field}. @\
-!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded @\
-!       dimensions in the {\tt field}.  All ungridded dimensions of the @\
-!       {\tt field} are also undistributed. If neither ungriddedLBounds or @\
-!       ungriddedUBounds are specified, the ungriddedLBound defaults to 1, @\
-!       and the ungriddedUBound defaults to the size of the dimension. @\
-!       If either ungriddedLBounds OR ungriddedUBounds are specified, the @\
-!       other will be calculated.  If BOTH are specified the values are checked @\
-!       for consistency.  Note that the the ordering of @\
-!       these ungridded dimensions is the same as their order in the {\tt farray}. @\
-!       Note also that the bounds for undistributed dimensions included in the {\tt grid} are set @\
-!       in the {\tt grid}. @\
+!       Lower bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt farray}.
+!       Note also that the bounds for undistributed dimensions included in the {\tt grid} are set
+!       in the {\tt grid}.
 ! \item [{[ungriddedUBound]}]
-!       Upper bounds of the ungridded dimensions of the {\tt field}. @\
-!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded @\
-!       dimensions in the {\tt field}.  All ungridded dimensions of the @\
-!       {\tt field} are also undistributed. If neither ungriddedLBounds or @\
-!       ungriddedUBounds are specified, the ungriddedLBound defaults to 1, @\
-!       and the ungriddedUBound defaults to the size of the dimension. @\
-!       If either ungriddedLBounds OR ungriddedUBounds are specified, the @\
-!       other will be calculated.  If BOTH are specified the values are checked @\
-!       for consistency.  Note that the the ordering of @\
-!       these ungridded dimensions is the same as their order in the {\tt farray}. @\
-!       Note also that the bounds for undistributed dimensions included in the {\tt grid} are set @\
-!       in the {\tt grid}. @\
+!       Upper bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt farray}.
+!       Note also that the bounds for undistributed dimensions included in the {\tt grid} are set
+!       in the {\tt grid}.
 ! \item [{[maxHaloLWidth]}]
-!       Lower bound of halo region.  The size of this array is the number @\
-!       of distributed dimensions in the {\tt grid}.  However, ordering of the elements @\
-!       needs to be the same as they appear in the {\tt farray}.  Values default @\
-!       to 0.  If values for maxHaloLWidth are specified they must be reflected in @\
-!       the size of the {\tt farray}.  That is, for each distributed dimension the @\
-!       {\tt farray} size should be {\tt maxHaloLWidth} + {\tt maxHaloUWidth} @\
-!       + {\tt computationalCount}. Although the halo operation is not @\
-!       implemented, the {\tt minHaloLWidth} is checked for validity and stored @\
-!       in preparation for the implementation of the halo method. @\
-!       HALO OPERATION NOT IMPLEMENTED @\
+!       Lower bound of halo region.  The size of this array is the number
+!       of distributed dimensions in the {\tt grid}.  However, ordering of the elements
+!       needs to be the same as they appear in the {\tt farray}.  Values default
+!       to 0.  If values for maxHaloLWidth are specified they must be reflected in
+!       the size of the {\tt farray}.  That is, for each distributed dimension the
+!       {\tt farray} size should be {\tt maxHaloLWidth} + {\tt maxHaloUWidth}
+!       + {\tt computationalCount}. Although the halo operation is not
+!       implemented, the {\tt minHaloLWidth} is checked for validity and stored
+!       in preparation for the implementation of the halo method.
+!       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[maxHaloUWidth]}]
-!       Upper bound of halo region.  The size of this array is the number @\
-!       of distributed dimensions in the {\tt grid}.  However, ordering of the elements @\
-!       needs to be the same as they appear in the {\tt farray}.  Values default @\
-!       to 0.  If values for maxHaloUWidth are specified they must be reflected in @\
-!       the size of the {\tt farray}.  That is, for each distributed dimension the @\
-!       {\tt farray} size should {\tt maxHaloLWidth} + {\tt maxHaloUWidth} @\
-!       + {\tt computationalCount}.  Although the halo operation is not @\
-!       implemented, the {\tt maxHaloUWidth} is checked for validity and stored @\
-!       in preparation for the implementation of the halo method.  @\
-!       HALO OPERATION NOT IMPLEMENTED @\
+!       Upper bound of halo region.  The size of this array is the number
+!       of distributed dimensions in the {\tt grid}.  However, ordering of the elements
+!       needs to be the same as they appear in the {\tt farray}.  Values default
+!       to 0.  If values for maxHaloUWidth are specified they must be reflected in
+!       the size of the {\tt farray}.  That is, for each distributed dimension the
+!       {\tt farray} size should {\tt maxHaloLWidth} + {\tt maxHaloUWidth}
+!       + {\tt computationalCount}.  Although the halo operation is not
+!       implemented, the {\tt maxHaloUWidth} is checked for validity and stored
+!       in preparation for the implementation of the halo method. 
+!       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[name]}] 
 !       {\tt Field} name. 
 ! \item [{[iospec]}] 
@@ -284,7 +280,6 @@ contains
          ESMF_ERR_PASSTHRU, &  
          ESMF_CONTEXT, rc)) return   
 
-
     ! Get number of grid dimensions, number  
     ! of distributed grid dimensions, distgrid,  
     ! number of ungridded Field dimensions,  
@@ -299,8 +294,19 @@ contains
         call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
              "- farray rank must be greater than or equal to grid rank", &  
                ESMF_CONTEXT, rc)   
+        return
     endif  
- 
+
+    if(fieldDimCount .gt. gridDimCount) then
+      if( (.not. present(ungriddedLBound)) .or. &
+          (.not. present(ungriddedUBound)) ) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+         "- ungridded bounds must be present when Field has ungridded dimension(s)", &
+           ESMF_CONTEXT, rc)
+        return
+      endif
+    endif
+
     fieldUngriddedDimCount = fieldDimCount-gridDimCount  
     fieldUndistDimCount = fieldDimCount-gridDistDimCount  
  
@@ -486,81 +492,77 @@ contains
 !       Includes data specification and allocated memory. 
 !       It must already include space for the halo regions.
 ! \item [{[copyflag]}]
-!       Indicates whether to copy the {\tt farray} or reference it directly. @\
-!       For valid values see \ref{opt:copyflag}.  The default is @\
-!       {\tt ESMF\_DATA\_REF}. @\
+!       Indicates whether to copy the {\tt farray} or reference it directly.
+!       For valid values see \ref{opt:copyflag}.  The default is
+!       {\tt ESMF\_DATA\_REF}.
 ! \item [{[staggerloc]}] 
-!       Stagger location of data in grid cells.  For valid  @\
-!       predefined values see Section \ref{sec:opt:staggerloc}. @\
-!       To create a custom stagger location see Section @\
-!       \ref{sec:usage:staggerloc:adv}. The default @\
-!       value is ESMF\_STAGGERLOC\_CENTER. @\
+!       Stagger location of data in grid cells.  For valid 
+!       predefined values see Section \ref{sec:opt:staggerloc}.
+!       To create a custom stagger location see Section
+!       \ref{sec:usage:staggerloc:adv}. The default
+!       value is ESMF\_STAGGERLOC\_CENTER.
 ! \item [{[gridToFieldMap]}]
-!       List with number of elements equal to the @\
-!       {\tt grid}'s dimCount.  The list elements map each dimension @\
-!       of the {\tt grid} to a dimension in the {\tt farray} by @\
-!       specifying the appropriate {\tt farray} dimension index. The default is to @\
-!       map all of the {\tt grid}'s dimensions against the lowest dimensions of @\
-!       the {\tt farray} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\
-!       The values of all {\tt gridToFieldMap} entries must be greater than or equal @\
-!       to one and smaller than or equal to the {\tt farray} rank. @\
-!       It is erroneous to specify the same {\tt gridToFieldMap} entry @\
-!       multiple times. The total ungridded dimensions in the {\tt field} @\
-!       are the total {\tt farray} dimensions less @\
-!       the total (distributed + undistributed) dimensions in @\
-!       the {\tt grid}.  Ungridded dimensions must be in the same order they are @\
-!       stored in the {\t farray}.  Permutations of the order of @\
-!       dimensions are handled via individual communication methods.  For example, @\
-!       an undistributed dimension can be remapped to a distributed dimension @\
-!       as part of the ESMF\_ ArrayRedist() operation. @\
+!       List with number of elements equal to the
+!       {\tt grid}'s dimCount.  The list elements map each dimension
+!       of the {\tt grid} to a dimension in the {\tt farray} by
+!       specifying the appropriate {\tt farray} dimension index. The default is to
+!       map all of the {\tt grid}'s dimensions against the lowest dimensions of
+!       the {\tt farray} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
+!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
+!       to one and smaller than or equal to the {\tt farray} rank.
+!       It is erroneous to specify the same {\tt gridToFieldMap} entry
+!       multiple times. The total ungridded dimensions in the {\tt field}
+!       are the total {\tt farray} dimensions less
+!       the total (distributed + undistributed) dimensions in
+!       the {\tt grid}.  Ungridded dimensions must be in the same order they are
+!       stored in the {\t farray}.  Permutations of the order of
+!       dimensions are handled via individual communication methods.  For example,
+!       an undistributed dimension can be remapped to a distributed dimension
+!       as part of the ESMF\_ ArrayRedist() operation.
 ! \item [{[ungriddedLBound]}]
-!       Lower bounds of the ungridded dimensions of the {\tt field}. @\
-!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded @\
-!       dimensions in the {\tt field}.  All ungridded dimensions of the @\
-!       {\tt field} are also undistributed. If neither ungriddedLBounds or @\
-!       ungriddedUBounds are specified, the ungriddedLBound defaults to 1, @\
-!       and the ungriddedUBound defaults to the size of the dimension. @\
-!       If either ungriddedLBounds OR ungriddedUBounds are specified, the @\
-!       other will be calculated.  If BOTH are specified the values are checked @\
-!       for consistency.  Note that the the ordering of @\
-!       these ungridded dimensions is the same as their order in the {\tt farray}. @\
-!       Note also that the bounds for undistributed dimensions included in the {\tt grid} are set @\
-!       in the {\tt grid}. @\
+!       Lower bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt farray}.
+!       Note also that the bounds for undistributed dimensions included in the {\tt grid} are set
+!       in the {\tt grid}.
 ! \item [{[ungriddedUBound]}]
-!       Upper bounds of the ungridded dimensions of the {\tt field}. @\
-!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded @\
-!       dimensions in the {\tt field}.  All ungridded dimensions of the @\
-!       {\tt field} are also undistributed. If neither ungriddedLBounds or @\
-!       ungriddedUBounds are specified, the ungriddedLBound defaults to 1, @\
-!       and the ungriddedUBound defaults to the size of the dimension. @\
-!       If either ungriddedLBounds OR ungriddedUBounds are specified, the @\
-!       other will be calculated.  If BOTH are specified the values are checked @\
-!       for consistency.  Note that the the ordering of @\
-!       these ungridded dimensions is the same as their order in the {\tt farray}. @\
-!       Note also that the bounds for undistributed dimensions included in the {\tt grid} are set @\
-!       in the {\tt grid}. @\
+!       Upper bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt farray}.
+!       Note also that the bounds for undistributed dimensions included in the {\tt grid} are set
+!       in the {\tt grid}.
 ! \item [{[maxHaloLWidth]}]
-!       Lower bound of halo region.  The size of this array is the number @\
-!       of distributed dimensions in the {\tt grid}.  However, ordering of the elements @\
-!       needs to be the same as they appear in the {\tt farray}.  Values default @\
-!       to 0.  If values for maxHaloLWidth are specified they must be reflected in @\
-!       the size of the {\tt farray}.  That is, for each distributed dimension the @\
-!       {\tt farray} size should be {\tt maxHaloLWidth} + {\tt maxHaloUWidth} @\
-!       + {\tt computationalCount}. Although the halo operation is not @\
-!       implemented, the {\tt minHaloLWidth} is checked for validity and stored @\
-!       in preparation for the implementation of the halo method. @\
-!       HALO OPERATION NOT IMPLEMENTED @\
+!       Lower bound of halo region.  The size of this array is the number
+!       of distributed dimensions in the {\tt grid}.  However, ordering of the elements
+!       needs to be the same as they appear in the {\tt farray}.  Values default
+!       to 0.  If values for maxHaloLWidth are specified they must be reflected in
+!       the size of the {\tt farray}.  That is, for each distributed dimension the
+!       {\tt farray} size should be {\tt maxHaloLWidth} + {\tt maxHaloUWidth}
+!       + {\tt computationalCount}. Although the halo operation is not
+!       implemented, the {\tt minHaloLWidth} is checked for validity and stored
+!       in preparation for the implementation of the halo method.
+!       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[maxHaloUWidth]}]
-!       Upper bound of halo region.  The size of this array is the number @\
-!       of distributed dimensions in the {\tt grid}.  However, ordering of the elements @\
-!       needs to be the same as they appear in the {\tt farray}.  Values default @\
-!       to 0.  If values for maxHaloUWidth are specified they must be reflected in @\
-!       the size of the {\tt farray}.  That is, for each distributed dimension the @\
-!       {\tt farray} size should {\tt maxHaloLWidth} + {\tt maxHaloUWidth} @\
-!       + {\tt computationalCount}.  Although the halo operation is not @\
-!       implemented, the {\tt maxHaloUWidth} is checked for validity and stored @\
-!       in preparation for the implementation of the halo method.  @\
-!       HALO OPERATION NOT IMPLEMENTED @\
+!       Upper bound of halo region.  The size of this array is the number
+!       of distributed dimensions in the {\tt grid}.  However, ordering of the elements
+!       needs to be the same as they appear in the {\tt farray}.  Values default
+!       to 0.  If values for maxHaloUWidth are specified they must be reflected in
+!       the size of the {\tt farray}.  That is, for each distributed dimension the
+!       {\tt farray} size should {\tt maxHaloLWidth} + {\tt maxHaloUWidth}
+!       + {\tt computationalCount}.  Although the halo operation is not
+!       implemented, the {\tt maxHaloUWidth} is checked for validity and stored
+!       in preparation for the implementation of the halo method. 
+!       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[name]}] 
 !       {\tt Field} name. 
 ! \item [{[iospec]}] 
@@ -620,7 +622,18 @@ contains
         call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
              "- farray rank must be greater than or equal to grid rank", &  
                ESMF_CONTEXT, rc)   
+        return
     endif  
+
+    if(fieldDimCount .gt. gridDimCount) then
+      if( (.not. present(ungriddedLBound)) .or. &
+          (.not. present(ungriddedUBound)) ) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+         "- ungridded bounds must be present when Field has ungridded dimension(s)", &
+           ESMF_CONTEXT, rc)
+        return
+      endif
+    endif
  
     fieldUngriddedDimCount = fieldDimCount-gridDimCount  
     fieldUndistDimCount = fieldDimCount-gridDistDimCount  
@@ -840,11 +853,9 @@ contains
 !       Lower bounds of the ungridded dimensions of the {\tt field}. @\
 !       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded @\
 !       dimensions in the {\tt field}.  All ungridded dimensions of the @\
-!       {\tt field} are also undistributed. If neither ungriddedLBounds or @\
-!       ungriddedUBounds are specified, the ungriddedLBound defaults to 1, @\
-!       and the ungriddedUBound defaults to the size of the dimension. @\
-!       If either ungriddedLBounds OR ungriddedUBounds are specified, the @\
-!       other will be calculated.  If BOTH are specified the values are checked @\
+!       {\tt field} are also undistributed. When field dimension count is @\
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound @\
+!       must be specified. When both are specified the values are checked @\
 !       for consistency.  Note that the the ordering of @\
 !       these ungridded dimensions is the same as their order in the {\tt farray}. @\
 !       Note also that the bounds for undistributed dimensions included in the {\tt grid} are set @\
@@ -853,11 +864,9 @@ contains
 !       Upper bounds of the ungridded dimensions of the {\tt field}. @\
 !       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded @\
 !       dimensions in the {\tt field}.  All ungridded dimensions of the @\
-!       {\tt field} are also undistributed. If neither ungriddedLBounds or @\
-!       ungriddedUBounds are specified, the ungriddedLBound defaults to 1, @\
-!       and the ungriddedUBound defaults to the size of the dimension. @\
-!       If either ungriddedLBounds OR ungriddedUBounds are specified, the @\
-!       other will be calculated.  If BOTH are specified the values are checked @\
+!       {\tt field} are also undistributed. When field dimension count is @\
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound @\
+!       must be specified. When both are specified the values are checked @\
 !       for consistency.  Note that the the ordering of @\
 !       these ungridded dimensions is the same as their order in the {\tt farray}. @\
 !       Note also that the bounds for undistributed dimensions included in the {\tt grid} are set @\
