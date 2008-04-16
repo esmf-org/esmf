@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentUTest.F90,v 1.11.2.4 2008/04/05 03:13:57 cdeluca Exp $
+! $Id: ESMF_VMComponentUTest.F90,v 1.11.2.5 2008/04/16 18:40:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -157,13 +157,11 @@ program ESMF_VMComponentUTest
 
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_VMBarrierUTest - Unit test for VM Barrier Function
+! !PROGRAM: ESMF_VMComponentUTest - Unit test for VM/Component interaction
 !
 ! !DESCRIPTION:
 !
-! The code in this file drives the F90 VM Barrier test.  The VM
-!   Barrier function is complex enough to require a separate test file.
-!   It runs on multiple processors.
+! The code in this file drives the F90 VM/Component test.
 !
 !-----------------------------------------------------------------------------
 ! !USES:
@@ -176,7 +174,7 @@ program ESMF_VMComponentUTest
 !------------------------------------------------------------------------------
   ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMComponentUTest.F90,v 1.11.2.4 2008/04/05 03:13:57 cdeluca Exp $'
+    '$Id: ESMF_VMComponentUTest.F90,v 1.11.2.5 2008/04/16 18:40:37 theurich Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
