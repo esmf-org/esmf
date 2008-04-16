@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGetEx.F90,v 1.4.2.6 2008/04/16 18:59:42 feiliu Exp $
+! $Id: ESMF_FieldGetEx.F90,v 1.4.2.7 2008/04/16 19:21:18 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -79,7 +79,7 @@
 !  In this example, we first create a 3D Field based on a 3D Grid and Array.
 !  Then we use the {\tt ESMF\_FieldGet} interface to retrieve the data pointer,
 !  potentially update or verify its values. We also retrieve the bounds and counts
-!  information of the 3D Field to help iteration.
+!  information of the 3D Field to assist data element iteration.
 !
 !EOE
 !BOC
@@ -143,7 +143,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Get ESMF\_Grid and ESMF\_Array and other information from a Field}
+!\subsubsection{Get Grid and Array and other information from a Field}
 !\label{sec:field:usage:field_get_default}
 !
 !  User can get the internal {\tt ESMF\_Grid} and {\tt ESMF\_Array} 
