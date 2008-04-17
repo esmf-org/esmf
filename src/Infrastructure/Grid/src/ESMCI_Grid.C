@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.36.2.9 2008/04/14 21:18:11 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.36.2.10 2008/04/17 22:13:24 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.36.2.9 2008/04/14 21:18:11 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.36.2.10 2008/04/17 22:13:24 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -78,7 +78,8 @@ int construct(Grid *_grid, int _nameLen, char *_name, ESMC_TypeKind *_typekind,
                InterfaceInt *_distgridToGridMap,
               InterfaceInt *_undistLBound, InterfaceInt *_undistUBound, 
               InterfaceInt *_coordDimCount, InterfaceInt *_coordDimMap,
-              ESMC_IndexFlag *_indexflag);
+              ESMC_IndexFlag *_indexflag, bool destroyDistgrid,
+              bool destroyDELayout);
 
 int setDefaultsLUA(int dimCount,
                    InterfaceInt *lWidthIn, InterfaceInt *uWidthIn, InterfaceInt *alignIn,
@@ -867,11 +868,14 @@ int Grid::commit(
 
   // setup the grid's internal structures 
   localrc=construct(this, proto->nameLen, proto->name, proto->typekind, 
-                       proto->distgrid, proto->gridEdgeLWidth, proto->gridEdgeUWidth,
+                       proto->distgrid, 
+                       proto->gridEdgeLWidth, proto->gridEdgeUWidth,
                        proto->gridAlign,
-                       proto->distgridToGridMap, proto->undistLBound,
-                       proto->undistUBound, proto->coordDimCount, proto->coordDimMap,
-                       proto->indexflag);
+                       proto->distgridToGridMap, 
+                       proto->undistLBound, proto->undistUBound, 
+                       proto->coordDimCount, proto->coordDimMap,
+		       proto->indexflag,
+                       proto->destroyDistgrid, proto->destroyDELayout);
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
             ESMF_ERR_PASSTHRU, &rc)) return rc;        
 
@@ -912,6 +916,8 @@ Grid *Grid::create(
   InterfaceInt *coordDimCountArg,               // (in) optional
   InterfaceInt *coordDimMapArg,             // (in) optional
   ESMC_IndexFlag *indexflagArg,             // (in) optional
+  bool *destroyDistgridArg,
+  bool *destroyDELayoutArg,
   int *rcArg                                // (out) return code optional
   ){
 //
@@ -943,7 +949,8 @@ Grid *Grid::create(
   localrc=construct(grid, nameLenArg, nameArg, typekindArg, distgridArg, 
                     gridEdgeLWidthArg,gridEdgeUWidthArg, gridAlignArg,
                     distgridToGridMapArg, undistLBoundArg, undistUBoundArg, 
-                    coordDimCountArg, coordDimMapArg, indexflagArg);
+                    coordDimCountArg, coordDimMapArg, indexflagArg,
+                    destroyDistgridArg, destroyDELayoutArg);
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
             ESMF_ERR_PASSTHRU, rcArg)) return ESMC_NULL_POINTER;        
 
@@ -1487,7 +1494,9 @@ int Grid::set(
   InterfaceInt *undistUBoundArg,      // (in) optional
   InterfaceInt *coordDimCountArg,    // (in) optional
   InterfaceInt *coordDimMapArg,  // (in) optional
-  ESMC_IndexFlag *indexflagArg   // (in) optional
+  ESMC_IndexFlag *indexflagArg,   // (in) optional
+  bool *destroyDistgridArg,
+  bool *destroyDELayoutArg
   ){
 //
 // !DESCRIPTION:
@@ -1624,6 +1633,19 @@ int Grid::set(
     *(proto->indexflag)=*indexflagArg;
   }
  
+  // if passed in, set destroyDistgrid
+  if (destroyDistgridArg!=NULL) {
+    if (proto->destroyDistgrid == ESMC_NULL_POINTER) proto->destroyDistgrid= new bool;
+    *(proto->destroyDistgrid)=*destroyDistgridArg;
+  }
+
+  // if passed in, set destroyDistgrid
+  if (destroyDELayoutArg!=NULL) {
+    if (proto->destroyDELayout == ESMC_NULL_POINTER) proto->destroyDELayout= new bool;
+    *(proto->destroyDELayout)=*destroyDELayoutArg;
+  }
+
+
   // return successfully
   return ESMF_SUCCESS;
   }
@@ -1978,7 +2000,9 @@ int Grid::constructInternal(
   int *gridAlignArg,                       // (in)
   int *coordDimCountArg,                      // (in)
   int **coordDimMapArg,                   // (in)
-  ESMC_IndexFlag indexflagArg             // (in)
+  ESMC_IndexFlag indexflagArg,             // (in)
+  bool destroyDistgridArg, 
+  bool destroyDELayoutArg 
   ){
 //
 // !DESCRIPTION:
@@ -2002,6 +2026,10 @@ int Grid::constructInternal(
   dimCount = dimCountArg;
 
   indexflag=indexflagArg;
+
+  destroyDistgrid=destroyDistgridArg; 
+  destroyDELayout=destroyDELayoutArg;
+
 
   // Set the number of stagger locations from the grid dimCount
   staggerLocCount=_NumStaggerLocsFromDimCount(dimCount); 
@@ -2323,6 +2351,10 @@ Grid::Grid(
   
   indexflag=ESMF_INDEX_DELOCAL;
   distgrid= ESMC_NULL_POINTER; 
+
+  destroyDistgrid=false; 
+  destroyDELayout=false;
+
   
 }
 //-----------------------------------------------------------------------------
@@ -2358,6 +2390,18 @@ Grid::Grid(
        }
      }
    }
+
+   // delete delayout
+   if (destroyDELayout) {
+     DELayout *tmpDELayout=distgrid->getDELayout();
+     DELayout::destroy(&tmpDELayout);
+   }
+
+   // delete distgrid
+   if (destroyDistgrid) {
+     DistGrid::destroy(&distgrid);
+   }
+
 
    // If present delete ProtoGrid
    if (proto != ESMC_NULL_POINTER) delete proto;
@@ -2397,8 +2441,6 @@ Grid::Grid(
 }
 
 
-
-
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::ProtoGrid()"
@@ -2434,6 +2476,8 @@ ProtoGrid::ProtoGrid(
   coordDimCount=ESMC_NULL_POINTER;  
   coordDimMap=ESMC_NULL_POINTER; 
   indexflag=ESMC_NULL_POINTER; 
+  destroyDistgrid=ESMC_NULL_POINTER; 
+  destroyDELayout=ESMC_NULL_POINTER; 
 }
 //-----------------------------------------------------------------------------
 
@@ -2472,6 +2516,8 @@ ProtoGrid::ProtoGrid(
   if (coordDimCount != ESMC_NULL_POINTER) _freeInterfaceInt(&coordDimCount);
   if (coordDimMap != ESMC_NULL_POINTER) _freeInterfaceInt(&coordDimMap);
   if (indexflag != ESMC_NULL_POINTER) delete indexflag; 
+  if (destroyDistgrid != ESMC_NULL_POINTER) delete destroyDistgrid; 
+  if (destroyDELayout != ESMC_NULL_POINTER) delete destroyDELayout; 
 }
 
 
@@ -2684,7 +2730,12 @@ int Grid::serialize(
 
     // Don't do status since we're changing it anyway
     SERIALIZE_VAR(cp, buffer,loffset,typekind,ESMC_TypeKind);
+
+    SERIALIZE_VAR(cp, buffer,loffset,indexflag,ESMC_IndexFlag);
     
+    SERIALIZE_VAR(cp, buffer,loffset,destroyDistgrid,bool);    
+    SERIALIZE_VAR(cp, buffer,loffset,destroyDELayout,bool);    
+
     SERIALIZE_VAR(cp, buffer,loffset,distDimCount,int);    
 
     SERIALIZE_VAR1D(cp, buffer,loffset,distgridToGridMap,distDimCount,int);
@@ -2827,9 +2878,14 @@ int Grid::deserialize(
 
   // Set status (instead of reading it)
   status =  ESMC_GRIDSTATUS_PROXY_READY;
-  
+
   DESERIALIZE_VAR( buffer,loffset,typekind,ESMC_TypeKind);
   
+  DESERIALIZE_VAR( buffer,loffset,indexflag,ESMC_IndexFlag);
+
+  DESERIALIZE_VAR( buffer,loffset,destroyDistgrid,bool);    
+  DESERIALIZE_VAR( buffer,loffset,destroyDELayout,bool);    
+
   DESERIALIZE_VAR( buffer,loffset,distDimCount,int);    
   
   DESERIALIZE_VAR1D( buffer,loffset,distgridToGridMap,distDimCount,int);
@@ -3165,7 +3221,9 @@ int construct(
   InterfaceInt *undistUBoundArg,                 // (in) optional
   InterfaceInt *coordDimCountArg,               // (in) optional
   InterfaceInt *coordDimMapArg,             // (in) optional
-  ESMC_IndexFlag *indexflagArg              // (in) optional
+  ESMC_IndexFlag *indexflagArg,              // (in) optional
+  bool *destroyDistgridArg,
+  bool *destroyDELayoutArg
   ){
 //
 // !DESCRIPTION:
@@ -3194,6 +3252,8 @@ int construct(
   ESMC_IndexFlag indexflag;
   int ind;
   char *name;  
+  bool destroyDistgrid;
+  bool destroyDELayout;
 
 
   // initialize return code; assume routine not implemented
@@ -3502,12 +3562,31 @@ int construct(
     indexflag=*indexflagArg;
   }
 
+  // If destroyDistgrid wasn't passed in then use default, otherwise 
+  // copy passed in value
+  if (destroyDistgridArg==NULL) {
+    destroyDistgrid=false;  // default
+  } else {
+    destroyDistgrid=*destroyDistgridArg;
+  }
+
+  // If destroyDELayout wasn't passed in then use default, otherwise 
+  // copy passed in value
+  if (destroyDELayoutArg==NULL) {
+    destroyDELayout=false;  // default
+  } else {
+    destroyDELayout=*destroyDELayoutArg;
+  }
+
+
   // construct the Grid object using the massaged parameter values
   localrc=gridArg->constructInternal(name, typekind, distgridArg, 
-             distDimCount, distgridToGridMap, 
-             undistDimCount, undistLBound, undistUBound,
-             dimCount, gridEdgeLWidth, gridEdgeUWidth, gridAlign, coordDimCount, coordDimMap, 
-             indexflag);
+				     distDimCount, distgridToGridMap, 
+				     undistDimCount, undistLBound, undistUBound,
+				     dimCount, gridEdgeLWidth, gridEdgeUWidth,
+				     gridAlign, coordDimCount, coordDimMap, 
+				     indexflag, destroyDistgrid, 
+				     destroyDELayout);
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
             ESMF_ERR_PASSTHRU, &rc)) return rc;
         

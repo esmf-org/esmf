@@ -154,7 +154,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47.2.10 2008/04/05 02:16:26 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47.2.11 2008/04/17 22:13:23 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -1199,7 +1199,8 @@ end interface
   ! Private name; call using ESMF_GridCreate()
       function ESMF_GridCreateFromDistGrid(name,coordTypeKind,distgrid, &
                          distgridToGridMap, undistLBound, undistUBound, coordDimCount, coordDimMap, &
-                         gridEdgeLWidth, gridEdgeUWidth, gridAlign, indexflag, rc)
+                         gridEdgeLWidth, gridEdgeUWidth, gridAlign, indexflag, &
+                         destroyDistGrid, destroyDELayout, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFromDistGrid
@@ -1217,6 +1218,8 @@ end interface
        integer,               intent(in),   optional  :: gridEdgeUWidth(:)
        integer,               intent(in),   optional  :: gridAlign(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
+       logical,               intent(in),   optional  :: destroyDistGrid
+       logical,               intent(in),   optional  :: destroyDELayout
        integer,               intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -1303,6 +1306,7 @@ end interface
     type(ESMF_InterfaceInt) :: undistUBoundArg ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordDimCountArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
+    integer :: intDestroyDistgrid,intDestroyDELayout
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1353,6 +1357,29 @@ end interface
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    !! Convert destroyDistGrid flag
+    if (present(destroyDistgrid)) then
+        if (destroyDistgrid) then
+           intDestroyDistgrid=1
+        else
+           intDestroyDistgrid=0
+         endif
+    else
+           intDestroyDistgrid=0
+    endif
+
+    !! Convert destroyDELayout flag
+    if (present(destroyDELayout)) then
+        if (destroyDELayout) then
+           intDestroyDELayout=1
+        else
+           intDestroyDELayout=0
+         endif
+    else
+           intDestroyDELayout=0
+    endif
+
+
     ! Initialize this grid object as invalid
     grid%this = ESMF_NULL_POINTER
 
@@ -1361,7 +1388,7 @@ end interface
       coordTypeKind, distgrid, distgridToGridMapArg, &
       undistLBoundArg, undistUBoundArg, coordDimCountArg, coordDimMapArg, &
       gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, &
-      indexflag, localrc)
+      indexflag, intDestroyDistGrid, intDestroyDELayout, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2527,7 +2554,10 @@ end interface
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
-                                    indexflag=indexflag, rc=localrc)
+                                    indexflag=indexflag, &
+                                    destroyDistGrid=.true., &
+                                    destroyDELayout=.true., &
+                                    rc=localrc)
     else
        ESMF_GridCreateShapeTileIrreg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
                                     distgrid=distgrid, distgridToGridMap=distgridToGridMap, &
@@ -2536,6 +2566,8 @@ end interface
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
                                     indexflag=indexflag, &
+                                    destroyDistGrid=.true., &
+                                    destroyDELayout=.true., &
                                     rc=localrc)
     endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3535,7 +3567,10 @@ end interface
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
-                                    indexflag=indexflag, rc=localrc)
+                                    indexflag=indexflag, &
+                                    destroyDistGrid=.true., &
+                                    destroyDELayout=.true., &
+                                    rc=localrc)
     else
        ESMF_GridCreateShapeTileReg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
                                     distgrid=distgrid, distgridToGridMap=distgridToGridMap, &
@@ -3544,6 +3579,8 @@ end interface
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
                                     indexflag=indexflag, &
+                                    destroyDistGrid=.true., &
+                                    destroyDELayout=.true., &
                                     rc=localrc)
     endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6533,8 +6570,8 @@ endif
   ! Private name; call using ESMF_GridSet()
     subroutine ESMF_GridSetFromDistGrid(grid, name, coordTypeKind, distgrid, & 
                  distgridToGridMap, undistLBound, undistUBound, coordDimCount, coordDimMap,           &
-                 gridEdgeLWidth, gridEdgeUWidth, gridAlign,                  &
-                 indexflag, rc)
+                 gridEdgeLWidth, gridEdgeUWidth, gridAlign, indexflag, &
+                 destroyDistgrid, destroyDELayout, rc)
 !
 ! !RETURN VALUE:
 
@@ -6553,6 +6590,8 @@ endif
        integer,               intent(in),   optional  :: gridEdgeUWidth(:)
        integer,               intent(in),   optional  :: gridAlign(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
+       logical,               intent(in),   optional  :: destroyDistgrid
+       logical,               intent(in),   optional  :: destroyDELayout
        integer,               intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -6604,6 +6643,12 @@ endif
 !     implies the EdgeWidths.
 ! \item[{[indexflag]}]
 !      Flag that indicates how the DE-local indices are to be defined.
+! \item[{[destroyDistgrid]}]
+!      If true, when the Grid is destroyed the DistGrid will be destroyed also. 
+!      Defaults to false. 
+! \item[{[destroyDELayout]}]
+!      If true, when the Grid is destroyed the DELayout will be destroyed also. 
+!      Defaults to false. 
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -6619,7 +6664,7 @@ endif
     type(ESMF_InterfaceInt) :: undistUBoundArg ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordDimCountArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
-
+    integer :: intDestroyDistgrid,intDestroyDELayout
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -7867,7 +7912,10 @@ endif
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
-                                    indexflag=indexflag, rc=localrc)
+                                    indexflag=indexflag,   &
+                                    destroyDistGrid=.true., &
+                                    destroyDELayout=.true., & 
+                                     rc=localrc)
     else
        call ESMF_GridSetFromDistGrid(grid, name, coordTypeKind, &
                                     distgrid=distgrid, distgridToGridMap=distgridToGridMap, &
@@ -7876,6 +7924,8 @@ endif
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
                                     indexflag=indexflag, &
+                                    destroyDistGrid=.true., &
+                                    destroyDELayout=.true., & 
                                     rc=localrc)
     endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -8879,7 +8929,10 @@ endif
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
-                                    indexflag=indexflag, rc=localrc)
+                                    indexflag=indexflag, &
+                                    destroyDistGrid=.true., &
+                                    destroyDELayout=.true., & 
+                                     rc=localrc)
     else
        call ESMF_GridSetFromDistGrid(grid, name=name, coordTypeKind=coordTypeKind, &
                                     distgrid=distgrid, distgridToGridMap=distgridToGridMap, &
@@ -8888,6 +8941,8 @@ endif
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
                                     indexflag=indexflag, &
+                                    destroyDistGrid=.true., &
+                                    destroyDELayout=.true., & 
                                     rc=localrc)
     endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
