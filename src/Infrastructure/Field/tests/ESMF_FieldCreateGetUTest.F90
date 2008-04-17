@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.28 2008/04/16 18:59:44 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.29 2008/04/17 19:27:11 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1307,7 +1307,6 @@ contains
         integer                 :: localrc
         type(ESMF_Field)        :: field
         type(ESMF_Grid)         :: grid
-        type(ESMF_DistGrid)     :: distgrid
         real, dimension(:,:), allocatable   :: farray
 
         type(ESMF_VM)                               :: vm
@@ -1368,7 +1367,6 @@ contains
         integer                 :: localrc
         type(ESMF_Field)        :: field
         type(ESMF_Grid)         :: grid
-        type(ESMF_DistGrid)     :: distgrid
         real, dimension(:,:), allocatable   :: farray
         real, dimension(:,:), pointer       :: farray1
 
@@ -2206,7 +2204,7 @@ contains
 
         type(ESMF_Field)        :: field
         type(ESMF_Grid)         :: grid
-        integer                 :: localrc, i
+        integer                 :: localrc
 
         type(ESMF_Grid)         :: grid1
         type(ESMF_Array)        :: array
@@ -2223,10 +2221,7 @@ contains
         type(ESMF_VM)                          :: vm
         integer                                :: lpe
 
-        integer, dimension(ESMF_MAXDIM)        :: ec, cc, g2fm, mhlw, mhuw, dg2fm, f2dgm, dg2gm
-        integer, dimension(ESMF_MAXDIM)        :: gelb, geub, gclb, gcub
         integer, dimension(3)                  :: fsize
-        integer                                :: gridDistDimCount, forderIndex
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
@@ -2935,7 +2930,7 @@ contains
         type(ESMF_Field)    :: f8
         type(ESMF_Grid)     :: grid
         type(ESMF_DistGrid) :: distgrid
-        type(ESMF_Array)    :: array8, array
+        type(ESMF_Array)    :: array8
         integer             :: localrc
         integer             :: fsize(7)
 
@@ -2989,7 +2984,7 @@ contains
         type(ESMF_Field)    :: f8
         type(ESMF_Grid)     :: grid
         type(ESMF_DistGrid) :: distgrid
-        type(ESMF_Array)    :: array8, array
+        type(ESMF_Array)    :: array8
         integer             :: localrc
         integer             :: flb(7), fub(7)
 
@@ -3106,7 +3101,7 @@ contains
             ESMF_CONTEXT, rc)) return
 
         allocate(farray(fsize(1), fsize(2), fsize(3), fsize(4), fsize(5), fsize(6), fsize(7)))
-        write(*, '(7I4)') fsize
+        !write(*, '(7I4)') fsize
 
         if(present(fieldget)) then
           if(fieldget) then
@@ -3134,6 +3129,7 @@ contains
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
             gridToFieldMap=gridToFieldMap, &
             copyflag=copyflag, &
+!            staggerloc=staggerloc, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -3294,6 +3290,7 @@ contains
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
             gridToFieldMap=gridToFieldMap, &
             copyflag=copyflag, &
+!            staggerloc=staggerloc, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -3536,7 +3533,14 @@ contains
             enddo
             ! access and verify
             call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+                exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
+                computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
+                totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
                 rc=localrc)
+            ! there is a subtle bug on tosh-absoft-lam-O that crashes with the following
+            ! code.
+!            call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+!                rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
