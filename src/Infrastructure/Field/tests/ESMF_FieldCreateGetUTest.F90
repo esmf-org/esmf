@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.30 2008/04/17 19:37:45 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.31 2008/04/17 20:55:49 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -3533,14 +3533,7 @@ contains
             enddo
             ! access and verify
             call ESMF_FieldGet(field, localDe=0, farray=farray1, &
-                exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
-                computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
-                totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
                 rc=localrc)
-            ! there is a subtle bug on tosh-absoft-lam-O that crashes with the following
-            ! code.
-!            call ESMF_FieldGet(field, localDe=0, farray=farray1, &
-!                rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
