@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.25.2.5 2008/04/16 18:59:42 feiliu Exp $ 
+# $Id: makefile,v 1.25.2.6 2008/04/17 16:20:15 theurich Exp $ 
 
-ALL:  build_examples
-
-run: run_examples
+ALL:      build_examples
+run:      run_examples
+run_uni:  run_examples_uni
 
 CFLAGS    =
 FFLAGS    =
@@ -18,21 +18,21 @@ LOCDIR	  = src/Infrastructure/Field/examples
 
 
 EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_FieldCreateEx \
-				$(ESMF_EXDIR)/ESMF_FieldGetEx
+                 $(ESMF_EXDIR)/ESMF_FieldGetEx
 #                 $(ESMF_EXDIR)/ESMF_FieldSetEx
 #                 $(ESMF_EXDIR)/ESMF_FieldFromUserEx \
 #                 $(ESMF_EXDIR)/ESMF_FieldGlobalEx \
 #                 $(ESMF_EXDIR)/ESMF_FieldWriteEx
 
 EXAMPLES_RUN = run_ESMF_FieldCreateEx \
-				run_ESMF_FieldGetEx
+               run_ESMF_FieldGetEx
 #                   run_ESMF_FieldSetEx
 #                   run_ESMF_FieldFromUserEx \
 #                   run_ESMF_FieldGlobalEx \
 #                   run_ESMF_FieldWriteEx 
 
 EXAMPLES_RUN_UNI = run_ESMF_FieldCreateEx_uni \
-#                   run_ESMF_FieldGetEx_uni \
+                   run_ESMF_FieldGetEx_uni
 #                   run_ESMF_FieldSetEx_uni
 #                   run_ESMF_FieldFromUserEx_uni \
 #                   run_ESMF_FieldGlobalEx_uni \
