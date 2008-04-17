@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.12 2008/04/16 18:59:43 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.13 2008/04/17 16:27:36 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.12 2008/04/16 18:59:43 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.13 2008/04/17 16:27:36 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -251,7 +251,7 @@ contains
     integer :: fieldDimCount, fieldUngriddedDimCount 
     integer :: gridDimCount, gridDistDimCount
     integer :: fieldUndistDimCount 
-    integer :: i,j
+    integer :: i
     integer :: localGridToFieldMap(ESMF_MAXDIM)
     integer :: localMaxHaloLWidth (ESMF_MAXDIM)
     integer :: localMaxHaloUWidth (ESMF_MAXDIM)
@@ -579,7 +579,7 @@ contains
     integer :: fieldDimCount, fieldUngriddedDimCount 
     integer :: gridDimCount, gridDistDimCount
     integer :: fieldUndistDimCount 
-    integer :: i,j
+    integer :: i
     integer :: localGridToFieldMap(ESMF_MAXDIM)
     integer :: localMaxHaloLWidth (ESMF_MAXDIM)
     integer :: localMaxHaloUWidth (ESMF_MAXDIM)
@@ -1396,24 +1396,12 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
 !------------------------------------------------------------------------------
     integer :: localrc
     type(ESMF_Array) :: array                  
-    type(ESMF_StaggerLoc) :: localStaggerloc
     type(ESMF_TypeKind) :: typekind
-    integer, dimension(ESMF_MAXDIM) :: gridcounts, arraycounts
-    integer, dimension(ESMF_MAXDIM) :: exclLBounds, exclUBounds
-    integer, dimension(ESMF_MAXDIM) :: dimorder, counts
-    integer :: hwidth, minRank
-    integer :: i, j, arrayRank, gridRank
+    integer :: i, arrayRank, gridRank
 
     ! Initialize return code   
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! make sure hwidth has a value here.
-!    if (present(haloWidth)) then
-!        hwidth = haloWidth
-!    else
-!        hwidth = 0
-!    endif
 
     call ESMF_BaseCreate(ftype%base, "Field", name, 0, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &

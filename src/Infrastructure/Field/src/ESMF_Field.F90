@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.272.2.23 2008/04/09 05:20:52 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.272.2.24 2008/04/17 16:27:36 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -182,7 +182,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.272.2.23 2008/04/09 05:20:52 cdeluca Exp $'
+    '$Id: ESMF_Field.F90,v 1.272.2.24 2008/04/17 16:27:36 feiliu Exp $'
 
 !==============================================================================
 !
@@ -2171,13 +2171,9 @@ contains
 
       type(ESMF_FieldType), pointer :: ftypep
       type(ESMF_StaggerLoc) :: staggerloc
-      character(len=ESMF_MAXSTR) :: msgbuf
       integer :: exclLBounds(ESMF_MAXDIM)  ! exclusive grid lower bounds
       integer :: exclUBounds(ESMF_MAXDIM)  ! exclusive grid upper bounds
-      integer :: maplist(ESMF_MAXDIM)          ! mapping between them
-      integer :: otheraxes(ESMF_MAXDIM)        ! counts for non-grid dims
       integer :: gridrank, arrayrank
-      logical :: hasgrid, hasarray             ! decide what we can validate
       integer :: i, lDE                        ! helper variables to verify bounds
       integer :: localDECount, dimCount        ! and distgrid
       integer, allocatable :: distgridToGridMap(:)
@@ -2211,11 +2207,6 @@ contains
          return
       endif 
 
-      ! figure out whether there is a grid, datamap, and/or arrays first
-      ! before doing tests to be sure they are consistent.
-      hasgrid = .FALSE.
-      hasarray = .FALSE.
-
       staggerloc = ftypep%staggerloc
 
       ! make sure there is a grid before asking it questions.
@@ -2247,7 +2238,6 @@ contains
                  return
               endif 
           enddo
-          hasgrid = .TRUE.
       endif
 
       ! make sure there is data before asking it questions.
@@ -2308,7 +2298,6 @@ contains
              return
           endif 
 
-          hasarray = .TRUE.
           ! verify array computational bounds match grid computational bounds per localDE
           do lDE=0, localDECount-1
               allocate(gridCompUBnd(dimCount), gridCompLBnd(dimCount))
@@ -3140,7 +3129,6 @@ contains
 !     \end{description}
 !
 !EOPI
-        integer :: i
 
         ftypep%fieldstatus = ESMF_STATUS_UNINIT
         ftypep%gridstatus  = ESMF_STATUS_UNINIT
