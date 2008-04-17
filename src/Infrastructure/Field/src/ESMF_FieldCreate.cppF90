@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.13 2008/04/17 16:27:36 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.14 2008/04/17 16:36:55 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.13 2008/04/17 16:27:36 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.14 2008/04/17 16:36:55 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1555,7 +1555,6 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
 !EOPI
 !------------------------------------------------------------------------------
     integer :: localrc 
-    type(ESMF_Field) :: tfield                  ! temp field for error check
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array)     :: newarray
     type(ESMF_TypeKind)  :: typekind

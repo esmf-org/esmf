@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.28 2008/04/16 18:59:44 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.29 2008/04/17 16:36:56 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.28 2008/04/16 18:59:44 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.29 2008/04/17 16:36:56 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -628,7 +628,6 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !------------------------------------------------------------------------------
     integer :: gridCompLBnd(ESMF_MAXDIM), gridCompUBnd(ESMF_MAXDIM)
     integer :: gridExclLBnd(ESMF_MAXDIM), gridExclUBnd(ESMF_MAXDIM)
-    integer :: gridTotaLBnd(ESMF_MAXDIM), gridTotaUBnd(ESMF_MAXDIM)
     integer :: gridrank, fieldrank, localrc
     integer :: i, j
     logical :: filled(ESMF_MAXDIM)
