@@ -79,8 +79,9 @@ BUILDING and INSTALLING the ESMF library
 
 The following compilers and utilities are required for compiling, linking and
 testing the ESMF software:
-* Fortran90 (or later) compiler
+* Fortran95 (or later) compiler
 * C++ compiler
+* LAPACK library compatible with the above compilers (but see below)
 * MPI implementation compatible with the above compilers (but see below)
 * GNU's gcc compiler - for a standard cpp preprocessor implementation
 * GNU make
@@ -229,6 +230,25 @@ ESMF_INSTALL_PREFIX by default. See the ESMF User's Guide on how to customize
 the installation location of the installed files using additional 
 "ESMF_INSTALL_..." environment variables. The ESMF_INSTALL_PREFIX may be
 provided as absolute path or relative to ESMF_DIR.
+
+ESMF_LAPACK
+
+This variable specifies the existence of an optional LAPACK library.  When
+ESMF_LAPACK is defined, certain portions of ESMF are conditionally
+enabled - notably in some of the meshing algorithms.
+
+On some targets, an LAPACK library is known to exist and is used by
+default.  However others need an optional user-supplied library.  To
+indicate that a user-supplied LAPACK library is available, ESMF_LAPACK
+can be defined.  For more details, see the README files for the individual
+targets in the build_config directory.
+
+ESMF_LAPACK_LIBS
+
+This variable specifies the linker directives to access an optional
+user-supplied LAPACK library, and perhaps its companion BLAS library.
+Typically this might have a -L directive to specify the path to the
+library, and will have a -l directive to specify the name of the library.
 
 
 Supported Makefile Targets
@@ -567,4 +587,4 @@ Please contact esmf_support@ucar.edu with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.90 2008/04/05 03:37:45 cdeluca Exp $
+ $Id: README,v 1.91 2008/04/17 17:31:47 w6ws Exp $
