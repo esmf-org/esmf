@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.60 2008/04/05 03:38:26 cdeluca Exp $
+// $Id: ESMCI_Grid.C,v 1.61 2008/04/17 18:58:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.60 2008/04/05 03:38:26 cdeluca Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.61 2008/04/17 18:58:35 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -2834,7 +2834,6 @@ Grid::Grid(
      }
    }
 
-   // Delete the internals of the Grid...
    // If present delete ProtoGrid
    if (proto != ESMC_NULL_POINTER) delete proto;
 
@@ -3343,7 +3342,7 @@ int Grid::deserialize(
       didIAllocList[i][j]=false;
     }
   }
-  
+
   DESERIALIZE_VAR1D( buffer,loffset,gridIsDist,dimCount,bool);
   DESERIALIZE_VAR1D( buffer,loffset,gridMapDim,dimCount,int);
 
@@ -3369,8 +3368,7 @@ int Grid::deserialize(
   for(int i=0; i<staggerLocCount; i++)
     for(int j=0; j<dimCount; j++)
       coordArrayList[i][j]=ESMC_NULL_POINTER;
-  
-  
+      
   // Deserialize the DistGrid
   distgrid = DistGrid::deserialize(buffer, &loffset);
 

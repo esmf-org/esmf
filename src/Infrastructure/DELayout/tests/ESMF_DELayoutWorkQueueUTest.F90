@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.10 2008/04/05 03:38:14 cdeluca Exp $
+! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.11 2008/04/17 18:58:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -23,101 +23,106 @@ module ESMF_DELayoutWQUTest_mod
   contains !--------------------------------------------------------------------
 
   subroutine mygcomp_register_withoutthreads(gcomp, rc)
-    type(ESMF_GridComp), intent(inout):: gcomp
+    type(ESMF_GridComp):: gcomp
     integer, intent(out):: rc
     
+    rc = ESMF_SUCCESS
+
     print *, "*** hi from mygcomp_register ***"
     
-    ! Run this VM default mode: single-threaded
+    ! Run this VM default mode: mpi-only, no threads
     
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, mygcomp_run, &
       ESMF_SINGLEPHASE, rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) return  ! bail out
     
-    rc = ESMF_SUCCESS      
   end subroutine !--------------------------------------------------------------
   
   subroutine mygcomp_register_withthreads(gcomp, rc)
-    type(ESMF_GridComp), intent(inout):: gcomp
+    type(ESMF_GridComp):: gcomp
     integer, intent(out):: rc
     
+    rc = ESMF_SUCCESS
+
     print *, "*** hi from mygcomp_register ***"
     
     ! Run this VM as multi-threaded as resources will allow
     call ESMF_GridCompSetVMMaxThreads(gcomp, rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) return  ! bail out
     
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, mygcomp_run, &
       ESMF_SINGLEPHASE, rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) return  ! bail out
     
-    rc = ESMF_SUCCESS      
   end subroutine !--------------------------------------------------------------
   
   recursive subroutine mygcomp_run(gcomp, istate, estate, clock, rc)
-    type(ESMF_GridComp), intent(inout):: gcomp
-    type(ESMF_State), intent(in):: istate, estate
-    type(ESMF_Clock), intent(in):: clock
+    type(ESMF_GridComp):: gcomp
+    type(ESMF_State):: istate, estate
+    type(ESMF_Clock):: clock
     integer, intent(out):: rc
     
     type(ESMF_VM):: vm
     type(ESMF_DELayout):: delayout
     integer:: petCount, localPet, localDeCount, i, workDe, k, deCount
-    integer:: localrc ! absoft refuses to use the dummy variable rc in functions
     integer, allocatable:: localDeList(:)
     type(ESMF_DELayoutServiceReply):: reply
     real:: x
     
+    rc = ESMF_SUCCESS
 
     print *, "*** hi from mygcomp_run ***"
     
-    call ESMF_GridCompGet(gcomp, vm=vm)
-!    call ESMF_VMPrint(vm, rc)
+    call ESMF_GridCompGet(gcomp, vm=vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
     deCount = 10*petCount
     delayout = ESMF_DELayoutCreate(deCount=deCount, &
-      dePinFlag=ESMF_DE_PIN_VAS, rc=localrc)
-    rc = localrc
+      dePinFlag=ESMF_DE_PIN_VAS, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     
 !    call ESMF_DELayoutPrint(delayout, rc=rc)
+!    if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_DELayoutGet(delayout, vasLocalDeCount=localDeCount, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     allocate(localDeList(localDeCount))
     call ESMF_DELayoutGet(delayout, vasLocalDeList=localDeList, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     
-  do k=1, 4
-  
-    do i=1, localDeCount
-      workDe = localDeList(i)
-!      print *, "I am PET", localPET, " and I am offering service for DE ", workDe
-      reply = ESMF_DELayoutServiceOffer(delayout, de=workDe, rc=localrc)
-      rc = localrc
-      if (reply == ESMF_DELAYOUT_SERVICE_ACCEPT) then
-!        print *, "I am PET", localPET, ", service offer for DE ", workDe, &
-!          " was accepted."
-        call work(x, workDe, petCount)  ! work for workDe
-!        print *, "x = ", x
-        call ESMF_DELayoutServiceComplete(delayout, de=workDe, rc=rc)
-!        print *, "I am PET", localPET, ", service for DE ", workDe, &
-!          " completed."
-      endif
-    enddo
-    
-  enddo    
+    do k=1, 4
+      do i=1, localDeCount
+        workDe = localDeList(i)
+!        print *, "I am PET", localPET, " and I am offering service for DE ", workDe
+        reply = ESMF_DELayoutServiceOffer(delayout, de=workDe, rc=rc)
+        if (rc/=ESMF_SUCCESS) return ! bail out
+        if (reply == ESMF_DELAYOUT_SERVICE_ACCEPT) then
+!          print *, "I am PET", localPET, ", service offer for DE ", workDe, &
+!            " was accepted."
+          call work(x, workDe, petCount)  ! work for workDe
+!          print *, "x = ", x
+          call ESMF_DELayoutServiceComplete(delayout, de=workDe, rc=rc)
+          if (rc/=ESMF_SUCCESS) return ! bail out
+!          print *, "I am PET", localPET, ", service for DE ", workDe, &
+!            " completed."
+        endif
+      enddo
+    enddo    
     
     deallocate(localDeList)
     
     call ESMF_DELayoutDestroy(delayout, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
-    rc = ESMF_SUCCESS
   end subroutine !--------------------------------------------------------------
 
 
   recursive subroutine work(x, de, petCount)
     real:: x, zend
-    integer:: de, petCount
+    integer:: de, petCount, i, iend
     
     real:: z, de_ratio, random
     
@@ -127,9 +132,12 @@ module ESMF_DELayoutWQUTest_mod
     call random_number(random)
     zend = zend * (1. + 10. * sin(de_ratio) * random)
     
-    x=0.    
-    do z=0., zend, 0.01
+    x=0.
+    z=0.
+    iend = zend/0.01
+    do i=0, iend
       x = x + sin(z) * de
+      z = z + 0.01
     enddo
     
   end subroutine
@@ -165,10 +173,9 @@ program ESMF_DELayoutWQUTest
   ! local variables
   integer:: rc
   type(ESMF_GridComp):: gcomp
-  type(ESMF_Clock):: dummyclock
-  type(ESMF_State):: dummystate
   real(ESMF_KIND_R8):: timeStart, timeEnd
   type(ESMF_VM):: vm
+  type(ESMF_Logical):: supportPthreads
   integer:: localPet
   ! individual test failure message
   character(ESMF_MAXSTR) :: failMsg
@@ -177,65 +184,83 @@ program ESMF_DELayoutWQUTest
   integer :: result = 0
 
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  !if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
   call ESMF_VMGetGlobal(vm, rc=rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
-  call ESMF_VMGet(vm, localPet=localPet, rc=rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_VMGet(vm, localPet=localPet, supportPthreadsFlag=supportPthreads, &
+    rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
 
   !----------------- test without threads ----------------------------
 
-
-  gcomp = ESMF_GridCompCreate(name="gridded component", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
-  call ESMF_GridCompSetServices(gcomp, mygcomp_register_withoutthreads, rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
-  !------------------------------------------------------------------------
-  !NEX___UTest Disabled see bug 1489171
+  !NEX_UTest
+  write(name, *) "GridCompCreate() - round 1"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  write(name, *) "Run work queue without threads Test"
+  gcomp = ESMF_GridCompCreate(name="gridded component", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !NEX_UTest
+  write(name, *) "GridCompSetServices() - round 1"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_GridCompSetServices(gcomp, mygcomp_register_withoutthreads, rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !NEX_UTest
+  write(name, *) "Run work queue - round 1"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_VMWtime(timeStart)
-  call ESMF_GridCompRun(gcomp, dummystate, dummystate, dummyclock, rc=rc)
+  call ESMF_GridCompRun(gcomp, rc=rc)
   call ESMF_VMWtime(timeEnd)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  if (rc.ne.ESMF_SUCCESS) goto 10
   
-  print *, "<without threads> PET ", localPet, " time: ", timeEnd-timeStart
+  print *, "<round 1> PET ", localPet, " time: ", timeEnd-timeStart
   
+  !NEX_UTest
+  write(name, *) "Run work queue - round 1"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_GridCompDestroy(gcomp, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
   !----------------- test with threads -------------------------------
 
-
-  gcomp = ESMF_GridCompCreate(name="gridded component", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
-  call ESMF_GridCompSetServices(gcomp, mygcomp_register_withthreads, rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
- 
-  !------------------------------------------------------------------------
-  !NEX___UTest Disabled see bug 1489171
+  !NEX_UTest
+  write(name, *) "GridCompCreate() - round 2"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  write(name, *) "Run work queue with threads Test"
+  gcomp = ESMF_GridCompCreate(name="gridded component", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !NEX_UTest
+  write(name, *) "GridCompSetServices() - round 2"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  if (supportPthreads==ESMF_TRUE) then
+    call ESMF_GridCompSetServices(gcomp, mygcomp_register_withthreads, rc)
+  else
+    call ESMF_GridCompSetServices(gcomp, mygcomp_register_withoutthreads, rc)
+  endif
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+ 
+  !NEX_UTest
+  write(name, *) "Run work queue - round 2"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_VMWtime(timeStart)
-  call ESMF_GridCompRun(gcomp, dummystate, dummystate, dummyclock, rc=rc)
+  call ESMF_GridCompRun(gcomp, rc=rc)
   call ESMF_VMWtime(timeEnd)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  if (rc.ne.ESMF_SUCCESS) goto 10
 
-  print *, "<with threads> PET ", localPet, " time: ", timeEnd-timeStart
+  print *, "<round 2> PET ", localPet, " time: ", timeEnd-timeStart
 
+  !NEX_UTest
+  write(name, *) "Run work queue - round 2"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_GridCompDestroy(gcomp, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
  
-10 continue
+  !---------------------------------------------------------------------------
   call ESMF_TestEnd(result, ESMF_SRCLINE)
   
 end program

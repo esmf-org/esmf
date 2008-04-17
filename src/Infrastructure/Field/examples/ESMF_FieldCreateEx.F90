@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.71 2008/04/07 06:45:51 theurich Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.72 2008/04/17 18:58:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
     
     ! Local variables
     integer :: rc, localPet, petCount
-    type(ESMF_Grid) :: grid, grid3d
+    type(ESMF_Grid) :: grid, grid2d
     type(ESMF_DistGrid) :: distgrid
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: array1, array2
@@ -42,6 +42,7 @@
     real(ESMF_KIND_R8), dimension(:,:), pointer :: farray
     real(ESMF_KIND_R8), dimension(:,:), pointer :: farray1
     real(ESMF_KIND_R8), dimension(:,:,:), pointer :: farray3d
+    real(ESMF_KIND_R4), dimension(:,:), pointer :: farray2d
     integer, dimension(2) :: compEdgeLWdith
     integer, dimension(2) :: compEdgeUWdith
     integer, dimension(ESMF_MAXDIM) :: gcc, gec, fa_shape
@@ -51,10 +52,14 @@
     integer :: i, j, k
 
     real(ESMF_KIND_R8), dimension(:,:,:,:,:,:,:), pointer :: farray7d
-    type(ESMF_Field)    :: field7d
+    real(ESMF_KIND_R8), dimension(:,:,:,:,:,:,:), pointer :: farray7d2
+    type(ESMF_Field)    :: field7d, field7d2
     type(ESMF_Grid)     :: grid5d
     type(ESMF_DistGrid) :: distgrid5d
     integer             :: fsize(7)
+    integer             :: flbound(7), fubound(7)
+    integer             :: ftlb(2), ftub(2), ftc(2)
+    real                :: PI = 3.14159265358
 
     integer :: finalrc       
 !   !Set finalrc to success
@@ -77,12 +82,18 @@
 !  This create associates the two objects.  
 ! 
 !  We first create a Grid with a regular distribution that is
-!  10x20 DEs.  This version of field create simply
+!  10x20 index in 2x2 DEs.  This version of field create simply
 !  associates the data with the Grid.  The data is referenced
 !  explicitly on a regular 2x2 uniform grid. 
 !  Then we create an arrayspec. With grid and arrayspec,
 !  finally we create a field from the grid, arrayspec, and a
 !  user specified staggerloc.
+!
+!  This example also illustrates a typical use of this Field creation
+!  method. By creating a Field from a Grid and an arrayspec, the
+!  user allows the ESMF library to create a internal Array in the Field.
+!  Then the user can use FieldGet to retrieve the Fortran data array
+!  and necessary bounds information to assign initial values to it.
 !EOE
 
 !BOC
@@ -99,6 +110,17 @@
     field1 = ESMF_FieldCreate(grid, arrayspec, &
          staggerloc=ESMF_STAGGERLOC_CENTER, name="pressure", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    call ESMF_FieldGet(field1, localDe=0, farray=farray2d, &
+        totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, rc=rc)
+
+    do i = ftlb(1), ftub(1)
+        do j = ftlb(2), ftub(2)
+            farray2d(i, j) = sin(i/ftc(1)*PI) * cos(j/ftc(2)*PI) 
+        enddo
+    enddo
+
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
 
     call ESMF_FieldDestroy(field1, rc=rc)
@@ -107,16 +129,41 @@
 !BOE
 !   User can also create an ArraySpec that has a different rank
 !   from the Grid, For example, the following code shows creation of 
-!   of 3D Field from a 2D Grid using 3D ArraySpec. We use the
-!   {\tt ESMF\_Grid} grid created from the previous example.
+!   of 3D Field from a 2D Grid using 3D ArraySpec.
+!
+!   This example also demonstrates the technique to create a typical
+!   3D data Field that has 2 gridded dimensions and 1 ungridded
+!   dimension. Such a 3D Field is typically used in atmospheric modelling
+!   such as the temperature or pressure Fields.
+!
+!   First we create a 2D grid with an index space of 180x360 one degree
+!   per Grid element. In the FieldCreate call, we use gridToFieldMap
+!   to indicate the mapping between Grid dimension and Field dimension,
+!   for the ungridded dimension (typically the altitude), we use
+!   ungriddedLBound and ungriddedUBound to describe its bounds. Internally
+!   the ungridded dimension has a stride of 1, so the number of elements
+!   of the ungridded dimension is ungriddedUBound - ungriddedLBound + 1.
+!
+!   The Field in this example has a 1km resolution in the vertical,
+!   upper to 50km to describe a physical Field in the troposphere and stratosphere.
+!   Note that gridToFieldMap in this specific example is (/1,2/) which
+!   is the default value
+!   so the user can neglect this argument for the FieldCreate call.
 !EOE
 
 !BOC
+    grid2d = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/180,360/), &
+          regDecomp=(/2,2/), name="atmgrid", rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
     call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R4, rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    field1 = ESMF_FieldCreate(grid, arrayspec, &
-         staggerloc=ESMF_STAGGERLOC_CENTER, name="pressure", rc=rc)
+    field1 = ESMF_FieldCreate(grid2d, arrayspec, &
+         staggerloc=ESMF_STAGGERLOC_CENTER, &
+         gridToFieldMap=(/1,2/), &
+         ungriddedLBound=(/1/), ungriddedUBound=(/50/), &
+         name="pressure", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
 
@@ -170,7 +217,7 @@
 !\label{sec:field:usage:create_grid_array}
 !
 !  User can create a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a 
-!  {\tt ESMF\_Array}. grid and array2 are objects created in previous examples.
+!  {\tt ESMF\_Array}. Object grid is created in the previous example.
 !EOE
 
 !BOC
@@ -690,15 +737,45 @@
         rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
+!BOE
+!  A user can allocate the Fortran array in a different manner using the lower and
+!  upper bounds returned from FieldGet through the optional allocLBound and allocUBound
+!  arguments. In the following example, we crete another 7D Field by retrieving the bounds
+!  and allocate the Fortran array with this approach. In this scheme, indexing the
+!  Fortran array is sometimes more convenient than using the shape directly.
+!EOE
+!BOC
+    call ESMF_FieldGet(grid5d, localDe=0, ungriddedLBound=(/1,2/), &
+        ungriddedUBound=(/4,5/), &
+        maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+        gridToFieldMap=(/3,2,5,4,1/), &
+        allocLBound=flbound, allocUBound=fubound, &
+        rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    allocate(farray7d2(flbound(1):fubound(1), flbound(2):fubound(2), flbound(3):fubound(3), &
+                       flbound(4):fubound(4), flbound(5):fubound(5), flbound(6):fubound(6), &
+                       flbound(7):fubound(7)) )
+
+    field7d2 = ESMF_FieldCreate(grid5d, farray7d2, &
+        ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
+        maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+        gridToFieldMap=(/3,2,5,4,1/), &
+        rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!EOC
 
     print *, "Field Create from a Grid and a Fortran data pointer returned"
     call ESMF_FieldDestroy(field7d)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_FieldDestroy(field7d2)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_GridDestroy(grid5d)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_DistGridDestroy(distgrid5d)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(farray7d)
+    deallocate(farray7d2)
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
@@ -738,6 +815,8 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_GridDestroy(grid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_GridDestroy(grid2d, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(farray)
 
 !-------------------------------------------------------------------------
@@ -747,8 +826,8 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     if (finalrc.EQ.ESMF_SUCCESS) then
-	print *, "PASS: ESMF_FieldCreateEx.F90"
+        print *, "PASS: ESMF_FieldCreateEx.F90"
     else
-	print *, "FAIL: ESMF_FieldCreateEx.F90"
+        print *, "FAIL: ESMF_FieldCreateEx.F90"
     end if
 end program ESMF_FieldCreateEx

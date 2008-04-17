@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.70 2008/04/07 06:45:48 theurich Exp $
+# $Id: build_rules.mk,v 1.71 2008/04/17 18:58:26 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -35,9 +35,9 @@ ESMF_MPIMPMDRUNDEFAULT  = mpiexec
 else
 ifeq ($(ESMF_COMM),mpich)
 # Mpich ----------------------------------------------------
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPICH
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpiCC
-ESMF_CXXCOMPILEOPTS    += -DESMF_MPICH
 ESMF_MPIRUNDEFAULT      = mpirun
 ifeq ($(ESMF_BATCH),sge.batch)
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.sge.batch
@@ -75,6 +75,7 @@ ESMF_MPIMPMDRUNDEFAULT  = mpiexec
 else
 ifeq ($(ESMF_COMM),lam)
 # LAM (assumed to be built with ifort) ---------------------
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif77
 ESMF_CXXDEFAULT         = mpic++
 ESMF_MPIRUNDEFAULT      = mpirun

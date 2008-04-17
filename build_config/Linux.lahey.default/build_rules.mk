@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.23 2008/02/04 20:44:57 theurich Exp $
+# $Id: build_rules.mk,v 1.24 2008/04/17 18:58:27 theurich Exp $
 #
 # Linux.lahey.default
 #
@@ -29,10 +29,9 @@ ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpich)
 # Mpich ----------------------------------------------------
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPICH
 ESMF_F90DEFAULT         = mpif90
-ESMF_F90LINKLIBS       += 
 ESMF_CXXDEFAULT         = mpiCC
-ESMF_CXXCOMPILEOPTS    += -DESMF_MPICH
 ESMF_MPIRUNDEFAULT      = mpirun
 else
 ifeq ($(ESMF_COMM),mpich2)
@@ -44,6 +43,7 @@ ESMF_MPIMPMDRUNDEFAULT  = mpiexec
 else
 ifeq ($(ESMF_COMM),lam)
 # LAM (assumed to be built with lf95) ----------------------
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif77
 ESMF_CXXDEFAULT         = mpic++
 ESMF_MPIRUNDEFAULT      = mpirun

@@ -1,7 +1,8 @@
-# $Id: makefile,v 1.12 2006/05/16 17:58:13 theurich Exp $ 
+# $Id: makefile,v 1.13 2008/04/17 18:58:33 theurich Exp $ 
 
-ALL:  build_unit_tests
-run:  run_unit_tests
+ALL:      build_unit_tests
+run:      run_unit_tests
+run_uni:  run_unit_tests_uni
 
 CFLAGS    =
 FFLAGS    =
@@ -16,15 +17,14 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/DELayout/tests
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_DELayoutUTest
-#                $(ESMF_TESTDIR)/ESMF_DELayoutWorkQueueUTest
-# disabled see bug 148171
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_DELayoutUTest \
+                $(ESMF_TESTDIR)/ESMF_DELayoutWorkQueueUTest
 
-TESTS_RUN     = RUN_ESMF_DELayoutUTest
-#                RUN_ESMF_DELayoutWorkQueueUTest
+TESTS_RUN     = RUN_ESMF_DELayoutUTest \
+                RUN_ESMF_DELayoutWorkQueueUTest
 
-TESTS_RUN_UNI = RUN_ESMF_DELayoutUTestUNI
-#                RUN_ESMF_DELayoutWorkQueueUTestUNI
+TESTS_RUN_UNI = RUN_ESMF_DELayoutUTestUNI \
+                RUN_ESMF_DELayoutWorkQueueUTestUNI
 
 
 include ${ESMF_DIR}/makefile
@@ -51,6 +51,4 @@ RUN_ESMF_DELayoutWorkQueueUTest:
 
 RUN_ESMF_DELayoutWorkQueueUTestUNI:
 	$(MAKE) TNAME=DELayoutWorkQueue NP=1 ftest
-
-
 

@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.32 2008/03/04 20:34:02 dneckels Exp $ 
+# $Id: makefile,v 1.33 2008/04/17 18:58:34 theurich Exp $ 
 
-ALL:  build_examples
-
-run: run_examples
+ALL:      build_examples
+run:      run_examples
+run_uni:  run_examples_uni
 
 CFLAGS    =
 FFLAGS    =
@@ -18,24 +18,24 @@ LOCDIR	  = src/Infrastructure/Field/examples
 
 
 EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_FieldCreateEx \
+                 $(ESMF_EXDIR)/ESMF_FieldGetEx \
                  $(ESMF_EXDIR)/ESMF_FieldRegridEx 
-#                 $(ESMF_EXDIR)/ESMF_FieldGetEx \
 #                 $(ESMF_EXDIR)/ESMF_FieldSetEx
 #                 $(ESMF_EXDIR)/ESMF_FieldFromUserEx \
 #                 $(ESMF_EXDIR)/ESMF_FieldGlobalEx \
 #                 $(ESMF_EXDIR)/ESMF_FieldWriteEx
 
 EXAMPLES_RUN = run_ESMF_FieldCreateEx \
-                 $(ESMF_EXDIR)/ESMF_FieldRegridEx 
-#                   run_ESMF_FieldGetEx \
+               run_ESMF_FieldGetEx \
+               run_ESMF_FieldRegridEx 
 #                   run_ESMF_FieldSetEx
 #                   run_ESMF_FieldFromUserEx \
 #                   run_ESMF_FieldGlobalEx \
 #                   run_ESMF_FieldWriteEx 
 
 EXAMPLES_RUN_UNI = run_ESMF_FieldCreateEx_uni \
-                 $(ESMF_EXDIR)/ESMF_FieldRegridEx_uni
-#                   run_ESMF_FieldGetEx_uni \
+                   run_ESMF_FieldGetEx_uni \
+                   run_ESMF_FieldRegridEx_uni
 #                   run_ESMF_FieldSetEx_uni
 #                   run_ESMF_FieldFromUserEx_uni \
 #                   run_ESMF_FieldGlobalEx_uni \
@@ -59,6 +59,7 @@ run_ESMF_FieldCreateEx:
 run_ESMF_FieldCreateEx_uni:
 	echo "PASS: ESMF_FieldCreateEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FieldCreateEx.stdout
 #	$(MAKE) EXNAME=FieldCreate NP=1 exfrun
+
 #
 # ESMF_FieldRegridEx
 #

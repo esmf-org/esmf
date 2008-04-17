@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.216 2008/04/11 21:14:18 svasquez Exp $
+#  $Id: common.mk,v 1.217 2008/04/17 18:58:22 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -729,14 +729,6 @@ endif
 #-------------------------------------------------------------------------------
 ifeq ($(ESMF_TESTWITHTHREADS),ON)
 CPPFLAGS       += -DESMF_TESTWITHTHREADS
-endif
-
-#-------------------------------------------------------------------------------
-# ESMF_TESTMPMD is passed (by CPP) into test programs to control the
-# dependency on MPMD testing.
-#-------------------------------------------------------------------------------
-ifeq ($(ESMF_TESTMPMD),ON)
-CPPFLAGS       += -DESMF_TESTMPMD
 endif
 
 #-------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.168 2008/04/05 03:39:13 cdeluca Exp $
+! $Id: ESMF_Comp.F90,v 1.169 2008/04/17 18:58:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -262,6 +262,7 @@
       public ESMF_CompSetVMMaxPEs
       public ESMF_CompWait
 
+      public ESMF_CWrapSetInitCreated
 !EOPI
 
       public operator(.eq.), operator(.ne.)
@@ -269,7 +270,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.168 2008/04/05 03:39:13 cdeluca Exp $'
+      '$Id: ESMF_Comp.F90,v 1.169 2008/04/17 18:58:38 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -2222,5 +2223,47 @@ end function
  
   end subroutine ESMF_CompWait
 !------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CWrapSetInitCreated()"
+!BOPI
+! !IROUTINE: ESMF_CWrapSetInitCreated - Set CWrap init code to "CREATED"
+
+! !INTERFACE:
+  subroutine ESMF_CWrapSetInitCreated(cw, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_CWrap), intent(inout)           :: cw
+    integer,          intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Set init code in CWrap object to "CREATED".
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[cw] 
+!          Specified {\tt ESMF\_CWrap} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Set init code
+    ESMF_INIT_SET_CREATED(cw)
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_CWrapSetInitCreated
+!------------------------------------------------------------------------------
+
+
 
 end module ESMF_CompMod

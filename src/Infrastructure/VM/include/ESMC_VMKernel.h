@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.54 2008/04/05 03:39:06 cdeluca Exp $
+// $Id: ESMC_VMKernel.h,v 1.55 2008/04/17 18:58:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -58,9 +58,6 @@ enum vmType { vmBYTE=1, vmI4, vmR4, vmR8};
 // - buffer lenghts in bytes
 #define PIPC_BUFFER                   (4096)
 #define SHARED_BUFFER                 (64)
-
-// IntraProcessSharedMemoryAllocation Table size
-#define IPSHM_TABLE_SIZE              (1000)
 
 // begin sync stuff -----
 #define SYNC_NBUFFERS                 (2)
@@ -147,6 +144,12 @@ typedef struct{
 }comminfo;
 
 
+typedef struct ipshmAllocS{
+  void *allocation;   // shared memory allocation
+  int auxCounter;     // counter to coordinate alloc/dealloc between threads
+  struct ipshmAllocS *prev; // pointer to prev. ipshmAlloc element in list
+  struct ipshmAllocS *next; // pointer to next ipshmAlloc element in list
+}ipshmAlloc;
 
 
 namespace ESMCI {
@@ -179,11 +182,9 @@ class VMK{
     int mpi_mutex_flag;
     // Communications array
     comminfo **commarray;   // this array is shared between pets of same pid
-    // IntraProcessSharedMemoryAllocation Table
-    void **ipshmTable;  // table of memory pointers (shared)
-    int *ipshmDeallocTable;  // keep track of how many threads dealloc (shared)
-    int *ipshmCount;    // current number of allocations (shared)
-    int ipshmAllocCount;// local count of how many times Alloc was called not-s
+    // IntraProcessSharedMemoryAllocation List
+    ipshmAlloc **ipshmTop;      // top of shared alloc list (shared)
+    ipshmAlloc *ipshmLocalTop;  // local top of shared alloc list
     pthread_mutex_t *ipshmMutex;  // mutex to operate (shared)
     // IntraProcessMutex setup mutex
     pthread_mutex_t *ipSetupMutex;  // mutex used to init and destroy (shared)
@@ -267,6 +268,16 @@ class VMK{
     int getLocalPet() const {return mypet;}
     int getPetCount() const {return npets;}
     pthread_t getLocalPthreadId() const {return mypthid;}
+    bool getSupportPthreads() const{
+#ifdef ESMF_NO_PTHREADS
+      return false;
+#else
+      return true;
+#endif
+    }
+    bool getSupportOpenMP() const{
+      return true;  //TODO: determine this during compile time
+    }
 
     // p2p communication calls
     int vmk_send(const void *message, int size, int dest, int tag=-1);

@@ -5,7 +5,7 @@ This section gives a brief
 description of to how to get the ESMF software, build it, 
 and run the self-tests to verify the installation was successful.
 More detailed information on each of these steps, as well as
-information on running a demonstration application and linking
+information on running a {\tt quick\_start} application and linking
 the ESMF with your own code is found in Sections \ref{sec:TechOver} 
 and \ref{sec:TechOver2}.  
 
@@ -324,7 +324,8 @@ The makefiles follow the GNU target standards where possible.
 The most frequently used targets for building are listed below:
 \begin{description}
 \item[lib] build the ESMF libraries only (default)
-\item[all] build the libraries, unit and system tests, examples, and demos
+%\item[all] build the libraries, unit and system tests, examples, and demos
+\item[all] build the libraries, unit and system tests and examples
 \item[doc] build the documentation (requires specific latex macros packages
 and additional utilities; see Section \ref{sec:TechOver} for more details
 on the requirements).  
@@ -346,13 +347,15 @@ A summary report of success and failures will be printed out at the end.
 
 \noindent Other test-related targets are:
 \begin{description}
-\item[all\_tests] build and run all available tests and demos
+%\item[all\_tests] build and run all available tests and demos
+\item[all\_tests] build and run all available tests
 \item[build\_all\_tests] build tests only, do not execute
 \item[run\_all\_tests] run tests without rebuilding and print a
 summary of the results
 \item[check\_all\_tests] 
 print out the results summary without re-executing the tests again
-\item[clean\_all\_tests] remove all test and demo executables 
+%\item[clean\_all\_tests] remove all test and demo executables 
+\item[clean\_all\_tests] remove all test executables 
 \end{description}
 
 For all the targets listed above, the string {\tt all\_tests} can be
@@ -362,7 +365,7 @@ specific type of test:
 \item[unit\_tests] unit tests exercise a single part of the system
 \item[system\_tests] system tests combine functions across the system
 \item[examples] examples contain code illustrating a single type of function
-\item[demos] demos are example applications showing the use of the system
+%\item[demos] demos are example applications showing the use of the system
 \end{description}
 For example, {\tt gmake build\_examples} recompiles the example programs but 
 does not execute them.  {\tt gmake clean\_system\_tests} removes all

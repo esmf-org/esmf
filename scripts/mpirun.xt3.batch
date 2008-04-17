@@ -1,5 +1,5 @@
 #!/bin/ksh
-# $Id: mpirun.xt3.batch,v 1.2 2007/11/07 16:25:12 svasquez Exp $
+# $Id: mpirun.xt3.batch,v 1.3 2008/04/17 18:58:32 theurich Exp $
 # This script provides an interface such that the simple command
 # mpirun -np #
 # runs # copies of the program in parallel.
@@ -15,10 +15,11 @@ shift 2
 export prog=$*
 
 # must be multiples of 2
-if [ $num_procs = 1 ]
-then
-        export num_procs=2
-fi
+#gjt: commenting out the following lines seems to work o.k. and allows uni-PET runs
+#if [ $num_procs = 1 ]
+#then
+#        export num_procs=2
+#fi
 
 export working_dir=`pwd`
 
