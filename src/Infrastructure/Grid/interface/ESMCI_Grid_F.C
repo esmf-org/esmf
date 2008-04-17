@@ -94,21 +94,41 @@ extern "C" {
 					  ESMCI::InterfaceInt **gridEdgeUWidthArg,    	  
 					  ESMCI::InterfaceInt **gridAlignArg,		  
 					  ESMC_IndexFlag *indexflag,
+                                          int *destroyDistgridArg, 
+                                          int *destroyDELayoutArg, 
 					  int *rc){
     int localrc;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridcreatefromdistgrid()"
+    bool destroyDistgrid, *destroyDistgridPtr;
+    bool destroyDELayout, *destroyDELayoutPtr;
 
     //Initialize return code
     localrc = ESMC_RC_NOT_IMPL;
+
+    // process destroyDistgrid
+    if (ESMC_NOT_PRESENT_FILTER(destroyDistgridArg) != ESMC_NULL_POINTER) {
+      destroyDistgrid=(*destroyDistgridArg==1)?true:false;
+      destroyDistgridPtr=&destroyDistgrid;
+    } else {
+      destroyDistgridPtr=ESMC_NULL_POINTER;
+    }
+
+    // process destroyDELayout
+    if (ESMC_NOT_PRESENT_FILTER(destroyDELayoutArg) != ESMC_NULL_POINTER) {
+      destroyDELayout=(*destroyDELayoutArg==1)?true:false;
+      destroyDELayoutPtr=&destroyDELayout;
+    } else {
+      destroyDELayoutPtr=ESMC_NULL_POINTER;
+    }
 
     // call into C++
     *ptr = ESMCI::Grid::create(*nameLen, ESMC_NOT_PRESENT_FILTER(name),
       ESMC_NOT_PRESENT_FILTER(coordTypeKind), *distgrid, 
       *gridEdgeLWidthArg, *gridEdgeUWidthArg, *gridAlignArg, *distgridToGridMapArg,
       *undistLBoundArg, *undistUBoundArg, *coordDimCountArg, *coordDimMapArg,
-      ESMC_NOT_PRESENT_FILTER(indexflag),
-      &localrc);
+      ESMC_NOT_PRESENT_FILTER(indexflag), 
+      destroyDistgridPtr, destroyDELayoutPtr, &localrc);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
@@ -446,21 +466,40 @@ extern "C" {
 					  ESMCI::InterfaceInt **gridEdgeUWidthArg,    	  
 					  ESMCI::InterfaceInt **gridAlignArg,		  
 					  ESMC_IndexFlag *indexflag,
+                                          int *destroyDistgridArg, 
+                                          int *destroyDELayoutArg, 
 					  int *rc){
     int localrc;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridsetfromdistgrid()"
     ESMCI::DistGrid *tmp_distgrid;
+    bool destroyDistgrid, *destroyDistgridPtr;
+    bool destroyDELayout, *destroyDELayoutPtr;
 
     //Initialize return code
     localrc = ESMC_RC_NOT_IMPL;
+
+    // process destroyDistgrid
+    if (ESMC_NOT_PRESENT_FILTER(destroyDistgridArg) != ESMC_NULL_POINTER) {
+      destroyDistgrid=(*destroyDistgridArg==1)?true:false;
+      destroyDistgridPtr=&destroyDistgrid;
+    } else {
+      destroyDistgridPtr=ESMC_NULL_POINTER;
+    }
+
+    // process destroyDELayout
+    if (ESMC_NOT_PRESENT_FILTER(destroyDELayoutArg) != ESMC_NULL_POINTER) {
+      destroyDELayout=(*destroyDELayoutArg==1)?true:false;
+      destroyDELayoutPtr=&destroyDELayout;
+    } else {
+      destroyDELayoutPtr=ESMC_NULL_POINTER;
+    }
 
     // translate optional distgrid
     if (ESMC_NOT_PRESENT_FILTER(distgrid)==ESMC_NULL_POINTER) {
       tmp_distgrid=ESMC_NULL_POINTER;
     } else {
       tmp_distgrid=*distgrid;
-
     }
     
     // call into C++
@@ -468,7 +507,8 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(coordTypeKind), tmp_distgrid, 
       *gridEdgeLWidthArg, *gridEdgeUWidthArg, *gridAlignArg, *distgridToGridMapArg,
       *undistLBoundArg, *undistUBoundArg, *coordDimCountArg, *coordDimMapArg,
-      ESMC_NOT_PRESENT_FILTER(indexflag));
+       ESMC_NOT_PRESENT_FILTER(indexflag), 
+      destroyDistgridPtr, destroyDELayoutPtr);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }

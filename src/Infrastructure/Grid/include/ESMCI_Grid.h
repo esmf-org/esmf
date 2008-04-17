@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.43 2008/04/07 06:45:56 theurich Exp $
+// $Id: ESMCI_Grid.h,v 1.44 2008/04/17 22:12:20 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -114,6 +114,13 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   // upper boundary of dimension d
   char *isDEUBnd;
 
+  // if true, then destroy the distgrid with the grid
+  bool destroyDistgrid;
+
+  // if true, then destroy the DELayout with the grid
+  bool destroyDELayout;
+
+
   ESMC_IndexFlag indexflag;
   DistGrid *distgrid;
 
@@ -154,7 +161,9 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
        int *gridAlign,
        int *coordDimCountArg,                     // (in)
        int **coordDimMapArg,                   // (in)
-       ESMC_IndexFlag indexflagArg             // (in)
+       ESMC_IndexFlag indexflagArg,             // (in)
+       bool destroyDistgrid,
+       bool destroyDELayout
        );
 
   // set information about a stagger location
@@ -235,7 +244,9 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 	  InterfaceInt *_undistUBound,                 // (in)
 	  InterfaceInt *_coordDimCount,              // (in)
 	  InterfaceInt *_coordDimMap,             // (in)
-	  ESMC_IndexFlag *_indexflag                  // (in)
+	  ESMC_IndexFlag *_indexflag,                  // (in)
+	  bool *destroyDistgrid,
+	  bool *destroyDELayout
 	  );
 
   // serialize Grid info into bytestream
@@ -274,6 +285,8 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 	       InterfaceInt *coordDimCount,              // (in)
 	       InterfaceInt *coordDimMap,             // (in)
 	       ESMC_IndexFlag *indexflag,                  // (in)
+	       bool *destroyDistgrid,
+	       bool *destroyDELayout,
 	       int *rc                                     // (out) return code
 	       );
 
@@ -412,7 +425,9 @@ int getComputationalUBound(
 		      InterfaceInt *_undistUBound,  
 		      InterfaceInt *_coordDimCount,
 		      InterfaceInt *_coordDimMap,
-		      ESMC_IndexFlag *_indexflag 
+		      ESMC_IndexFlag *_indexflag, 
+		      bool *destroyDistgrid,
+		      bool *destroyDELayout
 		      );
   
 };  // end class ESMC_Grid
@@ -551,6 +566,9 @@ class ProtoGrid {
   InterfaceInt *coordDimCount;  
   InterfaceInt *coordDimMap; 
   ESMC_IndexFlag *indexflag; 
+  bool *destroyDistgrid;
+  bool *destroyDELayout;
+
 
   // Proto Grid Construct
   ProtoGrid();
