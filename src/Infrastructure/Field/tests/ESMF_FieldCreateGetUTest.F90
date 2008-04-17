@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.29 2008/04/17 19:27:11 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.30 2008/04/17 19:37:45 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -2922,7 +2922,7 @@ contains
 
     end subroutine test3d_generic
 
-    ! create a 7d Field from 5d grid and 2d ungridded bounds using ESMF_FieldGetDataBounds
+    ! create a 7d Field from 5d grid and 2d ungridded bounds using ESMF_FieldGetAllocBounds
     subroutine test7d1(rc)
         integer, intent(inout) :: rc
 
@@ -2976,7 +2976,7 @@ contains
         call ESMF_ArrayDestroy(array8)
     end subroutine test7d1
 
-    ! create a 7d Field from 5d grid and 2d ungridded bounds using ESMF_FieldGetDataBounds
+    ! create a 7d Field from 5d grid and 2d ungridded bounds using ESMF_FieldGetAllocBounds
     subroutine test7d2(rc)
         integer, intent(inout) :: rc
 
@@ -3026,7 +3026,7 @@ contains
         call ESMF_ArrayDestroy(array8)
     end subroutine test7d2
 
-    ! create a 7d Field from 5d grid and 2d ungridded bounds using ESMF_FieldGetDataBounds
+    ! create a 7d Field from 5d grid and 2d ungridded bounds using ESMF_FieldGetAllocBounds
     subroutine test7d_generic(rc, minindex, maxindex, &
         gridEdgeLWidth, gridEdgeUWidth, &
         regDecomp, &
@@ -3090,7 +3090,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGet(grid, localDe=0, &
+        call ESMF_FieldGet(grid, localDe=0, staggerloc=staggerloc, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
             gridToFieldMap=gridToFieldMap, &
@@ -3129,7 +3129,7 @@ contains
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
             gridToFieldMap=gridToFieldMap, &
             copyflag=copyflag, &
-!            staggerloc=staggerloc, &
+            staggerloc=staggerloc, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -3186,7 +3186,7 @@ contains
         call ESMF_ArrayDestroy(array8)
     end subroutine test7d_generic
 
-    ! create a 7d Field from 5d grid and 2d ungridded bounds using ESMF_FieldGetDataBounds
+    ! create a 7d Field from 5d grid and 2d ungridded bounds using ESMF_FieldGetAllocBounds
     ! use allocBounds to verify field create
     subroutine test7d2_generic(rc, minindex, maxindex, &
         gridEdgeLWidth, gridEdgeUWidth, &
@@ -3251,7 +3251,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGet(grid, localDe=0, &
+        call ESMF_FieldGet(grid, localDe=0, staggerloc=staggerloc, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
             gridToFieldMap=gridToFieldMap, &
@@ -3290,7 +3290,7 @@ contains
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
             gridToFieldMap=gridToFieldMap, &
             copyflag=copyflag, &
-!            staggerloc=staggerloc, &
+            staggerloc=staggerloc, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
