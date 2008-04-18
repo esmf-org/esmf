@@ -4,3 +4,5 @@ and C++ compilers.
 Requires the following environment settings:
 
 ESMF_COMPILER xlf
+
+ESMF is currently configured to use the IBM ESSL version of LAPACK.
