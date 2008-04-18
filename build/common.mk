@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.201.2.12 2008/04/17 22:30:43 svasquez Exp $
+#  $Id: common.mk,v 1.201.2.13 2008/04/18 21:29:10 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -435,8 +435,8 @@ SYS_TESTS_CONFIG    = $(ESMF_TESTDIR)/sys_tests.config
 ESMF_TESTSCRIPTS    = $(ESMF_DIR)/scripts/test_scripts
 DO_UT_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ut_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
 DO_EX_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ex_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
-DO_ST_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_st_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) -m $(ESMF_TESTMPMD)
-DO_SUM_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_summary.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) -b $(ESMF_BOPT) -m $(ESMF_TESTMPMD)
+DO_ST_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_st_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) 
+DO_SUM_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_summary.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) -b $(ESMF_BOPT) 
 DO_UTC_RESULTS	    = $(ESMF_UTCSCRIPTS)/do_utc_results.pl -h $(ESMF_UTCSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) -e $(ESMF_MAX_PROCS)
 
 # C specific variables
