@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1.2.2 2008/02/28 01:42:08 theurich Exp $ 
+# $Id: makefile,v 1.1.2.3 2008/04/18 23:11:08 svasquez Exp $ 
 
 ALL:      tree_build_system_tests
 run:      tree_run_system_tests
@@ -17,7 +17,7 @@ SYSTEM_TESTS_OBJ      = component.o
 
 SYSTEM_TESTS_RUN      = RUN_RecursiveComponent
 
-SYSTEM_TESTS_RUN_UNI  = RUN_RecursiveComponentUNI
+SYSTEM_TESTS_RUN_UNI  =
 
 
 ESMF_RecursiveComponentSTest.o : $(SYSTEM_TESTS_OBJ)
@@ -34,5 +34,3 @@ CLOBBERDIRS =
 RUN_RecursiveComponent:
 	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=RecursiveComponent NP=6 stest
 
-RUN_RecursiveComponentUNI:
-	$(MAKE) TNAME=RecursiveComponent NP=1 stest

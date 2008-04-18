@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1.2.4 2008/04/04 20:01:07 theurich Exp $ 
+# $Id: makefile,v 1.1.2.5 2008/04/18 23:11:06 svasquez Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -31,7 +31,6 @@ SYSTEM_TESTS_RUN      =
 endif
 
 SYSTEM_TESTS_RUN_UNI  =
-
 
 ESMF_ArrayRedistSTestA.o : $(SYSTEM_TESTS_OBJ_A)
 ESMF_ArrayRedistSTestB.o : $(SYSTEM_TESTS_OBJ_B)

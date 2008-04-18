@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2007/10/08 23:17:02 theurich Exp $ 
+# $Id: makefile,v 1.1.2.1 2008/04/18 23:11:06 svasquez Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -27,8 +27,7 @@ SYSTEM_TESTS_OBJ      = user_model1.o user_model2.o user_coupler.o
 
 SYSTEM_TESTS_RUN      = RUN_ArrayScatterGather
 
-SYSTEM_TESTS_RUN_UNI  = RUN_ArrayScatterGatherUNI
-
+SYSTEM_TESTS_RUN_UNI  =
 
 ESMF_ArrayScatterGatherSTest.o : $(SYSTEM_TESTS_OBJ)
 
@@ -44,5 +43,3 @@ CLOBBERDIRS =
 RUN_ArrayScatterGather:
 	$(MAKE) TNAME=ArrayScatterGather NP=6 stest
 
-RUN_ArrayScatterGatherUNI:
-	$(MAKE) TNAME=ArrayScatterGather NP=1 stest
