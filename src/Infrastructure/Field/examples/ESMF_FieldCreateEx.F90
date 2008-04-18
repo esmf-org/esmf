@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.29 2008/04/18 18:48:05 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.30 2008/04/18 18:57:31 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -235,8 +235,8 @@
 !  create Fields for typical use.
 !
 !  Users who are not interested in laborious discussion of bounds calculation of Fortran
-!  data array may skip to Section ref{{sec:field:usage:create_5dgrid_7dptr_2dungridded}.
-!  Section ref{{sec:field:usage:create_5dgrid_7dptr_2dungridded} provides a higher level
+!  data array may skip to Section \ref{sec:field:usage:create_5dgrid_7dptr_2dungridded}.
+!  Section \ref{sec:field:usage:create_5dgrid_7dptr_2dungridded} provides a higher level
 !  helper method to assist user to create arbitrary dimension Field with ease.
 !
 !  In the following example, each dimension size of the Fortran array must be no greater 
