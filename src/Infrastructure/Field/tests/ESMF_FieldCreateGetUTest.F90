@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.31 2008/04/17 20:55:49 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.32 2008/04/18 18:48:05 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -950,7 +950,6 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        ! fieldget is very expensive for 7D grid, only this test has it set true
         call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
@@ -1231,6 +1230,61 @@
         !  Begin testing field create/get from grid and arrayspec
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
+        ! Create a 7D field from a 5D grid and 2D ungridded bounds
+        call test7d3_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+            regDecomp=(/2,1,2,1,1/), &
+            ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
+            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/) &
+            )
+        write(failMsg, *) ""
+        write(name, *) "Creating a 7D field from a 5D grid and 2D ungridded bounds " // &
+            "using generic interface"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a 7D field from a 5D grid and 2D ungridded bounds
+        call test7d3_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+            regDecomp=(/2,1,2,1,1/), &
+            ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
+            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            fieldget=.true. &
+            )
+        write(failMsg, *) ""
+        write(name, *) "Creating a 7D field from a 5D grid and 2D ungridded bounds " // &
+            "using generic interface, fieldget=true"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a 7D field from a 5D grid and 2D ungridded bounds
+        call test7d3_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+            regDecomp=(/2,1,2,1,1/), &
+            ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
+            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            gridToFieldMap=(/1,2,4,5,7/) &
+            )
+        write(failMsg, *) ""
+        write(name, *) "Creating a 7D field from a 5D grid and 2D ungridded bounds " // &
+            "using generic interface, irregular gridToFieldMap"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a 7D field from a 5D grid and 2D ungridded bounds
+        call test7d3_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/4,2,4,2,2/), &
+            regDecomp=(/2,1,2,1,1/), &
+            ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
+            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,1,2,1,1/), &
+            gridToFieldMap=(/1,2,4,5,7/) &
+            )
+        write(failMsg, *) ""
+        write(name, *) "Creating a 7D field from a 5D grid and 2D ungridded bounds " // &
+            "using generic interface, irregular gridToFieldMap, data copy"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 1D grid and 6D ungridded bounds
         call test7d3_generic(rc, minIndex=(/1/), maxIndex=(/6/), &
             regDecomp=(/4/), &
@@ -1244,13 +1298,134 @@
         write(name, *) "Creating a 7D field from a 1D grid and 6D ungridded bounds " // &
             "using generic interface, irregular gridToFieldMap and distgridToGridMap"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a 7D field from a 4D grid and 3D ungridded bounds
+        call test7d3_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
+            regDecomp=(/2,1,2,1/), &
+            ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,5,3/), &
+            maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/2,3,4,5/), &
+            fieldget=.true., &
+            distgridToGridMap=(/3,2,1,4/), &
+            gridToFieldMap=(/1,2,4,7/) &
+            )
+        write(failMsg, *) ""
+        write(name, *) "Creating a 7D field from a 4D grid and 3D ungridded bounds " // &
+            "using generic interface, irregular gridToFieldMap and distgridToGridMap"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !  Begin testing field create/get from grid and array
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a 7D field from a 5D grid and 2D ungridded bounds
+        call test7d4_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+            regDecomp=(/2,1,2,1,1/), &
+            ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
+            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/) &
+            )
+        write(failMsg, *) ""
+        write(name, *) "Creating a 7D field from a 5D grid and 2D ungridded bounds " // &
+            "using generic interface"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a 7D field from a 5D grid and 2D ungridded bounds
+        call test7d4_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+            regDecomp=(/2,1,2,1,1/), &
+            gridEdgeLWidth=(/0,0,0,0,0/), gridEdgeUWidth=(/0,0,0,0,0/), &
+            fieldget=.true., &
+            ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
+            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/) &
+            )
+        write(failMsg, *) ""
+        write(name, *) "Creating a 7D field from a 5D grid and 2D ungridded bounds " // &
+            "using generic interface"
+        call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a 7D field from a 5D grid and 2D ungridded bounds
+        call test7d4_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+            regDecomp=(/2,1,2,1,1/), &
+            gridEdgeLWidth=(/0,0,0,0,0/), gridEdgeUWidth=(/1,1,1,1,1/), &
+            ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
+            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            fieldget=.true. &
+            )
+        write(failMsg, *) ""
+        write(name, *) "Creating a 7D field from a 5D grid and 2D ungridded bounds " // &
+            "using generic interface, fieldget=true"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a 7D field from a 5D grid and 2D ungridded bounds
+        call test7d3_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+            regDecomp=(/2,1,2,1,1/), &
+            ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
+            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            gridToFieldMap=(/1,2,4,5,7/) &
+            )
+        write(failMsg, *) ""
+        write(name, *) "Creating a 7D field from a 5D grid and 2D ungridded bounds " // &
+            "using generic interface, irregular gridToFieldMap"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a 7D field from a 5D grid and 2D ungridded bounds
+        call test7d3_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/4,2,4,2,2/), &
+            regDecomp=(/2,1,2,1,1/), &
+            ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
+            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,1,2,1,1/), &
+            gridToFieldMap=(/1,2,4,5,7/) &
+            )
+        write(failMsg, *) ""
+        write(name, *) "Creating a 7D field from a 5D grid and 2D ungridded bounds " // &
+            "using generic interface, irregular gridToFieldMap, data copy"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a 7D field from a 1D grid and 6D ungridded bounds
+        call test7d3_generic(rc, minIndex=(/1/), maxIndex=(/6/), &
+            regDecomp=(/4/), &
+            ungriddedLBound=(/1,2,1,2,1,2/), ungriddedUBound=(/4,5,3,3,5,4/), &
+            maxHaloLWidth=(/1/), maxHaloUWidth=(/2/), &
+            fieldget=.true., &
+            distgridToGridMap=(/1/), &
+            gridToFieldMap=(/4/) &
+            )
+        write(failMsg, *) ""
+        write(name, *) "Creating a 7D field from a 1D grid and 6D ungridded bounds " // &
+            "using generic interface, irregular gridToFieldMap and distgridToGridMap"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a 7D field from a 4D grid and 3D ungridded bounds
+        call test7d3_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
+            regDecomp=(/2,1,2,1/), &
+            ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,5,3/), &
+            maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/2,3,4,5/), &
+            fieldget=.true., &
+            distgridToGridMap=(/3,2,1,4/), &
+            gridToFieldMap=(/1,2,4,7/) &
+            )
+        write(failMsg, *) ""
+        write(name, *) "Creating a 7D field from a 4D grid and 3D ungridded bounds " // &
+            "using generic interface, irregular gridToFieldMap and distgridToGridMap"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
     call ESMF_TestEnd(result, ESMF_SRCLINE)
 
 contains 
 #define ESMF_METHOD "ESMF_TESTS"
     subroutine test1(rc)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer                 :: localrc
         type(ESMF_Field)        :: field
 
@@ -1268,7 +1443,7 @@ contains
     end subroutine test1
 
     subroutine test2(rc)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer                 :: localrc
         type(ESMF_Field)        :: field
         type(ESMF_Grid)         :: grid1
@@ -1303,7 +1478,7 @@ contains
     end subroutine test2
 
     subroutine test2a(rc)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer                 :: localrc
         type(ESMF_Field)        :: field
         type(ESMF_Grid)         :: grid
@@ -1363,7 +1538,7 @@ contains
     end subroutine test2a
 
     subroutine test2a_get(rc)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer                 :: localrc
         type(ESMF_Field)        :: field
         type(ESMF_Grid)         :: grid
@@ -1433,7 +1608,7 @@ contains
     end subroutine test2a_get
 
     subroutine test2a_bigarray(rc)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer                 :: localrc
         real, dimension(8,28)  :: farray
         type(ESMF_Field)        :: field
@@ -1467,7 +1642,7 @@ contains
     end subroutine test2a_bigarray
 
     subroutine test2a_fail(rc)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer                 :: localrc
         real, dimension(4,20)  :: farray
         type(ESMF_Field)        :: field
@@ -1501,7 +1676,7 @@ contains
     end subroutine test2a_fail
 
     subroutine test2b(rc)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer                 :: localrc
         real, dimension(4,20)  :: farray
         type(ESMF_Field)        :: field
@@ -1534,7 +1709,7 @@ contains
     end subroutine test2b
 
     subroutine test2c(rc)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer                 :: localrc
         real, dimension(9,25)  :: farray
         type(ESMF_Field)        :: field
@@ -1568,7 +1743,7 @@ contains
     end subroutine test2c
 
     subroutine test2d(rc)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer                 :: localrc
         real, dimension(9,25)   :: farray
         type(ESMF_Field)        :: field
@@ -1603,7 +1778,7 @@ contains
     end subroutine test2d
 
     subroutine test2d_fail(rc)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer                 :: localrc
         real, dimension(8,25)   :: farray
         type(ESMF_Field)        :: field
@@ -1660,7 +1835,7 @@ contains
         integer, dimension(:), optional   :: maxHaloLWidth, maxHaloUWidth
         logical, dimension(:), optional   :: distdim
         logical, optional                 :: fieldget
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
 
         type(ESMF_Field)        :: field
         type(ESMF_Grid)         :: grid
@@ -1806,7 +1981,7 @@ contains
     end subroutine test2d_generic
 
     subroutine test2e(rc)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer                 :: localrc
         type(ESMF_Field)        :: field
         type(ESMF_Grid)         :: grid
@@ -1861,7 +2036,7 @@ contains
     end subroutine test2e
 
     subroutine test2e_ugb(rc)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer                 :: localrc
         type(ESMF_Field)        :: field
         type(ESMF_Grid)         :: grid
@@ -1922,7 +2097,7 @@ contains
     end subroutine test2e_ugb
 
     subroutine test2e_ugb_bigarray(rc)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer                 :: localrc
         real, dimension(5,21,15)  :: farray
         type(ESMF_Field)        :: field
@@ -1957,7 +2132,7 @@ contains
     end subroutine test2e_ugb_bigarray
 
     subroutine test2e_ugb_fail(rc)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer                 :: localrc
         real, dimension(5,21,5)  :: farray
         type(ESMF_Field)        :: field
@@ -1992,7 +2167,7 @@ contains
     end subroutine test2e_ugb_fail
 
     subroutine test2e_fail(rc)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer                 :: localrc
         real, dimension(5,21,10)  :: farray
         type(ESMF_Field)        :: field
@@ -2037,7 +2212,7 @@ contains
         ungriddedLBound, ungriddedUBound, &
         maxHaloLWidth, maxHaloUWidth, &
         fieldget)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer, dimension(:)   :: minIndex
         integer, dimension(:)   :: maxIndex
         integer, dimension(:), optional   :: gridEdgeLWidth, gridEdgeUWidth
@@ -2176,6 +2351,7 @@ contains
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
+        deallocate(farray)
     end subroutine test2e_generic
 
     ! test2e_generic provides an generic interface to test fieldCreateFromDataPtr
@@ -2190,7 +2366,7 @@ contains
         ungriddedLBound, ungriddedUBound, &
         maxHaloLWidth, maxHaloUWidth, &
         fieldget)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer, dimension(:)   :: minIndex
         integer, dimension(:)   :: maxIndex
         integer, dimension(:), optional   :: gridEdgeLWidth, gridEdgeUWidth
@@ -2283,10 +2459,11 @@ contains
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
+        deallocate(farray)
     end subroutine test2f_generic
 
     subroutine test3a(rc)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer                 :: localrc
         type(ESMF_Field)        :: field
         type(ESMF_Grid)         :: grid
@@ -2346,7 +2523,7 @@ contains
     end subroutine test3a
 
     subroutine test3b(rc)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer                 :: localrc
         type(ESMF_Field)        :: field
         type(ESMF_Grid)         :: grid
@@ -2397,7 +2574,7 @@ contains
     end subroutine test3b
 
     subroutine test3b_fail(rc)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer                 :: localrc
         real, dimension(20,27)  :: farray
         type(ESMF_Field)        :: field
@@ -2431,7 +2608,7 @@ contains
     end subroutine test3b_fail
 
     subroutine test3c(rc)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer                 :: localrc
         type(ESMF_Field)        :: field
         type(ESMF_Grid)         :: grid
@@ -2492,7 +2669,7 @@ contains
     end subroutine test3c
 
     subroutine test3d(rc)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer                 :: localrc
         type(ESMF_Field)        :: field
         type(ESMF_Grid)         :: grid
@@ -2552,7 +2729,7 @@ contains
     end subroutine test3d
 
     subroutine test3e(rc)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer                 :: localrc
         type(ESMF_Field)        :: field
         type(ESMF_Grid)         :: grid
@@ -2614,7 +2791,7 @@ contains
     end subroutine test3e
 
     subroutine test3f(rc)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer                 :: localrc
         type(ESMF_Field)        :: field
         type(ESMF_Grid)         :: grid
@@ -2676,7 +2853,7 @@ contains
     end subroutine test3f
 
     subroutine test3g(rc)
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
         integer                 :: localrc
         type(ESMF_Field)        :: field
         type(ESMF_Grid)         :: grid
@@ -2774,7 +2951,7 @@ contains
         integer, dimension(:), optional   :: maxHaloLWidth, maxHaloUWidth
         logical, dimension(:), optional   :: distdim
         logical, optional                 :: fieldget
-        integer, intent(inout)  :: rc
+        integer, intent(out)  :: rc
 
         type(ESMF_Field)        :: field
         type(ESMF_Grid)         :: grid
@@ -2924,7 +3101,7 @@ contains
 
     ! create a 7d Field from 5d grid and 2d ungridded bounds using ESMF_FieldGetAllocBounds
     subroutine test7d1(rc)
-        integer, intent(inout) :: rc
+        integer, intent(out) :: rc
 
         real(ESMF_KIND_R8), dimension(:,:,:,:,:,:,:), pointer :: farray
         type(ESMF_Field)    :: f8
@@ -2935,6 +3112,8 @@ contains
         integer             :: fsize(7)
 
         localrc = ESMF_SUCCESS
+        rc = ESMF_SUCCESS
+
         distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
             regDecomp=(/2,1,2,1,1/), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -2974,11 +3153,12 @@ contains
         call ESMF_GridDestroy(grid)
         call ESMF_DistGridDestroy(distgrid)
         call ESMF_ArrayDestroy(array8)
+        deallocate(farray)
     end subroutine test7d1
 
     ! create a 7d Field from 5d grid and 2d ungridded bounds using ESMF_FieldGetAllocBounds
     subroutine test7d2(rc)
-        integer, intent(inout) :: rc
+        integer, intent(out) :: rc
 
         real(ESMF_KIND_R8), dimension(:,:,:,:,:,:,:), pointer :: farray
         type(ESMF_Field)    :: f8
@@ -2989,6 +3169,8 @@ contains
         integer             :: flb(7), fub(7)
 
         localrc = ESMF_SUCCESS
+        rc = ESMF_SUCCESS
+
         distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
             regDecomp=(/2,1,2,1,1/), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -3024,6 +3206,7 @@ contains
         call ESMF_GridDestroy(grid)
         call ESMF_DistGridDestroy(distgrid)
         call ESMF_ArrayDestroy(array8)
+        deallocate(farray)
     end subroutine test7d2
 
     ! create a 7d Field from 5d grid and 2d ungridded bounds using ESMF_FieldGetAllocBounds
@@ -3037,7 +3220,7 @@ contains
         ungriddedLBound, ungriddedUBound, &
         maxHaloLWidth, maxHaloUWidth, &
         fieldget)
-        integer, intent(inout) :: rc
+        integer, intent(out) :: rc
         integer, dimension(:)   :: minIndex
         integer, dimension(:)   :: maxIndex
         integer, dimension(:), optional   :: gridEdgeLWidth, gridEdgeUWidth
@@ -3076,6 +3259,8 @@ contains
         real(ESMF_KIND_R8)                          :: n
 
         localrc = ESMF_SUCCESS
+        rc = ESMF_SUCCESS
+
         distgrid = ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
             regDecomp=regDecomp, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -3184,6 +3369,7 @@ contains
         call ESMF_GridDestroy(grid)
         call ESMF_DistGridDestroy(distgrid)
         call ESMF_ArrayDestroy(array8)
+        deallocate(farray)
     end subroutine test7d_generic
 
     ! create a 7d Field from 5d grid and 2d ungridded bounds using ESMF_FieldGetAllocBounds
@@ -3198,7 +3384,7 @@ contains
         ungriddedLBound, ungriddedUBound, &
         maxHaloLWidth, maxHaloUWidth, &
         fieldget)
-        integer, intent(inout) :: rc
+        integer, intent(out) :: rc
         integer, dimension(:)   :: minIndex
         integer, dimension(:)   :: maxIndex
         integer, dimension(:), optional   :: gridEdgeLWidth, gridEdgeUWidth
@@ -3237,6 +3423,8 @@ contains
         real(ESMF_KIND_R8)                          :: n
 
         localrc = ESMF_SUCCESS
+        rc = ESMF_SUCCESS
+
         distgrid = ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
             regDecomp=regDecomp, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -3341,6 +3529,7 @@ contains
         call ESMF_GridDestroy(grid)
         call ESMF_DistGridDestroy(distgrid)
         call ESMF_ArrayDestroy(array8)
+        deallocate(farray)
     end subroutine test7d2_generic
 
     ! create a 7d Field using grid and arrayspec
@@ -3357,7 +3546,7 @@ contains
         fieldget)
 
         ! input arguments
-        integer, intent(inout) :: rc
+        integer, intent(out) :: rc
         integer, dimension(:)   :: minIndex
         integer, dimension(:)   :: maxIndex
         integer, dimension(:), optional   :: gridEdgeLWidth, gridEdgeUWidth
@@ -3399,8 +3588,11 @@ contains
         real(ESMF_KIND_R8)                          :: n
         integer, dimension(7,1)                     :: aelb, aeub, aclb, acub, atlb, atub
         integer                                     :: ldec, ldel(1)
+        integer, dimension(:), pointer              :: audlb, audub
+        integer                                     :: arank, adimCount
 
         localrc = ESMF_SUCCESS
+        rc = ESMF_SUCCESS
     
         ! create distgrid
         distgrid = ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
@@ -3464,10 +3656,16 @@ contains
                 ESMF_CONTEXT, rc)) return
 
             ! verify that the field and array bounds agree with each other
+            call ESMF_ArrayGet(array, rank=arank, dimCount=adimCount, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+            allocate(audlb(arank-adimCount), audub(arank-adimCount))
             call ESMF_ArrayGet(array, exclusiveLBound=aelb, exclusiveUBound=aeub, &
                 computationalLBound=aclb, computationalUBound=acub, &
                 totalLBound=atlb, totalUBound=atub, &
                 localDeCount=ldec, localDeList=ldel, &
+                undistLBound=audlb, undistUBound=audub, &
                 rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -3484,27 +3682,20 @@ contains
             !    ESMF_CONTEXT, rc)) return
             
             !the following code causes error
-            !do i = 1, 7
-            !    if( (aelb(i,1) .ne. felb(i)) .or. (aeub(i,1) .ne. feub(i)) ) &
-            !        localrc = ESMF_FAILURE
-            !enddo
-            !if (ESMF_LogMsgFoundError(localrc, &
-            !    ESMF_ERR_PASSTHRU, &
-            !    ESMF_CONTEXT, rc)) return
-            !do i = 1, 7
-            !    if( (aclb(i,1) .ne. fclb(i)) .or. (acub(i,1) .ne. fcub(i)) ) &
-            !        localrc = ESMF_FAILURE
-            !enddo
-            !if (ESMF_LogMsgFoundError(localrc, &
-            !    ESMF_ERR_PASSTHRU, &
-            !    ESMF_CONTEXT, rc)) return
-            !do i = 1, 7
-            !    if( (atlb(i,1) .ne. ftlb(i)) .or. (atub(i,1) .ne. ftub(i)) ) &
-            !        localrc = ESMF_FAILURE
-            !enddo
-            !if (ESMF_LogMsgFoundError(localrc, &
-            !    ESMF_ERR_PASSTHRU, &
-            !    ESMF_CONTEXT, rc)) return
+            do i = 1, arank-adimCount
+                if(ungriddedLBound(i) .ne. audlb(i) ) &
+                    localrc = ESMF_FAILURE
+            enddo
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+            do i = 1, arank-adimCount
+                if(ungriddedUBound(i) .ne. audub(i) ) &
+                    localrc = ESMF_FAILURE
+            enddo
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
 
             ! compare the total bounds computed from FieldGetAllocBounds and FieldGetDataBounds
             do i = 1, 7
@@ -3563,5 +3754,288 @@ contains
         call ESMF_GridDestroy(grid)
         call ESMF_DistGridDestroy(distgrid)
     end subroutine test7d3_generic
+
+    ! create a 7d Field using grid and array
+    ! use allocBounds to verify field create
+    subroutine test7d4_generic(rc, minindex, maxindex, &
+        gridEdgeLWidth, gridEdgeUWidth, &
+        regDecomp, &
+        distgridToGridMap, &
+        copyflag, &
+        staggerloc, &
+        gridToFieldMap, &
+        ungriddedLBound, ungriddedUBound, &
+        maxHaloLWidth, maxHaloUWidth, &
+        fieldget)
+
+        ! input arguments
+        integer, intent(out) :: rc
+        integer, dimension(:)   :: minIndex
+        integer, dimension(:)   :: maxIndex
+        integer, dimension(:), optional   :: gridEdgeLWidth, gridEdgeUWidth
+        integer, dimension(:), optional   :: regDecomp
+        integer, dimension(:), optional   :: distgridToGridMap
+        type(ESMF_CopyFlag), optional     :: copyflag
+        type(ESMF_STAGGERLOC), optional   :: staggerloc
+        integer, dimension(:), optional   :: gridToFieldMap
+        integer, dimension(:), optional   :: ungriddedLBound, ungriddedUBound
+        integer, dimension(:), optional   :: maxHaloLWidth, maxHaloUWidth
+        logical, optional                 :: fieldget
+
+        ! local arguments used to create field
+        type(ESMF_Field)    :: field
+        type(ESMF_Array)    :: array
+        type(ESMF_Grid)     :: grid
+        type(ESMF_DistGrid) :: distgrid
+        integer             :: localrc
+        integer             :: flb(7), fub(7)
+
+        ! local arguments used to get info from field
+        type(ESMF_Grid)         :: grid1
+        type(ESMF_Array)        :: array1
+        type(ESMF_TypeKind)     :: typekind
+        integer                 :: dimCount
+        type(ESMF_StaggerLoc)   :: lstaggerloc
+        integer, dimension(ESMF_MAXDIM) :: lgridToFieldMap
+        integer, dimension(ESMF_MAXDIM) :: lungriddedLBound 
+        integer, dimension(ESMF_MAXDIM) :: lungriddedUBound 
+        integer, dimension(ESMF_MAXDIM) :: lmaxHaloLWidth
+        integer, dimension(ESMF_MAXDIM) :: lmaxHaloUWidth
+
+        ! local arguments used to verify field get
+        integer                                     :: i, ii, ij, ik, il, im, io, ip
+        integer, dimension(7)                       :: felb, feub, fclb, fcub, ftlb, ftub
+        integer, dimension(7)                       :: fec, fcc, ftc
+        real(ESMF_KIND_R8), dimension(:,:,:,:,:,:,:), pointer :: farray
+        real(ESMF_KIND_R8), dimension(:,:,:,:,:,:,:), pointer :: farray1
+        real(ESMF_KIND_R8)                          :: n
+        integer, dimension(7,1)                     :: aelb, aeub, aclb, acub, atlb, atub
+        integer                                     :: ldec, ldel(1)
+        integer, dimension(:), pointer              :: audlb, audub
+        integer                                     :: arank, adimCount, gdimCount
+        integer, dimension(:), allocatable          :: l_g2fm, l_dg2gm, distgridToArrayMap
+        integer, dimension(:), allocatable          :: l_mhlw, l_mhuw, celw, ceuw
+
+        localrc = ESMF_SUCCESS
+        rc = ESMF_SUCCESS
+    
+        ! create distgrid
+        distgrid = ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
+            regDecomp=regDecomp, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        ! create grid
+        grid = ESMF_GridCreate(distgrid=distgrid, name="grid", &
+            distgridToGridMap=distgridToGridMap, &
+            gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
+            rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldGet(grid, localDe=0, &
+            ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
+            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            gridToFieldMap=gridToFieldMap, &
+            allocLBound=flb, allocUBound=fub, &
+            rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        ! prepare input to ESMF_ArrayCreate
+        ! array pointer
+        allocate(farray(flb(1):fub(1), flb(2):fub(2), flb(3):fub(3), &
+            flb(4):fub(4), flb(5):fub(5), flb(6):fub(6), flb(7):fub(7)) )
+
+        if(present(fieldget)) then
+          if(fieldget) then
+            ! reverse looping order to make this a little faster by improving data locality
+            do ip = flb(7), fub(7)
+             do io = flb(6), fub(6)
+              do im = flb(5), fub(5)
+               do il = flb(4), fub(4)
+                do ik = flb(3), fub(3)
+                 do ij = flb(2), fub(2)
+                  do ii = flb(1), fub(1)
+                    farray(ii,ij,ik,il,im,io,ip) = ii+ij*2+ik+il*2+im+io*2+ip
+                  enddo
+                 enddo
+                enddo
+               enddo
+              enddo
+             enddo
+            enddo
+          endif
+        endif
+
+        gdimCount = size(minIndex, 1)
+        allocate( distgridToArrayMap(gdimCount), l_g2fm(gdimCount), l_dg2gm(gdimCount) )
+        allocate( l_mhlw(gdimCount), l_mhuw(gdimCount), celw(gdimCount), ceuw(gdimCount) )
+    
+        if(present(gridToFieldMap)) then
+            l_g2fm(1:gdimCount) = gridToFieldMap(1:gdimCount)
+        else
+            do i = 1, gdimCount
+                l_g2fm(i) = i
+            enddo
+        endif
+
+        if(present(distgridToGridMap)) then
+            l_dg2gm(1:gdimCount) = distgridToGridMap(1:gdimCount)
+        else
+            do i = 1, gdimCount
+                l_dg2gm(i) = i
+            enddo
+        endif
+
+        if(present(maxHaloLWidth)) then
+            l_mhlw(1:gdimCount) = maxHaloLWidth(1:gdimCount)
+        else
+            l_mhlw = 0
+        endif
+        if(present(maxHaloUWidth)) then
+            l_mhuw(1:gdimCount) = maxHaloUWidth(1:gdimCount)
+        else
+            l_mhuw = 0
+        endif
+
+        ! hardcode these, or call GridGetUndistInfo
+        celw = 0
+        ceuw = -1
+
+        do i = 1, gdimCount
+            distgridToArrayMap(i) = l_g2fm(l_dg2gm(i))
+        enddo
+        ! create array
+        array = ESMF_ArrayCreate(farray, distgrid, copyflag, distgridToArrayMap, &
+            staggerLoc=staggerloc%staggerloc, &
+            undistLBound = ungriddedLBound, undistUBound = ungriddedUBound, &
+            computationalEdgeLWidth=celw, computationalEdgeUWidth=ceuw, &
+            totalLWidth=maxHaloLWidth, totalUWidth=maxHaloUWidth, & 
+            rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        ! create field
+        field = ESMF_FieldCreate(grid, array, copyflag, gridToFieldMap=gridToFieldMap, &
+            ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
+            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            staggerloc=staggerloc, &
+            rc=localrc)
+!        field = ESMF_FieldCreate(grid, array, copyflag, gridToFieldMap=gridToFieldMap, &
+!            ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
+!            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+!            staggerloc=staggerloc, &
+!            rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        if(present(fieldget)) then
+          if(fieldget) then
+            call ESMF_FieldGet(field, grid=grid1, array=array1, typekind=typekind, &
+                dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
+                ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
+                maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
+                rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+            call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+                exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
+                computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
+                totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
+                rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+
+            ! verify that the field and array bounds agree with each other
+            call ESMF_ArrayGet(array, rank=arank, dimCount=adimCount, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+            allocate(audlb(arank-adimCount), audub(arank-adimCount))
+            call ESMF_ArrayGet(array, exclusiveLBound=aelb, exclusiveUBound=aeub, &
+                computationalLBound=aclb, computationalUBound=acub, &
+                totalLBound=atlb, totalUBound=atub, &
+                localDeCount=ldec, localDeList=ldel, &
+                undistLBound=audlb, undistUBound=audub, &
+                rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+            ! verify the numbers returned are correct
+            if(ldec .ne. 1)  localrc = ESMF_FAILURE
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+            !ldel(1) is PET dependent 
+            !if(ldel(1) .ne. 0) localrc = ESMF_FAILURE
+            !if (ESMF_LogMsgFoundError(localrc, &
+            !    ESMF_ERR_PASSTHRU, &
+            !    ESMF_CONTEXT, rc)) return
+            
+            !the following code causes error
+            do i = 1, arank-adimCount
+                if(ungriddedLBound(i) .ne. audlb(i) ) &
+                    localrc = ESMF_FAILURE
+            enddo
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+            do i = 1, arank-adimCount
+                if(ungriddedUBound(i) .ne. audub(i) ) &
+                    localrc = ESMF_FAILURE
+            enddo
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+
+            ! compare the total bounds computed from FieldGetAllocBounds and FieldGetDataBounds
+            do i = 1, 7
+                if( (ftlb(i) .ne. flb(i)) .or. (ftub(i) .ne. fub(i)) ) &
+                        localrc = ESMF_FAILURE
+            enddo
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+            ! access and verify
+            call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+                rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+            do ip = ftlb(7), ftub(7)
+             do io = ftlb(6), ftub(6)
+              do im = ftlb(5), ftub(5)
+               do il = ftlb(4), ftub(4)
+                do ik = ftlb(3), ftub(3)
+                 do ij = ftlb(2), ftub(2)
+                  do ii = ftlb(1), ftub(1)
+                    n = ii+ij*2+ik+il*2+im+io*2+ip
+                    if(farray1(ii,ij,ik,il,im,io,ip) .ne. n ) localrc = ESMF_FAILURE
+                  enddo
+                 enddo
+                enddo
+               enddo
+              enddo
+             enddo
+            enddo
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+          endif ! fieldget = .true.
+        endif ! present(fieldget) = .true.
+
+        call ESMF_FieldDestroy(field)
+        call ESMF_GridDestroy(grid)
+        call ESMF_DistGridDestroy(distgrid)
+        !deallocate(farray)
+    end subroutine test7d4_generic
 
 end program ESMF_FieldCreateGetUTest
