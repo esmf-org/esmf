@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.201.2.14 2008/04/18 22:33:29 svasquez Exp $
+#  $Id: common.mk,v 1.201.2.15 2008/04/18 22:36:04 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1406,7 +1406,7 @@ ifeq ($(ESMF_TESTMPMD),ON)
 	$(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*estmpmd/ Testmpmd/' $(SYS_TESTS_CONFIG) > $(SYS_TESTS_CONFIG).temp; \
 	$(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG);
 else
-	$(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*estmpmd/ Non-testmpmd/' $(SYS_TESTS_CONFIG) > $(SYS_TESTS_CONFIG).temp; \
+	$(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*estmpmd/ Nontestmpmd/' $(SYS_TESTS_CONFIG) > $(SYS_TESTS_CONFIG).temp; \
 	$(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG);
 endif
 
