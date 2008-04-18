@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.30 2008/04/18 18:57:31 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.31 2008/04/18 19:38:04 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -227,17 +227,18 @@
 !  a {\tt ESMF\_Grid} and a {\tt ESMF\_Array}. For a better discussion of
 !  these terminologies and concepts behind them, 
 !  e.g. exclusive, computational, total bounds
-!  for the lower and upper corner of data region, etc.., user can refer to 
-!  the explanation of these concepts for Grid and Array in their respective chapters 
+!  for the lower and upper corner of data region, etc.., users can refer to 
+!  the explanation of these concepts for Grid and Array in their respective sections 
 !  in the reference manual, e.g. Section \ref{Array_regions_and_default_bounds} on Array
 !  and Section \ref{sec:grid:usage:bounds} on Grid.
-!  . The examples here aim to help a user to get up to speed to
+!  The examples here are designed to help a user to get up to speed to
 !  create Fields for typical use.
 !
 !  Users who are not interested in laborious discussion of bounds calculation of Fortran
-!  data array may skip to Section \ref{sec:field:usage:create_5dgrid_7dptr_2dungridded}.
-!  Section \ref{sec:field:usage:create_5dgrid_7dptr_2dungridded} provides a higher level
-!  helper method to assist user to create arbitrary dimension Field with ease.
+!  array pointer may skip to Section \ref{sec:field:usage:create_5dgrid_7dptr_2dungridded}.
+!  Section \ref{sec:field:usage:create_5dgrid_7dptr_2dungridded} demonstrates
+!  a high level {\tt ESMF\_FieldGet}
+!  helper method to help user create arbitrary number of dimension Field with ease.
 !
 !  In the following example, each dimension size of the Fortran array must be no greater 
 !  than the maximum value of the computational and exclusive bounds of its corresponding 
