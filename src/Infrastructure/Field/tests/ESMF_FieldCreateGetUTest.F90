@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.32 2008/04/18 18:48:05 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.33 2008/04/18 19:47:40 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -3926,11 +3926,6 @@ contains
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
             staggerloc=staggerloc, &
             rc=localrc)
-!        field = ESMF_FieldCreate(grid, array, copyflag, gridToFieldMap=gridToFieldMap, &
-!            ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-!            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
-!            staggerloc=staggerloc, &
-!            rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -4035,7 +4030,7 @@ contains
         call ESMF_FieldDestroy(field)
         call ESMF_GridDestroy(grid)
         call ESMF_DistGridDestroy(distgrid)
-        !deallocate(farray)
+        deallocate(farray)
     end subroutine test7d4_generic
 
 end program ESMF_FieldCreateGetUTest
