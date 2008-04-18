@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: sys_tests_results.pl,v 1.3.4.6 2008/04/17 21:09:05 svasquez Exp $
+# $Id: sys_tests_results.pl,v 1.3.4.7 2008/04/18 23:15:32 svasquez Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 # The results are either complete results or a summary.
@@ -84,11 +84,28 @@ use File::Find
                         push(file_lines, $line);
                         }
                         close ($file);
-                        $count=grep ( /ESMF_SYSTEM_TEST/, @file_lines);
-                        if ($count != 0) {
-                                push (act_st_files, $file);
+			if ( $processor == 0) {
+				# Get the uni-PET system tests
+                        	$count=grep ( /ESMF_SYSTEM_TEST/, @file_lines);
+                        	if ($count != 0) {
+                                	push (act_st_files, $file);
+                                       	$st_count=$st_count + 1;
+                                }
+			}
+			else {
+				# Get the mult-PET only system_tests
+                        	$count=grep ( /ESMF_MULTI_PROC_SYSTEM_TEST/, @file_lines);
+                        	if ($count != 0) {
+                                	push (act_st_files, $file);
                                         $st_count=$st_count + 1;
                                 }
+				# Include the uni-PET system tests
+                        	$count=grep ( /ESMF_SYSTEM_TEST/, @file_lines);
+                        	if ($count != 0) {
+                                	push (act_st_files, $file);
+                                       	$st_count=$st_count + 1;
+                                }
+			}
                         if ( $testmpmd == 1 ) {
 			  # Include MPMD system tests
                           $count=grep ( /ESMF_MPMD_SYSTEM_TEST/, @file_lines);
@@ -265,7 +282,14 @@ use File::Find
 		else { # Print only if full output requested
 			print "\n\nSYSTEM TESTS SUMMARY\n";
 		}
-		print "Found $system_test_count system tests, $pass_count passed and $fail_count failed.\n\n";
+		print "Found $system_test_count ";
+        	if ($processor == 0) {
+                	print "single processor system tests, ";
+        	}       
+        	else {  
+                	print "multi-processor system tests, ";
+        	}   
+		print "$pass_count passed and $fail_count failed.\n\n";
 
 		# Write test results to be read by regression tests scripts.
 		$results_file="$TEST_DIR/system_tests_results";
