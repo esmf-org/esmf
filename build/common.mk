@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.201.2.13 2008/04/18 21:29:10 svasquez Exp $
+#  $Id: common.mk,v 1.201.2.14 2008/04/18 22:33:29 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1388,9 +1388,9 @@ else
 endif
 else
 ifeq ($(MULTI),)
-	@echo "Last run Non-testmpmd ; Noprocessor" >> $(SYS_TESTS_CONFIG)
+	@echo "Last run Nontestmpmd ; Noprocessor" >> $(SYS_TESTS_CONFIG)
 else
-	@echo "Last run Non-testmpmd ; " $(MULTI) >> $(SYS_TESTS_CONFIG)
+	@echo "Last run Nontestmpmd ; " $(MULTI) >> $(SYS_TESTS_CONFIG)
 endif
 endif
 
