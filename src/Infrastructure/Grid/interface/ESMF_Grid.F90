@@ -154,7 +154,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47.2.11 2008/04/17 22:13:23 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47.2.12 2008/04/18 19:04:08 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -6716,12 +6716,35 @@ endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    !! Convert destroyDistGrid flag
+    if (present(destroyDistgrid)) then
+        if (destroyDistgrid) then
+           intDestroyDistgrid=1
+        else
+           intDestroyDistgrid=0
+         endif
+    else
+           intDestroyDistgrid=0
+    endif
+
+    !! Convert destroyDELayout flag
+    if (present(destroyDELayout)) then
+        if (destroyDELayout) then
+           intDestroyDELayout=1
+        else
+           intDestroyDELayout=0
+         endif
+    else
+           intDestroyDELayout=0
+    endif
+
+
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridsetfromdistgrid(grid%this, nameLen, name, &
       coordTypeKind, distgrid, &
       distgridToGridMapArg, undistLBoundArg, undistUBoundArg, coordDimCountArg, coordDimMapArg, &
       gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, &
-      indexflag, localrc)
+      indexflag, intDestroyDistgrid, intDestroyDELayout, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
