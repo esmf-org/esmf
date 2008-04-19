@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.201.2.16 2008/04/19 00:09:58 svasquez Exp $
+#  $Id: common.mk,v 1.201.2.17 2008/04/19 00:14:10 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1427,8 +1427,7 @@ stest:
 # this target deletes only the system test related files from the test subdir
 #
 clean_system_tests:
-	$(ESMF_RM) $(ESMF_TESTDIR)/*STest* 
-	$(ESMF_RM) $(ESMF_TESTDIR)/$(SYS_TESTS_CONFIG)
+	$(ESMF_RM) $(ESMF_TESTDIR)/*STest*  $(SYS_TESTS_CONFIG)
 	$(ESMF_RM) $(ESMF_TESTDIR)/system_tests_results
 	$(MAKE) ACTION=tree_cleanfiles tree
 
