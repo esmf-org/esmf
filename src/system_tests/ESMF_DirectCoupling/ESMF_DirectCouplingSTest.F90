@@ -1,7 +1,7 @@
-! $Id: ESMF_DirectCouplingSTest.F90,v 1.1.2.3 2008/04/18 23:12:53 svasquez Exp $
+! $Id: ESMF_DirectCouplingSTest.F90,v 1.1.2.4 2008/04/19 01:40:48 svasquez Exp $
 !
 !-------------------------------------------------------------------------
-!ESMF_MULT_PROC_SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !-------------------------------------------------------------------------
