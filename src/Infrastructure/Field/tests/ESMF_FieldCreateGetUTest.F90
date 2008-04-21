@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.34 2008/04/21 17:07:18 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.35 2008/04/21 17:27:16 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -3682,14 +3682,14 @@ contains
             !    ESMF_CONTEXT, rc)) return
             
             do i = 1, arank-adimCount
-                if(ungriddedLBound(i) .ne. audlb(i) ) &
+                if(lungriddedLBound(i) .ne. audlb(i) ) &
                     localrc = ESMF_FAILURE
             enddo
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             do i = 1, arank-adimCount
-                if(ungriddedUBound(i) .ne. audub(i) ) &
+                if(lungriddedUBound(i) .ne. audub(i) ) &
                     localrc = ESMF_FAILURE
             enddo
             if (ESMF_LogMsgFoundError(localrc, &
@@ -3975,14 +3975,14 @@ contains
             !    ESMF_CONTEXT, rc)) return
             
             do i = 1, arank-adimCount
-                if(ungriddedLBound(i) .ne. audlb(i) ) &
+                if(lungriddedLBound(i) .ne. audlb(i) ) &
                     localrc = ESMF_FAILURE
             enddo
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             do i = 1, arank-adimCount
-                if(ungriddedUBound(i) .ne. audub(i) ) &
+                if(lungriddedUBound(i) .ne. audub(i) ) &
                     localrc = ESMF_FAILURE
             enddo
             if (ESMF_LogMsgFoundError(localrc, &
