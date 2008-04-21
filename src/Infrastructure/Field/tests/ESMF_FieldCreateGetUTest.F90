@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.33 2008/04/18 19:47:40 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.34 2008/04/21 17:07:18 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -3588,7 +3588,7 @@ contains
         real(ESMF_KIND_R8)                          :: n
         integer, dimension(7,1)                     :: aelb, aeub, aclb, acub, atlb, atub
         integer                                     :: ldec, ldel(1)
-        integer, dimension(:), pointer              :: audlb, audub
+        integer, dimension(:), allocatable          :: audlb, audub
         integer                                     :: arank, adimCount
 
         localrc = ESMF_SUCCESS
@@ -3681,7 +3681,6 @@ contains
             !    ESMF_ERR_PASSTHRU, &
             !    ESMF_CONTEXT, rc)) return
             
-            !the following code causes error
             do i = 1, arank-adimCount
                 if(ungriddedLBound(i) .ne. audlb(i) ) &
                     localrc = ESMF_FAILURE
@@ -3811,7 +3810,7 @@ contains
         real(ESMF_KIND_R8)                          :: n
         integer, dimension(7,1)                     :: aelb, aeub, aclb, acub, atlb, atub
         integer                                     :: ldec, ldel(1)
-        integer, dimension(:), pointer              :: audlb, audub
+        integer, dimension(:), allocatable          :: audlb, audub
         integer                                     :: arank, adimCount, gdimCount
         integer, dimension(:), allocatable          :: l_g2fm, l_dg2gm, distgridToArrayMap
         integer, dimension(:), allocatable          :: l_mhlw, l_mhuw, celw, ceuw
@@ -3975,7 +3974,6 @@ contains
             !    ESMF_ERR_PASSTHRU, &
             !    ESMF_CONTEXT, rc)) return
             
-            !the following code causes error
             do i = 1, arank-adimCount
                 if(ungriddedLBound(i) .ne. audlb(i) ) &
                     localrc = ESMF_FAILURE
