@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.76.2.3 2008/04/14 23:38:44 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.76.2.4 2008/04/21 22:37:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ extern "C" {
     }
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,"Unsupported data type.",
       rc)) return;
-    localrc = (*vm)->vmk_allfullreduce(input, output, *count, vmt, (vmOp)(*op));
+    localrc = (*vm)->allfullreduce(input, output, *count, vmt, (vmOp)(*op));
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -89,7 +89,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    localrc = (*vm)->vmk_allgather(input, output, *size);
+    localrc = (*vm)->allgather(input, output, *size);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -109,8 +109,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     *commhandle = NULL; // reset the commhandle
-    localrc = (*vm)->vmk_allgather(input, output, *size,
-      (vmk_commhandle **)commhandle);
+    localrc = (*vm)->allgather(input, output, *size,
+      (ESMCI::VMK::commhandle **)commhandle);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -148,7 +148,7 @@ extern "C" {
     }
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, "Unsupported data type.",
       rc)) return;
-    localrc = (*vm)->vmk_allgatherv(sendData, *sendCount, recvData, recvCounts,
+    localrc = (*vm)->allgatherv(sendData, *sendCount, recvData, recvCounts,
       recvOffsets, vmt);
     if (localrc){
       char *message = new char[160];
@@ -186,7 +186,7 @@ extern "C" {
     }
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, "Unsupported data type.",
       rc)) return;
-    localrc = (*vm)->vmk_allreduce(input, output, *count, vmt, (vmOp)(*op));
+    localrc = (*vm)->allreduce(input, output, *count, vmt, (vmOp)(*op));
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -224,7 +224,7 @@ extern "C" {
     }
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, "Unsupported data type.",
       rc)) return;
-    localrc = (*vm)->vmk_alltoallv(sendData, sendCounts, sendOffsets, recvData,
+    localrc = (*vm)->alltoallv(sendData, sendCounts, sendOffsets, recvData,
       recvCounts, recvOffsets, vmt);
     if (localrc){
       char *message = new char[160];
@@ -243,7 +243,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    localrc = (*ptr)->vmk_barrier();
+    localrc = (*ptr)->barrier();
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -262,7 +262,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    localrc = (*vm)->vmk_broadcast(data, *size, *root);
+    localrc = (*vm)->broadcast(data, *size, *root);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -282,8 +282,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     *commhandle = NULL; // reset the commhandle
-    localrc = (*vm)->vmk_broadcast(data, *size, *root,
-      (vmk_commhandle **)commhandle);
+    localrc = (*vm)->broadcast(data, *size, *root,
+      (ESMCI::VMK::commhandle **)commhandle);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -302,7 +302,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    localrc = (*vm)->vmk_gather(input, output, *size, *root);
+    localrc = (*vm)->gather(input, output, *size, *root);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -322,8 +322,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     *commhandle = NULL; // reset the commhandle
-    localrc = (*vm)->vmk_gather(input, output, *size, *root, 
-      (vmk_commhandle **)commhandle);
+    localrc = (*vm)->gather(input, output, *size, *root, 
+      (ESMCI::VMK::commhandle **)commhandle);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -361,7 +361,7 @@ extern "C" {
     }
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, "Unsupported data type.",
       rc)) return;
-    localrc = (*vm)->vmk_gatherv(sendData, *sendCount, recvData, recvCounts,
+    localrc = (*vm)->gatherv(sendData, *sendCount, recvData, recvCounts,
       recvOffsets, vmt, *root);
     if (localrc){
       char *message = new char[160];
@@ -491,7 +491,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    localrc = (*ptr)->vmk_recv(message, *size, *source);
+    localrc = (*ptr)->recv(message, *size, *source);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -511,8 +511,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     *commhandle = NULL; // reset the commhandle
-    localrc = (*ptr)->vmk_recv(message, *size, *source, 
-      (vmk_commhandle **)commhandle);
+    localrc = (*ptr)->recv(message, *size, *source,
+      (ESMCI::VMK::commhandle **)commhandle);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -549,7 +549,7 @@ extern "C" {
     }
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,"Unsupported data type.",
       rc)) return;
-    localrc = (*vm)->vmk_reduce(input, output, *count, vmt, (vmOp)(*op), *root);
+    localrc = (*vm)->reduce(input, output, *count, vmt, (vmOp)(*op), *root);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -568,7 +568,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    localrc = (*vm)->vmk_scatter(input, output, *size, *root);
+    localrc = (*vm)->scatter(input, output, *size, *root);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -588,8 +588,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     *commhandle = NULL; // reset the commhandle
-    localrc = (*vm)->vmk_scatter(input, output, *size, *root, 
-      (vmk_commhandle **)commhandle);
+    localrc = (*vm)->scatter(input, output, *size, *root, 
+      (ESMCI::VMK::commhandle **)commhandle);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -627,7 +627,7 @@ extern "C" {
     }
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, "Unsupported data type.",
       rc)) return;
-    localrc = (*vm)->vmk_scatterv(sendData, sendCounts, sendOffsets, recvData,
+    localrc = (*vm)->scatterv(sendData, sendCounts, sendOffsets, recvData,
       *recvCount, vmt, *root);
     if (localrc){
       char *message = new char[160];
@@ -647,7 +647,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    localrc = (*ptr)->vmk_send(message, *size, *dest);
+    localrc = (*ptr)->send(message, *size, *dest);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -667,8 +667,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     *commhandle = NULL; // reset the commhandle
-    localrc = (*ptr)->vmk_send(message, *size, *dest, 
-      (vmk_commhandle **)commhandle);
+    localrc = (*ptr)->send(message, *size, *dest, 
+      (ESMCI::VMK::commhandle **)commhandle);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -687,7 +687,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    localrc = (*ptr)->vmk_sendrecv(sendData, *sendSize, *dst, recvData,
+    localrc = (*ptr)->sendrecv(sendData, *sendSize, *dst, recvData,
       *recvSize, *src);
     if (localrc){
       char *message = new char[160];
@@ -709,8 +709,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     *commhandle = NULL; // reset the commhandle
-    localrc = (*ptr)->vmk_sendrecv(sendData, *sendSize, *dst, recvData,
-      *recvSize, *src, (vmk_commhandle **)commhandle);
+    localrc = (*ptr)->sendrecv(sendData, *sendSize, *dst, recvData,
+      *recvSize, *src, (ESMCI::VMK::commhandle **)commhandle);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -728,7 +728,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    localrc = (*ptr)->commwait((vmk_commhandle **)commhandle);
+    localrc = (*ptr)->commwait((ESMCI::VMK::commhandle **)commhandle);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -773,7 +773,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    localrc = (*ptr)->vmk_threadbarrier();
+    localrc = (*ptr)->threadbarrier();
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);

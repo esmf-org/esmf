@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.55.2.2 2008/04/09 22:26:11 theurich Exp $
+// $Id: ESMC_VM.C,v 1.55.2.3 2008/04/21 22:37:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -51,7 +51,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.55.2.2 2008/04/09 22:26:11 theurich Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.55.2.3 2008/04/21 22:37:53 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -723,8 +723,8 @@ int VM::sendVMId(
       "- Invalid VMId", &rc);
     return rc;
   }
-  vmk_send(vmID->vmKey, vmKeyWidth, dest);
-  vmk_send(&(vmID->localID), sizeof(int), dest);
+  send(vmID->vmKey, vmKeyWidth, dest);
+  send(&(vmID->localID), sizeof(int), dest);
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -764,8 +764,8 @@ int VM::recvVMId(
       "- Invalid VMId", &rc);
     return rc;
   }
-  vmk_recv(vmID->vmKey, vmKeyWidth, source);
-  vmk_recv(&(vmID->localID), sizeof(int), source);
+  recv(vmID->vmKey, vmKeyWidth, source);
+  recv(&(vmID->localID), sizeof(int), source);
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -1086,11 +1086,11 @@ VM *VM::initialize(
     matchTable_vmID[matchTableBound].vmKey[vmKeyWidth-1]<<vmKeyOff; // shift
   matchTable_vmID[matchTableBound].localID = 0;        // globalVM is first
 
-  ++matchTableBound;         // done
+  ++matchTableBound;    // done
 
-                             // totalview cannot handle events during the init
-                             // call - it freezes or crashes or ignores input.
-  GlobalVM->vmk_barrier();   // so for now, wait for everyone to init.
+                        // totalview cannot handle events during the init
+                        // call - it freezes or crashes or ignores input.
+  GlobalVM->barrier();  // so for now, wait for everyone to init.
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;

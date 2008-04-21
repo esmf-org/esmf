@@ -1,4 +1,4 @@
-// $Id: ESMC_SparseMsg.C,v 1.6.2.1 2008/04/05 03:12:49 cdeluca Exp $
+// $Id: ESMC_SparseMsg.C,v 1.6.2.2 2008/04/21 22:37:52 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_SparseMsg.C,v 1.6.2.1 2008/04/05 03:12:49 cdeluca Exp $";
+            "$Id: ESMC_SparseMsg.C,v 1.6.2.2 2008/04/21 22:37:52 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -166,7 +166,7 @@ void SparseMsg::setPattern(
   }
 
   //MPI_Reduce_scatter(&sendto[0], &num_incoming, &counts[0], MPI_INT, MPI_SUM, comm);
-  vm.vmk_reduce_scatter(&sendto[0], &num_incoming, &counts[0], vmI4, vmSUM);
+  vm.reduce_scatter(&sendto[0], &num_incoming, &counts[0], vmI4, vmSUM);
 
   // Set up send buffers (so we don't have save the proc ids
   if (nsend > 0) outBuffers.resize(nsend); else outBuffers.clear();
@@ -232,8 +232,9 @@ void SparseMsg::setSizes(
   // avoid allocating zero (add 1)
   //std::vector<MPI_Request> request(num_incoming+1, NULL);
   //std::vector<MPI_Status> status(num_incoming+1);
-  std::vector<vmk_commhandle*> commhp(num_incoming+1);
-  for (UInt i = 0; i < num_incoming; i++) commhp[i] = new vmk_commhandle;
+  std::vector<ESMCI::VMK::commhandle*> commhp(num_incoming+1);
+  for (UInt i = 0; i < num_incoming; i++) commhp[i] =
+    new ESMCI::VMK::commhandle;
   
 
   // Post Recieves
@@ -244,7 +245,7 @@ void SparseMsg::setSizes(
 
   for (UInt i = 0; i < enD; i++) {
     //MPI_Irecv(&inSizes[i], 1, MPI_INT, MPI_ANY_SOURCE, tag0, comm, &request[i]);
-    vm.vmk_recv(static_cast<void*>(&inSizes[i]), sizeof(int), VM_ANY_SRC, &commhp[i], tag0);
+    vm.recv(static_cast<void*>(&inSizes[i]), sizeof(int), VM_ANY_SRC, &commhp[i], tag0);
   }
 
   // Sends
@@ -252,11 +253,11 @@ void SparseMsg::setSizes(
     if (!sendself || i != self_idx) {
       buffer &buf = outBuffers[i];
       //MPI_Send(&(buf.msize), 1, MPI_INT, buf.pet, tag0, comm);
-      vm.vmk_send(static_cast<void*>(&(buf.msize)), sizeof(int), buf.pet, tag0);
+      vm.send(static_cast<void*>(&(buf.msize)), sizeof(int), buf.pet, tag0);
     }
   }
 
-  std::vector<vmk_status> stat(enD);
+  std::vector<ESMCI::VMK::status> stat(enD);
   if (num_incoming > 0) {
     for (UInt w = 0; w < enD; w++) {
       vm.commwait(&commhp[w], &stat[w]);
@@ -347,22 +348,23 @@ void SparseMsg::communicate()
  // std::vector<MPI_Request> request(num_incoming+1, NULL);
   //std::vector<MPI_Status> status(num_incoming+1);
 
-  std::vector<vmk_commhandle*> commhp(num_incoming+1);
-  for (UInt i = 0; i < num_incoming; i++) commhp[i] = new vmk_commhandle;
+  std::vector<ESMCI::VMK::commhandle*> commhp(num_incoming+1);
+  for (UInt i = 0; i < num_incoming; i++) commhp[i] =
+    new ESMCI::VMK::commhandle;
 
   // Post Recieves
   UInt tag1 = 1;
   UInt enD = num_incoming - (sendself ? 1 : 0);
   for (UInt i = 0; i < enD; i++) {
     //MPI_Irecv(inBuffers[i].beg, inBuffers[i].msize, MPI_BYTE, inBuffers[i].pet, tag1, comm, &request[i]);
-    vm.vmk_recv(static_cast<void*>(inBuffers[i].beg), inBuffers[i].msize, inBuffers[i].pet, &commhp[i], tag1);
+    vm.recv(static_cast<void*>(inBuffers[i].beg), inBuffers[i].msize, inBuffers[i].pet, &commhp[i], tag1);
   }
 
   // Sends
   for (UInt i = 0; i < nsend; i++) {
     if (!sendself || i != self_idx)
       //MPI_Send(outBuffers[i].beg, outBuffers[i].msize, MPI_BYTE, outBuffers[i].pet, tag1, comm);
-      vm.vmk_send(static_cast<void*>(outBuffers[i].beg), outBuffers[i].msize, outBuffers[i].pet, tag1);
+      vm.send(static_cast<void*>(outBuffers[i].beg), outBuffers[i].msize, outBuffers[i].pet, tag1);
   }
 
   for (UInt w = 0; w < enD; w++) {

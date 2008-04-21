@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.1.2.2 2008/04/05 03:12:35 cdeluca Exp $
+// $Id: ESMCI_DELayout.h,v 1.1.2.3 2008/04/21 22:37:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -97,8 +97,8 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
                                 // a vasLocal DE
     int *maxServiceOfferCount;  // maximum times service for a DE was offered by
                                 // any PET (shared memory variable)
-    vmk_ipmutex **serviceOfferMutex; // list of shared mutex between PETs
-    vmk_ipmutex **serviceMutex; // list of shared mutex between PETs
+    VMK::ipmutex **serviceOfferMutex; // list of shared mutex between PETs
+    VMK::ipmutex **serviceMutex; // list of shared mutex between PETs
     int *serviceMutexFlag;      // local flag to indicate that PET holds mutex
     
   private:
@@ -246,7 +246,7 @@ class XXE{
     int count;
     char **storage;
     int storageCount;
-    vmk_commhandle ***commhandle;
+    VMK::commhandle ***commhandle;
     int commhandleCount;
     XXE **xxeSubList;
     int xxeSubCount;
@@ -266,7 +266,7 @@ class XXE{
       storage = new char*[storageMaxCountArg];
       storageCount  = 0;
       storageMaxCount = storageMaxCountArg;
-      commhandle = new vmk_commhandle**[commhandleMaxCountArg];
+      commhandle = new VMK::commhandle**[commhandleMaxCountArg];
       commhandleCount  = 0;
       commhandleMaxCount = commhandleMaxCountArg;
       xxeSubList = new XXE*[xxeSubMaxCountArg];
@@ -328,7 +328,7 @@ class XXE{
     typedef struct{
       OpId opId;
       OpSubId opSubId;
-      vmk_commhandle **commhandle;
+      VMK::commhandle **commhandle;
       void *buffer;
       int size;
       int dstPet;
@@ -337,7 +337,7 @@ class XXE{
     typedef struct{
       OpId opId;
       OpSubId opSubId;
-      vmk_commhandle **commhandle;
+      VMK::commhandle **commhandle;
       void *buffer;
       int size;
       int srcPet;
@@ -346,7 +346,7 @@ class XXE{
     typedef struct{
       OpId opId;
       OpSubId opSubId;
-      vmk_commhandle **commhandle;
+      VMK::commhandle **commhandle;
       int rraOffset;
       int size;
       int dstPet;
@@ -356,7 +356,7 @@ class XXE{
     typedef struct{
       OpId opId;
       OpSubId opSubId;
-      vmk_commhandle **commhandle;
+      VMK::commhandle **commhandle;
       int rraOffset;
       int size;
       int srcPet;
@@ -520,7 +520,7 @@ class XXE{
     typedef struct{
       OpId opId;
       OpSubId opSubId;
-      vmk_commhandle **commhandle;
+      VMK::commhandle **commhandle;
     }CommhandleInfo;
 
 };  // class XXE

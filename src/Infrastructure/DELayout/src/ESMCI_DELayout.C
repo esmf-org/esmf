@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.1.2.2 2008/04/05 03:12:36 cdeluca Exp $
+// $Id: ESMCI_DELayout.C,v 1.1.2.3 2008/04/21 22:37:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.1.2.2 2008/04/05 03:12:36 cdeluca Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.1.2.3 2008/04/21 22:37:51 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -558,22 +558,22 @@ int DELayout::construct(
     localServiceOfferCount[i] = 0;  // reset
     serviceMutexFlag[i] = 0;        // reset
   }
-  serviceMutex = new vmk_ipmutex*[vasLocalDeCount];
-  serviceOfferMutex = new vmk_ipmutex*[vasLocalDeCount];
+  serviceMutex = new VMK::ipmutex*[vasLocalDeCount];
+  serviceOfferMutex = new VMK::ipmutex*[vasLocalDeCount];
   for (int i=0; i<vasLocalDeCount; i++)
-    serviceOfferMutex[i] = vm->vmk_ipmutexallocate();  // obtain shared mutex
+    serviceOfferMutex[i] = vm->ipmutexallocate();  // obtain shared mutex
   if (vasLocalDeCount)  // don't use mutex if it's not there
-    vm->vmk_ipmutexlock(serviceOfferMutex[0]);   // lock mutex
+    vm->ipmutexlock(serviceOfferMutex[0]);   // lock mutex
   int firstFlag;
   maxServiceOfferCount = (int *)
-    vm->vmk_ipshmallocate(4*vasLocalDeCount*sizeof(int), &firstFlag);
+    vm->ipshmallocate(4*vasLocalDeCount*sizeof(int), &firstFlag);
   if (firstFlag)
     for (int i=0; i<vasLocalDeCount; i++)
       maxServiceOfferCount[4*i] = 0; // reset:  step 4, better shared mem perf
   for (int i=0; i<vasLocalDeCount; i++)
-    serviceMutex[i] = vm->vmk_ipmutexallocate();  // obtain shared mutex
+    serviceMutex[i] = vm->ipmutexallocate();  // obtain shared mutex
   if (vasLocalDeCount)  // don't use mutex if it's not there
-    vm->vmk_ipmutexunlock(serviceOfferMutex[0]); // unlock mutex
+    vm->ipmutexunlock(serviceOfferMutex[0]); // unlock mutex
   
   // return successfully
   rc = ESMF_SUCCESS;
@@ -883,11 +883,11 @@ int DELayout::destruct(){
     delete [] localServiceOfferCount;
     delete [] serviceMutexFlag;
     if (vm!=NULL){
-      vm->vmk_ipshmdeallocate(maxServiceOfferCount);
+      vm->ipshmdeallocate(maxServiceOfferCount);
       for (int i=0; i<vasLocalDeCount; i++)
-        vm->vmk_ipmutexdeallocate(serviceOfferMutex[i]);
+        vm->ipmutexdeallocate(serviceOfferMutex[i]);
       for (int i=0; i<vasLocalDeCount; i++)
-        vm->vmk_ipmutexdeallocate(serviceMutex[i]);
+        vm->ipmutexdeallocate(serviceMutex[i]);
     }
     delete [] serviceOfferMutex;
     delete [] serviceMutex;
@@ -1602,8 +1602,8 @@ DELayout *DELayout::deserialize(
   a->vasLocalDeList = new int[a->vasLocalDeCount];
   a->localServiceOfferCount = new int[a->vasLocalDeCount];
   a->serviceMutexFlag = new int[a->vasLocalDeCount];
-  a->serviceMutex = new vmk_ipmutex*[a->vasLocalDeCount];
-  a->serviceOfferMutex = new vmk_ipmutex*[a->vasLocalDeCount];
+  a->serviceMutex = new VMK::ipmutex*[a->vasLocalDeCount];
+  a->serviceOfferMutex = new VMK::ipmutex*[a->vasLocalDeCount];
   
   // decode flags first, because dims is not sent unless logRectFlag is true.
   lp = (ESMC_Logical *)ip;
@@ -1692,15 +1692,15 @@ DELayoutServiceReply DELayout::serviceOffer(
   
   // ...de was found in local list
   ++localServiceOfferCount[ii];
-  vm->vmk_ipmutexlock(serviceOfferMutex[ii]);   // lock mutex
+  vm->ipmutexlock(serviceOfferMutex[ii]);   // lock mutex
   if (localServiceOfferCount[ii] > maxServiceOfferCount[4*ii]){
     reply = DELAYOUT_SERVICE_ACCEPT; // accept this PET's service offer
     ++maxServiceOfferCount[4*ii];
   }
-  vm->vmk_ipmutexunlock(serviceOfferMutex[ii]); // unlock mutex
+  vm->ipmutexunlock(serviceOfferMutex[ii]); // unlock mutex
   
   if (reply==DELAYOUT_SERVICE_ACCEPT){
-    vm->vmk_ipmutexlock(serviceMutex[ii]);  // lock service mutex
+    vm->ipmutexlock(serviceMutex[ii]);  // lock service mutex
     serviceMutexFlag[ii] = 1;               // set
   }
     
@@ -1784,7 +1784,7 @@ rc=ESMC_RC_NOT_VALID;
   }
   
   // ...pet holds service mutex for de   
-  vm->vmk_ipmutexunlock(serviceMutex[ii]);  // unlock service mutex
+  vm->ipmutexunlock(serviceMutex[ii]);  // unlock service mutex
   serviceMutexFlag[ii] = 0;                 // reset
   
   // return successfully
@@ -1844,10 +1844,10 @@ int DELayout::ESMC_DELayoutCopy(
     memcpy(destdata, srcdata, blen);
   }else if (srcpet==mypet){
     // srcDE is on my PET, but destDE is on another PET
-    vm->vmk_send(srcdata, blen, destpet);
+    vm->send(srcdata, blen, destpet);
   }else if (destpet==mypet){
     // destDE is on my PET, but srcDE is on another PET
-    vm->vmk_recv(destdata, blen, srcpet);
+    vm->recv(destdata, blen, srcpet);
   }
   // return successfully
   rc = ESMF_SUCCESS;
@@ -2493,21 +2493,21 @@ int XXE::exec(
     case sendnb:
       {
         xxeSendnbInfo = (SendnbInfo *)xxeElement;
-        vm->vmk_send(xxeSendnbInfo->buffer, xxeSendnbInfo->size,
+        vm->send(xxeSendnbInfo->buffer, xxeSendnbInfo->size,
           xxeSendnbInfo->dstPet, xxeSendnbInfo->commhandle);
       }
       break;
     case recvnb:
       {
         xxeRecvnbInfo = (RecvnbInfo *)xxeElement;
-        vm->vmk_recv(xxeRecvnbInfo->buffer, xxeRecvnbInfo->size,
+        vm->recv(xxeRecvnbInfo->buffer, xxeRecvnbInfo->size,
           xxeRecvnbInfo->srcPet, xxeRecvnbInfo->commhandle);
       }
       break;
     case sendnbRRA:
       {
         xxeSendnbRRAInfo = (SendnbRRAInfo *)xxeElement;
-        vm->vmk_send(rraList[xxeSendnbRRAInfo->rraIndex]    
+        vm->send(rraList[xxeSendnbRRAInfo->rraIndex]    
           + xxeSendnbRRAInfo->rraOffset,
           xxeSendnbRRAInfo->size, xxeSendnbRRAInfo->dstPet,
           xxeSendnbRRAInfo->commhandle);
@@ -2516,7 +2516,7 @@ int XXE::exec(
     case recvnbRRA:
       {
         xxeRecvnbRRAInfo = (RecvnbRRAInfo *)xxeElement;
-        vm->vmk_recv(rraList[xxeRecvnbRRAInfo->rraIndex]
+        vm->recv(rraList[xxeRecvnbRRAInfo->rraIndex]
           + xxeRecvnbRRAInfo->rraOffset,
           xxeRecvnbRRAInfo->size, xxeRecvnbRRAInfo->srcPet,
           xxeRecvnbRRAInfo->commhandle);
@@ -4598,14 +4598,14 @@ int XXE::growCommhandle(
   }
   
   int commhandleMaxCountNew = commhandleMaxCount + increase;
-  vmk_commhandle ***commhandleNew;
+  VMK::commhandle ***commhandleNew;
   try{
-    commhandleNew = new vmk_commhandle**[commhandleMaxCountNew];
+    commhandleNew = new VMK::commhandle**[commhandleMaxCountNew];
   }catch (...){
     ESMC_LogDefault.ESMC_LogAllocError(&rc);
     return rc;
   }
-  memcpy(commhandleNew, commhandle, commhandleCount*sizeof(vmk_commhandle **)); 
+  memcpy(commhandleNew, commhandle, commhandleCount*sizeof(VMK::commhandle **));
   delete [] commhandle;                         // delete previous commhandle
   commhandle = commhandleNew;           // plug in newly allocated commhandle
   commhandleMaxCount = commhandleMaxCountNew;   // adjust max value

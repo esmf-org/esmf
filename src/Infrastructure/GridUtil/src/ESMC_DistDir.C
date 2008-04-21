@@ -1,4 +1,4 @@
-// $Id: ESMC_DistDir.C,v 1.6.2.1 2008/04/05 03:12:49 cdeluca Exp $
+// $Id: ESMC_DistDir.C,v 1.6.2.2 2008/04/21 22:37:52 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistDir.C,v 1.6.2.1 2008/04/05 03:12:49 cdeluca Exp $";
+static const char *const version = "$Id: ESMC_DistDir.C,v 1.6.2.2 2008/04/21 22:37:52 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -95,8 +95,8 @@ my_managed()
     int gmin_i, gmax_i;
     // The expensive part of the algorithm.  Declare the minimum and maximum
     // overall pets of the id's.
-    vm.vmk_allreduce(&lmin, &gmin_i, 1, vmI4, vmMIN);
-    vm.vmk_allreduce(&lmax, &gmax_i, 1, vmI4, vmMAX);
+    vm.allreduce(&lmin, &gmin_i, 1, vmI4, vmMIN);
+    vm.allreduce(&lmax, &gmax_i, 1, vmI4, vmMAX);
     //MPI_Allreduce(&lmin, &t_gmin, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
     //MPI_Allreduce(&lmax, &t_gmax, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
     gmin = gmin_i; gmax = gmax_i; // Using UInt for correctness.

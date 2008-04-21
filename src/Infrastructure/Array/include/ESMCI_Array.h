@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.1.2.11 2008/04/05 03:12:28 cdeluca Exp $
+// $Id: ESMCI_Array.h,v 1.1.2.12 2008/04/21 22:37:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -278,7 +278,7 @@ class ESMC_newArray;
 
 typedef struct{
   int commhandleCount;
-  vmk_commhandle **vmk_commh;
+  VMK::commhandle **vmk_commh;
   int pthidCount;
   pthread_t pthid[10];
   void *buffer;

@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.1.2.4 2008/04/08 22:13:16 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.1.2.5 2008/04/21 22:37:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -152,7 +152,7 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     int setArbSeqIndex(InterfaceInt *arbSeqIndex);
     // fill()
     int fillIndexListPDimPDe(int *indexList, int de, int dim,
-      vmk_commhandle **commh, int rootPet, VM *vm=NULL) const;
+      VMK::commhandle **commh, int rootPet, VM *vm=NULL) const;
     // misc.
     static ESMC_Logical match(DistGrid *distgrid1, DistGrid *distgrid2,
       int *rc=NULL);

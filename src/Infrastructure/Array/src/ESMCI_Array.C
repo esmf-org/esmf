@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.14 2008/04/05 03:12:29 cdeluca Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.15 2008/04/21 22:37:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.14 2008/04/05 03:12:29 cdeluca Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.15 2008/04/21 22:37:48 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2385,13 +2385,13 @@ int Array::gather(
     if (typekindArg != typekind){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- TypeKind mismatch between array argument and Array object", &rc);
-      vm->vmk_broadcast(&rc, sizeof(int), rootPet);
+      vm->broadcast(&rc, sizeof(int), rootPet);
       return rc;
     }
     if (rankArg != rank){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- Type mismatch between array argument and Array object", &rc);
-      vm->vmk_broadcast(&rc, sizeof(int), rootPet);
+      vm->broadcast(&rc, sizeof(int), rootPet);
       return rc;
     }
     int tensorIndex=0;  // reset
@@ -2403,7 +2403,7 @@ int Array::gather(
         if (counts[i] != maxIndexPDim[j] - minIndexPDim[j] + 1){
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
             "- Extent mismatch between array argument and Array object", &rc);
-          vm->vmk_broadcast(&rc, sizeof(int), rootPet);
+          vm->broadcast(&rc, sizeof(int), rootPet);
           return rc;
         }
       }else{
@@ -2412,17 +2412,17 @@ int Array::gather(
           + 1){
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
             "- Extent mismatch between array argument and Array object", &rc);
-          vm->vmk_broadcast(&rc, sizeof(int), rootPet);
+          vm->broadcast(&rc, sizeof(int), rootPet);
           return rc;
         }
         ++tensorIndex;
       }
     }
     int success = ESMF_SUCCESS;
-    vm->vmk_broadcast(&success, sizeof(int), rootPet);
+    vm->broadcast(&success, sizeof(int), rootPet);
   }else{
     // not rootPet receive status from rootPet
-    vm->vmk_broadcast(&localrc, sizeof(int), rootPet);
+    vm->broadcast(&localrc, sizeof(int), rootPet);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       "- rootPet exited with error", &rc)) return rc;
   }
@@ -2440,9 +2440,9 @@ int Array::gather(
   const int *localDeList = delayout->getLocalDeList();
   
   // prepare for comms
-  vmk_commhandle **commh = new vmk_commhandle*; // used by all comm calls
-  vmk_commhandle **commhList = 
-    new vmk_commhandle*[dimCount]; // used for indexList comm
+  VMK::commhandle **commh = new VMK::commhandle*; // used by all comm calls
+  VMK::commhandle **commhList = 
+    new VMK::commhandle*[dimCount]; // used for indexList comm
   
   // rootPet is the only receiver for gather
   char **recvBuffer;
@@ -2462,7 +2462,7 @@ int Array::gather(
         int srcPet;
         delayout->getDEMatchPET(de, *vm, NULL, &srcPet, 1);
         *commh = NULL; // invalidate
-        localrc = vm->vmk_recv(recvBuffer[de], recvSize, srcPet, commh);
+        localrc = vm->recv(recvBuffer[de], recvSize, srcPet, commh);
         if (localrc){
           char *message = new char[160];
           sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -2573,7 +2573,7 @@ int Array::gather(
     
     // ready to send the sendBuffer to rootPet
     *commh = NULL; // invalidate
-    localrc = vm->vmk_send(sendBuffer[i], sendSize, rootPet, commh);
+    localrc = vm->send(sendBuffer[i], sendSize, rootPet, commh);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -2825,13 +2825,13 @@ int Array::scatter(
     if (typekindArg != typekind){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- TypeKind mismatch between array argument and Array object", &rc);
-      vm->vmk_broadcast(&rc, sizeof(int), rootPet);
+      vm->broadcast(&rc, sizeof(int), rootPet);
       return rc;
     }
     if (rankArg != rank){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- Type mismatch between array argument and Array object", &rc);
-      vm->vmk_broadcast(&rc, sizeof(int), rootPet);
+      vm->broadcast(&rc, sizeof(int), rootPet);
       return rc;
     }
     int tensorIndex=0;  // reset
@@ -2843,7 +2843,7 @@ int Array::scatter(
         if (counts[i] != maxIndexPDim[j] - minIndexPDim[j] + 1){
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
             "- Extent mismatch between array argument and Array object", &rc);
-          vm->vmk_broadcast(&rc, sizeof(int), rootPet);
+          vm->broadcast(&rc, sizeof(int), rootPet);
           return rc;
         }
       }else{
@@ -2852,17 +2852,17 @@ int Array::scatter(
           + 1){
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
             "- Extent mismatch between array argument and Array object", &rc);
-          vm->vmk_broadcast(&rc, sizeof(int), rootPet);
+          vm->broadcast(&rc, sizeof(int), rootPet);
           return rc;
         }
         ++tensorIndex;
       }
     }
     int success = ESMF_SUCCESS;
-    vm->vmk_broadcast(&success, sizeof(int), rootPet);
+    vm->broadcast(&success, sizeof(int), rootPet);
   }else{
     // not rootPet receive status from rootPet
-    vm->vmk_broadcast(&localrc, sizeof(int), rootPet);
+    vm->broadcast(&localrc, sizeof(int), rootPet);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       "- rootPet exited with error", &rc)) return rc;
   }
@@ -2880,9 +2880,9 @@ int Array::scatter(
   const int *localDeList = delayout->getLocalDeList();
   
   // prepare for comms
-  vmk_commhandle **commh = new vmk_commhandle*; // used by all comm calls
-  vmk_commhandle **commhList = 
-    new vmk_commhandle*[dimCount]; // used for indexList comm
+  VMK::commhandle **commh = new VMK::commhandle*; // used by all comm calls
+  VMK::commhandle **commhList = 
+    new VMK::commhandle*[dimCount]; // used for indexList comm
   
   // rootPet is the only sender for scatter, but may need info from other PETs
   char **sendBuffer;
@@ -2992,7 +2992,7 @@ int Array::scatter(
         int dstPet;
         delayout->getDEMatchPET(de, *vm, NULL, &dstPet, 1);
         *commh = NULL; // invalidate
-        localrc = vm->vmk_send(sendBuffer[de], sendSize, dstPet, commh);
+        localrc = vm->send(sendBuffer[de], sendSize, dstPet, commh);
         if (localrc){
           char *message = new char[160];
           sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -3055,7 +3055,7 @@ int Array::scatter(
       recvBuffer[i] = new char[recvSize];
     *commh = NULL; // invalidate
     // receive data into recvBuffer
-    localrc = vm->vmk_recv(recvBuffer[i], recvSize, rootPet, commh);
+    localrc = vm->recv(recvBuffer[i], recvSize, rootPet, commh);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -3269,7 +3269,7 @@ int Array::redistStore(
   
   // communicate typekindFactor across all Pets
   ESMC_TypeKind *typekindList = new ESMC_TypeKind[petCount];
-  vm->vmk_allgather(&typekindFactor, typekindList, sizeof(ESMC_TypeKind));
+  vm->allgather(&typekindFactor, typekindList, sizeof(ESMC_TypeKind));
   // Check that all non-ESMF_NOKIND typekindList elements match,
   // set local typekindFactor accordingly and keep track of Pets that have
   // factors.
@@ -3333,7 +3333,7 @@ int Array::redistStore(
     // communicate factorLocal variables and check for consistency
     int factorSize = ESMC_TypeKindSize(typekindFactor);
     char *factorLocalList = new char[petCount*factorSize];
-    vm->vmk_allgather(factorLocal, factorLocalList, factorSize);
+    vm->allgather(factorLocal, factorLocalList, factorSize);
     // prime factorLocal with value from first Pet with factor
     memcpy(factorLocal, factorLocalList + factorSize * factorPetList[0],
       factorSize);
@@ -3853,12 +3853,12 @@ void accessLookup(
   T *t
   ){
   // access look up table
-  vmk_commhandle **send1commhList = new vmk_commhandle*[petCount];
-  vmk_commhandle **send2commhList = new vmk_commhandle*[petCount];
-  vmk_commhandle **send3commhList = new vmk_commhandle*[petCount];
-  vmk_commhandle **recv1commhList = new vmk_commhandle*[petCount];
-  vmk_commhandle **recv2commhList = new vmk_commhandle*[petCount];
-  vmk_commhandle **recv3commhList = new vmk_commhandle*[petCount];
+  VMK::commhandle **send1commhList = new VMK::commhandle*[petCount];
+  VMK::commhandle **send2commhList = new VMK::commhandle*[petCount];
+  VMK::commhandle **send3commhList = new VMK::commhandle*[petCount];
+  VMK::commhandle **recv1commhList = new VMK::commhandle*[petCount];
+  VMK::commhandle **recv2commhList = new VMK::commhandle*[petCount];
+  VMK::commhandle **recv3commhList = new VMK::commhandle*[petCount];
   char **requestStreamClient = new char*[petCount];
   char **requestStreamServer = new char*[petCount];
   int *responseStreamSizeClient = new int[petCount];
@@ -3876,7 +3876,7 @@ void accessLookup(
     if (count>0){
       requestStreamServer[i] = new char[requestFactor*count];
       recv3commhList[i] = NULL;
-      vm->vmk_recv(requestStreamServer[i], requestFactor*count, i,
+      vm->recv(requestStreamServer[i], requestFactor*count, i,
         &(recv3commhList[i]));
     }
   }
@@ -3892,12 +3892,12 @@ void accessLookup(
       clientRequest(t, i, requestStreamClient);
       // send information to the serving Pet
       send1commhList[i] = NULL;
-      vm->vmk_send(requestStreamClient[i],
+      vm->send(requestStreamClient[i],
         requestFactor*localElementsPerIntervalCount[i], i, 
         &(send1commhList[i]));
       // post receive to obtain response size from server Pet
       recv1commhList[i] = NULL;
-      vm->vmk_recv(&(responseStreamSizeClient[i]), sizeof(int), i,
+      vm->recv(&(responseStreamSizeClient[i]), sizeof(int), i,
         &(recv1commhList[i]));
     }
   }
@@ -3918,7 +3918,7 @@ void accessLookup(
       // send response size to client Pet "i"
       responseStreamSizeServer[i] = responseStreamSize;
       send2commhList[i] = NULL;
-      vm->vmk_send(&(responseStreamSizeServer[i]), sizeof(int), i,
+      vm->send(&(responseStreamSizeServer[i]), sizeof(int), i,
         &(send2commhList[i]));
       if (responseStreamSize>0){
         // construct response stream
@@ -3927,7 +3927,7 @@ void accessLookup(
         serverResponse(t, count, i, requestStreamServer, responseStreamServer);
         // send response stream to client Pet "i"
         send3commhList[i] = NULL;
-        vm->vmk_send(responseStreamServer[i], responseStreamSize, i,
+        vm->send(responseStreamServer[i], responseStreamSize, i,
           &(send3commhList[i]));
         // garbage collection
         delete [] requestStreamServer[i];
@@ -3947,7 +3947,7 @@ void accessLookup(
       if (responseStreamSize>0){
         responseStreamClient[i] = new char[responseStreamSize];
         recv2commhList[i] = NULL;
-        vm->vmk_recv(responseStreamClient[i], responseStreamSize, i,
+        vm->recv(responseStreamClient[i], responseStreamSize, i,
           &(recv2commhList[i]));
       }
     }
@@ -4406,10 +4406,10 @@ int Array::sparseMatMulStore(
 
   // communicate typekindFactors across all Pets
   ESMC_TypeKind *typekindList = new ESMC_TypeKind[petCount];
-  vm->vmk_allgather(&typekindFactors, typekindList, sizeof(ESMC_TypeKind));
+  vm->allgather(&typekindFactors, typekindList, sizeof(ESMC_TypeKind));
   // communicate tensorMixFlag across all Pets
   bool *tensorMixFlagList = new bool[petCount];
-  vm->vmk_allgather(&tensorMixFlag, tensorMixFlagList, sizeof(bool));
+  vm->allgather(&tensorMixFlag, tensorMixFlagList, sizeof(bool));
   // Check that all non-ESMF_NOKIND typekindList elements match,
   // set local typekindFactors accordingly and keep track of Pets that have
   // factors. At the same time check that tensorMixFlag matches across Pets
@@ -4509,7 +4509,7 @@ int Array::sparseMatMulStore(
   // communicate srcElementCount across all Pets
   // todo: use nb-allgather and wait right before needed below
   int *srcElementCountList = new int[petCount];
-  vm->vmk_allgather(&srcElementCount, srcElementCountList, sizeof(int));
+  vm->allgather(&srcElementCount, srcElementCountList, sizeof(int));
   // determine local dstElementCount
   int dstLocalDeCount = dstArray->delayout->getLocalDeCount();
   const int *dstLocalDeList = dstArray->delayout->getLocalDeList();
@@ -4524,7 +4524,7 @@ int Array::sparseMatMulStore(
   // communicate dstElementCount across all Pets
   // todo: use nb-allgather and wait right before needed below
   int *dstElementCountList = new int[petCount];
-  vm->vmk_allgather(&dstElementCount, dstElementCountList, sizeof(int));
+  vm->allgather(&dstElementCount, dstElementCountList, sizeof(int));
   
   // set the effective tensorElementCount for src and dst Arrays
   int srcTensorElementCountEff = srcArray->tensorElementCount;  // default
@@ -4652,7 +4652,7 @@ int Array::sparseMatMulStore(
   // communicate srcSeqIndexMinMax across all Pets
   // todo: use nb-allgather and wait right before needed below
   int *srcSeqIndexMinMaxList = new int[2*petCount];
-  vm->vmk_allgather(srcSeqIndexMinMax, srcSeqIndexMinMaxList, 2*sizeof(int));
+  vm->allgather(srcSeqIndexMinMax, srcSeqIndexMinMaxList, 2*sizeof(int));
 
 #ifdef ASMMSTOREPRINT
   for (int i=0; i<srcLocalDeCount; i++)
@@ -4741,7 +4741,7 @@ int Array::sparseMatMulStore(
   // communicate dstSeqIndexMinMax across all Pets
   // todo: use nb-allgather and wait right before needed below
   int *dstSeqIndexMinMaxList = new int[2*petCount];
-  vm->vmk_allgather(dstSeqIndexMinMax, dstSeqIndexMinMaxList, 2*sizeof(int));
+  vm->allgather(dstSeqIndexMinMax, dstSeqIndexMinMaxList, 2*sizeof(int));
   
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t3);   //gjt - profile
@@ -4825,7 +4825,7 @@ int Array::sparseMatMulStore(
     srcLocalElementsPerIntervalCount[i] = count;
   }
   int *srcLocalIntervalPerPetCount = new int[petCount];
-  vm->vmk_alltoall(srcLocalElementsPerIntervalCount, sizeof(int),
+  vm->alltoall(srcLocalElementsPerIntervalCount, sizeof(int),
     srcLocalIntervalPerPetCount, sizeof(int), vmBYTE);
   
 #ifdef ASMMSTORETIMING
@@ -5161,7 +5161,7 @@ printf("srcArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
 #endif
     
           // send info to Pet "i"
-          vm->vmk_send(thisPetFactorCountList, 
+          vm->send(thisPetFactorCountList, 
             (srcSeqIndexInterval[i].countEff + 1) * sizeof(int), i);
             
 #ifdef ASMMSTORETIMING
@@ -5300,7 +5300,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   VMK::wtime(&t4c4);   //gjt - profile
 #endif
   
-          vm->vmk_send(stream, byteCount, i);
+          vm->send(stream, byteCount, i);
           
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t4c5);   //gjt - profile
@@ -5326,7 +5326,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
         new int[srcSeqIndexInterval[localPet].countEff+1];
       // the extra integer value is used to store thisPetTotalFactorCount
       // to optimize communications
-      vm->vmk_recv(localPetFactorCountList, 
+      vm->recv(localPetFactorCountList, 
         (srcSeqIndexInterval[localPet].countEff + 1) * sizeof(int), rootPet);
       int localPetTotalFactorCount =
         localPetFactorCountList[srcSeqIndexInterval[localPet].countEff];
@@ -5355,7 +5355,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
       int byteCount = localPetTotalFactorCount
         * (4*sizeof(int) + dataSizeFactors);
       char *stream = new char[byteCount];
-      vm->vmk_recv(stream, byteCount, rootPet);
+      vm->recv(stream, byteCount, rootPet);
       // process stream and set srcSeqIndexFactorLookup[] content
       int *intStream;
       if (typekindFactors == ESMC_TYPEKIND_R4){
@@ -5457,10 +5457,10 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
         }
       }
       // send information to the serving Pet
-      vm->vmk_send(&count, sizeof(int), i);
+      vm->send(&count, sizeof(int), i);
 //printf("localPet %d sending count %d to Pet %i\n", localPet, count, i);
       if (count)
-        vm->vmk_send(seqIndexDeInfoList, count*sizeof(SeqIndexDeInfo), i);
+        vm->send(seqIndexDeInfoList, count*sizeof(SeqIndexDeInfo), i);
       // garbage collection
       delete [] seqIndexDeInfoList;
     }else{
@@ -5486,11 +5486,11 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
         }else{
           // receive seqIndexWithinInterval from Pet "ii"
           int count;
-          vm->vmk_recv(&count, sizeof(int), ii);
+          vm->recv(&count, sizeof(int), ii);
           SeqIndexDeInfo *seqIndexDeInfoList = new SeqIndexDeInfo[count];
 //printf("localPet %d receiving count %d from Pet %i\n", localPet, count, ii);
           if (count)
-            vm->vmk_recv(seqIndexDeInfoList, count*sizeof(SeqIndexDeInfo), ii);
+            vm->recv(seqIndexDeInfoList, count*sizeof(SeqIndexDeInfo), ii);
           // process seqIndexDeInfoList and set srcSeqIndexFactorLookup[]
           for (int j=0; j<count; j++){
             int k = seqIndexDeInfoList[j].lookupIndex;
@@ -5580,7 +5580,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     dstLocalElementsPerIntervalCount[i] = count;
   }
   int *dstLocalIntervalPerPetCount = new int[petCount];
-  vm->vmk_alltoall(dstLocalElementsPerIntervalCount, sizeof(int),
+  vm->alltoall(dstLocalElementsPerIntervalCount, sizeof(int),
     dstLocalIntervalPerPetCount, sizeof(int), vmBYTE);
   
 #ifdef ASMMSTORETIMING
@@ -5896,7 +5896,7 @@ printf("dstArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
             ++thisPetFactorCountList[totalCountIndex];
           }
           // send info to Pet "i"
-          vm->vmk_send(thisPetFactorCountList, 
+          vm->send(thisPetFactorCountList, 
             (dstSeqIndexInterval[i].countEff + 1) * sizeof(int), i);
           // prepare to send remaining information to Pet "i" in one long stream
           int thisPetTotalFactorCount = thisPetFactorCountList[totalCountIndex];
@@ -6025,7 +6025,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
             }
           }
           // ready to send information to Pet "i" in one long stream
-          vm->vmk_send(stream, byteCount, i);
+          vm->send(stream, byteCount, i);
           // garbage collection
           delete [] stream;
         }
@@ -6038,7 +6038,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
         new int[dstSeqIndexInterval[localPet].countEff+1];
       // the extra integer value is used to store thisPetTotalFactorCount
       // to optimize communications
-      vm->vmk_recv(localPetFactorCountList, 
+      vm->recv(localPetFactorCountList, 
         (dstSeqIndexInterval[localPet].countEff + 1) * sizeof(int), rootPet);
       int localPetTotalFactorCount =
         localPetFactorCountList[dstSeqIndexInterval[localPet].countEff];
@@ -6067,7 +6067,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
       int byteCount = localPetTotalFactorCount
         * (4*sizeof(int) + dataSizeFactors);
       char *stream = new char[byteCount];
-      vm->vmk_recv(stream, byteCount, rootPet);
+      vm->recv(stream, byteCount, rootPet);
       // process stream and set dstSeqIndexFactorLookup[] content
       int *intStream;
       if (typekindFactors == ESMC_TYPEKIND_R4){
@@ -6169,10 +6169,10 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
         }
       }      
       // send information to the serving Pet
-      vm->vmk_send(&count, sizeof(int), i);
+      vm->send(&count, sizeof(int), i);
 //printf("localPet %d sending count %d to Pet %i\n", localPet, count, i);
       if (count)
-        vm->vmk_send(seqIndexDeInfoList, count*sizeof(SeqIndexDeInfo), i);
+        vm->send(seqIndexDeInfoList, count*sizeof(SeqIndexDeInfo), i);
       // garbage collection
       delete [] seqIndexDeInfoList;
     }else{
@@ -6198,11 +6198,11 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
         }else{
           // receive seqIndexWithinInterval from Pet "ii"
           int count;
-          vm->vmk_recv(&count, sizeof(int), ii);
+          vm->recv(&count, sizeof(int), ii);
           SeqIndexDeInfo *seqIndexDeInfoList = new SeqIndexDeInfo[count];
 //printf("localPet %d receiving count %d from Pet %i\n", localPet, count, ii);
           if (count)
-            vm->vmk_recv(seqIndexDeInfoList, count*sizeof(SeqIndexDeInfo), ii);
+            vm->recv(seqIndexDeInfoList, count*sizeof(SeqIndexDeInfo), ii);
           // process seqIndexDeInfoList and set dstSeqIndexFactorLookup[]
           for (int j=0; j<count; j++){
             int k = seqIndexDeInfoList[j].lookupIndex;
@@ -6239,7 +6239,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     srcLocalPartnerElementsPerIntervalCount[i] = count;
   }
   int *dstLocalPartnerIntervalPerPetCount = new int[petCount];
-  vm->vmk_alltoall(srcLocalPartnerElementsPerIntervalCount, sizeof(int),
+  vm->alltoall(srcLocalPartnerElementsPerIntervalCount, sizeof(int),
     dstLocalPartnerIntervalPerPetCount, sizeof(int), vmBYTE);
   
   // fill partnerDe in srcSeqIndexFactorLookup using dstSeqIndexFactorLookup
@@ -6279,7 +6279,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     dstLocalPartnerElementsPerIntervalCount[i] = count;
   }
   int *srcLocalPartnerIntervalPerPetCount = new int[petCount];
-  vm->vmk_alltoall(dstLocalPartnerElementsPerIntervalCount, sizeof(int),
+  vm->alltoall(dstLocalPartnerElementsPerIntervalCount, sizeof(int),
     srcLocalPartnerIntervalPerPetCount, sizeof(int), vmBYTE);
   
   // fill partnerDe in dstSeqIndexFactorLookup using srcSeqIndexFactorLookup
@@ -6682,8 +6682,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       xxeRecvnbInfo->buffer = buffer[j][i];
       xxeRecvnbInfo->size = partnerDeCount[j][i] * dataSizeSrc;
       xxeRecvnbInfo->srcPet = srcPet;
-      xxeRecvnbInfo->commhandle = new vmk_commhandle*;
-      *(xxeRecvnbInfo->commhandle) = new vmk_commhandle;
+      xxeRecvnbInfo->commhandle = new VMK::commhandle*;
+      *(xxeRecvnbInfo->commhandle) = new VMK::commhandle;
       localrc = xxe->incCount();
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -7036,8 +7036,8 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       // add commhandle to last xxe element (sendnbRRA or sendnb) and keep track
       // of commhandle for xxe garbage collection
       xxeCommhandleInfo = (XXE::CommhandleInfo *)xxeElement;
-      xxeCommhandleInfo->commhandle = new vmk_commhandle*;
-      *(xxeCommhandleInfo->commhandle) = new vmk_commhandle;
+      xxeCommhandleInfo->commhandle = new VMK::commhandle*;
+      *(xxeCommhandleInfo->commhandle) = new VMK::commhandle;
       xxe->commhandle[xxe->commhandleCount] = xxeCommhandleInfo->commhandle;
       localrc = xxe->incCommhandleCount();
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
@@ -7883,7 +7883,7 @@ int Array::sparseMatMulRelease(
         &rc))
       return rc;
     }
-    vm->vmk_barrier();
+    vm->barrier();
   }
 #endif
   
@@ -7976,15 +7976,15 @@ int ESMC_newArray::ESMC_newArrayConstruct(
   int laRank;
   if (localPet == rootPET)
     laRank = larray->ESMC_LocalArrayGetRank();
-  vm->vmk_broadcast(&laRank, sizeof(int), rootPET);
+  vm->broadcast(&laRank, sizeof(int), rootPET);
   int *laLength = new int[laRank];
   if (localPet == rootPET)
     larray->ESMC_LocalArrayGetLengths(laRank, laLength);
-  vm->vmk_broadcast(laLength, laRank * sizeof(int), rootPET);
+  vm->broadcast(laLength, laRank * sizeof(int), rootPET);
   int *laLbound = new int[laRank];
   if (localPet == rootPET)
     larray->ESMC_LocalArrayGetLbounds(laRank, laLbound);
-  vm->vmk_broadcast(laLbound, laRank * sizeof(int), rootPET);
+  vm->broadcast(laLbound, laRank * sizeof(int), rootPET);
   // set some newArray members
   rank = laRank;  // newArray's rank is equal to that of the origin LocalArray
   int decompRank;
@@ -8113,9 +8113,9 @@ int ESMC_newArray::ESMC_newArrayConstruct(
   // now the LocalArrays for all the DEs on this PET must be created
   if (localPet == rootPET){
     kind = larray->ESMC_LocalArrayGetTypeKind();
-    vm->vmk_broadcast(&kind, sizeof(ESMC_TypeKind), rootPET);
+    vm->broadcast(&kind, sizeof(ESMC_TypeKind), rootPET);
   }else{
-    vm->vmk_broadcast(&kind, sizeof(ESMC_TypeKind), rootPET);
+    vm->broadcast(&kind, sizeof(ESMC_TypeKind), rootPET);
   }
   if (localTid == 0){
     // this is the master thread of an ESMF-thread group
@@ -8127,9 +8127,9 @@ int ESMC_newArray::ESMC_newArrayConstruct(
       int vas = vm->getVas(pet);
       if (pet != localPet && vas == localVAS){
         // send the localArrays pointer to this PET
-        vm->vmk_send(&localArrays, sizeof(ESMC_LocalArray **), pet);
-        vm->vmk_send(&commhArray, sizeof(ESMC_newArrayCommHandle *), pet);
-        vm->vmk_send(&thargArray, sizeof(ESMC_newArrayThreadArg *), pet);
+        vm->send(&localArrays, sizeof(ESMC_LocalArray **), pet);
+        vm->send(&commhArray, sizeof(ESMC_newArrayCommHandle *), pet);
+        vm->send(&thargArray, sizeof(ESMC_newArrayThreadArg *), pet);
       }
     }
   }else{
@@ -8141,9 +8141,9 @@ int ESMC_newArray::ESMC_newArrayConstruct(
       if (vas == localVAS && tid == 0) break; // found master thread
     }
     // receive the localArrays and commhArray pointer from master thread
-    vm->vmk_recv(&localArrays, sizeof(ESMC_LocalArray **), pet);
-    vm->vmk_recv(&commhArray, sizeof(ESMC_newArrayCommHandle *), pet);
-    vm->vmk_recv(&thargArray, sizeof(ESMC_newArrayThreadArg *), pet);
+    vm->recv(&localArrays, sizeof(ESMC_LocalArray **), pet);
+    vm->recv(&commhArray, sizeof(ESMC_newArrayCommHandle *), pet);
+    vm->recv(&thargArray, sizeof(ESMC_newArrayThreadArg *), pet);
   }
   int *temp_counts = new int[rank];
   int de;
@@ -8268,15 +8268,15 @@ int ESMC_newArray::ESMC_newArrayScatter(
   int *laLength = new int[rank];
   if (localPet == rootPET)
     larray->ESMC_LocalArrayGetLengths(rank, laLength);
-  vm->vmk_broadcast(laLength, rank * sizeof(int), rootPET);
+  vm->broadcast(laLength, rank * sizeof(int), rootPET);
   int *laLbound = new int[rank];
   if (localPet == rootPET)
     larray->ESMC_LocalArrayGetLbounds(rank, laLbound);
-  vm->vmk_broadcast(laLbound, rank * sizeof(int), rootPET);
+  vm->broadcast(laLbound, rank * sizeof(int), rootPET);
   int laByteCount;
   if (localPet == rootPET)
     larray->ESMC_LocalArrayGetByteCount(&laByteCount);
-  vm->vmk_broadcast(&laByteCount, sizeof(int), rootPET);
+  vm->broadcast(&laByteCount, sizeof(int), rootPET);
   // get info out of the associated localArrays
   void **localDeArrayBase = new void*[localDeCount];
   for (int i=0; i<localDeCount; i++)
@@ -8313,7 +8313,7 @@ int ESMC_newArray::ESMC_newArrayScatter(
     printf("%d\n", blockID[rank-1]);
 #endif
     // broadcast a block of data
-    vm->vmk_broadcast(buffer, blockSize, rootPET);
+    vm->broadcast(buffer, blockSize, rootPET);
     // loop over local DEs
     for (int ide=0; ide<localDeCount; ide++){
       int de = localDeList[ide];
@@ -8563,7 +8563,7 @@ int ESMC_newArray::ESMC_newArrayScatter(
   printf("gjt in ESMC_newArrayScatter(ROOT): elementSize = %d\n", elementSize);
 #endif
   int totalHandles = deCount * (3 + blockCount);  // specific for this routine
-  commh->vmk_commh = new vmk_commhandle*[totalHandles];
+  commh->vmk_commh = new VMK::commhandle*[totalHandles];
 #if (VERBOSITY > 9)
   printf("gjt in ESMC_newArrayScatter(ROOT): commh=%p, vmk_commh=%p\n",
     commh, commh->vmk_commh);
@@ -8576,13 +8576,13 @@ int ESMC_newArray::ESMC_newArrayScatter(
     printf("gjt in ESMC_newArrayScatter(ROOT): sending info to de = %d\n", de);
 #endif
     commh->vmk_commh[*cc] = NULL; // mark as invalid element
-    vm->vmk_send(laLength, rank * sizeof(int), deVASList[de],
+    vm->send(laLength, rank * sizeof(int), deVASList[de],
       &(commh->vmk_commh[(*cc)++]), de+3000);
     commh->vmk_commh[*cc] = NULL; // mark as invalid element
-    vm->vmk_send(&laByteCount, sizeof(int), deVASList[de],
+    vm->send(&laByteCount, sizeof(int), deVASList[de],
       &(commh->vmk_commh[(*cc)++]), de+3000);
     commh->vmk_commh[*cc] = NULL; // mark as invalid element
-    vm->vmk_send(laLbound, rank * sizeof(int), deVASList[de],
+    vm->send(laLbound, rank * sizeof(int), deVASList[de],
       &(commh->vmk_commh[(*cc)++]), de+3000);  
 #if (VERBOSITY > 9)
     printf("gjt in ESMC_newArrayScatter(ROOT): done sending info to de = %d\n",
@@ -8634,7 +8634,7 @@ int ESMC_newArray::ESMC_newArrayScatter(
     // send block of data to all of the DEs
     for (int de=0; de<deCount; de++){
       commh->vmk_commh[*cc] = NULL; // mark as invalid element
-      vm->vmk_send(buffer, blockSize, deVASList[de],
+      vm->send(buffer, blockSize, deVASList[de],
         &(commh->vmk_commh[(*cc)++]),  de+3000);
     }
     // update the blockID
@@ -8980,7 +8980,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
     return localrc;
   }
   // reduce localResult across entire VM and put output into result on rootPET
-  vm->vmk_reduce(localResult, result, 1, vmt, (vmOp)op, rootPET);
+  vm->reduce(localResult, result, 1, vmt, (vmOp)op, rootPET);
   
   // garbage collection
   // need to typcast back before: delete localResult;
@@ -9281,9 +9281,9 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
   delete [] blockID;
   // send DE-local reduction result to rootPET
   commhArray[localDe].commhandleCount = 1;
-  commhArray[localDe].vmk_commh = new vmk_commhandle*[1];
+  commhArray[localDe].vmk_commh = new VMK::commhandle*[1];
   commhArray[localDe].vmk_commh[0] = NULL;  // mark as invalid
-  vm->vmk_send(localResult, size, rootVAS,
+  vm->send(localResult, size, rootVAS,
     &(commhArray[localDe].vmk_commh[0]), de+5000);
 #if (VERBOSITY > 9)
   printf("gjt in ESMC_newArrayScalarReduce: sent localResult=%g for de = %d\n",
@@ -9600,14 +9600,14 @@ ESMC_newArray *ESMC_newArrayCreate(
   int laRank, *laLength;
   if (localPet == rootPET){
     laRank = larray->ESMC_LocalArrayGetRank();
-    vm->vmk_broadcast(&laRank, sizeof(int), rootPET);
+    vm->broadcast(&laRank, sizeof(int), rootPET);
     laLength = new int[laRank];
     larray->ESMC_LocalArrayGetLengths(laRank, laLength);
-    vm->vmk_broadcast(laLength, laRank * sizeof(int), rootPET);
+    vm->broadcast(laLength, laRank * sizeof(int), rootPET);
   }else{
-    vm->vmk_broadcast(&laRank, sizeof(int), rootPET);
+    vm->broadcast(&laRank, sizeof(int), rootPET);
     laLength = new int[laRank];
-    vm->vmk_broadcast(laLength, laRank * sizeof(int), rootPET);
+    vm->broadcast(laLength, laRank * sizeof(int), rootPET);
   }
 #if (VERBOSITY > 9)
   printf("gjt in ESMC_newArrayCreate: %d, %d\n", laRank, laLength[0]);
@@ -9624,12 +9624,12 @@ ESMC_newArray *ESMC_newArrayCreate(
     }
   }    
   // broadcast rootPET's haloWidth array
-  vm->vmk_broadcast(&haloWidth, sizeof(int *), rootPET);
+  vm->broadcast(&haloWidth, sizeof(int *), rootPET);
   // don't worry, it is o.k. to overwrite local variables!
   if (haloWidth != NULL){
     if (localPet != rootPET)
       haloWidth = new int[laRank];
-    vm->vmk_broadcast(haloWidth, laRank * sizeof(int), rootPET);
+    vm->broadcast(haloWidth, laRank * sizeof(int), rootPET);
   }
   
   // determine the decomposition rank
@@ -9675,7 +9675,7 @@ ESMC_newArray *ESMC_newArrayCreate(
     printf("gjt in ESMC_newArrayCreate: haloVolume[%d]=%d\n", i, haloVolume[i]);
 #endif
   // need to broadcast rootPET's deCount
-  vm->vmk_broadcast(&deCount, sizeof(int), rootPET);
+  vm->broadcast(&deCount, sizeof(int), rootPET);
   // don't worry, it is o.k. to overwrite local variables!
   if (deCount == 0) deCount = petCount; // by default chose deCount = petCount
 
@@ -9839,14 +9839,14 @@ void *ESMC_newArrayScatterThread(
   // receive some of larray's meta info from scatter root method
   int rank = array->rank;
   int *laLength = new int[rank];
-  vmk_commhandle *ch_laLength = NULL; // mark as invalid
-  vm->vmk_recv(laLength, rank * sizeof(int), rootVAS, &ch_laLength, de+3000);
+  VMK::commhandle *ch_laLength = NULL; // mark as invalid
+  vm->recv(laLength, rank * sizeof(int), rootVAS, &ch_laLength, de+3000);
   int laByteCount;
-  vmk_commhandle *ch_laByteCount = NULL; // mark as invalid
-  vm->vmk_recv(&laByteCount, sizeof(int), rootVAS, &ch_laByteCount, de+3000);
+  VMK::commhandle *ch_laByteCount = NULL; // mark as invalid
+  vm->recv(&laByteCount, sizeof(int), rootVAS, &ch_laByteCount, de+3000);
   int *laLbound = new int[rank];
-  vmk_commhandle *ch_laLbound = NULL; // mark as invalid
-  vm->vmk_recv(laLbound, rank * sizeof(int), rootVAS, &ch_laLbound, de+3000);
+  VMK::commhandle *ch_laLbound = NULL; // mark as invalid
+  vm->recv(laLbound, rank * sizeof(int), rootVAS, &ch_laLbound, de+3000);
   // get info out of the associated localArrays
   ESMC_LocalArray **localArrays = array->localArrays;
   void **localDeArrayBase = new void*[localDeCount];
@@ -9878,7 +9878,7 @@ void *ESMC_newArrayScatterThread(
   vm->commwait(&ch_laLbound, NULL, 1);
   blockGlobalIndex[0] = laLbound[0];
   // prepare for loop over all blocks
-  vmk_commhandle *ch_buffer = NULL; // mark as invalid
+  VMK::commhandle *ch_buffer = NULL; // mark as invalid
   int **globalDataLBound = array->globalDataLBound;
   int **globalDataUBound = array->globalDataUBound;
   int **localFullLBound = array->localFullLBound; 
@@ -9899,7 +9899,7 @@ void *ESMC_newArrayScatterThread(
     // use ide instead of localDe in the following lines...
     int ide = localDe;
     // receive block data from root
-    vm->vmk_recv(buffer, blockSize, rootVAS, &ch_buffer, de+3000);
+    vm->recv(buffer, blockSize, rootVAS, &ch_buffer, de+3000);
     // check whether this DE's fullBox intersects the current block...
     int ii;
     for (ii=1; ii<rank; ii++){
@@ -10038,7 +10038,7 @@ void *ESMC_newArrayScatterThread(
       memcpy(baseOverlap, blockOverlap, overlapCount * elementSize);
     }else{
       // block does not intersect fullBox
-//gjt      vm->vmk_cancel(&ch_buffer);
+//gjt      vm->cancel(&ch_buffer);
       // gjt took the above line out again because canceling an MPI message is
       // much more involved than simply calling cancel on one side! In case the
       // cancel succeeds on the receiver side there is still the message queued
@@ -10132,11 +10132,11 @@ void *ESMC_newArrayScalarReduceThread(
   }
   // loop over all DEs and issue nb receive localResult
   char *localResultChar = (char *)localResult;
-  vmk_commhandle **vmk_commh = new vmk_commhandle*[deCount];
+  VMK::commhandle **vmk_commh = new VMK::commhandle*[deCount];
   int *deVASList = array->deVASList;
   for (int de=0; de<deCount; de++){
     vmk_commh[de] = NULL;    // mark as invalid
-    vm->vmk_recv(localResultChar, size, deVASList[de], &(vmk_commh[de]),
+    vm->recv(localResultChar, size, deVASList[de], &(vmk_commh[de]),
       de+5000);
     
 #if (VERBOSITY > 9)
