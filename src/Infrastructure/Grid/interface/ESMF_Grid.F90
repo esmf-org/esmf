@@ -154,7 +154,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47.2.13 2008/04/21 21:35:52 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47.2.14 2008/04/21 22:42:19 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -4164,7 +4164,7 @@ end subroutine ESMF_GridGet
 ! 
 ! !ARGUMENTS:
 !     type(ESMF_Grid),        intent(in) :: grid
-!     integer,                intent(in), optional :: localDE
+!     integer,                intent(in) :: localDE
 !     integer,                intent(in) :: coordDim
 !     type (ESMF_StaggerLoc), intent(in), optional :: staggerloc
 !     integer,                intent(out), optional :: exclusiveLBound(:)
@@ -4206,9 +4206,8 @@ end subroutine ESMF_GridGet
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{[localDE]}]
-!          The local DE to get the information for. If not set, defaults to 
-!          the first DE on this processor. (localDE starts at 0)
+!     \item[{localDE}]
+!          The local DE to get the information for. 
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -4287,7 +4286,7 @@ end subroutine ESMF_GridGet
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in) :: grid
-      integer,                intent(in), optional :: localDE
+      integer,                intent(in) :: localDE
       integer,                intent(in) :: coordDim
       type (ESMF_StaggerLoc), intent(in), optional :: staggerloc
       integer,                intent(out), optional :: exclusiveLBound(:)
@@ -4314,9 +4313,8 @@ end subroutine ESMF_GridGet
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{[localDE]}]
-!          The local DE to get the information for. If not set, defaults to 
-!          the first DE on this processor. (localDE starts at 0)
+!     \item[{localDE}]
+!          The local DE to get the information for. 
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -4391,7 +4389,6 @@ end subroutine ESMF_GridGet
     type(ESMF_TypeKind) :: typekind 
     type(ESMF_LocalArray), allocatable :: larrayList(:) 
     type(ESMF_CopyFlag) :: docopyInt
-    integer :: lDE
     integer :: coordDimCount(ESMF_MAXDIM)
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
@@ -4448,12 +4445,6 @@ end subroutine ESMF_GridGet
       docopyInt=ESMF_DATA_REF
     endif
 
-    if (present(localDE)) then
-      lDE=localDE
-    else
-      lDE=0
-    endif
-
 
     ! Require DELayout to be 1 DE per PET 
     if (localDeCount < 0) then 
@@ -4470,13 +4461,13 @@ end subroutine ESMF_GridGet
       return 
     endif
  
-    if (lDE>=localDeCount) then 
+    if (localDE>=localDeCount) then 
       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
         "- localDE too big", ESMF_CONTEXT, rc) 
       return 
     endif 
 
-    if (lDE<0) then 
+    if (localDE<0) then 
       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
         "- localDE can't be less than 0", ESMF_CONTEXT, rc) 
       return 
@@ -4502,7 +4493,7 @@ end subroutine ESMF_GridGet
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(lDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -4595,7 +4586,7 @@ end subroutine ESMF_GridGet
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in),optional :: localDE
+      integer, intent(in) :: localDE
       integer, intent(in) :: coordDim
       type (ESMF_StaggerLoc), intent(in),optional :: staggerloc
       integer,                intent(out), optional :: exclusiveLBound(:)
@@ -4623,8 +4614,7 @@ end subroutine ESMF_GridGet
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. If not set, defaults to 
-!          the first DE on this processor. (localDE starts at 0)
+!          The local DE to get the information for.
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -4701,7 +4691,6 @@ end subroutine ESMF_GridGet
     type(ESMF_TypeKind) :: typekind 
     type(ESMF_LocalArray), allocatable :: larrayList(:) 
     type(ESMF_CopyFlag) :: docopyInt
-    integer :: lDE
     integer :: coordDimCount(ESMF_MAXDIM)
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
@@ -4758,12 +4747,6 @@ end subroutine ESMF_GridGet
       docopyInt=ESMF_DATA_REF
     endif
 
-    if (present(localDE)) then
-      lDE=localDE
-    else
-      lDE=0
-    endif
-
     ! Require DELayout to be 1 DE per PET 
     if (localDeCount < 0) then 
       call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
@@ -4779,13 +4762,13 @@ end subroutine ESMF_GridGet
       return 
     endif
  
-    if (lDE>=localDeCount) then 
+    if (localDE>=localDeCount) then 
       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
         "- localDE too big", ESMF_CONTEXT, rc) 
       return 
     endif 
 
-    if (lDE<0) then 
+    if (localDE<0) then 
       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
         "- localDE can't be less than 0", & 
         ESMF_CONTEXT, rc) 
@@ -4814,7 +4797,7 @@ end subroutine ESMF_GridGet
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(lDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -4907,7 +4890,7 @@ end subroutine ESMF_GridGet
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in),optional :: localDE
+      integer, intent(in) :: localDE
       integer, intent(in) :: coordDim
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer,                intent(out), optional :: exclusiveLBound(:)
@@ -4935,8 +4918,7 @@ end subroutine ESMF_GridGet
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. If not set, defaults to 
-!          the first DE on this processor. (localDE starts at 0)
+!          The local DE to get the information for.
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -5070,12 +5052,6 @@ else
   docopyInt=ESMF_DATA_REF
 endif
 
-if (present(localDE)) then
-   lDE=localDE
-else
-  lDE=0
-endif
-
 
  ! Require DELayout to be 1 DE per PET 
  if (localDeCount < 0) then 
@@ -5092,14 +5068,14 @@ endif
  return 
  endif
  
- if (lDE>=localDeCount) then 
+ if (localDE>=localDeCount) then 
  call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
  "- localDE too big", & 
  ESMF_CONTEXT, rc) 
  return 
  endif 
 
- if (lDE<0) then 
+ if (localDE<0) then 
  call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
  "- localDE can't be less than 0", & 
  ESMF_CONTEXT, rc) 
@@ -5128,7 +5104,7 @@ endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(lDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -5222,7 +5198,7 @@ endif
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in),optional :: localDE
+      integer, intent(in) :: localDE
       integer, intent(in) :: coordDim
       type (ESMF_StaggerLoc), intent(in),optional :: staggerloc
       integer,                intent(out), optional :: exclusiveLBound(:)
@@ -5250,8 +5226,7 @@ endif
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. If not set, defaults to 
-!          the first DE on this processor. (localDE starts at 0)
+!          The local DE to get the information for. 
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -5328,7 +5303,6 @@ endif
  type(ESMF_TypeKind) :: typekind 
  type(ESMF_LocalArray), allocatable :: larrayList(:) 
  type(ESMF_CopyFlag) :: docopyInt
- integer :: lDE
  integer :: coordDimCount(ESMF_MAXDIM)
  type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
@@ -5385,12 +5359,6 @@ else
   docopyInt=ESMF_DATA_REF
 endif
 
-if (present(localDE)) then
-   lDE=localDE
-else
-  lDE=0
-endif
-
 
  ! Require DELayout to be 1 DE per PET 
  if (localDeCount < 0) then 
@@ -5407,14 +5375,14 @@ endif
  return 
  endif
  
- if (lDE>=localDeCount) then 
+ if (localDE>=localDeCount) then 
  call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
  "- localDE too big", & 
  ESMF_CONTEXT, rc) 
  return 
  endif 
 
- if (lDE<0) then 
+ if (localDE<0) then 
  call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
  "- localDE can't be less than 0", & 
  ESMF_CONTEXT, rc) 
@@ -5442,7 +5410,7 @@ endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(lDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -5536,7 +5504,7 @@ endif
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in),optional :: localDE
+      integer, intent(in) :: localDE
       integer, intent(in) :: coordDim
       type (ESMF_StaggerLoc), intent(in),optional :: staggerloc
       integer,                intent(out), optional :: exclusiveLBound(:)
@@ -5564,8 +5532,7 @@ endif
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. If not set, defaults to 
-!          the first DE on this processor. (localDE starts at 0)
+!          The local DE to get the information for. 
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -5699,12 +5666,6 @@ else
   docopyInt=ESMF_DATA_REF
 endif
 
-if (present(localDE)) then
-   lDE=localDE
-else
-  lDE=0
-endif
-
 
  ! Require DELayout to be 1 DE per PET 
  if (localDeCount < 0) then 
@@ -5721,14 +5682,14 @@ endif
  return 
  endif
  
- if (lDE>=localDeCount) then 
+ if (localDE>=localDeCount) then 
  call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
  "- localDE too big", & 
  ESMF_CONTEXT, rc) 
  return 
  endif 
 
- if (lDE<0) then 
+ if (localDE<0) then 
  call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
  "- localDE can't be less than 0", & 
  ESMF_CONTEXT, rc) 
@@ -5755,7 +5716,7 @@ endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(lDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -5849,7 +5810,7 @@ endif
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in),optional :: localDE
+      integer, intent(in) :: localDE
       integer, intent(in) :: coordDim
       type (ESMF_StaggerLoc), intent(in),optional :: staggerloc
       integer,                intent(out), optional :: exclusiveLBound(:)
@@ -5877,8 +5838,7 @@ endif
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. If not set, defaults to 
-!          the first DE on this processor. (localDE starts at 0)
+!          The local DE to get the information for. 
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -6012,12 +5972,6 @@ else
   docopyInt=ESMF_DATA_REF
 endif
 
-if (present(localDE)) then
-   lDE=localDE
-else
-  lDE=0
-endif
-
 
  ! Require DELayout to be 1 DE per PET 
  if (localDeCount < 0) then 
@@ -6034,14 +5988,14 @@ endif
  return 
  endif
  
- if (lDE>=localDeCount) then 
+ if (localDE>=localDeCount) then 
  call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
  "- localDE too big", & 
  ESMF_CONTEXT, rc) 
  return 
  endif 
 
- if (lDE<0) then 
+ if (localDE<0) then 
  call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
  "- localDE can't be less than 0", & 
  ESMF_CONTEXT, rc) 
@@ -6069,7 +6023,7 @@ endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(lDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -6162,7 +6116,7 @@ endif
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
-      integer,                intent(in),  optional :: localDE
+      integer,                intent(in)            :: localDE
       integer,                intent(in)            :: coordDim
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer,                intent(out), optional :: exclusiveLBound(:)
@@ -6189,9 +6143,8 @@ endif
 !\begin{description}
 !\item[{grid}]
 !    Grid to get the information from.
-!\item[{[localDE]}]
-!     The local DE from which to get the information.  If not set, defaults to 
-!     the first DE on this processor. (localDE starts at 0)
+!\item[{localDE}]
+!     The local DE from which to get the information. 
 !\item[{coordDim}]
 !     The coordinate dimension to get the information for (e.g. 1=x). 
 !\item[{staggerloc}]
