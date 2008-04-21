@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.2 2008/04/05 03:38:17 cdeluca Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.3 2008/04/21 21:45:01 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.2 2008/04/05 03:38:17 cdeluca Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.3 2008/04/21 21:45:01 dneckels Exp $'
 
 !==============================================================================
 !
@@ -75,7 +75,7 @@ contains
 !
 ! !INTERFACE:
       function ESMF_FieldRegridStore(srcField, dstField, &
-                      regridMethod, rc)
+                      regridMethod, regridScheme, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_RouteHandle)          :: ESMF_FieldRegridStore
@@ -84,6 +84,7 @@ contains
       type(ESMF_Field), intent(inout)     :: srcField
       type(ESMF_Field), intent(inout)     :: dstField
       type(ESMF_RegridMethod), intent(in) :: regridMethod
+      integer, intent(in), optional       :: regridScheme
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -103,7 +104,7 @@ contains
 !EOP
         integer :: localrc
         type(ESMF_RouteHandle) :: lrouteHandle
-        integer              :: regridScheme
+        integer              :: lregridScheme
 
         type(ESMF_Grid)      :: srcGrid
         type(ESMF_Grid)      :: dstGrid
@@ -133,7 +134,11 @@ contains
 
         ! Will eventually determine scheme either as a parameter or from properties
         ! of the source grid
-        regridScheme = ESMF_REGRID_SCHEME_NATIVE
+        if (present(regridScheme)) then
+          lregridScheme = regridScheme
+        else
+          lregridScheme = ESMF_REGRID_SCHEME_NATIVE
+        endif
 
         call ESMF_RegridStore(srcGrid, srcArray, dstGrid, dstArray, &
                  regridMethod, regridScheme, lrouteHandle, localrc)

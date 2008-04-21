@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.6 2008/04/05 03:38:52 cdeluca Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.7 2008/04/21 21:40:34 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -47,6 +47,9 @@
 
 using namespace ESMC;
 
+enum {ESMF_REGRID_SCHEME_FULL3D = 0, ESMF_REGRID_SCHEME_NATIVE = 1};
+
+
 
 extern "C" void FTN(c_esmc_arraysparsematmulstore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMC_RouteHandle **routehandle,
@@ -73,6 +76,13 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
   Mesh dstmesh;
 
   try {
+
+
+    if (*regridScheme == ESMF_REGRID_SCHEME_FULL3D) {
+      srcgrid.setSphere();
+      dstgrid.setSphere();
+      std::cout << "Regrid setting sphere!!" << std::endl;
+    }
 
     ESMCI::GridToMesh(srcgrid, *srcstaggerLoc, srcmesh, std::vector<ESMCI::Array*>());
     ESMCI::GridToMesh(dstgrid, *dststaggerLoc, dstmesh, std::vector<ESMCI::Array*>());

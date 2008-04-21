@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridUtil_F.C,v 1.7 2008/04/05 03:38:28 cdeluca Exp $
+// $Id: ESMCI_GridUtil_F.C,v 1.8 2008/04/21 21:40:09 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -58,6 +58,7 @@ extern "C" void FTN(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int *
                              ESMCI::Array **arraypp4,
                              ESMCI::Array **arraypp5,
                              ESMCI::Array **arraypp6,
+                             int *spherical,
                              int nlen
                              ) {
   ESMCI::VM *vm = *vmpp;
@@ -77,6 +78,9 @@ extern "C" void FTN(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int *
     arraypp5,
     arraypp6
   };
+
+
+  if (*spherical != 0) grid.setSphere();
 
   for (UInt i = 0; i < *num_arrays; ++i)
     arrays.push_back(*ar[i]);

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUtil.F90,v 1.2 2008/04/05 03:38:28 cdeluca Exp $
+! $Id: ESMF_GridUtil.F90,v 1.3 2008/04/21 21:40:09 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -71,7 +71,7 @@ module ESMF_GridUtilMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridUtil.F90,v 1.2 2008/04/05 03:38:28 cdeluca Exp $'
+    '$Id: ESMF_GridUtil.F90,v 1.3 2008/04/21 21:40:09 dneckels Exp $'
 
 !==============================================================================
 ! 
@@ -89,7 +89,8 @@ module ESMF_GridUtilMod
 !
 ! !INTERFACE:
     subroutine ESMF_MeshIO(vm, grid, staggerLoc, filename, &
-                         array1, array2, array3, array4, array5, array6, rc)
+                         array1, array2, array3, array4, array5, array6, &
+                         spherical, rc)
 !
 !
 ! !ARGUMENTS:
@@ -103,6 +104,7 @@ module ESMF_GridUtilMod
     type(ESMF_Array), intent(inout), optional     :: array4
     type(ESMF_Array), intent(inout), optional     :: array5
     type(ESMF_Array), intent(inout), optional     :: array6
+    integer,                intent(in), optional  :: spherical
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -118,6 +120,8 @@ module ESMF_GridUtilMod
 !         File (stub) to write results to
 !   \item [{[array1-6]}]
 !         Arrays to write as data
+!   \item [{[spherical]}]
+!         If == 1, then grid will be transformed to a 3d spherical manifold
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -126,10 +130,14 @@ module ESMF_GridUtilMod
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: minidx
+    integer                 :: lspherical
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_SUCCESS
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    lspherical = 0
+    if (present(spherical)) lspherical = spherical
 
     minidx = 10
 
@@ -145,22 +153,22 @@ module ESMF_GridUtilMod
         return 
       case (2)
         call c_ESMC_MeshIO(vm, grid, staggerLoc, 1, filename, localrc, &
-             array1, array1, array1, array1, array1, array1)
+             array1, array1, array1, array1, array1, array1, lspherical)
       case (3) 
         call c_ESMC_MeshIO(vm, grid, staggerLoc, 2, filename, localrc, &
-             array1, array2, array1, array1, array1, array1)
+             array1, array2, array1, array1, array1, array1, lspherical)
       case (4) 
         call c_ESMC_MeshIO(vm, grid, staggerLoc, 3, filename, localrc, &
-             array1, array2, array3, array1, array1, array1)
+             array1, array2, array3, array1, array1, array1, lspherical)
       case (5) 
         call c_ESMC_MeshIO(vm, grid, staggerLoc, 4, filename, localrc, &
-             array1, array2, array3, array4, array1, array1)
+             array1, array2, array3, array4, array1, array1, lspherical)
       case (6) 
         call c_ESMC_MeshIO(vm, grid, staggerLoc, 5, filename, localrc, &
-             array1, array2, array3, array4, array5, array1)
+             array1, array2, array3, array4, array5, array1, lspherical)
       case (10) 
         call c_ESMC_MeshIO(vm, grid, staggerLoc, 6, filename, localrc, &
-             array1, array2, array3, array4, array5, array6)
+             array1, array2, array3, array4, array5, array6, lspherical)
       case default
         localrc = ESMF_RC_NOT_IMPL
     end select

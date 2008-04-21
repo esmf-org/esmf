@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.18 2008/04/05 03:38:29 cdeluca Exp $
+// $Id: ESMC_GridToMesh.C,v 1.19 2008/04/21 21:40:09 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -39,6 +39,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <cmath>
 
 //#define G2M_DBG
 
@@ -95,6 +96,13 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh, const std::
      // In what dimension is the grid embedded?? (sphere = 3, simple rectangle = 2, etc...)
    // At this point the topological and spatial dim of the Grid is the same this should change soon
    UInt sdim = grid.getDimCount();
+
+
+   if (grid.isSphere()) {
+     std::cout << "g2m, is sphere=1" << std::endl;
+     sdim = 3;
+   }
+
    mesh.set_spatial_dimension(sdim);
   
 
@@ -321,7 +329,23 @@ Par::Out() << std::endl;
 
     // If local fill in coords
     if (gni->isLocal()) {
+
      gni->getCoord(c);
+
+     double DEG2RAD = M_PI/180.0;
+     if (grid.isSphere()) {
+
+         double lon = c[0];
+          double lat = c[1];
+          double ninety = 90.0;
+          double theta = DEG2RAD*lon, phi = DEG2RAD*(ninety-lat);
+          c[0] = std::cos(theta)*std::sin(phi);
+          c[1] = std::sin(theta)*std::sin(phi);
+          c[2] = std::cos(phi);
+
+ 
+     }
+
     } else { // set to Null value to be ghosted later
       for (int i=0; i<sdim; i++) {
    //     c[i]=std::numeric_limits<double>::max();
