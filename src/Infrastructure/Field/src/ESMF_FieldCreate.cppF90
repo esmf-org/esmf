@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.14 2008/04/17 16:36:55 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.15 2008/04/21 15:24:00 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.14 2008/04/17 16:36:55 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.15 2008/04/21 15:24:00 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1600,17 +1600,17 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
           ftype%gridToFieldMap(i) = i
         enddo
     else
-       ftype%gridToFieldMap = gridToFieldMap
+       ftype%gridToFieldMap(1:size(gridToFieldMap)) = gridToFieldMap
     end if
 
     if(present(ungriddedLBound)) &
-       ftype%ungriddedLBound = ungriddedLBound
+       ftype%ungriddedLBound(1:size(ungriddedLBound)) = ungriddedLBound
     if(present(ungriddedUBound)) &
-       ftype%ungriddedUBound = ungriddedUBound
+       ftype%ungriddedUBound(1:size(ungriddedUBound)) = ungriddedUBound
     if(present(maxHaloLWidth)) &
-       ftype%maxHaloLWidth = maxHaloLWidth
+       ftype%maxHaloLWidth(1:size(maxHaloLWidth)) = maxHaloLWidth
     if(present(maxHaloUWidth)) &
-       ftype%maxHaloUWidth = maxHaloUWidth
+       ftype%maxHaloUWidth(1:size(maxHaloUWidth)) = maxHaloUWidth
 
     ! default copyflag value is ESMF_DATA_REF
     ftype%array_internal = .false.
