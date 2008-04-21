@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.36.2.10 2008/04/17 22:13:24 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.36.2.11 2008/04/21 21:35:52 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.36.2.10 2008/04/17 22:13:24 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.36.2.11 2008/04/21 21:35:52 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -2391,10 +2391,11 @@ Grid::Grid(
      }
    }
 
-   // delete delayout
+   // Get tmpDELayout if we need it later
+   // (also if prevents us from getting layout from empty grid)
+   DELayout *tmpDELayout;
    if (destroyDELayout) {
-     DELayout *tmpDELayout=distgrid->getDELayout();
-     DELayout::destroy(&tmpDELayout);
+     tmpDELayout=distgrid->getDELayout();
    }
 
    // delete distgrid
@@ -2402,6 +2403,10 @@ Grid::Grid(
      DistGrid::destroy(&distgrid);
    }
 
+   // delete delayout
+   if (destroyDELayout) {
+     DELayout::destroy(&tmpDELayout);
+   }
 
    // If present delete ProtoGrid
    if (proto != ESMC_NULL_POINTER) delete proto;
@@ -2733,8 +2738,9 @@ int Grid::serialize(
 
     SERIALIZE_VAR(cp, buffer,loffset,indexflag,ESMC_IndexFlag);
     
-    SERIALIZE_VAR(cp, buffer,loffset,destroyDistgrid,bool);    
-    SERIALIZE_VAR(cp, buffer,loffset,destroyDELayout,bool);    
+    // Don't serialize these because after deserailizing distgrid and delayout are local
+    //  destroyDistgrid 
+    //  destroyDELayout
 
     SERIALIZE_VAR(cp, buffer,loffset,distDimCount,int);    
 
@@ -2883,8 +2889,9 @@ int Grid::deserialize(
   
   DESERIALIZE_VAR( buffer,loffset,indexflag,ESMC_IndexFlag);
 
-  DESERIALIZE_VAR( buffer,loffset,destroyDistgrid,bool);    
-  DESERIALIZE_VAR( buffer,loffset,destroyDELayout,bool);    
+  // Don't deserialize, but set 
+  destroyDistgrid=true;  // distgrid is Grid's after deserialize
+  destroyDELayout=false; // delayot belongs to DistGrid
 
   DESERIALIZE_VAR( buffer,loffset,distDimCount,int);    
   

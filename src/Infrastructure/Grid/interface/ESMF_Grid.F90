@@ -154,7 +154,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47.2.12 2008/04/18 19:04:08 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47.2.13 2008/04/21 21:35:52 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -2578,6 +2578,7 @@ end interface
     ! Clean up memory
     deallocate(coordDimCount)
     deallocate(coordDimMap)
+    deallocate(minIndexLocal)
     deallocate(minIndexDG)
     deallocate(maxIndexDG)
     deallocate(distgridToGridMap)
