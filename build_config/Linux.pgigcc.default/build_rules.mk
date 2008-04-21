@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.7 2008/04/17 18:58:32 theurich Exp $
+# $Id: build_rules.mk,v 1.8 2008/04/21 20:04:47 w6ws Exp $
 #
 # Linux.pgigcc.default
 #
@@ -94,6 +94,9 @@ ESMF_F90COMPILEFIXCPP    = -Mpreprocess -Mnofreeform
 ESMF_LAPACK         = PGI
 # ESMf_LAPACK_LIBPATH =
 ESMF_LAPACK_LIBS    = -llapack -lblas
+# PGI releases prior to 7.1-6 also need -lpgsse2.  For later
+# releases, this can be removed.
+ESMF_LAPACK_LIBS   += -lpgsse2
 
 ############################################################
 # Determine where pgf90's libraries are located
