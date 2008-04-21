@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.99.2.4 2008/04/14 18:46:05 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.99.2.5 2008/04/21 15:41:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -308,23 +308,22 @@ void VMK::init(MPI_Comm mpiCommunicator){
     mpi_mutex_flag = 1; // must use muteces around mpi comms
   else
     mpi_mutex_flag = 0; // don't need to use muteces around mpi comms
-  // set up the communication array
-  commarray = new comminfo*[npets];
-  for (int i=0; i<npets; i++){
-    commarray[i] = new comminfo[npets];
-    for (int j=0; j<npets; j++){
+  // setup the communication channels
+  sendChannel = new comminfo[npets];
+  recvChannel = new comminfo[npets];
 #ifdef ESMF_MPIUNI
-      // todo: check here that npets = 1
-      // for mpiuni the default ESMC_VMK communication is via MPIUNI branch
-      commarray[0][0].comm_type = VM_COMM_TYPE_MPIUNI;
-      commarray[0][0].shmp = new shared_mp;
-      sync_reset(&(commarray[0][0].shmp->shms));
+  // for mpiuni the default communication is via MPIUNI branch
+  sendChannel[0].comm_type = VM_COMM_TYPE_MPIUNI;
+  sendChannel[0].shmp = new shared_mp;
+  sync_reset(&(sendChannel[0].shmp->shms));
+  recvChannel[0] = sendChannel[0];
 #else
-      // normally for the default ESMC_VMK all communication is via MPI-1
-      commarray[i][j].comm_type = VM_COMM_TYPE_MPI1;
-#endif      
-    }
+  for (int i=0; i<npets; i++){
+    // normally by default all communication is via MPI-1
+    sendChannel[i].comm_type = VM_COMM_TYPE_MPI1;
+    recvChannel[i].comm_type = VM_COMM_TYPE_MPI1;
   }
+#endif
   // setup the IntraProcessSharedMemoryAllocation List
   ipshmTop = new ipshmAlloc*;
   *ipshmTop = NULL;      // reset
@@ -397,11 +396,10 @@ void VMK::finalize(int finalizeMpi){
   pthread_mutex_destroy(pth_mutex2);
   delete pth_mutex2;
 #ifdef ESMF_MPIUNI
-  delete commarray[0][0].shmp;
+  delete sendChannel[0].shmp;
 #endif
-  for (int i=0; i<npets; i++)
-    delete [] commarray[i];
-  delete [] commarray;
+  delete [] sendChannel;
+  delete [] recvChannel;  
   while (*ipshmTop != NULL){
     if ((*ipshmTop)->auxCounter > 0)
       free((*ipshmTop)->allocation);
@@ -479,7 +477,8 @@ struct vmk_spawn_arg{
   pthread_mutex_t *pth_mutex2;
   pthread_mutex_t *pth_mutex;
   int *pth_finish_count;
-  comminfo **commarray;
+  comminfo *sendChannel;
+  comminfo *recvChannel;
   ipshmAlloc **ipshmTop;
   pthread_mutex_t *ipshmMutex;
   pthread_mutex_t *ipSetupMutex;
@@ -502,7 +501,6 @@ void VMK::construct(void *ssarg){
   pthread_mutex_t *pth_mutex2 = sarg->pth_mutex2;
   pthread_mutex_t *pth_mutex = sarg->pth_mutex;
   int *pth_finish_count = sarg->pth_finish_count;
-  comminfo **commarray = sarg->commarray;
   int pref_intra_ssi = sarg->pref_intra_ssi;
   int nothreadsflag = sarg->nothreadsflag;
   // fill an already existing VMK object with info
@@ -532,7 +530,8 @@ void VMK::construct(void *ssarg){
     this->mpi_mutex_flag = 1; // must use muteces around mpi comms
   else
     this->mpi_mutex_flag = 0; // don't need to use muteces around mpi comms
-  this->commarray = commarray;
+  sendChannel = sarg->sendChannel;
+  recvChannel = sarg->recvChannel;
   // setup the IntraProcessSharedMemoryAllocation List
   ipshmTop = sarg->ipshmTop;
   ipshmLocalTop = *ipshmTop;
@@ -562,7 +561,7 @@ void VMK::construct(void *ssarg){
           int shm_fd;
           int size = sizeof(pipc_mp);
           void *shm_segment;
-          // first: [mypet][i]
+          // first: sendChannel
           sprintf(shm_file, "/tmp/shm_channel_%d_%d", mypet, i);
           // get a descriptor for this shared memory resource
           // which ever PET comes first will create this resource, the other
@@ -581,10 +580,10 @@ void VMK::construct(void *ssarg){
             strcpy(((pipc_mp *)shm_segment)->shm_name, shm_file);
             sync_reset(&((pipc_mp *)shm_segment)->shms);
           }
-          // enter the address into the commarray
-          commarray[mypet][i].pipcmp = (pipc_mp *)shm_segment;
-          commarray[mypet][i].comm_type = VM_COMM_TYPE_POSIXIPC;
-          // then: [i][sarg->mypet]
+          // enter the address into the sendChannel
+          sendChannel[i].pipcmp = (pipc_mp *)shm_segment;
+          sendChannel[i].comm_type = VM_COMM_TYPE_POSIXIPC;
+          // then: recvChannel
           sprintf(shm_file, "/tmp/shm_channel_%d_%d", i, mypet);
           // get a descriptor for this shared memory resource
           // which ever PET comes first will create this resource, the other
@@ -603,9 +602,9 @@ void VMK::construct(void *ssarg){
             strcpy(((pipc_mp *)shm_segment)->shm_name, shm_file);
             sync_reset(&((pipc_mp *)shm_segment)->shms);
           }
-          // enter the address into the commarray
-          commarray[i][mypet].pipcmp = (pipc_mp *)shm_segment;
-          commarray[i][mypet].comm_type = VM_COMM_TYPE_POSIXIPC;
+          // enter the address into the recvChannel
+          recvChannel[i].pipcmp = (pipc_mp *)shm_segment;
+          recvChannel[i].comm_type = VM_COMM_TYPE_POSIXIPC;
         }
       }
     }
@@ -670,43 +669,73 @@ void VMK::destruct(){
     delete ipshmMutex;
     pthread_mutex_destroy(ipSetupMutex);
     delete ipSetupMutex;
-    // - free commarray
-    for (int pet1=0; pet1<npets; pet1++){
-      for (int pet2=0; pet2<npets; pet2++){
-        if(commarray[pet1][pet2].comm_type==VM_COMM_TYPE_SHMHACK
-          ||commarray[pet1][pet2].comm_type==VM_COMM_TYPE_PTHREAD
-          ||commarray[pet1][pet2].comm_type==VM_COMM_TYPE_MPIUNI){
+    for (int i=0; i<npets; i++){
+      if(sendChannel[i].comm_type==VM_COMM_TYPE_SHMHACK
+        ||sendChannel[i].comm_type==VM_COMM_TYPE_PTHREAD
+        ||sendChannel[i].comm_type==VM_COMM_TYPE_MPIUNI){
+        // intra-process shared memory structure to be deleted
+        shared_mp *shmp=sendChannel[i].shmp;
+        if(sendChannel[i].comm_type==VM_COMM_TYPE_PTHREAD){
+          pthread_mutex_destroy(&(shmp->mutex1));
+          pthread_cond_destroy(&(shmp->cond1));
+          pthread_mutex_destroy(&(shmp->mutex2));
+          pthread_cond_destroy(&(shmp->cond2));
+        }
+#if (VERBOSITY > 9)
+        printf("deleting shmp=%p for sendChannel[%d], mypet=%d\n", 
+          shmp, i, mypet);
+#endif          
+        delete shmp;
+      }else if (sendChannel[i].comm_type==VM_COMM_TYPE_POSIXIPC){
+#ifdef ESMF_NO_POSIXIPC
+#else
+        pipc_mp *pipcmp=sendChannel[i].pipcmp;
+        char shm_name[80];
+        strcpy(shm_name, pipcmp->shm_name);
+        munmap((void *)pipcmp, sizeof(pipc_mp));
+        shm_unlink(shm_name);
+#if (VERBOSITY > 9)
+        printf("deleting pipcmp=%p (%s) for sendChannel[%d], mypet=%d\n", 
+          pipcmp, shm_name, i, mypet);
+#endif
+#endif
+      }
+      if (i != mypet){
+        // diagonal element is handled by sendChannel
+        if(recvChannel[i].comm_type==VM_COMM_TYPE_SHMHACK
+          ||recvChannel[i].comm_type==VM_COMM_TYPE_PTHREAD
+          ||recvChannel[i].comm_type==VM_COMM_TYPE_MPIUNI){
           // intra-process shared memory structure to be deleted
-          shared_mp *shmp=commarray[pet1][pet2].shmp;
-          if(commarray[pet1][pet2].comm_type==VM_COMM_TYPE_PTHREAD){                         pthread_mutex_destroy(&(shmp->mutex1));
+          shared_mp *shmp=recvChannel[i].shmp;
+          if(recvChannel[i].comm_type==VM_COMM_TYPE_PTHREAD){
+            pthread_mutex_destroy(&(shmp->mutex1));
             pthread_cond_destroy(&(shmp->cond1));
             pthread_mutex_destroy(&(shmp->mutex2));
             pthread_cond_destroy(&(shmp->cond2));
           }
 #if (VERBOSITY > 9)
-          printf("deleting shmp=%p for pet1=%d, pet2=%d, mypet=%d\n", 
-            shmp, pet1, pet2, mypet);
+          printf("deleting shmp=%p for recvChannel[%d], mypet=%d\n", 
+            shmp, i, mypet);
 #endif          
           delete shmp;
-        }else if (commarray[pet1][pet2].comm_type==VM_COMM_TYPE_POSIXIPC){
+        }else if (recvChannel[i].comm_type==VM_COMM_TYPE_POSIXIPC){
 #ifdef ESMF_NO_POSIXIPC
 #else
-          // this means that mypet is either pet1 or pet2
-          pipc_mp *pipcmp=commarray[pet1][pet2].pipcmp;
+          pipc_mp *pipcmp=recvChannel[i].pipcmp;
           char shm_name[80];
           strcpy(shm_name, pipcmp->shm_name);
           munmap((void *)pipcmp, sizeof(pipc_mp));
           shm_unlink(shm_name);
 #if (VERBOSITY > 9)
-          printf("deleting pipcmp=%p (%s) for pet1=%d, pet2=%d, mypet=%d\n", 
-            pipcmp, shm_name, pet1, pet2, mypet);
+          printf("deleting pipcmp=%p (%s) for recvChannel[%d], mypet=%d\n", 
+            pipcmp, shm_name, i, mypet);
 #endif
 #endif
         }
       }
-      delete [] commarray[pet1];
-    }
-    delete [] commarray;
+    }    
+    delete [] sendChannel;
+    delete [] recvChannel;
   }
   delete [] lpid;
   delete [] pid;
@@ -1044,12 +1073,11 @@ void *VMK::startup(class VMKPlan *vmp,
   int *new_ncontributors = new int[new_npets];
   int **new_cid = new int*[new_npets];
   contrib_id **new_contributors = new contrib_id*[new_npets];
-  // important note for the new_commarray:
-  // every PET that enters startup() (which are all of the current VMK)
-  // will get a new_commarray allocated. However, only those PETs that actually
-  // spawn will really use it and free it during destruct(). The 
-  // superficial allocations need to be dealt with in startup() still to
-  // prevent memory leaks.
+  
+  // A new_commarray will be allocated for every PET that enters startup() 
+  // (which are all of the PETs in the current, i.e. parent VMK).
+  // The new_commarray is a temporary data structure that will be deleted
+  // for every PET at the end of this routine.
   comminfo **new_commarray = new comminfo*[new_npets];
   for (int i=0; i<new_npets; i++){
     new_commarray[i] = new comminfo[new_npets];
@@ -1058,6 +1086,7 @@ void *VMK::startup(class VMKPlan *vmp,
       new_commarray[i][j].comm_type = VM_COMM_TYPE_MPI1;
     }
   }
+  bool new_commarray_delete_flag = true;  // default every PET must delete
   // local variables, unallocated yet...
   pthread_mutex_t *new_pth_mutex2;
   pthread_mutex_t *new_pth_mutex;
@@ -1429,6 +1458,7 @@ void *VMK::startup(class VMKPlan *vmp,
           for (int ii=0; ii<new_npets; ii++)
             delete [] new_commarray[ii];
           delete [] new_commarray;
+          new_commarray_delete_flag = false;  // mypet doesn't delete again
           // now this PET is ready to receive the pointers for shared variables
           vmk_recv(&new_pth_mutex2, sizeof(pthread_mutex_t*), pet_src);
           vmk_recv(&new_pth_mutex, sizeof(pthread_mutex_t*), pet_src);
@@ -1478,7 +1508,13 @@ void *VMK::startup(class VMKPlan *vmp,
     sarg[i].pth_mutex2 = new_pth_mutex2;
     sarg[i].pth_mutex = new_pth_mutex;
     sarg[i].pth_finish_count = new_pth_finish_count;
-    sarg[i].commarray = new_commarray;
+    sarg[i].sendChannel = new comminfo[new_npets];
+    sarg[i].recvChannel = new comminfo[new_npets];
+    for (int j=0; j<new_npets; j++){
+      int new_mypet = sarg[i].mypet;
+      sarg[i].sendChannel[j] = new_commarray[new_mypet][j];
+      sarg[i].recvChannel[j] = new_commarray[j][new_mypet];
+    }
     sarg[i].ipshmTop = new_ipshmTop;
     sarg[i].ipshmMutex = new_ipshmMutex;
     sarg[i].ipSetupMutex = new_ipSetupMutex;
@@ -1521,8 +1557,8 @@ void *VMK::startup(class VMKPlan *vmp,
   for (int i=0; i<num_diff_pids; i++)
     delete [] pet_list[i];
   delete [] pet_list;
-  if (vmp->spawnflag[mypet]==0){
-    // mypet does not spawn an thus new_commarray needs to be deleted here
+  if (new_commarray_delete_flag){
+    // mypet must deallocate its new_commarray
     for (int ii=0; ii<new_npets; ii++)
       delete [] new_commarray[ii];
     delete [] new_commarray;
@@ -1671,9 +1707,8 @@ void VMK::print()const{
   printf("vm located at: %p\n", this);
   printf("npets = %d, mypet=%d\n", npets, mypet);
   printf("  pth_mutex =\t\t %p\n"
-         "  pth_finish_count =\t %p\n"
-         "  commarray =\t\t %p\n", 
-    pth_mutex, pth_finish_count, commarray);
+         "  pth_finish_count =\t %p\n",
+    pth_mutex, pth_finish_count);
   int size, rank;
   MPI_Group_size(mpi_g, &size);
   printf("MPI_Group_size: %d\n", size);
@@ -2566,7 +2601,7 @@ int VMK::vmk_send(const void *message, int size, int dest, int tag){
   int i;
   char *mess;
   // switch into the appropriate implementation
-  switch(commarray[mypet][dest].comm_type){
+  switch(sendChannel[dest].comm_type){
   case VM_COMM_TYPE_MPI1:
     // MPI-1 implementation
     void *messageC; // for MPI C interface convert (const void *) -> (void *)
@@ -2581,7 +2616,7 @@ int VMK::vmk_send(const void *message, int size, int dest, int tag){
     break;
   case VM_COMM_TYPE_PTHREAD:
     // Pthread implementation
-    shmp = commarray[mypet][dest].shmp;  // shared memory mp channel
+    shmp = sendChannel[dest].shmp;  // shared memory mp channel
     shmp->ptr_src = message;                        // set the source pointer
     // synchronize with vmk_recv()
     pthread_mutex_lock(&(shmp->mutex1));
@@ -2616,7 +2651,7 @@ int VMK::vmk_send(const void *message, int size, int dest, int tag){
     break;
   case VM_COMM_TYPE_SHMHACK:
     // Shared memory hack sync with spin-lock
-    shmp = commarray[mypet][dest].shmp;  // shared memory mp channel
+    shmp = sendChannel[dest].shmp;  // shared memory mp channel
     if (size<=SHARED_BUFFER){
       // use buffer
       pdest = shmp->buffer;
@@ -2643,7 +2678,7 @@ int VMK::vmk_send(const void *message, int size, int dest, int tag){
     break;
   case VM_COMM_TYPE_POSIXIPC:
     // Shared memory hack sync with spin-lock
-    pipcmp = commarray[mypet][dest].pipcmp;  // shared memory mp channel
+    pipcmp = sendChannel[dest].pipcmp;  // shared memory mp channel
     i=0;
     mess = (char *)message;
     while (size>PIPC_BUFFER){
@@ -2669,7 +2704,7 @@ int VMK::vmk_send(const void *message, int size, int dest, int tag){
     break;
   case VM_COMM_TYPE_MPIUNI:
     // Shared memory hack for mpiuni
-    shmp = commarray[mypet][dest].shmp;  // shared memory mp channel
+    shmp = sendChannel[dest].shmp;  // shared memory mp channel
     if (size<=SHARED_BUFFER){
       // buffer is sufficient
       pdest = shmp->buffer;
@@ -2713,7 +2748,7 @@ int VMK::vmk_send(const void *message, int size, int dest,
     commqueueitem_link(*commhandle);
   }
   // switch into the appropriate implementation
-  switch(commarray[mypet][dest].comm_type){
+  switch(sendChannel[dest].comm_type){
   case VM_COMM_TYPE_MPI1:
     (*commhandle)->nelements=1;
     (*commhandle)->type=1;
@@ -2751,7 +2786,7 @@ int VMK::vmk_send(const void *message, int size, int dest,
     // TODO: To remove the single message per channel limitation there will need
     // TODO: to be one shared_mp element per request.
     (*commhandle)->type=-1; // indicate that this is a dummy commhandle
-    shmp = commarray[mypet][dest].shmp;  // shared memory mp channel
+    shmp = sendChannel[dest].shmp;  // shared memory mp channel
     if (size<=SHARED_BUFFER){
       // buffer is sufficient
       pdest = shmp->buffer;
@@ -2794,7 +2829,7 @@ int VMK::vmk_recv(void *message, int size, int source, int tag,
     comm_type = VM_COMM_TYPE_MPI1;
   }else{
     // use the predefined comm_type between source and destination (mypet)
-    comm_type = commarray[source][mypet].comm_type;
+    comm_type = recvChannel[source].comm_type;
   }
   // set comm_type in status
   if (status)
@@ -2833,7 +2868,7 @@ int VMK::vmk_recv(void *message, int size, int source, int tag,
     break;
   case VM_COMM_TYPE_PTHREAD:
     // Pthread implementation
-    shmp = commarray[source][mypet].shmp;   // shared memory mp channel
+    shmp = recvChannel[source].shmp;   // shared memory mp channel
     shmp->ptr_dest = message;               // set the destination pointer
     // synchronize with vmk_send()
     pthread_mutex_lock(&(shmp->mutex1));
@@ -2869,7 +2904,7 @@ int VMK::vmk_recv(void *message, int size, int source, int tag,
     break;
   case VM_COMM_TYPE_SHMHACK:
     // Shared memory hack sync with spin-lock
-    shmp = commarray[source][mypet].shmp;   // shared memory mp channel
+    shmp = recvChannel[source].shmp;   // shared memory mp channel
     if (size<=SHARED_BUFFER){
       // use buffer
       psrc = shmp->buffer;
@@ -2897,7 +2932,7 @@ int VMK::vmk_recv(void *message, int size, int source, int tag,
     break;
   case VM_COMM_TYPE_POSIXIPC:
     // Shared memory hack sync with spin-lock
-    pipcmp = commarray[source][mypet].pipcmp;   // shared memory mp channel
+    pipcmp = recvChannel[source].pipcmp;   // shared memory mp channel
     i=0;
     mess = (char *)message;
     while (size>PIPC_BUFFER){
@@ -2923,7 +2958,7 @@ int VMK::vmk_recv(void *message, int size, int source, int tag,
     break;
   case VM_COMM_TYPE_MPIUNI:
     // Shared memory hack for mpiuni
-    shmp = commarray[source][mypet].shmp;   // shared memory mp channel
+    shmp = recvChannel[source].shmp;   // shared memory mp channel
     if (size<=SHARED_BUFFER){
       // buffer is sufficient
       psrc = shmp->buffer;
@@ -2972,7 +3007,7 @@ int VMK::vmk_recv(void *message, int size, int source,
     comm_type = VM_COMM_TYPE_MPI1;
   }else{
     // use the predefined comm_type between source and destination (mypet)
-    comm_type = commarray[source][mypet].comm_type;
+    comm_type = recvChannel[source].comm_type;
   }
   // switch into the appropriate implementation
   switch(comm_type){
@@ -3015,7 +3050,7 @@ int VMK::vmk_recv(void *message, int size, int source,
     // TODO: To remove the single message per channel limitation there will need
     // TODO: to be one shared_mp element per request.
     (*commhandle)->type=-1; // indicate that this is a dummy commhandle
-    shmp = commarray[source][mypet].shmp;   // shared memory mp channel
+    shmp = recvChannel[source].shmp;   // shared memory mp channel
     if (size<=SHARED_BUFFER){
       // buffer is sufficient
       psrc = shmp->buffer;
@@ -3084,7 +3119,7 @@ int VMK::vmk_barrier(){
     for (int i=0; i<npets; i++)
       if (i!=mypet && pid[i]==myp){
         // pet "i" is another thread under same PID
-        shared_mp *shmp = commarray[mypet][i].shmp;
+        shared_mp *shmp = sendChannel[i].shmp;
         sync_a_flip(&shmp->shms);
       }
     // now all threads are "flip"-synced under their master thread
@@ -3094,7 +3129,7 @@ int VMK::vmk_barrier(){
     for (int i=0; i<npets; i++)
       if (i!=mypet && pid[i]==myp){
         // pet "i" is another thread under same PID
-        shared_mp *shmp = commarray[mypet][i].shmp;
+        shared_mp *shmp = sendChannel[i].shmp;
         sync_a_flop(&shmp->shms);
       }
   }else{
@@ -3103,7 +3138,7 @@ int VMK::vmk_barrier(){
     for (i=0; i<npets; i++)
       if (pid[i]==myp && tid[i]==0) break;
     // now PET "i" is the master thread for this PID
-    shared_mp *shmp = commarray[i][mypet].shmp;
+    shared_mp *shmp = recvChannel[i].shmp;
     sync_b_flip(&shmp->shms);
     // now all threads are "flip"-synced under their master thread
     // master will sync against all other masters using MPI-1 and then do flop
@@ -3195,13 +3230,13 @@ int VMK::vmk_threadbarrier(){
       for (int i=0; i<npets; i++)
         if (i!=mypet && pid[i]==myp){
           // pet "i" is another thread under same PID
-          shared_mp *shmp = commarray[mypet][i].shmp;
+          shared_mp *shmp = sendChannel[i].shmp;
           sync_a_flip(&shmp->shms);
         }
       for (int i=0; i<npets; i++)
         if (i!=mypet && pid[i]==myp){
           // pet "i" is another thread under same PID
-          shared_mp *shmp = commarray[mypet][i].shmp;
+          shared_mp *shmp = sendChannel[i].shmp;
           sync_a_flop(&shmp->shms);
         }
     }else{
@@ -3211,7 +3246,7 @@ int VMK::vmk_threadbarrier(){
       for (i=0; i<npets; i++)
         if (pid[i]==myp && tid[i]==0) break;
       // now PET "i" is the master thread for this PID
-      shared_mp *shmp = commarray[i][mypet].shmp;
+      shared_mp *shmp = recvChannel[i].shmp;
       sync_b_flip(&shmp->shms);
       // now all threads are "flip"-synced under their master thread
       sync_b_flop(&shmp->shms);

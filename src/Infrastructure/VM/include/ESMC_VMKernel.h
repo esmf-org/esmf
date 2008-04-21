@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.53.2.3 2008/04/14 23:38:44 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.53.2.4 2008/04/21 15:41:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -180,8 +180,9 @@ class VMK{
     int *pth_finish_count;
     // Mutex flag used to indicate that this PET must use muteces for MPI comms
     int mpi_mutex_flag;
-    // Communications array
-    comminfo **commarray;   // this array is shared between pets of same pid
+    // Communication channels
+    comminfo *sendChannel;
+    comminfo *recvChannel;
     // IntraProcessSharedMemoryAllocation List
     ipshmAlloc **ipshmTop;      // top of shared alloc list (shared)
     ipshmAlloc *ipshmLocalTop;  // local top of shared alloc list
@@ -194,7 +195,7 @@ class VMK{
     // static info of physical machine
     static int ncores; // total number of cores in the physical machine
     static int *cpuid; // cpuid associated with certain core (multi-core cpus)
-    static int *ssiid; // single system inmage id to which this core belongs
+    static int *ssiid; // single system image id to which this core belongs
   public:
     // Declaration of static data members - Definitions are in the header of
     // source file ESMF_VMKernel.C
