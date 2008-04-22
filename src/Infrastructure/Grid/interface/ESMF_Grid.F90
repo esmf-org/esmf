@@ -154,7 +154,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47.2.14 2008/04/21 22:42:19 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47.2.15 2008/04/22 16:46:36 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -2837,6 +2837,8 @@ end interface
     integer, pointer     :: gridEdgeLWidthLocal(:)
     integer, pointer     :: gridEdgeUWidthLocal(:)
     integer, pointer     :: gridAlignLocal(:)
+    integer, pointer     :: gridEdgeLWidthDG(:)
+    integer, pointer     :: gridEdgeUWidthDG(:)
     integer              :: deCount
     integer              :: d,ud,i1,i2,i3,k
     type(ESMF_GridConn)  :: connDim1Local(2)
@@ -3350,7 +3352,6 @@ end interface
 
 
    ! Set default for decomp flag based on gridEdgeWidths -----------------------------------
-   ! NOTE: This is a temporary fix until we have something better implemented in distGrid
 
     ! Set default for decompFlag 
     allocate(decompFlagLocal(dimCount), stat=localrc)
@@ -3360,16 +3361,7 @@ end interface
     if (present(decompFlag)) then
         decompFlagLocal(:)=decompFlag(:)
     else
-      do i=1, dimCount
-         ! set flag based on where the padding is
-         if (gridEdgeLWidthLocal(i) > gridEdgeUWidthLocal(i)) then
-            decompFlagLocal(i)=ESMF_DECOMP_RESTFIRST
-         else if (gridEdgeLWidthLocal(i) < gridEdgeUWidthLocal(i)) then
-            decompFlagLocal(i)=ESMF_DECOMP_RESTLAST
-         else 
-            decompFlagLocal(i)=ESMF_DECOMP_HOMOGEN
-         endif 
-      enddo
+        decompFlagLocal(:)=ESMF_DECOMP_HOMOGEN
     endif
 
 
@@ -3394,7 +3386,14 @@ end interface
               ESMF_CONTEXT, rc)) return
    allocate(undistUBound(undistDimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating undistUBound", &
-              ESMF_CONTEXT, rc)) return     
+              ESMF_CONTEXT, rc)) return 
+   allocate(gridEdgeLWidthDG(distDimCount), stat=localrc)
+   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeLWidthDG", &
+               ESMF_CONTEXT, rc)) return
+   allocate(gridEdgeUWidthDG(distDimCount), stat=localrc)
+   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeUWidthDG", &
+               ESMF_CONTEXT, rc)) return
+
 
    ! Fill in minIndex, maxIndex, distgridToGridMap, lbound, undistUBound
    d=1
@@ -3405,6 +3404,8 @@ end interface
       distgridToGridMap(d)=1      
       regDecompDG(d)=regDecompLocal(1)
       decompFlagDG(d)=decompFlagLocal(1)
+      gridEdgeLWidthDG(d)=gridEdgeLWidthLocal(1)
+      gridEdgeUWidthDG(d)=gridEdgeUWidthLocal(1)
       d=d+1
    else
      undistLBound(ud)=minIndexLocal(1)
@@ -3418,6 +3419,8 @@ end interface
       distgridToGridMap(d)=2      
       regDecompDG(d)=regDecompLocal(2)
       decompFlagDG(d)=decompFlagLocal(2)
+      gridEdgeLWidthDG(d)=gridEdgeLWidthLocal(2)
+      gridEdgeUWidthDG(d)=gridEdgeUWidthLocal(2)
       d=d+1
    else
      undistLBound(ud)=minIndexLocal(2)
@@ -3432,6 +3435,8 @@ end interface
          distgridToGridMap(d)=3      
          regDecompDG(d)=regDecompLocal(3)
          decompFlagDG(d)=decompFlagLocal(3)
+         gridEdgeLWidthDG(d)=gridEdgeLWidthLocal(3)
+         gridEdgeUWidthDG(d)=gridEdgeUWidthLocal(3)
          d=d+1
        else
          undistLBound(ud)=minIndexLocal(3)
@@ -3503,7 +3508,10 @@ end interface
    ! Create DistGrid --------------------------------------------------------------
     distgrid=ESMF_DistGridCreate(minIndex=minIndexDG, maxIndex=maxIndexDG, &
               regDecomp=regDecompDG, decompFlag=decompFlagDG, delayout=delayout, &
-              indexflag=indexflag, rc=localrc)   
+              indexflag=indexflag, &
+              regDecompFirstExtra=gridEdgeLWidthDG, &
+              regDecompLastExtra=gridEdgeUWidthDG, &
+              rc=localrc)   
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3604,6 +3612,8 @@ end interface
     deallocate(undistUBound)
     deallocate(gridEdgeLWidthLocal)
     deallocate(gridEdgeUWidthLocal)
+    deallocate(gridEdgeLWidthDG)
+    deallocate(gridEdgeUWidthDG)
     deallocate(gridAlignLocal)
 
  
@@ -8176,6 +8186,8 @@ endif
     integer, pointer     :: gridEdgeLWidthLocal(:)
     integer, pointer     :: gridEdgeUWidthLocal(:)
     integer, pointer     :: gridAlignLocal(:)
+    integer, pointer     :: gridEdgeLWidthDG(:)
+    integer, pointer     :: gridEdgeUWidthDG(:)
     integer              :: deCount
     integer              :: d,ud,i1,i2,i3,k
     type(ESMF_GridConn)  :: connDim1Local(2)
@@ -8688,7 +8700,6 @@ endif
     enddo
 
    ! Set default for decomp flag based on gridEdgeWidths -----------------------------------
-   ! NOTE: This is a temporary fix until we have something better implemented in distGrid
 
     ! Set default for decompFlag 
     allocate(decompFlagLocal(dimCount), stat=localrc)
@@ -8698,16 +8709,7 @@ endif
     if (present(decompFlag)) then
         decompFlagLocal(:)=decompFlag(:)
     else
-      do i=1, dimCount
-         ! set flag based on where the padding is
-         if (gridEdgeLWidthLocal(i) > gridEdgeUWidthLocal(i)) then
-            decompFlagLocal(i)=ESMF_DECOMP_RESTFIRST
-         else if (gridEdgeLWidthLocal(i) < gridEdgeUWidthLocal(i)) then
-            decompFlagLocal(i)=ESMF_DECOMP_RESTLAST
-         else 
-            decompFlagLocal(i)=ESMF_DECOMP_HOMOGEN
-         endif 
-      enddo
+        decompFlagLocal(:)=ESMF_DECOMP_HOMOGEN
     endif
 
 
@@ -8733,6 +8735,13 @@ endif
    allocate(undistUBound(undistDimCount), stat=localrc)
    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating undistUBound", &
               ESMF_CONTEXT, rc)) return     
+   allocate(gridEdgeLWidthDG(distDimCount), stat=localrc)
+   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeLWidthDG", &
+               ESMF_CONTEXT, rc)) return
+   allocate(gridEdgeUWidthDG(distDimCount), stat=localrc)
+   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeUWidthDG", &
+               ESMF_CONTEXT, rc)) return
+
 
    ! Fill in minIndex, maxIndex, distgridToGridMap, lbound, undistUBound
    d=1
@@ -8743,6 +8752,8 @@ endif
       distgridToGridMap(d)=1      
       regDecompDG(d)=regDecompLocal(1)
       decompFlagDG(d)=decompFlagLocal(1)
+      gridEdgeLWidthDG(d)=gridEdgeLWidthLocal(1)
+      gridEdgeUWidthDG(d)=gridEdgeUWidthLocal(1)
       d=d+1
    else
      undistLBound(ud)=minIndexLocal(1)
@@ -8756,6 +8767,8 @@ endif
       distgridToGridMap(d)=2      
       regDecompDG(d)=regDecompLocal(2)
       decompFlagDG(d)=decompFlagLocal(2)
+      gridEdgeLWidthDG(d)=gridEdgeLWidthLocal(2)
+      gridEdgeUWidthDG(d)=gridEdgeUWidthLocal(2)
       d=d+1
    else
      undistLBound(ud)=minIndexLocal(2)
@@ -8770,6 +8783,8 @@ endif
          distgridToGridMap(d)=3      
          regDecompDG(d)=regDecompLocal(3)
          decompFlagDG(d)=decompFlagLocal(3)
+         gridEdgeLWidthDG(d)=gridEdgeLWidthLocal(3)
+         gridEdgeUWidthDG(d)=gridEdgeUWidthLocal(3)
          d=d+1
        else
          undistLBound(ud)=minIndexLocal(3)
@@ -8841,7 +8856,10 @@ endif
    ! Create DistGrid --------------------------------------------------------------
     distgrid=ESMF_DistGridCreate(minIndex=minIndexDG, maxIndex=maxIndexDG, &
               regDecomp=regDecompDG, decompFlag=decompFlagDG, delayout=delayout, &
-              indexflag=indexflag, rc=localrc)   
+              indexflag=indexflag, &
+              regDecompFirstExtra=gridEdgeLWidthDG, &
+              regDecompLastExtra=gridEdgeUWidthDG, &
+              rc=localrc)   
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -8947,6 +8965,8 @@ endif
     deallocate(undistUBound)
     deallocate(gridEdgeLWidthLocal)
     deallocate(gridEdgeUWidthLocal)
+    deallocate(gridEdgeLWidthDG)
+    deallocate(gridEdgeUWidthDG)
     deallocate(gridAlignLocal)
 
  
