@@ -154,7 +154,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47.2.15 2008/04/22 16:46:36 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47.2.16 2008/04/22 20:07:10 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -4217,7 +4217,7 @@ end subroutine ESMF_GridGet
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{localDE}]
-!          The local DE to get the information for. 
+!          The local DE to get the information for (localDE starts at 0).
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -4324,7 +4324,7 @@ end subroutine ESMF_GridGet
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{localDE}]
-!          The local DE to get the information for. 
+!          The local DE to get the information for (localDE starts at 0).
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -4623,8 +4623,8 @@ end subroutine ESMF_GridGet
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{[localDE]}]
-!          The local DE to get the information for.
+!     \item[{localDE}]
+!          The local DE to get the information for (localDE starts at 0).
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -4927,8 +4927,8 @@ end subroutine ESMF_GridGet
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{[localDE]}]
-!          The local DE to get the information for.
+!     \item[{localDE}]
+!          The local DE to get the information for (localDE starts at 0).
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -5235,8 +5235,8 @@ endif
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{[localDE]}]
-!          The local DE to get the information for. 
+!     \item[{localDE}]
+!          The local DE to get the information for (localDE starts at 0).
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -5541,8 +5541,8 @@ endif
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{[localDE]}]
-!          The local DE to get the information for. 
+!     \item[{localDE}]
+!          The local DE to get the information for (localDE starts at 0).
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -5847,8 +5847,8 @@ endif
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{[localDE]}]
-!          The local DE to get the information for. 
+!     \item[{localDE}]
+!          The local DE to get the information for (localDE starts at 0).
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -6154,7 +6154,7 @@ endif
 !\item[{grid}]
 !    Grid to get the information from.
 !\item[{localDE}]
-!     The local DE from which to get the information. 
+!          The local DE to get the information for (localDE starts at 0).
 !\item[{coordDim}]
 !     The coordinate dimension to get the information for (e.g. 1=x). 
 !\item[{staggerloc}]
@@ -8965,9 +8965,9 @@ endif
     deallocate(undistUBound)
     deallocate(gridEdgeLWidthLocal)
     deallocate(gridEdgeUWidthLocal)
+    deallocate(gridAlignLocal)
     deallocate(gridEdgeLWidthDG)
     deallocate(gridEdgeUWidthDG)
-    deallocate(gridAlignLocal)
 
  
     ! Return successfully
