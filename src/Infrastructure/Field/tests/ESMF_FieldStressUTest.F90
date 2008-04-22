@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldStressUTest.F90,v 1.1.2.2 2008/04/21 15:57:21 theurich Exp $
+! $Id: ESMF_FieldStressUTest.F90,v 1.1.2.3 2008/04/22 17:47:18 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -138,11 +138,11 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_GridDestroy(grid, rc=localrc)
+            call ESMF_ArrayDestroy(array, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_ArrayDestroy(array, rc=localrc)
+            call ESMF_GridDestroy(grid, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
