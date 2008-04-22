@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1.2.1 2008/04/02 20:07:16 cdeluca Exp $ 
+# $Id: makefile,v 1.1.2.2 2008/04/22 23:47:33 theurich Exp $ 
 
 ALL: build_here
 
@@ -13,7 +13,6 @@ include $(ESMF_DIR)/makefile
 # directly below this directory, and have either library,
 # example/test code, or documents which need to be generated.
 DIRS	  = src interface doc tests examples
-# TODO:FIELDINTEGRATION Restore FieldBundle examples.
 
 CLEANDIRS   =
 CLEANFILES  =
