@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.217 2008/04/17 18:58:22 theurich Exp $
+#  $Id: common.mk,v 1.218 2008/04/22 18:01:21 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -427,11 +427,12 @@ DO_L2H		= $(ESMF_TEMPLATES)/scripts/do_l2h
 
 # test script variables
 UNIT_TESTS_CONFIG   = $(ESMF_TESTDIR)/unit_tests.config
+SYS_TESTS_CONFIG    = $(ESMF_TESTDIR)/sys_tests.config
 ESMF_TESTSCRIPTS    = $(ESMF_DIR)/scripts/test_scripts
 DO_UT_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ut_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
 DO_EX_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ex_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
-DO_ST_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_st_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) -m $(ESMF_TESTMPMD)
-DO_SUM_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_summary.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) -b $(ESMF_BOPT) -m $(ESMF_TESTMPMD)
+DO_ST_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_st_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) 
+DO_SUM_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_summary.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) -b $(ESMF_BOPT) 
 DO_UTC_RESULTS	    = $(ESMF_UTCSCRIPTS)/do_utc_results.pl -h $(ESMF_UTCSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) -e $(ESMF_MAX_PROCS)
 
 # C specific variables
@@ -1222,6 +1223,7 @@ system_tests: chkdir_tests
 	  $(MAKE) err ; \
           exit ; \
 	fi ; \
+	$(MAKE) MULTI="Multiprocessor" config_sys_tests ; \
 	$(MAKE) ACTION=tree_system_tests tree ; \
 	$(MAKE) check_system_tests
 
@@ -1241,6 +1243,7 @@ system_tests_uni: chkdir_tests
 	   fi; \
 	   echo current working directory is now `pwd` ; \
 	fi ; \
+	$(MAKE) MULTI="Uniprocessor" config_sys_tests
 	$(MAKE) ACTION=tree_system_tests_uni tree ; \
 	$(MAKE) check_system_tests
 
@@ -1249,7 +1252,7 @@ tree_system_tests_uni: tree_build_system_tests tree_run_system_tests_uni
 #
 # build_system_tests
 #
-build_system_tests: reqfile_libesmf reqdir_lib chkdir_tests
+build_system_tests: reqfile_libesmf reqdir_lib chkdir_tests 
 	@if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR) ; fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
@@ -1260,6 +1263,7 @@ build_system_tests: reqfile_libesmf reqdir_lib chkdir_tests
 	   fi; \
 	   echo current working directory is now `pwd` ; \
         fi ; \
+	$(MAKE) config_sys_tests
 	$(MAKE) ACTION=tree_build_system_tests tree ; \
 	echo "ESMF system tests built successfully."
 
@@ -1323,7 +1327,7 @@ MPMDCLEANUP:
 #
 # run_system_tests
 #
-run_system_tests:  reqdir_tests
+run_system_tests:  reqdir_tests update_mpmd_flag
 	@if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR) ; fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
@@ -1339,8 +1343,12 @@ run_system_tests:  reqdir_tests
 	  echo "run run_system_tests_uni instead." ; \
 	  echo "" ; \
 	  $(MAKE) err ; \
-          exit ; \
+          exit; \
 	fi; \
+        if [ -f $(SYS_TESTS_CONFIG) ] ; then \
+           $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Multiprocessor/' $(SYS_TESTS_CONFIG) > $(SYS_TESTS_CONFIG).temp; \
+           $(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG); \
+        fi; \
 	$(MAKE) ACTION=tree_run_system_tests tree ; \
 	$(MAKE) check_system_tests
 
@@ -1349,8 +1357,12 @@ tree_run_system_tests: $(SYSTEM_TESTS_RUN)
 #
 # run_system_tests_uni
 #
-run_system_tests_uni:  reqdir_tests
-	@if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR) ; fi; \
+run_system_tests_uni:  reqdir_tests update_mpmd_flag
+	@if [ -f $(SYS_TESTS_CONFIG) ] ; then \
+           $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Uniprocessor/' $(SYS_TESTS_CONFIG) > $(SYS_TESTS_CONFIG).temp; \
+           $(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG); \
+        fi; \
+	if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR) ; fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
 	       cd $(SYSTEM_TEST); \
@@ -1364,6 +1376,45 @@ run_system_tests_uni:  reqdir_tests
 	$(MAKE) check_system_tests
 
 tree_run_system_tests_uni: $(SYSTEM_TESTS_RUN_UNI)
+
+#
+# echo into a file how the tests were last built and run, so when the perl
+# scripts run to check the results it can compute the number of messages that
+# should be found.  it needs to know mpmd vs non-mpmd to know how many total
+# tests we expected to execute; it needs to know multi vs uni so it knows
+# how many messages per test are generated.
+#
+config_sys_tests:
+	@echo "# This file used by test scripts, please do not delete." > $(SYS_TESTS_CONFIG)
+ifeq ($(ESMF_TESTMPMD),ON)
+ifeq ($(MULTI),)
+	@echo "Last run Testmpmd ;  Noprocessor" >> $(SYS_TESTS_CONFIG)
+else
+	@echo "Last run Testmpmd ;" $(MULTI) >> $(SYS_TESTS_CONFIG)
+endif
+else
+ifeq ($(MULTI),)
+	@echo "Last run Nontestmpmd ; Noprocessor" >> $(SYS_TESTS_CONFIG)
+else
+	@echo "Last run Nontestmpmd ; " $(MULTI) >> $(SYS_TESTS_CONFIG)
+endif
+endif
+
+
+
+#
+# verify that either there is no SYS_TESTS_CONFIG file, or if one exists that
+# the string testmpmd or Non-testmpmd matches the current setting of the
+# ESMF_TESTMPMD environment variable.  
+#
+update_mpmd_flag:
+ifeq ($(ESMF_TESTMPMD),ON)
+	$(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*estmpmd/ Testmpmd/' $(SYS_TESTS_CONFIG) > $(SYS_TESTS_CONFIG).temp; \
+	$(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG);
+else
+	$(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*estmpmd/ Nontestmpmd/' $(SYS_TESTS_CONFIG) > $(SYS_TESTS_CONFIG).temp; \
+	$(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG);
+endif
 
 #
 # run the systests, either redirecting the stdout from the command line, or
@@ -1382,7 +1433,8 @@ stest:
 # this target deletes only the system test related files from the test subdir
 #
 clean_system_tests:
-	$(ESMF_RM) $(ESMF_TESTDIR)/*STest* 
+	$(ESMF_RM) $(ESMF_TESTDIR)/*STest*  $(SYS_TESTS_CONFIG)
+	$(ESMF_RM) $(ESMF_TESTDIR)/system_tests_results
 	$(MAKE) ACTION=tree_cleanfiles tree
 
 #

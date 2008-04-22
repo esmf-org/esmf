@@ -1,7 +1,7 @@
-! $Id: ESMF_DirectCouplingSTest.F90,v 1.2 2008/02/14 04:14:58 theurich Exp $
+! $Id: ESMF_DirectCouplingSTest.F90,v 1.3 2008/04/22 18:01:39 theurich Exp $
 !
 !-------------------------------------------------------------------------
-!ESMF_SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !-------------------------------------------------------------------------
@@ -155,11 +155,6 @@ program ESMF_DirectCouplingSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  if (petCount .lt. 6) then
-    print *, "This system test needs to run at least 6-way, petCount = ", &
-      petCount
-    goto 10 ! bail out
-  endif
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

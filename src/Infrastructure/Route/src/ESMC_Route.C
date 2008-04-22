@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.166 2008/04/05 03:38:54 cdeluca Exp $
+//$Id: ESMC_Route.C,v 1.167 2008/04/22 18:01:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.166 2008/04/05 03:38:54 cdeluca Exp $";
+               "$Id: ESMC_Route.C,v 1.167 2008/04/22 18:01:36 theurich Exp $";
 //-----------------------------------------------------------------------------
 class permuteLocal {
 public:
@@ -667,14 +667,14 @@ int compare2(const void *item1, const void *item2) {
     int nbytes, maxReqCount;
     int sendXPCount, recvXPCount, maxXPCount;
 #define STACKLIMIT 64
-    vmk_commhandle *stackHandle[STACKLIMIT];
+    ESMCI::VMK::commhandle *stackHandle[STACKLIMIT];
     char *stackSendBuffer[STACKLIMIT];
     char *stackRecvBuffer[STACKLIMIT];
     ESMC_RouteOptions useOptions;
 
     char *sendBuffer, *recvBuffer;
     char **sendBufferList, **recvBufferList;
-    vmk_commhandle **handle;
+    ESMCI::VMK::commhandle **handle;
     
     // uncomment for profiling
     // ESMC_R8 time, starttime;
@@ -769,11 +769,11 @@ int compare2(const void *item1, const void *item2) {
           rc = ESMC_XPacketMakeBuffer(sendXPCount, sendXPList, nbytes, numAddrs,
                                       &sendBuffer, &sendBufferSize);
           // uncomment for profiling
-          // vmk_wtime(&starttime);
+          // wtime(&starttime);
           rc = ESMC_XPacketPackBuffer(sendXPCount, sendXPList, dk, nbytes,
             numAddrs, sendAddr, sendBuffer);
           // uncomment for profiling
-          // vmk_wtime(&time);
+          // wtime(&time);
           // timer1 += time-starttime;
 
           // if my PET is both the sender and receiver, there is no need
@@ -788,22 +788,22 @@ int compare2(const void *item1, const void *item2) {
               numAddrs, &recvBuffer, &recvBufferSize);
 
             // uncomment for profiling
-            // vmk_wtime(&starttime);
-            vm->vmk_sendrecv(sendBuffer, sendBufferSize, theirPET,
+            // wtime(&starttime);
+            vm->sendrecv(sendBuffer, sendBufferSize, theirPET,
                              recvBuffer, recvBufferSize, theirPET);
             // uncomment for profiling
-            // vmk_wtime(&time);
+            // wtime(&time);
             // timer2 += time-starttime;
           }
 
           // whether myPET = theirPET or not, we still have to unpack the 
           // receive buffer to move the data into the final location.
           // uncomment for profiling
-          // vmk_wtime(&starttime);
+          // wtime(&starttime);
           rc = ESMC_XPacketUnpackBuffer(recvXPCount, recvXPList, dk, nbytes, 
                                         numAddrs, recvBuffer, recvAddr);
           // uncomment for profiling
-          // vmk_wtime(&time);
+          // wtime(&time);
           // timer3 += time-starttime;
           // delete the lists of pointers, plus the local packing buffers
           // allocated during this loop.
@@ -900,7 +900,7 @@ int compare2(const void *item1, const void *item2) {
               // to where it belongs.  this could be done with memcpy,
               // unpack, or sendrecv.  we're using the latter for now.
               if (recvContig) {
-                vm->vmk_sendrecv(sendBuffer, sendBufferSize, theirPET,
+                vm->sendrecv(sendBuffer, sendBufferSize, theirPET,
                                  recvBuffer, recvBufferSize, theirPET);
               } else {
                 // otherwise, the send buffer is a copy of what needs to be
@@ -910,7 +910,7 @@ int compare2(const void *item1, const void *item2) {
             } else {
               // myPET != theirPET 
               // now move the data 
-              vm->vmk_sendrecv(sendBuffer, sendBufferSize, theirPET,
+              vm->sendrecv(sendBuffer, sendBufferSize, theirPET,
                                recvBuffer, recvBufferSize, theirPET);
             }
            
@@ -1050,7 +1050,7 @@ int compare2(const void *item1, const void *item2) {
                 // time to exchange data
                 // if myPET == theirPET, sendrecv should use memcpy instead of
                 // calling real communication routines.
-                vm->vmk_sendrecv(sendBuffer, sendBufferSize, theirPET,
+                vm->sendrecv(sendBuffer, sendBufferSize, theirPET,
                                  recvBuffer, recvBufferSize, theirPET);
 
 
@@ -1129,7 +1129,7 @@ int compare2(const void *item1, const void *item2) {
                      // time to exchange data
                      // if myPET == theirPET, sendrecv should use memcpy 
                      // instead of calling real communication routines.
-                     vm->vmk_sendrecv(sendBuffer, sendBufferSize, theirPET,
+                     vm->sendrecv(sendBuffer, sendBufferSize, theirPET,
                                       recvBuffer, recvBufferSize, theirPET);
      
                    }    // l loop
@@ -1246,7 +1246,7 @@ int compare2(const void *item1, const void *item2) {
         sendBufferList = stackSendBuffer;
         recvBufferList = stackRecvBuffer;
       } else {
-        handle = new vmk_commhandle*[maxReqCount];
+        handle = new ESMCI::VMK::commhandle*[maxReqCount];
         sendBufferList = new char*[maxReqCount];
         recvBufferList = new char*[maxReqCount];
       }
@@ -1311,7 +1311,7 @@ int compare2(const void *item1, const void *item2) {
         if (useOptions & ESMC_ROUTE_OPTION_PACK_PET) {
 
           // uncomment for profiling
-          // vmk_wtime(&starttime);
+          // wtime(&starttime);
           // get corresponding send/recv xpackets from the rtable
           if (sendXPCount > 0)
             sendXPList = new ESMC_XPacket*[sendXPCount];
@@ -1337,7 +1337,7 @@ int compare2(const void *item1, const void *item2) {
             numAddrs, sendAddr, sendBufferList[req]);
 
           // uncomment for profiling
-          // vmk_wtime(&time);
+          // wtime(&time);
           // timer1 += time-starttime;
 
           // if my PET is both the sender and receiver, there is no need
@@ -1353,12 +1353,12 @@ int compare2(const void *item1, const void *item2) {
               numAddrs, &recvBufferList[req], &recvBufferSize);
 
             // uncomment for profiling
-            // vmk_wtime(&starttime);
-            vm->vmk_sendrecv(sendBufferList[req], sendBufferSize, theirPET,
+            // wtime(&starttime);
+            vm->sendrecv(sendBufferList[req], sendBufferSize, theirPET,
                              recvBufferList[req], recvBufferSize, theirPET,
                              &handle[req]);
             // uncomment for profiling
-            // vmk_wtime(&time);
+            // wtime(&time);
             // timer2 += time-starttime;
           }
 
@@ -1457,7 +1457,7 @@ int compare2(const void *item1, const void *item2) {
               // to where it belongs.  this could be done with memcpy,
               // unpack, or sendrecv.  we're using the latter for now.
               if (recvContig) {
-                vm->vmk_sendrecv(sendBufferList[req], sendBufferSize, theirPET,
+                vm->sendrecv(sendBufferList[req], sendBufferSize, theirPET,
                                  recvBufferList[req], recvBufferSize, theirPET);
               } else {
                 // otherwise, the send buffer is a copy of what needs to be
@@ -1467,7 +1467,7 @@ int compare2(const void *item1, const void *item2) {
             } else {
               // myPET != theirPET 
               // now move the data 
-              vm->vmk_sendrecv(sendBufferList[req], sendBufferSize, theirPET,
+              vm->sendrecv(sendBufferList[req], sendBufferSize, theirPET,
                                recvBufferList[req], recvBufferSize, theirPET,
                                &handle[req]);
             }
@@ -1596,12 +1596,12 @@ int compare2(const void *item1, const void *item2) {
                 // time to exchange data
                 handle[req] = NULL;
                 if (myPET == theirPET) {
-                  vm->vmk_sendrecv(sendBufferList[req], sendBufferSize, theirPET,
-                                   recvBufferList[req], recvBufferSize, theirPET);
+                  vm->sendrecv(sendBufferList[req], sendBufferSize, theirPET,
+                               recvBufferList[req], recvBufferSize, theirPET);
                 } else {
-                  vm->vmk_sendrecv(sendBufferList[req], sendBufferSize, theirPET,
-                                   recvBufferList[req], recvBufferSize, theirPET,
-                                   &handle[req]);
+                  vm->sendrecv(sendBufferList[req], sendBufferSize, theirPET,
+                               recvBufferList[req], recvBufferSize, theirPET,
+                               &handle[req]);
                 }
                 req ++;
 
@@ -1678,7 +1678,7 @@ int compare2(const void *item1, const void *item2) {
         // exchanged between PETs is loaded up into single buffers for exchange
         if (useOptions & ESMC_ROUTE_OPTION_PACK_PET) {
           // uncomment for profiling
-          // vmk_wtime(&starttime);
+          // wtime(&starttime);
           // get corresponding send/recv xpackets from the rtable
           if (recvXPCount > 0)
             recvXPList = new ESMC_XPacket*[recvXPCount];
@@ -1697,7 +1697,7 @@ int compare2(const void *item1, const void *item2) {
             vm->commwait(&handle[req]);
           }
           // uncomment for profiling
-          // vmk_wtime(&time);
+          // wtime(&time);
           // timer2 += time-starttime;
           // starttime = time;
 
@@ -1707,7 +1707,7 @@ int compare2(const void *item1, const void *item2) {
                                        numAddrs, recvBufferList[req], recvAddr);
 
           // uncomment for profiling
-          // vmk_wtime(&time);
+          // wtime(&time);
           // timer3 += time-starttime;
           
           // delete the individual buffers for this transfer

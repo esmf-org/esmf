@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2008/02/14 04:14:59 theurich Exp $ 
+# $Id: makefile,v 1.3 2008/04/22 18:01:39 theurich Exp $ 
 
 ALL:      tree_build_system_tests
 run:      tree_run_system_tests
@@ -17,8 +17,7 @@ SYSTEM_TESTS_OBJ      = cplComp.o ioComp.o modelAComp.o modelBComp.o modelComp.o
 
 SYSTEM_TESTS_RUN      = RUN_DirectCoupling
 
-SYSTEM_TESTS_RUN_UNI  = RUN_DirectCouplingUNI
-
+SYSTEM_TESTS_RUN_UNI  =
 
 ESMF_DirectCouplingSTest.o : $(SYSTEM_TESTS_OBJ)
 
@@ -34,5 +33,3 @@ CLOBBERDIRS =
 RUN_DirectCoupling:
 	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=DirectCoupling NP=6 stest
 
-RUN_DirectCouplingUNI:
-	$(MAKE) TNAME=DirectCoupling NP=1 stest

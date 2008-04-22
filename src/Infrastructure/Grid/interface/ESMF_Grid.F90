@@ -166,7 +166,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.77 2008/04/21 22:43:25 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.78 2008/04/22 18:01:35 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -3298,7 +3298,7 @@ end interface
       function ESMF_GridCreateFromDistGrid(name,coordTypeKind,distgrid, &
                          distgridToGridMap, undistLBound, undistUBound, coordDimCount, coordDimMap, &
                          gridEdgeLWidth, gridEdgeUWidth, gridAlign, indexflag, &
-                         destroyDistgrid, destroyDELayout, rc)
+                         destroyDistGrid, destroyDELayout, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFromDistGrid
@@ -3316,7 +3316,7 @@ end interface
        integer,               intent(in),   optional  :: gridEdgeUWidth(:)
        integer,               intent(in),   optional  :: gridAlign(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
-       logical,               intent(in),   optional  :: destroyDistgrid
+       logical,               intent(in),   optional  :: destroyDistGrid
        logical,               intent(in),   optional  :: destroyDELayout
        integer,               intent(out),  optional  :: rc
 !
@@ -3482,6 +3482,7 @@ end interface
     else
            intDestroyDELayout=0
     endif
+
 
     ! Initialize this grid object as invalid
     grid%this = ESMF_NULL_POINTER
@@ -4659,7 +4660,7 @@ end interface
                                     gridAlign=gridAlignLocal, &
                                     indexflag=indexflag, &
                                     destroyDistGrid=.true., &
-                                    destroyDELayout=.true., & 
+                                    destroyDELayout=.true., &
                                     rc=localrc)
     else
        ESMF_GridCreateShapeTileIrreg=ESMF_GridCreateFromDistGrid(name, coordTypeKind, &
@@ -4670,7 +4671,7 @@ end interface
                                     gridAlign=gridAlignLocal, &
                                     indexflag=indexflag, &
                                     destroyDistGrid=.true., &
-                                    destroyDELayout=.true., & 
+                                    destroyDELayout=.true., &
                                     rc=localrc)
     endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6545,6 +6546,7 @@ end subroutine ESMF_GridGet
       docopyInt=ESMF_DATA_REF
     endif
 
+
     ! Require DELayout to be 1 DE per PET 
     if (localDeCount < 0) then 
       call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
@@ -7150,6 +7152,7 @@ else
   docopyInt=ESMF_DATA_REF
 endif
 
+
  ! Require DELayout to be 1 DE per PET 
  if (localDeCount < 0) then 
  call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
@@ -7456,6 +7459,7 @@ else
   docopyInt=ESMF_DATA_REF
 endif
 
+
  ! Require DELayout to be 1 DE per PET 
  if (localDeCount < 0) then 
  call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
@@ -7761,6 +7765,7 @@ else
   docopyInt=ESMF_DATA_REF
 endif
 
+
  ! Require DELayout to be 1 DE per PET 
  if (localDeCount < 0) then 
  call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
@@ -8064,6 +8069,7 @@ if (present(docopy)) then
 else
   docopyInt=ESMF_DATA_REF
 endif
+
 
  ! Require DELayout to be 1 DE per PET 
  if (localDeCount < 0) then 
@@ -8698,8 +8704,8 @@ endif
   ! Private name; call using ESMF_GridSet()
     subroutine ESMF_GridSetFromDistGrid(grid, name, coordTypeKind, distgrid, & 
                  distgridToGridMap, undistLBound, undistUBound, coordDimCount, coordDimMap,           &
-                 gridEdgeLWidth, gridEdgeUWidth, gridAlign,                  &
-                 indexflag, destroyDistgrid, destroyDELayout, rc)
+                 gridEdgeLWidth, gridEdgeUWidth, gridAlign, indexflag, &
+                 destroyDistgrid, destroyDELayout, rc)
 !
 ! !RETURN VALUE:
 
@@ -8865,6 +8871,7 @@ endif
     else
            intDestroyDELayout=0
     endif
+
 
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridsetfromdistgrid(grid%this, nameLen, name, &

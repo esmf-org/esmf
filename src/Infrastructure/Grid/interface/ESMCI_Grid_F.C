@@ -127,7 +127,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(coordTypeKind), *distgrid, 
       *gridEdgeLWidthArg, *gridEdgeUWidthArg, *gridAlignArg, *distgridToGridMapArg,
       *undistLBoundArg, *undistUBoundArg, *coordDimCountArg, *coordDimMapArg,
-      ESMC_NOT_PRESENT_FILTER(indexflag), 
+      ESMC_NOT_PRESENT_FILTER(indexflag),
       destroyDistgridPtr, destroyDELayoutPtr, &localrc);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -508,7 +508,7 @@ extern "C" {
       *gridEdgeLWidthArg, *gridEdgeUWidthArg, *gridAlignArg, *distgridToGridMapArg,
       *undistLBoundArg, *undistUBoundArg, *coordDimCountArg, *coordDimMapArg,
        ESMC_NOT_PRESENT_FILTER(indexflag), 
-      destroyDistgridPtr, destroyDELayoutPtr);
+       destroyDistgridPtr, destroyDELayoutPtr);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }

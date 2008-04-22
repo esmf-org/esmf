@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cppF90,v 1.8 2008/04/17 18:58:34 theurich Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.9 2008/04/22 18:01:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldSetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSet.cppF90,v 1.8 2008/04/17 18:58:34 theurich Exp $'
+    '$Id: ESMF_FieldSet.cppF90,v 1.9 2008/04/22 18:01:33 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -421,7 +421,6 @@ contains
 @\
     type(ESMF_Field), intent(inout) :: field @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: dataptr @\
-    mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: old_dataptr @\
     type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
     integer, intent(in), optional :: staggerloc  @\
     type(ESMF_IndexFlag), intent(in), optional :: indexflag @\
@@ -662,7 +661,7 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
     ! local variables @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fpointer @\
     type(ESMF_StaggerLoc)          :: localStaggerLoc  @\
-    integer                        :: localrc, i, j, count @\
+    integer                        :: localrc, i, count @\
     integer                        :: fieldDimCount, fieldUngriddedDimCount @\
     integer                        :: gridDimCount, gridDistDimCount @\
     integer                        :: ungriddedIndex(ESMF_MAXDIM) @\
@@ -675,7 +674,7 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
     integer                        :: localMaxHaloUWidth (ESMF_MAXDIM) @\
     logical                        :: isGridded(ESMF_MAXDIM) @\
     integer                        :: distgridToGridMap(ESMF_MAXDIM) @\
-    type(ESMF_Array)               :: array, newarray @\
+    type(ESMF_Array)               :: array @\
     type(ESMF_DistGrid)            :: distgrid @\
     integer                        :: compEUWidth(ESMF_MAXDIM), compELWidth(ESMF_MAXDIM) @\
     integer                        :: fieldUndistDimCount                         @\

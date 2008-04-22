@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: sys_tests_results.pl,v 1.8 2008/04/11 01:18:28 svasquez Exp $
+# $Id: sys_tests_results.pl,v 1.9 2008/04/22 18:01:23 theurich Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 # The results are either complete results or a summary.
@@ -9,7 +9,6 @@ sub sys_tests_results($$$$) {
         my $TEST_DIR	= $_[0];
         my $ESMF_BOPT   = $_[1];
         my $SUMMARY     = $_[2];
-        my $MPMDFLAG    = $_[3];
 
 
 use File::Find
@@ -27,6 +26,46 @@ use File::Find
 @fail_tests = ();	# system tests that failed
 @pass_tests = ();	# system tests that passed
 
+
+                        
+        # Open the system test config file 
+        $ok=open(F,"$TEST_DIR/sys_tests.config");
+        if (!(defined $ok)) {
+                print "\n\n";
+                if ($SUMMARY) { # Print only if full output requested
+                        print "SYSTEM TESTS SUMMARY\n";
+                }
+                print "NOTE: Unable to open $TEST_DIR/sys_tests.config file.\n";
+                print "Either the 'gmake ESMF_BOPT=$ESMF_BOPT build_system_tests' has not been run ";
+                print "or the 'gmake ESMF_BOPT=$ESMF_BOPT' did not build successfully. \n\n";
+                
+                return 0;
+        } 
+        # Get flags from sys_tests_config file.
+        # testmpmd = 0 for ESMF_TESTMPMD=OFF
+        # testmpmd = 1 for ESMF_TESTMPMD=ON
+        # processor = 0 for uni_processor
+        # processor = 1 for multi_processor
+        foreach $line (<F>){
+                        push(file_lines, $line);
+                        $count=grep(/Non-testmpmd/, @file_lines);
+                        if ($count == 1) {
+                                $testmpmd=0;
+                        }
+                        $count=grep(/Testmpmd/, @file_lines);
+                        if ($count == 1) {
+                                $testmpmd=1;
+                        }
+                        $count=grep(/Uniprocessor/, @file_lines);
+                        if ($count == 1) {
+                                $processor=0;
+                        }
+                        $count=grep(/Multiprocessor/, @file_lines);
+                        if ($count == 1) {
+                                $processor=1;
+                        }
+        }
+
         #Find all files
         find(\&allFiles, '.');
         sub allFiles {
@@ -36,7 +75,7 @@ use File::Find
         # Get all system tests files
         @st_files=grep (/STest/, @all_files);
         # Find the system test files with the "ESMF_SYSTEM_TEST" string
-        # grep for "ESMF_SYSTEM_TEST"
+        # grep for system tests to report on
         $count=0;
         $st_count=0;
         foreach $file ( @st_files) {
@@ -45,12 +84,30 @@ use File::Find
                         push(file_lines, $line);
                         }
                         close ($file);
-                        $count=grep ( /ESMF_SYSTEM_TEST/, @file_lines);
-                        if ($count != 0) {
-                                push (act_st_files, $file);
+			if ( $processor == 0) {
+				# Get the uni-PET system tests
+                        	$count=grep ( /ESMF_SYSTEM_TEST/, @file_lines);
+                        	if ($count != 0) {
+                                	push (act_st_files, $file);
+                                       	$st_count=$st_count + 1;
+                                }
+			}
+			else {
+				# Get the mult-PET only system_tests
+                        	$count=grep ( /ESMF_MULTI_PROC_SYSTEM_TEST/, @file_lines);
+                        	if ($count != 0) {
+                                	push (act_st_files, $file);
                                         $st_count=$st_count + 1;
                                 }
-                        if ( $MPMDFLAG =~ m/^ON$/ ) {
+				# Include the uni-PET system tests
+                        	$count=grep ( /ESMF_SYSTEM_TEST/, @file_lines);
+                        	if ($count != 0) {
+                                	push (act_st_files, $file);
+                                       	$st_count=$st_count + 1;
+                                }
+			}
+                        if ( ($testmpmd == 1) &  ( $processor == 1)) {
+			  # Include MPMD system tests only if running multi processor
                           $count=grep ( /ESMF_MPMD_SYSTEM_TEST/, @file_lines);
                           if ($count != 0) {
                                 push (act_st_files, $file);
@@ -225,7 +282,14 @@ use File::Find
 		else { # Print only if full output requested
 			print "\n\nSYSTEM TESTS SUMMARY\n";
 		}
-		print "Found $system_test_count system tests, $pass_count passed and $fail_count failed.\n\n";
+		print "Found $system_test_count ";
+        	if ($processor == 0) {
+                	print "single processor system tests, ";
+        	}       
+        	else {  
+                	print "multi-processor system tests, ";
+        	}   
+		print "$pass_count passed and $fail_count failed.\n\n";
 
                 # Write test results to be read by regression tests scripts.
                 $results_file="$TEST_DIR/system_tests_results";

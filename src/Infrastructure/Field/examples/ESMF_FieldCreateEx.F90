@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.72 2008/04/17 18:58:33 theurich Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.73 2008/04/22 18:01:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -32,17 +32,14 @@
     type(ESMF_Grid) :: grid, grid2d
     type(ESMF_DistGrid) :: distgrid
     type(ESMF_ArraySpec) :: arrayspec
-    type(ESMF_Array) :: array1, array2
-    type(ESMF_DELayout) :: layout
+    type(ESMF_Array) :: array2d
     type(ESMF_VM) :: vm
 
-    type(ESMF_Field) :: field1, field2, field3, field4, field3d
-    real (ESMF_KIND_R8), dimension(2) :: origin
+    type(ESMF_Field) :: field1, field2, field3, field4
 
     real(ESMF_KIND_R8), dimension(:,:), pointer :: farray
-    real(ESMF_KIND_R8), dimension(:,:), pointer :: farray1
     real(ESMF_KIND_R8), dimension(:,:,:), pointer :: farray3d
-    real(ESMF_KIND_R4), dimension(:,:), pointer :: farray2d
+    real(ESMF_KIND_R4), dimension(:,:), pointer :: farray2dd
     integer, dimension(2) :: compEdgeLWdith
     integer, dimension(2) :: compEdgeUWdith
     integer, dimension(ESMF_MAXDIM) :: gcc, gec, fa_shape
@@ -111,12 +108,12 @@
          staggerloc=ESMF_STAGGERLOC_CENTER, name="pressure", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_FieldGet(field1, localDe=0, farray=farray2d, &
+    call ESMF_FieldGet(field1, localDe=0, farray=farray2dd, &
         totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, rc=rc)
 
     do i = ftlb(1), ftub(1)
         do j = ftlb(2), ftub(2)
-            farray2d(i, j) = sin(i/ftc(1)*PI) * cos(j/ftc(2)*PI) 
+            farray2dd(i, j) = sin(i/ftc(1)*PI) * cos(j/ftc(2)*PI) 
         enddo
     enddo
 
@@ -169,46 +166,6 @@
 
     print *, "Field creation from Grid and Arrayspec returned"
 
-! The following example is removed when FieldSetArray is removed
-! Final removal pending.
-!!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
-!!-------------------------------- Example -----------------------------
-!!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
-!!BremoveOE
-!!\subsubsection{Use ESMF\_ArrayCreate to reset Field internal Array}
-!!  It's often necessary to reset the data array contained within a field.
-!!  The following example demonstrates how to create a compliant {\tt ESMF\_Array}
-!!  and reset the existing {\tt ESMF\_Array} of a {\tt ESMF\_Field}.
-!!  User can reset the {\tt ESMF\_Array} inside an existing Field by construct a proper
-!!  shape {\tt ESMF\_Array}. 
-!!  arrayspec, distgrid are objects created from previous examples.
-!!EremoveOE
-!!-------------------------------------------------------------------------
-!!   !
-!!   ! The user can substitute another array created by ArrayCreate in field1.
-!!   ! This example
-!!   ! makes it clear that field1's array has a computational region smaller
-!!   ! than its exclusive region.
-!!BremoveOC
-!    call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-!        computationalEdgeLWidth=compEdgeLWdith, &
-!        computationalEdgeUWidth=compEdgeUWdith, rc=rc)
-!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!
-!    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc)
-!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!
-!    array2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, staggerLoc=0, &
-!            computationalEdgeLWidth=compEdgeLWdith, &
-!            computationalEdgeUWidth=compEdgeUWdith, rc=rc)
-!    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!
-!    call ESMF_FieldSet(field1, array2, rc=rc)
-!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!!EremoveOC
-!    print *, "Field reset internal array through ArrayCreate returned"
-!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
@@ -232,13 +189,13 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! Create a ESMF_Array from the arrayspec and distgrid
-    array2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, staggerLoc=0, &
+    array2d = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, staggerLoc=0, &
             computationalEdgeLWidth=compEdgeLWdith, &
             computationalEdgeUWidth=compEdgeUWdith, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! Create a ESMF_Field from the grid and array
-    field4 = ESMF_FieldCreate(grid, array2, rc=rc)
+    field4 = ESMF_FieldCreate(grid, array2d, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
     print *, "Field Create from a Grid and a ESMF_Array returned"
@@ -270,10 +227,18 @@
 !  a {\tt ESMF\_Grid} and a {\tt ESMF\_Array}. For a better discussion of
 !  these terminologies and concepts behind them, 
 !  e.g. exclusive, computational, total bounds
-!  for the lower and upper corner of data region, etc.., user can refer to 
-!  the explanation of these concepts for Grid and Array in their respective chapters 
-!  in the reference manual. The examples here aim to help a user to get up to speed to
+!  for the lower and upper corner of data region, etc.., users can refer to 
+!  the explanation of these concepts for Grid and Array in their respective sections 
+!  in the reference manual, e.g. Section \ref{Array_regions_and_default_bounds} on Array
+!  and Section \ref{sec:grid:usage:bounds} on Grid.
+!  The examples here are designed to help a user to get up to speed to
 !  create Fields for typical use.
+!
+!  Users who are not interested in laborious discussion of bounds calculation of Fortran
+!  array pointer may skip to Section \ref{sec:field:usage:create_5dgrid_7dptr_2dungridded}.
+!  Section \ref{sec:field:usage:create_5dgrid_7dptr_2dungridded} demonstrates
+!  a high level {\tt ESMF\_FieldGet}
+!  helper method to help user create arbitrary number of dimension Field with ease.
 !
 !  In the following example, each dimension size of the Fortran array must be no greater 
 !  than the maximum value of the computational and exclusive bounds of its corresponding 
@@ -811,7 +776,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_FieldDestroy(field3,rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-    call ESMF_ArrayDestroy(array2, rc=rc)
+    call ESMF_ArrayDestroy(array2d, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_GridDestroy(grid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

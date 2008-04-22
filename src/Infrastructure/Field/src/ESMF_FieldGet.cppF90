@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.16 2008/04/17 18:58:34 theurich Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.17 2008/04/22 18:01:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.16 2008/04/17 18:58:34 theurich Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.17 2008/04/22 18:01:32 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -628,7 +628,6 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !------------------------------------------------------------------------------
     integer :: gridCompLBnd(ESMF_MAXDIM), gridCompUBnd(ESMF_MAXDIM)
     integer :: gridExclLBnd(ESMF_MAXDIM), gridExclUBnd(ESMF_MAXDIM)
-    integer :: gridTotaLBnd(ESMF_MAXDIM), gridTotaUBnd(ESMF_MAXDIM)
     integer :: gridrank, fieldrank, localrc
     integer :: i, j
     logical :: filled(ESMF_MAXDIM)
@@ -638,6 +637,9 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     integer, allocatable :: undistBnd(:)
     integer, allocatable :: distgridToArrayMap(:)
     integer, allocatable :: distgridToPackedArrayMap(:)
+    integer, dimension(:), allocatable :: l_elb, l_eub, l_clb, l_cub
+    integer, dimension(:), allocatable :: l_tlb, l_tub
+    integer, dimension(:), allocatable :: l_ec, l_cc, l_tc
 
     if (present(rc)) rc = ESMF_RC_NOT_IMPL 
     localrc = ESMF_RC_NOT_IMPL
@@ -733,6 +735,11 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         endif 
     endif
 
+    ! local temporaries to store return values
+    allocate(l_elb(fieldrank), l_eub(fieldrank), l_clb(fieldrank), l_cub(fieldrank))
+    allocate(l_tlb(fieldrank), l_tub(fieldrank))
+    allocate(l_ec(fieldrank), l_cc(fieldrank), l_tc(fieldrank))
+
     if (present(totalLBound) .or. present(totalUBound)) then
     
         ! Get Size of Array info
@@ -758,7 +765,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
             ! set distributed dimensions
             filled=.false.
             do i=1, dimCount
-               totalLBound(distgridToArrayMap(i))=&
+               l_tlb(distgridToArrayMap(i))=&
                 arrayBnd(distgridToPackedArrayMap(i),localDe)
                filled(distgridToArrayMap(i))=.true.
             enddo
@@ -767,7 +774,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
             j=1
             do i=1, fieldRank
                if (.not. filled(i)) then
-                   totalLBound(i)=undistBnd(j)
+                   l_tlb(i)=undistBnd(j)
                    j=j+1;
                endif
             enddo
@@ -781,7 +788,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
             ! set distributed dimensions
             filled=.false.
             do i=1, dimCount
-               totalUBound(distgridToArrayMap(i))=&
+                l_tub(distgridToArrayMap(i))=&
                 arrayBnd(distgridToPackedArrayMap(i),localDe)
                filled(distgridToArrayMap(i))=.true.
             enddo
@@ -790,7 +797,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
             j=1
             do i=1, fieldRank
                if (.not. filled(i)) then
-                   totalUBound(i)=undistBnd(j)
+                   l_tub(i)=undistBnd(j)
                    j=j+1;
                endif
            enddo
@@ -810,45 +817,62 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
             exclusiveLBound=gridExclLBnd, &
             exclusiveUBound=gridExclUBnd, &
             rc=localrc) 
- 
+
+
     ! fill in Grid bounds 
     filled=.false. 
     do i=1, gridrank 
-        if(present(computationalLBound)) &
-           computationalLBound(field%ftypep%gridToFieldMap(i))=gridCompLBnd(i) 
-        if(present(computationalUBound)) &
-           computationalUBound(field%ftypep%gridToFieldMap(i))=gridCompUBnd(i) 
-        if(present(exclusiveLBound)) &
-           exclusiveLBound(field%ftypep%gridToFieldMap(i))=gridExclLBnd(i) 
-        if(present(exclusiveUBound)) &
-           exclusiveUBound(field%ftypep%gridToFieldMap(i))=gridExclUBnd(i) 
-       filled(field%ftypep%gridToFieldMap(i))=.true. 
+        if(field%ftypep%gridToFieldMap(i) .gt. 0) then
+            l_clb(field%ftypep%gridToFieldMap(i)) = gridCompLBnd(i)
+            l_cub(field%ftypep%gridToFieldMap(i)) = gridCompUBnd(i)
+            l_elb(field%ftypep%gridToFieldMap(i)) = gridExclLBnd(i) 
+            l_eub(field%ftypep%gridToFieldMap(i)) = gridExclUBnd(i) 
+            filled(field%ftypep%gridToFieldMap(i))=.true. 
+        endif
     enddo
  
     ! fill in ungridded bounds
     j=1
     do i=1,fieldrank
        if (.not. filled(i)) then
-        if(present(computationalLBound)) &
-              computationalLBound(i)=field%ftypep%ungriddedLBound(j) 
-        if(present(computationalUBound)) &
-              computationalUBound(i)=field%ftypep%ungriddedUBound(j) 
-        if(present(exclusiveLBound)) &
-             exclusiveLBound(i)=field%ftypep%ungriddedLBound(j) 
-        if(present(exclusiveUBound)) &
-              exclusiveUBound(i)=field%ftypep%ungriddedUBound(j) 
-          j=j+1
+            l_clb(i) = field%ftypep%ungriddedLBound(j)
+            l_cub(i) = field%ftypep%ungriddedUBound(j)
+            l_elb(i) = field%ftypep%ungriddedLBound(j)
+            l_eub(i) = field%ftypep%ungriddedUBound(j)
+            j=j+1
        endif
     enddo
 
     do i = 1, fieldrank 
-        if(present(computationalCount)) &
-            computationalCount(i) = computationalUBound(i) - computationalLBound(i) + 1
-        if(present(exclusiveCount)) &
-            exclusiveCount(i) = exclusiveUBound(i) - exclusiveLBound(i) + 1
-        if(present(totalCount)) &
-            totalCount(i) = totalUBound(i) - totalLBound(i) + 1
+        l_cc(i) = l_cub(i) - l_clb(i) + 1
+        l_ec(i) = l_eub(i) - l_elb(i) + 1
+        l_tc(i) = l_tub(i) - l_tlb(i) + 1
     end do
+
+    ! prepare return values
+    ! computational region
+    if(present(computationalLBound)) &
+        computationalLBound(1:fieldrank) = l_clb
+    if(present(computationalUBound)) &
+        computationalUBound(1:fieldrank) = l_cub
+    if(present(computationalCount)) &
+        computationalCount(1:fieldrank) = l_cc
+
+    ! exclusive region
+    if(present(exclusiveLBound)) &
+        exclusiveLBound(1:fieldrank) = l_elb
+    if(present(exclusiveUBound)) &
+        exclusiveUBound(1:fieldrank) = l_eub
+    if(present(exclusiveCount)) &
+        exclusiveCount(1:fieldrank) = l_ec
+
+    ! total region
+    if(present(totalLBound)) &
+        totalLBound(1:fieldrank) = l_tlb
+    if(present(totalUBound)) &
+        totalUBound(1:fieldrank) = l_tub
+    if(present(totalCount)) &
+        totalCount(1:fieldrank) = l_tc
 
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_FieldGetDataBounds

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.21 2008/04/17 18:58:34 theurich Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.22 2008/04/22 18:01:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.21 2008/04/17 18:58:34 theurich Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.22 2008/04/22 18:01:31 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -251,7 +251,7 @@ contains
     integer :: fieldDimCount, fieldUngriddedDimCount 
     integer :: gridDimCount, gridDistDimCount
     integer :: fieldUndistDimCount 
-    integer :: i,j
+    integer :: i
     integer :: localGridToFieldMap(ESMF_MAXDIM)
     integer :: localMaxHaloLWidth (ESMF_MAXDIM)
     integer :: localMaxHaloUWidth (ESMF_MAXDIM)
@@ -579,7 +579,7 @@ contains
     integer :: fieldDimCount, fieldUngriddedDimCount 
     integer :: gridDimCount, gridDistDimCount
     integer :: fieldUndistDimCount 
-    integer :: i,j
+    integer :: i
     integer :: localGridToFieldMap(ESMF_MAXDIM)
     integer :: localMaxHaloLWidth (ESMF_MAXDIM)
     integer :: localMaxHaloUWidth (ESMF_MAXDIM)
@@ -1396,24 +1396,12 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
 !------------------------------------------------------------------------------
     integer :: localrc
     type(ESMF_Array) :: array                  
-    type(ESMF_StaggerLoc) :: localStaggerloc
     type(ESMF_TypeKind) :: typekind
-    integer, dimension(ESMF_MAXDIM) :: gridcounts, arraycounts
-    integer, dimension(ESMF_MAXDIM) :: exclLBounds, exclUBounds
-    integer, dimension(ESMF_MAXDIM) :: dimorder, counts
-    integer :: hwidth, minRank
-    integer :: i, j, arrayRank, gridRank
+    integer :: i, arrayRank, gridRank
 
     ! Initialize return code   
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! make sure hwidth has a value here.
-!    if (present(haloWidth)) then
-!        hwidth = haloWidth
-!    else
-!        hwidth = 0
-!    endif
 
     call ESMF_BaseCreate(ftype%base, "Field", name, 0, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
@@ -1567,7 +1555,6 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
 !EOPI
 !------------------------------------------------------------------------------
     integer :: localrc 
-    type(ESMF_Field) :: tfield                  ! temp field for error check
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array)     :: newarray
     type(ESMF_TypeKind)  :: typekind
@@ -1613,17 +1600,17 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
           ftype%gridToFieldMap(i) = i
         enddo
     else
-       ftype%gridToFieldMap = gridToFieldMap
+       ftype%gridToFieldMap(1:size(gridToFieldMap)) = gridToFieldMap
     end if
 
     if(present(ungriddedLBound)) &
-       ftype%ungriddedLBound = ungriddedLBound
+       ftype%ungriddedLBound(1:size(ungriddedLBound)) = ungriddedLBound
     if(present(ungriddedUBound)) &
-       ftype%ungriddedUBound = ungriddedUBound
+       ftype%ungriddedUBound(1:size(ungriddedUBound)) = ungriddedUBound
     if(present(maxHaloLWidth)) &
-       ftype%maxHaloLWidth = maxHaloLWidth
+       ftype%maxHaloLWidth(1:size(maxHaloLWidth)) = maxHaloLWidth
     if(present(maxHaloUWidth)) &
-       ftype%maxHaloUWidth = maxHaloUWidth
+       ftype%maxHaloUWidth(1:size(maxHaloUWidth)) = maxHaloUWidth
 
     ! default copyflag value is ESMF_DATA_REF
     ftype%array_internal = .false.

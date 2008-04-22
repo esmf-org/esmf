@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.63 2008/04/21 21:36:31 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.64 2008/04/22 18:01:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.63 2008/04/21 21:36:31 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.64 2008/04/22 18:01:36 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -874,7 +874,7 @@ int Grid::commit(
                        proto->distgridToGridMap, 
                        proto->undistLBound, proto->undistUBound, 
                        proto->coordDimCount, proto->coordDimMap,
-		       proto->indexflag, 
+		       proto->indexflag,
                        proto->destroyDistgrid, proto->destroyDELayout);
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
             ESMF_ERR_PASSTHRU, &rc)) return rc;        
@@ -2090,8 +2090,7 @@ int Grid::set(
     if (proto->indexflag == ESMC_NULL_POINTER) proto->indexflag= new ESMC_IndexFlag;
     *(proto->indexflag)=*indexflagArg;
   }
-
-
+ 
   // if passed in, set destroyDistgrid
   if (destroyDistgridArg!=NULL) {
     if (proto->destroyDistgrid == ESMC_NULL_POINTER) proto->destroyDistgrid= new bool;
@@ -2489,6 +2488,7 @@ int Grid::constructInternal(
   destroyDistgrid=destroyDistgridArg; 
   destroyDELayout=destroyDELayoutArg;
 
+
   // Set the number of stagger locations from the grid dimCount
   staggerLocCount=_NumStaggerLocsFromDimCount(dimCount); 
 
@@ -2826,6 +2826,10 @@ Grid::Grid(
   
   indexflag=ESMF_INDEX_DELOCAL;
   distgrid= ESMC_NULL_POINTER; 
+
+  destroyDistgrid=false; 
+  destroyDELayout=false;
+
   
   destroyDistgrid=false; 
   destroyDELayout=false;
@@ -2920,8 +2924,6 @@ Grid::Grid(
   if (isDELBnd != ESMC_NULL_POINTER) delete [] isDELBnd;
   if (isDEUBnd != ESMC_NULL_POINTER) delete [] isDEUBnd;
 }
-
-
 
 
 //-----------------------------------------------------------------------------
@@ -3220,7 +3222,6 @@ int Grid::serialize(
     //  destroyDistgrid 
     //  destroyDELayout
 
-
     SERIALIZE_VAR(cp, buffer,loffset,distDimCount,int);    
 
     SERIALIZE_VAR1D(cp, buffer,loffset,distgridToGridMap,distDimCount,int);
@@ -3365,7 +3366,7 @@ int Grid::deserialize(
 
   // Set status (instead of reading it)
   status =  ESMC_GRIDSTATUS_PROXY_READY;
-  
+
   DESERIALIZE_VAR( buffer,loffset,typekind,ESMC_TypeKind);
 
   DESERIALIZE_VAR( buffer,loffset,indexflag,ESMC_IndexFlag);
@@ -3374,6 +3375,12 @@ int Grid::deserialize(
   destroyDistgrid=true;  // distgrid is Grid's after deserialize
   destroyDELayout=false; // delayot belongs to DistGrid
   
+  DESERIALIZE_VAR( buffer,loffset,indexflag,ESMC_IndexFlag);
+
+  // Don't deserialize, but set 
+  destroyDistgrid=true;  // distgrid is Grid's after deserialize
+  destroyDELayout=false; // delayot belongs to DistGrid
+
   DESERIALIZE_VAR( buffer,loffset,distDimCount,int);    
   
   DESERIALIZE_VAR1D( buffer,loffset,distgridToGridMap,distDimCount,int);
@@ -3746,6 +3753,7 @@ int construct(
   bool destroyDistgrid;
   bool destroyDELayout;
 
+
   // initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
 
@@ -4072,9 +4080,8 @@ int construct(
   // construct the Grid object using the massaged parameter values
   localrc=gridArg->constructInternal(name, typekind, distgridArg, 
 				     distDimCount, distgridToGridMap, 
-				     undistDimCount, undistLBound, 
-				     undistUBound, dimCount, 
-				     gridEdgeLWidth, gridEdgeUWidth, 
+				     undistDimCount, undistLBound, undistUBound,
+				     dimCount, gridEdgeLWidth, gridEdgeUWidth,
 				     gridAlign, coordDimCount, coordDimMap, 
 				     indexflag, destroyDistgrid, 
 				     destroyDELayout);

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.44 2008/04/17 22:12:20 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.45 2008/04/22 18:01:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -119,7 +119,6 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 
   // if true, then destroy the DELayout with the grid
   bool destroyDELayout;
-
 
   ESMC_IndexFlag indexflag;
   DistGrid *distgrid;
@@ -483,7 +482,7 @@ int getComputationalUBound(
 
   public:
 
-  const bool isDone(void) const {return done;}
+  bool isDone(void) const {return done;}
   GridIter(Grid *gridArg, int  staggerlocArg, bool cellNodesArg);
   ~GridIter();
   GridIter *toBeg();
@@ -536,7 +535,7 @@ int getComputationalUBound(
 
   public:
 
-  const bool isDone(void) const {return done;}
+  bool isDone(void) const {return done;}
   GridCellIter(Grid *gridArg, int  staggerlocArg);
   ~GridCellIter();
   GridCellIter *toBeg();
@@ -568,7 +567,6 @@ class ProtoGrid {
   ESMC_IndexFlag *indexflag; 
   bool *destroyDistgrid;
   bool *destroyDELayout;
-
 
   // Proto Grid Construct
   ProtoGrid();

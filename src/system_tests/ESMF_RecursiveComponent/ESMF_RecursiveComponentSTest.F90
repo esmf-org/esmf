@@ -1,7 +1,7 @@
-! $Id: ESMF_RecursiveComponentSTest.F90,v 1.2 2008/04/09 18:14:43 theurich Exp $
+! $Id: ESMF_RecursiveComponentSTest.F90,v 1.3 2008/04/22 18:01:40 theurich Exp $
 !
 !-------------------------------------------------------------------------
-!ESMF_SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !-------------------------------------------------------------------------
@@ -92,12 +92,6 @@ program ESMF_RecursiveComponentSTest
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
-  if (petCount .lt. 6) then
-    print *, "This system test needs to run at least 6-way, petCount = ", &
-      petCount
-    goto 10 ! bail out
-  endif
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

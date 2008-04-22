@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2007/10/16 21:53:18 theurich Exp $ 
+# $Id: makefile,v 1.11 2008/04/22 18:01:38 theurich Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -27,8 +27,7 @@ SYSTEM_TESTS_OBJ      = user_model1.o user_model2.o user_coupler.o
 
 SYSTEM_TESTS_RUN      = RUN_ArrayRedist
 
-SYSTEM_TESTS_RUN_UNI  = RUN_ArrayRedistUNI
-
+SYSTEM_TESTS_RUN_UNI  =
 
 ESMF_ArrayRedistSTest.o : $(SYSTEM_TESTS_OBJ)
 
@@ -44,5 +43,3 @@ CLOBBERDIRS =
 RUN_ArrayRedist:
 	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=ArrayRedist NP=6 stest
 
-RUN_ArrayRedistUNI:
-	$(MAKE) TNAME=ArrayRedist NP=1 stest

@@ -1,7 +1,7 @@
-! $Id: ESMF_ArraySparseMatMulSTest.F90,v 1.14 2008/02/14 04:14:57 theurich Exp $
+! $Id: ESMF_ArraySparseMatMulSTest.F90,v 1.15 2008/04/22 18:01:38 theurich Exp $
 !
 !-------------------------------------------------------------------------
-!ESMF_SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !-------------------------------------------------------------------------
@@ -96,12 +96,6 @@ program ESMF_ArraySparseMatMulSTest
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-
-  if (petCount .lt. 6) then
-    print *, "This system test needs to run at least 6-way, petCount = ", &
-      petCount
-    goto 10
-  endif
 
   ! Create the 2 model components and coupler
   cname1 = "user model 1"

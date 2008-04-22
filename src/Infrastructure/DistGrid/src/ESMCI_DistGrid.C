@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.4 2008/04/09 18:14:39 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.5 2008/04/22 18:01:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.4 2008/04/09 18:14:39 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.5 2008/04/22 18:01:27 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1661,7 +1661,7 @@ int DistGrid::fillIndexListPDimPDe(
   int *indexList,                   // out - only on rootPet
   int de,                           // in  - DE   = {0, ..., deCount-1}
   int dim,                          // in  - dim  = {1, ..., dimCount}
-  vmk_commhandle **commh,           // inout -
+  VMK::commhandle **commh,          // inout -
   int rootPet,                      // in  -
   VM *vm                            // [in] - default: currentVM
   )const{
@@ -1704,8 +1704,8 @@ int DistGrid::fillIndexListPDimPDe(
       // this DE is _not_ local -> receive indexList from respective Pet
       int srcPet;
       delayout->getDEMatchPET(de, *vm, NULL, &srcPet, 1);
-      if (*commh == NULL) *commh = new vmk_commhandle;
-      localrc = vm->vmk_recv(indexList,
+      if (*commh == NULL) *commh = new VMK::commhandle;
+      localrc = vm->recv(indexList,
         sizeof(int)*indexCountPDimPDe[de*dimCount+dim-1], srcPet, commh);
       if (localrc){
         char *message = new char[160];
@@ -1731,8 +1731,8 @@ int DistGrid::fillIndexListPDimPDe(
         getIndexListPDimPLocalDe(deList[de], dim, &localrc);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
-      if (*commh == NULL) *commh = new vmk_commhandle;
-      localrc = vm->vmk_send(localIndexList,
+      if (*commh == NULL) *commh = new VMK::commhandle;
+      localrc = vm->send(localIndexList,
         sizeof(int)*indexCountPDimPDe[de*dimCount+dim-1], rootPet, commh);
       if (localrc){
         char *message = new char[160];

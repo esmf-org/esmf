@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.55 2008/04/17 18:58:36 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.56 2008/04/22 18:01:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -84,77 +84,142 @@ void sync_reset(shmsync *shms);
 
 
 typedef struct{
-  // mutex variable for intraProcess sync
-  pthread_mutex_t pth_mutex;
-  int lastFlag;
-}vmk_ipmutex;
-
-
-typedef struct vmk_ch{
-  struct vmk_ch *prev_handle;   // previous handle in the queue
-  struct vmk_ch *next_handle;   // next handle in the queue
-  int nelements;    // number of elements
-  int type;         // 0: commhandle container, 1: MPI_Requests, 2: ... reserved
-  struct vmk_ch **handles;   // sub handles
-  MPI_Request *mpireq; // request array
-}vmk_commhandle;
-
-
-typedef struct{
-  int srcPet;
-  int tag;
-  int error;
-  // comm_type specific parts
-  int comm_type;      // comm_type for this communication status
-  MPI_Status mpi_s;
-}vmk_status;
-
-
-typedef struct{
-  // hack sync variables
-  shmsync shms;
-  // name of SHM resource
-  char shm_name[80];
-  // buffer
-  char buffer[2][PIPC_BUFFER];
-}pipc_mp;
-
-
-typedef struct{
-  // source and destination pointers
-  volatile const void *ptr_src;
-  volatile void *ptr_dest;
-  // hack sync variables
-  shmsync shms;
-  // buffer for small messages
-  char buffer[SHARED_BUFFER];
-  // Pthread sync variables
-  pthread_mutex_t mutex1;
+  volatile int flag;
+  pthread_t tid;
+  pthread_mutex_t mut0;
+  pthread_cond_t cond0;
+  pthread_mutex_t mut1;
   pthread_cond_t cond1;
-  pthread_mutex_t mutex2;
-  pthread_cond_t cond2;
-  volatile int tcounter;
-}shared_mp;
-
-
-typedef struct{
-  int comm_type;    // communication type
-  shared_mp *shmp;  // shared memory message passing structure
-  pipc_mp *pipcmp;  // posix ipc message passing structure
-}comminfo;
-
-
-typedef struct ipshmAllocS{
-  void *allocation;   // shared memory allocation
-  int auxCounter;     // counter to coordinate alloc/dealloc between threads
-  struct ipshmAllocS *prev; // pointer to prev. ipshmAlloc element in list
-  struct ipshmAllocS *next; // pointer to next ipshmAlloc element in list
-}ipshmAlloc;
+  pthread_mutex_t mut_extra1;
+  pthread_cond_t cond_extra1;
+  pthread_mutex_t mut_extra2;
+  pthread_cond_t cond_extra2;
+  void *arg;
+}vmkt_t;
 
 
 namespace ESMCI {
 
+
 class VMK{
+  
+  // structs
+  public:
+  
+  struct commhandle{
+    commhandle *prev_handle;// previous handle in the queue
+    commhandle *next_handle;// next handle in the queue
+    int nelements;          // number of elements
+    int type;       // 0: commhandle container, 1: MPI_Requests, 2: ... reserved
+    commhandle **handles;   // sub handles
+    MPI_Request *mpireq;    // request array
+  };
+
+  struct ipmutex{
+    // mutex variable for intraProcess sync
+    pthread_mutex_t pth_mutex;
+    int lastFlag;
+  };
+
+
+  struct status{
+    int srcPet;
+    int tag;
+    int error;
+    // comm_type specific parts
+    int comm_type;      // comm_type for this communication status
+    MPI_Status mpi_s;
+  };
+  
+  
+  struct pipc_mp{
+    // hack sync variables
+    shmsync shms;
+    // name of SHM resource
+    char shm_name[80];
+    // buffer
+    char buffer[2][PIPC_BUFFER];
+  };
+
+
+  struct shared_mp{
+    // source and destination pointers
+    volatile const void *ptr_src;
+    volatile void *ptr_dest;
+    // hack sync variables
+    shmsync shms;
+    // buffer for small messages
+    char buffer[SHARED_BUFFER];
+    // Pthread sync variables
+    pthread_mutex_t mutex1;
+    pthread_cond_t cond1;
+    pthread_mutex_t mutex2;
+    pthread_cond_t cond2;
+    volatile int tcounter;
+  };
+
+
+  struct comminfo{
+    int comm_type;    // communication type
+    shared_mp *shmp;  // shared memory message passing structure
+    pipc_mp *pipcmp;  // posix ipc message passing structure
+  };
+
+
+  struct ipshmAlloc{
+    void *allocation;   // shared memory allocation
+    int auxCounter;     // counter to coordinate alloc/dealloc between threads
+    ipshmAlloc *prev;   // pointer to prev. ipshmAlloc element in list
+    ipshmAlloc *next;   // pointer to next ipshmAlloc element in list
+  };
+
+
+  struct contrib_id{
+    pthread_t blocker_tid;    // POSIX thread id of blocker thread
+    vmkt_t *blocker_vmkt;     // pointer to blocker's vmkt structure
+    int mpi_pid;              // MPI rank in the context of the default VMK
+    pid_t pid;                // POSIX process id
+    pthread_t tid;            // POSIX thread id
+  };
+
+
+  struct SpawnArg{
+    // members which are different for each new pet
+    VMK *myvm;                  // pointer to vm instance on heap
+    pthread_t pthid;            // pthread id of the spawned thread
+    int mypet;                  // new mypet 
+    int *ncontributors;         // number of pets that contributed cores 
+    contrib_id **contributors;  // array of contributors
+    vmkt_t vmkt;                // this pet's vmkt
+    vmkt_t vmkt_extra;          // extra vmkt for this pet (sigcatcher)
+    // members which are identical for all new pets
+    void *(*fctp)(void *, void *);  // pointer to the user function
+    // 1st (void *) points to the provided object (child of VMK class)
+    // 2nd (void *) points to data that shall be passed to the user function
+    int npets;                  // new number of pets
+    int *lpid;
+    int *pid;
+    int *tid;
+    int *ncpet;
+    int **cid;
+    MPI_Group mpi_g;
+    MPI_Comm mpi_c;
+    int nothreadsflag;
+    // shared memory variables
+    pthread_mutex_t *pth_mutex2;
+    pthread_mutex_t *pth_mutex;
+    int *pth_finish_count;
+    comminfo *sendChannel;
+    comminfo *recvChannel;
+    ipshmAlloc **ipshmTop;
+    pthread_mutex_t *ipshmMutex;
+    pthread_mutex_t *ipSetupMutex;
+    int pref_intra_ssi;
+    // cargo
+    void *cargo;
+  };
+
+    
   // members
   protected:
     int mypet;          // PET id of this instance
@@ -180,8 +245,9 @@ class VMK{
     int *pth_finish_count;
     // Mutex flag used to indicate that this PET must use muteces for MPI comms
     int mpi_mutex_flag;
-    // Communications array
-    comminfo **commarray;   // this array is shared between pets of same pid
+    // Communication channels
+    comminfo *sendChannel;
+    comminfo *recvChannel;
     // IntraProcessSharedMemoryAllocation List
     ipshmAlloc **ipshmTop;      // top of shared alloc list (shared)
     ipshmAlloc *ipshmLocalTop;  // local top of shared alloc list
@@ -190,11 +256,11 @@ class VMK{
     pthread_mutex_t *ipSetupMutex;  // mutex used to init and destroy (shared)
     // Communication requests queue
     int nhandles;
-    vmk_commhandle *firsthandle;
+    commhandle *firsthandle;
     // static info of physical machine
     static int ncores; // total number of cores in the physical machine
     static int *cpuid; // cpuid associated with certain core (multi-core cpus)
-    static int *ssiid; // single system inmage id to which this core belongs
+    static int *ssiid; // single system image id to which this core belongs
   public:
     // Declaration of static data members - Definitions are in the header of
     // source file ESMF_VMKernel.C
@@ -205,7 +271,7 @@ class VMK{
     static int mpi_thread_level;
     // Static data members that hold command line arguments
     // There are two sets of these variables. The first set of variables is
-    // used to obtain the command line arguments in the vmk_obtain_args() method
+    // used to obtain the command line arguments in the obtain_args() method
     // and can be used throughout execution to access the command line args.
     // The second set with the "_mpich" part in the name is necessary to support
     // MPICH1.2. MPICH1.2 requires command line args to be passed into its
@@ -227,8 +293,8 @@ class VMK{
   // methods
   private:
     void obtain_args();
-    void commqueueitem_link(vmk_commhandle *commhandle);
-    int  commqueueitem_unlink(vmk_commhandle *commhandle);
+    void commqueueitem_link(commhandle *commh);
+    int  commqueueitem_unlink(commhandle *commh);
   public:
     void init(MPI_Comm mpiCommunicator=MPI_COMM_WORLD);
       // initialize the physical machine and a default (all MPI) virtual machine
@@ -280,81 +346,75 @@ class VMK{
     }
 
     // p2p communication calls
-    int vmk_send(const void *message, int size, int dest, int tag=-1);
-    int vmk_send(const void *message, int size, int dest,
-      vmk_commhandle **commhandle, int tag=-1);
-    int vmk_recv(void *message, int size, int source, int tag=-1, 
-      vmk_status *status=NULL);
-    int vmk_recv(void *message, int size, int source,
-      vmk_commhandle **commhandle, int tag=-1);
+    int send(const void *message, int size, int dest, int tag=-1);
+    int send(const void *message, int size, int dest, commhandle **commh,
+      int tag=-1);
+    int recv(void *message, int size, int source, int tag=-1,
+      status *status=NULL);
+    int recv(void *message, int size, int source, commhandle **commh,
+      int tag=-1);
     
-    int vmk_sendrecv(void *sendData, int sendSize, int dst,
-      void *recvData, int recvSize, int src);
-    int vmk_sendrecv(void *sendData, int sendSize, int dst,
-      void *recvData, int recvSize, int src, vmk_commhandle **commhandle);
+    int sendrecv(void *sendData, int sendSize, int dst, void *recvData,
+      int recvSize, int src);
+    int sendrecv(void *sendData, int sendSize, int dst, void *recvData,
+      int recvSize, int src, commhandle **commh);
 
-    int vmk_vassend(void *message, int size, int destVAS,
-      vmk_commhandle **commhandle, int tag=-1);
-    int vmk_vasrecv(void *message, int size, int srcVAS,
-      vmk_commhandle **commhandle, int tag=-1);
+    int vassend(void *message, int size, int destVAS, commhandle **commh,
+      int tag=-1);
+    int vasrecv(void *message, int size, int srcVAS, commhandle **commh,
+      int tag=-1);
 
     // collective communication calls
-    int vmk_barrier();
+    int barrier();
 
-    int vmk_threadbarrier();
+    int threadbarrier();
 
-    int vmk_reduce(void *in, void *out, int len, vmType type, vmOp op, 
+    int reduce(void *in, void *out, int len, vmType type, vmOp op, 
       int root);
-    int vmk_allreduce(void *in, void *out, int len, vmType type, vmOp op);
-    int vmk_allfullreduce(void *in, void *out, int len, vmType type,
+    int allreduce(void *in, void *out, int len, vmType type, vmOp op);
+    int allfullreduce(void *in, void *out, int len, vmType type,
       vmOp op);
     
-    int vmk_reduce_scatter(void *in, void *out, int *outCounts, vmType type,
+    int reduce_scatter(void *in, void *out, int *outCounts, vmType type,
       vmOp op);
 
-    int vmk_scatter(void *in, void *out, int len, int root);
-    int vmk_scatter(void *in, void *out, int len, int root,
-      vmk_commhandle **commhandle);
-    int vmk_scatterv(void *in, int *inCounts, int *inOffsets, void *out,
+    int scatter(void *in, void *out, int len, int root);
+    int scatter(void *in, void *out, int len, int root, commhandle **commh);
+    int scatterv(void *in, int *inCounts, int *inOffsets, void *out,
       int outCount, vmType type, int root);
     
-    int vmk_gather(void *in, void *out, int len, int root);
-    int vmk_gather(void *in, void *out, int len, int root,
-      vmk_commhandle **commhandle);
-    int vmk_gatherv(void *in, int inCount, void *out, int *outCounts, 
+    int gather(void *in, void *out, int len, int root);
+    int gather(void *in, void *out, int len, int root, commhandle **commh);
+    int gatherv(void *in, int inCount, void *out, int *outCounts, 
       int *outOffsets, vmType type, int root);
-    int vmk_allgather(void *in, void *out, int len);
-    int vmk_allgather(void *in, void *out, int len,
-      vmk_commhandle **commhandle);
-    int vmk_allgatherv(void *in, int inCount, void *out, int *outCounts, 
+    int allgather(void *in, void *out, int len);
+    int allgather(void *in, void *out, int len, commhandle **commh);
+    int allgatherv(void *in, int inCount, void *out, int *outCounts, 
       int *outOffsets, vmType type);
 
-    int vmk_alltoall(void *in, int inCount, void *out, int outCount,
+    int alltoall(void *in, int inCount, void *out, int outCount,
       vmType type);
-    int vmk_alltoallv(void *in, int *inCounts, int *inOffsets, void *out, 
+    int alltoallv(void *in, int *inCounts, int *inOffsets, void *out, 
       int *outCounts, int *outOffsets, vmType type);
 
-    int vmk_broadcast(void *data, int len, int root);
-    int vmk_broadcast(void *data, int len, int root,
-      vmk_commhandle **commhandle);
+    int broadcast(void *data, int len, int root);
+    int broadcast(void *data, int len, int root, commhandle **commh);
     
     // non-blocking service calls
-    int commtest(vmk_commhandle **commhandle, int *completeFlag,
-      vmk_status *status=NULL);
-    int commwait(vmk_commhandle **commhandle, vmk_status *status=NULL,
-      int nanopause=0);
+    int commtest(commhandle **commh, int *completeFlag, status *status=NULL);
+    int commwait(commhandle **commh, status *status=NULL, int nanopause=0);
     void commqueuewait();
-    void commcancel(vmk_commhandle **commhandle);
+    void commcancel(commhandle **commh);
     
     // IntraProcessSharedMemoryAllocation Table Methods
-    void *vmk_ipshmallocate(int bytes, int *firstFlag=NULL);
-    void vmk_ipshmdeallocate(void *);
+    void *ipshmallocate(int bytes, int *firstFlag=NULL);
+    void ipshmdeallocate(void *);
 
     // IntraProcessMutex Methods
-    vmk_ipmutex *vmk_ipmutexallocate();
-    void vmk_ipmutexdeallocate(vmk_ipmutex *ipmutex);
-    int vmk_ipmutexlock(vmk_ipmutex *ipmutex);
-    int vmk_ipmutexunlock(vmk_ipmutex *ipmutex);
+    ipmutex *ipmutexallocate();
+    void ipmutexdeallocate(ipmutex *ipmutex);
+    int ipmutexlock(ipmutex *ipmutex);
+    int ipmutexunlock(ipmutex *ipmutex);
     
     
     static void wtime(double *time);

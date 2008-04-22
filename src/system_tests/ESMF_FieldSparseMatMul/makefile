@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2007/10/29 01:53:54 cdeluca Exp $ 
+# $Id: makefile,v 1.2 2008/04/22 18:01:40 theurich Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -27,7 +27,7 @@ SYSTEM_TESTS_OBJ      = user_model1.o user_model2.o user_coupler.o
 
 SYSTEM_TESTS_RUN      = RUN_FieldSparseMatMul
 
-SYSTEM_TESTS_RUN_UNI  = RUN_FieldSparseMatMulUNI
+SYSTEM_TESTS_RUN_UNI  =
 
 
 ESMF_FieldSparseMatMulSTest.o : $(SYSTEM_TESTS_OBJ)
@@ -44,5 +44,3 @@ CLOBBERDIRS =
 RUN_FieldSparseMatMul:
 	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=FieldSparseMatMul NP=6 stest
 
-RUN_FieldSparseMatMulUNI:
-	$(MAKE) TNAME=FieldSparseMatMul NP=1 stest
