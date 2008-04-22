@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSphereRegridEx.F90,v 1.1 2008/04/21 21:45:00 dneckels Exp $
+! $Id: ESMF_FieldSphereRegridEx.F90,v 1.2 2008/04/22 20:48:08 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@ program ESMF_FieldSphereRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.1 2008/04/21 21:45:00 dneckels Exp $'
+    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.2 2008/04/22 20:48:08 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -83,7 +83,10 @@ program ESMF_FieldSphereRegridEx
   real(ESMF_KIND_R8) :: src_dx, src_dy
   real(ESMF_KIND_R8) :: dst_dx, dst_dy
   real(ESMF_KIND_R8) :: ctheta, stheta
-  real(ESMF_KIND_R8) :: theta, d2rad, xtmp, x, y
+  real(ESMF_KIND_R8) :: theta, d2rad, x, y, z
+  real(ESMF_KIND_R8) :: DEG2RAD, a, lat, lon, phi
+  real(ESMF_KIND_R8) :: rangle, xtmp, ytmp, ztmp
+  real(ESMF_KIND_R8) :: RAD2DEG
 
   integer :: spherical_grid
 
@@ -109,11 +112,11 @@ program ESMF_FieldSphereRegridEx
   rc=ESMF_SUCCESS
 
   ! Establish the resolution of the grids
-  src_nx = 192
-  src_ny = 94
+  dst_nx = 384
+  dst_ny = 320
 
-  dst_nx = 75
-  dst_ny = 50
+  src_nx = 75
+  src_ny = 50
 
   ! if petCount >1, setup petMap
   gridSrc=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/src_nx,src_ny/),regDecomp=(/petCount,1/), &
@@ -190,6 +193,11 @@ program ESMF_FieldSphereRegridEx
   src_dx = 360./src_nx
   src_dy = 180./src_ny
 
+  DEG2RAD = 3.14159265/180.0
+  RAD2DEG = 1./DEG2RAD
+
+  a = 3.14159265/4.0
+
   ! Get memory and set coords for src
   do lDE=0,localDECount-1
  
@@ -220,11 +228,11 @@ program ESMF_FieldSphereRegridEx
      do i2=clbnd(2),cubnd(2)
         fptrXC(i1,i2) = -180. + REAL((i1-1)*src_dx)
         fptrYC(i1,i2) = -90. + REAL((i2-1)*src_dy + 0.5*src_dy)
-        x = fptrXC(i1, i2)
-        y = fptrYC(i1,i2)
+        x = fptrXC(i1, i2)*DEG2RAD
+        y = fptrYC(i1,i2)*DEG2RAD
      
        ! Function
-        fptr(i1, i2) = sin(x*10*3.145)+cos(y*4*3.145)
+        fptr(i1, i2) = cos(2*x)*cos(a) + sin(2*x)*cos(3*y)*sin(a)
      enddo
      enddo
 
@@ -233,7 +241,9 @@ program ESMF_FieldSphereRegridEx
   dst_dx = 360./dst_nx
   dst_dy = 180./dst_ny
 
-  ! Get memory and set coords for src
+  rangle = DEG2RAD*20.
+
+  ! Get memory and set coords for dst
   do lDE=0,localDECount-1
  
      !! get coord 1
@@ -258,10 +268,26 @@ program ESMF_FieldSphereRegridEx
      !! set coords, interpolated function
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
-        fptrXC(i1,i2) = -180. + REAL((i1-1)*dst_dx)
-        fptrYC(i1,i2) = -90. + REAL((i2-1)*dst_dy + 0.5*dst_dy)
-        x = fptrXC(i1, i2)
-        y = fptrYC(i1,i2)
+        lon = -180. + REAL((i1-1)*dst_dx)
+        lat = -90. + REAL((i2-1)*dst_dy + 0.5*dst_dy)
+
+        ! to 3d
+        theta = DEG2RAD*lon
+        phi = DEG2RAD*(90.-lat)
+        x = cos(theta)*sin(phi)
+        y = sin(theta)*sin(phi)
+        z = cos(phi)
+
+        ! 3d rotation about x-axis
+        ! x is preserved
+        ytmp = cos(rangle)*y + sin(rangle)*z 
+        ztmp = -sin(rangle)*y + cos(rangle)*z
+        y = ytmp
+        z = ztmp
+
+        ! now back to lat lon
+        fptrXC(i1,i2) = atan2(y,x)*RAD2DEG
+        fptrYC(i1,i2) = asin(z)*RAD2DEG
 
         fptr(i1,i2) = 0.
      
@@ -270,12 +296,11 @@ program ESMF_FieldSphereRegridEx
 
   enddo    ! lDE
 
+  spherical_grid = 0
+  call ESMF_MeshIO(vm, Griddst, ESMF_STAGGERLOC_CENTER, &
+               "pre_dstmesh", dstArray, rc=localrc, &
+               spherical=spherical_grid)
 
-  ! Designation the grid as lat/lon
-  
-
-  !call ESMF_MeshIO(vm, GridSrc, ESMF_STAGGERLOC_CENTER, &
-  !             "srclatmesh", srcArray, spherical=spherical_grid, rc=localrc)
 
 !BOE
 !

@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.19 2008/04/21 21:40:09 dneckels Exp $
+// $Id: ESMC_GridToMesh.C,v 1.20 2008/04/22 20:48:23 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -240,8 +240,18 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
    // Presumably, for a structured grid there is only the
    // 'hypercube' topology, i.e. a quadrilateral for 2d
    // and a hexahedron for 3d
-   const MeshObjTopo *ctopo = pdim == 2 ? GetTopo("QUAD") :
-                                         (pdim == 3 ? GetTopo("HEX") : 0);
+   const MeshObjTopo *ctopo = 0;
+   if (pdim == 2) {
+   
+     ctopo = sdim == 2 ? GetTopo("QUAD") : GetTopo("QUAD_3D");
+                                         
+   } else if (pdim == 3) {
+
+     ThrowRequire(sdim == 3);
+     ctopo = GetTopo("HEX");
+
+   } else Throw() << "Invalid parametric dim:" << pdim;
+
    if (!ctopo)
      Throw() << "Could not get topology for pdim=" << pdim;
 
@@ -429,10 +439,19 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
    mesh.Commit();
 
    {
+     std::vector<MEField<>*> fds;
+
+     Mesh::FieldReg::MEField_iterator fi = mesh.Field_begin(), fe = mesh.Field_end();
+
+     for (; fi != fe; ++fi) fds.push_back(&*fi);
+
+     mesh.HaloFields(fds.size(), &fds[0]);
+ 
+/*
      MEField<> *cptr = mesh.GetCoordField();
      mesh.HaloFields(1, &cptr);
+*/
    }
-
 
  } // try catch block
   catch (std::exception &x) {
