@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.99.2.7 2008/04/22 04:42:04 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.99.2.8 2008/04/22 21:34:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -10,8 +10,6 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "ESMC_VMKernel.h"
-
 // On SunOS systems there are a couple of macros that need to be set
 // in order to get POSIX compliant functions IPC, pthreads, gethostid
 #ifdef __sun
@@ -21,7 +19,7 @@
 #define _POSIX_PTHREAD_SEMANTICS
 #endif
 
-#include <sys/types.h>
+#include "ESMC_VMKernel.h"
 
 // On OSF1 (i.e. Tru64) systems there is a problem with picking up the 
 // prototype of gethostid() from unistd.h from within C++....
