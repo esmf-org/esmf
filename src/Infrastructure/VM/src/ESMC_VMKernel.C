@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.99.2.6 2008/04/21 22:37:54 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.99.2.7 2008/04/22 04:42:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -1000,20 +1000,6 @@ void *VMK::startup(class VMKPlan *vmp,
   int *new_ncontributors = new int[new_npets];
   int **new_cid = new int*[new_npets];
   contrib_id **new_contributors = new contrib_id*[new_npets];
-  
-  // A new_commarray will be allocated for every PET that enters startup() 
-  // (which are all of the PETs in the current, i.e. parent VMK).
-  // The new_commarray is a temporary data structure that will be deleted
-  // for every PET at the end of this routine.
-  comminfo **new_commarray = new comminfo*[new_npets];
-  for (int i=0; i<new_npets; i++){
-    new_commarray[i] = new comminfo[new_npets];
-    for (int j=0; j<new_npets; j++){
-      // by default all communication is via MPI-1
-      new_commarray[i][j].comm_type = VM_COMM_TYPE_MPI1;
-    }
-  }
-  bool new_commarray_delete_flag = true;  // default every PET must delete
   // local variables, unallocated yet...
   pthread_mutex_t *new_pth_mutex2;
   pthread_mutex_t *new_pth_mutex;
@@ -1225,6 +1211,34 @@ void *VMK::startup(class VMKPlan *vmp,
   //    lpid_list[0][] list of current lpids with at least one pet spawning
   //    lpid_list[1][] associated list indicating how many pets will spawn
   //    pet_list[][] list of current pets that spawn
+  
+  // next, determine how many new pets are going to be in the thread group
+  // that's running in the same VAS as mypet
+  int mypetNewThreadGroupSize = 0;  // reset
+  for (int i=0; i<num_diff_pids; i++){
+    for (int j=0; j<lpid_list[1][i]; j++){
+      if (mypet == pet_list[i][j]){
+        for (int pet=0; pet<new_npets; pet++)
+          if (pid[mypet] == new_pid[pet])
+            ++mypetNewThreadGroupSize;
+      }
+    }
+  }
+  
+  // A new_commarray will be allocated for every PET that runs in a VAS
+  // that is going to have threads in the new VMK.
+  // The new_commarray is a temporary data structure that will be deleted
+  // for every PET at the end of this routine.
+  comminfo **new_commarray;
+  bool new_commarray_delete_flag = false; // reset
+  if (mypetNewThreadGroupSize){
+    new_commarray_delete_flag = true; // set
+    new_commarray = new comminfo*[mypetNewThreadGroupSize];
+    for (int i=0; i<mypetNewThreadGroupSize; i++){
+      new_commarray[i] = new comminfo[mypetNewThreadGroupSize];
+    }
+  }
+  
   // next, create MPI group
   // since this is a local MPI operation each pet can call this here...
   MPI_Group new_mpi_g;
@@ -1310,54 +1324,13 @@ void *VMK::startup(class VMKPlan *vmp,
 #if (VERBOSITY > 9)
         printf("mypet is first one for lpid -> allocating shared memory\n");
 #endif
-        new_pth_mutex2 = new pthread_mutex_t;
-        new_pth_mutex = new pthread_mutex_t;
-        new_pth_finish_count = new int;
         // initialize shared variables
+        new_pth_mutex2 = new pthread_mutex_t;
         pthread_mutex_init(new_pth_mutex2, NULL);
+        new_pth_mutex = new pthread_mutex_t;
         pthread_mutex_init(new_pth_mutex, NULL);
+        new_pth_finish_count = new int;
         *new_pth_finish_count = 0;
-        // set up the shared_mp structure within the commarray
-        for (int pet1=0; pet1<new_npets; pet1++){
-          for (int pet2=0; pet2<new_npets; pet2++){
-            if (new_pid[pet1]==new_pid[pet2] && new_pid[pet1]==pid[mypet]){
-              // pet1 and pet2 are either identical PETs or run as threads in
-              // the same VAS as mypet.
-#ifdef ESMF_MPIUNI
-              // -> allocate shared_mp structure for such PETs
-              new_commarray[pet1][pet2].shmp = new shared_mp;
-              // reset the shms structure in shared_mp preparing for use
-              sync_reset(&(new_commarray[pet1][pet2].shmp->shms));
-              // todo: check that pet1 and pet2 are both really 0
-              // todo: and that new_npets == 1 
-              new_commarray[pet1][pet2].comm_type = VM_COMM_TYPE_MPIUNI;
-#else
-              if (pet1 != pet2){
-                // -> allocate shared_mp structure for such PETs
-                new_commarray[pet1][pet2].shmp = new shared_mp;
-                // reset the shms structure in shared_mp preparing for use
-                sync_reset(&(new_commarray[pet1][pet2].shmp->shms));
-                // don't modify intra-PET comm_type
-                if (vmp->pref_intra_process == PREF_INTRA_PROCESS_SHMHACK){
-                  new_commarray[pet1][pet2].comm_type = VM_COMM_TYPE_SHMHACK;
-                }else if(vmp->pref_intra_process == PREF_INTRA_PROCESS_PTHREAD){
-                  new_commarray[pet1][pet2].comm_type = VM_COMM_TYPE_PTHREAD;
-                  // initialize pthread variables in shared_mp
-                  pthread_mutex_init(&(new_commarray[pet1][pet2].shmp->mutex1),
-                    NULL);
-                  pthread_cond_init(&(new_commarray[pet1][pet2].shmp->cond1),
-                    NULL);
-                  pthread_mutex_init(&(new_commarray[pet1][pet2].shmp->mutex2),
-                    NULL);
-                  pthread_cond_init(&(new_commarray[pet1][pet2].shmp->cond2),
-                    NULL);
-                  new_commarray[pet1][pet2].shmp->tcounter = 0;
-                }
-              }
-#endif
-            }
-          }
-        }
         // initialize the IntraProcessSharedMemoryAllocation Table
         new_ipshmTop = new ipshmAlloc*;
         *new_ipshmTop = NULL;  // reset
@@ -1365,6 +1338,61 @@ void *VMK::startup(class VMKPlan *vmp,
         pthread_mutex_init(new_ipshmMutex, NULL);
         new_ipSetupMutex = new pthread_mutex_t;
         pthread_mutex_init(new_ipSetupMutex, NULL);
+        // set up the shared_mp structure within the new_commarray
+        int pet1Index = 0;  // reset
+        for (int pet1=0; pet1<new_npets; pet1++){
+          if (new_pid[pet1]==pid[mypet]){
+            int pet2Index = 0;  // reset
+            for (int pet2=0; pet2<new_npets; pet2++){
+              if (new_pid[pet2]==pid[mypet]){
+#ifdef ESMF_MPIUNI
+                // pet1==pet2==mypet==0
+                // -> allocate shared_mp structure for such PETs
+                new_commarray[pet1Index][pet2Index].shmp = new shared_mp;
+                // reset the shms structure in shared_mp preparing for use
+                sync_reset(&(new_commarray[pet1Index][pet2Index].shmp->shms));
+                new_commarray[pet1Index][pet2Index].comm_type =
+                  VM_COMM_TYPE_MPIUNI;
+#else
+                if (pet1 != pet2){
+                  // pet1 and pet2 are different PETs that run in mypet's VAS
+                  // -> allocate shared_mp structure for such PETs
+                  new_commarray[pet1Index][pet2Index].shmp = new shared_mp;
+                  // reset the shms structure in shared_mp preparing for use
+                  sync_reset(&(new_commarray[pet1Index][pet2Index].shmp->shms));
+                  // don't modify intra-PET comm_type
+                  if (vmp->pref_intra_process == PREF_INTRA_PROCESS_SHMHACK){
+                    new_commarray[pet1Index][pet2Index].comm_type =
+                      VM_COMM_TYPE_SHMHACK;
+                  }else if(vmp->pref_intra_process==PREF_INTRA_PROCESS_PTHREAD){
+                    new_commarray[pet1Index][pet2Index].comm_type =
+                      VM_COMM_TYPE_PTHREAD;
+                    // initialize pthread variables in shared_mp
+                    pthread_mutex_init(
+                      &(new_commarray[pet1Index][pet2Index].shmp->mutex1),
+                      NULL);
+                    pthread_cond_init(
+                      &(new_commarray[pet1Index][pet2Index].shmp->cond1),
+                      NULL);
+                    pthread_mutex_init(
+                      &(new_commarray[pet1Index][pet2Index].shmp->mutex2),
+                      NULL);
+                    pthread_cond_init(
+                      &(new_commarray[pet1Index][pet2Index].shmp->cond2),
+                      NULL);
+                    new_commarray[pet1Index][pet2Index].shmp->tcounter = 0;
+                  }
+                }else{
+                  new_commarray[pet1Index][pet2Index].comm_type =
+                      VM_COMM_TYPE_MPI1;  // default for selfcommunication
+                }
+#endif               
+                ++pet2Index;
+              }
+            }
+            ++pet1Index;
+          }
+        }
       }
       // share pointers with all current pets that also spawn for same pid/lpid
       for (int j=1; j<lpid_list[1][i]; j++){
@@ -1375,14 +1403,14 @@ void *VMK::startup(class VMKPlan *vmp,
           send(&new_pth_mutex2, sizeof(pthread_mutex_t*), pet_dest);
           send(&new_pth_mutex, sizeof(pthread_mutex_t*), pet_dest);
           send(&new_pth_finish_count, sizeof(int*), pet_dest);
-          send(&new_commarray, sizeof(comminfo**), pet_dest);
           send(&new_ipshmTop, sizeof(ipshmAlloc*), pet_dest);
           send(&new_ipshmMutex, sizeof(pthread_mutex_t*), pet_dest);
           send(&new_ipSetupMutex, sizeof(pthread_mutex_t*), pet_dest);
+          send(&new_commarray, sizeof(comminfo**), pet_dest);
         }else if(mypet==pet_dest){
           // mypet is one of the pets that also spawn for this lpid -> receive
-          // before this PETs new_commarray is overwritten it must be deleted
-          for (int ii=0; ii<new_npets; ii++)
+          // before this PETs new_commarray is overridden it must be deleted
+          for (int ii=0; ii<mypetNewThreadGroupSize; ii++)
             delete [] new_commarray[ii];
           delete [] new_commarray;
           new_commarray_delete_flag = false;  // mypet doesn't delete again
@@ -1390,14 +1418,14 @@ void *VMK::startup(class VMKPlan *vmp,
           recv(&new_pth_mutex2, sizeof(pthread_mutex_t*), pet_src);
           recv(&new_pth_mutex, sizeof(pthread_mutex_t*), pet_src);
           recv(&new_pth_finish_count, sizeof(int*), pet_src);
-          recv(&new_commarray, sizeof(comminfo**), pet_src);
           recv(&new_ipshmTop, sizeof(ipshmAlloc*), pet_src);
           recv(&new_ipshmMutex, sizeof(pthread_mutex_t*), pet_src);
           recv(&new_ipSetupMutex, sizeof(pthread_mutex_t*), pet_src);
+          recv(&new_commarray, sizeof(comminfo**), pet_src);
         }
       }
-    }
-  }
+    } // at least one PET of the current VMK will spawn from this lpid
+  } // i
   // now:
   //    new_pth_mutex2 is valid pthread_mutex
   //    new_pth_mutex is valid pthread_mutex
@@ -1437,10 +1465,24 @@ void *VMK::startup(class VMKPlan *vmp,
     sarg[i].pth_finish_count = new_pth_finish_count;
     sarg[i].sendChannel = new comminfo[new_npets];
     sarg[i].recvChannel = new comminfo[new_npets];
+    int new_mypet = sarg[i].mypet;
+    int new_mypetIndex = 0; // reset
+    for (int j=0; j<new_mypet; j++)
+      if (new_pid[j] == new_pid[new_mypet])
+        ++new_mypetIndex;
+    int petIndex = 0; // reset
     for (int j=0; j<new_npets; j++){
-      int new_mypet = sarg[i].mypet;
-      sarg[i].sendChannel[j] = new_commarray[new_mypet][j];
-      sarg[i].recvChannel[j] = new_commarray[j][new_mypet];
+      if (new_pid[j] == new_pid[new_mypet]){
+        // new pet j and new_mypet will run in the same VAS
+        // -> copy new_commarray entry into sendChannel and recvChannel
+        sarg[i].sendChannel[j] = new_commarray[new_mypetIndex][petIndex];
+        sarg[i].recvChannel[j] = new_commarray[petIndex][new_mypetIndex];
+        ++petIndex;
+      }else{
+        // default inter-process communication via MPI1
+        sarg[i].recvChannel[j].comm_type = VM_COMM_TYPE_MPI1;
+        sarg[i].sendChannel[j].comm_type = VM_COMM_TYPE_MPI1;
+      }
     }
     sarg[i].ipshmTop = new_ipshmTop;
     sarg[i].ipshmMutex = new_ipshmMutex;
@@ -1486,7 +1528,7 @@ void *VMK::startup(class VMKPlan *vmp,
   delete [] pet_list;
   if (new_commarray_delete_flag){
     // mypet must deallocate its new_commarray
-    for (int ii=0; ii<new_npets; ii++)
+    for (int ii=0; ii<mypetNewThreadGroupSize; ii++)
       delete [] new_commarray[ii];
     delete [] new_commarray;
   }
