@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.35 2008/04/21 17:27:16 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.36 2008/04/22 17:47:59 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -923,7 +923,6 @@
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
         call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
-            fieldget=.true., &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/) &
             )
@@ -3107,7 +3106,6 @@ contains
         type(ESMF_Field)    :: f8
         type(ESMF_Grid)     :: grid
         type(ESMF_DistGrid) :: distgrid
-        type(ESMF_Array)    :: array8
         integer             :: localrc
         integer             :: fsize(7)
 
@@ -3152,7 +3150,6 @@ contains
         call ESMF_FieldDestroy(f8)
         call ESMF_GridDestroy(grid)
         call ESMF_DistGridDestroy(distgrid)
-        call ESMF_ArrayDestroy(array8)
         deallocate(farray)
     end subroutine test7d1
 
@@ -3164,7 +3161,6 @@ contains
         type(ESMF_Field)    :: f8
         type(ESMF_Grid)     :: grid
         type(ESMF_DistGrid) :: distgrid
-        type(ESMF_Array)    :: array8
         integer             :: localrc
         integer             :: flb(7), fub(7)
 
@@ -3205,7 +3201,6 @@ contains
         call ESMF_FieldDestroy(f8)
         call ESMF_GridDestroy(grid)
         call ESMF_DistGridDestroy(distgrid)
-        call ESMF_ArrayDestroy(array8)
         deallocate(farray)
     end subroutine test7d2
 
@@ -3237,7 +3232,6 @@ contains
         type(ESMF_Field)    :: field
         type(ESMF_Grid)     :: grid
         type(ESMF_DistGrid) :: distgrid
-        type(ESMF_Array)    :: array8
         integer             :: localrc
         integer             :: fsize(7)
 
@@ -3368,7 +3362,6 @@ contains
         call ESMF_FieldDestroy(field)
         call ESMF_GridDestroy(grid)
         call ESMF_DistGridDestroy(distgrid)
-        call ESMF_ArrayDestroy(array8)
         deallocate(farray)
     end subroutine test7d_generic
 
@@ -3401,7 +3394,6 @@ contains
         type(ESMF_Field)    :: field
         type(ESMF_Grid)     :: grid
         type(ESMF_DistGrid) :: distgrid
-        type(ESMF_Array)    :: array8
         integer             :: localrc
         integer             :: flb(7), fub(7)
 
@@ -3528,7 +3520,6 @@ contains
         call ESMF_FieldDestroy(field)
         call ESMF_GridDestroy(grid)
         call ESMF_DistGridDestroy(distgrid)
-        call ESMF_ArrayDestroy(array8)
         deallocate(farray)
     end subroutine test7d2_generic
 
