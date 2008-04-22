@@ -316,7 +316,8 @@ MasterElement<METRAITS> *Topo2ME<METRAITS>::operator()(const std::string &name) 
   else if (name == "SHELL3" || name == "SHELL3_L") {
       return MasterElementV<METRAITS>::instance(SFuncAdaptor<tri_shape_func>::instance());
   }
-  else if (name == "SHELL" || name == "SHELL4" || name == "SHELL_L" || name == "SHELL4_L") {
+  else if (name == "SHELL" || name == "SHELL4" ||
+           name == "SHELL_L" || name == "SHELL4_L" || name == "QUAD_3D") {
       return MasterElementV<METRAITS>::instance(SFuncAdaptor<quad_shape_func>::instance());
   }
   else if (name == "SHELL9_L") {
