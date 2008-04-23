@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2006/05/16 17:58:13 theurich Exp $
+# $Id: makefile,v 1.15.2.1 2008/04/23 18:56:53 theurich Exp $
 
 ALL: build_here
 
@@ -9,13 +9,10 @@ LOCDIR	  = src/Infrastructure/Array
 # Leave this line alone.
 include ${ESMF_DIR}/makefile
 
-
 # The DIRS line needs to contain all subdirectories which exist 
 # directly below this directory, and have either library,
 # example/test code, or documents which need to be generated.
 
-#DIRS	  = src interface tests examples doc
-#DIRS	  = interface examples doc
 DIRS      = src interface tests examples doc
 
 CLEANDIRS   =
