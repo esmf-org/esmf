@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: sys_tests_results.pl,v 1.3.4.8 2008/04/19 01:59:46 svasquez Exp $
+# $Id: sys_tests_results.pl,v 1.3.4.9 2008/04/23 21:44:43 svasquez Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 # The results are either complete results or a summary.
@@ -283,12 +283,18 @@ use File::Find
 			print "\n\nSYSTEM TESTS SUMMARY\n";
 		}
 		print "Found $system_test_count ";
-        	if ($processor == 0) {
-                	print "single processor system tests, ";
-        	}       
-        	else {  
-                	print "multi-processor system tests, ";
-        	}   
+                if ($processor == 0) {
+                        print "single processor system ";
+                }
+                else {
+                        print "multi-processor system ";
+                }
+                if ($system_test_count == 1) {
+                        print "test, ";
+                }
+                else {
+                        print "tests, ";
+                }
 		print "$pass_count passed and $fail_count failed.\n\n";
 
 		# Write test results to be read by regression tests scripts.
