@@ -1,7 +1,7 @@
-! $Id: ESMF_DistDirSTest.F90,v 1.7 2007/12/14 19:53:22 svasquez Exp $
+! $Id: ESMF_DistDirSTest.F90,v 1.8 2008/04/23 20:48:39 svasquez Exp $
 !
 !-------------------------------------------------------------------------
-!ESMF_SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !BOP
@@ -63,11 +63,6 @@ program DistDir
   call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
   if (rc .ne. ESMF_SUCCESS) goto 10
 
-  if (petCount .lt. 6) then
-    print *, "This system test needs to run at least 6-way, petCount = ", &
-      petCount
-    goto 10
-  endif
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 ! Test in the full address space
@@ -145,7 +140,7 @@ program DistDir
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-10 continue
+/bin/bash: line 1: :q: command not found
   print *, "System Test DistDir complete."
 
   ! Normal ESMF Test output
