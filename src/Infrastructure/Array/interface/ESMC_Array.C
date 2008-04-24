@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.10 2008/04/05 03:38:00 cdeluca Exp $
+// $Id: ESMC_Array.C,v 1.11 2008/04/24 14:33:03 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -31,11 +31,13 @@
 #include "ESMC_LogErr.h"
 #include "ESMF_LogMacros.inc"             // for LogErr
 #include "ESMCI_Array.h"
+#include "ESMC_Interface.h"
+#include "ESMCI_F90Interface.h"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.10 2008/04/05 03:38:00 cdeluca Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.11 2008/04/24 14:33:03 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -133,4 +135,28 @@ int ESMC_ArrayDestroy(ESMC_Array *array){
   return rc;
 }  
 
+int ESMC_ArraySetLWidth(ESMC_Array array, ESMC_InterfaceInt computationalLWidthArg){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArraySetLWidth()"
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+ 
+  ESMCI::Array* ap;
+
+  //typecast into ESMCI::Array
+  ap = (ESMCI::Array*)(array.ptr);
+ 
+  //call into ESMCI method
+  localrc = ap->setComputationalLWidth( 
+                          (ESMCI::InterfaceInt *)(computationalLWidthArg.ptr) );
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;  // bail out
+
+  //return code
+  rc = localrc;
+  return rc;
+}
+  
 }; // extern "C"

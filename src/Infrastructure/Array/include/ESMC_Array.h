@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.104 2008/04/05 03:37:57 cdeluca Exp $
+// $Id: ESMC_Array.h,v 1.105 2008/04/24 14:33:03 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -34,6 +34,7 @@
 
 #include "ESMC_ArraySpec.h"
 #include "ESMC_DistGrid.h"
+#include "ESMC_Interface.h"
 
 extern "C" {
 
@@ -48,7 +49,8 @@ ESMC_Array ESMC_ArrayCreate(ESMC_ArraySpec arrayspec, ESMC_DistGrid distgrid,
 int ESMC_ArrayPrint(ESMC_Array array);
 const char* ESMC_ArrayGetName(ESMC_Array array, int *rc);
 int ESMC_ArrayDestroy(ESMC_Array *array);
-
+int ESMC_ArraySetLWidth(ESMC_Array array,
+   ESMC_InterfaceInt computationalLWidthArg);
 
 }; // extern "C"
 
