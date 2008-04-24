@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.1.2.1 2008/04/24 18:04:40 theurich Exp $
+! $Id: user_model2.F90,v 1.1.2.2 2008/04/24 22:06:27 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -78,7 +78,8 @@ module user_model2
     ! Local variables
     type(ESMF_ArraySpec)  :: arrayspec
     type(ESMF_DistGrid)   :: distgrid
-    type(ESMF_Array)      :: array
+    type(ESMF_Array)      :: array(2)
+    type(ESMF_ArrayBundle):: arraybundle
     type(ESMF_VM)         :: vm
     integer               :: petCount
     
@@ -99,12 +100,16 @@ module user_model2
     distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/100,150/), &
       regDecomp=(/1,petCount/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-      indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+    array(1) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+      indexflag=ESMF_INDEX_GLOBAL, name="array data 1", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_ArraySet(array, name="array data", rc=rc)
+    array(2) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+      indexflag=ESMF_INDEX_GLOBAL, name="array data 2", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAddArray(importState, array, rc=rc)
+    arraybundle = ESMF_ArrayBundleCreate(arrayList=array, name="dstAryBndl", &
+      rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_StateAddArrayBundle(importState, arraybundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     print *, "User Comp2 Init returning"
@@ -124,8 +129,10 @@ module user_model2
 
     ! Local variables
     real(ESMF_KIND_R8)    :: pi
-    type(ESMF_Array)      :: array
-    real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
+    type(ESMF_Array)      :: array(2)
+    type(ESMF_ArrayBundle):: arraybundle
+    real(ESMF_KIND_R8), pointer :: farrayPtr1(:,:)   ! matching F90 array ptr
+    real(ESMF_KIND_R8), pointer :: farrayPtr2(:,:)   ! matching F90 array ptr
     integer               :: i, j
     
     ! Initialize return code
@@ -135,20 +142,30 @@ module user_model2
 
     pi = 3.14159d0
 
-    ! Get the destination Array from the import State
-    call ESMF_StateGetArray(importState, "array data", array, rc=rc)
+    ! Get the destination ArrayBundle from the export State
+    call ESMF_StateGetArrayBundle(importState, "dstAryBndl", arraybundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-   
+
+    ! Get the destination Arrays from the ArrayBundle
+    call ESMF_ArrayBundleGet(arraybundle, arrayList=array, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
     ! Gain access to actual data via F90 array pointer
-    call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr, rc=rc)
+    call ESMF_ArrayGet(array(1), localDe=0, farrayPtr=farrayPtr1, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_ArrayGet(array(2), localDe=0, farrayPtr=farrayPtr2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
       
     ! Test Array in import state against exact solution
-    do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
-      do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
-        if (abs(farrayPtr(i,j) - (10.0d0 &
+    do j = lbound(farrayPtr1, 2), ubound(farrayPtr1, 2)
+      do i = lbound(farrayPtr1, 1), ubound(farrayPtr1, 1)
+        if (abs(farrayPtr1(i,j) - (10.0d0 &
           + 5.0d0 * sin(real(i,ESMF_KIND_R8)/100.d0*pi) &
           + 2.0d0 * sin(real(j,ESMF_KIND_R8)/150.d0*pi))) > 1.d-8) then
+          rc=ESMF_FAILURE
+          return ! bail out
+        endif
+        if (abs(farrayPtr2(i,j) - farrayPtr1(i,j) - 123.456d0) > 1.d-8) then
           rc=ESMF_FAILURE
           return ! bail out
         endif
@@ -171,19 +188,26 @@ module user_model2
     integer, intent(out) :: rc
 
     ! Local variables
-    type(ESMF_DistGrid) :: distgrid
-    type(ESMF_Array) :: array
+    type(ESMF_DistGrid)   :: distgrid
+    type(ESMF_Array)      :: array(2)
+    type(ESMF_ArrayBundle):: arraybundle
 
     ! Initialize return code
     rc = ESMF_SUCCESS
 
     print *, "User Comp2 Final starting"
 
-    call ESMF_StateGetArray(importState, "array data", array, rc=rc)
+    call ESMF_StateGetArrayBundle(importState, "dstAryBndl", arraybundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_ArrayGet(array, distgrid=distgrid, rc=rc)
+    call ESMF_ArrayBundleGet(arraybundle, arrayList=array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_ArrayDestroy(array, rc=rc)
+    call ESMF_ArrayBundleDestroy(arraybundle, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_ArrayGet(array(1), distgrid=distgrid, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_ArrayDestroy(array(1), rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_ArrayDestroy(array(2), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_DistGridDestroy(distgrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out

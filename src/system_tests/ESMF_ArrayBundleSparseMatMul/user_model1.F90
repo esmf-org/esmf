@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.1.2.1 2008/04/24 18:04:40 theurich Exp $
+! $Id: user_model1.F90,v 1.1.2.2 2008/04/24 22:06:27 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -7,7 +7,7 @@
 
 !
 ! !DESCRIPTION:
-!  User-supplied Component, most recent interface revision.
+!  User-supplied Component
 !
 !
 !\begin{verbatim}
@@ -132,7 +132,8 @@ module user_model1
     real(ESMF_KIND_R8)    :: pi
     type(ESMF_Array)      :: array(2)
     type(ESMF_ArrayBundle):: arraybundle
-    real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
+    real(ESMF_KIND_R8), pointer :: farrayPtr1(:,:)   ! matching F90 array ptr
+    real(ESMF_KIND_R8), pointer :: farrayPtr2(:,:)   ! matching F90 array ptr
     integer               :: i, j
     
     ! Initialize return code
@@ -151,15 +152,18 @@ module user_model1
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer
-    call ESMF_ArrayGet(array(1), localDe=0, farrayPtr=farrayPtr, rc=rc)
+    call ESMF_ArrayGet(array(1), localDe=0, farrayPtr=farrayPtr1, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_ArrayGet(array(2), localDe=0, farrayPtr=farrayPtr2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Fill source Array with data
-    do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
-      do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
-        farrayPtr(i,j) = 10.0d0 &
+    do j = lbound(farrayPtr1, 2), ubound(farrayPtr1, 2)
+      do i = lbound(farrayPtr1, 1), ubound(farrayPtr1, 1)
+        farrayPtr1(i,j) = 10.0d0 &
           + 5.0d0 * sin(real(i,ESMF_KIND_R8)/100.d0*pi) &
           + 2.0d0 * sin(real(j,ESMF_KIND_R8)/150.d0*pi)
+        farrayPtr2(i,j) = farrayPtr1(i,j) + 123.456d0
       enddo
     enddo
  

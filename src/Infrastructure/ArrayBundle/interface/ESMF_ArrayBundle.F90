@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.1.2.2 2008/04/24 18:02:52 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.1.2.3 2008/04/24 22:06:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -89,6 +89,7 @@ module ESMF_ArrayBundleMod
 ! - ESMF-internal methods:
   public ESMF_ArrayBundleGetInit
   public ESMF_ArrayBundleSetInitCreated
+  public ESMF_ArrayBundleSetThisNull
 
 
 !EOPI
@@ -97,7 +98,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.1.2.2 2008/04/24 18:02:52 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.1.2.3 2008/04/24 22:06:26 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -834,43 +835,97 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleSparseMatMul()"
-!BOPI
-! !IROUTINE: ESMF_ArrayBundleSparseMatMul - Execute an ArrayBundle sparse matrix multiplication operation
+!BOP
+! !IROUTINE: ESMF_ArrayBundleSparseMatMul - Execute an ArrayBundle sparse matrix multiplication
 !
 ! !INTERFACE:
-    subroutine ESMF_ArrayBundleSparseMatMul(srcArrayBundle, dstArrayBundle, routehandle, rc)
+  subroutine ESMF_ArrayBundleSparseMatMul(srcArrayBundle, dstArrayBundle, &
+    routehandle, zeroflag, checkflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)           :: srcArrayBundle
-    type(ESMF_ArrayBundle), intent(inout)        :: dstArrayBundle
+    type(ESMF_ArrayBundle), intent(in),   optional  :: srcArrayBundle
+    type(ESMF_ArrayBundle), intent(inout),optional  :: dstArrayBundle
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    integer, intent(out), optional                  :: rc
+    type(ESMF_Logical),     intent(in),   optional  :: zeroflag
+    type(ESMF_Logical),     intent(in),   optional  :: checkflag
+    integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!   Execute an Array sparse matrix operation from the Arrays in {\tt srcArray} 
-!   to the Arrays in {\tt dstArray}. See {\tt ArrayInterpolateStore()} for 
-!   details.
+!   Execute a precomputed Array sparse matrix multiplication from the Arrays in
+!   {\tt srcArrayBundle} to the Arrays in {\tt dstArrayBundle}.
 !
-!     This version of the interface 
-!     implements the PET-based blocking paradigm: Each PET of the VM must issue
-!     this call exactly once for {\em all} of its DEs. The
-!     call will block until all PET-local data objects are accessible.
+!   This call is {\em collective} across the current VM.
 !
 !   \begin{description}
-!   \item [srcArrayBundle]
-!         {\tt ESMF\_ArrayBundle} with source data.
-!   \item [dstArrayBundle]
-!         {\tt ESMF\_ArrayBundle} with destination data.
+!   \item [{[srcArrayBundle]}]
+!     {\tt ESMF\_ArrayBundle} with source data.
+!   \item [{[dstArrayBundle]}]
+!     {\tt ESMF\_ArrayBundle} with destination data.
 !   \item [routehandle]
-!         Handle to the Route that stores the operation.
+!     Handle to the precomputed Route.
+!   \item [{[zeroflag]}]
+!     If set to {\tt ESMF\_TRUE} {\em (default)} the total regions of all 
+!     DEs in all Arrays in {\tt dstArrayBundle} will be initialized to zero 
+!     before updating the elements with the results of the sparse matrix 
+!     multiplication. If set to {\tt ESMF\_FALSE} the elements in the Arrays
+!     in {\tt dstArrayBundle} will not be modified prior to the sparse matrix
+!     multiplication and results will be added to the incoming element values.
+!   \item [{[checkflag]}]
+!     If set to {\tt ESMF\_TRUE} the input Array pairs will be checked for
+!     consistency with the precomputed operation provided by {\tt routehandle}.
+!     If set to {\tt ESMF\_FALSE} {\em (default)} only a very basic input check
+!     will be performed, leaving many inconsistencies undetected. Set
+!     {\tt checkflag} to {\tt ESMF\_FALSE} to achieve highest performance.
 !   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
-  ! Initialize return code
-  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    integer                 :: localrc      ! local return code
+    type(ESMF_Logical)      :: opt_zeroflag ! helper variable
+    type(ESMF_Logical)      :: opt_checkflag! helper variable
+    type(ESMF_ArrayBundle)  :: opt_srcArrayBundle ! helper variable
+    type(ESMF_ArrayBundle)  :: opt_dstArrayBundle ! helper variable
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments, deal with optional ArrayBundle args
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+    if (present(srcArrayBundle)) then
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit, srcArrayBundle, rc)
+      opt_srcArrayBundle = srcArrayBundle
+    else
+      call ESMF_ArrayBundleSetThisNull(opt_srcArrayBundle, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    if (present(dstArrayBundle)) then
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit, dstArrayBundle, rc)
+      opt_dstArrayBundle = dstArrayBundle
+    else
+      call ESMF_ArrayBundleSetThisNull(opt_dstArrayBundle, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
+    ! Set default flags
+    opt_zeroflag = ESMF_TRUE
+    if (present(zeroflag)) opt_zeroflag = zeroflag
+    opt_checkflag = ESMF_FALSE
+    if (present(checkflag)) opt_checkflag = checkflag
+        
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayBundleSparseMatMul(opt_srcArrayBundle, opt_dstArrayBundle,&
+      routehandle, opt_zeroflag, opt_checkflag, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
   end subroutine ESMF_ArrayBundleSparseMatMul
 !------------------------------------------------------------------------------
 
@@ -1003,6 +1058,49 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
     
   end subroutine ESMF_ArrayBundleSetInitCreated
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleSetThisNull()"
+!BOPI
+! !IROUTINE: ESMF_ArrayBundleSetThisNull - Set ArrayBundle this member to ESMF_NULL_POINTER
+
+! !INTERFACE:
+  subroutine ESMF_ArrayBundleSetThisNull(arraybundle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle), intent(inout)           :: arraybundle
+    integer,                intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Set Array this member to ESMF_NULL_POINTER.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[arraybundle] 
+!          Specified {\tt ESMF\_ArrayBundle} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+    
+    ! Set init code
+    arraybundle%this = ESMF_NULL_POINTER
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_ArrayBundleSetThisNull
 !------------------------------------------------------------------------------
 
 

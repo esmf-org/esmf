@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.1.2.1 2008/04/24 18:04:40 theurich Exp $
+! $Id: user_coupler.F90,v 1.1.2.2 2008/04/24 22:06:26 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -79,8 +79,8 @@ module user_coupler
 
     ! Local variables
     integer :: itemcount, localPet
-    type(ESMF_Array) :: srcArray(2), dstArray
-    type(ESMF_ArrayBundle):: srcArraybundle
+    type(ESMF_Array) :: srcArray(2), dstArray(2)
+    type(ESMF_ArrayBundle):: srcArraybundle, dstArraybundle
     type(ESMF_VM) :: vm
     real(ESMF_KIND_R8):: factorList(10000)
     integer:: i, factorIndexList(2,10000)
@@ -103,14 +103,17 @@ module user_coupler
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get source Array out of import state
-    call ESMF_StateGetArrayBundle(importState, "srcAryBndl", srcArrayBundle, &
+    call ESMF_StateGetArrayBundle(importState, "srcAryBndl", srcArraybundle, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayBundleGet(srcArraybundle, arrayList=srcArray, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get destination Array out of export state
-    call ESMF_StateGetArray(exportState, "array data", dstArray, rc=rc)
+    call ESMF_StateGetArrayBundle(exportState, "dstAryBndl", dstArraybundle, &
+      rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_ArrayBundleGet(dstArraybundle, arrayList=dstArray, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! get localPet
@@ -144,12 +147,14 @@ module user_coupler
     ! Precompute and store an ArraySparseMatMul operation
     if (localPet==0 .or. localPet==4) then
       ! only PET 0 and PET 4 provide factors
-      call ESMF_ArraySparseMatMulStore(srcArray=srcArray(1), dstArray=dstArray, &
+      call ESMF_ArraySparseMatMulStore(&
+        srcArray=srcArray(1), dstArray=dstArray(1), &
         routehandle=routehandle, factorList=factorList, &
         factorIndexList=factorIndexList, rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
     else
-      call ESMF_ArraySparseMatMulStore(srcArray=srcArray(1), dstArray=dstArray, &
+      call ESMF_ArraySparseMatMulStore(&
+        srcArray=srcArray(1), dstArray=dstArray(1), &
         routehandle=routehandle, rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
     endif
@@ -170,8 +175,8 @@ module user_coupler
     integer, intent(out) :: rc
 
     ! Local variables
-    type(ESMF_Array) :: srcArray(2), dstArray
-    type(ESMF_ArrayBundle):: srcArraybundle
+    type(ESMF_Array) :: srcArray(2), dstArray(2)
+    type(ESMF_ArrayBundle):: srcArraybundle, dstArraybundle
 
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -186,12 +191,16 @@ module user_coupler
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get destination Array out of export state
-    call ESMF_StateGetArray(exportState, "array data", dstArray, rc=rc)
+    call ESMF_StateGetArrayBundle(exportState, "dstAryBndl", dstArraybundle, &
+      rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_ArrayBundleGet(dstArraybundle, arrayList=dstArray, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    ! Use ArraySparseMatMul() to take data from srcArray to dstArray
-    call ESMF_ArraySparseMatMul(srcArray=srcArray(1), dstArray=dstArray, &
-      routehandle=routehandle, rc=rc)
+    ! Use ArrayBundleSparseMatMul() to take data
+    ! from srcArraybundle to dstArraybundle
+    call ESMF_ArrayBundleSparseMatMul(srcArrayBundle=srcArraybundle, &
+      dstArrayBundle=dstArraybundle, routehandle=routehandle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
   
     print *, "User Coupler Run returning"

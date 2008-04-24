@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.1.2.2 2008/04/24 18:02:52 theurich Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.1.2.3 2008/04/24 22:06:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -111,6 +111,20 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->print(),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN(c_esmc_arraybundlesparsematmul)(ESMCI::ArrayBundle **srcArraybundle,
+    ESMCI::ArrayBundle **dstArraybundle, ESMC_RouteHandle **routehandle,
+    ESMC_Logical *zeroflag, ESMC_Logical *checkflag, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraybundlesparsematmul()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::ArrayBundle::sparseMatMul(
+      *srcArraybundle, *dstArraybundle, routehandle, *zeroflag, *checkflag),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
