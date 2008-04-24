@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.1.2.1 2008/04/24 00:15:54 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.1.2.2 2008/04/24 18:02:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -88,6 +88,7 @@ module ESMF_ArrayBundleMod
 
 ! - ESMF-internal methods:
   public ESMF_ArrayBundleGetInit
+  public ESMF_ArrayBundleSetInitCreated
 
 
 !EOPI
@@ -96,7 +97,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.1.2.1 2008/04/24 00:15:54 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.1.2.2 2008/04/24 18:02:52 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -184,15 +185,15 @@ contains
     endif
 
     ! Check init status of arguments
-    do i=1, arrayCount
+    do i=1, arrayCount_opt
       ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, arrayList(i), rc)
     enddo
     
     ! Copy C++ pointers of deep objects into a simple ESMF_Pointer array
     ! This is necessary in order to strip off the F90 init check members
     ! when passing into C++
-    allocate(arrayPointerList(arrayCount))
-    do i=1, arrayCount
+    allocate(arrayPointerList(arrayCount_opt))
+    do i=1, arrayCount_opt
       call ESMF_ArrayGetThis(arrayList(i), arrayPointerList(i), localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -205,12 +206,12 @@ contains
     ! Optional name argument requires separate calls into C++
     if (present(name)) then
       len_name = len(name)
-      call c_ESMC_ArrayBundleCreate(arraybundle, arrayPointerList, arrayCount, &
-        name, len_name, localrc)
+      call c_ESMC_ArrayBundleCreate(arraybundle, arrayPointerList, &
+        arrayCount_opt, name, len_name, localrc)
     else
       len_name = 0
-      call c_ESMC_ArrayBundleCreate(arraybundle, arrayPointerList, arrayCount, &
-        "", len_name, localrc)
+      call c_ESMC_ArrayBundleCreate(arraybundle, arrayPointerList, &
+        arrayCount_opt, "", len_name, localrc)
     endif    
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -295,13 +296,15 @@ contains
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_ArrayBundleGet()
-    subroutine ESMF_ArrayBundleGet(arraybundle, arrayCount, arrayList, rc)
+    subroutine ESMF_ArrayBundleGet(arraybundle, arrayCount, arrayList, &
+      name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)                :: arraybundle
-    integer,                intent(out),    optional  :: arrayCount
-    type(ESMF_Array),       intent(inout),  optional  :: arrayList(:)
-    integer,                intent(out),    optional  :: rc
+    type(ESMF_ArrayBundle), intent(in)               :: arraybundle
+    integer,                intent(out),    optional :: arrayCount
+    type(ESMF_Array),       intent(inout),  optional :: arrayList(:)
+    character(len=*),       intent(out),    optional :: name
+    integer,                intent(out),    optional :: rc
 !
 ! !DESCRIPTION:
 !   Get the list of Arrays bundled in an ArrayBundle.
@@ -314,6 +317,8 @@ contains
 !   \item [{[arrayList]}]
 !         Upon return holds a List of Arrays bundled in ArrayBundle. The
 !         argument must be allocated to be at least of size {\tt arrayCount}.
+!   \item [{[name]}]
+!         Name of the ArrayBundle object.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -368,6 +373,13 @@ contains
     ! Garbage collection
     deallocate(opt_arrayPtrList)
 
+    ! Special call to get name out of Base class
+    if (present(name)) then
+      call c_ESMC_GetName(arraybundle, name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   
@@ -948,6 +960,49 @@ contains
     endif
 
     end function ESMF_ArrayBundleGetInit
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleSetInitCreated()"
+!BOPI
+! !IROUTINE: ESMF_ArrayBundleSetInitCreated - Set ArrayBundle init code to "CREATED"
+
+! !INTERFACE:
+  subroutine ESMF_ArrayBundleSetInitCreated(arraybundle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle), intent(inout)           :: arraybundle
+    integer,                intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Set init code in ArrayBundle object to "CREATED".
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[arraybundle] 
+!          Specified {\tt ESMF\_ArrayBundle} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+    
+    ! Set init code
+    ESMF_INIT_SET_CREATED(arraybundle)
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_ArrayBundleSetInitCreated
 !------------------------------------------------------------------------------
 
 

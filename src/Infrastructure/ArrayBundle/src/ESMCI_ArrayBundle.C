@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.1.2.1 2008/04/24 00:15:54 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.1.2.2 2008/04/24 18:02:52 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.1.2.1 2008/04/24 00:15:54 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.1.2.2 2008/04/24 18:02:52 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -122,8 +122,12 @@ ArrayBundle::~ArrayBundle(){
 //EOPI
 //-----------------------------------------------------------------------------
   // garbage collection
-  if (arrayList != NULL)
+  if (arrayList != NULL){
+    if (arrayCreator)
+      for (int i=0; i<arrayCount; i++)
+        Array::destroy(&arrayList[i]);
     delete [] arrayList;
+  }
 }
 //-----------------------------------------------------------------------------
 
@@ -286,6 +290,123 @@ int ArrayBundle::print()const{
   return rc;
 }
 //-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//
+// serialize() and deserialize()
+//
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayBundle::serialize()"
+//BOPI
+// !IROUTINE:  ESMCI::ArrayBundle::serialize - Turn ArrayBundle into byte stream
+//
+// !INTERFACE:
+int ArrayBundle::serialize(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+  char *buffer,          // inout - byte stream to fill
+  int *length,           // inout - buf length
+  int *offset)const{     // inout - original offset, updated to point 
+                         //         to first free byte after current obj info
+//
+// !DESCRIPTION:
+//    Turn info in ArrayBundle class into a stream of bytes.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // Prepare pointer variables of different types
+  char *cp;
+  int *ip;
+
+  // Check if buffer has enough free memory to hold object
+  if ((*length - *offset) < sizeof(ArrayBundle)){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "Buffer too short to add an ArrayBundle object", &rc);
+    return rc;
+  }
+
+  // Serialize the Base class,
+  localrc = ESMC_Base::ESMC_Serialize(buffer, length, offset);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  // Serialize the ArrayBundle with all its Arrays
+  ip = (int *)(buffer + *offset);
+  *ip++ = arrayCount;
+  cp = (char *)ip;
+  *offset = (cp - buffer);
+  for (int i=0; i<arrayCount; i++){
+    localrc = arrayList[i]->serialize(buffer, length, offset);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      return rc;
+  }
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayBundle::deserialize()"
+//BOPI
+// !IROUTINE:  ESMCI::ArrayBundle::deserialize - Turn byte strm into ArrayBundle
+//
+// !INTERFACE:
+int ArrayBundle::deserialize(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+  char *buffer,          // in - byte stream to read
+  int *offset){          // inout - original offset, updated to point 
+                         //         to first free byte after current obj info
+//
+// !DESCRIPTION:
+//    Turn a stream of bytes into an object.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // Prepare pointer variables of different types
+  char *cp;
+  int *ip;
+
+  // Deserialize the Base class
+  localrc = ESMC_Base::ESMC_Deserialize(buffer, offset);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  // Deserialize the ArrayBundle with all its Arrays
+  ip = (int *)(buffer + *offset);
+  arrayCount = *ip++;
+  cp = (char *)ip;
+  *offset = (cp - buffer);
+  arrayList = new Array*[arrayCount];
+  for (int i=0; i<arrayCount; i++){
+    arrayList[i] = new Array;
+    arrayList[i]->deserialize(buffer, offset);
+  }
+  arrayCreator = true;  // deserialize creates local Array objects
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
 
 
 } // namespace ESMCI

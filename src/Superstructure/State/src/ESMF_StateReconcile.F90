@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.42.2.3 2008/04/05 03:14:26 cdeluca Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.42.2.4 2008/04/24 18:02:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,6 +44,7 @@
       use ESMF_BaseMod
       use ESMF_VMMod
       use ESMF_ArrayMod
+      use ESMF_ArrayBundleMod
       use ESMF_FieldMod
       use ESMF_FieldBundleMod
       use ESMF_StateTypesMod
@@ -112,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.42.2.3 2008/04/05 03:14:26 cdeluca Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.42.2.4 2008/04/24 18:02:53 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -323,12 +324,12 @@
         stateitem => state%statep%datalist(i)
         offset = 0
         select case (stateitem%otype%ot)
-           case (ESMF_STATEITEM_BUNDLE%ot)
-             call c_ESMC_GetID(stateitem%datap%bp%btypep, si%idsend(i), localrc)
-             call c_ESMC_GetVMId(stateitem%datap%bp%btypep, si%vmidsend(i), localrc)
-             si%objsend(i) = ESMF_ID_BUNDLE%objectID
+           case (ESMF_STATEITEM_FIELDBUNDLE%ot)
+             call c_ESMC_GetID(stateitem%datap%fbp%btypep, si%idsend(i), localrc)
+             call c_ESMC_GetVMId(stateitem%datap%fbp%btypep, si%vmidsend(i), localrc)
+             si%objsend(i) = ESMF_ID_FIELDBUNDLE%objectID
              bptr => si%blindsend(:,i)
-             call ESMF_FieldBundleSerialize(stateitem%datap%bp, bptr, bufsize, &
+             call ESMF_FieldBundleSerialize(stateitem%datap%fbp, bptr, bufsize, &
                                        offset, localrc)
 !!DEBUG "serialized bundle, obj=", si%objsend(i), " id=", si%idsend(i)
 
@@ -349,6 +350,15 @@
              call c_ESMC_ArraySerialize(stateitem%datap%ap, bptr(1), &
                                        bufsize, offset, localrc)
 !!DEBUG "serialized array, obj=", si%objsend(i), " id=", si%idsend(i)
+
+           case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
+             call c_ESMC_GetID(stateitem%datap%abp, si%idsend(i), localrc)
+             call c_ESMC_GetVMId(stateitem%datap%abp, si%vmidsend(i), localrc)
+             si%objsend(i) = ESMF_ID_ARRAYBUNDLE%objectID
+             bptr => si%blindsend(:,i)
+             call c_ESMC_ArrayBundleSerialize(stateitem%datap%abp, bptr(1), &
+                                       bufsize, offset, localrc)
+!!DEBUG "serialized arraybundle, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_STATE%ot)
              call c_ESMC_GetID(stateitem%datap%spp, si%idsend(i), localrc)
@@ -539,6 +549,7 @@
     type(ESMF_FieldBundle) :: bundle
     type(ESMF_Field) :: field
     type(ESMF_Array) :: array
+    type(ESMF_ArrayBundle) :: arraybundle
     character(len=ESMF_MAXSTR) :: thisname
     integer(ESMF_KIND_I4), pointer, dimension(:) :: bptr
     logical :: ihave
@@ -748,7 +759,7 @@
 !!DEBUG " need to create local proxy object"
                 offset = 0  
                 select case (si%objrecv(k))
-                   case (ESMF_ID_BUNDLE%objectID)
+                   case (ESMF_ID_FIELDBUNDLE%objectID)
 !!DEBUG "need to create proxy bundle, remote id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
                     bundle = ESMF_FieldBundleDeserialize(vm, bptr, offset, localrc)
@@ -779,6 +790,19 @@
                     call ESMF_StateAddArray(state, array, proxyflag=.true., &
                       rc=localrc)
 !!DEBUG "array added to state"
+
+                   case (ESMF_ID_ARRAYBUNDLE%objectID)
+!!DEBUG "need to create proxy arraybundle, remote id=", si%idrecv(k)
+                    bptr => si%blindrecv(:,k)
+                    call c_ESMC_ArrayBundleDeserialize(arraybundle, bptr, &
+                      offset, localrc)
+                    ! Set init code
+                    call ESMF_ArrayBundleSetInitCreated(arraybundle, rc=localrc)
+!!DEBUG "created arraybundle, ready to set id and add to local state"
+                    call c_ESMC_SetVMId(arraybundle, si%vmidrecv(k), localrc)
+                    call ESMF_StateAddArrayBundle(state, arraybundle, &
+                      proxyflag=.true., rc=localrc)
+!!DEBUG "arraybundle added to state"
 
                    case (ESMF_ID_STATE%objectID)
 !!DEBUG "need to create proxy substate, remote id=", si%idrecv(k)

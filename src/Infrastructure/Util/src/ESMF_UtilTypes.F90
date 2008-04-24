@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.56.2.6 2008/04/05 03:13:51 cdeluca Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.56.2.7 2008/04/24 18:02:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -227,23 +227,19 @@
          ESMF_ID_CLOCK = ESMF_ObjectID(8, "ESMF_Clock"), &
          ESMF_ID_ARRAYSPEC = ESMF_ObjectID(9, "ESMF_ArraySpec"), &
          ESMF_ID_LOCALARRAY = ESMF_ObjectID(10, "ESMF_LocalArray"), &
-         ESMF_ID_ARRAYDATAMAP = ESMF_ObjectID(11, "ESMF_ArrayDataMap"), &
+         ESMF_ID_ARRAYBUNDLE = ESMF_ObjectID(11, "ESMF_ArrayBundle"), &
          ESMF_ID_VM = ESMF_ObjectID(12, "ESMF_VM"), &
          ESMF_ID_DELAYOUT = ESMF_ObjectID(13, "ESMF_DELayout"), &
          ESMF_ID_CONFIG = ESMF_ObjectID(14, "ESMF_Config"), &
          ESMF_ID_ARRAY = ESMF_ObjectID(16, "ESMF_Array"), &
          ESMF_ID_INTERNDG = ESMF_ObjectID(17, "ESMF_InternDG"), &
-         ESMF_ID_PHYSGRID = ESMF_ObjectID(18, "ESMF_PhysGrid"), &
-         ESMF_ID_IGRID = ESMF_ObjectID(19, "ESMF_IGrid"), &
-         ESMF_ID_EXCHANGEPACKET = ESMF_ObjectID(20, "ESMF_ExchangePacket"), &
          ESMF_ID_COMMTABLE = ESMF_ObjectID(21, "ESMF_CommTable"), &
          ESMF_ID_ROUTETABLE = ESMF_ObjectID(22, "ESMF_RouteTable"), &
          ESMF_ID_ROUTE = ESMF_ObjectID(23, "ESMF_Route"), &
          ESMF_ID_ROUTEHANDLE = ESMF_ObjectID(24, "ESMF_RouteHandle"), &
          ESMF_ID_FIELDDATAMAP = ESMF_ObjectID(25, "ESMF_FieldDataMap"), &
          ESMF_ID_FIELD = ESMF_ObjectID(26, "ESMF_Field"), &
-         ESMF_ID_BUNDLEDATAMAP = ESMF_ObjectID(27, "ESMF_FieldBundleDataMap"), &
-         ESMF_ID_BUNDLE = ESMF_ObjectID(28, "ESMF_FieldBundle"), &
+         ESMF_ID_FIELDBUNDLE = ESMF_ObjectID(28, "ESMF_FieldBundle"), &
          ESMF_ID_TRANSFORMVALUES = ESMF_ObjectID(29, "ESMF_TransformValues"), &
          ESMF_ID_REGRID = ESMF_ObjectID(30, "ESMF_Regrid"), &
          ESMF_ID_TRANSFORM = ESMF_ObjectID(31, "ESMF_Transform"), &
@@ -535,13 +531,12 @@
       public ESMF_ID_BASE, ESMF_ID_IOSPEC, ESMF_ID_LOGERR, ESMF_ID_TIME
       public ESMF_ID_CALENDAR, ESMF_ID_TIMEINTERVAL, ESMF_ID_ALARM
       public ESMF_ID_CLOCK, ESMF_ID_ARRAYSPEC, ESMF_ID_LOCALARRAY
-      public ESMF_ID_ARRAYDATAMAP, ESMF_ID_VM, ESMF_ID_DELAYOUT
+      public ESMF_ID_ARRAYBUNDLE, ESMF_ID_VM, ESMF_ID_DELAYOUT
       public ESMF_ID_CONFIG, ESMF_ID_ARRAY
       public ESMF_ID_INTERNARRAY, ESMF_ID_INTERNDG
-      public ESMF_ID_PHYSGRID, ESMF_ID_IGRID, ESMF_ID_EXCHANGEPACKET
       public ESMF_ID_COMMTABLE, ESMF_ID_ROUTETABLE, ESMF_ID_ROUTE
       public ESMF_ID_ROUTEHANDLE, ESMF_ID_FIELDDATAMAP, ESMF_ID_FIELD
-      public ESMF_ID_BUNDLEDATAMAP, ESMF_ID_BUNDLE, ESMF_ID_TRANSFORMVALUES
+      public ESMF_ID_FIELDBUNDLE, ESMF_ID_TRANSFORMVALUES
       public ESMF_ID_REGRID, ESMF_ID_TRANSFORM, ESMF_ID_STATE
       public ESMF_ID_GRIDCOMPONENT, ESMF_ID_CPLCOMPONENT, ESMF_ID_COMPONENT
 
