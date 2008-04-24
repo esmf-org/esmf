@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.36.2.4 2008/04/04 16:17:57 theurich Exp $ 
+# $Id: makefile,v 1.36.2.5 2008/04/24 18:04:39 theurich Exp $ 
 
 ALL: build_system_tests
 
@@ -14,6 +14,7 @@ DIRS      = ESMF_CompCreate \
             ESMF_ArrayRedist \
             ESMF_ArrayRedistMPMD \
             ESMF_DirectCoupling \
+            ESMF_ArrayBundleSparseMatMul \
             ESMF_DistDir \
             ESMF_FieldSparseMatMul
 
