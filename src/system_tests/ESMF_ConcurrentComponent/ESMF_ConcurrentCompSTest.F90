@@ -1,10 +1,10 @@
-! $Id: ESMF_ConcurrentCompSTest.F90,v 1.1.2.1 2008/04/24 21:42:37 feiliu Exp $
+! $Id: ESMF_ConcurrentCompSTest.F90,v 1.1.2.2 2008/04/24 21:48:18 feiliu Exp $
 !
 ! System test code ConcurrentComponent
 !  Description on Sourceforge under System Test #79497
 
 !-------------------------------------------------------------------------
-!SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 
