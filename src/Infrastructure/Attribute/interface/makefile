@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.4 2008/04/02 14:42:32 rokuingh Exp $ 
+# $Id: makefile,v 1.5 2008/04/24 21:32:07 rokuingh Exp $ 
 
 ALL: build_here 
 
 SOURCEC	  = ESMC_Attribute_F.C
-SOURCEF	  = ESMF_Attribute.F90
+SOURCEF	  = 
 SOURCEH	  = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
