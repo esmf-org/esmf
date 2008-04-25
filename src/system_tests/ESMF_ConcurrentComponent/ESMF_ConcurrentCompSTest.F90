@@ -1,4 +1,4 @@
-! $Id: ESMF_ConcurrentCompSTest.F90,v 1.1.2.4 2008/04/25 19:16:14 feiliu Exp $
+! $Id: ESMF_ConcurrentCompSTest.F90,v 1.1.2.5 2008/04/25 20:28:54 feiliu Exp $
 !
 ! System test code ConcurrentComponent
 !  Description on Sourceforge under System Test #79497
@@ -21,7 +21,7 @@
 ! Component 1 exports data to the coupler which then redistributes the
 ! data to component 2. Component 1 and 2 runs concurrently because they
 ! reside on different PETs. The coupler also runs concurrently across PETs, however
-! on each individual PET, it runs sequentially. In another word, each PET
+! on each individual PET, it runs sequentially. In other words, each PET
 ! has a copy of the coupler that executes different code simultaneously.
 ! So this pattern constitutes a SPMD concurrency model.
 !
