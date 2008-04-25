@@ -60,6 +60,9 @@ static const MeshObjTopo *vtk2topo(UInt vtk_type, UInt sdim) {
       case VTK_QUAD:
         return GetTopo("SHELL");
 
+      case VTK_TRIANGLE:
+        return GetTopo("SHELL3");
+
       default:
         Throw() "vtk type unknown:" << vtk_type;
     }

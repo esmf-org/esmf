@@ -24,6 +24,11 @@ class CommReg;
 // Mesh must be in a consistent state before this is called
 bool Rebalance(Mesh &mesh);
 
+
+// Or you can do this in two steps. 1) get the comm. 2) run the comm
+void GetRebalanceComm(Mesh &mesh, CommReg &comm);
+bool Rebalance(Mesh &mesh, CommReg &comm);
+
 } // namespace
 
 #endif

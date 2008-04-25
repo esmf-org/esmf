@@ -84,20 +84,11 @@ static void resolve_rebalance_ownership(Mesh &mesh) {
   }
 }
 
-/*--------------------------------------------------------*/
-// Rebalance mesh
-/*--------------------------------------------------------*/
-bool Rebalance(Mesh &mesh) {
-  Trace __trace("Rebalance(Mesh &mesh)");
-  
-  CommReg mig("_rebalance_migration", mesh, mesh);
+void GetRebalanceComm(Mesh &mesh, CommReg &mig) {
+  form_rebalance_comm(mesh, mig);
+}
 
-  ThrowRequire(mesh.is_committed());
-
-  if (!form_rebalance_comm(mesh, mig)) {
-    //std::cout << "No rebalance!!";
-    return false;
-  }
+bool Rebalance(Mesh &mesh, CommReg &mig) {
 
 #ifdef REBAL_DEBUG
   Par::Out() << "Rebalance comm:" << std::endl;
@@ -192,6 +183,25 @@ bool Rebalance(Mesh &mesh) {
   mesh.CompactData();
 
   return true;
+}
+
+/*--------------------------------------------------------*/
+// Rebalance mesh
+/*--------------------------------------------------------*/
+bool Rebalance(Mesh &mesh) {
+  Trace __trace("Rebalance(Mesh &mesh)");
+  
+  CommReg mig("_rebalance_migration", mesh, mesh);
+
+  ThrowRequire(mesh.is_committed());
+
+  if (!form_rebalance_comm(mesh, mig)) {
+    //std::cout << "No rebalance!!";
+    return false;
+  }
+
+  return Rebalance(mesh, mig);
+
 }
 
 static void add_obj_children(MeshObj &obj, std::vector<CommRel::CommNode> &cnodes, UInt P) {

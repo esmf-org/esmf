@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.20 2008/04/22 20:48:23 dneckels Exp $
+// $Id: ESMC_GridToMesh.C,v 1.21 2008/04/25 18:07:06 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -82,6 +82,9 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh, const std::
 
   Grid &grid = const_cast<Grid&>(grid_);
 
+
+ bool is_sphere = grid.isSphere();
+
  try {
 
    // *** Grid error checking here ***
@@ -98,8 +101,8 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh, const std::
    UInt sdim = grid.getDimCount();
 
 
-   if (grid.isSphere()) {
-     std::cout << "g2m, is sphere=1" << std::endl;
+   if (is_sphere) {
+     //std::cout << "g2m, is sphere=1" << std::endl;
      sdim = 3;
    }
 
@@ -163,7 +166,7 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
        
        node->set_owner(me);  // Set owner to this proc
        
-       UInt nodeset = 1;   // Do we need to partition the nodes in any sets?
+       UInt nodeset = is_sphere ? gni->getPoleID() : 0;   // Do we need to partition the nodes in any sets?
        mesh.add_node(node, nodeset);
        
        // If Shared add to list to use DistDir on
@@ -210,7 +213,7 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
          
          node->set_owner(std::numeric_limits<UInt>::max());  // Set owner to unknown (will have to ghost later)
          
-         UInt nodeset = 1;   // Do we need to partition the nodes in any sets?
+         UInt nodeset = is_sphere ? gni->getPoleID() : 0;   // Do we need to partition the nodes in any sets?
          mesh.add_node(node, nodeset);
          
          // Node must be shared
@@ -343,7 +346,7 @@ Par::Out() << std::endl;
      gni->getCoord(c);
 
      double DEG2RAD = M_PI/180.0;
-     if (grid.isSphere()) {
+     if (is_sphere) {
 
          double lon = c[0];
           double lat = c[1];

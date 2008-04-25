@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSphereRegridEx.F90,v 1.2 2008/04/22 20:48:08 dneckels Exp $
+! $Id: ESMF_FieldSphereRegridEx.F90,v 1.3 2008/04/25 18:07:06 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@ program ESMF_FieldSphereRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.2 2008/04/22 20:48:08 dneckels Exp $'
+    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.3 2008/04/25 18:07:06 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -112,8 +112,9 @@ program ESMF_FieldSphereRegridEx
   rc=ESMF_SUCCESS
 
   ! Establish the resolution of the grids
-  dst_nx = 384
-  dst_ny = 320
+  !dst_nx = 284
+  dst_nx = 254
+  dst_ny = 200
 
   src_nx = 75
   src_ny = 50

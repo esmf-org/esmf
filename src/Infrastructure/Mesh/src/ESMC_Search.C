@@ -458,6 +458,12 @@ static int found_func(BOX3DNODE *n, void *c, void *y) {
   si.investigated = true;
   double pcoord[3];
   double dist;
+
+/*
+if (si.snr.node->get_id() == 54885 || si.snr.node->get_id() == 7599) {
+std::cout << "found it" << std::endl;
+}
+*/
   
   const Kernel &ker = *elem.GetKernel();
   

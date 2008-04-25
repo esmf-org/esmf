@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.7 2008/04/21 21:40:34 dneckels Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.8 2008/04/25 18:07:07 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -33,6 +33,7 @@
 #include <Mesh/include/ESMC_MeshRead.h>
 #include <Mesh/include/ESMC_Exception.h>
 #include <Mesh/include/ESMC_Interp.h>
+#include <Mesh/include/ESMC_Extrapolation.h>
 
 #include <iostream>
 
@@ -81,16 +82,27 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     if (*regridScheme == ESMF_REGRID_SCHEME_FULL3D) {
       srcgrid.setSphere();
       dstgrid.setSphere();
-      std::cout << "Regrid setting sphere!!" << std::endl;
+      //std::cout << "Regrid setting sphere!!" << std::endl;
     }
 
     ESMCI::GridToMesh(srcgrid, *srcstaggerLoc, srcmesh, std::vector<ESMCI::Array*>());
     ESMCI::GridToMesh(dstgrid, *dststaggerLoc, dstmesh, std::vector<ESMCI::Array*>());
 
-/*
+    // If a spherical grid, mesh the poles, if they exist
+    IWeights pole_constraints;
+    if (srcgrid.isSphere()) {
+
+      UInt constraint_id = srcmesh.DefineContext("pole_constraints");
+
+      // Why 7?  Ask Bob.
+      for (UInt i = 1; i <= 7; ++i) {
+        MeshAddPole(srcmesh, i, constraint_id, pole_constraints);
+      }
+
+    }
+
     WriteMesh(srcmesh, "src_grid");
     WriteMesh(dstmesh, "dst_grid");
-*/
 
     // Now we have the meshes, so go ahead and calc bilinear weights.
     // Since bilin needs a field, just do coords.
@@ -106,10 +118,21 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
  
     interp(0, wts);
 
+    // Remove pole constraint by condensing out
+    if (srcgrid.isSphere()) {
+
+      // Get the pole matrix on the right processors
+      wts.GatherToCol(pole_constraints);
+
+      // Take pole constraint out of matrix
+      wts.AssimilateConstraints(pole_constraints);
+
+    }
+
     // Remove non-locally owned weights (assuming destination mesh decomposition)
     wts.Prune(dstmesh, 0);
 
-    wts.Print(Par::Out());
+    //wts.Print(Par::Out());
 
     // We have the weights, now set up the sparsemm object
 
