@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSphereRegridEx.F90,v 1.3 2008/04/25 18:07:06 dneckels Exp $
+! $Id: ESMF_FieldSphereRegridEx.F90,v 1.4 2008/04/25 18:30:59 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@ program ESMF_FieldSphereRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.3 2008/04/25 18:07:06 dneckels Exp $'
+    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.4 2008/04/25 18:30:59 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -229,11 +229,21 @@ program ESMF_FieldSphereRegridEx
      do i2=clbnd(2),cubnd(2)
         fptrXC(i1,i2) = -180. + REAL((i1-1)*src_dx)
         fptrYC(i1,i2) = -90. + REAL((i2-1)*src_dy + 0.5*src_dy)
-        x = fptrXC(i1, i2)*DEG2RAD
-        y = fptrYC(i1,i2)*DEG2RAD
+        x = fptrXC(i1, i2)
+        y = fptrYC(i1,i2)
      
-       ! Function
-        fptr(i1, i2) = cos(2*x)*cos(a) + sin(2*x)*cos(3*y)*sin(a)
+       ! Function.  The X component of a windfield over a
+
+        !fptr(i1, i2) = cos(2*x)*cos(a) + sin(2*x)*cos(3*y)*sin(a)
+        theta = DEG2RAD*x
+        phi = DEG2RAD*(90.-y)
+        x = cos(theta)*sin(phi)
+        y = sin(theta)*sin(phi)
+        z = cos(phi)
+
+        fptr(i1,i2) = sin(3*3.14*x) + cos(2*3.14*y) + z*z;
+
+
      enddo
      enddo
 
