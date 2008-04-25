@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.21.2.8 2008/04/17 22:13:22 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.21.2.9 2008/04/25 15:56:18 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -39,7 +39,9 @@
 
 
 // Eventually move this to ESMCI_Util.h
-enum ESMC_GridStatus {ESMC_GRIDSTATUS_NOT_READY=1,
+enum ESMC_GridStatus {ESMC_GRIDSTATUS_INVALID=-1,
+                      ESMC_GRIDSTATUS_UNINIT,
+                      ESMC_GRIDSTATUS_NOT_READY,
 		      ESMC_GRIDSTATUS_PROXY_READY,
 		      ESMC_GRIDSTATUS_SHAPE_READY
 };

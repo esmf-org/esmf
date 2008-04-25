@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.23.2.9 2008/04/17 22:13:22 oehmke Exp $
+// $Id: ESMCI_Grid_F.C,v 1.23.2.10 2008/04/25 15:56:18 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -379,6 +379,18 @@ extern "C" {
     if (_rc!=NULL) *_rc = ESMF_SUCCESS;
 }
 
+
+  ///////////////////////////////////////////////////////////////////////////////////
+
+  void FTN(c_esmc_gridgetstatus)(ESMCI::Grid **_grid, 
+                           ESMC_GridStatus *_status){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridgetstatus()"
+
+    // Get Grid pointer
+    *_status=(*_grid)->getStatus();
+
+}
 
 
   ///////////////////////////////////////////////////////////////////////////////////
