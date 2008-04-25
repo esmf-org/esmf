@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.1.2.3 2008/04/24 22:06:26 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.1.2.4 2008/04/25 15:39:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -98,7 +98,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.1.2.3 2008/04/24 22:06:26 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.1.2.4 2008/04/25 15:39:59 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -269,7 +269,7 @@ contains
     localrc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit, arraybundle, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
     
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_ArrayBundleDestroy(arraybundle, localrc)
@@ -336,7 +336,7 @@ contains
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit, arraybundle, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
     
     ! Deal with (optional) array arguments
     if (present(arrayList)) then
@@ -425,7 +425,7 @@ contains
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit, arraybundle, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
     
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_ArrayBundlePrint(arraybundle, localrc)
@@ -893,9 +893,9 @@ contains
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments, deal with optional ArrayBundle args
-    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit, routehandle, rc)
     if (present(srcArrayBundle)) then
-      ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit, srcArrayBundle, rc)
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, srcArrayBundle, rc)
       opt_srcArrayBundle = srcArrayBundle
     else
       call ESMF_ArrayBundleSetThisNull(opt_srcArrayBundle, localrc)
@@ -903,7 +903,7 @@ contains
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     if (present(dstArrayBundle)) then
-      ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit, dstArrayBundle, rc)
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, dstArrayBundle, rc)
       opt_dstArrayBundle = dstArrayBundle
     else
       call ESMF_ArrayBundleSetThisNull(opt_dstArrayBundle, localrc)
@@ -965,7 +965,7 @@ contains
     localrc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit, arraybundle, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
     
     ! Call into the C++ interface, which will sort out optional arguments.
     !todo: call c_ESMC_ArrayBundleValidate(arraybundle, localrc)
