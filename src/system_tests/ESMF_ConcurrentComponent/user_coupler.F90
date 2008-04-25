@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.1.2.1 2008/04/24 21:42:37 feiliu Exp $
+! $Id: user_coupler.F90,v 1.1.2.2 2008/04/25 17:34:07 feiliu Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -97,7 +97,7 @@
   
         ! Since the components we are coupling between are running concurrently,
         ! they have each separately created ESMF objects.   We are planning to
-        ! use a communications call (Regrid) here, so first we must make a new
+        ! use a communications call (Redist) here, so first we must make a new
         ! call to reconcile the object lists in all the import and export states.
   
         ! New routine:
@@ -121,11 +121,11 @@
         call ESMF_StateGet(importState, itemcount=itemcount, rc=status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        print *, "Import State contains ", itemcount, " items."
+        !print *, "Import State contains ", itemcount, " items."
         call ESMF_StateGet(exportState, itemcount=itemcount, rc=status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        print *, "Export State contains ", itemcount, " items."
+        !print *, "Export State contains ", itemcount, " items."
 
         ! Get the src and dst arrays
         call ESMF_StateGetArray(importState, "sorted_data1", sorted_data1, rc=status)       
@@ -174,6 +174,8 @@
             ESMF_CONTEXT, rc)) return
 
         ! preform data redistribution
+        ! deliver sorted result from component 1 to component 2
+        ! component 2 will verify component 1 result
         call ESMF_ArrayRedist(sorted_data1, sorted_data2, redistRH12, &
             ESMF_TRUE, rc=status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -212,4 +214,3 @@
     end module user_coupler
     
 !\end{verbatim}
-    

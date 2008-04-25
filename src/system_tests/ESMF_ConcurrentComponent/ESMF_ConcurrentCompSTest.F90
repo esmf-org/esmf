@@ -1,4 +1,4 @@
-! $Id: ESMF_ConcurrentCompSTest.F90,v 1.1.2.2 2008/04/24 21:48:18 feiliu Exp $
+! $Id: ESMF_ConcurrentCompSTest.F90,v 1.1.2.3 2008/04/25 17:34:07 feiliu Exp $
 !
 ! System test code ConcurrentComponent
 !  Description on Sourceforge under System Test #79497
@@ -13,7 +13,30 @@
 ! !DESCRIPTION:
 ! System test ConcurrentComponent.  
 !   Concurrent, Concurrent Component test.  
+!   This system test demonstrates the use of ESMF coupling framework
+! to couple 2 gridded components with 1 coupler component. The coupler
+! component runs on the union of the PETs that are exclusively allocated
+! to each individual gridded component. 
 !
+! Component 1 exports data to the coupler which then redistributes the
+! data to component 2. Component 1 and 2 runs concurrently because they
+! reside on different PETs. The coupler also runs concurrently across PETs, however
+! on each individual PET, it runs sequentially. In another word, each PET
+! has a copy of the coupler that executes different code simultaneously.
+! So this pattern constitutes a SPMD concurrency model.
+!
+! It's possible to reschedule the component execution by introducing wait
+! and block semantic. Components on exclusive sets
+! of PETs can be rescheduled to execute sequentially. 
+!
+! This system test exercises the ESMF coupling framework to perform
+! parallel quick sort can be useful in search engine, gnome sequencing, etc. 
+! The sorting result of component 1 is redistributed to component 2. Component
+! 2 verifies the sorting result.
+!
+! This system test also captures the typical design of a simple hierarchical 
+! climate model with a coupler component that couples individual gridded components
+! (e.g. atmosphere, land, and ocean).
 !
 !\begin{verbatim}
 
@@ -21,6 +44,8 @@
 
 #include <ESMF_Macros.inc>
 #include <ESMF_Conf.inc>
+#include <ESMF.h>
+#define ESMF_METHOD "ConcurrentComponent"
 
     ! ESMF Framework module
     use ESMF_Mod
@@ -33,7 +58,7 @@
     implicit none
     
     ! Local variables
-    integer :: pet_id, npets, rc
+    integer :: pet_id, npets, rc, localrc
     character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
     type(ESMF_VM):: vm
     type(ESMF_State) :: c1exp, c2imp
@@ -69,33 +94,45 @@
 !-------------------------------------------------------------------------
 !
     ! Initialize framework and get back default global VM
-    call ESMF_Initialize(vm=vm, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    call ESMF_Initialize(vm=vm, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
     ! Get number of PETs we are running with
-    call ESMF_VMGet(vm, petCount=npets, localPET=pet_id, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    call ESMF_VMGet(vm, petCount=npets, localPET=pet_id, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
     if (npets .lt. 8) then
       print *, "This system test needs to run at least 8-way, current np = ", &
                npets
-      goto 10
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     endif
    
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
-    comp1 = ESMF_GridCompCreate(name=cname1, petList=(/ 6,2,4,0 /), rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    comp1 = ESMF_GridCompCreate(name=cname1, petList=(/ 6,2,4,0 /), rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     !print *, "Created component ", trim(cname1), "rc =", rc
 
     cname2 = "user model 2"
-    comp2 = ESMF_GridCompCreate(name=cname2, petList=(/ 5,1,3 /), rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    comp2 = ESMF_GridCompCreate(name=cname2, petList=(/ 5,1,3 /), rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     !print *, "Created component ", trim(cname2), "rc =", rc
 
     cplname = "user one-way coupler"
-    cpl = ESMF_CplCompCreate(name=cplname, petList=(/ 0,1,2,3,4,5,6 /), rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    cpl = ESMF_CplCompCreate(name=cplname, petList=(/ 0,1,2,3,4,5,6 /), rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     !print *, "Created component ", trim(cplname), ", rc =", rc
 
     !print *, "Comp Creates finished"
@@ -105,15 +142,19 @@
 !  Register section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-    call ESMF_GridCompSetServices(comp1, userm1_register, rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    call ESMF_GridCompSetServices(comp1, userm1_register, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     !print *, "Comp SetServices finished, rc= ", rc
 
-    call ESMF_GridCompSetServices(comp2, userm2_register, rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    call ESMF_GridCompSetServices(comp2, userm2_register, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     !print *, "Comp SetServices finished, rc= ", rc
 
-    call ESMF_CplCompSetServices(cpl, usercpl_register, rc)
+    call ESMF_CplCompSetServices(cpl, usercpl_register, rc=localrc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     !print *, "Comp SetServices finished, rc= ", rc
 
@@ -124,25 +165,25 @@
 !-------------------------------------------------------------------------
     ! initialize calendar to be Gregorian type
     gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
-                                            ESMF_CAL_GREGORIAN, rc)
+                                            ESMF_CAL_GREGORIAN, rc=localrc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! initialize time interval to 4 hours
-    call ESMF_TimeIntervalSet(timeStep, h=4, rc=rc)
+    call ESMF_TimeIntervalSet(timeStep, h=4, rc=localrc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! initialize start time to 5/01/2003
     call ESMF_TimeSet(startTime, yy=2003, mm=5, dd=1, &
-                      calendar=gregorianCalendar, rc=rc)
+                      calendar=gregorianCalendar, rc=localrc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! initialize stop time to 5/02/2003
     call ESMF_TimeSet(stopTime, yy=2003, mm=5, dd=2, &
-                      calendar=gregorianCalendar, rc=rc)
+                      calendar=gregorianCalendar, rc=localrc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! initialize the clock with the above values
-    clock = ESMF_ClockCreate("Clock 1", timeStep, startTime, stopTime, rc=rc)
+    clock = ESMF_ClockCreate("Clock 1", timeStep, startTime, stopTime, rc=localrc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
 !-------------------------------------------------------------------------
@@ -151,20 +192,20 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
  
-    c1exp = ESMF_StateCreate("comp1 export", ESMF_STATE_EXPORT, rc=rc)
+    c1exp = ESMF_StateCreate("comp1 export", ESMF_STATE_EXPORT, rc=localrc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_GridCompInitialize(comp1, exportState=c1exp, clock=clock, rc=rc)
+    call ESMF_GridCompInitialize(comp1, exportState=c1exp, clock=clock, rc=localrc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     !print *, "Comp 1 Initialize finished, rc =", rc
  
-    c2imp = ESMF_StateCreate("comp2 import", ESMF_STATE_IMPORT, rc=rc)
+    c2imp = ESMF_StateCreate("comp2 import", ESMF_STATE_IMPORT, rc=localrc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_GridCompInitialize(comp2, importState=c2imp, clock=clock, rc=rc)
+    call ESMF_GridCompInitialize(comp2, importState=c2imp, clock=clock, rc=localrc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     !print *, "Comp 2 Initialize finished, rc =", rc
  
     ! note that the coupler's import is comp1's export
-    call ESMF_CplCompInitialize(cpl, c1exp, c2imp, clock=clock, rc=rc)
+    call ESMF_CplCompInitialize(cpl, c1exp, c2imp, clock=clock, rc=localrc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     !print *, "Coupler Initialize finished, rc =", rc
 
@@ -174,7 +215,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-    do while (.not. ESMF_ClockIsStopTime(clock, rc))
+    do while (.not. ESMF_ClockIsStopTime(clock, rc=localrc))
     
       !print *, "PET ", pet_id, " starting time step..."
 
@@ -182,7 +223,7 @@
       ! comp1 and comp2. The following ESMF_GridCompWait() call will block
       ! all PETs until comp2 has returned. Consequently comp1 will not be
       ! run until comp2 has returned.
-      !call ESMF_GridCompWait(comp2, blockingflag=ESMF_BLOCKING, rc=rc)
+      !call ESMF_GridCompWait(comp2, blockingflag=ESMF_BLOCKING, rc=localrc)
       !print *, "Comp 2 Wait returned, rc =", rc
       !if (rc .ne. ESMF_SUCCESS) goto 10
     
@@ -191,7 +232,7 @@
       ! with the second component since comp1 and comp2 are defined on 
       ! exclusive sets of PETs
       !print *, "I am calling into GridCompRun(comp1)"
-      call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, rc=rc)
+      call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, rc=localrc)
       !print *, "Comp 1 Run returned, rc =", rc
       if (rc .ne. ESMF_SUCCESS) goto 10
 
@@ -200,10 +241,10 @@
       ! will block all PETs until comp1 and comp2 have returned. Consequently 
       ! the coupler component will not be run until comp1 and comp2 have 
       ! returned.
-      !call ESMF_GridCompWait(comp1, blockingflag=ESMF_BLOCKING, rc=rc)
+      !call ESMF_GridCompWait(comp1, blockingflag=ESMF_BLOCKING, rc=localrc)
       !print *, "Comp 1 Wait returned, rc =", rc
       !if (rc .ne. ESMF_SUCCESS) goto 10
-      !call ESMF_GridCompWait(comp2, blockingflag=ESMF_BLOCKING, rc=rc)
+      !call ESMF_GridCompWait(comp2, blockingflag=ESMF_BLOCKING, rc=localrc)
       !print *, "Comp 2 Wait returned, rc =", rc
       !if (rc .ne. ESMF_SUCCESS) goto 10
 
@@ -216,7 +257,7 @@
       ! calls contained in the user written coupler methods will indirectly
       ! lead to inter PET synchronization of the coupler component.
       !print *, "I am calling into CplCompRun(cpl)"
-      call ESMF_CplCompRun(cpl, c1exp, c2imp, clock=clock, rc=rc)
+      call ESMF_CplCompRun(cpl, c1exp, c2imp, clock=clock, rc=localrc)
       !print *, "Coupler Run returned, rc =", rc
       if (rc .ne. ESMF_SUCCESS) goto 10
 
@@ -224,7 +265,7 @@
       ! comp1 and comp2. The following ESMF_GridCompWait() call will block
       ! all PETs until comp1 has returned. Consequently comp2 will not be
       ! run until comp2 has returned.
-      !call ESMF_GridCompWait(comp1, blockingflag=ESMF_BLOCKING, rc=rc)
+      !call ESMF_GridCompWait(comp1, blockingflag=ESMF_BLOCKING, rc=localrc)
       !print *, "Comp 1 Wait returned, rc =", rc
       !if (rc .ne. ESMF_SUCCESS) goto 10
 
@@ -233,13 +274,13 @@
       ! that are part of comp1 will not block in the following call but proceed
       ! to the next loop increment, executing comp1 concurrently with comp2.
       !print *, "I am calling into GridCompRun(comp2)"
-      call ESMF_GridCompRun(comp2, importState=c2imp, clock=clock, rc=rc)
+      call ESMF_GridCompRun(comp2, importState=c2imp, clock=clock, rc=localrc)
       !print *, "Comp 2 Run returned, rc =", rc
       if (rc .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_ClockAdvance(clock, rc=rc)
+      call ESMF_ClockAdvance(clock, rc=localrc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      !call ESMF_ClockPrint(clock, rc=rc)
+      !call ESMF_ClockPrint(clock, rc=localrc)
       
       !print *, "... time step finished on PET ", pet_id, "."
 
@@ -252,15 +293,15 @@
 !-------------------------------------------------------------------------
 !     Print result
 
-    call ESMF_GridCompFinalize(comp1, exportState=c1exp, clock=clock, rc=rc)
+    call ESMF_GridCompFinalize(comp1, exportState=c1exp, clock=clock, rc=localrc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     !print *, "Comp 1 Finalize finished, rc =", rc
 
-    call ESMF_GridCompFinalize(comp2, importState=c2imp, clock=clock, rc=rc)
+    call ESMF_GridCompFinalize(comp2, importState=c2imp, clock=clock, rc=localrc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     !print *, "Comp 2 Finalize finished, rc =", rc
 
-    call ESMF_CplCompFinalize(cpl, c1exp, c2imp, clock=clock, rc=rc)
+    call ESMF_CplCompFinalize(cpl, c1exp, c2imp, clock=clock, rc=localrc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     !print *, "Coupler Finalize finished, rc =", rc
 
@@ -275,15 +316,15 @@
 !-------------------------------------------------------------------------
 !     Clean up
 
-    call ESMF_StateDestroy(c1exp, rc)
-    call ESMF_StateDestroy(c2imp, rc)
+    call ESMF_StateDestroy(c1exp, rc=localrc)
+    call ESMF_StateDestroy(c2imp, rc=localrc)
 
-    call ESMF_ClockDestroy(clock, rc)
-    call ESMF_CalendarDestroy(gregorianCalendar, rc)
+    call ESMF_ClockDestroy(clock, rc=localrc)
+    call ESMF_CalendarDestroy(gregorianCalendar, rc=localrc)
 
-    call ESMF_GridCompDestroy(comp1, rc)
-    call ESMF_GridCompDestroy(comp2, rc)
-    call ESMF_CplCompDestroy(cpl, rc)
+    call ESMF_GridCompDestroy(comp1, rc=localrc)
+    call ESMF_GridCompDestroy(comp2, rc=localrc)
+    call ESMF_CplCompDestroy(cpl, rc=localrc)
 
     !print *, "All Destroy routines done"
 
@@ -314,7 +355,7 @@
 
     endif
   
-    call ESMF_Finalize(rc=rc) 
+    call ESMF_Finalize(rc=localrc) 
 
     end program ConcurrentComponent
     

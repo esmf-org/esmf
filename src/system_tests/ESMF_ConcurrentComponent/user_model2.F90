@@ -1,6 +1,6 @@
-! $Id: user_model2.F90,v 1.1.2.1 2008/04/24 21:42:38 feiliu Exp $
+! $Id: user_model2.F90,v 1.1.2.2 2008/04/25 17:34:07 feiliu Exp $
 !
-! System test for Exclusive Components, user-written component 2.
+! System test for Concurrent Components, user-written component 2.
 
 !--------------------------------------------------------------------------------
 !--------------------------------------------------------------------------------
@@ -83,10 +83,12 @@
   
         print *, "In user 2 init routine"
         ! Determine petCount
-        call ESMF_GridCompGet(comp, vm=vm, rc=rc)
-        if (rc/=ESMF_SUCCESS) return ! bail out
-        call ESMF_VMGet(vm, petCount=petCount, rc=rc)
-        if (rc/=ESMF_SUCCESS) return ! bail out
+        call ESMF_GridCompGet(comp, vm=vm, rc=status)
+        if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+        call ESMF_VMGet(vm, petCount=petCount, rc=status)
+        if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
 
         distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/9/), &
             regDecomp=(/petCount/), rc=status)
@@ -128,17 +130,6 @@
         integer, dimension(:), pointer      :: rdptr     ! raw data ptr
         integer, dimension(:), pointer      :: sdptr     ! sorted data ptr
         integer                             :: i
-
-        type(ESMF_VM) :: vm
-        integer :: pet_id
-  
-        ! Get VM from coupler component
-        call ESMF_VMGetGlobal(vm, rc=status)
-        if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
-        call ESMF_VMGet(vm, localPET=pet_id, rc=status)
-        if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
 
         print *, "In user 2 run routine"
         call ESMF_StateGetArray(importState, "sorted_data2", sorted_data, rc=status)
@@ -247,4 +238,3 @@
     end module user_model2
     
 !\end{verbatim}
-    

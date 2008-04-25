@@ -1,6 +1,6 @@
-! $Id: user_model1.F90,v 1.1.2.1 2008/04/24 21:42:38 feiliu Exp $
+! $Id: user_model1.F90,v 1.1.2.2 2008/04/25 17:34:07 feiliu Exp $
 !
-! System test for Exclusive Components.  User-code, component 1.
+! System test for Concurrent Components.  User-code, component 1.
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -85,9 +85,11 @@
         print *, "In user 1 init routine"
         ! Determine petCount
         call ESMF_GridCompGet(comp, vm=vm, rc=rc)
-        if (rc/=ESMF_SUCCESS) return ! bail out
+        if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
         call ESMF_VMGet(vm, petCount=petCount, rc=rc)
-        if (rc/=ESMF_SUCCESS) return ! bail out
+        if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
 
         distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/9/), &
             regDecomp=(/petCount/), rc=status)
@@ -154,11 +156,13 @@
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
+        ! sort the input data locally
         pd => d
         call quicksortI4(pd, 1, 9)
+
+        ! assign sorting result to output that will be delivered to component 2
+        ! through coupler component
         sdptr(:) = d(lbound(sdptr, 1):ubound(sdptr, 1))
-        !write(*, '(A8, 9I3)') 'rdptr', rdptr
-        !write(*, '(A8, 9I3)') 'sdptr', sdptr
 
         rc = status
 
@@ -255,4 +259,3 @@
     end module user_model1
     
 !\end{verbatim}
-    
