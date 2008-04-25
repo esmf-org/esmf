@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.1.2.5 2008/04/25 23:02:12 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.1.2.6 2008/04/25 23:39:01 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.1.2.5 2008/04/25 23:02:12 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.1.2.6 2008/04/25 23:39:01 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -912,7 +912,7 @@ contains
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments, deal with optional Array args
-    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit, routehandle, rc)
         
     ! Call into the RouteHandle code
     call ESMF_RouteHandleRelease(routehandle, localrc)
