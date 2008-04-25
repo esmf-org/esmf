@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.1.2.4 2008/04/24 22:06:26 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.1.2.5 2008/04/25 23:02:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.1.2.4 2008/04/24 22:06:26 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.1.2.5 2008/04/25 23:02:13 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -301,6 +301,88 @@ int ArrayBundle::print()const{
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayBundle::sparseMatMulStore()"
+//BOPI
+// !IROUTINE:  ESMCI::ArrayBundle::sparseMatMulStore
+//
+// !INTERFACE:
+int ArrayBundle::sparseMatMulStore(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  ArrayBundle *srcArraybundle,          // in    - source ArrayBundle
+  ArrayBundle *dstArraybundle,          // in    - destination ArrayBundle
+  ESMC_RouteHandle **routehandle,       // inout - handle to precomputed comm
+  ESMC_TypeKind typekindFactors,        // in    - typekind of factors
+  void *factorList,                     // in    - sparse matrix factors
+  int factorListCount,                  // in    - number of sparse mat. indices
+  InterfaceInt *factorIndexList         // in    - sparse matrix indices
+  ){    
+//
+// !DESCRIPTION:
+//  Precompute and store communication pattern for sparse matrix multiplication
+//  from srcArrayBundle to dstArrayBundle.
+//
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  try{
+    // initial check of input
+    int srcArrayCount = 0; // reset
+    int dstArrayCount = 0; // reset
+    if (srcArraybundle != NULL)
+      srcArrayCount = srcArraybundle->getArrayCount();
+    if (dstArraybundle != NULL)
+      dstArrayCount = dstArraybundle->getArrayCount();
+    if (srcArrayCount != dstArrayCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+        "- srcArraybundle and dstArraybundle contain different number"
+        " of Arrays", &rc);
+      return rc;
+    }
+    
+    if (srcArrayCount == 0){
+      // nothing to do for empty ArrayBundles
+      // return successfully
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+    
+    // trivial implementation only call Array::sparseMatMulStore() for first
+    // src/dst Array pair
+    
+    Array *srcArray = srcArraybundle->getArrayList()[0];
+    Array *dstArray = dstArraybundle->getArrayList()[0];
+    localrc = Array::sparseMatMulStore(srcArray, dstArray, routehandle,
+      typekindFactors, factorList, factorListCount, factorIndexList);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      &rc)) return rc;
+
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+    
+  }catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught exception", &rc);
+    return rc;
+  }
+  
+  // return, don't set success, this is multi exit method
+  return rc;
+}
+//-----------------------------------------------------------------------------
+    
+    
+    //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::ArrayBundle::sparseMatMul()"
 //BOPI
 // !IROUTINE:  ESMCI::ArrayBundle::sparseMatMul
@@ -335,44 +417,119 @@ int ArrayBundle::sparseMatMul(
     // in the most trivial implementation call Array::sparseMatMul() for each
     // Array pair
     
-    // TODO: check whether incoming routehandle is simple ASMM handle, in this
-    // case this trivial branch is the correct choice!
+    ESMC_HandleType rhType = (*routehandle)->ESMC_RouteHandleGetType();
     
-    Array *srcArray = NULL;
-    Array *dstArray = NULL;
+    if (rhType == ESMC_ARRAYSPARSEMATMULHANDLE){
+      // apply routehandle for each src/dst Array pair
+    
+      Array *srcArray = NULL;
+      Array *dstArray = NULL;
 
-    if (srcArraybundle != NULL && dstArraybundle != NULL){
-      if (srcArraybundle->getArrayCount() != dstArraybundle->getArrayCount()){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
-          "- srcArraybundle and dstArraybundle contain different number Arrays",
-          &rc);
-        return rc;
+      if (srcArraybundle != NULL && dstArraybundle != NULL){
+        if (srcArraybundle->getArrayCount() != dstArraybundle->getArrayCount()){
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+            "- srcArraybundle and dstArraybundle contain different number"
+            " of Arrays", &rc);
+          return rc;
+        }
+        for (int i=0; i<srcArraybundle->getArrayCount(); i++){
+          srcArray = srcArraybundle->getArrayList()[i];
+          dstArray = dstArraybundle->getArrayList()[i];
+          localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
+            zeroflag, checkflag);
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+            &rc)) return rc;
+        }
+      }else if (srcArraybundle != NULL){
+        for (int i=0; i<srcArraybundle->getArrayCount(); i++){
+          srcArray = srcArraybundle->getArrayList()[i];
+          localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
+            zeroflag, checkflag);
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+            &rc)) return rc;
+        }
+      }else if (dstArraybundle != NULL){
+        for (int i=0; i<dstArraybundle->getArrayCount(); i++){
+          dstArray = dstArraybundle->getArrayList()[i];
+          localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
+            zeroflag, checkflag);
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+            &rc)) return rc;
+        }
       }
-      for (int i=0; i<srcArraybundle->getArrayCount(); i++){
-        srcArray = srcArraybundle->getArrayList()[i];
-        dstArray = dstArraybundle->getArrayList()[i];
-        localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
-          zeroflag, checkflag);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-          &rc)) return rc;
-      }
-    }else if (srcArraybundle != NULL){
-      for (int i=0; i<srcArraybundle->getArrayCount(); i++){
-        srcArray = srcArraybundle->getArrayList()[i];
-        localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
-          zeroflag, checkflag);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-          &rc)) return rc;
-      }
-    }else if (dstArraybundle != NULL){
-      for (int i=0; i<dstArraybundle->getArrayCount(); i++){
-        dstArray = dstArraybundle->getArrayList()[i];
-        localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
-          zeroflag, checkflag);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-          &rc)) return rc;
-      }
+      // return successfully
+      rc = ESMF_SUCCESS;
+      return rc;
+    }else{
     }
+  }catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught exception", &rc);
+    return rc;
+  }
+  
+  // return, don't set success, this is multi exit method
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayBundle::sparseMatMulRelease()"
+//BOPI
+// !IROUTINE:  ESMCI::ArrayBundle::sparseMatMulRelease
+//
+// !INTERFACE:
+int ArrayBundle::sparseMatMulRelease(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  ESMC_RouteHandle *routehandle        // inout -
+  ){    
+//
+// !DESCRIPTION:
+//    Release information for an ArrayBundle sparse matrix multiplication
+//    operation.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  try{
+  
+  // get XXE from routehandle
+  XXE *xxe = (XXE *)routehandle->ESMC_RouteHandleGetStorage();
+  
+#define XXEPROFILEPRINT
+#ifdef XXEPROFILEPRINT
+  // print XXE stream profile
+  VM *vm = VM::getCurrent(&localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  int localPet = vm->getLocalPet();
+  int petCount = vm->getPetCount();
+  for (int pet=0; pet<petCount; pet++){
+    if (pet==localPet){
+      localrc = xxe->printProfile();
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        &rc))
+      return rc;
+    }
+    vm->barrier();
+  }
+#endif
+  
+  // delete xxe
+  delete xxe;
+
+  // mark storage pointer in RouteHandle as invalid  
+  routehandle->ESMC_RouteHandleSetStorage(NULL);
   
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
