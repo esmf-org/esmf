@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.114.2.8 2008/04/25 23:17:58 theurich Exp $
+! $Id: ESMF_State.F90,v 1.114.2.9 2008/04/25 23:45:32 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.114.2.8 2008/04/25 23:17:58 theurich Exp $'
+      '$Id: ESMF_State.F90,v 1.114.2.9 2008/04/25 23:45:32 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -793,7 +793,7 @@
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
       do i=1,arraybundleCountOpt
-         ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit,arraybundleList(i),rc)
+         ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit,arraybundleList(i),rc)
       enddo
 
       call ESMF_StateClsAddArrayBundleList(state%statep, arraybundleCountOpt,&
@@ -5491,7 +5491,7 @@
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
       do i=1,acount
-         ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit,arraybundles(i),rc)
+         ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit,arraybundles(i),rc)
       enddo
 
 
