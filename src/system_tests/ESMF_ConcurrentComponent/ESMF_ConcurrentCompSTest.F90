@@ -1,4 +1,4 @@
-! $Id: ESMF_ConcurrentCompSTest.F90,v 1.1.2.3 2008/04/25 17:34:07 feiliu Exp $
+! $Id: ESMF_ConcurrentCompSTest.F90,v 1.1.2.4 2008/04/25 19:16:14 feiliu Exp $
 !
 ! System test code ConcurrentComponent
 !  Description on Sourceforge under System Test #79497
@@ -30,11 +30,11 @@
 ! of PETs can be rescheduled to execute sequentially. 
 !
 ! This system test exercises the ESMF coupling framework to perform
-! parallel quick sort can be useful in search engine, gnome sequencing, etc. 
+! quick sort that can be useful in search engine, gnome sequencing, etc. 
 ! The sorting result of component 1 is redistributed to component 2. Component
 ! 2 verifies the sorting result.
 !
-! This system test also captures the typical design of a simple hierarchical 
+! This system test also captures the design of a typical hierarchical 
 ! climate model with a coupler component that couples individual gridded components
 ! (e.g. atmosphere, land, and ocean).
 !
