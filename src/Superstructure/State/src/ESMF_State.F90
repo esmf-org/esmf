@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.114.2.7 2008/04/24 18:02:52 theurich Exp $
+! $Id: ESMF_State.F90,v 1.114.2.8 2008/04/25 23:17:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.114.2.7 2008/04/24 18:02:52 theurich Exp $'
+      '$Id: ESMF_State.F90,v 1.114.2.8 2008/04/25 23:17:58 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -427,7 +427,7 @@
 
       temp_list(1) = routehandle
 
-      call ESMF_StateClassAddRHandleList(state%statep, 1, temp_list, &
+      call ESMF_StateClsAddRHandleList(state%statep, 1, temp_list, &
         rc=localrc)      
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
@@ -494,7 +494,7 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_StateClassAddRHandleList(state%statep, routehandleCount, &
+      call ESMF_StateClsAddRHandleList(state%statep, routehandleCount, &
         routehandleList, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
@@ -560,7 +560,7 @@
 
       temp_list(1) = array
 
-      call ESMF_StateClassAddArrayList(state%statep, 1, temp_list, &
+      call ESMF_StateClsAddArrayList(state%statep, 1, temp_list, &
         proxyflag=proxyflag, rc=localrc)      
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
@@ -645,7 +645,7 @@
          ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,arrayList(i),rc)
       enddo
 
-      call ESMF_StateClassAddArrayList(state%statep, arrayCountOpt, arrayList, &
+      call ESMF_StateClsAddArrayList(state%statep, arrayCountOpt, arrayList, &
         rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc))  return
@@ -710,7 +710,7 @@
 
       temp_list(1) = arraybundle
 
-      call ESMF_StateClassAddArrayBundleList(state%statep, 1, temp_list, &
+      call ESMF_StateClsAddArrayBundleList(state%statep, 1, temp_list, &
         proxyflag=proxyflag, rc=localrc)      
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
@@ -796,7 +796,7 @@
          ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit,arraybundleList(i),rc)
       enddo
 
-      call ESMF_StateClassAddArrayBundleList(state%statep, arraybundleCountOpt,&
+      call ESMF_StateClsAddArrayBundleList(state%statep, arraybundleCountOpt,&
         arraybundleList, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc))  return
@@ -993,7 +993,7 @@
 
       temp_list(1) = field
 
-      call ESMF_StateClassAddFieldList(state%statep, 1, temp_list, &
+      call ESMF_StateClsAddFieldList(state%statep, 1, temp_list, &
         proxyflag=proxyflag, rc=localrc)      
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
@@ -1058,7 +1058,7 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_StateClassAddFieldList(state%statep, fieldCount, fieldList, rc=localrc)
+      call ESMF_StateClsAddFieldList(state%statep, fieldCount, fieldList, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -1184,7 +1184,7 @@
                                   ESMF_CONTEXT, rc)) return
 
 
-      call ESMF_StateClassAddDataNameList(state%statep, namecount, &
+      call ESMF_StateClsAddDataNameList(state%statep, namecount, &
                   namelist, rc=localrc)      
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1252,7 +1252,7 @@
 
       temp_list(1) = nestedState
 
-      call ESMF_StateClassAddStateList(state%statep, 1, temp_list, &
+      call ESMF_StateClsAddStateList(state%statep, 1, temp_list, &
         proxyflag=proxyflag, rc=localrc)      
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
@@ -1319,7 +1319,7 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_StateClassAddStateList(state%statep, nestedStateCount, &
+      call ESMF_StateClsAddStateList(state%statep, nestedStateCount, &
                                       nestedStateList, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
@@ -4831,7 +4831,7 @@
         if (present(fields)) then
           count = size(fields)
           if (count .gt. 0) then
-            call ESMF_StateClassAddFieldList(stypep, count, fields, &
+            call ESMF_StateClsAddFieldList(stypep, count, fields, &
               rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -4842,7 +4842,7 @@
         if (present(arrays)) then
           count = size(arrays)
           if (count .gt. 0) then
-            call ESMF_StateClassAddArrayList(stypep, count, arrays, &
+            call ESMF_StateClsAddArrayList(stypep, count, arrays, &
               rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -4853,7 +4853,7 @@
         if (present(states)) then
           count = size(states)
           if (count .gt. 0) then
-            call ESMF_StateClassAddStateList(stypep, count, states, &
+            call ESMF_StateClsAddStateList(stypep, count, states, &
               rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -4864,7 +4864,7 @@
         if (present(names)) then
           count = size(names)
           if (count .gt. 0) then
-            call ESMF_StateClassAddDataNameList(stypep, count, names, &
+            call ESMF_StateClsAddDataNameList(stypep, count, names, &
               rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -5049,12 +5049,12 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateClassAddRHandleList"
+#define ESMF_METHOD "ESMF_StateClsAddRHandleList"
 !BOPI
-! !IROUTINE: ESMF_StateClassAddRHandleList - Add a list of RouteHandles to a StateClass
+! !IROUTINE: ESMF_StateClsAddRHandleList - Add a list of RouteHandles to a StateClass
 !
 ! !INTERFACE:
-      subroutine ESMF_StateClassAddRHandleList(stypep, acount, routehandles, &
+      subroutine ESMF_StateClsAddRHandleList(stypep, acount, routehandles, &
         proxyflag, rc)
 !
 ! !ARGUMENTS:
@@ -5243,16 +5243,16 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StateClassAddRHandleList
+      end subroutine ESMF_StateClsAddRHandleList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateClassAddArrayList"
+#define ESMF_METHOD "ESMF_StateClsAddArrayList"
 !BOPI
-! !IROUTINE: ESMF_StateClassAddArrayList - Add a list of Arrays to a StateClass
+! !IROUTINE: ESMF_StateClsAddArrayList - Add a list of Arrays to a StateClass
 !
 ! !INTERFACE:
-      subroutine ESMF_StateClassAddArrayList(stypep, acount, arrays, &
+      subroutine ESMF_StateClsAddArrayList(stypep, acount, arrays, &
         proxyflag, rc)
 !
 ! !ARGUMENTS:
@@ -5440,16 +5440,16 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StateClassAddArrayList
+      end subroutine ESMF_StateClsAddArrayList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateClassAddArrayBundleList"
+#define ESMF_METHOD "ESMF_StateClsAddArrayBundleList"
 !BOPI
-! !IROUTINE: ESMF_StateClassAddArrayBundleList - Add a list of ArrayBundles to a StateClass
+! !IROUTINE: ESMF_StateClsAddArrayBundleList - Add a list of ArrayBundles to a StateClass
 !
 ! !INTERFACE:
-      subroutine ESMF_StateClassAddArrayBundleList(stypep, acount, &
+      subroutine ESMF_StateClsAddArrayBundleList(stypep, acount, &
         arraybundles, proxyflag, rc)
 !
 ! !ARGUMENTS:
@@ -5637,16 +5637,16 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StateClassAddArrayBundleList
+      end subroutine ESMF_StateClsAddArrayBundleList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateClassAddFieldList"
+#define ESMF_METHOD "ESMF_StateClsAddFieldList"
 !BOPI
-! !IROUTINE: ESMF_StateClassAddFieldList - Add a list of Fields to a StateClass
+! !IROUTINE: ESMF_StateClsAddFieldList - Add a list of Fields to a StateClass
 !
 ! !INTERFACE:
-      subroutine ESMF_StateClassAddFieldList(stypep, fcount, fields, &
+      subroutine ESMF_StateClsAddFieldList(stypep, fcount, fields, &
         proxyflag, rc)
 !
 ! !ARGUMENTS:
@@ -5842,7 +5842,7 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StateClassAddFieldList
+      end subroutine ESMF_StateClsAddFieldList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -6204,12 +6204,12 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateClassAddStateList"
+#define ESMF_METHOD "ESMF_StateClsAddStateList"
 !BOPI
-! !IROUTINE: ESMF_StateClassAddStateList - Add a list of States to a StateClass
+! !IROUTINE: ESMF_StateClsAddStateList - Add a list of States to a StateClass
 !
 ! !INTERFACE:
-      subroutine ESMF_StateClassAddStateList(stypep, scount, states, &
+      subroutine ESMF_StateClsAddStateList(stypep, scount, states, &
         proxyflag, rc)
 !
 ! !ARGUMENTS:
@@ -6406,7 +6406,7 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StateClassAddStateList
+      end subroutine ESMF_StateClsAddStateList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -6509,12 +6509,12 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateClassAddDataNameList"
+#define ESMF_METHOD "ESMF_StateClsAddDataNameList"
 !BOPI
-! !IROUTINE: ESMF_StateClassAddDataNameList - internal routine
+! !IROUTINE: ESMF_StateClsAddDataNameList - internal routine
 !
 ! !INTERFACE:
-      subroutine ESMF_StateClassAddDataNameList(stypep, ncount, namelist, &
+      subroutine ESMF_StateClsAddDataNameList(stypep, ncount, namelist, &
         proxyflag, rc)
 !
 ! !ARGUMENTS:
@@ -6669,7 +6669,7 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StateClassAddDataNameList
+      end subroutine ESMF_StateClsAddDataNameList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
