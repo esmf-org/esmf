@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2008/03/28 23:51:35 w6ws Exp $ 
+# $Id: makefile,v 1.9 2008/04/26 23:13:15 w6ws Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -19,18 +19,21 @@ LOCDIR	  = src/prologue/tests
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_StringUTest \
                 $(ESMF_TESTDIR)/ESMF_WordsizeUTest \
                 $(ESMF_TESTDIR)/ESMF_F90ArrayPtrUTest \
-		$(ESMF_TESTDIR)/ESMF_LAPACKUTest
+		$(ESMF_TESTDIR)/ESMF_LAPACKUTest \
+		$(ESMF_TESTDIR)/ESMF_F95PtrUTest
 
 TESTS_RUN     = RUN_ESMF_StringUTest \
                 RUN_ESMF_WordsizeUTest \
                 RUN_ESMF_F90ArrayPtrUTest \
 		RUN_ESMF_F90ARR \
-		RUN_ESMF_LAPACKUTest
+		RUN_ESMF_LAPACKUTest \
+		RUN_ESMF_F95PtrUTest
 
 TESTS_RUN_UNI = RUN_ESMF_StringUTestUNI \
                 RUN_ESMF_WordsizeUTestUNI \
                 RUN_ESMF_F90ArrayPtrUTestUNI \
-		RUN_ESMF_LAPACKUTestUNI
+		RUN_ESMF_LAPACKUTestUNI \
+		RUN_ESMF_F95PtrUTestUNI
 
 include ${ESMF_DIR}/makefile
 
@@ -94,3 +97,14 @@ RUN_ESMF_LAPACKUTest:
 
 RUN_ESMF_LAPACKUTestUNI:
 	$(MAKE) TNAME=LAPACK NP=1 ftest
+
+#
+# Test for pointers to derived types changing size based on type
+#
+
+RUN_ESMF_F95PtrUTest:
+	$(MAKE) TNAME=F95Ptr NP=2 ftest
+
+RUN_ESMF_F95PtrUTestUNI:
+	$(MAKE) TNAME=F95Ptr NP=1 ftest
+
