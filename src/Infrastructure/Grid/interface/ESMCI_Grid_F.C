@@ -380,6 +380,18 @@ extern "C" {
 }
 
 
+  ///////////////////////////////////////////////////////////////////////////////////
+
+  void FTN(c_esmc_gridgetstatus)(ESMCI::Grid **_grid, 
+                           ESMC_GridStatus *_status){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridgetstatus()"
+
+    // Get Grid pointer
+    *_status=(*_grid)->getStatus();
+
+}
+
 
   ///////////////////////////////////////////////////////////////////////////////////
 

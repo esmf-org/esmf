@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.76 2008/04/14 20:45:36 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.77 2008/04/26 06:43:35 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.76 2008/04/14 20:45:36 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.77 2008/04/26 06:43:35 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -460,6 +460,45 @@ program ESMF_GridCreateUTest
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test GetGridStatus"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! create grid with nondefault parameter
+  rc=ESMF_SUCCESS
+  correct=.true.
+
+  ! make sure uncreated grid returns uninit
+  if (ESMF_GridGetStatus(grid) /=ESMF_GRIDSTATUS_UNINIT) correct=.false. 
+
+  ! Create empty grid
+  grid=ESMF_GridCreateEmpty(rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! make sure empty grid returns not ready
+  if (ESMF_GridGetStatus(grid) /=ESMF_GRIDSTATUS_NOT_READY) correct=.false. 
+
+  ! Commit grid
+  call ESMF_GridSetCommitShapeTile(grid, countsPerDEDim1=(/4/), &
+                                    countsPerDeDim2=(/5/), &
+                                    countsPerDeDim3=(/8/), &
+                                    rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! make sure empty grid returns not ready
+  if (ESMF_GridGetStatus(grid) /=ESMF_GRIDSTATUS_SHAPE_READY) correct=.false. 
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
 
 
   !-----------------------------------------------------------------------------

@@ -66,7 +66,6 @@
     ESMF_INIT_DECLARE
   end type
 
-
 !------------------------------------------------------------------------------
 ! ! ESMF_GridStatus
 !
@@ -76,6 +75,14 @@
 !  private
      integer :: gridstatus
   end type
+
+  type(ESMF_GridStatus), parameter :: &
+                      ESMF_GRIDSTATUS_INVALID=ESMF_GridStatus(-1), &
+                      ESMF_GRIDSTATUS_UNINIT=ESMF_GridStatus(0), &
+                      ESMF_GRIDSTATUS_NOT_READY=ESMF_GridStatus(1), &
+		      ESMF_GRIDSTATUS_PROXY_READY=ESMF_GridStatus(2), &
+		      ESMF_GRIDSTATUS_SHAPE_READY=ESMF_GridStatus(3)
+
 
 !------------------------------------------------------------------------------
 ! ! ESMF_GridConn
@@ -111,7 +118,9 @@
 public ESMF_Grid
 public  ESMF_GridConn,  ESMF_GRIDCONN_NONE, ESMF_GRIDCONN_PERIODIC, &
                         ESMF_GRIDCONN_POLE, ESMF_GRIDCONN_BIPOLE
-public  ESMF_GridStatus
+public  ESMF_GridStatus,  ESMF_GRIDSTATUS_INVALID, ESMF_GRIDSTATUS_UNINIT, &
+                      ESMF_GRIDSTATUS_NOT_READY,  ESMF_GRIDSTATUS_PROXY_READY, &
+		      ESMF_GRIDSTATUS_SHAPE_READY
 public  ESMF_DefaultFlag
 
 !------------------------------------------------------------------------------
@@ -131,6 +140,7 @@ public  ESMF_DefaultFlag
 
   public ESMF_GridGet
   public ESMF_GridGetCoord
+  public ESMF_GridGetStatus
 
   public ESMF_GridGetIndCoord ! HOPEFULLY TEMPORARY SEPARATE INTERFACE
 
@@ -143,7 +153,8 @@ public  ESMF_DefaultFlag
 
   public ESMF_GridValidate
 
-  public operator(.eq.), operator(.ne.) 
+  public operator(.eq.), operator(.ne.)
+  public operator(.gt.), operator(.ge.)  
   public ESMF_ArrayCreateFromGrid
   public ESMF_GridGetArrayInfo
 
@@ -155,7 +166,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.80 2008/04/23 21:02:26 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.81 2008/04/26 06:43:34 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -370,6 +381,100 @@ end interface
 !
 !EOPI
       end interface
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (.eq.)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridStatusEqual
+
+! !DESCRIPTION:
+!     This interface overloads the equality operator for the specific
+!     ESMF GridStatus.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (.ne.)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridStatusNotEqual
+
+! !DESCRIPTION:
+!     This interface overloads the inequality operator for the specific
+!     ESMF GridStatus.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (.gt.)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridStatusGreater
+
+! !DESCRIPTION:
+!     This interface overloads the inequality operator for the specific
+!     ESMF GridStatus.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (.lt.)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridStatusLess
+
+! !DESCRIPTION:
+!     This interface overloads the inequality operator for the specific
+!     ESMF GridStatus.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (.ge.)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridStatusGreaterEqual
+
+! !DESCRIPTION:
+!     This interface overloads the inequality operator for the specific
+!     ESMF GridStatus.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (.le.)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridStatusLessEqual
+
+! !DESCRIPTION:
+!     This interface overloads the inequality operator for the specific
+!     ESMF GridStatus.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+
+
+
 !==============================================================================
 
       contains
@@ -6501,6 +6606,46 @@ endif
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetStatus"
+!BOP
+! !IROUTINE: ESMF_GridGetStatus - Return the status of the Grid
+
+! !INTERFACE:
+     function ESMF_GridGetStatus(grid)
+!
+! !RETURN VALUE:
+     type(ESMF_GridStatus) :: ESMF_GridGetStatus
+!
+! !ARGUMENTS:
+     type(ESMF_Grid) :: grid
+
+!
+! !DESCRIPTION:
+! Returns the status of the passed in Grid object. 
+!
+! The arguments are:
+! \begin{description}
+! \item[{grid}]
+!      The grid to return the status from. 
+! \end{description}
+!
+!EOP
+
+    integer :: rc ! fake return code for INIT_CHECK_DEEP
+
+    ! init grid status
+    ESMF_GridGetStatus=ESMF_GRIDSTATUS_UNINIT
+
+    ! check variables
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
+    ! Call C++ Subroutine to get the status
+    call c_ESMC_gridgetstatus(grid%this, ESMF_GridGetStatus)
+
+      end function ESMF_GridGetStatus
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSerialize"
 
 !BOPI
@@ -9357,6 +9502,216 @@ endif
     end subroutine ESMF_GridLUADefault
 
 !------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridStatusEqual"
+!BOPI
+! !IROUTINE: ESMF_GridStatusEqual - Equality of GridStatus statuses
+!
+! !INTERFACE:
+      function ESMF_GridStatusEqual(GridStatus1, GridStatus2)
+
+! !RETURN VALUE:
+      logical :: ESMF_GridStatusEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_GridStatus), intent(in) :: &
+         GridStatus1,      &! Two igrid statuses to compare for
+         GridStatus2        ! equality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF GridStatus statuses to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[GridStatus1, GridStatus2]
+!          Two igrid statuses to compare for equality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_GridStatusEqual = (GridStatus1%gridstatus == &
+                              GridStatus2%gridstatus)
+
+      end function ESMF_GridStatusEqual
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridStatusNotEqual"
+!BOPI
+! !IROUTINE: ESMF_GridStatusNotEqual - Non-equality of GridStatus statuses
+!
+! !INTERFACE:
+      function ESMF_GridStatusNotEqual(GridStatus1, GridStatus2)
+
+! !RETURN VALUE:
+      logical :: ESMF_GridStatusNotEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_GridStatus), intent(in) :: &
+         GridStatus1,      &! Two GridStatus Statuses to compare for
+         GridStatus2        ! inequality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF GridStatus statuses to see if
+!     they are unequal.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[GridStatus1, GridStatus2]
+!          Two statuses of GridStatuss to compare for inequality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_GridStatusNotEqual = (GridStatus1%gridstatus /= &
+                                 GridStatus2%gridstatus)
+
+      end function ESMF_GridStatusNotEqual
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridStatusGreater"
+!BOPI
+! !IROUTINE: ESMF_GridStatusGreater - Equality of GridStatus statuses
+!
+! !INTERFACE:
+      function ESMF_GridStatusGreater(GridStatus1, GridStatus2)
+
+! !RETURN VALUE:
+      logical :: ESMF_GridStatusGreater
+
+! !ARGUMENTS:
+
+      type (ESMF_GridStatus), intent(in) :: &
+         GridStatus1,      &! Two igrid statuses to compare for
+         GridStatus2        ! equality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF GridStatus statuses to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[GridStatus1, GridStatus2]
+!          Two igrid statuses to compare for equality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_GridStatusGreater = (GridStatus1%gridstatus .gt. &
+                              GridStatus2%gridstatus)
+
+      end function ESMF_GridStatusGreater
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridStatusLess"
+!BOPI
+! !IROUTINE: ESMF_GridStatusLess - Non-equality of GridStatus statuses
+!
+! !INTERFACE:
+      function ESMF_GridStatusLess(GridStatus1, GridStatus2)
+
+! !RETURN VALUE:
+      logical :: ESMF_GridStatusLess
+
+! !ARGUMENTS:
+
+      type (ESMF_GridStatus), intent(in) :: &
+         GridStatus1,      &! Two GridStatus Statuses to compare for
+         GridStatus2        ! inequality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF GridStatus statuses to see if
+!     they are unequal.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[GridStatus1, GridStatus2]
+!          Two statuses of GridStatuss to compare for inequality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_GridStatusLess = (GridStatus1%gridstatus .lt. &
+                                 GridStatus2%gridstatus)
+
+      end function ESMF_GridStatusLess
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridStatusGreaterEqual"
+!BOPI
+! !IROUTINE: ESMF_GridStatusGreaterEqual - Greater than or equal of GridStatus statuses
+!
+! !INTERFACE:
+      function ESMF_GridStatusGreaterEqual(GridStatus1, GridStatus2)
+
+! !RETURN VALUE:
+      logical :: ESMF_GridStatusGreaterEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_GridStatus), intent(in) :: &
+         GridStatus1,      &! Two igrid statuses to compare for
+         GridStatus2        ! equality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF GridStatus statuses to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[GridStatus1, GridStatus2]
+!          Two igrid statuses to compare
+!     \end{description}
+!
+!EOPI
+
+      ESMF_GridStatusGreaterEqual = (GridStatus1%gridstatus .ge. &
+                              GridStatus2%gridstatus)
+
+      end function ESMF_GridStatusGreaterEqual
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridStatusLessEqual"
+!BOPI
+! !IROUTINE: ESMF_GridStatusLessEqual - Less than or equal of GridStatus statuses
+!
+! !INTERFACE:
+      function ESMF_GridStatusLessEqual(GridStatus1, GridStatus2)
+
+! !RETURN VALUE:
+      logical :: ESMF_GridStatusLessEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_GridStatus), intent(in) :: &
+         GridStatus1,      &! Two GridStatus Statuses to compare for
+         GridStatus2        ! inequality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF GridStatus statuses to see if
+!     they are unequal.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[GridStatus1, GridStatus2]
+!          Two statuses of GridStatuss to compare
+!     \end{description}
+!
+!EOPI
+
+      ESMF_GridStatusLessEqual = (GridStatus1%gridstatus .le. &
+                                 GridStatus2%gridstatus)
+
+      end function ESMF_GridStatusLessEqual
+
 
 #undef  ESMF_METHOD
 
