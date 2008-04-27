@@ -1,4 +1,4 @@
-! $Id: ESMF_ConcurrentCompSTest.F90,v 1.1.2.5 2008/04/25 20:28:54 feiliu Exp $
+! $Id: ESMF_ConcurrentCompSTest.F90,v 1.1.2.6 2008/04/27 02:40:06 feiliu Exp $
 !
 ! System test code ConcurrentComponent
 !  Description on Sourceforge under System Test #79497
@@ -86,6 +86,8 @@
 !-------------------------------------------------------------------------
 
     print *, "Start of System Test ConcurrentComponent."
+    localrc = ESMF_SUCCESS
+    rc = ESMF_SUCCESS
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -155,7 +157,9 @@
     !print *, "Comp SetServices finished, rc= ", rc
 
     call ESMF_CplCompSetServices(cpl, usercpl_register, rc=localrc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     !print *, "Comp SetServices finished, rc= ", rc
 
 !-------------------------------------------------------------------------
@@ -166,25 +170,35 @@
     ! initialize calendar to be Gregorian type
     gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
                                             ESMF_CAL_GREGORIAN, rc=localrc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
     ! initialize time interval to 4 hours
     call ESMF_TimeIntervalSet(timeStep, h=4, rc=localrc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
     ! initialize start time to 5/01/2003
     call ESMF_TimeSet(startTime, yy=2003, mm=5, dd=1, &
                       calendar=gregorianCalendar, rc=localrc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
     ! initialize stop time to 5/02/2003
     call ESMF_TimeSet(stopTime, yy=2003, mm=5, dd=2, &
                       calendar=gregorianCalendar, rc=localrc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
     ! initialize the clock with the above values
     clock = ESMF_ClockCreate("Clock 1", timeStep, startTime, stopTime, rc=localrc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -193,20 +207,30 @@
 !-------------------------------------------------------------------------
  
     c1exp = ESMF_StateCreate("comp1 export", ESMF_STATE_EXPORT, rc=localrc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     call ESMF_GridCompInitialize(comp1, exportState=c1exp, clock=clock, rc=localrc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     !print *, "Comp 1 Initialize finished, rc =", rc
  
     c2imp = ESMF_StateCreate("comp2 import", ESMF_STATE_IMPORT, rc=localrc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     call ESMF_GridCompInitialize(comp2, importState=c2imp, clock=clock, rc=localrc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     !print *, "Comp 2 Initialize finished, rc =", rc
  
     ! note that the coupler's import is comp1's export
     call ESMF_CplCompInitialize(cpl, c1exp, c2imp, clock=clock, rc=localrc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     !print *, "Coupler Initialize finished, rc =", rc
 
 !-------------------------------------------------------------------------
@@ -224,8 +248,10 @@
       ! all PETs until comp2 has returned. Consequently comp1 will not be
       ! run until comp2 has returned.
       !call ESMF_GridCompWait(comp2, blockingflag=ESMF_BLOCKING, rc=localrc)
-      !print *, "Comp 2 Wait returned, rc =", rc
-      !if (rc .ne. ESMF_SUCCESS) goto 10
+      !print *, "Comp 2 Wait returned, rc =", localrc
+      !if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      !  ESMF_CONTEXT, rcToReturn=rc)) &
+      !  call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     
       ! Run the first component:
       ! After the first time thru the loop this will be running concurrently 
@@ -233,8 +259,10 @@
       ! exclusive sets of PETs
       !print *, "I am calling into GridCompRun(comp1)"
       call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, rc=localrc)
-      !print *, "Comp 1 Run returned, rc =", rc
-      if (rc .ne. ESMF_SUCCESS) goto 10
+      !print *, "Comp 1 Run returned, rc =", localrc
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
       ! Uncomment the following calls to ESMF_GridCompWait() to sequentialize
       ! comp1, comp2 and the coupler. The following ESMF_GridCompWait() calls 
@@ -242,11 +270,15 @@
       ! the coupler component will not be run until comp1 and comp2 have 
       ! returned.
       !call ESMF_GridCompWait(comp1, blockingflag=ESMF_BLOCKING, rc=localrc)
-      !print *, "Comp 1 Wait returned, rc =", rc
-      !if (rc .ne. ESMF_SUCCESS) goto 10
+      !print *, "Comp 1 Wait returned, rc =", localrc
+      !if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      !  ESMF_CONTEXT, rcToReturn=rc)) &
+      !  call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
       !call ESMF_GridCompWait(comp2, blockingflag=ESMF_BLOCKING, rc=localrc)
-      !print *, "Comp 2 Wait returned, rc =", rc
-      !if (rc .ne. ESMF_SUCCESS) goto 10
+      !print *, "Comp 2 Wait returned, rc =", localrc
+      !if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      !  ESMF_CONTEXT, rcToReturn=rc)) &
+      !  call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
       ! Run the coupler:
       ! The coupler will run in "per-PET sequential" mode because it runs on 
@@ -258,16 +290,20 @@
       ! lead to inter PET synchronization of the coupler component.
       !print *, "I am calling into CplCompRun(cpl)"
       call ESMF_CplCompRun(cpl, c1exp, c2imp, clock=clock, rc=localrc)
-      !print *, "Coupler Run returned, rc =", rc
-      if (rc .ne. ESMF_SUCCESS) goto 10
+      !print *, "Coupler Run returned, rc =", localrc
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
       ! Uncomment the following call to ESMF_GridCompWait() to sequentialize
       ! comp1 and comp2. The following ESMF_GridCompWait() call will block
       ! all PETs until comp1 has returned. Consequently comp2 will not be
       ! run until comp2 has returned.
       !call ESMF_GridCompWait(comp1, blockingflag=ESMF_BLOCKING, rc=localrc)
-      !print *, "Comp 1 Wait returned, rc =", rc
-      !if (rc .ne. ESMF_SUCCESS) goto 10
+      !print *, "Comp 1 Wait returned, rc =", localrc
+      !if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      !  ESMF_CONTEXT, rcToReturn=rc)) &
+      !  call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
       ! Run the second component:
       ! Since comp1 and comp2 are defined on exclusive sets of PETs those PET
@@ -275,11 +311,15 @@
       ! to the next loop increment, executing comp1 concurrently with comp2.
       !print *, "I am calling into GridCompRun(comp2)"
       call ESMF_GridCompRun(comp2, importState=c2imp, clock=clock, rc=localrc)
-      !print *, "Comp 2 Run returned, rc =", rc
-      if (rc .ne. ESMF_SUCCESS) goto 10
+      !print *, "Comp 2 Run returned, rc =", localrc
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
       call ESMF_ClockAdvance(clock, rc=localrc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
       !call ESMF_ClockPrint(clock, rc=localrc)
       
       !print *, "... time step finished on PET ", pet_id, "."
@@ -294,15 +334,21 @@
 !     Print result
 
     call ESMF_GridCompFinalize(comp1, exportState=c1exp, clock=clock, rc=localrc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     !print *, "Comp 1 Finalize finished, rc =", rc
 
     call ESMF_GridCompFinalize(comp2, importState=c2imp, clock=clock, rc=localrc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     !print *, "Comp 2 Finalize finished, rc =", rc
 
     call ESMF_CplCompFinalize(cpl, c1exp, c2imp, clock=clock, rc=localrc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     !print *, "Coupler Finalize finished, rc =", rc
 
 
@@ -317,20 +363,42 @@
 !     Clean up
 
     call ESMF_StateDestroy(c1exp, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     call ESMF_StateDestroy(c2imp, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
     call ESMF_ClockDestroy(clock, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     call ESMF_CalendarDestroy(gregorianCalendar, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
     call ESMF_GridCompDestroy(comp1, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     call ESMF_GridCompDestroy(comp2, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     call ESMF_CplCompDestroy(cpl, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
     !print *, "All Destroy routines done"
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10    print *, "System Test ConcurrentComponent complete."
+    print *, "System Test ConcurrentComponent complete."
+    rc = localrc
 
     ! Only on PET 0 or any PET with an error. 
     if ((pet_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
@@ -356,6 +424,9 @@
     endif
   
     call ESMF_Finalize(rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
     end program ConcurrentComponent
     

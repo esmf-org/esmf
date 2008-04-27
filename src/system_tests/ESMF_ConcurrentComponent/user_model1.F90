@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.1.2.2 2008/04/25 17:34:07 feiliu Exp $
+! $Id: user_model1.F90,v 1.1.2.3 2008/04/27 02:40:10 feiliu Exp $
 !
 ! System test for Concurrent Components.  User-code, component 1.
 
@@ -34,10 +34,10 @@
 #define ESMF_METHOD "userm1_register"
 
     subroutine userm1_register(comp, rc)
-        type(ESMF_GridComp), intent(inout) :: comp
-        integer, intent(out) :: rc
+        type(ESMF_GridComp), intent(inout)  :: comp
+        integer, intent(out)                :: rc
 
-        integer :: status = ESMF_SUCCESS
+        integer                             :: status = ESMF_SUCCESS
 
         print *, "In user 1 register routine"
         ! Register the callback routines.
@@ -75,7 +75,7 @@
         integer, intent(out) :: rc
 
        ! Local variables
-        integer :: status = ESMF_SUCCESS
+        integer                             :: status = ESMF_SUCCESS
         type(ESMF_VM)                       :: vm
         type(ESMF_Array)                    :: rawdata, sorted_data
         type(ESMF_DistGrid)                 :: distgrid
