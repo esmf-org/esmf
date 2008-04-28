@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleSparseMatMulSTest.F90,v 1.1.2.1 2008/04/24 18:04:40 theurich Exp $
+! $Id: ESMF_ArrayBundleSparseMatMulSTest.F90,v 1.1.2.2 2008/04/28 05:13:49 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -34,8 +34,8 @@
 !-------------------------------------------------------------------------
 !\begin{verbatim}
 
-program ESMF_ArrayBundleSparseMatMulSTest
-#define ESMF_METHOD "program ESMF_ArrayBundleSparseMatMulSTest"
+program ESMF_ArrayBundleSparseMMSTest
+#define ESMF_METHOD "program ESMF_ArrayBundleSparseMMSTest"
 
 #include "ESMF.h"
 
@@ -70,7 +70,7 @@ program ESMF_ArrayBundleSparseMatMulSTest
 !-------------------------------------------------------------------------
 
   write(failMsg, *) "System Test failure"
-  write(testname, *) "System Test ESMF_ArrayBundleSparseMatMulSTest"
+  write(testname, *) "System Test ESMF_ArrayBundleSparseMMSTest"
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -289,6 +289,6 @@ program ESMF_ArrayBundleSparseMatMulSTest
 
   call ESMF_Finalize()
 
-end program ESMF_ArrayBundleSparseMatMulSTest
+end program ESMF_ArrayBundleSparseMMSTest
     
 !\end{verbatim}
