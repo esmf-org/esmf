@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.2 2008/04/28 06:38:19 rokuingh Exp $
+! $Id: ESMF_Attribute.F90,v 1.3 2008/04/28 22:06:54 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -98,7 +98,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.2 2008/04/28 06:38:19 rokuingh Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.3 2008/04/28 22:06:54 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -118,8 +118,8 @@ module ESMF_AttributeMod
         module procedure ESMF_ArrayAttAddPackCustom
         module procedure ESMF_FieldAttAddPack
         module procedure ESMF_FieldAttAddPackCustom
-        module procedure ESMF_FieldBundleAttAddPack
-        module procedure ESMF_FieldBundleAttAddPackCustom
+        module procedure ESMF_FBundleAttAddPack
+        module procedure ESMF_FBundleAttAddPackCustom
         module procedure ESMF_GridAttAddPack
         module procedure ESMF_GridAttAddPackCustom
         module procedure ESMF_StateAttAddPack
@@ -188,20 +188,20 @@ module ESMF_AttributeMod
         module procedure ESMF_FieldAttGetInfoByName
         module procedure ESMF_FieldAttGetInfoByNum
         module procedure ESMF_FieldAttGetCount
-        module procedure ESMF_FieldBundleAttGetInt4
-        module procedure ESMF_FieldBundleAttGetInt4List
-        module procedure ESMF_FieldBundleAttGetInt8
-        module procedure ESMF_FieldBundleAttGetInt8List
-        module procedure ESMF_FieldBundleAttGetReal4
-        module procedure ESMF_FieldBundleAttGetReal4List
-        module procedure ESMF_FieldBundleAttGetReal8
-        module procedure ESMF_FieldBundleAttGetReal8List
-        module procedure ESMF_FieldBundleAttGetLogical
-        module procedure ESMF_FieldBundleAttGetLogicalList
-        module procedure ESMF_FieldBundleAttGetChar
-        module procedure ESMF_FieldBundleAttGetInfoByName
-        module procedure ESMF_FieldBundleAttGetInfoByNum
-        module procedure ESMF_FieldBundleAttGetCount
+        module procedure ESMF_FBundleAttGetInt4
+        module procedure ESMF_FBundleAttGetInt4List
+        module procedure ESMF_FBundleAttGetInt8
+        module procedure ESMF_FBundleAttGetInt8List
+        module procedure ESMF_FBundleAttGetReal4
+        module procedure ESMF_FBundleAttGetReal4List
+        module procedure ESMF_FBundleAttGetReal8
+        module procedure ESMF_FBundleAttGetReal8List
+        module procedure ESMF_FBundleAttGetLogical
+        module procedure ESMF_FBundleAttGetLogicalList
+        module procedure ESMF_FBundleAttGetChar
+        module procedure ESMF_FBundleAttGetInfoByName
+        module procedure ESMF_FBundleAttGetInfoByNum
+        module procedure ESMF_FBundleAttGetCount
         module procedure ESMF_GridAttGetInt4
         module procedure ESMF_GridAttGetInt4List
         module procedure ESMF_GridAttGetInt8
@@ -269,18 +269,18 @@ module ESMF_AttributeMod
         module procedure ESMF_FieldAttSetLogical
         module procedure ESMF_FieldAttSetLogicalList
         module procedure ESMF_FieldAttSetChar
-        module procedure ESMF_FieldBundleAttSetInt4
-        module procedure ESMF_FieldBundleAttSetInt4List
-        module procedure ESMF_FieldBundleAttSetInt8
-        module procedure ESMF_FieldBundleAttSetInt8List
-        module procedure ESMF_FieldBundleAttSetReal4
-        module procedure ESMF_FieldBundleAttSetReal4List
-        module procedure ESMF_FieldBundleAttSetReal8
-        module procedure ESMF_FieldBundleAttSetReal8List
-        module procedure ESMF_FieldBundleAttSetLogical
-        module procedure ESMF_FieldBundleAttSetLogicalList
-        module procedure ESMF_FieldBundleAttSetChar
-        module procedure ESMF_FieldBundleAttSetLinkField
+        module procedure ESMF_FBundleAttSetInt4
+        module procedure ESMF_FBundleAttSetInt4List
+        module procedure ESMF_FBundleAttSetInt8
+        module procedure ESMF_FBundleAttSetInt8List
+        module procedure ESMF_FBundleAttSetReal4
+        module procedure ESMF_FBundleAttSetReal4List
+        module procedure ESMF_FBundleAttSetReal8
+        module procedure ESMF_FBundleAttSetReal8List
+        module procedure ESMF_FBundleAttSetLogical
+        module procedure ESMF_FBundleAttSetLogicalList
+        module procedure ESMF_FBundleAttSetChar
+        module procedure ESMF_FBundleAttSetLinkField
         module procedure ESMF_GridAttSetInt4
         module procedure ESMF_GridAttSetInt4List
         module procedure ESMF_GridAttSetInt8
@@ -324,7 +324,7 @@ module ESMF_AttributeMod
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_ArrayAttWrite
         module procedure ESMF_FieldAttWrite
-        module procedure ESMF_FieldBundleAttWrite
+        module procedure ESMF_FBundleAttWrite
         module procedure ESMF_GridAttWrite
         module procedure ESMF_StateAttWrite
 
@@ -6031,13 +6031,13 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttAddPack"
+#define ESMF_METHOD "ESMF_FBundleAttAddPack"
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttAddPack - Create the attribute package
+! !IROUTINE: ESMF_FBundleAttAddPack - Create the attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleAttAdd()
-      subroutine ESMF_FieldBundleAttAddPack(fieldbundle, convention, purpose, rc)
+      subroutine ESMF_FBundleAttAddPack(fieldbundle, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
@@ -6104,17 +6104,17 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttAddPack
+      end subroutine ESMF_FBundleAttAddPack
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttAddPackCustom"
+#define ESMF_METHOD "ESMF_FBundleAttAddPackCustom"
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttAddPackCustom - Create the attribute package
+! !IROUTINE: ESMF_FBundleAttAddPackCustom - Create the attribute package
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttAdd()
-      subroutine ESMF_FieldBundleAttAddPackCustom(fieldbundle, convention, purpose, &
+      ! Private name; call using ESMF_FBundleAttAdd()
+      subroutine ESMF_FBundleAttAddPackCustom(fieldbundle, convention, purpose, &
       attrList, count, rc)
 !
 ! !ARGUMENTS:
@@ -6184,14 +6184,14 @@ contains
       
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttAddPackCustom
+      end subroutine ESMF_FBundleAttAddPackCustom
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldBundleAttGet  - Retrieve an attribute
+! !IROUTINE: ESMF_FBundleAttGet  - Retrieve an attribute
 !
 ! !INTERFACE:
-!     subroutine ESMF_FieldBundleAttGet(fieldbundle, name, <value argument>, &
+!     subroutine ESMF_FBundleAttGet(fieldbundle, name, <value argument>, &
 !                            <defaultvalue argument>, convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -6252,14 +6252,14 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttGetInt4"
+#define ESMF_METHOD "ESMF_FBundleAttGetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttGet  - Retrieve a 4-byte integer attribute
+! !IROUTINE: ESMF_FBundleAttGet  - Retrieve a 4-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttGet()
-      subroutine ESMF_FieldBundleAttGetInt4(fieldbundle, name, value, defaultvalue, &
+      ! Private name; call using ESMF_FBundleAttGet()
+      subroutine ESMF_FBundleAttGetInt4(fieldbundle, name, value, defaultvalue, &
         convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -6353,18 +6353,18 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttGetInt4
+      end subroutine ESMF_FBundleAttGetInt4
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttGetInt4List"
+#define ESMF_METHOD "ESMF_FBundleAttGetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttGet - Retrieve a 4-byte integer list attribute
+! !IROUTINE: ESMF_FBundleAttGet - Retrieve a 4-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttGet()
-      subroutine ESMF_FieldBundleAttGetInt4List(fieldbundle, name, count, valueList, &
+      ! Private name; call using ESMF_FBundleAttGet()
+      subroutine ESMF_FBundleAttGetInt4List(fieldbundle, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -6471,18 +6471,18 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttGetInt4List
+      end subroutine ESMF_FBundleAttGetInt4List
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttGetInt8"
+#define ESMF_METHOD "ESMF_FBundleAttGetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttGet  - Retrieve an 8-byte integer attribute
+! !IROUTINE: ESMF_FBundleAttGet  - Retrieve an 8-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttGet()
-      subroutine ESMF_FieldBundleAttGetInt8(fieldbundle, name, value, defaultvalue, &
+      ! Private name; call using ESMF_FBundleAttGet()
+      subroutine ESMF_FBundleAttGetInt8(fieldbundle, name, value, defaultvalue, &
         convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -6577,18 +6577,18 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttGetInt8
+      end subroutine ESMF_FBundleAttGetInt8
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttGetInt8List"
+#define ESMF_METHOD "ESMF_FBundleAttGetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttGet - Retrieve an 8-byte integer list attribute
+! !IROUTINE: ESMF_FBundleAttGet - Retrieve an 8-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttGet()
-      subroutine ESMF_FieldBundleAttGetInt8List(fieldbundle, name, count, valueList, &
+      ! Private name; call using ESMF_FBundleAttGet()
+      subroutine ESMF_FBundleAttGetInt8List(fieldbundle, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -6695,18 +6695,18 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttGetInt8List
+      end subroutine ESMF_FBundleAttGetInt8List
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttGetReal4"
+#define ESMF_METHOD "ESMF_FBundleAttGetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttGet - Retrieve a 4-byte real attribute
+! !IROUTINE: ESMF_FBundleAttGet - Retrieve a 4-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttGet()
-      subroutine ESMF_FieldBundleAttGetReal4(fieldbundle, name, value, defaultvalue, &
+      ! Private name; call using ESMF_FBundleAttGet()
+      subroutine ESMF_FBundleAttGetReal4(fieldbundle, name, value, defaultvalue, &
         convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -6801,18 +6801,18 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttGetReal4
+      end subroutine ESMF_FBundleAttGetReal4
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttGetReal4List"
+#define ESMF_METHOD "ESMF_FBundleAttGetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttGet - Retrieve a 4-byte real list attribute
+! !IROUTINE: ESMF_FBundleAttGet - Retrieve a 4-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttGet()
-      subroutine ESMF_FieldBundleAttGetReal4List(fieldbundle, name, count, valueList, &
+      ! Private name; call using ESMF_FBundleAttGet()
+      subroutine ESMF_FBundleAttGetReal4List(fieldbundle, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -6919,18 +6919,18 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttGetReal4List
+      end subroutine ESMF_FBundleAttGetReal4List
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttGetReal8"
+#define ESMF_METHOD "ESMF_FBundleAttGetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttGet - Retrieve an 8-byte real attribute
+! !IROUTINE: ESMF_FBundleAttGet - Retrieve an 8-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttGet()
-      subroutine ESMF_FieldBundleAttGetReal8(fieldbundle, name, value, defaultvalue, &
+      ! Private name; call using ESMF_FBundleAttGet()
+      subroutine ESMF_FBundleAttGetReal8(fieldbundle, name, value, defaultvalue, &
         convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -7025,18 +7025,18 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttGetReal8
+      end subroutine ESMF_FBundleAttGetReal8
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttGetReal8List"
+#define ESMF_METHOD "ESMF_FBundleAttGetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttGet - Retrieve an 8-byte real list attribute
+! !IROUTINE: ESMF_FBundleAttGet - Retrieve an 8-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttGet()
-      subroutine ESMF_FieldBundleAttGetReal8List(fieldbundle, name, count, valueList, &
+      ! Private name; call using ESMF_FBundleAttGet()
+      subroutine ESMF_FBundleAttGetReal8List(fieldbundle, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -7143,18 +7143,18 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttGetReal8List
+      end subroutine ESMF_FBundleAttGetReal8List
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttGetLogical"
+#define ESMF_METHOD "ESMF_FBundleAttGetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttGet - Retrieve a logical attribute
+! !IROUTINE: ESMF_FBundleAttGet - Retrieve a logical attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttGet()
-      subroutine ESMF_FieldBundleAttGetLogical(fieldbundle, name, value, defaultvalue, &
+      ! Private name; call using ESMF_FBundleAttGet()
+      subroutine ESMF_FBundleAttGetLogical(fieldbundle, name, value, defaultvalue, &
         convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -7249,18 +7249,18 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttGetLogical
+      end subroutine ESMF_FBundleAttGetLogical
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttGetLogicalList"
+#define ESMF_METHOD "ESMF_FBundleAttGetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttGet - Retrieve a logical list attribute
+! !IROUTINE: ESMF_FBundleAttGet - Retrieve a logical list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttGet()
-      subroutine ESMF_FieldBundleAttGetLogicalList(fieldbundle, name, count, valueList, &
+      ! Private name; call using ESMF_FBundleAttGet()
+      subroutine ESMF_FBundleAttGetLogicalList(fieldbundle, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -7367,18 +7367,18 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttGetLogicalList
+      end subroutine ESMF_FBundleAttGetLogicalList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttGetChar"
+#define ESMF_METHOD "ESMF_FBundleAttGetChar"
 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttGet - Retrieve a character attribute
+! !IROUTINE: ESMF_FBundleAttGet - Retrieve a character attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttGet()
-      subroutine ESMF_FieldBundleAttGetChar(fieldbundle, name, value, defaultvalue, &
+      ! Private name; call using ESMF_FBundleAttGet()
+      subroutine ESMF_FBundleAttGetChar(fieldbundle, name, value, defaultvalue, &
         convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -7471,18 +7471,18 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttGetChar
+      end subroutine ESMF_FBundleAttGetChar
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttGetCount"
+#define ESMF_METHOD "ESMF_FBundleAttGetCount"
 
 !BOP
-! !IROUTINE: ESMF_FieldBundleAttGet - Query the number of attributes
+! !IROUTINE: ESMF_FBundleAttGet - Query the number of attributes
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleAttGetCount(fieldbundle, count, rc)
+      subroutine ESMF_FBundleAttGetCount(fieldbundle, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
@@ -7523,18 +7523,18 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttGetCount
+      end subroutine ESMF_FBundleAttGetCount
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttGetInfoByName"
+#define ESMF_METHOD "ESMF_FBundleAttGetInfoByName"
 
 !BOP
-! !IROUTINE: ESMF_FieldBundleAttGet - Query FieldBundle attributes by name
+! !IROUTINE: ESMF_FBundleAttGet - Query FBundle attributes by name
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttGet()
-      subroutine ESMF_FieldBundleAttGetInfoByName(fieldbundle, name, typekind, count, rc)
+      ! Private name; call using ESMF_FBundleAttGet()
+      subroutine ESMF_FBundleAttGetInfoByName(fieldbundle, name, typekind, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
@@ -7588,18 +7588,18 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttGetInfoByName
+      end subroutine ESMF_FBundleAttGetInfoByName
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttGetInfoByNum"
+#define ESMF_METHOD "ESMF_FBundleAttGetInfoByNum"
 
 !BOP
-! !IROUTINE: ESMF_FieldBundleAttGet - Query FieldBundle attributes by index number
+! !IROUTINE: ESMF_FBundleAttGet - Query FBundle attributes by index number
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttGet()
-      subroutine ESMF_FieldBundleAttGetInfoByNum(fieldbundle, attributeIndex, name, &
+      ! Private name; call using ESMF_FBundleAttGet()
+      subroutine ESMF_FBundleAttGetInfoByNum(fieldbundle, attributeIndex, name, &
         typekind, itemcount, rc)
 !
 ! !ARGUMENTS:
@@ -7659,14 +7659,14 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttGetInfoByNum
+      end subroutine ESMF_FBundleAttGetInfoByNum
       
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldBundleAttSet - Set an attribute
+! !IROUTINE: ESMF_FBundleAttSet - Set an attribute
 !
 ! !INTERFACE:
-!     subroutine ESMF_FieldBundleAttSet(fieldbundle, name, <value argument>, rc)
+!     subroutine ESMF_FBundleAttSet(fieldbundle, name, <value argument>, rc)
 !
 ! !ARGUMENTS:
 !     type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
@@ -7717,14 +7717,14 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttSetInt4"
+#define ESMF_METHOD "ESMF_FBundleAttSetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttSet - Set a 4-byte integer attribute
+! !IROUTINE: ESMF_FBundleAttSet - Set a 4-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttSet()
-      subroutine ESMF_FieldBundleAttSetInt4(fieldbundle, name, value, convention, &
+      ! Private name; call using ESMF_FBundleAttSet()
+      subroutine ESMF_FBundleAttSetInt4(fieldbundle, name, value, convention, &
         purpose, rc)
 !
 ! !ARGUMENTS:
@@ -7805,18 +7805,18 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttSetInt4
+      end subroutine ESMF_FBundleAttSetInt4
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttSetInt4List"
+#define ESMF_METHOD "ESMF_FBundleAttSetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttSet - Set a 4-byte integer list attribute
+! !IROUTINE: ESMF_FBundleAttSet - Set a 4-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttSet()
-      subroutine ESMF_FieldBundleAttSetInt4List(fieldbundle, name, count, valueList, &
+      ! Private name; call using ESMF_FBundleAttSet()
+      subroutine ESMF_FBundleAttSetInt4List(fieldbundle, name, count, valueList, &
         convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -7910,18 +7910,18 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttSetInt4List
+      end subroutine ESMF_FBundleAttSetInt4List
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttSetInt8"
+#define ESMF_METHOD "ESMF_FBundleAttSetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttSet - Set an 8-byte integer attribute
+! !IROUTINE: ESMF_FBundleAttSet - Set an 8-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttSet()
-      subroutine ESMF_FieldBundleAttSetInt8(fieldbundle, name, value, convention, &
+      ! Private name; call using ESMF_FBundleAttSet()
+      subroutine ESMF_FBundleAttSetInt8(fieldbundle, name, value, convention, &
         purpose, rc)
 !
 ! !ARGUMENTS:
@@ -8002,18 +8002,18 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttSetInt8
+      end subroutine ESMF_FBundleAttSetInt8
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttSetInt8List"
+#define ESMF_METHOD "ESMF_FBundleAttSetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttSet - Set an 8-byte integer list attribute
+! !IROUTINE: ESMF_FBundleAttSet - Set an 8-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttSet()
-      subroutine ESMF_FieldBundleAttSetInt8List(fieldbundle, name, count, valueList, &
+      ! Private name; call using ESMF_FBundleAttSet()
+      subroutine ESMF_FBundleAttSetInt8List(fieldbundle, name, count, valueList, &
         convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -8107,18 +8107,18 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttSetInt8List
+      end subroutine ESMF_FBundleAttSetInt8List
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttSetReal4"
+#define ESMF_METHOD "ESMF_FBundleAttSetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttSet - Set a 4-byte real attribute
+! !IROUTINE: ESMF_FBundleAttSet - Set a 4-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttSet()
-      subroutine ESMF_FieldBundleAttSetReal4(fieldbundle, name, value, convention, &
+      ! Private name; call using ESMF_FBundleAttSet()
+      subroutine ESMF_FBundleAttSetReal4(fieldbundle, name, value, convention, &
         purpose, rc)
 !
 ! !ARGUMENTS:
@@ -8199,18 +8199,18 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttSetReal4
+      end subroutine ESMF_FBundleAttSetReal4
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttSetReal4List"
+#define ESMF_METHOD "ESMF_FBundleAttSetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttSet - Set a 4-byte real list attribute
+! !IROUTINE: ESMF_FBundleAttSet - Set a 4-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttSet()
-      subroutine ESMF_FieldBundleAttSetReal4List(fieldbundle, name, count, valueList, &
+      ! Private name; call using ESMF_FBundleAttSet()
+      subroutine ESMF_FBundleAttSetReal4List(fieldbundle, name, count, valueList, &
         convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -8304,18 +8304,18 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttSetReal4List
+      end subroutine ESMF_FBundleAttSetReal4List
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttSetReal8"
+#define ESMF_METHOD "ESMF_FBundleAttSetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttSet - Set an 8-byte real attribute
+! !IROUTINE: ESMF_FBundleAttSet - Set an 8-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttSet()
-      subroutine ESMF_FieldBundleAttSetReal8(fieldbundle, name, value, convention, &
+      ! Private name; call using ESMF_FBundleAttSet()
+      subroutine ESMF_FBundleAttSetReal8(fieldbundle, name, value, convention, &
         purpose, rc)
 !
 ! !ARGUMENTS:
@@ -8396,18 +8396,18 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttSetReal8
+      end subroutine ESMF_FBundleAttSetReal8
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttSetReal8List"
+#define ESMF_METHOD "ESMF_FBundleAttSetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttSet - Set an 8-byte real list attribute
+! !IROUTINE: ESMF_FBundleAttSet - Set an 8-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttSet()
-      subroutine ESMF_FieldBundleAttSetReal8List(fieldbundle, name, count, valueList, &
+      ! Private name; call using ESMF_FBundleAttSet()
+      subroutine ESMF_FBundleAttSetReal8List(fieldbundle, name, count, valueList, &
         convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -8502,18 +8502,18 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttSetReal8List
+      end subroutine ESMF_FBundleAttSetReal8List
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttSetLogical"
+#define ESMF_METHOD "ESMF_FBundleAttSetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttSet - Set a logical attribute
+! !IROUTINE: ESMF_FBundleAttSet - Set a logical attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttSet()
-      subroutine ESMF_FieldBundleAttSetLogical(fieldbundle, name, value, convention, &
+      ! Private name; call using ESMF_FBundleAttSet()
+      subroutine ESMF_FBundleAttSetLogical(fieldbundle, name, value, convention, &
         purpose, rc)
 !
 ! !ARGUMENTS:
@@ -8594,18 +8594,18 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttSetLogical
+      end subroutine ESMF_FBundleAttSetLogical
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttSetLogicalList"
+#define ESMF_METHOD "ESMF_FBundleAttSetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttSet - Set a logical list attribute
+! !IROUTINE: ESMF_FBundleAttSet - Set a logical list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttSet()
-      subroutine ESMF_FieldBundleAttSetLogicalList(fieldbundle, name, count, valueList, &
+      ! Private name; call using ESMF_FBundleAttSet()
+      subroutine ESMF_FBundleAttSetLogicalList(fieldbundle, name, count, valueList, &
         convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -8699,18 +8699,18 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttSetLogicalList
+      end subroutine ESMF_FBundleAttSetLogicalList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttSetChar"
+#define ESMF_METHOD "ESMF_FBundleAttSetChar"
 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttSet - Set a character attribute
+! !IROUTINE: ESMF_FBundleAttSet - Set a character attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttSet()
-      subroutine ESMF_FieldBundleAttSetChar(fieldbundle, name, value, convention, &
+      ! Private name; call using ESMF_FBundleAttSet()
+      subroutine ESMF_FBundleAttSetChar(fieldbundle, name, value, convention, &
         purpose, rc)
 !
 ! !ARGUMENTS:
@@ -8788,18 +8788,18 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttSetChar
+      end subroutine ESMF_FBundleAttSetChar
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttSetLinkField"
+#define ESMF_METHOD "ESMF_FBundleAttSetLinkField"
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAttSetLinkField - Link a FieldBundle to a Field in 
+! !IROUTINE: ESMF_FBundleAttSetLinkField - Link a FBundle to a Field in 
 !            an attribute hierarchy
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
-      subroutine ESMF_FieldBundleAttSetLinkField(fieldbundle, field, rc)
+      subroutine ESMF_FBundleAttSetLinkField(fieldbundle, field, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: fieldbundle
@@ -8843,17 +8843,17 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttSetLinkField
+      end subroutine ESMF_FBundleAttSetLinkField
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleAttWrite"
+#define ESMF_METHOD "ESMF_FBundleAttWrite"
 !BOP
-! !IROUTINE: ESMF_FieldBundleAttWrite - Print the attribute package
+! !IROUTINE: ESMF_FBundleAttWrite - Print the attribute package
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttWrite()
-      subroutine ESMF_FieldBundleAttWrite(fieldbundle, convention, purpose, rc)
+      ! Private name; call using ESMF_FBundleAttWrite()
+      subroutine ESMF_FBundleAttWrite(fieldbundle, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
@@ -8918,7 +8918,7 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldBundleAttWrite
+      end subroutine ESMF_FBundleAttWrite
 
 !-------------------------------------------------------------------------
 !  GRID
