@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.201.2.17 2008/04/19 00:14:10 svasquez Exp $
+#  $Id: common.mk,v 1.201.2.18 2008/04/28 21:08:43 cdeluca Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2045,7 +2045,8 @@ tree_demos_uni: tree_build_demos tree_run_demos_uni
 build_demos: reqfile_libesmf reqdir_lib chkdir_tests
 	@if [ -d src/demos ] ; then cd src/demos; fi; \
 	$(MAKE) ACTION=tree_build_demos tree
-	@echo "ESMF demos built successfully."
+# TODO:FIELDINTEGRATION Restore once the demo is updated
+#	@echo "ESMF demos built successfully."
 
 tree_build_demos: $(DEMOS_BUILD) 
 
