@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.23.2.10 2008/04/25 15:56:18 oehmke Exp $
+// $Id: ESMCI_Grid_F.C,v 1.23.2.11 2008/04/28 23:22:57 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -438,6 +438,35 @@ extern "C" {
 }
 
   ///////////////////////////////////////////////////////////////////////////////////
+
+
+  ///////////////////////////////////////////////////////////////////////////////////
+
+  void FTN(c_esmc_gridaddcoordfromarraylist)(ESMCI::Grid **grid, 
+                                         int *staggerloc, 
+                                         int *arrayCount, 
+                                         ESMCI::Array **arrayList,
+                                         ESMC_DataCopy *docopy, 
+                                         ESMCI::InterfaceInt **staggerEdgeLWidthArg, 
+                                         ESMCI::InterfaceInt **staggerEdgeUWidthArg, 
+                                         ESMCI::InterfaceInt **staggerAlignArg, 
+                                         int *rc) {
+    int localrc;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridsetfromarraylist()"
+
+    //Initialize return code
+    localrc = ESMC_RC_NOT_IMPL;
+
+    // call into C++
+    localrc= (*grid)->addCoordFromArrayList(ESMC_NOT_PRESENT_FILTER(staggerloc),
+                    *arrayCount, arrayList, ESMC_NOT_PRESENT_FILTER(docopy),
+            *staggerEdgeLWidthArg, *staggerEdgeUWidthArg, *staggerAlignArg);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+}
+
+
 
 
   ///////////////////////////////////////////////////////////////////////////////////

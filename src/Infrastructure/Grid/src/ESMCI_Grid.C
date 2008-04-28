@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.36.2.11 2008/04/21 21:35:52 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.36.2.12 2008/04/28 23:22:57 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.36.2.11 2008/04/21 21:35:52 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.36.2.12 2008/04/28 23:22:57 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -1718,10 +1718,6 @@ int Grid::setCoordArray(
   } else {
     coord=(*coordArg)-1; // translate from 1 based to 0 based
   }
-
-
-  // NEED TO MAKE SURE THAT THIS COORD HAS BEEN ALLOCATED !!!!!!!!!!!!!!
-  
 
 
   // Make sure arrayArg is a valid pointer
