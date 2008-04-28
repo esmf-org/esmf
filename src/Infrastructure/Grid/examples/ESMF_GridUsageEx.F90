@@ -1609,14 +1609,14 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!
    distgrid2D=ESMF_DistGridCreate(minIndex=(/1,1/),maxIndex=(/10,10/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-   grid3D=ESMF_GridCreate(distgrid=distgrid2D, undistLBound=(/1/), undistUBound=(/10/), rc=rc)
+   grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_GridAddCoord(grid3D, staggerloc=ESMF_STAGGERLOC_CORNER, rc=rc)
+  call ESMF_GridAddCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CORNER, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOC
     ! Get info about staggerloc
-    call ESMF_GridGet(grid3D, staggerLoc=ESMF_STAGGERLOC_CORNER,  &
+    call ESMF_GridGet(grid2D, staggerLoc=ESMF_STAGGERLOC_CORNER,  &
            computationalEdgeLWidth=celwdth, computationalEdgeUWidth=ceuwdth, &
            rc=rc)
 
@@ -1626,7 +1626,7 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Cleanup after Example
 !!!!!!!!!!!!!!!!!!!!!!
-   call ESMF_GridDestroy(grid3D, rc=rc)
+   call ESMF_GridDestroy(grid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    call ESMF_DistGridDestroy(distgrid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.10 2008/04/22 18:01:33 theurich Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.11 2008/04/28 23:25:47 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -291,7 +291,6 @@
 !            regDecomp=(/4,1/), &
 !            staggerloc=ESMF_STAGGERLOC_CENTER, &
 !            fieldget=.true., &
-!            distdim=(/.true., .false./), &
 !            maxHaloLWidth=(/6/), maxHaloUWidth=(/8/))
 !        write(failMsg, *) ""
 !        write(name, *) "Creating a Field from a fortran array 2d 1st dim distributed, " // &
@@ -742,7 +741,6 @@
 !            regDecomp=(/4,1,1/), &
 !            staggerloc=ESMF_STAGGERLOC_CENTER, &
 !            fieldget=.true., &
-!            distdim=(/.true., .false., .false./), &
 !            maxHaloLWidth=(/6/), maxHaloUWidth=(/8/))
 !        write(failMsg, *) ""
 !        write(name, *) "Creating a Field from a fortran array 3d 1st dim distributed, " // &
@@ -1822,7 +1820,6 @@ contains
         gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         maxHaloLWidth, maxHaloUWidth, &
-        distdim, &
         fieldget)
         integer, dimension(:)   :: minIndex
         integer, dimension(:)   :: maxIndex
@@ -1833,7 +1830,6 @@ contains
         integer, dimension(:), optional   :: gridToFieldMap
         integer, dimension(:), optional   :: ungriddedLBound, ungriddedUBound
         integer, dimension(:), optional   :: maxHaloLWidth, maxHaloUWidth
-        logical, dimension(:), optional   :: distdim
         logical, optional                 :: fieldget
         integer, intent(out)  :: rc
 
@@ -1869,12 +1865,12 @@ contains
 
         grid = ESMF_GridCreateShapeTile(minIndex=minIndex, maxIndex=maxIndex, &
                                   gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
-                                  regDecomp=regDecomp, distdim=distdim, name="testgrid", rc=localrc)
+                                  regDecomp=regDecomp, name="testgrid", rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_GridGet(grid, distDimCount=gridDistDimCount, rc=localrc)
+        call ESMF_GridGet(grid, dimCount=gridDistDimCount, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -2258,7 +2254,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_GridGet(grid, distDimCount=gridDistDimCount, distgridToGridMap=dg2gm, rc=localrc)
+        call ESMF_GridGet(grid, dimCount=gridDistDimCount, distgridToGridMap=dg2gm, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -2938,7 +2934,6 @@ contains
         gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         maxHaloLWidth, maxHaloUWidth, &
-        distdim, &
         fieldget)
         integer, dimension(:)   :: minIndex
         integer, dimension(:)   :: maxIndex
@@ -2949,7 +2944,6 @@ contains
         integer, dimension(:), optional   :: gridToFieldMap
         integer, dimension(:), optional   :: ungriddedLBound, ungriddedUBound
         integer, dimension(:), optional   :: maxHaloLWidth, maxHaloUWidth
-        logical, dimension(:), optional   :: distdim
         logical, optional                 :: fieldget
         integer, intent(out)  :: rc
 
@@ -2985,12 +2979,12 @@ contains
 
         grid = ESMF_GridCreateShapeTile(minIndex=minIndex, maxIndex=maxIndex, &
                                   gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
-                                  regDecomp=regDecomp, distdim=distdim, name="testgrid", rc=localrc)
+                                  regDecomp=regDecomp, name="testgrid", rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_GridGet(grid, distDimCount=gridDistDimCount, rc=localrc)
+        call ESMF_GridGet(grid, dimCount=gridDistDimCount, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
