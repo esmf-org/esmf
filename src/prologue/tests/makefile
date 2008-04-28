@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2007/04/09 18:09:25 theurich Exp $ 
+# $Id: makefile,v 1.7.2.1 2008/04/28 05:25:23 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -18,15 +18,18 @@ LOCDIR	  = src/prologue/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_StringUTest \
                 $(ESMF_TESTDIR)/ESMF_WordsizeUTest \
-                $(ESMF_TESTDIR)/ESMF_F90ArrayPtrUTest
+                $(ESMF_TESTDIR)/ESMF_F90ArrayPtrUTest \
+                $(ESMF_TESTDIR)/ESMF_F95PtrUTest
 
 TESTS_RUN     = RUN_ESMF_StringUTest \
                 RUN_ESMF_WordsizeUTest \
-                RUN_ESMF_F90ArrayPtrUTest
+                RUN_ESMF_F90ArrayPtrUTest \
+                RUN_ESMF_F95PtrUTest
 
 TESTS_RUN_UNI = RUN_ESMF_StringUTestUNI \
                 RUN_ESMF_WordsizeUTestUNI \
-                RUN_ESMF_F90ArrayPtrUTestUNI
+                RUN_ESMF_F90ArrayPtrUTestUNI \
+                RUN_ESMF_F95PtrUTestUNI
 
 include ${ESMF_DIR}/makefile
 
@@ -79,5 +82,15 @@ RUN_ESMF_WordsizeUTest:
 
 RUN_ESMF_WordsizeUTestUNI:
 	$(MAKE) TNAME=Wordsize NP=1 ftest
+
+#
+# Test for pointers to derived types changing size based on type
+#
+
+RUN_ESMF_F95PtrUTest:
+	$(MAKE) TNAME=F95Ptr NP=2 ftest
+
+RUN_ESMF_F95PtrUTestUNI:
+	$(MAKE) TNAME=F95Ptr NP=1 ftest
 
 
