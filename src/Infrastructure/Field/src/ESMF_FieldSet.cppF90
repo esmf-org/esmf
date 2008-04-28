@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cppF90,v 1.2.2.8 2008/04/17 16:27:37 feiliu Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.2.2.9 2008/04/28 23:23:33 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldSetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.8 2008/04/17 16:27:37 feiliu Exp $'
+    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.9 2008/04/28 23:23:33 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -715,9 +715,10 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
     ! of distributed grid dimensions, distgrid, @\
     ! number of ungridded Field dimensions, @\
     ! and number of undistributed Field Dimensions @\
-    call ESMF_GridGet(grid, dimCount=gridDimCount, distDimCount=gridDistDimCount, & @\
+    call ESMF_GridGet(grid, dimCount=gridDimCount, & @\
           distgridToGridMap=distgridToGridMap, & @\
           distgrid=distgrid, rc=localrc) @\
+    gridDistDimCount=gridDimCount @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\

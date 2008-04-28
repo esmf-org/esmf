@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.15 2008/04/21 15:24:00 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.16 2008/04/28 23:23:33 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.15 2008/04/21 15:24:00 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.16 2008/04/28 23:23:33 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -284,8 +284,8 @@ contains
     ! of distributed grid dimensions, distgrid,  
     ! number of ungridded Field dimensions,  
     ! and number of undistributed Field Dimensions  
-    call ESMF_GridGet(grid, dimCount=gridDimCount, distDimCount=gridDistDimCount, &  
-          rc=localrc)  
+    call ESMF_GridGet(grid, dimCount=gridDimCount, rc=localrc) 
+    gridDistDimCount=gridDimCount 
     if (ESMF_LogMsgFoundError(localrc, &  
         ESMF_ERR_PASSTHRU, &  
         ESMF_CONTEXT, rc)) return  
@@ -612,8 +612,8 @@ contains
     ! of distributed grid dimensions, distgrid,  
     ! number of ungridded Field dimensions,  
     ! and number of undistributed Field Dimensions  
-    call ESMF_GridGet(grid, dimCount=gridDimCount, distDimCount=gridDistDimCount, &  
-          rc=localrc)  
+    call ESMF_GridGet(grid, dimCount=gridDimCount, rc=localrc)
+    gridDistDimCount=gridDimCount   
     if (ESMF_LogMsgFoundError(localrc, &  
         ESMF_ERR_PASSTHRU, &  
         ESMF_CONTEXT, rc)) return  
@@ -1763,7 +1763,7 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
   ftype%grid = grid
   ftype%gridstatus = ESMF_STATUS_READY
 
-  call ESMF_GridGet(grid, distDimCount=gridRank, rc=localrc)
+  call ESMF_GridGet(grid, dimCount=gridRank, rc=localrc)
 
   ! construct the array here - but TODO: we are missing the counts
   ! in case there are non-grid axes.  there has to be an additional
@@ -1868,7 +1868,7 @@ end subroutine ESMF_FieldConstructNoDataPtr
     ftype%grid = grid
     ftype%gridstatus = ESMF_STATUS_READY
 
-    call ESMF_GridGet(ftype%grid, distDimCount=gridRank, rc=localrc)
+    call ESMF_GridGet(ftype%grid, dimCount=gridRank, rc=localrc)
     
     ftype%fieldstatus = ESMF_STATUS_READY
 
