@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.114.2.10 2008/04/28 06:01:34 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.114.2.11 2008/04/28 20:29:16 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.114.2.10 2008/04/28 06:01:34 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.114.2.11 2008/04/28 20:29:16 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -2582,7 +2582,7 @@
       subroutine ESMF_StateGetAttributeCount(state, count, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
+      type(ESMF_State), intent(inout) :: state  
       integer, intent(out) :: count   
       integer, intent(out), optional :: rc   
 
@@ -2706,9 +2706,9 @@
         typekind, count, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
+      type(ESMF_State), intent(inout) :: state  
       integer, intent(in) :: attributeIndex
-      character(len=*), intent(out), optional :: name
+      character(len=*), intent(out) :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
@@ -2760,7 +2760,7 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      if (present(name)) name = localName
+      name = localName
       if (present(typekind)) typekind = localTk
       if (present(count)) count = localCount
 

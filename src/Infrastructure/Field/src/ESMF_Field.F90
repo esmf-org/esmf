@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.272.2.25 2008/04/28 06:01:32 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.272.2.26 2008/04/28 20:29:14 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -204,7 +204,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.272.2.25 2008/04/28 06:01:32 cdeluca Exp $'
+    '$Id: ESMF_Field.F90,v 1.272.2.26 2008/04/28 20:29:14 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -1070,7 +1070,7 @@ contains
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
       integer, intent(in) :: attributeIndex
-      character(len=*), intent(out), optional :: name
+      character(len=*), intent(out) :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
@@ -1118,7 +1118,7 @@ contains
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      if (present(name)) name = localName
+      name = localName
       if (present(typekind)) typekind = localTk
       if (present(count)) count = localCount
 

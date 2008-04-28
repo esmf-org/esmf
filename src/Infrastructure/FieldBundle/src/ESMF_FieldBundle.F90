@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.1.2.5 2008/04/09 05:20:56 cdeluca Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.1.2.6 2008/04/28 20:29:15 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -1794,7 +1794,7 @@ end function
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: bundle  
       integer, intent(in) :: attributeIndex
-      character(len=*), intent(out), optional :: name
+      character(len=*), intent(out) :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
@@ -1848,7 +1848,7 @@ end function
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      if (present(name)) name = localName
+      name = localName
       if (present(typekind)) typekind = localTk
       if (present(count)) count = localCount
 

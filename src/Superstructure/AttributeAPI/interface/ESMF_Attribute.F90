@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.1.2.1 2008/04/28 06:01:34 cdeluca Exp $
+! $Id: ESMF_Attribute.F90,v 1.1.2.2 2008/04/28 20:29:15 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -71,14 +71,12 @@ module ESMF_AttributeMod
 !  Attribute methods
       public ESMF_AttributeSet
       public ESMF_AttributeGet
-      public ESMF_AttributeGetCount
-      public ESMF_AttributeGetInfo
 
 !------------------------------------------------------------------------------
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.1.2.1 2008/04/28 06:01:34 cdeluca Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.1.2.2 2008/04/28 20:29:15 cdeluca Exp $'
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_AttributeGet - Get an Attribute
@@ -123,40 +121,8 @@ module ESMF_AttributeMod
         module procedure ESMF_StateGetLogicalListAttr
         module procedure ESMF_StateGetCharAttr
 
-! !DESCRIPTION:
-!     This interface provides a single entry point for methods that retrieve
-!     attributes.
- 
-!EOPI
-      end interface
+!----------------------------------------------------------------------
 
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_AttributeGetCount - Get number of Attributes
-!
-! !INTERFACE:
-      interface ESMF_AttributeGetCount 
-   
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_FieldBundleGetAttCount
-        module procedure ESMF_FieldGetAttributeCount
-        module procedure ESMF_StateGetAttributeCount
-
-! !DESCRIPTION:
-!     This interface provides a single entry point for methods that get
-!     total Attribute count.
- 
-!EOPI
-      end interface
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_AttributeGetInfo - Query Attribute information
-!
-! !INTERFACE:
-      interface ESMF_AttributeGetInfo 
-   
-! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_FieldBundleGetAttByName
         module procedure ESMF_FieldBundleGetAttByNum
 
@@ -166,10 +132,16 @@ module ESMF_AttributeMod
         module procedure ESMF_StateGetAttrInfoByName
         module procedure ESMF_StateGetAttrInfoByNum
 
+!----------------------------------------------------------------------
+
+        module procedure ESMF_FieldBundleGetAttCount
+        module procedure ESMF_FieldGetAttributeCount
+        module procedure ESMF_StateGetAttributeCount
+
 
 ! !DESCRIPTION:
-!     This interface provides a single entry point for methods that get
-!     information about Attributes.
+!     This interface provides a single entry point for methods that retrieve
+!     attributes and attribute information.
  
 !EOPI
       end interface
@@ -241,6 +213,238 @@ module ESMF_AttributeMod
 
       end subroutine ESMF_BlankRoutine
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet  - Retrieve an Attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeGet(<object>, name, <value argument>, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *), intent(in) :: name
+!     <value argument>, see below for supported values
+!     integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Returns the value of an Attribute given its name.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF_Field), intent(inout) :: field
+!     \item type(ESMF_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF_State), intent(inout) :: state
+!     \end{description}
+!
+!     Supported values for <value argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: value
+!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: valueList
+!     \item integer(ESMF\_KIND\_I8), intent(out) :: value
+!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: valueList
+!     \item real (ESMF\_KIND\_R4), intent(out) :: value
+!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: valueList
+!     \item real (ESMF\_KIND\_R8), intent(out) :: value
+!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: valueList
+!     \item type(ESMF\_Logical), intent(out) :: value
+!     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
+!     \item character (len = *), intent(out), value
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           The object containing the Attribute.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [<value argument>]
+!           The value of the named Attribute.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet - Query the number of Attributes
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeGet(<object>, count, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     integer, intent(out) :: count
+!     integer, intent(out), optional :: rc
+!
+!
+! !DESCRIPTION:
+!     Returns the number of Attributes associated with the given object
+!     in the argument {\tt count}.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF_Field), intent(inout) :: field
+!     \item type(ESMF_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF_State), intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           The object to be queried.
+!     \item [count]
+!           The number of Attributes associated with this object.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet - Query an Attribute by name
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeGet(<object>, name, typekind, count, rc)
+!
+! !ARGUMENTS:
+!      
+!       <object>, see below for supported values
+!       character(len=*), intent(in) :: name
+!       type(ESMF_TypeKind), intent(out), optional :: typekind
+!       integer, intent(out), optional :: count
+!       integer, intent(out), optional :: rc
+! 
+!
+! !DESCRIPTION:
+!     Returns information associated with the named Attribute,
+!     including {\tt typekind} and {\tt count}.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF_Field), intent(inout) :: field
+!     \item type(ESMF_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF_State), intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           The object containing the Attribute.
+!     \item [name]
+!           The name of the Attribute to query.
+!     \item [{[typekind]}]
+!           The typekind of the Attribute.
+!     \item [{[count]}]
+!           The number of items in this Attribute.  For character types,
+!           the length of the character string.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet - Query an Attribute by index number
+!
+! !INTERFACE:
+!      subroutine ESMF_AttributeGet(<object>, attributeIndex, name, &
+!        typekind, itemcount, rc)
+!
+! !ARGUMENTS:
+!      <object>, see below for supported values
+!      integer, intent(in) :: attributeIndex
+!      character(len=*), intent(out) :: name
+!      type(ESMF_TypeKind), intent(out), optional :: typekind
+!      integer, intent(out), optional :: itemcount
+!      integer, intent(out), optional :: rc
+!
+!
+! !DESCRIPTION:
+!     Returns information associated with the indexed Attribute,
+!     including {\tt name}, {\tt typekind} and {\tt itemcount}.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF_Field), intent(inout) :: field
+!     \item type(ESMF_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF_State), intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           The object to be queried.
+!     \item [attributeIndex]
+!           The index number of the Attribute to query.
+!     \item [name]
+!           Returns the name of the Attribute.
+!     \item [{[typekind]}]
+!           The typekind of the Attribute.
+!     \item [{[itemcount]}]
+!           Returns the number of items in this Attribute.  For character types,
+!           this is the length of the character string.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Set the value of an Attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeSet(<object>, name, <value argument>, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *), intent(in) :: name
+!     <value argument>, see below for supported values
+!     integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Sets the value of an Attribute.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF_Field), intent(inout) :: field
+!     \item type(ESMF_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF_State), intent(inout) :: state
+!     \end{description}
+!
+!     Supported values for the <value argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in) :: value
+!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(in) :: valueList
+!     \item integer(ESMF\_KIND\_I8), intent(in) :: value
+!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(in) :: valueList
+!     \item real (ESMF\_KIND\_R4), intent(in) :: value
+!     \item real (ESMF\_KIND\_R4), dimension(:), intent(in) :: valueList
+!     \item real (ESMF\_KIND\_R8), intent(in) :: value
+!     \item real (ESMF\_KIND\_R8), dimension(:), intent(in) :: valueList
+!     \item type(ESMF\_Logical), intent(in) :: value
+!     \item type(ESMF\_Logical), dimension(:), intent(in) :: valueList
+!     \item character (len = *), intent(in), value
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           The object containing the Attribute to set.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [<value argument>]
+!           The value of the Attribute to set.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
 !------------------------------------------------------------------------------
 
 end module ESMF_AttributeMod
