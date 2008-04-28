@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.1.2.1 2008/04/08 05:34:19 cdeluca Exp $
+! $Id: ESMF_Attribute.F90,v 1.1.2.1 2008/04/28 06:01:34 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -48,6 +48,8 @@ module ESMF_AttributeMod
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_LogErrMod        ! ESMF error handling
   use ESMF_FieldBundleMod
+  use ESMF_FieldMod
+  use ESMF_StateMod
 
 
   implicit none
@@ -76,7 +78,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.1.2.1 2008/04/08 05:34:19 cdeluca Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.1.2.1 2008/04/28 06:01:34 cdeluca Exp $'
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_AttributeGet - Get an Attribute
@@ -97,6 +99,30 @@ module ESMF_AttributeMod
         module procedure ESMF_FieldBundleGetLogListAttr
         module procedure ESMF_FieldBundleGetCharAttr
 
+        module procedure ESMF_FieldGetInt4Attr
+        module procedure ESMF_FieldGetInt4ListAttr
+        module procedure ESMF_FieldGetInt8Attr
+        module procedure ESMF_FieldGetInt8ListAttr
+        module procedure ESMF_FieldGetReal4Attr
+        module procedure ESMF_FieldGetReal4ListAttr
+        module procedure ESMF_FieldGetReal8Attr
+        module procedure ESMF_FieldGetReal8ListAttr
+        module procedure ESMF_FieldGetLogicalAttr
+        module procedure ESMF_FieldGetLogicalListAttr
+        module procedure ESMF_FieldGetCharAttr
+
+        module procedure ESMF_StateGetInt4Attr
+        module procedure ESMF_StateGetInt4ListAttr
+        module procedure ESMF_StateGetInt8Attr
+        module procedure ESMF_StateGetInt8ListAttr
+        module procedure ESMF_StateGetReal4Attr
+        module procedure ESMF_StateGetReal4ListAttr
+        module procedure ESMF_StateGetReal8Attr
+        module procedure ESMF_StateGetReal8ListAttr
+        module procedure ESMF_StateGetLogicalAttr
+        module procedure ESMF_StateGetLogicalListAttr
+        module procedure ESMF_StateGetCharAttr
+
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that retrieve
 !     attributes.
@@ -113,6 +139,8 @@ module ESMF_AttributeMod
    
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_FieldBundleGetAttCount
+        module procedure ESMF_FieldGetAttributeCount
+        module procedure ESMF_StateGetAttributeCount
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that get
@@ -131,6 +159,13 @@ module ESMF_AttributeMod
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_FieldBundleGetAttByName
         module procedure ESMF_FieldBundleGetAttByNum
+
+        module procedure ESMF_FieldGetAttrInfoByName
+        module procedure ESMF_FieldGetAttrInfoByNum
+
+        module procedure ESMF_StateGetAttrInfoByName
+        module procedure ESMF_StateGetAttrInfoByNum
+
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that get
@@ -159,31 +194,37 @@ module ESMF_AttributeMod
         module procedure ESMF_FieldBundleSetLogListAttr
         module procedure ESMF_FieldBundleSetCharAttr
 
+        module procedure ESMF_FieldSetInt4Attr
+        module procedure ESMF_FieldSetInt4ListAttr
+        module procedure ESMF_FieldSetInt8Attr
+        module procedure ESMF_FieldSetInt8ListAttr
+        module procedure ESMF_FieldSetReal4Attr
+        module procedure ESMF_FieldSetReal4ListAttr
+        module procedure ESMF_FieldSetReal8Attr
+        module procedure ESMF_FieldSetReal8ListAttr
+        module procedure ESMF_FieldSetLogicalAttr
+        module procedure ESMF_FieldSetLogicalListAttr
+        module procedure ESMF_FieldSetCharAttr
+
+        module procedure ESMF_StateSetInt4Attr
+        module procedure ESMF_StateSetInt4ListAttr
+        module procedure ESMF_StateSetInt8Attr
+        module procedure ESMF_StateSetInt8ListAttr
+        module procedure ESMF_StateSetReal4Attr
+        module procedure ESMF_StateSetReal4ListAttr
+        module procedure ESMF_StateSetReal8Attr
+        module procedure ESMF_StateSetReal8ListAttr
+        module procedure ESMF_StateSetLogicalAttr
+        module procedure ESMF_StateSetLogicalListAttr
+        module procedure ESMF_StateSetCharAttr
+
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that attach
 !     attributes to FieldBundles and other objects.
  
-!EOP
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_FieldBundleGetAttInfo - Get type, count from a FieldBundle attribute
-!
-! !INTERFACE:
-      interface ESMF_FieldBundleGetAttInfo
-   
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_FieldBundleGetAttByName
-        module procedure ESMF_FieldBundleGetAttByNum
-
-! !DESCRIPTION:
-!     This interface provides a single entry point for methods that retrieve
-!     information about attributes.
- 
 !EOPI
       end interface
-
+!
 !------------------------------------------------------------------------------
 
       contains

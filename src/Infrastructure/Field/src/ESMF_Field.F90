@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.272.2.24 2008/04/17 16:27:36 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.272.2.25 2008/04/28 06:01:32 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -145,12 +145,6 @@ module ESMF_FieldMod
 ! !PUBLIC MEMBER FUNCTIONS:
 !
 ! - ESMF-public methods:
-   public ESMF_FieldSetAttribute       ! Set and Get attributes
-   public ESMF_FieldGetAttribute       !  
-
-   public ESMF_FieldGetAttributeCount  ! number of attribs
-   public ESMF_FieldGetAttributeInfo   ! get type, length by name or number
-
    public ESMF_FieldValidate           ! Check internal consistency
    public ESMF_FieldPrint              ! Print contents of a Field
 
@@ -167,6 +161,34 @@ module ESMF_FieldMod
    public ESMF_FieldDeserialize
    public ESMF_FieldInitialize         ! Default initiailze field member variables
 
+   public ESMF_FieldGetInt4Attr
+   public ESMF_FieldGetInt4ListAttr
+   public ESMF_FieldGetInt8Attr
+   public ESMF_FieldGetInt8ListAttr
+   public ESMF_FieldGetReal4Attr
+   public ESMF_FieldGetReal4ListAttr
+   public ESMF_FieldGetReal8Attr
+   public ESMF_FieldGetReal8ListAttr
+   public ESMF_FieldGetLogicalAttr
+   public ESMF_FieldGetLogicalListAttr
+   public ESMF_FieldGetCharAttr
+
+   public ESMF_FieldGetAttrInfoByName
+   public ESMF_FieldGetAttrInfoByNum
+   public ESMF_FieldGetAttributeCount
+
+   public ESMF_FieldSetInt4Attr
+   public ESMF_FieldSetInt4ListAttr
+   public ESMF_FieldSetInt8Attr
+   public ESMF_FieldSetInt8ListAttr
+   public ESMF_FieldSetReal4Attr
+   public ESMF_FieldSetReal4ListAttr
+   public ESMF_FieldSetReal8Attr
+   public ESMF_FieldSetReal8ListAttr
+   public ESMF_FieldSetLogicalAttr
+   public ESMF_FieldSetLogicalListAttr
+   public ESMF_FieldSetCharAttr
+
 !  !subroutine ESMF_FieldWriteRestart(field, iospec, rc)
 !  !function ESMF_FieldReadRestart(name, iospec, rc)
 !  !subroutine ESMF_FieldWrite(field, subset, iospec, rc)
@@ -182,87 +204,13 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.272.2.24 2008/04/17 16:27:36 feiliu Exp $'
+    '$Id: ESMF_Field.F90,v 1.272.2.25 2008/04/28 06:01:32 cdeluca Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_FieldSetAttribute  - Set Field attributes
-!
-! !INTERFACE:
-      interface ESMF_FieldSetAttribute 
-   
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_FieldSetInt4Attr
-        module procedure ESMF_FieldSetInt4ListAttr
-        module procedure ESMF_FieldSetInt8Attr
-        module procedure ESMF_FieldSetInt8ListAttr
-        module procedure ESMF_FieldSetReal4Attr
-        module procedure ESMF_FieldSetReal4ListAttr
-        module procedure ESMF_FieldSetReal8Attr
-        module procedure ESMF_FieldSetReal8ListAttr
-        module procedure ESMF_FieldSetLogicalAttr
-        module procedure ESMF_FieldSetLogicalListAttr
-        module procedure ESMF_FieldSetCharAttr
-
-! !DESCRIPTION:
-!     This interface provides a single entry point for methods that attach
-!     attributes to an {\tt ESMF\_Field}.
- 
-!EOPI
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_FieldGetAttribute  - Get Field attributes
-!
-! !INTERFACE:
-      interface ESMF_FieldGetAttribute 
-   
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_FieldGetInt4Attr
-        module procedure ESMF_FieldGetInt4ListAttr
-        module procedure ESMF_FieldGetInt8Attr
-        module procedure ESMF_FieldGetInt8ListAttr
-        module procedure ESMF_FieldGetReal4Attr
-        module procedure ESMF_FieldGetReal4ListAttr
-        module procedure ESMF_FieldGetReal8Attr
-        module procedure ESMF_FieldGetReal8ListAttr
-        module procedure ESMF_FieldGetLogicalAttr
-        module procedure ESMF_FieldGetLogicalListAttr
-        module procedure ESMF_FieldGetCharAttr
-
-! !DESCRIPTION:
-!     This interface provides a single entry point for methods that retrieve
-!     attributes from an {\tt ESMF\_Field}.
- 
-!EOPI
-      end interface
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_FieldGetAttributeInfo - Get type, count from a Field attribute
-!
-! !INTERFACE:
-      interface ESMF_FieldGetAttributeInfo
-   
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_FieldGetAttrInfoByName
-        module procedure ESMF_FieldGetAttrInfoByNum
-
-! !DESCRIPTION:
-!     This interface provides a single entry point for methods that retrieve
-!     information about attributes from an {\tt ESMF\_Field}.
- 
-!EOPI
-      end interface
-!
-!
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -326,51 +274,6 @@ contains
  ESMF_INIT_COPY(dval,sval)
 
  end subroutine
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldGetAttribute  - Retrieve an attribute
-!
-! !INTERFACE:
-!     subroutine ESMF_FieldGetAttribute(field, name, <value argument>, rc)
-!
-! !ARGUMENTS:
-!     type(ESMF_Field), intent(inout) :: field  
-!     character (len = *), intent(in) :: name
-!     <value argument>, see below for supported values
-!     integer, intent(out), optional :: rc   
-!
-! !DESCRIPTION:
-!     Returns an attribute from the {\tt field}.
-!     Supported values for <value argument> are:
-!     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(out) :: value
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: valueList
-!     \item integer(ESMF\_KIND\_I8), intent(out) :: value
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: valueList
-!     \item real (ESMF\_KIND\_R4), intent(out) :: value
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: valueList
-!     \item real (ESMF\_KIND\_R8), intent(out) :: value
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: valueList
-!     \item type(ESMF\_Logical), intent(out) :: value
-!     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
-!     \item character (len = *), intent(out), value
-!     \end{description}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           An {\tt ESMF\_Field} object.
-!     \item [name]
-!           The name of the attribute to retrieve.
-!     \item [<value argument>]
-!           The value of the named attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1040,7 +943,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldGetAttributeCount"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldGetAttributeCount - Query the number of attributes
 !
 ! !INTERFACE:
@@ -1067,7 +970,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc 
 
@@ -1091,7 +994,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldGetAttrInfoByName"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldGetAttributeInfo - Query Field attributes by name
 !
 ! !INTERFACE:
@@ -1126,7 +1029,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc             
       type(ESMF_TypeKind) :: localTk
@@ -1156,7 +1059,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldGetAttrInfoByNum"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldGetAttributeInfo - Query Field attributes by index number
 !
 ! !INTERFACE:
@@ -1195,7 +1098,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc 
       character(len=ESMF_MAXSTR) :: localName
@@ -1400,53 +1303,6 @@ contains
         ESMF_FieldReadRestart = a
 
         end function ESMF_FieldReadRestart
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldSetAttribute - Set an attribute
-!
-! !INTERFACE:
-!     subroutine ESMF_FieldSetAttribute(field, name, <value argument>, rc)
-!
-! !ARGUMENTS:
-!     type(ESMF_Field), intent(inout) :: field  
-!     character (len = *), intent(in) :: name
-!     <value argument>, see below for supported values
-!     integer, intent(out), optional :: rc   
-!
-! !DESCRIPTION:
-!     Attaches an attribute to the {\tt field}.
-!     The attribute has a {\tt name} and either a {\tt value} or a 
-!     {\tt valueList}.
-!     Supported values for the <value argument> are:
-!     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(in) :: value
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(in) :: valueList
-!     \item integer(ESMF\_KIND\_I8), intent(in) :: value
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(in) :: valueList
-!     \item real (ESMF\_KIND\_R4), intent(in) :: value
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(in) :: valueList
-!     \item real (ESMF\_KIND\_R8), intent(in) :: value
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(in) :: valueList
-!     \item type(ESMF\_Logical), intent(in) :: value
-!     \item type(ESMF\_Logical), dimension(:), intent(in) :: valueList
-!     \item character (len = *), intent(in), value
-!     \end{description}
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           An {\tt ESMF\_Field} object.
-!     \item [name]
-!           The name of the attribute to set.
-!     \item [<value argument>]
-!           The value of the attribute to set.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2845,8 +2701,6 @@ contains
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
-
-! TODO:FIELDINTEGRATION Restore grid and array serialize
       if (fp%gridstatus .eq. ESMF_STATUS_READY) then
          call ESMF_GridSerialize(fp%grid, buffer, length, offset, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
@@ -2942,7 +2796,6 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-! TODO:FIELDINTEGRATION Restore grid and array deserialize
       if (fp%gridstatus .eq. ESMF_STATUS_READY) then
           fp%grid=ESMF_GridDeserialize(vm, buffer, offset, localrc)
           if (ESMF_LogMsgFoundError(localrc, &

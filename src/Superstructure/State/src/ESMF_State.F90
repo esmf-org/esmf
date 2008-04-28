@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.114.2.9 2008/04/25 23:45:32 oehmke Exp $
+! $Id: ESMF_State.F90,v 1.114.2.10 2008/04/28 06:01:34 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -70,18 +70,8 @@
       public ESMF_StateSetNeeded, ESMF_StateGetNeeded
       public ESMF_StateIsNeeded
 
-      !public ESMF_StateGetNeededList     ! returns an array of values
-      !public ESMF_State{Get/Set}Ready    ! is data ready
-      !public ESMF_State{Get/Set}Valid    ! has data been validated?
-      !public ESMF_State{Get/Set}CompName ! normally set at create time
-      !public ESMF_StateValidate          ! is import state ready to read?
+!      public ESMF_StateValidate          
  
-      public ESMF_StateSetAttribute       ! Set and Get Attributes
-      public ESMF_StateGetAttribute       !  
-
-      public ESMF_StateGetAttributeCount  ! number of Attributes
-      public ESMF_StateGetAttributeInfo   ! get type, length by name or number
-
       public ESMF_StateWriteRestart
       public ESMF_StateReadRestart
 
@@ -89,45 +79,47 @@
       public ESMF_StatePrint, ESMF_StateValidate
       public ESMF_StateSerialize, ESMF_StateDeserialize
 
+      public ESMF_StateGetInt4Attr
+      public ESMF_StateGetInt4ListAttr
+      public ESMF_StateGetInt8Attr
+      public ESMF_StateGetInt8ListAttr
+      public ESMF_StateGetReal4Attr
+      public ESMF_StateGetReal4ListAttr
+      public ESMF_StateGetReal8Attr
+      public ESMF_StateGetReal8ListAttr
+      public ESMF_StateGetLogicalAttr
+      public ESMF_StateGetLogicalListAttr
+      public ESMF_StateGetCharAttr
+
+      public ESMF_StateGetAttrInfoByName
+      public ESMF_StateGetAttrInfoByNum
+
+      public ESMF_StateGetAttributeCount 
+
+      public ESMF_StateSetInt4Attr
+      public ESMF_StateSetInt4ListAttr
+      public ESMF_StateSetInt8Attr
+      public ESMF_StateSetInt8ListAttr
+      public ESMF_StateSetReal4Attr
+      public ESMF_StateSetReal4ListAttr
+      public ESMF_StateSetReal8Attr
+      public ESMF_StateSetReal8ListAttr
+      public ESMF_StateSetLogicalAttr
+      public ESMF_StateSetLogicalListAttr
+      public ESMF_StateSetCharAttr
+
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.114.2.9 2008/04/25 23:45:32 oehmke Exp $'
+      '$Id: ESMF_State.F90,v 1.114.2.10 2008/04/28 06:01:34 cdeluca Exp $'
 
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_StateAddData -- Add Data to a State
-
-! !INTERFACE:
-!!     interface ESMF_StateAddData
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
-!!        module procedure ESMF_StateAddOneArray
-!!        module procedure ESMF_StateAddArrayList
-!!        module procedure ESMF_StateAddOneField
-!!        module procedure ESMF_StateAddFieldList
-!!        module procedure ESMF_StateAddOneFieldBundle
-!!        module procedure ESMF_StateAddFieldBundleList
-!!        module procedure ESMF_StateAddOneState
-!!        module procedure ESMF_StateAddStateList
-!!        module procedure ESMF_StateAddOneName
-!!        module procedure ESMF_StateAddNameList
-
-! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_StateAddData} functions.   
-!  
-!EOPI 
-!!end interface
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -267,101 +259,6 @@
 !  
 !EOPI 
   end interface
-
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_StateGetData -- Retrieve FieldBundles, Fields, or Arrays from a State
-
-! !INTERFACE:
-!!     interface ESMF_StateGetData
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
-!!      module procedure ESMF_StateGetFieldBundle
-!!      module procedure ESMF_StateGetField
-!!      module procedure ESMF_StateGetArray
-!!      module procedure ESMF_StateGetState
-
-! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_StateGetData} functions.   
-!  
-!EOPI 
-!!end interface
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_StateSetAttribute - Set a State attribute
-!
-! !INTERFACE:
-      interface ESMF_StateSetAttribute 
-   
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_StateSetInt4Attr
-        module procedure ESMF_StateSetInt4ListAttr
-        module procedure ESMF_StateSetInt8Attr
-        module procedure ESMF_StateSetInt8ListAttr
-        module procedure ESMF_StateSetReal4Attr
-        module procedure ESMF_StateSetReal4ListAttr
-        module procedure ESMF_StateSetReal8Attr
-        module procedure ESMF_StateSetReal8ListAttr
-        module procedure ESMF_StateSetLogicalAttr
-        module procedure ESMF_StateSetLogicalListAttr
-        module procedure ESMF_StateSetCharAttr
-
-! !DESCRIPTION:
-!     This interface provides a single entry point for methods that attach
-!     attributes to an {\tt ESMF\_State}.
- 
-!EOPI
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_StateGetAttribute - Get a State attribute
-!
-! !INTERFACE:
-      interface ESMF_StateGetAttribute 
-   
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_StateGetInt4Attr
-        module procedure ESMF_StateGetInt4ListAttr
-        module procedure ESMF_StateGetInt8Attr
-        module procedure ESMF_StateGetInt8ListAttr
-        module procedure ESMF_StateGetReal4Attr
-        module procedure ESMF_StateGetReal4ListAttr
-        module procedure ESMF_StateGetReal8Attr
-        module procedure ESMF_StateGetReal8ListAttr
-        module procedure ESMF_StateGetLogicalAttr
-        module procedure ESMF_StateGetLogicalListAttr
-        module procedure ESMF_StateGetCharAttr
-
-! !DESCRIPTION:
-!     This interface provides a single entry point for methods that retrieve
-!     attributes from an {\tt ESMF\_State}.
- 
-!EOPI
-      end interface
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_StateGetAttributeInfo - Get type, count from a State attribute
-!
-! !INTERFACE:
-      interface ESMF_StateGetAttributeInfo
-   
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_StateGetAttrInfoByName
-        module procedure ESMF_StateGetAttrInfoByNum
-
-! !DESCRIPTION:
-!     This interface provides a single entry point for methods that retrieve
-!     information about attributes from an {\tt ESMF\_State}.
- 
-!EOPI
-      end interface
-
 
 !==============================================================================
 
@@ -1979,51 +1876,6 @@
       end subroutine ESMF_StateGetArrayBundle
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateGetAttribute - Retrieve an attribute 
-!
-! !INTERFACE:
-!      subroutine ESMF_StateGetAttribute(state, name, <value argument>, rc)
-!
-! !ARGUMENTS:
-!      type(ESMF_State), intent(in) :: state  
-!      character (len = *), intent(in) :: name
-!      <value argument>, see below for supported values
-!      integer, intent(out), optional :: rc   
-!
-!
-! !DESCRIPTION:
-!     Returns an attribute from the {\tt state}.
-!     Supported values for <value argument> are:
-!     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(out) :: value
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: valueList
-!     \item integer(ESMF\_KIND\_I8), intent(out) :: value
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: valueList
-!     \item real (ESMF\_KIND\_R4), intent(out) :: value
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: valueList
-!     \item real (ESMF\_KIND\_R8), intent(out) :: value
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: valueList
-!     \item type(ESMF\_Logical), intent(out) :: value
-!     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
-!     \item character (len = *), intent(out), value
-!     \end{description}
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!      An {\tt ESMF\_State} object.
-!     \item [name]
-!      The name of the attribute to retrieve.
-!     \item [<value argument>]
-!      The value of the named attribute.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-
-!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetInt4Attr"
 !BOPI
@@ -2723,7 +2575,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetAttributeCount"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateGetAttributeCount - Query the number of attributes
 !
 ! !INTERFACE:
@@ -2750,7 +2602,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
 
@@ -2777,7 +2629,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetAttrInfoByName"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateGetAttributeInfo - Query State attributes by name
 !
 ! !INTERFACE:
@@ -2812,7 +2664,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
       type(ESMF_TypeKind) :: localTk
@@ -2845,7 +2697,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetAttrInfoByNum"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateGetAttributeInfo - Query State attributes by index number
 !
 ! !INTERFACE:
@@ -2884,7 +2736,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
       character(len=ESMF_MAXSTR) :: localName
@@ -3641,54 +3493,6 @@
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
  
         end function ESMF_StateReadRestart
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateSetAttribute - Set an attribute
-!
-! !INTERFACE:
-!      subroutine ESMF_StateSetAttribute(state, name, <value argument>, rc)
-!
-! !ARGUMENTS:
-!      type(ESMF_State), intent(in) :: state  
-!      character (len = *), intent(in) :: name
-!      <value argument>, see below for supported values
-!      integer, intent(out), optional :: rc   
-!
-!
-! !DESCRIPTION:
-!     Attaches an attribute to the {\tt state}.
-!     The attribute has a {\tt name} and either a {\tt value} or a 
-!     {\tt valueList}.
-!     Supported values for the <value argument> are:
-!     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(in) :: value
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(in) :: valueList
-!     \item integer(ESMF\_KIND\_I8), intent(in) :: value
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(in) :: valueList
-!     \item real (ESMF\_KIND\_R4), intent(in) :: value
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(in) :: valueList
-!     \item real (ESMF\_KIND\_R8), intent(in) :: value
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(in) :: valueList
-!     \item type(ESMF\_Logical), intent(in) :: value
-!     \item type(ESMF\_Logical), dimension(:), intent(in) :: valueList
-!     \item character (len = *), intent(in), value
-!     \end{description}
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!       An {\tt ESMF\_State} object.
-!     \item [name]
-!       The name of the attribute to set.
-!     \item [<value argument>]
-!       The value of the attribute to set.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
