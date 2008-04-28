@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUTest.F90,v 1.1 2008/04/24 21:30:01 rokuingh Exp $
+! $Id: ESMF_AttributeUTest.F90,v 1.2 2008/04/28 06:38:20 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeUTest.F90,v 1.1 2008/04/24 21:30:01 rokuingh Exp $'
+      '$Id: ESMF_AttributeUTest.F90,v 1.2 2008/04/28 06:38:20 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -54,6 +54,8 @@ program ESMF_AttributeUTest
       type(ESMF_State)       :: state, state2
       type(ESMF_FieldBundle) :: fieldbundleforstate
 			type(ESMF_Field)       :: fieldforstate
+      type(ESMF_Field)       :: fieldforbundle
+      type(ESMF_FieldBundle) :: fieldbundle
       character(ESMF_MAXSTR) :: conv, purp, attrname, attrvalue
       character(ESMF_MAXSTR), dimension(3) :: attrList
       integer                :: rc, count, number, defaultvalue, inval, outval
@@ -88,6 +90,8 @@ program ESMF_AttributeUTest
       state2 = ESMF_StateCreate("state 2", ESMF_STATE_EXPORT, rc=rc)
       fieldbundleforstate = ESMF_FieldBundleCreate(name="fieldbundleforstate1", rc=rc)
       fieldforstate = ESMF_FieldCreate(name="fieldforstate1", rc=rc)
+      fieldbundle = ESMF_FieldBundleCreate(name="bundle 1", rc=rc)
+      fieldforbundle = ESMF_FieldCreate(name="field 1", rc=rc)
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !-------------------------------------------------------------------------
@@ -125,7 +129,7 @@ program ESMF_AttributeUTest
 
       !EX_UTest
       ! Get an integer attribute from a Array Test
-      call ESMF_AttributeGetInfo(array, name="Sides", count=number, rc=rc)
+      call ESMF_AttributeGet(array, name="Sides", count=number, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an attribute info from a Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.1), &
@@ -137,7 +141,7 @@ program ESMF_AttributeUTest
 
       !EX_UTest
       ! Create an attribute package on a Array Test
-      call ESMF_ArrayAttPackCreate(array, convention=conv, &
+      call ESMF_AttributeAdd(array, convention=conv, &
         purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating an Attpack on a Array Test"
@@ -153,7 +157,7 @@ program ESMF_AttributeUTest
       
       !EX_UTest
       ! Create a custom attribute package on a Field Test
-      call ESMF_ArrayAttPackCreate(array, convention=conv, &
+      call ESMF_AttributeAdd(array, convention=conv, &
         purpose=purp, attrList=attrList, count=count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a custom Attpack on an Array Test"
@@ -167,7 +171,7 @@ program ESMF_AttributeUTest
       
       !EX_UTest
       ! Set an attribute in an attribute package on a Array Test
-      call ESMF_ArrayAttPackSet(array, name=attrname, value=attrvalue, &
+      call ESMF_AttributeSet(array, name=attrname, value=attrvalue, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an Attribute in an Attpack from a Array Test"
@@ -176,7 +180,7 @@ program ESMF_AttributeUTest
 
       !EX_UTest
       ! Write the attribute package from a Array Test
-      call ESMF_ArrayAttPackWrite(array, convention=conv, &
+      call ESMF_AttributeWrite(array, convention=conv, &
         purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Writing an Attpack from a Array Test"
@@ -185,17 +189,17 @@ program ESMF_AttributeUTest
 
       !EX_UTest
       ! Getting Attribute count from a Array
-      call ESMF_ArrayAttributeGetCount(array, count, rc=rc)
+      call ESMF_AttributeGet(array, count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Attribute Count from a Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
-!  FEILD
+!  FIELD
 !-------------------------------------------------------------------------
 
-!EX_UTest
+      !EX_UTest
       ! Add an integer attribute to a Field Test
       call ESMF_AttributeSet(field, name="Sides", value=65, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -315,6 +319,115 @@ program ESMF_AttributeUTest
       !------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
+!  FIELDBUNDLE
+!-------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Add an integer attribute to a FieldBundle Test
+      call ESMF_AttributeSet(fieldbundle, name="Sides", value=65, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding an integer attribute to a FieldBundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get an integer attribute from a FieldBundle Test
+      call ESMF_AttributeGet(fieldbundle, name="Sides", value=number, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting an integer attribute from a FieldBundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.65), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      defaultvalue = 7;
+
+      !EX_UTest
+      ! Get an integer attribute from a Field Test
+      call ESMF_AttributeGet(fieldbundle, name="NotSides", value=number, &
+        defaultvalue=defaultvalue, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting a default integer attribute from a FieldBundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.7), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Get an integer attribute from a FieldBundle Test
+      call ESMF_AttributeGet(fieldbundle, name="Sides", count=number, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting an attribute info from a FieldBundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.1), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      conv = "defaultconvention"
+      purp = "defaultpurpose"
+
+      !EX_UTest
+      ! Create an attribute package on a FieldBundle Test
+      call ESMF_AttributeAdd(fieldbundle, convention=conv, &
+        purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Creating an Attpack on a FieldBundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      attrList(1) = "Custom1"
+      attrList(2) = "Custom2"
+      attrList(3) = "Custom3"
+      count = 3
+      conv = "customconvention"
+      purp = "custompurpose"
+      
+      !EX_UTest
+      ! Create a custom attribute package on a FieldBundle Test
+      call ESMF_AttributeAdd(fieldbundle, convention=conv, &
+        purpose=purp, attrList=attrList, count=count, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Creating a custom Attpack on a FieldBundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      attrname = "units"
+      attrvalue = "m/s"
+      conv = "defaultconvention"
+      purp = "defaultpurpose"
+
+      !EX_UTest
+      ! Set an attribute in an attribute package on a FieldBundle Test
+      call ESMF_AttributeSet(fieldbundle, name=attrname, value=attrvalue, &
+        convention=conv, purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Setting an Attribute in an Attpack from a FieldBundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Write the attribute package from a FieldBundle Test
+      call ESMF_AttributeWrite(fieldbundle, convention=conv, &
+        purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Writing an Attpack from a FieldBundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Link a bundle attribute hierarchy to a field attribute hierarchy FieldBundle Test
+      call ESMF_AttributeSet(fieldbundle, fieldforbundle, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Linking a FieldBundle hierarchy to a Field hierarchy Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Getting Attribute count from a FieldBundle
+      call ESMF_AttributeGet(fieldbundle, count, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting Attribute Count from a FieldBundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------
 !  GRID
 !-------------------------------------------------------------------------
 
@@ -349,7 +462,7 @@ program ESMF_AttributeUTest
 
       !EX_UTest
       ! Get an integer attribute from a Grid Test
-      call ESMF_AttributeGetInfo(grid, name="Sides", count=number, rc=rc)
+      call ESMF_AttributeGet(grid, name="Sides", count=number, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an attribute info from a Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.1), &
@@ -361,7 +474,7 @@ program ESMF_AttributeUTest
 
       !EX_UTest
       ! Create an attribute package on a Grid Test
-      call ESMF_GridAttPackCreate(grid, convention=conv, &
+      call ESMF_AttributeAdd(grid, convention=conv, &
         purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating an Attpack on a Grid Test"
@@ -377,7 +490,7 @@ program ESMF_AttributeUTest
       
       !EX_UTest
       ! Create a custom attribute package on a Grid Test
-      call ESMF_GridAttPackCreate(grid, convention=conv, &
+      call ESMF_AttributeAdd(grid, convention=conv, &
         purpose=purp, attrList=attrList, count=count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a custom Attpack on a Grid Test"
@@ -391,7 +504,7 @@ program ESMF_AttributeUTest
       
       !EX_UTest
       ! Set an attribute in an attribute package on a Grid Test
-      call ESMF_GridAttPackSet(grid, name=attrname, value=attrvalue, &
+      call ESMF_AttributeSet(grid, name=attrname, value=attrvalue, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an Attribute in an Attpack from a Grid Test"
@@ -400,7 +513,7 @@ program ESMF_AttributeUTest
 
       !EX_UTest
       ! Write the attribute package from a Grid Test
-      call ESMF_GridAttPackWrite(grid, convention=conv, &
+      call ESMF_AttributeWrite(grid, convention=conv, &
         purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Writing an Attpack from a Grid Test"
@@ -409,7 +522,7 @@ program ESMF_AttributeUTest
 
       !EX_UTest
       ! Getting Attribute count from a Grid
-      call ESMF_GridAttributeGetCount(grid, count, rc=rc)
+      call ESMF_AttributeGet(grid, count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Attribute Count from a Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -451,7 +564,7 @@ program ESMF_AttributeUTest
 
       !EX_UTest
       ! Get an integer attribute from a State Test
-      call ESMF_AttributeGetInfo(state, name="Sides", count=number, rc=rc)
+      call ESMF_AttributeGet(state, name="Sides", count=number, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an attribute info from a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.1), &
@@ -463,7 +576,7 @@ program ESMF_AttributeUTest
 
       !EX_UTest
       ! Create an attribute package on a State Test
-      call ESMF_StateAttPackCreate(state, convention=conv, &
+      call ESMF_AttributeAdd(state, convention=conv, &
         purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating an Attpack on a State Test"
@@ -479,7 +592,7 @@ program ESMF_AttributeUTest
       
       !EX_UTest
       ! Create a custom attribute package on a Field Test
-      call ESMF_StateAttPackCreate(state, convention=conv, &
+      call ESMF_AttributeAdd(state, convention=conv, &
         purpose=purp, attrList=attrList, count=count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a custom Attpack on a State Test"
@@ -493,7 +606,7 @@ program ESMF_AttributeUTest
 
       !EX_UTest
       ! Set an attribute in an attribute package on a State Test
-      call ESMF_StateAttPackSet(state, name=attrname, value=attrvalue, &
+      call ESMF_AttributeSet(state, name=attrname, value=attrvalue, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an Attribute in an Attpack from a State Test"
@@ -502,7 +615,7 @@ program ESMF_AttributeUTest
 
       !EX_UTest
       ! Write the attribute package from a State Test
-      call ESMF_StateAttPackWrite(state, convention=conv, &
+      call ESMF_AttributeWrite(state, convention=conv, &
         purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Writing an Attpack from a State Test"
@@ -511,7 +624,7 @@ program ESMF_AttributeUTest
 
       !EX_UTest
       ! Link a state attribute hierarchy to a bundle attribute hierarchy State Test
-      call ESMF_StateAttributeSetLink(state, fieldbundleforstate, rc=rc)
+      call ESMF_AttributeSet(state, fieldbundleforstate, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Linking a State hierarchy to a FieldBundle hierarchy Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -519,7 +632,7 @@ program ESMF_AttributeUTest
 
       !EX_UTest
       ! Link a state attribute hierarchy to a field attribute hierarchy State Test
-      call ESMF_StateAttributeSetLink(state, fieldforstate, rc=rc)
+      call ESMF_AttributeSet(state, fieldforstate, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Linking a State hierarchy to a Field hierarchy Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -527,7 +640,7 @@ program ESMF_AttributeUTest
 
 			!EX_UTest
       ! Getting Attribute count from a State
-      call ESMF_StateAttributeGetCount(state, count, rc=rc)
+      call ESMF_AttributeGet(state, count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Attribute Count from a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -535,7 +648,7 @@ program ESMF_AttributeUTest
       
       !EX_UTest
       ! Copy an attribute hierarchy from state1 to state2
-      call ESMF_StateAttributeCopyAll(state, state2, rc=rc)
+      call ESMF_AttributeCopy(state, state2, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Copy an attribute hierarchy from state1 to state2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -547,6 +660,8 @@ program ESMF_AttributeUTest
       call ESMF_DistGridDestroy(distGrid, rc=rc)
       call ESMF_FieldDestroy(field, rc=rc)
       call ESMF_GridDestroy(grid, rc=rc)
+      call ESMF_FieldBundleDestroy(fieldbundle, rc=rc)
+      call ESMF_FieldDestroy(fieldforbundle, rc=rc)
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 #endif
