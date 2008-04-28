@@ -1,4 +1,4 @@
-! $Id: ESMF_F95PtrUTest.F90,v 1.1 2008/04/26 23:13:15 w6ws Exp $
+! $Id: ESMF_F95PtrUTest.F90,v 1.2 2008/04/28 05:12:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_F95PTRUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_F95PtrUTest.F90,v 1.1 2008/04/26 23:13:15 w6ws Exp $'
+    '$Id: ESMF_F95PtrUTest.F90,v 1.2 2008/04/28 05:12:27 theurich Exp $'
 !------------------------------------------------------------------------------
 
   integer, parameter :: int8_k = selected_int_kind (12)		! 8-byte integer
@@ -115,7 +115,7 @@ contains
     equivalence (biggerudt_begin, biggerudt_chars)
     common /biggerudtcom/ biggerudt_begin, biggerudt_ptr, biggerudt_endchar
 
-#if defined (ENABLE_EMSF_UDT_TEST)
+#if defined (ENABLE_ESMF_UDT_TEST)
     integer(pad_k) :: vm_begin
     type (ESMF_VM), pointer :: vm_ptr
     character :: vm_chars(chars_l), vm_endchar
@@ -182,7 +182,7 @@ contains
 ! constraint in the Standard, or an oversight in the compilers.
 
   !-----------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_disabled_UTest
     write(name, *) "Pointer to ESMF_VM type"
     write(failMsg, *) "Pointer size changed!"
     vm_chars = achar (0)
@@ -192,7 +192,7 @@ contains
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_disabled_UTest
     write(name, *) "Pointer to ESMF_Base type"
     write(failMsg, *) "Pointer size changed!"
     base_chars = achar (0)

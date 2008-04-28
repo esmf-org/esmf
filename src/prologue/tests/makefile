@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2008/04/26 23:13:15 w6ws Exp $ 
+# $Id: makefile,v 1.10 2008/04/28 05:12:27 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -25,7 +25,6 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_StringUTest \
 TESTS_RUN     = RUN_ESMF_StringUTest \
                 RUN_ESMF_WordsizeUTest \
                 RUN_ESMF_F90ArrayPtrUTest \
-		RUN_ESMF_F90ARR \
 		RUN_ESMF_LAPACKUTest \
 		RUN_ESMF_F95PtrUTest
 
