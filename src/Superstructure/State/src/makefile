@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2008/02/15 23:36:08 theurich Exp $
+# $Id: makefile,v 1.15 2008/04/29 00:38:14 theurich Exp $
 
 # Leave alone.
 ALL: build_here 
@@ -40,7 +40,7 @@ CLEANDIRS   =
 CLEANFILES  = $(AUTOGEN) $(addprefix ../doc/, $(TEXFILES) ) ESMF_LogFile
 CLOBBERDIRS =
 
-ESMF_StateGet.o: ESMF_StateGet.cppF90 ESMF_StateMacros.h ESMF_State.o
+ESMF_StateGet.o: ESMF_StateGet.cppF90 ESMF_State.o
 
 ESMF_State.o: ESMF_StateTypes.o
 

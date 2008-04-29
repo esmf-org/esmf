@@ -1,9 +1,9 @@
-! $Id: ESMF_FieldBundleCreateEx.F90,v 1.2 2008/04/02 20:42:53 cdeluca Exp $
+! $Id: ESMF_FieldBundleCreateEx.F90,v 1.3 2008/04/29 00:38:02 theurich Exp $
 !
 ! Example/test code which creates a new bundle.
 
 !-------------------------------------------------------------------------
-!ESMF_EXremoveAMPLE        String used by test script to count examples.
+!ESMF_EXAMPLE        String used by test script to count examples.
 !-------------------------------------------------------------------------
 
 !BOP
@@ -26,15 +26,9 @@
     integer :: i, rc, fieldcount
     type(ESMF_Grid) :: grid
     type(ESMF_ArraySpec) :: arrayspec
-    !type(ESMF_FieldDataMap) :: datamap
-    type(ESMF_DELayout) :: delayout
-    type(ESMF_VM) :: vm
     character (len = ESMF_MAXSTR) :: bname1, fname1, fname2
     type(ESMF_Field) :: field(10), returnedfield1, returnedfield2, simplefield
     type(ESMF_FieldBundle) :: bundle1, bundle2, bundle3
-  !real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr1, f90ptr2
-    integer :: counts(2)
-    real(ESMF_KIND_R8) :: min_coord(2), max_coord(2)
 !\end{verbatim}
 !EOP
 
@@ -44,32 +38,19 @@
 !-------------------------------------------------------------------------
     ! Initialize framework
     call ESMF_Initialize(rc=rc)
-    call ESMF_VMGetGlobal(vm, rc)
 !EOC
     
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-
+!-------------------------------------------------------------------------
 !   !  Create several Fields and add them to a new FieldBundle.
  
-!    counts = (/ 100, 200 /)
-!    min_coord = (/  0.0,  0.0 /)
-!    max_coord = (/ 50.0, 60.0 /)
-    delayout = ESMF_DELayoutCreate(vm, rc=rc)
     grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/100,200/), &
                                   regDecomp=(/2,2/), name="atmgrid", rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-!    distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/100,200/), &
-!                                  regDecomp=(/2,2/), rc=rc)
-!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!
-!    coordX = ESMF_ArrayCreate(farray=fa_x, distgrid=distgrid, rc=rc)
-!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!    call ESMF_ArrayPrint(coordX, rc=rc)
-!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
 
     call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)

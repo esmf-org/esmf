@@ -1,4 +1,4 @@
-! $Id: ESMF_StateTypes.F90,v 1.26 2008/04/05 03:39:18 cdeluca Exp $
+! $Id: ESMF_StateTypes.F90,v 1.27 2008/04/29 00:38:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -40,6 +40,7 @@
       use ESMF_IOSpecMod
       use ESMF_VMMod
       use ESMF_ArrayMod
+      use ESMF_ArrayBundleMod
       use ESMF_FieldMod
       use ESMF_FieldBundleMod
       use ESMF_RHandleMod
@@ -79,15 +80,16 @@
 
       ! keep these numbers distinct from the 30 or so esmf object types.
       type(ESMF_StateItemType), parameter :: &
-                ESMF_STATEITEM_BUNDLE       = ESMF_StateItemType(101), &
-                ESMF_STATEITEM_FIELD        = ESMF_StateItemType(102), &
+                ESMF_STATEITEM_FIELD        = ESMF_StateItemType(101), &
+                ESMF_STATEITEM_FIELDBUNDLE  = ESMF_StateItemType(102), &
                 ESMF_STATEITEM_ARRAY        = ESMF_StateItemType(103), &
-                ESMF_STATEITEM_ROUTEHANDLE  = ESMF_StateItemType(104), &
-                ESMF_STATEITEM_STATE        = ESMF_StateItemType(105), &
-                ESMF_STATEITEM_NAME         = ESMF_StateItemType(106), &
-                ESMF_STATEITEM_INDIRECT     = ESMF_StateItemType(107), &
-                ESMF_STATEITEM_UNKNOWN      = ESMF_StateItemType(108), &
-                ESMF_STATEITEM_NOTFOUND     = ESMF_StateItemType(109)
+                ESMF_STATEITEM_ARRAYBUNDLE  = ESMF_StateItemType(104), &
+                ESMF_STATEITEM_ROUTEHANDLE  = ESMF_StateItemType(105), &
+                ESMF_STATEITEM_STATE        = ESMF_StateItemType(106), &
+                ESMF_STATEITEM_NAME         = ESMF_StateItemType(107), &
+                ESMF_STATEITEM_INDIRECT     = ESMF_StateItemType(108), &
+                ESMF_STATEITEM_UNKNOWN      = ESMF_StateItemType(109), &
+                ESMF_STATEITEM_NOTFOUND     = ESMF_StateItemType(110)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_NeededFlag
@@ -163,9 +165,10 @@
       sequence
 #endif
       !private
-          type(ESMF_FieldBundle) :: bp
-          type(ESMF_Field)  :: fp 
-          type(ESMF_Array)  :: ap
+          type(ESMF_Field)        :: fp 
+          type(ESMF_FieldBundle)  :: fbp
+          type(ESMF_Array)        :: ap
+          type(ESMF_ArrayBundle)  :: abp
           type(ESMF_RouteHandle)  :: rp
           type(ESMF_StateClass), pointer  :: spp
           ESMF_INIT_DECLARE
@@ -239,7 +242,8 @@
 ! !PUBLIC TYPES:
       public ESMF_State
       public ESMF_StateItemType, &
-        ESMF_STATEITEM_BUNDLE, ESMF_STATEITEM_FIELD, ESMF_STATEITEM_ARRAY, &
+        ESMF_STATEITEM_FIELD, ESMF_STATEITEM_FIELDBUNDLE, &
+        ESMF_STATEITEM_ARRAY, ESMF_STATEITEM_ARRAYBUNDLE, &
         ESMF_STATEITEM_ROUTEHANDLE, ESMF_STATEITEM_STATE, ESMF_STATEITEM_NAME, &
         ESMF_STATEITEM_NOTFOUND
       public ESMF_StateType, ESMF_STATE_IMPORT, ESMF_STATE_EXPORT, &
@@ -283,7 +287,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateTypes.F90,v 1.26 2008/04/05 03:39:18 cdeluca Exp $'
+      '$Id: ESMF_StateTypes.F90,v 1.27 2008/04/29 00:38:13 theurich Exp $'
 
 !==============================================================================
 ! 

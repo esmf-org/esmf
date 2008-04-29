@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.7 2008/04/05 03:37:57 cdeluca Exp $
+// $Id: ESMCI_Array_F.C,v 1.8 2008/04/29 00:37:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ extern "C" {
     ESMCI::InterfaceInt **undistUBoundArg,
     char *name, int *len_name, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arraycreatealldecomp()"
+#define ESMC_METHOD "c_esmc_arraycreatelocalarray()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -98,7 +98,7 @@ extern "C" {
     ESMCI::InterfaceInt **undistUBoundArg,
     char *name, int *len_name, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arraycreatealldecomp()"
+#define ESMC_METHOD "c_esmc_arraycreateallocate()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;

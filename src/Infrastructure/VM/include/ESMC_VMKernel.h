@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.56 2008/04/22 18:01:36 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.57 2008/04/29 00:38:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -83,21 +83,6 @@ void sync_reset(shmsync *shms);
 // end sync stuff -----
 
 
-typedef struct{
-  volatile int flag;
-  pthread_t tid;
-  pthread_mutex_t mut0;
-  pthread_cond_t cond0;
-  pthread_mutex_t mut1;
-  pthread_cond_t cond1;
-  pthread_mutex_t mut_extra1;
-  pthread_cond_t cond_extra1;
-  pthread_mutex_t mut_extra2;
-  pthread_cond_t cond_extra2;
-  void *arg;
-}vmkt_t;
-
-
 namespace ESMCI {
 
 
@@ -174,52 +159,6 @@ class VMK{
   };
 
 
-  struct contrib_id{
-    pthread_t blocker_tid;    // POSIX thread id of blocker thread
-    vmkt_t *blocker_vmkt;     // pointer to blocker's vmkt structure
-    int mpi_pid;              // MPI rank in the context of the default VMK
-    pid_t pid;                // POSIX process id
-    pthread_t tid;            // POSIX thread id
-  };
-
-
-  struct SpawnArg{
-    // members which are different for each new pet
-    VMK *myvm;                  // pointer to vm instance on heap
-    pthread_t pthid;            // pthread id of the spawned thread
-    int mypet;                  // new mypet 
-    int *ncontributors;         // number of pets that contributed cores 
-    contrib_id **contributors;  // array of contributors
-    vmkt_t vmkt;                // this pet's vmkt
-    vmkt_t vmkt_extra;          // extra vmkt for this pet (sigcatcher)
-    // members which are identical for all new pets
-    void *(*fctp)(void *, void *);  // pointer to the user function
-    // 1st (void *) points to the provided object (child of VMK class)
-    // 2nd (void *) points to data that shall be passed to the user function
-    int npets;                  // new number of pets
-    int *lpid;
-    int *pid;
-    int *tid;
-    int *ncpet;
-    int **cid;
-    MPI_Group mpi_g;
-    MPI_Comm mpi_c;
-    int nothreadsflag;
-    // shared memory variables
-    pthread_mutex_t *pth_mutex2;
-    pthread_mutex_t *pth_mutex;
-    int *pth_finish_count;
-    comminfo *sendChannel;
-    comminfo *recvChannel;
-    ipshmAlloc **ipshmTop;
-    pthread_mutex_t *ipshmMutex;
-    pthread_mutex_t *ipSetupMutex;
-    int pref_intra_ssi;
-    // cargo
-    void *cargo;
-  };
-
-    
   // members
   protected:
     int mypet;          // PET id of this instance

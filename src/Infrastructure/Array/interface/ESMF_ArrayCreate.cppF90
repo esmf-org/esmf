@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.31 2008/04/05 03:38:01 cdeluca Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.32 2008/04/29 00:37:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -98,6 +98,8 @@ module ESMF_ArrayCreateMod
 ! - ESMF-internal methods:
   public ESMF_ArrayGetInit
   public ESMF_ArraySetInitCreated
+  public ESMF_ArrayGetThis
+  public ESMF_ArraySetThis
   public ESMF_ArraySetThisNull
   public ESMF_ArrayCopyThis
 ! ESMF_ArrayCreateFromGrid - defined in ESMF_Grid.F90 due to circularity issues 
@@ -108,7 +110,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.31 2008/04/05 03:38:01 cdeluca Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.32 2008/04/29 00:37:49 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1155,6 +1157,94 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     if (present(rc)) rc = ESMF_SUCCESS
     
   end subroutine ESMF_ArraySetInitCreated
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayGetThis()"
+!BOPI
+! !IROUTINE: ESMF_ArrayGetThis - Internal access routine for C++ pointer
+
+! !INTERFACE:
+  subroutine ESMF_ArrayGetThis(array, this, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),   intent(in)              :: array
+    type(ESMF_Pointer), intent(out)             :: this
+    integer,            intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Internal access routine for C++ pointer.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[array] 
+!          Specified {\tt ESMF\_Array} object.
+!     \item[this] 
+!          C++ pointer.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Copy C++ pointer
+    this = array%this
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_ArrayGetThis
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArraySetThis()"
+!BOPI
+! !IROUTINE: ESMF_ArraySetThis - Set C++ pointer in VM
+
+! !INTERFACE:
+  subroutine ESMF_ArraySetThis(array, this, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),   intent(inout)           :: array
+    type(ESMF_Pointer), intent(in)              :: this
+    integer,            intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Set C++ pointer in VM.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[array] 
+!          Specified {\tt ESMF\_Array} object.
+!     \item[this] 
+!          C++ pointer.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Copy C++ pointer
+    array%this = this
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_ArraySetThis
 !------------------------------------------------------------------------------
 
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.102 2008/04/22 18:01:37 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.103 2008/04/29 00:38:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -102,6 +102,19 @@ char **VMK::argv_mpich = &(argv_mpich_store[0]);
 
 // -----------------------------------------------------------------------------
 // vmkt encapsulation: begin
+typedef struct{
+  volatile int flag;
+  pthread_t tid;
+  pthread_mutex_t mut0;
+  pthread_cond_t cond0;
+  pthread_mutex_t mut1;
+  pthread_cond_t cond1;
+  pthread_mutex_t mut_extra1;
+  pthread_cond_t cond_extra1;
+  pthread_mutex_t mut_extra2;
+  pthread_cond_t cond_extra2;
+  void *arg;
+}vmkt_t;
 
 int vmkt_create(vmkt_t *vmkt, void *(*vmkt_spawn)(void *), void *arg){
   vmkt->flag = 0;
@@ -420,6 +433,52 @@ void VMK::finalize(int finalizeMpi){
 }
 
 
+struct contrib_id{
+  pthread_t blocker_tid;    // POSIX thread id of blocker thread
+  vmkt_t *blocker_vmkt;     // pointer to blocker's vmkt structure
+  int mpi_pid;              // MPI rank in the context of the default VMK
+  pid_t pid;                // POSIX process id
+  pthread_t tid;            // POSIX thread id
+};
+
+
+struct SpawnArg{
+  // members which are different for each new pet
+  VMK *myvm;                  // pointer to vm instance on heap
+  pthread_t pthid;            // pthread id of the spawned thread
+  int mypet;                  // new mypet 
+  int *ncontributors;         // number of pets that contributed cores 
+  contrib_id **contributors;  // array of contributors
+  vmkt_t vmkt;                // this pet's vmkt
+  vmkt_t vmkt_extra;          // extra vmkt for this pet (sigcatcher)
+  // members which are identical for all new pets
+  void *(*fctp)(void *, void *);  // pointer to the user function
+  // 1st (void *) points to the provided object (child of VMK class)
+  // 2nd (void *) points to data that shall be passed to the user function
+  int npets;                  // new number of pets
+  int *lpid;
+  int *pid;
+  int *tid;
+  int *ncpet;
+  int **cid;
+  MPI_Group mpi_g;
+  MPI_Comm mpi_c;
+  int nothreadsflag;
+  // shared memory variables
+  pthread_mutex_t *pth_mutex2;
+  pthread_mutex_t *pth_mutex;
+  int *pth_finish_count;
+  VMK::comminfo *sendChannel;
+  VMK::comminfo *recvChannel;
+  VMK::ipshmAlloc **ipshmTop;
+  pthread_mutex_t *ipshmMutex;
+  pthread_mutex_t *ipSetupMutex;
+  int pref_intra_ssi;
+  // cargo
+  void *cargo;
+};
+
+    
 void VMK::abort(){
   // abort default (all MPI) virtual machine
   int finalized;
@@ -677,7 +736,7 @@ void VMK::destruct(){
 static void *vmk_spawn(void *arg){
   // vmkt's first level spawn function, includes the catch/release loop
   // typecast the argument into the type it really is:
-  ESMCI::VMK::SpawnArg *sarg = (ESMCI::VMK::SpawnArg *)arg;
+  SpawnArg *sarg = (SpawnArg *)arg;
 #if (VERBOSITY > 5)
   fprintf(stderr, "hello from within vmk_spawn, mypet=%d\n", sarg->mypet);
 #endif
@@ -762,7 +821,7 @@ static void *vmk_spawn(void *arg){
 static void *vmk_sigcatcher(void *arg){
   // vmkt's first level spawn function, includes the catch/release loop
   // typecast the argument into the type it really is:
-  ESMCI::VMK::SpawnArg *sarg = (ESMCI::VMK::SpawnArg *)arg;
+  SpawnArg *sarg = (SpawnArg *)arg;
 #if (VERBOSITY > 5)
   fprintf(stderr, "hello from within vmk_sigcatcher\n");
 #endif
@@ -871,7 +930,7 @@ static void *vmk_sigcatcher(void *arg){
 static void *vmk_block(void *arg){
   // vmkt's first level spawn function, includes the catch/release loop
   // typecast the argument into the type it really is:
-  ESMCI::VMK::SpawnArg *sarg = (ESMCI::VMK::SpawnArg *)arg;
+  SpawnArg *sarg = (SpawnArg *)arg;
 #if (VERBOSITY > 5)
   fprintf(stderr, "hello from within vmk_block\n");
 #endif

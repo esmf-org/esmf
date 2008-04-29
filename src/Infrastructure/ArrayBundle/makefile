@@ -1,10 +1,10 @@
-# $Id: makefile,v 1.16 2008/04/29 00:37:47 theurich Exp $
+# $Id: makefile,v 1.2 2008/04/29 00:37:50 theurich Exp $
 
 ALL: build_here
 
 # This needs to be the path of this directory relative to the
 # top level esmf directory.
-LOCDIR	  = src/Infrastructure/Array
+LOCDIR	  = src/Infrastructure/ArrayBundle
 
 # Leave this line alone.
 include ${ESMF_DIR}/makefile
@@ -13,7 +13,8 @@ include ${ESMF_DIR}/makefile
 # directly below this directory, and have either library,
 # example/test code, or documents which need to be generated.
 
-DIRS      = src interface tests examples doc
+#DIRS	  = src interface tests examples doc
+DIRS	  = src interface tests
 
 CLEANDIRS   =
 CLEANFILES  =

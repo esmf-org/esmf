@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.11 2008/04/28 23:25:47 oehmke Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.12 2008/04/29 00:38:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -921,7 +921,6 @@
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
         call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
-            fieldget=.true., &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/) &
             )
@@ -1314,6 +1313,57 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a 7D field from a 7D grid
+        call test7d3_generic(rc, minIndex=(/1,1,1,1,1,1,1/), maxIndex=(/6,4,6,4,3,3,3/), &
+            regDecomp=(/2,1,2,1,1,1,1/), &
+            fieldget=.true., &
+            distgridToGridMap=(/3,2,1,4,7,5,6/), &
+            gridToFieldMap=(/1,2,4,7,5,6,3/) &
+            )
+        write(failMsg, *) ""
+        write(name, *) "Creating a 7D field from a 4D grid and 3D ungridded bounds " // &
+            "using generic interface, irregular gridToFieldMap and distgridToGridMap"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a 7D field from a 4D grid and 3D ungridded bounds
+        call test7d3_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
+            regDecomp=(/2,1,2,1/), &
+            ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,5,3/), &
+            maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/2,3,4,5/), &
+            staggerloc=ESMF_STAGGERLOC_CORNER, &
+            fieldget=.true., &
+            distgridToGridMap=(/3,2,1,4/), &
+            gridToFieldMap=(/1,2,4,7/) &
+            )
+        write(failMsg, *) ""
+        write(name, *) "Creating a 7D field from a 4D grid and 3D ungridded bounds " // &
+            "using generic interface, irregular gridToFieldMap and distgridToGridMap " // &
+            "data copy, corner stagger"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a 7D field from a 4D grid and 3D ungridded bounds
+        call test7d3_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
+            regDecomp=(/2,1,2,1/), &
+            ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,5,3/), &
+            maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/2,3,4,5/), &
+            staggerloc=ESMF_STAGGERLOC_CORNER, &
+            allocflag=ESMF_NO_ALLOC, &
+            fieldget=.true., &
+            distgridToGridMap=(/3,2,1,4/), &
+            gridToFieldMap=(/1,2,4,7/) &
+            )
+        write(failMsg, *) ""
+        write(name, *) "Creating a 7D field from a 4D grid and 3D ungridded bounds " // &
+            "using generic interface, irregular gridToFieldMap and distgridToGridMap " // &
+            "data copy, corner stagger"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
         !  Begin testing field create/get from grid and array
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
@@ -1361,7 +1411,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d3_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
+        call test7d4_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/6,4,6,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
@@ -1375,7 +1425,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d3_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/4,2,4,2,2/), &
+        call test7d4_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/4,2,4,2,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,1,2,1,1/), &
@@ -1389,7 +1439,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 1D grid and 6D ungridded bounds
-        call test7d3_generic(rc, minIndex=(/1/), maxIndex=(/6/), &
+        call test7d4_generic(rc, minIndex=(/1/), maxIndex=(/6/), &
             regDecomp=(/4/), &
             ungriddedLBound=(/1,2,1,2,1,2/), ungriddedUBound=(/4,5,3,3,5,4/), &
             maxHaloLWidth=(/1/), maxHaloUWidth=(/2/), &
@@ -1405,7 +1455,7 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 4D grid and 3D ungridded bounds
-        call test7d3_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
+        call test7d4_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
             regDecomp=(/2,1,2,1/), &
             ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,5,3/), &
             maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/2,3,4,5/), &
@@ -1417,6 +1467,41 @@
         write(name, *) "Creating a 7D field from a 4D grid and 3D ungridded bounds " // &
             "using generic interface, irregular gridToFieldMap and distgridToGridMap"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a 7D field from a 7D grid
+        call test7d4_generic(rc, minIndex=(/1,1,1,1,1,1,1/), maxIndex=(/6,4,6,4,3,3,3/), &
+            regDecomp=(/2,1,2,1,1,1,1/), &
+            copyflag=ESMF_DATA_COPY, &
+            fieldget=.true., &
+            distgridToGridMap=(/3,2,1,4,7,5,6/), &
+            gridToFieldMap=(/1,2,4,7,5,6,3/) &
+            )
+        write(failMsg, *) ""
+        write(name, *) "Creating a 7D field from a 4D grid and 3D ungridded bounds " // &
+            "using generic interface, irregular gridToFieldMap and distgridToGridMap"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a 7D field from a 4D grid and 3D ungridded bounds
+        ! this test fails since grid padding is currently hardcoded in test7d4
+        call test7d4_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
+            regDecomp=(/2,1,2,1/), &
+            ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,5,3/), &
+            maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/2,3,4,5/), &
+            copyflag=ESMF_DATA_COPY, &
+            staggerloc=ESMF_STAGGERLOC_CORNER, &
+            fieldget=.true., &
+            distgridToGridMap=(/3,2,1,4/), &
+            gridToFieldMap=(/1,2,4,7/) &
+            )
+        write(failMsg, *) ""
+        write(name, *) "Creating a 7D field from a 4D grid and 3D ungridded bounds " // &
+            "using generic interface, irregular gridToFieldMap and distgridToGridMap " // &
+            "data copy, corner stagger"
+        call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
     call ESMF_TestEnd(result, ESMF_SRCLINE)
 
@@ -3101,7 +3186,6 @@ contains
         type(ESMF_Field)    :: f8
         type(ESMF_Grid)     :: grid
         type(ESMF_DistGrid) :: distgrid
-        type(ESMF_Array)    :: array8
         integer             :: localrc
         integer             :: fsize(7)
 
@@ -3146,7 +3230,6 @@ contains
         call ESMF_FieldDestroy(f8)
         call ESMF_GridDestroy(grid)
         call ESMF_DistGridDestroy(distgrid)
-        call ESMF_ArrayDestroy(array8)
         deallocate(farray)
     end subroutine test7d1
 
@@ -3158,7 +3241,6 @@ contains
         type(ESMF_Field)    :: f8
         type(ESMF_Grid)     :: grid
         type(ESMF_DistGrid) :: distgrid
-        type(ESMF_Array)    :: array8
         integer             :: localrc
         integer             :: flb(7), fub(7)
 
@@ -3199,7 +3281,6 @@ contains
         call ESMF_FieldDestroy(f8)
         call ESMF_GridDestroy(grid)
         call ESMF_DistGridDestroy(distgrid)
-        call ESMF_ArrayDestroy(array8)
         deallocate(farray)
     end subroutine test7d2
 
@@ -3231,7 +3312,6 @@ contains
         type(ESMF_Field)    :: field
         type(ESMF_Grid)     :: grid
         type(ESMF_DistGrid) :: distgrid
-        type(ESMF_Array)    :: array8
         integer             :: localrc
         integer             :: fsize(7)
 
@@ -3362,7 +3442,6 @@ contains
         call ESMF_FieldDestroy(field)
         call ESMF_GridDestroy(grid)
         call ESMF_DistGridDestroy(distgrid)
-        call ESMF_ArrayDestroy(array8)
         deallocate(farray)
     end subroutine test7d_generic
 
@@ -3395,7 +3474,6 @@ contains
         type(ESMF_Field)    :: field
         type(ESMF_Grid)     :: grid
         type(ESMF_DistGrid) :: distgrid
-        type(ESMF_Array)    :: array8
         integer             :: localrc
         integer             :: flb(7), fub(7)
 
@@ -3522,7 +3600,6 @@ contains
         call ESMF_FieldDestroy(field)
         call ESMF_GridDestroy(grid)
         call ESMF_DistGridDestroy(distgrid)
-        call ESMF_ArrayDestroy(array8)
         deallocate(farray)
     end subroutine test7d2_generic
 
@@ -3605,6 +3682,7 @@ contains
             ESMF_CONTEXT, rc)) return
 
         call ESMF_FieldGet(grid, localDe=0, &
+            staggerloc=staggerloc,&
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
             gridToFieldMap=gridToFieldMap, &
@@ -3829,6 +3907,7 @@ contains
             ESMF_CONTEXT, rc)) return
 
         call ESMF_FieldGet(grid, localDe=0, &
+            staggerloc=staggerloc,&
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
             gridToFieldMap=gridToFieldMap, &
