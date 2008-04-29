@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.16 2008/04/28 23:23:33 oehmke Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.17 2008/04/29 18:44:02 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.16 2008/04/28 23:23:33 oehmke Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.17 2008/04/29 18:44:02 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -131,7 +131,7 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateFromArraySpec(grid, arrayspec, allocflag, &
+  function ESMF_FieldCreateFromArraySpec(grid, arrayspec, &
     staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     maxHaloLWidth, maxHaloUWidth, name, iospec, rc)
 !
@@ -141,7 +141,6 @@ contains
 ! !ARGUMENTS:
     type(ESMF_Grid) :: grid               
     type(ESMF_ArraySpec), intent(inout) :: arrayspec     
-    type(ESMF_AllocFlag), intent(in), optional :: allocflag
     type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
     integer, intent(in), optional :: gridToFieldMap(:)    
     integer, intent(in), optional :: ungriddedLBound(:)
@@ -164,10 +163,6 @@ contains
 !       Pointer to an {\tt ESMF\_Grid} object. 
 ! \item [arrayspec]
 !       Data type and kind specification. 
-! \item [{[allocflag]}]
-!       Whether to allocate space for the array.  See 
-!       Section~\ref{opt:allocflag} for possible values.  Default is
-!       {\tt ESMF\_ALLOC}.
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
 !       predefined values see Section \ref{sec:opt:staggerloc}.
@@ -421,7 +416,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
 
     ! Call construction method to allocate and initialize field internals.
-    call ESMF_FieldConstructIANew(ftype, grid, arrayspec, allocflag, &
+    call ESMF_FieldConstructIANew(ftype, grid, arrayspec, &
                                 localStaggerloc, localGridToFieldMap(1:gridDimCount), ungriddedLBound, &
                                 ungriddedUBound, localMaxHaloLWidth(1:gridDistDimCount), &
                                 localMaxHaloUWidth(1:gridDistDimCount), name, &
@@ -1318,7 +1313,7 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
 ! !IROUTINE: ESMF_FieldConstructIANew - Construct the internals of a Field
 
 ! !INTERFACE:
-  subroutine ESMF_FieldConstructIANew(ftype, grid, arrayspec, allocflag, &
+  subroutine ESMF_FieldConstructIANew(ftype, grid, arrayspec, &
     staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     maxHaloLWidth, maxHaloUWidth, name, iospec, rc)
 !
@@ -1326,7 +1321,6 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
     type(ESMF_FieldType), pointer :: ftype 
     type(ESMF_Grid) :: grid               
     type(ESMF_ArraySpec), intent(inout)         :: arrayspec
-    type(ESMF_AllocFlag), intent(in), optional  :: allocflag
     type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
     integer, intent(in), optional :: gridToFieldMap(:)
     integer, intent(in), optional :: ungriddedLBound(:)
@@ -1352,9 +1346,6 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
 !       Pointer to an {\tt ESMF\_Grid} object. 
 ! \item [arrayspec]
 !       Data specification.
-! \item [{[allocflag]}]
-!       Allocate space for data array or not.  For possible values
-!       see Section~\ref{opt:allocflag}.
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid 
 !       predefined values see Section \ref{sec:opt:staggerloc}.

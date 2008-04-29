@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.38 2008/04/28 23:23:33 oehmke Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.39 2008/04/29 18:44:02 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1352,7 +1352,6 @@
             ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,5,3/), &
             maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/2,3,4,5/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
-            allocflag=ESMF_NO_ALLOC, &
             fieldget=.true., &
             distgridToGridMap=(/3,2,1,4/), &
             gridToFieldMap=(/1,2,4,7/) &
@@ -3609,7 +3608,6 @@ contains
         gridEdgeLWidth, gridEdgeUWidth, &
         regDecomp, &
         distgridToGridMap, &
-        allocflag, &
         staggerloc, &
         gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
@@ -3623,7 +3621,6 @@ contains
         integer, dimension(:), optional   :: gridEdgeLWidth, gridEdgeUWidth
         integer, dimension(:), optional   :: regDecomp
         integer, dimension(:), optional   :: distgridToGridMap
-        type(ESMF_AllocFlag), optional    :: allocflag
         type(ESMF_STAGGERLOC), optional   :: staggerloc
         integer, dimension(:), optional   :: gridToFieldMap
         integer, dimension(:), optional   :: ungriddedLBound, ungriddedUBound
@@ -3702,7 +3699,7 @@ contains
         field = ESMF_FieldCreate(grid, arrayspec, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
-            staggerloc=staggerloc, allocflag=allocflag, &
+            staggerloc=staggerloc, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
