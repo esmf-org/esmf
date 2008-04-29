@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSphereRegridEx.F90,v 1.5 2008/04/29 20:11:11 dneckels Exp $
+! $Id: ESMF_FieldSphereRegridEx.F90,v 1.6 2008/04/29 20:23:16 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@ program ESMF_FieldSphereRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.5 2008/04/29 20:11:11 dneckels Exp $'
+    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.6 2008/04/29 20:23:16 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -230,9 +230,8 @@ program ESMF_FieldSphereRegridEx
         x = fptrXC(i1, i2)
         y = fptrYC(i1,i2)
      
-       ! Function.  The X component of a windfield over a
+       ! Set the source to be a sinusoidal function of x,y,z
 
-        !fptr(i1, i2) = cos(2*x)*cos(a) + sin(2*x)*cos(3*y)*sin(a)
         theta = DEG2RAD*x
         phi = DEG2RAD*(90.-y)
         x = cos(theta)*sin(phi)
@@ -246,6 +245,10 @@ program ESMF_FieldSphereRegridEx
      enddo
 
   enddo    ! lDE
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! Destination grid
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   dst_dx = 360./dst_nx
   dst_dy = 180./dst_ny
