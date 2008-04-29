@@ -166,7 +166,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47.2.18 2008/04/28 23:22:57 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47.2.19 2008/04/29 05:24:50 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -187,7 +187,7 @@ interface ESMF_GridAddCoord
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_GridAddCoordNoValues
-      module procedure ESMF_GridAddCoordFromArrayList
+      module procedure ESMF_GridAddCoordArrayList
       
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -613,13 +613,13 @@ end interface
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridAddCoordFromArrayList"
+#define ESMF_METHOD "ESMF_GridAddCoord"
 !BOP
 ! !IROUTINE: ESMF_GridAddCoord - Set coordinates using array of ESMF Arrays
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_GridAllocCoord()
-      subroutine ESMF_GridAddCoordFromArrayList(grid, staggerloc, &
+  ! Private name; call using ESMF_GridAddCoord()
+      subroutine ESMF_GridAddCoordArrayList(grid, staggerloc, &
                    arrayList, doCopy, staggerEdgeLWidth,   &
                    staggerEdgeUWidth, staggerAlign, rc)
 !
@@ -735,7 +735,7 @@ end interface
     enddo
 
     ! Call C++ Subroutine to do the create
-    call c_ESMC_gridaddcoordfromarraylist(grid%this,tmp_staggerloc, &
+    call c_ESMC_gridaddcoordarraylist(grid%this,tmp_staggerloc, &
       arrayCount, arrayPointerList, docopy, staggerEdgeLWidthArg,     &
       staggerEdgeUWidthArg, staggerAlignArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -758,7 +758,7 @@ end interface
 
     if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_GridAddCoordFromArrayList
+      end subroutine ESMF_GridAddCoordArrayList
 
 
 !------------------------------------------------------------------------------

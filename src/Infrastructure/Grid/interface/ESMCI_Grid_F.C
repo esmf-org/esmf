@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.23.2.11 2008/04/28 23:22:57 oehmke Exp $
+// $Id: ESMCI_Grid_F.C,v 1.23.2.12 2008/04/29 05:24:49 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -442,7 +442,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
-  void FTN(c_esmc_gridaddcoordfromarraylist)(ESMCI::Grid **grid, 
+  void FTN(c_esmc_gridaddcoordarraylist)(ESMCI::Grid **grid, 
                                          int *staggerloc, 
                                          int *arrayCount, 
                                          ESMCI::Array **arrayList,
@@ -453,7 +453,7 @@ extern "C" {
                                          int *rc) {
     int localrc;
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_gridsetfromarraylist()"
+#define ESMC_METHOD "c_esmc_gridaddcoordarraylist()"
 
     //Initialize return code
     localrc = ESMC_RC_NOT_IMPL;
