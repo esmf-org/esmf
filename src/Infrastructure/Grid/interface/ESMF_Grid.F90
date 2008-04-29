@@ -166,7 +166,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47.2.19 2008/04/29 05:24:50 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47.2.20 2008/04/29 21:50:57 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -187,7 +187,7 @@ interface ESMF_GridAddCoord
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_GridAddCoordNoValues
-      module procedure ESMF_GridAddCoordArrayList
+!      module procedure ESMF_GridAddCoordArrayList  ! Currently not public
       
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -614,7 +614,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAddCoord"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridAddCoord - Set coordinates using array of ESMF Arrays
 
 ! !INTERFACE:
@@ -674,7 +674,7 @@ end interface
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
 !
-!EOP
+!EOPI
     integer :: tmp_staggerloc
     integer :: localrc ! local error status
     type(ESMF_InterfaceInt) :: staggerEdgeLWidthArg  ! Language Interface Helper Var
