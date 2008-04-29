@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.h,v 1.1.2.4 2008/04/25 23:02:11 theurich Exp $
+// $Id: ESMCI_ArrayBundle.h,v 1.1.2.5 2008/04/29 22:13:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -77,6 +77,14 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
     int serialize(char *buffer, int *length, int *offset) const;
     int deserialize(char *buffer, int *offset);
     // comms
+    static int redistStore(ArrayBundle *srcArraybundle,
+      ArrayBundle *dstArraybundle, ESMC_RouteHandle **routehandle,
+      InterfaceInt *srcToDstTransposeMap,
+      ESMC_TypeKind typekindFactor = ESMF_NOKIND, void *factor = NULL);
+    static int redist(ArrayBundle *srcArraybundle,
+      ArrayBundle *dstArraybundle, ESMC_RouteHandle **routehandle,
+      ESMC_Logical checkflag=ESMF_FALSE);
+    static int redistRelease(ESMC_RouteHandle *routehandle);
     static int sparseMatMulStore(ArrayBundle *srcArraybundle,
       ArrayBundle *dstArraybundle, ESMC_RouteHandle **routehandle,
       ESMC_TypeKind typekindFactors = ESMF_NOKIND, void *factorList = NULL,
