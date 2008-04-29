@@ -501,7 +501,7 @@ void OctSearch(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResul
      std::vector<const MeshObj*> *to_investigate,BOX3D *box_in) {
   Trace __trace("Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResult &result, double stol, std::vector<const MeshObj*> *to_investigate");
 
-  std::cout << "Start octree search" << std::endl;
+  //std::cout << "Start octree search" << std::endl;
 
   MEField<> &coord_field = *src.GetCoordField();
   
@@ -549,7 +549,7 @@ void OctSearch(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResul
   if (!box_in) {
     int num_box = num_intersecting_elems(src, dstBBox, dstint, normexp);
   
-    std::cout << "num_box=" << num_box << std::endl;
+    //std::cout << "num_box=" << num_box << std::endl;
     Create_BOX3D(&box, num_box); 
 
     populate_box(box, src, dstBBox, dstint, normexp);
@@ -637,7 +637,7 @@ void OctSearch(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResul
        OctSearch(src, dest, dst_obj_type, result, stol*1e+2, &again, box);
      }
   }
-  std::cout << "end octree search" << std::endl;
+  //std::cout << "end octree search" << std::endl;
 
   if (!box_in)
     Destroy_BOX3D(&box);

@@ -754,8 +754,8 @@ dstmesh(dest)
   if (is_parallel) {
    
     // Form the parallel rendezvous meshes/specs
-     if (Par::Rank() == 0)
-       std::cout << "Building rendezvous..." << std::endl;
+   //  if (Par::Rank() == 0)
+       //std::cout << "Building rendezvous..." << std::endl;
     grend.Build(srcF.size(), &srcF[0], dstF.size(), &dstF[0]);
     
 //#define MYSEARCH
@@ -764,11 +764,13 @@ dstmesh(dest)
     Search(grend.GetSrcRend(), grend.GetDstRend(), grend.GetDstObjType(), sres);
     if (Par::Rank() == 0) std::cout << "end search" << std::endl;
 #else
+/*
      if (Par::Rank() == 0)
        std::cout << "Starting search..." << std::endl;
+*/
     OctSearch(grend.GetSrcRend(), grend.GetDstRend(), grend.GetDstObjType(), sres);
-     if (Par::Rank() == 0)
-       std::cout << "Done with search..." << std::endl;
+  //   if (Par::Rank() == 0)
+       //std::cout << "Done with search..." << std::endl;
 #endif
     /*
     Par::Out() << "SrcRend **************" << std::endl;
@@ -783,11 +785,15 @@ dstmesh(dest)
     Search(src, dest, search_obj_type, sres);
     if (Par::Rank() == 0) std::cout << "end search" << std::endl;
 #else
+/*
      if (Par::Rank() == 0)
        std::cout << "Starting search..." << std::endl;
+*/
      OctSearch(src, dest, search_obj_type, sres);
+/*
      if (Par::Rank() == 0)
        std::cout << "Done with search..." << std::endl;
+*/
 #endif
      
      //PrintSearchResult(sres);

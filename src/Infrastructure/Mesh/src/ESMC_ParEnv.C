@@ -18,19 +18,21 @@ namespace ESMC {
 
 ParLog *ParLog::classInstance = NULL;
 
-ParLog *ParLog::instance(const std::string &fstem, UInt rank) {
+ParLog *ParLog::instance(const std::string &fstem, UInt rank, bool use_log) {
   
   if (classInstance) return classInstance;
 
   char buf[512];
   std::sprintf(buf, "%s.%d", fstem.c_str(), rank);
-  classInstance = new ParLog(buf);
+  classInstance = new ParLog(buf, use_log);
   return classInstance;
 }
 
-ParLog::ParLog(const std::string &fname) :
-of(fname.c_str(), std::ios::out)
+ParLog::ParLog(const std::string &fname, bool _use_log) :
+ use_log(_use_log)
 {
+  if (use_log)
+    of.open(fname.c_str(), std::ios::out);
 }
 
 // ******* Env ********
@@ -39,7 +41,7 @@ int Par::psize = 0;
 bool Par::serial = false;
 ParLog *Par::log = NULL;
 
-void Par::Init(const std::string &logfile) {
+void Par::Init(const std::string &logfile, bool use_log) {
   int mpi_init = 0;
   MPI_Initialized(&mpi_init);
   if (!mpi_init) {
@@ -49,7 +51,7 @@ void Par::Init(const std::string &logfile) {
   }
   MPI_Comm_size(MPI_COMM_WORLD, &psize);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  log = ParLog::instance(logfile, rank);
+  log = ParLog::instance(logfile, rank, use_log);
 }
 
 void Par::Abort() {

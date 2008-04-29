@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSphereRegridEx.F90,v 1.4 2008/04/25 18:30:59 dneckels Exp $
+! $Id: ESMF_FieldSphereRegridEx.F90,v 1.5 2008/04/29 20:11:11 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@ program ESMF_FieldSphereRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.4 2008/04/25 18:30:59 dneckels Exp $'
+    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.5 2008/04/29 20:11:11 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -197,8 +197,6 @@ program ESMF_FieldSphereRegridEx
   DEG2RAD = 3.14159265/180.0
   RAD2DEG = 1./DEG2RAD
 
-  a = 3.14159265/4.0
-
   ! Get memory and set coords for src
   do lDE=0,localDECount-1
  
@@ -307,11 +305,6 @@ program ESMF_FieldSphereRegridEx
 
   enddo    ! lDE
 
-  spherical_grid = 0
-  call ESMF_MeshIO(vm, Griddst, ESMF_STAGGERLOC_CENTER, &
-               "pre_dstmesh", dstArray, rc=localrc, &
-               spherical=spherical_grid)
-
 
 !BOE
 !
@@ -367,12 +360,12 @@ program ESMF_FieldSphereRegridEx
 
   ! Uncomment these calls to see some actual regrid results
   spherical_grid = 1
-  call ESMF_MeshIO(vm, GridSrc, ESMF_STAGGERLOC_CENTER, &
-               "srcmesh", srcArray, rc=localrc, &
-               spherical=spherical_grid)
-  call ESMF_MeshIO(vm, Griddst, ESMF_STAGGERLOC_CENTER, &
-               "dstmesh", dstArray, rc=localrc, &
-               spherical=spherical_grid)
+!  call ESMF_MeshIO(vm, GridSrc, ESMF_STAGGERLOC_CENTER, &
+!               "srcmesh", srcArray, rc=localrc, &
+!               spherical=spherical_grid)
+!  call ESMF_MeshIO(vm, Griddst, ESMF_STAGGERLOC_CENTER, &
+!               "dstmesh", dstArray, rc=localrc, &
+!               spherical=spherical_grid)
 
 
 10   continue
