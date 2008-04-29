@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.2 2008/04/29 00:38:22 theurich Exp $
+! $Id: user_coupler.F90,v 1.3 2008/04/29 04:18:54 theurich Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -37,7 +37,7 @@
 #define ESMF_METHOD "usercpl_register"
     subroutine usercpl_register(comp, rc)
         type(ESMF_CplComp) :: comp
-        integer :: rc
+        integer, intent(out) :: rc
   
         integer :: status = ESMF_SUCCESS
   
@@ -74,7 +74,7 @@
         type(ESMF_CplComp) :: comp
         type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
-        integer :: rc
+        integer,intent(out) :: rc
   
         ! Local variables
         integer :: status = ESMF_SUCCESS
@@ -155,7 +155,7 @@
         type(ESMF_CplComp) :: comp
         type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
-        integer :: rc
+        integer,intent(out) :: rc
 
         ! Local variables
         integer :: status = ESMF_SUCCESS
@@ -195,7 +195,7 @@
         type(ESMF_CplComp) :: comp
         type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
-        integer :: rc
+        integer,intent(out) :: rc
   
         ! Local variables
         integer :: status = ESMF_SUCCESS

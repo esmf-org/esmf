@@ -7,15 +7,10 @@
 
 \subsection{Method Name and Argument Conventions}
 
-There are conventions for how class methods are presented throughout 
-this document.  Although Fortran interfaces are not case-sensitive,
-we use case to help parse multi-word names.  We also use case to help
-make the presentation of Fortran interfaces consistent with the 
-presentation of C++ interfaces.  
-
 Method names begin with {\tt ESMF\_}, followed by the class name, 
 followed by the name of the operation being performed.  Each new 
-word is capitalized. 
+word is capitalized.  Although Fortran interfaces are not case-sensitive,
+we use case to help parse multi-word names.  
 
 For method arguments that are multi-word, the first word is lower
 case and subsequent words begin with upper case.  ESMF class 
@@ -30,7 +25,7 @@ Most Fortran calls in the ESMF are subroutines, with
 any returned values passed through the interface.  For the sake of 
 convenience, some ESMF calls are written as functions.
 
-A typical ESMF call thus looks like this:
+A typical ESMF call looks like this:
 
 \begin{verbatim}
 call ESMF_<ClassName><Operation>(classname, firstArgument, 
@@ -50,12 +45,13 @@ and {\tt rc} is a return code. \newline
 
 Methods for each class are located in the section devoted to 
 that class in the {\it Reference Manual}.  In some classes, methods
-are split into a number of different types.  For example, there are 
-separate listings for Basic Field Methods, Field Overloads for Fortran Arrays,
-and Field Communications.  The methods in each listing are ordered 
-alphabetically.  The split into different listings is a side effect
-of the automated document generation system we use; it reflects 
-which methods are located in the same source files.  It is something 
-we are working to eliminate!   
+are split into a number of different types.  For example, there may
+be separate listings for basic Field methods and overloaded Field
+methods.  The methods in each listing are ordered alphabetically.
+The split into different
+listings is a side effect of the automated document generation system
+we use; it reflects which methods are located in the same source files.
+Eventually we hope to eliminate this issue and have all methods in
+a class listed together.
 
 

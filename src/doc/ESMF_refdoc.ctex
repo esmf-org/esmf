@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.81 2008/04/02 20:43:02 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.82 2008/04/29 04:18:52 theurich Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -77,6 +77,7 @@
 
 \newpage
 %\section{Introduction}
+\input{ESMF_whatisesmf}
 \input{ESMF_refintro}
 
 %\section{Support}
@@ -177,8 +178,6 @@
 
 #include "../Infrastructure/TimeMgr/doc/TimeMgr_refdoc.ctex"
 
-%#include "../Infrastructure/DELayout/doc/CommMem_refdoc.ctex"
-
 #include "../Infrastructure/Config/doc/Config_refdoc.ctex"
 
 #include "../Infrastructure/LogErr/doc/LogErr_refdoc.ctex"
@@ -187,7 +186,6 @@
 
 #include "../Infrastructure/VM/doc/VM_refdoc.ctex"
 
-%#include "../Infrastructure/IO/doc/IO_refdoc.ctex"
 
 \newpage
 \section{References}

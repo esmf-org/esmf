@@ -1,25 +1,21 @@
 
 
-\input{ESMF_whatisesmf}
-
 \section{The ESMF Reference Manual for Fortran}
 
-ESMF provides a complete set of Fortran interfaces and
-some C and C++ interfaces.  This {\it ESMF Reference Manual} is a listing of 
-ESMF standard interfaces for Fortran.\footnote{Since the audience for it is 
-small, we have not yet prepared a comprehensive reference manual for C 
-or C++.}  
+ESMF has a complete set of Fortran interfaces and
+some C interfaces.  This {\it ESMF Reference Manual} is a listing of 
+ESMF interfaces for Fortran.\footnote{Since the customer base for it is 
+small, we have not yet prepared a comprehensive reference manual for C.}  
 
-Interfaces are grouped by class.  A class is an object-oriented software 
-design construct that embodies 
-a specific concept like a physical field.  Superstructure classes 
+Interfaces are grouped by class.  A class is composed of the data and
+methods for a specific concept like a physical field.  Superstructure classes 
 are listed first in this {\it Manual}, followed by infrastructure 
 classes.
 
 The major classes in the ESMF superstructure are Components, which 
 typically represent
 large pieces of functionality such as models, model couplers, and 
-dynamics and physics packages; and States, which are the data structures
+dynamics and physics packages, and States, which are the data structures
 used to communicate data between Components.  There are both data
 structures and utilities in the ESMF 
 infrastructure; classes include Fields, collections of Fields on the 
@@ -28,9 +24,9 @@ decomposition, time management, and application configuration.
 
 \begin{center}
 \begin{figure}
-\caption{Schematic of the ESMF ``sandwich'' architecture. In this
-design the framework consists of two parts, an upper level
-{\bf superstructure} layer and a lower-level {\bf infrastructure} layer.
+\caption{Schematic of the ESMF ``sandwich'' architecture.
+The framework consists of two parts, an upper level
+{\bf superstructure} layer and a lower level {\bf infrastructure} layer.
 User code is sandwiched between these two layers.}
 \label{fig:TheESMFwich}
 \scalebox{1.0}{\includegraphics{ESMF_sandwich}}

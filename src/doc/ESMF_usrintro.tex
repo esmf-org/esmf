@@ -1,34 +1,4 @@
 
-\input{ESMF_whatisesmf}
-
-The Earth System Modeling Framework (ESMF) is a structured collection of 
-software building blocks that can be used or customized to develop 
-Earth system model components, and assemble them into applications.  
-The simplest view of the ESMF is that it consists of an {\it infrastructure} 
-of utilities and data structures for creating 
-model components, and a {\it superstructure} for coupling them.  
-User code sits between these two layers, making calls to the infrastructure
-libraries beneath it and being scheduled and synchronized by the 
-superstructure above it.  The configuration resembles a sandwich, as
-shown in Figure~\ref{fig:TheESMFwich}.
-
-The ESMF architecture is scalable, flexible paradigm for building highly 
-complex climate, weather, and related applications from components such
-as atmospheric models, land models, and data assimilation systems.  The 
-ESMF is not a single master application into which all components must fit; 
-rather it is a way of developing components so that they can be used 
-in many different user-written applications.  Model components that adopt 
-ESMF are designed to be usable in different contexts with minimal code
-modification, and may be
-incorporated into other ESMF-based modeling systems within the Earth 
-science community.  In addition to high-level organization, ESMF provides 
-a set of robust, portable, performance optimized libraries for regridding, 
-data transfers, time management, and other common modeling functions.  
-ESMF users may choose to extensively rewrite their codes to take advantage 
-of the ESMF infrastructure, or they may decide to simply wrap user-written 
-components in ESMF interfaces in order to adopt the ESMF architecture and 
-utilize framework coupling services.
-
 \section{The ESMF User's Guide}
 
 This {\it ESMF User's Guide} is mainly an installation and build guide for

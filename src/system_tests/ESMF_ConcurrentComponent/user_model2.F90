@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.2 2008/04/29 00:38:23 theurich Exp $
+! $Id: user_model2.F90,v 1.3 2008/04/29 04:18:55 theurich Exp $
 !
 ! System test for Concurrent Components, user-written component 2.
 
@@ -34,7 +34,7 @@
 #define ESMF_METHOD "userm2_register"
     subroutine userm2_register(comp, rc)
         type(ESMF_GridComp)         :: comp
-        integer                     :: rc
+        integer, intent(out)        :: rc
 
         integer                     :: status = ESMF_SUCCESS
 
@@ -67,9 +67,9 @@
  
 #define ESMF_METHOD "userm2_init"
     subroutine user_init(comp, importState, exportState, clock, rc)
-        type(ESMF_GridComp), intent(inout) :: comp
-        type(ESMF_State), intent(inout) :: importState, exportState
-        type(ESMF_Clock), intent(in) :: clock
+        type(ESMF_GridComp)  :: comp
+        type(ESMF_State)     :: importState, exportState
+        type(ESMF_Clock)     :: clock
         integer, intent(out) :: rc
   
   !   ! Local variables
@@ -118,9 +118,9 @@
  
 #define ESMF_METHOD "userm2_run"
     subroutine user_run(comp, importState, exportState, clock, rc)
-        type(ESMF_GridComp), intent(inout) :: comp
-        type(ESMF_State), intent(inout) :: importState, exportState
-        type(ESMF_Clock), intent(in) :: clock
+        type(ESMF_GridComp)  :: comp
+        type(ESMF_State)     :: importState, exportState
+        type(ESMF_Clock)     :: clock
         integer, intent(out) :: rc
   
   !   ! Local variables
@@ -160,9 +160,9 @@
  
 #define ESMF_METHOD "userm2_final"
     subroutine user_final(comp, importState, exportState, clock, rc)
-        type(ESMF_GridComp), intent(inout) :: comp
-        type(ESMF_State), intent(inout) :: importState, exportState
-        type(ESMF_Clock), intent(in) :: clock
+        type(ESMF_GridComp)  :: comp
+        type(ESMF_State)     :: importState, exportState
+        type(ESMF_Clock)     :: clock
         integer, intent(out) :: rc
   
         ! Local variables

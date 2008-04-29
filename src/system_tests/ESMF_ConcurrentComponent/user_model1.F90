@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.2 2008/04/29 00:38:23 theurich Exp $
+! $Id: user_model1.F90,v 1.3 2008/04/29 04:18:55 theurich Exp $
 !
 ! System test for Concurrent Components.  User-code, component 1.
 
@@ -34,8 +34,8 @@
 #define ESMF_METHOD "userm1_register"
 
     subroutine userm1_register(comp, rc)
-        type(ESMF_GridComp), intent(inout)  :: comp
-        integer, intent(out)                :: rc
+        type(ESMF_GridComp)  :: comp
+        integer, intent(out) :: rc
 
         integer                             :: status = ESMF_SUCCESS
 
@@ -69,9 +69,9 @@
     
 #define ESMF_METHOD "userm1_init"
     subroutine user_init(comp, importState, exportState, clock, rc)
-        type(ESMF_GridComp), intent(inout) :: comp
-        type(ESMF_State), intent(inout) :: importState, exportState
-        type(ESMF_Clock), intent(in) :: clock
+        type(ESMF_GridComp)  :: comp
+        type(ESMF_State)     :: importState, exportState
+        type(ESMF_Clock)     :: clock
         integer, intent(out) :: rc
 
        ! Local variables
@@ -127,9 +127,9 @@
  
 #define ESMF_METHOD "userm1_run"
     subroutine user_run(comp, importState, exportState, clock, rc)
-        type(ESMF_GridComp), intent(inout) :: comp
-        type(ESMF_State), intent(inout) :: importState, exportState
-        type(ESMF_Clock), intent(in) :: clock
+        type(ESMF_GridComp)  :: comp
+        type(ESMF_State)     :: importState, exportState
+        type(ESMF_Clock)     :: clock
         integer, intent(out) :: rc
 
         ! local variables
@@ -174,9 +174,9 @@
  
 #define ESMF_METHOD "userm1_final"
     subroutine user_final(comp, importState, exportState, clock, rc)
-        type(ESMF_GridComp), intent(inout) :: comp
-        type(ESMF_State), intent(inout) :: importState, exportState
-        type(ESMF_Clock), intent(in) :: clock
+        type(ESMF_GridComp)  :: comp
+        type(ESMF_State)     :: importState, exportState
+        type(ESMF_Clock)     :: clock
         integer, intent(out) :: rc
 
         ! local variables

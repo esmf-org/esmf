@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleUTest.F90,v 1.5 2008/04/07 06:45:55 theurich Exp $
+! $Id: ESMF_FieldBundleUTest.F90,v 1.6 2008/04/29 04:18:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleUTest.F90,v 1.5 2008/04/07 06:45:55 theurich Exp $'
+      '$Id: ESMF_FieldBundleUTest.F90,v 1.6 2008/04/29 04:18:50 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -143,20 +143,20 @@
 !      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! Getting Attribute count from a deleted FieldBundle
-!      call ESMF_FieldBundleAttributeGetCount(bundle2, count, rc=rc)
-!      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
-!      write(name, *) "Getting Attribute Count from a deleted FieldBundle Test"
-!      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_AttributeGet(bundle2, count, rc=rc)
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+      write(name, *) "Getting Attribute Count from a deleted FieldBundle Test"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_removeUTest
+      !EX_UTest
       ! Getting Attribute count from a non-created FieldBundle
-!      call ESMF_FieldBundleAttributeGetCount(bundle1, count, rc=rc)
-!      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
-!      write(name, *) "Getting Attribute Count from a non-created FieldBundle Test"
-!      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_AttributeGet(bundle1, count, rc=rc)
+      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+      write(name, *) "Getting Attribute Count from a non-created FieldBundle Test"
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -384,20 +384,20 @@
 
       !------------------------------------------------------------------------
 
-      !EX_removeUTest
+      !EX_UTest
       ! Getting Attribute count from a FieldBundle
-!      call ESMF_FieldBundleAttributeGetCount(bundle2, count, rc=rc)
-!      write(failMsg, *) "Did not return ESMF_SUCCESS"
-!      write(name, *) "Getting Attribute Count from a FieldBundle Test"
-!      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_AttributeGet(bundle2, count, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting Attribute Count from a FieldBundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
 
-      !EX_removeUTest
+      !EX_UTest
       ! Verify Attribute count Test
-!      write(failMsg, *) "Incorrect count"
-!      write(name, *) "Verify Attribute count from a FieldBundle "
-!      call ESMF_Test((count.eq.0), name, failMsg, result, ESMF_SRCLINE)
+      write(failMsg, *) "Incorrect count"
+      write(name, *) "Verify Attribute count from a FieldBundle "
+      call ESMF_Test((count.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -531,6 +531,52 @@
       write(failMsg, *) ""
       write(name, *) "Getting a non-existent Field from a FieldBundle Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+
+      !EX_UTest
+      ! Add an integer attribute to a FieldBundle Test
+      call ESMF_AttributeSet(bundle1, name="Sides", value=65, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding an integer attribute to a FieldBundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+
+
+      !EX_UTest
+      ! Get an integer attribute from a FieldBundle Test
+      call ESMF_AttributeGet(bundle1, name="Sides", value=number, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting an integer attribute from a FieldBundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.65), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get an integer attribute from a FieldBundle Test
+      call ESMF_AttributeGet(bundle1, name="Sides", count=number, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting an attribute info from a FieldBundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.1), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Getting Attribute count from a FieldBundle
+      call ESMF_AttributeGet(bundle1, count, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting Attribute Count from a FieldBundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      
+      !EX_UTest
+      ! Verify Attribute count Test
+      write(failMsg, *) "Incorrect count"
+      write(name, *) "Verify Attribute count from a FieldBundle "
+      call ESMF_Test((count.eq.1), name, failMsg, result, ESMF_SRCLINE)
+      
       !------------------------------------------------------------------------
 
       !EX_UTest

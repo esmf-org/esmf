@@ -1,4 +1,4 @@
-% $Id: ESMF_usrdoc.ctex,v 1.32 2008/04/17 18:58:39 theurich Exp $
+% $Id: ESMF_usrdoc.ctex,v 1.33 2008/04/29 04:18:53 theurich Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -58,6 +58,7 @@
 \newpage
 
 %\section{Introduction}
+\input{ESMF_whatisesmf}
 \input{ESMF_usrintro}
 
 %\section{ESMF Support and Contacts}
