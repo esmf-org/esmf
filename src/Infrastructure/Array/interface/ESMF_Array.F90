@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.73.2.9 2008/04/23 23:54:33 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.73.2.10 2008/04/29 22:13:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.73.2.9 2008/04/23 23:54:33 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.73.2.10 2008/04/29 22:13:01 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -715,7 +715,7 @@ contains
     integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
     integer,                    intent(out),  optional  :: rc
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg   ! index helper
@@ -776,7 +776,7 @@ contains
     integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
     integer,                    intent(out),  optional  :: rc
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg   ! index helper
@@ -837,7 +837,7 @@ contains
     integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
     integer,                    intent(out),  optional  :: rc
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg   ! index helper
@@ -898,7 +898,7 @@ contains
     integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
     integer,                    intent(out),  optional  :: rc
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg   ! index helper
