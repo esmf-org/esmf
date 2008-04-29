@@ -1,4 +1,4 @@
-! $Id: ESMF_F95PtrUTest.F90,v 1.2.2.2 2008/04/28 05:25:23 theurich Exp $
+! $Id: ESMF_F95PtrUTest.F90,v 1.2.2.3 2008/04/29 05:10:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_F95PTRUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_F95PtrUTest.F90,v 1.2.2.2 2008/04/28 05:25:23 theurich Exp $'
+    '$Id: ESMF_F95PtrUTest.F90,v 1.2.2.3 2008/04/29 05:10:31 theurich Exp $'
 !------------------------------------------------------------------------------
 
   integer, parameter :: int8_k = selected_int_kind (12)		! 8-byte integer
@@ -145,33 +145,36 @@ contains
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_notest_UTest
     write(name, *) "Pointer to CHARACTER string"
     write(failMsg, *) "Pointer size changed!"    
     char_chars = achar (0)
     char_endchar = achar (1)
     charptr_l = maxloc (iachar (char_chars), dim=1) - 9
-    call ESMF_Test((charptr_l == realptr_l), name, failMsg, result, ESMF_SRCLINE)
+    print *, '  F95 pointer-to-characterString length =', charptr_l
+    !call ESMF_Test((charptr_l == realptr_l), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_notest_UTest
     write(name, *) "Pointer to simple Plain Old Data derived type"
     write(failMsg, *) "Pointer size changed!"
     udt_chars = achar (0)
     udt_endchar = achar (1)
     udtptr_l = maxloc (iachar (udt_chars), dim=1) - 9
-    call ESMF_Test((udtptr_l == realptr_l), name, failMsg, result, ESMF_SRCLINE)
+    print *, '  F95 pointer-to-simpleUDT length =', udtptr_l
+    !call ESMF_Test((udtptr_l == realptr_l), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-    write(name, *) "Pointer to more complex derived type"
-    write(failMsg, *) "Pointer size changed!"
+    write(name, *) "Compare pointer size between simple and bigger UDT"
+    write(failMsg, *) "Pointer size changed between UDTs!"
     biggerudt_chars = achar (0)
     biggerudt_endchar = achar (1)
     biggerudtptr_l = maxloc (iachar (biggerudt_chars), dim=1) - 9
-    call ESMF_Test((biggerudtptr_l == realptr_l), name, failMsg, result, ESMF_SRCLINE)
+    print *, '  F95 pointer-to-biggerUDT length =', biggerudtptr_l
+    call ESMF_Test((biggerudtptr_l == udtptr_l), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
 #if defined (ENABLE_ESMF_UDT_TEST)
