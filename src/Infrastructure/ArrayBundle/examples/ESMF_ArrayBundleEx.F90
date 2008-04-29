@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleEx.F90,v 1.1.2.1 2008/04/29 18:51:20 theurich Exp $
+! $Id: ESMF_ArrayBundleEx.F90,v 1.1.2.2 2008/04/29 20:08:56 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -21,41 +21,12 @@ program ESMF_ArrayBundleEx
   implicit none
   
   ! local variables
-  integer:: rc, de, i, j, k, petCount, localDeCount, localPet
-!  integer:: dim, nodeCount, dimCount
-!  integer:: deNeighborCount, linkCount
+  integer:: rc, petCount, localPet
   type(ESMF_VM):: vm
-  type(ESMF_DELayout):: delayout
-  type(ESMF_DistGrid):: distgrid, distgrid3D, distgrid2D, distgrid1D
+  type(ESMF_DistGrid):: distgrid
   type(ESMF_ArraySpec):: arrayspec
-  type(ESMF_Array):: array, array1, array2, array1D, array2D, array3D
-!  type(ESMF_Array):: arrayTracer, arrayNScalar, arrayNEu, arrayNEv
-!  type(ESMF_ArrayBundle):: arrayBundle
-!  type(ESMF_Array), allocatable:: arrayList(:)
-  type(ESMF_LocalArray), allocatable:: larrayList(:)
-  type(ESMF_LocalArray), allocatable:: larrayList1(:), larrayList2(:)
-  real(ESMF_KIND_R8), pointer:: myF90Array(:,:)
-!  real(ESMF_KIND_R8), pointer:: myF90Array1(:,:), myF90Array2(:,:)
-  real(ESMF_KIND_R8), pointer:: myF90Array1D(:), myF90Array3D(:,:,:)
-  real(ESMF_KIND_R8), pointer:: myF90Array2D(:,:)
-  real(ESMF_KIND_R8):: dummySum
-  type(ESMF_IndexFlag):: indexflag
-!  integer, allocatable:: dimExtent(:,:), indexList(:), regDecompDeCoord(:)
-!  integer, allocatable:: minIndex(:,:), maxIndex(:,:), regDecomp(:,:)
-!  integer, allocatable:: deBlockList(:,:), connectionList(:,:), connectionTransformList(:,:)
-!  integer, allocatable:: deNeighborList(:), deNeighborInterface(:,:)
-!  integer, allocatable:: linkList(:,:)
-  integer, allocatable:: arrayToDistGridMap(:)
-  integer, allocatable:: localDeList(:)
-  integer, allocatable:: exclusiveLBound(:,:), exclusiveUBound(:,:)
-  integer, allocatable:: totalLWidth(:,:), totalUWidth(:,:)
-  integer, allocatable:: totalLBound(:,:), totalUBound(:,:)
-!  integer, allocatable:: totalElementMask(:,:)
-  integer, allocatable:: computationalLWidth(:,:), computationalUWidth(:,:)
-  integer, allocatable:: computationalLBound(:,:), computationalUBound(:,:)
-!  integer, allocatable:: haloLDepth(:), haloUDepth(:)
-!  type(ESMF_Logical):: regDecompFlag
-!  type(ESMF_RouteHandle):: haloHandle, haloHandle2
+  type(ESMF_Array):: array(2)
+  type(ESMF_ArrayBundle):: arraybundle
 
   ! result code
   integer :: finalrc
@@ -71,49 +42,74 @@ program ESMF_ArrayBundleEx
 !BOE
 ! \subsubsection{ArrayBundle creation from a list of Arrays}
 !
-! The examples of the previous sections made the user responsible for 
-! providing memory allocations for the PET-local regions of the Array object.
-! The user was able to use any of the Fortran90 array methods or go through the
-! {\tt ESMF\_LocalArray} interfaces to obtain memory allocations before
-! passing them into ArrayCreate(). Alternatively, users may wish for ESMF to
-! handle memory allocation of an Array object directly. The following example
-! shows the interfaces that are available to the user to do just this.
-! 
-! To create an {\tt ESMF\_Array} object without providing an existing
-! Fortran90 array or {\tt ESMF\_LocalArray} the {\em type, kind and rank}
-! (tkr) of the Array must be specified in form of an {\tt ESMF\_ArraySpec}
-! argument. Here a 2D Array of double precision real numbers is to be created:
+! First create an array of two {\tt ESMF\_Array} objects.
 !EOE
 !BOC
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOE
-! Further an {\tt ESMF\_DistGrid} argument must be constructed that holds
-! information about the entire domain (patchwork) and the decomposition into 
-! DE-local exclusive
-! regions. The following line creates a DistGrid for a 5x5 global LR domain 
-! that is decomposed into 2 x 3 = 6 DEs.
-!EOE
 !BOC
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
     regDecomp=(/2,3/), rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOE
-! This is enough information to create a Array object with default settings.
-!EOE
 !BOC
-  array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
+  array(1) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOC
+  array(2) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-!  call ESMF_ArrayPrint(array, rc=rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOE
+! Now the {\tt array} of Arrays can be used to create an ArrayBundle object.
+!EOE
+
+!BOC
+  arraybundle = ESMF_ArrayBundleCreate(arrayList=array, &
+    name="MyArrayBundle", rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! The ArrayBundle object can be printed.
+!EOE
+
+!BOC
+  call ESMF_ArrayBundlePrint(arraybundle, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! The ArrayBundle object can be destroyed.
+!EOE
+
+!BOC
+  call ESMF_ArrayBundleDestroy(arraybundle, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! After the ArrayBundle object has been destroyed it is safe to destroy its
+! constituents.
+!EOE
 
 
+!BOC
+  call ESMF_ArrayDestroy(array(1), rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
+!BOC
+  call ESMF_ArrayDestroy(array(2), rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOC
   call ESMF_DistGridDestroy(distgrid, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 
 10 continue
