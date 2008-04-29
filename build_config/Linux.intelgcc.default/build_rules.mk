@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.9 2008/04/17 18:58:26 theurich Exp $
+# $Id: build_rules.mk,v 1.10 2008/04/29 17:33:31 dneckels Exp $
 #
 # Linux.intelgcc.default
 #
@@ -57,6 +57,7 @@ else
 ifeq ($(ESMF_COMM),lam)
 # LAM (assumed to be built with ifort) ---------------------
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
+ESMF_F90LINKLIBS       += -llammpi++
 ESMF_F90DEFAULT         = mpif77
 ESMF_CXXDEFAULT         = mpic++
 ESMF_MPIRUNDEFAULT      = mpirun
