@@ -166,7 +166,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.82 2008/04/28 23:24:15 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.83 2008/04/29 22:06:52 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -187,6 +187,7 @@ interface ESMF_GridAddCoord
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_GridAddCoordNoValues
+!      module procedure ESMF_GridAddCoordArrayList  ! Currently not public
       
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -627,6 +628,156 @@ end interface
     if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridAddCoordNoValues
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridAddCoord"
+!BOPI
+! !IROUTINE: ESMF_GridAddCoord - Set coordinates using array of ESMF Arrays
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridAddCoord()
+      subroutine ESMF_GridAddCoordArrayList(grid, staggerloc, &
+                   arrayList, doCopy, staggerEdgeLWidth,   &
+                   staggerEdgeUWidth, staggerAlign, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid),        intent(in)            :: grid
+      type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
+      type(ESMF_Array),       intent(in)            :: arrayList(:)
+      type(ESMF_CopyFlag),    intent(in), optional  :: docopy ! NOT IMPLEMENTED
+      integer,                intent(in),optional   :: staggerEdgeLWidth(:)
+      integer,                intent(in),optional   :: staggerEdgeUWidth(:)
+      integer,                intent(in),optional   :: staggerAlign(:)
+      integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   This method sets the passed in Array as the holder of the coordinate data
+!   for stagger location {\tt staggerloc} and coordinate {\tt coord}. If the location
+!   already contains an Array, then this one overwrites it. 
+!    
+!     The arguments are:
+!\begin{description}
+!\item[{staggerloc}]
+!    The stagger location into which to copy the arrays. 
+!    Please see Section~\ref{sec:opt:staggerloc} for a list 
+!    of predefined stagger locations. If not present, defaults to
+!    ESMF\_STAGGERLOC\_CENTER.
+!\item[{arrayList}]
+!    An array to set the grid coordinate information from.
+!\item[{[doCopy]}]
+!    If not specified, default to {\tt ESMF\_DATA\_REF}, in this case the Grid 
+!    coordinate Array will be set to a reference to {\tt array}. Please see 
+!    Section~\ref{opt:copyflag} for further description and a list of
+!    valid values. 
+!    [THE ESMF\_DATA\_COPY OPTION IS CURRENTLY NOT IMPLEMENTED] 
+! \item[{[staggerEdgeLWidth]}] 
+!      This array should be the same rank as the grid. It specifies the lower corner of the stagger
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[staggerEdgeUWidth]}] 
+!      This array should be the same rank as the grid. It specifies the upper corner of the stagger
+!      region with respect to the upper corner of the exclusive region.
+! \item[{[staggerAlign]}] 
+!      This array is of size  grid rank.
+!      For this stagger location, it specifies which element
+!      has the same index value as the center. For example, 
+!      for a 2D cell with corner stagger it specifies which 
+!      of the 4 corners has the same index as the center. 
+!      If this is set and either staggerEdgeUWidth or staggerEdgeLWidth is not,
+!      this determines the default array padding for a stagger. 
+!      If not set, then this defaults to all negative. (e.g. 
+!      The most negative part of the stagger in a cell is aligned with the 
+!      center and the padding is all on the postive side.) 
+!\item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!\end{description}
+!
+!EOPI
+    integer :: tmp_staggerloc
+    integer :: localrc ! local error status
+    type(ESMF_InterfaceInt) :: staggerEdgeLWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: staggerEdgeUWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: staggerAlignArg  ! Language Interface Helper Var
+    integer :: i,arrayCount
+    type(ESMF_Pointer), allocatable :: arrayPointerList(:) ! helper variable
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Get size of array list
+    arrayCount=size(arrayList)
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
+    do i=1, arrayCount
+       ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayGetInit, arrayList(i), rc)
+    enddo
+
+    ! handle staggerloc
+    if (present(staggerloc)) then
+       tmp_staggerloc=staggerloc%staggerloc
+    else
+       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc
+    endif
+
+    !! staggerLWidth
+    staggerEdgeLWidthArg = ESMF_InterfaceIntCreate(staggerEdgeLWidth, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    !! staggerEdgeUWidth
+    staggerEdgeUWidthArg = ESMF_InterfaceIntCreate(staggerEdgeUWidth, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    !! staggeAlign
+    staggerAlignArg = ESMF_InterfaceIntCreate(staggerAlign, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    !! staggerAlign
+    staggerAlignArg = ESMF_InterfaceIntCreate(staggerAlign, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Copy C++ pointers of deep objects into a simple ESMF_Pointer array
+    ! This is necessary in order to strip off the F90 init check members
+    ! when passing into C++
+    allocate(arrayPointerList(arrayCount))
+    do i=1, arrayCount
+      call ESMF_ArrayGetThis(arrayList(i), arrayPointerList(i), localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+
+    ! Call C++ Subroutine to do the create
+    call c_ESMC_gridaddcoordarraylist(grid%this,tmp_staggerloc, &
+      arrayCount, arrayPointerList, docopy, staggerEdgeLWidthArg,     &
+      staggerEdgeUWidthArg, staggerAlignArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! cleanup
+    deallocate(arrayPointerList)
+    call ESMF_InterfaceIntDestroy(staggerEdgeLWidthArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_InterfaceIntDestroy(staggerEdgeUWidthArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_InterfaceIntDestroy(staggerAlignArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridAddCoordArrayList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

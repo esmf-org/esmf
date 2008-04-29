@@ -440,6 +440,36 @@ extern "C" {
   ///////////////////////////////////////////////////////////////////////////////////
 
 
+
+  ///////////////////////////////////////////////////////////////////////////////////
+
+  void FTN(c_esmc_gridaddcoordarraylist)(ESMCI::Grid **grid, 
+                                         int *staggerloc, 
+                                         int *arrayCount, 
+                                         ESMCI::Array **arrayList,
+                                         ESMC_DataCopy *docopy, 
+                                         ESMCI::InterfaceInt **staggerEdgeLWidthArg, 
+                                         ESMCI::InterfaceInt **staggerEdgeUWidthArg, 
+                                         ESMCI::InterfaceInt **staggerAlignArg, 
+                                         int *rc) {
+    int localrc;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridaddcoordarraylist()"
+
+    //Initialize return code
+    localrc = ESMC_RC_NOT_IMPL;
+
+    // call into C++
+    localrc= (*grid)->addCoordFromArrayList(ESMC_NOT_PRESENT_FILTER(staggerloc),
+                    *arrayCount, arrayList, ESMC_NOT_PRESENT_FILTER(docopy),
+            *staggerEdgeLWidthArg, *staggerEdgeUWidthArg, *staggerAlignArg);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+}
+
+
+
+
   ///////////////////////////////////////////////////////////////////////////////////
 
   void FTN(c_esmc_gridsetcoordfromarray)(ESMCI::Grid **grid, 
