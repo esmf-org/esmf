@@ -1,0 +1,13 @@
+% $Id: ArrayBundle_rest.tex,v 1.1.2.1 2008/04/29 18:51:18 theurich Exp $
+
+%\subsubsection{Restrictions and Future Work}
+\begin{itemize}
+\item Adding Arrays to an existing ArrayBundle is currently not supported. In
+the future this functionality will be provided via the
+{\tt ESMF\_ArrayBundleAdd()} method.
+\item The current implementation of the ArrayBundle communication methods only
+supports ArrayBundles that contain Arrays with identical distribution, i.e.
+DistGrid, type, kind and rank.
+\item The current implementation of the ArrayBundle communication methods have
+not been optimized for performance or memory usage.
+\end{itemize}

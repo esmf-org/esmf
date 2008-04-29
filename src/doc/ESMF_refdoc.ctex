@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.79.2.2 2008/04/28 06:01:35 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.79.2.3 2008/04/29 18:51:21 theurich Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -136,6 +136,8 @@
 #include "../Infrastructure/FieldBundle/doc/FieldBundle_refdoc.ctex"
 
 #include "../Infrastructure/Field/doc/Field_refdoc.ctex"
+
+#include "../Infrastructure/ArrayBundle/doc/ArrayBundle_refdoc.ctex"
 
 #include "../Infrastructure/Array/doc/Array_refdoc.ctex"
 
