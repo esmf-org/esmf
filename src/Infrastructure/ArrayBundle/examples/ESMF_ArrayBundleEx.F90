@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleEx.F90,v 1.1.2.2 2008/04/29 20:08:56 theurich Exp $
+! $Id: ESMF_ArrayBundleEx.F90,v 1.1.2.3 2008/04/29 20:32:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -22,10 +22,12 @@ program ESMF_ArrayBundleEx
   
   ! local variables
   integer:: rc, petCount, localPet
+  integer:: i, arrayCount
   type(ESMF_VM):: vm
   type(ESMF_DistGrid):: distgrid
   type(ESMF_ArraySpec):: arrayspec
   type(ESMF_Array):: array(2)
+  type(ESMF_Array), allocatable:: arrayList(:)
   type(ESMF_ArrayBundle):: arraybundle
 
   ! result code
@@ -80,6 +82,40 @@ program ESMF_ArrayBundleEx
   call ESMF_ArrayBundlePrint(arraybundle, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! Use {\tt ESMF\_ArrayBundleGet()} to determine how many Arrays are stored
+! in an ArrayBundle.
+!EOE
+
+!BOC
+  call ESMF_ArrayBundleGet(arraybundle, arrayCount=arrayCount, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! The {\tt arrayCount} can be used to correctly allocate the {\tt arrayList}
+! variable for a second call to {\tt ESMF\_ArrayBundleGet()} to gain access
+! to the bundled Array objects.
+!EOE
+
+!BOC
+  allocate(arrayList(arrayCount))
+  call ESMF_ArrayBundleGet(arraybundle, arrayList=arraylist, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! The {\tt arrayList} variable can be used to access the individual Arrays,
+! e.g. to print them.
+!EOE
+
+!BOC
+  do i=1, arrayCount
+    call ESMF_ArrayPrint(arrayList(i), rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  enddo
+!EOC
 
 !BOE
 ! The ArrayBundle object can be destroyed.
