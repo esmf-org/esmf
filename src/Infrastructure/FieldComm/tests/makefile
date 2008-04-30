@@ -1,7 +1,8 @@
-# $Id: makefile,v 1.16 2007/08/17 20:53:25 cdeluca Exp $
+# $Id: makefile,v 1.17 2008/04/30 17:27:42 feiliu Exp $ 
 
-ALL:  build_unit_tests
-run:  run_unit_tests
+ALL:      build_unit_tests
+run:      run_unit_tests
+run_uni:  run_unit_tests_uni
 
 CFLAGS    =
 FFLAGS    =
@@ -13,39 +14,24 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
+DIRS	  = 
 LOCDIR	  = src/Infrastructure/FieldComm/tests
 
-TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_FieldGatherUTest \
-		$(ESMC_TESTDIR)/ESMF_FieldGather1DUTest
-
-TESTS_RUN     = RUN_ESMF_FieldGatherUTest \
-		RUN_ESMF_FieldGather1DUTest
-
-TESTS_RUN_UNI = RUN_ESMF_FieldGatherUTestUNI \
-		RUN_ESMF_FieldGather1DUTestUNI
-
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_FieldGatherUTest
+               
+TESTS_RUN     = RUN_ESMF_FieldGatherUTest
+                
+TESTS_RUN_UNI = 
 
 include ${ESMF_DIR}/makefile
 
-DIRS	  = 
-
 CLEANDIRS   = 
-CLEANFILES  = $(TESTS_BUILD)
+CLEANFILES  = $(TESTS_BUILD) $(CPFILES)
 CLOBBERDIRS =
 
 #
-# FieldComm unit tests
+# Field
 #
+
 RUN_ESMF_FieldGatherUTest:
-	$(MAKE) TNAME=FieldGather NP=6 ftest
-
-RUN_ESMF_FieldGatherUTestUNI:
-	echo "PASS: ESMF_FieldGatherUTest not set up to run on one processor." > $(ESMF_TESTDIR)/ESMF_FieldGatherUTest.stdout
-
-
-RUN_ESMF_FieldGather1DUTest:
-	$(MAKE) TNAME=FieldGather1D NP=6 ftest
-
-RUN_ESMF_FieldGather1DUTestUNI:
-	$(MAKE) TNAME=FieldGather1D NP=1 ftest
-
+	$(MAKE) TNAME=FieldGather NP=4 ftest
