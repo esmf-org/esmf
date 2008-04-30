@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleEx.F90,v 1.1.2.3 2008/04/29 20:32:08 theurich Exp $
+! $Id: ESMF_ArrayBundleEx.F90,v 1.1.2.4 2008/04/30 23:06:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -84,6 +84,11 @@ program ESMF_ArrayBundleEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOE
+! \subsubsection{Access Arrays inside the ArrayBundle}
+!
+!EOE
+
+!BOE
 ! Use {\tt ESMF\_ArrayBundleGet()} to determine how many Arrays are stored
 ! in an ArrayBundle.
 !EOE
@@ -116,6 +121,11 @@ program ESMF_ArrayBundleEx
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   enddo
 !EOC
+
+!BOE
+! \subsubsection{Destroy an ArrayBundle and its constituents}
+!
+!EOE
 
 !BOE
 ! The ArrayBundle object can be destroyed.
