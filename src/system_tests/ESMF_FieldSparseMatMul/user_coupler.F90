@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.4.2.3 2008/04/01 00:26:12 theurich Exp $
+! $Id: user_coupler.F90,v 1.4.2.4 2008/04/30 23:47:31 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -146,15 +146,15 @@ module user_coupler
       enddo
     endif
 
-    ! Precompute and store an ArraySparseMatMul operation
+    ! Precompute and store an ArraySMM operation
     if (localPet==0 .or. localPet==4) then
       ! only PET 0 and PET 4 provide factors
-      call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
+      call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
         routehandle=routehandle, factorList=factorList, &
         factorIndexList=factorIndexList, rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
     else
-      call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
+      call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
         routehandle=routehandle, rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
     endif
@@ -199,8 +199,8 @@ module user_coupler
     call ESMF_FieldGet(dstField, array=dstArray, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    ! Use ArraySparseMatMul() to take data from srcArray to dstArray
-    call ESMF_ArraySparseMatMul(srcArray=srcArray, dstArray=dstArray, &
+    ! Use ArraySMM() to take data from srcArray to dstArray
+    call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
       routehandle=routehandle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
   
@@ -224,8 +224,8 @@ module user_coupler
 
     print *, "User Coupler Final starting"
   
-    ! Release resources stored for the ArraySparseMatMul.
-    call ESMF_ArraySparseMatMulRelease(routehandle=routehandle, rc=rc)
+    ! Release resources stored for the ArraySMM.
+    call ESMF_ArraySMMRelease(routehandle=routehandle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     print *, "User Coupler Final returning"
