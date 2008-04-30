@@ -1,6 +1,6 @@
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2008, University Corporation for Atmospheric Research,
+! Copyright 2002-2007, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -106,7 +106,7 @@
 
   ! sized char type
   type sized_char_array
-     integer :: charsize
+     integer :: tagsize
      type(character_array), pointer :: tag(:)
   end type sized_char_array
 
@@ -1318,8 +1318,342 @@
     end function pattern_query
     !---------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  ! methods to query config tables
+  !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  subroutine  read_table_integer(int_value,                                    &
+                                kelements, irow, nrows, ncolumns, new_row,     &
+                                lfilename, descriptor_label, localcf, rc)  
+
+  !-----------------------------------------------------------------------------
+  ! helper routine to read a single integer entry of a config file table. The
+  ! tables are designed to have multiple lines for a single entry by using "&"
+  ! continuation symbols to indicate a line continuation. It internally tests 
+  ! for the end of the table line and looks for a continuation symbol on the
+  ! next line. If found it advances to the next entry.
+  !
+  ! This separate routine was created to avoid significant duplication of code
+  ! necessary for parsing the tables.
+  !-----------------------------------------------------------------------------
+  character(ESMF_MAXSTR), intent(in   ) :: lfilename, descriptor_label
+  integer, intent(  out) :: int_value
+  integer, intent(in   ) :: ncolumns(:), new_row(:)
+  integer, intent(inout) :: irow, nrows, kelements
+  type(ESMF_Config), intent(inout) :: localcf
+  integer, intent(inout) :: rc
+
+  ! local parameters
+  integer :: localrc ! local error status
+
+  ! local character strings
+  character(ESMF_MAXSTR) :: lchar, ltmp
+  integer :: int_tmp
+
+  logical :: flag = .true.
+
+  ! initialize return flag
+  localrc = ESMF_RC_NOT_IMPL
+  rc = ESMF_RC_NOT_IMPL
+
+  !-----------------------------------------------------------------------------
+  !
+  !-----------------------------------------------------------------------------
+  if( kelements < ncolumns(irow) ) then
+     call ESMF_ConfigGetAttribute(localcf, int_tmp, rc=localrc)
+     !--------------------------------------------------------------------------
+     ! if error
+     !--------------------------------------------------------------------------
+     write(lchar,"(i5)") irow
+     if( ESMF_LogMsgFoundError(localrc,                                        &
+         "cannot read row " // trim(adjustL(lchar)) //                         &
+         " of table " //trim(descriptor_label) // "in file " //                &
+         trim(lfilename), rcToReturn=rc) ) return
+         kelements = kelements + 1
+         int_value = int_tmp
+
+  elseif( kelements >= ncolumns(irow) .and. irow+1 <= nrows ) then
+     !--------------------------------------------------------------------------
+     ! reached end of the row, check if another line exists
+     !--------------------------------------------------------------------------
+     if( new_row(irow+1) == 0 .and. ncolumns(irow+1) >= 2 ) then
+        !-----------------------------------------------------------------------
+        ! if new line starts with a continuation and there are at least two
+        ! columns, advance and read
+        !-----------------------------------------------------------------------
+        irow = irow + 1
+        kelements = 1
+        ! if error
+        call ESMF_ConfigNextLine(localcf, flag, rc=localrc)
+        write(lchar,"(i5)") irow
+        if( ESMF_LogMsgFoundError(localrc,                                     &
+           "cannot read row " // trim(adjustL(lchar)) //                       &
+           " of table " //trim(descriptor_label) // "in file " //              &
+           trim(lfilename), rcToReturn=rc) ) return
+        !-----------------------------------------------------------------------
+        ! read and discard continuation symbol
+        !-----------------------------------------------------------------------
+        call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
+        if( ESMF_LogMsgFoundError(localrc,                                     &
+           "cannot read row " // trim(adjustL(lchar)) //                       &
+           " of table " //trim(descriptor_label) // "in file " //              &
+           trim(lfilename), rcToReturn=rc) ) return
+
+        !-----------------------------------------------------------------------
+        ! read string from table
+        !-----------------------------------------------------------------------
+        call ESMF_ConfigGetAttribute(localcf, int_tmp, rc=localrc)
+        if( ESMF_LogMsgFoundError(localrc,                                     &
+           "cannot read row " // trim(adjustL(lchar)) //                       &
+           " of table " //trim(descriptor_label) // "in file " //              &
+           trim(lfilename), rcToReturn=rc) ) return
+
+        kelements = kelements + 1
+        int_value = int_tmp
+
+     else
+           !--------------------------------------------------------------------
+           ! error continuation line missing, but grid not finished
+           !--------------------------------------------------------------------
+           write(lchar,"(i5)") irow
+           call ESMF_LogMsgSetError( ESMF_FAILURE,                             &
+              "cannot read row " // trim(adjustL(lchar)) //                    &
+              " of table " //trim(descriptor_label) // "in file " //           &
+              trim(lfilename), rcToReturn=rc)
+     endif    ! new line
+  endif    ! 
+
+  !-----------------------------------------------------------------------------
+  rc = ESMF_SUCCESS     
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  end subroutine read_table_integer
+  !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  subroutine  read_table_real(flt_value,                                       &
+                                kelements, irow, nrows, ncolumns, new_row,     &
+                                lfilename, descriptor_label, localcf, rc)  
+
+  !-----------------------------------------------------------------------------
+  ! helper routine to read a single real entry of a config file table. The
+  ! tables are designed to have multiple lines for a single entry by using "&"
+  ! continuation symbols to indicate a line continuation. It internally tests 
+  ! for the end of the table line and looks for a continuation symbol on the
+  ! next line. If found it advances to the next entry.
+  !
+  ! This separate routine was created to avoid significant duplication of code
+  ! necessary for parsing the tables.
+  !-----------------------------------------------------------------------------
+  character(ESMF_MAXSTR), intent(in   ) :: lfilename, descriptor_label
+  real(ESMF_KIND_R8), intent(  out) :: flt_value
+  integer, intent(in   ) :: ncolumns(:), new_row(:)
+  integer, intent(inout) :: irow, nrows, kelements
+  type(ESMF_Config), intent(inout) :: localcf
+  integer, intent(inout) :: rc
+
+  ! local parameters
+  integer :: localrc ! local error status
+
+  ! local character strings
+  character(ESMF_MAXSTR) :: lchar, ltmp
+  real(ESMF_KIND_R8) :: flt_tmp
+
+  logical :: flag = .true.
+
+  ! initialize return flag
+  localrc = ESMF_RC_NOT_IMPL
+  rc = ESMF_RC_NOT_IMPL
+
+  !-----------------------------------------------------------------------------
+  !
+  !-----------------------------------------------------------------------------
+  if( kelements < ncolumns(irow) ) then
+     call ESMF_ConfigGetAttribute(localcf, flt_tmp, rc=localrc)
+     !--------------------------------------------------------------------------
+     ! if error
+     !--------------------------------------------------------------------------
+     write(lchar,"(i5)") irow
+     if( ESMF_LogMsgFoundError(localrc,                                        &
+         "cannot read row " // trim(adjustL(lchar)) //                         &
+         " of table " //trim(descriptor_label) // "in file " //                &
+         trim(lfilename), rcToReturn=rc) ) return
+         kelements = kelements + 1
+         flt_value = flt_tmp
+
+  elseif( kelements >= ncolumns(irow) .and. irow+1 <= nrows ) then
+     !--------------------------------------------------------------------------
+     ! reached end of the row, check if another line exists
+     !--------------------------------------------------------------------------
+     if( new_row(irow+1) == 0 .and. ncolumns(irow+1) >= 2 ) then
+        !-----------------------------------------------------------------------
+        ! if new line starts with a continuation and there are at least two
+        ! columns, advance and read
+        !-----------------------------------------------------------------------
+        irow = irow + 1
+        kelements = 1
+        ! if error
+        call ESMF_ConfigNextLine(localcf, flag, rc=localrc)
+        write(lchar,"(i5)") irow
+        if( ESMF_LogMsgFoundError(localrc,                                     &
+           "cannot read row " // trim(adjustL(lchar)) //                       &
+           " of table " //trim(descriptor_label) // "in file " //              &
+           trim(lfilename), rcToReturn=rc) ) return
+        !-----------------------------------------------------------------------
+        ! read and discard continuation symbol
+        !-----------------------------------------------------------------------
+        call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
+        if( ESMF_LogMsgFoundError(localrc,                                     &
+           "cannot read row " // trim(adjustL(lchar)) //                       &
+           " of table " //trim(descriptor_label) // "in file " //              &
+           trim(lfilename), rcToReturn=rc) ) return
+
+        !-----------------------------------------------------------------------
+        ! read string from table
+        !-----------------------------------------------------------------------
+        call ESMF_ConfigGetAttribute(localcf, flt_tmp, rc=localrc)
+        if( ESMF_LogMsgFoundError(localrc,                                     &
+           "cannot read row " // trim(adjustL(lchar)) //                       &
+           " of table " //trim(descriptor_label) // "in file " //              &
+           trim(lfilename), rcToReturn=rc) ) return
+
+        kelements = kelements + 1
+        flt_value = flt_tmp
+
+     else
+           !--------------------------------------------------------------------
+           ! error continuation line missing, but grid not finished
+           !--------------------------------------------------------------------
+           write(lchar,"(i5)") irow
+           call ESMF_LogMsgSetError( ESMF_FAILURE,                             &
+              "cannot read row " // trim(adjustL(lchar)) //                    &
+              " of table " //trim(descriptor_label) // "in file " //           &
+              trim(lfilename), rcToReturn=rc)
+     endif    ! new line
+  endif    ! 
+
+  !-----------------------------------------------------------------------------
+  rc = ESMF_SUCCESS     
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  end subroutine read_table_real
+  !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  subroutine  read_table_string(string,                                        &
+                                kelements, irow, nrows, ncolumns, new_row,     &
+                                lfilename, descriptor_label, localcf, rc)  
+
+  !-----------------------------------------------------------------------------
+  ! helper routine to read character string entry of a config file table. The
+  ! tables are designed to have multiple lines for a single entry by using "&"
+  ! continuation symbols to indicate a line continuation. It internally tests 
+  ! for the end of the table line and looks for a continuation symbol on the
+  ! next line. If found it advances to the next entry.
+  !
+  ! This separate routine was created to avoid significant duplication of code
+  ! necessary for parsing the tables.
+  !-----------------------------------------------------------------------------
+  character(ESMF_MAXSTR), intent(in   ) :: lfilename, descriptor_label
+  character(ESMF_MAXSTR), intent(  out) :: string
+  integer, intent(in   ) :: ncolumns(:), new_row(:)
+  integer, intent(inout) :: irow, nrows, kelements
+  type(ESMF_Config), intent(inout) :: localcf
+  integer, intent(inout) :: rc
+
+  ! local parameters
+  integer :: localrc ! local error status
+
+  ! local character strings
+  character(ESMF_MAXSTR) :: ltmp, lchar
+
+  logical :: flag = .true.
+
+  ! initialize return flag
+  localrc = ESMF_RC_NOT_IMPL
+  rc = ESMF_RC_NOT_IMPL
+
+  !-----------------------------------------------------------------------------
+  !
+  !-----------------------------------------------------------------------------
+  if( kelements < ncolumns(irow) ) then
+     call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
+     !--------------------------------------------------------------------------
+     ! if error
+     !--------------------------------------------------------------------------
+     write(lchar,"(i5)") irow
+     if( ESMF_LogMsgFoundError(localrc,                                        &
+         "cannot read row " // trim(adjustL(lchar)) //                         &
+         " of table " //trim(descriptor_label) // "in file " //                &
+         trim(lfilename), rcToReturn=rc) ) return
+         kelements = kelements + 1
+         string = ltmp
+
+  elseif( kelements >= ncolumns(irow) .and. irow+1 <= nrows ) then
+     !--------------------------------------------------------------------------
+     ! reached end of the row, check if another line exists
+     !--------------------------------------------------------------------------
+     if( new_row(irow+1) == 0 .and. ncolumns(irow+1) >= 2 ) then
+        !-----------------------------------------------------------------------
+        ! if new line starts with a continuation and there are at least two
+        ! columns, advance and read
+        !-----------------------------------------------------------------------
+        irow = irow + 1
+        kelements = 1
+        ! if error
+        call ESMF_ConfigNextLine(localcf, flag, rc=localrc)
+        write(lchar,"(i5)") irow
+        if( ESMF_LogMsgFoundError(localrc,                                     &
+              "cannot read row " // trim(adjustL(lchar)) //                    &
+              " of table " //trim(descriptor_label) // "in file " //           &
+              trim(lfilename), rcToReturn=rc) ) return
+        !-----------------------------------------------------------------------
+        ! read and discard continuation symbol
+        !-----------------------------------------------------------------------
+        call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
+        if( ESMF_LogMsgFoundError(localrc,                                     &
+              "cannot read row " // trim(adjustL(lchar)) //                    &
+              " of table " //trim(descriptor_label) // "in file " //           &
+              trim(lfilename), rcToReturn=rc) ) return
+
+        !-----------------------------------------------------------------------
+        ! read string from table
+        !-----------------------------------------------------------------------
+        call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
+        if( ESMF_LogMsgFoundError(localrc,                                     &
+              "cannot read row " // trim(adjustL(lchar)) //                    &
+              " of table " //trim(descriptor_label) // "in file " //           &
+              trim(lfilename), rcToReturn=rc) ) return
+
+        kelements = kelements + 1
+        string = ltmp
+
+     else
+        !-----------------------------------------------------------------------
+        ! error continuation line missing, but grid not finished
+        !-----------------------------------------------------------------------
+        write(lchar,"(i5)") irow
+        call ESMF_LogMsgSetError( ESMF_FAILURE,                                &
+               "cannot read row " // trim(adjustL(lchar)) //                   &
+               " of table " //trim(descriptor_label) // "in file " //          &
+               trim(lfilename), rcToReturn=rc)
+     endif    ! new line
+  endif    ! 
+
+  !-----------------------------------------------------------------------------
+  rc = ESMF_SUCCESS     
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  end subroutine read_table_string
+  !-----------------------------------------------------------------------------
 
 !===============================================================================
   end module ESMF_TestHarnessMod
 !===============================================================================
-

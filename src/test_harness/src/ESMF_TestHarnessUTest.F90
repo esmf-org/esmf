@@ -1,23 +1,23 @@
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2008, University Corporation for Atmospheric Research,
+! Copyright 2002-2005, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
 ! Licensed under the GPL.
 !
-!==============================================================================
+!===============================================================================
 !
   program esmf_test_harness
 
-!------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 ! INCLUDES
 #include <ESMF.h>
 
-!------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !USE_TEST_CASE
-!==============================================================================
+!===============================================================================
 !BOP
 ! !PROGRAM: ESMF_TEST_HARNESS - Data redistribution and regridding tests
 !
@@ -26,7 +26,7 @@
 ! The code in this file drives the testing harness for testing the redistribution
 ! and regridding methods. 
 !
-!-----------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 ! !USES:
   use ESMF_TestMod  
   use ESMF_Mod
@@ -53,6 +53,8 @@
   integer :: ncount
   integer :: k, n, kfile
 
+  logical :: debugflag = .true.
+
   ! top level test harness config file
   character(ESMF_MAXSTR) :: test_harness_name = "test_harness.rc"
 
@@ -69,36 +71,117 @@
   call ESMF_VMGet(vm, localPet, petCount=petCount, rc=rc)
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-  !---------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  ! first stage of test
+  !   - open the testharness configuration file "test_harness.rc" & extract info
+  !     * read test class
+  !     * read test harness report style
+  !     * read names of problem descriptor files
+  !     * populate the data structure with the information
+  !   - open each problem descriptor file
+  !     * extract the problem descriptor string
+  !     * extract the accompanying specifier file names
+  !     * populate the information into problem descritpion data structure
+  !   - go back and open each specifier file & populate the data structure
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
   ! read testharness configuration file, create the test harness record
   ! variable "harness" and extract (1) the test class, (2) report type, (3)
   ! number of records or problem descriptor files.
-  !---------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   call read_testharness_config(rc)
-  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc .ne. ESMF_SUCCESS) then
+     print*,'Error reading file test_harness.rc - see log file for details'
+     finalrc = ESMF_FAILURE
+     goto 999
+  endif
+  !-----------------------------------------------------------------------------
+  ! debugging statements
+  !-----------------------------------------------------------------------------
+  if(debugflag) then
+     print*,'=----------in main-------------------------------='
+     print*,'  Read test harness config debug statements '
+     print*,'Problem descriptor Test Class:',harness%testClass
+     print*,'Total number of problem descriptor files:',harness%numRecords
+     do kfile=1,harness%numRecords
+        print*,kfile,' Descriptor file name:',trim(harness%Record(kfile)%filename)
+     enddo
+     print*,'=------------------------------------------------='
+  endif
+  !-----------------------------------------------------------------------------
 
-  !---------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  ! read each of the problem descriptor files obtained from read_testharness_config 
+  ! and extract the problem descriptor strings and the accompanying specifier
+  ! filenames.
+  !-----------------------------------------------------------------------------
+  call read_descriptor_files(rc)
+  if (rc .ne. ESMF_SUCCESS) then
+     print*,'Error reading problem descriptor files - see log file for details'
+     finalrc = ESMF_FAILURE
+     goto 999
+  endif
+  !-----------------------------------------------------------------------------
+  ! debugging statements
+  !-----------------------------------------------------------------------------
+  if(debugflag) then
+     print*,'=---------in main--------------------------------='
+     print*,'  Read descriptor file debug statements '
+     do kfile=1,harness%numRecords
+        print*,'Problem descriptor filename: ',trim(harness%Record(kfile)%filename)
+        do k=1,harness%Record(kfile)%numStrings
+           print*,'>',trim( harness%Record(kfile)%string(k)%pds )
+           print*,'Number of Distribution Specifier files', &
+                                 harness%Record(kfile)%string(k)%distfiles%tagsize
+           do n=1,harness%Record(kfile)%string(k)%distfiles%tagsize
+              print*,'   ',n,   &
+                 trim( harness%Record(kfile)%string(k)%distfiles%tag(n)%string )
+           enddo     ! n
+           print*,'Number of Grid Specifier files',   &
+                                 harness%Record(kfile)%string(k)%gridfiles%tagsize
+           do n=1,harness%Record(kfile)%string(k)%gridfiles%tagsize
+              print*,'   ',n,   &
+                 trim( harness%Record(kfile)%string(k)%gridfiles%tag(n)%string )
+              print*,'                                            '
+           enddo     ! n
+        enddo      ! k
+     enddo      ! kfile
+     print*,'=------------------------------------------------='
+     goto 999
+  endif
+
+  !-----------------------------------------------------------------------------
   ! loops through the list of descriptor files and reads each problem
   ! descriptor string and its associated specifer files for (1) class, (2)
   ! distribution ensemble, and (3) grid ensemble.
-  !---------------------------------------------------------------------------
-  call read_descriptor_files(rc)
+  !-----------------------------------------------------------------------------
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-  !---------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ! parse each of the problem descriptor strings and fill in the test harness
   ! record variable.
-  !---------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  print*,'entering parse descriptor string'
   call parse_descriptor_string(rc)
+  print*,'exiting parse descriptor string'
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-  print*,'Read specification'
+  print*,'Read specification - number of records ', harness%numRecords
+
   do kfile=1, harness%numRecords
+  print*,' number of problem descriptor strings ',harness%Record(kfile)%numStrings
      do k=1, harness%Record(kfile)%numStrings
-        do n=1,harness%Record(kfile)%string(k)%gridfiles%charsize
+  print*,' number of grid files',harness%Record(kfile)%string(k)%gridfiles%tagsize
+        do n=1,harness%Record(kfile)%string(k)%gridfiles%tagsize
+           print*,'entering read grid specification'
            call read_grid_specification(                                       &
                   harness%Record(kfile)%string(k)%gridfiles%tag(n)%string,rc)
+           print*,'exiting read grid specification'
            if (rc .ne. ESMF_SUCCESS) then 
-               print*,' read grid spec failed'
+               print*,' read grid spec failed',kfile,k,n
+               print*,harness%Record(kfile)%string(k)%gridfiles%tag(n)%string
                finalrc = ESMF_FAILURE
                call ESMF_Finalize(terminationflag=ESMF_ABORT)
            endif
@@ -111,21 +194,20 @@
 
   ! clean up and release memory
 
-  !---------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
 999 continue
-  !---------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
 
   call ESMF_TestEnd(result, ESMF_SRCLINE)
 
 
   ! -------- end of unit test code ------------------------
 
-!============================================================================
+!===============================================================================
 
 contains
 
-!============================================================================
-!2345678901234567890123456789012345678901234567890123456789012345678901234567890
+!===============================================================================
 ! !IROUTINE: read_testharness_config
 
 ! !INTERFACE:
@@ -137,9 +219,15 @@ contains
 !
 ! !DESCRIPTION:
 ! Routine opens the top level config file "test_harness.rc", which specifies the 
-! test class, the reporting style, and depending on how the ESMF_TESTEXHAUSTIVE flag
+! test class, the reporting style, and depending on how the ESMF_EXHAUSTIVE flag
 ! is set, extracts the list of files containing the problem descriptor strings.
 !
+! Upon completion, the routine returns the values to a public record
+!       harness%testClass               Problem Descriptor Test Class
+!       harness%reportType              Output Report type
+!       harness%numRecords              number of problem descriptor filenames
+!       harnessRecord(k)%filename       kth problem descriptor filename
+!===============================================================================
 
   ! local ESMF types
   type(ESMF_Config)      :: localcf
@@ -153,7 +241,7 @@ contains
   character(ESMF_MAXSTR) :: ltag
 
   ! local integer variables
-  integer :: file, ncolumns
+  integer :: kfile, ncolumns
 
   ! local  logical
   logical :: flag = .true.
@@ -161,142 +249,138 @@ contains
   ! initialize return code
   localrc = ESMF_RC_NOT_IMPL
 
-  !--------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ! create config handle and load the testing harness config file
-  !--------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   localcf = ESMF_ConfigCreate(localrc)
-  if( ESMF_LogMsgFoundError(localrc, "cannot create config object",         &
+  if( ESMF_LogMsgFoundError(localrc, "cannot create config object",            &
                             rcToReturn=localrc) ) return
                             
-  print*,'Opening ',trim( test_harness_name )
-  call ESMF_ConfigLoadFile(localcf, trim(test_harness_name), rc=localrc )
-  if( ESMF_LogMsgFoundError(localrc,                                        &
-           "cannot load config file " // trim( test_harness_name ),         &
+  call ESMF_ConfigLoadFile(localcf, trim(adjustL(test_harness_name)),          &
+           rc=localrc )
+  if( ESMF_LogMsgFoundError(localrc,                                           &
+           "cannot load config file " // trim(adjustL(test_harness_name)),     &
            rcToReturn=localrc) ) return
   
-  !--------------------------------------------------------------------------
-  ! find and load the test class 
-  !--------------------------------------------------------------------------
-  print*,'Reading ',trim( test_harness_name )
-  call ESMF_ConfigFindLabel(localcf, trim(test_class_name), rc=localrc )
-  if( ESMF_LogMsgFoundError(localrc,                                        &
-           "cannot find config label " // trim( test_class_name ),          &
+  !-----------------------------------------------------------------------------
+  ! find and read the test class 
+  !-----------------------------------------------------------------------------
+  call ESMF_ConfigFindLabel(localcf, trim(adjustL(test_class_name)),           &
+           rc=localrc )
+  if( ESMF_LogMsgFoundError(localrc,                                           &
+           "cannot find config label " // trim(adjustL(test_class_name)),      &
            rcToReturn=localrc) ) return
 
   call ESMF_ConfigGetAttribute(localcf, harness%testClass, rc=localrc )
-  if( ESMF_LogMsgFoundError(localrc,                                        &
-           "cannot get value for label " // trim( test_class_name ),        &
+  if( ESMF_LogMsgFoundError(localrc,                                           &
+           "cannot get value for label " // trim(adjustL(test_class_name)),    &
            rcToReturn=localrc) ) return
 
-! debug
-
-! print*,'-->',trim(harness%testClass),'<--', INDEX('FIELD',trim(harness%testClass))
-  if ( trim(harness%testClass) /= 'ARRAY'  .and.                            &
-       trim(harness%testClass) /= 'BUNDLE' .and.                            &
-       trim(harness%testClass) /= 'FIELD'  .and.                            &
-       trim(harness%testClass) /= 'GRID'   .and.                            &
-       trim(harness%testClass) /= 'REGRID' ) then
-     call ESMF_LogMsgSetError( ESMF_FAILURE,                                &
-              "class name not of valid type " // trim(harness%testClass),   &
-              rcToReturn=localrc)
+  !-----------------------------------------------------------------------------
+  ! if the class is not supported, then post an error
+  !-----------------------------------------------------------------------------
+  if ( trim(adjustL(harness%testClass)) /= 'ARRAY'  .and.                      &
+       trim(adjustL(harness%testClass)) /= 'BUNDLE' .and.                      &
+       trim(adjustL(harness%testClass)) /= 'FIELD'  .and.                      &
+       trim(adjustL(harness%testClass)) /= 'GRID'   .and.                      &
+       trim(adjustL(harness%testClass)) /= 'REGRID' ) then
+     call ESMF_LogMsgSetError( ESMF_FAILURE,                                   &
+          "class name not of valid type " // trim(adjustL(harness%testClass)), &
+          rcToReturn=localrc)
      return
   endif
 
-  print*,'Test class is ',trim( harness%testClass )
-
-  !--------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ! determine type of test report to be requested
-  !--------------------------------------------------------------------------
-  call ESMF_ConfigFindLabel(localcf, trim(test_report_name), rc=localrc )
-  if( ESMF_LogMsgFoundError(localrc,                                        &
-           "cannot find config label " // trim( test_report_name ),         &
+  !-----------------------------------------------------------------------------
+  call ESMF_ConfigFindLabel(localcf,trim(adjustL(test_report_name)),rc=localrc )
+  if( ESMF_LogMsgFoundError(localrc,                                           &
+           "cannot find config label " // trim(adjustL(test_report_name)),     &
            rcToReturn=localrc) ) return
 
-  !--------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ! read test report flag 
   !	0 = no output
   !	1 = report successful tests
   !    -1 = report test failures
   !	2 = report both successes and failures.
-  !--------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   call ESMF_ConfigGetAttribute(localcf, harness%reportType, rc=localrc )
-  if( ESMF_LogMsgFoundError(localrc,                                        &
-           "cannot get value for label " // trim( test_report_name ),       &
+  if( ESMF_LogMsgFoundError(localrc,                                           &
+           "cannot get value for label " // trim(adjustL(test_report_name)),   &
            rcToReturn=localrc) ) return
 
   if ( harness%reportType .lt.-2 .or. harness%reportType .gt.2) then
-     call ESMF_LogMsgSetError( ESMF_FAILURE,                                &
-               "report flag improperly set " // char(harness%reportType),   &
+     call ESMF_LogMsgSetError( ESMF_FAILURE,                                   &
+               "report flag improperly set " // char(harness%reportType),      &
                rcToReturn=localrc)
      return
   endif
-  print*,'Test report flag is ', harness%reportType
 
-  !--------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ! based on whether exhaustive or nonexhaustive tests are to be run,  find 
   ! and load the problem descriptor file names
-  !--------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
 #ifdef ESMF_TESTEXHAUSTIVE
   ltag = 'exhaustive::'
-  print *, "exhaustive"
+  print *, "running exhaustive tests"
 #else
   ltag = 'nonexhaustive::'
-  print *, "nonexhaustive"
+  print *, "running nonexhaustive tests"
 #endif
-  call ESMF_ConfigFindLabel(localcf, trim(ltag), rc=localrc )
-  if( ESMF_LogMsgFoundError(localrc,                                        &
-           "cannot find config label " // trim(ltag),                       &
+  call ESMF_ConfigFindLabel(localcf, trim(adjustL(ltag)), rc=localrc )
+  if( ESMF_LogMsgFoundError(localrc,                                           &
+           "cannot find config label " // trim(adjustL(ltag)),                 &
            rcToReturn=localrc) ) return
 
   ! determine the number of entries
-  call ESMF_ConfigGetDim(localcf, harness%numRecords, ncolumns, trim(ltag), &
-                         rc=localrc)
-  if( ESMF_LogMsgFoundError(localrc,                                        &
-           "cannot find table size of " // trim(ltag),                      &
+  call ESMF_ConfigGetDim(localcf, harness%numRecords, ncolumns,                &
+           trim(adjustL(ltag)), rc=localrc)
+  if( ESMF_LogMsgFoundError(localrc,                                           &
+           "cannot find table size of " // trim(adjustL(ltag)),                &
            rcToReturn=localrc) ) return
 
-  print*,'The number of problem descriptor files is ',harness%numRecords
+  ! if there are no entries post an error
   if ( harness%numRecords .le. 0 ) then
-     call ESMF_LogMsgSetError( ESMF_FAILURE,                                &
-               "no problem descriptor files specified",                     &
+     call ESMF_LogMsgSetError( ESMF_FAILURE,                                   &
+               "no problem descriptor files specified",                        &
                rcToReturn=localrc)
      return
   endif
 
-  !--------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ! find the problem descriptor file names and read them
-  !--------------------------------------------------------------------------
-  call ESMF_ConfigFindLabel(localcf, trim(ltag), rc=localrc)
-  if( ESMF_LogMsgFoundError(localrc,                                        &
-           "cannot find table label of " // trim(ltag),                     &
+  !-----------------------------------------------------------------------------
+  call ESMF_ConfigFindLabel(localcf, trim(adjustL(ltag)), rc=localrc)
+  if( ESMF_LogMsgFoundError(localrc,                                           &
+           "cannot find table label of " // trim(adjustL(ltag)),               &
            rcToReturn=localrc) ) return
 
-  !--------------------------------------------------------------------------
-  ! allocate space to hold problem descriptors and advance through file and 
-  ! extract problem descriptor filenames
-  !--------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  ! allocate space to hold problem descriptor filenames and advance through the
+  ! table extracting the problem descriptor filenames
+  !-----------------------------------------------------------------------------
   allocate( harness%Record(harness%numRecords) )
 
-  do file=1,harness%numRecords
+  do kfile=1,harness%numRecords
      ! advance to new line in table
      call ESMF_ConfigNextLine(localcf, flag, rc=localrc)
-     if( ESMF_LogMsgFoundError(localrc,                                     &
-              "cannot advance to next line of table " // trim(ltag),        &
+     if( ESMF_LogMsgFoundError(localrc,                                        &
+              "cannot advance to next line of table " // trim(adjustL(ltag)),  &
               rcToReturn=localrc) ) return
  
      ! retrieve the problem descriptor filenames 
-     call ESMF_ConfigGetAttribute(localcf, harness%Record(file)%filename,   &
+     call ESMF_ConfigGetAttribute(localcf, harness%Record(kfile)%filename,     &
                                   rc=localrc)
-     if( ESMF_LogMsgFoundError(localrc,                                     &
-              "cannot get descriptor filename in " // trim(ltag),           &
+     if( ESMF_LogMsgFoundError(localrc,                                        &
+              "cannot get descriptor filename in " // trim(adjustL(ltag)),     &
               rcToReturn=localrc) ) return
 
-     print*,'Descriptor file name:',trim(harness%Record(file)%filename)
   enddo   ! file
 
-  !--------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   ! clean up CF
-  !--------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   call ESMF_ConfigDestroy(localcf, localrc)
   if( ESMF_LogMsgFoundError(localrc,                                        &
            "cannot destroy config file " // trim(test_harness_name),        &
@@ -305,14 +389,13 @@ contains
   ! if I've gotten this far without an error, then the routine has succeeded.
   localrc = ESMF_SUCCESS
 
-  !--------------------------------------------------------------------------
+!===============================================================================
   end subroutine read_testharness_config
-  !--------------------------------------------------------------------------
+!===============================================================================
 
-!2345678901234567890123456789012345678901234567890123456789012345678901234567890
-
-!--------------------------------------------------------------------------
-!--------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+ 
+!===============================================================================
 ! !IROUTINE: read_descriptor_files
 
 ! !INTERFACE:
@@ -325,15 +408,41 @@ contains
 ! !DESCRIPTION:
 ! This routine takes the problem descriptor file names specified in the top 
 ! level config file "test_harness.rc" and extracts from a config table the
-! "problem descriptor string" and all the "problem specifier helper files."
-! The helper files are divided into groups by flags preceeded by a dash. The
-! "-c" flag indicates the file containing the CLASS specific settings. The
-! "-d" flag indicates the file(s) containing the ensemble of distribution 
-! configurations to be run with the specific "problem descriptor string."
-! Likewise the "-g" flag indicates the file(s) containing the ensemble of
-! grid configurations to be run with the specific "problem descriptor string."
-! This routine only extracts the information from the configuration file. 
+! "problem descriptor string" and all the "problem specifier files." These
+! helper files are divided into groups by flags preceeded by a dash. The
+! "-c" flag (currently not implemented) indicates file(s) containing the CLASS 
+! specific settings. The "-d" flag indicates the file(s) containing an ensemble
+! of distribution configurations to be run with the specific "problem descriptor
+! string." Likewise the "-g" flag indicates the file(s) containing an ensemble
+! of grid configurations to be run with the specific "problem descriptor string."
+! This routine only extracts the information from the configuration file,
 ! additional processing occurs in a later routine.
+!
+! Upon completion, the routine returns the values to a public record
+
+!   harnessRecord(n)%numStrings          number of problem descriptor strings in 
+!                                        the n'th problem descriptor file.
+
+!   harnessRecord(n)%string(k)%pds       k'th problem descriptor from the n'th
+!                                        problem descriptor file.
+!
+!   harnessRecord(n)%string(k)%distfiles%tagsize         number of distribution
+!                                                        specifier files
+!   harnessRecord(n)%string(k)%distfiles%tag(l)%string   filename string for
+!                                        the l'th distribution specifier file 
+!                                        associated with the k'th problem descriptor
+!                                        string, located in the n'th problem 
+!                                        descriptor file.                  
+!
+!   harnessRecord(n)%string(k)%gridfiles%tagsize         number of grid
+!                                                        specifier files
+
+!   harnessRecord(n)%string(k)%gridfiles%tag(l)%string   filename string for
+!                                        the l'th grid specifier file associated
+!                                        with the k'th problem descriptor string
+!                                        located in the n'th problem descriptor
+!                                        file.                  
+!===============================================================================
 
   ! local ESMF types
   type(ESMF_Config)      :: localcf
@@ -352,10 +461,10 @@ contains
   logical :: flag = .true.
 
 ! local integer variables
-  integer :: n, nn, k, pos, col, ncount, npds, ntmp
-  integer :: file, nfiles,string, pstring
+  integer :: n, nn, k, pos, kcol, ncount, npds, ntmp
+  integer :: kfile, nfiles, kstring, pstring
   integer :: cpos, dpos, gpos, csize, dsize, gsize
-  integer, allocatable :: count(:), ncolumns(:), nstrings(:)
+  integer, allocatable :: kcount(:), ncolumns(:), nstrings(:)
   integer, allocatable :: pds_loc(:), pds_flag(:)
 
 ! local logical variable
@@ -364,274 +473,285 @@ contains
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
 
-  !--------------------------------------------------------------------------
-  ! open each problem descriptor, one at a time, and extract the table contents
-  !--------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  ! open each problem descriptor and extract the contents of the table
+  ! containing the problem descriptor strings and the specifier filenames
+  !-----------------------------------------------------------------------------
   nfiles = harness%numRecords
   allocate( nstrings(nfiles) )
 
-  do file=1,nfiles
-    print*,'opening file number ',file
-    !------------------------------------------------------------------------
+  do kfile=1,nfiles
+    !---------------------------------------------------------------------------
     ! create a new config handle for reading problem descriptor strings
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     localcf = ESMF_ConfigCreate(localrc)
-    if( ESMF_LogMsgFoundError(localrc, "cannot create config object",       &
+    if( ESMF_LogMsgFoundError(localrc, "cannot create config object",          &
                          rcToReturn=localrc) ) return
 
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     ! load file holding the problem descriptor strings
-    !------------------------------------------------------------------------
-    lfilename = trim( harness%Record(file)%filename )
+    !---------------------------------------------------------------------------
+    lfilename = trim(adjustL(harness%Record(kfile)%filename))
 
-    print*,'Opening ',trim( lfilename )
-    call ESMF_ConfigLoadFile(localcf, trim( lfilename ), rc=localrc )
-    if( ESMF_LogMsgFoundError(localrc,                                      &
-           "cannot load config file " // trim( lfilename ),                 &
-           rcToReturn=localrc) ) return
+    call ESMF_ConfigLoadFile(localcf, trim(adjustL(lfilename)), rc=localrc )
+    if( ESMF_LogMsgFoundError(localrc, "cannot load config file " //           &
+            trim(adjustL(lfilename)), rcToReturn=localrc) ) return
 
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     ! Search for the problem descriptor string table
-    !------------------------------------------------------------------------
-    call ESMF_ConfigFindLabel(localcf, trim(descriptor_label), rc=localrc )
-    if( ESMF_LogMsgFoundError(localrc,                                      &
-           "cannot find config label " // trim(descriptor_label),           &
-           rcToReturn=localrc) ) return
+    !---------------------------------------------------------------------------
+    call ESMF_ConfigFindLabel(localcf, trim(adjustL(descriptor_label)),        &
+             rc=localrc )
+    if( ESMF_LogMsgFoundError(localrc, "cannot find config label " //          &
+             trim(adjustL(descriptor_label)), rcToReturn=localrc) ) return
 
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     ! determine the number of entries
-    !------------------------------------------------------------------------
-    call ESMF_ConfigGetDim(localcf, nstrings(file), ntmp,                   &
-             trim(descriptor_label), rc=localrc)
-    if( ESMF_LogMsgFoundError(localrc,                                      &
-           "cannot get descriptor table size in file " // trim(lfilename),  &
-           rcToReturn=localrc) ) return
+    !---------------------------------------------------------------------------
+    call ESMF_ConfigGetDim(localcf, nstrings(kfile), ntmp,                     &
+             trim(adjustL(descriptor_label)), rc=localrc)
+    if( ESMF_LogMsgFoundError(localrc, "cannot get descriptor table size in "  &
+            // "file " // trim(adjustL(lfilename)), rcToReturn=localrc) ) return
 
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     ! determine that the table has entries before preceeding
-    !------------------------------------------------------------------------
-    if( nstrings(file) .le. 0 ) then
-      call ESMF_LogMsgSetError( ESMF_FAILURE,                               &
-               "problem descriptor table empty in file " //trim(lfilename), &
-               rcToReturn=localrc)
+    !---------------------------------------------------------------------------
+    if( nstrings(kfile) .le. 0 ) then
+      call ESMF_LogMsgSetError( ESMF_FAILURE, "problem descriptor table empty" &
+               // " in file " // trim(adjustL(lfilename)), rcToReturn=localrc)
       return
     endif
 
-    write(lchar,"(i5)")  nstrings(file)
-    print*,'problem descriptor table in file '//trim(lfilename)//' has '    &
-            // trim(adjustl(lchar)) //' entries'
+    !---------------------------------------------------------------------------
+    ! extract column lengths of the table to determine the number of specifier files
+    !---------------------------------------------------------------------------
+    call ESMF_ConfigFindLabel(localcf, trim(adjustL(descriptor_label)),        &
+           rc=localrc )
+    if( ESMF_LogMsgFoundError(localrc, "cannot find config label" //           &
+           trim(adjustL(descriptor_label)), rcToReturn=localrc) ) return
 
-    !------------------------------------------------------------------------
-    ! extract the table column lengths of this file
-    !------------------------------------------------------------------------
-    call ESMF_ConfigFindLabel(localcf, trim(descriptor_label), rc=localrc )
-    if( ESMF_LogMsgFoundError(localrc,                                      &
-           "cannot find config label " // trim(descriptor_label),           &
-           rcToReturn=localrc) ) return
+    allocate( ncolumns(nstrings(kfile)) )
+    allocate ( ltmpstring(nstrings(kfile)) )
 
-    allocate( ncolumns(nstrings(file)) )
-    allocate ( ltmpstring(nstrings(file)) )
-
-    do string=1,nstrings(file)
+    do kstring=1,nstrings(kfile)
       call ESMF_ConfigNextLine(localcf, flag , rc=localrc)
-      if( ESMF_LogMsgFoundError(localrc,                                    &
-             "cannot advance to next line of table " //                     &
-              trim(descriptor_label) // " in file " // trim(lfilename),     &
-              rcToReturn=localrc) ) return
+      if( ESMF_LogMsgFoundError(localrc, "cannot advance to the next line of"  &
+              //" the table "// trim(adjustL(descriptor_label)) // " in file " &
+              // trim(adjustL(lfilename)), rcToReturn=localrc) ) return
 
-      ncolumns(string) = ESMF_ConfigGetLen(localcf, rc=localrc)
-      if (localrc .ne. ESMF_SUCCESS .or. ncolumns(string) .lt. 2 ) then
-        write(lchar,"(i5)")  string
-        call ESMF_LogMsgSetError( ESMF_FAILURE,                             &
-                 "problem reading line " // trim(adjustl(lchar)) //         &
-                 " of table in file " // trim(lfilename), rcToReturn=localrc)
+      ncolumns(kstring) = ESMF_ConfigGetLen(localcf, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS .or. ncolumns(kstring) .lt. 1 ) then
+        write(lchar,"(i5)")  kstring
+        call ESMF_LogMsgSetError( ESMF_FAILURE, "problem reading line " //     &
+                 trim(adjustL(lchar)) // " of table in file " //               &
+                 trim(adjustL(lfilename)), rcToReturn=localrc)
         return
       endif
 
-      !----------------------------------------------------------------------
+      !-------------------------------------------------------------------------
       ! allocate tempory storage so that the file needs to be read only once
-      !----------------------------------------------------------------------
-      allocate ( ltmpstring(string)%tag( ncolumns(string) ) )
-      ltmpstring(string)%charsize = ncolumns(string)
+      !-------------------------------------------------------------------------
+      allocate ( ltmpstring(kstring)%tag( ncolumns(kstring) ) )
+      ltmpstring(kstring)%tagsize = ncolumns(kstring)
     enddo    ! end string
 
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     ! Starting again at the top of the table, extract the table contents into
     ! a local character array structure for later processing
-    !------------------------------------------------------------------------
-    call ESMF_ConfigFindLabel(localcf, trim(descriptor_label), rc=localrc )
-    if( ESMF_LogMsgFoundError(localrc,                                      &
-           "cannot find config label " // trim(descriptor_label),           &
-           rcToReturn=localrc) ) return
+    !---------------------------------------------------------------------------
+    call ESMF_ConfigFindLabel(localcf, trim(adjustL(descriptor_label)),        &
+             rc=localrc )
+    if( ESMF_LogMsgFoundError(localrc,                                         &
+            "cannot find config label " // trim(adjustL(descriptor_label)),    &
+            rcToReturn=localrc) ) return
 
-    do string=1,nstrings(file)
-    !------------------------------------------------------------------------
+    do kstring=1,nstrings(kfile)
+    !---------------------------------------------------------------------------
     ! copy the table into a character array
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
       call ESMF_ConfigNextLine(localcf, flag , rc=localrc)
-      if( ESMF_LogMsgFoundError(localrc,                                    &
-             "cannot advance to next line of table " //                     &
-              trim(descriptor_label) // " in file " // trim(lfilename),     &
-              rcToReturn=localrc) ) return
+      if( ESMF_LogMsgFoundError(localrc, "cannot advance to the next line " // &
+              "of table " // trim(adjustL(descriptor_label)) // " in file " // &
+              trim(adjustL(lfilename)), rcToReturn=localrc) ) return
 
-      do col=1, ncolumns(string)
+      do kcol=1, ncolumns(kstring)
         call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
-        write(lchar,"(i5)") string
-        if( ESMF_LogMsgFoundError(localrc,                                  &
-              "cannot get table entry from line "//trim(adjustl(lchar)) //  &
-              " column " // char(col)  // "of file " // trim(lfilename),    &
-              rcToReturn=localrc) ) return
-         ltmpstring(string)%tag(col)%string = trim( ltmp )
+        write(lchar,"(i5)") kstring
+        if( ESMF_LogMsgFoundError(localrc, "cannot get table entry from line " &
+                // trim(adjustl(lchar)) //  " column " // char(kcol)  //       &
+                "of file " // trim(adjustL(lfilename)),                        &
+                rcToReturn=localrc) ) return
+         ltmpstring(kstring)%tag(kcol)%string = trim( ltmp )
       enddo     ! end col
     enddo       ! end string
 
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     ! count the number of actual problem descriptor strings & continuation lines
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     ncount = 0
     npds = 0
-    allocate( pds_flag(nstrings(file)) )
-    do string=1,nstrings(file)
-       if( trim( ltmpstring(string)%tag(1)%string ) /= "&") then
-         pds_flag(string) = 1         
+    allocate( pds_flag(nstrings(kfile)) )
+    do kstring=1,nstrings(kfile)
+       if( trim(adjustL(ltmpstring(kstring)%tag(1)%string)) /= "&") then
+         pds_flag(kstring) = 1         
          npds = npds + 1
        else
          ncount = ncount + 1
-         pds_flag(string) = 0         
+         pds_flag(kstring) = 0         
        endif
     enddo     ! end string
     ! sanity check
-    if( (npds + ncount) /= nstrings(file) ) then
-      write(lchar,"(i5)")  nstrings(file)
+    if( (npds + ncount) /= nstrings(kfile) ) then
+      write(lchar,"(i5)")  nstrings(kfile)
       write(lchar1,"(i5)")  npds
       write(lchar2,"(i5)")  ncount
-      call ESMF_LogMsgSetError( ESMF_FAILURE, "number of rows " //          &
-             trim(adjustl(lchar)) // " in the table"  //                    &
-             " does not match the sum of strings " // trim(adjustl(lchar1)) &
-             // " and continuation lines " //  trim(adjustl(lchar2)) //     &
-             " of file " // trim(lfilename), rcToReturn=localrc) 
+      call ESMF_LogMsgSetError( ESMF_FAILURE, "number of rows " //             &
+             trim(adjustl(lchar)) // " in the table"  //                       &
+             " does not match the sum of strings " // trim(adjustl(lchar1))    &
+             // " and continuation lines " //  trim(adjustl(lchar2)) //        &
+             " of file " // trim(adjustL(lfilename)), rcToReturn=localrc) 
     endif
 
-    harness%Record(file)%numStrings = npds
-    !------------------------------------------------------------------------
+    harness%Record(kfile)%numStrings = npds
+
+
+    !---------------------------------------------------------------------------
+    ! debug statements
+    !---------------------------------------------------------------------------
+    if(debugflag) then
+       print*,'                                                    '
+       print*,'=------begin-read_descriptor_files----------------='
+       print*,'Opening ',trim( lfilename )
+       write(lchar,"(i3)")  nstrings(kfile)
+       print*,'  file ',trim(lfilename),' descriptor table has ',                &
+            trim(adjustl(lchar)),' rows, but only ',npds,' strings'         
+       print*,'=------end-read_descriptor_files------------------='
+       print*,'                                                    '
+    endif
+
+    !---------------------------------------------------------------------------
     ! save the addresses of the non-continuation lines
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     k = 0
     allocate( pds_loc(npds) )
-    do string=1,nstrings(file)
-       if( pds_flag(string) == 1 ) then
+    do kstring=1,nstrings(kfile)
+       if( pds_flag(kstring) == 1 ) then
          k = k + 1
-         pds_loc(k) =  string        
+         pds_loc(k) =  kstring        
        endif
     enddo     ! end string
     ! sanity check
     if( npds .ne. k ) then 
-      write(lchar,"(i5)")  nstrings(file)
+      write(lchar,"(i5)")  nstrings(kfile)
       write(lchar1,"(i5)")  npds
       write(lchar2,"(i5)")  ncount
-      call ESMF_LogMsgSetError( ESMF_FAILURE, "number of rows " //          &
-             trim(adjustl(lchar)) // " in the table" //                     &
-             " does not match the sum of strings "//trim(adjustl(lchar1))   &
-             // " and continuation lines " // trim(adjustl(lchar2)) //      &
-             " of file " // trim(lfilename), rcToReturn=localrc)
+      call ESMF_LogMsgSetError( ESMF_FAILURE, "number of rows " //             &
+             trim(adjustl(lchar)) // " in the table" //                        &
+             " does not match the sum of strings "//trim(adjustl(lchar1))      &
+             // " and continuation lines " // trim(adjustl(lchar2)) //         &
+             " of file " // trim(adjustL(lfilename)), rcToReturn=localrc)
     endif
 
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     ! to simplify the later search algorithm, reshape the input table from a 
     ! series of lines with a PDS plus optional continuations lines, to a single
     ! line with everything on it. Count the total number of elements on both 
     ! type of lines to that we can allocate enough memory to store the whole 
     ! specification.
-    !------------------------------------------------------------------------
-    allocate( count(npds) )
+    !---------------------------------------------------------------------------
+    allocate( kcount(npds) )
     do k=1,npds
       if( trim( ltmpstring( pds_loc(k) )%tag(1)%string ) == "&") then
         write(lchar,"(i5)")   pds_loc(k)
-        call ESMF_LogMsgSetError( ESMF_FAILURE,                             &
-                 "no problem descriptor string on line " //                 &
-                  trim(adjustl(lchar)) // " of file " // trim(lfilename),   &
-                 rcToReturn=localrc)
+        call ESMF_LogMsgSetError( ESMF_FAILURE,                                &
+                 "no problem descriptor string on line " //                    &
+                 trim(adjustl(lchar)) // " of file " //                        &
+                 trim(adjustL(lfilename)),rcToReturn=localrc)
       else    ! at new PDS
-        count(k) = ncolumns(pds_loc(k))
+        kcount(k) = ncolumns(pds_loc(k))
         pstring =  pds_loc(k)
  21     continue
-        !--------------------------------------------------------------------
+        !-----------------------------------------------------------------------
         ! if not end of table, look for additional continuation lines 
-        !--------------------------------------------------------------------
-        if(pstring < nstrings(file)) then
+        !-----------------------------------------------------------------------
+        if(pstring < nstrings(kfile)) then
           pstring =  pstring + 1
-          !------------------------------------------------------------------
+          !---------------------------------------------------------------------
           ! if find a continuation line add additional elements (minus the
           ! continuation symbol "&")
-          !------------------------------------------------------------------
+          !---------------------------------------------------------------------
           if( trim( ltmpstring(pstring)%tag(1)%string ) == "&" ) then 
-            count(k) = count(k) + ncolumns(pstring) -1
+            kcount(k) = kcount(k) + ncolumns(pstring) -1
             goto 21
           endif
         endif
 
       endif
     enddo     ! k
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     ! create reshaped workspace to hold the problem descriptor table contents
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     allocate ( lstring(npds) )    
     do k=1, npds
-      allocate ( lstring(k)%tag(count(k)) )    
+      allocate ( lstring(k)%tag(kcount(k)) )    
       do n=1,ncolumns(pds_loc(k))
-        lstring(k)%tag(n)%string = &
-                              trim( ltmpstring(pds_loc(k))%tag(n)%string )
+        lstring(k)%tag(n)%string = trim( ltmpstring(pds_loc(k))%tag(n)%string )
       enddo     ! n
         
       pstring =  pds_loc(k)
       nn = ncolumns(pds_loc(k))+1
  22   continue
-      !----------------------------------------------------------------------
+
+      !-------------------------------------------------------------------------
       ! if not end of table, look for additional continuation lines
-      !----------------------------------------------------------------------
-      if(pstring < nstrings(file)) then
+      !-------------------------------------------------------------------------
+      if(pstring < nstrings(kfile)) then
         pstring =  pstring + 1
-        !--------------------------------------------------------------------
+
+        !-----------------------------------------------------------------------
         ! if find a continuation line, and add to the line length (minus the 
         ! continuation symbol)
-        !--------------------------------------------------------------------
+        !-----------------------------------------------------------------------
         if( trim( ltmpstring(pstring)%tag(1)%string ) == "&" ) then
           do n=2,ncolumns(pstring)
-            lstring(k)%tag(nn)%string = &
-                                   trim(ltmpstring(pstring)%tag(n)%string )
+            lstring(k)%tag(nn)%string = trim(ltmpstring(pstring)%tag(n)%string )
             nn = nn + 1
           enddo     ! n
           goto 22
         endif
       endif
     enddo     ! k
-    !------------------------------------------------------------------------
+
+    !---------------------------------------------------------------------------
     ! mine the table entries for the problem descriptor strings
-    !------------------------------------------------------------------------
-    allocate( harness%Record(file)%string(npds) )
+    !---------------------------------------------------------------------------
+    allocate( harness%Record(kfile)%string(npds) )
     do k=1,npds
-       harness%Record(file)%string(k)%pds = trim( lstring(k)%tag(1)%string )
+       harness%Record(kfile)%string(k)%pds = trim( lstring(k)%tag(1)%string )
     enddo     ! k
-    !------------------------------------------------------------------------
+
+    !---------------------------------------------------------------------------
     ! mine the table entries for the names of the specifier files
-    !------------------------------------------------------------------------
+    !---------------------------------------------------------------------------
     do k=1,npds
       pos = 2
       endflag = .true.
-      cflag = .false.
+      ! drs debug
+      cflag = .true.  ! set to true so that it doesn't look for a "-c" argument
+      ! drs debug
       dflag = .false.
       gflag = .false.
-      !----------------------------------------------------------------------
+      !-------------------------------------------------------------------------
       ! loop through the specifiers for each of the problem desriptor strings
-      !----------------------------------------------------------------------
+      !-------------------------------------------------------------------------
       do while(endflag)
       ltmp = trim( lstring(k)%tag(pos)%string )
 
-        select case ( trim(ltmp) )
+        select case ( trim(adjustL(ltmp)) )
 
-         !-------------------------------------------------------------------
+         !----------------------------------------------------------------------
          ! class descriptor file
-         !-------------------------------------------------------------------
+         !----------------------------------------------------------------------
          case('-c')
          if( cflag ) then
            write(lchar,"(i5)") k
@@ -646,9 +766,9 @@ contains
          cpos = pos
  11      continue
          ! if not at the end of the row, then check next element
-         if( pos < count(k) ) then
+         if( pos < kcount(k) ) then
            pos = pos + 1
-           ltmp =  trim( lstring(k)%tag(pos)%string )
+           ltmp =  trim(adjustL( lstring(k)%tag(pos)%string ))
            ! if not a flag, repeat until a flag
            if( ltmp(1:1) /= '-' ) goto 11
            csize = pos-1-cpos
@@ -658,11 +778,11 @@ contains
            endflag = .false.
          endif
 
-         allocate( harness%Record(file)%string(k)%classfile%tag(csize) )
-         harness%Record(file)%string(k)%classfile%charsize = csize
+         allocate( harness%Record(kfile)%string(k)%classfile%tag(csize) )
+         harness%Record(kfile)%string(k)%classfile%tagsize = csize
          do n=1,csize
-           harness%Record(file)%string(k)%classfile%tag(n)%string =            &
-                                      trim( lstring(k)%tag(cpos+n)%string )
+           harness%Record(kfile)%string(k)%classfile%tag(n)%string =            &
+                                 trim(adjustL( lstring(k)%tag(cpos+n)%string ))
          enddo      ! n
          cflag = .true.
 
@@ -675,7 +795,7 @@ contains
            call ESMF_LogMsgSetError( ESMF_FAILURE, "the -d specifier flag"     &
                     // " is used more than once on the " //                    &
                    trim(adjustl(lchar))//"th string of the problem " //        &
-                   "descriptor table in file" // trim(lfilename),              &
+                   "descriptor table in file" // trim(adjustL(lfilename)),     &
                    rcToReturn=localrc)
            return
          endif
@@ -684,9 +804,9 @@ contains
 
  12      continue
          ! if not at the end of the row, then check next element
-         if( pos < count(k) ) then
+         if( pos < kcount(k) ) then
            pos = pos + 1
-           ltmp =  trim( lstring(k)%tag(pos)%string )
+           ltmp =  trim(adjustL( lstring(k)%tag(pos)%string ))
            ! if not a flag, repeat until a flag
            if( ltmp(1:1) /= '-' ) goto 12
            dsize = pos-1-dpos
@@ -696,25 +816,24 @@ contains
            endflag =.false. 
          endif
 
-         allocate( harness%Record(file)%string(k)%distfiles%tag(dsize) )
-         harness%Record(file)%string(k)%distfiles%charsize = dsize
+         allocate( harness%Record(kfile)%string(k)%distfiles%tag(dsize) )
+         harness%Record(kfile)%string(k)%distfiles%tagsize = dsize
          do n=1,dsize
-           harness%Record(file)%string(k)%distfiles%tag(n)%string =            &
-                                      trim( lstring(k)%tag(dpos+n)%string )
+           harness%Record(kfile)%string(k)%distfiles%tag(n)%string =            &
+                               trim(adjustL( lstring(k)%tag(dpos+n)%string ))
          enddo      ! n
          dflag = .true.
 
-         !-------------------------------------------------------------------
+         !----------------------------------------------------------------------
          ! grid descriptor file
-         !-------------------------------------------------------------------
+         !----------------------------------------------------------------------
          case('-g')
          if( gflag ) then
            write(lchar,"(i5)") k
-           call ESMF_LogMsgSetError( ESMF_FAILURE, "the -g specifier flag"  &
-                    // " is used more than once on the " //                 &
-                   trim(adjustl(lchar))//"th string of the problem " //     &
-                   "descriptor table in file" // trim(lfilename),           &
-                   rcToReturn=localrc)
+           call ESMF_LogMsgSetError( ESMF_FAILURE, "the -g specifier flag" //  &
+                    " is used more than once on the " // trim(adjustl(lchar))  &
+                    //"th string of the problem descriptor table in file " //  &
+                    trim(adjustL(lfilename)), rcToReturn=localrc)
            return
          endif
          ! starting position
@@ -722,9 +841,9 @@ contains
 
  13      continue
          ! if not at the end of the row, then check next element
-         if( pos < count(k) ) then
+         if( pos < kcount(k) ) then
            pos = pos + 1
-           ltmp =  trim( lstring(k)%tag(pos)%string )
+           ltmp =  trim(adjustL( lstring(k)%tag(pos)%string ))
            ! if not a flag, repeat until a flag
            if( ltmp(1:1) /= '-' ) goto 13
            gsize = pos-1-gpos
@@ -734,11 +853,11 @@ contains
            endflag = .false.
          endif  
 
-         allocate( harness%Record(file)%string(k)%gridfiles%tag(gsize) )
-         harness%Record(file)%string(k)%gridfiles%charsize = gsize
+         allocate( harness%Record(kfile)%string(k)%gridfiles%tag(gsize) )
+         harness%Record(kfile)%string(k)%gridfiles%tagsize = gsize
          do n=1,gsize
-           harness%Record(file)%string(k)%gridfiles%tag(n)%string =            &
-                                     trim( lstring(k)%tag(gpos+n)%string )
+           harness%Record(kfile)%string(k)%gridfiles%tag(n)%string =           &
+                             trim(adjustL(lstring(k)%tag(gpos+n)%string))
          enddo     ! n
          gflag = .true.
 
@@ -755,38 +874,10 @@ contains
       end do  ! while
     enddo      ! k
 
-!  diagnostics
-         !
-         print*,'  Diagnositcs                     '
-      do k=1,harness%Record(file)%numStrings
-         print*,'                                  '
-         print*,k,trim( harness%Record(file)%string(k)%pds )
-         print*,'Class Specifier files',   &
-                                 harness%Record(file)%string(k)%classfile%charsize
-         do n=1,harness%Record(file)%string(k)%classfile%charsize
-           print*,n, &
-               trim( harness%Record(file)%string(k)%classfile%tag(n)%string )
-         enddo   ! n
-         print*,'Distribution Specifier files', &
-                                 harness%Record(file)%string(k)%distfiles%charsize
-         do n=1,harness%Record(file)%string(k)%distfiles%charsize
-           print*,n,   &
-               trim( harness%Record(file)%string(k)%distfiles%tag(n)%string )
-         enddo     ! n
-         print*,'Grid Specifier files',   &
-                                 harness%Record(file)%string(k)%gridfiles%charsize
-         do n=1,harness%Record(file)%string(k)%gridfiles%charsize
-           print*,n,   &
-               trim( harness%Record(file)%string(k)%gridfiles%tag(n)%string )
-         enddo     ! n
-      enddo      ! k
-         !
-!  diagnostics
-
     !---------------------------------------------------------------------------
     ! finish cleaning up workspace before opening new file
     !---------------------------------------------------------------------------
-    deallocate( ncolumns, count )
+    deallocate( ncolumns, kcount )
     deallocate( ltmpstring, lstring )
     deallocate( pds_loc, pds_flag )
 
@@ -794,10 +885,8 @@ contains
     ! clean up CF
     !---------------------------------------------------------------------------
     call ESMF_ConfigDestroy(localcf, localrc)
-    if( ESMF_LogMsgFoundError(localrc,                                         &
-            "cannot destroy config file " // trim(lfilename),                  &
-            rcToReturn=localrc) ) return
-
+    if( ESMF_LogMsgFoundError(localrc, "cannot destroy config file "  //       &
+            trim(adjustL(lfilename)),  rcToReturn=localrc) ) return
   enddo  ! file
 
   !-----------------------------------------------------------------------------
@@ -814,10 +903,8 @@ contains
   end subroutine read_descriptor_files
   !-----------------------------------------------------------------------------
 
-!2345678901234567890123456789012345678901234567890123456789012345678901234567890
 
-!-------------------------------------------------------------------------------
-!-------------------------------------------------------------------------------
+!===============================================================================
 ! !IROUTINE: parse_descriptor_string
 
 ! !INTERFACE:
@@ -834,6 +921,7 @@ contains
 !	rank of distribution
 !	rank of grid association
 !
+!-------------------------------------------------------------------------------
 
   ! local character types
 
@@ -876,11 +964,13 @@ contains
   ! parse each problem descriptor string
   !-----------------------------------------------------------------------------
   nfiles = harness%numRecords
+  print*,'     PARSE: numRecords',nfiles
   allocate( nstrings(nfiles) )
 
   !-----------------------------------------------------------------------------
   !-----------------------------------------------------------------------------
   do kfile=1,nfiles
+  print*,'     PARSE: nstrings', nstrings(kfile)
      do string=1,nstrings(kfile)
         lstring = trim( harness%Record(kfile)%string(string)%pds )
   !-----------------------------------------------------------------------------
