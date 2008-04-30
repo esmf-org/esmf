@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.1.2.5 2008/04/29 22:13:48 theurich Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.1.2.6 2008/04/30 23:00:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -159,12 +159,12 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arraybundlesparsemmstr)(ESMCI::ArrayBundle **srcArraybundle,
+  void FTN(c_esmc_arraybundlesmmstore)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMC_RouteHandle **routehandle, 
     ESMC_TypeKind *typekind, void *factorList, int *factorListCount,
     ESMCI::InterfaceInt **factorIndexList, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arraybundlesparsemmstr()"
+#define ESMC_METHOD "c_esmc_arraybundlesmmstore()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
@@ -175,11 +175,11 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arraybundlesparsemmstrnf)(ESMCI::ArrayBundle **srcArraybundle,
+  void FTN(c_esmc_arraybundlesmmstorenf)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMC_RouteHandle **routehandle,
     int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arraybundlesparsemmstrnf()"
+#define ESMC_METHOD "c_esmc_arraybundlesmmstorenf()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
@@ -189,11 +189,11 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arraybundlesparsematmul)(ESMCI::ArrayBundle **srcArraybundle,
+  void FTN(c_esmc_arraybundlesmm)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMC_RouteHandle **routehandle,
     ESMC_Logical *zeroflag, ESMC_Logical *checkflag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arraybundlesparsematmul()"
+#define ESMC_METHOD "c_esmc_arraybundlesmm()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling

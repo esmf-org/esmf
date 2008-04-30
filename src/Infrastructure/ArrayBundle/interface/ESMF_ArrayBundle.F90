@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.1.2.7 2008/04/29 22:13:49 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.1.2.8 2008/04/30 23:00:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -79,9 +79,9 @@ module ESMF_ArrayBundleMod
   public ESMF_ArrayBundleRedist
   public ESMF_ArrayBundleRedistStore
   public ESMF_ArrayBundleRedistRelease
-  public ESMF_ArrayBundleSparseMatMul
-  public ESMF_ArrayBundleSparseMatMulRel
-  public ESMF_ArrayBundleSparseMatMulStr
+  public ESMF_ArrayBundleSMM
+  public ESMF_ArrayBundleSMMRelease
+  public ESMF_ArrayBundleSMMStore
 
   public ESMF_ArrayBundleHalo
   public ESMF_ArrayBundleHaloStore
@@ -100,7 +100,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.1.2.7 2008/04/29 22:13:49 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.1.2.8 2008/04/30 23:00:53 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -130,18 +130,18 @@ module ESMF_ArrayBundleMod
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
-! !IROUTINE: ESMF_ArrayBundleSparseMatMulStr -- Generic interface
+! !IROUTINE: ESMF_ArrayBundleSMMStore -- Generic interface
 
 ! !INTERFACE:
-  interface ESMF_ArrayBundleSparseMatMulStr
+  interface ESMF_ArrayBundleSMMStore
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-    module procedure ESMF_ArrayBundleSparseMMSI4
-    module procedure ESMF_ArrayBundleSparseMMSI8
-    module procedure ESMF_ArrayBundleSparseMMSR4
-    module procedure ESMF_ArrayBundleSparseMMSR8
-    module procedure ESMF_ArrayBundleSparseMMSNF
+    module procedure ESMF_ArrayBundleSMMStoreI4
+    module procedure ESMF_ArrayBundleSMMStoreI8
+    module procedure ESMF_ArrayBundleSMMStoreR4
+    module procedure ESMF_ArrayBundleSMMStoreR8
+    module procedure ESMF_ArrayBundleSMMStoreNF
 !EOPI
 
   end interface
@@ -861,7 +861,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleRedistStoreI4()"
 !BOPI
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication 
+! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute ArrayBundle redistribution
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleRedistStore()
@@ -922,7 +922,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleRedistStoreI8()"
 !BOPI
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication 
+! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute ArrayBundle redistribution
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleRedistStore()
@@ -983,7 +983,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleRedistStoreR4()"
 !BOPI
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication 
+! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute ArrayBundle redistribution
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleRedistStore()
@@ -1044,7 +1044,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleRedistStoreR8()"
 !BOPI
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication 
+! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute ArrayBundle redistribution
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleRedistStore()
@@ -1204,13 +1204,13 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleSparseMatMul()"
+#define ESMF_METHOD "ESMF_ArrayBundleSMM()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleSparseMatMul - Execute an ArrayBundle sparse matrix multiplication
+! !IROUTINE: ESMF_ArrayBundleSMM - Execute an ArrayBundle sparse matrix multiplication
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleSparseMatMul(srcArrayBundle, dstArrayBundle, &
-    routehandle, zeroflag, checkflag, rc)
+  subroutine ESMF_ArrayBundleSMM(srcArrayBundle, dstArrayBundle, routehandle, &
+    zeroflag, checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in),   optional  :: srcArrayBundle
@@ -1288,7 +1288,7 @@ contains
     if (present(checkflag)) opt_checkflag = checkflag
         
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayBundleSparseMatMul(opt_srcArrayBundle, opt_dstArrayBundle,&
+    call c_ESMC_ArrayBundleSMM(opt_srcArrayBundle, opt_dstArrayBundle,&
       routehandle, opt_zeroflag, opt_checkflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1296,18 +1296,18 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArrayBundleSparseMatMul
+  end subroutine ESMF_ArrayBundleSMM
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleSparseMatMulRel()"
+#define ESMF_METHOD "ESMF_ArrayBundleSMMRelease()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleSparseMatMulRel - Release resources associated with ArrayBundle sparse matrix multiplication
+! !IROUTINE: ESMF_ArrayBundleSMMRelease - Release resources associated with ArrayBundle sparse matrix multiplication
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleSparseMatMulRel(routehandle, rc)
+  subroutine ESMF_ArrayBundleSMMRelease(routehandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
@@ -1343,17 +1343,17 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArrayBundleSparseMatMulRel
+  end subroutine ESMF_ArrayBundleSMMRelease
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_ArrayBundleSparseMatMulStr - Precompute ArrayBundle sparse matrix multiplication with local factors
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute ArrayBundle sparse matrix multiplication with local factors
 !
 ! !INTERFACE:
-! ! Private name; call using ESMF_ArrayBundleSparseMatMulStr()
-! subroutine ESMF_ArrayBundleSparseMatMulStr<type><kind>(srcArrayBundle, &
+! ! Private name; call using ESMF_ArrayBundleSMMStore()
+! subroutine ESMF_ArrayBundleSMMStore<type><kind>(srcArrayBundle, &
 !   dstArrayBundle, routehandle, factorList, factorIndexList, rc)
 !
 ! !ARGUMENTS:
@@ -1376,11 +1376,11 @@ contains
 !   The effect of this method on ArrayBundles that contain aliased members is
 !   undefined.
 !
-!   See the description of method {\tt ESMF\_ArraySparseMatMulStore()} for
+!   See the description of method {\tt ESMF\_ArraySMMStore()} for
 !   the definition of the Array based operation.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_ArrayBundleSparseMatMul()} on any pair of ArrayBundles that 
+!   {\tt ESMF\_ArrayBundleSMM()} on any pair of ArrayBundles that 
 !   are congruent and typekind conform with the Arrays contained in
 !   {\tt srcArrayBundle} and {\tt dstArrayBundle}. 
 !   Congruent Arrays possess matching DistGrids and the shape of the local
@@ -1438,13 +1438,13 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleSparseMMSI4()"
+#define ESMF_METHOD "ESMF_ArrayBundleSMMStoreI4()"
 !BOPI
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication 
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute ArrayBundle sparse matrix multiplication with local factors
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_ArrayBundleSparseMatMulStr()
-  subroutine ESMF_ArrayBundleSparseMMSI4(srcArrayBundle, dstArrayBundle, &
+  ! Private name; call using ESMF_ArrayBundleSMMStore()
+  subroutine ESMF_ArrayBundleSMMStoreI4(srcArrayBundle, dstArrayBundle, &
     routehandle, factorList, factorIndexList, rc)
 !
 ! !ARGUMENTS:
@@ -1479,7 +1479,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayBundleSparseMMStr(srcArrayBundle, dstArrayBundle, &
+    call c_ESMC_ArrayBundleSMMStore(srcArrayBundle, dstArrayBundle, &
       routehandle, ESMF_TYPEKIND_I4, opt_factorList, len_factorList, &
       factorIndexListArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1498,19 +1498,19 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArrayBundleSparseMMSI4
+  end subroutine ESMF_ArrayBundleSMMStoreI4
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleSparseMMSI8()"
+#define ESMF_METHOD "ESMF_ArrayBundleSMMStoreI8()"
 !BOPI
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication 
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute ArrayBundle sparse matrix multiplication with local factors
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_ArrayBundleSparseMatMulStr()
-  subroutine ESMF_ArrayBundleSparseMMSI8(srcArrayBundle, dstArrayBundle, &
+  ! Private name; call using ESMF_ArrayBundleSMMStore()
+  subroutine ESMF_ArrayBundleSMMStoreI8(srcArrayBundle, dstArrayBundle, &
     routehandle, factorList, factorIndexList, rc)
 !
 ! !ARGUMENTS:
@@ -1545,7 +1545,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayBundleSparseMMStr(srcArrayBundle, dstArrayBundle, &
+    call c_ESMC_ArrayBundleSMMStore(srcArrayBundle, dstArrayBundle, &
       routehandle, ESMF_TYPEKIND_I8, opt_factorList, len_factorList, &
       factorIndexListArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1564,19 +1564,19 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArrayBundleSparseMMSI8
+  end subroutine ESMF_ArrayBundleSMMStoreI8
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleSparseMMSR4()"
+#define ESMF_METHOD "ESMF_ArrayBundleSMMStoreR4()"
 !BOPI
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication 
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute ArrayBundle sparse matrix multiplication with local factors
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_ArrayBundleSparseMatMulStr()
-  subroutine ESMF_ArrayBundleSparseMMSR4(srcArrayBundle, dstArrayBundle, &
+  ! Private name; call using ESMF_ArrayBundleSMMStore()
+  subroutine ESMF_ArrayBundleSMMStoreR4(srcArrayBundle, dstArrayBundle, &
     routehandle, factorList, factorIndexList, rc)
 !
 ! !ARGUMENTS:
@@ -1611,7 +1611,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayBundleSparseMMStr(srcArrayBundle, dstArrayBundle, &
+    call c_ESMC_ArrayBundleSMMStore(srcArrayBundle, dstArrayBundle, &
       routehandle, ESMF_TYPEKIND_R4, opt_factorList, len_factorList, &
       factorIndexListArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1630,19 +1630,19 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArrayBundleSparseMMSR4
+  end subroutine ESMF_ArrayBundleSMMStoreR4
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleSparseMMSR8()"
+#define ESMF_METHOD "ESMF_ArrayBundleSMMStoreR8()"
 !BOPI
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication 
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute ArrayBundle sparse matrix multiplication with local factors
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_ArrayBundleSparseMatMulStr()
-  subroutine ESMF_ArrayBundleSparseMMSR8(srcArrayBundle, dstArrayBundle, &
+  ! Private name; call using ESMF_ArrayBundleSMMStore()
+  subroutine ESMF_ArrayBundleSMMStoreR8(srcArrayBundle, dstArrayBundle, &
     routehandle, factorList, factorIndexList, rc)
 !
 ! !ARGUMENTS:
@@ -1677,7 +1677,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayBundleSparseMMStr(srcArrayBundle, dstArrayBundle, &
+    call c_ESMC_ArrayBundleSMMStore(srcArrayBundle, dstArrayBundle, &
       routehandle, ESMF_TYPEKIND_R8, opt_factorList, len_factorList, &
       factorIndexListArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1696,19 +1696,19 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArrayBundleSparseMMSR8
+  end subroutine ESMF_ArrayBundleSMMStoreR8
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleSparseMMSNF()"
+#define ESMF_METHOD "ESMF_ArrayBundleSMMStoreNF()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleSparseMatMulStr - Precompute ArrayBundle sparse matrix multiplication without local factors
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute ArrayBundle sparse matrix multiplication with local factors
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_ArrayBundleSparseMatMulStr()
-  subroutine ESMF_ArrayBundleSparseMMSNF(srcArrayBundle, dstArrayBundle, &
+  ! Private name; call using ESMF_ArrayBundleSMMStore()
+  subroutine ESMF_ArrayBundleSMMStoreNF(srcArrayBundle, dstArrayBundle, &
     routehandle, rc)
 !
 ! !ARGUMENTS:
@@ -1733,7 +1733,7 @@ contains
 !   the definition of the Array based operation.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_ArrayBundleSparseMatMul()} on any pair of ArrayBundles that 
+!   {\tt ESMF\_ArrayBundleSMM()} on any pair of ArrayBundles that 
 !   are congruent and typekind conform with the Arrays contained in
 !   {\tt srcArrayBundle} and {\tt dstArrayBundle}. 
 !   Congruent Arrays possess matching DistGrids and the shape of the local
@@ -1770,7 +1770,7 @@ contains
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, dstArrayBundle, rc)
     
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayBundleSparseMMStrNF(srcArrayBundle, dstArrayBundle, &
+    call c_ESMC_ArrayBundleSMMStoreNF(srcArrayBundle, dstArrayBundle, &
       routehandle, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1783,7 +1783,7 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArrayBundleSparseMMSNF
+  end subroutine ESMF_ArrayBundleSMMStoreNF
 !------------------------------------------------------------------------------
 
 

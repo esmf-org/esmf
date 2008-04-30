@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.1.2.3 2008/04/25 23:02:14 theurich Exp $
+! $Id: user_coupler.F90,v 1.1.2.4 2008/04/30 23:00:54 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -144,16 +144,16 @@ module user_coupler
       enddo
     endif
 
-    ! Precompute and store an ArraySparseMatMul operation
+    ! Precompute and store an ArrayBundleSMM operation
     if (localPet==0 .or. localPet==4) then
       ! only PET 0 and PET 4 provide factors
-      call ESMF_ArrayBundleSparseMatMulStr(&
+      call ESMF_ArrayBundleSMMStore(&
         srcArrayBundle=srcArraybundle, dstArrayBundle=dstArraybundle, &
         routehandle=routehandle, factorList=factorList, &
         factorIndexList=factorIndexList, rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
     else
-      call ESMF_ArrayBundleSparseMatMulStr(&
+      call ESMF_ArrayBundleSMMStore(&
         srcArrayBundle=srcArraybundle, dstArrayBundle=dstArraybundle, &
         routehandle=routehandle, rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
@@ -197,9 +197,9 @@ module user_coupler
     call ESMF_ArrayBundleGet(dstArraybundle, arrayList=dstArray, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    ! Use ArrayBundleSparseMatMul() to take data
+    ! Use ESMF_ArrayBundleSMM() to take data
     ! from srcArraybundle to dstArraybundle
-    call ESMF_ArrayBundleSparseMatMul(srcArrayBundle=srcArraybundle, &
+    call ESMF_ArrayBundleSMM(srcArrayBundle=srcArraybundle, &
       dstArrayBundle=dstArraybundle, routehandle=routehandle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
   
@@ -223,8 +223,8 @@ module user_coupler
 
     print *, "User Coupler Final starting"
   
-    ! Release resources stored for the ArrayBundleSparseMatMul.
-    call ESMF_ArrayBundleSparseMatMulRel(routehandle=routehandle, rc=rc)
+    ! Release resources stored for the ESMF_ArrayBundleSMM.
+    call ESMF_ArrayBundleSMMRelease(routehandle=routehandle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     print *, "User Coupler Final returning"
