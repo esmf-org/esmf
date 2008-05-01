@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.20 2008/05/01 18:47:42 oehmke Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.21 2008/05/01 21:46:32 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.20 2008/05/01 18:47:42 oehmke Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.21 2008/05/01 21:46:32 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -204,10 +204,10 @@ contains
 !       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[maxHaloLWidth]}]
 !       Lower bound of halo region.  The size of this array is the number
-!       of distributed dimensions in the {\tt grid}.  However, ordering of the elements
+!       of dimensions in the {\tt grid}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
 !       to 0.  If values for maxHaloLWidth are specified they must be reflected in
-!       the size of the {\tt field}.  That is, for each distributed dimension the
+!       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should be max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth}
 !       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not
 !       implemented, the {\tt minHaloLWidth} is checked for validity and stored
@@ -215,10 +215,10 @@ contains
 !       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[maxHaloUWidth]}]
 !       Upper bound of halo region.  The size of this array is the number
-!       of distributed dimensions in the {\tt grid}.  However, ordering of the elements
+!       of dimensions in the {\tt grid}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
 !       to 0.  If values for maxHaloUWidth are specified they must be reflected in
-!       the size of the {\tt field}.  That is, for each distributed dimension the
+!       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth}
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not
 !       implemented, the {\tt maxHaloUWidth} is checked for validity and stored
@@ -522,10 +522,10 @@ contains
 !       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[maxHaloLWidth]}]
 !       Lower bound of halo region.  The size of this array is the number
-!       of distributed dimensions in the {\tt grid}.  However, ordering of the elements
+!       of dimensions in the {\tt grid}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
 !       to 0.  If values for maxHaloLWidth are specified they must be reflected in
-!       the size of the {\tt field}.  That is, for each distributed dimension the
+!       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should be max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth}
 !       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not
 !       implemented, the {\tt minHaloLWidth} is checked for validity and stored
@@ -533,10 +533,10 @@ contains
 !       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[maxHaloUWidth]}]
 !       Upper bound of halo region.  The size of this array is the number
-!       of distributed dimensions in the {\tt grid}.  However, ordering of the elements
+!       of dimensions in the {\tt grid}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
 !       to 0.  If values for maxHaloUWidth are specified they must be reflected in
-!       the size of the {\tt field}.  That is, for each distributed dimension the
+!       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth}
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not
 !       implemented, the {\tt maxHaloUWidth} is checked for validity and stored
@@ -865,10 +865,10 @@ contains
 !       these ungridded dimensions is the same as their order in the {\tt farray}. @\
 ! \item [{[maxHaloLWidth]}] @\
 !       Lower bound of halo region.  The size of this array is the number @\
-!       of distributed dimensions in the {\tt grid}.  However, ordering of the elements @\
+!       of dimensions in the {\tt grid}.  However, ordering of the elements @\
 !       needs to be the same as they appear in the {\tt farray}.  Values default @\
 !       to 0.  If values for maxHaloLWidth are specified they must be reflected in @\
-!       the size of the {\tt farray}.  That is, for each distributed dimension the @\
+!       the size of the {\tt farray}.  That is, for each gridded dimension the @\
 !       {\tt farray} size should be max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth} @\
 !       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not @\
 !       implemented, the {\tt minHaloLWidth} is checked for validity and stored @\
@@ -876,10 +876,10 @@ contains
 !       HALO OPERATION NOT IMPLEMENTED @\
 ! \item [{[maxHaloUWidth]}] @\
 !       Upper bound of halo region.  The size of this array is the number @\
-!       of distributed dimensions in the {\tt grid}.  However, ordering of the elements @\
+!       of dimensions in the {\tt grid}.  However, ordering of the elements @\
 !       needs to be the same as they appear in the {\tt farray}.  Values default @\
 !       to 0.  If values for maxHaloUWidth are specified they must be reflected in @\
-!       the size of the {\tt farray}.  That is, for each distributed dimension the @\
+!       the size of the {\tt farray}.  That is, for each gridded dimension the @\
 !       {\tt farray} size should max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth} @\
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not @\
 !       implemented, the {\tt maxHaloUWidth} is checked for validity and stored @\
@@ -1078,29 +1078,63 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
 !       Stagger location of data in grid cells.  For valid 
 !       predefined values see Section \ref{sec:opt:staggerloc}.
 !       To create a custom stagger location see Section
-!       \ref{sec:usage:staggerloc:adv}.
+!       \ref{sec:usage:staggerloc:adv}.The default
+!       value is ESMF\_STAGGERLOC\_CENTER.
 ! \item [{[gridToFieldMap]}]
-!       List that contains as many elements as is indicated by the {\tt grid}'s rank. 
-!       The list elements map each dimension of the Grid object to a dimension in the
-!       Field's Array by specifying the appropriate Array dimension index. The default is to
-!       map all of the grid's dimensions against the lower dimensions of the Field's
-!       Array in sequence, i.e. gridDimmap = (/1, 2, .../). Unmapped dimensions are
-!       undistributed dimensions.  The total undistributed dimensions are the total 
-!       Array dimensions - the distributed dimensions in the Grid (distRank).  All
-!       gridToFieldMap entries must be greater than or equal to one and smaller than or equal
-!       to the Array rank. It is erroneous to specify the same entry multiple times
-!       unless it is zero.  If the Array rank is less than the Grid dimCount then
-!       the default gridToFieldMap will contain zeros for the dimCount.
-!       A zero entry in the dimmap indicates that the particular Grid dimension will
-!       be replicating the Array across the DEs along this direction.
+!       List with number of elements equal to the
+!       {\tt grid}'s dimCount.  The list elements map each dimension
+!       of the {\tt grid} to a dimension in the {\tt field} by
+!       specifying the appropriate {\tt field} dimension index. The default is to
+!       map all of the {\tt grid}'s dimensions against the lowest dimensions of
+!       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
+!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
+!       to one and smaller than or equal to the {\tt field} rank.
+!       It is erroneous to specify the same {\tt gridToFieldMap} entry
+!       multiple times. The total ungridded dimensions in the {\tt field}
+!       are the total {\tt field} dimensions less
+!       the dimensions in
+!       the {\tt grid}.  Ungridded dimensions must be in the same order they are
+!       stored in the {\t field}.  
 ! \item [{[ungriddedLBound]}]
-!       Lower bounds of the ungridded dimensions of the Field.
+!       Lower bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[ungriddedUBound]}]
-!       Upper bounds of the ungridded dimensions of the Field.
+!       Upper bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[maxHaloLWidth]}]
-!       Lower bound of halo region.  Defaults to 0.
+!       Lower bound of halo region.  The size of this array is the number
+!       of dimensions in the {\tt grid}.  However, ordering of the elements
+!       needs to be the same as they appear in the {\tt field}.  Values default
+!       to 0.  If values for maxHaloLWidth are specified they must be reflected in
+!       the size of the {\tt field}.  That is, for each gridded dimension the
+!       {\tt field} size should be max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth}
+!       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not
+!       implemented, the {\tt minHaloLWidth} is checked for validity and stored
+!       in preparation for the implementation of the halo method.
+!       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[maxHaloUWidth]}]
-!       Upper bound of halo region.  Defaults to 0.
+!       Upper bound of halo region.  The size of this array is the number
+!       of dimensions in the {\tt grid}.  However, ordering of the elements
+!       needs to be the same as they appear in the {\tt field}.  Values default
+!       to 0.  If values for maxHaloUWidth are specified they must be reflected in
+!       the size of the {\tt field}.  That is, for each gridded dimension the
+!       {\tt field} size should max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth}
+!       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not
+!       implemented, the {\tt maxHaloUWidth} is checked for validity and stored
+!       in preparation for the implementation of the halo method. 
+!       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[name]}] 
 !       {\tt Field} name. 
 ! \item [{[iospec]}] 
@@ -1188,7 +1222,8 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
 !       Stagger location of data in grid cells.  For valid 
 !       predefined values see Section \ref{sec:opt:staggerloc}.
 !       To create a custom stagger location see Section
-!       \ref{sec:usage:staggerloc:adv}.
+!       \ref{sec:usage:staggerloc:adv}. The default
+!       value is ESMF\_STAGGERLOC\_CENTER.
 ! \item [{[name]}] 
 !       {\tt Field} name. 
 ! \item [{[iospec]}] 
@@ -1347,31 +1382,63 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
 !       Stagger location of data in grid cells.  For valid 
 !       predefined values see Section \ref{sec:opt:staggerloc}.
 !       To create a custom stagger location see Section
-!       \ref{sec:usage:staggerloc:adv}.
+!       \ref{sec:usage:staggerloc:adv}.The default
+!       value is ESMF\_STAGGERLOC\_CENTER.
 ! \item [{[gridToFieldMap]}]
-!       List that contains as many elements as is indicated by the {\tt grid}'s rank. 
-!       The list elements map each dimension of the Grid object to a dimension in the
-!       Field's Array by specifying the appropriate Array dimension index. The default is to
-!       map all of the grid's dimensions against the lower dimensions of the Field's
-!       Array in sequence, i.e. gridDimmap = (/1, 2, .../). Unmapped dimensions are
-!       undistributed dimensions.  The total undistributed dimensions are the total 
-!       Array dimensions - the distributed dimensions in the Grid (distRank).  All
-!       gridToFieldMap entries must be greater than or equal to one and smaller than or equal
-!       to the Array rank. It is erroneous to specify the same entry multiple times
-!       unless it is zero.  If the Array rank is less than the Grid dimCount then
-!       the default gridToFieldMap will contain zeros for the dimCount.
-!       A zero entry in the dimmap indicates that the particular Grid dimension will
-!       be replicating the Array across the DEs along this direction.
+!       List with number of elements equal to the
+!       {\tt grid}'s dimCount.  The list elements map each dimension
+!       of the {\tt grid} to a dimension in the {\tt field} by
+!       specifying the appropriate {\tt field} dimension index. The default is to
+!       map all of the {\tt grid}'s dimensions against the lowest dimensions of
+!       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
+!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
+!       to one and smaller than or equal to the {\tt field} rank.
+!       It is erroneous to specify the same {\tt gridToFieldMap} entry
+!       multiple times. The total ungridded dimensions in the {\tt field}
+!       are the total {\tt field} dimensions less
+!       the dimensions in
+!       the {\tt grid}.  Ungridded dimensions must be in the same order they are
+!       stored in the {\t field}.  
 ! \item [{[ungriddedLBound]}]
-!       Lower bounds of the ungridded dimensions of the Field.
+!       Lower bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[ungriddedUBound]}]
-!       Upper bounds of the ungridded dimensions of the Field.
+!       Upper bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[maxHaloLWidth]}]
-!       Lower bound of halo region.  Halo widths should be in the same order as
-!       the DistGrid in {\tt grid}.  Defaults to 0. ! NOT IMPLEMENTED
+!       Lower bound of halo region.  The size of this array is the number
+!       of dimensions in the {\tt grid}.  However, ordering of the elements
+!       needs to be the same as they appear in the {\tt field}.  Values default
+!       to 0.  If values for maxHaloLWidth are specified they must be reflected in
+!       the size of the {\tt field}.  That is, for each gridded dimension the
+!       {\tt field} size should be max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth}
+!       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not
+!       implemented, the {\tt minHaloLWidth} is checked for validity and stored
+!       in preparation for the implementation of the halo method.
+!       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[maxHaloUWidth]}]
-!       Upper bound of halo region.  Halo widths should be in the same order as
-!       the DistGrid in {\tt grid}.  Defaults to 0. ! NOT IMPLEMENTED
+!       Upper bound of halo region.  The size of this array is the number
+!       of dimensions in the {\tt grid}.  However, ordering of the elements
+!       needs to be the same as they appear in the {\tt field}.  Values default
+!       to 0.  If values for maxHaloUWidth are specified they must be reflected in
+!       the size of the {\tt field}.  That is, for each gridded dimension the
+!       {\tt field} size should max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth}
+!       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not
+!       implemented, the {\tt maxHaloUWidth} is checked for validity and stored
+!       in preparation for the implementation of the halo method. 
+!       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[name]}] 
 !       {\tt ESMF\_Field} name. 
 ! \item [{[iospec]}] 
@@ -1504,35 +1571,67 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
 ! \item [copyflag]
 !       Whether to copy the existing data space or reference directly. Valid
 !       values are {\tt ESMF\_DATA\_COPY} or {\tt ESMF\_DATA\_REF} (default).
-! \item [{[staggerloc]}] 
+! \item [staggerloc] 
 !       Stagger location of data in grid cells.  For valid 
 !       predefined values see Section \ref{sec:opt:staggerloc}.
 !       To create a custom stagger location see Section
-!       \ref{sec:usage:staggerloc:adv}.
-! \item [{[gridToFieldMap]}]
-!       List that contains as many elements as is indicated by the {\tt grid}'s rank. 
-!       The list elements map each dimension of the Grid object to a dimension in the
-!       Field's Array by specifying the appropriate Array dimension index. The default is to
-!       map all of the grid's dimensions against the lower dimensions of the Field's
-!       Array in sequence, i.e. gridDimmap = (/1, 2, .../). Unmapped dimensions are
-!       undistributed dimensions.  The total undistributed dimensions are the total 
-!       Array dimensions - the distributed dimensions in the Grid (distRank).  All
-!       gridToFieldMap entries must be greater than or equal to one and smaller than or equal
-!       to the Array rank. It is erroneous to specify the same entry multiple times
-!       unless it is zero.  If the Array rank is less than the Grid dimCount then
-!       the default gridToFieldMap will contain zeros for the dimCount.
-!       A zero entry in the dimmap indicates that the particular Grid dimension will
-!       be replicating the Array across the DEs along this direction.
-! \item [{[ungriddedLBound]}]
-!       Lower bounds of the ungridded dimensions of the Field.
-! \item [{[ungriddedUBound]}]
-!       Upper bounds of the ungridded dimensions of the Field.
-! \item [{[maxHaloLWidth]}]
-!       Lower bound of halo region.  Halo widths should be in the same order as
-!       the DistGrid in {\tt grid}.  Defaults to 0. ! NOT IMPLEMENTED
-! \item [{[maxHaloUWidth]}]
-!       Upper bound of halo region.  Halo widths should be in the same order as
-!       the DistGrid in {\tt grid}.  Defaults to 0. ! NOT IMPLEMENTED
+!       \ref{sec:usage:staggerloc:adv}. The default
+!       value is ESMF\_STAGGERLOC\_CENTER.
+! \item [gridToFieldMap]
+!       List with number of elements equal to the
+!       {\tt grid}'s dimCount.  The list elements map each dimension
+!       of the {\tt grid} to a dimension in the {\tt field} by
+!       specifying the appropriate {\tt field} dimension index. The default is to
+!       map all of the {\tt grid}'s dimensions against the lowest dimensions of
+!       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
+!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
+!       to one and smaller than or equal to the {\tt field} rank.
+!       It is erroneous to specify the same {\tt gridToFieldMap} entry
+!       multiple times. The total ungridded dimensions in the {\tt field}
+!       are the total {\tt field} dimensions less
+!       the dimensions in
+!       the {\tt grid}.  Ungridded dimensions must be in the same order they are
+!       stored in the {\t field}.  
+! \item [ungriddedLBound]
+!       Lower bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt field}.
+! \item [ungriddedUBound]
+!       Upper bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt field}.
+! \item [maxHaloLWidth]
+!       Lower bound of halo region.  The size of this array is the number
+!       of dimensions in the {\tt grid}.  However, ordering of the elements
+!       needs to be the same as they appear in the {\tt field}.  Values default
+!       to 0.  If values for maxHaloLWidth are specified they must be reflected in
+!       the size of the {\tt field}.  That is, for each gridded dimension the
+!       {\tt field} size should be max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth}
+!       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not
+!       implemented, the {\tt minHaloLWidth} is checked for validity and stored
+!       in preparation for the implementation of the halo method.
+!       HALO OPERATION NOT IMPLEMENTED
+! \item [maxHaloUWidth]
+!       Upper bound of halo region.  The size of this array is the number
+!       of dimensions in the {\tt grid}.  However, ordering of the elements
+!       needs to be the same as they appear in the {\tt field}.  Values default
+!       to 0.  If values for maxHaloUWidth are specified they must be reflected in
+!       the size of the {\tt field}.  That is, for each gridded dimension the
+!       {\tt field} size should max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth}
+!       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not
+!       implemented, the {\tt maxHaloUWidth} is checked for validity and stored
+!       in preparation for the implementation of the halo method. 
+!       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[name]}] 
 !       {\tt ESMF\_Field} name. 
 ! \item [{[iospec]}] 
@@ -1650,31 +1749,63 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
 !       Stagger location of data in grid cells.  For valid 
 !       predefined values see Section \ref{sec:opt:staggerloc}.
 !       To create a custom stagger location see Section
-!       \ref{sec:usage:staggerloc:adv}.
-!       If a stagger location is specified both as an argument
-!       here as well as set in the {\tt datamap}, this takes priority.
+!       \ref{sec:usage:staggerloc:adv}. The default
+!       value is ESMF\_STAGGERLOC\_CENTER.
 ! \item [{[gridToFieldMap]}]
-!       List that contains as many elements as is indicated by the {\tt grid}'s rank. 
-!       The list elements map each dimension of the Grid object to a dimension in the
-!       Field's Array by specifying the appropriate Array dimension index. The default is to
-!       map all of the grid's dimensions against the lower dimensions of the Field's
-!       Array in sequence, i.e. gridDimmap = (/1, 2, .../). Unmapped dimensions are
-!       undistributed dimensions.  The total undistributed dimensions are the total 
-!       Array dimensions - the distributed dimensions in the Grid (distRank).  All
-!       gridToFieldMap entries must be greater than or equal to one and smaller than or equal
-!       to the Array rank. It is erroneous to specify the same entry multiple times
-!       unless it is zero.  If the Array rank is less than the Grid dimCount then
-!       the default gridToFieldMap will contain zeros for the dimCount.
-!       A zero entry in the dimmap indicates that the particular Grid dimension will
-!       be replicating the Array across the DEs along this direction.
+!       List with number of elements equal to the
+!       {\tt grid}'s dimCount.  The list elements map each dimension
+!       of the {\tt grid} to a dimension in the {\tt field} by
+!       specifying the appropriate {\tt field} dimension index. The default is to
+!       map all of the {\tt grid}'s dimensions against the lowest dimensions of
+!       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
+!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
+!       to one and smaller than or equal to the {\tt field} rank.
+!       It is erroneous to specify the same {\tt gridToFieldMap} entry
+!       multiple times. The total ungridded dimensions in the {\tt field}
+!       are the total {\tt field} dimensions less
+!       the dimensions in
+!       the {\tt grid}.  Ungridded dimensions must be in the same order they are
+!       stored in the {\t field}.  
 ! \item [{[ungriddedLBound]}]
-!       Lower bounds of the ungridded dimensions of the Field.
+!       Lower bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[ungriddedUBound]}]
-!       Upper bounds of the ungridded dimensions of the Field.
+!       Upper bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[maxHaloLWidth]}]
-!       Lower bound of halo region.  Defaults to 0. ! NOT IMPLEMENTED
+!       Lower bound of halo region.  The size of this array is the number
+!       of dimensions in the {\tt grid}.  However, ordering of the elements
+!       needs to be the same as they appear in the {\tt field}.  Values default
+!       to 0.  If values for maxHaloLWidth are specified they must be reflected in
+!       the size of the {\tt field}.  That is, for each gridded dimension the
+!       {\tt field} size should be max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth}
+!       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not
+!       implemented, the {\tt minHaloLWidth} is checked for validity and stored
+!       in preparation for the implementation of the halo method.
+!       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[maxHaloUWidth]}]
-!       Upper bound of halo region.  Defaults to 0. ! NOT IMPLEMENTED
+!       Upper bound of halo region.  The size of this array is the number
+!       of dimensions in the {\tt grid}.  However, ordering of the elements
+!       needs to be the same as they appear in the {\tt field}.  Values default
+!       to 0.  If values for maxHaloUWidth are specified they must be reflected in
+!       the size of the {\tt field}.  That is, for each gridded dimension the
+!       {\tt field} size should max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth}
+!       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not
+!       implemented, the {\tt maxHaloUWidth} is checked for validity and stored
+!       in preparation for the implementation of the halo method. 
+!       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[name]}] 
 !       {\tt ESMF\_Field} name. 
 ! \item [{[iospec]}] 

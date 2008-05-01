@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGetEx.F90,v 1.4.2.8 2008/05/01 17:42:20 feiliu Exp $
+! $Id: ESMF_FieldGetEx.F90,v 1.4.2.9 2008/05/01 21:46:32 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
     program ESMF_FieldGetEx
 
 !------------------------------------------------------------------------------
-!ESMF_EXAMPLE        String used by test script to count examples.
+!EremoveSMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 ! !PROGRAM: ESMF_FieldGetEx - Field Get Examples
 !

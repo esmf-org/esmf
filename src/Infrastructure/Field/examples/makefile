@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.25.2.6 2008/04/17 16:20:15 theurich Exp $ 
+# $Id: makefile,v 1.25.2.7 2008/05/01 21:46:32 feiliu Exp $ 
 
 ALL:      build_examples
 run:      run_examples
@@ -18,21 +18,24 @@ LOCDIR	  = src/Infrastructure/Field/examples
 
 
 EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_FieldCreateEx \
-                 $(ESMF_EXDIR)/ESMF_FieldGetEx
+                 $(ESMF_EXDIR)/ESMF_FieldEx
+#                 $(ESMF_EXDIR)/ESMF_FieldGetEx
 #                 $(ESMF_EXDIR)/ESMF_FieldSetEx
 #                 $(ESMF_EXDIR)/ESMF_FieldFromUserEx \
 #                 $(ESMF_EXDIR)/ESMF_FieldGlobalEx \
 #                 $(ESMF_EXDIR)/ESMF_FieldWriteEx
 
 EXAMPLES_RUN = run_ESMF_FieldCreateEx \
-               run_ESMF_FieldGetEx
+               run_ESMF_FieldEx
+#               run_ESMF_FieldGetEx
 #                   run_ESMF_FieldSetEx
 #                   run_ESMF_FieldFromUserEx \
 #                   run_ESMF_FieldGlobalEx \
 #                   run_ESMF_FieldWriteEx 
 
 EXAMPLES_RUN_UNI = run_ESMF_FieldCreateEx_uni \
-                   run_ESMF_FieldGetEx_uni
+                   run_ESMF_FieldEx_uni
+#                   run_ESMF_FieldGetEx_uni
 #                   run_ESMF_FieldSetEx_uni
 #                   run_ESMF_FieldFromUserEx_uni \
 #                   run_ESMF_FieldGlobalEx_uni \
@@ -46,6 +49,14 @@ CLEANDIRS   =
 CLEANFILES  = foo.nc $(EXAMPLES_BUILD) 0 1 2 3
 CLOBBERDIRS =
 
+#
+# ESMF_FieldEx
+#
+run_ESMF_FieldEx:
+	$(MAKE) EXNAME=Field NP=4 exfrun
+
+run_ESMF_FieldEx_uni:
+	echo "PASS: ESMF_FieldEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FieldEx.stdout
 
 #
 # ESMF_FieldCreateEx
@@ -55,7 +66,6 @@ run_ESMF_FieldCreateEx:
 
 run_ESMF_FieldCreateEx_uni:
 	echo "PASS: ESMF_FieldCreateEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FieldCreateEx.stdout
-#	$(MAKE) EXNAME=FieldCreate NP=1 exfrun
 
 #
 # ESMF_FieldGetEx
@@ -102,7 +112,3 @@ run_ESMF_FieldGlobalEx_uni:
 
  run_ESMF_FieldWriteEx_uni:
 	$(MAKE) EXNAME=FieldWrite NP=1 exfrun
-
-
-
-
