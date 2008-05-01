@@ -167,7 +167,7 @@ extern "C" {
     if (_rc!=NULL) *_rc = ESMC_RC_NOT_IMPL;
 
     // make sure status is correct
-    if (grid->getStatus() < ESMC_GRIDSTATUS_PROXY_READY) {
+    if (grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
               "- grid not ready for this operation ", ESMC_NOT_PRESENT_FILTER(_rc));
       return;
@@ -201,11 +201,7 @@ extern "C" {
 
     // undistdimCount
     if (ESMC_NOT_PRESENT_FILTER(_localDECount) != ESMC_NULL_POINTER) {
-      if (grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
-        *_localDECount = 0; 
-      } else {
-        *_localDECount = grid->getDistGrid()->getDELayout()->getLocalDeCount();
-      }
+       *_localDECount = grid->getDistGrid()->getDELayout()->getLocalDeCount();
     }
     
     // tileCount
@@ -1460,7 +1456,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
 
     // Check status
-   if ((*_grid)->getStatus() < ESMC_GRIDSTATUS_PROXY_READY) {
+   if ((*_grid)->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
           "- grid status below ESMC_GRIDSTATUS_SHAPE_READY ", ESMC_NOT_PRESENT_FILTER(rc));
         return;

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.65 2008/05/01 04:44:45 rokuingh Exp $
+// $Id: ESMCI_Grid.C,v 1.66 2008/05/01 22:43:43 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.65 2008/05/01 04:44:45 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.66 2008/05/01 22:43:43 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -3168,7 +3168,7 @@ int Grid::serialize(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   bool cp, done;
   int loffset,r;
-
+  bool **arrayExists;
 
   // Define serialization macros
 #define SERIALIZE_VAR(cp,bufptr,loff,var,t) \
@@ -3188,10 +3188,23 @@ int Grid::serialize(
 
 
   // Check status
-  if (status < ESMC_GRIDSTATUS_PROXY_READY) {
+  if (status < ESMC_GRIDSTATUS_SHAPE_READY) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
       "- Grid not fully created", &rc);
     return rc;
+  }
+
+
+  // Create list of which Arrays exist
+  arrayExists=_allocate2D<bool>(staggerLocCount,dimCount);
+  for (int s=0; s<staggerLocCount; s++) {
+    for (int c=0; c<dimCount; c++) {
+      if (coordArrayList[s][c] == ESMC_NULL_POINTER) {
+	arrayExists[s][c]=false;
+      } else {
+	arrayExists[s][c]=true;
+      }
+    }
   }
 
 
@@ -3261,14 +3274,20 @@ int Grid::serialize(
     r=loffset%8;
     if (r!=0) loffset += 8-r;
 
-    
-    // Don't do Coordinate Arrays right now because it doesn't
-    // seem necessary. Will be easy enough to add in the 
-    // future if necessary (just serialize an array indicating
-    // which staggerloc's contain valid Arrays and then serialize
-    // the Arrays (using the Array serialize) in order.
-    
-    
+    // Serialize the Array exists array
+    SERIALIZE_VAR2D(cp, buffer,loffset,arrayExists,staggerLocCount,dimCount,bool);
+    // Serialize the Coord Arrays 
+    for (int s=0; s<staggerLocCount; s++) {
+      for (int c=0; c<dimCount; c++) {
+	if (arrayExists[s][c]) {
+           //// Serialize the Array
+	  localrc = coordArrayList[s][c]->serialize(buffer, length, &loffset);
+	  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+				      ESMF_ERR_PASSTHRU, &rc)) return rc;  
+	}
+      }
+    }
+
     // Serialize the DistGrid
     localrc = distgrid->serialize(buffer, length, &loffset);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
@@ -3294,6 +3313,9 @@ int Grid::serialize(
       cp=true;
     }
   }
+
+  // free arrayExists
+  _free2D<bool>(&arrayExists);
 
   // output localoffset
   *offset=loffset;
@@ -3334,6 +3356,7 @@ int Grid::deserialize(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   int loffset,r;
+  bool **arrayExists;
 
   // Define serialization macros
 #define DESERIALIZE_VAR(bufptr,loff,var,t) \
@@ -3365,7 +3388,7 @@ int Grid::deserialize(
   proto=ESMC_NULL_POINTER;
 
   // Set status (instead of reading it)
-  status =  ESMC_GRIDSTATUS_PROXY_READY;
+  status =  ESMC_GRIDSTATUS_SHAPE_READY;
 
   DESERIALIZE_VAR( buffer,loffset,typekind,ESMC_TypeKind);
 
@@ -3404,16 +3427,6 @@ int Grid::deserialize(
   DESERIALIZE_VAR2D( buffer,loffset,staggerAlignList,staggerLocCount,dimCount,int);
   DESERIALIZE_VAR2D( buffer,loffset,staggerEdgeLWidthList,staggerLocCount,dimCount,int);
   DESERIALIZE_VAR2D( buffer,loffset,staggerEdgeUWidthList,staggerLocCount,dimCount,int);
-  // Setup didIAllocList as all false since this proxy grid won't
-  // have Array's allocated 
-  //// allocate storage for array allocation flag
-  didIAllocList=_allocate2D<bool>(staggerLocCount,dimCount);
-  //// set to all false since we're a proxy Grid
-  for(int i=0; i<staggerLocCount; i++) {
-    for(int j=0; j<dimCount; j++) {
-      didIAllocList[i][j]=false;
-    }
-  }
 
   DESERIALIZE_VAR1D( buffer,loffset,gridIsDist,dimCount,bool);
   DESERIALIZE_VAR1D( buffer,loffset,gridMapDim,dimCount,int);
@@ -3430,16 +3443,31 @@ int Grid::deserialize(
   r=loffset%8;
   if (r!=0) loffset += 8-r;
     
-  // Don't do Coordinate Arrays right now because it doesn't
-  // seem necessary. Will be easy enough to add in the 
-  // future if necessary (just serialize an array indicating
-  // which staggerloc's contain valid Arrays and then serialize
-  // the Arrays (using the Array serialize) in order.
-  // For now just create an empty list. 
-  coordArrayList=_allocate2D<Array *>(staggerLocCount,dimCount);
-  for(int i=0; i<staggerLocCount; i++)
-    for(int j=0; j<dimCount; j++)
-      coordArrayList[i][j]=ESMC_NULL_POINTER;
+    // Deserialize the Array exists array
+    DESERIALIZE_VAR2D( buffer,loffset,arrayExists,staggerLocCount,dimCount,bool);
+
+    // Deserialize the Coord Arrays 
+    coordArrayList=_allocate2D<Array *>(staggerLocCount,dimCount);
+    for (int s=0; s<staggerLocCount; s++) {
+      for (int c=0; c<dimCount; c++) {
+	if (arrayExists[s][c]) {
+	  coordArrayList[s][c]=new Array;
+	  coordArrayList[s][c]->deserialize(buffer, &loffset);
+	} else {
+	  coordArrayList[s][c]=ESMC_NULL_POINTER;
+	}
+      }
+    }
+
+  // Setup didIAllocList if the arrayExists then deallocate it
+  //// allocate storage for array allocation flag
+  didIAllocList=_allocate2D<bool>(staggerLocCount,dimCount);
+  //// set to all false since we're a proxy Grid
+  for(int i=0; i<staggerLocCount; i++) {
+    for(int j=0; j<dimCount; j++) {
+      didIAllocList[i][j]=arrayExists[i][j];
+    }
+  }
       
   // Deserialize the DistGrid
   distgrid = DistGrid::deserialize(buffer, &loffset);
@@ -3447,6 +3475,10 @@ int Grid::deserialize(
     // make sure loffset is aligned correctly
     r=loffset%8;
     if (r!=0) loffset += 8-r;
+
+  // free arrayExists
+  _free2D<bool>(&arrayExists);
+
 
   // output localoffset
   *offset=loffset;
@@ -3624,8 +3656,13 @@ static  void _free3D(Type ****array)
     const int *deIndexListExtentList=distgrid->getIndexCountPDimPDe();
 
     // allocate Bnds
-    isDELBnd=new char[localDECount];
-    isDEUBnd=new char[localDECount];
+    if (localDECount > 0) {
+      isDELBnd=new char[localDECount];
+      isDEUBnd=new char[localDECount];
+    } else {
+      isDELBnd=ESMC_NULL_POINTER;
+      isDEUBnd=ESMC_NULL_POINTER;
+    }
 
     // loop through local DE's setting flags
     for (int lDE=0; lDE<localDECount; lDE++) {

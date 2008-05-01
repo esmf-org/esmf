@@ -80,8 +80,7 @@
                       ESMF_GRIDSTATUS_INVALID=ESMF_GridStatus(-1), &
                       ESMF_GRIDSTATUS_UNINIT=ESMF_GridStatus(0), &
                       ESMF_GRIDSTATUS_NOT_READY=ESMF_GridStatus(1), &
-		      ESMF_GRIDSTATUS_PROXY_READY=ESMF_GridStatus(2), &
-		      ESMF_GRIDSTATUS_SHAPE_READY=ESMF_GridStatus(3)
+		      ESMF_GRIDSTATUS_SHAPE_READY=ESMF_GridStatus(2)
 
 
 !------------------------------------------------------------------------------
@@ -119,8 +118,7 @@ public ESMF_Grid
 public  ESMF_GridConn,  ESMF_GRIDCONN_NONE, ESMF_GRIDCONN_PERIODIC, &
                         ESMF_GRIDCONN_POLE, ESMF_GRIDCONN_BIPOLE
 public  ESMF_GridStatus,  ESMF_GRIDSTATUS_INVALID, ESMF_GRIDSTATUS_UNINIT, &
-                      ESMF_GRIDSTATUS_NOT_READY,  ESMF_GRIDSTATUS_PROXY_READY, &
-		      ESMF_GRIDSTATUS_SHAPE_READY
+                      ESMF_GRIDSTATUS_NOT_READY,  ESMF_GRIDSTATUS_SHAPE_READY
 public  ESMF_DefaultFlag
 
 !------------------------------------------------------------------------------
@@ -166,7 +164,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.83 2008/04/29 22:06:52 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.84 2008/05/01 22:43:43 oehmke Exp $'
 
 !==============================================================================
 ! 
