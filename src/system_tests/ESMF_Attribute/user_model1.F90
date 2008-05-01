@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.19 2008/04/03 00:42:56 rokuingh Exp $
+! $Id: user_model1.F90,v 1.20 2008/05/01 22:26:03 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -111,9 +111,9 @@ module user_model1
     type(ESMF_ArraySpec)        :: arrayspec
     type(ESMF_Array)            :: array
     type(ESMF_Field)            :: uwind, ozone, co, tke, wt, field
-    type(ESMF_FieldBundle)           :: bundle, tracers, turbulence
+    type(ESMF_FieldBundle)      :: bundle, tracers, turbulence
     type(ESMF_Grid)             :: grid
-    integer                     :: petCount, backward_run, status, myPet
+    integer                     :: petCount, status, myPet
     character(len=ESMF_MAXSTR)  :: name, value, conv, purp, fconv, fpurp, sname, svalue, outvalue
     
     ! Initialize return code
@@ -121,25 +121,14 @@ module user_model1
 
     ! Determine petCount
     call ESMF_GridCompGet(comp, vm=vm, rc=status)
-    if (status .ne. ESMF_SUCCESS) goto 20
+    if (status .ne. ESMF_SUCCESS) return
     call ESMF_VMGet(vm, petCount=petCount, localPet=myPet, rc=status)
-    if (status .ne. ESMF_SUCCESS) goto 20
+    if (status .ne. ESMF_SUCCESS) return
 
-      conv = 'ESG-CDP'  
-      purp = 'general'
-      name = 'name'
-      value = 'changed attpack attribute name in user model 1 run 1'
-!      call ESMF_StateAttPackSet(importState, name, value, convention=conv, purpose=purp, rc=rc)
-      if (status .ne. ESMF_SUCCESS) goto 20
-   
-      ! state stuff
-      conv = 'ESG-CDP'  
-      purp = 'general'
-      name = 'discipline'
-      value = 'changed attpack attribute discipline in user model 1 run 2'
-!      call ESMF_StateAttPackSet(importState, name, value, convention=conv, purpose=purp, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-      
+    ! Get the export state
+    call ESMF_StateGet(exportState, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
   !!! Arlindo's State Pretty Print example
   !!!
   !!!
@@ -153,13 +142,13 @@ module user_model1
       svalue = 'My Nice State'
  
       MyState = ESMF_StateCreate("MyState", ESMF_STATE_IMPORT, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
+      if (status .ne. ESMF_SUCCESS) return
 
-      call ESMF_StateAttributeSet(MyState, sname, svalue, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
+      call ESMF_AttributeSet(MyState, sname, svalue, rc=status)
+      if (status .ne. ESMF_SUCCESS) return
 
       physics = ESMF_StateCreate("physics", ESMF_STATE_IMPORT, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
+      if (status .ne. ESMF_SUCCESS) return
       
       ! field stuff
       fconv = 'netCDF'
@@ -168,75 +157,75 @@ module user_model1
       value = 'zonal wind'
       
       uwind = ESMF_FieldCreate("uwind", rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldAttAdd(uwind, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldAttSet(uwind, name, value, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
+      if (status .ne. ESMF_SUCCESS) return
+      call ESMF_AttributeAdd(uwind, convention=fconv, purpose=fpurp, rc=status)
+      if (status .ne. ESMF_SUCCESS) return
+      call ESMF_AttributeSet(uwind, name, value, convention=fconv, purpose=fpurp, rc=status)
+      if (status .ne. ESMF_SUCCESS) return
       
       value = 'ozone'
       ozone = ESMF_FieldCreate("ozone", rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldAttAdd(ozone, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldAttSet(ozone, name, value, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
+      if (status .ne. ESMF_SUCCESS) return
+      call ESMF_AttributeAdd(ozone, convention=fconv, purpose=fpurp, rc=status)
+      if (status .ne. ESMF_SUCCESS) return
+      call ESMF_AttributeSet(ozone, name, value, convention=fconv, purpose=fpurp, rc=status)
+      if (status .ne. ESMF_SUCCESS) return
       
       value = 'carbon monoxide'
       co = ESMF_FieldCreate("co", rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldAttAdd(co, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldAttSet(co, name, value, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
+      if (status .ne. ESMF_SUCCESS) return
+      call ESMF_AttributeAdd(co, convention=fconv, purpose=fpurp, rc=status)
+      if (status .ne. ESMF_SUCCESS) return
+      call ESMF_AttributeSet(co, name, value, convention=fconv, purpose=fpurp, rc=status)
+      if (status .ne. ESMF_SUCCESS) return
       
       value = 'turbulent kinetic energy'
       tke = ESMF_FieldCreate("tke", rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldAttAdd(tke, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldAttSet(tke, name, value, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
+      if (status .ne. ESMF_SUCCESS) return
+      call ESMF_AttributeAdd(tke, convention=fconv, purpose=fpurp, rc=status)
+      if (status .ne. ESMF_SUCCESS) return
+      call ESMF_AttributeSet(tke, name, value, convention=fconv, purpose=fpurp, rc=status)
+      if (status .ne. ESMF_SUCCESS) return
       
       value = 'heat fluxes'
       wt = ESMF_FieldCreate("wt", rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldAttAdd(wt, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldAttSet(wt, name, value, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
+      if (status .ne. ESMF_SUCCESS) return
+      call ESMF_AttributeAdd(wt, convention=fconv, purpose=fpurp, rc=status)
+      if (status .ne. ESMF_SUCCESS) return
+      call ESMF_AttributeSet(wt, name, value, convention=fconv, purpose=fpurp, rc=status)
+      if (status .ne. ESMF_SUCCESS) return
 
       ! bundle stuff
       tracers = ESMF_FieldBundleCreate(name="tracers", rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
+      if (status .ne. ESMF_SUCCESS) return
       
       turbulence = ESMF_FieldBundleCreate(name="turbulence", rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
+      if (status .ne. ESMF_SUCCESS) return
       
       ! connect the attribute hierarchy
-!      call ESMF_FieldBundleAttributeSetLink(turbulence, tke, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-!      call ESMF_FieldBundleAttributeSetLink(turbulence, wt, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
+      call ESMF_AttributeSet(turbulence, tke, rc=status)
+      if (status .ne. ESMF_SUCCESS) return
+      call ESMF_AttributeSet(turbulence, wt, rc=status)
+      if (status .ne. ESMF_SUCCESS) return
 
-!      call ESMF_FieldBundleAttributeSetLink(tracers, ozone, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-!      call ESMF_FieldBundleAttributeSetLink(tracers, co, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
+      call ESMF_AttributeSet(tracers, ozone, rc=status)
+      if (status .ne. ESMF_SUCCESS) return
+      call ESMF_AttributeSet(tracers, co, rc=status)
+      if (status .ne. ESMF_SUCCESS) return
 
-      call ESMF_StateAttributeSetLink(physics, turbulence, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
+      call ESMF_AttributeSet(physics, turbulence, rc=status)
+      if (status .ne. ESMF_SUCCESS) return
 
-      call ESMF_StateAttributeSetLink(MyState, uwind, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_StateAttributeSetLink(MyState, tracers, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_StateAttributeSetLink(MyState, physics, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
+      call ESMF_AttributeSet(MyState, uwind, rc=status)
+      if (status .ne. ESMF_SUCCESS) return
+      call ESMF_AttributeSet(MyState, tracers, rc=status)
+      if (status .ne. ESMF_SUCCESS) return
+      call ESMF_AttributeSet(MyState, physics, rc=status)
+      if (status .ne. ESMF_SUCCESS) return
  
       if (myPet .eq. 0) then
-        call ESMF_StatePrint(MyState, rc=status)
-        if (status .ne. ESMF_SUCCESS) goto 20
+        !call ESMF_StatePrint(MyState, rc=status)
+        if (status .ne. ESMF_SUCCESS) return
         print *, "--------------------------------------- "
         print *, 'End of State Pretty Print example'
         print *, "--------------------------------------- "
@@ -244,78 +233,10 @@ module user_model1
   !!!
   !!!
   !!! Arlindo's State Pretty Print example
-      
-      ! array stuff
-      call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
-      distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
-        regDecomp=(/2,3/), rc=rc)
-      array = ESMF_ArrayCreate(arrayspec, distgrid, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_ArrayAttPackCreate(array, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-!      call ESMF_ArrayAttPackSet(array, name, value, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-      name = 'retrievable'
-      value = 'retrieved' 
-      call ESMF_ArrayAttributeSet(array, name, value, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_ArrayAttributeGet(array, name, outvalue, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-      if (myPet .eq. 0) then
-        print *, 'An attribute was retrieved from the array with name = ', name, ' and value = ', outvalue
-      endif
-      
-      name = 'longname'
-      value = 'longattributename'
-      
-      ! bundle stuff
-      bundle = ESMF_FieldBundleCreate(name="bundle1", rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-!      call ESMF_FieldBundleAttPackCreate(bundle, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-!      call ESMF_FieldBundleAttPackSet(bundle, name, value, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
 
-      ! field stuff
-      field = ESMF_FieldCreate(rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldAttAdd(field, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_FieldAttSet(field, name, value, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-
-      ! grid stuff
-      grid = ESMF_GridCreateEmpty(rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-      call ESMF_GridAttPackCreate(grid, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-!      call ESMF_GridAttPackSet(grid, name, value, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 20
-
-      if (myPet .eq. 0) then
-        conv = 'ESG-CDP'
-        purp = 'general'
-      
-        print *, 'Write the Array Attpack from the second run of component 1.'
-        call ESMF_ArrayAttPackWrite(array, convention=fconv, purpose=fpurp, rc=rc)
-        if (status .ne. ESMF_SUCCESS) goto 20
-
-        print *, 'Write the FieldBundle Attpack from the second run of component 1.'
-!        call ESMF_FieldBundleAttPackWrite(bundle, convention=fconv, purpose=fpurp, rc=rc)
-        if (status .ne. ESMF_SUCCESS) goto 20
-
-        print *, 'Write the Field Attpack from the second run of component 1.'
-        call ESMF_FieldAttWrite(field, convention=fconv, purpose=fpurp, rc=rc)
-        if (status .ne. ESMF_SUCCESS) goto 20
-
-        print *, 'Write the Grid Attpack from the second run of component 1.'
-        call ESMF_GridAttPackWrite(grid, convention=fconv, purpose=fpurp, rc=rc)
-        if (status .ne. ESMF_SUCCESS) goto 20
-        
-        print *, 'Write the State Attpack from the second run of component 1.'
-        call ESMF_StateAttPackWrite(importState, convention=conv, purpose=purp, rc=rc)
-        if (status .ne. ESMF_SUCCESS) goto 20
-      endif
+    ! copy all attribute information into export state
+    call ESMF_AttributeCopy(MyState, exportState, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_FieldDestroy(uwind, rc=rc)
     call ESMF_FieldDestroy(ozone, rc=rc)
@@ -326,12 +247,6 @@ module user_model1
     call ESMF_FieldBundleDestroy(turbulence, rc=rc)
     call ESMF_StateDestroy(physics, rc=rc)
     call ESMF_StateDestroy(MyState, rc=rc)
-
-    call ESMF_ArrayDestroy(array, rc=rc)
-    call ESMF_DistGridDestroy(distgrid, rc=rc)
-    call ESMF_FieldBundleDestroy(bundle, rc=rc)
-    call ESMF_FieldDestroy(field, rc=rc)
-    call ESMF_GridDestroy(grid, rc=rc)
 
     rc = ESMF_SUCCESS
     return
