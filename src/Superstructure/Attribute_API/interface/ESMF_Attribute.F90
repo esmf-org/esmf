@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.3 2008/04/28 22:06:54 rokuingh Exp $
+! $Id: ESMF_Attribute.F90,v 1.4 2008/05/01 08:41:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -98,7 +98,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.3 2008/04/28 22:06:54 rokuingh Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.4 2008/05/01 08:41:35 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -344,6 +344,388 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeAdd  - Add an attribute package
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeAdd() 
+!     subroutine ESMF_AttAddPack(<object>, convention, purpose, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values  
+!     character(ESMF_MAXSTR), intent(in) :: convention
+!     character(ESMF_MAXSTR), intent(in) :: purpose
+!     integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Adds an attribute package to <object> with four attributes named 
+!     {\tt shortname}, {\tt longname}, {\tt units}, and {\tt coordinates}.
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF_Array), intent(inout) :: array
+!     \item type(ESMF_Field), intent(inout) :: field  
+!     \item type(ESMF_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF_Grid), intent(inout) :: grid
+!     \item type(ESMF_State), intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [convention]
+!           The convention of the attribute package.
+!     \item [purpose]
+!           The purpose of the attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeAdd  - Add an attribute package
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeAdd() 
+!     subroutine ESMF_AttAddPackCustom(<object>, convention, purpose, attrList, &
+!       count, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values  
+!     character(ESMF_MAXSTR), intent(in), optional :: convention
+!     character(ESMF_MAXSTR), intent(in), optional :: purpose
+!     character (ESMF_MAXSTR), dimension(:), intent(in) :: attrList
+!     integer, intent(in) :: count   
+!     integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Adds a customized attribute package to <object>.
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF_Array), intent(inout) :: array
+!     \item type(ESMF_Field), intent(inout) :: field  
+!     \item type(ESMF_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF_Grid), intent(inout) :: grid
+!     \item type(ESMF_State), intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [convention]
+!           The convention of the attribute package.
+!     \item [purpose]
+!           The purpose of the attribute package.
+!     \item [attrList]
+!           The list of attribute names to specify the custom attribute package.
+!     \item [count]
+!           The number of attributes to add to the custom attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeCopy - Copy an attribute or attribute hierarchy
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeCopy() 
+!     subroutine ESMF_AttributeCopyAll(<object1>, <object2>, rc)
+!
+! !ARGUMENTS:
+!     <object1>, see below for supported values  
+!     <object2>, see below for supported values 
+!     integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Copies an attribute hierarchy from <object1> to <object2>.
+!     Supported values for <object1> are:
+!     \begin{description}
+!     \item type(ESMF_State), intent(inout) :: state
+!     \end{description}
+!     Supported values for <object2> are:
+!     \begin{description}
+!     \item type(ESMF_State), intent(inout) :: state
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [<object1>]
+!           An {\tt ESMF} object.
+!     \item [<object2>]
+!           An {\tt ESMF} object.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet  - Retrieve an attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeGet(<object>, name, <value argument>, &
+!                            <defaultvalue argument>, convention, purpose, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values  
+!     character (len = *), intent(in) :: name
+!     <value argument>, see below for supported values
+!     <defaultvalue>, see below for supported values   
+!     character(ESMF_MAXSTR), intent(in), optional :: convention
+!     character(ESMF_MAXSTR), intent(in), optional :: purpose
+!     integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Returns an attribute from the <object>, or from the attribute package
+!     specified by {\tt convention} and {\tt purpose}.  A default value 
+!     argument may be given if a return code is not desired when the 
+!     attibute is not found.
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF_Array), intent(inout) :: array
+!     \item type(ESMF_Field), intent(inout) :: field  
+!     \item type(ESMF_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF_Grid), intent(inout) :: grid
+!     \item type(ESMF_State), intent(inout) :: state
+!     \end{description}
+!     Supported values for <value argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: value
+!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: valueList
+!     \item integer(ESMF\_KIND\_I8), intent(out) :: value
+!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: valueList
+!     \item real (ESMF\_KIND\_R4), intent(out) :: value
+!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: valueList
+!     \item real (ESMF\_KIND\_R8), intent(out) :: value
+!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: valueList
+!     \item type(ESMF\_Logical), intent(out) :: value
+!     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
+!     \item character (len = *), intent(out), value
+!     \end{description}
+!     Supported values for <defaultvalue argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: defaultvalue
+!     \item integer(ESMF\_KIND\_I8), intent(out) :: defaultvalue
+!     \item real (ESMF\_KIND\_R4), intent(out) :: defaultvalue
+!     \item real (ESMF\_KIND\_R8), intent(out) :: defaultvalue
+!     \item type(ESMF\_Logical), intent(out) :: defaultvalue
+!     \item character (len = *), intent(out), defaultvalue
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [<value argument>]
+!           The value of the named attribute.
+!     \item [<defaultvalue argument>]
+!           The default value of the named attribute.
+!     \item [convention]
+!           The convention of the attribute package.
+!     \item [purpose]
+!           The purpose of the attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet - Get the attribute count
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeGetCount(<object>, count, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values  
+!     integer, intent(out) :: count
+!     integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Returns the attribute count for <object>
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF_Array), intent(inout) :: array
+!     \item type(ESMF_Field), intent(inout) :: field  
+!     \item type(ESMF_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF_Grid), intent(inout) :: grid
+!     \item type(ESMF_State), intent(inout) :: state
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [count] 
+!           The attribute count for <object>.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet - Get attribute info by name
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeGetInfoByName(<object>, name, typekind, count, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values  
+!     character (len = *), intent(in) :: name
+!     type(ESMF_TypeKind), intent(out), optional :: typekind
+!     integer, intent(out), optional :: count   
+!     integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Returns information associated with the named attribute, 
+!     including {\tt typekind} and {\tt count}.
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF_Array), intent(inout) :: array
+!     \item type(ESMF_Field), intent(inout) :: field  
+!     \item type(ESMF_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF_Grid), intent(inout) :: grid
+!     \item type(ESMF_State), intent(inout) :: state
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the attribute to query.
+!     \item [{[typekind]}]
+!           The typekind of the attribute.
+!     \item [{[count]}]
+!           The number of items in this attribute.  For character types,
+!           the length of the character string.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet - Get attribute info by index number
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeGetInfoByNum(<object>, attributeIndex, name, &
+!       typekind, count, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values  
+!     integer, intent(in) :: attributeIndex
+!     character (len = *), intent(in) :: name
+!     type(ESMF_TypeKind), intent(out), optional :: typekind
+!     integer, intent(out), optional :: count   
+!     integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Returns information associated with the indexed attribute, 
+!     including {\tt name}, {\tt typekind} and {\tt count}.
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF_Array), intent(inout) :: array
+!     \item type(ESMF_Field), intent(inout) :: field  
+!     \item type(ESMF_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF_Grid), intent(inout) :: grid
+!     \item type(ESMF_State), intent(inout) :: state
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [attributeIndex]
+!           The index number of the attribute to query.
+!     \item [name]
+!           Returns the name of the attribute.
+!     \item [{[typekind]}]
+!           The typekind of the attribute.
+!     \item [{[count]}]
+!           Returns the number of items in this attribute.  For character types,
+!           this is the length of the character string.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ArrayAttSet - Set an attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_ArrayAttSet(<object>, name, <value argument>, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values  
+!     character (len = *), intent(in) :: name
+!     <value argument>, see below for supported values
+!     character(ESMF_MAXSTR), intent(in), optional :: convention
+!     character(ESMF_MAXSTR), intent(in), optional :: purpose
+!     integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Attaches an attribute to <object>, or sets an attribute on an 
+!     attribute package.
+!     The attribute has a {\tt name} and either a {\tt value} or a 
+!     {\tt valueList} and a {\tt convention} and {\tt purpose}.
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF_Array), intent(inout) :: array
+!     \item type(ESMF_Field), intent(inout) :: field  
+!     \item type(ESMF_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF_Grid), intent(inout) :: grid
+!     \item type(ESMF_State), intent(inout) :: state
+!     \end{description}
+!     Supported values for the <value argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in) :: value
+!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(in) :: valueList
+!     \item integer(ESMF\_KIND\_I8), intent(in) :: value
+!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(in) :: valueList
+!     \item real (ESMF\_KIND\_R4), intent(in) :: value
+!     \item real (ESMF\_KIND\_R4), dimension(:), intent(in) :: valueList
+!     \item real (ESMF\_KIND\_R8), intent(in) :: value
+!     \item real (ESMF\_KIND\_R8), dimension(:), intent(in) :: valueList
+!     \item type(ESMF\_Logical), intent(in) :: value
+!     \item type(ESMF\_Logical), dimension(:), intent(in) :: valueList
+!     \item character (len = *), intent(in), value
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [<value argument>]
+!           The value of the attribute to set.
+!     \item [convention]
+!           The convention of the attribute package.
+!     \item [purpose]
+!           The purpose of the attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
 
 !-------------------------------------------------------------------------
 !  ARRAY
@@ -353,10 +735,10 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayAttAddPack"
 !BOPI
-! !IROUTINE: ESMF_ArrayAttAddPack - Create the attribute package
+! !IROUTINE: ESMF_ArrayAttAddPack - Create an array attribute package
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttAdd()
+      ! Private name; call using ESMF_AttributeAdd()
       subroutine ESMF_ArrayAttAddPack(array, convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -368,8 +750,9 @@ contains
 !
 ! !DESCRIPTION:
 !     Sets up the attribute package for the {\tt array}.
-!     The attribute package defines the convention, purpose, and object type of the three 
-!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
+!     The attribute package defines the convention, purpose, and object type 
+!     of the three associated attributes {\tt longname}, {\tt shortname}, 
+!     {\tt units}, and {\tt coordinates}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -433,7 +816,7 @@ contains
 ! !IROUTINE: ESMF_ArrayAttAddPackCustom - Create the attribute package
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttAdd()
+      ! Private name; call using ESMF_AttributeAdd()
       subroutine ESMF_ArrayAttAddPackCustom(array, convention, purpose, &
       attrList, count, rc)
 !
@@ -447,8 +830,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Sets up a custom attribute package for the {\tt array}, or adds to an existing 
-!     attribute package.
+!     Sets up a custom attribute package for the {\tt array}, or adds to an 
+!     existing attribute package.
 !
 !     The arguments are:
 !     \begin{description}
@@ -507,78 +890,14 @@ contains
       end subroutine ESMF_ArrayAttAddPackCustom
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ArrayAttGet  - Retrieve an attribute
-!
-! !INTERFACE:
-!     subroutine ESMF_ArrayAttGet(array, name, <value argument>, &
-!                            <defaultvalue argument>, convention, purpose, rc)
-!
-! !ARGUMENTS:
-!     type(ESMF_Array), intent(inout) :: array  
-!     character (len = *), intent(in) :: name
-!     <value argument>, see below for supported values
-!     <defaultvalue>, see below for supported values   
-!     character(ESMF_MAXSTR), intent(in), optional :: convention
-!     character(ESMF_MAXSTR), intent(in), optional :: purpose
-!     integer, intent(out), optional :: rc   
-!
-! !DESCRIPTION:
-!     Returns an attribute from the {\tt array}.
-!     Supported values for <value argument> are:
-!     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(out) :: value
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: valueList
-!     \item integer(ESMF\_KIND\_I8), intent(out) :: value
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: valueList
-!     \item real (ESMF\_KIND\_R4), intent(out) :: value
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: valueList
-!     \item real (ESMF\_KIND\_R8), intent(out) :: value
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: valueList
-!     \item type(ESMF\_Logical), intent(out) :: value
-!     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
-!     \item character (len = *), intent(out), value
-!     \end{description}
-!     Supported values for <defaultvalue argument> are:
-!     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(out) :: defaultvalue
-!     \item integer(ESMF\_KIND\_I8), intent(out) :: defaultvalue
-!     \item real (ESMF\_KIND\_R4), intent(out) :: defaultvalue
-!     \item real (ESMF\_KIND\_R8), intent(out) :: defaultvalue
-!     \item type(ESMF\_Logical), intent(out) :: defaultvalue
-!     \item character (len = *), intent(out), defaultvalue
-!     \end{description}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [array]
-!           An {\tt ESMF\_Array} object.
-!     \item [name]
-!           The name of the attribute to retrieve.
-!     \item [<value argument>]
-!           The value of the named attribute.
-!     \item [<defaultvalue argument>]
-!           The default value of the named attribute.
-!     \item [convention]
-!           The convention of the attribute package.
-!     \item [purpose]
-!           The purpose of the attribute package.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-
-!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayAttGetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_ArrayAttGet  - Retrieve a 4-byte integer attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve a 4-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_ArrayAttGetInt4(array, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -680,10 +999,10 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_ArrayAttGet - Retrieve a 4-byte integer list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_ArrayAttGetInt4List(array, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -798,10 +1117,10 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_ArrayAttGet  - Retrieve an 8-byte integer attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve an 8-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_ArrayAttGetInt8(array, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -904,10 +1223,10 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_ArrayAttGet - Retrieve an 8-byte integer list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_ArrayAttGetInt8List(array, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -1022,10 +1341,10 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_ArrayAttGet - Retrieve a 4-byte real attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_ArrayAttGetReal4(array, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -1128,10 +1447,10 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_ArrayAttGet - Retrieve a 4-byte real list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_ArrayAttGetReal4List(array, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -1246,10 +1565,10 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_ArrayAttGet - Retrieve an 8-byte real attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_ArrayAttGetReal8(array, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -1352,10 +1671,10 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_ArrayAttGet - Retrieve an 8-byte real list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_ArrayAttGetReal8List(array, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -1470,10 +1789,10 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_ArrayAttGet - Retrieve a logical attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_ArrayAttGetLogical(array, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -1576,10 +1895,10 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_ArrayAttGet - Retrieve a logical list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_ArrayAttGetLogicalList(array, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -1694,10 +2013,10 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetChar"
 
 !BOPI
-! !IROUTINE: ESMF_ArrayAttGet - Retrieve a character attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a character attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_ArrayAttGetChar(array, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -1799,9 +2118,10 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetCount"
 
 !BOP
-! !IROUTINE: ESMF_ArrayAttGet - Query the number of attributes
+! !IROUTINE: ESMF_AttributeGet - Query the number of attributes
 !
 ! !INTERFACE:
+      ! Private name; call using ESMF_AttributeGet() 
       subroutine ESMF_ArrayAttGetCount(array, count, rc)
 !
 ! !ARGUMENTS:
@@ -1825,7 +2145,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc 
 
@@ -1850,10 +2170,10 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetInfoByName"
 
 !BOP
-! !IROUTINE: ESMF_ArrayAttGet - Query Array attributes by name
+! !IROUTINE: ESMF_AttributeGet - Query Array attributes by name
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_ArrayAttGetInfoByName(array, name, typekind, count, rc)
 !
 ! !ARGUMENTS:
@@ -1884,7 +2204,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc             
       type(ESMF_TypeKind) :: localTk
@@ -1915,19 +2235,19 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetInfoByNum"
 
 !BOP
-! !IROUTINE: ESMF_ArrayAttGet - Query Array attributes by index number
+! !IROUTINE: ESMF_AttributeGet - Query Array attributes by index number
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_ArrayAttGetInfoByNum(array, attributeIndex, name, &
-        typekind, itemcount, rc)
+        typekind, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array  
       integer, intent(in) :: attributeIndex
       character(len=*), intent(out) :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
-      integer, intent(out), optional :: itemcount   
+      integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
 !
@@ -1945,7 +2265,7 @@ contains
 !           Returns the name of the attribute.
 !     \item [{[typekind]}]
 !           The typekind of the attribute.
-!     \item [{[itemcount]}]
+!     \item [{[count]}]
 !           Returns the number of items in this attribute.  For character types,
 !           this is the length of the character string.
 !     \item [{[rc]}] 
@@ -1953,7 +2273,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc 
       character(len=ESMF_MAXSTR) :: localName
@@ -1975,75 +2295,21 @@ contains
 
       name = localName
       if (present(typekind)) typekind = localTk
-      if (present(itemcount)) itemcount = localItemcount
+      if (present(count)) count = localItemcount
 
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_ArrayAttGetInfoByNum
       
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ArrayAttSet - Set an attribute
-!
-! !INTERFACE:
-!     subroutine ESMF_ArrayAttSet(array, name, <value argument>, rc)
-!
-! !ARGUMENTS:
-!     type(ESMF_Array), intent(inout) :: array  
-!     character (len = *), intent(in) :: name
-!     <value argument>, see below for supported values
-!     character(ESMF_MAXSTR), intent(in), optional :: convention
-!     character(ESMF_MAXSTR), intent(in), optional :: purpose
-!     integer, intent(out), optional :: rc   
-!
-! !DESCRIPTION:
-!     Attaches an attribute to the {\tt array}, or set an attribute on an 
-!     attribute package.
-!     The attribute has a {\tt name} and either a {\tt value} or a 
-!     {\tt valueList} and a {\tt convention} and {\tt purpose}.
-!     Supported values for the <value argument> are:
-!     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(in) :: value
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(in) :: valueList
-!     \item integer(ESMF\_KIND\_I8), intent(in) :: value
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(in) :: valueList
-!     \item real (ESMF\_KIND\_R4), intent(in) :: value
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(in) :: valueList
-!     \item real (ESMF\_KIND\_R8), intent(in) :: value
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(in) :: valueList
-!     \item type(ESMF\_Logical), intent(in) :: value
-!     \item type(ESMF\_Logical), dimension(:), intent(in) :: valueList
-!     \item character (len = *), intent(in), value
-!     \end{description}
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [array]
-!           An {\tt ESMF\_Array} object.
-!     \item [name]
-!           The name of the attribute to set.
-!     \item [<value argument>]
-!           The value of the attribute to set.
-!     \item [convention]
-!           The convention of the attribute package.
-!     \item [purpose]
-!           The purpose of the attribute package.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-
-!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayAttSetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_ArrayAttSet - Set a 4-byte integer attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_ArrayAttSetInt4(array, name, value, convention, &
         purpose, rc)
 !
@@ -2132,10 +2398,10 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttSetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_ArrayAttSet - Set a 4-byte integer list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_ArrayAttSetInt4List(array, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -2237,10 +2503,10 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttSetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_ArrayAttSet - Set an 8-byte integer attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_ArrayAttSetInt8(array, name, value, convention, &
         purpose, rc)
 !
@@ -2329,10 +2595,10 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttSetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_ArrayAttSet - Set an 8-byte integer list attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_ArrayAttSetInt8List(array, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -2434,10 +2700,10 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttSetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_ArrayAttSet - Set a 4-byte real attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_ArrayAttSetReal4(array, name, value, convention, &
         purpose, rc)
 !
@@ -2526,10 +2792,10 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttSetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_ArrayAttSet - Set a 4-byte real list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_ArrayAttSetReal4List(array, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -2631,10 +2897,10 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttSetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_ArrayAttSet - Set an 8-byte real attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_ArrayAttSetReal8(array, name, value, convention, &
         purpose, rc)
 !
@@ -2723,10 +2989,10 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttSetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_ArrayAttSet - Set an 8-byte real list attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_ArrayAttSetReal8List(array, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -2829,10 +3095,10 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttSetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_ArrayAttSet - Set a logical attribute
+! !IROUTINE: ESMF_AttributeSet - Set a logical attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_ArrayAttSetLogical(array, name, value, convention, &
         purpose, rc)
 !
@@ -2921,10 +3187,10 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttSetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_ArrayAttSet - Set a logical list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a logical list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_ArrayAttSetLogicalList(array, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -3026,10 +3292,10 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttSetChar"
 
 !BOPI
-! !IROUTINE: ESMF_ArrayAttSet - Set a character attribute
+! !IROUTINE: ESMF_AttributeSet - Set a character attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_ArrayAttSetChar(array, name, value, convention, &
         purpose, rc)
 !
@@ -3113,11 +3379,11 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayAttWrite"
-!BOP
-! !IROUTINE: ESMF_ArrayAttWrite - Print the attribute package
+!BOPI
+! !IROUTINE: ESMF_AttributeWrite - Print the attribute package
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAttWrite()
+      ! Private name; call using ESMF_AttributeWrite()
       subroutine ESMF_ArrayAttWrite(array, convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -3129,8 +3395,9 @@ contains
 !
 ! !DESCRIPTION:
 !     Print the attribute package for the {\tt array}.
-!     The attribute package defines the convention, purpose, and object type of the three 
-!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
+!     The attribute package defines the convention, purpose, and object type
+!     of the four associated attributes {\tt longname}, {\tt shortname}, 
+!     {\tt units}, and {\tt coordinates}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -3145,7 +3412,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
@@ -3196,7 +3463,7 @@ contains
 ! !IROUTINE: ESMF_FieldAttAddPack - Create the attribute package
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttAdd()
+      ! Private name; call using ESMF_AttributeAdd()
       subroutine ESMF_FieldAttAddPack(field, convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -3208,8 +3475,9 @@ contains
 !
 ! !DESCRIPTION:
 !     Sets up the attribute package for the {\tt field}.
-!     The attribute package defines the convention, purpose, and object type of the three 
-!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
+!     The attribute package defines the convention, purpose, and object type
+!     of the four associated attributes {\tt longname}, {\tt shortname}, 
+!     {\tt units}, and {\tt coordinates}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -3273,7 +3541,7 @@ contains
 ! !IROUTINE: ESMF_FieldAttAddPackCustom - Create the attribute package
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttAdd()
+      ! Private name; call using ESMF_AttributeAdd()
       subroutine ESMF_FieldAttAddPackCustom(field, convention, purpose, &
       attrList, count, rc)
 !
@@ -3287,8 +3555,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Sets up a custom attribute package for the {\tt field}, or adds to an existing 
-!     attribute package.
+!     Sets up a custom attribute package for the {\tt field}, or adds to an 
+!     existing attribute package.
 !
 !     The arguments are:
 !     \begin{description}
@@ -3347,78 +3615,14 @@ contains
       end subroutine ESMF_FieldAttAddPackCustom
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldAttGet  - Retrieve an attribute
-!
-! !INTERFACE:
-!     subroutine ESMF_FieldAttGet(field, name, <value argument>, &
-!                            <defaultvalue argument>, convention, purpose, rc)
-!
-! !ARGUMENTS:
-!     type(ESMF_Field), intent(inout) :: field  
-!     character (len = *), intent(in) :: name
-!     <value argument>, see below for supported values
-!     <defaultvalue>, see below for supported values   
-!     character(ESMF_MAXSTR), intent(in), optional :: convention
-!     character(ESMF_MAXSTR), intent(in), optional :: purpose
-!     integer, intent(out), optional :: rc   
-!
-! !DESCRIPTION:
-!     Returns an attribute from the {\tt field}.
-!     Supported values for <value argument> are:
-!     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(out) :: value
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: valueList
-!     \item integer(ESMF\_KIND\_I8), intent(out) :: value
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: valueList
-!     \item real (ESMF\_KIND\_R4), intent(out) :: value
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: valueList
-!     \item real (ESMF\_KIND\_R8), intent(out) :: value
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: valueList
-!     \item type(ESMF\_Logical), intent(out) :: value
-!     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
-!     \item character (len = *), intent(out), value
-!     \end{description}
-!     Supported values for <defaultvalue argument> are:
-!     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(out) :: defaultvalue
-!     \item integer(ESMF\_KIND\_I8), intent(out) :: defaultvalue
-!     \item real (ESMF\_KIND\_R4), intent(out) :: defaultvalue
-!     \item real (ESMF\_KIND\_R8), intent(out) :: defaultvalue
-!     \item type(ESMF\_Logical), intent(out) :: defaultvalue
-!     \item character (len = *), intent(out), defaultvalue
-!     \end{description}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           An {\tt ESMF\_Field} object.
-!     \item [name]
-!           The name of the attribute to retrieve.
-!     \item [<value argument>]
-!           The value of the named attribute.
-!     \item [<defaultvalue argument>]
-!           The default value of the named attribute.
-!     \item [convention]
-!           The convention of the attribute package.
-!     \item [purpose]
-!           The purpose of the attribute package.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-
-!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldAttGetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_FieldAttGet  - Retrieve a 4-byte integer attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve a 4-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FieldAttGetInt4(field, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -3520,10 +3724,10 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttGetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_FieldAttGet - Retrieve a 4-byte integer list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FieldAttGetInt4List(field, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -3638,10 +3842,10 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttGetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_FieldAttGet  - Retrieve an 8-byte integer attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve an 8-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FieldAttGetInt8(field, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -3744,10 +3948,10 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttGetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_FieldAttGet - Retrieve an 8-byte integer list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FieldAttGetInt8List(field, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -3862,10 +4066,10 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttGetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_FieldAttGet - Retrieve a 4-byte real attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FieldAttGetReal4(field, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -3968,10 +4172,10 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttGetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_FieldAttGet - Retrieve a 4-byte real list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FieldAttGetReal4List(field, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -4086,10 +4290,10 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttGetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_FieldAttGet - Retrieve an 8-byte real attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FieldAttGetReal8(field, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -4192,10 +4396,10 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttGetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_FieldAttGet - Retrieve an 8-byte real list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FieldAttGetReal8List(field, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -4310,10 +4514,10 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttGetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_FieldAttGet - Retrieve a logical attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FieldAttGetLogical(field, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -4416,10 +4620,10 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttGetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_FieldAttGet - Retrieve a logical list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FieldAttGetLogicalList(field, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -4534,10 +4738,10 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttGetChar"
 
 !BOPI
-! !IROUTINE: ESMF_FieldAttGet - Retrieve a character attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a character attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FieldAttGetChar(field, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -4638,10 +4842,11 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldAttGetCount"
 
-!BOP
-! !IROUTINE: ESMF_FieldAttGet - Query the number of attributes
+!BOPI
+! !IROUTINE: ESMF_AttributeGet - Query the number of attributes
 !
 ! !INTERFACE:
+      ! Private name; call using ESMF_AttributeGet() 
       subroutine ESMF_FieldAttGetCount(field, count, rc)
 !
 ! !ARGUMENTS:
@@ -4665,7 +4870,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc 
 
@@ -4689,11 +4894,11 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldAttGetInfoByName"
 
-!BOP
-! !IROUTINE: ESMF_FieldAttGet - Query Field attributes by name
+!BOPI
+! !IROUTINE: ESMF_AttributeGet - Query Field attributes by name
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FieldAttGetInfoByName(field, name, typekind, count, rc)
 !
 ! !ARGUMENTS:
@@ -4724,7 +4929,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc             
       type(ESMF_TypeKind) :: localTk
@@ -4754,20 +4959,20 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldAttGetInfoByNum"
 
-!BOP
-! !IROUTINE: ESMF_FieldAttGet - Query Field attributes by index number
+!BOPI
+! !IROUTINE: ESMF_AttributeGet - Query Field attributes by index number
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FieldAttGetInfoByNum(field, attributeIndex, name, &
-        typekind, itemcount, rc)
+        typekind, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
       integer, intent(in) :: attributeIndex
       character(len=*), intent(out) :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
-      integer, intent(out), optional :: itemcount   
+      integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
 !
@@ -4785,7 +4990,7 @@ contains
 !           Returns the name of the attribute.
 !     \item [{[typekind]}]
 !           The typekind of the attribute.
-!     \item [{[itemcount]}]
+!     \item [{[count]}]
 !           Returns the number of items in this attribute.  For character types,
 !           this is the length of the character string.
 !     \item [{[rc]}] 
@@ -4793,7 +4998,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc 
       character(len=ESMF_MAXSTR) :: localName
@@ -4815,75 +5020,21 @@ contains
 
       name = localName
       if (present(typekind)) typekind = localTk
-      if (present(itemcount)) itemcount = localItemcount
+      if (present(count)) count = localItemcount
 
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldAttGetInfoByNum
       
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldAttSet - Set an attribute
-!
-! !INTERFACE:
-!     subroutine ESMF_FieldAttSet(field, name, <value argument>, rc)
-!
-! !ARGUMENTS:
-!     type(ESMF_Field), intent(inout) :: field  
-!     character (len = *), intent(in) :: name
-!     <value argument>, see below for supported values
-!     character(ESMF_MAXSTR), intent(in), optional :: convention
-!     character(ESMF_MAXSTR), intent(in), optional :: purpose
-!     integer, intent(out), optional :: rc   
-!
-! !DESCRIPTION:
-!     Attaches an attribute to the {\tt field}, or set an attribute on an 
-!     attribute package.
-!     The attribute has a {\tt name} and either a {\tt value} or a 
-!     {\tt valueList} and a {\tt convention} and {\tt purpose}.
-!     Supported values for the <value argument> are:
-!     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(in) :: value
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(in) :: valueList
-!     \item integer(ESMF\_KIND\_I8), intent(in) :: value
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(in) :: valueList
-!     \item real (ESMF\_KIND\_R4), intent(in) :: value
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(in) :: valueList
-!     \item real (ESMF\_KIND\_R8), intent(in) :: value
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(in) :: valueList
-!     \item type(ESMF\_Logical), intent(in) :: value
-!     \item type(ESMF\_Logical), dimension(:), intent(in) :: valueList
-!     \item character (len = *), intent(in), value
-!     \end{description}
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           An {\tt ESMF\_Field} object.
-!     \item [name]
-!           The name of the attribute to set.
-!     \item [<value argument>]
-!           The value of the attribute to set.
-!     \item [convention]
-!           The convention of the attribute package.
-!     \item [purpose]
-!           The purpose of the attribute package.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-
-!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldAttSetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_FieldAttSet - Set a 4-byte integer attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_FieldAttSetInt4(field, name, value, convention, &
         purpose, rc)
 !
@@ -4972,10 +5123,10 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttSetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_FieldAttSet - Set a 4-byte integer list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_FieldAttSetInt4List(field, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -5077,10 +5228,10 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttSetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_FieldAttSet - Set an 8-byte integer attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_FieldAttSetInt8(field, name, value, convention, &
         purpose, rc)
 !
@@ -5169,10 +5320,10 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttSetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_FieldAttSet - Set an 8-byte integer list attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_FieldAttSetInt8List(field, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -5274,10 +5425,10 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttSetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_FieldAttSet - Set a 4-byte real attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_FieldAttSetReal4(field, name, value, convention, &
         purpose, rc)
 !
@@ -5366,10 +5517,10 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttSetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_FieldAttSet - Set a 4-byte real list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_FieldAttSetReal4List(field, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -5471,10 +5622,10 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttSetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_FieldAttSet - Set an 8-byte real attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_FieldAttSetReal8(field, name, value, convention, &
         purpose, rc)
 !
@@ -5563,10 +5714,10 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttSetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_FieldAttSet - Set an 8-byte real list attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_FieldAttSetReal8List(field, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -5669,10 +5820,10 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttSetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_FieldAttSet - Set a logical attribute
+! !IROUTINE: ESMF_AttributeSet - Set a logical attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_FieldAttSetLogical(field, name, value, convention, &
         purpose, rc)
 !
@@ -5761,10 +5912,10 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttSetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_FieldAttSet - Set a logical list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a logical list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_FieldAttSetLogicalList(field, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -5866,10 +6017,10 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttSetChar"
 
 !BOPI
-! !IROUTINE: ESMF_FieldAttSet - Set a character attribute
+! !IROUTINE: ESMF_AttributeSet - Set a character attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_FieldAttSetChar(field, name, value, convention, &
         purpose, rc)
 !
@@ -5953,11 +6104,11 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldAttWrite"
-!BOP
-! !IROUTINE: ESMF_FieldAttWrite - Print the attribute package
+!BOPI
+! !IROUTINE: ESMF_AttributeWrite - Print the attribute package
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttWrite()
+      ! Private name; call using ESMF_AttributeWrite()
       subroutine ESMF_FieldAttWrite(field, convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -5968,9 +6119,10 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Print the attribute package for the {\tt field}.
-!     The attribute package defines the convention, purpose, and object type of the three 
-!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
+!     Write the attribute package for the {\tt field}.
+!     The attribute package defines the convention, purpose, and object type
+!     of the four associated attributes {\tt longname}, {\tt shortname}, 
+!     {\tt units}, and {\tt coordinates}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -5985,7 +6137,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
@@ -6036,7 +6188,7 @@ contains
 ! !IROUTINE: ESMF_FBundleAttAddPack - Create the attribute package
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAttAdd()
+      ! Private name; call using ESMF_AttributeAdd()
       subroutine ESMF_FBundleAttAddPack(fieldbundle, convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -6048,8 +6200,9 @@ contains
 !
 ! !DESCRIPTION:
 !     Sets up the attribute package for the {\tt fieldbundle}.
-!     The attribute package defines the convention, purpose, and object type of the three 
-!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
+!     The attribute package defines the convention, purpose, and object type
+!     of the four associated attributes {\tt longname}, {\tt shortname}, 
+!     {\tt units}, and {\tt coordinates}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -6113,7 +6266,7 @@ contains
 ! !IROUTINE: ESMF_FBundleAttAddPackCustom - Create the attribute package
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttAdd()
+      ! Private name; call using ESMF_AttributeAdd()
       subroutine ESMF_FBundleAttAddPackCustom(fieldbundle, convention, purpose, &
       attrList, count, rc)
 !
@@ -6127,8 +6280,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Sets up a custom attribute package for the {\tt fieldbundle}, or adds to an existing 
-!     attribute package.
+!     Sets up a custom attribute package for the {\tt fieldbundle}, or adds to an 
+!     existing attribute package.
 !
 !     The arguments are:
 !     \begin{description}
@@ -6187,78 +6340,14 @@ contains
       end subroutine ESMF_FBundleAttAddPackCustom
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FBundleAttGet  - Retrieve an attribute
-!
-! !INTERFACE:
-!     subroutine ESMF_FBundleAttGet(fieldbundle, name, <value argument>, &
-!                            <defaultvalue argument>, convention, purpose, rc)
-!
-! !ARGUMENTS:
-!     type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
-!     character (len = *), intent(in) :: name
-!     <value argument>, see below for supported values
-!     <defaultvalue>, see below for supported values   
-!     character(ESMF_MAXSTR), intent(in), optional :: convention
-!     character(ESMF_MAXSTR), intent(in), optional :: purpose
-!     integer, intent(out), optional :: rc   
-!
-! !DESCRIPTION:
-!     Returns an attribute from the {\tt fieldbundle}.
-!     Supported values for <value argument> are:
-!     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(out) :: value
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: valueList
-!     \item integer(ESMF\_KIND\_I8), intent(out) :: value
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: valueList
-!     \item real (ESMF\_KIND\_R4), intent(out) :: value
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: valueList
-!     \item real (ESMF\_KIND\_R8), intent(out) :: value
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: valueList
-!     \item type(ESMF\_Logical), intent(out) :: value
-!     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
-!     \item character (len = *), intent(out), value
-!     \end{description}
-!     Supported values for <defaultvalue argument> are:
-!     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(out) :: defaultvalue
-!     \item integer(ESMF\_KIND\_I8), intent(out) :: defaultvalue
-!     \item real (ESMF\_KIND\_R4), intent(out) :: defaultvalue
-!     \item real (ESMF\_KIND\_R8), intent(out) :: defaultvalue
-!     \item type(ESMF\_Logical), intent(out) :: defaultvalue
-!     \item character (len = *), intent(out), defaultvalue
-!     \end{description}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [fieldbundle]
-!           An {\tt ESMF\_FieldBundle} object.
-!     \item [name]
-!           The name of the attribute to retrieve.
-!     \item [<value argument>]
-!           The value of the named attribute.
-!     \item [<defaultvalue argument>]
-!           The default value of the named attribute.
-!     \item [convention]
-!           The convention of the attribute package.
-!     \item [purpose]
-!           The purpose of the attribute package.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-
-!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FBundleAttGetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_FBundleAttGet  - Retrieve a 4-byte integer attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve a 4-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FBundleAttGetInt4(fieldbundle, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -6360,10 +6449,10 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttGetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_FBundleAttGet - Retrieve a 4-byte integer list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FBundleAttGetInt4List(fieldbundle, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -6478,10 +6567,10 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttGetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_FBundleAttGet  - Retrieve an 8-byte integer attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve an 8-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FBundleAttGetInt8(fieldbundle, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -6584,10 +6673,10 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttGetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_FBundleAttGet - Retrieve an 8-byte integer list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FBundleAttGetInt8List(fieldbundle, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -6702,10 +6791,10 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttGetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_FBundleAttGet - Retrieve a 4-byte real attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FBundleAttGetReal4(fieldbundle, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -6808,10 +6897,10 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttGetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_FBundleAttGet - Retrieve a 4-byte real list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FBundleAttGetReal4List(fieldbundle, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -6926,10 +7015,10 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttGetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_FBundleAttGet - Retrieve an 8-byte real attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FBundleAttGetReal8(fieldbundle, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -7032,10 +7121,10 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttGetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_FBundleAttGet - Retrieve an 8-byte real list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FBundleAttGetReal8List(fieldbundle, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -7150,10 +7239,10 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttGetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_FBundleAttGet - Retrieve a logical attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FBundleAttGetLogical(fieldbundle, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -7256,10 +7345,10 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttGetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_FBundleAttGet - Retrieve a logical list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FBundleAttGetLogicalList(fieldbundle, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -7374,10 +7463,10 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttGetChar"
 
 !BOPI
-! !IROUTINE: ESMF_FBundleAttGet - Retrieve a character attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a character attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FBundleAttGetChar(fieldbundle, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -7478,10 +7567,11 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FBundleAttGetCount"
 
-!BOP
-! !IROUTINE: ESMF_FBundleAttGet - Query the number of attributes
+!BOPI
+! !IROUTINE: ESMF_AttributeGet - Query the number of attributes
 !
 ! !INTERFACE:
+      ! Private name; call using ESMF_AttributeGet() 
       subroutine ESMF_FBundleAttGetCount(fieldbundle, count, rc)
 !
 ! !ARGUMENTS:
@@ -7505,7 +7595,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc 
 
@@ -7529,11 +7619,11 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FBundleAttGetInfoByName"
 
-!BOP
-! !IROUTINE: ESMF_FBundleAttGet - Query FBundle attributes by name
+!BOPI
+! !IROUTINE: ESMF_AttributeGet - Query FBundle attributes by name
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FBundleAttGetInfoByName(fieldbundle, name, typekind, count, rc)
 !
 ! !ARGUMENTS:
@@ -7564,7 +7654,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc             
       type(ESMF_TypeKind) :: localTk
@@ -7594,20 +7684,20 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FBundleAttGetInfoByNum"
 
-!BOP
-! !IROUTINE: ESMF_FBundleAttGet - Query FBundle attributes by index number
+!BOPI
+! !IROUTINE: ESMF_AttributeGet - Query FBundle attributes by index number
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FBundleAttGetInfoByNum(fieldbundle, attributeIndex, name, &
-        typekind, itemcount, rc)
+        typekind, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
       integer, intent(in) :: attributeIndex
       character(len=*), intent(out) :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
-      integer, intent(out), optional :: itemcount   
+      integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
 !
@@ -7625,7 +7715,7 @@ contains
 !           Returns the name of the attribute.
 !     \item [{[typekind]}]
 !           The typekind of the attribute.
-!     \item [{[itemcount]}]
+!     \item [{[count]}]
 !           Returns the number of items in this attribute.  For character types,
 !           this is the length of the character string.
 !     \item [{[rc]}] 
@@ -7633,7 +7723,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc 
       character(len=ESMF_MAXSTR) :: localName
@@ -7655,75 +7745,21 @@ contains
 
       name = localName
       if (present(typekind)) typekind = localTk
-      if (present(itemcount)) itemcount = localItemcount
+      if (present(count)) count = localItemcount
 
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FBundleAttGetInfoByNum
       
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FBundleAttSet - Set an attribute
-!
-! !INTERFACE:
-!     subroutine ESMF_FBundleAttSet(fieldbundle, name, <value argument>, rc)
-!
-! !ARGUMENTS:
-!     type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
-!     character (len = *), intent(in) :: name
-!     <value argument>, see below for supported values
-!     character(ESMF_MAXSTR), intent(in), optional :: convention
-!     character(ESMF_MAXSTR), intent(in), optional :: purpose
-!     integer, intent(out), optional :: rc   
-!
-! !DESCRIPTION:
-!     Attaches an attribute to the {\tt fieldbundle}, or set an attribute on an 
-!     attribute package.
-!     The attribute has a {\tt name} and either a {\tt value} or a 
-!     {\tt valueList} and a {\tt convention} and {\tt purpose}.
-!     Supported values for the <value argument> are:
-!     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(in) :: value
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(in) :: valueList
-!     \item integer(ESMF\_KIND\_I8), intent(in) :: value
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(in) :: valueList
-!     \item real (ESMF\_KIND\_R4), intent(in) :: value
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(in) :: valueList
-!     \item real (ESMF\_KIND\_R8), intent(in) :: value
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(in) :: valueList
-!     \item type(ESMF\_Logical), intent(in) :: value
-!     \item type(ESMF\_Logical), dimension(:), intent(in) :: valueList
-!     \item character (len = *), intent(in), value
-!     \end{description}
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [fieldbundle]
-!           An {\tt ESMF\_FieldBundle} object.
-!     \item [name]
-!           The name of the attribute to set.
-!     \item [<value argument>]
-!           The value of the attribute to set.
-!     \item [convention]
-!           The convention of the attribute package.
-!     \item [purpose]
-!           The purpose of the attribute package.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-
-!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FBundleAttSetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_FBundleAttSet - Set a 4-byte integer attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_FBundleAttSetInt4(fieldbundle, name, value, convention, &
         purpose, rc)
 !
@@ -7812,10 +7848,10 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttSetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_FBundleAttSet - Set a 4-byte integer list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_FBundleAttSetInt4List(fieldbundle, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -7917,10 +7953,10 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttSetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_FBundleAttSet - Set an 8-byte integer attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_FBundleAttSetInt8(fieldbundle, name, value, convention, &
         purpose, rc)
 !
@@ -8009,10 +8045,10 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttSetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_FBundleAttSet - Set an 8-byte integer list attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_FBundleAttSetInt8List(fieldbundle, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -8114,10 +8150,10 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttSetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_FBundleAttSet - Set a 4-byte real attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_FBundleAttSetReal4(fieldbundle, name, value, convention, &
         purpose, rc)
 !
@@ -8206,10 +8242,10 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttSetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_FBundleAttSet - Set a 4-byte real list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_FBundleAttSetReal4List(fieldbundle, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -8311,10 +8347,10 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttSetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_FBundleAttSet - Set an 8-byte real attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_FBundleAttSetReal8(fieldbundle, name, value, convention, &
         purpose, rc)
 !
@@ -8403,10 +8439,10 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttSetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_FBundleAttSet - Set an 8-byte real list attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_FBundleAttSetReal8List(fieldbundle, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -8509,10 +8545,10 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttSetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_FBundleAttSet - Set a logical attribute
+! !IROUTINE: ESMF_AttributeSet - Set a logical attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_FBundleAttSetLogical(fieldbundle, name, value, convention, &
         purpose, rc)
 !
@@ -8601,10 +8637,10 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttSetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_FBundleAttSet - Set a logical list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a logical list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_FBundleAttSetLogicalList(fieldbundle, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -8706,10 +8742,10 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttSetChar"
 
 !BOPI
-! !IROUTINE: ESMF_FBundleAttSet - Set a character attribute
+! !IROUTINE: ESMF_AttributeSet - Set a character attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_FBundleAttSetChar(fieldbundle, name, value, convention, &
         purpose, rc)
 !
@@ -8793,8 +8829,8 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FBundleAttSetLinkField"
-!BOPI
-! !IROUTINE: ESMF_FBundleAttSetLinkField - Link a FBundle to a Field in 
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Link a FBundle to a Field in 
 !            an attribute hierarchy
 !
 ! !INTERFACE:
@@ -8820,7 +8856,7 @@ contains
 !     \end{description}
 !
 !
-!EOPI
+!EOP
 
       integer :: localrc                           ! Error status
 
@@ -8848,11 +8884,11 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FBundleAttWrite"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FBundleAttWrite - Print the attribute package
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FBundleAttWrite()
+      ! Private name; call using ESMF_AttributeWrite()
       subroutine ESMF_FBundleAttWrite(fieldbundle, convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -8863,9 +8899,10 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Print the attribute package for the {\tt fieldbundle}.
-!     The attribute package defines the convention, purpose, and object type of the three 
-!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
+!     Write the attribute package for the {\tt fieldbundle}.
+!     The attribute package defines the convention, purpose, and object type
+!     of the four associated attributes {\tt longname}, {\tt shortname}, 
+!     {\tt units}, and {\tt coordinates}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -8880,7 +8917,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
@@ -8931,7 +8968,7 @@ contains
 ! !IROUTINE: ESMF_GridAttAddPack - Create the attribute package
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttAdd()
+      ! Private name; call using ESMF_AttributeAdd()
       subroutine ESMF_GridAttAddPack(grid, convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -8943,8 +8980,9 @@ contains
 !
 ! !DESCRIPTION:
 !     Sets up the attribute package for the {\tt grid}.
-!     The attribute package defines the convention, purpose, and object type of the three 
-!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
+!     The attribute package defines the convention, purpose, and object type
+!     of the four associated attributes {\tt longname}, {\tt shortname}, 
+!     {\tt units}, and {\tt coordinates}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -9008,7 +9046,7 @@ contains
 ! !IROUTINE: ESMF_GridAttAddPackCustom - Create the attribute package
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttAdd()
+      ! Private name; call using ESMF_AttributeAdd()
       subroutine ESMF_GridAttAddPackCustom(grid, convention, purpose, &
       attrList, count, rc)
 !
@@ -9022,8 +9060,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Sets up a custom attribute package for the {\tt grid}, or adds to an existing 
-!     attribute package.
+!     Sets up a custom attribute package for the {\tt grid}, or adds to an 
+!     existing attribute package.
 !
 !     The arguments are:
 !     \begin{description}
@@ -9082,78 +9120,14 @@ contains
       end subroutine ESMF_GridAttAddPackCustom
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_GridAttGet  - Retrieve an attribute
-!
-! !INTERFACE:
-!     subroutine ESMF_GridAttGet(grid, name, <value argument>, &
-!                            <defaultvalue argument>, convention, purpose, rc)
-!
-! !ARGUMENTS:
-!     type(ESMF_Grid), intent(inout) :: grid  
-!     character (len = *), intent(in) :: name
-!     <value argument>, see below for supported values
-!     <defaultvalue>, see below for supported values   
-!     character(ESMF_MAXSTR), intent(in), optional :: convention
-!     character(ESMF_MAXSTR), intent(in), optional :: purpose
-!     integer, intent(out), optional :: rc   
-!
-! !DESCRIPTION:
-!     Returns an attribute from the {\tt grid}.
-!     Supported values for <value argument> are:
-!     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(out) :: value
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: valueList
-!     \item integer(ESMF\_KIND\_I8), intent(out) :: value
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: valueList
-!     \item real (ESMF\_KIND\_R4), intent(out) :: value
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: valueList
-!     \item real (ESMF\_KIND\_R8), intent(out) :: value
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: valueList
-!     \item type(ESMF\_Logical), intent(out) :: value
-!     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
-!     \item character (len = *), intent(out), value
-!     \end{description}
-!     Supported values for <defaultvalue argument> are:
-!     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(out) :: defaultvalue
-!     \item integer(ESMF\_KIND\_I8), intent(out) :: defaultvalue
-!     \item real (ESMF\_KIND\_R4), intent(out) :: defaultvalue
-!     \item real (ESMF\_KIND\_R8), intent(out) :: defaultvalue
-!     \item type(ESMF\_Logical), intent(out) :: defaultvalue
-!     \item character (len = *), intent(out), defaultvalue
-!     \end{description}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [grid]
-!           An {\tt ESMF\_Grid} object.
-!     \item [name]
-!           The name of the attribute to retrieve.
-!     \item [<value argument>]
-!           The value of the named attribute.
-!     \item [<defaultvalue argument>]
-!           The default value of the named attribute.
-!     \item [convention]
-!           The convention of the attribute package.
-!     \item [purpose]
-!           The purpose of the attribute package.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-
-!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAttGetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_GridAttGet  - Retrieve a 4-byte integer attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve a 4-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridAttGetInt4(grid, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -9255,10 +9229,10 @@ contains
 #define ESMF_METHOD "ESMF_GridAttGetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_GridAttGet - Retrieve a 4-byte integer list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridAttGetInt4List(grid, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -9373,10 +9347,10 @@ contains
 #define ESMF_METHOD "ESMF_GridAttGetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_GridAttGet  - Retrieve an 8-byte integer attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve an 8-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridAttGetInt8(grid, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -9479,10 +9453,10 @@ contains
 #define ESMF_METHOD "ESMF_GridAttGetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_GridAttGet - Retrieve an 8-byte integer list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridAttGetInt8List(grid, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -9597,10 +9571,10 @@ contains
 #define ESMF_METHOD "ESMF_GridAttGetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_GridAttGet - Retrieve a 4-byte real attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridAttGetReal4(grid, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -9703,10 +9677,10 @@ contains
 #define ESMF_METHOD "ESMF_GridAttGetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_GridAttGet - Retrieve a 4-byte real list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridAttGetReal4List(grid, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -9821,10 +9795,10 @@ contains
 #define ESMF_METHOD "ESMF_GridAttGetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_GridAttGet - Retrieve an 8-byte real attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridAttGetReal8(grid, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -9927,10 +9901,10 @@ contains
 #define ESMF_METHOD "ESMF_GridAttGetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_GridAttGet - Retrieve an 8-byte real list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridAttGetReal8List(grid, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -10045,10 +10019,10 @@ contains
 #define ESMF_METHOD "ESMF_GridAttGetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_GridAttGet - Retrieve a logical attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridAttGetLogical(grid, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -10151,10 +10125,10 @@ contains
 #define ESMF_METHOD "ESMF_GridAttGetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_GridAttGet - Retrieve a logical list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridAttGetLogicalList(grid, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -10269,10 +10243,10 @@ contains
 #define ESMF_METHOD "ESMF_GridAttGetChar"
 
 !BOPI
-! !IROUTINE: ESMF_GridAttGet - Retrieve a character attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a character attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridAttGetChar(grid, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -10373,10 +10347,11 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAttGetCount"
 
-!BOP
-! !IROUTINE: ESMF_GridAttGet - Query the number of attributes
+!BOPI
+! !IROUTINE: ESMF_AttributeGet - Query the number of attributes
 !
 ! !INTERFACE:
+      ! Private name; call using ESMF_AttributeGet() 
       subroutine ESMF_GridAttGetCount(grid, count, rc)
 !
 ! !ARGUMENTS:
@@ -10400,7 +10375,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc 
 
@@ -10424,11 +10399,11 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAttGetInfoByName"
 
-!BOP
-! !IROUTINE: ESMF_GridAttGet - Query Grid attributes by name
+!BOPI
+! !IROUTINE: ESMF_AttributeGet - Query Grid attributes by name
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridAttGetInfoByName(grid, name, typekind, count, rc)
 !
 ! !ARGUMENTS:
@@ -10459,7 +10434,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc             
       type(ESMF_TypeKind) :: localTk
@@ -10489,20 +10464,20 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAttGetInfoByNum"
 
-!BOP
-! !IROUTINE: ESMF_GridAttGet - Query Grid attributes by index number
+!BOPI
+! !IROUTINE: ESMF_AttributeGet - Query Grid attributes by index number
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridAttGetInfoByNum(grid, attributeIndex, name, &
-        typekind, itemcount, rc)
+        typekind, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid  
       integer, intent(in) :: attributeIndex
       character(len=*), intent(out) :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
-      integer, intent(out), optional :: itemcount   
+      integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
 !
@@ -10520,7 +10495,7 @@ contains
 !           Returns the name of the attribute.
 !     \item [{[typekind]}]
 !           The typekind of the attribute.
-!     \item [{[itemcount]}]
+!     \item [{[count]}]
 !           Returns the number of items in this attribute.  For character types,
 !           this is the length of the character string.
 !     \item [{[rc]}] 
@@ -10528,7 +10503,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc 
       character(len=ESMF_MAXSTR) :: localName
@@ -10550,75 +10525,21 @@ contains
 
       name = localName
       if (present(typekind)) typekind = localTk
-      if (present(itemcount)) itemcount = localItemcount
+      if (present(count)) count = localItemcount
 
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridAttGetInfoByNum
       
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_GridAttSet - Set an attribute
-!
-! !INTERFACE:
-!     subroutine ESMF_GridAttSet(grid, name, <value argument>, rc)
-!
-! !ARGUMENTS:
-!     type(ESMF_Grid), intent(inout) :: grid  
-!     character (len = *), intent(in) :: name
-!     <value argument>, see below for supported values
-!     character(ESMF_MAXSTR), intent(in), optional :: convention
-!     character(ESMF_MAXSTR), intent(in), optional :: purpose
-!     integer, intent(out), optional :: rc   
-!
-! !DESCRIPTION:
-!     Attaches an attribute to the {\tt grid}, or set an attribute on an 
-!     attribute package.
-!     The attribute has a {\tt name} and either a {\tt value} or a 
-!     {\tt valueList} and a {\tt convention} and {\tt purpose}.
-!     Supported values for the <value argument> are:
-!     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(in) :: value
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(in) :: valueList
-!     \item integer(ESMF\_KIND\_I8), intent(in) :: value
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(in) :: valueList
-!     \item real (ESMF\_KIND\_R4), intent(in) :: value
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(in) :: valueList
-!     \item real (ESMF\_KIND\_R8), intent(in) :: value
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(in) :: valueList
-!     \item type(ESMF\_Logical), intent(in) :: value
-!     \item type(ESMF\_Logical), dimension(:), intent(in) :: valueList
-!     \item character (len = *), intent(in), value
-!     \end{description}
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [grid]
-!           An {\tt ESMF\_Grid} object.
-!     \item [name]
-!           The name of the attribute to set.
-!     \item [<value argument>]
-!           The value of the attribute to set.
-!     \item [convention]
-!           The convention of the attribute package.
-!     \item [purpose]
-!           The purpose of the attribute package.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-
-!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAttSetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_GridAttSet - Set a 4-byte integer attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_GridAttSetInt4(grid, name, value, convention, &
         purpose, rc)
 !
@@ -10707,10 +10628,10 @@ contains
 #define ESMF_METHOD "ESMF_GridAttSetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_GridAttSet - Set a 4-byte integer list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_GridAttSetInt4List(grid, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -10812,10 +10733,10 @@ contains
 #define ESMF_METHOD "ESMF_GridAttSetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_GridAttSet - Set an 8-byte integer attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_GridAttSetInt8(grid, name, value, convention, &
         purpose, rc)
 !
@@ -10904,10 +10825,10 @@ contains
 #define ESMF_METHOD "ESMF_GridAttSetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_GridAttSet - Set an 8-byte integer list attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_GridAttSetInt8List(grid, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -11009,10 +10930,10 @@ contains
 #define ESMF_METHOD "ESMF_GridAttSetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_GridAttSet - Set a 4-byte real attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_GridAttSetReal4(grid, name, value, convention, &
         purpose, rc)
 !
@@ -11101,10 +11022,10 @@ contains
 #define ESMF_METHOD "ESMF_GridAttSetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_GridAttSet - Set a 4-byte real list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_GridAttSetReal4List(grid, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -11206,10 +11127,10 @@ contains
 #define ESMF_METHOD "ESMF_GridAttSetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_GridAttSet - Set an 8-byte real attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_GridAttSetReal8(grid, name, value, convention, &
         purpose, rc)
 !
@@ -11298,10 +11219,10 @@ contains
 #define ESMF_METHOD "ESMF_GridAttSetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_GridAttSet - Set an 8-byte real list attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_GridAttSetReal8List(grid, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -11404,10 +11325,10 @@ contains
 #define ESMF_METHOD "ESMF_GridAttSetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_GridAttSet - Set a logical attribute
+! !IROUTINE: ESMF_AttributeSet - Set a logical attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_GridAttSetLogical(grid, name, value, convention, &
         purpose, rc)
 !
@@ -11496,10 +11417,10 @@ contains
 #define ESMF_METHOD "ESMF_GridAttSetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_GridAttSet - Set a logical list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a logical list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_GridAttSetLogicalList(grid, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -11601,10 +11522,10 @@ contains
 #define ESMF_METHOD "ESMF_GridAttSetChar"
 
 !BOPI
-! !IROUTINE: ESMF_GridAttSet - Set a character attribute
+! !IROUTINE: ESMF_AttributeSet - Set a character attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_GridAttSetChar(grid, name, value, convention, &
         purpose, rc)
 !
@@ -11688,11 +11609,11 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAttWrite"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridAttWrite - Print the attribute package
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_GridAttWrite()
+      ! Private name; call using ESMF_AttributeWrite()
       subroutine ESMF_GridAttWrite(grid, convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -11703,9 +11624,10 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Print the attribute package for the {\tt grid}.
-!     The attribute package defines the convention, purpose, and object type of the three 
-!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
+!     Write the attribute package for the {\tt grid}.
+!     The attribute package defines the convention, purpose, and object type
+!     of the four associated attributes {\tt longname}, {\tt shortname}, 
+!     {\tt units}, and {\tt coordinates}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -11720,7 +11642,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
@@ -11771,7 +11693,7 @@ contains
 ! !IROUTINE: ESMF_StateAttAddPack - Create the attribute package
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttAdd()
+      ! Private name; call using ESMF_AttributeAdd()
       subroutine ESMF_StateAttAddPack(state, convention, purpose, rc)
 !
 ! !ARGUMENTS:
@@ -11783,8 +11705,9 @@ contains
 !
 ! !DESCRIPTION:
 !     Sets up the attribute package for the {\tt state}.
-!     The attribute package defines the convention, purpose, and object type of the three 
-!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
+!     The attribute package defines the convention, purpose, and object type 
+!     of the three associated attributes {\tt name}, {\tt organization}, and 
+!     {\tt discipline}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -11843,12 +11766,75 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAttributeCopyAll"
+!BOPI
+! !IROUTINE: ESMF_StateAttributeCopyAll - Copy an attribute hierarchy between states
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeCopy()
+      subroutine ESMF_StateAttributeCopyAll(state1, state2, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state1  
+      type(ESMF_State), intent(inout) :: state2 
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Copy all attributes in one {\tt state} hierarchy to another.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [state1]
+!      An {\tt ESMF\_State} object.
+!     \item [state2]
+!      An {\tt ESMF\_State} object.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                           ! Error status
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state1,rc)
+      
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state2,rc)
+
+      call ESMF_StateValidate(state1, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      
+      call ESMF_StateValidate(state2, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return                                                    
+
+      call c_ESMC_AttributeCopyAll(state1%statep%base, state2%statep%base, &
+        localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateAttributeCopyAll
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAttAddPackCustom"
 !BOPI
 ! !IROUTINE: ESMF_StateAttAddPackCustom - Create the attribute package
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttAdd()
+      ! Private name; call using ESMF_AttributeAdd()
       subroutine ESMF_StateAttAddPackCustom(state, convention, purpose, &
       attrList, count, rc)
 !
@@ -11862,8 +11848,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Sets up a custom attribute package for the {\tt state}, or adds to an existing 
-!     attribute package.
+!     Sets up a custom attribute package for the {\tt state}, or adds to an 
+!     existing attribute package.
 !
 !     The arguments are:
 !     \begin{description}
@@ -11922,78 +11908,14 @@ contains
       end subroutine ESMF_StateAttAddPackCustom
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateAttGet  - Retrieve an attribute
-!
-! !INTERFACE:
-!     subroutine ESMF_StateAttGet(state, name, <value argument>, &
-!                            <defaultvalue argument>, convention, purpose, rc)
-!
-! !ARGUMENTS:
-!     type(ESMF_State), intent(inout) :: state  
-!     character (len = *), intent(in) :: name
-!     <value argument>, see below for supported values
-!     <defaultvalue>, see below for supported values   
-!     character(ESMF_MAXSTR), intent(in), optional :: convention
-!     character(ESMF_MAXSTR), intent(in), optional :: purpose
-!     integer, intent(out), optional :: rc   
-!
-! !DESCRIPTION:
-!     Returns an attribute from the {\tt state}.
-!     Supported values for <value argument> are:
-!     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(out) :: value
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: valueList
-!     \item integer(ESMF\_KIND\_I8), intent(out) :: value
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: valueList
-!     \item real (ESMF\_KIND\_R4), intent(out) :: value
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: valueList
-!     \item real (ESMF\_KIND\_R8), intent(out) :: value
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: valueList
-!     \item type(ESMF\_Logical), intent(out) :: value
-!     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
-!     \item character (len = *), intent(out), value
-!     \end{description}
-!     Supported values for <defaultvalue argument> are:
-!     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(out) :: defaultvalue
-!     \item integer(ESMF\_KIND\_I8), intent(out) :: defaultvalue
-!     \item real (ESMF\_KIND\_R4), intent(out) :: defaultvalue
-!     \item real (ESMF\_KIND\_R8), intent(out) :: defaultvalue
-!     \item type(ESMF\_Logical), intent(out) :: defaultvalue
-!     \item character (len = *), intent(out), defaultvalue
-!     \end{description}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!           An {\tt ESMF\_State} object.
-!     \item [name]
-!           The name of the attribute to retrieve.
-!     \item [<value argument>]
-!           The value of the named attribute.
-!     \item [<defaultvalue argument>]
-!           The default value of the named attribute.
-!     \item [convention]
-!           The convention of the attribute package.
-!     \item [purpose]
-!           The purpose of the attribute package.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-
-!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAttGetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_StateAttGet  - Retrieve a 4-byte integer attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve a 4-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_StateAttGetInt4(state, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -12095,10 +12017,10 @@ contains
 #define ESMF_METHOD "ESMF_StateAttGetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_StateAttGet - Retrieve a 4-byte integer list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_StateAttGetInt4List(state, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -12213,10 +12135,10 @@ contains
 #define ESMF_METHOD "ESMF_StateAttGetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_StateAttGet  - Retrieve an 8-byte integer attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve an 8-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_StateAttGetInt8(state, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -12319,10 +12241,10 @@ contains
 #define ESMF_METHOD "ESMF_StateAttGetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_StateAttGet - Retrieve an 8-byte integer list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_StateAttGetInt8List(state, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -12437,10 +12359,10 @@ contains
 #define ESMF_METHOD "ESMF_StateAttGetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_StateAttGet - Retrieve a 4-byte real attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_StateAttGetReal4(state, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -12543,10 +12465,10 @@ contains
 #define ESMF_METHOD "ESMF_StateAttGetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_StateAttGet - Retrieve a 4-byte real list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_StateAttGetReal4List(state, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -12661,10 +12583,10 @@ contains
 #define ESMF_METHOD "ESMF_StateAttGetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_StateAttGet - Retrieve an 8-byte real attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_StateAttGetReal8(state, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -12767,10 +12689,10 @@ contains
 #define ESMF_METHOD "ESMF_StateAttGetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_StateAttGet - Retrieve an 8-byte real list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_StateAttGetReal8List(state, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -12885,10 +12807,10 @@ contains
 #define ESMF_METHOD "ESMF_StateAttGetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_StateAttGet - Retrieve a logical attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_StateAttGetLogical(state, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -12991,10 +12913,10 @@ contains
 #define ESMF_METHOD "ESMF_StateAttGetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_StateAttGet - Retrieve a logical list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_StateAttGetLogicalList(state, name, count, valueList, &
         defaultvalue, convention, purpose, rc)
 !
@@ -13109,10 +13031,10 @@ contains
 #define ESMF_METHOD "ESMF_StateAttGetChar"
 
 !BOPI
-! !IROUTINE: ESMF_StateAttGet - Retrieve a character attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a character attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_StateAttGetChar(state, name, value, defaultvalue, &
         convention, purpose, rc)
 !
@@ -13213,10 +13135,11 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAttGetCount"
 
-!BOP
-! !IROUTINE: ESMF_StateAttGet - Query the number of attributes
+!BOPI
+! !IROUTINE: ESMF_AttributeGet - Query the number of attributes
 !
 ! !INTERFACE:
+      ! Private name; call using ESMF_AttributeGet() 
       subroutine ESMF_StateAttGetCount(state, count, rc)
 !
 ! !ARGUMENTS:
@@ -13240,7 +13163,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc 
 
@@ -13264,11 +13187,11 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAttGetInfoByName"
 
-!BOP
-! !IROUTINE: ESMF_StateAttGet - Query State attributes by name
+!BOPI
+! !IROUTINE: ESMF_AttributeGet - Query State attributes by name
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_StateAttGetInfoByName(state, name, typekind, count, rc)
 !
 ! !ARGUMENTS:
@@ -13299,7 +13222,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc             
       type(ESMF_TypeKind) :: localTk
@@ -13329,20 +13252,20 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAttGetInfoByNum"
 
-!BOP
-! !IROUTINE: ESMF_StateAttGet - Query State attributes by index number
+!BOPI
+! !IROUTINE: ESMF_AttributeGet - Query State attributes by index number
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttGet()
+      ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_StateAttGetInfoByNum(state, attributeIndex, name, &
-        typekind, itemcount, rc)
+        typekind, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
       integer, intent(in) :: attributeIndex
       character(len=*), intent(out) :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
-      integer, intent(out), optional :: itemcount   
+      integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
 !
@@ -13360,7 +13283,7 @@ contains
 !           Returns the name of the attribute.
 !     \item [{[typekind]}]
 !           The typekind of the attribute.
-!     \item [{[itemcount]}]
+!     \item [{[count]}]
 !           Returns the number of items in this attribute.  For character types,
 !           this is the length of the character string.
 !     \item [{[rc]}] 
@@ -13368,7 +13291,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc 
       character(len=ESMF_MAXSTR) :: localName
@@ -13390,75 +13313,21 @@ contains
 
       name = localName
       if (present(typekind)) typekind = localTk
-      if (present(itemcount)) itemcount = localItemcount
+      if (present(count)) count = localItemcount
 
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateAttGetInfoByNum
       
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateAttSet - Set an attribute
-!
-! !INTERFACE:
-!     subroutine ESMF_StateAttSet(state, name, <value argument>, rc)
-!
-! !ARGUMENTS:
-!     type(ESMF_State), intent(inout) :: state  
-!     character (len = *), intent(in) :: name
-!     <value argument>, see below for supported values
-!     character(ESMF_MAXSTR), intent(in), optional :: convention
-!     character(ESMF_MAXSTR), intent(in), optional :: purpose
-!     integer, intent(out), optional :: rc   
-!
-! !DESCRIPTION:
-!     Attaches an attribute to the {\tt state}, or set an attribute on an 
-!     attribute package.
-!     The attribute has a {\tt name} and either a {\tt value} or a 
-!     {\tt valueList} and a {\tt convention} and {\tt purpose}.
-!     Supported values for the <value argument> are:
-!     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(in) :: value
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(in) :: valueList
-!     \item integer(ESMF\_KIND\_I8), intent(in) :: value
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(in) :: valueList
-!     \item real (ESMF\_KIND\_R4), intent(in) :: value
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(in) :: valueList
-!     \item real (ESMF\_KIND\_R8), intent(in) :: value
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(in) :: valueList
-!     \item type(ESMF\_Logical), intent(in) :: value
-!     \item type(ESMF\_Logical), dimension(:), intent(in) :: valueList
-!     \item character (len = *), intent(in), value
-!     \end{description}
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!           An {\tt ESMF\_State} object.
-!     \item [name]
-!           The name of the attribute to set.
-!     \item [<value argument>]
-!           The value of the attribute to set.
-!     \item [convention]
-!           The convention of the attribute package.
-!     \item [purpose]
-!           The purpose of the attribute package.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-
-!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAttSetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_StateAttSet - Set a 4-byte integer attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_StateAttSetInt4(state, name, value, convention, &
         purpose, rc)
 !
@@ -13547,10 +13416,10 @@ contains
 #define ESMF_METHOD "ESMF_StateAttSetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_StateAttSet - Set a 4-byte integer list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_StateAttSetInt4List(state, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -13652,10 +13521,10 @@ contains
 #define ESMF_METHOD "ESMF_StateAttSetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_StateAttSet - Set an 8-byte integer attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_StateAttSetInt8(state, name, value, convention, &
         purpose, rc)
 !
@@ -13744,10 +13613,10 @@ contains
 #define ESMF_METHOD "ESMF_StateAttSetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_StateAttSet - Set an 8-byte integer list attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_StateAttSetInt8List(state, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -13849,10 +13718,10 @@ contains
 #define ESMF_METHOD "ESMF_StateAttSetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_StateAttSet - Set a 4-byte real attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_StateAttSetReal4(state, name, value, convention, &
         purpose, rc)
 !
@@ -13941,10 +13810,10 @@ contains
 #define ESMF_METHOD "ESMF_StateAttSetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_StateAttSet - Set a 4-byte real list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_StateAttSetReal4List(state, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -14046,10 +13915,10 @@ contains
 #define ESMF_METHOD "ESMF_StateAttSetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_StateAttSet - Set an 8-byte real attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_StateAttSetReal8(state, name, value, convention, &
         purpose, rc)
 !
@@ -14138,10 +14007,10 @@ contains
 #define ESMF_METHOD "ESMF_StateAttSetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_StateAttSet - Set an 8-byte real list attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_StateAttSetReal8List(state, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -14244,10 +14113,10 @@ contains
 #define ESMF_METHOD "ESMF_StateAttSetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_StateAttSet - Set a logical attribute
+! !IROUTINE: ESMF_AttributeSet - Set a logical attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_StateAttSetLogical(state, name, value, convention, &
         purpose, rc)
 !
@@ -14336,10 +14205,10 @@ contains
 #define ESMF_METHOD "ESMF_StateAttSetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_StateAttSet - Set a logical list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a logical list attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_StateAttSetLogicalList(state, name, count, valueList, &
         convention, purpose, rc)
 !
@@ -14441,10 +14310,10 @@ contains
 #define ESMF_METHOD "ESMF_StateAttSetChar"
 
 !BOPI
-! !IROUTINE: ESMF_StateAttSet - Set a character attribute
+! !IROUTINE: ESMF_AttributeSet - Set a character attribute
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttSet()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_StateAttSetChar(state, name, value, convention, &
         purpose, rc)
 !
@@ -14526,100 +14395,26 @@ contains
       end subroutine ESMF_StateAttSetChar
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateAttWrite"
 !BOP
-! !IROUTINE: ESMF_StateAttWrite - Print the attribute package
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAttWrite()
-      subroutine ESMF_StateAttWrite(state, convention, purpose, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state  
-      character (len = *), intent(in), optional :: convention
-      character (len = *), intent(in), optional :: purpose
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Print the attribute package for the {\tt state}.
-!     The attribute package defines the convention, purpose, and object type of the three 
-!     associated attributes {\tt name}, {\tt organization}, and {\tt discipline}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!      An {\tt ESMF\_State} object.
-!     \item [convention]
-!      The convention of the attribute package.
-!     \item [purpose]
-!      The purpose of the attribute package.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-
-      integer :: localrc                           ! Error status
-      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-
-      call ESMF_StateValidate(state, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      if (present(convention))  then
-        fconvention = convention
-      else 
-        fconvention = 'N/A'
-      endif
-      
-      if (present(purpose)) then
-        fpurpose = purpose
-      else 
-        fpurpose = 'N/A'
-      endif
-      
-      fobject = 'state'
-
-      call c_ESMC_AttPackWrite(state%statep%base, fconvention, &
-        fpurpose, fobject, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateAttWrite
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateAttributeSetLink - Line a state attribute hierarchy with the
+! !IROUTINE: ESMF_AttributeSet - Link a state attribute hierarchy with the
 !                                         hierarchy of bundle, field, or state
 !
 ! !INTERFACE:
-!      subroutine ESMF_StateAttributeSet(state, name, <value argument>, rc)
+!      ! Private name; call using ESMF_AttributeSet()
+!      subroutine ESMF_StateAttributeSetLink(state, name, <value argument>, rc)
 !
 ! !ARGUMENTS:
 !      type(ESMF\_State), intent(inout) :: state  
-!      <value argument>, see below for supported values
+!      <object>, see below for supported values
 !      integer, intent(out), optional :: rc   
 !
 !
 ! !DESCRIPTION:
 !     Attaches a {\tt state} attribute hierarchy to the hierarchy of
-!     a {\tt bundle}, {\tt field}, or another {\tt state},. 
-!     Supported values for the <value argument> are:
+!     a {\tt fieldbundle}, {\tt field}, or another {\tt state},. 
+!     Supported values for the <object> are:
 !     \begin{description}
-!     \item type(ESMF\_FieldBundle), intent(inout) :: bundle
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle
 !     \item type(ESMF\_Field), intent(inout) :: field
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
@@ -14628,7 +14423,7 @@ contains
 !     \begin{description}
 !     \item [state]
 !       An {\tt ESMF\_State} object.
-!     \item [<value argument>]
+!     \item [<object>]
 !       The object with which to link hierarchies.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -14637,14 +14432,13 @@ contains
 !
 !EOP
 !------------------------------------------------------------------------------
-
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAttSetLinkFB"
 !BOPI
-! !IROUTINE: ESMF_StateAttSetLinkFB - Link a State to a FieldBundle in an attribute hierarchy
+! !IROUTINE: ESMF_AttributeSet - Link a State to a FieldBundle in an attribute hierarchy
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_AttributeSetLink()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_StateAttSetLinkFB(state, bundle, rc)
 !
 ! !ARGUMENTS:
@@ -14689,14 +14483,15 @@ contains
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateAttSetLinkFB
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAttSetLinkField"
 !BOPI
-! !IROUTINE: ESMF_StateAttSetLinkField - Link a State to a Field in an attribute hierarchy
+! !IROUTINE: ESMF_AttributeSet - Link a State to a Field in an attribute hierarchy
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_eAttributeSetLink()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_StateAttSetLinkField(state, field, rc)
 !
 ! !ARGUMENTS:
@@ -14741,14 +14536,15 @@ contains
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateAttSetLinkField
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAttSetLinkState"
 !BOPI
-! !IROUTINE: ESMF_StateAttSetLinkState - Link a State to a State in an attribute hierarchy
+! !IROUTINE: ESMF_AttributeSet - Link a State to a State in an attribute hierarchy
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_AttributeSetLink()
+      ! Private name; call using ESMF_AttributeSet()
       subroutine ESMF_StateAttSetLinkState(state1, state2, rc)
 !
 ! !ARGUMENTS:
@@ -14802,68 +14598,119 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateAttributeCopyAll"
-!BOP
-! !IROUTINE: ESMF_StateAttributeCopyAll - Copy an attribute hierarchy between states
+#define ESMF_METHOD "ESMF_StateAttWrite"
+!BOPI
+! !IROUTINE: ESMF_StateAttWrite - Print the attribute package
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAttPackWrite()
-      subroutine ESMF_StateAttributeCopyAll(state1, state2, rc)
+      ! Private name; call using ESMF_AttributeWrite()
+      subroutine ESMF_StateAttWrite(state, convention, purpose, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state1  
-      type(ESMF_State), intent(inout) :: state2 
+      type(ESMF_State), intent(inout) :: state  
+      character (len = *), intent(in), optional :: convention
+      character (len = *), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!     Copy all attributes in one {\tt state} hierarchy to another.
+!     Write the attribute package for the {\tt state}.
+!     The attribute package defines the convention, purpose, and object type 
+!     of the three associated attributes {\tt name}, {\tt organization}, and 
+!     {\tt discipline}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [state1]
+!     \item [state]
 !      An {\tt ESMF\_State} object.
-!     \item [state2]
-!      An {\tt ESMF\_State} object.
+!     \item [convention]
+!      The convention of the attribute package.
+!     \item [purpose]
+!      The purpose of the attribute package.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
-      
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state1,rc)
-      
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state2,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
-      call ESMF_StateValidate(state1, rc=localrc)
+      call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-      
-      call ESMF_StateValidate(state2, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return                                                    
 
-      call c_ESMC_AttributeCopyAll(state1%statep%base, state2%statep%base, &
-        localrc)
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'state'
+
+      call c_ESMC_AttPackWrite(state%statep%base, fconvention, &
+        fpurpose, fobject, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StateAttributeCopyAll
-
-
+      end subroutine ESMF_StateAttWrite
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeWrite  - Write an attribute package
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeWrite(<object>, convention, purpose, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values  
+!     character(ESMF_MAXSTR), intent(in), optional :: convention
+!     character(ESMF_MAXSTR), intent(in), optional :: purpose
+!     integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Write the attribute package for object.  The attribute package defines 
+!     the convention, purpose, and object type of the associated attributes.
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF_Array), intent(inout) :: array
+!     \item type(ESMF_Field), intent(inout) :: field  
+!     \item type(ESMF_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF_Grid), intent(inout) :: grid
+!     \item type(ESMF_State), intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [convention]
+!           The convention of the attribute package.
+!     \item [purpose]
+!           The purpose of the attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
 
 end module ESMF_AttributeMod
 
