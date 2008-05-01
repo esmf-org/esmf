@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.30 2008/04/17 20:55:49 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.31 2008/05/01 17:10:17 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.30 2008/04/17 20:55:49 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.31 2008/05/01 17:10:17 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1172,8 +1172,8 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     endif
 
     ! First we compute the ungridded bounds:
-    ! compute a reverse mapping from Field to Grid then use rule 2 
-    ! to compute ungridded Fortran array bounds
+    ! compute a reverse mapping from Field to Grid then
+    ! compute ungridded Fortran array bounds
     f2gm = 0
     do i = 1, gridrank
         f2gm(l_g2fm(i)) = i
@@ -1189,14 +1189,14 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         endif
     enddo
 
-    ! Next compute the gridded bounds according to rule 4 using the mapping
+    ! Next compute the gridded bounds using the mapping
     ! from Field to Grid computed in last step
     forderIndex = 1
     do i = 1, arrayrank
         ! if i-th dimension is distributed (including trivially distributed)
         if(f2gm(i) .gt. 0) then
             l_ac(i) = max(cc(f2gm(i))+l_mhlw(forderIndex)+l_mhuw(forderIndex), ec(f2gm(i)))
-            l_alb(i) = gclb(f2gm(i)) - l_mhlw(forderIndex)
+            l_alb(i) = min(gclb(f2gm(i)) - l_mhlw(forderIndex), gelb(f2gm(i)))
             l_aub(i) = l_alb(i) + l_ac(i) - 1
             forderIndex = forderIndex + 1
         endif

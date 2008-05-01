@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.31 2008/04/18 19:38:04 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.32 2008/05/01 17:10:11 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -421,10 +421,9 @@
 !EOE
 
 !BOC
-    do i = 1, 2
-        fa_shape(i) = max(gec(i), gcc(i))
-    end do
-    fa_shape(3) = 7 ! 9-3+1
+    fa_shape(1) = max(gec(1), gcc(1)) ! rule 1
+    fa_shape(2) = max(gec(2), gcc(2))
+    fa_shape(3) = 7 ! rule 2 9-3+1
     allocate(farray3d(fa_shape(1), fa_shape(2), fa_shape(3)))
     field2 = ESMF_FieldCreate(grid, farray3d, &
         ungriddedLBound=(/3/), ungriddedUBound=(/9/), &
