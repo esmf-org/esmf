@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.58.2.1 2008/04/07 20:15:48 theurich Exp $
+% $Id: ESMF_install.tex,v 1.58.2.2 2008/05/01 18:55:10 theurich Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -31,11 +31,13 @@ most systems.
 \begin{description}
 
 \item[ESMF\_ABI]
-Possible value: {\tt 32}, {\tt 64}
+Possible value: {\tt 32}, {\tt 64}, {\tt x86\_64\_32}, {\tt x86\_64\_small}, {\tt x86\_64\_medium}
 
 If a system supports 32-bit and 64-bit (pointer wordsize) application binary
 interfaces (ABIs), this variable can be set to select which ABI to use. Valid 
-values are {\tt 32} or {\tt 64}. By default the most common ABI is chosen.
+values are {\tt 32} or {\tt 64}. By default the most common ABI is chosen. On
+x86\_64 achitectures three additional, more specific ABI settings are available,
+{\tt x86\_64\_32}, {\tt x86\_64\_small} and {\tt x86\_64\_medium}.
 
 \item[ESMF\_ARRAY\_LITE]
 Possible value: {\tt TRUE}, {\tt FALSE} (default)
