@@ -1,4 +1,4 @@
-% $Id: Attribute_refdoc.ctex,v 1.4 2008/04/05 03:38:06 cdeluca Exp $ 
+% $Id: Attribute_refdoc.ctex,v 1.5 2008/05/01 17:42:26 rokuingh Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -84,6 +84,13 @@
 %#elif defined(CONSTITUENT)
 %\input{../Infrastructure/Attribute/doc/Attribute_implnotes}
 %#endif
+
+\subsection{Class API}
+#ifdef STANDALONE
+\input{Attribute_fapi}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/Attribute_API/doc/ESMF_Attribute_fapi}
+#endif
 
 #ifdef STANDALONE
 %\section{Bibliography}

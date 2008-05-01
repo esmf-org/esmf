@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2008/02/15 18:19:26 rokuingh Exp $
+# $Id: makefile,v 1.2 2008/05/01 17:42:26 rokuingh Exp $
 
 ALL: onedoc
 
@@ -29,6 +29,7 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.F90))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f90))))
+
 
 # Files that a doc depends on.  Do not list the the ctex file !  
 # The ctex file is listed in the rule found in the build/common file.
