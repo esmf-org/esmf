@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.32 2008/05/01 17:10:11 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.33 2008/05/01 17:42:20 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -688,7 +688,7 @@
         ungriddedUBound=(/4,5/), &
         maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
         gridToFieldMap=(/3,2,5,4,1/), &
-        allocCount=fsize, &
+        totalCount=fsize, &
         rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -703,7 +703,7 @@
 !EOC
 !BOE
 !  A user can allocate the Fortran array in a different manner using the lower and
-!  upper bounds returned from FieldGet through the optional allocLBound and allocUBound
+!  upper bounds returned from FieldGet through the optional totalLBound and totalUBound
 !  arguments. In the following example, we crete another 7D Field by retrieving the bounds
 !  and allocate the Fortran array with this approach. In this scheme, indexing the
 !  Fortran array is sometimes more convenient than using the shape directly.
@@ -713,7 +713,7 @@
         ungriddedUBound=(/4,5/), &
         maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
         gridToFieldMap=(/3,2,5,4,1/), &
-        allocLBound=flbound, allocUBound=fubound, &
+        totalLBound=flbound, totalUBound=fubound, &
         rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 

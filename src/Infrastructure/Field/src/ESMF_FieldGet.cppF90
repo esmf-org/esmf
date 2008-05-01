@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.31 2008/05/01 17:10:17 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.32 2008/05/01 17:42:20 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.31 2008/05/01 17:10:17 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.32 2008/05/01 17:42:20 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -889,7 +889,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     subroutine ESMF_FieldGetAllocBounds(grid, localDe, staggerloc, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         maxHaloLWidth, maxHaloUWidth, &
-        allocLBound, allocUBound, allocCount, rc)
+        totalLBound, totalUBound, totalCount, rc)
     
 ! !ARGUMENTS:
     type(ESMF_Grid), intent(inout) :: grid     
@@ -900,9 +900,9 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     integer, intent(in), optional :: ungriddedUBound(:)
     integer, intent(in), optional :: maxHaloLWidth(:)
     integer, intent(in), optional :: maxHaloUWidth(:)
-    integer, intent(out), optional :: allocLBound(:)
-    integer, intent(out), optional :: allocUBound(:)
-    integer, intent(out), optional :: allocCount(:)
+    integer, intent(out), optional :: totalLBound(:)
+    integer, intent(out), optional :: totalUBound(:)
+    integer, intent(out), optional :: totalCount(:)
     integer, intent(out), optional :: rc     
 
 !
@@ -987,15 +987,15 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !       implemented, the {\tt maxHaloUWidth} is checked for validity and stored
 !       in preparation for the implementation of the halo method.
 !       HALO OPERATION NOT IMPLEMENTED
-! \item [{[allocLBound]}]
+! \item [{[totalLBound]}]
 !       The relative lower bounds of Fortran data array to be used
 !       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_Grid} and Fortran data array.
 !       This is an output variable from this user interface.
-! \item [{[allocUBound]}]
+! \item [{[totalUBound]}]
 !       The relative upper bounds of Fortran data array to be used
 !       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_Grid} and Fortran data array.
 !       This is an output variable from this user interface.
-! \item [{[allocCount]}]
+! \item [{[totalCount]}]
 !       Number of elements need to be allocated for Fortran data array to be used
 !       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_Grid} and Fortran data array.
 !       This is an output variable from this user interface.
@@ -1008,10 +1008,11 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !  !Local Variables
     integer :: localrc
 
-!   temporary local variables corresponding to input arguments
+!   temporary local variables corresponding to input/output arguments
     type(ESMF_STAGGERLOC)                  :: l_staggerloc
-    integer, dimension(:), allocatable     :: l_alb, l_aub, l_ac, l_uglb, l_ugub
     integer, dimension(ESMF_MAXDIM)        :: l_g2fm, l_mhlw, l_mhuw
+    integer, dimension(:), allocatable     :: l_uglb, l_ugub
+    integer, dimension(:), allocatable     :: l_alb, l_aub, l_ac
 
 !   internal local variables 
     integer, dimension(ESMF_MAXDIM)        :: ec, cc, dg2gm
@@ -1104,26 +1105,26 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     arrayrank = gridrank + uglb_size
 
     ! check argument validity
-    if(present(allocLBound)) then
-        if(size(allocLBound) .ne. arrayrank) then
+    if(present(totalLBound)) then
+        if(size(totalLBound) .ne. arrayrank) then
            call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-              "allocLBound size must equal to the desired array rank", &
+              "totalLBound size must equal to the desired array rank", &
                ESMF_CONTEXT, rc)
            return
         endif 
     endif
-    if(present(allocUBound)) then
-        if(size(allocUBound) .ne. arrayrank) then
+    if(present(totalUBound)) then
+        if(size(totalUBound) .ne. arrayrank) then
            call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-              "allocUBound size must equal to the desired array rank", &
+              "totalUBound size must equal to the desired array rank", &
                ESMF_CONTEXT, rc)
            return
         endif 
     endif
-    if(present(allocCount)) then
-        if(size(allocCount) .ne. arrayrank) then
+    if(present(totalCount)) then
+        if(size(totalCount) .ne. arrayrank) then
            call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-              "allocCount size must equal to the desired array rank", &
+              "totalCount size must equal to the desired array rank", &
                ESMF_CONTEXT, rc)
            return
         endif 
@@ -1203,9 +1204,9 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     enddo
 
     ! Prepare the return values
-    if(present(allocLBound)) allocLBound(1:arrayrank) = l_alb(1:arrayrank)
-    if(present(allocUBound)) allocUBound(1:arrayrank) = l_aub(1:arrayrank)
-    if(present(allocCount))  allocCount(1:arrayrank)  = l_ac(1:arrayrank)
+    if(present(totalLBound)) totalLBound(1:arrayrank) = l_alb(1:arrayrank)
+    if(present(totalUBound)) totalUBound(1:arrayrank) = l_aub(1:arrayrank)
+    if(present(totalCount))  totalCount(1:arrayrank)  = l_ac(1:arrayrank)
 
     if (present(rc)) rc = ESMF_SUCCESS
     end subroutine ESMF_FieldGetAllocBounds

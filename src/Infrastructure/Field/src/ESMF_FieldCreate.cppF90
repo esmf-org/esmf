@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.18 2008/05/01 17:10:12 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.19 2008/05/01 17:42:20 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.18 2008/05/01 17:10:12 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.19 2008/05/01 17:42:20 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -565,6 +565,8 @@ contains
     integer :: localMaxHaloUWidth (ESMF_MAXDIM)
     logical :: flipflop(ESMF_MAXDIM)
     type(ESMF_StaggerLoc)  :: localStaggerLoc
+    type(ESMF_CopyFlag)    :: l_copyflag
+    integer :: l_uglb(ESMF_MAXDIM), l_ugub(ESMF_MAXDIM)
     
     ! Initialize pointers
     localrc = ESMF_RC_NOT_IMPL
@@ -670,6 +672,12 @@ contains
     else  
        localStaggerLoc = ESMF_STAGGERLOC_CENTER  
     endif  
+    
+    if (present(copyflag)) then
+        l_copyflag = copyflag
+    else
+        l_copyflag = ESMF_DATA_REF
+    endif
  
     ! Set default gridToFieldMap
      if (present(gridToFieldMap)) then  
@@ -718,6 +726,17 @@ contains
           localMaxHaloUWidth = 0  
      endif  
 
+    if(present(ungriddedLBound)) then
+        l_uglb(1:size(ungriddedLBound)) = ungriddedLBound
+    else
+        l_uglb = -1
+    endif
+    if(present(ungriddedUBound)) then
+        l_ugub(1:size(ungriddedUBound)) = ungriddedUBound
+    else
+        l_ugub = -1
+    endif
+
     allocate(ftype, stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Field information", &
                                      ESMF_CONTEXT, rc)) return
@@ -726,10 +745,9 @@ contains
                                      ESMF_CONTEXT, rc)) return
 
     ! Call construction method to allocate and initialize field internals.
-    call ESMF_FieldConstructIANewArray(ftype, grid, array, copyflag, staggerloc, &
-                                     gridToFieldMap, ungriddedLBound, &
-                                     ungriddedUBound, maxHaloLWidth, &
-                                     maxHaloUWidth, name, &
+    call ESMF_FieldConstructIANewArray(ftype, grid, array, l_copyflag, localstaggerloc, &
+                                     localgridToFieldMap, l_uglb, l_ugub, &
+                                     localmaxHaloLWidth, localmaxHaloUWidth, name, &
                                      iospec, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1560,45 +1578,26 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-    if (present(staggerloc)) then
-        ftype%staggerloc = staggerloc
-    else
-        ftype%staggerloc = ESMF_STAGGERLOC_CENTER
-    endif
+    ftype%staggerloc = staggerloc
 
-    ! Default of gridToFieldMap should be {1,2,3...}
-    if (.not. present(gridToFieldMap)) then
-        do i = 1, ESMF_MAXDIM
-          ftype%gridToFieldMap(i) = i
-        enddo
-    else
-       ftype%gridToFieldMap(1:size(gridToFieldMap)) = gridToFieldMap
-    end if
-
-    if(present(ungriddedLBound)) &
-       ftype%ungriddedLBound(1:size(ungriddedLBound)) = ungriddedLBound
-    if(present(ungriddedUBound)) &
-       ftype%ungriddedUBound(1:size(ungriddedUBound)) = ungriddedUBound
-    if(present(maxHaloLWidth)) &
-       ftype%maxHaloLWidth(1:size(maxHaloLWidth)) = maxHaloLWidth
-    if(present(maxHaloUWidth)) &
-       ftype%maxHaloUWidth(1:size(maxHaloUWidth)) = maxHaloUWidth
+    ftype%gridToFieldMap(1:size(gridToFieldMap)) = gridToFieldMap
+ 
+    ftype%ungriddedLBound(1:size(ungriddedLBound)) = ungriddedLBound
+    ftype%ungriddedUBound(1:size(ungriddedUBound)) = ungriddedUBound
+    ftype%maxHaloLWidth(1:size(maxHaloLWidth)) = maxHaloLWidth
+    ftype%maxHaloUWidth(1:size(maxHaloUWidth)) = maxHaloUWidth
 
     ! default copyflag value is ESMF_DATA_REF
     ftype%array_internal = .false.
-    if(.not. present(copyflag)) then
+    if(copyflag == ESMF_DATA_REF) then
         ftype%array = array
     else
-        if(copyflag == ESMF_DATA_REF) then
-            ftype%array = array
-        else
-            newarray = ESMF_ArrayCreate(array, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
-            ftype%array = newarray
-            ftype%array_internal = .true.
-        endif
+        newarray = ESMF_ArrayCreate(array, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        ftype%array = newarray
+        ftype%array_internal = .true.
     endif
         
     ftype%datastatus = ESMF_STATUS_READY

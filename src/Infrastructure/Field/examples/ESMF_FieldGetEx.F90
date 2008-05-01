@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGetEx.F90,v 1.4.2.7 2008/04/16 19:21:18 feiliu Exp $
+! $Id: ESMF_FieldGetEx.F90,v 1.4.2.8 2008/05/01 17:42:20 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -97,7 +97,7 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_FieldGet(grid3d, localDe=0, staggerloc=ESMF_STAGGERLOC_CENTER, &
-        allocCount=fa_shape, rc=rc)
+        totalCount=fa_shape, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     allocate(farray(fa_shape(1), fa_shape(2), fa_shape(3)) )
