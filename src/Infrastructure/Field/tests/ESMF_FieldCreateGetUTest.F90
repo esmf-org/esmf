@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.12 2008/04/29 00:38:00 theurich Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.13 2008/05/01 19:19:54 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1943,7 +1943,7 @@ contains
         integer, dimension(ESMF_MAXDIM)             :: fsize
         integer, dimension(2)                       :: felb, feub, fclb, fcub, ftlb, ftub
         integer, dimension(2)                       :: fec, fcc, ftc
-        integer                                     :: gridDistDimCount
+        integer                                     :: gridDimCount
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
@@ -1955,7 +1955,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_GridGet(grid, dimCount=gridDistDimCount, rc=localrc)
+        call ESMF_GridGet(grid, dimCount=gridDimCount, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -1975,11 +1975,11 @@ contains
         endif
         mhlw = 0
         if(present(maxHaloLWidth)) then
-            mhlw(1:gridDistDimCount) = maxHaloLWidth(1:gridDistDimCount)
+            mhlw(1:gridDimCount) = maxHaloLWidth(1:gridDimCount)
         endif
         mhuw = 0
         if(present(maxHaloUWidth)) then
-            mhuw(1:gridDistDimCount) = maxHaloUWidth(1:gridDistDimCount)
+            mhuw(1:gridDimCount) = maxHaloUWidth(1:gridDimCount)
         endif
         fsize=0
         do i = 1, 2
@@ -2327,7 +2327,7 @@ contains
         integer, dimension(ESMF_MAXDIM)        :: ec, cc, g2fm, mhlw, mhuw, dg2fm, f2dgm, dg2gm
         integer, dimension(ESMF_MAXDIM)        :: gelb, geub, gclb, gcub
         integer, dimension(ESMF_MAXDIM)        :: fsize
-        integer                                :: gridDistDimCount, forderIndex
+        integer                                :: gridDimCount, forderIndex
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
@@ -2339,7 +2339,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_GridGet(grid, dimCount=gridDistDimCount, distgridToGridMap=dg2gm, rc=localrc)
+        call ESMF_GridGet(grid, dimCount=gridDimCount, distgridToGridMap=dg2gm, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -2367,19 +2367,19 @@ contains
         endif
         mhlw = 0
         if(present(maxHaloLWidth)) then
-            mhlw(1:gridDistDimCount) = maxHaloLWidth(1:gridDistDimCount)
+            mhlw(1:gridDimCount) = maxHaloLWidth(1:gridDimCount)
         endif
         mhuw = 0
         if(present(maxHaloUWidth)) then
-            mhuw(1:gridDistDimCount) = maxHaloUWidth(1:gridDistDimCount)
+            mhuw(1:gridDimCount) = maxHaloUWidth(1:gridDimCount)
         endif
         fsize = 10
         ! create a couple of mappings following index mapping lemma 1 and lemma 7
-        do i = 1, gridDistDimCount
+        do i = 1, gridDimCount
             dg2fm(i) = g2fm(dg2gm(i))
         enddo
         f2dgm = 0
-        do i = 1, gridDistDimCount
+        do i = 1, gridDimCount
             f2dgm(dg2fm(i)) = i
         enddo
         forderIndex = 1
@@ -2399,7 +2399,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 !        write(*, "(A7, 17I3)") 'MZS: ', lpe, ec(1:3), cc(1:3), fsize(1:3), &
-!            dg2fm(1:3), f2dgm(1:3), gridDistDimCount
+!            dg2fm(1:3), f2dgm(1:3), gridDimCount
 
         allocate(farray(fsize(1), fsize(2), fsize(3)))
 
@@ -2507,7 +2507,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 !        write(*, "(A7, 17I3)") 'MZS: ', lpe, ec(1:3), cc(1:3), fsize(1:3), &
-!            dg2fm(1:3), f2dgm(1:3), gridDistDimCount
+!            dg2fm(1:3), f2dgm(1:3), gridDimCount
 
         allocate(farray(fsize(1), fsize(2), fsize(3)))
 
@@ -3057,7 +3057,7 @@ contains
         integer, dimension(ESMF_MAXDIM)             :: fsize
         integer, dimension(3)                       :: felb, feub, fclb, fcub, ftlb, ftub
         integer, dimension(3)                       :: fec, fcc, ftc
-        integer                                     :: gridDistDimCount
+        integer                                     :: gridDimCount
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
@@ -3069,7 +3069,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_GridGet(grid, dimCount=gridDistDimCount, rc=localrc)
+        call ESMF_GridGet(grid, dimCount=gridDimCount, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -3089,11 +3089,11 @@ contains
         endif
         mhlw = 0
         if(present(maxHaloLWidth)) then
-            mhlw(1:gridDistDimCount) = maxHaloLWidth(1:gridDistDimCount)
+            mhlw(1:gridDimCount) = maxHaloLWidth(1:gridDimCount)
         endif
         mhuw = 0
         if(present(maxHaloUWidth)) then
-            mhuw(1:gridDistDimCount) = maxHaloUWidth(1:gridDistDimCount)
+            mhuw(1:gridDimCount) = maxHaloUWidth(1:gridDimCount)
         endif
         fsize=0
         do i = 1, 3
