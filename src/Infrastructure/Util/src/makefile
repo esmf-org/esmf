@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2007/09/18 22:21:17 cdeluca Exp $ 
+# $Id: makefile,v 1.17.2.1 2008/05/01 23:24:24 theurich Exp $ 
 
 # default rule if no explicit target is given to make
 ALL: build_here
@@ -16,7 +16,8 @@ SOURCEF	  = ESMF_UtilTypes.F90 \
             ESMF_InitMacros.F90
             
 STOREH    = ESMC_Arg.h ESMCI_Arg.h ESMF_Macros.inc ESMF.h ESMC_Macros.h \
-            ESMC_Util.h ESMCI_Util.h ESMF_TypeKindRankMacros.hcppF90 ESMC_Start.h \
+            ESMC_Util.h ESMCI_Util.h ESMF_TypeKindRankMacros.hcppF90 \
+            ESMC_Start.h \
             ESMC_F90Interface.h ESMCI_F90Interface.h ESMF_ErrReturnCodes.inc \
             ESMF_LogMacros.inc ESMF_LogConstants.inc ESMC_Fraction.h \
             ESMF_TypeKindMacros.hcppF90 ESMF_InitMacros.inc
@@ -40,5 +41,5 @@ CLOBBERDIRS =
 
 ESMF_InitMacros.o: ESMF_LogErr.o ESMF_UtilTypes.o 
 ESMF_LogErr.o: ESMF_UtilTypes.o 
-ESMF_FortranWordsize.o: ESMF_FortranWordsize.cppF90 ESMF_TypeKindMacros.hcppF90 ESMF_FortranWordsizeMacros.h
-ESMF_TypeKindGet.o: ESMF_TypeKindGet.cppF90 ESMF_TypeKindMacros.hcppF90 ESMF_TypeKindGet.h
+ESMF_FortranWordsize.o: ESMF_FortranWordsize.cppF90 ESMF_TypeKindMacros.hcppF90
+ESMF_TypeKindGet.o: ESMF_TypeKindGet.cppF90 ESMF_TypeKindMacros.hcppF90
