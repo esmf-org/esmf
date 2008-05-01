@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cppF90,v 1.10 2008/04/28 23:25:47 oehmke Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.11 2008/05/01 18:51:59 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldSetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSet.cppF90,v 1.10 2008/04/28 23:25:47 oehmke Exp $'
+    '$Id: ESMF_FieldSet.cppF90,v 1.11 2008/05/01 18:51:59 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -663,7 +663,7 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
     type(ESMF_StaggerLoc)          :: localStaggerLoc  @\
     integer                        :: localrc, i, count @\
     integer                        :: fieldDimCount, fieldUngriddedDimCount @\
-    integer                        :: gridDimCount, gridDistDimCount @\
+    integer                        :: gridDimCount  @\
     integer                        :: ungriddedIndex(ESMF_MAXDIM) @\
     integer                        :: distgridToArrayMap (ESMF_MAXDIM) @\
     integer                        :: undistLBound(ESMF_MAXDIM), undistUBound(ESMF_MAXDIM) @\
@@ -718,7 +718,6 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
     call ESMF_GridGet(grid, dimCount=gridDimCount, & @\
           distgridToGridMap=distgridToGridMap, & @\
           distgrid=distgrid, rc=localrc) @\
-     gridDistDimCount=gridDimCount @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
@@ -740,7 +739,7 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
     endif @\
 @\
     fieldUngriddedDimCount = fieldDimCount-gridDimCount @\
-    fieldUndistDimCount = fieldDimCount-gridDistDimCount @\
+    fieldUndistDimCount = fieldDimCount-gridDimCount @\
 @\
     ! Error Check Input @\
     if (present(gridToFieldMap)) then  @\
@@ -771,18 +770,18 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
     endif @\
 @\
     if (present(maxHaloLWidth)) then  @\
-         if (size(maxHaloLWidth) .ne. gridDistDimCount) then @\
+         if (size(maxHaloLWidth) .ne. gridDimCount) then @\
     call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
-          "- maxHaloLWidth must equal to distgrid_rank", & @\
+          "- maxHaloLWidth must equal to grid dimCount", & @\
             ESMF_CONTEXT, rc)  @\
     return @\
          endif @\
     endif @\
 @\
     if (present(maxHaloUWidth)) then  @\
-         if (size(maxHaloUWidth) .ne. gridDistDimCount) then @\
+         if (size(maxHaloUWidth) .ne. gridDimCount) then @\
     call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
-          "- maxHaloUWidth must equal to distgrid_rank", & @\
+          "- maxHaloUWidth must equal to grid dimCount", & @\
             ESMF_CONTEXT, rc)  @\
     return @\
          endif @\
@@ -827,15 +826,15 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
     enddo @\
 @\
     if(present(maxHaloLWidth)) then @\
-      localMaxHaloLWidth(1:gridDistDimCount) = & @\
-         maxHaloLWidth (1:gridDistDimCount) @\
+      localMaxHaloLWidth(1:gridDimCount) = & @\
+         maxHaloLWidth (1:gridDimCount) @\
     else @\
          localMaxHaloLWidth = 0 @\
     endif @\
 @\
     if(present(maxHaloUWidth)) then @\
-      localMaxHaloUWidth(1:gridDistDimCount) = & @\
-         maxHaloUWidth (1:gridDistDimCount) @\
+      localMaxHaloUWidth(1:gridDimCount) = & @\
+         maxHaloUWidth (1:gridDimCount) @\
     else @\
          localMaxHaloUWidth = 0 @\
     endif @\
@@ -919,13 +918,13 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
 @\
     ! Create Array with undistributed dimensions                                @\
     array = ESMF_ArrayCreate(farray, distgrid=distgrid, copyflag=copyflag, & @\
-            distgridToArrayMap=distgridToArrayMap (1:gridDistDimCount), & @\
+            distgridToArrayMap=distgridToArrayMap (1:gridDimCount), & @\
             undistLBound=undistLBound(1:fieldUndistDimCount), & @\
             undistUBound=undistUBound(1:fieldUndistDimCount), & @\
-            computationalEdgeLWidth=compELWidth(1:gridDistDimCount), & @\
-            computationalEdgeUWidth=compEUWidth(1:gridDistDimCount), & @\
-            totalLWidth=localMaxHaloLWidth(1:gridDistDimCount), & @\
-            totalUWidth=localMaxHaloUWidth(1:gridDistDimCount), & @\
+            computationalEdgeLWidth=compELWidth(1:gridDimCount), & @\
+            computationalEdgeUWidth=compEUWidth(1:gridDimCount), & @\
+            totalLWidth=localMaxHaloLWidth(1:gridDimCount), & @\
+            totalUWidth=localMaxHaloUWidth(1:gridDimCount), & @\
             staggerloc=localStaggerLoc%staggerloc, rc=localrc) @\
             if (ESMF_LogMsgFoundError(localrc, & @\
                    ESMF_ERR_PASSTHRU, & @\
@@ -941,10 +940,10 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
     field%ftypep%staggerloc = localStaggerLoc @\
     field%ftypep%gridToFieldMap(1:gridDimCount) = & @\
        localGridToFieldMap(1:gridDimCount) @\
-    field%ftypep%maxHaloLWidth(1:gridDistDimCount) = & @\
-       localMaxHaloLWidth (1:gridDistDimCount) @\
-    field%ftypep%maxHaloUWidth(1:gridDistDimCount) = & @\
-       localMaxHaloUWidth (1:gridDistDimCount) @\
+    field%ftypep%maxHaloLWidth(1:gridDimCount) = & @\
+       localMaxHaloLWidth (1:gridDimCount) @\
+    field%ftypep%maxHaloUWidth(1:gridDimCount) = & @\
+       localMaxHaloUWidth (1:gridDimCount) @\
     field%ftypep%ungriddedLBound(1:fieldUngriddedDimCount) = & @\
        localUngriddedLBound(1:fieldUngriddedDimCount) @\
     field%ftypep%ungriddedUBound(1:fieldUngriddedDimCount) = & @\
