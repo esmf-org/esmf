@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.23.2.12 2008/04/29 05:24:49 oehmke Exp $
+// $Id: ESMCI_Grid_F.C,v 1.23.2.13 2008/05/01 22:05:01 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -167,7 +167,7 @@ extern "C" {
     if (_rc!=NULL) *_rc = ESMC_RC_NOT_IMPL;
 
     // make sure status is correct
-    if (grid->getStatus() < ESMC_GRIDSTATUS_PROXY_READY) {
+    if (grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
               "- grid not ready for this operation ", ESMC_NOT_PRESENT_FILTER(_rc));
       return;
@@ -201,11 +201,7 @@ extern "C" {
 
     // undistdimCount
     if (ESMC_NOT_PRESENT_FILTER(_localDECount) != ESMC_NULL_POINTER) {
-      if (grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
-        *_localDECount = 0; 
-      } else {
         *_localDECount = grid->getDistGrid()->getDELayout()->getLocalDeCount();
-      }
     }
     
     // tileCount
@@ -239,7 +235,6 @@ extern "C" {
 	(*_distgridToGridMap)->array[i]=distgridToGridMap[i]+1;
       }
     }
-
 
     // get undistLBound
     if (*_undistLBound != NULL){
@@ -1538,7 +1533,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
 
     // Check status
-   if ((*grid)->getStatus() < ESMC_GRIDSTATUS_PROXY_READY) {
+   if ((*grid)->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
           "- grid status below ESMC_GRIDSTATUS_SHAPE_READY ", ESMC_NOT_PRESENT_FILTER(rc));
         return;
